@@ -1,0 +1,685 @@
+{
+ "training-screen-green-theme": {
+  "file": "Screenshot 2026-07-14 194819.png",
+  "size": [
+   730,
+   986
+  ],
+  "probes": [
+   {
+    "name": "discipline-banner-fill(Dirt)",
+    "at": [
+     150,
+     207
+    ],
+    "hex": "#52C518"
+   },
+   {
+    "name": "training-btn-ring(Speed)",
+    "at": [
+     100,
+     905
+    ],
+    "hex": "#BFE0C2"
+   },
+   {
+    "name": "training-btn-labelband",
+    "at": [
+     100,
+     963
+    ],
+    "hex": "#BBAD85"
+   },
+   {
+    "name": "training-btn-active-core",
+    "at": [
+     283,
+     905
+    ],
+    "hex": "#9B1D32"
+   },
+   {
+    "name": "stat-panel-header-band",
+    "at": [
+     400,
+     745
+    ],
+    "hex": "#A83E68"
+   },
+   {
+    "name": "skillpts-header-band",
+    "at": [
+     640,
+     745
+    ],
+    "hex": "#B5A984"
+   },
+   {
+    "name": "stat-panel-body",
+    "at": [
+     400,
+     780
+    ],
+    "hex": "#B6314F"
+   },
+   {
+    "name": "grade-badge-Eplus",
+    "at": [
+     78,
+     776
+    ],
+    "hex": "#CCBC93"
+   },
+   {
+    "name": "grade-badge-F",
+    "at": [
+     232,
+     776
+    ],
+    "hex": "#F5E3EC"
+   },
+   {
+    "name": "mood-pill-GOOD",
+    "at": [
+     560,
+     130
+    ],
+    "hex": "#ED8036"
+   },
+   {
+    "name": "energy-gauge-fill-cyan",
+    "at": [
+     196,
+     130
+    ],
+    "hex": "#F5F6F5"
+   },
+   {
+    "name": "energy-gauge-fill-green",
+    "at": [
+     245,
+     130
+    ],
+    "hex": "#898989"
+   },
+   {
+    "name": "energy-gauge-fill-olive",
+    "at": [
+     300,
+     130
+    ],
+    "hex": "#898989"
+   },
+   {
+    "name": "energy-gauge-track",
+    "at": [
+     355,
+     130
+    ],
+    "hex": "#898989"
+   },
+   {
+    "name": "turn-card-blue",
+    "at": [
+     40,
+     40
+    ],
+    "hex": "#FFFFFF"
+   },
+   {
+    "name": "date-pill-bg",
+    "at": [
+     250,
+     19
+    ],
+    "hex": "#98D4FF"
+   },
+   {
+    "name": "goal-pill-bg",
+    "at": [
+     100,
+     19
+    ],
+    "hex": "#18ADFF"
+   },
+   {
+    "name": "details-btn-bg",
+    "at": [
+     648,
+     74
+    ],
+    "hex": "#5CBBFE"
+   },
+   {
+    "name": "gain-cloud-white",
+    "at": [
+     400,
+     686
+    ],
+    "hex": "#A7C1E5"
+   },
+   {
+    "name": "gain-number-orange",
+    "at": [
+     200,
+     700
+    ],
+    "hex": "#DDE9F8"
+   },
+   {
+    "name": "failure-pill-blue",
+    "at": [
+     400,
+     838
+    ],
+    "hex": "#BE2C47"
+   },
+   {
+    "name": "lvl-ribbon-pale",
+    "at": [
+     60,
+     170
+    ],
+    "hex": "#89DE55"
+   },
+   {
+    "name": "bond-gauge-green",
+    "at": [
+     720,
+     210
+    ],
+    "hex": "#77C9FD"
+   },
+   {
+    "name": "bond-gauge-blue",
+    "at": [
+     720,
+     282
+    ],
+    "hex": "#E7F6FF"
+   }
+  ],
+  "dominant": [
+   {
+    "hex": "#BCAA82",
+    "pct": 17.0
+   },
+   {
+    "hex": "#F5FBFF",
+    "pct": 12.4
+   },
+   {
+    "hex": "#9E364B",
+    "pct": 11.0
+   },
+   {
+    "hex": "#74D1BD",
+    "pct": 10.2
+   },
+   {
+    "hex": "#6BB2BC",
+    "pct": 10.2
+   },
+   {
+    "hex": "#7F91A1",
+    "pct": 9.8
+   },
+   {
+    "hex": "#9FDEC0",
+    "pct": 9.7
+   },
+   {
+    "hex": "#DEDDD3",
+    "pct": 9.2
+   },
+   {
+    "hex": "#C7B49F",
+    "pct": 7.4
+   },
+   {
+    "hex": "#F2F7DE",
+    "pct": 3.1
+   }
+  ]
+ },
+ "training-screen-blue-theme-and-race-calendar": {
+  "file": "Screenshot 2026-07-17 230755.png",
+  "size": [
+   1920,
+   1080
+  ],
+  "probes": [
+   {
+    "name": "discipline-banner-blue-freestyle",
+    "at": [
+     100,
+     180
+    ],
+    "hex": "#F4F2FD"
+   },
+   {
+    "name": "lvl-ribbon-pale-blue",
+    "at": [
+     100,
+     160
+    ],
+    "hex": "#F6F1FE"
+   },
+   {
+    "name": "training-btn-ring-blue",
+    "at": [
+     245,
+     895
+    ],
+    "hex": "#B29D83"
+   },
+   {
+    "name": "section-capsule-green",
+    "at": [
+     1310,
+     39
+    ],
+    "hex": "#DDF2BE"
+   },
+   {
+    "name": "tab-active-green",
+    "at": [
+     1372,
+     152
+    ],
+    "hex": "#F4FBE9"
+   },
+   {
+    "name": "tab-inactive-white",
+    "at": [
+     1180,
+     152
+    ],
+    "hex": "#F1EDEC"
+   },
+   {
+    "name": "tabbar-track",
+    "at": [
+     1100,
+     152
+    ],
+    "hex": "#FAFAFC"
+   },
+   {
+    "name": "datecell-current-paleyellow",
+    "at": [
+     1440,
+     248
+    ],
+    "hex": "#C8EA8E"
+   },
+   {
+    "name": "datecell-disabled-grey",
+    "at": [
+     1170,
+     248
+    ],
+    "hex": "#D0D1D0"
+   },
+   {
+    "name": "datecell-white",
+    "at": [
+     1250,
+     372
+    ],
+    "hex": "#CDCDE3"
+   },
+   {
+    "name": "plus-icon-green",
+    "at": [
+     1170,
+     294
+    ],
+    "hex": "#F9F9F9"
+   },
+   {
+    "name": "race-thumb-scheduled-pink",
+    "at": [
+     1125,
+     497
+    ],
+    "hex": "#BABEE3"
+   },
+   {
+    "name": "reset-btn",
+    "at": [
+     1382,
+     983
+    ],
+    "hex": "#FAF8FE"
+   },
+   {
+    "name": "back-btn-white",
+    "at": [
+     222,
+     1041
+    ],
+    "hex": "#AD8D75"
+   },
+   {
+    "name": "skip-btn-green",
+    "at": [
+     545,
+     1054
+    ],
+    "hex": "#A3DB4C"
+   },
+   {
+    "name": "quick-btn-white",
+    "at": [
+     703,
+     1054
+    ],
+    "hex": "#D4C5BD"
+   },
+   {
+    "name": "rightrail-label",
+    "at": [
+     1847,
+     98
+    ],
+    "hex": "#F2EFF7"
+   }
+  ],
+  "dominant": [
+   {
+    "hex": "#9BA7BC",
+    "pct": 14.2
+   },
+   {
+    "hex": "#EADFDB",
+    "pct": 11.5
+   },
+   {
+    "hex": "#F7F6F9",
+    "pct": 10.7
+   },
+   {
+    "hex": "#ABD2CD",
+    "pct": 10.6
+   },
+   {
+    "hex": "#FAF8FE",
+    "pct": 10.2
+   },
+   {
+    "hex": "#F7F6FE",
+    "pct": 9.9
+   },
+   {
+    "hex": "#5A5269",
+    "pct": 9.6
+   },
+   {
+    "hex": "#FAF9F6",
+    "pct": 9.0
+   },
+   {
+    "hex": "#FCFDFF",
+    "pct": 7.6
+   },
+   {
+    "hex": "#E7F4F3",
+    "pct": 6.6
+   }
+  ]
+ },
+ "event-choices-panel": {
+  "file": "Screenshot 2026-07-14 124128.png",
+  "size": [
+   1505,
+   663
+  ],
+  "probes": [
+   {
+    "name": "choice-preview-selected-green",
+    "at": [
+     1200,
+     162
+    ],
+    "hex": "#79CA0B"
+   },
+   {
+    "name": "choice-preview-selected-green2",
+    "at": [
+     1200,
+     361
+    ],
+    "hex": "#79CA0B"
+   },
+   {
+    "name": "choice-preview-unselected-white",
+    "at": [
+     1200,
+     240
+    ],
+    "hex": "#F2EDE9"
+   },
+   {
+    "name": "stat-header-band",
+    "at": [
+     1199,
+     66
+    ],
+    "hex": "#FFFFFF"
+   },
+   {
+    "name": "stat-body-white",
+    "at": [
+     1240,
+     105
+    ],
+    "hex": "#FFFFFF"
+   },
+   {
+    "name": "skillpts-teal",
+    "hex": null,
+    "note": "out of frame 1505x663"
+   },
+   {
+    "name": "event-tag-cyan",
+    "at": [
+     150,
+     36
+    ],
+    "hex": "#DAF4FF"
+   },
+   {
+    "name": "event-title-ribbon-blue",
+    "at": [
+     300,
+     76
+    ],
+    "hex": "#39A8F7"
+   },
+   {
+    "name": "choice-btn-white-fill",
+    "at": [
+     400,
+     624
+    ],
+    "hex": "#FFFFFF"
+   },
+   {
+    "name": "choice-btn-arrow-grad",
+    "at": [
+     680,
+     624
+    ],
+    "hex": "#FCE8A6"
+   },
+   {
+    "name": "choice-btn-gold-arrow",
+    "hex": null,
+    "note": "out of frame 1505x663"
+   },
+   {
+    "name": "choice-icon-green-circle",
+    "at": [
+     145,
+     624
+    ],
+    "hex": "#FFFFFF"
+   },
+   {
+    "name": "choice-icon-gold-circle",
+    "hex": null,
+    "note": "out of frame 1505x663"
+   }
+  ],
+  "dominant": [
+   {
+    "hex": "#F1F1EF",
+    "pct": 17.5
+   },
+   {
+    "hex": "#664F37",
+    "pct": 16.2
+   },
+   {
+    "hex": "#FFFFFF",
+    "pct": 12.8
+   },
+   {
+    "hex": "#482720",
+    "pct": 11.8
+   },
+   {
+    "hex": "#807463",
+    "pct": 9.2
+   },
+   {
+    "hex": "#ADA89C",
+    "pct": 8.3
+   },
+   {
+    "hex": "#9CD26A",
+    "pct": 7.6
+   },
+   {
+    "hex": "#FAF8F7",
+    "pct": 6.1
+   },
+   {
+    "hex": "#69777A",
+    "pct": 5.5
+   },
+   {
+    "hex": "#FEFEFC",
+    "pct": 4.8
+   }
+  ]
+ },
+ "training-screen-junior": {
+  "file": "Screenshot 2026-07-14 202142.png",
+  "size": [
+   721,
+   993
+  ],
+  "probes": [
+   {
+    "name": "discipline-banner-green",
+    "at": [
+     150,
+     199
+    ],
+    "hex": "#55C618"
+   },
+   {
+    "name": "stat-panel-header",
+    "at": [
+     400,
+     700
+    ],
+    "hex": "#C0906D"
+   },
+   {
+    "name": "skillpts-header",
+    "at": [
+     640,
+     700
+    ],
+    "hex": "#8DEDFF"
+   },
+   {
+    "name": "grade-D-blue",
+    "at": [
+     96,
+     735
+    ],
+    "hex": "#6DA0D9"
+   },
+   {
+    "name": "grade-F-purple",
+    "at": [
+     243,
+     735
+    ],
+    "hex": "#0D96FF"
+   },
+   {
+    "name": "mood-GREAT-pink",
+    "at": [
+     560,
+     121
+    ],
+    "hex": "#FB5590"
+   },
+   {
+    "name": "lvl-ribbon-grey",
+    "at": [
+     100,
+     160
+    ],
+    "hex": "#89DE55"
+   }
+  ],
+  "dominant": [
+   {
+    "hex": "#C8BDC0",
+    "pct": 16.7
+   },
+   {
+    "hex": "#E6E9EA",
+    "pct": 13.2
+   },
+   {
+    "hex": "#695479",
+    "pct": 12.8
+   },
+   {
+    "hex": "#7CB8C0",
+    "pct": 11.4
+   },
+   {
+    "hex": "#8193AD",
+    "pct": 11.2
+   },
+   {
+    "hex": "#F9FFFF",
+    "pct": 11.0
+   },
+   {
+    "hex": "#FFFFFF",
+    "pct": 9.8
+   },
+   {
+    "hex": "#FBEEE1",
+    "pct": 7.6
+   },
+   {
+    "hex": "#AAE4CC",
+    "pct": 5.9
+   },
+   {
+    "hex": "#FDFEE9",
+    "pct": 0.4
+   }
+  ]
+ }
+}

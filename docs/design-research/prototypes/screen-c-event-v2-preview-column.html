@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Theme before first paint (CONSTRAINTS D-104). */
+(function(){try{var t=localStorage.getItem("uma-theme");
+if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}
+document.documentElement.dataset.theme=t;}catch(e){}})();
+</script>
+<title>Screen C variant 2 · Event Resolution · persistent preview column</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&family=M+PLUS+Rounded+1s:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Tokens from DESIGN.md 3.5 / 3.7. Component rules read these and never branch on theme
+   except where D-101 names the exceptions. */
+:root{
+  --page:#F2F1F8;--panel:#F8F8FB;--raised:#FFFFFF;--idle:#D2D2DB;--sunken:#E7E7EC;--disabled:#D0D1D0;
+  --ink:#6A5641;--ink-strong:#482720;--ink-muted:#7A7067;--ink-faint:#988F87;--rule:#E4E1EA;
+  --green:#7FCC09;--green-deep:#4E7906;--chrome:#4E7906;--on-chrome:#FFFFFF;
+  --green-tint:#F0F8EC;--green-line:#C6E5B3;
+  --up:#FF9A2C;--down:#0088E0;--sp:#009FE1;--pick:#EFC96A;--risk:#800014;--rank:#351F70;
+  --blue-700:#0B6FB8;--cyan-800:#106F9F;--lattice:#6ABE01;
+  --tint-speed:#E6ECF7;--tint-stamina:#F7E6F1;--tint-power:#F7F1E6;--tint-guts:#F7E6E6;--tint-wit:#ECF7E6;--tint-sp:#E6F4F7;
+  --lift:0 2px 0 rgba(53,31,112,.06),0 6px 16px -6px rgba(53,31,112,.22);
+  --press:0 1px 0 rgba(53,31,112,.10),0 2px 6px -2px rgba(53,31,112,.18);
+  --glow:0 0 0 3px rgba(127,204,9,.35);
+}
+:root[data-theme="dark"]{
+  --page:#0D0C0F;--panel:#121013;--raised:#24262A;--idle:#32343A;--sunken:#1A181D;--disabled:#3A3A40;
+  --ink:#ECEAF2;--ink-strong:#FFFFFF;--ink-muted:#AAABB5;--ink-faint:#7C7D87;--rule:#2E2C33;
+  --green-deep:#9BE83A;--chrome:#7FCC09;--on-chrome:#121013;
+  --green-tint:#1F2A12;--green-line:#3D5A18;
+  --down:#4EA1E8;--sp:#4FC3F7;--pick:#F5B73C;--risk:#FF6B7A;--rank:#B6B4C2;
+  --blue-700:#4EA1E8;--cyan-800:#4FC3F7;
+  --tint-speed:#252C42;--tint-stamina:#3B2736;--tint-power:#312C2A;--tint-guts:#3F272B;--tint-wit:#26302A;--tint-sp:#242E35;
+  --lift:0 2px 0 rgba(0,0,0,.4),0 6px 18px -6px rgba(0,0,0,.7);
+  --glow:0 0 0 3px rgba(155,232,58,.32);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+  font-family:"Nunito","M PLUS Rounded 1s",ui-rounded,"Hiragino Maru Gothic ProN",sans-serif;
+  font-size:14px;line-height:1.5;font-weight:500;
+  background-image:linear-gradient(115deg,rgba(255,255,255,.55) 0 14%,transparent 14%),
+                   linear-gradient(245deg,rgba(53,31,112,.035) 0 22%,transparent 22%);}
+:root[data-theme="dark"] body{
+  background-image:linear-gradient(115deg,rgba(255,255,255,.035) 0 14%,transparent 14%),
+                   linear-gradient(245deg,rgba(255,255,255,.02) 0 22%,transparent 22%);}
+.stage{display:grid;grid-template-columns:minmax(400px,1fr) minmax(360px,460px);gap:22px;
+  max-width:1240px;margin:0 auto;padding:22px 22px 56px;align-items:start;position:relative}
+
+/* ---- the run screen, which must stay visible behind the event panel (D-131) ---- */
+.run{position:relative;z-index:1}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--lift);padding:0 18px 18px}
+.panel>.capsule{margin:-22px 0 16px}
+.capsule{position:relative;height:40px;border-radius:9999px;background:var(--chrome);color:var(--on-chrome);
+  display:flex;align-items:center;padding:0 20px 0 66px;font-weight:700;font-size:15px;box-shadow:var(--lift)}
+.capsule::before{content:"";position:absolute;left:0;top:0;bottom:0;width:54px;border-radius:9999px 0 0 9999px;
+  background-color:var(--lattice);
+  background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.34) 0 4px,transparent 4px 11px),
+                   repeating-linear-gradient(-45deg,rgba(255,255,255,.34) 0 4px,transparent 4px 11px)}
+.ident{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.ident h2{margin:0;font-size:24px;font-weight:800;color:var(--ink-strong);line-height:1.15;letter-spacing:-.01em}
+.ident .sub{margin:3px 0 0;font-size:12px;color:var(--ink-muted)}
+.chip{position:relative;flex:0 0 auto;width:88px;padding-top:10px;background:var(--raised);
+  border:2px solid var(--down);border-radius:10px;text-align:center;box-shadow:var(--lift)}
+.chip::before{content:"";position:absolute;left:7px;right:7px;top:0;height:10px;background:var(--green);border-radius:0 0 4px 4px}
+.chip .n{display:block;font-size:36px;font-weight:800;color:var(--blue-700);line-height:1.05;font-variant-numeric:tabular-nums}
+.chip .l{display:block;font-size:10px;font-weight:700;color:var(--ink-muted);padding-bottom:7px}
+.band{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.band .col{background:var(--raised);text-align:center;padding-bottom:8px}
+.band .hd{min-height:24px;font-size:11px;font-weight:700;color:var(--ink);display:flex;align-items:center;
+  justify-content:center;gap:4px;padding:4px 2px}
+.band .hd svg{width:13px;height:13px;flex:0 0 auto}
+.band .grade{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:5px;background:var(--rank);
+  color:#fff;font-size:10px;font-weight:800;margin:2px 0 3px}
+:root[data-theme="dark"] .band .grade{color:var(--panel)}
+.band .val{font-size:21px;font-weight:800;color:var(--ink-strong);line-height:1;font-variant-numeric:tabular-nums}
+.band .capv{font-size:10px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.band .bar{height:4px;margin:5px 6px 0;border-radius:2px;background:var(--sunken);overflow:hidden}
+.band .bar i{display:block;height:100%;border-radius:2px;background:var(--green)}
+.band .bar{position:relative}
+.band .bar u{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--risk);left:66.6%}
+.bandnote{font-size:10px;color:var(--ink-muted);margin:6px 0 0;text-align:right}
+
+/* ---- the event panel ---- */
+.event{position:relative;z-index:3}
+.tag{display:inline-block;background:var(--cyan-800);color:#FFFFFF;font-weight:800;font-size:12px;letter-spacing:.02em;
+  padding:5px 26px 5px 14px;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%);margin-bottom:6px}
+:root[data-theme="dark"] .tag{color:var(--panel)}
+.title-ribbon{background:linear-gradient(100deg,var(--blue-700),var(--cyan-800));color:#FFFFFF;font-weight:800;font-size:19px;
+  padding:9px 34px 9px 16px;clip-path:polygon(0 0,100% 0,calc(100% - 16px) 100%,0 100%);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px}
+:root[data-theme="dark"] .title-ribbon{color:var(--panel)}
+.title-ribbon .thumb{width:30px;height:30px;border-radius:6px;background:var(--raised);display:grid;place-items:center;flex:0 0 auto}
+.title-ribbon .thumb svg{width:18px;height:18px;color:var(--blue-700)}
+.narr{background:var(--panel);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--lift);
+  padding:14px 16px;margin-bottom:14px}
+.narr .who{font-weight:800;color:var(--ink-strong);font-size:15px;padding-bottom:6px;margin-bottom:8px;
+  border-bottom:1px solid var(--rule)}
+.narr p{margin:0;font-size:15px;line-height:1.6}
+
+.choice{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:54px;margin:0 0 10px;
+  padding:7px 52px 7px 10px;border:1px solid var(--green-line);border-radius:10px;background:var(--raised);
+  color:var(--ink-strong);font:inherit;font-size:16px;font-weight:700;text-align:left;cursor:pointer;
+  box-shadow:var(--lift);transition:transform .12s ease,box-shadow .14s ease,background-color .14s ease}
+.choice:hover{transform:translateY(-1px)}
+.choice:focus-visible{outline:none;box-shadow:var(--glow)}
+.choice .cap{position:absolute;right:0;top:0;bottom:0;width:42px;
+  background:linear-gradient(180deg,var(--green-tint),var(--green-line));
+  clip-path:polygon(0 0,100% 50%,0 100%)}
+.choice .glyph{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:var(--green);display:grid;place-items:center;color:#fff}
+:root[data-theme="dark"] .choice .glyph{color:var(--panel)}
+.choice .glyph svg{width:18px;height:18px}
+/* Selected = gold with dark ink. Bright green with white fails at 1.99:1 (D-3). */
+.choice[aria-checked="true"]{background:var(--pick);border-color:#C5A558;color:var(--ink-strong);box-shadow:var(--glow)}
+.choice[aria-checked="true"] .cap{background:linear-gradient(180deg,#FDF7EF,var(--pick))}
+.choice[aria-checked="true"] .glyph{background:var(--chrome);color:var(--on-chrome)}
+.choice[aria-checked="true"]::after{content:"";position:absolute;right:13px;top:50%;width:12px;height:24px;
+  transform:translateY(-50%) skewX(-14deg);
+  background:linear-gradient(90deg,var(--ink-strong) 0 3px,transparent 3px 6px,var(--ink-strong) 6px 9px,transparent 9px)}
+
+.preview{transition:box-shadow .14s ease}
+.preview[data-open="false"] .preview-inner{opacity:.55}
+.preview-inner{background:var(--raised);border:1px solid var(--rule);border-left:3px solid var(--green);
+  border-radius:10px;box-shadow:var(--lift);padding:11px 15px;margin:0 0 12px}
+.preview-inner h3{margin:0 0 7px;font-size:12px;font-weight:700;color:var(--ink-muted);letter-spacing:.01em}
+.dl{display:grid;grid-template-columns:1fr auto;gap:2px 16px;margin:0;font-size:15px}
+.dl dt{color:var(--ink)}
+.dl dd{margin:0;text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.down{color:var(--down)}
+.mandatory{font-size:12px;color:var(--risk);margin:8px 0 0;font-weight:700}
+
+.btn{border-radius:10px;padding:12px 26px;font:inherit;font-size:16px;font-weight:700;cursor:pointer;
+  border:1px solid var(--rule);background:var(--raised);color:var(--ink-strong);box-shadow:var(--press);
+  position:relative;overflow:hidden;transition:transform .12s ease,box-shadow .12s ease}
+.btn:hover{box-shadow:var(--lift)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:none;box-shadow:var(--glow)}
+/* Hard-edged enamel sheen: one crisp boundary, not a feathered range (D-112). */
+.btn-primary{background:var(--chrome);border-color:var(--green-line);color:var(--on-chrome)}
+.btn-primary::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(116deg,rgba(255,255,255,.30) 0 34%,rgba(255,255,255,0) 34.5% 100%)}
+.btn-primary[disabled]{background:var(--disabled);border-color:var(--disabled);color:var(--ink-faint);cursor:not-allowed}
+.btn-primary[disabled]::before{display:none}
+.footer{display:flex;gap:12px;align-items:center;margin-top:6px}
+.stepline{margin-left:auto;text-align:right;font-size:12px;font-weight:700;color:var(--ink)}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--idle)}
+.dot[data-on="true"]{background:var(--green)}
+
+.log{margin-top:20px}
+.entry{position:relative;background:var(--raised);border:1px solid var(--rule);border-radius:10px;
+  box-shadow:var(--lift);padding:10px 14px 10px 56px;margin:0 0 10px 18px}
+.entry .disc{position:absolute;left:-17px;top:10px;width:36px;height:36px;border-radius:50%;background:var(--raised);
+  border:2px solid var(--green);color:var(--ink-strong);display:grid;place-items:center;font-weight:800;font-size:14px;
+  font-variant-numeric:tabular-nums}
+.entry h4{margin:0 0 4px;padding-bottom:4px;border-bottom:1px solid var(--rule);font-size:15px;font-weight:700;color:var(--ink-strong)}
+.entry p{margin:0;font-size:14px}
+@keyframes push{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.entry.new{animation:push .2s ease-out}
+.notice{grid-column:1/-1;background:var(--raised);border:1px solid var(--rule);border-radius:10px;
+  padding:10px 14px;font-size:12px;color:var(--ink-muted);box-shadow:var(--lift)}
+.tag-sample{display:inline-block;background:var(--pick);color:var(--ink-strong);border-radius:5px;
+  padding:1px 7px;font-size:11px;font-weight:700}
+.themeblock{display:flex;gap:8px;align-items:center;margin-left:auto}
+.themeblock span{font-size:12px;font-weight:700;color:var(--ink-muted)}
+.tbtn{font:inherit;font-size:13px;font-weight:700;border-radius:9999px;padding:5px 14px;cursor:pointer;
+  border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
+.tbtn[aria-pressed="true"]{background:var(--chrome);border-color:var(--green-line);color:var(--on-chrome)}
+.tbtn:focus-visible{outline:none;box-shadow:var(--glow)}
+.head{grid-column:1/-1;display:flex;gap:12px;align-items:center}
+.event{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:16px;align-items:start}
+.event>.tag,.event>.title-ribbon,.event>.narr,.event>[role="radiogroup"],.event>.footer,.event>.dots,.event>.stepline{grid-column:1}
+.event>.tag,.event>.title-ribbon,.event>.narr{grid-column:1/-1}
+.event>.preview{grid-column:2;grid-row:5;max-height:none;opacity:1;overflow:visible}
+.event>.preview .preview-inner{margin:0;position:sticky;top:22px}
+@media (max-width:980px){.stage{grid-template-columns:1fr}.event{grid-template-columns:1fr}
+  .event>.preview{grid-column:1;grid-row:auto}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="head">
+    <p class="notice" style="flex:1;margin:0">
+      <span class="tag-sample">Static design prototype</span>
+      Variant 2 of 2 for the event resolution flow: the outcome preview is a <strong>persistent right-hand column</strong>
+      that updates on hover and focus, so the choice list never reflows. The run screen stays visible behind the panel.
+      Trainee, card and skill names are real Global-client strings; all values are sample data.
+    </p>
+    <div class="themeblock">
+      <span>Theme</span>
+      <button type="button" class="tbtn" data-theme-set="light">Light</button>
+      <button type="button" class="tbtn" data-theme-set="dark">Dark</button>
+    </div>
+  </div>
+
+  <!-- RUN SCREEN, visible behind the event panel -->
+  <div class="run">
+    <section class="panel" aria-labelledby="run-h">
+      <h1 class="capsule" id="run-h">Training run</h1>
+      <div class="ident">
+        <div style="flex:1;min-width:0">
+          <h2>Rice Shower</h2>
+          <p class="sub">Trainee Umamusume · Unity Cup · scenario cap Wit 1,800</p>
+        </div>
+        <div class="chip"><span class="n">13</span><span class="l">turn(s) left</span></div>
+      </div>
+      <div class="band" id="band" role="table" aria-label="Current stats against the scenario cap for each stat"></div>
+      <p class="bandnote">Bar end is the Unity Cup base cap for that stat. The crimson tick is 1,200, this tool's current input limit. See docs/adr/0002.</p>
+    </section>
+
+    <section class="log" aria-labelledby="log-h">
+      <h2 class="capsule" id="log-h" style="margin-bottom:14px">Turn timeline</h2>
+      <div id="log"></div>
+    </section>
+  </div>
+
+  <!-- EVENT PANEL -->
+  <section class="event" aria-labelledby="ev-h">
+    <p class="tag">Support Card Event</p>
+    <h2 class="title-ribbon" id="ev-h">
+      <span class="thumb" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/></svg>
+      </span>
+      Overthrow the Rival!
+    </h2>
+
+    <div class="narr">
+      <p class="who">Rice Shower</p>
+      <p>The race ahead is crowded. Three of them have been running together since the debut, and they know every move I make.</p>
+    </div>
+
+    <div role="radiogroup" aria-label="Event choices" id="choices"></div>
+
+    <div class="preview" id="preview" data-open="false" aria-live="polite">
+      <div class="preview-inner">
+        <h3 id="pv-title">Hover a choice to preview it</h3>
+        <dl class="dl" id="pv-list"></dl>
+        <p class="mandatory" id="pv-mand" hidden>Mandatory goal races cannot be skipped.</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button class="btn btn-primary" id="confirm" disabled>Confirm</button>
+      <button class="btn" id="change">Change answer</button>
+    </div>
+    <div class="dots" aria-hidden="true"><span class="dot" data-on="true"></span><span class="dot"></span><span class="dot"></span></div>
+    <p class="stepline">Step 1 of 3 · nothing is saved until you confirm</p>
+  </section>
+</div>
+
+<script>
+// Sample data. turn_entries columns only: turn, speed, stamina, power, guts, wit, sp, condition.
+// Bars scale to the Unity Cup scenario base cap per stat (ADR-0002), not to a global constant.
+const CAPS = { speed: 1300, stamina: 1300, power: 1300, guts: 1300, wit: 1800 };
+const NOW = { speed: 302, stamina: 292, power: 254, guts: 344, wit: 145, sp: 308 };
+const TINTS = { speed:"var(--tint-speed)", stamina:"var(--tint-stamina)", power:"var(--tint-power)",
+                guts:"var(--tint-guts)", wit:"var(--tint-wit)", sp:"var(--tint-sp)" };
+const GLYPH = {
+  speed:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 14c3.6 0 5.4-2.6 8.2-2.6 3 0 4.4 1.8 8.4 1.8 2 0 3.4 1 3.4 2.8V19H2z"/></svg>',
+  stamina:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.6S3.4 15 3.4 9.6A4.9 4.9 0 0 1 12 6.2a4.9 4.9 0 0 1 8.6 3.4c0 5.4-8.6 11-8.6 11z"/></svg>',
+  power:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="1.6" y="8.4" width="3.6" height="7.2" rx="1.4"/><rect x="18.8" y="8.4" width="3.6" height="7.2" rx="1.4"/><rect x="5.6" y="10.2" width="12.8" height="3.6" rx="1.6"/></svg>',
+  guts:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.4 1.8c1.2 4.4-3.2 5.6-3.2 9.6a3.2 3.2 0 0 0 6.4 0c2 2 2.2 4 2.2 5.2a6 6 0 1 1-11.6-2C7.2 9.6 13.4 7.8 13.4 1.8z"/></svg>',
+  wit:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2.6 7.2 12 11.4l9.4-4.2z"/><path d="M5.4 10v6.2c0 1.9 3 3.5 6.6 3.5s6.6-1.6 6.6-3.5V10l-6.6 2.9z"/></svg>'
+};
+const LABEL = { speed:"Speed", stamina:"Stamina", power:"Power", guts:"Guts", wit:"Wit", sp:"Skill Points" };
+const GRADE = (v,cap) => { const r=v/cap; return r>=.85?"B+":r>=.7?"B":r>=.55?"C+":r>=.4?"C":r>=.28?"D+":r>=.16?"D":r>=.08?"E":"F"; };
+
+const band = document.getElementById("band");
+band.innerHTML = Object.keys(CAPS).map(k => {
+  const pct = Math.min(100, NOW[k] / CAPS[k] * 100);
+  return `<div class="col" role="row">
+    <div class="hd" style="background:${TINTS[k]}"><span style="width:13px;height:13px;display:inline-block">${GLYPH[k]}</span>${LABEL[k]}</div>
+    <div class="grade">${GRADE(NOW[k], CAPS[k])}</div>
+    <div class="val">${NOW[k].toLocaleString("en-US")}</div>
+    <div class="capv">/${CAPS[k].toLocaleString("en-US")}</div>
+    <div class="bar"><i style="width:${pct}%"></i><u></u></div>
+  </div>`;
+}).join("") + `<div class="col"><div class="hd" style="background:${TINTS.sp}">${LABEL.sp}</div>
+    <div class="capv" style="margin-top:6px">available</div><div class="val">${NOW.sp}</div><div class="capv">&nbsp;</div><div class="bar"></div></div>`;
+
+// Event choices. Gains are orange, losses blue (D-133). Never green, never red.
+const CHOICES = [
+  { id:"rivals", label:"That's way too many rivals!", glyph:"stamina",
+    d:{ stamina:11, guts:4 }, sp:2, mood:"GOOD", note:"" },
+  { id:"onebyone", label:"Knock 'em down one by one!", glyph:"power",
+    d:{ power:12, stamina:6 }, sp:2, mood:"GREAT", note:"" },
+  { id:"hold", label:"Hold back and study them", glyph:"wit",
+    d:{ wit:9 }, sp:5, mood:"NORMAL", note:"" }
+];
+
+const wrap = document.getElementById("choices"), preview = document.getElementById("preview");
+const pvList = document.getElementById("pv-list"), confirmBtn = document.getElementById("confirm");
+const log = document.getElementById("log");
+let picked = null, turn = 13;
+
+CHOICES.forEach((c, i) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "choice"; b.dataset.id = c.id;
+  b.setAttribute("role","radio"); b.setAttribute("aria-checked","false");
+  b.innerHTML = `<span class="glyph"><span style="width:18px;height:18px;display:block">${GLYPH[c.glyph]}</span></span>` +
+                `<span>${c.label}</span><span class="cap"></span>`;
+  b.addEventListener("click", () => select(c.id, true));
+  b.addEventListener("mouseenter", () => { if (!picked) preview_(c); });
+  b.addEventListener("focus", () => { if (!picked) preview_(c); });
+  wrap.appendChild(b);
+});
+
+function preview_(c){
+  pvList.innerHTML = Object.entries(c.d).map(([k,v]) =>
+      `<dt>${LABEL[k]}</dt><dd class="up">+${v}</dd>`).join("") +
+    `<dt>Skill Points</dt><dd class="up">+${c.sp}</dd>` +
+    `<dt>Mood</dt><dd>${c.mood}</dd>`;
+  document.getElementById("pv-title").textContent = "Would log";
+}
+function select(id, lock){
+  picked = id;
+  const c = CHOICES.find(x => x.id === id);
+  [...wrap.children].forEach(el => el.setAttribute("aria-checked", String(el.dataset.id === id)));
+  preview_(c);
+  preview.dataset.open = "true";
+  confirmBtn.disabled = false;
+}
+function clear(){
+  picked = null; preview.dataset.open = "false"; confirmBtn.disabled = true;
+  pvList.innerHTML = `<dt style="grid-column:1/-1;color:var(--ink-muted);font-size:13px">Nothing selected yet.</dt>`;
+  document.getElementById("pv-title").textContent = "Hover a choice to preview it";
+}
+function renderEntry(e, isNew){
+  const el = document.createElement("article");
+  el.className = "entry" + (isNew ? " new" : "");
+  const parts = Object.entries(e.d).filter(([k,v]) => v > 0 && k !== "sp").map(([k,v]) =>
+    `${LABEL[k]} went <span class="up">up</span> by <span class="up">${v}</span>`);
+  if (e.d.sp > 0) parts.push(`Skill Points went <span class="up">up</span> by <span class="up">${e.d.sp}</span>`);
+  const sentence = parts.length ? parts.join(". ") + "." : "";
+  el.innerHTML = `<span class="disc">${e.turn}</span><h4>${e.title}</h4><p>${sentence}${e.extra ? " " + e.extra : ""}</p>`;
+  return el;
+}
+[ {turn:12,title:"Rest",d:{},extra:"Energy recovered. No stat change this turn."},
+  {turn:11,title:"Wit training",d:{wit:12,speed:3,sp:5}},
+  {turn:10,title:"Speed training",d:{speed:14,power:5,sp:2}}
+].slice().reverse().forEach(e => log.appendChild(renderEntry(e,false)));
+
+confirmBtn.addEventListener("click", () => {
+  if (!picked) return;
+  const c = CHOICES.find(x => x.id === picked);
+  log.appendChild(renderEntry({ turn, title:"Event: Overthrow the Rival!", d:{...c.d, sp:c.sp},
+    extra:`Choice recorded: "${c.label}".` }, true));
+  turn += 1;
+  document.querySelector(".chip .n").textContent = String(turn);
+  document.querySelector(".stepline").textContent = "Step 1 of 3 \u00b7 the event is logged, the next step opens on a real run";
+  clear();
+});
+document.getElementById("change").addEventListener("click", clear);
+document.addEventListener("keydown", ev => {
+  if (/^[1-3]$/.test(ev.key)) { select(CHOICES[Number(ev.key)-1].id); ev.preventDefault(); }
+  else if (ev.key === "Escape") clear();
+  else if (ev.key === "Enter" && !confirmBtn.disabled && document.activeElement.tagName !== "BUTTON") confirmBtn.click();
+});
+
+const tbtns = document.querySelectorAll("[data-theme-set]");
+function paint(){ const s = localStorage.getItem("uma-theme");
+  tbtns.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.themeSet === (s || "light")))); }
+tbtns.forEach(b => b.addEventListener("click", () => {
+  localStorage.setItem("uma-theme", b.dataset.themeSet);
+  document.documentElement.dataset.theme = b.dataset.themeSet; paint();
+}));
+paint();
+</script>
+</body>
+</html>

@@ -1,0 +1,519 @@
+{
+ "training-green": {
+  "file": "Screenshot 2026-07-14 194819.png",
+  "size": [
+   518,
+   700
+  ],
+  "accents": [
+   {
+    "hue": 210,
+    "share_pct": 15.24,
+    "mean_hex": "#63B8F8",
+    "peak_hex": "#007BDE"
+   },
+   {
+    "hue": 345,
+    "share_pct": 8.88,
+    "mean_hex": "#A8273F",
+    "peak_hex": "#800014"
+   },
+   {
+    "hue": 105,
+    "share_pct": 5.84,
+    "mean_hex": "#7ADF5C",
+    "peak_hex": "#209900"
+   },
+   {
+    "hue": 90,
+    "share_pct": 2.19,
+    "mean_hex": "#86D736",
+    "peak_hex": "#81F100"
+   },
+   {
+    "hue": 165,
+    "share_pct": 1.61,
+    "mean_hex": "#48A890",
+    "peak_hex": "#09FFE0"
+   },
+   {
+    "hue": 120,
+    "share_pct": 1.55,
+    "mean_hex": "#58C653",
+    "peak_hex": "#007B00"
+   },
+   {
+    "hue": 195,
+    "share_pct": 1.52,
+    "mean_hex": "#4CBEF2",
+    "peak_hex": "#00A1E1"
+   },
+   {
+    "hue": 30,
+    "share_pct": 1.23,
+    "mean_hex": "#C07B3E",
+    "peak_hex": "#672700"
+   }
+  ],
+  "panel_white_mean": "#F9F9FB",
+  "panel_white_share_pct": 12.7,
+  "text_brown_mean": "#66505D",
+  "text_brown_share_pct": 0.9
+ },
+ "training-green-junior": {
+  "file": "Screenshot 2026-07-14 202142.png",
+  "size": [
+   508,
+   700
+  ],
+  "accents": [
+   {
+    "hue": 210,
+    "share_pct": 6.05,
+    "mean_hex": "#4C95DC",
+    "peak_hex": "#008DF2"
+   },
+   {
+    "hue": 255,
+    "share_pct": 3.39,
+    "mean_hex": "#58458B",
+    "peak_hex": "#351F76"
+   },
+   {
+    "hue": 195,
+    "share_pct": 2.97,
+    "mean_hex": "#54CCFA",
+    "peak_hex": "#009FE0"
+   },
+   {
+    "hue": 90,
+    "share_pct": 1.98,
+    "mean_hex": "#81D42F",
+    "peak_hex": "#378E00"
+   },
+   {
+    "hue": 105,
+    "share_pct": 1.22,
+    "mean_hex": "#4CBE1D",
+    "peak_hex": "#2AB500"
+   },
+   {
+    "hue": 75,
+    "share_pct": 1.17,
+    "mean_hex": "#B5E334",
+    "peak_hex": "#5B8F00"
+   },
+   {
+    "hue": 180,
+    "share_pct": 1.02,
+    "mean_hex": "#58E6F0",
+    "peak_hex": "#00FFE4"
+   },
+   {
+    "hue": 30,
+    "share_pct": 0.99,
+    "mean_hex": "#B7773A",
+    "peak_hex": "#6A2C00"
+   }
+  ],
+  "panel_white_mean": "#F8FAFC",
+  "panel_white_share_pct": 25.9,
+  "text_brown_mean": "#503E57",
+  "text_brown_share_pct": 2.6
+ },
+ "training-blue-plus-calendar": {
+  "file": "Screenshot 2026-07-17 230755.png",
+  "size": [
+   700,
+   394
+  ],
+  "accents": [
+   {
+    "hue": 210,
+    "share_pct": 3.33,
+    "mean_hex": "#4EA1E8",
+    "peak_hex": "#0084DD"
+   },
+   {
+    "hue": 195,
+    "share_pct": 1.8,
+    "mean_hex": "#5CCEFA",
+    "peak_hex": "#009FE1"
+   },
+   {
+    "hue": 255,
+    "share_pct": 1.2,
+    "mean_hex": "#554488",
+    "peak_hex": "#311D70"
+   },
+   {
+    "hue": 90,
+    "share_pct": 0.96,
+    "mean_hex": "#A2DD57",
+    "peak_hex": "#6BEE00"
+   },
+   {
+    "hue": 75,
+    "share_pct": 0.91,
+    "mean_hex": "#BFE571",
+    "peak_hex": "#659D00"
+   },
+   {
+    "hue": 225,
+    "share_pct": 0.74,
+    "mean_hex": "#6584D8",
+    "peak_hex": "#0041DB"
+   },
+   {
+    "hue": 180,
+    "share_pct": 0.52,
+    "mean_hex": "#60E9F2",
+    "peak_hex": "#00FCDF"
+   },
+   {
+    "hue": 30,
+    "share_pct": 0.45,
+    "mean_hex": "#C58448",
+    "peak_hex": "#682700"
+   }
+  ],
+  "panel_white_mean": "#F7F7FB",
+  "panel_white_share_pct": 53.4,
+  "text_brown_mean": "#4B3D4E",
+  "text_brown_share_pct": 3.7
+ },
+ "event-choices": {
+  "file": "Screenshot 2026-07-14 124128.png",
+  "size": [
+   700,
+   308
+  ],
+  "accents": [
+   {
+    "hue": 30,
+    "share_pct": 12.64,
+    "mean_hex": "#725534",
+    "peak_hex": "#6A2B00"
+   },
+   {
+    "hue": 90,
+    "share_pct": 6.72,
+    "mean_hex": "#7BCB10",
+    "peak_hex": "#72C800"
+   },
+   {
+    "hue": 210,
+    "share_pct": 2.85,
+    "mean_hex": "#449BEB",
+    "peak_hex": "#006BE8"
+   },
+   {
+    "hue": 45,
+    "share_pct": 1.64,
+    "mean_hex": "#95793A",
+    "peak_hex": "#FFA100"
+   },
+   {
+    "hue": 345,
+    "share_pct": 0.7,
+    "mean_hex": "#5F1C27",
+    "peak_hex": "#5E0926"
+   },
+   {
+    "hue": 195,
+    "share_pct": 0.68,
+    "mean_hex": "#4BCBF7",
+    "peak_hex": "#03B3E2"
+   },
+   {
+    "hue": 15,
+    "share_pct": 0.6,
+    "mean_hex": "#6F3C29",
+    "peak_hex": "#652300"
+   }
+  ],
+  "panel_white_mean": "#F9F9F9",
+  "panel_white_share_pct": 39.0,
+  "text_brown_mean": "#6A5641",
+  "text_brown_share_pct": 18.9
+ },
+ "event-choices-2": {
+  "file": "Screenshot 2026-07-14 124926.png",
+  "size": [
+   700,
+   310
+  ],
+  "accents": [
+   {
+    "hue": 90,
+    "share_pct": 7.15,
+    "mean_hex": "#7DCA15",
+    "peak_hex": "#6FC700"
+   },
+   {
+    "hue": 210,
+    "share_pct": 2.91,
+    "mean_hex": "#4298E6",
+    "peak_hex": "#0267E0"
+   },
+   {
+    "hue": 120,
+    "share_pct": 1.82,
+    "mean_hex": "#366436",
+    "peak_hex": "#255A24"
+   },
+   {
+    "hue": 195,
+    "share_pct": 1.03,
+    "mean_hex": "#44A1BF",
+    "peak_hex": "#20BCF9"
+   },
+   {
+    "hue": 30,
+    "share_pct": 0.76,
+    "mean_hex": "#966338",
+    "peak_hex": "#682800"
+   },
+   {
+    "hue": 255,
+    "share_pct": 0.63,
+    "mean_hex": "#3F3566",
+    "peak_hex": "#25195D"
+   },
+   {
+    "hue": 45,
+    "share_pct": 0.47,
+    "mean_hex": "#DAB842",
+    "peak_hex": "#7A6001"
+   },
+   {
+    "hue": 0,
+    "share_pct": 0.43,
+    "mean_hex": "#702929",
+    "peak_hex": "#620E14"
+   }
+  ],
+  "panel_white_mean": "#F8F9F9",
+  "panel_white_share_pct": 40.8,
+  "text_brown_mean": "#47504A",
+  "text_brown_share_pct": 20.1
+ },
+ "most-repeated-frame": {
+  "file": "Screenshot 2026-07-18 001811.png",
+  "size": [
+   700,
+   394
+  ],
+  "accents": [
+   {
+    "hue": 30,
+    "share_pct": 12.81,
+    "mean_hex": "#D79E5B",
+    "peak_hex": "#692900"
+   },
+   {
+    "hue": 45,
+    "share_pct": 2.2,
+    "mean_hex": "#F9C759",
+    "peak_hex": "#907D00"
+   },
+   {
+    "hue": 90,
+    "share_pct": 2.09,
+    "mean_hex": "#87D325",
+    "peak_hex": "#76C900"
+   },
+   {
+    "hue": 345,
+    "share_pct": 2.05,
+    "mean_hex": "#AE2E47",
+    "peak_hex": "#80001A"
+   },
+   {
+    "hue": 0,
+    "share_pct": 1.34,
+    "mean_hex": "#9A4A48",
+    "peak_hex": "#990003"
+   },
+   {
+    "hue": 15,
+    "share_pct": 0.89,
+    "mean_hex": "#B56649",
+    "peak_hex": "#632100"
+   },
+   {
+    "hue": 75,
+    "share_pct": 0.75,
+    "mean_hex": "#90D20F",
+    "peak_hex": "#93DA00"
+   },
+   {
+    "hue": 210,
+    "share_pct": 0.74,
+    "mean_hex": "#2D96EE",
+    "peak_hex": "#0099F8"
+   }
+  ],
+  "panel_white_mean": "#FAF9FC",
+  "panel_white_share_pct": 54.4,
+  "text_brown_mean": "#55404D",
+  "text_brown_share_pct": 4.2
+ },
+ "guide-dialog": {
+  "file": "Screenshot 2026-07-14 025344.png",
+  "size": [
+   700,
+   394
+  ],
+  "accents": [
+   {
+    "hue": 90,
+    "share_pct": 2.47,
+    "mean_hex": "#8FD43D",
+    "peak_hex": "#69C200"
+   },
+   {
+    "hue": 75,
+    "share_pct": 1.5,
+    "mean_hex": "#B1E152",
+    "peak_hex": "#84D000"
+   },
+   {
+    "hue": 30,
+    "share_pct": 0.25,
+    "mean_hex": "#936442",
+    "peak_hex": "#6A2900"
+   },
+   {
+    "hue": 45,
+    "share_pct": 0.09,
+    "mean_hex": "#E4C056",
+    "peak_hex": "#E9B600"
+   },
+   {
+    "hue": 210,
+    "share_pct": 0.04,
+    "mean_hex": "#4791E8",
+    "peak_hex": "#1F76E1"
+   }
+  ],
+  "panel_white_mean": "#F8F7FA",
+  "panel_white_share_pct": 59.5,
+  "text_brown_mean": "#564638",
+  "text_brown_share_pct": 0.1
+ },
+ "team-showdown": {
+  "file": "Screenshot 2026-07-17 235229.png",
+  "size": [
+   700,
+   394
+  ],
+  "accents": [
+   {
+    "hue": 90,
+    "share_pct": 8.84,
+    "mean_hex": "#82C240",
+    "peak_hex": "#71C600"
+   },
+   {
+    "hue": 210,
+    "share_pct": 2.91,
+    "mean_hex": "#4888CB",
+    "peak_hex": "#0A4E81"
+   },
+   {
+    "hue": 75,
+    "share_pct": 1.44,
+    "mean_hex": "#B0DD50",
+    "peak_hex": "#82CF00"
+   },
+   {
+    "hue": 195,
+    "share_pct": 0.81,
+    "mean_hex": "#41ABD8",
+    "peak_hex": "#0087D3"
+   },
+   {
+    "hue": 105,
+    "share_pct": 0.69,
+    "mean_hex": "#54A237",
+    "peak_hex": "#2BA505"
+   },
+   {
+    "hue": 15,
+    "share_pct": 0.65,
+    "mean_hex": "#9F5C42",
+    "peak_hex": "#872600"
+   },
+   {
+    "hue": 30,
+    "share_pct": 0.54,
+    "mean_hex": "#B67D4C",
+    "peak_hex": "#6C2B00"
+   },
+   {
+    "hue": 300,
+    "share_pct": 0.49,
+    "mean_hex": "#C25CBD",
+    "peak_hex": "#A82FB7"
+   }
+  ],
+  "panel_white_mean": "#F7F6FA",
+  "panel_white_share_pct": 51.2,
+  "text_brown_mean": "#45545A",
+  "text_brown_share_pct": 4.7
+ },
+ "photo-album": {
+  "file": "Screenshot 2026-07-18 134106.png",
+  "size": [
+   700,
+   394
+  ],
+  "accents": [
+   {
+    "hue": 90,
+    "share_pct": 19.79,
+    "mean_hex": "#7BAD3E",
+    "peak_hex": "#67B500"
+   },
+   {
+    "hue": 75,
+    "share_pct": 6.32,
+    "mean_hex": "#8FB639",
+    "peak_hex": "#8DCE00"
+   },
+   {
+    "hue": 105,
+    "share_pct": 4.38,
+    "mean_hex": "#468832",
+    "peak_hex": "#1A6200"
+   },
+   {
+    "hue": 120,
+    "share_pct": 3.37,
+    "mean_hex": "#3B7338",
+    "peak_hex": "#0F9D00"
+   },
+   {
+    "hue": 45,
+    "share_pct": 0.69,
+    "mean_hex": "#9C8251",
+    "peak_hex": "#D39511"
+   },
+   {
+    "hue": 30,
+    "share_pct": 0.51,
+    "mean_hex": "#886035",
+    "peak_hex": "#682800"
+   }
+  ],
+  "panel_white_mean": "#F5F3F8",
+  "panel_white_share_pct": 40.7,
+  "text_brown_mean": "#477046",
+  "text_brown_share_pct": 5.0
+ },
+ "result-pits-modal": {
+  "file": "Screenshot 2026-07-15 005040.png",
+  "missing": true
+ }
+}

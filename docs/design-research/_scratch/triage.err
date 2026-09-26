@@ -1,0 +1,10 @@
+D:\Projects\umamusume-laravel13\docs\design-research\_scratch\triage.py:20: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  px = list(small.getdata())
+D:\Projects\umamusume-laravel13\docs\design-research\_scratch\triage.py:28: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  cells = list(grid.getdata())
+0/1160
+200/1160
+400/1160
+600/1160
+800/1160
+1000/1160

@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>/* Apply the theme before first paint so there is no flash of the wrong theme (D-104). */(function(){try{var t=localStorage.getItem("uma-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="light";}})();</script>
+<title>Screen E · Scenario-Aware Header, Strip and Guided Turn</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style type="text/tailwindcss">
+@theme {
+  --color-page: #F2F1F8; --color-panel: #F8F8FB; --color-raised: #FFFFFF;
+  --color-idle: #D2D2DB; --color-sunken: #E7E7EC; --color-disabled: #D0D1D0;
+  --color-ink: #6A5641; --color-ink-strong: #482720; --color-ink-muted: #7A7067;
+  --color-ink-faint: #988F87; --color-rule: #E4E1EA;
+  --color-green: #7FCC09; --color-green-deep: #4E7906; --color-green-tint: #F0F8EC;
+  --color-green-line: #C6E5B3; --color-up: #FF9A2C; --color-down: #0088E0;
+  --color-sp: #009FE1; --color-pick: #EFC96A; --color-risk: #800014; --color-rank: #351F70;
+  --radius-panel: 14px; --radius-card: 10px; --radius-chip: 8px;
+}
+</style>
+<style>
+/* Plain-CSS fallback; token names and values mirror the @theme block above. */
+:root{
+  --page:#F2F1F8;--panel:#F8F8FB;--raised:#FFFFFF;--idle:#D2D2DB;--sunken:#E7E7EC;--disabled:#D0D1D0;
+  --ink:#6A5641;--ink-strong:#482720;--ink-muted:#7A7067;--ink-faint:#988F87;--rule:#E4E1EA;
+  --green:#7FCC09;--green-deep:#4E7906;--green-tint:#F0F8EC;--green-line:#C6E5B3;
+  --up:#FF9A2C;--down:#0088E0;--sp:#009FE1;--pick:#EFC96A;--risk:#800014;--rank:#351F70;
+  --chrome:#4E7906;--on-chrome:#FFFFFF;
+  --tint-speed:#E6ECF7;--tint-stamina:#F7E6F1;--tint-power:#F7F1E6;--tint-guts:#F7E6E6;
+  --tint-wit:#ECF7E6;--tint-sp:#E6F4F7;--lattice:#6ABE01;
+  --lift:0 2px 0 rgba(53,31,112,.06),0 6px 16px -6px rgba(53,31,112,.22);
+}
+:root[data-theme="dark"]{
+  --page:#0D0C0F;--panel:#121013;--raised:#24262A;--idle:#32343A;--sunken:#1A181D;--disabled:#3A3A40;
+  --ink:#ECEAF2;--ink-strong:#FFFFFF;--ink-muted:#AAABB5;--ink-faint:#7C7D87;--rule:#2E2C33;
+  --green:#7FCC09;--green-deep:#9BE83A;--chrome:#7FCC09;--on-chrome:#121013;
+  --green-tint:#1F2A12;--green-line:#3D5A18;
+  --up:#FF9A2C;--down:#4EA1E8;--sp:#4FC3F7;--pick:#F5B73C;--risk:#FF6B7A;--rank:#B6B4C2;
+  --tint-speed:#252C42;--tint-stamina:#3B2736;--tint-power:#312C2A;--tint-guts:#3F272B;
+  --tint-wit:#26302A;--tint-sp:#242E35;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font-size:14px;line-height:1.5;
+  font-family:"Nunito","M PLUS Rounded 1s",ui-rounded,system-ui,sans-serif;
+  background-image:linear-gradient(115deg,rgba(255,255,255,.5) 0 14%,transparent 14%),
+                   linear-gradient(245deg,rgba(53,31,112,.035) 0 22%,transparent 22%)}
+:root[data-theme="dark"] body{background-image:none}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 20px 64px;display:grid;gap:18px}
+.capsule{position:relative;height:44px;border-radius:9999px;background:var(--chrome);display:flex;
+  align-items:center;padding:0 22px 0 78px;color:var(--on-chrome);font-weight:800;font-size:17px;
+  letter-spacing:.01em;box-shadow:var(--lift)}
+.capsule::before{content:"";position:absolute;left:0;top:0;bottom:0;width:64px;border-radius:9999px 0 0 9999px;
+  background-color:var(--lattice);
+  background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.34) 0 4px,transparent 4px 11px),
+                   repeating-linear-gradient(-45deg,rgba(255,255,255,.34) 0 4px,transparent 4px 11px)}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:var(--radius-panel);
+  box-shadow:var(--lift);padding:0 18px 18px}
+.panel>.capsule{margin:-22px 0 16px}
+h1{margin:0;font-size:19px;font-weight:800;color:var(--ink-strong)}
+h3{margin:0 0 10px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)}
+.muted{color:var(--ink-muted);font-size:12px}
+.faint{color:var(--ink-faint);font-size:11px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.between{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+
+/* scenario switcher */
+.switch{display:flex;gap:6px;flex-wrap:wrap}
+.switch button{font:inherit;font-weight:800;font-size:13px;cursor:pointer;padding:9px 16px;border-radius:9999px;
+  border:2px solid var(--rule);background:var(--raised);color:var(--ink)}
+.switch button[aria-pressed="true"]{border-color:var(--green);background:var(--green-tint);color:var(--ink-strong)}
+.switch button:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+
+/* run header */
+.ident{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.ident .who{flex:1 1 240px;min-width:0}
+.ident h2{margin:0;font-size:27px;font-weight:800;letter-spacing:-.01em;color:var(--ink-strong);line-height:1.15}
+.tag{display:inline-block;border-radius:9999px;padding:3px 11px;font-size:12px;font-weight:800;
+  border:2px solid var(--green);background:var(--green-tint);color:var(--ink-strong)}
+.tag.ghost{border-color:var(--rule);background:var(--raised)}
+.linkchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);border-radius:9999px;
+  padding:4px 11px 4px 4px;background:var(--raised);font-size:12px;font-weight:700}
+.mono{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:9999px;
+  background:var(--chrome);color:var(--on-chrome);font-size:10px;font-weight:800}
+
+/* resource strip: flex, never a fixed grid (D-220, DESIGN 6.23) */
+.strip{display:flex;gap:10px;flex-wrap:wrap}
+.res{flex:1 1 150px;min-width:140px;background:var(--raised);border:1px solid var(--rule);
+  border-radius:var(--radius-card);padding:10px 13px}
+.res .k{display:block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-muted)}
+.res .v{display:block;font-size:21px;font-weight:800;color:var(--ink-strong);font-variant-numeric:tabular-nums}
+.res .s{display:block;font-size:11px;color:var(--ink-faint)}
+.batt{display:flex;gap:3px;margin-top:5px}
+.batt i{height:8px;flex:1;border-radius:3px;background:var(--idle)}
+.batt i.on{background:var(--green)}
+
+/* stat band */
+.band{display:flex;gap:0;background:var(--raised);border:1px solid var(--rule);border-radius:var(--radius-card);overflow:hidden}
+.cell{flex:1 1 0;min-width:0;padding:10px 12px 13px;border-right:1px solid var(--rule)}
+.cell:last-child{border-right:0}
+.cell .hd{display:flex;align-items:center;gap:6px;margin:-10px -12px 9px;padding:6px 12px;
+  border-bottom:1px solid var(--rule);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.cell[data-stat="speed"] .hd{background:var(--tint-speed)}
+.cell[data-stat="stamina"] .hd{background:var(--tint-stamina)}
+.cell[data-stat="power"] .hd{background:var(--tint-power)}
+.cell[data-stat="guts"] .hd{background:var(--tint-guts)}
+.cell[data-stat="wit"] .hd{background:var(--tint-wit)}
+.cell[data-stat="sp"] .hd{background:var(--tint-sp)}
+.glyph{width:14px;height:14px;flex:0 0 auto;fill:var(--ink)}
+.num{font-size:25px;font-weight:800;line-height:1;color:var(--ink-strong);font-variant-numeric:tabular-nums}
+.cap{font-size:11px;color:var(--ink-muted);font-variant-numeric:tabular-nums}
+.track{position:relative;height:7px;margin-top:9px;border-radius:4px;background:var(--sunken);overflow:hidden}
+.track i{position:absolute;left:0;top:0;bottom:0;background:var(--green)}
+.track .past{left:auto;background:var(--up);opacity:.55}
+.soft{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink-faint)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--ink-muted)}
+.legend b{color:var(--ink-strong);font-weight:800}
+
+/* goal panels */
+.cards{display:flex;gap:10px;flex-wrap:wrap}
+.gcard{flex:1 1 168px;background:var(--raised);border:2px solid var(--rule);border-radius:var(--radius-card);padding:11px 13px}
+.gcard.goal{border-color:var(--green)}
+.gcard.locked{background:var(--sunken);color:var(--ink-muted)}
+.gcard.open{border-style:dashed}
+.pennant{display:inline-block;width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid var(--green);margin-right:5px}
+.padlock{display:inline-block;width:9px;height:8px;background:var(--ink-muted);border-radius:0 0 2px 2px;position:relative;margin-right:6px}
+.padlock::before{content:"";position:absolute;left:1px;top:-6px;width:7px;height:7px;border:2px solid var(--ink-muted);border-bottom:0;border-radius:5px 5px 0 0}
+.meter{height:9px;border-radius:5px;background:var(--sunken);overflow:hidden;margin:7px 0 5px}
+.meter i{display:block;height:100%;background:var(--green)}
+.obj{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--rule)}
+.obj:last-child{border-bottom:0}
+.dot{width:15px;height:15px;border-radius:9999px;border:2px solid var(--idle);flex:0 0 auto}
+.dot.done{background:var(--green);border-color:var(--green-deep)}
+.dot.now{border-color:var(--up);box-shadow:0 0 0 3px rgba(255,154,44,.28)}
+.warn{display:flex;gap:8px;align-items:flex-start;background:var(--green-tint);border:1px solid var(--green-line);
+  border-radius:var(--radius-chip);padding:9px 11px;font-size:12px}
+.warn .tri{flex:0 0 auto;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid var(--up);margin-top:1px}
+
+/* burst roster */
+.roster{display:flex;flex-direction:column;gap:6px}
+.brow{display:flex;align-items:center;gap:9px;background:var(--raised);border:1px solid var(--rule);
+  border-radius:var(--radius-chip);padding:6px 10px}
+.brow .nm{flex:1;min-width:0;font-weight:700;font-size:13px}
+.state{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;border-radius:9999px;
+  padding:3px 10px;border:1px solid var(--rule);background:var(--sunken);color:var(--ink)}
+.state.chg{border-color:var(--up);background:var(--raised);color:var(--ink-strong)}
+.state.full{border-color:var(--green-deep);background:var(--green-tint);color:var(--ink-strong)}
+.state.held{border-color:var(--down);background:var(--raised);color:var(--ink-strong)}
+.state.used{color:var(--ink-faint)}
+.state.exa{border-color:var(--rank);background:var(--raised);color:var(--ink-strong);box-shadow:inset 0 0 0 1px var(--rank)}
+.state.exb{border-color:var(--rank);background:var(--raised);color:var(--ink-strong);box-shadow:inset 0 0 0 3px var(--rank)}
+.state.exb::before{content:"";width:8px;height:8px;background:var(--rank);border-radius:2px}
+.flames{display:flex;gap:2px}
+.flames i{width:9px;height:12px;background:var(--up);clip-path:polygon(50% 0,80% 40%,100% 78%,50% 100%,0 78%,20% 40%)}
+.flames i.off{background:var(--idle)}
+
+/* guided turn input */
+.steps{display:flex;gap:6px;align-items:center}
+.steps i{height:5px;width:34px;border-radius:3px;background:var(--idle)}
+.steps i.on{background:var(--green)}
+.steps .st{font-size:12px;font-weight:800;color:var(--ink-muted)}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{display:flex;gap:12px;align-items:center;text-align:left;font:inherit;cursor:pointer;
+  background:var(--raised);border:2px solid var(--rule);border-radius:var(--radius-card);padding:11px 14px;color:var(--ink)}
+.choice:hover{border-color:var(--green-line)}
+.choice[aria-checked="true"]{border-color:var(--pick);box-shadow:0 0 0 1px var(--pick)}
+.choice .idx{display:grid;place-items:center;width:24px;height:24px;flex:0 0 auto;border-radius:var(--radius-chip);
+  background:var(--sunken);font-size:12px;font-weight:800;color:var(--ink-strong)}
+.choice .lb{flex:1;min-width:0}
+.choice .lb b{display:block;font-size:15px;font-weight:800;color:var(--ink-strong)}
+.choice .lb span{display:block;font-size:12px;color:var(--ink-muted)}
+.delta{font-weight:800;font-variant-numeric:tabular-nums;font-size:13px}
+.delta.up{color:var(--up)}
+.delta.down{color:var(--down)}
+.btn{font:inherit;font-weight:800;cursor:pointer;border-radius:9999px;padding:11px 22px;border:0;
+  background:var(--chrome);color:var(--on-chrome);position:relative;overflow:hidden;box-shadow:var(--lift)}
+.btn::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(116deg,rgba(255,255,255,.30) 0 34%,rgba(255,255,255,0) 34.5% 100%)}
+.btn.ghost{background:transparent;color:var(--ink-strong);border:2px solid var(--rule);box-shadow:none}
+.btn:disabled{background:var(--disabled);color:var(--ink-faint);box-shadow:none;cursor:not-allowed}
+.btn:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.energy-at-confirm{display:flex;align-items:center;gap:10px}
+.unverified{border:1px dashed var(--down);border-radius:5px;padding:0 5px;font-size:10px;font-weight:800;color:var(--down)}
+.log{display:flex;flex-direction:column;gap:5px;max-height:158px;overflow:auto}
+.log div{font-size:12px;border-bottom:1px solid var(--rule);padding-bottom:5px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+<header class="between">
+  <div>
+    <h1>Scenario-Aware Shell</h1>
+    <p class="muted" style="margin:2px 0 0">Run header, resource strip and guided turn input. Toggle a scenario: widgets appear and disappear per <span class="faint">CONSTRAINTS.md</span> §10n.</p>
+  </div>
+  <div class="row" style="gap:8px">
+    <span class="faint">Theme</span>
+    <button class="btn ghost" id="theme" type="button" style="padding:7px 14px;font-size:12px">Dark</button>
+  </div>
+</header>
+
+<section class="panel" aria-labelledby="sw">
+  <div class="capsule" id="sw">Select scenario</div>
+  <div class="switch" role="group" aria-label="Scenario">
+    <button type="button" data-sc="ura" aria-pressed="true">URA Finale</button>
+    <button type="button" data-sc="unity" aria-pressed="false">Unity Cup</button>
+    <button type="button" data-sc="track" aria-pressed="false">Trackblazer</button>
+    <button type="button" data-sc="concert" aria-pressed="false">Our Grand Concert</button>
+  </div>
+  <p class="faint" id="scnote" style="margin:10px 0 0"></p>
+</section>
+
+<section class="panel" aria-labelledby="hd">
+  <div class="capsule" id="hd">Run header</div>
+  <div class="ident">
+    <div class="who">
+      <h2 id="trainee"></h2>
+      <p class="muted" style="margin:3px 0 0">Trainee Umamusume · Trainer log · <span id="phase"></span></p>
+    </div>
+    <div class="row" id="scenarioTags"></div>
+  </div>
+  <div style="margin-top:14px">
+    <h3>Persistent resource strip</h3>
+    <div class="strip" id="strip"></div>
+    <p class="faint" style="margin:9px 0 0">A widget a scenario has no mechanic for is not rendered as an empty slot. It is absent.</p>
+  </div>
+</section>
+
+<section class="panel" aria-labelledby="bd">
+  <div class="capsule" id="bd">Stat band</div>
+  <div class="band" id="band"></div>
+  <div class="legend" id="capLegend"></div>
+  <p class="faint" style="margin:8px 0 0" id="boundNote"></p>
+</section>
+
+<section class="panel" aria-labelledby="gp">
+  <div class="capsule" id="gp">Goals and scenario panels</div>
+  <div id="goals"></div>
+</section>
+
+<section class="panel" aria-labelledby="gi">
+  <div class="capsule" id="gi">Guided turn input</div>
+  <div class="between" style="margin-bottom:12px">
+    <div class="steps" id="steps"></div>
+    <span class="st faint" id="stepLabel"></span>
+  </div>
+  <div id="flow"></div>
+</section>
+
+<section class="panel" aria-labelledby="lg">
+  <div class="capsule" id="lg">Turn log</div>
+  <div class="log" id="log"><p class="muted">Nothing logged yet. Complete a turn to see the entry append.</p></div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+
+/* Caps are 1200 base + the per-stat scenario bonus published in scenarios.json.
+   The bonus is a delta, not a ceiling: one JP scenario carries a negative Stamina
+   bonus, so a cap can sit below the base. Hard cap is a separate field. */
+var BASE = 1200;
+var HARD_CAP = 2000;
+var STATS = ["Speed","Stamina","Power","Guts","Wit"];
+
+var SCENARIOS = {
+  ura: {
+    name: "URA Finale",
+    trainee: "Silence Suzuka",
+    bonus: [200,200,200,200,200],
+    link: ["Aoi Kiryuin"],
+    strip: ["turn","energy","fans"],
+    calendar: true, teamRace: false, grade: false, shop: false,
+    steps: ["activity","review","confirm"],
+    note: "Baseline scenario. No team system, no shop, no scenario currency, so the strip carries three items and no more."
+  },
+  unity: {
+    name: "Unity Cup",
+    trainee: "Oguri Cap",
+    bonus: [100,100,100,100,600],
+    link: ["Taiki Shuttle","Rice Shower","Haru Urara","Matikanefukukitaru","Riko Kashimoto"],
+    teamName: "Team Blue Bloom",
+    strip: ["turn","energy","fans","teamrank","bursts"],
+    calendar: true, teamRace: true, grade: false, shop: false,
+    steps: ["facility","review","confirm"],
+    note: "Team layer on top of the URA goal structure. Facility level comes from team rank, not personal repetition. No energy penalty on team training since the 2026-07-01 update."
+  },
+  track: {
+    name: "Trackblazer",
+    trainee: "Tokai Teio",
+    bonus: [0,700,0,0,300],
+    link: [],
+    strip: ["turn","energy","fans","grade","coins"],
+    calendar: false, teamRace: false, grade: true, shop: true,
+    steps: ["activity","shop","review","confirm"],
+    note: "No mandatory race goals, so the Race Calendar is absent and replaced by Grade Point objectives. No Scenario Link character exists for this scenario, so the header carries none."
+  },
+  concert: {
+    name: "Our Grand Concert",
+    trainee: "Mihono Bourbon",
+    bonus: [400,100,100,300,100],
+    link: ["Smart Falcon","Agnes Tachyon","Silence Suzuka","Mihono Bourbon","Light Hello"],
+    strip: ["turn","energy","fans"],
+    calendar: false, teamRace: false, grade: false, shop: false,
+    steps: ["activity","review","confirm"],
+    note: "Live on Global since 2026-07-22 and the reason this screen exists. No mechanics guide is held for it, so it renders the baseline strip plus its published caps and invents nothing (D-241)."
+  }
+};
+
+var STATE = { sc: "ura", step: 0, pick: null, energy: 78, fans: 41250, turn: 27,
+              teamRank: "S+", bursts: 8, grade: 240, coins: 185, logged: [] };
+
+function caps(){ var s = SCENARIOS[STATE.sc]; return s.bonus.map(function(b){ return BASE + b; }); }
+function fmt(n){ return n.toLocaleString("en-US"); }
+
+var GLYPH = {
+  Speed:  "M2 13h11l1 2H1v-2zm1-3 3-4 3 3 3-2 1 3H3z",
+  Stamina:"M8 15S2 11 2 6.6A3.6 3.6 0 0 1 8 4a3.6 3.6 0 0 1 6 2.6C14 11 8 15 8 15z",
+  Power:  "M1 5h2v6H1zm3 1h2v4H4zm8-1h2v6h-2zM10 6h2v4h-2zM6 7h4v2H6z",
+  Guts:   "M8 1c2 3 5 4 5 8a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 1-2-1-4-1-7z",
+  Wit:    "M8 2 15 6l-7 4-7-4 7-4zm-5 7v3c0 1.7 10 1.7 10 0V9L8 11 3 9z",
+  sp:     "M3 2h9a1 1 0 0 1 1 1v10H4a1 1 0 0 1-1-1V2zm2 1v8h7V3H5z"
+};
+
+function glyph(key){
+  return '<svg class="glyph" viewBox="0 0 16 16" aria-hidden="true"><path d="' + GLYPH[key] + '"/></svg>';
+}
+
+function stripItems(){
+  var s = SCENARIOS[STATE.sc], out = [];
+  s.strip.forEach(function(k){
+    if (k === "turn")   out.push(["Turn", fmt(STATE.turn), s.name + " · " + phase()]);
+    if (k === "energy") out.push(["Energy", STATE.energy + "/100", null]);
+    if (k === "fans")   out.push(["Fans", fmt(STATE.fans), "next gate 60,000"]);
+    if (k === "teamrank")  out.push(["Team Rank", STATE.teamRank, "drives facility level"]);
+    if (k === "bursts")    out.push(["Spirit Bursts", String(STATE.bursts), "normal plus Extreme"]);
+    if (k === "grade")     out.push(["Grade Points", STATE.grade + "/300", "End of Classic Year"]);
+    if (k === "coins")     out.push(["Shop Coins", String(STATE.coins), "rotation in 2 turns"]);
+  });
+  return out;
+}
+
+function phase(){
+  if (STATE.sc === "unity") return "Late June, Classic Year";
+  if (STATE.sc === "track") return "Early Nov, Classic Year";
+  if (STATE.sc === "concert") return "Late April, Classic Year";
+  return "Late April, Classic Year";
+}
+
+function renderHeader(){
+  var s = SCENARIOS[STATE.sc];
+  document.getElementById("trainee").textContent = s.trainee;
+  document.getElementById("phase").textContent = phase();
+  document.getElementById("scnote").textContent = s.note;
+
+  var tags = '<span class="tag">' + s.name + "</span>";
+  if (s.teamName) { tags += '<span class="tag ghost">' + s.teamName + "</span>"; }
+  if (s.link.length) {
+    tags += '<div class="row" style="gap:6px"><span class="faint">Scenario Link</span>' +
+      s.link.map(function(n){
+        return '<span class="linkchip"><span class="mono" aria-hidden="true">' + n.split(" ").map(function(w){return w[0];}).join("") +
+          "</span>" + n + "</span>";
+      }).join("") + "</div>";
+  } else {
+    tags += '<span class="faint">No Scenario Link character in this scenario</span>';
+  }
+  document.getElementById("scenarioTags").innerHTML = tags;
+
+  document.getElementById("strip").innerHTML = stripItems().map(function(r){
+    var body = '<span class="k">' + r[0] + '</span><span class="v">' + r[1] + "</span>";
+    if (r[0] === "Energy") {
+      var on = Math.round(STATE.energy / 20);
+      body += '<span class="batt" role="img" aria-label="Energy ' + STATE.energy + ' of 100">';
+      for (var i = 0; i < 5; i++) { body += '<i class="' + (i < on ? "on" : "") + '"></i>'; }
+      body += "</span>";
+    } else if (r[2]) {
+      body += '<span class="s">' + r[2] + "</span>";
+    }
+    return '<div class="res">' + body + "</div>";
+  }).join("");
+}
+
+function renderBand(){
+  var c = caps();
+  var cells = STATS.map(function(name, i){
+    var v = [912,640,705,588,612][i];
+    if (STATE.sc === "unity") v = [1044,812,977,704,1340][i];
+    if (STATE.sc === "track") v = [902,1516,868,740,1030][i];
+    if (STATE.sc === "concert") v = [1104,712,866,790,742][i];
+    var pct = Math.min(100, v / c[i] * 100);
+    var soft = BASE / c[i] * 100;
+    var past = v > BASE ? ((v - BASE) / c[i] * 100) : 0;
+    return '<div class="cell" data-stat="' + name.toLowerCase() + '">' +
+      '<div class="hd">' + glyph(name) + name + "</div>" +
+      '<div class="num">' + fmt(v) + '</div>' +
+      '<div class="cap">/ ' + fmt(c[i]) + "</div>" +
+      '<div class="track"><i style="width:' + pct + '%"></i>' +
+      (past ? '<i class="past" style="width:' + past + '%;left:' + soft + '%"></i>' : "") +
+      '<span class="soft" style="left:' + soft + '%"></span></div></div>';
+  }).join("");
+  cells += '<div class="cell" data-stat="sp"><div class="hd">' + glyph("sp") + "Skill Points</div>" +
+    '<div class="num">68</div><div class="cap">no cap, no grade</div></div>';
+  document.getElementById("band").innerHTML = cells;
+
+  document.getElementById("capLegend").innerHTML =
+    "<span><b>1,200</b> soft cap, gains halved past it</span>" +
+    "<span><b>bar end</b> scenario ceiling</span>" +
+    "<span><b>amber</b> halved-return region</span>" +
+    "<span>Stack: 1,200 base + " + SCENARIOS[STATE.sc].bonus.map(function(b){ return "+" + b; }).join(" ") +
+    " scenario bonus + 0 breakthrough + deck untracked</span>";
+
+  document.getElementById("boundNote").textContent =
+    "The two thresholds are drawn apart on purpose: the soft cap is a game mechanic, the ceiling is per scenario, and the tool accepts values up to the hard cap of " +
+    fmt(HARD_CAP) + " (ADR-0002, option B). Highest ceiling reachable in this scenario: " + fmt(Math.max.apply(null, c)) + ".";
+}
+
+function renderGoals(){
+  var s = SCENARIOS[STATE.sc], html = "";
+
+  if (s.calendar) {
+    html += "<h3>Race calendar</h3><div class=\"cards\">" +
+      '<div class="gcard goal"><span class="pennant" aria-hidden="true"></span><b>Fuwa Fuji Taima Stakes</b>' +
+      '<div class="muted">G2 · mandatory goal</div></div>' +
+      '<div class="gcard locked"><span class="padlock" aria-hidden="true"></span><b>Tenno Sho (Spring)</b>' +
+      '<div class="muted">G1 · needs 12,000 fans</div></div>' +
+      '<div class="gcard open"><b>Naruta Kinpa Cup</b><div class="muted">OP · entry open</div></div>' +
+      "</div>";
+  }
+
+  if (s.teamRace) {
+    html += '<h3 style="margin-top:16px">Team race · round 3 of 5</h3><div class="cards">' +
+      '<div class="gcard"><b>Elite Team Ares</b><div class="muted">strongest · 5 circles</div></div>' +
+      '<div class="gcard"><b>The Turf Queens</b><div class="muted">3 circles · recommended</div></div>' +
+      '<div class="gcard"><b>Novice Squad</b><div class="muted">1 circle</div></div></div>' +
+      '<p class="faint" style="margin:8px 0 0">Field 1 to 3 teammates per distance. A loss lowers league rank and can be retried with an Alarm Clock.</p>';
+  }
+
+  if (s.grade) {
+    html += '<h3>Grade Point objectives</h3>' +
+      '<div class="meter"><i style="width:' + (STATE.grade / 300 * 100) + '%"></i>' +
+      '<span class="sr">' + STATE.grade + " of 300 Grade Points</span></div>" +
+      '<div class="obj"><span class="dot done"></span><div class="row between" style="flex:1"><span>Debut race</span><span class="muted">complete</span></div></div>' +
+      '<div class="obj"><span class="dot done"></span><div class="row between" style="flex:1"><span>End of Junior Year · 60</span><span class="muted">60 / 60</span></div></div>' +
+      '<div class="obj"><span class="dot now"></span><div class="row between" style="flex:1"><span><b>End of Classic Year · 300</b></span><span class="muted">' + STATE.grade + " / 300, in 11 turns</span></div></div>" +
+      '<div class="obj"><span class="dot"></span><div class="row between" style="flex:1"><span>End of Senior Year · 300</span><span class="muted">locked</span></div></div>' +
+      '<div class="warn" style="margin-top:10px"><span class="tri" aria-hidden="true"></span><span><b>Surplus does not carry over.</b> Points past 300 are spent, not banked, so this meter reads against the current objective only.</span></div>';
+  }
+
+  if (s.shop) {
+    html += '<h3 style="margin-top:16px">Special shop · rotation resets in 2 turns</h3><div class="cards">' +
+      '<div class="gcard"><b>Empowering Megaphone</b><div class="muted">Training bonus +60% for 2 turns</div><div class="delta up">70 coins</div></div>' +
+      '<div class="gcard"><b>Master Cleat Hammer</b><div class="muted">Race bonus +35% for 1 turn</div><div class="delta up">40 coins</div></div>' +
+      '<div class="gcard"><b>Berry Sweet Cupcake</b><div class="muted">Mood +2</div><div class="delta up">55 coins</div></div>' +
+      '<div class="gcard locked"><b>Wit Training Application</b><div class="muted">Facility level +1, permanent</div><div class="delta up">150 coins</div></div>' +
+      "</div>" +
+      '<p class="faint" style="margin:8px 0 0">Up to 5 copies of one item. Buying a weaker timed effect while a stronger one is active replaces it.</p>';
+  }
+
+  if (!s.calendar && !s.grade) {
+    html += '<div class="warn"><span class="tri" aria-hidden="true"></span><span><b>No goal panel is rendered.</b> This scenario is live on Global but no mechanics guide is held for it, so the shell shows baseline resources and published caps only. A calendar, a team gauge or a shop here would be invented.</span></div>';
+  }
+
+  document.getElementById("goals").innerHTML = html;
+}
+
+var ROSTER = [
+  ["Agnes Tachyon","chg","chargeable"],["Tokai Teio","full","charged"],["Rice Shower","held","held"],
+  ["Haru Urara","used","spent"],["Taiki Shuttle","exa","Extreme ready"],["Matikanefukukitaru","exb","Extreme spent"]
+];
+
+function activities(){
+  var s = SCENARIOS[STATE.sc];
+  var list = STATS.map(function(n,i){
+    var flames = s.teamRace ? [3,2,5,2,4][i] : 0;
+    return { key:"train-"+n, label:n + " Work", sub:"Facility Lv " + [4,3,5,4,5][i] + " · " + (s.teamRace ? flames + " teammates present" : "personal repetition"),
+             gain:"+" + [8,7,4,3,2][i] + " " + n, cost:"-" + [19,17,18,20,0][i] + " Energy", flames:flames };
+  });
+  list.push({ key:"rest", label:"Rest", sub:"Recovers Energy, spends the turn", gain:"+30 Energy", cost:"" });
+  list.push({ key:"mood", label:"Mood adjustment", sub:"Raises Mood. Client label unverified: Recreation or Outing", gain:"+1 Mood", cost:"", unverified:true });
+  if (!s.grade) {
+    list.push({ key:"race", label:"Race entry", sub:s.calendar ? "Goal race available" : "Entry race available", gain:"Fans + Skill Points", cost:"" });
+  } else {
+    list.push({ key:"race", label:"Race entry", sub:"Pays Grade Points and Shop Coins", gain:"+40 to +100 Grade Points", cost:"" });
+  }
+  return list;
+}
+
+function renderFlow(){
+  var s = SCENARIOS[STATE.sc], steps = s.steps, i = STATE.step;
+
+  document.getElementById("steps").innerHTML = steps.map(function(k,n){
+    return '<i class="' + (n <= i ? "on" : "") + '"></i>';
+  }).join("") + '<span class="st">Step ' + (i + 1) + " of " + steps.length + " · " + steps[i] + "</span>";
+  document.getElementById("stepLabel").textContent = s.name;
+
+  var el = document.getElementById("flow");
+
+  if (steps[i] === "activity" || steps[i] === "facility") {
+    el.innerHTML = '<h3>' + (steps[i] === "facility" ? "Choose a training facility" : "Choose the activity for this turn") + "</h3>" +
+      '<div class="choices" role="radiogroup" aria-label="Turn activity">' +
+      activities().map(function(c,n){
+        return '<button class="choice" type="button" role="radio" data-k="' + c.key + '" aria-checked="' + (STATE.pick === c.key) + '">' +
+          '<span class="idx">' + (n + 1) + "</span><span class=\"lb\"><b>" + c.label +
+          (c.unverified ? ' <span class="unverified" title="Not confirmed as the Global client string">[Unverified]</span>' : "") +
+          "</b><span>" + c.sub + "</span></span>" +
+          '<span class="delta up">' + c.gain + "</span>" +
+          (c.cost ? '<span class="delta down">' + c.cost + "</span>" : "") +
+          (c.flames ? '<span class="flames" role="img" aria-label="' + c.flames + ' teammates on this facility">' + flameRow(c.flames) + "</span>" : "") +
+          "</button>";
+      }).join("") + "</div>" +
+      (steps[i] === "facility"
+        ? '<p class="faint" style="margin:10px 0 0">Facility level here is set by team rank, not by how often you trained it. Teammate presence is shown because the bonus scales with how many are on the tile.</p>'
+        : "");
+    return;
+  }
+
+  if (steps[i] === "shop") {
+    el.innerHTML = '<h3>Spend Shop Coins (optional)</h3>' +
+      '<div class="row" style="gap:10px"><span class="tag ghost">' + STATE.coins + " coins</span>" +
+      '<span class="tag ghost">rotation in 2 turns</span></div>' +
+      '<div class="warn" style="margin-top:12px"><span class="tri" aria-hidden="true"></span><span>Unspent coins are lost when the career ends, and this scenario\'s final races pay none.</span></div>' +
+      nav("Skip shop");
+    return;
+  }
+
+  if (steps[i] === "review") {
+    var p = activities().filter(function(c){ return c.key === STATE.pick; })[0] || activities()[0];
+    el.innerHTML = "<h3>Review this turn</h3>" +
+      '<div class="gcard" style="max-width:560px"><b>' + p.label + "</b>" +
+      '<div class="muted">' + p.sub + "</div>" +
+      '<div class="row" style="margin-top:9px;gap:14px"><span class="delta up">' + p.gain + "</span>" +
+      (p.cost ? '<span class="delta down">' + p.cost + "</span>" : "") + "</div>" +
+      '<div class="faint" style="margin-top:9px">Recorded as entered. No outcome is projected: race results, Mood shifts and Skill Point totals come from you, not from a simulation. Odds are not shown because no source publishes them.</div></div>' +
+      "<h3 style=\"margin-top:14px\">Spirit burst roster</h3>" +
+      (STATE.sc === "unity"
+        ? '<div class="roster">' + ROSTER.map(function(r){
+            return '<div class="brow"><span class="mono" aria-hidden="true">' + initials(r[0]) + "</span>" +
+              '<span class="nm">' + r[0] + '</span><span class="state ' + r[1] + '">' + r[2] + "</span></div>";
+          }).join("") + "</div>" +
+          '<p class="faint" style="margin:8px 0 0">Spent is not the end of the line: a teammate who has burst can still charge an Extreme burst. Each state is written as a word as well as coloured, so the difference survives without hue.</p>'
+        : '<p class="muted">Not present in this scenario.</p>') +
+      nav("Back");
+    return;
+  }
+
+  var on = Math.round(STATE.energy / 20), seg = "";
+  for (var b = 0; b < 5; b++) { seg += '<i class="' + (b < on ? "on" : "") + '"></i>'; }
+  el.innerHTML = "<h3>Confirm</h3>" +
+    '<div class="row" style="justify-content:flex-end;gap:16px">' +
+    '<div class="energy-at-confirm"><span class="batt" role="img" aria-label="Energy ' + STATE.energy + ' of 100">' + seg + "</span>" +
+    '<span class="muted">Energy ' + STATE.energy + "/100</span></div>" +
+    '<button class="btn ghost" type="button" data-nav="back">Back</button>' +
+    '<button class="btn" type="button" data-nav="commit">Confirm turn</button></div>' +
+    '<p class="faint" style="margin:10px 0 0">The gauge sits immediately left of the control that spends it. A gauge carried only in the header is read once at the top of the screen and forgotten before the button.</p>';
+}
+
+function flameRow(n){
+  var out = "";
+  for (var i = 0; i < 5; i++) { out += '<i class="' + (i < n ? "" : "off") + '"></i>'; }
+  return out;
+}
+function initials(n){
+  return n.split(" ").map(function(w){ return w[0]; }).join("");
+}
+function nav(backLabel){
+  return '<div class="row" style="margin-top:14px"><button class="btn ghost" type="button" data-nav="back">' + backLabel +
+    '</button><button class="btn" type="button" data-nav="next">Continue</button></div>';
+}
+
+function commit(){
+  var p = activities().filter(function(c){ return c.key === STATE.pick; })[0];
+  var label = p ? p.label : "Turn";
+  STATE.logged.push("Turn " + STATE.turn + " · " + SCENARIOS[STATE.sc].name + " · " + label);
+  STATE.turn += 1;
+  STATE.energy = Math.max(0, Math.min(100, STATE.energy - 12));
+  STATE.fans += 3200;
+  if (STATE.sc === "track") { STATE.coins += 60; STATE.grade = Math.min(300, STATE.grade + 40); }
+  if (STATE.sc === "unity") { STATE.bursts += 1; }
+  STATE.step = 0; STATE.pick = null;
+  renderAll();
+  var box = document.getElementById("log");
+  box.innerHTML = STATE.logged.slice().reverse().map(function(t){ return "<div>" + t + "</div>"; }).join("");
+}
+
+function renderAll(){ renderHeader(); renderBand(); renderGoals(); renderFlow(); }
+
+document.querySelectorAll(".switch button").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    STATE.sc = btn.getAttribute("data-sc");
+    STATE.step = 0; STATE.pick = null;
+    document.querySelectorAll(".switch button").forEach(function(o){
+      o.setAttribute("aria-pressed", String(o === btn));
+    });
+    renderAll();
+  });
+});
+
+document.getElementById("flow").addEventListener("click", function(e){
+  var choice = e.target.closest(".choice");
+  if (choice) { STATE.pick = choice.getAttribute("data-k"); STATE.step = 1; renderFlow(); return; }
+  var go = e.target.closest("[data-nav]");
+  if (!go) { return; }
+  if (go.getAttribute("data-nav") === "next") { STATE.step = Math.min(SCENARIOS[STATE.sc].steps.length - 1, STATE.step + 1); }
+  if (go.getAttribute("data-nav") === "back") { STATE.step = Math.max(0, STATE.step - 1); }
+  if (go.getAttribute("data-nav") === "commit") { commit(); return; }
+  renderFlow();
+});
+
+document.getElementById("theme").addEventListener("click", function(){
+  var dark = document.documentElement.dataset.theme === "dark";
+  document.documentElement.dataset.theme = dark ? "light" : "dark";
+  this.textContent = dark ? "Dark" : "Light";
+  try { localStorage.setItem("uma-theme", document.documentElement.dataset.theme); } catch (e) {}
+});
+
+document.getElementById("theme").textContent =
+  document.documentElement.dataset.theme === "dark" ? "Light" : "Dark";
+renderAll();
+</script>
+</body>
+</html>
