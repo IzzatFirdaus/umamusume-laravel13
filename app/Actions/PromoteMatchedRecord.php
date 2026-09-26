@@ -8,6 +8,7 @@ use App\Enums\ReleaseStatus;
 use App\Models\DataSource;
 use App\Models\Umamusume;
 use App\Services\DataPipeline\NameNormalizer;
+use App\Services\DataPipeline\Parsers\GametoraCharacterParser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -53,6 +54,7 @@ final class PromoteMatchedRecord
                     'release_status' => $releaseStatus ?? ReleaseStatus::GlobalReleased,
                     'jp_debut_date' => $record['jp_debut_date'] ?? null,
                     'global_debut_date' => $record['global_debut_date'] ?? null,
+                    ...$this->aptitudes($record),
                 ]);
                 $umamusume->save();
                 $created = true;
@@ -62,6 +64,8 @@ final class PromoteMatchedRecord
                     'name_ja' => $record['name_ja'] ?? $existing->name_ja,
                     'jp_debut_date' => $record['jp_debut_date'] ?? $existing->jp_debut_date,
                     'global_debut_date' => $record['global_debut_date'] ?? $existing->global_debut_date,
+                    // Absent letters must not blank out grades an earlier fetch stored.
+                    ...$this->aptitudes($record),
                 ]);
 
                 if ($releaseStatus !== null) {
@@ -85,6 +89,25 @@ final class PromoteMatchedRecord
 
             return ['umamusume' => $umamusume, 'created' => $created, 'skipped' => false];
         });
+    }
+
+    /**
+     * @param  array<string, mixed>  $record
+     * @return array<string, string>
+     */
+    private function aptitudes(array $record): array
+    {
+        $kept = [];
+
+        foreach (GametoraCharacterParser::APTITUDE_COLUMNS as $column) {
+            $value = $record[$column] ?? null;
+
+            if (is_string($value)) {
+                $kept[$column] = $value;
+            }
+        }
+
+        return $kept;
     }
 
     private function uniqueSlug(string $name): string

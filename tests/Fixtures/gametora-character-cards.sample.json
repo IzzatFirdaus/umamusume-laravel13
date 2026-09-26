@@ -1,0 +1,38 @@
+[
+  {
+    "char_id": 1001,
+    "card_id": 100101,
+    "name_en": "Special Week",
+    "name_ja": null,
+    "release": "2021-02-24",
+    "release_en": "2025-06-26",
+    "url_name": "100101-special-week"
+  },
+  {
+    "char_id": 1002,
+    "card_id": 100201,
+    "name_en": "Silence Suzuka",
+    "name_ja": null,
+    "release": "2021-02-24",
+    "release_en": "2025-06-26",
+    "url_name": "100201-silence-suzuka"
+  },
+  {
+    "char_id": 1008,
+    "card_id": 100801,
+    "name_en": "Vodka",
+    "name_ja": null,
+    "release": "2021-02-24",
+    "release_en": "2025-06-26",
+    "url_name": "100801-vodka"
+  },
+  {
+    "char_id": 1008,
+    "card_id": 100802,
+    "name_en": "Vodka",
+    "name_ja": null,
+    "release": "2022-11-28",
+    "release_en": null,
+    "url_name": "100802-vodka"
+  }
+]
