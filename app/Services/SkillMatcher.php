@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+/**
+ * Scores registry skills against a free-text task description by trigger
+ * keywords, file types, and patterns (weighted sums, not ML); find() returns
+ * matches above the threshold ordered by relevance, plan() orders a subset by
+ * dependencies. Skill-automation subsystem; unrelated to the Uma domain.
+ */
 class SkillMatcher
 {
     private SkillRegistry $registry;

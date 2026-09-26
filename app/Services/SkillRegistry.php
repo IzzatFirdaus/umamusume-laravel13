@@ -6,6 +6,11 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\File;
 
+/**
+ * Reads the declarative skill definitions from .agents/skills.json and hands
+ * them out as validated-shaped arrays. Part of the skill-automation subsystem
+ * that predates the Umamusume domain; touches none of the catalog/run tables.
+ */
 class SkillRegistry
 {
     /** @var array<string, array{triggers?: array<string, mixed>, dependencies?: array<int, string>, enabled?: bool, command?: string, runner?: string, id: string, name: string, description: string, input?: array<string, mixed>, output?: array<string, mixed>}> */

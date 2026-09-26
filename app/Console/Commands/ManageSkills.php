@@ -9,6 +9,12 @@ use App\Services\SkillMatcher;
 use App\Services\SkillRegistry;
 use Illuminate\Console\Command;
 
+/**
+ * Console entry point of the skill-automation subsystem (predates the
+ * Umamusume domain and is unrelated to it): list, find, run, info, and
+ * execute the skills declared in .agents/skills.json via SkillRegistry,
+ * SkillMatcher, and SkillExecutor.
+ */
 class ManageSkills extends Command
 {
     protected $signature = 'skill:manage

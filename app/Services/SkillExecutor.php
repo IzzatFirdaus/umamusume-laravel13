@@ -7,6 +7,14 @@ namespace App\Services;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Process\Process as SymfonyProcess;
 
+/**
+ * Runs skill commands declared in the registry as subprocesses (php artisan
+ * or a PHP script), filling {param} placeholders from trimmed, allowlisted
+ * parameters and recording every outcome in an in-process log. The only
+ * commands ever run are the ones in .agents/skills.json; task text selects
+ * skills but never becomes a command line. Skill-automation subsystem;
+ * unrelated to the Uma domain.
+ */
 class SkillExecutor
 {
     private SkillRegistry $registry;
@@ -311,7 +319,7 @@ class SkillExecutor
         foreach ($matches as $match) {
             $relevance = number_format($match['relevance'] * 100, 0);
             $lines[] = sprintf(
-                '  - %s (%s%% relevance) — %s',
+                '  - %s (%s%% relevance): %s',
                 $match['skill']['name'],
                 $relevance,
                 $match['skill']['description']
