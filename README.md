@@ -1,156 +1,121 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Umamusume Trainer Companion
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Working title; the product name is an open decision (PRD OQ-1).
 
-## Skill Automation
+A local-only Laravel 13 tool for Trainers of the Global English version of *Umamusume Pretty Derby*. It consolidates four legacy apps (three trackers plus a career-run planner) into one machine: browse a catalog of Umamusume whose JP and Global data is cross-referenced by a fetch engine, log training runs turn by turn, compare planned vs actual skills, and export. SQLite only, single user, no accounts, no telemetry.
 
-This project includes an **automated skill discovery and invocation system** that automatically runs Laravel development tasks for you.
+The characters are Umamusume, a humanoid race. Repository text and code never use equine vocabulary for them (lore gate, `CONSTRAINTS.md` C-4).
 
-### How It Works
+## Documentation map
 
-When you ask for any development task:
-1. **The agent automatically discovers matching skills** from `.agents/skills.json`
-2. **Shows you which skills will be used** (with relevance scores)
-3. **Executes them automatically** via `php artisan skill:manage execute`
-4. **Reports results** showing what was created/changed
-
-### Example
-
-```bash
-You: "Create a User model with email and password fields"
-
-Agent:
-📋 Matched Skills:
-- model_create (0.98) — Scaffolds Eloquent models
-
-🔧 Executing: Model Creator
-   Running: php artisan make:model User
-
-✅ Complete: User model created
-```
-
-### Skill System Files
-
-- `.agentrules` — Auto-loaded rules that activate skill automation
-- `.agents/` — Skill system configuration and registry
-  - `config.json` — Automation settings
-  - `skills.json` — 24 available Laravel skills
-  - `README.md` — Skill documentation
-- `app/Services/` — Skill execution engine (SkillRegistry, SkillMatcher, SkillExecutor)
-- `app/Console/Commands/ManageSkills.php` — Manual skill management commands
-
-### Disable Automation (If Needed)
-
-```bash
-# Manually invoke a specific skill
-php artisan skill:manage execute "your task description"
-
-# List available skills
-php artisan skill:manage list
-
-# Find skills matching a keyword
-php artisan skill:manage find "migration"
-
-# Get info about a skill
-php artisan skill:manage info migration_create
-```
-
-### How Agents Know to Use Skills
-
-The system uses `.agentrules` (loaded by compatible agents on startup):
-- **GitHub Copilot** — Reads `.copilot/instructions.md`
-- **Codeium Windsurf** — Reads `.windsurf/rules.json`
-- **Claude** — Uses custom instructions
-- **Any LLM agent** — Can read and follow `.agentrules`
-
-No additional setup needed - skills auto-activate!
-
----
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Quick Start (Sail)
-
-The canonical development environment is [Laravel Sail](https://laravel.com/docs/sail). All commands below use `./vendor/bin/sail` — never mix `php artisan` with `sail artisan`.
-
-```bash
-# 1. Start the stack (mysql, redis, mailpit, app server)
-./vendor/bin/sail up -d
-
-# 2. Install dependencies (first time only)
-composer install
-npm install
-
-# 3. Generate the app key and run migrations
-./vendor/bin/sail artisan key:generate
-./vendor/bin/sail artisan migrate
-
-# 4. Start the Vite dev server (HMR) in a separate terminal
-./vendor/bin/sail npm run dev
-```
-
-The application is available at `http://localhost`. Mailpit inbox: `http://localhost:8025`.
-
-### Common Commands
-
-| Task | Command |
+| File | Role |
 |---|---|
-| Run tests | `./vendor/bin/sail test` |
-| Lint code style | `./vendor/bin/sail composer lint` |
-| Fix code style | `./vendor/bin/sail composer fix` |
-| Static analysis | `./vendor/bin/sail composer analyse` |
-| Tinker REPL | `./vendor/bin/sail tinker` |
-| Stop the stack | `./vendor/bin/sail stop` |
+| `PRD.md` | Product truth: users, stories, functional requirements, non-goals, open questions |
+| `ARCHITECTURE.md` | Full system design: schema, fetch engine, API contract, security model |
+| `ARCHITECTURE-ESSENTIALS.md` | Token-efficient digest of the above for agent context |
+| `docs/PRE-MORTEM.md` | Risk record; §4 covers the fourth (planner) repository |
+| `CONSTRAINTS.md` | Quality bar with thresholds and commands; read before writing code |
+| `AGENTS.md` | Agent roles, escalation paths, Laravel Boost guidelines |
+| `CLAUDE.md` | Coding rules for assistants (gitignored by design, machine-local) |
 
-### Local Development Without Docker
+## Requirements
 
-If Docker is unavailable, the project falls back to an in-memory SQLite database. Copy `.env.example` to `.env`, set `DB_CONNECTION=sqlite`, and run `php artisan migrate`.
+- PHP >= 8.3 (`composer.json`; developed on 8.5) with `pdo_sqlite` and `intl`
+- Composer, and Node.js with npm for the Vite/Tailwind build
+- No database server: SQLite in `database/database.sqlite` (WAL mode)
 
-## Architecture
+## Setup
 
-- **PHP 8.4+** with Laravel 13
-- **Vite 7** + **Tailwind CSS v4** + TypeScript (`resources/js/*.ts`)
-- **Pest v4** for testing (level 6 Larastan static analysis)
-- **Laravel Pint** for PSR-12 code style
-- **Sail** with MySQL 8.4, Redis, and Mailpit
+```bash
+composer setup        # install deps, .env, key, migrate, npm install + build
+php artisan migrate:fresh --seed   # illustrative catalog data (seeder headers explain scope)
+composer dev          # serve + queue worker + pail + Vite HMR on loopback
+```
 
-## Contributing
+Keep the app on loopback; it has no auth surface and must not be exposed.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Web surface
 
-## Code of Conduct
+| Route | Purpose |
+|---|---|
+| `/umamusume` | Catalog index: filter by release status, normalized search |
+| `/umamusume/{slug}` | Detail with aliases and provenance (source URL + fetched date) |
+| `/training-runs` | Trainer run CRUD, per-turn stat logging (0..1200 bounds), skill states Suggested/Acquired/Skipped |
+| `/training-runs/{run}/export/csv|.json` | Run download, no data lock-in (US-6) |
+| `/review` | Match review queue: confirm, alias, or reject engine proposals |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Fetch engine
 
-## Security Vulnerabilities
+Declare sources in `config/uma.php` (list ships empty by design; adding one requires a robots/rate-limit review and a parser class, PRD OQ-2):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```php
+'sources' => [
+    'example-wiki' => [
+        'url' => 'https://example.org/characters',
+        'parser' => \App\Services\DataPipeline\Parsers\ExampleParser::class,
+        'delay_ms' => 1000,
+        'timeout_s' => 15,
+        'timezone' => 'Asia/Tokyo',
+    ],
+],
+```
 
-## License
+```bash
+php artisan uma:fetch [source]    # fetch -> snapshot -> parse -> match -> promote|review
+php artisan uma:reparse <source>  # replay from stored snapshots, zero network
+php artisan uma:backup [path]     # WAL checkpoint + consistent file copy (NFR-5)
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Local API (read-only, P2)
+
+```bash
+GET /api/v1/umamusume?status=GlobalReleased&search=special%20week&page=1&pageSize=25
+GET /api/v1/umamusume/{slug}
+GET /api/v1/training-runs[/{id}]
+```
+
+List shape: `{ "data": [...], "pagination": { "page", "pageSize", "totalItems", "totalPages" } }`.
+Every non-2xx: `{ "error": { "code", "message" } }` (rendered centrally in `bootstrap/app.php`).
+
+## Module map
+
+```
+app/Actions/          PromoteMatchedRecord (upsert + provenance, is_manual safe),
+                      ResolveMatchCandidate (review verdicts)
+app/Console/Commands/ UmaFetch, UmaReparse, UmaBackup (+ ManageSkills, see below)
+app/Enums/            ReleaseStatus, RunStatus, SkillAcquisition, MatchTier,
+                      CandidateStatus, AliasLanguage (TitleCase backed, DB stores values)
+app/Http/Requests/    StoreTrainingRunRequest, StoreTurnEntryRequest (stat bounds),
+                      StoreRunSkillRequest, ResolveMatchCandidateRequest
+app/Http/Resources/   UmamusumeResource, TrainingRunResource, TurnEntryResource (camelCase)
+app/Jobs/             FetchSourceJob (unique per source on the database queue)
+app/Models/           Umamusume, UmamusumeAlias, Skill, TrainingRun, TurnEntry,
+                      DataSource, MatchCandidate, RunSkill (pivot)
+app/Services/DataPipeline/
+                      SourceFetcher (only outbound HTTP path), NameNormalizer (NFKD match keys),
+                      CrossReferenceMatcher (Exact/Alias/Fuzzy/None tiers),
+                      PipelineRunner (shared stage loop), Contracts/SourceParser
+database/             migrations per ARCHITECTURE §3; factories for all models;
+                      seeders labeled illustrative
+resources/views/      Blade + layout component, Tailwind v4 (@theme in resources/css/app.css)
+tests/                Pest: Feature (catalog, runs, API, pipeline, matcher) + Unit (normalizer)
+```
+
+## Skill automation subsystem (pre-existing, unrelated to the Uma domain)
+
+`app/Services/Skill{Registry,Matcher,Executor}.php` and `php artisan skill:manage`
+drive the declarative skills in `.agents/skills.json` (see `.agents/README.md`).
+They touch none of the catalog/run tables; treat them as a separate tooling
+layer with its own docs.
+
+## Quality gates
+
+| Gate | Command |
+|---|---|
+| Tests | `composer test` or `vendor/bin/pest --compact` |
+| Style | `composer lint` (check) / `vendor/bin/pint --dirty --format agent` (fix) |
+| Static analysis | `composer analyse` (PHPStan level 6; needs `--memory-limit=1G` on a 128M CLI default) |
+| Lore grep | `make lore` (hits need a context ruling, CONSTRAINTS.md) |
+| Migrations | `php artisan migrate:fresh --seed` |
+
+The full bar, including the no-suppression floor, is `CONSTRAINTS.md`.
