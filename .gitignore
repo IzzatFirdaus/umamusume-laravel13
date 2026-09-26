@@ -1,17 +1,8 @@
+# Laravel: logs, cache, generated files
 *.log
-.DS_Store
-.env
-.env.backup
-.env.production
-.env.testing
 .phpactor.json
 .phpunit.result.cache
-/.fleet
-/.idea
-/.nova
 /.phpunit.cache
-/.vscode
-/.zed
 /auth.json
 /node_modules
 /public/build
@@ -19,7 +10,40 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/framework/cache/phpstan
 /vendor
+
+# Build artifacts: npm debug logs
+npm-debug.log*
+yarn-error.log*
+
+# Environment files (never commit local overrides)
+.env
+.env.*
+!.env.example
+
+# OS: Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# OS: macOS
+.DS_Store
+
+# Editors / IDEs
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# Homestead
+Homestead.json
+Homestead.yaml
+
+# AI agent tooling (personal configs and installed skill payloads)
 /.mcp.json
 /.claude
 /.agents
@@ -29,13 +53,43 @@
 /CLAUDE.md
 /boost.json
 /opencode.json
-Homestead.json
-Homestead.yaml
-Thumbs.db
+/.augment/
+/.cline/
+/.codebuddy/
+/.codewhale/
+/.codex/
+/.continue/
+/.copilot/
+/.crush/
+/.factory/
+/.gemini/
+/.hermes/
+/.junie/
+/.kilo/
+/.kilocode/
+/.kiro/
+/.minimax/
+/.mux/
+/.opencode/
+/.playwright/
+/.playwright-mcp/
+/.qoder/
+/.roo/
+/.superpowers/
+/.trae/
+/.vibe/
+/.warp/
+/.windsurf/
+/skills-lock.json
+/kilo.json
+/.github/
 
-# Impeccable design skill
-/.impeccable/*.png
-/.impeccable/*.tmp
-/.impeccable/config.local.json
-/.impeccable/live/session*.json
-/.impeccable/live/*.tmp
+# Local-only artifacts (this app is never deployed; PRD NFR-1)
+/research-scratch/
+/jev-inspect/
+/testing
+/database/*.sqlite*
+*.sql
+
+# Impeccable design skill (generated scratch)
+/.impeccable/
