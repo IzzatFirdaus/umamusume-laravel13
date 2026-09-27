@@ -111,7 +111,7 @@
 
                 <div class="relative mt-2 h-1.5 overflow-hidden rounded bg-sunken
                             {{ $atCeiling ? 'border-r-2 border-dashed border-r-ink-faint rounded-l' : '' }}">
-                    <div class="absolute inset-y-0 left-0 bg-green" style="width: {{ round($pct, 2) }}%"></div>
+                    <div class="absolute inset-y-0 left-0 bg-green-deep" style="width: {{ round($pct, 2) }}%"></div>
                     @if ($value > $base)
                         <div class="absolute inset-y-0 bg-up opacity-50"
                              style="left: {{ round($softPct, 2) }}%; width: {{ round(min(100 - $softPct, ($value - $base) / $cap * 100), 2) }}%"></div>

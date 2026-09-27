@@ -159,7 +159,7 @@ it('sums Grade Points only when every completed race can be priced', function ()
     // 100 for a G1 win, from config's `grade_point_by_grade` (docs/scenarios/05 §Grade Points).
     expect($run->fresh()->gradeEarned())->toBe(100);
 
-    // Below first the points scale down, and the factor is not in our corpus, so
+    // Below first the points scale down, and no ratio for that is in our corpus, so
     // the total is withheld rather than understated.
     RaceEntry::create([
         'training_run_id' => $run->id,

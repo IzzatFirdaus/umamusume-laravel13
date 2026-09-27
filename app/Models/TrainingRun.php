@@ -295,7 +295,7 @@ class TrainingRun extends Model
      * the matrix's `grade_point_by_grade`, transcribed from
      * docs/scenarios/05-trackblazer-gametora.md §"Grade Points and Shop Coins".
      * That table prices a first place only; below first the corpus says points
-     * "scale down proportionally" and gives no factor. A run holding any finish
+     * "scale down proportionally" and names no ratio. A run holding any finish
      * below first therefore reports nothing rather than a total that understates
      * itself (D-256).
      */
