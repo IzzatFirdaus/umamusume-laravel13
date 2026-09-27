@@ -85,11 +85,12 @@ work, not a contract change.
 | Ink-bearing green fill | `--color-chrome` / `--color-on-chrome` | `#4E7906` / `#FFFFFF` | `#7FCC09` / `#121013` | the only green allowed to carry button text, and its partner |
 | Increase / gain | `--color-up` | `#B45309` | `#FF9A2C` | **orange, never green.** Light value stepped from the client's `#FF9A2C` for 5.05:1 |
 | Decrease / loss | `--color-down` | `#0667B0` | `#4EA1E8` | **blue, never red.** Stepped from the client's `#0088E0` (3.75:1 on white fails) |
-| Selection | `--color-pick` | `#EFC96A` | `#F5B73C` | gold; `ink-strong` on top, never white |
+| Selection | `--color-pick` / `--color-on-pick` | `#EFC96A` / `#482720` | `#F5B73C` / `#121013` | gold fill with a **dark** ink in both themes. Not `ink-strong`: that is white in the dark theme, and white on amber measures 1.75:1 |
 | Skill Points identity | `--color-sp` | `#009FE1` | `#4FC3F7` | the client's cyan, exact; **fills, rules and tint only** |
 | Skill Points text | `--color-sp-ink` | `#0E7490` | `#4FC3F7` | the client cyan measures 2.66-2.98 as text on light surfaces (research §3.4 already recorded the fail), so text uses the stepped value |
 | Risk / rejected | `--color-risk` | `#800014` | `#FF6B7A` | reserved: training failure and rejection only |
 | Turn chip anchor | `--color-anchor` | `#0B6FB8` | `#8FC4EE` | deliberately not `--color-down`; blue already means "went down" |
+| Focus ring | `--color-ring` | `#4E7906` | `#7FCC09` | 3:1 non-text boundary in both themes; `--color-green` alone fails light at 1.88 (see §8) |
 
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
@@ -312,8 +313,16 @@ pattern every other screen copies.
 ## 8. Motion
 
 Dial MOTION 1: hover and focus states only, `transition-colors` on
-interactive elements, `focus-visible` rings using `--color-green` glow token
-`--shadow-glow`. No page animations; a desk does not move (R-19).
+interactive elements, `focus-visible` rings using `--color-ring`
+(2px outline, 2px offset). No page animations; a desk does not move (R-19).
+
+The ring is its own token rather than `--color-green`, which this section used to specify.
+That prescription predates the light-first flip: `#7FCC09` measures 9.51:1 on the dark panel
+but only **1.88:1 on the light panel and 1.99:1 on white**, against WCAG 1.4.11's 3:1 floor for
+non-text boundaries. No single green clears both themes — the deep `--color-chrome` passes the
+light surfaces at 4.88 but drops to 2.93 on the dark raised cell — so the ring splits per theme
+exactly as `chrome`/`on-chrome` do, and components stay theme-agnostic (D-101, D-258's rule that
+a contrast rule must name its second colour).
 
 ## 9. Where tokens live
 
