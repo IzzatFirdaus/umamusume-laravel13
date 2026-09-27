@@ -160,7 +160,12 @@ external fonts (offline constraint + C-8 dependency gate).
 
 All views render through `resources/views/components/layout.blade.php`
 (`x-layout`: nav, flash, slot). States column: yes / gap = required by C-7
-but not yet implemented.
+but not yet implemented. **Updated 2026-09-27:** four content pages
+(`catalog/index`, `catalog/show`, `review/index`, `runs/create`) still hold
+skeleton `zinc-*` utilities; their loading/error states remain gaps.
+Token-migrated components (`stat-band`, `resource-strip`, `guided-step`,
+`race-calendar`, `design-preview`, `grade-point-meter`) render from
+`@theme static` and have no skeleton palette classes.
 
 | Component | Route | Purpose | Empty | Loading | Error |
 |---|---|---|---|---|---|
@@ -178,6 +183,11 @@ but not yet implemented.
 | Export links | `runs.show` | csv / json download | n/a | n/a | gap |
 | Candidate cards | `review.index` | proposed name, tier, source, suggestion | yes | gap | gap |
 | Resolve form | `review.index` | confirm / alias / reject per candidate | n/a | n/a | @error per card |
+| Stat band | `runs.show` | grade badges, values, cap markers | "No turns" | gap | gap |
+| Resource strip | `runs.show` | turn, energy, fans, scenario widgets | n/a | gap | gap |
+| Guided step | `runs.show` | discipline pick, preview, confirm | n/a | n/a | validation errors |
+| Race calendar | `runs.show` | scenario timeline, gates, goal pennants | n/a | gap | gap |
+| Grade point meter | `runs.show` | Trackblazer objectives, progress | n/a | gap | gap |
 
 ## 4. Surface specifications
 

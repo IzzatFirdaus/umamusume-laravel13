@@ -2,11 +2,10 @@
 {{--
     Theme resolution order, so the first paint is already correct (CONSTRAINTS.md D-104, G-20):
     a stored preference wins, then the OS, then light as the base palette. The preference is
-    rendered server-side by `$theme` once the preferences table lands — owner ruling 2026-09-27
+    rendered server-side by `$theme` via `AppServiceProvider` composer — owner ruling 2026-09-27
     puts preferences in SQLite, not the browser, because PRD §6.12 cuts browser-side storage as a
-    second source of truth. Until that table exists nothing is stored locally and the inline script
-    is the whole mechanism. It must stay inline and in the head: a bundled script runs after first
-    paint and would flash the wrong theme.
+    second source of truth. The inline script is the fallback when no row exists; it must stay
+    inline and in the head: a bundled script runs after first paint and would flash the wrong theme.
 --}}
 <html lang="en" @if (! empty($theme)) data-theme="{{ $theme }}" @endif>
 <head>

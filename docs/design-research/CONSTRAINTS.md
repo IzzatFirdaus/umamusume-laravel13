@@ -897,7 +897,7 @@ G-60 is the case worth naming: it is the check that would have caught the transp
 | G-18 | Both themes | toggle to dark, repeat G-5, G-6, G-7 and G-13 | every pair passes in dark too; no component is light-only (D-103, D-105) |
 | G-19 | Theme fork check | grep components for `dark:` utilities and theme conditionals | zero outside the theme override block (D-101) |
 | G-20 | No flash of wrong theme | reload with the OS set to dark | first paint is already dark (D-104) |
-| G-21 | Font identity | computed `font-family` of body, a heading and a numeral | resolves to the declared rounded face, never to a banned grotesque (D-110) |
+| G-21 | Font identity | computed `font-family` of body, a heading and a numeral | resolves to the declared rounded face, never to a banned grotesque (D-110) — **RULING B5 (2026-09-27): C-8 exemption granted; system stack (`ui-sans-serif, system-ui, sans-serif`) is the shipped identity. G-21 technically fails on the system grotesque but is exempted per KI-6. The rounded face (Nunito/M PLUS Rounded 1s) is parked pending a C-8 dependency approval that has not been granted. The exemption is recorded here so the gate's failure is a known decision, not noise.**
 | G-22 | Weight availability | request 500, 600, 700, 800 from the font's own CSS | all four served, no synthetic bolding (D-110) |
 | G-23 | Icon weight | render every glyph at 20px solid black | legible as a filled shape, not as an outline (D-111) |
 | G-24 | Sheen geometry | inspect the primary button's gradient stops | a single hard split, not a feathered range or a vertical ramp (D-112) |

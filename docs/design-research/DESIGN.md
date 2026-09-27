@@ -1,6 +1,6 @@
 # DESIGN.md: Umamusume Trainer Companion design system
 
-Phase 2 deliverable. Design contract only; no production code was written or modified.
+Phase 2 deliverable. Design contract only; no production code was written or modified **at the time of writing (2026-09-27)**. Production components now exist: `stat-band`, `resource-strip`, `guided-step`, `race-calendar`, `grade-point-meter`, `design-preview`, and token-migrated `layout` (see root `DESIGN.md` §3). This line is retained for audit traceability.
 Anchors in this file were measured from `docs/game-screenshots/` (see `RAW-FINDINGS.md` §3.2). Ramps were derived from those anchors by linear-light mixing. Every text/background pair used for real copy was contrast-checked; the numbers are printed in §3.4.
 
 Read the root `CONSTRAINTS.md` first. This file does not relax it. The design-side contract derived from this system lives in `docs/design-research/CONSTRAINTS.md`.

@@ -155,7 +155,7 @@ owner of that suite to agree the replacement string.
 
 ---
 
-## KI-6 The shipped font fails the design system's own mandate, deliberately
+## KI-6 The shipped font fails the design system's own mandate — **CLOSED as decision (2026-09-27)**
 
 **The conflict.** `docs/design-research/DESIGN.md` §4.1 makes a rounded humanist sans a hard
 rule and bans neutral grotesques as the primary voice; gate **G-21** checks that body, heading and
@@ -171,17 +171,7 @@ NFR-1, or committing font binaries plus a build step. Neither was authorised, so
 proposal rather than silently shipping a face — and `app.css` carries that parking note so the choice
 reads as a decision and not an oversight.
 
-**The trap this creates, and how to avoid making it worse.** An exempted rule is invisible to the gate
-that checks it. G-21 will keep failing and be read as noise; meanwhile §4.1's mandate keeps appearing in
-prose as though it were in force, which is how the pasted frontend spec came to state "Rounded humanist
-sans — mandatory. Recommended: Nunito" as settled policy (`docs/design-research/FRONTEND-SPEC-DIVERGENCE.md`
-§1.6). Do not "fix" this by fetching a font, and do not fix it by deleting §4.1 either — the mandate is
-the design intent, and it is the *approval* that is outstanding.
-
-**To close it.** Owner decision on one of: bundle a rounded face offline (satisfies C-8 by approval,
-then NFR-1 must be re-verified), or accept the system stack as the shipped identity and reword §4.1's
-"mandatory" to "target, pending C-8". Until then G-21 is recorded here as knowingly failing rather than
-passing.
+**Ruling B5 (2026-09-27):** C-8 exemption granted. The system stack (`ui-sans-serif, system-ui, sans-serif`) is the shipped identity. G-21 technically fails on the system grotesque but is **exempted** per this ruling. The rounded face (Nunito / M PLUS Rounded 1s) is parked pending a C-8 dependency approval that has not been granted. The exemption is recorded in `docs/design-research/CONSTRAINTS.md` G-21 so the gate's failure is a known decision, not noise. **Do not "fix" this by fetching a font, and do not fix it by deleting §4.1 either** — the mandate is the design intent, and it is the *approval* that is outstanding.
 
 ---
 
