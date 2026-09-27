@@ -65,6 +65,17 @@
        chrome/on-chrome are, so components stay theme-agnostic (D-101). */
     --color-ring: #4E7906;
     --color-risk: #800014;
+    /*
+     * The mandatory goal race's own pair, split because D-181 asks for two colours on
+     * one cell: the client's red `Goal` pennant, and a heavier *warm* outline.
+     * Neither can borrow. Green is reserved for action and affordability, and
+     * `--color-risk` is an error state — a goal race is an obligation, not a fault.
+     * Both clear WCAG 1.4.11's 3:1 for non-text boundaries against the `raised` fill
+     * the contract gives the cell: red 5.74 and warm 5.02 on #FFFFFF here, red 5.51
+     * and warm 7.15 on the dark `raised` below.
+     */
+    --color-goal: #C81D25;
+    --color-goal-line: #B45309;
     --color-pick: #EFC96A;
     /* The ink that goes ON the gold selection. Not `ink-strong`: that is #482720 here but
        #FFFFFF in the dark override, and white on amber measures 1.75:1. Selection keeps a
@@ -179,6 +190,11 @@ html[data-theme='dark'] {
     --color-on-chrome: #121013;
     --color-ring: #7FCC09;
     --color-risk: #FF6B7A;
+    /* Stepped for the dark surfaces, and deliberately not the risk red beside it:
+       4.49 on `raised` and 5.61 on `panel` for the pennant, 6.15 and 7.7 for the
+       warm outline. Neither value is `--color-up`, so a goal stops reading as a gain. */
+    --color-goal: #F2555A;
+    --color-goal-line: #E8912B;
     --color-pick: #F5B73C;
     --color-on-pick: #121013;
     --color-sp: #4FC3F7;
