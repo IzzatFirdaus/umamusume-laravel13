@@ -2,8 +2,8 @@
 
 Product name **Trainer Desk**, owner decision 2026-09-27 (closes PRD OQ-1).
 This file is the design contract for the app's visual system. Owner rulings
-recorded here: dark-first theme, tactical-athletic identity, catalog-first
-design priority, and the lore-sensitive iconography boundary.
+recorded here: **light-first theme** (revised same day, see §2.1), tactical-athletic
+identity, catalog-first design priority, and the lore-sensitive iconography boundary.
 
 Design Read: personal analyst desk for one Trainer of Umamusume Pretty Derby,
 tactical-athletic language, dial ENERGY 1 / RHYTHM 1 / MOTION 1.
@@ -12,10 +12,14 @@ speed and buys nothing. R-31.)
 
 Relationship to `docs/design-research/DESIGN.md`: that document is the
 screenshot-anchored research package (measured color ramps, contrast tables,
-cap-stack spec §6.21). This file does not re-derive it. Color values below are
-the research package's **measured dark anchors** (its §3.7, taken from the
-game's own raceboard screenshot), promoted to the app default by owner
-decision. Where a value is genuinely new here, it is marked `Proposed`.
+cap-stack rendering spec §6.21). This file does not re-derive it. **Amended
+2026-09-27:** the app default is now the research package's measured **light**
+system (its §3, D-100), and its raceboard **dark anchors** (§3.7, from the game's
+own raceboard screenshot) are the supported override rather than the promoted
+default. The earlier decision to ship dark-first is reversed by owner ruling;
+the reason is recorded in §2.1, and the two themes are now both verified
+surface-down rather than one being a derivative of the other. Where a value is
+genuinely new here, it is marked `Proposed`.
 
 ## 1. Design principles
 
@@ -38,39 +42,64 @@ decision. Where a value is genuinely new here, it is marked `Proposed`.
 
 ### 2.1 Color system
 
-Tokens live in the `@theme` block of `resources/css/app.css`
+Tokens live in the `@theme static` block of `resources/css/app.css`
 (Tailwind v4 CSS-first). Source of truth for full ramps and contrast math:
-`docs/design-research/DESIGN.md` §3. The dark theme below is the default;
-light remains the research package's measured light system and can ship later
-as `html[data-theme="light"]`, but per antislop R-34 an unshipped theme is
-not half-shipped: until a second theme is verified, only dark renders.
+`docs/design-research/DESIGN.md` §3. **Light is the base palette** (owner ruling
+2026-09-27, reversing the earlier dark-first promotion) because the client is a
+high-key light interface — research D-100. Dark ships as
+`html[data-theme='dark']` and is a measured palette of its own, not an inversion.
+**Light is not a forced default:** resolution is stored preference → `prefers-color-scheme` →
+light, so a Trainer on a dark OS gets dark (D-104, amended the same day; preferences go to
+SQLite rather than `localStorage`, because PRD §6.12 cuts browser-side storage as a second
+source of truth). G-18 requires every text/background pair to pass in both themes, and G-20
+requires the first paint to already be the resolved theme.
 
-Implementation status, stated honestly: the committed views still use the
-skeleton's light zinc utilities (`bg-zinc-50`, `text-zinc-900`). Migrating the
-layout component and views onto the tokens below is pending implementation
-work; until it lands, this section is the contract, not the current render.
+**The table gives both values per role, deliberately.** One hex per role is the
+defect that keeps reappearing in prose about this system: a role's colour is safe in
+one theme and fails in the other, and a table with a single column silently teaches
+the wrong thing. `chrome` is the clearest case — the ink-bearing green is `#4E7906`
+with white letters in the default theme and `#7FCC09` with near-black letters in the
+dark one. The same hue cannot do both jobs.
 
-| Role | Token (dark default) | Value | Why |
-|---|---|---|---|
-| Page field | `--color-page` | `#0D0C0F` | raceboard surround, measured |
-| Panel surface | `--color-panel` | `#121013` | board charcoal, measured |
-| Raised surface | `--color-raised` | `#24262A` | unlit LED cell, measured |
-| Primary ink | `--color-ink` | `#ECEAF2` | 15.88:1 on panel, AAA |
-| Heading/value ink | `--color-ink-strong` | `#FFFFFF` | display numerals |
-| Muted ink | `--color-ink-muted` | `#AAABB5` | board label text, 8.30:1 |
-| Hairline | `--color-rule` | `#2E2C33` | separation (no shadows on dark) |
-| Action / released | `--color-green` | `#7FCC09` | client action green; 9.51:1 as fill with near-black ink |
-| Selection / JP-only | `--color-pick` | `#F5B73C` | display amber, measured |
-| Announced | `--color-sp` | `#4FC3F7` | Proposed mapping for `GlobalAnnounced` (Skill Points cyan) |
-| Risk / rejected | `--color-risk` | `#FF6B7A` | reserved for failure and rejection only |
+Implementation status, stated honestly: the four components built from the approved
+prototype (`stat-band`, `resource-strip`, `guided-step`, `race-calendar`), `design-preview`,
+and now `components/layout` render from the tokens below. The shell migrated on 2026-09-27
+because system-follow made dark reachable and `bg-zinc-50 text-zinc-900` was holding a
+near-white body while `--color-page` had already resolved to #0D0C0F — a dark theme with a
+light page. The **four content pages still do not**: `catalog/index`, `catalog/show`,
+`review/index`, `runs/create` keep the skeleton's `zinc-*` utilities, so their tables, forms
+and badges ignore `data-theme` and G-18 fails on them while passing everywhere a token is
+used. Migrating them is the remaining
+work, not a contract change.
 
-Status badges (release status is the catalog's load-bearing signal):
+| Role | Token | Light (default) | Dark (override) | Why |
+|---|---|---|---|---|
+| Page field | `--color-page` | `#F2F1F8` | `#0D0C0F` | pale lavender; raceboard surround, measured |
+| Panel surface | `--color-panel` | `#F8F8FB` | `#121013` | card and modal body; board charcoal |
+| Raised surface | `--color-raised` | `#FFFFFF` | `#24262A` | stat cells; unlit LED cell |
+| Primary ink | `--color-ink` | `#6A5641` | `#ECEAF2` | warm brown, never grey-900, never black |
+| Heading/value ink | `--color-ink-strong` | `#482720` | `#FFFFFF` | display numerals, and every grade letter |
+| Muted ink | `--color-ink-muted` | `#6E6459` | `#AAABB5` | the accessible subordinate tier, 4.5:1+ on every surface |
+| Hairline | `--color-rule` | `#E4E1EA` | `#2E2C33` | separation; `ink-faint` is non-text only |
+| Action green | `--color-green` | `#7FCC09` | `#7FCC09` | client action green; rings, borders, lattice — never behind white text |
+| Ink-bearing green fill | `--color-chrome` / `--color-on-chrome` | `#4E7906` / `#FFFFFF` | `#7FCC09` / `#121013` | the only green allowed to carry button text, and its partner |
+| Increase / gain | `--color-up` | `#B45309` | `#FF9A2C` | **orange, never green.** Light value stepped from the client's `#FF9A2C` for 5.05:1 |
+| Decrease / loss | `--color-down` | `#0667B0` | `#4EA1E8` | **blue, never red.** Stepped from the client's `#0088E0` (3.75:1 on white fails) |
+| Selection | `--color-pick` | `#EFC96A` | `#F5B73C` | gold; `ink-strong` on top, never white |
+| Skill Points identity | `--color-sp` | `#009FE1` | `#4FC3F7` | the client's cyan, exact; **fills, rules and tint only** |
+| Skill Points text | `--color-sp-ink` | `#0E7490` | `#4FC3F7` | the client cyan measures 2.66-2.98 as text on light surfaces (research §3.4 already recorded the fail), so text uses the stepped value |
+| Risk / rejected | `--color-risk` | `#800014` | `#FF6B7A` | reserved: training failure and rejection only |
+| Turn chip anchor | `--color-anchor` | `#0B6FB8` | `#8FC4EE` | deliberately not `--color-down`; blue already means "went down" |
+
+Status badges (release status is the catalog's load-bearing signal) render through
+`--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
+literal hexes, so they follow the active theme instead of pinning one.
 
 | ReleaseStatus | Treatment | Rule |
 |---|---|---|
-| `GlobalReleased` | green `#7FCC09` capsule, ink `#121013` | fill + text label always together |
-| `GlobalAnnounced` | cyan `#4FC3F7` text + hairline outline | Proposed, no fill |
-| `JapanOnly` | amber `#F5B73C` text + hairline outline | never color-only: the word says it (D-12) |
+| `GlobalReleased` | `--color-green` capsule with `--color-on-chrome` ink (dark) or `--color-chrome` fill with white ink (light) | fill + text label always together; never color-only |
+| `GlobalAnnounced` | `--color-sp-ink` text + hairline outline | Proposed mapping, no fill — cyan as a fill reads as selected. Text uses `sp-ink`, not `sp`: the client cyan cannot carry a label on light surfaces |
+| `JapanOnly` | `--color-pick` text + hairline outline | never color-only: the word says it (D-12) |
 
 Never use Tailwind default `green-500` etc. as brand tokens; the client's
 action green is hue ~87°, and six degrees of drift breaks the resemblance
@@ -179,6 +208,11 @@ pattern every other screen copies.
 - Index: compact run rows (Umamusume, scenario, status, created date).
 - Create: single-column form, `max-w-lg`; selects over free text where an
   enum exists.
+- Ancestor selection, when it ships, is **Legacy Select**: a pre-run step only
+  (never reachable from a turn, D-260), labeled Legacy/Ancestor in copy while
+  the schema keeps `inheritance_parent_*` identifiers (D-267). Its full
+  six-slot client state is not persistable in today's two FK columns; the
+  screen must not imply it is until a schema proposal lands (D-268).
 
 ### 4.4 Run detail `/training-runs/{run}`
 
@@ -225,10 +259,20 @@ pattern every other screen copies.
 - Visual motifs that are forbidden: saddles, whips, reins, hay, horseshoes,
   🏇, any equestrian or animal iconography, and racing-trope decoration that
   frames the characters as animals.
-- Inheritance UI: "Parent A" / "Parent B" with abstract lineage nodes; never
-  family-tree-with-animal-motifs, never "sire" / "dam" (PRD §6.3).
+- Inheritance terminology (owner ruling 2026-09-27, matching
+  `docs/UMAMUSUME_REFERENCE.md` §1.5): the system is **Inspiration**, the two
+  ancestors picked for a run are **Legacies**, inheritable traits are
+  **Sparks**, and the pre-run pick screen/widget is labeled **Legacy Select**
+  (rules D-260 through D-268, `docs/design-research/CONSTRAINTS.md` §10q;
+  anatomy in that file's DESIGN.md §6.27). Never "sire" / "dam", never
+  family-tree-with-animal-motifs (PRD §6.3). Two caveats carried with the
+  ruling: shipped identifiers stay `inheritance_parent_a_id` /
+  `inheritanceParentA()` while copy uses Legacy (D-267, identifier rename is
+  schema-phase work), and full Legacy Select state exceeds today's two-id
+  columns; do not imply the six-slot payload persists until the ADR-0003
+  pattern proposal lands (D-268).
 - UI labels follow the Global client wording in
-  `docs/UMAMUSUME_REFERENCE.md` Section 6: Speed / Stamina / Power / Guts /
+  `docs/UMAMUSUME_REFERENCE.md` Section 6 and §1.5: Speed / Stamina / Power / Guts /
   Wit; Trainee Umamusume; Veteran Umamusume; Scout (not gacha); Uncap;
   Carats; Front Runner / Pace Chaser / Late Surger / End Closer. Fan-English
   strings from exports are never UI copy.
@@ -263,12 +307,16 @@ interactive elements, `focus-visible` rings using `--color-green` glow token
 
 ## 9. Where tokens live
 
-- `resources/css/app.css` `@theme` block: single source of truth.
+- `resources/css/app.css` `@theme static` block: single source of truth.
   There is no `tailwind.config.js` and none may be created (Tailwind v4
-  CSS-first; ARCHITECTURE §1).
+  CSS-first; ARCHITECTURE §1). **`static` is load-bearing:** without it Tailwind
+  prunes any custom property no utility class references yet, an undefined
+  `var()` silently inherits instead of failing, and a contrast check then reports
+  a pass on a token that is not in the stylesheet (research `CONSTRAINTS.md` D-288).
 - `docs/design-research/DESIGN.md`: measured ramps, contrast tables,
-  cap-stack rendering spec (§6.21), and the light theme this default replaced.
+  cap-stack rendering spec (§6.21), and the light theme that is now the app default.
 - `docs/design-research/CONSTRAINTS.md`: the research-phase design rules
   (D-numbers) this file cites (D-12, D-20, D-101).
-- Proposed values in this file (Announced-cyan, scale numbers, `max-w-6xl`,
-  the mono stack) need owner sign-off before they become tokens.
+- Proposed values in this file (scale numbers, `max-w-6xl`, the mono stack) need
+  owner sign-off before they become tokens. The Announced-cyan proposal is now a
+  shipped pair — `--color-sp` for identity surfaces, `--color-sp-ink` for text.

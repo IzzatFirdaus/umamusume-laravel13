@@ -1,5 +1,16 @@
+{{--
+  ============================================================================
+  TEMPORARY REVIEW SURFACE. DELETE THIS FILE WITH THE /design-preview ROUTE.
+  ============================================================================
+
+  Rendered only so the scenario components could be opened in a browser and their
+  contrast measured in both themes. Sample data is assembled in routes/web.php by
+  closure; there is no controller, no model and no query behind this page.
+
+  Not a spec for the real run screen. Do not extend it. See KNOWN-ISSUES.md.
+--}}
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,7 +51,7 @@
                     <span class="rounded-md border border-rule px-2 py-0.5 font-mono text-xs tabular-nums text-ink-muted">
                         {{ $key }}
                     </span>
-                    <span class="text-xs text-ink-faint">
+                    <span class="text-xs text-ink-muted">
                         Live on Global {{ $sample['live'] }} · {{ count($sample['links']) }} scenario link(s)
                     </span>
                 </div>

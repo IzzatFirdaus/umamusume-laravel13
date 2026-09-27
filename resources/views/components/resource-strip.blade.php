@@ -39,19 +39,37 @@
                 : null;
         @endphp
 
-        <div class="min-w-36 flex-1 rounded-md border border-rule bg-raised px-3 py-2">
-            <span class="block text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ $label }}</span>
-            <span class="block font-mono text-xl font-extrabold tabular-nums text-ink-strong">{{ $value }}</span>
-
-            @if ($segments !== null)
-                <span class="mt-1 flex gap-1" role="img" aria-label="Energy {{ $run['energy'] ?? 0 }} of 100">
-                    @for ($i = 0; $i < 5; $i++)
-                        <span class="h-1.5 flex-1 rounded-sm {{ $i < $segments ? 'bg-green' : 'bg-idle' }}"></span>
-                    @endfor
+        {{-- The turn widget is the torn-page calendar card of research §6.6: a tab strip
+             with two punch holes over a bordered body. It is the run's timeline anchor and,
+             in a run list, the row's identity, so it is drawn as an object rather than as
+             another number in a box. --}}
+        @if ($widget === 'turn')
+            <div class="relative min-w-36 flex-1 overflow-hidden rounded-md border-2 border-anchor bg-raised px-3 pt-6 pb-2">
+                <span class="absolute inset-x-0 top-0 flex h-5 items-center gap-1.5 bg-anchor px-2" aria-hidden="true">
+                    <span class="size-2 rounded-full bg-raised"></span>
+                    <span class="size-2 rounded-full bg-raised"></span>
                 </span>
-            @elseif ($sub !== null)
-                <span class="block text-xs text-ink-faint">{{ $sub }}</span>
-            @endif
-        </div>
+                <span class="block font-mono text-xl leading-none font-extrabold tabular-nums text-anchor">{{ $value }}</span>
+                <span class="mt-1 block text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ $label }}</span>
+                @if ($sub !== null)
+                    <span class="block text-xs text-ink-muted">{{ $sub }}</span>
+                @endif
+            </div>
+        @else
+            <div class="min-w-36 flex-1 rounded-md border border-rule bg-raised px-3 py-2">
+                <span class="block text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ $label }}</span>
+                <span class="block font-mono text-xl font-extrabold tabular-nums text-ink-strong">{{ $value }}</span>
+
+                @if ($segments !== null)
+                    <span class="mt-1 flex gap-1" role="img" aria-label="Energy {{ $run['energy'] ?? 0 }} of 100">
+                        @for ($i = 0; $i < 5; $i++)
+                            <span class="h-1.5 flex-1 rounded-sm {{ $i < $segments ? 'bg-green' : 'bg-idle' }}"></span>
+                        @endfor
+                    </span>
+                @elseif ($sub !== null)
+                    <span class="block text-xs text-ink-muted">{{ $sub }}</span>
+                @endif
+            </div>
+        @endif
     @endforeach
 </div>

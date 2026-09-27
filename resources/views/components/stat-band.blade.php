@@ -46,6 +46,17 @@
      * Grade is derived from the entered value, never stored. The banding is ours:
      * no source in this repository defines a client stat grade, so the boundaries
      * are printed below the band and labelled provisional (D-256, G-46).
+     *
+     * Provenance of the letter set and the tint families: visual observation of
+     * client frames, NOT client text. RAW-FINDINGS §5 records that the badge hexes
+     * came from block averages over ~28px targets and are weaker evidence than the
+     * point probes used elsewhere, and no exported string names a grade threshold.
+     * So both the boundaries and the colours are read off pixels.
+     *
+     * How to resolve it: high-resolution screenshots of grade badges spanning all
+     * nine letters, sampled at the letter fill rather than the white interior, plus
+     * one capture where a stat is nudged across a boundary. That turns this comment
+     * into a sourced table and retires the [Provisional] marker.
      */
     $band = $config['grade_banding'];
     $gradeOf = function (int $value) use ($band): string {
@@ -136,7 +147,7 @@
         </span>
     </div>
 
-    <div class="px-3 pb-3 font-mono text-xs tabular-nums text-ink-faint">
+    <div class="px-3 pb-3 font-mono text-xs tabular-nums text-ink-muted">
         {{ $base }} base
         + @foreach ($order as $stat){{ $stat }} +{{ $def['cap_bonus'][$stat] }}@if (! $loop->last), @endif @endforeach
         + 0 breakthrough + deck untracked.

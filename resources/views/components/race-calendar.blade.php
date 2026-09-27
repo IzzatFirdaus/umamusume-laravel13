@@ -28,12 +28,12 @@
      * (D-152, gate G-28).
      */
     $stateClass = [
-        'empty' => 'border-rule bg-sunken text-ink-faint',
+        'empty' => 'border-rule bg-sunken text-ink-muted',
         'open' => 'border-dashed border-green-line bg-raised text-ink',
         'goal' => 'border-green bg-green-tint text-ink-strong',
         'fan_locked' => 'border-rule bg-sunken text-ink-muted',
         'maiden_locked' => 'border-rule bg-panel text-ink-muted',
-        'past' => 'border-rule bg-transparent text-ink-faint',
+        'past' => 'border-rule bg-transparent text-ink-muted',
         'current' => 'border-pick bg-raised text-ink-strong',
     ];
 
@@ -49,7 +49,14 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
-    <h3 class="mb-2 text-xs font-bold uppercase tracking-widest text-ink-muted">Race calendar</h3>
+    {{-- Capsule header with argyle lattice bleed: the client's most repeated element,
+         measured across frames 234521, 230755 and 232345. It marks this as a section
+         header rather than as data. The fill is --color-chrome, not the client's bright
+         lime, because a capsule always carries a word and white on bright lime measures
+         1.99:1 (DESIGN.md §2.3 amendment, research §6.3, D-3). --}}
+    <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pl-16 pr-4 text-sm font-bold text-on-chrome">
+        <span>Race calendar</span>
+    </div>
 
     <div class="grid grid-cols-12 gap-1">
         @foreach ($monthLabels as $index => $month)
@@ -67,7 +74,7 @@
                 @endphp
                 <div class="col-span-1 rounded-md border px-1 py-1.5 text-center text-xs leading-tight
                             {{ $stateClass[$state] }}">
-                    <span class="block font-mono text-xs tabular-nums text-ink-faint">{{ $half }}</span>
+                    <span class="block font-mono text-xs tabular-nums text-ink-muted">{{ $half }}</span>
                     <span class="block truncate font-semibold" title="{{ $label ?? $stateWord[$state] }}">
                         {{ $label ?? $stateWord[$state] }}
                     </span>

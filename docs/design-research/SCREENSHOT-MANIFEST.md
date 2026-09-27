@@ -34,7 +34,7 @@ This is the section that matters for the comparative request, and the honest ans
 | Scenario | Evidence in corpus | Coverage |
 |---|---|---|
 | **Unity Cup** | Turn chips reading `Until the Unity Cup` / `Unity Cup Begins at End of Turn` across the 96-frame montage; `TEAM RANK B 11/16` and `Result Pts` counters; Team Showdown opponent select | **Dominant.** Deep coverage of training HUD, choices, log, calendar, team screens |
-| **Ura Finale** | `012428` carries a `Place 1st in URA Finals` goal with a `FINISHED` state; `014154` shows the same goal line with `Power Lvl 5` | **Present but thin.** Goal-line and end-state frames only, not a full run |
+| **Ura Finale** | `012428` carries a `Place 1st in URA Finals` goal with a `FINISHED` state; `014154` shows the same goal line with `Power Lvl 5` | **Minimal — two frames, not a coverage basis.** Both are known only for their goal line; nothing else about URA's surfaces is recorded in this corpus, and `014154`'s `Power Lvl 5` implies a training screen that has not been described or cropped here. "Present" means the label is legible in the corpus, not that URA's UI is represented — designing URA-specific layout from this would be designing from two goal-line crops. Reading those two frames in full is the cheap way to widen this row |
 | **Trackblazer / Climax** | None found | **Absent** |
 | **Our Grand Concert** | None found | **Absent** |
 
@@ -61,9 +61,9 @@ This is the section that matters for the comparative request, and the honest ans
 
 ## Facility activity names observed
 
-Extracted from the discipline banner across the montage. These are scenario- and facility-dependent, which is the strongest available evidence for differing facility layouts:
+Extracted from the discipline banner across the montage. **Scope of the claim, corrected 2026-09-27:** every frame that shows one of these names is a **Unity Cup** frame (see the coverage table, which records zero Trackblazer and zero Our Grand Concert training HUDs). So the list evidences that activity names vary **per facility within Unity Cup**, and that the banner carries them. It does **not** evidence that facility layouts differ *between* scenarios — that comparison is not available on this corpus, and this file's own methodology line says so. Any artifact that cited these six names as cross-scenario evidence was over-reading a single scenario's data; the claim is corrected in `CONSTRAINTS.md` D-187 and `DESIGN.md` §6.4b and §6.22, and the rule D-187 states (a banner without its activity line is incomplete) is unaffected.
 
-`Breaststroke`, `Freestyle`, `Long-Distance Swimming` (Stamina, pool), `Incline` (Guts), `Running` (Speed), `Dirt` (Power).
+`Breaststroke`, `Freestyle`, `Long-Distance Swimming` (Stamina, pool), `Incline` (Guts), `Running` (Speed), `Dirt` (Power) — all Unity Cup.
 
 ## Scenario guides fetched from the web, same date
 

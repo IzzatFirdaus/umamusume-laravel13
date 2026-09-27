@@ -1,5 +1,11 @@
 # Unity Cup (Aoharu Hai) — Scenario Guide (Global EN Server)
 
+**Server:** `[Global]`
+**Status:** Superseded (pre-2026-07-01 mechanic numbers; strategy prose remains useful)
+**Last Verified:** 2026-09-27 (metadata pass)
+**Superseded By:** `06-unity-cup-gametora.md` for all mechanics numbers
+
+
 > ## ⚠️ Currency of this file — read before using any number in it
 >
 > **`[Global]` reworked Unity Cup on 2026-07-01** (the same rework that raised stat caps and added

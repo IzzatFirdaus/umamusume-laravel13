@@ -28,11 +28,22 @@ Route::get('/review', [ReviewController::class, 'index'])->name('review.index');
 Route::post('/review/{candidate}', [ReviewController::class, 'resolve'])->name('review.resolve');
 
 /*
- * Design review surface. Temporary, by closure and not by controller, because the
- * owner asked for the Blade components and the Tailwind theme to be reviewed before
- * any backend work lands. It reads config/scenarios.php and renders literal sample
- * values, so it touches no database and no model. Delete this route and
- * resources/views/design-preview.blade.php once the real run screen replaces them.
+ * ============================================================================
+ * TEMPORARY REVIEW SURFACE. DELETE THIS ROUTE WHEN THE REAL RUN SCREEN LANDS.
+ * ============================================================================
+ *
+ * Present so the Phase 1-4 output could be opened in a browser and measured. It
+ * is a closure rather than a controller because the owner scoped this phase out
+ * of backend work, and it reads config/scenarios.php plus literal sample values,
+ * so it touches no database, no model and no migration.
+ *
+ * Delete together with:
+ *   resources/views/design-preview.blade.php
+ *   any component that turns out to be used only by it
+ *
+ * It is NOT a spec for the real run screen. The real screen should come from the
+ * TrainingRun controller with an actual run, and it should reuse the four
+ * components, not this page's data assembly.
  */
 Route::get('/design-preview', function (): \Illuminate\View\View {
     $scenarios = config('scenarios.scenarios');
