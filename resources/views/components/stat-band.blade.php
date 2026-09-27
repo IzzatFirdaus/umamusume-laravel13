@@ -150,15 +150,14 @@
     <div class="px-3 pb-3 font-mono text-xs tabular-nums text-ink-muted">
         {{ $base }} base
         + @foreach ($order as $stat){{ $stat }} +{{ $def['cap_bonus'][$stat] }}@if (! $loop->last), @endif @endforeach
-        + 0 breakthrough + deck untracked.
+        breakthrough not tracked + deck untracked.
         Hard cap {{ number_format($config['hard_cap']) }}.
     </div>
 
     <div class="border-t border-rule px-3 py-2">
         <p class="text-xs text-ink-muted">
             <span class="rounded border border-dashed border-down px-1 font-semibold text-down">Provisional</span>
-            Grade banding is every {{ $band['step'] }} points:
-            {{ implode(', ', array_map(fn (string $l, int $i) => $l . ' ' . number_format($i * $band['step']), $band['labels'], array_keys($band['labels']))) }}.
+            Our grade scale is provisional; validated below 450 only.
             No source in this repository defines a client stat grade, so these letters are ours.
         </p>
     </div>

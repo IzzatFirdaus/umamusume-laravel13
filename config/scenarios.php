@@ -37,6 +37,16 @@ return [
     // application limit. It is drawn as its own marker on every bar.
     'base_cap' => 1200,
 
+    /*
+    | The strip a run renders when it names no scenario. URA Finale is that
+    | baseline because it is the only Global scenario with every panel off by
+    | definition, so "no scenario" cannot be mistaken for "a scenario with fewer
+    | features" (owner ruling 2026-09-27). Named here rather than in a view so the
+    | baseline is a fact about the matrix, not a literal repeated in a template.
+    | Our Grand Concert renders the same strip, from its own entry, on purpose.
+    */
+    'baseline' => 'ura_finale',
+
     // scenarios.json `hard_caps`, all four Global scenarios. This is the
     // validation ceiling adopted by ADR-0002 option B.
     'hard_cap' => 2000,
@@ -48,8 +58,8 @@ return [
     | blocking item recorded in DESIGN.md §11.3.
     */
     'grade_banding' => [
-        'step' => 150,
-        'labels' => ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'S', 'SS'],
+        'step' => 50,
+        'labels' => ['G', 'G+', 'F', 'F+', 'E', 'E+', 'D', 'D+', 'C', 'C+', 'B', 'B+', 'A', 'A+', 'S', 'S+', 'SS'],
         'provisional' => true,
     ],
 
@@ -72,7 +82,7 @@ return [
             'scenario_links' => ['Aoi Kiryuin'],
             'facility_level_source' => 'repetition',
             'notes' => 'Defined by absence: no team system, no shop, no scenario currency. '
-                . 'This is the minimal strip, and adding another scenario widget here would state something false.',
+                .'This is the minimal strip, and adding another scenario widget here would state something false.',
         ],
 
         'unity_cup' => [
@@ -80,7 +90,7 @@ return [
             'live_on_global' => '2025-11-06',
             'cap_bonus' => ['Speed' => 100, 'Stamina' => 100, 'Power' => 100, 'Guts' => 100, 'Wit' => 600],
             'widgets' => ['turn', 'energy', 'fans', 'team_rank', 'spirit_bursts'],
-            'steps' => ['facility', 'training', 'outcome', 'skill'],
+            'steps' => ['facility', 'training', 'team_race', 'outcome', 'skill'],
             'panels' => [
                 'race_calendar' => true,
                 'team_race' => true,
@@ -96,6 +106,35 @@ return [
             // Post 2026-07-01: the extra energy cost on team training was removed.
             'team_training_energy_penalty' => false,
             'wit_burst_energy_bonus' => 5,
+            /*
+            | Team Race opponent selection (docs/scenarios/06-unity-cup-gametora.md
+            | and 02-unity-cup.md). Three NPC teams, strongest to weakest, and
+            | beating a stronger one moves league rank further.
+            |
+            | `circles_per_category` is deliberately absent. The circle estimate is
+            | the client's own display before you commit; the tool records what the
+            | Trainer saw and never computes it (Planner Rule 1, D-225). A number
+            | here would be the tool doing the client's arithmetic.
+            */
+            'team_race' => [
+                'occurs_every_months' => 6,
+                'opponent_count' => 3,
+                'opponents' => [
+                    // Keyed `tier`, not by the attribute the JP wikis rank characters
+                    // by: the lore gate bans that word, and "which of three teams is
+                    // hardest to beat" is not that attribute.
+                    ['name' => 'Elite Team Ares', 'tier' => 'strongest'],
+                    ['name' => 'The Turf Queens', 'tier' => 'middle'],
+                    ['name' => 'Novice Squad', 'tier' => 'weakest'],
+                ],
+                // 06:109 — aim for at least 3 circles as a safety margin, because
+                // losing decreases league rank. A margin, not a win condition.
+                'circles_guidance' => 3,
+                'loss_lowers_league_rank' => true,
+                // 06:110 — the 2026-07-01 rework added a retry with an Alarm Clock
+                // item; older guidance treats a loss as permanent and is wrong.
+                'loss_retryable_with_alarm_clock' => true,
+            ],
             'spirit_burst_states' => ['chargeable', 'charged', 'held', 'spent', 'extreme_ready', 'extreme_spent'],
             'team_rank_ladder' => [
                 ['ranks' => ['G', 'F'], 'level' => 1],
@@ -105,7 +144,7 @@ return [
                 ['ranks' => ['S'], 'level' => 5],
             ],
             'notes' => 'Facility level is a team property, so a level chip must name its cause (D-222). '
-                . 'Rank S+ sits above S and grants a second hint rather than a higher facility.',
+                .'Rank S+ sits above S and grants a second hint rather than a higher facility.',
         ],
 
         'trackblazer' => [
@@ -135,14 +174,79 @@ return [
                 'limited_turf_range' => ['Junior' => 60, 'Classic' => 200, 'Senior' => 300],
             ],
             'grade_points_surplus_carries_over' => false,
+            /*
+            | Display names for the four Grade Point objectives. Kept beside the
+            | numbers above rather than inside them so the figures stay exactly as
+            | D-232 states them (debut, then 60, +300, +300) and can be diffed
+            | against the source without a translation layer in the way.
+            |
+            | "End of <year>" is our wording for the client's end-of-year assessment;
+            | the client names the year, not a deadline, so the phrase says when the
+            | figure is judged rather than inventing a game term.
+            */
+            'grade_objective_labels' => [
+                'debut' => 'Debut race',
+                'Junior' => 'End of Junior Year',
+                'Classic' => 'End of Classic Year',
+                'Senior' => 'End of Senior Year',
+            ],
             'grade_point_by_grade' => ['G1' => 100, 'G2' => 80, 'G3' => 60, 'OP' => 40, 'Pre-OP' => 20],
             'shop_coins_by_placement' => ['1st' => 100, '2nd' => 60, '3rd' => 60, '4th' => 30, '5th' => 30, '6th' => 0],
             'shop' => ['rotation_turns' => 6, 'max_copies_per_item' => 5, 'locked_until_debut' => true],
+            /*
+            | The static catalogue behind the shop step.
+            |
+            | Every cost and effect below is transcribed from
+            | docs/scenarios/05-trackblazer-gametora.md §"Full Shop Item List"
+            | (GameTora, 2026). Nothing here is invented and nothing is a
+            | placeholder: a row is either a real client item at its real price or
+            | it is absent from the list.
+            |
+            | `sale` and `limited` are per-offer flags, not per-item ones. The
+            | rotation is not modelled by this build, so no row carries a flag and
+            | the client will not show one either — the flags are supported by the
+            | component and exercised by a test, but until a rotation exists there
+            | is nothing honest to flag. Inventing "Berry Sweet Cupcake is on sale"
+            | would state a state of a lineup this tool cannot see.
+            |
+            | This is a subset of the published list, chosen to span the categories
+            | (stats, energy, mood, training effects, races, facility). It is not
+            | the whole catalogue, and the step says so where it renders.
+            |
+            | One item name trips the `lore-code` gate: "Good-Luck Charm" contains
+            | "Luck", which is banned because the JP wikis use it for a stat the
+            | client does not have. Here it is a verbatim client item name kept as
+            | source data, which C-4 puts outside the copy ban — the same carve-out
+            | skill and race names get. It is kept spelled as the client spells it
+            | rather than renamed to satisfy a grep.
+            */
+            'shop_items' => [
+                ['name' => 'Speed Notepad', 'cost' => 10, 'effect' => '+3 Speed'],
+                ['name' => 'Speed Manual', 'cost' => 15, 'effect' => '+7 Speed'],
+                ['name' => 'Speed Scroll', 'cost' => 30, 'effect' => '+15 Speed'],
+                ['name' => 'Vita 20', 'cost' => 35, 'effect' => 'Energy +20'],
+                ['name' => 'Vita 40', 'cost' => 55, 'effect' => 'Energy +40'],
+                ['name' => 'Royal Kale Juice', 'cost' => 70, 'effect' => 'Energy +100, Mood −1'],
+                ['name' => 'Energy Drink MAX EX', 'cost' => 50, 'effect' => 'Max Energy +8'],
+                ['name' => 'Plain Cupcake', 'cost' => 30, 'effect' => 'Mood +1'],
+                ['name' => 'Berry Sweet Cupcake', 'cost' => 55, 'effect' => 'Mood +2'],
+                ['name' => 'Coaching Megaphone', 'cost' => 40, 'effect' => 'Training bonus +20% for 4 turns'],
+                ['name' => 'Motivating Megaphone', 'cost' => 55, 'effect' => 'Training bonus +40% for 3 turns'],
+                ['name' => 'Empowering Megaphone', 'cost' => 70, 'effect' => 'Training bonus +60% for 2 turns'],
+                // 05:114 — there is no Wit version. The tool must not offer one.
+                ['name' => 'Ankle Weights', 'cost' => 50, 'effect' => '+50% training bonus for that stat, +20% Energy cost, 1 turn'],
+                ['name' => 'Good-Luck Charm', 'cost' => 40, 'effect' => 'Training failure rate 0% for 1 turn'],
+                ['name' => 'Artisan Cleat Hammer', 'cost' => 25, 'effect' => 'Race bonus +20%, 1 turn'],
+                ['name' => 'Master Cleat Hammer', 'cost' => 40, 'effect' => 'Race bonus +35%, 1 turn'],
+                ['name' => 'Glow Sticks', 'cost' => 15, 'effect' => 'Race fan gain +50%, 1 turn'],
+                ['name' => 'Speed Training Application', 'cost' => 150, 'effect' => 'Speed facility level +1 for the run'],
+                ['name' => 'Miracle Cure', 'cost' => 40, 'effect' => 'Heals all negative conditions'],
+            ],
             'race_fatigue' => ['hide_after' => 'late_december', 'final_races_pay_coins' => false],
             'finale' => ['kind' => 'points_league', 'races' => 3],
             'notes' => 'No mandatory race goals, so the race calendar is absent rather than empty, and no '
-                . 'Scenario Link character exists here. Racing is the strategy in this scenario and is '
-                . 'discouraged in Unity Cup, so any race advisory must be scenario-gated (D-225).',
+                .'Scenario Link character exists here. Racing is the strategy in this scenario and is '
+                .'discouraged in Unity Cup, so any race advisory must be scenario-gated (D-225).',
         ],
 
         'our_grand_concert' => [
@@ -165,8 +269,8 @@ return [
             'facility_level_source' => null,
             'documented' => false,
             'notes' => 'Live on Global and caps Speed highest of any scenario here, but no mechanics guide is '
-                . 'held for it. Baseline strip plus published caps only: every panel is off, because an '
-                . 'undescribed scenario must render as absence rather than as a guess (D-241, gate G-41).',
+                .'held for it. Baseline strip plus published caps only: every panel is off, because an '
+                .'undescribed scenario must render as absence rather than as a guess (D-241, gate G-41).',
         ],
 
     ],
