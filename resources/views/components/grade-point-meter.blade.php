@@ -11,6 +11,10 @@
     // `$value ?? $default`, so a default of 0 would silently turn "nothing
     // entered" into "she is on zero points" for every caller that passes null.
     'earned' => null,
+    // How many completed races cannot be converted to points (R18). Zero plus a null
+    // $earned means nothing was logged; a positive count means the run did race and
+    // the tool cannot price it. Those are different sentences.
+    'unpricedCount' => 0,
 ])
 
 @php
@@ -69,7 +73,7 @@
         <p class="mt-0.5 text-base font-bold text-ink-strong">{{ $objective['name'] ?? '' }}</p>
 
         <div class="mt-2 h-2.5 overflow-hidden rounded-full bg-sunken" role="img"
-             aria-label="{{ $logged ? number_format($earned).' of '.number_format($required) : 'Grade Points not yet recorded' }} toward {{ $objective['name'] ?? 'the current objective' }}">
+             aria-label="{{ $logged ? number_format($earned).' of '.number_format($required) : ($unpricedCount > 0 ? 'Grade Points not totalled' : 'Grade Points not yet recorded') }} toward {{ $objective['name'] ?? 'the current objective' }}">
             <div class="h-full rounded-full bg-green-deep" style="width: {{ $percent }}%"></div>
         </div>
 
@@ -86,13 +90,26 @@
                     @endif
                 </span>
             </p>
+        @elseif ($unpricedCount > 0)
+            {{-- R18's middle state, and the reason Slice 2's two states were not
+                 enough. A run that logged two races and cannot be priced is not a run
+                 that logged nothing, and the old sentence read as a instruction to go
+                 enter races. The total stays withheld (KI-10): grade points are
+                 published for a 1st place only, and a race with no calendar slot
+                 records no grade at all. --}}
+            <p class="mt-1.5 text-sm text-ink-muted">
+                <span class="font-bold text-ink">not yet totalled</span>:
+                {{ $unpricedCount }} logged {{ $unpricedCount === 1 ? 'result has' : 'results have' }}
+                no published Grade Point value, so any total here would count less than
+                this run earned.
+            </p>
         @else
             {{-- Nothing is entered, so nothing is claimed. The bar stays empty and
                  the figure is named as missing: "0 / 300" would assert that this
                  trainee stands on zero points, which is a fact, not an absence. --}}
             <p class="mt-1.5 text-sm text-ink-muted">
-                <span class="font-bold text-ink">not yet recorded</span>: no Grade Points are
-                entered for this run, so there is no progress to show yet.
+                <span class="font-bold text-ink">not yet recorded</span>: no races are
+                logged for this run, so there is no progress to show yet.
             </p>
         @endif
 

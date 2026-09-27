@@ -353,6 +353,34 @@ class TrainingRun extends Model
         return $total;
     }
 
+    /**
+     * How many completed races cannot be turned into a Grade Point figure.
+     *
+     * R18 gives the meter a third state, and this is what distinguishes "nothing was
+     * logged" from "logged, but not convertible". A result is unpriceable when it
+     * finished below first, because `grade_point_by_grade` prices a 1st place only,
+     * or when it has no slot, because the grade lives on the slot and a free-form
+     * race records no grade. Neither is a data-entry failure by the Trainer, which is
+     * what the old single sentence implied.
+     */
+    public function gradeUnpricedCount(): int
+    {
+        if (! $this->hasScenario()) {
+            return 0;
+        }
+
+        $table = (array) config('scenarios.scenarios.'.$this->scenarioKey().'.grade_point_by_grade');
+
+        return $this->raceEntries()
+            ->where('status', RaceEntryStatus::Completed)
+            ->with('scenarioSlot')
+            ->get()
+            ->filter(fn (RaceEntry $entry): bool => $entry->placement !== 1
+                || $entry->scenarioSlot?->tier === null
+                || ! array_key_exists($entry->scenarioSlot->tier, $table))
+            ->count();
+    }
+
     protected function casts(): array
     {
         return [

@@ -52,6 +52,7 @@
             :scenario="$panelScenario"
             :objectives="$run->gradeObjectives()"
             :earned="$run->gradeEarned()"
+            :unpriced-count="$run->gradeUnpricedCount()"
             class="mt-3"
         />
     @endif

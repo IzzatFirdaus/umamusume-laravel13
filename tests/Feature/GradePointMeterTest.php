@@ -37,12 +37,13 @@ function gradeObjectives(): array
 function renderMeter(array $overrides = []): string
 {
     return Blade::render(
-        '<x-grade-point-meter :scenario="$scenario" :objectives="$objectives" :current="$current" :earned="$earned" />',
+        '<x-grade-point-meter :scenario="$scenario" :objectives="$objectives" :current="$current" :earned="$earned" :unpriced-count="$unpricedCount" />',
         array_merge([
             'scenario' => 'trackblazer',
             'objectives' => gradeObjectives(),
             'current' => 2,
             'earned' => 240,
+            'unpricedCount' => 0,
         ], $overrides),
     );
 }
@@ -182,6 +183,43 @@ it('does not invent a coin balance or a turn count', function (): void {
     expect($html)
         ->toContain('not yet recorded')
         ->not->toMatch('/Shop Coins:\s*[\d,]+/');
+});
+
+it('names the reason when results are logged but cannot be priced', function (): void {
+    // R18's middle state. Slice 2 shipped only two states, so a run with a G1 win
+    // plus a free-form race read "no Grade Points are entered for this run" — a
+    // sentence blaming the Trainer for races they did enter (KI-12). The total is
+    // still withheld; what changes is that the panel says why.
+    $html = renderMeter(['earned' => null, 'unpricedCount' => 2]);
+
+    expect($html)
+        ->toContain('2 logged results')
+        ->toContain('no published Grade Point value')
+        ->not->toContain('no Grade Points are entered for this run')
+        // Withholding means withholding: no figure, and no zero standing in for one.
+        ->not->toMatch('/\b\d+ \/ \d+/');
+});
+
+it('still says nothing was recorded when nothing was recorded', function (): void {
+    // The first state must survive the split. A run with no races at all is a
+    // different fact from a run whose races cannot be priced, and the two used to
+    // share one sentence that was true only of the first.
+    $html = renderMeter(['earned' => null, 'unpricedCount' => 0]);
+
+    expect($html)
+        ->toContain('not yet recorded')
+        ->not->toContain('logged results');
+});
+
+it('keeps the figure state when every logged result can be priced', function (): void {
+    $html = renderMeter(['earned' => 240, 'unpricedCount' => 0]);
+
+    // Scoped to the figure: the footer's Shop Coins line legitimately still reads
+    // "not yet recorded" here, so a whole-document assertion would be testing the
+    // wrong widget.
+    expect($html)->toContain('240 / 300')
+        ->not->toContain('logged results')
+        ->not->toContain('no progress to show yet');
 });
 
 it('refuses a scenario it has no descriptor for', function (): void {
