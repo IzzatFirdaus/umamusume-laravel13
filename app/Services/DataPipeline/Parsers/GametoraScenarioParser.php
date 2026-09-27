@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\DataPipeline\Parsers;
 
 use App\Services\DataPipeline\Contracts\ScenarioSourceParser;
+use Illuminate\Support\Carbon;
 use JsonException;
 
 /**
@@ -120,6 +121,6 @@ final class GametoraScenarioParser implements ScenarioSourceParser
             return null;
         }
 
-        return (\Illuminate\Support\Carbon::createFromTimestamp((int) $epoch, $timezone))->toDateString();
+        return Carbon::createFromTimestamp((int) $epoch, $timezone)->toDateString();
     }
 }

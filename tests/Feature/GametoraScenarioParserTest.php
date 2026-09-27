@@ -23,7 +23,7 @@ function scenarioRecord(array $overrides = []): array
 
     $body = json_encode([array_merge($base, $overrides)], JSON_THROW_ON_ERROR);
 
-    return (new GametoraScenarioParser())->parse($body)[0] ?? [];
+    return (new GametoraScenarioParser)->parse($body)[0] ?? [];
 }
 
 it('derives each scenario cap from the base plus the published bonus', function (): void {
@@ -71,7 +71,7 @@ it('falls back to the Japanese-side rendering when no Global name exists', funct
 it('drops unusable entries rather than guessing', function (array $scenario) {
     $body = json_encode([$scenario], JSON_THROW_ON_ERROR);
 
-    expect((new GametoraScenarioParser())->parse($body))->toBe([]);
+    expect((new GametoraScenarioParser)->parse($body))->toBe([]);
 })->with([
     'no slug' => [['url_name' => null, 'name_en' => 'X', 'stats' => [0, 0, 0, 0, 0]]],
     'no usable name' => [['url_name' => 'x', 'name_en' => '  ', 'name_en_old' => null, 'stats' => [0, 0, 0, 0, 0]]],
@@ -80,5 +80,5 @@ it('drops unusable entries rather than guessing', function (array $scenario) {
 ]);
 
 it('rejects bodies that are not a scenario list', function (string $body): void {
-    expect((new GametoraScenarioParser())->parse($body))->toBe([]);
+    expect((new GametoraScenarioParser)->parse($body))->toBe([]);
 })->with(['not json' => ['{oops'], 'object' => ['{"id": 1}'], 'empty' => ['[]']]);

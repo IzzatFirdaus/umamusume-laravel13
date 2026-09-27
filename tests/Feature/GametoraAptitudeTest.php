@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Umamusume;
+use App\Services\DataPipeline\NameNormalizer;
 use App\Services\DataPipeline\Parsers\GametoraCharacterParser;
 use App\Services\DataPipeline\PipelineRunner;
 
@@ -22,7 +23,7 @@ it('emits the ten aptitude letters in the export order', function (): void {
         'aptitude' => ['A', 'G', 'F', 'C', 'A', 'A', 'G', 'A', 'A', 'C'],
     ]]);
 
-    $record = (new GametoraCharacterParser())->parse($body)[0];
+    $record = (new GametoraCharacterParser)->parse($body)[0];
 
     expect($record['aptitude_turf'])->toBe('A')
         ->and($record['aptitude_dirt'])->toBe('G')
@@ -42,18 +43,22 @@ it('omits every aptitude column when the set is incomplete or malformed', functi
         'aptitude' => $aptitude,
     ]]);
 
-    $record = (new GametoraCharacterParser())->parse($body)[0];
+    $record = (new GametoraCharacterParser)->parse($body)[0];
 
     expect($record)->toHaveKey('name')
         ->and(array_intersect_key($record, array_flip(GametoraCharacterParser::APTITUDE_COLUMNS)))->toBe([]);
 })->with([
-    'short array' => [['A', 'G', 'F']],
-    'unknown letter' => ['A', 'G', 'F', 'C', 'A', 'A', 'G', 'Z', 'A', 'C'],
-    'non string entry' => ['A', 'G', 'F', 'C', 'A', 'A', 'G', null, 'A', 'C'],
+    'short array' => [[['A', 'G', 'F']]],
+    'unknown letter' => [[['A', 'G', 'F', 'C', 'A', 'A', 'G', 'Z', 'A', 'C']]],
+    'non string entry' => [[['A', 'G', 'F', 'C', 'A', 'A', 'G', null, 'A', 'C']]],
 ]);
 
 it('persists aptitudes through the pipeline onto an existing catalog row', function (): void {
-    $umamusume = Umamusume::factory()->create(['name' => 'Special Week', 'aptitude_turf' => null]);
+    $umamusume = Umamusume::factory()->create([
+        'name' => 'Special Week',
+        'match_key' => app(NameNormalizer::class)->normalize('Special Week'),
+        'aptitude_turf' => null,
+    ]);
 
     $body = scenarioBody([[
         'char_id' => 1001,
@@ -83,6 +88,7 @@ it('persists aptitudes through the pipeline onto an existing catalog row', funct
 it('keeps stored aptitudes when a later fetch carries none', function (): void {
     $umamusume = Umamusume::factory()->create([
         'name' => 'Silence Suzuka',
+        'match_key' => app(NameNormalizer::class)->normalize('Silence Suzuka'),
         'aptitude_turf' => 'A',
     ]);
 

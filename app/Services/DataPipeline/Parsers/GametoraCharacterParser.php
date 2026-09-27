@@ -41,8 +41,8 @@ final class GametoraCharacterParser implements SourceParser
     ];
 
     /**
-     * @return list<array<string, string|null>>  catalog fields, plus the ten aptitude
-     *         letters only when a card carries a complete and well formed set
+     * @return list<array<string, string|null>> catalog fields, plus the ten aptitude
+     *                                          letters only when a card carries a complete and well formed set
      */
     public function parse(string $body): array
     {
@@ -106,7 +106,7 @@ final class GametoraCharacterParser implements SourceParser
     }
 
     /**
-     * @return array<string, string>  empty unless all ten letters are present
+     * @return array<string, string> empty unless all ten letters are present
      */
     private function aptitudes(mixed $aptitude): array
     {
