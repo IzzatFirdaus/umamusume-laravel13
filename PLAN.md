@@ -9,7 +9,7 @@
 
 **Every slice must satisfy all of the following before being marked complete:**
 
-1. **Gates green with pasted output** — `migrate:fresh --seed`, `pest`, `pint --test`, `phpstan --no-progress`, `make lore` (manual), `make lore-code` (manual), `npx vite build`, `DesignTokensTest` all pass; outputs recorded in commit message or linked CI run.
+1. **Gates green with pasted output** — `pest`, `pint --test`, `phpstan --no-progress`, `make lore` (manual), `make lore-code` (manual), `npx vite build`, `DesignTokensTest` all pass; outputs recorded in commit message or linked CI run. **Migration gate:** `migrate:fresh --seed` is a destructive drop and is not run here; the equivalent evidence is `php artisan migrate` plus `db:seed` applied to a **fresh empty scratch DB** (`DB_DATABASE=/tmp/…`), which proves the same thing with no blast radius on the shared dev file.
 2. **Every status claim cites file:line or commit sha** — no "done" without evidence.
 3. **No open D-number violation in touched files** — `git grep -n D-XXX` in changed files returns zero unresolved hits.
 4. **No false/stale status lines** — plan doc re-baselined against tree in the same commit.
@@ -42,8 +42,8 @@
 | T3: US-10 P2→P1 with ADR-0003 criteria | `1e859e8` | `PRD.md:35` |
 | T4: ADR-0003 Amendment R1 | `e9a944a` | `docs/adr/0003...md` |
 | T5: DesignTokensTest wired | `c70967f` | `tests/Feature/DesignTokensTest.php` |
-| T6: Gates run | — | All green (see above) |
-| T7: Artifacts committed | `b0bb0d5` | pagination override, `.gitignore`, stray `Continue` removed |
+| T6: Gates run | re-run 2026-09-28 | **Green:** pest 217 passed / 2 skipped; `pint --test` PASS 141 files; phpstan `[OK] No errors`; `lore` + `lore-code` clean (4 allowed-sense hits, all adjudicated); `vite build` ok; migrations + seeders apply to a fresh scratch DB. **Not green:** `DesignTokensTest` passes 9 but **skips 2** — the browser half of D-288/G-18 needs a Playwright driver, absent in this environment. The contrast numbers on the Phase 5 row are a one-time manual measurement, not a reproducible gate. |
+| T7: Artifacts committed | `b0bb0d5` + uncommitted follow-up | pagination override and stray `Continue` removal landed; `.gitignore` line covered `/research-scratch/` but **not `.scratch-uma/`**, so T7's third item had not actually landed. Fixed 2026-09-28: `.gitignore:88` `/.scratch-uma/`, confirmed by `git check-ignore -v`. |
 | T8: Doc drift closed | (this commit) | `DESIGN.md:3`, `layout.blade.php:3-10`, root `DESIGN.md:165-180`, `CONSTRAINTS.md G-21`, `KNOWN-ISSUES.md KI-6` |
 | T9: Phase 6 freeze | — | Enforced by plan |
 
