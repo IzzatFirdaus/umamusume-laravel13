@@ -34,6 +34,7 @@ class ScenarioRaceFactory extends Factory
             'snapshot_path' => null,
             'fetched_at' => now(),
             'source_timezone' => 'Asia/Tokyo',
+            'is_manual' => false,
         ];
     }
 
