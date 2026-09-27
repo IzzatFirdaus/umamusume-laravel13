@@ -221,8 +221,22 @@ A torn-page calendar card: white body, blue outline, a blue tab strip across the
 ### 4.2 Energy gauge (S1)
 A fully rounded track with a dark charcoal unfilled remainder and a **segmented** fill running cyan → green → olive, so the bar reads both level and threshold at once. Label "Energy" sits in its own small cream pill to the left of the track.
 
-### 4.3 Mood pill (S1)
-A saturated rounded pill with an up-arrow glyph and a single uppercase word: `GREAT` (pink `#FB5590`), `GOOD` (orange `#ED8036`). Five states exist in the game (`UMAMUSUME_REFERENCE.md` §1.1.6); the pill carries both colour and word, never colour alone.
+### 4.3 Mood pill (S1, plus the owner's Mood Effect capture)
+A saturated rounded pill with a directional arrow glyph and a single uppercase word. Measured strings, all five, with their training and pre-race effects and their arrow:
+
+| Word | Arrow | Training | Pre-race | Pill colour |
+|---|---|---|---|---|
+| `GREAT` | up | +20% | +4% | pink `#FB5590`, point probe on frame `202142` |
+| `GOOD` | up | +10% | +2% | orange `#ED8036`, point probe on frame `194819` |
+| `NORMAL` | flat | 0% | 0% | not captured |
+| `BAD` | down | −10% | −2% | not captured |
+| `AWFUL` | down | −20% | −4% | not captured |
+
+The words and the numbers come from an owner-supplied capture of the client's Mood Effect panel (2026-09-27) — the client's own legend screen, which lists all five tiers and marks the current one. That is outside this document's screenshot corpus, so it is attributed to the owner rather than to a frame ID, and it is what closed the terminology gap that D-20 and D-203 recorded as blocked. It also retires the JP guides' English glosses (Peak / Good / Normal / Poor / Worst) and their ±10% / ±5% pre-race column, both of which `UMAMUSUME_REFERENCE.md` §1.1.6 carried until this capture arrived.
+
+The three uncaptured colours are a deliberate non-claim: the Mood Effect panel is a legend, and averaging its row bands measures the pill against the panel field rather than the pill fill (the same method returns a dark crimson for the `GREAT` band where the HUD point probe measures `#FB5590`). `DESIGN.md` §3.5 therefore *derives* those three at the anchors' luminance and marks them provisional, and `CONSTRAINTS.md` D-259 makes the arrow mandatory precisely because equal-luminance steps cannot be ordered by hue.
+
+The pill carries colour, word and arrow; never colour alone. Of the five arrows the four off-centre ones read unambiguously in the capture; the `NORMAL` mark is recorded as neutral, and a flat arrow versus no arrow at that row is the distinction worth settling on the next capture (D-259).
 
 ### 4.4 Stat band (S1, S5)
 Six equal columns. Each: a coloured header strip with icon + label, then a white body holding a grade badge, a large value, and a small `/cap` beneath. Skill Pts is separated by a teal header and has no grade badge. Gain previews float **above** the band in scalloped white bubbles with red numerals, plus a larger orange delta under the bubble.
@@ -350,4 +364,4 @@ The client is built for a controller/touch rhythm with a character model carryin
 - The precise hex of the grade-badge letters (S/A/B/C/D/E/F/G). The badges are ~28 px in the source frames and my block averages landed on the white interior rather than the letter fill. Values in §3.2 for grade colour are cluster peaks, which is weaker evidence than the point probes.
 - Whether the JP and Global clients differ in UI colour at all, beyond the language. The corpus is entirely one client and I cannot tell which from the frames.
 - Whether the discipline-banner colour is per-trainee, per-scenario, or per-season. Two data points (Oguri Cap green, Mejiro McQueen blue) are consistent with per-trainee but do not prove it; a third character would settle it and the corpus has more frames I did not open.
-- The mood-pill colour for all five states. Only GREAT and GOOD were captured.
+- The mood-pill colour for `NORMAL`, `BAD` and `AWFUL`. The two upper tiers were captured by point probe (§4.3); the other three are derived and marked provisional. The five tier *strings* are no longer in this list — the client's own Mood Effect panel supplies them, recorded in §4.3.
