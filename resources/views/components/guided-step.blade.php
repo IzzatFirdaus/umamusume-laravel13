@@ -45,7 +45,7 @@
         <span class="text-xs font-semibold text-ink-muted">
             Step {{ $index + 1 }} of {{ count($steps) }} · {{ $stepLabel[$current] ?? $current }}
         </span>
-        <span class="ml-auto text-xs text-ink-faint">{{ $def['label'] }}</span>
+        <span class="ml-auto text-xs text-ink-muted">{{ $def['label'] }}</span>
     </div>
 
     @if ($choices !== [])
@@ -92,7 +92,7 @@
                     </span>
                 @endforeach
             </div>
-            <p class="mt-2 text-xs text-ink-faint">
+            <p class="mt-2 text-xs text-ink-muted">
                 Recorded as entered. No outcome is projected and no odds are shown, because no source
                 publishes them. Anything you did not log is not claimed.
             </p>
@@ -113,8 +113,11 @@
             <button type="button" class="rounded-full border-2 border-rule px-4 py-2 text-sm font-bold text-ink-strong">
                 Change
             </button>
+            {{-- Enamel sheen: the client's buttons are glossy enamel, and this is the one
+                 primary action on the screen, so the sheen marks it rather than decorating.
+                 Hard-edged single split, never a feathered ramp (DESIGN.md §2.3, research §6.1). --}}
             <button type="button"
-                    class="rounded-full bg-chrome px-5 py-2 text-sm font-bold text-on-chrome hover:opacity-90">
+                    class="enamel rounded-full bg-chrome px-5 py-2 text-sm font-bold text-on-chrome">
                 Confirm turn
             </button>
         </div>

@@ -1,13 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+{{--
+    Theme resolution order, so the first paint is already correct (CONSTRAINTS.md D-104, G-20):
+    a stored preference wins, then the OS, then light as the base palette. The preference is
+    rendered server-side by `$theme` once the preferences table lands — owner ruling 2026-09-27
+    puts preferences in SQLite, not the browser, because PRD §6.12 cuts browser-side storage as a
+    second source of truth. Until that table exists nothing is stored locally and the inline script
+    is the whole mechanism. It must stay inline and in the head: a bundled script runs after first
+    paint and would flash the wrong theme.
+--}}
+<html lang="en" @if (! empty($theme)) data-theme="{{ $theme }}" @endif>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Trainer Companion' }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @empty($theme)
+        <script>
+            (function () {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.dataset.theme = 'dark';
+                }
+            })();
+        </script>
+    @endempty
+    @vite(['resources/css/app.css', 'resources/js/app.ts'])
 </head>
-<body class="min-h-screen bg-zinc-50 text-zinc-900">
-    <nav class="border-b border-zinc-200 bg-white">
+{{--
+    The shell is the ground plane for both themes, so it renders from tokens, not from the
+    skeleton's zinc utilities: with system-follow active, `bg-zinc-50 text-zinc-900` kept the
+    page near-white while `--color-page` had already resolved to #0D0C0F, i.e. a dark theme with
+    a light body. Page-level tables and forms still use zinc utilities (root DESIGN.md §2.1
+    implementation status); this is the shared fix, not the whole migration.
+--}}
+<body class="min-h-screen bg-page text-ink">
+    <nav class="border-b border-rule bg-panel">
         <div class="mx-auto flex max-w-5xl gap-6 px-4 py-3 text-sm font-medium">
             <a href="{{ route('catalog.index') }}" class="hover:underline">Catalog</a>
             <a href="{{ route('runs.index') }}" class="hover:underline">Training runs</a>
