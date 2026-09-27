@@ -4,9 +4,22 @@ Compiled 2026-09-27. This is a dated snapshot, not a subscription.
 
 ## What this document is
 
-A self-contained reference for Trainers of *Umamusume: Pretty Derby* by Cygames, written so that a player with no prior knowledge can act on it, and so that it can serve as upstream data for a companion tool. Every mechanic, name, date and rate in here is either cited to a source you can open or marked as unverified. Where two sources disagreed, the disagreement is recorded rather than smoothed over: see the Source Conflict Log at the end, which carries 42 rows.
+A self-contained reference for Trainers of *Umamusume: Pretty Derby* by Cygames, written so that a player with no prior knowledge can act on it, and so that it can serve as upstream data for a companion tool. Every mechanic, name, date and rate in here is either cited to a source you can open or marked as unverified. Where two sources disagreed, the disagreement is recorded rather than smoothed over: see the Source Conflict Log at the end, which carried 42 rows when this sentence was written and **46** as of 2026-09-27 — counts in prose go stale silently, so re-derive it from the table rather than quoting this line.
 
-Four sections: core game mechanics, the character roster, live operations and events, and the gacha and banner schedule. Then the conflict log, the source registry above, and a self-audit that states which parts of this document are weak.
+**Structure, as of 2026-09-27 — eight sections, not four.** An incoming agent operating manual reproduced a four-section map of this file that has not been true since the scenario work landed; it was a mirror of this preamble's own stale line 9, which said "Four sections" (§ D-285 in `docs/design-research/CONSTRAINTS.md`: a write-up citing this repository is not a second source, and here it was not even that — it was a copy of an out-of-date sentence here). The real contents:
+
+| # | Section | What it holds |
+|---|---|---|
+| 1 | Core Game Mechanics | 1.1 Training, 1.2 Race, 1.3 Stats, 1.4 Support Cards, 1.5 Inheritance, 1.6 Additional Systems and Game Modes (through 1.6.10 Consumables) |
+| 2 | **Scenario Strategies and Mechanics `[Global]`** | The four Global scenarios, per-scenario mechanics, the shared-heuristics ledger, and the numbered conflicts |
+| 3 | Character Roster | Debut forms, alternate costume cards, how the tables were built, cross-checks |
+| 4 | Live Operations & Events | Current and announced events, both servers |
+| 5 | Gacha & Banner Schedule | Banners, rates, banner history |
+| 6 | Server Terminology Map | One concept per row, `[JP]` against `[Global]` client wording |
+| 7 | Source Attribution and Conflict Log | **46 rows** as of 2026-09-27 (re-derive the count from the table before quoting it; rows 43-46 were added by the mechanics-brief pass) |
+| 8 | Self-Audit Report | Per-section confidence, weakest coverage, known gaps, blockers |
+
+The scenario section is the one an ingestion pipeline is most likely to miss and least able to do without: it carries the Global-only rulings, the cap derivation, and the import filter that `docs/scenarios/07` and `08` depend on.
 
 ## Two servers, and why that is the first thing to understand
 
@@ -2058,7 +2071,7 @@ Pointer drift was the third blocking item, and it was mechanical: consolidating 
 | 3 Live Operations | HIGH for items tagged active; MEDIUM overall | Every active item on both servers was read from the official feed through a rendering browser, and the three items that had rested on one domain now carry two or three. Gaps remain at the level of one unnamed JP story event. |
 | 4 Gacha and Banners | MEDIUM | Windows and lineups resolve through an id chain and are cross-checked. Rates are tier-B arithmetic because neither server publishes them on the web; that is stated where the rates appear, not in a footnote. |
 
-Conflict log disposition: 42 rows, of which 13 resolved HIGH, 21 MEDIUM, 8 LOW. Nothing rated LOW is presented elsewhere as settled.
+Conflict log disposition: **46 rows** as of 2026-09-27 — this sentence said 42 rows / 13 HIGH / 21 MEDIUM / 8 LOW, and the four added by the mechanics-brief pass changed the shape of the tally rather than just its size. Counted from the table rather than derived: **15 High, 19 Medium, 7 Low** on the strict single-word label, with **five rows carrying compound ratings** ("Medium, breadth gap only", "Low, by design", "Medium on dates, none on name", "High confidence in the gap being real", and one similar), which is why 15+19+7 does not equal 46. Nothing rated LOW is presented elsewhere as settled. ⚠️ This line is the second count in this file that went stale by being written as prose instead of derived from the table; both now say how to re-derive them.
 
 ### 8.3 Weakest source coverage
 
