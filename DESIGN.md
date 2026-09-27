@@ -85,12 +85,13 @@ work, not a contract change.
 | Ink-bearing green fill | `--color-chrome` / `--color-on-chrome` | `#4E7906` / `#FFFFFF` | `#7FCC09` / `#121013` | the only green allowed to carry button text, and its partner |
 | Increase / gain | `--color-up` | `#B45309` | `#FF9A2C` | **orange, never green.** Light value stepped from the client's `#FF9A2C` for 5.05:1 |
 | Decrease / loss | `--color-down` | `#0667B0` | `#4EA1E8` | **blue, never red.** Stepped from the client's `#0088E0` (3.75:1 on white fails) |
-| Selection | `--color-pick` / `--color-on-pick` | `#EFC96A` / `#482720` | `#F5B73C` / `#121013` | gold fill with a **dark** ink in both themes. Not `ink-strong`: that is white in the dark theme, and white on amber measures 1.75:1 |
+| Selection fill | `--color-pick` / `--color-on-pick` | `#EFC96A` / `#482720` | `#F5B73C` / `#121013` | gold fill with a **dark** ink in both themes: 8.34 light, 10.57 dark. Not `ink-strong`: that is white in the dark theme, and white on amber measures 1.75:1. **Fill only** — as a boundary it is 1.59:1 on light `raised` (KI-9) |
+| Selection boundary | `--color-pick-line` | `#7A5C10` | `#F5B73C` | the deep end of the same gold, for the 2px outline that says "this one is live": **6.24** on light `raised`, **8.46** on dark `raised`, against WCAG 1.4.11's 3:1. Aliases to `--color-pick` in dark because that value already cleared there. Four consumers, all measured: the calendar's `current` cell, the meter ladder's `aria-current` step, the guided step's selected card, and the step links. Known weakness: it sits 1.24:1 from `--color-goal-line` in luminance, so a goal cell and a current cell are told apart by hue and by the goal's red pennant, not by lightness — both also carry words, so D-12 holds |
 | Skill Points identity | `--color-sp` | `#009FE1` | `#4FC3F7` | the client's cyan, exact; **fills, rules and tint only** |
 | Skill Points text | `--color-sp-ink` | `#0E7490` | `#4FC3F7` | the client cyan measures 2.66-2.98 as text on light surfaces (research §3.4 already recorded the fail), so text uses the stepped value |
 | Risk / rejected | `--color-risk` | `#800014` | `#FF6B7A` | reserved: training failure and rejection only |
 | Turn chip anchor | `--color-anchor` | `#0B6FB8` | `#8FC4EE` | deliberately not `--color-down`; blue already means "went down" |
-| Focus ring | `--color-ring` | `#4E7906` | `#7FCC09` | 3:1 non-text boundary in both themes; `--color-green` alone fails light at 1.88 (see §8) |
+| Focus ring | `--color-ring` | `#4E7906` | `#7FCC09` | 3:1 non-text boundary in both themes; `--color-green` alone fails light at 1.88 (see §8). Measured against the surfaces it actually sits on: **5.17 / 4.88 / 4.61** on light `raised` / `panel` / `page`, **7.61 / 9.51 / 9.79** in dark |
 
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
@@ -100,7 +101,7 @@ literal hexes, so they follow the active theme instead of pinning one.
 |---|---|---|
 | `GlobalReleased` | `--color-green` capsule with `--color-on-chrome` ink (dark) or `--color-chrome` fill with white ink (light) | fill + text label always together; never color-only |
 | `GlobalAnnounced` | `--color-sp-ink` text + hairline outline | Proposed mapping, no fill — cyan as a fill reads as selected. Text uses `sp-ink`, not `sp`: the client cyan cannot carry a label on light surfaces |
-| `JapanOnly` | `--color-pick` text + hairline outline | never color-only: the word says it (D-12) |
+| `JapanOnly` | **unimplemented** — the catalog renders this status as `--color-ink-muted` label text today (`catalog/index.blade.php:43`), not as a badge | never color-only: the word says it (D-12). The treatment written here formerly said `--color-pick` **text** + hairline outline; gold text on a light surface is 1.59:1, so building it as specified would have shipped a text-contrast failure. Corrected during the KI-9 split rather than implemented. If a badge is ever wanted, it needs a fill + ink pair from the pair table above, not the pick hue as text |
 
 Never use Tailwind default `green-500` etc. as brand tokens; the client's
 action green is hue ~87°, and six degrees of drift breaks the resemblance

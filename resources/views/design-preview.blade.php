@@ -64,12 +64,26 @@
                     <div class="col-span-12">
                         <x-race-calendar :scenario="$key" :cells="$sample['calendar']" />
                     </div>
+                    <div class="col-span-12">
+                        <x-grade-point-meter :scenario="$key" :objectives="$sample['objectives']"
+                                             :current="2" :earned="240" />
+                    </div>
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                    @foreach ($sample['steps'] as $step)
+                        <a href="{{ route('design.preview', ['step' => $step]) }}"
+                           class="rounded-full border px-3 py-1 text-xs font-bold
+                                  {{ $sample['step'] === $step ? 'border-pick-line bg-raised text-ink-strong' : 'border-rule bg-panel text-ink-muted hover:border-green-line' }}">
+                            {{ $step }}
+                        </a>
+                    @endforeach
                 </div>
 
                 <div class="mt-3 grid grid-cols-12 gap-3">
                     <div class="col-span-12 lg:col-span-7">
                         <x-guided-step :scenario="$key"
-                                       :current="$sample['steps'][0]"
+                                       :current="$sample['step']"
                                        :selected="$sample['selected']"
                                        :choices="$sample['choices']"
                                        :preview="$sample['preview']"

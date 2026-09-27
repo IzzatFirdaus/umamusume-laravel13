@@ -144,7 +144,7 @@
                 $isCurrent = $i === $index;
             @endphp
             <li class="flex items-baseline justify-between gap-3 rounded-md border px-3 py-2 text-sm
-                       {{ $isCurrent ? 'border-2 border-pick bg-raised' : 'border-rule bg-panel' }}"
+                       {{ $isCurrent ? 'border-2 border-pick-line bg-raised' : 'border-rule bg-panel' }}"
                 @if ($isCurrent) aria-current="step" @endif>
                 <span class="min-w-0 flex-1">
                     <span class="font-semibold {{ $isCurrent ? 'text-ink-strong' : 'text-ink-muted' }}">

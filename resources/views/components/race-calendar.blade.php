@@ -51,7 +51,7 @@
         'fan_locked' => 'border-2 border-solid border-rule bg-sunken text-ink-muted py-1.5',
         'maiden_locked' => 'border-2 border-dashed border-ink-muted bg-raised text-ink-muted py-1.5',
         'past' => 'border border-rule bg-transparent text-ink-muted py-1.5',
-        'current' => 'border-2 border-pick bg-raised text-ink-strong py-1.5',
+        'current' => 'border-2 border-pick-line bg-raised text-ink-strong py-1.5',
     ];
 
     $stateWord = [

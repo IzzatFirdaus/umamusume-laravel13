@@ -138,6 +138,37 @@ it('ignores a stored theme it cannot honour rather than writing a dead attribute
  * the declarations here means a new token has to move this number, and a stale
  * documented figure fails a test instead of sitting in a comment.
  */
+it('draws every selection boundary with the line token, never the fill token', function (): void {
+    // KI-9 / R15. `--color-pick` is the gold used to paint a selection, and on a
+    // `raised` surface in the light theme it measures 1.59:1 — fine as a fill behind
+    // dark ink, useless as a 2px outline someone must see to know which row is live.
+    // So boundaries take `--color-pick-line` and the fill keeps `--color-pick`.
+    //
+    // Asserted across the view tree because the failure mode is one component
+    // drifting back to the prettier token, not all of them being wrong at once.
+    $walk = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(base_path('resources/views'), FilesystemIterator::SKIP_DOTS),
+    );
+
+    $offenders = [];
+
+    foreach ($walk as $file) {
+        if (! str_ends_with($file->getFilename(), '.blade.php')) {
+            continue;
+        }
+
+        $source = (string) file_get_contents($file->getPathname());
+
+        // `border-pick-line` is allowed; `border-pick` followed by anything but a
+        // hyphen is the fill token used as a boundary.
+        if (preg_match('/border-pick(?![-\w])/', $source) === 1) {
+            $offenders[] = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});
+
 it('counts every colour token the static theme declares', function (): void {
     $css = (string) file_get_contents(base_path('resources/css/app.css'));
     $theme = substr($css, strpos($css, '@theme static'));
@@ -162,7 +193,7 @@ it('counts every colour token the static theme declares', function (): void {
 
     preg_match_all('/(--color-[a-z0-9-]+)\s*:/', $block, $matches);
 
-    expect(array_unique($matches[1]))->toHaveCount(52)
+    expect(array_unique($matches[1]))->toHaveCount(53)
         ->and($matches[1])->toContain('--color-goal')
         ->and($matches[1])->toContain('--color-goal-line');
 });
@@ -187,7 +218,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         }
     });
 
-    it('resolves all 52 tokens in both themes and fails on empty', function (): void {
+    it('resolves all 53 tokens in both themes and fails on empty', function (): void {
         // This test uses Pest Browser (Playwright) to:
         // 1. Visit each page in both light and dark themes
         // 2. Read getComputedStyle(document.documentElement) for every --color-* token
@@ -201,9 +232,10 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         // - Grade badges: 9.00+ in both themes
         //
         // Implementation notes:
-        // - Tokens: 52 --color-* custom properties from app.css @theme static, the
+        // - Tokens: 53 --color-* custom properties from app.css @theme static, the
         //   number asserted by the static count test above. 50 before the
-        //   --color-goal pair landed in this slice. --color-ring, --color-on-pick
+        //   --color-goal pair landed in Slice 2, plus --color-pick-line in Slice 3.
+        //   --color-ring, --color-on-pick
         //   and --color-goal are all theme-split, so a single-theme check would not
         //   catch a wrong pair. The 41 and 43 this note carried earlier were both
         //   stale on arrival: the tint and line families had already grown the

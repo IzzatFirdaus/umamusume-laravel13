@@ -57,7 +57,7 @@
                 @php $key = (string) ($choice['key'] ?? ''); @endphp
                 <button type="button" role="radio" aria-checked="{{ $key === $selected ? 'true' : 'false' }}"
                         class="flex items-center gap-3 rounded-md border-2 px-3 py-2.5 text-left
-                               {{ $key === $selected ? 'border-pick bg-raised' : 'border-rule bg-raised hover:border-green-line' }}">
+                               {{ $key === $selected ? 'border-pick-line bg-raised' : 'border-rule bg-raised hover:border-green-line' }}">
                     <span class="grid size-6 shrink-0 place-items-center rounded border border-rule
                                  bg-sunken text-xs font-bold text-ink-strong">{{ $loop->iteration }}</span>
                     <span class="min-w-0 flex-1">
