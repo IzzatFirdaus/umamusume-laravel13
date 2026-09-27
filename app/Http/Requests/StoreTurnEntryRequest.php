@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\MoodTier;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -44,6 +45,13 @@ class StoreTurnEntryRequest extends FormRequest
             'wit' => ['required', 'integer', 'between:0,1200'],
             'sp' => ['nullable', 'integer', 'between:0,1200'],
             'condition' => ['nullable', 'string', 'max:255'],
+            // Energy is 0..100 (ADR-0001); mood is the client's five tiers, not
+            // free text. The 0..1200 stat bound above is unchanged here:
+            // ADR-0003 decision 6 replaces it with the scenario's own hard_cap,
+            // which is a separate change and not folded into this one.
+            'energy' => ['nullable', 'integer', 'between:0,100'],
+            'mood' => ['nullable', Rule::enum(MoodTier::class)],
+            'fans' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }
