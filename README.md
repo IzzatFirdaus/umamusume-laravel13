@@ -45,19 +45,18 @@ Keep the app on loopback; it has no auth surface and must not be exposed.
 | `/training-runs` | Trainer run CRUD, per-turn stat logging (0..1200 bounds), skill states Suggested/Acquired/Skipped |
 | `/training-runs/{run}/export/csv|.json` | Run download, no data lock-in (US-6) |
 | `/review` | Match review queue: confirm, alias, or reject engine proposals |
+| `/design-preview` | Component review surface for the design system (not a product flow) |
 
 ## Fetch engine
 
-Declare sources in `config/uma.php` (list ships empty by design; adding one requires a robots/rate-limit review and a parser class, PRD OQ-2):
+Sources live in `config/uma.php`. One is owner-approved today (`gametora-characters`, structured JSON, recorded 2026-09-27; the approval used conservative politeness defaults, the robots/live check is still outstanding, PRD OQ-2). Adding any further source requires a robots/rate-limit review and one parser class:
 
 ```php
 'sources' => [
-    'example-wiki' => [
-        'url' => 'https://example.org/characters',
-        'parser' => \App\Services\DataPipeline\Parsers\ExampleParser::class,
-        'delay_ms' => 1000,
-        'timeout_s' => 15,
-        'timezone' => 'Asia/Tokyo',
+    'gametora-characters' => [
+        'url' => 'https://gametora.com/data/umamusume/character-cards.<hash>.json',
+        'parser' => GametoraCharacterParser::class,
+        // plus politeness keys: delay_ms, timeout_s, timezone
     ],
 ],
 ```

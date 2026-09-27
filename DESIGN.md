@@ -27,9 +27,9 @@ genuinely new here, it is marked `Proposed`.
    making the number faster to read (PRD NFR-3, Pre-Mortem: data-dense tool).
 2. Colour is semantic only. A coloured element must change what the Trainer
    knows; otherwise it is neutral (research doc P1, antislop R-01/R-16).
-3. Dark by default, measured not inverted. Charcoal field, high-contrast
-   ink, amber display numerals, taken from the raceboard anchors rather than
-   a generic dark skin (owner ruling 2026-09-27, research doc §3.7).
+3. Light base by default, measured not inverted, with dark as a preference-resolved
+   opt-in (ADR-0006). Both palettes are measured from client frames; the dark one
+   keeps the raceboard character rather than a generic dark skin.
 4. The desk is serious: no pastel anime gradients, no soft drop shadows, no
    marketing layout. It reads like a sports-science or esports analytics
    tool, never like a gacha wiki (owner ruling; antislop Part 1).

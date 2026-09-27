@@ -76,6 +76,8 @@ fixed.
 
 ---
 
+**Status annotation (2026-09-28, docs audit).** Runtime verification pending after the current frontend dirty work lands. Feature tests cannot reproduce this because each test starts with an empty cache; the 500 requires stale cached rows from before the view's model switch. Evidence gap: runtime HTTP pass not executed in the audit/remediation turns. Close it with a real-server pass (`/umamusume` and `/training-runs` returning 200) or by confirming the cache-key version bump cleared old entries.
+
 ## KI-3 `welcome.blade.php` breaks the offline requirement
 
 **Evidence.**
@@ -186,3 +188,31 @@ reads as a decision and not an oversight.
 - **`APP_NAME` in `.env` is still `Laravel`**, while the product is Trainer Desk.
   Recorded in `DESIGN.md` §1.
 - **`PRD.md` still lists US-10 at P2**, although `ADR-0003` promoted it to P1.
+
+---
+
+## KI-7 Blocker: em dashes in rendered Blade copy
+
+Status: Open (handoff, not fixable from the docs side)  
+Severity: Blocker  
+Owner: Frontend  
+Do-not-land: Yes
+
+### Evidence (2026-09-28 disk state)
+
+- `resources/views/components/grade-point-meter.blade.php:94` (rendered; :43 is a PHPDoc comment, not shipped copy)
+- `resources/views/components/guided-step.blade.php:166`, `:202`, `:209` (rendered; :116 is inside a `{{-- --}}` Blade comment, not shipped copy)
+
+### Rule violated
+
+- Settled owner ruling (2026-09-28): the disclosure glyph is `N/A` with an optional `title` tooltip, never an em dash.
+- R-02 bans em dashes in shipped copy; the C-4/R-02 no-carve-out ruling applies.
+- Note: the dirty `ARCHITECTURE-ESSENTIALS.md` D-220 line currently documents rendering "as `—` / not yet recorded", which contradicts the settled ruling; it belongs to the in-flight frontend slice and must be reconciled to `N/A` wording when that slice commits.
+
+### Required fix
+
+Replace rendered em dashes with compliant punctuation (comma, colon, parentheses) or `N/A` + `title="..."` where the dash acts as a disclosure marker. `tools/gate.py` checks em dashes (D-79) only in prototype HTML, so no automated catch exists for shipped Blade today; that gap is registered in `docs/GATE-REGISTRY.md`.
+
+### Notes
+
+- Both files are uncommitted frontend work; the blocker exists in the working tree, not in HEAD for `guided-step` (tracked, dirty) and nowhere tracked for `grade-point-meter` (untracked).

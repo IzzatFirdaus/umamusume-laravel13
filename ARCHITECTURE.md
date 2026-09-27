@@ -275,4 +275,4 @@ Pest 4, feature-first (repo test rules). HTTP faked (`Http::fake`) for all fetch
 - Queues, unique jobs: https://laravel.com/docs/13.x/queues
 - Intl `Normalizer` (NFKD): https://www.php.net/manual/en/normalizer.normalize.php
 
-Unverified at writing time: exact robots.txt/rate-limit posture of candidate sources (PRD OQ-2); to be checked per source before it is added to `config('uma.sources')`.
+Unverified at writing time (rev 0.1): exact robots.txt/rate-limit posture of candidate sources. Status 2026-09-28: the first source is owner-approved and configured (`gametora-characters`, `config/uma.php`, entry dated 2026-09-27, static JSON so one request per fetch plus lock and TTL); its robots/live-availability check is still outstanding, and PRD OQ-2 remains open for all further sources.

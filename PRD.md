@@ -97,7 +97,7 @@ Explicitly not built, with the legacy feature they replace:
 ## 7. Open Questions
 
 - OQ-1 (CLOSED 2026-09-27): Product name is **Trainer Desk**, owner decision recorded in `DESIGN.md`. `APP_NAME` in `.env` should be set to match at the next config change.
-- OQ-2: Which concrete sources for the fetch engine's Phase 1 list. Candidates observed in legacy docs: community wikis (GamePress, umamusume.wiki) and the official JP site. Each addition is a legal/robots.txt review plus one parser class; the Trainer picks.
+- OQ-2: **Partially resolved** (2026-09-28). First source approved: GameTora structured JSON datasets, recorded in `config/uma.php` (`gametora-characters`, entry dated 2026-09-27). Remaining: robots/live availability verification, refresh/schedule policy, additional source selection, parser maturity, and promotion policy for data types beyond characters. Original wording: candidates observed in legacy docs were community wikis (GamePress, umamusume.wiki) and the official JP site; each addition stays a legal/robots.txt review plus one parser class, and the Trainer picks.
 - OQ-3: Whether `uma:fetch` runs on the Laravel scheduler by default or only manually. Default: manual, until rate-limit behavior of chosen sources is observed.
 - OQ-4 [rev 0.2 — repo #4]: **Closed 2026-09-27 by the owner: enters as engine-owned facts with provenance.** Scope of the closure is exactly what `ADR-0004` implements, the ten aptitude letters (FR-A-5) and the per-scenario stat caps (FR-A-5, `scenarios` table), both arriving through `uma:fetch` against a declared source. Growth rates and base stats stay out: nothing in the PRD requires them yet, and `ADR-0004` leaves them unimplemented rather than seeding them by hand.
 

@@ -15,6 +15,8 @@ The quality bar for this repository, written as a contract. Agents: read this be
 | C-7 | UI states | Every data view renders empty, loading/refresh, and error states (§7, antislop R-27) | review checklist |
 | C-8 | Dependencies | No new package without human approval; `composer audit` and `npm audit` with no reachable critical/high | `composer audit`; `npm audit --omit=dev` |
 
+> C-7 loading-state scope is interpreted by ADR-0007 (`docs/adr/0007-c7-loading-state-scope-for-server-rendered-views.md`): initial server-rendered navigation may rely on browser-native loading; user-initiated async operations require explicit loading states. Empty/error/data states remain mandatory. Gate tooling and G-number registration live in `docs/GATE-REGISTRY.md`.
+
 ## Floor (never, in any change)
 
 - No new suppressions: `@phpstan-ignore`, `@phpstan-` escapes, `eslint-disable`, `@ts-ignore`.
