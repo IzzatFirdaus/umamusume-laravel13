@@ -145,7 +145,7 @@ Your team is built from:
 ## Spirit Burst
 
 - Triggers automatically on the **next** Special Training with a teammate once their Spirit gauge is full.
-- Grants: (1) a big stat boost to the teammate, (2) a moderate stat boost to your trainee, (3) a random skill hint for your trainee.
+- Grants: (1) a big stat boost to the teammate, (2) a moderate stat boost to your trainee, (3) a skill hint for your trainee — **no longer random**; see the hint-sourcing bullet directly below, which is the post-rework rule.
 - **Skill hint sourcing (changed by the update):** now drawn from the specific support card's own hint pool (R-card pool substituted for non-deck teammates). If that pool is exhausted, falls back to a random hint based on your trainee's A-rank aptitudes.
 - **Hint level formula:** `support card's hint bonus + 2` (so always at least Lv.2), **+1 more for scenario-linked cards.**
 - You are **not** forced to trigger a burst the instant it's ready — you can hold it until the teammate is training the stat you actually want.

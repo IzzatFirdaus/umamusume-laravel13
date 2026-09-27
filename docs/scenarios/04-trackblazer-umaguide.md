@@ -79,7 +79,7 @@ Trackblazer swaps individual Uma career goals for **4 shared objectives**:
 
 Winning **every race in a named route** grants bonus stats or skill hints. uma.guide highlights these as the routes that most shape your racing schedule:
 
-### Tiara Route (Fillies-focused)
+### Tiara Route (the Oka Sho / Japanese Oaks / Shuka Sho line)
 | Epithet | Requirement | Reward |
 |---|---|---|
 | Lady | Win Oka Sho, Japanese Oaks, Shuka Sho | +10 to 2 random stats |
