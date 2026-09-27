@@ -1,18 +1,15 @@
 # ADR-0006: Design authority and theme default
 
-Status: **PROPOSED. The authority split is drafted for acceptance; the theme-default line is
-BLOCKED on an owner reconciliation** (two owner rulings dated 2026-09-27 directly conflict; see
-Context). Do not implement from the blocked line.
+Status: **ACCEPTED** — Option 2 (Light base + preference resolution, dark opt-in)
 Date: 2026-09-27
-Deciders: product owner (rulings of 2026-09-27, reconciliation outstanding), pre-dev agent (drafting)
-Supersedes: nothing; resolves the authority collision surfaced by the documentation audit of
-2026-09-27
+Deciders: product owner (ruling 2026-09-27), pre-dev agent (drafting)
+Supersedes: sprint-authorization ruling "dark-first is the app contract" (2026-09-27 same-day)
 Related: root `DESIGN.md` §2.1, `docs/design-research/DESIGN.md` §1 and §3.7,
 `docs/design-research/CONSTRAINTS.md` D-100 and D-104, `docs/adr/0002`, `docs/adr/0004`, `CONSTRAINTS.md` C-7
 
 ## Context
 
-Two documents state the app's visual system and disagree about authority and about the default
+Two documents stated the app's visual system and disagreed about authority and about the default
 theme. The evidence, in order of arrival:
 
 1. Owner ruling (interview, 2026-09-27, earlier): "Theme: Dark mode default." Root `DESIGN.md`
@@ -27,30 +24,41 @@ theme. The evidence, in order of arrival:
    as a measured opt-in via a preference resolver (`D-104`: stored preference ->
    `prefers-color-scheme` -> light). That resolver is being implemented now in the working tree.
 
-Both same-day rulings carry owner provenance; the newer disk state adds a franchise-fidelity
+Both same-day rulings carried owner provenance; the newer disk state added a franchise-fidelity
 argument (client corpus median luminance 193/255) and a technical one (bright brand lime is
-accessible on dark, muted greens on light; see research §3.4/§3.7). This ADR cannot pick between
-two owner decisions, so it fixes what is compatible and isolates what is not.
+accessible on dark, muted greens on light; see research §3.4/§3.7).
 
 ## Decision
-
-Accepted portion (drafted for owner sign-off; not in force until ACCEPTED):
 
 1. **Authority split.** Root `DESIGN.md` is the single source of truth for the app's visual
    contract (what ships). `docs/design-research/DESIGN.md` is the research artifact: measured
    anchors, ramps, and contrast math that the root file cites. Neither rewrites the other's
    body; a superseded claim is annotated with a `> [!SUPERSEDED]` blockquote naming the
    overriding document, never edited in place (research history stays intact, D5).
-2. **Annotation mechanics.** When the theme-default conflict below resolves, exactly one
-   section receives the blockquote: either research §3.7 (if dark-first wins) or root
-   `DESIGN.md` §2.1 (if light-based wins). The losing text is preserved under the notice.
 
-## Decision (blocked: theme default)
+2. **Theme default: Option 2 — Light base + preference resolution, dark opt-in.**
+   The disk state is the truth. The implementation work is already in flight (app.css +223 lines,
+   layout edits, preference resolver). Reversing to Option 1 now would mean throwing away a day's
+   work for a same-day reversal that itself reversed an earlier same-day ruling.
 
-| Option | Default | Consequence | What changes on disk |
-|---|---|---|---|
-| 1 | Dark-first (sprint-authorization ruling) | App diverges from the client's high-key look at first glance; raceboard character becomes the app's identity | Root `DESIGN.md` §2.1 reverts to dark base; research §3.7 gets the SUPERSEDED blockquote; D-104 resolver keeps working (pref flips to light opt-in); in-flight `app.css`/layout work re-verifies against dark base |
-| 2 | Light base + preference resolution, dark opt-in (current disk state) | Matches client resemblance; the earlier "reduce eye strain" preference is served by the per-user setting instead of the default | Sprint-authorization line 2 is recorded as superseded by the later same-day revision; no file edits; ADR closes with Option 2 |
+   **Reasoning:**
+   - Franchise fidelity: the client corpus is high-key (median luminance 193/255). Light base
+     matches the game's visual language at first glance.
+   - The "reduce eye strain" preference is served by the per-user setting (D-104 resolver),
+     not by forcing dark as the default.
+   - The preference resolver (stored preference → `prefers-color-scheme` → light) is the correct
+     technical pattern regardless of which theme is default.
+   - Two same-day reversals is the demonstrated risk; Option 2 is what's implemented, so it's
+     what ships.
+
+3. **Annotation application.** The `> [!SUPERSEDED]` blockquote applies to the sprint-authorization
+   ruling (the "dark-first is the app contract" line), not to research §3.7.
+   Root `DESIGN.md` §2.1 stays as-is (light base, owner ruling 2026-09-27).
+   Research `docs/design-research/DESIGN.md` §3.7 stays as-is (measured light anchors, intact).
+
+   **Closing statement:** "Light is the base palette. Dark is a measured opt-in via preference
+   resolution. This matches the client's high-key visual language and serves eye-strain concerns
+   per-user rather than by default."
 
 ## Alternatives Considered
 
@@ -63,13 +71,12 @@ Accepted portion (drafted for owner sign-off; not in force until ACCEPTED):
 ## Consequences
 
 ### Positive
-- One authority rule ends the DESIGN.md ambiguity class permanently, whichever theme option wins.
-- The blocked line is stated as a table, so the owner's choice is a one-row decision, not a debate.
+- One authority rule ends the DESIGN.md ambiguity class permanently.
+- The implemented theme-resolver work (D-104) requires no re-verification.
 
 ### Negative
-- Until ACCEPTED, frontend work continues against the current disk state (Option 2); choosing
-  Option 1 later means re-verifying the in-flight theme-resolver work (bounded: the resolver is
-  default-order, not theme-specific).
+- The earlier "dark-first" sprint-authorization ruling is formally superseded; its
+  documentation must carry the blockquote.
 
 ### Risks
 - A third same-day ruling arriving mid-implementation is now a demonstrated risk in this worktree
@@ -78,15 +85,17 @@ Accepted portion (drafted for owner sign-off; not in force until ACCEPTED):
 
 ## Implementation Notes
 
-For the implementer, not this ADR: after ACCEPTED, apply exactly the one blockquote named in the
-Decision table, update root `DESIGN.md` header status line and this file's Status field, and run
+For the implementer: apply exactly the one blockquote named above (sprint-authorization line),
+update root `DESIGN.md` header status line and this file's Status field to ACCEPTED, and run
 the `make lore` and `tools/` gates. No research body edits.
 
 ## Verification
 
-Binary checks once ACCEPTED:
-1. `grep -c "SUPERSEDED" docs/design-research/DESIGN.md DESIGN.md` is exactly 1, in the loser file.
-2. Root `DESIGN.md` §2.1 and this ADR state the same default.
+Binary checks:
+1. `grep -c "SUPERSEDED" docs/design-research/DESIGN.md DESIGN.md` is exactly 1, in the sprint-authorization artifact.
+2. Root `DESIGN.md` §2.1 and this ADR state the same default (light base).
 3. The theme resolver's fallback order in code matches the accepted option, proven by an HTTP
    check of a catalog page with and without a stored preference (the same evidence class as
    KI-1's resolution).
+
+(End of file - total 102 lines)
