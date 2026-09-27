@@ -194,7 +194,38 @@ invented.
 
 **Dropped from scope, with reasons recorded.** Removing `scenario_race_id` and the
 `scenarioRace` relation is still the destination, but it is blocked behind (a) a populated
-`scenario_slots` — see KI-11, `ScenarioSlotSeeder` is an empty stub and is never called —
+`scenario_slots` having no populated rows outside a factory — the empty
+`ScenarioSlotSeeder` stub was deleted in Slice 3's T5, and slot population is recorded
+below as fetch-engine work —
 and (b) a decision about what a Trackblazer race points at once `gradeEarned()` can be
 attributed to an objective (KI-10). A migration that drops a column two tests still
 exercise, on a table that has never held a row outside a factory, would be schema theatre.
+
+---
+
+## Amendment R3 — 2026-09-28: `scenario_slots` is populated by the fetch engine, not a seeder
+
+Slice 3's T5 (R14) asked whether `ScenarioSlotSeeder` should be filled with URA Finale
+goal-race slots, conditional on every row carrying a server qualifier and a source date
+(D-227). The condition fails, so the stub is deleted and the rule is recorded here.
+
+**Why it cannot be filled today.** `docs/scenarios/01-ura-finale.md` contains no goal-race
+list. The only race row in the whole guide is `Junior Make Debut (race) | After 11 turns |
+Mandatory debut race` (line 87). There is no Oka Sho, no fan threshold, no month-and-half
+placement for any URA target — so a seeder would have to author the `month`, `half`,
+`tier` and `fans_needed` values that `scenario_slots` requires, which is inventing client
+data (D-20) and attaching no provenance to it (D-227). The race names that appear in this
+repository's tests and browser fixtures are factory sample data, and none of them is
+sourced as a URA goal race with a gate figure.
+
+**Where the rows come from instead.** The ADR-0004 pattern, which this table already
+follows for caps: reference data arrives through the fetch engine with `source_url`,
+`snapshot_path`, `fetched_at` and `source_timezone` populated, and `is_manual` reserved for
+Trainer-entered rows. `scenario_slots` carries all five columns already, so the schema is
+not the blocker — the source is. Slot population is therefore Data Engineer work against a
+declared fetch source, and the escalation in `AGENTS.md` applies: an uncertain source is
+stopped and surfaced, not seeded around.
+
+**What this does not unblock.** R2's decision to keep `race_entries.scenario_slot_id`
+nullable stands on its own grounds: Trackblazer's Trainer-chosen races have no slot in any
+future, sourced version of this table either.
