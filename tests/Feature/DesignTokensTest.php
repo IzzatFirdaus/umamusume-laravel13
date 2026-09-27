@@ -150,7 +150,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         }
     });
 
-    it('resolves all 41 tokens in both themes and fails on empty', function (): void {
+    it('resolves all 43 tokens in both themes and fails on empty', function (): void {
         // This test uses Pest Browser (Playwright) to:
         // 1. Visit each page in both light and dark themes
         // 2. Read getComputedStyle(document.documentElement) for every --color-* token
@@ -164,7 +164,12 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         // - Grade badges: 9.00+ in both themes
         //
         // Implementation notes:
-        // - Tokens: 41 --color-* custom properties from app.css @theme static
+        // - Tokens: 43 --color-* custom properties from app.css @theme static
+        //   (41 before 2026-09-28, which added --color-ring and --color-on-pick;
+        //   both are theme-split, so a single-theme check would not catch a wrong pair)
+        // - Non-text boundary pairs must clear WCAG 1.4.11's 3:1, not 4.5:1: the focus
+        //   ring measures 4.88/5.17 on light panel/raised and 9.51/7.61 on dark, while
+        //   --color-green (the value this rule replaced) is 1.88 on the light panel.
         // - Pairs: defined in design-research/DESIGN.md §3.4
         // - Grade badges: 9 grades × 2 themes = 18 fills + 9 letters
         $this->markTestIncomplete('Requires Playwright; implementation follows Pest Browser API.');
