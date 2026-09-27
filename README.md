@@ -1,6 +1,6 @@
-# Umamusume Trainer Companion
+# Trainer Desk
 
-Working title; the product name is an open decision (PRD OQ-1).
+Product name confirmed 2026-09-27 (PRD OQ-1 closed). Visual system: `DESIGN.md`.
 
 A local-only Laravel 13 tool for Trainers of the Global English version of *Umamusume Pretty Derby*. It consolidates four legacy apps (three trackers plus a career-run planner) into one machine: browse a catalog of Umamusume whose JP and Global data is cross-referenced by a fetch engine, log training runs turn by turn, compare planned vs actual skills, and export. SQLite only, single user, no accounts, no telemetry.
 
@@ -11,6 +11,8 @@ The characters are Umamusume, a humanoid race. Repository text and code never us
 | File | Role |
 |---|---|
 | `PRD.md` | Product truth: users, stories, functional requirements, non-goals, open questions |
+| `PRODUCT.md` | Product summary for design and agent context (name, audience, commitments) |
+| `DESIGN.md` | Visual system contract: theme, tokens, components, surface specs |
 | `ARCHITECTURE.md` | Full system design: schema, fetch engine, API contract, security model |
 | `ARCHITECTURE-ESSENTIALS.md` | Token-efficient digest of the above for agent context |
 | `docs/PRE-MORTEM.md` | Risk record; §4 covers the fourth (planner) repository |

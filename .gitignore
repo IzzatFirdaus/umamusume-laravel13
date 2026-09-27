@@ -93,3 +93,8 @@ Homestead.yaml
 
 # Impeccable design skill (generated scratch)
 /.impeccable/
+
+# Research screenshot assets (local reference; ~870 MB, not history material)
+/docs/game-screenshots/
+/docs/design-research/**/*.png
+/vibe_images/
