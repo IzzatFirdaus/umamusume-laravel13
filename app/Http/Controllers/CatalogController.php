@@ -64,18 +64,19 @@ class CatalogController extends Controller
      * Detail page for one Umamusume by slug (aliases + last 10 provenance
      * rows). Renders catalog.show.
      *
+     * Not cached. This read is one indexed lookup plus two bounded relation
+     * loads on a local SQLite file, and the only thing a cache could hold for it
+     * is the model graph itself — which `serializable_classes => false` will not
+     * hand back. Leaving it out is the fix; see `cached()` for the same reason
+     * stated with the evidence (KI-2).
+     *
      * @throws NotFoundHttpException when the slug is unknown
      */
     public function show(string $slug): View
     {
-        $version = (int) Cache::remember('catalog:version', 3600, fn () => 0);
-        $ttl = (int) config('uma.cache.ttl', 900);
-
-        $umamusume = Cache::remember("catalog:umamusume:v{$version}:{$slug}", $ttl, function () use ($slug): ?Umamusume {
-            return Umamusume::where('slug', $slug)
-                ->with(['aliases', 'dataSources' => fn ($q) => $q->latest('fetched_at')->limit(10)])
-                ->first();
-        });
+        $umamusume = Umamusume::where('slug', $slug)
+            ->with(['aliases', 'dataSources' => fn ($q) => $q->latest('fetched_at')->limit(10)])
+            ->first();
 
         abort_if($umamusume === null, 404);
 
@@ -87,6 +88,14 @@ class CatalogController extends Controller
      * bumps catalog:version, so a whole page group invalidates at once instead
      * of per-row churn (versioned-keys strategy, ARCHITECTURE §6).
      *
+     * What is cached is the page's list of ids and its total, never the models.
+     * `config/cache.php` ships `serializable_classes => false`, which is the
+     * framework refusing to unserialize objects out of a persistent store: a
+     * cached Eloquent collection comes back as `__PHP_Incomplete_Class` and the
+     * view dies reading `->slug`. CACHE_STORE=array in phpunit.xml kept the suite
+     * green because the array store hands back the very objects it was given, so
+     * only the real app showed it (KI-2).
+     *
      * @param  Builder<Umamusume>  $query
      * @return array{0: Collection<int, Umamusume>, 1: int}
      */
@@ -96,8 +105,23 @@ class CatalogController extends Controller
         $ttl = (int) config('uma.cache.ttl', 900);
         $base = "catalog:list:v{$version}:".md5("{$status}|{$searchKey}");
 
-        $items = Cache::remember("{$base}:p{$page}:{$pageSize}", $ttl, fn () => $query->orderBy('name')->forPage($page, $pageSize)->get());
+        /** @var list<int> $ids */
+        $ids = Cache::remember(
+            "{$base}:p{$page}:{$pageSize}",
+            $ttl,
+            fn (): array => $query->orderBy('name')->forPage($page, $pageSize)->pluck('id')->all(),
+        );
+
         $total = Cache::remember("{$base}:count", $ttl, fn () => $query->count());
+
+        // Re-read the page by id. `aliases_count` is asked for again rather than
+        // cached: it is a live count, and the cache's job here is the identity of
+        // the page, not the numbers drawn on it.
+        $items = Umamusume::query()
+            ->withCount('aliases')
+            ->whereIn('id', $ids)
+            ->orderBy('name')
+            ->get();
 
         return [$items, $total];
     }
