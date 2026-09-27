@@ -124,10 +124,16 @@ and two are commonly overstated in English summaries:
   *and* 「理事長の絆ゲージが緑以上」; late December **120,000 / 80,000**. Note the second number differs
   from Unity Cup's (50,000 vs 40,000 at the February gate), so the dirt-leaning column is
   scenario-specific and must not be copied between scenarios.
-- **Stat caps:** 1500 / 1400 / 1500 / 1300 / 1300 (Speed / Stamina / Power / Guts / Wit). This is
-  now **three-source corroborated** and reproduces `1200 + scenarios.json.stats` =
+- **Stat caps:** 1500 / 1400 / 1500 / 1300 / 1300 (Speed / Stamina / Power / Guts / Wit). This is now
+  **three-source corroborated** and reproduces `1200 + scenarios.json.stats` =
   `[300, 200, 300, 100, 100]` exactly, so it doubles as a check on the cap formula §2.1 of the
-  reference guide derives.
+  reference guide derives. ⚠️ **Staleness, stated rather than smoothed:** all three agreeing guides are
+  `⚠️ STALE` against the 2026-09-27 anchor — 1,168, 902 and 167 days — so this is three old sources
+  that never disagreed, not three current ones. The only fresh check is the tier-B export, and under
+  the conflict-resolution protocol a B-tier dataset needs A- or S-tier confirmation before a claim
+  becomes app data. Because the scenario has never shipped on `[Global]`, no `[Global]`-side source
+  can supply that confirmation; **do not promote these five numbers to Global-facing data on the
+  strength of this row.**
 - **Scenario skills:** 「太陽の叡智」「大海の叡智」「大地の叡智」 — available at that goddess's
   「知識」**Lv4 or higher**, and chosen **the turn before** the final; 「陽の加護」「海の加護」「地の加護」;
   「良バ場の鬼」 with **hint level +1** once **all three** goddesses reach Lv3; and 「全身全霊」.
@@ -147,11 +153,11 @@ and two are commonly overstated in English summaries:
 
 [Umamusume JP official scenario page](https://umamusume.jp/contents/game/scenario/grandmasters/)
 (live 2026-09-28, tier S) ·
-[GameWith 388788](https://gamewith.jp/uma-musume/article/show/388788) 2023-07-17 (tier A) ·
-[Game8 510269](https://game8.jp/umamusume/510269) 2026-04-13 (tier A) ·
-[Game8 375145](https://game8.jp/umamusume/375145) 2025-11-20 ·
-[Game8 518990](https://game8.jp/umamusume/518990) 2026-09-10 ·
-[Kamigame scenario guide](https://kamigame.jp/umamusume/page/251718874821586120.html) 2024-04-08 ·
+[GameWith 388788](https://gamewith.jp/uma-musume/article/show/388788) 2023-07-17, ⚠️ **STALE** (1,168 days against the 2026-09-27 anchor; tier A) ·
+[Game8 510269](https://game8.jp/umamusume/510269) 2026-04-13, ⚠️ **STALE** (167 days; tier A) ·
+[Game8 375145](https://game8.jp/umamusume/375145) 2025-11-20, ⚠️ **STALE** (311 days) ·
+[Game8 518990](https://game8.jp/umamusume/518990) 2026-09-10 (tier A, fresh) ·
+[Kamigame scenario guide](https://kamigame.jp/umamusume/page/251718874821586120.html) 2024-04-08, ⚠️ **STALE** (902 days) ·
 [Kamigame 「叡智」](https://kamigame.jp/umamusume/page/251958908782950284.html) and
 [「欠片」](https://kamigame.jp/umamusume/page/251963810783478794.html) 2025-06-07 ·
 [umamusume.wikiru.jp](https://umamusume.wikiru.jp/) 2023-07-25 (tier B, community wiki) ·
