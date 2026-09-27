@@ -6,7 +6,6 @@ namespace Database\Factories;
 
 use App\Enums\RaceEntryStatus;
 use App\Models\RaceEntry;
-use App\Models\ScenarioRace;
 use App\Models\TrainingRun;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -24,7 +23,10 @@ class RaceEntryFactory extends Factory
     {
         return [
             'training_run_id' => TrainingRun::factory(),
-            'scenario_race_id' => ScenarioRace::factory(),
+            // Null by default. `scenario_races` is frozen by ADR-0003 R1.3, so a
+            // race entry does not belong to one unless a test names it, and a
+            // Trackblazer race has no calendar row to name.
+            'scenario_race_id' => null,
             'status' => RaceEntryStatus::Entered,
             'placement' => null,
             'fans_gain' => null,
