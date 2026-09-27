@@ -128,8 +128,10 @@ the stock welcome page). `DESIGN.md` proposes replacing it with a system stack.
   expansion) recorded 2026-09-27.
 - `docs/UMAMUSUME_REFERENCE.md`: source-cited player reference compiled
   2026-09-27 (mechanics, roster, live-ops snapshot, server terminology map in
-  Section 6, conflict log). Subject to its own staleness flags; re-verify dated
-  claims before use.
+  Section 6, conflict log). Inheritance wording set by owner ruling
+  2026-09-27: Inspiration (system), Legacies (ancestors), Sparks (traits),
+  Legacy Select (pre-run screen), per its §1.5. Subject to its own staleness
+  flags; re-verify dated claims before use.
 - `docs/PRE-MORTEM.md`: risk analysis of the four legacy repositories
   consolidated, including the feature-by-feature cut/keep rulings for the
   planner app (§4).

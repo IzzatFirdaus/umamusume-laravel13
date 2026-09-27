@@ -28,12 +28,14 @@ Wit  1,340 / 1,800
 |---|---|---|---|---|---|---|
 | Ura Finale | 1400 | 1400 | 1400 | 1400 | 1400 | two corroborating guides, both `STALE` |
 | Unity Cup | 1300 | 1300 | 1300 | 1300 | 1800 | same |
-| Trackblazer | 1200 | 1900 | 1200 | 1500 | 1200 | same |
+| Trackblazer | 1200 | 1900 | 1200 | 1500 | 1200 | **RETIRED (pre-correction) — DO NOT COPY.** Guts and Wit are transposed in this row. Correct value: `1200 / 1900 / 1200 / 1200 / 1500`, see `UMAMUSUME_REFERENCE.md` §1.3.4 (corrected 2026-09-27) and `docs/adr/0002` amendment 2. Retained only as the record of what this script patched |
 | Our Grand Concert | 1600 | 1300 | 1300 | 1500 | 1300 | same |
-| Grand Masters | 1500 | 1400 | 1500 | 1300 | 1300 | single-source, not corroborated |
-| L'Arc | 1600 | 1600 | 1500 | 1500 | 1300 | single-source, not corroborated |
+| Grand Masters | 1500 | 1400 | 1500 | 1300 | 1300 | `[JP-Only]`, no `[Global]` release date. Written here as single-source; since upgraded to three-source (GameWith 2023-07-17, Game8 2026-04-13, Kamigame 2024-04-08), and it reproduces `1200 + scenarios.json.stats` = [300, 200, 300, 100, 100] |
+| L'Arc | 1600 | 1600 | 1500 | 1500 | 1300 | `[JP-Only]`, no `[Global]` release date. ⚠️ STALE: single-source on Kamigame 2024-02-19 only, not corroborated |
 
-The two single-source rows may be displayed only with their confidence stated. Presenting them as settled fact would promote an unverified claim into UI copy, which `CONSTRAINTS.md` D-20 forbids.
+**Server and date for every row above** (CONSTRAINTS.md §"every stored game value needs a server qualifier and a date"). Ura Finale `[Global]` 2025-06-26, Unity Cup `[Global]` 2025-11-06, Trackblazer `[Global]` 2026-03-12, Our Grand Concert `[Global]` 2026-07-22 — these four trace to Game8 2025-11-21 and Kamigame 2024-02-19, both ⚠️ STALE, and are reproduced by `scenarios.json` as `1200 + stats`. Grand Masters and L'Arc are `[JP-Only]` and get no UI.
+
+The rows above state the confidence held **at the time this script ran**; two have since moved. Presenting a single-source figure as settled fact would promote an unverified claim into UI copy, which `CONSTRAINTS.md` D-20 forbids.
 
 **Research gap, stated rather than papered over.** Every frame in the 1,160-image corpus is one scenario: the turn chips read "Until the Unity Cup". There is no screenshot evidence for Ura Finale, Trackblazer or Our Grand Concert UI, and none for the claim that scenarios differ in facility layout. The cap table above is documentary, not visual. Scenario-specific chrome variations must be designed from the scenario data, or captured from the client, before any of them is asserted in a mockup.
 

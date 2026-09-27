@@ -14,15 +14,17 @@ Compiled 2026-09-27, revised the same day after Global-side verification against
 |---|---|---|---|
 | Core loop | Train solo, scripted events | Team building | Player-directed racing |
 | Scenario currency / extra system | **None** | Team Rank, Spirit Bursts, Result Pts | Grade Points, Shop Coins |
-| Goal structure | Fixed mandatory race goals | Fixed race goals **plus** 5 Team Race rounds | **No race goals.** Grade Point deadlines |
-| Facility level from | Repeating one stat 4x | **Team's** aggregate stat rank for that stat | Repeat one stat 4x **+ levels bought from the shop** |
+| Goal structure | Fixed mandatory race goals | Fixed race goals **plus** 5 Team Race rounds | **No fixed race list.** Grade Point deadlines, earned by racing |
+| Facility level from | Repeating one stat 4x | **Team's** aggregate stat rank for that stat | Repeat one stat 4x **+ shop levels: 150 coins, permanent for the run** |
 | Fan role | Gates 3 Unique Skill upgrade events | Secondary; racing is actively discouraged | Primary farming vector |
 | Shop | No | No | Yes, in-run, coins from placement |
+
+**Read the Trackblazer row carefully: no fixed race list is not the same as racing being optional.** Three facts the earlier short phrasing blurred, all from `05`/`04`: the objective list is **four items, starting with the Debut race**, then 60 / +300 / +300 Grade Points (lower for dirt-leaning trainees); Grade Points are earned **only by racing** (G1 1st = 100, G2 80, G3 60, scaled by placement); and missing a deadline **fails the run**. So racing is functionally mandatory and the *race log* is load-bearing data — the difference from URA and Unity Cup is that the Trainer chooses which races to enter, so there is no calendar to render. This matters beyond wording: `ADR-0003`'s `race_entries` was rejected here as "URA/Unity-Cup-shaped" on the strength of "no race goals", which was the wrong reason for a right conclusion — see the corrected argument at the end of this file.
 | Scenario Link character | Aoi Kiryuin | 5 linked characters, chosen via Team Name | **None** |
 | Finale | URA elimination races | 4 Team Races then Team Zenith, then URA-style finals | **Twinkle Star Climax: 3-race points league** |
 | Secret character events | Yes | Yes | **Do not trigger** |
 
-**This matrix covers three scenarios; the client offers four.** *Brighter Together: Our Grand Concert* has been live on Global since **2026-07-22** with a Speed cap of 1600 and five scenario-linked characters (`scenarios.json` order 3), and no file in `docs/scenarios/` describes it. Everything below is therefore a three-of-four analysis, and the scenario-composition rules in D-220 must be written so a fourth scenario can be added without redesigning the strip.
+**This matrix covers three scenarios; the client offers four.** *Brighter Together: Our Grand Concert* has been live on Global since **2026-07-22** with a Speed cap of 1600 and five scenario-linked characters (`scenarios.json` order **4** — this line previously said order 3, which is Trackblazer), and no file in `docs/scenarios/` described it until `07-grand-concert.md` recorded it as a known gap. Everything below is therefore a three-of-four analysis, and the scenario-composition rules in D-220 must be written so a fourth scenario can be added without redesigning the strip.
 
 ## Per-scenario UI consequences
 
@@ -41,20 +43,20 @@ What it does have that the design must carry:
 ### Unity Cup — a second resource layer on top
 
 - **Facility level is a team property, not a personal one.** `G-F=1, E-D=2, C-B=3, A=4, S=5`. The same "Lvl 5" label means opposite things in URA (you ground it) and Unity Cup (your team is strong enough). A level chip that doesn't say *why* it is that level is misleading in one of the two scenarios.
-- **Spirit Bursts need their own visual state machine**: chargeable (flame icon), charged (meter full), held-but-not-triggered, and spent-forever. *"Each character only gets one Spirit Burst per career."* A spent teammate must look permanently consumed, not resettable.
+- **Spirit Bursts need their own visual state machine**, and it is a **six**-state machine, not four: chargeable (white flame) → charged (meter full) → held (charged, deliberately untriggered) → normal burst spent → **Extreme chargeable** → Extreme spent. *"Each character only gets one Spirit Burst per career"* is still true of the **normal** burst, and each teammate gets exactly one **Extreme** burst after it (D-223). A spent teammate must therefore never render as permanently consumed or resettable — it renders as **one tier spent, one tier pending**.
 - **Extreme (purple) Spirit Bursts are live on Global as of 2026-07-01**, so the state machine has a fifth, higher state, and it carries a hard consequence the design has been getting wrong: **"There is a 0% Failure Rate in the training facility where the Support has active ESB."** An Extreme burst standing up a risk warning on that facility is a false alarm the tool would be inventing. The facility's risk affordance must go quiet, not merely smaller.
 - **The 2026-07-01 patch also made a stronger opponent team live** — an **Elite Team** can appear in the 4th Team Race round once the qualifying conditions are met, and losing rounds can now be retried by spending a Clock. Both are timeline events worth a marker, and the retry in particular means a logged loss is no longer necessarily final.
-- **Bursts raise Energy cost except on Wit**, where they raise Energy gain. That is a direct, scenario-specific modifier on the §6.15 gauge and on the preview deltas.
-- **Multi-uma bonus scales with headcount on the tile** (2 / 3 / 4). Facility occupancy is information, not decoration.
+- **Special Training carries no Energy penalty anymore.** The pre-patch rule — bursts raising Energy cost on every facility except Wit — was removed on 2026-07-01, so a Unity Training preview must **not** show an energy deduction it no longer incurs. The Wit exception survives only as a **burst** bonus: a Wit-facility burst grants **+5 extra energy recovery**. (§6.15 gauge and the preview deltas are where this used to bite.)
+- **Multi-uma bonus scales with headcount on the tile** (2 / 3 / 4 / **5** flames), and it is **gated**: your trainee gains bonus stats and SP **only from 2 flames upward** — a lone flame benefits that teammate alone, so a one-flame facility is not a trainee gain at all. Facility occupancy is information, not decoration, and the ≥2 threshold is a display state, not just a magnitude.
 - **Team Races: 5 rounds at fixed calendar points**, each a 5-race card, one per distance, 1-3 racers per distance. Structurally different from goal races and must not share their calendar cell treatment.
 - **Team Name selection around Junior Late September**, five options bound to linked characters, reward granted only on beating Team Zenith.
-- **Burning / Ignited Spirit ladder** from burst count: 13+, 10-12, 7-9, 4-6. A progress-toward-reward display, variant chosen by the team's highest stat rank.
+- **The scenario-skill ladder is white → gold** and its denominator is **normal + Extreme bursts combined**: 4-6 · 7-9 · 10-12 · 13+ → white Lv1 +10/+10, white Lv3 +20/+20, gold Lv1 +30/+30, **gold Lv3 +40/+40** (stat + SP). A progress-toward-reward display, variant chosen by the team's highest stat rank. ⚠️ This section formerly named the tiers "Burning / Ignited Spirit" off normal bursts only; that retired naming is quoted once, as the withdrawn claim, in the superseded table below — the live rule is the white/gold ladder. "Ignited Spirit" is specifically what an **Extreme** burst hints.
 - **The guide records a genuine usability defect we can fix:** *"Skill hint icons are largely hidden by the Unity Training icon overlay on facilities — check every facility manually."* A tracker that surfaces a hidden skill hint is real value, not a reskin.
 - **Racing outside team and goal races is actively bad here.** The opposite of Trackblazer. Any race advisory must be scenario-gated or it will give harmful advice in one of the two.
 
 ### Trackblazer — a different game shape
 
-- **No mandatory race goals.** The goal structure is Grade Points against deadlines. **The Race Calendar panel does not apply.** What replaces it is a Grade Point progress meter with deadline markers, and a free-form race log.
+- **No fixed race list — but racing is still mandatory.** The goal structure is Grade Points against deadlines, and objective 1 is the Debut race. **The Race Calendar panel does not apply**, because there is no prescribed fixture to render. What replaces it is a Grade Point progress meter with deadline markers, plus a race log that is not decorative: Grade Points derive from that log's tiers and placements, so it is required data, not a free-form note field.
 - **The deadlines are Late December of each year, and surplus does not carry forward.** That pair of facts defines the meter's job: it is not a running total, it is a countdown against a per-year target. A Grade Point readout that never resets states the wrong thing, and banking points for the next phase is not a strategy available to the Trainer.
 - **Shop Coins and an in-run shop.** Coins scale with placement, 100 for first. Items raise stats, set condition, restore Energy, raise bond. Unspent coins are worthless, so the UI should surface a balance with a "spend it" nudge.
 - **The shop restocks every 6 turns.** This converts the spend-it nudge into a countdown with a real decision in it: saving coins for an item you want means risking it leaves the rotation before you can afford it. A balance without the restock timer loses information the Trainer is actively reasoning over.
@@ -101,7 +103,7 @@ The one internal conflict worth recording: umamusu.wiki quoted Grade Point thres
 
 ### The trap that produced the wrong Trackblazer row
 
-`UMAMUSUME_REFERENCE.md` line 357 records the Climax row as `1200 / 1900 / 1200 / 1500 / 1200` and attributes it to **Game8 JP 2025-11-21** and **Kamigame 2024-02-19**. Climax is JP's name for the scenario Global shipped as Trackblazer (§1.6 item 3). The game data says `1200 / 1900 / 1200 / 1200 / 1500`, so **the reference doc has Guts and Wit transposed**, and `ADR-0002` plus `DESIGN.md` §6.22 faithfully carried that error forward under a Global label.
+`UMAMUSUME_REFERENCE.md` line 357 recorded the Climax row as `1200 / 1900 / 1200 / 1500 / 1200` and attributed it to **Game8 JP 2025-11-21** and **Kamigame 2024-02-19**. Climax is JP's name for the scenario Global shipped as Trackblazer (§1.6 item 3). The game data says `1200 / 1900 / 1200 / 1200 / 1500`, so **the reference doc had Guts and Wit transposed**, and `ADR-0002` plus `DESIGN.md` §6.22 faithfully carried that error forward under a Global label. Line 357 was corrected on 2026-09-27; the correction landed in §1.6's Trackblazer row first, which is why the source table stayed wrong for a round after the diagnosis was written — see D-285.
 
 Stamina 1900 agrees either way, which is what kept it invisible: the one number large enough to break validation was right, and only the two below it were swapped.
 
@@ -181,6 +183,8 @@ Both are exactly the class `CONSTRAINTS.md` D-20 exists to stop. Copying a table
 | 3 | 60% | 90%+ | 15% | 25% | 0% |
 | 4+ | 100% | 100% | 33% | 33% | 40% |
 
+**Sourcing status of that table: one guide, and the `+` cells are lower bounds.** Every figure comes from `04-trackblazer-umaguide.md` alone — no second source, no client capture, no dataset field — and `| 3 | … 90%+ |` means *at least* 90%, not 90%. So the table is **provisional** under `CONSTRAINTS.md` D-230, which now requires client data or two independent sources before a percentage prints as a number; a UI rendering `90%` for that cell states a figure no source gives. What is safe today is the shape: risk rises with consecutive races, it reaches certainty at four, and it cannot occur after Late December.
+
 Two rules follow. **The risk is a function of a count the tool already keeps** — consecutive races — so this is the rare case where a real probability can be shown instead of a band, derived deterministically from entered turns exactly as Planner Rule 4 requires. And **Race Fatigue cannot occur after Late December**, so the warning must switch off in the endgame stretch rather than following the player into the Climax.
 
 ### 3. Mood race-performance figure
@@ -193,7 +197,7 @@ Two rules follow. **The risk is a function of a count the tool already keeps** �
 
 ## What this does to the schema
 
-`ADR-0003` proposed `scenario_races` and `race_entries`. That design is now known to be **URA/Unity-Cup-shaped** and does not fit Trackblazer, which has no race goals. Two options:
+`ADR-0003` proposed `scenario_races` and `race_entries`. That design is **URA/Unity-Cup-shaped** — but not for the reason this file first gave. It said Trackblazer "has no race goals", which is wrong: objective 1 is the Debut race, and every Grade Point comes from a race. The real mismatch is that `scenario_races` models a **calendar the Trainer follows**, and Trackblazer has no prescribed calendar — the Trainer chooses entries and the deadline is a *points total*, not a named race. So Trackblazer still needs per-race rows (entry, tier, placement, points earned), and what it does not need is a locked fixture list. Two options:
 
 - **Generalise** `scenario_races` into `scenario_slots` with a `kind` discriminator (`GoalRace`, `TeamRace`, `GradeDeadline`, `ScriptedEvent`), letting each scenario populate different slot types against one table.
 - **Split**, giving Trackblazer its own `grade_deadlines` and leaving `scenario_races` for the goal-race scenarios.
