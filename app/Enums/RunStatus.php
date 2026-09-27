@@ -10,6 +10,8 @@ namespace App\Enums;
  */
 enum RunStatus: string
 {
+    use HasLabel;
+
     case Active = 'Active';
     case Completed = 'Completed';
     case Retired = 'Retired';

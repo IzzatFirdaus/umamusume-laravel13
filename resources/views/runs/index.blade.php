@@ -18,7 +18,7 @@
                             <span class="text-zinc-500">· {{ $run->scenario }}</span>
                         @endif
                     </a>
-                    <span class="text-zinc-500">{{ $run->status->value }} · {{ $run->created_at->toDateString() }}</span>
+                    <span class="text-zinc-500">{{ $run->status->label() }} · {{ $run->created_at->toDateString() }}</span>
                 </li>
             @endforeach
         </ul>

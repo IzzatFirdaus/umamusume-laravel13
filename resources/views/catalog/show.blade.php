@@ -12,7 +12,7 @@
     <dl class="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 rounded border border-zinc-200 bg-white p-4 text-sm md:grid-cols-4">
         <div>
             <dt class="text-zinc-500">Release status</dt>
-            <dd>{{ $umamusume->release_status->value }}</dd>
+            <dd>{{ $umamusume->release_status->label() }}</dd>
         </div>
         <div>
             <dt class="text-zinc-500">JP debut</dt>
@@ -40,7 +40,7 @@
     @else
         <ul class="mt-2 flex flex-wrap gap-2 text-sm">
             @foreach ($umamusume->aliases as $alias)
-                <li class="rounded bg-zinc-100 px-2 py-1">{{ $alias->alias }} <span class="text-zinc-500">({{ $alias->language->value }})</span></li>
+                <li class="rounded bg-zinc-100 px-2 py-1">{{ $alias->alias }} <span class="text-zinc-500">({{ $alias->language->label() }})</span></li>
             @endforeach
         </ul>
     @endif

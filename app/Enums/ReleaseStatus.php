@@ -11,6 +11,8 @@ namespace App\Enums;
  */
 enum ReleaseStatus: string
 {
+    use HasLabel;
+
     case GlobalReleased = 'GlobalReleased';
     case GlobalAnnounced = 'GlobalAnnounced';
     case JapanOnly = 'JapanOnly';

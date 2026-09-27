@@ -2,7 +2,7 @@
     <div class="flex items-baseline justify-between">
         <h1 class="text-2xl font-semibold">
             {{ $run->umamusume->name }}
-            <span class="ml-2 text-sm font-normal text-zinc-500">{{ $run->status->value }}@if($run->scenario) · {{ $run->scenario }}@endif</span>
+            <span class="ml-2 text-sm font-normal text-zinc-500">{{ $run->status->label() }}@if($run->scenario) · {{ $run->scenario }}@endif</span>
         </h1>
         <div class="flex gap-3 text-sm">
             <a href="{{ route('runs.export', ['run' => $run, 'format' => 'csv']) }}" class="hover:underline">Export CSV</a>
@@ -90,7 +90,7 @@
             </select>
             <select name="skills[0][status]" class="rounded border border-zinc-300 px-2 py-1">
                 @foreach (\App\Enums\SkillAcquisition::cases() as $acquisition)
-                    <option value="{{ $acquisition->value }}">{{ $acquisition->value }}</option>
+                    <option value="{{ $acquisition->value }}">{{ $acquisition->label() }}</option>
                 @endforeach
             </select>
             <input type="number" name="skills[0][turn_acquired]" min="1" placeholder="Turn" class="w-20 rounded border border-zinc-300 px-2 py-1">
