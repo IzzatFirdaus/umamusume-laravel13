@@ -25,7 +25,7 @@ it is strictly pre-run (D-260).
 | Turn logging with stats 0..1200, SP, condition, MoodTier | Live | `StoreTurnEntryRequest:40-53`, `app/Enums/MoodTier.php` |
 | Skill states Suggested/Acquired/Skipped | Live | `runs.show` sync form, `TrainingRun::setSkillStatus` |
 | Scenario config driving panels/widgets | In flight (uncommitted) | `config/scenarios.php` tracked at HEAD; component work dirty in tree |
-| `ScenarioSlot`, richer race/lineage tables | In flight (untracked models/migrations) | working tree only; not committed |
+| `ScenarioSlot`, richer race/inheritance tables | In flight (untracked models/migrations) | working tree only; not committed |
 
 Claim limit: nothing here asserts that six-slot Legacy data persists; see §7.
 
@@ -112,6 +112,6 @@ saved today; it cannot.
 
 ## 10. Out of scope
 
-Mid-run ancestor editing (forbidden by D-260), six-slot lineage persistence
+Mid-run ancestor editing (forbidden by D-260), six-slot ancestor persistence
 (no schema), affinity computation (D-262: entered/fetched, never inferred),
 spark probability simulation (D-264: show published rates only).

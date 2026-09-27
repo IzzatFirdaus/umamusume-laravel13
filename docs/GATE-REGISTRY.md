@@ -75,6 +75,9 @@ Evidence | Exceptions | Owner | Status
 3. Verbatim quoted game/client source data where the term is data, not framing
    (display path is the gated surface; dataset keys like `intelligence`,
    `friend` are out of scope per C-4's copy-and-framing boundary).
+4. A gate's own source: the pattern list and allow-list in `tools/gate.py` match
+   `make lore` by construction, so the scanner is a permanent self-hit. Expect
+   them, do not clear them.
 Ambiguous framing (a real violation vs a quote) requires a Lore Guardian or owner
 ruling before merge; the ruling is recorded next to the hit list.
 
