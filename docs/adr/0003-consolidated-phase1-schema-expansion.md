@@ -116,6 +116,23 @@ This is a `StoreTurnEntryRequest` change, and Planner Rule 6 says bounds live in
 
 ---
 
+## Amendment R1 — 2026-09-27: Timeline source-of-truth ruling
+
+**Ruling R1** (owner, following the scenario-slot migration and the PRD US-10 promotion):
+
+1. **config = composition descriptors.** `config/scenarios.php` is the authoritative source for panel flags (`panels.*`), step lists (`steps`), grade objectives, and the shop catalogue. These are *composition descriptors* — they describe which UI pieces exist for a scenario. They are not a data store.
+
+2. **scenario_slots = forward timeline store.** The `scenario_slots` table (created 2026-09-27 15:34, migration `2026_09_27_153416`) is the single canonical store for every timeline slot across all scenarios. Its `kind` discriminator (`goal_race`, `team_race`, `grade_deadline`, `scripted_event`) absorbs what `scenario_races` and the Trackblazer/Unity Cup logic previously split. Every slot carries provenance (`source_url`, `snapshot_path`, `fetched_at`, `source_timezone`) per FR-A-4 and the Data Engineer rule.
+
+3. **scenario_races deprecated and frozen.** The `scenario_races` table and its new `is_manual` column (migration `2026_09_27_132304`) are frozen. No new rows, no queries against it in new code. The column is marked unused in this ruling. Existing data stays for rollback; a future migration may drop it once `scenario_slots` is fully wired.
+
+4. **RaceEntry rewire deferred to Slice 2, test-first.** `RaceEntry` currently relates to both `scenario_race_id` (fillable, factory) and `scenario_slot_id` (FK, nullable). The rewire — making `scenario_slot_id` the sole reference and dropping `scenario_race_id` — is deferred to the next slice. It will land with:
+   - a migration dropping `scenario_race_id` and its factory
+   - a `RaceEntry` model change removing the `scenarioRace` relation
+   - a feature test asserting `RaceEntry` is created via `scenario_slot_id` only
+
+5. **Provenance exemption for owner-transcribed config values.** The shop catalogue and grade objectives in `config/scenarios.php` are transcribed from `docs/scenarios/04` and `05` with code-comment citations (e.g., lines 197–217). These do **not** carry the `source_url` / `snapshot_path` columns the schema requires for engine-written facts. This is an explicit, time-limited exemption: the values are accepted as "owner-transcribed" pending a fetch-source decision (PRD OQ-2). They are not engine-written, so they do not violate FR-B-4. A future fetch pipeline that ingests scenario data must supersede them with provenance-carrying rows.
+
 ## Formal record, 2026-09-27
 
 `scenario_slots` is **approved by the owner** and recorded here so the file matches the decision. The
