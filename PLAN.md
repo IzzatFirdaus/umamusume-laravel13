@@ -1,7 +1,7 @@
 # Trainer Desk — Frontend Development Plan
 
-**Status:** Phase 4 (Implementation) active; Phase 6 (Iteration/Evidence Integration) frozen until Slice 2 commit.
-**Last Updated:** 2026-09-27 (Post-Phase 3 Audit & Phase 4 Slice 1 Complete)
+**Status:** Phase 4 (Implementation) active through Slice 2; Phase 6 unfrozen by the Slice 2 commit and **not started** — no Phase 6 work was done in the Slice 2 session.
+**Last Updated:** 2026-09-28 (Slice 2 complete; ADR-0003 Amendment R2 records why S1's rewire did not happen as written)
 
 ---
 
@@ -27,9 +27,9 @@
 | **2.5 — Prototype** | Converged | `prototypes/screen-a-scenario-v10.html` |
 | **3 — Spec Intake** | Completed | `FRONTEND-SPEC-DIVERGENCE.md`, `FRONTEND-BRIEF-AUDIT.md` |
 | **4 — Implementation** | **Slice 1 Complete** | `1e859e8` (T2+T3), `e9a944a` (T4), `c70967f` (T5), `b0bb0d5` (T7) |
-| **4 — Implementation** | Slice 2 In Progress | `scenario_slots` wired; RaceEntry rewire; goal pennant |
+| **4 — Implementation** | **Slice 2 Complete** | S1 `9134206`, S2 `83084ab`, S3 `bb6eec6`, S4 `d53a4b1`, S5 `70f9218` + `9451659`, S6 (this commit) |
 | **5 — Verification** | Routine | Browser metrics: light 4.74 / dark 5.48 / badges 9.00+ |
-| **6 — Iteration** | **Frozen** until Slice 2 commit | Evidence triage only |
+| **6 — Iteration** | Unfrozen by Slice 2, **not started** | Owner instruction: the slice's commit unfreezes it; no Phase 6 anatomy in this session |
 
 ---
 
@@ -49,12 +49,51 @@
 
 ---
 
-## Open Blockers for Slice 2
+## Open Blockers for Slice 2 — closed or reclassified 2026-09-28
 
-1. **RaceEntry rewire** — drop `scenario_race_id`, make `scenario_slot_id` sole FK (test-first)
-2. **Goal pennant** — wire `scenario_slots` `goal_race` rows to `race-calendar` component
-3. **Grade meter data** — feed `earned` points from run storage (currently `null`)
-4. **Schema cap** — validation bound read from `scenarios.hard_cap` (ADR-0002 option B)
+1. ~~RaceEntry rewire~~ — **did not happen as written, on measured grounds.** The FK
+   stays nullable and no backfill ran: `scenario_races` has no `month`/`half`/`kind` for
+   `scenario_slots`' NOT NULL columns, holds 0 rows after a clean seed, SQLite 3.49 refuses
+   both the in-place NOT NULL and the column drop, and Trackblazer's Trainer-picked races
+   have no slot to point at (D-221). The real defect was `scenario_slot_id` missing from
+   `#[Fillable]`, silently dropped on every create. Full reasoning in ADR-0003 Amendment R2;
+   pinned by `tests/Feature/Schema/RaceEntrySlotLinkTest.php`. `9134206`, `9451659`.
+2. ~~Goal pennant~~ — shipped, and it corrected the component to the contract it cites:
+   red `Goal` pennant + warm outline + greater height, replacing a green treatment the
+   code, its comment and its test name each disagreed with. `bb6eec6`.
+3. ~~Grade meter data~~ — partially. `gradeEarned()` now returns a real number (100 for a
+   priced G1 win, rendered live as `100 / 0 · 100 over the objective`) and returns `null`
+   rather than an understated total when a finish below first is in the log, because the
+   corpus prices 1st place only and `race_entries` carries no year bucket. That gap is
+   KI-10, not a TODO. `83084ab`.
+4. **Schema cap** — untouched by this slice; still open.
+
+**New blockers Slice 2 found and did not fix:** KI-8 (`/design-preview` 500s, which is why
+the stat band's rendered pairs are unmeasured), KI-9 (`--color-pick` boundary at 1.59:1 on
+the base theme), KI-11 (empty `ScenarioSlotSeeder`, orphaned `--color-green-tint`).
+
+---
+
+## Slice 2 Summary (2026-09-28)
+
+| Step | Commit | Evidence |
+|---|---|---|
+| S1: slot link + rewire refused | `9134206` | 5 tests in `RaceEntrySlotLinkTest`; failed first with "Failed asserting that null is identical to 1" |
+| S2: panels fed from slots and the race log | `83084ab` | 7 tests in `RaceSlotPanelComposerTest`; live page shows `Apr Early: Fan gate` + `15,000 fans`, `Apr Late: Mandatory goal`, `May Early: Run` |
+| S3: red pennant, warm outline, height, named state | `bb6eec6` | `RaceCalendarTest` 17 passed; browser-measured 13.24/5.02/5.74 light, 15.15/6.15/4.49 dark, +14px over neighbours |
+| S4: KI-2 closed | `d53a4b1` | 3 tests drive `CACHE_STORE=database`; live server `/umamusume -> 200` |
+| S5: gates + R9 manual contrast pass | `70f9218`, `9451659` | `docs/design-research/verification/slice-2-2026-09-28.md` — full sequence with outputs, the 1.62:1 bar defect found and fixed, 2 skips reported as skips |
+| S6: docs | (this commit) | ADR-0003 R2, KI-2 resolved with its wrong cause corrected, KI-8 to KI-11 opened, PLAN re-baselined here |
+
+**End state:** `php artisan test --compact` → 2 skipped, 235 passed, 751 assertions.
+`pint --dirty` → passed. `phpstan analyse --no-progress` → `[OK] No errors`. `lore-code` →
+4 hits, all pre-existing (Laravel's SQS example URL; the three documented `Good-Luck Charm`
+lines). `vite build` → 69.05 kB CSS, all 52 colour tokens present in the sheet, 0 pruned.
+
+**Where the commits are.** `master` is at `83084ab` (S2). S3 onward sit on
+`docs/audit-remediation`, because a concurrent session created that branch from `83084ab`
+and moved this shared checkout onto it mid-slice. Nothing was rewritten; reconciling the
+branch is the owner's call and is the one thing this summary cannot close.
 
 ---
 

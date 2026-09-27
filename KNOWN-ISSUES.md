@@ -45,7 +45,41 @@ KI-2, so fixing it alone would not make any page load. Fix the two together and 
 
 ---
 
-## KI-2 Catalog index passes strings where the view expects models
+## KI-2 Catalog pages die on a cache that cannot hand back models — RESOLVED 2026-09-28
+
+> **Resolved in `d53a4b1`.** The diagnosis below was written as a guess and both
+> halves of it were wrong, so they are corrected here rather than quietly dropped.
+>
+> - **Not** "the controller hands the view a collection of strings, or a
+>   `pluck()`-style list". The controller returned a real `Collection<Umamusume>`.
+>   The strings were made by the cache, not by the query.
+> - **Not** "Feature tests cannot reproduce this because each test starts with an
+>   empty cache; the 500 requires stale cached rows". That annotation would have
+>   stopped anyone trying. A test reproduces it deterministically in four lines:
+>   point `cache.default` at `database`, flush, visit once to write, visit again to
+>   read. No pre-existing rows are needed — the round-trip is the bug. That is
+>   `tests/Feature/CatalogCacheRenderTest.php`, and all three of its cases failed
+>   with this exact message before the fix.
+>
+> **Actual cause.** `config/cache.php:128` sets `serializable_classes => false`, so
+> `DatabaseStore::unserialize()` calls `unserialize($value, ['allowed_classes' =>
+> false])` and every object comes back as `__PHP_Incomplete_Class` (proved in tinker:
+> `returned class=__PHP_Incomplete_Class`). Blade iterating that yields strings, which
+> is the `->slug` error. The suite never saw it because `phpunit.xml:25` pins
+> `CACHE_STORE=array` while `.env` runs `CACHE_STORE=database`, and the array store
+> hands back the objects it was given.
+>
+> **Fix.** The cache now holds primitives — the page's ids and its total — and the
+> models are re-read from them; `show()` is not cached at all. The framework setting
+> was left alone: it is a deliberate refusal to revive objects from a persistent store,
+> and relaxing it to keep caching model graphs would trade a lore-scale safety default
+> for a micro-optimisation on a local SQLite read path.
+>
+> **Runtime pass, which the annotation asked for.** `php artisan serve` against the
+> real database cache: `/umamusume -> 200`, `/training-runs -> 200`. Recorded with the
+> rest of the slice in `docs/design-research/verification/slice-2-2026-09-28.md`. The
+> detail page had the same defect and was covered by neither this report nor the old
+> test.
 
 **Symptom.** `GET /umamusume` returns **500**. `GET /training-runs` also returns **500**.
 
@@ -216,3 +250,95 @@ Replace rendered em dashes with compliant punctuation (comma, colon, parentheses
 ### Notes
 
 - Both files are uncommitted frontend work; the blocker exists in the working tree, not in HEAD for `guided-step` (tracked, dirty) and nowhere tracked for `grade-point-meter` (untracked).
+- **Currency (2026-09-28, Slice 2).** `grade-point-meter.blade.php` and its test are now tracked — they were committed in `70f9218`, which also re-lit that component's progress fill. `guided-step` remains uncommitted, so the em-dash blocker described above still stands for it.
+
+---
+
+## KI-8 `/design-preview` 500s on a grade label the badge map has no entry for
+
+**Symptom.** `GET /design-preview` returns **500**: `Undefined array key "B+"` at
+`resources/views/components/stat-band.blade.php:99`.
+
+**Cause.** `config('scenarios.grade_banding')` now emits half-step labels
+(`B+`, `A-` and friends — seventeen of them at `step => 50`), while the component's
+`$gradeClass` map has keys for the nine base grades only (G, F, E, D, C, B, A, S, SS).
+Any stat that lands on a half-step dereferences a missing key.
+
+**Evidence.** Live server, 2026-09-28: `design-preview -> 500` while
+`umamusume -> 200` and `training-runs -> 200` on the same boot.
+
+**Impact.** `x-stat-band` is rendered by this route and nothing else, so the stat band
+has no reachable surface and **no test file at all** — its rendered contrast pairs could
+not be measured in Slice 2's manual pass. That pass still fixed the band's progress fill
+(`70f9218`, same 1.62:1 defect as the meter's bar) and guards it by reading both
+component sources, but makes no claim about unmeasured pairs.
+
+**Decision needed, not made here.** Either collapse half-steps onto the base grade's fill
+(needs its ratio recorded per D-10 before it ships) or give the seventeen labels a map of
+seventeen tokens. Nine fills versus seventeen labels is a design-system decision, and it
+is outside Slice 2's scope.
+
+**Owner.** The phase that owns `grade_banding` in `config/scenarios.php`.
+
+---
+
+## KI-9 The selection gold measures 1.59:1 against `raised` in the light theme
+
+**Symptom.** `--color-pick` (`#EFC96A` light) used as a 2px boundary on a `raised`
+surface reads **1.59:1** — under WCAG 1.4.11's 3:1 for non-text boundaries. Measured in
+the browser on the Grade Point ladder's `aria-current="step"` row and on the race
+calendar's `current` cell. Dark is fine (`#F5B73C` on `#24262A` = 8.46:1).
+
+**Why it is not fixed in passing.** `--color-pick` does three jobs at once: this
+boundary, `*::selection`'s background, and part of the focus/selection pair recorded in
+`DESIGN.md` §8. Re-stepping it means re-measuring all three surfaces in both themes,
+which is its own pass. Nothing is colour-only today — the current step also carries
+`aria-current` and heavier text, so D-12 holds and no user is left unable to read state.
+
+**Owner.** Design system, with the token-pair table in `DESIGN.md`.
+
+---
+
+## KI-10 Trackblazer Grade Points cannot be totalled or bucketed from what is stored
+
+**Symptom.** `TrainingRun::gradeEarned()` returns `null` for any run holding a finish
+below first, and the meter shows "not yet recorded" even though races happened.
+
+**Cause.** Two independent gaps, both measured rather than assumed:
+
+1. `docs/scenarios/05-trackblazer-gametora.md` prices Grade Points for **1st place only**
+   (`grade_point_by_grade`: G1 100 … Pre-OP 20) and states that lower placements "scale
+   down proportionally (similar to how Fan gain scales)" without naming a ratio. No
+   placement scaling table for Grade Points exists in the corpus, and no fan-placement
+   table exists either, so there is nothing to derive it from.
+2. D-232 makes the four objectives separate deadlines judged alone, but `race_entries`
+   carries no turn, year, or objective bucket, so a race cannot be attributed to the
+   period it counts toward.
+
+**Current behaviour is deliberate.** Withholding beats understating: a partial sum shown
+as a total would be a false claim about a trainee (D-256).
+
+**Required fix.** (a) a sourced placement ratio, or a `[Unverified]` placeholder decision
+from the owner; (b) a turn or year bucket on `race_entries`, which is schema work and
+therefore an ADR, not a patch.
+
+**Owner.** Planner Domain Specialist with Data Engineer for the source.
+
+---
+
+## KI-11 Design-system debts left visible by the Slice 2 gate run
+
+- **`database/seeders/ScenarioSlotSeeder.php` is an empty stub** — `run()` contains only
+  `//`, and `DatabaseSeeder` never calls it. Against `CONSTRAINTS.md`'s floor ("no
+  unimplemented stubs") it should be filled with sourced slot rows or removed. Left in
+  place because it belongs to another session's in-flight work; deleting a peer's file to
+  quiet a gate is not this slice's call. It is also the reason `scenario_slots` is empty
+  after a clean seed (see the verification record, §1.1), which is what makes any
+  `scenario_races` backfill vacuous.
+- **`--color-green-tint` is now referenced by no utility.** The goal cell moved to
+  `bg-raised` in `bb6eec6`. The token still resolves in both themes and all 52 declared
+  tokens survive `@theme static` (0 missing from the built sheet), so nothing breaks —
+  but a pair that renders nowhere is unverified in practice, not proven. Either retire it
+  with the token table or give it a consumer.
+
+**Owner.** Design system.
