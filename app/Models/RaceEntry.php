@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $training_run_id
  * @property int|null $scenario_race_id
+ * @property int|null $scenario_slot_id
  * @property RaceEntryStatus $status
  * @property int|null $placement
  * @property int|null $fans_gain
@@ -27,9 +28,10 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property-read TrainingRun $trainingRun
  * @property-read ScenarioRace|null $scenarioRace
+ * @property-read ScenarioSlot|null $scenarioSlot
  */
 #[Table('race_entries')]
-#[Fillable(['training_run_id', 'scenario_race_id', 'status', 'placement', 'fans_gain'])]
+#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'status', 'placement', 'fans_gain'])]
 class RaceEntry extends Model
 {
     /** @use HasFactory<RaceEntryFactory> */
@@ -41,6 +43,14 @@ class RaceEntry extends Model
     public function trainingRun(): BelongsTo
     {
         return $this->belongsTo(TrainingRun::class);
+    }
+
+    /**
+     * @return BelongsTo<ScenarioSlot, $this>
+     */
+    public function scenarioSlot(): BelongsTo
+    {
+        return $this->belongsTo(ScenarioSlot::class, 'scenario_slot_id');
     }
 
     /**
