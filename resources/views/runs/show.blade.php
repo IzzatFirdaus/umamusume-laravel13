@@ -68,7 +68,7 @@
             {{-- A select, because the value is now validated against the matrix:
                  free text here would only produce a rejected submission. --}}
             <select name="scenario" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
-                <option value="">Not set — baseline strip</option>
+                <option value="">Not set (baseline strip)</option>
                 @foreach ($scenarios as $key => $label)
                     <option value="{{ $key }}" @selected($run->scenario === $key)>{{ $label }}</option>
                 @endforeach

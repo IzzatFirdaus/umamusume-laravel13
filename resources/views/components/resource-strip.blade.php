@@ -1,5 +1,15 @@
 @props([
-    'scenario' => 'ura_finale',
+    // No default. A named default would put a scenario name in the view, which is
+    // the D-240 smell the whole component exists to avoid, and a strip with no
+    // scenario has nothing to compose from.
+    'scenario',
+    /**
+     * The run's own numbers, keyed by widget: turn, energy, fans, team_rank,
+     * bursts, grade_points, shop_coins. A key a scenario does not own is never
+     * read, so a caller can pass one flat array for every scenario.
+     *
+     * @var array<string, int|string>
+     */
     'run' => [],
 ])
 
@@ -17,25 +27,52 @@
      * it is why there is no `if ($scenario === 'unity_cup')` anywhere in the tree.
      */
     $widgets = $def['widgets'];
+
+    /*
+     * A caption is a claim about the run, so it is composed the same way. Trackblazer
+     * has no race calendar and therefore no fan-gated event, and printing "next event
+     * gate 60,000" there states a mechanic the scenario does not have — D-220's failure
+     * in caption form. Read the panel flag, not the scenario name (D-240).
+     */
+    $fansCaption = ($def['panels']['grade_objectives'] ?? false)
+        ? 'farmed by racing here'
+        : 'next event gate 60,000';
 @endphp
 
 <div {{ $attributes->merge(['class' => 'flex flex-wrap gap-2']) }}>
     @foreach ($widgets as $widget)
         @php
             // Each branch produces presentation only. Adding a scenario never touches this loop.
+            //
+            // A value the run does not have renders as `N/A` with a caption saying so.
+            // Defaulting instead would assert a fact about the trainee that nobody
+            // entered — a Team Rank of "G" on a run with no team data says the run is in
+            // the lowest rank, and "0/100" says the trainee is exhausted (D-220). The
+            // widget itself is still present: the scenario owns Energy, so the box
+            // appears; only the value is withheld. `N/A` rather than a dash because an
+            // em dash is banned in shipped copy (R-02, D-79) and a bare glyph says
+            // nothing to a screen reader anyway.
+            $raw = $run[$widget === 'spirit_bursts' ? 'bursts' : $widget] ?? null;
+            $recorded = $raw !== null && $raw !== '';
+
             [$label, $value, $sub] = match ($widget) {
                 'turn' => ['Turn', number_format((int) ($run['turn'] ?? 0)), $def['label']],
-                'energy' => ['Energy', ((int) ($run['energy'] ?? 0)) . '/100', null],
-                'fans' => ['Fans', number_format((int) ($run['fans'] ?? 0)), 'next event gate 60,000'],
-                'team_rank' => ['Team Rank', (string) ($run['team_rank'] ?? 'G'), 'drives facility level'],
-                'spirit_bursts' => ['Spirit Bursts', number_format((int) ($run['bursts'] ?? 0)), 'normal plus Extreme'],
-                'grade_points' => ['Grade Points', ((int) ($run['grade_points'] ?? 0)) . '/300', 'surplus does not carry over'],
-                'shop_coins' => ['Shop Coins', number_format((int) ($run['shop_coins'] ?? 0)), 'rotation in 2 turns'],
+                'energy' => ['Energy', $recorded ? ((int) $raw).'/100' : 'N/A', $recorded ? null : 'not yet recorded'],
+                'fans' => ['Fans', $recorded ? number_format((int) $raw) : 'N/A', $recorded ? $fansCaption : 'not yet recorded'],
+                'team_rank' => ['Team Rank', $recorded ? (string) $raw : 'N/A', $recorded ? 'drives facility level' : 'not yet recorded'],
+                'spirit_bursts' => ['Spirit Bursts', $recorded ? number_format((int) $raw) : 'N/A', $recorded ? 'normal plus Extreme' : 'not yet recorded'],
+                'grade_points' => ['Grade Points', $recorded ? ((int) $raw).'/300' : 'N/A', $recorded ? 'surplus does not carry over' : 'not yet recorded'],
+                'shop_coins' => ['Shop Coins', $recorded ? number_format((int) $raw) : 'N/A', $recorded ? 'rotation in 2 turns' : 'not yet recorded'],
                 default => throw new InvalidArgumentException("Unknown widget [{$widget}] in scenario config."),
             };
 
-            $segments = $widget === 'energy'
-                ? max(0, min(5, (int) round(((int) ($run['energy'] ?? 0)) / 20)))
+            // "N/A" alone is ambiguous between "not applicable" and "not available", so
+            // the tooltip names which. The caption already says it in words; this is the
+            // hover-time half of the same fact.
+            $valueHint = $recorded ? null : 'No value recorded for this run';
+
+            $segments = $widget === 'energy' && $recorded
+                ? max(0, min(5, (int) round((int) $raw / 20)))
                 : null;
         @endphp
 
@@ -58,7 +95,8 @@
         @else
             <div class="min-w-36 flex-1 rounded-md border border-rule bg-raised px-3 py-2">
                 <span class="block text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ $label }}</span>
-                <span class="block font-mono text-xl font-extrabold tabular-nums text-ink-strong">{{ $value }}</span>
+                <span class="block font-mono text-xl font-extrabold tabular-nums text-ink-strong"
+                      @if ($valueHint !== null) title="{{ $valueHint }}" @endif>{{ $value }}</span>
 
                 @if ($segments !== null)
                     <span class="mt-1 flex gap-1" role="img" aria-label="Energy {{ $run['energy'] ?? 0 }} of 100">

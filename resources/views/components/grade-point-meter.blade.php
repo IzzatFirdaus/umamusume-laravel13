@@ -91,7 +91,7 @@
                  the figure is named as missing: "0 / 300" would assert that this
                  trainee stands on zero points, which is a fact, not an absence. --}}
             <p class="mt-1.5 text-sm text-ink-muted">
-                <span class="font-bold text-ink">not yet recorded</span> — no Grade Points are
+                <span class="font-bold text-ink">not yet recorded</span>: no Grade Points are
                 entered for this run, so there is no progress to show yet.
             </p>
         @endif

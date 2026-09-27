@@ -1,5 +1,7 @@
 @props([
-    'scenario' => 'ura_finale',
+    // No default, for the same reason as x-resource-strip: a named default puts a
+    // scenario in the view, and a step rail with no scenario has no steps to order.
+    'scenario',
     'current' => null,
     'selected' => null,
     'choices' => [],
@@ -24,6 +26,7 @@
         'facility' => 'Choose facility',
         'training' => 'Choose activity',
         'shop' => 'Spend Shop Coins',
+        'team_race' => 'Choose opponent',
         'outcome' => 'Record outcome',
         'skill' => 'Review skills',
         'confirm' => 'Confirm',
@@ -59,6 +62,13 @@
                                  bg-sunken text-xs font-bold text-ink-strong">{{ $loop->iteration }}</span>
                     <span class="min-w-0 flex-1">
                         <span class="block text-base font-bold text-ink-strong">{{ $choice['label'] ?? '' }}</span>
+                        @if (($choice['unverified'] ?? false) === true)
+                            {{-- The client label for a mood adjustment is not confirmed
+                                 as one string or the other, so the gap is shown rather
+                                 than resolved by picking one (D-20). --}}
+                            <span class="ml-1 inline-block rounded border border-down px-1 align-middle text-xs font-bold text-down"
+                                  title="Not confirmed as the Global client string">[Unverified]</span>
+                        @endif
                         @isset($choice['detail'])
                             <span class="block text-xs text-ink-muted">{{ $choice['detail'] }}</span>
                         @endisset
@@ -95,6 +105,109 @@
             <p class="mt-2 text-xs text-ink-muted">
                 Recorded as entered. No outcome is projected and no odds are shown, because no source
                 publishes them. Anything you did not log is not claimed.
+            </p>
+        </div>
+    @endif
+
+    {{--
+        The two scenario-owned steps. Each is gated twice: the step key decides
+        whether to draw the body, and the scenario's own panel flag decides whether
+        this scenario is allowed to have one. The second gate is not belt-and-braces
+        — a fifth scenario can arrive with a `shop` step in its config and no shop
+        behind it, and an empty till would be worse than no till (D-220, gate G-40).
+    --}}
+    @if ($current === 'shop' && ($def['panels']['shop'] ?? false) === true)
+        <div class="mt-3 rounded-md border border-rule bg-raised p-3">
+            <h4 class="text-xs font-bold uppercase tracking-widest text-ink-muted">Shop</h4>
+
+            {{-- D-232: the rotation is the shop's primary number. Unspent coins die
+                 with the run, so "how long until this lineup changes" is the decision
+                 the Trainer is making; a balance would be the reassuring number. --}}
+            <div class="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-muted">
+                <span class="font-semibold text-ink">
+                    Rotation resets in {{ (int) $def['shop']['rotation_turns'] }} turns
+                </span>
+                <span>Shop Coins: not yet recorded</span>
+                <span>Up to {{ (int) $def['shop']['max_copies_per_item'] }} copies of one item</span>
+                @if ($def['shop']['locked_until_debut'] === true)
+                    <span>Locked until debut</span>
+                @endif
+            </div>
+
+            <ul class="mt-3 flex flex-col gap-1.5">
+                @foreach ($def['shop_items'] ?? [] as $item)
+                    <li class="flex items-baseline justify-between gap-3 rounded-md border border-rule bg-panel px-3 py-2 text-sm">
+                        <span class="min-w-0 flex-1">
+                            <span class="font-semibold text-ink-strong">{{ $item['name'] }}</span>
+                            <span class="block text-xs text-ink-muted">{{ $item['effect'] }}</span>
+                        </span>
+                        {{-- The client puts Sale top-left and Limited top-right on the
+                             shop button, so a Trainer scans corners. Held counts are
+                             run state, and no rotation is modelled yet, so nothing is
+                             flagged and no count is claimed. --}}
+                        <span class="flex shrink-0 items-center gap-1.5">
+                            @if (($item['sale'] ?? false) === true)
+                                {{-- Blue is the palette's "decrease", and a discount is
+                                     the one priced thing on this row that goes down.
+                                     Orange would read as a stat increase. --}}
+                                <span class="rounded border border-down px-1.5 text-xs font-bold text-down">Sale</span>
+                            @endif
+                            @if (($item['limited'] ?? false) === true)
+                                <span class="rounded border border-idle px-1.5 text-xs font-bold text-ink-muted">Limited</span>
+                            @endif
+                            <span class="font-mono text-sm tabular-nums text-ink-strong">{{ (int) $item['cost'] }}c</span>
+                        </span>
+                    </li>
+                @endforeach
+            </ul>
+
+            <p class="mt-2 text-xs text-ink-muted">
+                held: not yet recorded · A multi-turn item cannot be used again while active, and
+                buying a weaker effect than the one running overwrites the active one, so the order
+                of two purchases is a real, lossy decision.
+            </p>
+            <p class="mt-1 text-xs text-ink-muted">
+                Flags sit where the client puts them: Sale top-left, Limited top-right. This build
+                does not model the rotation, so no offer is flagged and the rows above are the item
+                catalogue rather than a current lineup.
+            </p>
+        </div>
+    @endif
+
+    @if ($current === 'team_race' && ($def['panels']['team_race'] ?? false) === true)
+        <div class="mt-3 rounded-md border border-rule bg-raised p-3">
+            <h4 class="text-xs font-bold uppercase tracking-widest text-ink-muted">
+                Opponent · one of {{ (int) $def['team_race']['opponent_count'] }}
+            </h4>
+
+            <ul class="mt-2 flex flex-col gap-1.5">
+                @foreach ($def['team_race']['opponents'] as $opponent)
+                    <li class="flex items-baseline justify-between gap-3 rounded-md border border-rule bg-panel px-3 py-2 text-sm">
+                        <span class="min-w-0 flex-1">
+                            <span class="font-semibold text-ink-strong">{{ $opponent['name'] }}</span>
+                            <span class="block text-xs text-ink-muted">{{ $opponent['tier'] }}</span>
+                        </span>
+                        {{-- The circles are the client's own estimate, shown before you
+                             commit. This tool records what the Trainer saw and never
+                             computes it, so the number is not here to be guessed at. --}}
+                        <span class="shrink-0 text-xs text-ink-muted">circles not yet recorded</span>
+                    </li>
+                @endforeach
+            </ul>
+
+            <p class="mt-2 rounded-md border border-rule bg-panel px-3 py-2 text-xs text-ink">
+                Before you commit, the game shows a circle-based win-odds estimate per category.
+                Source guidance: aim for at least {{ (int) $def['team_race']['circles_guidance'] }} circles
+                in total as a margin, not a win condition, because a loss lowers league rank and
+                beating a stronger team raises it further. Opponent names are sample data: the
+                client names its own teams, and this tool has no source for them.
+            </p>
+            <p class="mt-1 text-xs text-ink-muted">
+                A Team Race comes every {{ (int) $def['team_race']['occurs_every_months'] }} months.
+                @if ($def['team_race']['loss_retryable_with_alarm_clock'] === true)
+                    A loss can be retried with an Alarm Clock item, so a bad race day is not
+                    permanent. Older guidance that says it is, is out of date.
+                @endif
             </p>
         </div>
     @endif
