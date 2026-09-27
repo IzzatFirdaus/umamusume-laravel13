@@ -342,3 +342,35 @@ therefore an ADR, not a patch.
   with the token table or give it a consumer.
 
 **Owner.** Design system.
+
+---
+
+## KI-12 The Grade Point meter says nothing was entered when races were entered but cannot be priced
+
+**Symptom.** A Trackblazer run holding two completed 1st-place races — one linked to a
+`G1` slot worth 100 points, one free-form with no slot — renders:
+
+> **not yet recorded** — no Grade Points are entered for this run, so there is no progress
+> to show yet.
+
+**Evidence.** Browser pass, 2026-09-28, `/training-runs/2` on an isolated database with
+both entries present; `gradeEarned()` returns `null` while
+`raceEntries` holds `[{slot: 6, tier: "G1", placement: 1}, {slot: null, tier: null,
+placement: 1}]`.
+
+**Cause.** `gradeEarned()` withholds the whole total when any completed entry cannot be
+priced, which is the deliberate KI-10 rule: a partial sum shown as a total would
+understate. The *sentence* is the defect, not the arithmetic — it attributes the blank
+panel to the Trainer having entered nothing.
+
+**Not fixed here.** Withholding is correct and the copy needs to name the real reason, but
+the wording differs by cause ("nothing entered" versus "a recorded result whose point value
+is not published"), so the honest fix is for `gradeEarned()` to expose which case it is —
+a new prop on a component whose other consumers are pinned by three existing assertions.
+That is a copy decision with a schema consequence, and it belongs with KI-10's resolution.
+
+**Interim truthfulness of what is shown:** the panel claims nothing about points, so no
+false number is drawn. The misleading part is the implication that the Trainer's races were
+not recorded.
+
+**Owner.** Design system with the Planner Domain Specialist, alongside KI-10.
