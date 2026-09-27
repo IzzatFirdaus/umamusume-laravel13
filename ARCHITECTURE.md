@@ -131,6 +131,16 @@ Planner-domain boundary [rev 0.2 — repo #4]: repo #4's career-run planner maps
 
 Framework defaults (`users`, `cache`, `jobs`) remain untouched; `users` is unused by design (no auth).
 
+### Support-card entities: proposed, not built
+
+No support-card table exists, and `PRD.md` §6.9 lists a support-card database as a Phase 1 non-goal.
+The entity shapes that a 2026-09-27 brief asked for are specified in `docs/adr/0005-support-card-entities.md`
+with the evidence that corrects them, and they are **not** part of this design until the owner settles
+the scope question there. Read that ADR before adding any `support_cards`, `user_support_cards` or
+`deck_slots` migration, model, factory or route: the game mechanics they would describe are documented
+and settled (`docs/UMAMUSUME_REFERENCE.md` §1.4.7), the schema is not, and an entity copied out of the
+ADR into a migration would silently reverse §6.9.
+
 ### Eloquent conventions (laravel-best-practices)
 
 - `#[Fillable]` / `#[Hidden]` attributes, not legacy properties.

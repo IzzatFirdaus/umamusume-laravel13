@@ -53,7 +53,7 @@ The constant set, with the citation each one carries. These are the only values 
 | Rest recovery | +30 | §1.1.5, GameWith 2026-09-25 | current |
 | Wit session cost | 0, recovers a small amount | §1.1.1, Game8 2026-09-10 | current |
 | Advisory threshold | 50 Energy | §1.1.5: success rate 「大きく変わってくる」 | current, **qualitative only** |
-| Mood multipliers | +20 / +10 / 0 / −10 / −20 % | §1.1.6, Kamigame + GameWith | corroborated |
+| Mood multipliers | +20 / +10 / 0 / −10 / −20 % | §1.1.6, `[Global]` client Mood Effect panel; Kamigame + GameWith agree | current, **client-confirmed 2026-09-27** |
 | Injury stat hit | −5 to −10 | §1.1.5, GameWith | ⚠ STALE, 2023-02-25 |
 | Maximum Energy raise from events | +12 | §1.1.6, GameWith 2026-09-25 | current |
 
@@ -64,6 +64,7 @@ This is the sharpest limit on the decision and it is a data problem, not a polic
 Therefore:
 
 - **Default: a three-band risk indicator**, Safe / Caution / Danger, classified against the sourced 50 line. A band is a stated threshold applied to a stored value, which is defensible.
+- **The band is computed from Energy, so it may not be shown for Wit.** Corrected 2026-09-27 on review of this section's own logic. Energy is the band's only input, and a Wit session always enters it with full Energy, so the rule as written would render Wit `Safe` at every level — which asserts the exemption this ADR's §1.1.5 conflict row says is unsettled, and which [GameWith (2023-02-25, ⚠️ STALE)](https://gamewith.jp/uma-musume/article/show/257432) contradicts outright by recording a separate Wit failure branch. `UMAMUSUME_REFERENCE.md` Source Conflict Log row 2 already rules the substance: "treat failure as possible but rare". So a Wit row renders **`Risk not measured`** rather than Safe, and the recommender's reason line stays the arithmetic it already is (`"Wit costs 0 Energy and you are at 42"`), which names an Energy fact without claiming an outcome. Low-risk and risk-free are different claims, and only the first is sourced.
 - **Optional: a numeric estimate, off by default.** When enabled it must render with its formula and parameters visible on the same surface, be labelled as this tool's model rather than the game's, and be stored in config rather than hardcoded. Shipping "23% risk" as bare UI copy would be a fabricated statistic, which `AGENTS.md` forbids for the Docs Writer and the Lore Guardian alike for every other artifact.
 - The 30-Energy "highly dangerous" line quoted in the owner's brief is **not in the sources** and must not appear as game fact. If the owner wants a Danger band below 30, it is recorded here as an owner ruling and attributed as such.
 
@@ -85,7 +86,11 @@ Two notes on this table:
 - **Negative stat changes need no schema change.** The model stores absolute per-turn values, so an injury is already representable as turn 12 Speed 302, turn 13 Speed 294, and the timeline renders the drop as a blue decrease. This was raised in the brief as a gap and is not one.
 - **`mood` overlaps the existing `condition` string.** Either `condition` is retired in favour of the enum, or it stays as free text and `mood` is added beside it. This is unresolved and is the one schema question that should be answered before a migration is written.
 
-### 6. Terminology conflict, currently blocking UI copy
+### 6. Terminology conflict, currently blocking UI copy — RESOLVED 2026-09-27, text below kept as written
+
+> **Resolved on the first of the three options below.** The owner supplied a capture of the client's own Mood Effect panel, which prints all five tiers: `GREAT` / `GOOD` / `NORMAL` / `BAD` / `AWFUL`, each with its directional arrow, a training effect of +20 / +10 / 0 / −10 / −20 percent and a pre-race attribute effect of +4 / +2 / 0 / −2 / −4 percent, and the active tier marked on its own row. That is the client, not a gloss, so the block is lifted and nothing needs the owner-override route.
+> Two consequences inside this ADR: the `MoodTier` cases in §5's table are `Great` / `Good` / `Normal` / `Bad` / `Awful`, not the Game8 glosses printed there (Peak / Poor / Worst appear nowhere in the client), and §3's mood-multipliers row now cites the client for its training column as well as the wikis, while the race-side percentage this ADR never carried is settled at ±4 percent. Recorded in `docs/UMAMUSUME_REFERENCE.md` §1.1.6, `docs/design-research/DESIGN.md` §6.17, and rules D-20 / D-203 / D-259 of `docs/design-research/CONSTRAINTS.md`. The three lower pills' *colours* in §6.17 are derived, not measured, so capturing those pills is still worth doing even though the strings no longer need it.
+> The `mood` versus `condition` column question in §5 is untouched by this and remains the open schema item.
 
 The brief uses Peak / Good / Normal / Poor / Worst. Those are Game8's English **glosses** of 絶好調 / 好調 / 普通 / 不調 / 絶不調. `UMAMUSUME_REFERENCE.md` §1.1.6 records the exact Global client strings as **❌ UNVERIFIED**, and the screenshot corpus shows the client actually rendering `GREAT` and `GOOD` on its mood pill.
 
