@@ -1,5 +1,11 @@
 # Our Grand Concert — Known-Gap Stub
 
+**Server:** `[Global]`
+**Status:** Known-Gap Stub
+**Last Verified:** 2026-09-27 (metadata pass)
+**Superseded By:** none (filling this gap requires sourced mechanics, see the stub's boundary note)
+
+
 > **This file is a boundary marker, not a guide.** It records what is sourced about the fourth
 > `[Global]` scenario and, more importantly, the exact edge of what is not. It exists so that no
 > later pass reads the repository as complete at three scenarios, and so nobody fills this gap by

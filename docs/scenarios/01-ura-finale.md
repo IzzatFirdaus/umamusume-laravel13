@@ -1,5 +1,11 @@
 # URA Finale — Scenario Guide (Global EN Server)
 
+**Server:** `[Global]`
+**Status:** Active
+**Last Verified:** 2026-09-27 (metadata pass; guide carries no stat-cap claims, see `docs/adr/0002` for the measured cap table)
+**Superseded By:** none
+
+
 ## Overview
 
 URA Finale is the **first and most basic career (training) scenario** in *Umamusume: Pretty Derby*, and was the only scenario available on Global at launch. It's the "default" mode the rest of the scenarios build on top of, so understanding it thoroughly makes every later scenario easier to learn.

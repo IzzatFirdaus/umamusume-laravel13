@@ -1,5 +1,11 @@
 # Trackblazer Scenario — GameTora Reference Guide
 
+**Server:** `[Global]`
+**Status:** Active
+**Last Verified:** 2026-09-27 (metadata pass; source page last updated 2026-03-12, the Global launch day)
+**Superseded By:** none
+
+
 *Source: gametora.com/umamusume/trackblazer — By Gertas & robflop. Last updated 2026-03-12 (scenario's Global launch day).*
 
 > This is GameTora's precise mechanics/data reference for Trackblazer, meant to complement uma.guide's strategy-and-deck-focused write-up (see the separate uma.guide file) and the general overview in the original three-scenario document set. Where numbers differ slightly between sources, that's normal — GameTora tracks exact patch-accurate values, while community strategy guides sometimes round or generalize.

@@ -1,5 +1,12 @@
 # Grand Masters — `[JP-Only]` reference note
 
+**Server:** `[JP]` (reference only)
+**Status:** Active
+**Last Verified:** 2026-09-27 (metadata pass)
+**Superseded By:** none. Per `AGENTS.md` and the owner's Global-scope ruling this file must not be
+imported into app data, config, or UI copy until a Global release date exists.
+
+
 > ## ⚠️ Read this first: what this file is and is not
 >
 > **`グランドマスターズ -継ぐ者達へ-` has never been released on the Global English server.** As of the

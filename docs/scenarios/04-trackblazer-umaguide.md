@@ -1,5 +1,11 @@
 # Trackblazer (MANT) — uma.guide Community Guide
 
+**Server:** `[Global]`
+**Status:** Active
+**Last Verified:** 2026-09-27 (metadata pass; source page last updated 2026-04-29)
+**Superseded By:** none
+
+
 *Source: uma.guide/guides/trackblazer — Contributors: ayan, catbomb, KoYu1, Luseless, Charles, and others. Last updated Apr 29, 2026.*
 
 > This document captures uma.guide's community strategy take on Trackblazer, which is complementary to the more mechanics-first GameTora breakdown (see the separate GameTora file). Trackblazer launched on Global **March 12, 2026** as the third permanent scenario, alongside URA Finale and Unity Cup — all three remain selectable going forward.

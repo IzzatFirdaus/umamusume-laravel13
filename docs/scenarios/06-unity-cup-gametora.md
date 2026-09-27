@@ -1,5 +1,11 @@
 # Unity Cup Scenario — GameTora Reference Guide
 
+**Server:** `[Global]`
+**Status:** Active (authoritative Unity Cup reference post-2026-07-01 rework)
+**Last Verified:** 2026-09-27 (metadata pass; source page last updated 2026-07-20)
+**Supersedes:** `02-unity-cup.md` for mechanic numbers
+
+
 *Source: gametora.com/umamusume/unity-cup — By Gertas, robflop & Burgh. Last updated 2026-07-20.*
 
 > ⚠️ **This document reflects Unity Cup AFTER its major July 1, 2026 (Global) mechanics update.** If you've read an earlier Unity Cup guide (including the original overview document in this set, which predates this patch), several numbers below — especially Spirit Burst values and the existence of Extreme Spirit Bursts — are new or changed. This file supersedes those older figures; treat this as the current authoritative mechanical reference.

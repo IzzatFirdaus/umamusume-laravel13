@@ -1,6 +1,13 @@
 # Trackblazer (Make a New Track / MANT) — Scenario Guide (Global EN Server)
 
-> ⚠️ **Not yet released on Global.** Trackblazer is confirmed for a **mid-March 2026** release on Global. It will be the **third permanent scenario**, joining URA Finale and Unity Cup (previous scenarios remain playable forever — nothing gets replaced). Everything below is based on currently available pre-release information; details may be adjusted before or shortly after Global release, the way Unity Cup received an early, Global-exclusive balance patch just after its launch.
+**Server:** `[Global]`
+**Status:** Superseded (pre-release snapshot)
+**Last Verified:** 2026-09-27 (metadata pass)
+**Superseded By:** `04-trackblazer-umaguide.md` and `05-trackblazer-gametora.md`
+
+> **Superseded 2026-09-27.** Trackblazer shipped on Global on **2026-03-12** (`05` is dated to its
+> launch day; `04` was updated 2026-04-29). Everything below is the pre-release view, preserved as
+> written; where it hedged or guessed, read 04/05 for the shipped scenario instead.
 
 In the Japanese version, this scenario is called **Make a New Track (MANT)**, and it was JP's **1st Anniversary scenario**, originally released February 24, 2022. Global's pacing has it arriving well after Unity Cup, giving Unity Cup roughly 4 months as the "current best" training scenario before Trackblazer takes over that role — this mirrors JP's own release cadence, just compressed for Global.
 
