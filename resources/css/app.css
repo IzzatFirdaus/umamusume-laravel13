@@ -5,7 +5,152 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+/*
+ * Design tokens. Single source of truth for the app's palette, per DESIGN.md §2.1
+ * and §9. Measured ramps, contrast math and the light system live in
+ * docs/design-research/DESIGN.md §3; do not re-derive a colour here.
+ *
+ * Dark is the shipped default (DESIGN.md §2.1). Light is the research package's
+ * measured system and is provided as a verified override rather than a half-shipped
+ * theme. Components never branch on theme: there are no `dark:` utilities anywhere,
+ * only these variables flip (research CONSTRAINTS.md D-101, gate G-19).
+ *
+ * No shadows and no custom radius tokens: separation comes from the hairline rule
+ * and the raised/sunken step, and radius is `rounded-md` throughout (DESIGN.md §2.3).
+ */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /*
+     * Typography. System stack only. The skeleton's 'Instrument Sans' named a font
+     * the app neither bundles nor loads, which also broke the offline requirement
+     * (NFR-1); this closes that pending item. Numerals use the mono stack with
+     * `tabular-nums` on every stat cell and timestamp (DESIGN.md §2.2).
+     * The rounded display-font proposal stays parked behind a C-8 approval.
+     */
+    --font-sans: ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', Consolas, monospace;
+
+    /* Surfaces and ink */
+    --color-page: #0D0C0F;
+    --color-panel: #121013;
+    --color-raised: #24262A;
+    --color-sunken: #1A181D;
+    --color-idle: #32343A;
+    --color-disabled: #3A3A40;
+    --color-ink: #ECEAF2;
+    --color-ink-strong: #FFFFFF;
+    --color-ink-muted: #AAABB5;
+    --color-ink-faint: #7C7D87;
+    --color-rule: #2E2C33;
+
+    /* Semantic roles. Green is action and affordability only, never "good". */
+    --color-green: #7FCC09;
+    --color-green-deep: #9BE83A;
+    --color-green-tint: #1F2A12;
+    --color-green-line: #3D5A18;
+    --color-chrome: #7FCC09;
+    --color-on-chrome: #121013;
+    --color-risk: #FF6B7A;
+    --color-pick: #F5B73C;
+    --color-sp: #4FC3F7;
+    --color-rank: #B6B4C2;
+
+    /*
+     * Delta pair. increase = orange, decrease = blue.
+     * This is inverted from the web's green-up/red-down habit and was measured
+     * twice, independently, in two different client frames
+     * (docs/design-research/RAW-FINDINGS.md §3.2). It is absent from the token
+     * table in DESIGN.md §2.1, so it is recorded here explicitly: an implementer
+     * reaching for `text-green-600` on a gain would break client resemblance,
+     * and green is already reserved for action affordances.
+     */
+    --color-up: #FF9A2C;
+    --color-down: #4EA1E8;
+
+    /* Per-stat band tints. Whisper, not colour chip: near-invisible individually,
+     * legible only as a group. Stats carry no saturated identity hue (D-114). */
+    --color-tint-speed: #252C42;
+    --color-tint-stamina: #3B2736;
+    --color-tint-power: #312C2A;
+    --color-tint-guts: #3F272B;
+    --color-tint-wit: #26302A;
+    --color-tint-sp: #242E35;
+    --color-line-speed: #252C42;
+    --color-line-stamina: #3B2736;
+    --color-line-power: #312C2A;
+    --color-line-guts: #3F272B;
+    --color-line-wit: #26302A;
+    --color-line-sp: #242E35;
+
+    /* Grade badge fills. Light fills with ink-strong letters: white on these
+     * families measures 1.20-1.44 in the light theme and is banned (D-258, G-47). */
+    --color-grade-g: #2C3A2F;
+    --color-grade-f: #38343F;
+    --color-grade-e: #3E2A4A;
+    --color-grade-d: #263A4F;
+    --color-grade-c: #2F4220;
+    --color-grade-b: #4A2838;
+    --color-grade-a: #4A3520;
+    --color-grade-s: #4A3F22;
+    --color-grade-ss: #55481F;
+
+    /* Modal scrim. The one overlay treatment in the system; documented here
+     * because it was previously only inferable from a single mockup. */
+    --color-scrim: rgba(0, 0, 0, 0.62);
+}
+
+/*
+ * Light theme. Values are the measured research system, not a dimming of the dark
+ * palette. Contrast for every pair below is measured in the browser, not assumed.
+ */
+html[data-theme='light'] {
+    --color-page: #F2F1F8;
+    --color-panel: #F8F8FB;
+    --color-raised: #FFFFFF;
+    --color-sunken: #E7E7EC;
+    --color-idle: #D2D2DB;
+    --color-disabled: #D0D1D0;
+    --color-ink: #6A5641;
+    --color-ink-strong: #482720;
+    --color-ink-muted: #7A7067;
+    --color-ink-faint: #988F87;
+    --color-rule: #E4E1EA;
+
+    --color-green: #7FCC09;
+    --color-green-deep: #4E7906;
+    --color-green-tint: #F0F8EC;
+    --color-green-line: #C6E5B3;
+    --color-chrome: #4E7906;
+    --color-on-chrome: #FFFFFF;
+    --color-risk: #800014;
+    --color-pick: #EFC96A;
+    --color-sp: #009FE1;
+    --color-rank: #351F70;
+
+    --color-up: #FF9A2C;
+    --color-down: #0088E0;
+
+    --color-tint-speed: #E6ECF7;
+    --color-tint-stamina: #F7E6F1;
+    --color-tint-power: #F7F1E6;
+    --color-tint-guts: #F7E6E6;
+    --color-tint-wit: #ECF7E6;
+    --color-tint-sp: #E6F4F7;
+    --color-line-speed: #CCD6EA;
+    --color-line-stamina: #EACCE0;
+    --color-line-power: #EADFCC;
+    --color-line-guts: #EACCCD;
+    --color-line-wit: #D6EACC;
+    --color-line-sp: #CCE4EA;
+
+    --color-grade-g: #D6E2D8;
+    --color-grade-f: #DED9E8;
+    --color-grade-e: #E4D0F0;
+    --color-grade-d: #CFE0F5;
+    --color-grade-c: #D8EFC8;
+    --color-grade-b: #FBD0E0;
+    --color-grade-a: #FBD9BC;
+    --color-grade-s: #FBE9BE;
+    --color-grade-ss: #F6DFAE;
+
+    --color-scrim: rgba(13, 12, 15, 0.48);
 }
