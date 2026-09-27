@@ -83,6 +83,13 @@
                 $softPct = min(100, $cap > 0 ? $base / $cap * 100 : 100);
                 $atCeiling = $cap <= $base;
                 $grade = $gradeOf($value);
+                // R13: the fill is keyed on the base letter with the modifier
+                // stripped, the badge prints the full letter. The banding emits
+                // seventeen labels including half-steps like `B+`, and the nine tint
+                // families are the nine letters — a `+` is a step within B's colour,
+                // not a tenth colour, and inventing one would be reading a client
+                // badge that no capture shows (KI-8).
+                $gradeFill = $gradeClass[rtrim($grade, '+-')];
             @endphp
             <div class="border-b border-r border-rule p-3 last:border-r-0">
                 <div class="-mx-3 -mt-3 mb-2 flex items-center gap-1.5 border-b px-3 py-1.5
@@ -96,7 +103,7 @@
 
                 <div class="flex items-end gap-2">
                     <span class="inline-grid size-5 place-items-center rounded border border-rule
-                                 text-xs font-bold text-ink-strong {{ $gradeClass[$grade] }}"
+                                 text-xs font-bold text-ink-strong {{ $gradeFill }}"
                           title="Derived from the entered value, not read from the client">
                         {{ $grade }}
                     </span>
