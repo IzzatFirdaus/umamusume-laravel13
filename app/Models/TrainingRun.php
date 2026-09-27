@@ -30,6 +30,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Collection<int, TurnEntry> $turnEntries
+ * @property-read Collection<int, TurnEvent> $turnEvents
+ * @property-read Collection<int, RaceEntry> $raceEntries
  * @property-read Collection<int, Skill> $skills
  * @property-read Umamusume $umamusume
  */
@@ -69,6 +71,22 @@ class TrainingRun extends Model
     public function turnEntries(): HasMany
     {
         return $this->hasMany(TurnEntry::class)->orderBy('turn');
+    }
+
+    /**
+     * @return HasMany<TurnEvent, $this>
+     */
+    public function turnEvents(): HasMany
+    {
+        return $this->hasMany(TurnEvent::class)->orderBy('turn');
+    }
+
+    /**
+     * @return HasMany<RaceEntry, $this>
+     */
+    public function raceEntries(): HasMany
+    {
+        return $this->hasMany(RaceEntry::class);
     }
 
     /**

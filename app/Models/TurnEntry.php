@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\MoodTier;
 use Database\Factories\TurnEntryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +14,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * One Trainer-entered turn of stats; the sole input to all run math (PRD
  * FR-C-2, CLAUDE.md planner rule: deterministic over entered turns).
+ *
+ * Energy, mood and fans are end-of-turn totals, not deltas, matching the five
+ * stat columns (ADR-0003). All three are nullable because runs logged before
+ * they existed must not be backfilled with guesses.
  *
  * @property int $id
  * @property int $training_run_id
@@ -24,9 +29,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $wit
  * @property int|null $sp
  * @property string|null $condition
+ * @property int|null $energy
+ * @property MoodTier|null $mood
+ * @property int|null $fans
  * @property-read TrainingRun $trainingRun
  */
-#[Fillable(['training_run_id', 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition'])]
+#[Fillable(['training_run_id', 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans'])]
 class TurnEntry extends Model
 {
     /** @use HasFactory<TurnEntryFactory> */
@@ -50,6 +58,9 @@ class TurnEntry extends Model
             'guts' => 'integer',
             'wit' => 'integer',
             'sp' => 'integer',
+            'energy' => 'integer',
+            'mood' => MoodTier::class,
+            'fans' => 'integer',
         ];
     }
 }
