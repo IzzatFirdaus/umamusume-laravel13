@@ -107,9 +107,25 @@ external fonts (offline constraint + C-8 dependency gate).
   `space-y-3`; cards `p-4`; section gaps `mt-8`.
 - Structure per surface: one h1, one primary action per screen, filters as a
   single inline form row, pagination under tables.
-- Radius `rounded-md` consistently; borders `1px --color-rule`;
-  shadows: none on dark (separation comes from the rule edge and the
-  raised/sunken step, research doc §3.7 consequence 2).
+- Radius `rounded-md` consistently; borders `1px --color-rule`.
+- Shadows: none. Separation comes from the rule edge and the raised/sunken step
+  (research doc §3.7 consequence 2).
+- **Amended 2026-09-27: three franchise motifs are material, not elevation, and are
+  allowed.** An earlier reading of this section treated them as generic decoration and
+  banned them along with drop shadows. That was wrong on the evidence: each is measured
+  from a specific client frame and each carries meaning rather than gloss. They are
+  implemented as named `@utility` rules in `app.css`, not as arbitrary values.
+
+  | Motif | Spec | Where | Why it is not decoration |
+  |---|---|---|---|
+  | Enamel sheen | research §6.1 | primary action button only | The client's buttons are glossy enamel, and the sheen marks the one confirm control per screen. Hard-edged single split at about 34%, never a feathered ramp (research D-112). |
+  | Argyle lattice bleed | research §6.3 | capsule headers | The client's most repeated element, measured across frames `234521`, `230755`, `232345`. It identifies a header as chrome rather than as data. |
+  | Torn-page turn chip | research §6.6 | the Turn widget in the resource strip | Frame `194819`. Tab strip plus two punch holes. It is the run's timeline anchor, and in a run list it is the row's identity, because turn depth is the first thing a Trainer reads. |
+
+  Two limits survive the amendment. A capsule always carries a word, so its fill stays on
+  the accessible chrome step and never the client's bright lime, where white measures
+  1.99:1 (research §6.3, D-3). And none of the three is a shadow: the rule above is
+  untouched.
 
 ## 3. Component inventory (actual committed Blade)
 
@@ -216,9 +232,11 @@ pattern every other screen copies.
   Wit; Trainee Umamusume; Veteran Umamusume; Scout (not gacha); Uncap;
   Carats; Front Runner / Pace Chaser / Late Surger / End Closer. Fan-English
   strings from exports are never UI copy.
-- Unverified client strings (mood labels like Recreation/Outing, MoodTier)
-  must not appear as UI copy; use a neutral phrase or a visible
-  `[Unverified]` marker (design-research ruling D-20).
+- The five mood tier labels are no longer in this category. `GREAT` / `GOOD` /
+  `NORMAL` / `BAD` / `AWFUL` are measured client strings (research doc §6.17, D-203
+  withdrawn), and a mood pill renders the word, its colour and its directional arrow
+  (D-259). Still blocked: the outing labels and any other term the corpus has not
+  captured.
 - Naming: the app is "Trainer Desk"; it does not adopt the game's trademarks
   into the product name.
 

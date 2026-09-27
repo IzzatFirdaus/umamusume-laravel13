@@ -28,7 +28,9 @@ A Trainer who has spent 400 hours in the client should be able to open this tool
 
 **P1. Light field, saturated meaning.** Surfaces are near-white and quiet. Colour is spent only where it carries information. If a coloured element does not change what the Trainer knows, it should be neutral.
 
-**P2. Preview before commit.** The client never lets you fire a decision blind: the Choices panel shows each option's outcome before you accept, and acceptance is a separate action (RAW-FINDINGS §5.1). Every destructive or irreversible-feeling action in this tool gets the same two-step shape. This is also what makes the guided turn flow feel like the game rather than like a form.
+**P2. Preview before commit — informed risk-taking.** The client never lets you fire a decision blind: the Choices panel shows each option's outcome before you accept, and acceptance is a separate action (RAW-FINDINGS §5.1). Every destructive or irreversible-feeling action in this tool gets the same two-step shape. This is also what makes the guided turn flow feel like the game rather than like a form.
+
+The name matters, and it is borrowed: an external mechanics write-up calls this principle **informed risk-taking**, and the phrase is worth adopting because it describes the Trainer's act rather than the UI's (`CONSTRAINTS.md` D-283 governs what else may be taken from that source). A preview whose job is stated as *reducing risk* would soften the number, hide the cost, or recommend a safer option. Its actual job is to make the risk known and leave the decision alone — which is the same boundary P6 draws around predictions. The under-50 Energy caution at the Confirm control (§6.21, D-171) is this principle at the point of commitment rather than a second, kinder preview.
 
 **P3. Numbers are the display voice.** In the client, the biggest and heaviest thing on screen is a number: the turn count, the stat value, the cost. Headlines are modest. Our type scale inverts the web default, where the H1 shouts and the data whispers.
 
@@ -195,15 +197,26 @@ Tailwind v4 is CSS-first in this repo: the theme lives in an `@theme` block in `
   --color-risk: #800014;        /* training failure, validation error */
   --color-rank: #351F70;        /* grade and rank badges */
 
-  /* mood scale, five states. PROVISIONAL: only GREAT (#FB5590) and GOOD
-     (#ED8036) are evidenced in the corpus. The other three steps are placed
-     inside the measured hue families and must not ship as UI copy until the
-     Global client strings are confirmed. See CONSTRAINTS.md D-20. */
-  --color-mood-peak: #FB5590;    /* measured */
-  --color-mood-good: #ED8036;    /* measured */
-  --color-mood-normal: #7A7067;  /* decided: neutral, the safe default */
-  --color-mood-poor: #A7592B;    /* provisional, amber-800 */
-  --color-mood-worst: #8F3053;   /* provisional, pink-900 */
+  /* mood scale, five states. The five tier WORDS are now measured: the client's own
+     Mood Effect panel prints GREAT / GOOD / NORMAL / BAD / AWFUL (owner-supplied
+     primary evidence, 2026-09-27; see §6.17). The token names follow those words, so
+     the former mood-peak / mood-poor / mood-worst are renamed.
+     Colours are a different matter. Only GREAT and GOOD are measured point probes
+     (§3.1). The Mood Effect capture gives the words and the numbers but no usable point
+     probe for NORMAL, BAD or AWFUL: it is a legend panel, and sampling its row bands
+     averages the pill against the panel field, which is why the same method returns a
+     dark crimson where §3.1's probe on the HUD pill measures #FB5590. So those three are
+     DERIVED, not measured: each keeps the hue and chroma this section previously decided
+     and is solved by bisection to the mean relative luminance of the two measured anchors
+     (0.3136), the same method §3.6 uses for the stat tints. Consequence recorded in
+     D-259: at equal luminance GOOD/BAD sit 3.3 deg apart and GREAT/AWFUL 1.0 deg, so the
+     hue carries no ordinal information and the arrow plus the word carry all of it.
+     PROVISIONAL until the client's own three lower pill colours are captured. */
+  --color-mood-great: #FB5590;    /* measured, §3.1 */
+  --color-mood-good: #ED8036;     /* measured, §3.1 */
+  --color-mood-normal: #A0978E;   /* derived at anchor luminance, provisional */
+  --color-mood-bad: #D48556;      /* derived at anchor luminance, provisional */
+  --color-mood-awful: #D47E9E;    /* derived at anchor luminance, provisional */
 
   /* geometry */
   --radius-panel: 14px;
@@ -338,9 +351,9 @@ Selection stays amber in both themes, so the gold-on-light and amber-on-dark sta
 
 Being explicit about which is which, because it affects how much weight the reader should give each line.
 
-- **Measured:** all of §3.1, plus `mood-peak` and `mood-good`, and the five dark surfaces in §3.7.
-- **Derived:** all ramp steps other than 500, by the mixing rule in §3.2.
-- **Decided:** `ink-muted` `#7A7067` (chosen as the lightest warm neutral that still clears 4.5:1 on the panel, so it is not a ramp step), `mood-normal` (neutral is the safe default for a state the client renders without strong colour), `mood-poor` and `mood-worst` (provisional placements inside measured families, blocked from UI copy by D-20), the page field `#F2F1F8`, and the dark theme's `--color-page`, `--color-idle`, `--color-rule` and ink steps, which are derived from the measured board charcoal rather than measured directly.
+- **Measured:** all of §3.1, plus `mood-great` and `mood-good`, and the five dark surfaces in §3.7. The five mood tier **words** are measured too (§6.17); only their three lower pill **colours** are not.
+- **Derived:** all ramp steps other than 500, by the mixing rule in §3.2. `mood-normal`, `mood-bad` and `mood-awful` are derived by a second rule, bisection to the mean luminance of the two measured mood anchors, and are provisional (D-259).
+- **Decided:** `ink-muted` `#7A7067` (chosen as the lightest warm neutral that still clears 4.5:1 on the panel, so it is not a ramp step), the hue and chroma of the three provisional mood steps (neutral is the safe default for the middle state; the two low states were placed inside measured families rather than given a new hue, per D-26), the page field `#F2F1F8`, and the dark theme's `--color-page`, `--color-idle`, `--color-rule` and ink steps, which are derived from the measured board charcoal rather than measured directly.
 
 
 ---
@@ -474,17 +487,42 @@ The v9 mockup round produced two frames from the same system that used different
 
 | Concept | Glyph | Notes |
 |---|---|---|
-| Speed | running shoe | |
-| Stamina | heart | owns the heart; nothing else may use it |
-| Power | dumbbell | |
-| Guts | flame | ⚠️ collides with burst readiness and occupancy; resolve per D-251 |
+| Speed | running shoe | the support-card type chip is the same boot, measured in `155016` |
+| Stamina | heart | owns the heart; nothing else may use it. The `stamina` type chip is the same heart |
+| Power | dumbbell | ⚠️ the measured type chip is a **flexed arm**, not a dumbbell; see the note under this table |
+| Guts | flame | ⚠️ collides with burst readiness and occupancy; resolve per D-251. The `guts` type chip is the same flame |
 | Wit | graduation cap | never a brain |
 | Skill Points | book | |
 | Energy | rounded battery with a lightning notch | deliberately **not** a heart |
-| Mood | smiley face | |
-| Fans / Team | two people | |
+| Mood | smiley face | ⚠️ collides with the `friend` type chip below |
+| Fans / Team | two people | ⚠️ collides with the `group` type chip below |
+| Support card type: Pal (`friend`) | single smiley figure, olive on grey | ⚠️ **new collision, unresolved.** The client's own type chip is a smiley person, which is the same shape this table assigns to Mood |
+| Support card type: Group | two figures, green on grey | ⚠️ **new collision, unresolved.** Same shape family as Fans / Team |
 | Race / Team Race | trophy | |
 | Calendar | page with a torn top edge | the torn edge is the motif, not an ornament |
+
+**The support-card type chips are measured, and two of them break G-42.** Deck editor frame
+`Screenshot 2026-07-15 155016.png` carries a legend row of seven chips, and six cards in the same frame
+identify five of them because the export states each card's type: three `speed` cards wear the blue boot,
+two `guts` cards the pink flame, and the `stamina` card the red heart. The remaining chips are the brown
+flexed arm (`power`), the dark-green graduation cap (`intelligence`, which the client calls Wit), the
+single olive figure (`friend`) and the pair of green figures (`group`).
+
+Three findings follow, and none of them is cosmetic:
+
+1. `power` is drawn as a **flexed arm** on the type chip while `RAW-FINDINGS.md` §3.6 records the HUD's
+   3D icon as a dumbbell. One concept, two glyphs, both legitimate, because they belong to different
+   render layers. The flat glyph this system draws for Power is the arm; the dumbbell stays only if the
+   3D icon is being imitated. Unresolved which the §3.6 list and this table should agree on.
+2. The `friend` chip is a smiley figure and `Mood` already owns a smiley face. Under G-42 one of them
+   must move, and the resolution is the owner's, not an agent's: the `friend` glyph is the client's and
+   cannot change, so the only free variable is Mood's glyph, which this package chose rather than
+   measured.
+3. The `group` chip is two figures and `Fans / Team` already owns two people. Same class of problem,
+   same reason it is escalated rather than fixed here.
+
+The chip **fill** colours are read from the legend row and are not point probes; treat them as
+indicative until measured. The glyph identities are not in doubt.
 
 ### 6.1 Button
 Two families, and they are not interchangeable.
@@ -550,7 +588,7 @@ Stamina Lvl 1        <- pale ribbon, the discipline and its level
 Breaststroke         <- saturated ribbon, the activity the facility offers
 ```
 
-A mockup showing only `Stamina Lvl 1` is incomplete. The activity line is where the game tells you *what this turn actually is*, and it is also the strongest single piece of evidence that facility layouts differ between scenarios, since the activity set is a function of the facility.
+A mockup showing only `Stamina Lvl 1` is incomplete. The activity line is where the game tells you *what this turn actually is*. It is **not** evidence that facility layouts differ between scenarios — every frame carrying these names is Unity Cup, so the list shows variation per facility within one scenario (D-187 carried the stronger claim until 2026-09-27; see `SCREENSHOT-MANIFEST.md`).
 
 ### 6.5 Stat band
 
@@ -559,6 +597,7 @@ The core readout (frames `194819`, `202142`, `232345`). Six columns, equal width
 - body: per column, a grade badge (§6.7) at left, `numeral-lg` value, and `/cap` at `meta` beneath
 - the value is the largest thing in the band. The label is not.
 - **Two markers, two meanings.** The bar carries the **1200 soft-cap line**, where *"training gains for stats beyond 1200 are always halved"* (`CONSTRAINTS.md` D-211), and separately the **scenario ceiling**, expressed as base plus bonus (D-212). They are different facts and must not collapse into one line.
+- **Why they cannot collapse: one is a behaviour gate, the other is a maximum.** A stat threshold in this game does not just mean "more"; past 1200 the client runs *different logic* on the stat — gains halve — so the line marks where the rules change. The scenario ceiling marks only the largest value that can be held. Two kinds of fact, drawn apart, because folding the behaviour gate into the bar end would hide the one that changes what a Trainer should do next. The same distinction applies wherever a threshold unlocks a named behaviour rather than a quantity; the thresholds themselves are governed by D-283 and stay untraced until a capture or dataset carries them.
 - gain bubbles float **above** the column they apply to (§6.8)
 - **the bar's end is the scenario ceiling for that stat, not the app's validation bound.** An earlier revision of this bullet instructed the opposite — cap the bar at 1200 and never imply a wider ceiling — and that instruction is withdrawn: it dressed a schema limitation as a design decision (D-31, `ADR-0002`). The denominators are `1,200 + scenarios.json.stats[i]`, so 1400 / 1300 / 1800 / 1900 per scenario and stat, with **2000** as the recorded hard cap, and a Unity Cup Wit bar and a URA Wit bar at the same value must be visibly different lengths. Where a ceiling has components the tool does not store, §6.22's disclosure line says so rather than silently widening the bar.
 
@@ -567,6 +606,49 @@ The core readout (frames `194819`, `202142`, `232345`). Six columns, equal width
 Three elements the client keeps on the training screen permanently and that every mockup in this package so far has omitted.
 
 **Support card rail.** A vertical column on the right edge of the training HUD, one circular avatar per card in the deck. Each carries a small type badge for the card's discipline, a segmented **bond gauge** beneath it, an orange double chevron when friendship training is available, and a flame mark when the card sits on its own tile. It is the Trainer's read on deck state at a glance, and it belongs on the dashboard, not only on the training screen.
+
+**Deck composition editor.** Measured from `Screenshot 2026-07-15 155016.png`, which is the client's own
+deck screen and the only frame in this package that shows all six slots at once. Anatomy, top to bottom:
+
+- **Header.** The deck name sits in a green capsule at the left with a pencil control for editing it, and
+  `Copy` is a secondary button at the right. The name is the Trainer's, not the game's, so it is free text
+  and must not be styled as a stat.
+- **Grid.** Two rows of three slots. Each slot carries, in fixed corners: the rarity ribbon at the top
+  left, the **type chip** at the top right, the **four limit-break diamonds** at the bottom left, and
+  `Lvl N` at the bottom right in display numerals. The corners are the contract; a slot that moves them
+  stops being readable at a glance.
+- **The sixth slot is the friend slot.** It takes a pink frame and the caption `Friends` under the level.
+  Any card may occupy it — the captured deck puts a `stamina` card there — so the caption names the
+  **slot**, never the card's type. This is the single most misread thing about this screen, and
+  `ADR-0005` exists partly because of it.
+- **`Scenario Link`.** A green pill over the lower-left of the art, present on exactly the cards whose
+  character appears on the running scenario's linked list. In the frame one card of six carries it, and
+  it is the deck's only Unity Cup linked character, so the badge is a join, not a stored flag
+  (`UMAMUSUME_REFERENCE.md` §1.4.7).
+- **Type legend.** A row of seven chips under the grid — boot, heart, flexed arm, flame, cap, single
+  figure, two figures — each followed by `xN` **only when the count is non-zero**. The absent counts are
+  the information: a Trainer reads which disciplines the deck neglects.
+- **Footer.** `Reset` as secondary, `Auto-Fill` as the single primary action, and a row of page dots
+  beneath for the Trainer's saved deck presets.
+
+**Card detail panel.** Measured from the six panels captured the same minute (`155215` through `155337`).
+Art at the left with the rarity ribbon and the type chip; at the right the bracket title above the
+character name, then `Lvl N / MAX` with `0 SP to next level` beside it, then a `Unique Perk` heading over
+the perk name and its own `Lvl N` badge, then the two effect names the perk grants. A tab row below
+offers `Support Effects`, `Skills`, `Career Events`, `Flavor Text`.
+
+Two limits on what this tool may draw in that layout, both from the data rather than from taste:
+
+1. **The perk level is not the card level and the perk has no values on record.** A `Lvl 50 / 50` card
+   appears with perk `Lvl 30` and a `Lvl 35` card with perk `Lvl 40`, so the two are independent axes.
+   `UMAMUSUME_REFERENCE.md` §1.4.7 records that the export carries no perk values and that one of the
+   two named perk effects is not even present in the card's effect list. So a detail view may show the
+   perk's **name** and its **level** if the Trainer entered them, and must show no magnitude. A number
+   there would be invented (D-20, D-256).
+2. **Effect magnitudes are computed, and the computation is public.** The client's value at any level is
+   the floor of a straight line between the stored anchor levels, verified against the client at three
+   levels on five effects. Where this tool displays one, it prints the anchors it interpolated between
+   beside the figure, per D-256's rule that a derived value names its own rule.
 
 **Failure badge.** A blue pill directly beneath the stat band reading `Failure 0%` (`194819`). It is the client's own risk surface and it is the natural home for the §6.15 Safe / Caution / Danger bands. Note the limit: the client shows a percentage it can compute from live state; this tool has no sourced curve, so we render the band word and never a number (D-155, ADR-0001 §3).
 
@@ -625,14 +707,45 @@ Badge tokens, both themes. These are the sanctioned hexes; an artifact using a g
 }
 ```
 
-- grade is **derived** from the value, and **the derivation is not sourced.** §6.7 has never had a value-to-letter mapping, and no file in this repo carries one: the sentence in `UMAMUSUME_REFERENCE.md` §1.5 that reads "Speed around 800 or an A rank to win the URA finale" is about **aptitude** rank, not a stat grade, and cannot be used as an anchor. So the banding below is a **local, provisional, evenly-spaced rule**, and the prototype must print it next to the badges rather than let the letter stand as if it were the client's.
+- grade is **derived** from the value. This section previously said the derivation was
+  unsourced and invented an evenly-spaced 150-point banding. **That banding was wrong and is
+  replaced**: seven Legacy Select frames supplied real client pairs.
+
+  Ten stat cells read off two frames, each a (value, letter) pair as the client renders it:
+
+  | Value | 75 | 90 | 90 | 95 | 96 | 104 | 107 | 107 | 138 | 143 |
+  |---|---|---|---|---|---|---|---|---|---|---|
+  | Letter | G+ | G+ | G+ | G+ | G+ | F | F | F | F | F |
+
+  Monotonic, with a hard boundary between 96 and 104. The simplest rule consistent with every
+  observation, and with the client's use of `+` modifiers, is a 50-point half-step ladder:
 
 ```
-step = 150 over the 0..1200 halved-gains range
-G 0-149 · F 150-299 · E 300-449 · D 450-599 · C 600-749 · B 750-899 · A 900-1049 · S 1050-1199 · SS 1200 and above
+G 0-49 · G+ 50-99 · F 100-149 · F+ 150-199 · E 200-249 · E+ 250-299
+D 300-349 · D+ 350-399 · C 400-449 · C+ 450-499 · B 500-549 · B+ 550-599
+A 600-649 · A+ 650-699 · S 700-749 · S+ 750-799 · SS 800 and above
 ```
 
-It is deterministic and explainable, which satisfies Planner Rules 4 and 5, and it is **wrong until sourced**: nothing here says the client's A starts at 900. Sourcing it is a blocking item, not a polish item, because a grade letter is the single most-quoted number in a training log. Until then the UI labels the badge strip `[Provisional banding]` and shows the boundaries.
+  **State the confidence honestly, and note that it has since been partly falsified.** The one
+  measured boundary is G+ / F at 100, and the ladder fits the low range: 436 and 442 both
+  predict and render as `C`. It then **breaks**. Run Completion frames add Speed 1245,
+  Stamina 442, Power 716, Guts 436, Wit 499, and the ladder predicts 499 as `C+`, 716 as `S`
+  and 1245 as `SS`, where the client renders `C`, `B+` and an unexplained `U/G` badge. Two of
+  those five are wrong and the third is not on the ladder at all.
+
+  So the 50-point half-step model is **valid below roughly 450 and unvalidated above it**,
+  which is the opposite of what a grade display needs, because the interesting values in a
+  finished run are the high ones. The ladder stays published and marked `[Provisional]`
+  precisely so it is not trusted above its evidence, and §11 carries the open item: a grade
+  function needs either the client's real table or a sweep of captures crossing each boundary
+  in the 500-to-1300 band, plus a reading of what `U/G` denotes.
+
+  Three things fall out of the same frames. Aptitude letters (`Turf A`, `Sprint E`, `Dirt G`)
+  are not on this numeric scale at all; they are a separate character property. The `B+ RANK`
+  badge on a Legacy portrait is a third scale again, a score rank. The three must not share
+  one token set. And the frames show caps of 1304, 1316, 1318, 1320, 1325 and 1800, which
+  confirms §6.22's stack model from client pixels **and contradicts the flat "+16 per ★3"
+  breakthrough figure**: 4, 16, 18, 20 and 25 all appear above a 1300 base.
 
 ### 6.8 Gain bubble
 The scalloped cloud over a stat (frame `194819`):
@@ -747,9 +860,27 @@ Failure risk renders as the **band word from §6.16, never a percentage**, unles
 
 ### 6.17 Mood tier
 
-Five tiers, pill-shaped, using the tint-and-border pattern from §3.4 so the label stays legible. The pill carries the word always; colour alone never signals the tier.
+Five tiers, pill-shaped, using the tint-and-border pattern from §3.4 so the label stays legible. The pill carries the word always; colour alone never signals the tier. **It also carries the arrow: see D-259, which makes the direction a required part of the component rather than an embellishment.**
 
-**Blocked on terminology.** The client's own Global strings for the five tiers are unverified (`UMAMUSUME_REFERENCE.md` §1.1.6 records `❌ UNVERIFIED`), and the corpus shows the client rendering `GREAT` and `GOOD` rather than the wiki glosses Peak / Good / Normal / Poor / Worst. `CONSTRAINTS.md` D-20 forbids promoting an unverified string into UI copy, so the label set is an open decision (`ADR-0001` §6), not a token.
+**Terminology is no longer blocked.** An owner-supplied capture of the client's own Mood Effect panel (2026-09-27) prints all five tier strings and both effect columns, so the label set is a measured client string set, not an open decision. The panel is the client explaining the system to the player, which is primary evidence of the highest kind available here, and `UMAMUSUME_REFERENCE.md` §1.1.6 now reproduces its figures.
+
+| Tier (client string) | Arrow | Training effect | Pre-race attribute effect | Token |
+|---|---|---|---|---|
+| `GREAT` | up | +20% | +4% | `--color-mood-great` |
+| `GOOD` | up | +10% | +2% | `--color-mood-good` |
+| `NORMAL` | flat | 0% | 0% | `--color-mood-normal` |
+| `BAD` | down | −10% | −2% | `--color-mood-bad` |
+| `AWFUL` | down | −20% | −4% | `--color-mood-awful` |
+
+Three rulings come out of that table, and each one reverses something this package previously asserted:
+
+1. **The arrow direction is the ordinal signal.** Up for the two positive tiers, neutral at `NORMAL`, down for the two negative ones. Because the three provisional colours were derived at the anchors' luminance (§3.5), `GOOD` and `BAD` sit 3.3° apart and `GREAT` and `AWFUL` 1.0° apart, so hue alone cannot order the scale. The arrow is what makes a five-pill row readable, which is why D-259 makes it mandatory instead of stylistic. Of the five glyphs, the `NORMAL` one is the least certain reading from the capture (flat versus no mark at all reads the same at small sizes); the other four are unambiguous, and the rule does not change either way.
+
+**⚠️ This makes pill size a correctness constraint, not a taste one.** The three derived colours are not distinguishable by hue at the luminance they were derived to, so **arrow direction is the only ordinal signal in the component** — a Trainer reading mood at a glance reads the glyph or nothing. Therefore: no mood pill may be rendered smaller than the size at which its arrow is legible, and no layout may drop the arrow while keeping the colour pair to save space. The minimum itself is **not measured**, and none is stated here because inventing one would be the same failure this section documents — the practical rule is to test the five-pill row at the smallest size any surface uses, in both themes, and treat an unreadable arrow as a rejected layout. Related: G-47 (badge contrast) and D-259.
+2. **`Practice Poor` is not a mood tier.** It is a failure *condition* from an event outcome (§6.16b, D-201), and D-203 had floated it as a candidate label for the low tier. The client's low tiers are `BAD` and `AWFUL`. The two vocabularies must not be merged, and a mood widget must never offer a `Practice Poor` state.
+3. **The wiki glosses are retired on both counts, the words and the second column.** `UMAMUSUME_REFERENCE.md` §1.1.6 previously printed Peak / Good / Normal / Poor / Worst against a pre-race column of +10 / +5 / 0 / −2 / −5 — the strings are glosses of the JP terms rather than client copy, and that column is not even symmetric across the sign, which is the tell that it was transcribed from prose rather than read off a table. The client prints ±4 and ±2. The training column is the one both camps agree on, so the ±20 % headline is unchanged. D-20's general rule (never invent a client string) is untouched and still binds every other label in the system.
+
+The tier also carries a state marker: the client's panel flags the row the Umamusume is currently on, in the capture at the `GOOD` row. In this system that is a `Current` marker on the row, per D-202's rule that the tier word and the numeric delta are both shown and neither replaces the other.
 
 
 ### 6.18 Empty, loading, error
@@ -837,16 +968,19 @@ The tool must never read as a URA-only tracker. Four scenarios are live on Globa
 
 **Scenario identity is a first-class header element**, not a subtitle. The active scenario name sits in the run header at `label-strong` beside the trainee name, and the phase bars in the timeline carry it, because a Trainer running two scenarios side by side needs to know which is which at a glance.
 
-**The cap display has to be honest about being a derived value.** A run's ceiling is 1,200 base, plus the scenario bonus, plus breakthrough at +16 per ★3 inherited basic-ability factor, plus per-stat support-card 「限界値アップ」 effects, applied at three separate moments in the run. The first two terms are now stored facts — `scenarios.json` publishes the per-stat scenario bonus directly. The last two are not in the schema at all. There is therefore no single stored cap to print, and the components that are known should be shown as components.
+**The cap display has to be honest about being a derived value.** A run's ceiling is 1,200 base, plus the scenario bonus, plus breakthrough raises on inherited ★3 basic-ability Sparks, plus per-stat support-card 「限界値アップ」 effects, applied at three separate moments in the run. The first two terms are stored facts — `scenarios.json` publishes the per-stat scenario bonus directly. The last two are not in the schema at all. There is therefore no single stored cap to print, and the components that are known should be shown as components.
+
+Note the breakthrough term is **not** a flat +16. The client's own finished-run frames show increments of 4, 16, 18, 20 and 25 above a 1300 base (§11 item 3), so the +16 figure that `ADR-0002` amendment 1 carried from a guide is one observed step, not the rule. The disclosure line does not need it — it needs to say the term is untracked — and any later attempt to compute a ceiling from +16 would be building on a disproved generalisation.
 
 So the stat band renders the cap as a **stack, not a number**:
 
 ```
 Wit  1,340 / 1,800
-       1,200 base · +600 scenario · +0 breakthrough · deck not tracked
+       1,200 base · +600 scenario · breakthrough not tracked · deck not tracked
 ```
 
 - The denominator is the sum of the terms the tool actually holds, each labelled.
+- **A term the tool cannot observe never renders as zero.** `+0 breakthrough` states a game fact — that this Trainer inherited no ★3 basic-ability Sparks — and the tool has no idea whether it is true, because inherited Sparks are not in the schema. Zero and untracked are different disclosures, and only the first is a number: `+0 breakthrough (no ★3 Sparks entered)` when a Trainer has actually recorded the inheritance, and `breakthrough not tracked` otherwise. The same split applies to the deck term, which is a Phase 1 tool limitation rather than any state of the run. Printing a quiet `+0` is the D-94 failure in numeric form: a figure that looks sourced because it is a digit.
 - A disclosure line names what is included and what is not. Until support cards exist in the schema, the line says the deck contribution is untracked. Naming a known gap beats implying a complete figure.
 - The bar fill is scaled to the **scenario base for that stat**, never to a global constant, so a Unity Cup Wit bar and a URA Wit bar of the same value are visibly different lengths. This is what makes the tool read as scenario-aware without a single extra pixel of chrome.
 - The 1200 validation line is drawn as a separate marker on the bar, not as the bar's end. See `CONSTRAINTS.md` D-31 and `docs/adr/0002`.
@@ -865,7 +999,7 @@ The earlier version of this table carried a `Trackblazer` row of `1200 / 1900 / 
 
 **Scenario coverage, corrected.** An earlier revision of this file claimed the whole corpus was one scenario. That was an overreach from a ten-frame sample and is withdrawn. A 96-frame stratified montage of the turn-chip region shows the corpus is **predominantly Unity Cup** with **confirmed Ura Finale material** (`012428` carries a `Place 1st in URA Finals` goal and a `FINISHED` state). **No Trackblazer or Our Grand Concert evidence was found**, so a three-way scenario comparison is not possible from this corpus.
 
-Unity Cup also turns out to carry scenario-specific resources the design had not accounted for: a `Result Pts` counter and a `TEAM RANK B 11/16` badge (`121214`, `024535`, `031816`). The facility activity names in §6.4b are the strongest evidence that scenarios differ in facility layout, since the activity set is a function of the facility. The cap table above remains documentary, not visual. Scenario-specific chrome variations must be designed from the scenario data, or captured from the client, before any of them is asserted in a mockup.
+Unity Cup also turns out to carry scenario-specific resources the design had not accounted for: a `Result Pts` counter and a `TEAM RANK B 11/16` badge (`121214`, `024535`, `031816`). The facility activity names in §6.4b are Unity Cup's own; they show the banner carries an activity line, and nothing yet about how another scenario's facilities are arranged. The cap table above remains documentary, not visual. Scenario-specific chrome variations must be designed from the scenario data, or captured from the client, before any of them is asserted in a mockup.
 
 
 ---
@@ -907,6 +1041,188 @@ The scenario guides describe rewards as **gold-rarity** and **white-rarity** ski
 So: rarity is written as a **word**, never as the selection colour. If a visual marker is needed it is a neutral outline or a rank letter, and the selection treatment stays exclusive to selection. The same test applies to the client's own gold-text cap-increase signal (D-213): that one is legitimate because it marks a *value*, sits inline in numerals, and never appears on an interactive surface — three conditions the rarity case fails.
 
 **Scenario currencies get no identity colour.** Grade Points, Shop Coins, Team Rank, Result Pts and Spirit Burst counts are glyph-plus-label-plus-numeral, matching how the five stats are already handled (§3.6, D-114). Each new currency could claim a hue; four of them would blow the dose cap in §7.1 and none of them carries meaning that colour could add, since the Trainer's decision depends on the *number*, not the pigment.
+
+### 6.27 Legacy Select
+
+The pre-run screen where a Trainer fixes the two Legacies a Trainee Umamusume will inherit
+Sparks from. Sourced from seven client frames captured 2026-07-15
+(`docs/game-screenshots/Screenshot 2026-07-15 1538*.png`, `1539*.png`, `154010.png`), read at
+crop resolution rather than from a description, and cross-checked against Game8's Global
+Legacy and Sparks guide and the umareference inheritance chance tables.
+
+**Layout.** A two-panel composition, which is the client's desktop grammar (§3.8) rather than
+a choice: the left panel holds the Trainee's stat band, aptitude table and the two Legacy
+slots over the scene; the right panel is a full-height Sparks list under a capsule header.
+Left is decision, right is consequence. This is the one place the persistent right-hand
+region legitimately holds data rather than navigation, because it is a detail pane of the
+selection on the left, not a destination.
+
+**Two numbering systems, both client-authored.** The left slots read `Legacy 1` and
+`Legacy 2`; the right panel groups read `1st Legacy` and `2nd Legacy`. Reproduce both
+verbatim. Normalising them to one style would break matching a label on screen to a label in
+the tool, and inventing a third would be worse.
+
+**Spark colour coding, measured from the bars themselves.**
+
+| Kind | Bar fill (measured) | What it carries |
+|---|---|---|
+| Stat | `#3CB4F0` / `#60C0F0` blue | Speed, Stamina, Power, Guts, Wit |
+| Aptitude | `#FC84B4` / `#FC78B4` pink | Track, Distance and Style aptitudes |
+| Unique skill | `#90CC30` green | The ancestor's Unique Skill, e.g. `Red Shift/LP1211-M`, `Triumphant Pulse` |
+
+Blue and pink here are **category identity**, not direction. That is a real collision with
+§3.3, where blue means decrease and pink carries no meaning, and with the delta pair this
+package had to step darker for the light theme. The resolution is containment: the spark
+fills are large bars with white text on them, they appear only inside the Sparks list, and
+no delta, badge or status control may reuse them. A pink bar must never be able to read as
+"this went down".
+
+**Star rating.** Three slots per spark, filled gold against empty grey. The count is the
+spark's rank and it drives the inheritance chance, so it is data, not ornament. It must never
+be the only signal: the row carries the rank numerically on request, and the filled/empty
+shapes differ in silhouette as well as colour (P5, D-12).
+
+**Affinity is a header pill, not a between-slots gauge.** The client renders
+`Affinity:` followed by a concentric-ring mark, on a pink-to-orange pill, in the panel header
+beside the `Skills` button, above the stat band. It describes the Trainee's relationship to
+the selection as a whole. Placing it between the two Legacy slots, which is where a designer
+would reasonably guess it goes, is wrong and would imply it is a property of one pairing.
+
+**Guest Legacy.** A borrowed friend Umamusume is marked with a `Guest` pill over the portrait.
+It is read-only: the Trainer cannot alter another player's Umamusume, so every control that
+would mutate it is absent rather than disabled-grey. Borrowing is free once a day and costs
+Monies after that, which is the game's economy and not this tool's; the tool records only
+that the Legacy was a guest.
+
+**Rank badge.** Each Legacy portrait carries its own letter rank in the client's badge
+treatment, for example `B+ RANK`, plus a ring whose colour denotes the card's rarity. That
+badge is the ancestor's, not the Trainee's, and the two must not be confused in a list.
+
+**What the tool must not do.** Inheritance is a **roll**, and the rates are published:
+
+| Spark kind | ★1 | ★2 | ★3 |
+|---|---|---|---|
+| Stat (blue) | 70% | 80% | 90% |
+| Aptitude (pink) | 1% | 3% | 5% |
+| Unique skill (green) | 5% | 10% | 15% |
+
+Second-generation Sparks have their rates **halved**, and affinity acts as a percentage
+multiplier on those chances. None of this may be presented as a predicted outcome. Planner
+Rule 1 forbids simulation and Rule 4 requires every number to be a pure function of what the
+Trainer entered, so the tool shows the **chance the game publishes** and the **result the
+Trainer observed**, and never a projection of what a run will inherit. A row may read
+`Stat spark, 90% chance` because that is a sourced constant. It may not read `likely to pass
+Speed` because that is a guess about a random event.
+
+**Data model reality check.** `training_runs` carries `inheritance_parent_a_id` and
+`inheritance_parent_b_id`, both nullable FKs to `umamusume`. That records *which character*
+was chosen and nothing else. It cannot record the second Legacy's own ancestors, the affinity
+value, the Guest flag, the star ranks, or which Sparks actually came through. The screen
+described above therefore has more state than the schema can hold; `ADR-0003`'s `turn_events`
+payload pattern is the natural home, and closing that gap is a schema proposal, not a UI
+decision.
+
+**Terminology conflict, unresolved and needing a ruling.** The owner instruction bans
+"parent" in favour of "Legacy" or "Ancestor". Game8's Global guide glosses Legacies as
+"(also known for parents)", the client's own second-generation grouping is what English
+guides call grandparents, and the shipped columns are literally
+`inheritance_parent_a_id`. UI copy can honour the ban today at no cost. The **column names
+cannot**, and renaming them is a migration, which is out of this phase's scope. Recorded
+rather than silently half-applied.
+
+### 6.28 Run Completion state
+
+The summary the client shows when a career ends and the Trainee becomes a Veteran Umamusume.
+Sourced from six frames dated 2026-07-15 (`Screenshot 2026-07-15 0622*.png`, `0623*.png`,
+`0625*.png`), read at crop resolution. The example run is `[Peak Blue] Daiwa Scarlet`,
+Career Rank **A**, Rating **10,884**, Fans **396,191**.
+
+**6.28.1 Career Rank medal.** A circular medal: laurel wreath border, a coloured disc, the
+rank letter at full height in white, and a ribbon across the lower third reading `RANK`. The
+disc colour tracks the rank (observed orange-red for A). Beneath it, `Rating` and the number
+in monospace tabular figures. Below that, a horizontal progress bar between two smaller medals
+showing the current rank and the next one, `A RANK` to `A+ RANK`, with the filled portion
+indicating progress.
+
+This is the run's score and it is the largest element on the screen. **The rating is not
+computable here.** Career Rating in the client is a function of final stats, race results and
+fans across the whole run, and reproducing it would be a simulation, which Planner Rule 1
+forbids. So the tool records the rank letter and the rating number the Trainer read off this
+screen, labels them as entered, and never derives or forecasts them. A run may be saved with
+an empty rating; it may not be saved with a predicted one.
+
+**6.28.2 Career Record and Major Wins.** Two green section bars, `Career Record` and
+`Major Wins`, each with the double-slash mark at its right end. The record line reads
+`Races: 18   Wins: 16`. Major Wins is a list where the **icon encodes the tier of the
+achievement**, and the two kinds are visually different: a gold medal disc for a series title
+(`Senior Autumn Triple Crown`, `Triple Tiara`) and a blue `G1` tier badge for a single race
+(`Yasuda Kinen`).
+
+The rule that follows is a content rule, not a visual one: **a win title may only be rendered
+if the race exists in the scenario calendar data.** `Triple Tiara` and `Triple Crown` are
+composite achievements rather than races, so they have no row in a race table and must come
+from a curated list, not be assembled from race names. Inventing a title because it sounds
+plausible is the same failure as inventing a skill name.
+
+**6.28.3 Final stats and aptitude grid.** The stat band returns in its list form, five columns,
+each a grade badge, the label, and a monospace value: Speed 1245, Stamina 442, Power 716,
+Guts 436, Wit 499. Below it the aptitude grid, three rows labelled `Track`, `Distance`,
+`Style`, each cell a letter badge: Turf A, Dirt G, Sprint F, Mile A, Medium A, Long B,
+Front A, Pace S, Late D, End G.
+
+A radar chart appears in the client as an alternative view behind a swap control. It is
+optional here and the list is mandatory, because the list carries the numbers and the chart
+does not (D-94: a chart must answer a question, and "which of my five stats is weakest" is
+answered faster by five numerals).
+
+**Measured badge palette.** Confirmed from these frames, correcting two entries in §6.7's
+table: `A` orange, `B` and `B+` pink, `C` green, `D` blue, `F` **periwinkle**, `G` grey,
+`S` gold. **F is not grey.** It is the same violet-blue seen on the Legacy Select frames, and
+grouping F with G, as an earlier draft did, removes the one distinction that makes the ladder
+scannable.
+
+**The `U/G` badge, unexplained.** Speed 1245 carries a badge that is not a letter on the
+G-to-SS ladder: a large violet `U` with a smaller grey `G` set at its lower right. The same
+mark appears on a Legacy portrait in the §6.27 frames. What it means is **not established**.
+It is almost certainly a tier above `SS`, but it could be a different axis entirely. Do not
+render it, do not map it to a number, and do not invent a meaning for it. Recorded as an open
+item in §11.
+
+**6.28.4 Class progression pyramid.** A gold-gradient triangle listing the fan classes bottom
+to top, each with its threshold in fans on the right:
+
+| Class | Fans |
+|---|---|
+| Debut / Maiden | entry class |
+| Beginner | 1st place |
+| Bronze | 5,000 |
+| Silver | 20,000 |
+| Gold | 50,000 |
+| Platinum | 100,000 |
+| Star | 160,000 |
+| Top Star | 240,000 |
+| Legend | 320,000 |
+
+The reached tier must be marked, not inferred from a number: the client flags `Legend` with a
+`KEEP !` pointer because the run is above its threshold and the tier must be defended. The
+line below reads `Fans 396,191 (+51,012)`, the gain from the final race in the same
+increase-orange used for every other gain, so the delta convention holds here.
+
+**These thresholds are a fourth, separate fan scale.** Race entry gates run 350 to 25,000, URA
+event gates 60,000 / 70,000 / 120,000, Trackblazer's Unique Skill gates 5,000 / 60,000 /
+120,000 paired with bond, and the class ladder is the nine tiers above. D-224 forbids merging
+two of them; this adds a fourth. A single "Fans" readout serves none of them, and the class
+ladder is the one that matters at run end.
+
+**6.28.5 Race result header, and a new tier.** The final race screen shows `EX` beside
+`Twinkle Star Climax Race 3`, then `Nakayama Turf 2000m (Medium) Right / Inner`, a `Firm`
+going chip, and a large `1st` placing medal under a `Placing` label.
+
+`EX` is a **sixth tier label** beyond Pre-OP, OP, G3, G2 and G1, and it had not been recorded
+anywhere in this package. It confirms that the tier set is not closed, which is why D-153
+forbids deriving a tier from a grade code: an unseen code would be silently mislabelled. The
+`EX` badge also appears on the Legacy Select frames, so it is a general class marker rather
+than something specific to the Climax.
 
 ## 7. Motif and ornament budget
 
@@ -965,6 +1281,10 @@ The critical property: **the preview is the input.** The Trainer is not filling 
 Energy enters this flow as a **logged value plus an advisory row**, not as a gate. The gauge is persistent in the header so the Trainer knows their position before choosing, and when stored Energy is under 50 the step shows the §6.17 advisory naming Rest, Outing and Wit as the game's three documented mitigations. What the flow must not do is block, dim, or auto-reorder the five options on the basis of a modelled risk: that turns an advisory into a prediction the sources cannot support. The Trainer picks; the tool explains.
 
 **No numbered step sidebar.** A vertical 1-2-3-4 rail with a highlighted current step is the shape of a SaaS setup wizard, and it is the single fastest way for this flow to stop feeling like an in-game event. The client has no such rail: an event screen presents one question and its options, and the only progress cue is the turn counter. So the flow carries a single `Step 1 of 3` line with three dots at the foot of the card stack, and nothing else. Where the steps genuinely need naming for orientation, they are named *inside* that line, not in a column beside it.
+
+**Deck awareness, and the hard limit on it.** The discipline step asks "Which training are you focusing on this turn?", and a Trainer is answering that question with their deck in mind: which cards sit on that tile, whether their gauges are past 80, and whether the tile is where a card's own discipline is. So the option row carries the deck's chips for the chosen discipline — the §6.5b rail's data, reused here rather than redrawn — because the deck is the reason the choice is good, and a step that asks the question while hiding the answer is a form, not a decision.
+
+What the step must not do is turn that into a recommendation. Three of the inputs to "which tile should I pick" are **not stored anywhere in this application**: the per-card friendship gauge at the start of the turn, the Specialty Priority roll that decides whether a card actually appears on its own tile, and the per-tile participant count. Each is either Trainer state the tool never records or a random draw the tool must not simulate (Planner Rule 4, PRD §6.11). So the deck row is **descriptive and inert**: it names the cards whose discipline matches the option, and it stops there. No ordering of the five options by deck strength, no "recommended because three cards are here", no highlighted option. If the owner later accepts `ADR-0005` option 2 and the deck becomes stored data, the row may add counts, and still no ranking, because the roll underneath it is not modelled.
 
 ### 8.3 Run list (Screen C)
 Cards, not a table, because the turn chip wants to be an object. Each card: trainee name (`title`), scenario, status pill, turn depth chip, the **micro-grade strip**, and the skill plan tally as Suggested/Acquired/Skipped counts. Sort and filter are `label`-weight controls in the panel header, never a toolbar that outshouts the data.
@@ -1083,9 +1403,9 @@ Surfaced, not resolved. Each needs the owner or a role escalation.
 
 1. **Font dependency.** The rounded mandate is settled (§4.1) and Nunito is recommended, but it is still a new dependency and root C-8 requires the owner's approval. Self-hosting is the expected answer for a tool that must work offline (NFR-1); a Google Fonts `<link>` would break that. The web study came back and did **not** settle it in Nunito's favour: Cygames' own sites run Roboto. The client, which is what we are matching, is rounded. The owner should confirm the tool follows the client and not the marketing site.
 2. **Per-trainee accent.** The client tints its HUD to the character (Oguri Cap green, Mejiro McQueen blue; RAW-FINDINGS §7.2). We cannot follow it without a colour column on `umamusume`, which has no PRD requirement. Escalation: Architect, and PRD §6 governs if it becomes a scope question.
-3. **Grade derivation. Partially resolved, still blocked on a source.** §6.7 now carries an explicit evenly-spaced banding, and `screen-a-scenario-v10.html` prints the boundaries beside the badges rather than letting a letter imply authority. It is deterministic and legal under Planner Rule 4. It is also **ours, not the client's**: no file in this repository defines a stat grade scale, and the sentence in `UMAMUSUME_REFERENCE.md` §1.5 that reads "Speed around 800 or an A rank" is about **aptitude**, not a stat grade, so it is not the anchor it looked like. Sourcing the real thresholds needs either a sampled screenshot set spanning all nine letters or a data field. Until then the `[Provisional]` label stays on the component.
+3. **Grade derivation. Partly closed by client frames; still not sourced.** §6.7 previously invented a 150-point banding. Ten (value, letter) pairs read off the Legacy Select screenshots replaced it with a 50-point half-step ladder, because the client itself puts 75-96 at `G+` and 104-143 at `F`. That measures exactly **one** boundary, G+ / F at 100; the remaining fourteen are extrapolation. The `[Provisional]` label and the printed boundaries stay until a capture crosses each threshold or the table is exported. Note the same frames also disproved the flat "+16 per ★3" breakthrough figure, showing increments of 4, 16, 18, 20 and 25 over a 1300 base.
 4. **Per-grade badge colour. Resolved, with the gold collision accepted under protest.** §6.7 now defines nine badge tokens in both themes, and the white-letter rule that came with the indigo draft is void: measured against the light fills, white text lands between **1.20:1 and 1.44:1**, which is not a near miss but a different planet. `ink-strong` on the same nine fills measures **9.19 to 11.03** in light and **9.00 to 12.84** in dark. Grade S and SS take a stronger gold per the client's convention, which does sit next to `pick` gold; they are separated by surface (a small filled square with a letter, versus a 2px outline on an interactive row), not by hue.
-5. **Mood state strings.** Only GREAT and GOOD are evidenced (`RAW-FINDINGS.md` §8). The three provisional steps in §3.5 are blocked from UI copy by `CONSTRAINTS.md` D-20 until the Global client strings are confirmed.
+5. **Mood state strings. CLOSED 2026-09-27.** An owner-supplied capture of the client's Mood Effect panel gives all five tier words (`GREAT` / `GOOD` / `NORMAL` / `BAD` / `AWFUL`) and both effect columns, so §3.5's tokens are renamed to them and D-20's mood-specific block is lifted. What remains open is narrower and is a colour question, not a terminology one: the three lower pills' measured hues. Until they are captured from the HUD the values are derived at the anchors' luminance and marked provisional, and the arrow rule (D-259) is what carries the distinction.
 6. **Dark mode.** In scope, specified in §3.7, and anchored on the measured raceboard surface. Open question is narrower than the earlier draft of this file assumed: does the theme follow the system preference, default to light, or offer a three-way switch? A local single-Trainer tool can reasonably follow the OS, and that is the recommended default.
 7. **Product name. CLOSED elsewhere; this file was stale.** PRD OQ-1 was closed on 2026-09-27 with the name **Trainer Desk**, recorded in root `DESIGN.md` and `PRD.md` §OQ-1. An earlier revision of this item said the question still stood; it does not. This package predates the naming and still carries a descriptive header, which is now the wrong title on a superseded artifact rather than an open question.
 8. **Layout convergence. Decided: one spine.** The dashboard and the guided input are a single vertical spine in `screen-a-scenario-v10.html`, and the only thing that varies by scenario is which panels the goal region composes. Four files were retired to `prototypes/superseded/` with reasons in its README. Two specific calls:
@@ -1097,6 +1417,7 @@ Surfaced, not resolved. Each needs the owner or a role escalation.
    - **Root `DESIGN.md` (Trainer Desk):** dark-first, tactical-athletic, system sans with `ui-monospace` numerals, `rounded-md`, 1px borders, "no pastel gradients, no soft shadows, no gacha-wiki look", the rounded display-font proposal **parked**, and the app does not adopt the game's trademarks.
    - **This package:** light-first with a measured dark theme, Nunito or M PLUS Rounded 1s, 14-20px radii, a soft elevation token, and deliberate client resemblance (capsule headers with argyle lattice, torn-paper calendar, hard enamel sheen).
    These are not reconcilable by preferring the newer file. The brief that produced this package asked for fidelity to the client's look; the Trainer Desk ruling asks for a neutral tool that does not imitate it. **The token math is already shared**, since root `DESIGN.md` reuses this package's measured §3.7 dark anchors, so the disagreement is confined to the identity layer: default theme, typeface, radius, elevation, and how much client ornament is permitted. Until the owner rules, `screen-a-scenario-v10.html` validates **structure, scenario composition and label correctness** under §10n, and is not a settled visual target.
+11. **The grade ladder above roughly 450 is unvalidated, and `U/G` is uninterpreted.** §6.7's 50-point half-step model fits the low range and is contradicted by Run Completion frames, where the client renders 499 as `C` (the model predicts `C+`), 716 as `B+` (it predicts `S`), and 1245 as a `U/G` badge that is not on the ladder at all. Two questions, one artifact: the real thresholds between 500 and 1300, and what `U/G` denotes. Needed is a sweep of captures crossing each boundary in that band, or the client's grade table if it is ever exported. Until then `CONSTRAINTS.md` D-274 forbids rendering or mapping `U/G`, and the `[Provisional]` marker on the badge strip is load-bearing rather than decorative. This is the one open item that could corrupt a number a Trainer quotes, so it outranks the cosmetic questions above it.
 
 ---
 
@@ -1137,3 +1458,68 @@ Four frames generated against `CONSTRAINTS.md` §10n, then read back at full res
 **The load-bearing conclusion.** Not one of these was catchable by `gate.py`. It scans HTML rendered text; the mockups are PNGs, and D-184 already recorded that they cannot be gate-verified. The closest call was a fabricated skill name, **"Endurance Up"** — the gate *does* ban `endurance`, so the same string pasted into a prototype would have failed G-3, but as a picture it reached a human and nowhere else.
 
 That asymmetry is the argument for the next piece of work rather than a criticism of this one: **any string that must be correct belongs in an HTML prototype.** The mockups are art direction — they settle composition, density, colour dose and whether a scenario's strip reads as that scenario. They are not evidence that a label is right, and the four frames in this round should be read as the visual target and nothing more.
+
+## 14. Legacy and Run Completion mockup review
+
+Three frames generated for §6.27 and §6.28, then read back at full resolution. The
+documentation is correct; the pictures are not, and nothing automated could tell the
+difference. This is the fourth consecutive round in which a rendered PNG contradicted a
+sourced number, and it is the argument for the HTML surface, restated with evidence.
+
+| Defect | Correct value | Where it came from |
+|---|---|---|
+| Class pyramid renders `Gold 550,000` | Gold is **50,000**. `550,000` does not exist in the client. | Invented digit. The threshold column is also shifted, so Star shows 100,000 instead of 160,000 and 160,000 is absent entirely. |
+| Stat rows ordered Stamina, Power, Guts, Wit, Speed | Fixed order is Speed, Stamina, Power, Guts, Wit (§6.5). | Order is itself information; a Trainer scans positions, not labels. |
+| Mini medals carry garbled micro-text | No text belongs there. | Filler glyphs the generator invented to fill a small area. |
+
+What survived verification, and is worth keeping as the target: the `U/G` problem is rendered
+honestly. The Speed row shows a grey badge with a question mark and a dashed `tier
+unconfirmed` tag rather than guessing a letter, which is D-274 expressed visually. The
+pyramid marks the reached tier with the `KEEP` pointer instead of leaving a bare fan count.
+The two Major Win icon kinds are visibly distinct, gold disc for composite titles against the
+blue `G1` badge for a single race. `Sprint F` is periwinkle, confirming D-273 against the
+earlier draft that grouped F with G. And the footnotes state that rank and rating are recorded
+rather than computed, which is the Planner Rule 1 boundary made visible.
+
+**The rule this round establishes about mockups.** A PNG may set composition, density, colour
+and whether a layout reads as this product. It may not be the place a number, a label or a
+threshold is first written down, because every one of those has to survive a grep, and a
+picture cannot be grepped. The pyramid defect is the proof: the correct thresholds were
+already in §6.28.4, and the mockup corrupted three of them anyway.
+
+---
+
+## 15. External review pass, claims versus citations (2026-09-27)
+
+A cross-document review of this package raised nineteen findings. Each was checked against the
+files before being acted on. Verdicts below are keyed to that review's numbering; **rejected**
+means the proposed fix would have made the corpus less accurate, and the underlying defect was
+still real.
+
+| # | Verdict | What was verified and done |
+|---|---|---|
+| 1.1 | Accepted, with the reviewer's premise corrected | "A gate above the maximum possible value cannot exist" was too absolute. Source Conflict Log row 3 is **reconciled, not open**: `hard_caps` is per scenario — 2000 on the twelve older, 2500 on Beyond Dreams, whose cap is `1200 + 900 = 2100`. Row 3's own closing instruction holds: on `[Global]` no cap exceeds 1900. |
+| 1.2 | Accepted | White and Scenario Sparks are **export-confirmed**, not "plausibly corroborated": `REFERENCE:585-592` gives 452 / 37 / 34 records, basis `[A]+[A]+[B]`. Only their *rendering* remains uncaptured. |
+| 1.3 | Accepted, escalated | `REFERENCE:571` records the `[Global]` system name as **Inspiration**, ancestors as **legacies**. Rows added to `CONSTRAINTS.md` §4. The collision with the owner's **Legacy Select** heading is flagged for ruling, not resolved — neither caption has been read off a frame. |
+| 2.1 | Accepted, severity raised | The real damage was not the headline table but the schema argument at `SCENARIO-DIFFERENCES.md:196`, which rejected `race_entries` because Trackblazer "has no race goals" — objective 1 is the Debut race and all Grade Points come from racing. Correct argument now: no *prescribed fixture list*, per-race rows still required. |
+| 2.2 | Accepted | "permanent for the run" restored to the shop-level row (`05:99`, 150 coins). |
+| 2.3 | Accepted | Race Fatigue table marked single-source and provisional; `90%+` called out as a **lower bound**, so printing `90%` would state a figure no source gives. |
+| 2.4 | Partly | The three-of-four caveat already governs the matrix, and §10n already makes the fourth column the architectural test. Per-rule stamps on every derived rule would be noise; the weight went where it binds — D-230's new sourcing bar and the §10n column note. |
+| 3.1 | Partly | `SCREENSHOT-MANIFEST.md:41` already stated that a three-way comparison is impossible on this corpus. The coverage *cell* still read "Present", which is what a skimmer takes; now "Minimal — two frames, not a coverage basis", and it says what the two frames do and do not evidence. |
+| 3.2 | Accepted | Confirmed: the six activity names are all Unity Cup frames, so the cross-scenario inference was unevidenced. Found in **four** copies (`manifest:64`, `D-187`, `DESIGN §6.4b`, `§6.22`), not the one file cited. Rule kept, reason withdrawn — `D-287`. |
+| 4.1 | **Rejected as proposed**, accepted as diagnosis | The reviewer's fix was to downgrade "always halved" to "reduced effect, stale source". That would have replaced a `[Global]` post-rework claim with a stale JP one. What was actually wrong: **`D-211` misattributed its own quotation** to `01-ura-finale.md`, which contains neither *halved* nor *1200*; the source is Game8's `[Global]` EN pages per `ADR-0002` amendment 1. `Fully Charged` was also credited to URA when it is an Our Grand Concert mechanic. Fixed at `D-211` and at `REFERENCE §1.3.4`, where the training-gain and race-effect axes were conflated. |
+| 4.2 | Accepted, and found shipped | `+0 breakthrough` asserts a game fact the tool cannot observe. Disclosure line corrected, with a three-state split (entered zero / not tracked / tool limitation). **The same string is live in `resources/views/components/stat-band.blade.php:153`** and the converged prototype — see the open decision below. |
+| 4.3 | Partly | The near-identical hues were already documented at §6.17 item 1; the missing piece was that this makes **pill size a correctness constraint**. Added, deliberately without a numeric floor, since inventing one would repeat the failure being fixed. |
+| 5.1 | Accepted, with evidence correction | `turns-left` is *not* unsourced — §6.6 reads the remaining count and its contrast ratios off frame `194819`. The hidden defect was arithmetic: `total − current` has no total, so the value is entered, per D-270's pattern, and period-remaining must not be conflated with career-remaining. |
+| 5.2 | Accepted | D-211 now states its verification status against D-212's data-level confirmation: threshold corroborated by the export, halving prose-only, and the source page undated. |
+| 5.3 | Accepted | D-230's opening clause was a general principle wearing a specific rule's clothes. Now: client data **or** two independent sources, with Race Fatigue held as a provisional exception. |
+| 5.4 | Accepted, and caught a second error | The gates table did not separate scripted from manual. Corrected against `gate.py`'s own PASS banner — my first pass read grep fragments and **inverted the two lists**, which is the defect this whole section is about. |
+| 5.5 | Accepted | `§4` presented `Pal` as a required label while D-278 says it was never captured. Row now carries `[uncaptured]` plus a note that keeps the two readable in isolation. |
+| 6.1 | Accepted as an axis split | Not a wording alignment: two different mechanisms, now separated in `REFERENCE §1.3.4` so a UI sentence cannot quote one as the other. |
+| 6.2 | Accepted as a standing gap | Our Grand Concert remains the least-documented Global scenario; §10n treats it as the architectural test and D-287 bars using the three known scenarios as proof of a cross-scenario pattern. |
+| 6.3 | Accepted | Correction propagation is now D-286 and G-60; the misattribution sweep in this round is that gate applied by hand. |
+
+**One new rule came out of the round.** `CONSTRAINTS.md` **D-287**: a correct rule with a wrong
+reason still fails review, and it is the kind that survives every check, because review reads the
+requirement and skims the citation. Two of this package's rules were of that shape, and both had
+already been copied outward.

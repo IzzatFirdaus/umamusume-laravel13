@@ -152,17 +152,19 @@ Whether Wit training can fail at all is not settled across sources; see the Sour
 
 #### 1.1.6 Motivation (mood) and Energy thresholds
 
-Mood (やる気, `[Global]`: Mood) has five states and modifies both training yield and the ability the Umamusume carries into a race [Kamigame, ⚠️ STALE: 2021-10-15](https://kamigame.jp/umamusume/page/146276970408242410.html):
+Mood (やる気, `[Global]`: Mood) has five states and modifies both training yield and the attributes the Umamusume carries into a race. The table below is the `[Global]` client's own Mood Effect panel, which prints the tier strings, both effect columns, and marks the tier the unit is currently on [User-Supplied / client Mood Effect panel capture, 2026-09-27]:
 
-| State (JP) | English gloss | Training effect | Pre-race base ability |
-|---|---|---|---|
-| 絶好調 | peak condition | +20% | +10% |
-| 好調 | good | +10% | +5% |
-| 普通 | normal | 0% | 0% |
-| 不調 | poor | −10% | −2% |
-| 絶不調 | worst | −20% | −5% |
+| `[Global]` client string | State (JP) | Wiki gloss | Training effect | Pre-race attributes |
+|---|---|---|---|---|
+| `GREAT` | 絶好調 | peak condition | +20% | +4% |
+| `GOOD` | 好調 | good | +10% | +2% |
+| `NORMAL` | 普通 | normal | 0% | 0% |
+| `BAD` | 不調 | poor | −10% | −2% |
+| `AWFUL` | 絶不調 | worst | −20% | −4% |
 
-The ±20% headline figure is corroborated by [GameWith (2026-09-25)](https://gamewith.jp/uma-musume/article/show/257614) (「やる気が高いとトレーニングで得られる効果が大きくなり、レース前のステータスも上昇する」, with a 20% peak bonus quoted) and by [Game8 (2026-09-10)](https://game8.jp/umamusume/372572). Exact `[Global]` client strings for the five states: ❌ UNVERIFIED: No current source found. Last known: the `[Global]` guide vocabulary uses "Mood" as the category name [Game8.co (2026-09-25)](https://game8.co/games/Umamusume-Pretty-Derby/archives/536322).
+The training column agrees with the `[JP]` guides, which state the ±20% headline [GameWith (2026-09-25)](https://gamewith.jp/uma-musume/article/show/257614) (「やる気が高いとトレーニングで得られる効果が大きくなり、レース前のステータスも上昇する」, with a 20% peak bonus quoted) and [Game8 (2026-09-10)](https://game8.jp/umamusume/372572). The pre-race column does not: [Kamigame, ⚠️ STALE: 2021-10-15](https://kamigame.jp/umamusume/page/146276970408242410.html) and Game8 print ±10% with the second tier at ±5%, and the client panel prints ±4% and ±2%. That settles the conflict recorded under "New conflict worth logging: the mood race effect" in Section 2 in GameWith's favour and against the two glosses this table previously carried. The five tier strings and the ten percentages are the client's; the two column headers and the "Wiki gloss" column are this document's wording, because the panel's own header labels were not transcribed with the capture.
+
+Exact `[Global]` client strings for the five states: **confirmed** by the client's own panel, as `GREAT` / `GOOD` / `NORMAL` / `BAD` / `AWFUL`. An earlier revision of this section marked them `❌ UNVERIFIED` and used the JP glosses as the English column; the peak and good strings had already been read off mood pills in the screenshot corpus (`docs/design-research/RAW-FINDINGS.md` §4.3), and the panel capture supplies the remaining three plus the arrow that accompanies each tier (up, up, neutral, down, down). Two files already in this repository point the same way as the panel, which is worth recording because neither was read for this purpose: `docs/scenarios/01-ura-finale.md` line 46 states "+20% training stat gains, +4% race performance" at Great mood, and `docs/scenarios/04-trackblazer-umaguide.md` line 183 reports mood affecting stats by "2% per level", which is the panel's second tier. Neither is the client and both are third-hand, so they corroborate rather than confirm.
 
 Energy thresholds worth acting on, all `[JP]`-measured: sessions cost roughly 17 to 28 Energy at the levels where you use them [GameWith, ⚠️ STALE: 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432); rest returns +30 [GameWith (2026-09-25)](https://gamewith.jp/uma-musume/article/show/257614); certain event chains raise the maximum by +12 [GameWith (2026-09-25)](https://gamewith.jp/uma-musume/article/show/257614); and 50 Energy is the practical line where failure risk changes character [GameWith (2026-09-25)](https://gamewith.jp/uma-musume/article/show/257614).
 
@@ -351,9 +353,9 @@ No source publishes a metres-per-Stamina conversion. Neither of the two guides t
 
 | Cap layer | Value | Applies to | Source |
 |---|---|---|---|
-| Baseline per-stat cap | 1200 | every stat before breakthroughs. Points earned past 1200 exist, but the guides state that they have a reduced effect on the Umamusume during the race, which is the documented soft-cap behaviour | [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668), [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html) |
-| Scenario caps, Speed / Stamina / Power / Guts / Wit | URA 1400 / 1400 / 1400 / 1400 / 1400; Unity Cup 1300 / 1300 / 1300 / 1300 / 1800; Climax 1200 / 1900 / 1200 / 1500 / 1200; Our Grand Concert 1600 / 1300 / 1300 / 1500 / 1300 | the training run you are in | [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668) for the first four scenarios; [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html) for all five |
-| Extended scenario caps | Grand Masters 1500 / 1400 / 1500 / 1300 / 1300; L'Arc 1600 / 1600 / 1500 / 1500 / 1300 | single-source, not corroborated | [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html) |
+| Baseline per-stat cap | 1200 | every stat before breakthroughs. **Two different past-1200 effects are recorded here and they are not the same claim.** (a) *Training axis:* gains past 1200 are halved — `[Global]` Game8 EN pages, "always halved" (see 1.3.4 note below and `docs/adr/0002` amendment 1; the exact reduction is prose-only, no dataset field carries it). (b) *Race axis:* points earned past 1200 exist but have a reduced effect on the Umamusume during the race — the two JP guides cited here. A UI sentence must name which axis it is quoting. | [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668), [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html) — race axis; training axis from `[Global]` Game8 EN, dated 2026-07-07 / 2026-08-25 in the rework note |
+| Scenario caps, Speed / Stamina / Power / Guts / Wit | URA 1400 / 1400 / 1400 / 1400 / 1400; Unity Cup 1300 / 1300 / 1300 / 1300 / 1800; Climax (Global: Trackblazer) 1200 / 1900 / 1200 / 1200 / 1500; Our Grand Concert 1600 / 1300 / 1300 / 1500 / 1300 | the training run you are in | [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668) for the first four scenarios; [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html) for all five. **Climax row corrected 2026-09-27:** this cell previously read `1200 / 1900 / 1200 / 1500 / 1200`, with Guts and Wit transposed; `scenarios.json` and 1.6's Trackblazer row both give `… / 1200 / 1500`. The diagnosis is in `docs/design-research/SCENARIO-DIFFERENCES.md` ("The trap that produced the wrong Trackblazer row"). Any artifact that copied the pre-correction figure is reproducing this row, not an independent source |
+| Extended scenario caps | Grand Masters 1500 / 1400 / 1500 / 1300 / 1300 (`[JP-Only]`, and it reproduces `1200 + scenarios.json.stats` = [300, 200, 300, 100, 100]); L'Arc 1600 / 1600 / 1500 / 1500 / 1300 | **Grand Masters now three-source corroborated** (GameWith 2023-07-17, Game8 2026-04-13, Kamigame 2024-04-08) — upgraded from this row's previous "single-source". **L'Arc stays single-source**, on Kamigame alone | [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html); [GameWith (2023-07-17, ⚠️ STALE)](https://gamewith.jp/uma-musume/article/show/388788); [Game8 (2026-04-13)](https://game8.jp/umamusume/510269) |
 | Breakthrough (上限突破) | +16 to that stat's cap per ★3 basic-ability factor inherited; the cap applies at 育成開始時, Classic and Senior inheritance moments. A unique-skill factor also raises caps, in proportion to the donor's growth rates | inheritance tools, `[JP]` | [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668) |
 | Support-card cap effects | Per-stat 「限界値アップ」 ([Global]: Max Speed, Max Stamina, and so on) raise the cap the run starts with | deck building, `[Both]` wording | [GameTora data export, `support_effects.json` ids 20 to 24](https://gametora.com/data/umamusume/support_effects.ca447e53.json) |
 | Recorded hard ceiling | 2000 per stat, with a sixth unlabeled column at 9999, identical for all five scenarios in the export | `[Both]` | [GameTora data export, `scenarios.json`](https://gametora.com/data/umamusume/scenarios.61b7c51c.json) |
@@ -368,6 +370,7 @@ These are four different things and they do not stack the same way.
 * Growth is the run-time multiplier on training gains (1.1.2), and it also distributes the fixed star budget unevenly, which is why two cards with the same base total peak in different stats.
 * Support-card stat bonuses are additive deck effects: per-type 「ボーナス」 that raise gains on shared tiles, 「初期○アップ」 that raise the starting value, and 「限界値アップ」 that raise the ceiling [GameTora data export, `support_effects.json` ids 3 to 7, 9 to 13, 20 to 24](https://gametora.com/data/umamusume/support_effects.ca447e53.json).
 * Star breakthrough is the biggest single structural fact in the export: the ★4 row always sums to exactly 500 and the ★5 row to exactly 550, for all 268 cards. Every rank past the card's native rarity adds a flat 50 points, redistributed by profile; per-stat deltas from ★4 to ★5 run +4 to +14 in Speed, +6 to +14 in Stamina and +7 to +13 in Power, Guts and Wit.
+* **There is no system named "Trainer Abilities" on either client**, and no pre-run passive-buff system by that name was found in any source read for this document. The phrase reaches the repo from an incoming write-up (`docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md:1154`, "STEP 5: Trainer Abilities (if applicable)"), which is triaged rather than merged and cites this file as its own source — per `docs/design-research/CONSTRAINTS.md` D-285 that is a mirror, not corroboration. What actually exists before a run starts is the stack this section and 1.4 enumerate, and a planner should model these five, not a sixth invented one: **base stats** for the card; **`stat_bonus`** (owner still unstated, see below); **Inherited Blue and Pink Sparks** at run start (+5 / +12 / +21 per stat, and aptitude grade shifts, 1.5.1-1.5.3); **initial-value support effects** (`初期○アップ`, `[Global]` Initial Speed and friends, ids 9 to 13; Initial Friendship Gauge id 14; Specialty Priority id 19); and **cap-setting effects** (`限界値アップ`, `[Global]` Max Speed and friends, ids 20 to 24). Two neighbouring things are often mistaken for it: **Potential Levels** (`覚醒Lv`, 1.3.5) and the `[JP]` **Training Pass** reward track (1.6.7), neither of which is a per-run buff. See also 1.6.10 for what a run can consume.
 
 | Row in the export | Total across the five stats | Per-stat maximum observed |
 |---|---|---|
@@ -430,7 +433,7 @@ Rarity is R, SR, SSR on `[Both]` (export `rarity` 1/2/3, confirmed by the Game8 
 
 `[Global]` keeps the original upgrade model. A card takes four breaks by consuming copies of itself, so a fully broken card is five copies, and two identical copies cannot sit in one deck, which is why duplicates are spent instead of equipped. English guides say Limit Break and score at "Max Limit Break (MLB/4LB)"; official `[Global]` tutorial material names the item path "Support Cards and Uncap Crystals", matching the export entries Rainbow Uncap Crystal and Gold Uncap Crystal, described as "Uncaps an SSR Support Card" and "Uncaps an SR Support Card" `[Global]`.
 
-❌ UNVERIFIED: the current `[Global]` level gain per break. Last known, from a 2021 page: +5 level cap per break against base caps SSR 50, SR 45, R 40, plus one more obtainable support effect per release.
+`[Global]` level caps per break are **confirmed from the client** as of 2026-09-27, closing the gap this line carried. The deck editor draws four diamonds on every card slot and fills one per completed break, and the level readout next to them is `30 + 5 × breaks` for SSR: in `Screenshot 2026-07-15 155016.png` three cards show ◇◇◇◇ at `Lvl 30`, two show ◆◇◇◇ at `Lvl 35`, and one shows ◆◆◆◆ at `Lvl 50`. That matches the 2021 guide's +5-per-break rule and its ceiling set of SSR 50 / SR 45 / R 40, and it is corroborated independently by the export: the effect-value ladder in 1.4.7 stops at level 50 for `rarity` 3, at 45 for `rarity` 2 and at 40 for `rarity` 1, which is only possible if those are the three rarities' caps. The unbroken bases are therefore SSR 30, SR 25, R 20.
 
 `[JP]` replaced that model at the 2025-10-07 maintenance: card levels and the Support Pt currency were removed, Support Pt was refunded as money, 上限解放 was renamed 性能解放, and a duplicate now applies the release stage automatically. Effect values at a given stage equal what the old fully levelled card produced, the level-40 gate on a card's unique bonus is gone, and the team arena bonus scales off rarity plus release stage instead of levels. Current `[JP]` guides still score 無凸 (no break) to 完凸 (four breaks) without quoting levels, which confirms the four-stage ceiling survived the change.
 
@@ -485,6 +488,84 @@ The second `[JP]` source, Kamigame's ranking of 2026-09-18, agrees at the top of
 
 **Sources:** `[A]` Game8 tier list, 2026-09-23: https://game8.co/games/Umamusume-Pretty-Derby/archives/536715; `[A]` GameWith ranking, 2026-09-26: https://gamewith.jp/uma-musume/article/show/258925; `[A]` Kamigame ranking, 2026-09-18: https://kamigame.jp/umamusume/page/147029748571208590.html; `[A]` Kamigame factor farming, 2026-08-25, mandatory Pal slot per scenario: https://kamigame.jp/umamusume/page/147455032642539573.html; `[S]` Umamusume JP news list, items of 2026-09-18 and 2026-09-26: https://umamusume.jp/news/?t=game; `[B]` `support-cards.json` (titles, `release`, `release_en`)
 
+#### 1.4.7 Effect values: the level ladder, how it interpolates, and the Unique Perk
+
+The export's `support-cards.json` stores each card's effects as `[[effect_id, v1 … v11], …]`. The eleven value slots are **card levels 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50**, and `-1` means the client holds no entry for the effect at that level rather than that the effect is zero. `[Global]`, decoded `[B]` and confirmed against the client's own numbers below.
+
+The decode came from the GameTora support-card page (`https://gametora.com/umamusume/supports/<url_name>`; note the plural, the singular paths 404), which carries a level selector with −5 / −1 / +1 / +5 controls and prints "Unlocked at level N" against effects a card does not yet have. Reading Tokai Teio `[Dream Big!]` (`support_id` 30003) at three selector positions against its export row gives the rule:
+
+| Effect (id) | export anchors | level 30 shown | level 35 shown | level 40 shown |
+|---|---|---|---|---|
+| Friendship Bonus (1) | 30→15, 45→20 | 15% | 16% | 18% |
+| Mood Effect (2) | 30→40, 50→60 | 40% | 45% | 50% |
+| Initial Friendship Gauge (14) | 30→20, 45→25 | 20 | 21 | 23 |
+| Hint Frequency (18) | 30→30, 45→40 | 30% | 33% | 36% |
+| Specialty Priority (19) | 30→20, 45→35 | 20 | 25 | 30 |
+| Power Bonus (5) | 35→1 | not unlocked | 1 | 1 |
+| Race Bonus (15) / Fan Bonus (16) | 45→5 / 45→10 | not unlocked | not unlocked | not unlocked |
+
+Every intermediate figure is the **floor of a straight line drawn between the two bracketing anchors**: at level 35, Friendship Bonus is `15 + (20−15)·(35−30)/(45−30) = 16.67 → 16`, Mood Effect is `40 + 20·5/20 = 45`, Initial Friendship Gauge is `20 + 5·5/15 = 21.67 → 21`. All five changing effects land on the displayed integer at levels 35 and 40, and the two `Unlocked at level 45` effects are still absent at 40, so the rule is not a lucky fit on one row. `[Global]`
+
+Two consequences worth stating plainly. First, a card's **effect count grows with its level**, which is the mechanism behind the 2021 note's "one more obtainable support effect per release": the release stage raises the level cap, and the higher cap exposes effects that were locked below it. Second, the tool can therefore reproduce any `[Global]` effect value from the export alone, provided it stores the anchors and applies the floor rule; rounding is truncation, not nearest, and getting that wrong shifts every intermediate value by one.
+
+**The Unique Perk is a second, independent axis and the export does not carry its numbers.** The client's card detail panel has a heading `Unique Perk`, names it after the card's bracket title (`Dream Big!`, `Piece of Mind`, `Even the Littlest Bud`), gives it its own level badge, and lists exactly two effect names under it — for `[Even the Littlest Bud]` Nishino Flower, "Mood Effect and Initial Friendship Gauge"; for `[Piece of Mind]` Super Creek, "Friendship Bonus and Specialty Priority". Its level is **not** the card's level: across the six captured panels a card at `Lvl 35` appears with perk `Lvl 30` and another at `Lvl 35` with perk `Lvl 40`, and a fully broken card at `Lvl 50 / 50` still shows perk `Lvl 30`. `[Global]`
+
+The export's `effects` array covers the card's levelled effects, not the perk's: `[Dream Big!]` Tokai Teio prints "Friendship Bonus and Initial Speed" under its perk while its `effects` rows contain no Initial Speed (id 9) at all. So the perk's magnitude at a given perk level is **not derivable from anything in this repository**, and what raises the perk level is likewise unstated by every source consulted here. ❌ UNVERIFIED: the `[Global]` Unique Perk value table and the currency or action that levels a perk. Last known: none; the six client panels give the two effect names per card and the level number, and nothing else.
+
+The same panel prints `Lvl N / MAX` beside a bar and the text `0 SP to next level`, so SP is the card-experience currency and a card at its cap reads zero. The GameTora page shows two figures at once (37,785 and 75,570 at level 35, 56,935 and 113,870 at level 40, each pair exactly 1 : 2), which is consistent with a next-step and a total-to-cap reading. ❌ UNVERIFIED: which of the two is which.
+
+**Scenario Link is derived, not stored per card.** The deck editor badges a card `Scenario Link` when the Umamusume who holds it is on the running scenario's linked list, and that is exactly what the data says: Unity Cup's `scenario_linked_characters` holds Taiki Shuttle, Rice Shower, Haru Urara, Matikanefukukitaru and Riko Kashimoto, and in `Screenshot 2026-07-15 155016.png` a six-card Unity Cup deck whose only member of that list is Haru Urara `[Urara's Day Off!]` (`char_id` 1052) badges that card and no other. Per-scenario list lengths are Ura Finale 1, Unity Cup 5, Trackblazer 0, Our Grand Concert 5, Grandmasters Legacies 1, and then 13, 6, 6, 5, 6, 6, 6, 6, 7 across the remaining nine scenarios `[Both]`. A schema that stores a `is_scenario_link` flag per card is therefore wrong: the flag is a join between `char_id` and the scenario, and it changes when the scenario does. `[B]` + client frame
+
+**Support card type glyphs, fixed by the client and distinct from the stat-band icons.** The deck editor's legend row carries seven chips, and six cards in the frame identify five of them by pairing the chip with the export's `type` value: `[Dream Big!]`, `[Even the Littlest Bud]` and `[Double Carrot Punch!]` are all `speed` and all wear the blue boot; `[Urara's Day Off!]` and `[Just Keep Going]` are both `guts` and both wear the pink flame; `[Piece of Mind]` is `stamina` and wears the red heart. The remaining chips in the same row are the brown flexed arm (`power`), the dark-green graduation cap (`intelligence`, which the client calls Wit) and two figure marks — a single olive figure (`friend`) and a pair of green figures (`group`). `[Global]`
+
+Note the collision this creates with the training HUD: the heart is Stamina's type chip here, and the client's own HUD uses a heart for Energy in other contexts, which is why `docs/design-research/CONSTRAINTS.md` pins one glyph to one meaning. The chip fill colours are read from the frame's legend row and are not point-probed; treat them as indicative until they are measured.
+
+**Sources:** `[B]` `support-cards.json` (559 records, `effects` anchor vectors, `rarity`, `type`, `char_id`), `support_effects.json` (35 effects with `[Global]` `name_en`, `desc_en`, `calc`, `symbol`), `scenarios.json` (`scenario_linked_characters`), all pulled 2026-09-27; `[B]` GameTora support card page https://gametora.com/umamusume/supports/30003-tokai-teio read at selector levels 30, 35 and 40 on 2026-09-27; `[S]` client frames `docs/game-screenshots/Screenshot 2026-07-15 155016.png` (deck editor, six cards with break diamonds, level readouts, Scenario Link badge and the type legend) and the six card detail panels captured the same minute (`155215`, `155222`, `155239`, `155311`, `155324`, `155337`); ⚠️ STALE: Kamigame uncap guide dated 2021-10-13 for the +5-per-break rule and the extra-effect-per-release claim: https://kamigame.jp/umamusume/page/146591481853953911.html
+
+
+
+#### 1.4.8 Where each effect lands in a run
+
+The dictionary carries 35 effect records, and each one states in the export whether it multiplies or adds
+(`calc`) and what its unit is (`symbol`). That is the client's own metadata rather than this document's
+reading, so the grouping below is a re-shelving of published fields, not an interpretation. `[Global]` `[B]`
+
+| When it pays | Effects (id) | `calc` | Coverage on the 312 `[JP]` SSR records |
+|---|---|---|---|
+| At career start | Initial Speed (9), Initial Stamina (10), Initial Power (11), Initial Guts (12), Initial Wit (13), Initial Friendship Gauge (14) | flat | 65 / 40 / 62 / 49 / 18 / **305** |
+| On every shared training session, as a multiplier | Friendship Bonus (1), Mood Effect (2), Training Effectiveness (8) | 1 is `mult`; 2 and 8 flat percent | 301 / 218 / 195 |
+| On a specific discipline's gain, added | Speed Bonus (3), Stamina Bonus (4), Power Bonus (5), Guts Bonus (6), Wit Bonus (7), Skill Point Bonus (30) | flat | 78 / 48 / 69 / 56 / 35 / 126 |
+| On whether the card shows up on its own tile | Specialty Priority (19) | `add` | 276 |
+| On race days | Race Bonus (15), Fan Bonus (16) | flat percent | 250 / 250 |
+| On this card's own events | Event Recovery (25), Event Effectiveness (26) | flat percent | 15 / 16 |
+| On failure and Energy spend | Failure Protection (27) `mult`, Energy Cost Reduction (28) `mult`, Wit Friendship Recovery (31) | 27 and 28 multiply | 10 / 11 / 58 |
+| On hint output | Hint Levels (17) as a `level`, Hint Frequency (18) as percent | flat | 253 / 254 |
+| Named, and carried by **no card at all** | Max Speed (20), Max Stamina (21), Max Power (22), Max Guts (23), Max Wit (24), Minigame Effectiveness (29), Hint Quantity Bonus (33), id 41, id 9991 | — | 0 |
+
+Three things in that table are worth more than the rest.
+
+**Only four effects declare `calc`, and they are the four that combine multiplicatively** — Friendship
+Bonus (1), Failure Protection (27), Energy Cost Reduction (28) and Specialty Priority (19, `add`).
+Everything else is a flat percentage or a flat amount. This matters because §1.4.3's training formula
+multiplies its terms, and an engine that guessed "percent means multiply" would compute wrong gains on
+every card carrying a stat bonus. `[B]`
+
+**The five "Max <stat>" effects exist in the dictionary and are carried by zero of the 559 cards.** They
+are the game's own vocabulary for raising a stat ceiling, and no shipped support card uses them, which is
+the strongest evidence in this document that a scenario's cap is not a card effect on `[Global]`. It also
+means a UI that offers a "cap raised by support cards" line would be displaying a feature the catalogue
+does not contain. `[B]`
+
+**Id 32 has no name in any language and appears on 14 SSR cards.** Id 9991's `name_en` is the sentence
+"Increases Stats from Hints" rather than a label, and ids 33 and 41 have neither name nor coverage. A
+deck view that renders effect names from the dictionary will therefore print a blank cell for those 14
+cards, and must show a visible `[Unverified]` marker rather than inventing a label (D-20). `[B]`
+
+**Sources:** `[B]` `support_effects.json` (35 records: `id`, `name_en`, `desc_en`, `calc`, `symbol`) and
+`support-cards.json` (coverage counted across all 559 records and the 312 `rarity` 3 records, pulled
+2026-09-27); the training formula the multipliers feed into is §1.4.3.
+
+
 ### 1.5 Inheritance System
 
 `[Global]` localizes the system as Inspiration, where the ancestors picked for a run are legacies and the inheritable traits are Sparks, while `[JP]` uses 継承 and 因子. Each is described with its own terms below.
@@ -524,7 +605,7 @@ Factors carry 1 to 3 stars and three is the ceiling; more stars mean larger payo
 | 600 to 1100 | about 50% | about 45% | about 6% |
 | Above 1100 | about 20% | about 70% | about 10% |
 
-The same thresholds are the `[JP]` planning rule: guides tell farmers to finish an ancestor with the target stat above 600 and, for a real shot at three stars, above 1100, so a three-star stat factor is unreachable below 600 in that stat `[Both]`.
+The same thresholds are the `[JP]` planning rule: guides tell farmers to finish an ancestor with the target stat above 600 and, for a real shot at three stars, above 1100, so a three-star stat factor is unreachable below 600 in that stat `[Both]`. Read the table as probabilities, not as an award schedule: **crossing 1100 buys a roughly 1-in-10 roll at three stars, not a three-star factor**, and below 600 the three-star branch is 0% rather than unlikely. Any planner output that states "Speed 1100 → ★★★" as a deterministic mapping is wrong on this row, and the run's own ★ count is rolled, never chosen.
 
 Aptitude factors roll off the grade instead, from 10% at G or F to 100% at A, with S graded parents rolling extra guaranteed inheritance attempts rather than a chance above 100% `[Global]` + `[JP]`. The ceilings a parent faces: inheritance cannot lift an aptitude above A before the run starts, cannot lift it more than four grades, and cannot take an aptitude starting at F or below all the way to A `[Both]`. Mid-run events can push A to S, and a mid-run jump is worth one grade whether the factor is one star or three, with stars affecting only the trigger chance `[JP]`.
 
@@ -659,6 +740,29 @@ Second source, [game8.co Transfer Request guide, ⚠️ STALE: dated 2025-10-05]
 
 **Sources:** [Umamusume Global Official News, 2026-09-24](https://umamusume.com/news/1058/), [Umamusume Global Official News index](https://umamusume.com/news/), [game8.co, ⚠️ STALE 2025-10-05](https://game8.co/games/Umamusume-Pretty-Derby/archives/554781), `data/manifest.json` keys `missions/specialtransfer/*` (tier B).
 
+#### 1.6.10 Consumables, and where each is actually spent `[Both]`
+
+Spendable items are not support effects, and the two are conflated constantly in third-party guides. Three questions sort every item here: *does it act before a run, inside a career, or on a race entry?* and *which mode consumes it?*
+
+**Two widely-circulated items do not do what guides claim.** ❌ **No item on either client guarantees training success.** The real zero-failure levers are: the Trackblazer shop's **Good-Luck Charm** (40 coins, failure rate 0% for 1 turn, 2.3), **Extreme Spirit Burst's** 0% on its own facility (2.2), and the support effect **Failure Protection** (id 27, a multiplicative reduction, 1.1.5). And the JP item family 「虹の蹄鉄 / 金の蹄鉄 / 銀の蹄鉄」 (`items.json` ids 48, 49, 50) is a **shop currency**, not a training buff: `[Global]` client text renders it **Rainbow / Gold / Silver Cleat**, one duplicate SSR support card converts to **10 Rainbow Cleats** via Storage → Support Cards, and they are spent in the **Cleat Exchange** on Scout Tickets (×2), the "SR+ Guaranteed Make Debut" ticket (×2), Dream Glimmer and Winner's Sashes. ⚠️ Third-party English pages render that JP noun with an equine word — the same string `DESIGN.md` lists among forbidden visual motifs. It is not client text; never key on it, in data or in copy. Do not confuse the **Cleat** currency with Trackblazer's **Artisan / Master Cleat Hammer** shop items, which are Race Bonus purchases (2.3).
+
+⚠️ Likewise, a **"Goddess Statue"** (`[JP]` 「女神像」) exists on `[Global]` but is **pure currency**: exchanged for Trainee Star Pieces in the **Statue Exchange** shop on an escalating **×1 → ×5** rate, **650 Star Pieces** to max a trainee, with the client stating statues "cannot be used to unlock an unscouted Trainee". **It grants no buff**, so it is not a scenario modifier of any kind.
+
+| Item (`[Global]` client name) | Effect, as the client puts it | Where it is spent |
+|---|---|---|
+| **Alarm Clock** | "Lets you try again on a Career goal race" | **Career only.** Retries a missed mandatory placing (1.2.6), and a lost Unity Cup **Team Race** since the 2026-07-01 rework (2.2). Also paid as a league-selection participation reward (1.6.2) |
+| **Toughness 30** | "Restores 30 TP" | Compensation currency (1.1.7, 1.6.3). ❌ **What TP governs is unverified**, and it is *not* the training Energy bar — do not model it as energy |
+| **Pleasing Parfait** | "Raises a runner's mood to Great" | **Team Trials and Daily Races** (1.6.4) |
+| **Sunshine Doll** / **Rainfall Doll** | Set weather to **Sunny** and footing to **Firm** / to **Rain** and **Heavy** | Team Trials and Daily Races. ⚠️ Note the interaction with 1.2.5: choosing Rain via the doll makes Soft-or-Heavy footing near-mandatory, so the two effects are one decision, not two |
+| **Inner Post Raffle Ball** / **Outer Post Raffle Ball** | Draw an **inner bracket (1-3)** / an **outer (6-8)** gate | Team Trials and Daily Races. Gate *position* is separate from the slow-start penalty mechanics in 1.2.3 |
+| **Books of Hints** — Book of Hints, Rare Book of Hints, Textbook of Hints, Rare Textbook of Hints | Raise a skill's **hint level** | **Before** a run, on the deck/build screen. Costs on an unenhanced card to Lv3: 12 / 6 / 30 of 「ヒント本 / ヒント専門書 / 夢の煌めき」 (Dream Glimmer), 1.4.4 |
+| **Rainbow / Gold Uncap Crystal** | "Uncaps an SSR / SR Support Card" | Card leveling, `[Global]` only — `[JP]` replaced that model on 2025-10-07 (1.4.2) |
+| **Rainbow / Gold Crystal Shard** | Exchange material | Bought with Carnival Pts in the Racing Carnival shop (1.6.5) |
+
+⚠️ **Spend-site error to avoid:** the mood, weather and gate items above are **Team Trials** (`[JP]` チーム競技場) and **Daily Races** consumables. Guides routinely place them in **Champions Meeting**, which publishes no such item path (1.6.2, 1.6.4). ❌ **`"Special Katsu Curry"` appears in no Global item list found**; treat it as not-Global rather than as a hidden Energy item.
+
+**Sources:** [game8.co Global item list, 2026-07-14](https://game8.co/games/Umamusume-Pretty-Derby/archives/538152); [game8.co consumables list, 2026-07-13](https://game8.co/games/Umamusume-Pretty-Derby/archives/543018); [game8.co Cleat exchange, 2026-03-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/543930); [game8.co Statue Exchange, 2026-03-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/542870); [Game8 JP item list, 2026-09-15](https://game8.jp/umamusume/418448); [Game8 JP Cleat shop, 2025-11-20](https://game8.jp/umamusume/419913); data export `items.json` ids 48 to 50, 97, 116 to 120, 144 to 150, 159, 168, 195, 268 with `[Global]` `name_en` / `desc_en` (tier B, fetched 2026-09-27).
+
 ## Section 2: Scenario Strategies and Mechanics, `[Global]`
 
 Freshness anchor 2026-09-27. Scope is `[Global]` only, per instruction. The ten `[JP-Only]` scenarios
@@ -746,8 +850,29 @@ Game8 scenario pages, with the source noted per claim.
 ### 2.3 Trackblazer `[Global]`
 
 - **Open career, no race goals, no scenario link.** The export agrees: this scenario has zero linked
-  characters, the only one of the fourteen with none. Objective is Result Points by late December each
-  year.
+  characters, the only one of the fourteen with none, and the GameTora extraction states the same thing
+  in prose ("no Scenario Link mechanic attached to it"). What replaces career goals is **four shared
+  objectives**, and the term for its currency is **Grade Points** — not `Result Pts`, which is Unity Cup's
+  counter (2.2). An earlier revision of this bullet called the objective "Result Points"; that was a
+  terminology slip across two scenario currencies, corrected here on 2026-09-27.
+- **The four objectives, and their thresholds.** Late June of Junior Year: run the Debut race. End of
+  Junior: 60 Grade Points. End of Classic: 300. End of Senior: 300. The thresholds have **two tracks by
+  aptitude**, not one: a high-dirt or low-turf character takes 30 / 200 / 300, and a turf character whose
+  range is narrow takes 60 / 200 / 300 — the guides name Haru Urara and Curren Chan as the respective
+  cases. **Surplus points do not carry over**: each period starts from zero, so over-shooting one deadline
+  cannot fund the next. Two independent extractions agree on all of the above
+  (`docs/scenarios/04-trackblazer-umaguide.md:31-44`, `docs/scenarios/05-trackblazer-gametora.md:12-21`).
+- **Missing a threshold ends the career.** This is a hard fail state, not a penalty: the run terminates to
+  the standard career-end screen, and the player chooses between retiring to the results (banking Sparks)
+  or spending an **Alarm Clock** to retry from a checkpoint. `[Global]`. Sourced: owner-supplied from
+  in-game observation, 2026-09-27, and corroborated by the item's own client text — Alarm Clock
+  (`items.json` id 95, 目覚まし時計) reads "Lets you try again on a Career goal race" and this document
+  already records it retrying a missed mandatory placing (1.2.6) and a lost Team Race (2.2). A missed
+  Grade Point deadline is the same category of failure, and the item is the game's answer to it.
+  ❌ Partially unverified: **where** the retry resumes. "The start of that semester" is the owner's
+  recollection and no source here states a resume point; the tracker must not encode one.
+  The consequence matters to the schema for one reason: a `GradeDeadline` row has to be able to be
+  *missed*, which a log of what happened cannot express (see `ADR-0003` item 5).
 - **Pro Shop and Shop Coins.** Coins scale with race placement, 100 for first and less below, and buy
   training items. Losing reduces income, so race consistency has a direct economic penalty.
 - **Rivals.** A race may carry a rival; beating one grants a skill hint tied to the race distance or
@@ -767,7 +892,17 @@ Guide](https://game8.co/games/Umamusume-Pretty-Derby/archives/607337), page date
 [Game8 Fully Charged Explained](https://game8.co/games/Umamusume-Pretty-Derby/archives/607687) dated
 2026-07-02, whose title indicates the scenario's named resource mechanic. Neither was read in this
 session: two rendering attempts were navigated away by a concurrent browser session before the
-content could be captured. Fetch both and fill this section before treating 2.4 as usable.
+content could be captured. **Status changed by owner decision on 2026-09-27: extraction is suspended,
+not merely unfinished**, so 2.4 stays open deliberately rather than being filled by inference. The
+boundary and the matrix consequences are written up in `docs/scenarios/07-grand-concert.md`, which
+records the sourced facts (titles, both server dates, **dataset order 4**, caps 1600 / 1300 / 1300 /
+1500 / 1300 over the 1200 base, hard ceiling 2000, 5 linked characters, **0 frames** in
+`SCREENSHOT-MANIFEST.md:39`) and marks every mechanic `❌ UNVERIFIED`. ⚠️ Two rules from that file are
+load-bearing for this section: the 「Fully Charged」 / Power-1200 line above is **a name and a number
+from a citation, not an extracted mechanic**, and per `CONSTRAINTS.md` D-165 and D-241 the scenario
+must render as baseline widgets plus its known caps. Re-opening 2.4 requires a primary source — one of
+the two Game8 pages read end to end, a `[Global]` notice, or a client capture — not a third guide
+paraphrasing the first two.
 
 ### 2.3. Shared training heuristics `[Both]`
 
@@ -824,9 +959,18 @@ them.
    it is the newest scenario `[Global]` actually has.
 5. **Game8 page dates.** Not captured for 536520, 545572 and 580723, so their recency cannot be
    graded. A re-read must record them.
-6. **Server leakage risk in `docs/scenarios/02`.** It carries a "Known Future Updates (Not Yet on
-   Global)" section. Correctly labeled, but any importer of that file into app data must filter that
-   section, or `[JP]` content will land in a Global-facing table.
+6. **Server leakage risk in `docs/scenarios/`.** This row formerly flagged only `02-unity-cup.md`,
+   which carried a "future updates" section that an importer had to filter. **Resolved on
+   2026-09-27:** that section was rewritten into a dated delta table, so every row in it is now live
+   `[Global]` state except the one explicitly marked `[JP]`-side (the larger per-facility Skill Point
+   payouts). Two files now need the opposite treatment, and they are the reason the rule is still
+   open rather than closed: **`08-grand-masters-jp-only.md` is `[JP-Only]` end to end** — no Global
+   release, therefore no Global client string, and every English name in it is a third-party
+   rendering — and `07-grand-concert.md` carries rows marked `❌ UNVERIFIED` that must not be seeded
+   as facts. An importer for scenario mechanics must read a file's **server tag and its `❌` markers**,
+   not its directory, and `AGENTS.md`'s provenance rule bars storing any row without a source. The
+   related design-side rule is D-285: an incoming write-up that cites this file is a mirror, not a
+   second source.
 
 ### Build note
 
@@ -979,8 +1123,10 @@ be amended rather than re-argued when someone checks.
 ### Other content worth carrying
 
 - The Trackblazer scenario factor is printed as **"Climax Scenario"** and grants Stamina and Guts
-  bonuses on successful inheritance, which is the mechanic a `[Global]` bloodline planner cares about
-  when choosing this scenario for farming.
+  bonuses on successful inheritance, which is the mechanic a `[Global]` Legacy planner cares about
+  when choosing this scenario for farming. ("bloodline" appeared here until 2026-09-27; it is a
+  banned framing term under `docs/design-research/CONSTRAINTS.md` §3.1, and the Global client word
+  for this screen is Legacy.)
 - 04 supplies a turn-economy framing worth keeping: races dominate the turn budget here, Grade Points
   replace career goals, and epithet routes gate shop and stat rewards, with the Goddess epithet
   requiring the Lady plus Victoria Mile, Hanshin Juvenile Fillies and both Queen Elizabeth II Cups for
@@ -997,6 +1143,16 @@ forbids. Two nearby uses differ and should be judged separately: line 87's "Hans
 is a verbatim race name, which is source data, whereas line 82 is the document's own label for a route
 and is better written as a classic-age or Tiara-track route. Also note that two other apparent hits in
 these files, on "stacking" and similar, are the substring inside unrelated words and are not findings.
+
+### Lore rulings and their disposition, 2026-09-27
+
+Three items went to the Guardian during the mechanics pass that produced 1.6.10 and the Section 6 rows. All three are rulings rather than grep hits, and each is disposed of here instead of only logged. The heading above is retained as the record of what was found; it is the file's single quoted use of the retired descriptor, and it is withdrawn below.
+
+1. **The Tiara-route heading.** **Disposition: fixed.** `04-trackblazer-umaguide.md` now reads **"Tiara Route (the Oka Sho / Japanese Oaks / Shuka Sho line)"** — named by its three races, which is both unambiguous and free of character framing. The race name on the following line stays verbatim as source data, and the route's mechanics are untouched. ⚠️ Gate lesson worth keeping: `make lore` does not carry the plural form and `lore-code` matches only the singular inside app directories, so **no gate in this repository can see a heading like that**; the read, not the grep, is the control. C-4's pattern list is a floor, and this was a hole in it.
+2. **「蹄鉄」 is "Cleat" in `[Global]` client text, and the fan equine rendering is not adoptable.** Disposition: 1.6.10 documents the item as the **Cleat currency** with its exchange rates, the Section 6 row carries the ban, and the collision with Trackblazer's **Artisan / Master Cleat Hammer** race items is logged so nobody later "corrects" one into the other. `DESIGN.md` already forbids the object as a visual motif, so this is one rule shared by lore and design rather than two. ⚠️ Note what survives on purpose: the `[Global]` client itself names five distance/surface items **"Racing Shoes"** — client text, kept, and equipment vocabulary rather than character framing.
+3. **The `[JP-Only]` Grand Masters goddesses.** Out of game these are the historical foundation lines of a racing breed; **in game the premise is a Satono Group VR product and three support AIs carrying goddess names** (「三女神」 is Cygames' own wording). Disposition: `docs/scenarios/08-grand-masters-jp-only.md` states the premise in those terms and names the wiki's English reward title "Trail of Hooves" and any breeding framing as **do-not-import** rather than translating them. The scenario has no Global release, so nothing here can reach Global-facing copy today; the live risk is the import path in conflict 6.
+
+Two substring classes were checked and are **not** findings, recorded so a future gate run does not re-open them: the `[Global]` card bracket **`[Fille Éclair]`** in Section 3 is a French word inside a proper card name, not the equine noun; and the short-word members of C-4's list appear in `docs/` only **inside longer words** — the equine-noun lookalike family already inventoried in §8.8, plus the compound and adjective senses — where C-4's context rule clears them. This paragraph therefore adds no new hit for `make lore` to report, which matters because §8.8's audit line states a specific hit count. `docs/PRE-MORTEM.md` stays exempt as elimination evidence.
 
 ## Section 3: Character Roster
 
@@ -1782,7 +1938,9 @@ One concept per row, `[JP]` client wording against `[Global]` client wording. Th
 | Pull currency | ジュエル | Carats | Same concept | `items.json` id 43: 「虹色に輝く…ニンジン型の宝石」 vs "A rainbow-colored jewel in the shape of a carrot" |
 | Per-pull exchange currency | 育成ウマ娘交換Pt / サポートカード交換Pt | Trainee Exchange Points / Support Card Exchange Points | Same concept, different wording | [JP official news id 3457](https://umamusume.jp/news/detail?id=3457) and the Global Scout notice; neither string appears in `items.json`, whose ids 1001 and 110 are the Dream Team event currency and the old support-card level currency |
 | Card max-limit item and verb | 虹の解放結晶, 金の解放結晶, 虹の結晶片, 金の結晶片; JP slot term 限界突破 | "Rainbow Uncap Crystal", "Gold Uncap Crystal", "Rainbow Crystal Shard", "Gold Crystal Shard"; verb "Uncaps an SSR Support Card" | Same concept; Global verb is Uncap | `items.json` ids 144, 145, 149, 150 |
-| Card shop amulet | 虹の蹄鉄 / 金 / 銀 (fan English exports render this name with an equine noun) | "Rainbow Cleat", "Gold Cleat", "Silver Cleat" | Same concept; do not key on the fan English string | `items.json` ids 48, 49, 50 |
+| Card shop amulet | 虹の蹄鉄 / 金の蹄鉄 / 銀の蹄鉄 (fan English exports render this name with an equine noun) | "Rainbow Cleat", "Gold Cleat", "Silver Cleat" | Same concept; **do not key on the fan English string**. These are a **shop currency**, not a training buff: 1 duplicate SSR card → 10 Rainbow Cleats, spent in "Cleat Exchange". See 1.6.10 | `items.json` ids 48, 49, 50; [game8.co 2026-03-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/543930) |
+| Trainee exchange statue | 女神像 | "Goddess Statue" | Same concept; **currency only, no buff**. Exchanged for Trainee Star Pieces in the "Statue Exchange" shop on an escalating ×1→×5 rate; 650 pieces maxes a trainee, and statues "cannot be used to unlock an unscouted Trainee" | [game8.co 2026-03-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/542870) |
+| Trackblazer race item | JP string ❌ not verified in this pass | "Artisan Cleat Hammer" (25 coins), "Master Cleat Hammer" (40 coins) | **Name-collision hazard:** a *Hammer* is a one-turn Race Bonus purchase in the Trackblazer shop, not the Cleat currency above | `docs/scenarios/05-trackblazer-gametora.md:114-115` |
 | Support card rarity | R / SR / SSR plus ★1 to ★3 | R, SR, SSR plus "3★", "SR+", "SSR" | Same | `items.json` ids 113 to 115, 130; `support-cards.json` rarity 1/2/3 |
 | Support card types | スピード, スタミナ, パワー, 根性, 賢さ, 友人, グループ | Speed, Stamina, Power, Guts, Wit, Pal, Group | 友人 to "Pal" is a label change; the JP export holds 23 friend-type rows and game8.co's Pal page lists the subset live on Global (Light Hello, Sasami Anshinzawa, Riko Kashimoto, Tazuna Hayakawa, Aoi Kiryuin, Wallflower, Corner Recovery) | `support-cards.json` type keys and `release_en`, [game8.co 2026-08-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/537276) |
 | Inheritance factor | 因子 (因子研究レポート, 因子強化) | Spark ("Spark Research Report", "Can be used for Spark Enhancement", "Carnival Bonus Spark") | Same concept, different word | `items.json` id 195, `en/missions/racingcarnival-limited` |
@@ -1813,7 +1971,7 @@ Consolidated from the five research drafts. One row per disagreement between sou
 |---|---|---|---|---|---|---|---|
 | 1 | 1.1/1.3 | Daily limit on 自主トレ育成 runs | [Kamigame (2026-07-20)](https://kamigame.jp/umamusume/page/429951462450165905.html): 20 runs/day, sharing the 2025 cap on free jewels from training race rewards | [Game8 (2026-06-30)](https://game8.jp/umamusume/794628): no daily cap documented for the mode | One documents a cap on the mode, the other documents none on the mode itself | Recorded as a cap on jewel payout from training race rewards rather than on 自主トレ育成 entries; plan on the jewel limit binding, not the run count | Medium |
 | 2 | 1.1/1.3 | Can 賢さ / Wit training fail? | [GameWith (2023-02-25, ⚠️ STALE)](https://gamewith.jp/uma-musume/article/show/257432): failure listed for the four energy-spending disciplines, with a separate Wit failure branch recorded | [Game8 (2026-09-10)](https://game8.jp/umamusume/372572): Wit consumes no Energy, so the driver of failure risk is absent | Ambiguous whether Wit is exempt or merely very low risk | Text says Wit is the low-risk filler turn, not a risk-free one; treat failure as possible but rare, until a current measurement exists | Low |
-| 3 | 1.1/1.3 | Highest achievable Speed in a current `[JP]` run | [GameWith (2026-09-26)](https://gamewith.jp/uma-musume/article/show/575798): advanced target 2100 | [GameTora data export, `scenarios.json`](https://gametora.com/data/umamusume/scenarios.61b7c51c.json): hard cap 2000 per stat; [Game8 (2026-09-24)](https://game8.jp/umamusume/372949) puts the full-spurt gate just past 2000 | A published target exceeds the recorded ceiling | Both kept, flagged: either the ceiling has moved since the export or the guide's 2100 is a rounded stretch goal. Do not build to 2100 without an in-game check | Low |
+| 3 | 1.1/1.3 | Highest achievable Speed in a current `[JP]` run | [GameWith (2026-09-26)](https://gamewith.jp/uma-musume/article/show/575798): advanced target 2100 | [GameTora data export, `scenarios.json`](https://gametora.com/data/umamusume/scenarios.61b7c51c.json): hard cap 2000 per stat; [Game8 (2026-09-24)](https://game8.jp/umamusume/372949) puts the full-spurt gate just past 2000 | A published target exceeds the recorded ceiling | **Reconciled 2026-09-27, not a contradiction.** The two figures measure different things: 2100 is Beyond Dreams' Speed **scenario cap** (`1200 + 900` from `scenarios.json.stats`), and 2000 is the `hard_caps` database ceiling of the twelve older scenarios, which is 2500 on Beyond Dreams itself. A 2100 target therefore sits comfortably under its own ceiling, and §2.6 carries the arithmetic. Residual, and it is a small one: the GameWith page's own scenario context was not captured, so if its 2100 was meant against an older scenario then the ceiling has moved since the export. Do not build to 2100 on `[Global]`, where no scenario cap exceeds 1900 | Low |
 | 4 | 1.1/1.3 | Display name of the fifth stat | game8.co Global guide and GameTora export: Wit | Local client effect strings alternate "Wisdom Bonus" and "Intelligence Limit Up", and the support-card type key is `intelligence` ([GameTora data export, `support_effects.json` ids 7 and 24, plus `support-cards.json`](https://gametora.com/data/umamusume/support_effects.ca447e53.json)) | Two labels for the same stat inside Global assets | Player-facing text uses Wit; the internal key and one localization pass use intelligence/Wisdom. Noted so future exports are not read as two stats | High |
 | 5 | 1.1/1.3 | Scenario caps for Grand Masters and L'Arc | [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html) | [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668) does not list them | Single-source rows in the cap table | Kept with an explicit single-source label; both sources are already stale-flagged, so re-verify before using them in a build planner | Medium |
 | 6 | 1.1/1.3 | Bond gauge scale for friendship training | [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/454202): four visible segments, orange at value 80 | [Kamigame (2022-12-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/149493615532457367.html): threshold value 80, +5 per joint training | Segment count is described, the underlying 0 to 100 scale is implied | Both agree on the number that matters (80) and on the type-match requirement; the visible segment count is reported as four per Game8 without an independent second count | Medium |
@@ -1826,7 +1984,7 @@ Consolidated from the five research drafts. One row per disagreement between sou
 | 13 | 1.4/1.5 | `[JP]` card levels and Support Pt | [Famitsu](https://www.famitsu.com/article/202508/51020) 2025-08-29 and [4Gamer](https://www.4gamer.net/games/414/G041434/20251007025/) 2025-10-07: removed on 2025-10-07 | [GameWith](https://gamewith.jp/uma-musume/article/show/293366) 2026-09-14 nav still links level and Support Pt guides | Site navigation still advertises the deleted grind | Removed on `[JP]`, three outlets cite the official notice; kept as the live model on `[Global]`, where official material names Uncap Crystals | High |
 | 14 | 1.4/1.5 | Level gain per break on `[Global]` | [Kamigame](https://kamigame.jp/umamusume/page/146591481853953911.html) 2021-10-13: +5 per break, four breaks, plus a "up to five releases" line in the same paragraph | No second source | The page contradicts its own break count and is five years old | Only the four-break and five-copy facts kept, confirmed by Game8 MLB/4LB; level figures flagged ❌ UNVERIFIED | Low |
 | 15 | 1.4/1.5 | Yellow and orange stages | [Game8 JP](https://game8.jp/umamusume/454202) 2025-11-21 and [Game8 Global](https://game8.co/games/Umamusume-Pretty-Derby/archives/542672) 2025-08-07: gauge turns orange at 80 | No source colors the hint indicator | The brief expected the colors to mark hint stages | Color change reported where sourced, on the gauge; hint coloring flagged ❌ UNVERIFIED | Medium |
-| 16 | 1.4/1.5 | 10% cost cut per hint level | [Game8 JP](https://game8.jp/umamusume/442505) 2026-09-10: 30% at Lv3 | [GameWith](https://gamewith.jp/uma-musume/article/show/274990) 2022-05-18 covers payout, not the discount | Single source for the percentage | Published with its date and this note; no second source found | Medium |
+| 16 | 1.4/1.5 | 10% cost cut per hint level | [Game8 JP](https://game8.jp/umamusume/442505) 2026-09-10: 30% at Lv3, quoted from client-adjacent text | [GameWith](https://gamewith.jp/uma-musume/article/show/274990) 2022-05-18 covers payout, not the discount; [umamusu.wiki Game:Skills, rev. 2026-08-30](https://umamusu.wiki/Game:Skills) prints **~8% per hint, max 40%**, plus a separate **Fast Learner −10%** | A second domain now disagrees rather than merely being silent, and the two figures cannot both describe one quantity — 40% is not reachable at 10%/level capped at Lv3 | Keep 10%/level and −30% at Lv3 as the published value because it is quoted from JP client text and matches the Lv3 ceiling; treat the wiki's 8%/40% as possibly folding in Fast Learner. Do not encode either as a multiplier without an in-client check | Medium |
 | 17 | 1.4/1.5 | `[Global]` top-tier ranking | [Game8](https://game8.co/games/Umamusume-Pretty-Derby/archives/536715) 2026-09-23 ranks seven SS cards | `[B]` `support-cards.json` confirms each exists on `[Global]`, ranks nothing | No second ranking source inside the approved list | Tier claims kept with the Game8 date plus the availability cross-check; ranking stays one-source | Medium |
 | 18 | 1.4/1.5 | Top-grade starts per farming run | [Kamigame factor loop](https://kamigame.jp/umamusume/page/147871627357506165.html) 2025-06-05: 15 or more | [Kamigame double circle](https://kamigame.jp/umamusume/page/144421049306500950.html) 2025-06-05: 20 or more | Same site, two target counts | Number dropped; only the rule that shared wins raise compatibility is used | Low |
 | 19 | 1.4/1.5 | Factor slots on a finished Umamusume | [Kamigame](https://kamigame.jp/umamusume/page/154134787475434233.html) 2025-06-05: count follows stats, aptitudes, skills | [Umamusume Wiki](https://umamusu.wiki/Game:Inspiration) 2025-11-24: same, no maximum | Neither states a slot number | Written as ❌ UNVERIFIED with the qualitative rule kept | Low |
@@ -1853,6 +2011,10 @@ Consolidated from the five research drafts. One row per disagreement between sou
 | 40 | 3/4 | Global story event history | `en__storyevents.json` stops at event_id 1009 (2026-02-05 UTC) | `umamusume.com/news/1024/` and `/news/1076/` cover the March to October 2026 editions | The data export is 7 months behind, so it cannot corroborate any September Global event | Rely on the official notices plus `en/foresight/timeline` (`is_estimated: false` for event 1020); flagged so nobody treats the export as complete | High |
 | 41 | 3/4 | JP next story event (record 1057) | `events__story-events.json` gives 2026-09-30 12:00 -> 2026-10-13 11:59 JST with no name | no official notice as of 2026-09-27 02:05 JST | Name and rewards missing, dates single-sourced | Held in 4.3 as a placeholder line, not counted as an announced event | Medium on dates, none on name |
 | 42 | 3/4 | Global Scout pair of 2026-08-25 (Aston Machan, Fine Motion, Maruzensky) | GameTora `en` records 30120 and 30121 with the resolved pickups | Game8's schedule page (updated 2026-09-17) starts its list at Sep. 1, and the Global news index only exposed items from 2026-09-15 back | No second domain covers that pair; the `release_en` fields that agree with it come from the same vendor, so they are not independent | Published in 5.5 flagged `❌ single source` rather than dropped, since the record is internally consistent with the neighbouring pairs' 8-day cadence | Medium, breadth gap only |
+| 43 | 1.6.10 | An item that guarantees training success | An incoming write-up (`COMPREHENSIVE UX DELIVERABLES.md`) and the client brief for this pass both assert a **guaranteed-training-success consumable named with the equine-noun rendering of 「蹄鉄」**, and "Goddess Statues" as permanent scenario buffs | `[Global]` and `[JP]` item lists read in 1.6.10: 「蹄鉄」 is the **Cleat** **currency** and 「女神像」 the **Statue Exchange** currency, and neither carries a buff effect string | The fan rendering of one item name was read as a different, powerful item; the second was read as a modifier | **Both retired.** Deliberately not re-typed here: naming the fan rendering would add a `C-4` substring hit to tracked text purely to describe a mistake, and the ban reads cleanly without it. The only documented zero-failure levers are Trackblazer's Good-Luck Charm (40 coins, 1 turn), an Extreme Spirit Burst's 0% on its own facility, and support effect Failure Protection (id 27) | High |
+| 44 | 1.6.4 | A "cover" mechanic in Team Trials scoring | The same brief: scoring rests on "total team stats, skill coverage across all 5 distances, and specific 'cover' mechanics" | [game8.co 2026-09-23](https://game8.co/games/Umamusume-Pretty-Derby/archives/536831), GameTora's Team Trials scoring tool (2026-09-24) and uma.guide publish position points, per-skill points (rare 1,200 / common 500), target-time and margin bonuses, and state no cover requirement beyond fielding entrants | "cover" is not a mode term; the nearest real quantities are **skill count** and the five-category field | Model the published component table. Do not add a cover flag. "Team Stadium" is likewise neither server's word for the mode (1.6.4) | Medium |
+| 45 | 1.2.2/1.3.1 | Whether evolved skills exist on `[Global]` | [umamusu.wiki Game:Skills, rev. 2026-08-30](https://umamusu.wiki/Game:Skills): 「進化スキル」 evolves **gold only** (覚醒 skills at ★3 and ★5) on 1-3 per-trainee conditions, chosen at career completion, "currently exclusive to the Japanese version" | [game8.co Global skill tier list 2026-09-23](https://game8.co/games/Umamusume-Pretty-Derby/archives/536805) carries **no** Evolved category; no official Global notice found as of 2026-09-27 | Global availability is asserted negative by two independent angles but never stated by Cygames | Treat as `[JP-Only]` until a Global notice exists. 1.3.1's Wit-1200 gate already names evolved skills, so the gate text is shared and the *system* is server-split — do not let a reader infer Global evolved skills from that row | Medium |
+| 46 | 2.x | `[JP-Only]` Grand Masters goddess bonuses | [umamusu.wiki Game:Grand Masters, rev. 2026-07-28](https://umamusu.wiki/Game:Grand_Masters) EN table: energy reduction → Byerley Turk, event effect → Darley Arabian, chain chance → Godolphin Barb, hint rate omitted | [GameWith (2023-07-17)](https://gamewith.jp/uma-musume/article/show/388788) and [Game8 (2026-04-13)](https://game8.jp/umamusume/510269) agree with each other and with Kamigame: ダーレー = 「体力消費ダウン」, ゴドルフィン = 「ヒント発生率アップ」 + post-training event rate, バイアリー = support-event magnitude + 「連続イベント率」, and **all three share** a 「トレーニング効果アップ」 ladder the wiki row drops | The EN wiki row shifts the mapping across goddesses and omits the shared effect | Follow the JP pair; recorded in `docs/scenarios/08-grand-masters-jp-only.md`. Scenario is `[JP-Only]`, so no Global-facing table or copy depends on this — but the file is in the scenario directory, so conflict 6's import filter now has two files to exclude, not one | High |
 
 ## Section 8: Self-Audit Report
 
@@ -1907,10 +2069,12 @@ Conflict log disposition: 42 rows, of which 13 resolved HIGH, 21 MEDIUM, 8 LOW. 
 
 Gaps found and closed during the review round: Transfer Requests' end date and reward list (the live-ops section had left them `❌ UNVERIFIED` while the game-modes section had already resolved them from a full read of the same notice, and conflict row 30's ruling had never been applied); Masters Challenge and Training Pass second domains (now Game8 JP and Kamigame, and GameWith's reward-list page respectively); the terminology map's currency row, which had cited two `items.json` records that are the Dream Team event currency and the retired support-card level currency rather than the gacha exchange currencies.
 
+Closed after publication, on 2026-09-27: the `[Global]` mood tier strings in 1.1.6, which were `❌ UNVERIFIED` and are now confirmed from the client's own Mood Effect panel, along with the race-side percentage that Section 2 left as an open conflict. This is the one place in the document where a claim was settled by the client's UI rather than by a publisher, and it is recorded here rather than quietly, because the two wiki camps it contradicts are still live sources elsewhere in these sections.
+
 Gaps that remain, each naming what was tried:
 
 - Whether 賢さ / Wit training can fail at all; sources exist on both sides.
-- The current `[JP]` Speed ceiling: 2100 or 2000.
+- ~~The current `[JP]` Speed ceiling: 2100 or 2000.~~ Closed 2026-09-27: they are different quantities, a scenario cap and a database ceiling, and the arithmetic reconciles them. See conflict row 3 and §2.6.
 - The exact cost reduction per hint level.
 - The number of factor slots on a finished Umamusume, and the per-run count of top-grade farming starts.
 - Whether Masters Challenge, Training Pass and 自主トレ育成 reached `[Global]`.

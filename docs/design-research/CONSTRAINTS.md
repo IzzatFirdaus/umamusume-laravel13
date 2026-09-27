@@ -101,12 +101,14 @@ UI labels must use the Global English client's words, not the JP client's and no
 | Style abbreviations | Front, Pace, Late, End (aptitude table only) | the four full names inside a dense aptitude grid |
 | Distances | Sprint, Mile, Medium, Long | Short, Middle, Staying |
 | Surfaces | Turf, Dirt | Grass, Sand |
-| Support card types | Speed, Stamina, Power, Guts, Wit, Pal, Group | Friend (for 友人) |
+| Support card types | Speed, Stamina, Power, Guts, Wit, `Pal` **[uncaptured]**, Group | Friend (for 友人) |
 | Gacha | Scouts | Gacha, Pickup, Banner |
 | Pull currency | Carats | Jewels, Gems |
 | Character being trained | Trainee Umamusume | Trainee Uma Musume, Uma Musume being trained |
 | Finished character | Veteran Umamusume | Hall of Fame, graduated |
 | Inheritance unit | Spark | Factor (JP-side 因子 wording) |
+| Inheritance **system** | Inspiration | Inheritance as the English label (that is the JP 継承 word, not the `[Global]` one) |
+| Ancestors picked for a run | Legacies | Parents, grandparents, bloodline (D-267 bars these in copy) |
 | Energy | Energy | Stamina for the gauge (collides with the stat) |
 | Mood | Mood, with the five state words shown | Motivation (the JP guide gloss), Condition |
 | Scenario names | Ura Finale, Unity Cup, Brighter Together Our Grand Concert; Trackblazer or Twinkle Star Climax for the third | Make a new track!!, Climax bare |
@@ -117,7 +119,11 @@ UI labels must use the Global English client's words, not the JP client's and no
 | Skill acquisition states | Suggested, Acquired, Skipped (the `SkillAcquisition` enum) | Planned/Used/Ignored, Proposed |
 | Run states | Active, Completed, Retired (the `RunStatus` enum) | Ongoing/Finished/Archived |
 
-**D-20. Never invent a client string.** If a label is needed and no Global string is on record, use a plain descriptive phrase and record the gap. `UMAMUSUME_REFERENCE.md` marks its own unverified items with `❌ UNVERIFIED`; a design artifact must not silently promote one into UI copy. The five mood state names are a live instance of this: only GREAT and GOOD are evidenced in the corpus (`RAW-FINDINGS.md` §8), so the other three pill labels are an open item, not a token.
+**What `[uncaptured]` means in this table.** The labels in the middle column are not equally evidenced. The five discipline names are client strings read from captures; **`Pal` is not** — it is Game8 English's word for 友人, and the client's own label for the sixth type has never been read off a frame (D-278). "Do not ship it as though the client said it" is D-278's ruling, and this table's job is to keep a reader of one row from concluding what a reader of both rows knows. Same status applies to the running-style abbreviations' *rendering*, not their words.
+
+**Open naming question this table exposes, for the owner, not for an agent to settle.** `UMAMUSUME_REFERENCE.md:571` records `[Global]` localising the **system** as *Inspiration*, with *legacies* for the chosen ancestors and *Sparks* for the traits. The owner's ruling named the screen **Legacy Select** and barred "Inheritance Screen", and §6.27 and D-260 use that heading throughout. "Legacy Select" and "Inspiration" can both be right — a system name and a screen caption are different objects — but neither has been read off a capture, so no surface may present either as the client's own caption until a frame settles it. Escalated rather than resolved here because the existing label is an owner decision.
+
+**D-20. Never invent a client string.** If a label is needed and no Global string is on record, use a plain descriptive phrase and record the gap. `UMAMUSUME_REFERENCE.md` marks its own unverified items with `❌ UNVERIFIED`; a design artifact must not silently promote one into UI copy. This rule is general and stands. Its mood-tier instance is **resolved, not relaxed**: the client's own Mood Effect panel (owner-supplied capture, 2026-09-27) prints `GREAT` / `GOOD` / `NORMAL` / `BAD` / `AWFUL`, so those five are evidenced client strings and §6.17 of `DESIGN.md` now uses them as UI copy. The strings this rule still blocks are every label the corpus has not captured from the client itself, the outing action's button text among them.
 
 **D-21. Do not key on fan-translation strings.** Some community English names carry banned vocabulary that the official Global label does not (the reference doc's Rainbow Cleat case). Official Global text wins.
 
@@ -344,7 +350,9 @@ One residual risk worth naming rather than legislating away: `antislop-ui` also 
 
 **D-135. Scenario sheets are data-driven.** No game mechanic is hardcoded into a scenario UI. Where the brief and the cited source disagree about a mechanic, the sheet renders what the record supplies and the disagreement is raised rather than silently resolved by a wireframe. Live instance: summer camp, `UMAMUSUME_REFERENCE.md` §1.1.2 versus the brief.
 
-**D-136. Never hardcode a run length.** No source in this repo records a total turn count and the brief's "~50 rounds" is unverified. The turn chip shows a turn number and a turns-left value, as the client does, and derives nothing from an assumed total.
+**D-136. Never hardcode a run length.** No source in this repo records a total turn count and the brief's "~50 rounds" is unverified. The turn chip shows a turn number and a remaining-turn count, as the client does (`DESIGN.md` §6.6 reads both off frame `194819`, plus a second chip for the phase countdown), and derives nothing from an assumed total.
+
+**The remaining count is entered, not computed — this is the arithmetic the earlier wording hid.** "Turns left" looks like `total − current`, and with no recorded total that subtraction has no operand. So the value is a Trainer-entered reading of what the client printed for that turn, stored per turn like any other observed figure, on the D-270 pattern: the tool records what the client showed and never derives it. Two labels must stay distinct in UI and in schema, because they are different claims — remaining turns *in the current period*, which the client's calendar structure implies, and remaining turns *in the career*, which nothing in this repo records. A single field named `turns_left` without a period would silently assert the second one. G-31 stays as the check; the superseded `screen-a-dashboard.html` hardcoded `3` and is the reason it is a gate rather than a preference.
 
 **D-137. `TurnEvent` needs a PRD citation and Architect sign-off before any migration.** `AGENTS.md` makes an uncited table a no-merge. Its `deltas` column stores observed outcomes only; `turn_entries` remains the source of truth for absolute values.
 
@@ -422,7 +430,9 @@ Recorded because each of these was visible in the client and my earlier specs go
 
 **D-186. The Energy fill sweeps the full gauge spectrum.** Cyan through green and lime into yellow, amber and red toward the right end. Colour encodes **position on the track**, not the current level. An earlier spec said "cyan to lime", which was a measurement artefact: the probe only covered the filled portion of a partly-drained bar, so the amber and red tail sat behind the dark unfilled track and went unmeasured.
 
-**D-187. The discipline banner carries the facility activity name.** Two stacked ribbons: the pale one names the discipline and level, the saturated one names the activity the facility offers (`Breaststroke`, `Freestyle`, `Incline`, `Running`, `Long-Distance Swimming`, `Dirt`). A mockup showing only `Stamina Lvl 1` is incomplete, and the activity set is the best evidence in the corpus that scenarios differ in facility layout.
+**D-187. The discipline banner carries the facility activity name.** Two stacked ribbons: the pale one names the discipline and level, the saturated one names the activity the facility offers (`Breaststroke`, `Freestyle`, `Incline`, `Running`, `Long-Distance Swimming`, `Dirt`). A mockup showing only `Stamina Lvl 1` is incomplete.
+
+**The closing clause of this rule was an over-reading and is withdrawn.** It previously said the activity set is "the best evidence in the corpus that scenarios differ in facility layout". Every frame carrying these six names is **Unity Cup**; the corpus has no Trackblazer or Our Grand Concert training HUD (`SCREENSHOT-MANIFEST.md` coverage table), so within-corpus evidence for the list is variation *per facility within one scenario*, not variation *between scenarios*. What survives: the activity line is required content on the banner, and a future cross-scenario claim needs frames or scenario data behind it, not this list.
 
 **D-188. The support card rail belongs on the dashboard.** Circular avatar, discipline type badge, segmented bond gauge, orange double chevron when friendship training is available, flame mark when the card sits on its own tile. Documented in `RAW-FINDINGS.md` §3.6 and then omitted from every mockup in this package.
 
@@ -455,9 +465,10 @@ Required form: a success block, a failure block, and a probability label where o
 
 ### Mood
 
-**D-202. Mood is both a tier and a number.** Wikis record mood changes as integer deltas, `-2 Mood`, `-3 Mood`, and `+ 20%` style training modifiers. The mood pill shows the tier word; a mood change in a preview or log shows the delta. Both, never one alone.
+**D-202. Mood is both a tier and a number.** Wikis record mood changes as integer deltas, `-2 Mood`, `-3 Mood`, and `+ 20%` style training modifiers. The mood pill shows the tier word; a mood change in a preview or log shows the delta. Both, never one alone. The pill's directional arrow is the third required part of the tier readout (D-259).
 
-**D-203. The five tier labels remain blocked.** Still unverified as Global client strings. `GREAT` and `GOOD` are evidenced in the screenshot corpus. `Practice Poor` is now evidenced as a Global status label from Game8 and is a strong candidate for the low tier, but a wiki's prose is not the client's pill text. D-20 and D-138 stand.
+**D-203. Withdrawn 2026-09-27, superseded by D-259.** This rule blocked the five tier labels as unverified Global client strings. An owner-supplied capture of the client's Mood Effect panel resolves it: the tiers are `GREAT`, `GOOD`, `NORMAL`, `BAD`, `AWFUL`, with training effects +20 / +10 / 0 / −10 / −20 percent and pre-race attribute effects +4 / +2 / 0 / −2 / −4 percent, and the active tier marked on its own row. `DESIGN.md` §6.17 carries the table and D-20 now records the resolution rather than the block.
+The rule's speculation is withdrawn with it: `Practice Poor` is **not** a candidate for the low mood tier. It is a failure condition from an event outcome (D-201, `DESIGN.md` §6.16b), and the client's low tiers are `BAD` and `AWFUL`. A mood widget must never offer a `Practice Poor` state, and the two vocabularies must not be merged.
 
 ### Energy
 
@@ -490,9 +501,17 @@ Read 2026-09-27 in a real browser. **Coverage is uneven and that is recorded rat
 ### The 1200 line is a real soft cap, not an app artefact
 
 **D-211. Gains past 1200 are halved, and the UI must say so.**
-The URA guide states plainly: *"Training gains for stats beyond 1200 are always halved."* It also names a mechanic, `Fully Charged`, that requires Power 1200 or more. So 1200 is a meaningful in-game inflection point, not just a validation constant this app happens to use.
+*"Training gains for stats beyond 1200 are always halved."* 1200 is therefore a meaningful in-game inflection point, not just a validation constant this app happens to use.
 
-This reframes `ADR-0002`. The defect there is real, the app rejects values a real run reaches, but the fix is not "raise the number to an arbitrary 2000". The bar should show **1200 as the soft-cap line where returns halve**, which is a fact about the game, and separately show the scenario ceiling, which is a different fact. Two markers, two meanings, both sourced.
+**Attribution corrected 2026-09-27; this rule previously cited its own source wrongly.** The text here used to read "The URA guide states plainly", and `docs/scenarios/01-ura-finale.md` contains neither the word *halved* nor the figure *1200* anywhere. The sentence is from **Game8's `[Global]` English scenario pages**, read in a browser — `archives/536520` per `docs/adr/0002` amendment 1, and the same phrasing recorded in `UMAMUSUME_REFERENCE.md` under "The July 1, 2026 Global rework" against Unity Cup `545572` (2026-07-07) and Trackblazer `580723` (2026-08-25). The rule stands on a post-rework `[Global]` source; what was wrong was the pointer to it.
+
+The second clause was also misattributed: `Fully Charged` is not in the URA guide either. It is a **Grand Live / Our Grand Concert** mechanic that pays off at Power 1200 or more (`UMAMUSUME_REFERENCE.md` §1.6 conflict 4, still OPEN on its mechanics). Same threshold, different scenario, and the tool must not present a Grand Concert gate as URA documentation.
+
+**Two axes, one threshold — do not merge them.** This rule is about *training gains* being halved past 1200. `UMAMUSUME_REFERENCE.md` §1.3.4 separately records that points past 1200 "have a **reduced effect on the Umamusume during the race**", sourced from Game8 2025-11-21 and Kamigame 2024, both ⚠️ STALE. Those are different claims about different phases of a run, and §1.3.4's baseline row currently states only the race-side one. A UI sentence like "gains halved past 1200" asserts the training axis; it must not be quoted as though it were the race-effect figure.
+
+**Verification status, stated so it is not read as equal to D-212.** The additive cap model in D-212 is confirmed at the data level by `scenarios.json`. This rule's *threshold* is corroborated by the same export (every scenario's cap reproduces as `1200 + stats[i]`), but the **halving itself is prose-only** — no dataset field carries a 50% factor, and `archives/536520` has no recorded date, which D-228 would ordinarily require. So: render the 1200 marker as sourced, attribute the halving to a `[Global]` guide rather than to game data, and treat the exact reduction as unconfirmed pending re-verification.
+
+This reframes `ADR-0002`. The defect there is real, the app rejects values a real run reaches, but the fix is not "raise the number to an arbitrary 2000". The bar should show **1200 as the soft-cap line where returns halve**, which is a fact about the game, and separately show the scenario ceiling, which is a different fact. Two markers, two meanings.
 
 **D-212. Caps are expressed as base plus bonus, and the client renders the bonus in gold.**
 *"The URA Finale Scenario now has +200 stat caps for Speed, Stamina, Power, Guts, and Wit."* So URA's 1400 is `1200 base + 200 scenario`, not a flat 1400. The cap stack in `DESIGN.md` §6.22 is confirmed as the right model, and its rows should read as additions, not totals.
@@ -550,7 +569,9 @@ Resolved: Global Unity Cup caps **are** `1300/1300/1300/1300/1800` and the 1,800
 
 **D-229. Surface hidden information the client obscures.** The Unity Cup guide records that the Unity Training icon overlay hides skill hint icons on facilities, forcing manual inspection. Where the tool can show a fact the client makes hard to see, that is the value being designed for, and it outranks visual fidelity to the client's layout.
 
-**D-230. Where a probability is genuinely sourced, show the number and derive it from entered turns.** `ADR-0001` concluded training failure rates could not be sourced and had to ship as bands. Trackblazer's **Race Fatigue** table is a different case and is fully quantified: it keys on the count of **consecutive races** (1 race: 0-15% mood down; 2: 0-33%; 3: 60-90%+; **4+: 100%**, plus 33% Skin Outbreak and 40% for 3 random stats −10). Because consecutive-race count is already recoverable from `turn_entries`, this satisfies Planner Rule 4 — it is a pure function of logged turns, not a simulation. It is also the only place in the design so far that may print a real percentage instead of a band, so it must not be used as precedent for the training-failure case.
+**D-230. A probability may print as a number only when it is sourced from client data or from two independent sources — and then derive it from entered turns.** `ADR-0001` concluded training failure rates could not be sourced and had to ship as bands. Trackblazer's **Race Fatigue** table is a different case and is fully quantified: it keys on the count of **consecutive races** (1 race: 0-15% mood down; 2: 0-33%; 3: 60-90%+; **4+: 100%**, plus 33% Skin Outbreak and 40% for 3 random stats −10). Because consecutive-race count is already recoverable from `turn_entries`, this satisfies Planner Rule 4 — it is a pure function of logged turns, not a simulation.
+
+**The opening clause is bounded on purpose, because as first written it was a general principle a future round could cite for any number.** "Genuinely sourced" here means **client data or two independent sources**, not "a guide I like". Race Fatigue clears that bar on *form* (a quantified table) but not on *count*: it comes from `04-trackblazer-umaguide.md`, **a single source**, so the table ships as a **provisional exception**, marked as such where it renders, and it is not precedent for the training-failure case — `ADR-0001` still governs there with bands. Also note the `90%+` cell: the `+` makes it a **lower bound, not a figure**, so a UI that prints "90%" states something no source claims. Either render the band as `≥90%` or keep that cell in band form.
 
 **D-231. Race Fatigue is switched off after Late December, and a sourced 0% must silence a warning rather than shrink it.** The fatigue events *"cannot occur after Late December"*, so the advisory has a hard calendar end and must disappear in the endgame stretch, not fade. Separately and more generally: when a mechanic sets a rate to zero — Race Fatigue after December, an **Extreme Spirit Burst's 0% failure at its facility**, or a purchased **Good-Luck Charm** (40 coins, one turn) — the risk affordance goes fully quiet. Rendering "low risk" where the game says "impossible" invents a warning the player is being told to ignore.
 
@@ -668,11 +689,137 @@ Recorded after the v10 build, which replaced the PNG Screen A set with a single 
 
 **D-258. A contrast rule must name its second colour.** "1.04 to 1.14 against the panel" is not checkable while the component is painted on `--raised`. The dark tint set was solved against the surface it sits on and measures 1.09 to 1.11; the light set was solved against `--panel` and measures 1.10 to 1.21 where it actually renders. Same rule, two reference surfaces, one of them quietly failing. Every contrast threshold in this file must state both colours, or it cannot be verified by anyone, including the author.
 
+**D-259. A mood pill renders the directional arrow. Colour plus word without it is a review failure.** The five tiers are `GREAT` ↑ +20%, `GOOD` ↑ +10%, `NORMAL` → 0%, `BAD` ↓ −10%, `AWFUL` ↓ −20% (`DESIGN.md` §6.17, from the client's own Mood Effect panel), and the arrow is not ornament: it is the only part of the readout that carries the ordinal direction. The middle tier's mark is read from the capture as neutral, and whether the client draws a flat arrow there or nothing at all is the one glyph worth re-confirming on the next capture; the rule is unaffected, since the tiers either side of it are unambiguous.
+
+The reason it is now a rule rather than a preference is arithmetic. Three of the five pill colours are derived, not measured, and were derived at the mean relative luminance of the two measured anchors per the owner's fallback instruction (`DESIGN.md` §3.5). At equal luminance the ramp's own structure collapses: `GOOD` `#ED8036` and `BAD` `#D48556` are 3.3 degrees of hue apart at the same brightness, and `GREAT` `#FB5590` and `AWFUL` `#D47E9E` are 1.0 degree apart. Two pairs of *opposite* meaning therefore render as one colour, and no amount of re-picking saturation fixes that while the luminance is held equal. What the equal-luminance derivation buys is a row of five pills of even weight, which is what was asked for; what it costs is hue as an ordering signal, and the arrow is what pays for it.
+
+Consequences, all checkable:
+- The arrow renders on every mood pill, at every size, in every theme, including the compact forms in the log and the guided preview.
+- The arrow is the client's own grammar (up for the two positive tiers, flat at `NORMAL`, down for the two negative ones), so it is a measured pattern rather than an invention, and it must not be replaced by a sign-prefixed number or a colour-only chip.
+- G-6 (colour independence) is necessary but not sufficient for a mood pill: G-6 passes on a word-only pill, and a word-only pill still fails here. G-57 is the specific check.
+- When the three provisional colours are replaced by measured ones, this rule does **not** lapse. The arrow is a client behaviour being copied, not a compensation this system chose.
+
+## 10q. Legacy Select rules
+
+From seven client frames dated 2026-07-15 and the Global Legacy and Sparks guides. Screen
+anatomy in `DESIGN.md` §6.27.
+
+**D-260. Legacy Select is a pre-run step, never a per-turn one.** The client reaches it before training begins: create run, choose scenario, choose Trainee Umamusume, choose Legacies, then turn one. It must not appear in the guided turn flow, must not be reachable from a turn, and its result is fixed for the life of the run. A per-turn Legacy control would imply the Trainer can re-choose ancestors mid-run, which the game does not allow and which would silently invalidate every turn entered before the change.
+
+**D-261. Every Spark names the Legacy it came from and its generation.** The right-hand list groups under `1st Legacy` and `2nd Legacy`, each headed by the ancestor's portrait and rank badge, and second-generation Sparks carry half the inheritance rate. So the group heading is not decoration, it is the provenance: the same `Speed ★2` means different odds depending on which group it sits in. A flattened Spark list that drops the grouping throws away the one fact that changes the number's meaning (Planner Rule 5).
+
+**D-262. Affinity is entered or fetched, never inferred.** As written this rule asked that affinity "be deterministic and explainable". That is not achievable here, and stating it unchanged would license a guess. The client derives affinity from shared competitive history, principally overlapping G1 wins between the Trainee and the Legacy, plus canonical relationships. **The schema stores none of that**: `training_runs` has two nullable FKs to `umamusume` and no per-character race record, so no function over local data can produce an affinity value. The honest form is therefore: the Trainer enters the affinity the client showed them, or it arrives from a fetched dataset with provenance, and the UI displays it as recorded. It is explainable precisely because it is not computed. Any proposal to compute it is an Architect escalation and almost certainly a PRD §6 non-goal.
+
+**D-263. A Guest Legacy is read-only, and absent beats disabled.** A borrowed friend Umamusume carries a `Guest` pill over its portrait. The Trainer cannot alter another player's Umamusume, so the controls that would mutate it are not rendered at all rather than greyed out. A disabled control invites a click and then refuses it; absence states the fact up front (D-26 family). Borrowing costs are the game's economy, not this tool's: record that the Legacy was a guest, never a Monies figure.
+
+**D-264. Inheritance is a roll. Show the published chance and the observed result, never a projection.** The client's rates are public: stat Sparks 70 / 80 / 90% at ★1 / ★2 / ★3, aptitude Sparks 1 / 3 / 5%, Unique Skill Sparks 5 / 10 / 15%, and half again for second-generation Sparks, with affinity applied as a percentage multiplier. A row may read `Stat spark, 90% chance`, because that is a sourced constant. It may not read `likely to pass Speed`, because that is a guess about a random event, and Planner Rule 1 forbids simulation while Rule 4 requires every number to be a pure function of entered turns. This is the sharpest boundary on this screen: it is the one place in the product where the underlying game is explicitly random, and the temptation to model it is constant.
+
+**D-265. Spark category colours are contained to the Sparks list.** Measured fills: stat `#3CB4F0`, aptitude `#FC84B4`, Unique Skill `#90CC30`. These mean *category*, and they collide on sight with §3.3, where blue already means "this stat decreased". The containment rule: no delta, badge, status pill or chart may reuse these three fills, and the Sparks list is the only surface where they appear. They also never appear without their word and their star count, so the colour is a scanning aid rather than the carrier of meaning (P5, D-12).
+
+**D-266. Reproduce the client's own inconsistency rather than normalising it.** The slots read `Legacy 1` / `Legacy 2`; the Spark groups read `1st Legacy` / `2nd Legacy`. Two numbering styles for the same two objects in one screen. It is the client's inconsistency, not ours, and a Trainer reconciling the tool against the game needs the strings to match what they see. Invent a third form and the mapping breaks; silently unify the two and the labels no longer correspond to anything on screen.
+
+**D-267. The "parent" ban cannot be applied to the schema in a UI phase.** UI copy uses Legacy and Ancestor throughout, which is free. But the shipped columns are `inheritance_parent_a_id` and `inheritance_parent_b_id`, the relations are `inheritanceParentA()` and `inheritanceParentB()`, and Game8's Global guide itself glosses Legacies as "parents". Renaming columns is a migration with a PRD citation, out of a documentation and mockup phase. Recorded as a known divergence between the copy rule and the identifier rule, for the phase that owns the schema to settle.
+
+**D-268. The screen has more state than the schema can hold.** Legacy Select shows, per Legacy: the chosen Umamusume, its rank, whether it is a Guest, its own two ancestors, and a Spark list with per-Spark kind, target and star rank, plus an affinity value for the pairing. The `training_runs` record holds two character ids. Phase 4's provenance requirement is therefore **not met by the existing columns**, and closing it is a schema proposal on the `ADR-0003` pattern, most likely a typed json payload keyed to the run rather than a wide table of nullable columns. Documenting the screen without stating this would imply the data can be persisted today.
+
+## 10r. Run Completion state rules
+
+Note on numbering: this was requested as "10p", but §10p is already Convergence and derivation
+rules and §10q is Legacy Select, so it continues the sequence as §10r. Component anatomy lives
+in `DESIGN.md` §6.28, not here, because §10x in this file is for rules and DESIGN §6 is for
+anatomy.
+
+**D-270. Run Completion is a terminal, read-only summary, and its headline number is entered, not computed.** Career Rank and Rating are the client's own score of a finished run, derived from final stats, race results and fans across the whole career. Recomputing them here would be a simulation and is barred by Planner Rule 1; Rule 4 requires every displayed number to be a pure function of entered turns, and the rating is not. So the Trainer records what the client showed, the UI labels it as entered, and an absent rating renders as absent rather than as zero or as an estimate.
+
+**D-271. A Major Win may only be rendered if its source is real data.** Single races must exist in the scenario calendar or race dataset. Composite achievements such as `Senior Autumn Triple Crown` and `Triple Tiara` are not races, have no row in a race table, and must come from a curated title list. The failure this prevents is the one this project has hit repeatedly: a plausible-sounding string generated into a surface that looks sourced. A gold medal icon and a blue tier badge also encode different kinds of achievement and must not be interchanged.
+
+**D-272. The fan class ladder is a fourth, separate fan scale and may not be merged with the others.** Measured thresholds: Bronze 5,000, Silver 20,000, Gold 50,000, Platinum 100,000, Star 160,000, Top Star 240,000, Legend 320,000, over a Debut/Maiden and Beginner base. These are distinct from race entry gates (350 to 25,000), URA event gates (60,000 / 70,000 / 120,000) and Trackblazer's Unique Skill gates (5,000 / 60,000 / 120,000 with bond). D-224 already forbade merging two of these; the ladder is a fourth and the same reasoning holds. It is also the scale that matters at run end, so the summary must name the tier reached and mark it, not leave a bare fan count to be looked up.
+
+**D-273. Grade badge palette, corrected from frames.** `A` orange, `B`/`B+` pink, `C` green, `D` blue, `F` periwinkle, `G` grey, `S` gold. An earlier draft grouped `F` with `G` as grey; the client renders F in the same violet-blue seen on the Legacy Select frames, and greying it destroys the distinction that makes the ladder scannable. The letter always accompanies the colour regardless (P5, D-12).
+
+**D-274. The `U/G` badge must not be rendered, mapped, or explained until it is understood.** Speed 1245 on a finished run carries a large violet `U` with a smaller grey `G` at its lower right, which is not a member of the G-to-SS ladder. Its meaning is unestablished. The temptation is to treat it as the top tier and assign it a threshold; that would promote an uninterpreted glyph into a rule and silently corrupt the grade function above roughly 1200, which is exactly the range a completed run lives in. Absent beats invented.
+
+**D-275. The race tier set is not closed, because `EX` exists.** Pre-OP, OP, G3, G2 and G1 are the five this package had recorded; the Climax result header shows an `EX` badge, and the same badge appears on the Legacy Select frames, so it is a general class marker. This is direct evidence for D-153's ban on deriving a tier label from a grade code: an unseen code would be silently mislabelled rather than flagged.
+
+**D-276. The final stats list is mandatory and the radar chart is optional.** The client offers a swap between them. The list carries values and grade badges; the pentagon shows shape without magnitude, so a run can be reviewed without it but not without the numerals. A chart that is the only carrier of a number is a chart placed because the space looked bare (D-94).
+
+---
+
+## 10s. Support card rules
+
+Recorded from the deck-editor frame `Screenshot 2026-07-15 155016.png`, the six card detail panels
+captured the same minute, and the export decode in `UMAMUSUME_REFERENCE.md` §1.4.7. These describe the
+client, so they hold whichever way `ADR-0005`'s scope question is answered.
+
+**D-277. `Friends` names the sixth slot, never the card in it.** The client frames slot six in pink and
+captions it `Friends` under the level, and the captured deck puts a `stamina` card there. So the caption
+is a slot role and the type chip on that same card still reads heart. A design artifact, mockup or schema
+that treats "friend" as a property of the card is wrong in a way that is invisible until a Trainer puts a
+stat card in slot six and the app calls it a Pal. The export's `type: friend` is a separate, real thing —
+the 23 NPC staff cards — and the two must not be merged (D-20, G-38).
+
+**D-278. The client's own word for the sixth type is still not on record.** "Pal" comes from Game8's
+list, not from a captured string, and the export key is `friend`. Render the discipline names the client
+uses — Speed, Stamina, Power, Guts, **Wit** — and store the export key `intelligence` behind that word at
+the model boundary. For the two special types, label them from a capture or mark the label
+`[Unverified]`; do not ship "Pal" as though the client said it.
+
+**D-279. Effect magnitudes are interpolated, and the interpolation is shown.** The client's value at any
+level is the **floor** of a straight line between the stored anchor levels (1, 5, 10, 15, 20, 25, 30, 35,
+40, 45, 50), verified against the client at levels 30, 35 and 40 on five effects at once. Two obligations
+follow: truncation, not round-half, because the client truncates and a one-off figure reads as a data
+error; and the anchors the value was drawn between print beside it, per D-256. A materialised value-per-
+level table is forbidden — it is 50 rows of derived data per effect that can disagree with the rule that
+generated it.
+
+**D-280. Never display a Unique Perk magnitude.** The perk has its own level axis, independent of the
+card's (`Lvl 50 / 50` with perk `Lvl 30`; `Lvl 35` with perk `Lvl 40`), and no source in this repository
+carries its values — for `[Dream Big!]` Tokai Teio one of the two named perk effects is not even present
+in that card's effect list. So a perk block may show the name, and the level only where the Trainer
+entered it, and nothing else. A percentage under a perk heading is an invented statistic (D-20, D-256).
+
+**D-281. `Scenario Link` is derived from the scenario, never stored on the card.** The badge appears on
+exactly those cards whose character is on the running scenario's linked list; in the captured Unity Cup
+deck one card of six carries it and it is the deck's only linked character. A stored flag would freeze a
+per-scenario fact into the card and would then be wrong in the other three scenarios, which is the same
+class of error D-227 warns about for unqualified numbers.
+
+**D-282. The slot's four corners are the contract.** Rarity ribbon top-left, type chip top-right, four
+limit-break diamonds bottom-left, `Lvl N` bottom-right, with the friend-slot caption below that. The
+diamond count is four because a card takes four breaks, and the level readout is
+`base(rarity) + 5 × breaks` (bases 20 / 25 / 30), so a slot showing three filled diamonds and `Lvl 50` is
+a defect, not a style choice. The type legend under the grid prints `xN` only for non-zero counts, and
+that absence is the read a Trainer is actually after.
+
+---
+
+## 10t. Ingested third-party design prose
+
+Numbering continues from §10s. The full triage of the incoming document is in
+`MECHANICS-TRANSLATION-TRIAGE.md`; this section carries only the rule that outlives it.
+
+**D-283. A design write-up is a source of patterns, never of values, copy, or vocabulary.** An external "game mechanics translated into UI/UX design language" document arrived with fifteen sections, correct shape, and mostly unusable content: it uses **Factor** where the Global client says **Spark** and **Motivation** where it says **Mood** as its primary vocabulary rather than incidentally; it asserts "typically 70+ turns", which is the D-136 defect with a larger number; it claims "Speed > 2000 unlocks Full Spurt" against its own §4.2 statement that 2000 *is* the hard ceiling; and three of its sections describe systems with no Global row in `scenarios.json`. The disposition is therefore per-axis, not accept/reject: the **pattern** survives translation ("a progress-gated unlock with a visible threshold"), the **number** attached to it does not, and the **copy** never does. This is not a new obligation — it is D-227's provenance requirement and D-256's derived-value rule applied one stage earlier, to the moment a figure enters a design doc rather than the moment it renders. The failure it prevents is the one this repository has been catching all session: a plausible constant arriving from prose, being seeded, then appearing on a surface that looks sourced.
+
+**D-284. Adopting a pattern from prose requires an existing evidence anchor.** A pattern that only the write-up supports stays in `MECHANICS-TRANSLATION-TRIAGE.md`; a pattern that this package can already point at in a capture, a dataset field, or a measured frame is the one worth naming in `DESIGN.md`. Both of the adoptions made from this document pass that test — informed risk-taking is already implemented as the preview step and D-171's energy-beside-Confirm rule, and behaviour gates are already drawn as §6.5's second marker — and the ones that fail it, like support card anatomy, stay out of the design system regardless of how good the writing is.
+
+**D-285. A document that cites this repository is a mirror, not corroboration.** A second incoming write-up (`docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md`) states at line 5 that its numbers are "drawn from the source-cited reference guide (compiled 2026-09-27)", and it is telling the truth: its Trackblazer cap row reproduces `UMAMUSUME_REFERENCE.md` §1.3.4 line 357 **verbatim, including the Guts/Wit transposition that `SCENARIO-DIFFERENCES.md` diagnosed**, and its mood table reproduces the `❌ UNVERIFIED` status that §1.1.6 and `ADR-0001` §6 both closed earlier the same day. Two consequences, and the second is the uncomfortable one. First, two artifacts agreeing is evidence of a shared source, never of the source being right — so a third-party doc that matches our reference cannot be cited back at ourselves. Second, when an incoming artifact disagrees with an authority here, check the authority's *internal* consistency before concluding the outsider invented the figure; in both cases here the "invention" was our own stale row, still circulating because the correction had been applied at one location and not the other. The corrected line 357 now names this risk in its own source cell.
+
+**D-286. A correction is not finished until every copy is gone.** Changing a value in one table while it stands corrected-elsewhere-and-wrong-here is the defect that produced D-285, and it is invisible to review: the file you edited reads correctly. The unit of correction is the literal, not the file. This applies hardest to figures that mockups, seeds, configs and other documents quote — the cap rows and the mood percentages are both in that class. The same rule cuts the other way for deliberate historical text: `ADR-0001` §6 keeps the superseded glosses below a dated "RESOLVED" block, and `DESIGN.md` §6.22 records the pre-correction row as a withdrawn instruction. Those are citations of an error, not copies of it, and G-60's grep is read with that distinction, not applied blind. **A third category exists and is exempt:** the inert one-shot patch scripts under `docs/design-research/_scratch/`, which are how several of these literals were written into the corpus in the first place. They are provenance records, not live text, and they will keep matching every retired string forever — so G-60 counts hits in `docs/**` prose, `config/**`, `resources/**` and prototypes, and treats `_scratch/` as history unless a script is being re-run, in which case its literal must be updated before it executes.
+
+**D-287. A correct rule with a wrong reason still fails review.** Two findings in this repository were of that shape, and both survived every check that looks at the rule rather than its citation. D-211's halved-gains rule is right and its source was misattributed — "The URA guide states plainly", in a file containing neither the word *halved* nor the figure *1200*; the sentence is from Game8's `[Global]` English pages, as `ADR-0002` amendment 1 already recorded. The same rule also credited `Fully Charged` to URA when it is an Our Grand Concert mechanic. D-187's banner rule is right and its stated evidence was an over-reading — six activity names, all from Unity Cup frames, offered as proof that layouts differ *between* scenarios in a corpus with zero Trackblazer training HUDs. Both defects had been copied outward before they were caught: D-211's into `CONSTRAINTS.md`, D-187's into three files. So review asks two questions of every rule, in this order: **is the requirement true, and does the reason given hold up to the evidence it names?** A rule that passes the first and fails the second will still mislead the next implementer, because the reason is what they generalise from.
+
 ---
 
 ## 11. Verification gates
 
 These are the checks a reviewer runs on any UI change. They are additive to the root file's sequence.
+
+**Scripted versus manual, so no gate reads as stronger than it is.** This table is a checklist, not a report of automation, and the distinction matters: a reviewer who assumes G-60 runs itself will repeat the exact defect it describes.
+
+- **Enforced by `gate.py`** over the prototype HTML: **G-1** lore, **G-2** required forms, **G-3** terminology, **G-4** token discipline, **G-13** rendered-text sweep, **G-16** sample-data integrity, **G-27** `node --check`, **G-31** total-turn denominator, **G-32** cap denominator honesty, plus the D-79 em dash and D-84 emoji checks.
+- **Manual or browser-assisted, no automation:** everything from **G-33 through G-60**, and the rows `gate.py` itself lists as not machine-checkable — **G-5** contrast, **G-6**, **G-7**, **G-9**, **G-11**, **G-12**, **G-14**, **G-15**, **G-17**. Contrast and computed style are measured in a browser by an agent, not by the script.
+
+G-60 is the case worth naming: it is the check that would have caught the transposed cap row surviving one file while another was corrected, and it currently runs only when a person remembers to run it. Automating it needs a registry of retired literals, so that is offered as a decision, not assumed. Two side observations from writing this: `gate.py`'s own PASS banner under-reports its coverage (it omits G-27/G-31/G-32, which it does enforce), and this very bullet was first written from grep fragments with the manual and automated lists swapped — caught only by reading the file, which is D-287's point about checking the reason rather than the rule.
 
 | # | Gate | How it is checked | Pass |
 |---|---|---|---|
@@ -725,6 +872,18 @@ These are the checks a reviewer runs on any UI change. They are additive to the 
 | G-46 | Derived-value disclosure | find every letter or number the artifact computes rather than records | its rule is printed in the UI and labelled client-sourced or ours (D-256) |
 | G-47 | Badge contrast | measure all nine grade badge letters against all nine fills, in both themes | ink-strong passes 9.00 and above; **white on the light fills measures 1.20-1.44 and is banned** (D-258) |
 | G-48 | Single spine | place the four scenario renders side by side in one artifact | identical section order and positions; only the goal region differs (D-257) |
+| G-49 | No inheritance prediction | grep the Legacy surface for projected outcomes | zero. Published chances and observed results only; no "likely", "expected", or rolled value (D-264) |
+| G-50 | Spark provenance | inspect any Spark row | its Legacy group and generation are visible, since generation halves the rate (D-261) |
+| G-51 | Guest affordance | inspect a Guest Legacy | mutating controls are absent, not disabled, and no in-game currency figure is shown (D-263) |
+| G-52 | Colour containment | grep for the three Spark fills outside the Sparks list | zero occurrences (D-265) |
+| G-53 | No computed score | inspect Career Rank and Rating on a completion surface | they are entered values labelled as such, never derived, never defaulted to zero (D-270) |
+| G-54 | Win title provenance | for each Major Win shown | it resolves to a calendar race row or to the curated composite title list (D-271) |
+| G-55 | Fan scale separation | count the fan scales rendered in one widget | one. Entry gates, event gates, skill gates and the class ladder never share a readout (D-272) |
+| G-56 | No uninterpreted glyph | grep grade rendering for `U/G` | absent, and no threshold is assigned to it (D-274) |
+| G-57 | Mood arrow present | render all five mood tiers, plus the same pill in the log and the guided preview | each carries its directional arrow (up, up, neutral, down, down) beside the word. A colour-plus-word pill with no arrow fails (D-259) |
+| G-58 | Deck slot integrity | build a deck with a stat card in slot six and a non-linked character in slot three | slot six is captioned `Friends` with its own type chip unchanged, no `Scenario Link` badge appears on the non-linked card, and every slot's diamonds and level agree with `base + 5 × breaks` (D-277, D-281, D-282) |
+| G-59 | Prose-sourced figure | take every numeric in a design artifact that arrived from a write-up rather than a capture or dataset, and name its source | each traces to a client frame, a dataset field, or a measured value with a date. An untraced figure is either `unsourced` in this file or absent from the artifact — it never reaches seed data or UI copy (D-283, D-284) |
+| G-60 | Correction completeness | after retiring a sourced literal (a cap row, a percentage, a tier string), grep the **retired** literal across all tracked files | zero hits, or every remaining hit is a line that quotes it as withdrawn/superseded and says so in place. A file that reads correctly in isolation is not evidence the correction propagated (D-285, D-286) |
 | G-18 | Both themes | toggle to dark, repeat G-5, G-6, G-7 and G-13 | every pair passes in dark too; no component is light-only (D-103, D-105) |
 | G-19 | Theme fork check | grep components for `dark:` utilities and theme conditionals | zero outside the theme override block (D-101) |
 | G-20 | No flash of wrong theme | reload with the OS set to dark | first paint is already dark (D-104) |
