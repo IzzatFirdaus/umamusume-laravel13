@@ -125,7 +125,16 @@ Consider a composer script so the gate does not depend on a GNU make binary on W
 
 ---
 
-## KI-5 A test asserts a fabricated skill name built on a banned word
+## KI-5 A test asserts a fabricated skill name built on a banned word — FIXED 2026-09-27
+
+**Fixed.** `tests/Feature/TrainingRunTest.php` now uses real Global skill strings read from
+`.scratch-uma/skills.json` (`Certain Victory`, `1st Place Kiss☆`, `Feel the Burn!`), and the local
+variable is renamed `suggested`, matching the client enum. `app/Enums/SkillAcquisition.php`'s
+comment reworded `planned` to `marked for this run` so the banned word leaves the shipped code
+as well as the test. Verified: the test passes and the `lore-code` gate is clean on
+`app/**` `tests/**` `lang/**`.
+
+**Original defect, kept as written.**
 
 **Evidence.**
 
