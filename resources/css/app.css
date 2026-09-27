@@ -59,8 +59,18 @@
     --color-green-line: #C6E5B3;
     --color-chrome: #4E7906;
     --color-on-chrome: #FFFFFF;
+    /* Keyboard-focus ring. A separate token because no single green clears WCAG 1.4.11's
+       3:1 for non-text boundaries in both themes: `green` #7FCC09 is 1.88 on the light panel,
+       and `chrome` #4E7906 is 2.93 on the dark raised surface. Split per theme the same way
+       chrome/on-chrome are, so components stay theme-agnostic (D-101). */
+    --color-ring: #4E7906;
     --color-risk: #800014;
     --color-pick: #EFC96A;
+    /* The ink that goes ON the gold selection. Not `ink-strong`: that is #482720 here but
+       #FFFFFF in the dark override, and white on amber measures 1.75:1. Selection keeps a
+       dark ink in both themes, so it needs its own token (D-288: declared in `@theme static`
+       so Tailwind cannot prune it, and overridden below with the rest of the dark set). */
+    --color-on-pick: #482720;
     /*
      * Skill Points cyan, split in two because the corpus mandates one value and measures
      * another. `--color-sp` is the client's identity colour (research §3.1, §3.3) and stays
@@ -167,8 +177,10 @@ html[data-theme='dark'] {
     --color-green-line: #3D5A18;
     --color-chrome: #7FCC09;
     --color-on-chrome: #121013;
+    --color-ring: #7FCC09;
     --color-risk: #FF6B7A;
     --color-pick: #F5B73C;
+    --color-on-pick: #121013;
     --color-sp: #4FC3F7;
     --color-sp-ink: #4FC3F7;
     --color-rank: #B6B4C2;
@@ -239,5 +251,32 @@ html[data-theme='dark'] {
         background-image:
             repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.34) 0 4px, rgba(255, 255, 255, 0) 4px 11px),
             repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.34) 0 4px, rgba(255, 255, 255, 0) 4px 11px);
+    }
+}
+
+/*
+ * The surfaces nobody drew. Before this block, focus rings, selection, and the text caret
+ * all shipped as browser defaults belonging to no design system, which is the cheapest
+ * tell of an assembled page. Nothing here is a new decision: root DESIGN.md §8 (Dial
+ * MOTION 1) already prescribes "`focus-visible` rings using the `--color-green` glow
+ * token", and selection is already the amber `pick` in both themes carrying `ink-strong`,
+ * never white (root DESIGN.md §2.1, G-47). No new custom properties, so D-288 is not
+ * engaged; `green` is used as a ring only — it is never a fill behind white text (D-3).
+ */
+@layer base {
+    :focus-visible {
+        outline: 2px solid var(--color-ring);
+        outline-offset: 2px;
+    }
+
+    *::selection {
+        background-color: var(--color-pick);
+        color: var(--color-on-pick);
+    }
+
+    input,
+    textarea,
+    select {
+        caret-color: var(--color-chrome);
     }
 }
