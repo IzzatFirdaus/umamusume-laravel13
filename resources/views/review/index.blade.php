@@ -12,7 +12,7 @@
                 <li class="rounded border border-zinc-200 bg-white p-4 text-sm">
                     <div class="flex items-baseline justify-between">
                         <span class="font-medium">{{ $candidate->proposed_name }}</span>
-                        <span class="text-xs text-zinc-500">{{ $candidate->match_tier->value }} · {{ $candidate->source_key }} · {{ $candidate->created_by_fetch_at->toDateString() }}</span>
+                        <span class="text-xs text-zinc-500">{{ $candidate->match_tier->label() }} · {{ $candidate->source_key }} · {{ $candidate->created_by_fetch_at->toDateString() }}</span>
                     </div>
                     @if ($candidate->proposed_name_ja)
                         <p class="text-zinc-600">{{ $candidate->proposed_name_ja }}</p>
@@ -32,7 +32,7 @@
                         <select name="alias_language" class="rounded border border-zinc-300 px-2 py-1">
                             <option value="">Alias language</option>
                             @foreach (\App\Enums\AliasLanguage::cases() as $language)
-                                <option value="{{ $language->value }}">{{ $language->value }}</option>
+                                <option value="{{ $language->value }}">{{ $language->label() }}</option>
                             @endforeach
                         </select>
                         <button type="submit" class="rounded bg-zinc-900 px-3 py-1.5 text-white">Resolve</button>

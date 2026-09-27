@@ -11,6 +11,8 @@ namespace App\Enums;
  */
 enum AliasLanguage: string
 {
+    use HasLabel;
+
     case Japanese = 'Japanese';
     case English = 'English';
     case Romanized = 'Romanized';

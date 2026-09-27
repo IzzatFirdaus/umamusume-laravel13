@@ -9,6 +9,8 @@ namespace App\Enums;
  */
 enum MatchTier: string
 {
+    use HasLabel;
+
     case Exact = 'Exact';
     case Alias = 'Alias';
     case Fuzzy = 'Fuzzy';

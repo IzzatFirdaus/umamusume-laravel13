@@ -9,6 +9,8 @@ namespace App\Enums;
  */
 enum SkillAcquisition: string
 {
+    use HasLabel;
+
     case Suggested = 'Suggested';
     case Acquired = 'Acquired';
     case Skipped = 'Skipped';

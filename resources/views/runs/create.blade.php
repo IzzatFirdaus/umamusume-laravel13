@@ -24,7 +24,7 @@
             <span class="font-medium">Status</span>
             <select name="status" required class="mt-1 w-full rounded border border-zinc-300 px-2 py-1">
                 @foreach (\App\Enums\RunStatus::cases() as $status)
-                    <option value="{{ $status->value }}" @selected(old('status', 'Active') === $status->value)>{{ $status->value }}</option>
+                    <option value="{{ $status->value }}" @selected(old('status', 'Active') === $status->value)>{{ $status->label() }}</option>
                 @endforeach
             </select>
         </label>

@@ -11,7 +11,7 @@
             <select name="status" class="rounded border border-zinc-300 px-2 py-1">
                 <option value="">All</option>
                 @foreach ($statuses as $status)
-                    <option value="{{ $status->value }}" @selected($currentStatus === $status)>{{ $status->value }}</option>
+                    <option value="{{ $status->value }}" @selected($currentStatus === $status)>{{ $status->label() }}</option>
                 @endforeach
             </select>
         </label>
@@ -32,7 +32,7 @@
                             <span class="ml-2 text-sm text-zinc-500">{{ $umamusume->name_ja }}</span>
                         @endif
                     </a>
-                    <span class="text-xs text-zinc-500">{{ $umamusume->release_status->value }} · {{ $umamusume->aliases_count }} aliases</span>
+                    <span class="text-xs text-zinc-500">{{ $umamusume->release_status->label() }} · {{ $umamusume->aliases_count }} aliases</span>
                 </li>
             @endforeach
         </ul>
