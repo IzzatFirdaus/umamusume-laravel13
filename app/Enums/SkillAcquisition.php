@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Enums;
 
 /**
- * Suggested = planned before the run; Acquired/Skipped = outcome (PRD FR-C-3).
+ * Suggested = a skill the Trainer marked for this run before it happened;
+ * Acquired / Skipped = outcome, recorded when the turn that would have
+ * triggered it is logged (PRD FR-C-3).
  */
 enum SkillAcquisition: string
 {

@@ -51,13 +51,13 @@ it('rejects a stat above the 1200 cap', function (): void {
 
 it('records suggested acquired and skipped skills on a run', function (): void {
     $run = TrainingRun::factory()->create();
-    $planned = Skill::factory()->create(['name' => 'Planned Skill']);
-    $taken = Skill::factory()->create(['name' => 'Taken Skill']);
-    $missed = Skill::factory()->create(['name' => 'Missed Skill']);
+    $suggested = Skill::factory()->create(['name' => 'Certain Victory']);
+    $taken = Skill::factory()->create(['name' => '1st Place Kiss☆']);
+    $missed = Skill::factory()->create(['name' => 'Feel the Burn!']);
 
     test()->post("/training-runs/{$run->id}/skills", [
         'skills' => [
-            ['skill_id' => $planned->id, 'status' => 'Suggested'],
+            ['skill_id' => $suggested->id, 'status' => 'Suggested'],
             ['skill_id' => $taken->id, 'status' => 'Acquired', 'turn_acquired' => 3],
             ['skill_id' => $missed->id, 'status' => 'Skipped'],
         ],
@@ -69,9 +69,9 @@ it('records suggested acquired and skipped skills on a run', function (): void {
 
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Planned Skill')
-        ->assertSee('Taken Skill')
-        ->assertSee('Missed Skill');
+        ->assertSee('Certain Victory')
+        ->assertSee('1st Place Kiss☆')
+        ->assertSee('Feel the Burn!');
 });
 
 it('exports a run as csv and json', function (): void {
