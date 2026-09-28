@@ -2,6 +2,9 @@
     // No default, for the same reason as x-resource-strip: a named default puts a
     // scenario in the view, and a step rail with no scenario has no steps to order.
     'scenario',
+    // See x-resource-strip: the baseline key is what the rail composes steps from, not
+    // a claim that the run runs that scenario (audit F-3, D-220).
+    'declared' => true,
     'current' => null,
     'selected' => null,
     'choices' => [],
@@ -83,7 +86,9 @@
         <span class="text-xs font-semibold text-ink-muted">
             Step {{ $index + 1 }} of {{ count($steps) }} · {{ $stepLabel[$current] ?? $current }}
         </span>
-        <span class="ml-auto text-xs text-ink-muted">{{ $def['label'] }}</span>
+        @if ($declared)
+            <span class="ml-auto text-xs text-ink-muted">{{ $def['label'] }}</span>
+        @endif
     </div>
 
     @if ($confirmRoute !== null && $choices !== [])
