@@ -24,6 +24,7 @@ class ScenarioSlotFactory extends Factory
         return [
             'scenario_key' => 'ura_finale',
             'kind' => 'goal_race',
+            'source_key' => null,
             'slot_label' => 'G1',
             'title' => 'Test Race',
             'description' => null,

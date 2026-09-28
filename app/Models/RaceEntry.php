@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property int $training_run_id
  * @property int|null $scenario_race_id
  * @property int|null $scenario_slot_id
+ * @property int|null $race_catalog_slot_id
  * @property RaceEntryStatus $status
  * @property int|null $placement
  * @property int|null $fans_gain
@@ -36,9 +37,10 @@ use Illuminate\Support\Carbon;
  * @property-read TrainingRun $trainingRun
  * @property-read ScenarioRace|null $scenarioRace
  * @property-read ScenarioSlot|null $scenarioSlot
+ * @property-read RaceCatalogSlot|null $raceCatalogSlot
  */
 #[Table('race_entries')]
-#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'status', 'placement', 'fans_gain', 'objective_index', 'circles'])]
+#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'race_catalog_slot_id', 'status', 'placement', 'fans_gain', 'objective_index', 'circles'])]
 class RaceEntry extends Model
 {
     /** @use HasFactory<RaceEntryFactory> */
@@ -111,6 +113,19 @@ class RaceEntry extends Model
     }
 
     /**
+     * The slot in the shared career calendar this entry was run against.
+     *
+     * Null for a Trainer-typed free race, which has no catalogue row, and for a
+     * team race round, which belongs to the scenario rather than to the calendar.
+     *
+     * @return BelongsTo<RaceCatalogSlot, $this>
+     */
+    public function raceCatalogSlot(): BelongsTo
+    {
+        return $this->belongsTo(RaceCatalogSlot::class, 'race_catalog_slot_id');
+    }
+
+    /**
      * @return BelongsTo<ScenarioRace, $this>
      */
     public function scenarioRace(): BelongsTo
@@ -127,5 +142,30 @@ class RaceEntry extends Model
             'objective_index' => 'integer',
             'circles' => 'integer',
         ];
+    }
+
+    /**
+     * The finish as a Trainer reads it: 1st, 2nd, 3rd. R69.
+     *
+     * The teens carry the rule, not the last digit: 11/12/13 take `th` while the same final
+     * digits take `st/nd/rd` two numbers later, which is why the modulo-10 branch is checked
+     * against 11-13 first rather than folded into a suffix lookup.
+     */
+    public function placementOrdinal(): string
+    {
+        if ($this->placement === null) {
+            return 'no placement';
+        }
+
+        if (in_array($this->placement % 100, [11, 12, 13], true)) {
+            return $this->placement.'th';
+        }
+
+        return $this->placement.match ($this->placement % 10) {
+            1 => 'st',
+            2 => 'nd',
+            3 => 'rd',
+            default => 'th',
+        };
     }
 }

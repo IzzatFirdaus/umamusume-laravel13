@@ -31,6 +31,7 @@ class ScenarioSlot extends Model
     protected $fillable = [
         'scenario_key',
         'kind',
+        'source_key',
         'slot_label',
         'title',
         'description',
@@ -65,6 +66,7 @@ class ScenarioSlot extends Model
         'team_race',
         'grade_deadline',
         'scripted_event',
+        'free_race',
     ];
 
     protected static function booted(): void
@@ -111,6 +113,11 @@ class ScenarioSlot extends Model
     public function isScriptedEvent(): bool
     {
         return $this->kind === 'scripted_event';
+    }
+
+    public function isFreeRace(): bool
+    {
+        return $this->kind === 'free_race';
     }
 
     // Convenience: does this slot have a fan gate?

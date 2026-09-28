@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Enums\RaceEntryStatus;
+use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use Illuminate\Support\Facades\Blade;
 
 /*
  * S2: the run-detail goal panels read from `scenario_slots` and this run's own
@@ -25,34 +27,57 @@ function runWithFans(int $fans): TrainingRun
     return $run->fresh();
 }
 
-it('places a scenario slot in the calendar at its own month and half', function (): void {
+it('renders a mandatory career race as an open cell, not as a Goal pennant', function (): void {
     $run = runWithFans(20000);
-    ScenarioSlot::factory()->create([
-        'scenario_key' => 'ura_finale',
-        'kind' => 'goal_race',
+    RaceCatalogSlot::factory()->create([
+        'scenario_key' => null,
+        'year' => 1,
         'title' => 'Tenno Sho (Spring)',
         'month' => 4,
         'half' => 'Late',
+        'turn' => 8,
         'is_mandatory' => true,
         'fans_needed' => 12000,
     ]);
 
     $cells = $run->calendarCells();
 
-    // The component indexes cells from zero (Jan = 0); the table stores 1-12.
-    expect($cells[3]['halves']['Late']['state'])->toBe('goal')
-        ->and($cells[3]['halves']['Late']['label'])->toBe('Tenno Sho (Spring)')
-        ->and($cells[0]['halves']['Early']['state'])->toBe('empty')
+    // The cell indexes from zero (Jan = 0); the table stores 1-12.
+    //
+    // This is the audit's conflation, closed. `is_mandatory` is a scenario-scoped
+    // career obligation — the debut and the final rounds — while the client's red
+    // banner marks a per-character objective. Every Goal banner in the four
+    // [Global] panels recorded in 09 sits on a race like NHK Mile Cup or Tokyo
+    // Yushun, never on the debut or the finals. So the flag stays true on the row
+    // and stops being a rendering input until trainee_goals can drive it.
+    expect($cells[3]['halves']['Late']['slots'][0]['state'])->toBe('open')
+        ->and($cells[3]['halves']['Late']['slots'][0]['label'])->toBe('Tenno Sho (Spring)')
+        ->and($cells[0]['halves']['Early']['slots'])->toBe([])
         ->and(count($cells))->toBe(12);
 });
 
+it('keeps the debut pennant-free while it is mandatory but unGoal-ed', function (): void {
+    // State one of the two the fix needs: mandatory, no Goal seeded, no pennant.
+    $run = runWithFans(20000);
+    RaceCatalogSlot::factory()->debut()->create();
+
+    $html = Blade::render(
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" />',
+        ['cells' => $run->fresh()->calendarCells(1)]
+    );
+
+    expect($html)->toContain('Junior Make Debut')
+        ->and($html)->not->toContain('border-goal-line');
+});
+
 it('locks a fan-gated race until this run has the fans it asks for', function (): void {
-    ScenarioSlot::factory()->create([
-        'scenario_key' => 'ura_finale',
-        'kind' => 'goal_race',
+    RaceCatalogSlot::factory()->create([
+        'scenario_key' => null,
+        'year' => 1,
         'title' => 'Oka Sho',
         'month' => 4,
         'half' => 'Early',
+        'turn' => 7,
         'is_mandatory' => false,
         'fans_needed' => 15000,
     ]);
@@ -61,18 +86,19 @@ it('locks a fan-gated race until this run has the fans it asks for', function ()
     $long = runWithFans(15000);
 
     // The figure travels with the lock: it is what the Trainer works toward (D-173).
-    expect($short->calendarCells()[3]['halves']['Early']['state'])->toBe('fan_locked')
-        ->and($short->calendarCells()[3]['halves']['Early']['fans_needed'])->toBe(15000)
-        ->and($long->calendarCells()[3]['halves']['Early']['state'])->toBe('open');
+    expect($short->calendarCells()[3]['halves']['Early']['slots'][0]['state'])->toBe('fan_locked')
+        ->and($short->calendarCells()[3]['halves']['Early']['slots'][0]['fans_needed'])->toBe(15000)
+        ->and($long->calendarCells()[3]['halves']['Early']['slots'][0]['state'])->toBe('open');
 });
 
 it('shows a maiden-gated race as a maiden lock until this run has won', function (): void {
-    ScenarioSlot::factory()->create([
-        'scenario_key' => 'ura_finale',
-        'kind' => 'goal_race',
+    RaceCatalogSlot::factory()->create([
+        'scenario_key' => null,
+        'year' => 1,
         'title' => 'Naruta Kinpa Cup',
         'month' => 5,
         'half' => 'Early',
+        'turn' => 9,
         'is_mandatory' => false,
         'is_maiden_gated' => true,
         'fans_needed' => 0,
@@ -80,9 +106,9 @@ it('shows a maiden-gated race as a maiden lock until this run has won', function
 
     $winless = runWithFans(3000);
 
-    expect($winless->calendarCells()[4]['halves']['Early']['state'])->toBe('maiden_locked')
+    expect($winless->calendarCells()[4]['halves']['Early']['slots'][0]['state'])->toBe('maiden_locked')
         // No fan figure: a maiden gate is decided by an event, not a quantity.
-        ->and($winless->calendarCells()[4]['halves']['Early'])->not->toHaveKey('fans_needed');
+        ->and($winless->calendarCells()[4]['halves']['Early']['slots'][0])->not->toHaveKey('fans_needed');
 
     RaceEntry::create([
         'training_run_id' => $winless->id,
@@ -90,28 +116,115 @@ it('shows a maiden-gated race as a maiden lock until this run has won', function
         'placement' => 1,
     ]);
 
-    expect($winless->fresh()->calendarCells()[4]['halves']['Early']['state'])->toBe('open');
+    expect($winless->fresh()->calendarCells()[4]['halves']['Early']['slots'][0]['state'])->toBe('open');
 });
 
 it('marks a slot this run has already raced as past', function (): void {
     $run = runWithFans(20000);
-    $slot = ScenarioSlot::factory()->create([
-        'scenario_key' => 'ura_finale',
-        'kind' => 'goal_race',
+    $slot = RaceCatalogSlot::factory()->create([
+        'scenario_key' => null,
+        'year' => 1,
         'title' => 'Asahi Hai Futurity Stakes',
         'month' => 11,
         'half' => 'Late',
+        'turn' => 21,
         'is_mandatory' => true,
     ]);
 
     RaceEntry::create([
         'training_run_id' => $run->id,
-        'scenario_slot_id' => $slot->id,
+        'race_catalog_slot_id' => $slot->id,
         'status' => RaceEntryStatus::Completed,
         'placement' => 3,
     ]);
 
-    expect($run->calendarCells()[10]['halves']['Late']['state'])->toBe('past');
+    expect($run->calendarCells()[10]['halves']['Late']['slots'][0]['state'])->toBe('past');
+});
+
+it('carries a Trainer-typed free race through the model as an open manual cell', function (): void {
+    // The existing "labels manual rows distinctly" check in RaceCalendarTest builds
+    // its cells array by hand and hands them to the component, so it cannot see the
+    // model drop the marker. This is the path that actually regresses: a real
+    // free_race row, read through calendarCells(). KI-22 suspected the rule had
+    // been lost during the read-path retarget; this is what proves it either way.
+    $run = runWithFans(20000);
+    $slot = ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'free_race',
+        'title' => 'Some Cup',
+        'slot_label' => 'Some Cup',
+        'month' => 8,
+        'half' => 'Late',
+        'tier' => null,
+        'is_mandatory' => false,
+        'is_manual' => true,
+    ]);
+
+    $cell = $run->fresh()->calendarCells()[7]['halves']['Late']['slots'][0];
+
+    expect($cell)->toMatchArray(['state' => 'open', 'label' => 'Some Cup', 'manual' => true])
+        // R61: a free race is never a goal, whatever the flags say.
+        ->not->toBe('goal');
+});
+
+it('keeps a free race out of the goal pennant even when it is marked mandatory', function (): void {
+    // The retarget passes an explicit `false` for mandatory on the free-race path
+    // rather than reading the column, so a mis-set flag cannot draw a pennant on a
+    // race the Trainer invented.
+    $run = runWithFans(20000);
+    ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'free_race',
+        'title' => 'Mislabeled Cup',
+        'slot_label' => 'Mislabeled Cup',
+        'month' => 9,
+        'half' => 'Early',
+        'is_mandatory' => true,
+        'is_manual' => true,
+    ]);
+
+    $cell = $run->fresh()->calendarCells()[8]['halves']['Early']['slots'][0];
+
+    expect($cell['state'])->toBe('open')->and($cell['manual'])->toBeTrue();
+});
+
+it('shows a catalogue race and a free race together in the same half-month', function (): void {
+    // The retarget reads two tables and merges them; the merge is the part a
+    // single-source test would never exercise.
+    $run = runWithFans(20000);
+    RaceCatalogSlot::factory()->create([
+        'year' => 1, 'month' => 8, 'half' => 'Early', 'turn' => 15, 'title' => 'Phoenix Sho',
+    ]);
+    ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'free_race',
+        'title' => 'Trainer Pick',
+        'slot_label' => 'Trainer Pick',
+        'month' => 8,
+        'half' => 'Early',
+        'is_manual' => true,
+    ]);
+
+    $labels = array_column($run->fresh()->calendarCells()[7]['halves']['Early']['slots'], 'label');
+
+    expect($labels)->toBe(['Phoenix Sho', 'Trainer Pick']);
+});
+
+it('keeps the goal treatment ready on the component while the model withholds it', function (): void {
+    // State two. There is no trainee_goals table yet, so the model cannot know a
+    // character's objective — but the treatment must not be deleted on the way
+    // past that, or the fix becomes a rewrite. A cell carrying the goal state
+    // still draws the pennant, which is exactly what a goals source will emit.
+    $html = Blade::render(
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="2" />',
+        ['cells' => [3 => ['halves' => [
+            'Late' => ['slots' => [['state' => 'goal', 'label' => 'Japanese Oaks']]],
+            'Early' => ['slots' => []],
+        ]]] + array_fill(0, 12, ['halves' => ['Early' => ['slots' => []], 'Late' => ['slots' => []]]])]
+    );
+
+    expect($html)->toContain('border-goal-line')
+        ->and($html)->toContain('Japanese Oaks');
 });
 
 it('composes the calendar only from the run own scenario', function (): void {

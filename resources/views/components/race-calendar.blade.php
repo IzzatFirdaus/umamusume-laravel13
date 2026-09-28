@@ -3,6 +3,12 @@
     // scenario in the view, and a panel for "no scenario chosen" is not a panel.
     'scenario',
     'cells' => [],
+    // Which of the three career years these 24 cells belong to. Null keeps the
+    // panel as it was before the grid had a year to show: no tabs, no highlight.
+    'year' => null,
+    // The run's turn within `year`, 1-24, or null when the run has logged nothing
+    // or the Trainer is looking at a year they are not in.
+    'currentTurn' => null,
     'monthLabels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 ])
 
@@ -78,6 +84,27 @@
         <span>Race calendar</span>
     </div>
 
+    @if ($year !== null)
+        {{-- The client's own three tabs, server-rendered as links. There is no
+             runtime JavaScript dependency in this project, and a career year is
+             part of the screen's address rather than a transient UI state: a
+             Trainer should be able to hand someone "look at her Classic spring"
+             as a URL, and back should not lose the tab. --}}
+        <div class="mb-3 flex gap-1" role="tablist" aria-label="Career year">
+            @foreach (\App\Models\RaceCatalogSlot::YEARS as $value => $label)
+                @continue($value === \App\Models\RaceCatalogSlot::YEAR_FINALE)
+                <a role="tab"
+                   aria-selected="{{ $value === $year ? 'true' : 'false' }}"
+                   href="{{ request()->fullUrlWithQuery(['year' => $value]) }}"
+                   class="rounded-full px-3 py-1 text-xs font-semibold {{ $value === $year
+                        ? 'bg-pick text-on-pick'
+                        : 'border border-rule bg-raised text-ink hover:bg-sunken' }}">
+                    {{ $label }} Year
+                </a>
+            @endforeach
+        </div>
+    @endif
+
     @if ($cells === [])
         {{-- A bare "no data" line tells the Trainer nothing. The scenario owns this
              calendar either way, so the structure stays; what is missing is their own
@@ -92,7 +119,7 @@
          until it fits would make the lock treatments unreadable, which is the one
          thing this grid exists to communicate. So the grid keeps its width and the
          region scrolls, focusable for keyboard users. --}}
-    <div class="overflow-x-auto" role="region" aria-label="Race calendar, {{ $slotCount }} turn slots" tabindex="0">
+    <div class="overflow-x-auto" role="region" aria-label="Race calendar, {{ $year !== null ? \App\Models\RaceCatalogSlot::YEARS[$year].' year, ' : '' }}{{ $slotCount }} turn slots" tabindex="0">
         {{-- 56rem on the spacing scale (224 × 0.25rem), not an arbitrary value: G-4 keeps
              geometry on the scale so it moves with the token system. --}}
         <div class="grid min-w-224 grid-cols-12 items-start gap-1">
@@ -104,14 +131,42 @@
                 @foreach ($monthLabels as $monthIndex => $month)
                     @php
                         $cell = $cells[$monthIndex]['halves'][$half] ?? [];
-                        $state = $cell['state'] ?? 'empty';
+                        $slotItems = $cell['slots'] ?? [];
+                        // Derive a single state for the cell's border treatment from
+                        // its slots: goal wins, then fan_locked, then maiden_locked,
+                        // then open, then past, then empty. Multiple slots share one
+                        // border; their labels stack inside.
+                        $state = 'empty';
+                        $priority = ['goal' => 6, 'current' => 5, 'fan_locked' => 4, 'maiden_locked' => 3, 'open' => 2, 'past' => 1];
+                        $cellTurn = $monthIndex * 2 + ($half === 'Early' ? 1 : 2);
+                        $isCurrent = $currentTurn !== null && $currentTurn === $cellTurn;
+                        // The peer's priority map already ranked `current` between
+                        // goal and fan_locked; nothing ever fed it, so the state was
+                        // defined and unreachable. The current turn is a property of
+                        // the cell, not of any race in it, so it enters as one more
+                        // candidate for the same loop rather than as a slot.
+                        $candidates = array_map(fn (array $s): string => $s['state'] ?? '', $slotItems);
+
+                        if ($isCurrent) {
+                            $candidates[] = 'current';
+                        }
+
+                        foreach ($candidates as $candidate) {
+                            if (($priority[$candidate] ?? 0) > ($priority[$state] ?? 0)) {
+                                $state = $candidate;
+                            }
+                        }
                         $state = array_key_exists($state, $stateClass) ? $state : 'empty';
-                        $label = $cell['label'] ?? null;
-                        // Only the fan gate has a number. A maiden lock renders one
-                        // only if a caller supplies a figure for it, because a fan
-                        // figure on a maiden cell would send the Trainer off to grind
-                        // toward eligibility that is decided by an event instead.
-                        $fans = $state === 'fan_locked' ? ($cell['fans_needed'] ?? null) : ($cell['maiden_fans_needed'] ?? null);
+                        $firstLabel = $slotItems[0]['label'] ?? null;
+                        $fans = $state === 'fan_locked' ? ($slotItems[0]['fans_needed'] ?? null) : null;
+                        $ariaSlots = count($slotItems);
+                        $ariaText = $ariaSlots > 1
+                            ? "{$ariaSlots} races: " . implode(', ', array_map(fn ($s) => $s['label'] ?? '', $slotItems))
+                            : ($firstLabel ?? $stateWord[$state]);
+
+                        if ($isCurrent) {
+                            $ariaText .= '; current turn';
+                        }
                     @endphp
                     {{-- The accessible name carries the month, the half and the state,
                          because a cell's state lives in its outline and its pennant and
@@ -123,7 +178,7 @@
                     <div class="col-span-1 rounded-md border px-1 text-center text-xs leading-tight
                                 {{ $stateClass[$state] }} relative"
                          role="img"
-                         aria-label="{{ $month }} {{ $half }}: {{ $stateWord[$state] }}{{ $label !== null ? ', '.$label : '' }}">
+                         aria-label="{{ $month }} {{ $half }}: {{ $stateWord[$state] }}, {{ $ariaText }}">
                         @if ($state === 'goal')
                             {{-- D-181: "A goal race announces itself with a Goal pennant, a
                                  heavier warm outline and greater height." The client's own
@@ -137,13 +192,26 @@
                                   aria-hidden="true"></span>
                         @endif
                         <span class="block font-mono text-xs tabular-nums text-ink-muted">{{ $half }}</span>
-                        <span class="block truncate font-semibold" title="{{ $label ?? $stateWord[$state] }}">
-                            {{ $label ?? $stateWord[$state] }}
-                        </span>
+                        @if ($ariaSlots > 1)
+                            <ul class="space-y-0.5">
+                                @foreach ($slotItems as $slotItem)
+                                    <li class="truncate font-semibold" title="{{ $slotItem['label'] ?? '' }}">
+                                        {{ $slotItem['label'] ?? $stateWord[$state] }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <span class="block truncate font-semibold" title="{{ $firstLabel ?? $stateWord[$state] }}">
+                                {{ $firstLabel ?? $stateWord[$state] }}
+                            </span>
+                        @endif
                         @if ($fans !== null)
                             <span class="block font-mono text-xs tabular-nums text-ink-muted">
                                 {{ number_format((int) $fans) }} fans
                             </span>
+                        @endif
+                        @if (collect($slotItems)->contains('manual', true))
+                            <span class="block text-[10px] text-ink-muted">Trainer-entered</span>
                         @endif
                     </div>
                 @endforeach

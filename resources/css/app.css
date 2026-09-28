@@ -240,10 +240,10 @@ html[data-theme='dark'] {
     --color-chrome: #7FCC09;
     --color-on-chrome: #121013;
     --color-ring: #7FCC09;
-    --color-risk: #FF6B7A;
-    /* Stepped for the dark surfaces, and deliberately not the risk red beside it:
-       4.49 on `raised` and 5.61 on `panel` for the pennant, 6.15 and 7.7 for the
-       warm outline. Neither value is `--color-up`, so a goal stops reading as a gain. */
+    --color-risk: #FF7E8C;
+    /* Stepped from #FF6B7A (4.33:1 on raised) to clear 4.5:1 for AA text (KI-20).
+       The goal comment below still holds: this is deliberately not the risk red, and
+       neither value aliases `--color-up`. */
     --color-goal: #F2555A;
     --color-goal-line: #E8912B;
     --color-pick: #F5B73C;

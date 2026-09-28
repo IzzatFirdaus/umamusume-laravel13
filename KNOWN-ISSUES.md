@@ -7,22 +7,42 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
-**Status (2026-09-29, catalog roster Task 2):** 20 issues filed. **15 resolved/closed** (KI-1–9,
-KI-11–14, KI-18, KI-21). **5 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies),
-KI-17 (the consecutive-race count cannot be derived from the log), KI-19 (the impeccable tool cannot
-update itself), KI-20 (the shop error text is an unmeasured contrast pair). KI-21 was filed and
-resolved in the same change: the character parser read `name_ja` where the GameTora export publishes
-`name_jp`, so fetched trainees stored a null Japanese name. Prior:
+**Status (2026-09-29, catalog roster merge):** 23 issues filed. **17 resolved/closed** (KI-1–5,
+KI-6–14, KI-18–20, KI-23). **6 open**: KI-10 (ratio half), KI-15, KI-17, KI-21, KI-22 (both still
+blocking Slice 12's T4), and KI-24 (a fresh clone or worktree has six red tests because the skill
+registry file is gitignored). Two entries arrived by merge: KI-23 is the `name_jp` parser defect,
+filed as KI-21 on branch `feat/catalog-roster-and-trainee-selector` and renumbered here because
+trunk took KI-21 and KI-22 for unrelated issues; KI-24 is new from that branch's Task 1. The
+counts above were derived by reading every `## KI-n` heading in this file, not carried forward from
+the block below: KI-5 reads FIXED and KI-10 reads "SCHEMA HALF CLOSED, RATIO HALF OPEN", so a
+keyword match on RESOLVED|CLOSED alone miscounts both.
+
+**Status (2026-09-29, Slice 12 T3):** 21 issues filed. **16 resolved/closed** (KI-1–9, KI-11–14,
+KI-18–20). **5 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
+consecutive-race count cannot be derived from the log), and two filed by the T3 browser pass —
+KI-21 (the race entry form is built on Alpine.js, which is not a dependency, so neither path renders)
+and KI-22 (a free_race cell renders `state=past` without the Trainer-entered marker, so R61's calendar
+rule is no longer implemented). Both block this slice's T4: gates would go green over a form nobody
+can use. KI-22 is a shared-master collision with concurrent commit `82959e9`, not a Slice 12 defect.
+Prior:
+**Status (2026-09-29, Slice 12):** 19 issues filed. **16 resolved/closed** (KI-1–9, KI-11–14,
+KI-18–20). **3 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
+consecutive-race count cannot be derived from the log). Slice 11 closed KI-20 by measuring the pair
+and stepping the dark `--color-risk`; Slice 12 closed KI-19 on the successful second `update` attempt
+(engine v0.1.5) and re-closed KI-11 on current evidence, its deletion basis having been superseded by
+the sourced seeder at `f0ae288` and its token half now measured against the Slice 8 epithet rows.
+Counts read off `grep -c "^## KI-"` (19 headings at that time; KI-16 was never filed, which is why the
+numbers run to KI-20). Prior:
+**Status (2026-09-29, Slice 11):** 19 issues filed. **15 resolved/closed** (KI-1–9, KI-11–14,
+KI-18, KI-20). **4 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
+consecutive-race count cannot be derived from the log), KI-19 (the impeccable tool cannot update
+itself). Slice 11 closed KI-20 by measuring `text-risk` on `bg-raised` in both themes and stepping
+the dark-theme token from #FF6B7A (4.33:1) to #FF7E8C (4.77:1) per the D-259 precedent. Prior:
 **Status (2026-09-29, Slice 10):** 19 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14,
 KI-18). **5 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
 consecutive-race count cannot be derived from the log), KI-19 (the impeccable tool cannot update
 itself), KI-20 (the shop error text is an unmeasured contrast pair). Slice 10 closed KI-18,
-which `f7a59e8` had already fixed in Slice 9, and filed KI-19 and KI-20. Slice 10 closed KI-18, which `f7a59e8` had already fixed in Slice 9, and filed KI-19.
-Two register corrections ride with that closure, both against the Slice 7 commit `94db315`: KI-15
-was written into this file twice, so the line below was really counting 17 issues as 18; and the
-same line names `KI-1–9, KI-11–14` as 14 resolved when that range is 13, the closed set having
-been 13 until KI-18 joined it. Every figure here is now read off the headings in this file rather
-than asserted in prose about them. Prior:
+which `f7a59e8` had already fixed in Slice 9, and filed KI-19 and KI-20.
 **Status (2026-09-28, Slice 8):** 18 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
 **4 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the consecutive-race
 count cannot be derived from the log), KI-18 (the burst roster prints tool identifiers as UI copy).
@@ -498,26 +518,42 @@ therefore an ADR, not a patch.
 
 ---
 
-## KI-11 Design-system debts left visible by the Slice 2 gate run — BOTH HALVES CLOSED 2026-09-28
+## KI-11 Design-system debts left visible by the Slice 2 gate run — CLOSED 2026-09-28, RE-CLOSED ON CURRENT EVIDENCE 2026-09-29 (Slice 12)
 
-- **CLOSED (`5c65597`). `database/seeders/ScenarioSlotSeeder.php` was an empty stub** —
-  `run()` contained only `//`, and `DatabaseSeeder` never called it. Against
+- **CLOSED (`5c65597`), superseded by `f0ae288`. `database/seeders/ScenarioSlotSeeder.php` was an
+  empty stub** — `run()` contained only `//`, and `DatabaseSeeder` never called it. Against
   `CONSTRAINTS.md`'s floor ("no unimplemented stubs") it was filled with sourced slot rows or
-  removed; the slot rows are fetch-engine work per ADR-0003 Amendment R3, so there was
-  nothing honest to put in it and the file is deleted. `scenario_slots` stays empty after a
-  clean seed by design, which is also what makes any `scenario_races` backfill vacuous: a
-  re-measured fresh scratch database seeds 24 tables and 10 skills and **0 slots**.
-- **CLOSED (`71bbb4b` + `d50a0ec`, measured in Slice 5). `--color-green-tint` now has its
-  committed consumer.** The goal cell moved to `bg-raised` in `bb6eec6` and the token was
-  referenced by no utility after that; retirement was refused under R14 on G-60 grounds, and
-  R23 settled the alternative - the Safe band word lands in Slice 5, or the token is retired
-  and the spec amended in the same slice. It landed: the energy band word renders `ink` on
-  `green-tint` on the run screen, and the pair measures **6.40:1 light / 12.60:1 dark** off the
-  rendered element (`docs/design-research/verification/slice-5-2026-09-28.md` §3). The token
-  is no longer a declared value awaiting a consumer, and the "unverified in practice" debt this
-  bullet recorded is paid.
+  removed; the slot rows were fetch-engine work per ADR-0003 Amendment R3, so there was
+  nothing honest to put in it and the file was deleted. `scenario_slots` stayed empty after a
+  clean seed by design, and a re-measured fresh scratch database seeded 24 tables, 10 skills and
+  **0 slots**.
 
-**Owner.** Design system. Both halves closed 2026-09-28.
+  **That closure basis no longer describes the tree.** Slice 11 restored the seeder with sourced
+  URA Finale rows read from the committed client export (R55, `f0ae288`), so the debt is now paid
+  by content rather than by deletion, and the "0 slots" measurement is withdrawn as stale. Three
+  files still cite that stale basis and should be corrected by their owners:
+  `app/Http/Controllers/TrainingRunController.php:78` ("Empty by design until the fetch engine
+  lands (KI-11)"), and the free-form-race notes at `slice-8-2026-09-28.md:127` and
+  `slice-9-2026-09-28.md:78`. The URA half is seeded; Trackblazer and Unity Cup still have zero
+  rows, so those two sentences are half-true and were written before R55.
+- **CLOSED (`71bbb4b` + `d50a0ec`, measured in Slice 5; second consumer measured in Slice 8).
+  `--color-green-tint` has committed consumers.** The goal cell moved to `bg-raised` in `bb6eec6`
+  and the token was referenced by no utility after that; retirement was refused under R14 on G-60
+  grounds, and R23 settled the alternative: the Safe band word lands in Slice 5, or the token is
+  retired and the spec amended in the same slice. It landed: the energy band word renders `ink` on
+  `green-tint` on the run screen, and the pair measures **6.40:1 light / 12.60:1 dark** off the
+  rendered element (`docs/design-research/verification/slice-5-2026-09-28.md` §3).
+
+  **The Slice 8 epithet rows are the second consumer, and they hold.**
+  `slice-8-2026-09-28.md` §4 measured the same token pair on two more surfaces from the new panels:
+  `ink` on `green-tint` at **6.40** on the earned epithet row (line 79), and `ink-muted` on
+  `green-tint` at **5.33 light / 6.58 dark** on the route-and-reward meta line (line 80). One
+  consumer could be an accident of a single component; three, on two different panels, is the token
+  doing a job. R23's promise is paid twice over, and the "unverified in practice" debt this bullet
+  recorded is closed on measurement rather than on the existence of a class name.
+
+**Owner.** Design system. First half closed 2026-09-28 by deletion and re-closed 2026-09-29 on
+sourced content; second half closed 2026-09-28 and re-measured against the Slice 8 epithet rows.
 
 ---
 
@@ -754,30 +790,45 @@ closes the bookkeeping, not the defect.
 
 ---
 
-## KI-19 The impeccable tool cannot update itself, so a maintenance slice cannot measure a version delta — FILED 2026-09-29 (Slice 10), OPEN
+## KI-19 The impeccable tool cannot update itself, so a maintenance slice cannot measure a version delta — FILED 2026-09-29 (Slice 10), RESOLVED 2026-09-29 (Slice 12, R66)
 
 **Symptom.** `C:/Users/exatf/.agents/skills/impeccable/scripts/impeccable.cmd check` and the same
 launcher's `update` both return `Could not verify skill bundle: HTTP 404. Nothing was installed`.
 `--version` reads `4.0.0` before and after, so Slice 10's re-audit ran on the incumbent build rather
 than an updated one. Upstream points the report at `pbakaus/impeccable` issue #479.
 
-**Second half of the finding.** The interface the brief names, `npx impeccable update`, is not this
-project's: `impeccable` is not in `package.json` and has no `node_modules/.bin` entry, so an `npx`
-run would fetch an unrelated package from the registry under that name. The launcher next to the
-installed skill is the real interface, and it is what was run.
+**Attempt log (both dated 2026-09-29, per R66).**
 
-**Consequence for the audit.** The score delta in `slice-10-2026-09-29.md` §4 is a same-version
-comparison. It is still a measurement, but it is not evidence that the new version would agree.
+| Attempt | Slice | Command | Result |
+|---|---|---|---|
+| 1 | Slice 10 | `impeccable.cmd update` | `Could not verify skill bundle: HTTP 404. Nothing was installed`. `--version` unchanged at 4.0.0 |
+| 2 | Slice 12 | `impeccable.cmd update` | Succeeded. Engine v0.1.5 (windows-x64) installed into `.kiro/` and `.opencode/` script bins; hooks installed into `.claude`, `.cursor`, `.agents`, `.github`, `.grok`. `--version` still reports 4.0.0 |
 
-**Required fix.** Nothing in this repository. Either the upstream bundle URL the launcher verifies
-moves, or the launcher is updated out-of-band; until then a slice that intends to compare versions
-must check `--version` first and say so when it does not change.
+**The version half of the finding stands.** `--version` reports the *skill bundle* version (4.0.0),
+not the engine version (v0.1.5), so a same-`--version` reading is not evidence that nothing changed.
+The engine binary is what runs `detect`, and it did move. What Slice 10 could not do — compare
+audits across a version delta — is now possible; the second attempt is what closes it.
 
-**Owner.** Whoever runs the tool update, outside this repo. Re-check at the next maintenance slice.
+**Second half of the finding, unchanged.** The interface the brief names, `npx impeccable update`, is
+still not this project's: `impeccable` is in no `package.json` and has no `node_modules/.bin` entry,
+so an `npx` run would fetch an unrelated registry package under that name. The launcher next to the
+installed skill is the real interface, and it is what was run both times.
+
+**Audit at the updated engine (R66).** `impeccable.cmd detect` over the two Slice 11 surfaces —
+`resources/views/components/race-panel.blade.php` and `resources/views/components/race-calendar.blade.php`
+— returns **1 finding**: `race-calendar.blade.php:148 [side-tab] border-l-5`. Not acted on: the left
+edge marks the mandatory goal race, so it carries information rather than decorating, which is the
+exception the rule itself names. Evidence in `slice-12-2026-09-29.md` §4.
+
+**Required fix.** Nothing in this repository. The upstream bundle URL resolves again as of the second
+attempt; if it 404s in a later slice, record both attempt dates rather than one, because a single
+date cannot distinguish a transient failure from a moved URL.
+
+**Owner.** Whoever runs the tool update, outside this repo. Closed by the successful second attempt.
 
 ---
 
-## KI-20 The shop error text has never been measured as a rendered pair — FILED 2026-09-29 (Slice 10), OPEN
+## KI-20 The shop error text has never been measured as a rendered pair — RESOLVED 2026-09-29 (Slice 11)
 
 **Symptom.** `shop-panel.blade.php` renders validation messages in `text-risk` on the form's
 `bg-raised` ground, and Slice 10 T3 moved those messages from one combined block to one per field,
@@ -786,22 +837,116 @@ so the pair is now on four inputs instead of one. No record measures `risk` as t
 (`on-chrome` on `risk` 10.89 light / 6.88 dark, and `on-pick` on `risk`), which says nothing about
 the red glyph on a raised card.
 
-**Why it is not patched in this slice.** The colour choice is not this slice's to make. D-288's
-method needs a running server and a rendered element, and Slice 10's brief is a maintenance slice with
-no browser pass scheduled. Changing the token to dodge an unmeasured pair would be a visual decision
-made without the measurement that would justify it.
+**Measurement (Slice 11).** Computed from CSS token values in `resources/css/app.css`:
 
-**Required fix.** Read `getComputedStyle` on the error span, walk up to the first opaque background,
-and record the ratio in both themes. If it lands under 4.5:1, the fix belongs to the token owner as a
-`--color-risk` legibility pair (the D-259 pattern: a dedicated `on-` token), not to the component.
+| Theme | Foreground | Background | Ratio | Threshold | Verdict |
+|-------|-----------|------------|-------|-----------|---------|
+| Light | #800014 (`--color-risk`) | #FFFFFF (`--color-raised`) | 10.04:1 | 4.5:1 AA text | PASS |
+| Dark (before) | #FF6B7A (`--color-risk`) | #24262A (`--color-raised`) | 4.33:1 | 4.5:1 AA text | FAIL |
+| Dark (after) | #FF7E8C (`--color-risk`) | #24262A (`--color-raised`) | 4.77:1 | 4.5:1 AA text | PASS |
 
-**Owner.** Frontend with the design-system owner, on the next browser pass. This entry is the reason
-the Slice 10 re-audit scores Accessibility 3 rather than 4.
+Cross-pair verification after stepping: `border-risk` on `bg-raised` (non-text boundary, 3:1) =
+4.77:1 PASS; `bg-risk` with `text-on-chrome` (#121013 on #FF7E8C) = 6.15:1 PASS. Light theme
+unchanged at 10.04:1.
+
+**Fix.** Dark-theme `--color-risk` stepped from #FF6B7A to #FF7E8C in `resources/css/app.css`,
+following the D-259 precedent (`--color-on-mood`, `--color-on-green`): the ink moves to clear the
+threshold while the hue family stays. No component changes needed; the token fix propagates to all
+four shop-panel error spans and every other `text-risk` consumer.
+
+**Owner.** Frontend with the design-system owner. Closed by measurement and token step in Slice 11.
 
 ---
 
-## KI-21 The character parser read a source key the GameTora export never published, so fetched trainees lost their Japanese name — FILED and RESOLVED 2026-09-29 (catalog roster, Task 2)
+## KI-21 The race entry form is built on Alpine.js, which is not a dependency, so neither path renders — FILED 2026-09-29 (Slice 12), OPEN
 
+**Symptom.** On a live run screen, the race panel's two-path entry form renders no fields at all.
+Measured on an isolated scratch fixture (`slice-12-2026-09-29.md` §7.2):
+
+```
+window.Alpine                          → false
+template[x-if] count                   → 2        (both branches inert)
+select[name="scenario_slot_id"]        → absent
+input[name="title"]                    → absent
+select[name="month"], [name="half"]    → absent
+input[name="entry_mode"]               → present, value ""
+```
+
+**Cause.** `resources/views/components/race-panel.blade.php` was written against Alpine (`x-data`,
+`@click`, `:class`, `<template x-if>`). Alpine is not installed: `package.json` devDependencies are
+`@tailwindcss/vite`, `axios`, `concurrently`, `laravel-vite-plugin`, `tailwindcss`, `vite`, and
+`resources/js/app.ts` imports only `./bootstrap` and `./guided-flow`. A `<template>` element's
+children stay unrendered until a framework clones them out, so with no Alpine both branches stay
+inert and the hidden `entry_mode` input — which has `x-model` and no `value` attribute — posts the
+empty string. `prepareForValidation()` reads that as `calendar`, which then fails validation because
+the slot select was never rendered to submit. The manual path is unreachable by any means.
+
+**Impact.** R56's free-race writer is unusable end-to-end. The controller, the Form Request, the
+fifth kind and the atomic slot+entry create all work; `FreeRaceWriterTest` proves that by posting the
+request directly. What does not exist is the ability of a Trainer to reach any of it.
+
+**Why the suite and Slice 11's browser pass both missed it.** The tests exercise the HTTP layer, not
+the DOM, so they are correct and simply silent on the broken layer. Slice 11 §4 grepped rendered text
+and found "Naruta Kinpa Cup" eight times and "Trainer-entered" five — all true, and all from the
+server-rendered calendar and entries list, not from the form. Neither check can fail for the reason it
+is running.
+
+**Required fix — a decision, not a patch.** Two defensible routes, and the choice is the owner's:
+
+1. Add `alpinejs` to `package.json` and register it in the entry. This is a new dependency, so
+   `CONSTRAINTS.md` C-8 bars it without approval; `AGENTS.md` escalation 2 sends it to the human owner.
+2. Rewrite the two-path form framework-free: submit `entry_mode`, re-render server-side with that
+   branch's fields. No new dependency, and it matches the tool's existing post-redirect flow —
+   `guided-step` already works this way (R31's navigation model), so the interaction stays consistent.
+
+Route 2 is the smaller rule footprint and keeps NFR-1's local-only posture untouched. Route 1 buys
+in-place switching with no round trip. Neither is adopted silently.
+
+**Owner.** Human owner for the dependency call; Laravel Dev implements whichever is chosen. Blocks
+Slice 12's T4, because a green gate run would be reporting on a form that cannot be used.
+
+---
+
+## KI-22 A free_race cell renders `state=past` without the Trainer-entered marker, so R61's calendar rule is no longer implemented — FILED 2026-09-29 (Slice 12), OPEN
+
+**Symptom.** A `free_race` slot at month 5 Early renders in the calendar as a past cell with no
+marker. Reading the model on the same fixture:
+
+```
+calendarCells()[4]['halves']['Early']['slots'] → [ { "state": "past", "label": "Naruta Kinpa Cup" } ]
+```
+
+There is no `manual` key, so `race-calendar.blade.php`'s
+`collect($slotItems)->contains('manual', true)` gate never fires. The page contains exactly one
+"Trainer-entered" leaf and it is the race panel's (`class="ml-1 …"`), not the calendar's
+(`class="block …"`).
+
+**Rule broken.** R61: `free_race` cells take open-cell geometry and a Trainer-entered marker, and
+never a Goal pennant. Both halves of that are now unimplemented in `HEAD`.
+
+**Cause, and it is a collision rather than a bug in either session.** T4 added an `isFreeRace()`
+branch to `TrainingRun::calendarCell()` returning `['state' => 'open', …, 'manual' => true]`.
+Concurrent commit `82959e9 feat(calendar): read the grid from race_catalog_slots` rewrote that read
+path and the branch is gone — `grep -n "isFreeRace" app/Models/TrainingRun.php` returns nothing. The
+data layer still agrees with R61: `:293` still queries `where('kind', 'free_race')`, so free_race rows
+reach the grid. Only the presentation regressed. `TrainingRun.php` was dirty at this slice's opening
+snapshot, clean by §4 of the record, then committed at `82959e9`.
+
+**Not repaired here.** Re-adding the branch means editing a read path another session is actively
+changing, in a shared worktree, with no way to tell whether their rewrite intends to reinstate it in a
+different shape. This is a coordination item, not a one-line fix.
+
+**Required fix.** Restore open-cell geometry and the `manual` marker for `kind = free_race` in the
+race_catalog_slots read path, and pin it with a test that asserts the calendar cell's state and marker
+for a free_race slot — `slice-12-2026-09-29.md` §7.3 is the reproduction. The Goal-pennant half of
+R61 already holds and should stay.
+
+**Owner.** Planner Domain Specialist with the calendar session, on the shared `master`.
+---
+
+## KI-23 The character parser read a source key the GameTora export never published, so fetched trainees lost their Japanese name — FILED and RESOLVED 2026-09-29 (catalog roster, Task 2)
+
+Filed as KI-21 at branch base `b387e07`; renumbered to KI-23 on merge because trunk took KI-21 (the Alpine race entry form) and KI-22 (the `free_race` calendar rule) for unrelated issues. Commits `d755da3` and `e8ead2d` say KI-21 in their messages and were not rewritten; this line is the trail.
 **Symptom.** `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php:92` read
 `$card['name_ja']` — that line number is the defective line as it stood before the fix; `d755da3`
 replaced it with a comment plus the corrected read, so today's `:93` is the line being described. The
@@ -855,3 +1000,17 @@ nothing is left over from it in that file.
 **Owner.** Data Engineer. Filed and closed by the same commit (`d755da3`), because the fix and its proof
 landed together; the review follow-up `e8ead2d` strengthened that proof (and corrected the Residual
 paragraph above) rather than reopening the entry.
+
+---
+
+## KI-24 A fresh clone or worktree has six red tests before anyone touches it, because the skill registry file is gitignored - FILED and OPEN 2026-09-29 (catalog roster, Task 1)
+
+**Symptom.** On a clean `git worktree add` or `git clone` of this repo, `php artisan test --compact` reports **6 failed / 364 passed / 2 skipped** at a commit where every other working tree sees green. All six failures are in `tests/Feature/SkillAutomationTest.php`, and the assertion that fails reads `Failed asserting that ... contains 'Route Inspector'`.
+
+**Cause.** `app/Services/SkillRegistry.php:23` resolves its path as `base_path('.agents/skills.json')`, and `app/Services/SkillExecutor.php:340` reads `base_path('.agents/config.json')`. `.gitignore:49` ignores `/.agents`, so that directory exists only in a working tree where some tool wrote it. `git worktree add` and `git clone` check out tracked files only, so a fresh tree has no registry and the tests that read it fail for a reason unrelated to the change under test.
+
+**Why it matters beyond one red run.** The failure is indistinguishable from a genuine regression at the exact moment a slice most needs a trustworthy baseline: Step 4 of any plan's setup task is "prove the gates are green before you start," and six red tests there means either stopping for a base that is not actually dirty, or proceeding with no baseline at all. Nothing in the output names the missing file, so the first response is to suspect the code.
+
+**Fix candidates, none chosen here.** (a) Move the registry default to a tracked path, or commit a minimal `.agents/skills.json` fixture, keeping any local overrides gitignored. (b) Have the suite skip those six tests with a named reason when the registry is absent, so a fresh baseline reads `6 skipped` rather than `6 failed`. (c) Document the copy step in `README.md`'s setup section. (a) is the smallest permanent fix; (c) is the cheapest and leaves the trap armed for the next worktree.
+
+**Owner.** Data Engineer with whoever owns `docs/SKILL_AUTOMATION.md`. Found by the catalog-roster plan's Task 1 provisioning step, which now copies `.agents` into its worktree; that copy is a workaround local to one branch and does not close this entry.

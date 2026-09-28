@@ -101,8 +101,19 @@
         not picked a scenario at all (D-220, D-221).
     --}}
     @if ($run->hasScenario())
-        @php $panelScenario = $run->scenarioKey(); @endphp
-        <x-race-calendar :scenario="$panelScenario" :cells="$run->calendarCells()" class="mt-3" />
+        @php
+            $panelScenario = $run->scenarioKey();
+            // The year is address state, not view state: a Trainer should be able
+            // to link "her Classic spring", and back should not drop the tab.
+            // Clamped because the query string is user input.
+            $calendarYear = min(3, max(1, (int) request('year', $run->currentYear())));
+        @endphp
+        <x-race-calendar
+            :scenario="$panelScenario"
+            :cells="$run->calendarCells($calendarYear)"
+            :year="$calendarYear"
+            :current-turn="$calendarYear === $run->currentYear() ? $run->currentTurnNumber() : null"
+            class="mt-3" />
         <x-grade-point-meter
             :scenario="$panelScenario"
             :objectives="$run->gradeObjectives()"
@@ -121,7 +132,7 @@
              does not open a mechanic renders nothing rather than an empty frame: these
              are Trackblazer and Unity Cup surfaces, and an URA run must not show either
              (D-221, D-241, gate G-34). --}}
-        <x-race-panel :run="$run" :slots="$raceSlots" class="mt-3" />
+        <x-race-panel :run="$run" :slots="$raceSlots" :entry-mode="$entryMode" class="mt-3" />
         <x-team-rank-gauge :run="$run" class="mt-3" />
         <x-spirit-burst-roster :run="$run" class="mt-3" />
         <x-team-race-panel :run="$run" class="mt-3" />

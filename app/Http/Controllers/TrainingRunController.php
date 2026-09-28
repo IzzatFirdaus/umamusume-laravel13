@@ -145,8 +145,14 @@ class TrainingRunController extends Controller
 
         $latest = $run->turnEntries->sortByDesc('turn')->first();
 
+        // R67: which half of the race form is open is server state, read the same way the
+        // disclosure control supplies it. `old()` wins inside showData's caller below, so a
+        // failed write comes back to the branch the Trainer was filling in.
+        $entryMode = request()->query('entry_mode');
+
         return [
             'run' => $run,
+            'entryMode' => in_array($entryMode, ['calendar', 'manual'], true) ? $entryMode : 'calendar',
             'skills' => Skill::orderBy('name')->get(['id', 'name']),
             'scenarios' => $this->scenarioLabels(),
             'raceSlots' => $this->raceSlotsFor($run),
@@ -341,7 +347,8 @@ class TrainingRunController extends Controller
     }
 
     /**
-     * Records what the Trainer did with one calendar slot (US-10, ADR-0003).
+     * Records what the Trainer did with one calendar slot (US-10, ADR-0003), or
+     * creates a manual slot for a race not on the calendar (R56, R61).
      *
      * The write goes through `RaceEntry::create`, not the factory, so the model's saving
      * guards are the ones that decide whether circles or a period index are admissible
@@ -350,7 +357,38 @@ class TrainingRunController extends Controller
      */
     public function storeRace(StoreRaceEntryRequest $request, TrainingRun $run): RedirectResponse
     {
-        $run->raceEntries()->create($request->validated());
+        $validated = $request->validated();
+
+        if ($request->isManualPath()) {
+            $maxSort = ScenarioSlot::where('scenario_key', $run->scenarioKey())
+                ->max('sort_order') ?? 0;
+
+            $slot = ScenarioSlot::create([
+                'scenario_key' => $run->scenarioKey(),
+                'kind' => 'free_race',
+                'source_key' => null,
+                'slot_label' => $validated['title'],
+                'title' => $validated['title'],
+                'month' => (int) $validated['month'],
+                'half' => $validated['half'],
+                'tier' => $validated['tier'] ?? null,
+                'is_manual' => true,
+                'sort_order' => $maxSort + 1,
+            ]);
+
+            $entryData = array_intersect_key($validated, array_flip([
+                'status', 'placement', 'fans_gain', 'circles', 'objective_index',
+            ]));
+            $entryData['scenario_slot_id'] = $slot->id;
+
+            $run->raceEntries()->create($entryData);
+        } else {
+            $entryData = array_intersect_key($validated, array_flip([
+                'scenario_slot_id', 'status', 'placement', 'fans_gain', 'circles', 'objective_index',
+            ]));
+
+            $run->raceEntries()->create($entryData);
+        }
 
         return redirect()
             ->route('runs.show', $run)

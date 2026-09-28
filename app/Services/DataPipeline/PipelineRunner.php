@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Services\DataPipeline;
 
 use App\Actions\PromoteMatchedRecord;
+use App\Actions\StoreRaceCatalogSlots;
 use App\Enums\CandidateStatus;
 use App\Enums\MatchTier;
 use App\Models\MatchCandidate;
+use App\Services\DataPipeline\Contracts\RaceCatalogSourceParser;
 use App\Services\DataPipeline\Contracts\SourceParser;
 use Illuminate\Support\Facades\Cache;
 
@@ -20,6 +22,7 @@ final class PipelineRunner
     public function __construct(
         private readonly CrossReferenceMatcher $matcher,
         private readonly PromoteMatchedRecord $promote,
+        private readonly StoreRaceCatalogSlots $storeRaceCatalog,
     ) {}
 
     /**
@@ -28,6 +31,34 @@ final class PipelineRunner
      */
     public function run(string $sourceKey, array $sourceConfig, string $body, ?string $snapshotPath): array
     {
+        /** @var class-string $parserClass */
+        $parserClass = $sourceConfig['parser'];
+
+        /*
+         * Reference data that is not a display name does not get cross-referenced.
+         *
+         * Without this branch a race-catalogue source would fall into the loop
+         * below, where every one of its 410 rows fails to match an Umamusume and is
+         * filed as a pending review candidate — turning the review queue into 410
+         * races. The parser's own contract is what distinguishes the two kinds, so
+         * nothing here keys off a source name.
+         *
+         * Both uma:fetch and uma:reparse arrive through this method, so the branch
+         * is written once.
+         */
+        if (is_a($parserClass, RaceCatalogSourceParser::class, true)) {
+            /** @var RaceCatalogSourceParser $parser */
+            $parser = app($parserClass);
+            $stored = $this->storeRaceCatalog->handle(
+                $parser->parse($body),
+                $sourceConfig['url'],
+                $snapshotPath,
+                $sourceConfig['timezone'] ?? null,
+            );
+
+            return [...$stored, 'review' => 0];
+        }
+
         /** @var SourceParser $parser */
         $parser = app($sourceConfig['parser']);
 

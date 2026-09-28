@@ -23,11 +23,11 @@ use Illuminate\View\ViewException;
 function calendarCells(): array
 {
     $states = [
-        0 => ['Early' => ['state' => 'goal', 'label' => 'Fuwa Fuji Taima Stakes']],
-        3 => ['Late' => ['state' => 'fan_locked', 'label' => 'Tenno Sho', 'fans_needed' => 12000]],
-        4 => ['Early' => ['state' => 'maiden_locked', 'label' => 'Naruta Kinpa Cup']],
-        5 => ['Early' => ['state' => 'open', 'label' => 'Entry open']],
-        1 => ['Late' => ['state' => 'current', 'label' => 'Next']],
+        0 => ['Early' => [['state' => 'goal', 'label' => 'Fuwa Fuji Taima Stakes']]],
+        3 => ['Late' => [['state' => 'fan_locked', 'label' => 'Tenno Sho', 'fans_needed' => 12000]]],
+        4 => ['Early' => [['state' => 'maiden_locked', 'label' => 'Naruta Kinpa Cup']]],
+        5 => ['Early' => [['state' => 'open', 'label' => 'Entry open']]],
+        1 => ['Late' => [['state' => 'current', 'label' => 'Next']]],
     ];
 
     $cells = [];
@@ -35,8 +35,8 @@ function calendarCells(): array
     for ($month = 0; $month < 12; $month++) {
         $cells[] = [
             'halves' => [
-                'Early' => $states[$month]['Early'] ?? ['state' => 'empty'],
-                'Late' => $states[$month]['Late'] ?? ['state' => 'empty'],
+                'Early' => ['slots' => $states[$month]['Early'] ?? []],
+                'Late' => ['slots' => $states[$month]['Late'] ?? []],
             ],
         ];
     }
@@ -116,7 +116,7 @@ it('prints no fan figure on a maiden cell, because a maiden gate is not a target
     $cells = calendarCells();
     // The design-preview sample used to pass fans_needed 0 here, which rendered
     // "0 fans" and told the Trainer to grind toward a number that decides nothing.
-    $cells[4]['halves']['Early']['fans_needed'] = 0;
+    $cells[4]['halves']['Early']['slots'][0]['fans_needed'] = 0;
 
     $html = renderCalendar('ura_finale', $cells);
 
@@ -151,7 +151,7 @@ it('names each cell with its month, half and state, not its race name alone', fu
         ->toContain('aria-label="Apr Late: Fan gate, Tenno Sho"')
         ->toContain('aria-label="May Early: Maiden rule, Naruta Kinpa Cup"')
         ->toContain('aria-label="Jan Early: Mandatory goal, Fuwa Fuji Taima Stakes"')
-        ->toContain('aria-label="Sep Late: No race"');
+        ->toContain('aria-label="Sep Late: No race, No race"');
 });
 
 it('renders a red Goal pennant on mandatory goal cells', function (): void {
@@ -226,7 +226,7 @@ it('falls back to the state word when a cell carries no label', function (): voi
 
 it('treats an unrecognised cell state as an empty slot rather than rendering nothing', function (): void {
     $cells = calendarCells();
-    $cells[7]['halves']['Early'] = ['state' => 'teleported'];
+    $cells[7]['halves']['Early'] = ['slots' => [['state' => 'teleported']]];
 
     $html = renderCalendar('ura_finale', $cells);
 
@@ -244,4 +244,42 @@ it('contains no scenario name anywhere in the component', function (): void {
     foreach (array_keys(config('scenarios.scenarios')) as $key) {
         expect($code)->not->toContain($key);
     }
+});
+
+it('renders multiple slots in one half-month cell as a stack, not one-per-cell', function (): void {
+    $cells = calendarCells();
+    // Replace August Early with three races (the Early August triple).
+    $cells[7]['halves']['Early'] = ['slots' => [
+        ['state' => 'open', 'label' => 'Cosmos Sho'],
+        ['state' => 'open', 'label' => 'Dahlia Sho'],
+        ['state' => 'open', 'label' => 'Phoenix Sho'],
+    ]];
+
+    $html = renderCalendar('ura_finale', $cells);
+
+    expect($html)
+        ->toContain('Cosmos Sho')
+        ->toContain('Dahlia Sho')
+        ->toContain('Phoenix Sho')
+        // All three are inside one cell, so they share one aria-label.
+        ->toContain('3 races: Cosmos Sho, Dahlia Sho, Phoenix Sho');
+});
+
+it('renders an empty cell when a half-month has no slots', function (): void {
+    $cells = calendarCells();
+    // September Late is already empty in the fixture.
+    $html = renderCalendar('ura_finale', $cells);
+
+    expect($html)->toContain('Sep Late: No race, No race');
+});
+
+it('labels manual (Trainer-entered) rows distinctly from seeded ones', function (): void {
+    $cells = calendarCells();
+    $cells[6]['halves']['Late'] = ['slots' => [
+        ['state' => 'past', 'label' => 'Local Stakes (Trainer-entered)'],
+    ]];
+
+    $html = renderCalendar('ura_finale', $cells);
+
+    expect($html)->toContain('Trainer-entered');
 });

@@ -1,11 +1,11 @@
 # ADR-0009: Seeding `scenario_slots` — three sources, what each unlocks, what stays dark
 
-Status: **PROPOSED, document only.** No migration, no seeder, no parser and no fixture is added by
-this ADR, and it takes no decision: the choice belongs to the owner, per `AGENTS.md` escalation 2 and
-the standing rule that an agent never adopts a scope change silently. It exists because the reason
-`ADR-0003` Amendment R3 gave for deleting the seeder has been overtaken by events, and because the
-brief that asked for this document (Slice 10 T4, R51-era) named three candidate sources and asked
-what each one actually unlocks.
+Status: **RULED IN PART.** Slice 11 implemented Option A (committed client export) for URA Finale
+only: `source_key` migration (R54, `c0a743f`), `ScenarioSlotSeeder` reading committed JSON (R55,
+`f0ae288`), and tier-label correction nulling unsourced grade codes (R65, `2d0c1dc`). Options B
+(live fetch) and C (bulk seeding from wiki) remain unimplemented. The "document only" status is
+lifted for the URA Finale path; the remaining scenarios and the fetch-engine work named in §3
+still await owner decision.
 
 Date: 2026-09-29
 Deciders: Architect (schema reading), Planner Domain Specialist (domain consequences), implementing
