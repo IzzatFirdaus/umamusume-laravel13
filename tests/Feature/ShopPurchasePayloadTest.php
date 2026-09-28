@@ -112,17 +112,44 @@ it('refuses a sixth copy of the same item', function (): void {
     ])->assertSessionHasErrors('item');
 });
 
-it('rejects an item the scenario does not sell and a price the catalogue disagrees with', function (): void {
+it('rejects an item the scenario does not sell as a field error on item', function (): void {
     $run = shopRun();
 
     $this->post('/training-runs/'.$run->id.'/purchases', [
         'turn' => 1, 'item' => 'Wit Manual', 'cost' => 15, 'effect' => '+7 Wit',
     ])->assertSessionHasErrors('item');
+});
 
-    // The catalogue rule is the payload's, and the write path goes through it.
-    $this->post('/training-runs/'.$run->id.'/purchases', [
+it('answers a cost the catalogue disagrees with as a 422 envelope, not a 500', function (): void {
+    $run = shopRun();
+
+    // A price the client does not charge is a Trainer mistake at a form, so it answers at
+    // the boundary instead of reaching `ShopPurchasePayload::fromArray()` and throwing.
+    // The envelope stays {code, message}: `ARCHITECTURE.md:166` defines it that way, so the
+    // field map is not added to a JSON contract without a ruling.
+    $this->postJson('/training-runs/'.$run->id.'/purchases', [
         'turn' => 1, 'item' => 'Vita 40', 'cost' => 40, 'effect' => 'Energy +40',
-    ])->assertStatus(500);
+    ])->assertStatus(422)
+        ->assertJsonPath('error.code', 'VALIDATION_ERROR')
+        ->assertJsonPath('error.message', 'The trackblazer shop charges 55 coins for Vita 40, not 40. Enter the price the client showed.');
+});
+
+it('marks the cost input when the catalogue price disagrees', function (): void {
+    $run = shopRun();
+
+    // Its own test because a second failed request in the same session ages the first
+    // one's flashed bag out before the page renders, which would prove nothing about the
+    // form. The referer is what a browser sends, and `back()` needs it to return here.
+    $html = $this->withHeader('referer', url('/training-runs/'.$run->id))
+        ->followingRedirects()
+        ->post('/training-runs/'.$run->id.'/purchases', [
+            'turn' => 1, 'item' => 'Vita 40', 'cost' => 40, 'effect' => 'Energy +40',
+        ])
+        ->assertOk()
+        ->getContent();
+
+    expect($html)->toMatch('/name="cost"[^>]*aria-invalid="true"/')
+        ->and($html)->toMatch('/charges 55 coins for Vita 40/');
 });
 
 it('warns about the overwrite and the cap beside the purchase control', function (): void {

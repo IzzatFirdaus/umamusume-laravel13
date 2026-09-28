@@ -89,30 +89,44 @@
 
     <form method="POST" action="{{ route('runs.purchases.store', $run) }}" class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-3 text-sm">
         @csrf
-        <label class="flex flex-col gap-1">
-            <span class="font-medium text-ink">Turn</span>
-            <input type="number" name="turn" min="1" value="{{ (int) $run->turnEntries->max('turn', 0) ?: 1 }}"
-                   class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink" required>
-        </label>
-        <label class="flex flex-col gap-1">
-            <span class="font-medium text-ink">Item</span>
-            <select name="item" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink" required>
+        {{-- Explicit `for`/`id` labelling, and the error outside the label: text inside a
+             wrapped label joins the field's accessible name, which would read
+             "Cost read The trackblazer shop charges 55 coins" to a screen reader. --}}
+        <div class="flex flex-col gap-1">
+            <label for="purchase-turn" class="font-medium text-ink">Turn</label>
+            <input id="purchase-turn" type="number" name="turn" min="1" aria-invalid="{{ $errors->has('turn') ? 'true' : 'false' }}"
+                   @error('turn') aria-describedby="purchase-turn-error" @enderror
+                   value="{{ (int) $run->turnEntries->max('turn', 0) ?: 1 }}"
+                   class="w-20 rounded-md border {{ $errors->has('turn') ? 'border-risk' : 'border-rule' }} bg-raised px-2 py-1 text-ink" required>
+            @error('turn')<span id="purchase-turn-error" class="text-xs text-risk">{{ $message }}</span>@enderror
+        </div>
+        <div class="flex flex-col gap-1">
+            <label for="purchase-item" class="font-medium text-ink">Item</label>
+            {{-- The price rides the option's own text: this build ships no script to read a
+                 data attribute, so a hidden one would be a promise nothing keeps. --}}
+            <select id="purchase-item" name="item" aria-invalid="{{ $errors->has('item') ? 'true' : 'false' }}"
+                    @error('item') aria-describedby="purchase-item-error" @enderror
+                    class="rounded-md border {{ $errors->has('item') ? 'border-risk' : 'border-rule' }} bg-raised px-2 py-1 text-ink" required>
                 @foreach ($catalogue as $name => $row)
-                    <option value="{{ $name }}" data-cost="{{ $row['cost'] }}" data-effect="{{ $row['effect'] }}">
-                        {{ $name }} · {{ number_format($row['cost']) }} coins
-                    </option>
+                    <option value="{{ $name }}">{{ $name }} · {{ number_format($row['cost']) }} coins</option>
                 @endforeach
             </select>
-        </label>
-        <label class="flex flex-col gap-1">
-            <span class="font-medium text-ink">Cost read</span>
-            <input type="number" name="cost" min="0" class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink" required>
-        </label>
-        <label class="flex flex-col gap-1 grow">
-            <span class="font-medium text-ink">Effect read</span>
-            <input type="text" name="effect" maxlength="255"
-                   class="rounded-md border border-rule bg-raised px-2 py-1 text-ink" required>
-        </label>
+            @error('item')<span id="purchase-item-error" class="text-xs text-risk">{{ $message }}</span>@enderror
+        </div>
+        <div class="flex flex-col gap-1">
+            <label for="purchase-cost" class="font-medium text-ink">Cost read</label>
+            <input id="purchase-cost" type="number" name="cost" min="0" aria-invalid="{{ $errors->has('cost') ? 'true' : 'false' }}"
+                   @error('cost') aria-describedby="purchase-cost-error" @enderror
+                   class="w-20 rounded-md border {{ $errors->has('cost') ? 'border-risk' : 'border-rule' }} bg-raised px-2 py-1 text-ink" required>
+            @error('cost')<span id="purchase-cost-error" class="text-xs text-risk">{{ $message }}</span>@enderror
+        </div>
+        <div class="flex grow flex-col gap-1">
+            <label for="purchase-effect" class="font-medium text-ink">Effect read</label>
+            <input id="purchase-effect" type="text" name="effect" maxlength="255" aria-invalid="{{ $errors->has('effect') ? 'true' : 'false' }}"
+                   @error('effect') aria-describedby="purchase-effect-error" @enderror
+                   class="rounded-md border {{ $errors->has('effect') ? 'border-risk' : 'border-rule' }} bg-raised px-2 py-1 text-ink" required>
+            @error('effect')<span id="purchase-effect-error" class="text-xs text-risk">{{ $message }}</span>@enderror
+        </div>
         <button type="submit" class="rounded-full border-2 border-rule px-4 py-2 font-bold text-ink-strong">Record purchase</button>
 
         {{-- Both warnings are shown before the commit, not after it: the overwrite is the
@@ -124,13 +138,10 @@
             the catalogue this scenario sells.
         </p>
 
+        {{-- One live region for the set: the per-field messages above are read with their
+             inputs, and this says that the page came back with a problem at all. --}}
         @if ($errors->any())
-            <p class="w-full text-sm text-risk" role="alert">
-                {{ $errors->first('item', 'That item is not in this scenario\'s shop, or its holding cap is reached.') }}
-                {{ $errors->first('cost', 'The cost must be the number the client showed.') }}
-                {{ $errors->first('effect', 'The effect sentence is required, as read.') }}
-                {{ $errors->first('turn', 'A purchase belongs to a turn.') }}
-            </p>
+            <p class="w-full text-sm text-risk" role="alert">The purchase was not recorded. See the field marked below.</p>
         @endif
     </form>
 

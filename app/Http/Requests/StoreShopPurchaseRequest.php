@@ -16,9 +16,10 @@ use Illuminate\Foundation\Http\FormRequest;
  *
  * The structural rules live here so a bad submission comes back as field errors on the
  * form rather than as an exception; the catalogue facts (this scenario sells this item,
- * at this price) are decided once, in `ShopPurchasePayload`, and the model's saving guard
- * still refuses the write if anything reaches it from another path. The two together are
- * the reason this request does not re-check the price table itself.
+ * at this price) are read from `ShopPurchasePayload::catalogueFor()`, which is the same
+ * table the view offers and the model's saving guard still checks. A price the client
+ * does not charge is a mistake a Trainer can correct, so it is a field error on `cost`
+ * and not a 500 from the payload guard (Slice 10 T3).
  *
  * The holding limit is the one rule that needs the run's history: the shop stocks at most
  * `shop.max_copies_per_item` of an item, so a sixth copy is not a price problem, it is a
@@ -65,7 +66,29 @@ class StoreShopPurchaseRequest extends FormRequest
                     }
                 },
             ],
-            'cost' => ['required', 'integer', 'min:0'],
+            'cost' => [
+                'required',
+                'integer',
+                'min:0',
+                // The price check moved to the boundary because the Trainer can fix it and
+                // nothing else can: `ShopPurchasePayload::fromArray()` still refuses the
+                // write, but on this path its exception arrived as a 500 with no field to
+                // correct (D-256, C-7). An unknown item is the `item` rule's message, so
+                // this one stays quiet when there is no catalogue row to compare against.
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if (! is_numeric($value)) {
+                        return;
+                    }
+
+                    $run = $this->run();
+                    $item = $this->input('item');
+                    $row = is_string($item) ? (ShopPurchasePayload::catalogueFor($run)[$item] ?? null) : null;
+
+                    if ($row !== null && $row['cost'] !== (int) $value) {
+                        $fail("The {$run->scenarioKey()} shop charges {$row['cost']} coins for {$item}, not ".(int) $value.'. Enter the price the client showed.');
+                    }
+                },
+            ],
             'effect' => ['required', 'string', 'max:255'],
         ];
     }
