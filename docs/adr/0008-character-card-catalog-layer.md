@@ -18,7 +18,7 @@ Relates to: `ADR-0004` (Tier B reference data promoted with provenance: the clos
 `PRD.md` FR-A-1, FR-A-6, FR-B-3, FR-C-1, US-1, US-2, §6.6, §6.9, §6.11, §6.12,
 `docs/requests/2026-09-29-catalog-roster-and-trainee-selector.md` §2 and §3 (erratum E-1, E-4, E-9,
 E-11, E-12, E-14, E-15, E-16), `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php`,
-`app/Services/DataPipeline/PipelineRunner.php:61-74`, `config/uma.php:44-61`, `CONSTRAINTS.md` C-4 with
+`app/Services/DataPipeline/PipelineRunner.php:92` (`MatchCandidate::create`, in the Fuzzy/None branch), `config/uma.php:46-62`, `CONSTRAINTS.md` C-4 with
 its verbatim-name exemption at `:38`, `docs/design-research/CONSTRAINTS.md` §5 preamble and D-30,
 `docs/scenarios/09-global-race-calendar.md:655` (the Tier B confirmation rule, quoted there from
 `docs/SOURCE-OF-TRUTH.md` §5), and `docs/UMAMUSUME_REFERENCE.md` `:66-78` (the source registry that rates
@@ -120,7 +120,7 @@ reason to widen the query, and erratum E-15's counts need re-recording here and 
 
 Per erratum E-9, a live fetch creates **zero** trainee rows on its own:
 `CrossReferenceMatcher::match()` returns `None` for any name not already stored
-(`app/Services/DataPipeline/CrossReferenceMatcher.php:28-52`) and `PipelineRunner.php:61-74` routes
+(`app/Services/DataPipeline/CrossReferenceMatcher.php:28-52`) and `PipelineRunner.php:92` routes
 `None` to `match_candidates`. `PRD.md` FR-B-3 is deliberate about it. Erratum E-15 records what that
 means in numbers for this export: 135 parsed records queue **133** candidates, not the 66 the original
 brief assumed. The roster therefore leaves the review queue through the existing
@@ -210,7 +210,7 @@ written for it, and Task 8's file counts a fourth class beside the three verdict
 (`docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md`, Tasks 8 and 9).
 
 Two provenance facts are worth naming so a later reader does not re-open them. First, the source is
-already declared and approved: `config/uma.php:44-61` records the owner's 2026-09-27 approval of
+already declared and approved: `config/uma.php:46-62` records the owner's 2026-09-27 approval of
 `gametora-characters` "with conservative politeness defaults rather than a live robots.txt check". The
 2026-09-29 ruling to fetch live answers `AGENTS.md` escalation 5 for a re-fetch of that same declared
 host; it is not an approval of a new host, and OQ-2 stays open for every other source question. Second,
@@ -238,3 +238,23 @@ This ADR adds no behaviour, so it ships no test. What proves it:
   `CharacterCardParserTest` (Task 6), `CharacterCardFetchTest` (Task 7), `CatalogRosterTreeTest`
   (Task 10), `TraineeSelectorTest` (Task 12), and Task 9's live pass re-measures the counts recorded
   above and reports where they moved.
+
+---
+
+## Citation re-derivation note - 2026-09-29, added on merge
+
+Every `file:NN` in this ADR was measured against branch base `b387e07`. Twenty commits
+landed on `master` before this branch merged them, and `e7b78a4` inserted 31 lines into
+`PipelineRunner.php`, so the two citations above were corrected from `:61-74` to `:92` and
+from `config/uma.php:44-61` to `:46-62`.
+
+The rest were re-read rather than assumed, and three that looked wrong were right:
+`GametoraCharacterParser.php:101` is the `external_ref` line and `:102` is the `aptitude`
+line, so both appear correctly in different paragraphs; `:15-18` still holds the
+costume-variants sentence at `:18`; and `CrossReferenceMatcher.php:28-52` is unmoved, that
+file being untouched by the merge. `TrainingRun.php` moved on trunk while `#[Fillable]`
+stayed at `:50` - which is the reason this pass re-reads line by line instead of
+blanket-shifting every number by the insertion count.
+
+Line numbers in this document are hints to the reader, not load-bearing assertions. Where a
+claim depends on a location, it names the symbol as well as the line.

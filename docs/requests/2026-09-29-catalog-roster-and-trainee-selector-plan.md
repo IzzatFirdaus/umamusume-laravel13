@@ -568,6 +568,26 @@ return new class extends Migration
             // Global status did not reach two sources is stored flagged and hidden
             // by default, rather than dropped or quietly trusted.
             $table->boolean('unconfirmed')->default(false);
+            /*
+             * Inline provenance, the way every reference table in this repo does it.
+             * ADR-0003 Amendment R3 requires `source_url`, `snapshot_path`,
+             * `fetched_at` and `source_timezone` on the reference row itself, and
+             * `scenarios`, `scenario_races`, `scenario_slots` and `race_catalog_slots`
+             * all carry all four. `data_sources` stays what it always was: the
+             * character-level provenance table behind FR-A-4 and the detail page's
+             * Provenance section. A card is not a character, and borrowing the parent's
+             * provenance row would make "where did this release date come from" a
+             * question with no row that answers it.
+             */
+            $table->string('source_url');
+            $table->string('snapshot_path')->nullable();
+            $table->timestamp('fetched_at')->nullable();
+            $table->string('source_timezone')->nullable();
+            // FR-B-4's stop sign at card grain. Borrowing the trainee's flag was the
+            // first draft and it is wrong twice over: a Trainer may correct one card's
+            // title without claiming her whole character, and every other reference
+            // table here carries its own.
+            $table->boolean('is_manual')->default(false);
             $table->timestamps();
         });
     }
@@ -658,10 +678,15 @@ use Illuminate\Support\Carbon;
  * @property Carbon $global_release_date
  * @property bool $is_debut_form
  * @property bool $unconfirmed not confirmed by two sources; hidden by default
+ * @property string $source_url
+ * @property string|null $snapshot_path
+ * @property Carbon|null $fetched_at
+ * @property string|null $source_timezone
+ * @property bool $is_manual the Trainer's own correction; the engine's stop sign (FR-B-4)
  * @property-read Umamusume $umamusume
  */
 #[Table('character_cards')]
-#[Fillable(['card_id', 'umamusume_id', 'title', 'rarity', 'global_release_date', 'is_debut_form', 'unconfirmed'])]
+#[Fillable(['card_id', 'umamusume_id', 'title', 'rarity', 'global_release_date', 'is_debut_form', 'unconfirmed', 'source_url', 'snapshot_path', 'fetched_at', 'source_timezone', 'is_manual'])]
 class CharacterCard extends Model
 {
     /** @use HasFactory<CharacterCardFactory> */
@@ -1332,7 +1357,37 @@ must yield nothing, which holds the Global-only rule down with a test."
 
 ---
 
-## Task 7: Second declared source, cards branch, idempotent upsert
+## Task 7: Second declared source, cards branch, idempotent store
+
+> ### AMENDMENT A1 — binding. This task's design changed when trunk's `e7b78a4` merged in.
+>
+> **Why.** Two things landed on `master` that this task must follow rather than restate.
+>
+> 1. **Routing is by parser interface, not by a config key.** `app/Services/DataPipeline/PipelineRunner.php:49` now reads `if (is_a($parserClass, RaceCatalogSourceParser::class, true))`, with the comment "The parser's own contract is what distinguishes the two kinds, so nothing here keys off a source name." `AGENTS.md` requires following established patterns, so **Step 6's `'records' => 'cards'` key and Step 7's `($sourceConfig['records'] ?? 'umamusume') === 'cards'` test are both superseded.** Do not add a `records` key to any source config, and do not document one in the config shape block.
+> 2. **Reference rows carry inline provenance.** `ADR-0003` Amendment R3 requires `source_url`, `snapshot_path`, `fetched_at` and `source_timezone` on the reference row, and `scenarios`, `scenario_races`, `scenario_slots` and `race_catalog_slots` all do it, each with its own `is_manual`. Task 4's migration is amended to match, so **`UpsertCharacterCard`'s per-record `DataSource::create` in Step 3 is superseded** — provenance is stamped on the card row, and `data_sources` keeps its existing meaning as the character-level table behind FR-A-4.
+>
+> **What replaces them.** The action changes shape, name and file to mirror `app/Actions/StoreRaceCatalogSlots.php` exactly: `app/Actions/StoreCharacterCards.php`, taking the whole list and returning counts.
+>
+> ```php
+> final class StoreCharacterCards
+> {
+>     /**
+>      * @param  list<array<string, mixed>>  $records
+>      * @return array{created: int, updated: int, skipped: int}
+>      */
+>     public function handle(array $records, string $url, ?string $snapshotPath, ?string $timezone): array
+> ```
+>
+> Inside it: resolve the trainee per record with `Umamusume::where('external_ref', $record['char_external_ref'])->first()`; `skipped++` and continue when she is absent; `skipped++` and continue when **the card** exists and `$card->is_manual` (FR-B-4 at its own grain, not the parent's); otherwise `updateOrCreate(['card_id' => ...], [...$record's columns, 'umamusume_id' => ..., ...$provenance])` where `$provenance` supplies `source_url`, `snapshot_path`, `fetched_at => now()`, `source_timezone`. It must **not** write `unconfirmed` — Task 8 owns that column, and a fetch may not clear a human verdict.
+>
+> In `PipelineRunner::run()`, add a second `is_a()` branch beside the race-catalog one, calling the store once with the full parsed list and returning `[...$stored, 'review' => 0]`. Then bump `catalog:version` when `$stored['created'] + $stored['updated'] > 0`, or the catalog page serves its cached id list unchanged. The existing branch is the model for all of this, including its comment about both `uma:fetch` and `uma:reparse` arriving through one method.
+>
+> In `config/uma.php`, the new source is `url`, `parser`, `delay_ms`, `timeout_s`, `timezone` — nothing else. Its comment keeps the cost disclosure (the same document fetched twice per full `uma:fetch`) and the ordering note (characters first so `external_ref` exists), and the statement that `AGENTS.md` escalation 5's robots question for this host stays formally unanswered as recorded above it.
+>
+> **Test changes A1 forces.** The five `UpsertCharacterCard` cases in Step 1 become `StoreCharacterCards` cases taking a list: the provenance test asserts the four **columns on the returned card**, not a `DataSource` row; the `is_manual` test sets `is_manual` on the card row itself and asserts its title survives while an unlocked sibling in the same call is updated; add one case asserting `unconfirmed => true` on an existing card stays true after a re-store. The runner case keeps its counts (`created 3 / skipped 5 / review 0`) and gains `MatchCandidate::count() === 0`.
+>
+> **Task 4 and 11 follow from A1.** `CharacterCardFactory` gains `'is_manual' => false`, `'source_url' => 'https://gametora.test/character-cards.json'`, and a `manual()` state. Task 11's card provenance sentence reads the card's own `source_url` and `fetched_at`, which is what the brief asked for anyway — "name the source and fetch date" per card, not per character.
+
 
 The owner ruled the data arrives by live `uma:fetch` (spec §2), so the card dataset becomes a declared source. `config/uma.php:31-32` requires a config entry, one parser class, fixture tests (Task 6) and a robots note; `SourceFetcher` is the only outbound path and its allowlist is `config('uma.sources')`.
 
