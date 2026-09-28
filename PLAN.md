@@ -212,7 +212,7 @@ residuals, push. Frontend and docs only: no schema, no config, no new screen, no
 | T1: six doc amendments | `61f6165` | D-40 as region lifetimes; the radio clause reversed; controller inventory; Livewire **decided** with a reopen criterion; `aria-live` closed as correct-by-design; the two audit corrections recorded |
 | T2: mood tokens, pill, legibility | `51d29d4` | Five `--color-mood-*` + `--color-on-mood`; `x-mood-pill` with the D-259 arrow; `MoodTier::arrow()`; timeline column and state-region readout; pairs measured in both themes, floor 5.82:1 |
 | T3: the green ink borrow | `e80c6f2` | `--color-on-green` #1F1508, 9.02:1 measured in both themes; the advisory badge and two stale comments corrected; `TokenPairHygieneTest` pins the naming |
-| T4: gates + browser pass | this commit | 2 skipped, 374 passed (1,247 assertions); pint passed; PHPStan level 6 clean; `gate.py` PASS; lore 137 / lore-code 6 all explained; build 57.37 kB CSS, all seven new utilities in the bundle; token count 53 → 60 |
+| T4: gates + browser pass | this commit | 2 skipped, 374 passed (1,247 assertions); pint passed; PHPStan level 6 clean; `gate.py` PASS; lore-code 6 all adjudicated in §3.2, `composer lore` 137 → 140 with all three new lines being this plan and the record quoting a banned word to rule on it; build 57.37 kB CSS, all seven new utilities in the bundle; token count 53 → 60 |
 | T5: record, second push | this commit + push | `docs/design-research/verification/slice-6-2026-09-28.md`; PLAN and KNOWN-ISSUES re-baselined |
 
 **Deviation the reviewer should look at first.** The mood pill does not use §3.4's tint-and-border
