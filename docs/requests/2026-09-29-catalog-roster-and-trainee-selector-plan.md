@@ -1415,7 +1415,7 @@ must yield nothing, which holds the Global-only rule down with a test."
 > **Why.** Two things landed on `master` that this task must follow rather than restate.
 >
 > 1. **Routing is by parser interface, not by a config key.** `app/Services/DataPipeline/PipelineRunner.php:49` now reads `if (is_a($parserClass, RaceCatalogSourceParser::class, true))`, with the comment "The parser's own contract is what distinguishes the two kinds, so nothing here keys off a source name." `AGENTS.md` requires following established patterns, so **Step 6's `'records' => 'cards'` key and Step 7's `($sourceConfig['records'] ?? 'umamusume') === 'cards'` test are both superseded.** Do not add a `records` key to any source config, and do not document one in the config shape block.
-> 2. **Reference rows carry inline provenance.** `ADR-0003` Amendment R3 requires `source_url`, `snapshot_path`, `fetched_at` and `source_timezone` on the reference row, and `scenarios`, `scenario_races`, `scenario_slots` and `race_catalog_slots` all do it, each with its own `is_manual`. Task 4's migration is amended to match, so **`UpsertCharacterCard`'s per-record `DataSource::create` in Step 3 is superseded** — provenance is stamped on the card row, and `data_sources` keeps its existing meaning as the character-level table behind FR-A-4.
+> 2. **Reference rows carry inline provenance.** `ADR-0003` Amendment R3 requires `source_url`, `snapshot_path`, `fetched_at` and `source_timezone` on the reference row, and `scenario_races`, `scenario_slots` and `race_catalog_slots` carry all four and each has its own `is_manual`; `scenarios` predates the full set and carries `source_url`, `fetched_at` and `is_manual` only, which is `ADR-0004:50`'s own choice rather than a gap. Task 4's migration is amended to match, so **`UpsertCharacterCard`'s per-record `DataSource::create` in Step 3 is superseded** — provenance is stamped on the card row, and `data_sources` keeps its existing meaning as the character-level table behind FR-A-4.
 >
 > **What replaces them.** The action changes shape, name and file to mirror `app/Actions/StoreRaceCatalogSlots.php` exactly: `app/Actions/StoreCharacterCards.php`, taking the whole list and returning counts.
 >
@@ -2131,7 +2131,8 @@ it('double-resolving the same candidate directly does create a second trainee', 
     // NOT a passing assertion that this is good. It pins a real hazard: nothing in
     // ResolveMatchCandidate refuses a verdict on an already-resolved candidate, so a
     // replayed POST to /review/{candidate} -- a back-button double-submit -- silently
-    // forks a catalog row. File it as KI-22 with this test as the reproducer.
+    // forks a catalog row. File it as the next free KI at run time (KI-25 expected: trunk holds 21 and 22,
+    // this branch's parser defect is 23, and KI-24 is the fresh-clone gap), with this test as the reproducer.
     expect(App\Models\Umamusume::query()->count())->toBe(2);
 });
 
@@ -2168,7 +2169,7 @@ it('leaves a candidate Pending when its verdict throws, so a re-run retries it',
 });
 ```
 
-Run all three, and file **KI-22** in `KNOWN-ISSUES.md` against the second test: nothing in `ResolveMatchCandidate` refuses a verdict on an already-resolved candidate, so a replayed POST to `review.resolve` — a back-button double-submit — silently forks a catalog row. The review UI hides resolved candidates, so it is not normally reachable, but this plan is the first thing to drive the action at volume. The fix is a one-line guard (no-op or reject when `status !== Pending`) and belongs to a separate slice, not to Task 9; record the deferral here rather than expanding this task's blast radius mid-run.
+Run all three, and file **the next free KI** in `KNOWN-ISSUES.md` against the second test, re-derived by the same run-time recipe Task 2 Step 7 uses (KI-25 is the expected number now that trunk holds KI-21 and KI-22 and this branch holds KI-23 and KI-24): nothing in `ResolveMatchCandidate` refuses a verdict on an already-resolved candidate, so a replayed POST to `review.resolve` — a back-button double-submit — silently forks a catalog row. The review UI hides resolved candidates, so it is not normally reachable, but this plan is the first thing to drive the action at volume. The fix is a one-line guard (no-op or reject when `status !== Pending`) and belongs to a separate slice, not to Task 9; record the deferral here rather than expanding this task's blast radius mid-run.
 
 - [ ] **Step 4c: Confirm no duplicates actually landed**
 
@@ -2278,7 +2279,7 @@ Expected: `pending 67 | resolved 66 | rejected 0`.
 
 Write that number into the record, because it changes what `/review` is. `ReviewController::index()` lists Pending only, `latest('created_by_fetch_at')`, `paginate(25)`, and `review/index.blade.php` offers no filter by tier, source or release status and no aggregate count. After this task the queue is **three pages of 67 JP-only candidates with zero actionable ones** — correct by US-2's letter (the lookahead is visible rather than silently missing, which is exactly what that story demands) and the least useful surface in the tool by practice.
 
-File it as **KI-23**, describing the state rather than prescribing a fix: a queue filter or a "JP-only lookahead" grouping is a scope question with no PRD citation, so it goes to the owner, not into this slice. Record it in the report's "Not built" section too. Do not add a filter here on the way past — it is a new surface, its own tests, and its own citation, and Task 9's contract is that it changes no application code.
+File it as **the next free KI after that one** (KI-26 expected by the same count), describing the state rather than prescribing a fix: a queue filter or a "JP-only lookahead" grouping is a scope question with no PRD citation, so it goes to the owner, not into this slice. Record it in the report's "Not built" section too. Do not add a filter here on the way past — it is a new surface, its own tests, and its own citation, and Task 9's contract is that it changes no application code.
 
 Say plainly in the KI that **these 67 are not lost**. They stay addressable in two directions: they remain in `/review` for a verdict at any time, and a Trainer who ever confirms one gets a `JapanOnly` catalog row that reads correctly under `status=all` and `status=JapanOnly` — the shape Task 10's `defaults the release status filter to released on Global` test already pins, including the `status=all` half. The KI is about the queue's signal-to-noise, not about data that disappears.
 
@@ -2942,7 +2943,7 @@ The JP and Global debut `<dt>` rows keep their existing markup: after Task 2 Ste
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php tests/Feature/CatalogTest.php tests/Feature/DesignTokensTest.php tests/Feature/RenderedCopyHygieneTest.php
 ```
 
-Expected: all green. `CatalogTest:33` `'shows a detail page with Japanese name and provenance'` creates a `DataSource` with a `https://example.test/...` URL and no `source_key`, and the existing Provenance list at `:64` already prints that key bare, so the added sentence must not read `source_key` at all; that is why it does not. Confirm the test stays green rather than editing it. The per-card span needs no such tolerance because `CharacterCard::factory()` now sets `fetched_at` (Task 4 Step 11), but it does need the `@if`: a row stored before a fetch stamped it has `fetched_at` null, and `null->timezone()` is a fatal.
+Expected: all green. `CatalogTest:33` `'shows a detail page with Japanese name and provenance'` creates a `DataSource` with a `https://example.test/...` URL and no `source_key`, and the existing Provenance list at `:65` already prints that key bare, so the added sentence must not read `source_key` at all; that is why it does not. Confirm the test stays green rather than editing it. The per-card span needs no such tolerance because `CharacterCard::factory()` now sets `fetched_at` (Task 4 Step 11), but it does need the `@if`: a row stored before a fetch stamped it has `fetched_at` null, and `null->timezone()` is a fatal.
 
 - [ ] **Step 7: Gates and commit**
 

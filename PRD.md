@@ -47,8 +47,9 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
   Umamusume, the `[Global]` client title verbatim including its brackets, rarity,
   Global release date, a debut-form flag derived from the earliest JP release
   among that trainee's cards, and an `unconfirmed` flag. Provenance is inline on the
-  card row, the way every other reference row in this schema carries it
-  (`ADR-0003` Amendment R3): `source_url`, `snapshot_path`, `fetched_at`,
+  card row, as the sibling reference tables do (`ADR-0003` Amendment R3;
+  `scenario_races`, `scenario_slots` and `race_catalog_slots` carry all four fields,
+  `scenarios` predates the set and carries three): `source_url`, `snapshot_path`, `fetched_at`,
   `source_timezone`, plus the card's own `is_manual` so a hand-correction to one card
   is immutable to the engine without claiming that trainee's whole record (B-4).
   Only cards carrying a Global release date are stored;
