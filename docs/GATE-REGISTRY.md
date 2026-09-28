@@ -77,9 +77,13 @@ Evidence | Exceptions | Owner | Status
    `friend` are out of scope per C-4's copy-and-framing boundary).
 4. A gate's own source: the pattern list in `tools/gate.py` and the grep list in
    `tools/lore.php` match `make lore` by construction, so each scanner is a permanent
-   self-hit. Expect them, do not clear them. Measured on the `cc3f963` tree: `make lore`
-   reports 130 lines, of which 7 are `tools/lore.php` naming its own patterns and 3 are
-   `tools/gate.py`. `lore-code` cannot self-hit — `tools/` is outside its path list.
+   self-hit. Expect them, do not clear them. Composition on the `21f9906` tree: the sweep
+   prints 131 match lines, of which 5 distinct `tools/lore.php` lines and 3
+   `tools/gate.py` lines are the scanners naming their own patterns. The total counts
+   prints, not distinct lines - a line matching two of the three greps prints twice - and
+   it moves whenever a rules file quotes a banned word, so treat it as a measurement of
+   that day, never as a threshold. `lore-code` cannot self-hit: `tools/` is outside its
+   path list.
 Ambiguous framing (a real violation vs a quote) requires a Lore Guardian or owner
 ruling before merge; the ruling is recorded next to the hit list.
 

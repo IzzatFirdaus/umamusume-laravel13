@@ -167,14 +167,16 @@ command text runs through `cmd.exe`, which does not quote with single quotes, so
 and the gate prints nothing and exits 0. The failure mode this replaced was a gate that
 reported clean while matching no file at all.
 
-Parity is measured rather than claimed. The recipe bodies run verbatim report 123 hits and
-`composer lore` reports 123; the `lore-code` body and `composer lore-code` both report 4.
-`LoreGateParityTest` compares the pattern strings between the Makefile and the runner, and
-dropping `withers` from the script is what proves the guard bites. One side effect is
-recorded rather than hidden: tracking the runner made it a permanent self-hit, so the
-repo-wide count moved 123 → 130 and `docs/GATE-REGISTRY.md` allowed class 4 now names
-`tools/lore.php` beside `tools/gate.py`. The Makefile targets stay — `CONSTRAINTS.md` C-4
-names them — and `lore-code` cannot self-hit because `tools/` is outside its path list.
+Parity is measured rather than claimed. On one tree, the recipe bodies run verbatim and
+`composer lore` report the same count, and the `lore-code` body and `composer lore-code`
+both report 4. `LoreGateParityTest` compares the pattern strings between the Makefile and
+the runner, and dropping `withers` from the script is what proves the guard bites. One side
+effect is recorded rather than hidden: tracking the runner made it a permanent self-hit, so
+the sweep now prints the scanner's own pattern lines beside `gate.py`'s, and
+`docs/GATE-REGISTRY.md` allowed class 4 names both files with their composition — counts
+there are dated, because any rules file quoting a banned word moves the total. The Makefile
+targets stay — `CONSTRAINTS.md` C-4 names them — and `lore-code` cannot self-hit because
+`tools/` is outside its path list.
 
 The untracked-file half of this entry was never closed by the runner: `make lore` reads
 tracked files only by design, and `lore-code` reads untracked copy inside app paths only.
