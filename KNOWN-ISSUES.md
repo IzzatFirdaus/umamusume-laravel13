@@ -875,7 +875,7 @@ screen, and the branch is chosen on the server before the response is sent. `old
 query default so a failed write returns to the branch being filled, and the entered values return
 with it — including placement, status, circles and period, which sit outside both branches and were
 retypeable before. `package.json` is untouched. The calendar session's own comment at
-`race-calendar.blade.php:81` — "there is no runtime JavaScript dependency in this project" — is the
+`race-calendar.blade.php:89` — "there is no runtime JavaScript dependency in this project" — is the
 evidence this was the house stance and not just the permitted route.
 
 **Proof is the rendered DOM, not the HTML source (R71).** `RaceEntryDisclosureTest` resolves every
