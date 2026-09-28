@@ -84,6 +84,10 @@ recorded sha is dropped.
 | **4 — Implementation** | **Slice 3 Complete** | T1 `ab915f8`, T2 `726f106` + `78697e9`, T3 `2816309`, T4 `725a5ff`, T5 `5c65597`, T6 `5548b9e`, T7 `ee97869` + `cc3f963` + `21f9906` + `ee6786c`, T8 `dc13d8d` + `35fb0c7`, T9 `33949f5` |
 | **4 — Implementation** | **Slice 4 Complete (repo-integrity)** | T1 `35fb0c7`, T2 `dc13d8d`, T3 coherence outputs (20/20 migrations, ScenarioSlot+Preference defs, 23 tables), T4 push shas `9b774f9`/`33949f5`, T5 docs commit, T6 gates |
 | **4 — Implementation** | **Slice 5 Complete (frontend only)** | T0 `cd0be38`, T1 `d50a0ec` + `2685a37` + `edeb8cd` + `03a5d05`, T2 `71bbb4b`, T3 `6a53c15`, T4/T5 this commit |
+| **4 — Implementation** | **Slice 8 Complete** | Panels and scenario widgets; KI-17, KI-18 filed |
+| **4 — Implementation** | **Slice 9 Complete** | `f7a59e8` (KI-18 closed), mood pill tokens |
+| **4 — Implementation** | **Slice 10 Complete** | Maintenance: R51 marker, R52 KI-18 bookkeeping, ADR-0009 draft, KI-19/KI-20 filed |
+| **4 — Implementation** | **Slice 11 Complete** | `c0a743f` (T1), `f0ae288` (T2), `70248b3` (T3), `5820e77` (T4), `65f8b92` (T5); KI-20 closed |
 | **5 — Verification** | Routine | Browser metrics: light 4.74 / dark 5.48 / badges 9.00+; energy bands 6.40 / 8.34 / 10.89 light and 12.60 / 10.57 / 6.88 dark, and the preview pairs, in `slice-5-2026-09-28.md` |
 | **6 — Iteration** | Unfrozen by Slice 2, **not started** | Owner instruction: the slice's commit unfreezes it; no Phase 6 anatomy in this session |
 
@@ -280,6 +284,54 @@ panel UI (Slice 8), no new dependency, peer files untouched.
 
 **Suite at the tip of this slice's code:** `php artisan test --compact` → 2 skipped, 390 passed
 (1,287 assertions); PHPStan level 6 `[OK] No errors`; Pint clean on the files this slice touched.
+
+---
+
+## Slice 8 Summary (2026-09-28) — Panels and scenario widgets
+
+Built the four scenario-aware panels (race, team-race, spirit-burst, shop) plus supporting
+components (epithet-checklist, race-fatigue-chip). Filed KI-17 (consecutive-race count not
+derivable from log) and KI-18 (burst roster prints tool identifiers as UI copy). No token changes,
+no migrations.
+
+---
+
+## Slice 9 Summary (2026-09-28) — Spirit burst labels, mood pill tokens
+
+Closed KI-18 (`f7a59e8`): `SpiritBurstState::label()` mapping six cases to Trainer-readable words;
+roster prints labels, tests assert labels and fail on leaked backing values. Mood pill tokens
+landed with legibility minimum measured in browser. Subject-prefix erratum: `68fa190` carries
+`docs(slice-7)` but is a Slice 9 commit (R50).
+
+---
+
+## Slice 10 Summary (2026-09-29) — Maintenance and drift
+
+Closed KI-18 bookkeeping (R52). Lore-ignore-line marker landed (R51). Impeccable re-audit ran
+on same version (KI-19: updater returns 404). Purchase cost prefill + 422 field error per-field.
+ADR-0009 drafted for scenario-slot seeding. Filed KI-19 and KI-20.
+
+---
+
+## Slice 11 Summary (2026-09-29) — Calendar slots, free-race writer, KI-20 closure
+
+Rulings: R54 (source_key migration), R55 (URA Finale seeder), R56 (free-race manual writer),
+R57 (delete welcome page), R58 (measure and close KI-20), R59 (push once + record commit),
+R60 (rulings are repo artifacts), R61 (fifth kind: free_race), R62 (lore-code path exclusion).
+
+| Task | Commit | Claim, with the thing that proves it |
+|---|---|---|
+| T1 source_key migration | `c0a743f` | `scenario_slots.source_key` nullable string; unique composite `(scenario_key, month, half, source_key)`; migration tested in `ScenarioSlotMigrationTest` |
+| T2 URA Finale seeder | `f0ae288` | `ScenarioSlotSeeder` reads `database/seeders/data/ura_finale_slots.json` (committed client export); 297 rows seeded; idempotent via upsert on composite key |
+| T3 multi-slot calendar | `70248b3` | `TrainingRun::calendarCells()` queries both `goal_race` and `free_race`; cells carry `['slots' => [...]]` arrays; priority state derivation; `race-calendar.blade.php` renders multiple slots per cell |
+| T4 free-race writer | `5820e77` | Two-path form (calendar/manual) in `race-panel.blade.php`; `StoreRaceEntryRequest` validates both paths; controller creates `ScenarioSlot(kind=free_race)` + `RaceEntry` atomically; `FreeRaceWriterTest` 8 tests; lore-code baseline stays 7 after R62 path exclusion |
+| T5 closures | `65f8b92` | Welcome page deleted, `/` redirects to `runs.index` (R57); KI-20 measured (light 10.04:1 PASS, dark 4.33:1 FAIL → stepped #FF6B7A to #FF7E8C = 4.77:1 PASS); KNOWN-ISSUES updated to 15 closed / 4 open |
+
+**Gates:** Pest 507 passed / 2 skipped / 1 pre-existing failure (`RunViewFrameTest` radiogroup count, confirmed pre-existing via `git stash`); Pint PASS; PHPStan PASS; lore-code baseline 7; Vite build clean.
+
+**Browser pass:** `/` → 302 redirect confirmed; `/training-runs/1` with free_race data → 200, "Naruta Kinpa Cup" rendered, "Trainer-entered" marker present, zero server errors.
+
+**Push cadence (R59):** One push at slice end, post-push `ls-remote` verification recorded in §T7.
 
 ---
 
