@@ -123,6 +123,34 @@ it('loads no remote stylesheet or font on first paint', function (): void {
     expect($offenders)->toBe([]);
 });
 
+it('ships no comment form that Blade does not understand', function (): void {
+    $views = base_path('resources/views');
+    $offenders = [];
+
+    // `{# ... #}` is a Vue/Angular comment, not a Blade one, and Blade renders it as page
+    // text. `stat-band.blade.php` carried seven lines of design rationale this way and it
+    // only became visible when the band reached a Trainer's screen: on the review surface
+    // nobody reads the prose. The dash guard below strips `{{-- --}}` and the two PHP
+    // forms; this catches the form that is not a comment at all.
+    $walk = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($views, FilesystemIterator::SKIP_DOTS),
+    );
+
+    foreach ($walk as $file) {
+        if (! str_ends_with($file->getFilename(), '.blade.php')) {
+            continue;
+        }
+
+        foreach (preg_split('/\R/', (string) file_get_contents($file->getPathname())) ?: [] as $index => $line) {
+            if (preg_match('/^\s*(\{#|#})\s*$/', $line) === 1) {
+                $offenders[] = str_replace($views.DIRECTORY_SEPARATOR, '', $file->getPathname()).':'.($index + 1);
+            }
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});
+
 it('ships no em dash or en dash in rendered Blade copy', function (): void {
     $hits = renderedDashLines();
 

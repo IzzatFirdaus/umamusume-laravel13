@@ -69,13 +69,13 @@
     };
 @endphp
 
-{#
+{{--
     One band, six columns, identical geometry in every scenario and every theme.
     Two markers, two meanings: the dashed tick is the 1200 halved-gains line, the
     bar end is the scenario ceiling. Where a ceiling equals 1200 the two coincide,
     and the bar end itself takes the dashes so the coincidence stays visible instead
     of being clipped away by the track's overflow (ADR-0002, D-211, D-212).
-#}
+--}}
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-raised']) }}>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
         @foreach ($order as $stat)
