@@ -54,7 +54,7 @@
                  It is a status chip, not an action, and the tokens follow that: the
                  tint-and-border treatment of DESIGN.md §3.4 ("the standard treatment for
                  every coloured status chip") and the band table's `ink` on `green-tint`
-                 (§6.16 Safe). Not `bg-green` + `text-on-pick` — §3.4 splits every hue into a
+                 (§6.16 Safe). Not the bright `bg-green` fill at all — §3.4 splits every hue into a
                  500 chrome step that is "fills, borders, rings, lattice, and anything
                  non-text" and an ink-bearing step, and `green-500 #7FCC09` is absent from
                  the approved text-pair table because white on it measures 1.99:1. The

@@ -153,8 +153,29 @@ Approved text pairs, all computed:
 | `ink-body` | `pink-200` `#FEDBE3` | 5.45 | AA |
 | `ink-body` | `orange-100` `#FFF2ED` | 6.35 | AA |
 | `ink-body` | `blue-100` `#ECF1FA` | 6.13 | AA |
+| `on-mood` `#1F1508` | `mood-great` `#FB5590` | 5.82 | AA |
+| `on-mood` `#1F1508` | `mood-good` `#ED8036` | 6.62 | AA |
+| `on-mood` `#1F1508` | `mood-normal` `#A0978E` | 6.25 | AA |
+| `on-mood` `#1F1508` | `mood-bad` `#D48556` | 6.23 | AA |
+| `on-mood` `#1F1508` | `mood-awful` `#D47E9E` | 6.23 | AA |
+| `on-green` `#1F1508` | `green-500` `#7FCC09` | 9.02 | AAA |
 
-**State pills use the tint-and-border pattern.** A mood pill is `amber-100` fill, a 2px `amber-500` border, `ink-strong` text, plus the saturated arrow glyph. The hue identity survives through the border, the glyph, and the word; the text passes. This is the standard treatment for every coloured status chip in the system, and it is the one place we knowingly depart from the client's flat saturated pill.
+The last seven rows are measured from the rendered element in both themes on 2026-09-28
+(`slice-6-2026-09-28.md` §2 and §3), not computed from the table above, and they read the same in
+both themes because the five mood fills and `green-500` are chrome that does not move between
+themes: the client paints
+the same pink whatever surface it sits on, and `--color-green` is the same #7FCC09 in the dark
+block. Their ink rows are therefore single-valued.
+
+**State pills use the tint-and-border pattern** for chips on a surface: a pale fill, a 2px border
+in the hue, `ink-strong` text. **Mood is the exception, ruled 2026-09-28.** The mood chip keeps the
+client's flat saturated pill and steps the ink instead of the fill, because three of the five tiers
+were derived to their neighbours' luminance (§6.17 item 1) and a pale tint of a hue that already
+cannot be told from its neighbour turns a status chip into a wash. Measured against this row's own
+ink, `ink-strong` #482720 on `mood-great` is 4.29:1, which fails; `on-mood` #1F1508 on the same
+fill is 5.82:1, which passes, and it is the darkest member of the ink family the system already
+uses. The pill never shrinks to buy the contrast: D-259 makes the arrow the part that has to stay
+readable, so a smaller pill is the wrong fix for a contrast failure.
 
 ### 3.5 Tailwind v4 theme block
 
@@ -217,6 +238,7 @@ Tailwind v4 is CSS-first in this repo: the theme lives in an `@theme` block in `
   --color-mood-normal: #A0978E;   /* derived at anchor luminance, provisional */
   --color-mood-bad: #D48556;      /* derived at anchor luminance, provisional */
   --color-mood-awful: #D47E9E;    /* derived at anchor luminance, provisional */
+  --color-on-mood: #1F1508;       /* the ink all five take; §3.4's measured rows */
 
   /* geometry */
   --radius-panel: 14px;
@@ -343,7 +365,7 @@ Three consequences a reviewer should check, because they are where a naive inver
 2. **Shadows stop doing the work.** On `#121013` a shadow has nowhere to go, so separation comes from the `--color-rule` edge and the raised/sunken step. Do not keep the light theme's violet-cast shadow and expect depth.
 3. **Brown ink does not survive.** Warm brown on charcoal reads as mud, which is why the dark ink moves to a near-white with only a trace of warmth. This is the one place the two themes genuinely diverge in character, and it is deliberate.
 
-Selection stays amber in both themes, so the gold-on-light and amber-on-dark states remain the same idea. Mood pills keep the tint-and-border pattern, with the tint becoming a deep shade.
+Selection stays amber in both themes, so the gold-on-light and amber-on-dark states remain the same idea. Mood pills are the exception to the tint-and-border treatment (§3.4) and are the client's saturated fills in both themes, with `--color-on-mood` as their ink; because neither the fills nor the ink is theme-relative, the five mood pairs read identically in light and dark and are declared once.
 
 
 
@@ -887,7 +909,27 @@ Three rulings come out of that table, and each one reverses something this packa
 
 1. **The arrow direction is the ordinal signal.** Up for the two positive tiers, neutral at `NORMAL`, down for the two negative ones. Because the three provisional colours were derived at the anchors' luminance (§3.5), `GOOD` and `BAD` sit 3.3° apart and `GREAT` and `AWFUL` 1.0° apart, so hue alone cannot order the scale. The arrow is what makes a five-pill row readable, which is why D-259 makes it mandatory instead of stylistic. Of the five glyphs, the `NORMAL` one is the least certain reading from the capture (flat versus no mark at all reads the same at small sizes); the other four are unambiguous, and the rule does not change either way.
 
-**⚠️ This makes pill size a correctness constraint, not a taste one.** The three derived colours are not distinguishable by hue at the luminance they were derived to, so **arrow direction is the only ordinal signal in the component** — a Trainer reading mood at a glance reads the glyph or nothing. Therefore: no mood pill may be rendered smaller than the size at which its arrow is legible, and no layout may drop the arrow while keeping the colour pair to save space. The minimum itself is **not measured**, and none is stated here because inventing one would be the same failure this section documents — the practical rule is to test the five-pill row at the smallest size any surface uses, in both themes, and treat an unreadable arrow as a rejected layout. Related: G-47 (badge contrast) and D-259.
+**⚠️ This makes pill size a correctness constraint, not a taste one.** The three derived colours are not distinguishable by hue at the luminance they were derived to, so **arrow direction is the only ordinal signal in the component** — a Trainer reading mood at a glance reads the glyph or nothing. Therefore: no mood pill may be rendered smaller than the size at which its arrow is legible, and no layout may drop the arrow while keeping the colour pair to save space.
+
+**Measured 2026-09-28, so the pill ships at a known size and a known pair.** Read off the rendered timeline pills on the run screen, per D-288 (`getComputedStyle` on the element itself, both themes):
+
+| What | Value |
+|---|---|
+| Ink on each of the five fills | 5.82 (GREAT) / 6.62 (GOOD) / 6.25 (NORMAL) / 6.23 (BAD) / 6.23 (AWFUL) |
+| Both themes | identical, because the fills are chrome and are not overridden (§3.4) |
+| Ink | `--color-on-mood` `#1F1508`, stepped from `ink-strong` #482720, which is 4.29 on `mood-great` and fails |
+| Label size and weight | 12 px, weight 700, `font-mono` |
+| Arrow glyph box | 7.3 × 16 CSS px |
+| Pill box | 20 px tall; 45.3 / 52.7 / 60.0 / 60.0 / 67.3 px wide for BAD / GOOD / GREAT / AWFUL / NORMAL |
+| Padding, radius | 6 px inline, 2 px block; fully rounded |
+
+**The legibility minimum this fixes is 5.82:1, the worst of the five pairs, and it is above the 4.5:1
+AA bar for text at this size.** The minimum that was missing from this section is now the size
+floor, and the size floor still has no number: 12 px / 700 is what the shipped pill measures, and
+whether a Trainer can tell `↑` from `→` at that size is a judgement about a glyph, not a ratio. It
+was not measured here, so it is not stated as one. The practical rule is unchanged and now has a
+concrete reference: test the five-pill row at the smallest size any surface uses, in both themes,
+and treat an unreadable arrow as a rejected layout. Related: G-47 (badge contrast) and D-259.
 2. **`Practice Poor` is not a mood tier.** It is a failure *condition* from an event outcome (§6.16b, D-201), and D-203 had floated it as a candidate label for the low tier. The client's low tiers are `BAD` and `AWFUL`. The two vocabularies must not be merged, and a mood widget must never offer a `Practice Poor` state.
 3. **The wiki glosses are retired on both counts, the words and the second column.** `UMAMUSUME_REFERENCE.md` §1.1.6 previously printed Peak / Good / Normal / Poor / Worst against a pre-race column of +10 / +5 / 0 / −2 / −5 — the strings are glosses of the JP terms rather than client copy, and that column is not even symmetric across the sign, which is the tell that it was transcribed from prose rather than read off a table. The client prints ±4 and ±2. The training column is the one both camps agree on, so the ±20 % headline is unchanged. D-20's general rule (never invent a client string) is untouched and still binds every other label in the system.
 
