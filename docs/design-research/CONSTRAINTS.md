@@ -380,7 +380,11 @@ One residual risk worth naming rather than legislating away: `antislop-ui` also 
 
 **D-152. The maiden gate is a distinct state from a fan lock.** The client requires a Debut or Maiden win before standard races are open, which is a conditional lock unrelated to fan count. Rendering it with the fan treatment sends the Trainer to check the wrong number.
 
-**D-153. Tier badges display what is recorded, never what is inferred from a grade code.** Only grade 100 = G1 and grade 400 = OP are client-confirmed. Codes 200, 300 and 700 are `❌ UNVERIFIED` against G2, G3 and Pre-OP, so a UI that maps them is asserting a fact the repo does not have.
+**D-153. Tier labels are per-race claims, never inferred from a grade code.** Only grade 100 = G1 and grade 400 = OP were client-confirmed when this was written; codes 200, 300 and 700 were `❌ UNVERIFIED`, so a UI mapping them was asserting a fact the repo did not have. That ban on inference stands.
+
+**Dated per-row exceptions, measured 2026-09-29 (R72, `race-tier-labels-2026-09-29.json`).** The rule was tested against two publishers read in a rendering browser, joined on the race's own name rather than its numeric code: G1 agrees on **34/34**, G2 on **42/42**, G3 on **76/76** rows of the URA schedule, so those tiers are now per-race sourced and the seeder carries no code-to-label constant at all. **Open and Pre-OP are not settled by this.** Game8's table is graded-only (161 rows: G1 43, G2 42, G3 76), so its silence on Open and Pre-OP is silence, not agreement; and uma.guide alone labels Open as `"OP/L (Open/Listed)"`, a label that conflates two classes. Three Open rows are pinned per row by their own client name carrying 「オープン」; the remaining 115 keep the label as a **disclosed generalisation** from those three (`scope: code-level-client-naming-pin`, `per_row_sourced: false`), not as per-row evidence. Nulling them would have removed a tier correct since Slice 11 to satisfy a grep; that trade is the owner's, and it is written down rather than decided quietly. Pre-OP is labelled by one publisher only and stays null.
+
+**Publisher dates are asymmetric and stay that way in the record:** Game8's page is dated 2026-09-09, which clears the 2026-07-01 bar; uma.guide publishes no date anywhere — no `Last-Modified`, no time element, no generated-at field in the dataset chunk — so only its fetch date is knowable.
 
 **D-154. Race selection is F5 and reuses the event panel.** It appears only on a turn where the calendar holds an entry. Skip is a first-class option with its own banner, never the absence of a click.
 
@@ -875,7 +879,7 @@ G-60 is the case worth naming: it is the check that would have caught the transp
 | G-15c | Bound honesty | enter a stat of 1350 | the rejection names the tool's limitation, not a game ceiling (D-31) |
 | G-16a | Fan lock legibility | inspect a locked race cell | the `fans_needed` figure is shown, not a padlock alone (D-151) |
 | G-16b | Lock kinds | inspect a maiden-gated race and a fan-gated race | they are visually distinct (D-152) |
-| G-16c | Tier inference | grep for grade-code to tier-label mapping | none beyond G1 and OP (D-153) |
+| G-16c | Tier inference | grep for grade-code to tier-label mapping | none in `database/seeders/` or `config/` since R72: the seeder joins per race on the dated extraction, so it holds no code-to-label constant at all. One known residue, held as a documented dissent rather than a pass: `GametoraRaceCatalogParser.php` still carries a five-entry map, unreconciled under R72 because the coordination condition needs the peer session idle, not merely its file clean. See D-153's dated exceptions |
 | G-16d | Race outcome projection | inspect the race selection panel | eligibility only, no placing or win estimate (D-155) |
 | G-17a | Event overlay | trigger an event panel and inspect what is behind it | scene, turn chip and stat band still visible (D-131) |
 | G-17b | Delta colour | inspect every gain and loss in an event preview | gains orange, losses blue, no green or red (D-133) |
