@@ -17,7 +17,9 @@ use Illuminate\Support\Carbon;
  * One slot of a scenario's fixed race calendar (ADR-0003 scenario_races).
  * Reference data: it arrives through the fetch pipeline with provenance and is
  * never hand-seeded. `tier` stores the recorded label, never a grade-code
- * derivation.
+ * derivation. A Trainer may pin a row with is_manual so a later fetch leaves it
+ * alone (FR-B-4); the guard that honours that flag lives in the catalog upsert
+ * only, so a scenario_races parser must carry its own check when it lands.
  *
  * @property int $id
  * @property string $scenario_key
@@ -31,6 +33,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $snapshot_path
  * @property Carbon|null $fetched_at
  * @property string|null $source_timezone
+ * @property bool $is_manual
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Collection<int, RaceEntry> $raceEntries
@@ -39,7 +42,7 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'scenario_key', 'slot_label', 'race_name', 'tier', 'fans_needed',
     'mandatory', 'maiden_gated', 'source_url', 'snapshot_path', 'fetched_at',
-    'source_timezone',
+    'source_timezone', 'is_manual',
 ])]
 class ScenarioRace extends Model
 {
@@ -60,6 +63,7 @@ class ScenarioRace extends Model
             'fans_needed' => 'integer',
             'mandatory' => 'boolean',
             'maiden_gated' => 'boolean',
+            'is_manual' => 'boolean',
             'fetched_at' => 'datetime',
         ];
     }

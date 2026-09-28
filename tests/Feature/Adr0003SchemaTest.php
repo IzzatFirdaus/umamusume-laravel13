@@ -121,6 +121,14 @@ it('carries provenance on calendar reference data', function (): void {
         ->and($slot->source_timezone)->toBe('Asia/Tokyo');
 });
 
+it('marks a calendar row as engine-owned unless a Trainer pins it', function (): void {
+    $fetched = ScenarioRace::factory()->create();
+    $pinned = ScenarioRace::factory()->create(['is_manual' => true]);
+
+    expect($fetched->is_manual)->toBeFalse()
+        ->and($pinned->fresh()->is_manual)->toBeTrue();
+});
+
 it('survives deleting a calendar slot by clearing the reference', function (): void {
     $slot = ScenarioRace::factory()->create();
     $entry = RaceEntry::factory()->create(['scenario_race_id' => $slot->id]);
