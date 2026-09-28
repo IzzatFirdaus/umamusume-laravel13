@@ -1,0 +1,86 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\ScenarioSlot;
+use App\Models\TrainingRun;
+
+/*
+ * R61/R68: a `free_race` cell takes open-cell geometry and the Trainer-entered marker, and never
+ * a Goal pennant.
+ *
+ * Slice 12 §7.3 reported this rule as lost. Slice 13 found that report was wrong about the cause
+ * and the calendar session reached the same conclusion independently in `5dcc06c`, which pins the
+ * model: a persisted free_race row reads back as `['state' => 'open', 'manual' => true]`.
+ *
+ * What nothing pinned was the rendered cell, and the one test that appeared to was
+ * `RaceCalendarTest.php:276`, which hand-writes `['state' => 'past', 'label' => 'Local Stakes
+ * (Trainer-entered)']` into the cells array and then asserts the string `Trainer-entered` is in
+ * the output. That passes on the label text alone; it would still pass if `calendarCell()` never
+ * emitted `manual`, because it never calls `calendarCell()`. So the check could not fail for the
+ * reason it was running, which is the same failure KI-21 was filed against.
+ *
+ * This file goes through the read path. A Trainer-entered race is created as a row, the run is
+ * fetched over HTTP, and the marker is required to sit inside a calendar cell that carries the
+ * open treatment, names its state to assistive tech, and has no Goal pennant anywhere on the page.
+ */
+
+it('renders a persisted free_race row as an open manual cell on the run screen', function (): void {
+    $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
+    ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'free_race',
+        'source_key' => null,
+        'slot_label' => 'Autumn Practice Stakes',
+        'title' => 'Autumn Practice Stakes',
+        'month' => 9,
+        'half' => 'Late',
+        'tier' => null,
+        'is_manual' => true,
+        'sort_order' => 1,
+    ]);
+
+    $html = $this->get(route('runs.show', $run))->content();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML($html);
+    $xpath = new DOMXPath($dom);
+
+    // Scoped to a calendar cell, which is the element carrying role="img": the race panel prints
+    // the same words on its own entry rows, and a page-wide count would pass without the calendar
+    // rendering anything at all.
+    $markers = $xpath->query('//*[text()="Trainer-entered"][ancestor::*[@role="img"]]');
+
+    expect($markers->length)->toBe(1);
+
+    $cell = $xpath->query('ancestor::*[@role="img"]', $markers->item(0))->item(0);
+    $cellClass = $cell->getAttribute('class');
+
+    // Open geometry: the dashed edge. Not the goal outline, and not the past treatment.
+    expect($cellClass)->toContain('border-dashed')
+        ->and($cellClass)->toContain('border-green-line')
+        ->and($cellClass)->not->toContain('border-goal-line')
+        ->and($cellClass)->not->toContain('bg-transparent');
+
+    // D-12: the treatment is not the only signal. The cell says its state out loud.
+    expect($cell->getAttribute('aria-label'))->toContain('Entry open')
+        ->and($cell->getAttribute('aria-label'))->toContain('Autumn Practice Stakes');
+
+    // R61: never a Goal pennant. D-181 draws it as a corner triangle with border-l-goal, and it
+    // is emitted only for state `goal`, so the whole page holding zero of them is the assertion.
+    expect($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " border-l-goal ")]')->length)
+        ->toBe(0);
+});
+
+/*
+ * Not asserted, and deliberately so: what happens to the marker once the free race has been run.
+ * `calendarCell()` checks the recorded entry first (`app/Models/TrainingRun.php:429`) and returns
+ * `past` with no `manual` key, so a completed Trainer-entered race loses its calendar marker.
+ * Measured both ways in Slice 13: unrun renders the dashed open cell with the marker, completed
+ * renders `past` without it.
+ *
+ * The entry row in the race panel still labels it, so provenance is not lost from the screen, and
+ * R61 speaks about a cell the Trainer is deciding whether to enter. Whether the marker should
+ * survive the finish is a question for the read path's owner. This slice does not invent the
+ * requirement and then satisfy it by editing a file another session owns.
+ */
