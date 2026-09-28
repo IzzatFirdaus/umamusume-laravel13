@@ -27,6 +27,10 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property int $umamusume_id
+ * @property int|null $character_card_id the costume-card form this run started on
+ *                                       (FR-C-1 as amended by ADR-0008); null when
+ *                                       the Trainer named only the trainee, which is
+ *                                       a complete run rather than a missing field
  * @property string|null $scenario
  * @property RunStatus $status
  * @property int|null $inheritance_parent_a_id
@@ -46,8 +50,9 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, RaceEntry> $raceEntries
  * @property-read Collection<int, Skill> $skills
  * @property-read Umamusume $umamusume
+ * @property-read CharacterCard|null $characterCard
  */
-#[Fillable(['umamusume_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'notes', 'current_objective_index', 'shop_resets_in'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'notes', 'current_objective_index', 'shop_resets_in'])]
 class TrainingRun extends Model
 {
     /** @use HasFactory<TrainingRunFactory> */
@@ -130,6 +135,17 @@ class TrainingRun extends Model
     public function umamusume(): BelongsTo
     {
         return $this->belongsTo(Umamusume::class);
+    }
+
+    /**
+     * The costume-card form this run started on, or null when the Trainer named
+     * only the trainee (FR-C-1 as amended by ADR-0008).
+     *
+     * @return BelongsTo<CharacterCard, $this>
+     */
+    public function characterCard(): BelongsTo
+    {
+        return $this->belongsTo(CharacterCard::class);
     }
 
     /**

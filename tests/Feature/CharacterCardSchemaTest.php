@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\CardRarity;
 use App\Models\CharacterCard;
+use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
@@ -127,4 +128,52 @@ it('orders rarity by the glyph run, since hue cannot rank three near-identical f
         ->and(CardRarity::OneStar->stars())->toBe('★')
         ->and(CardRarity::TwoStar->stars())->toBe('★★')
         ->and(CardRarity::ThreeStar->stars())->toBe('★★★');
+});
+
+/*
+ * ADR-0008 / PRD FR-C-1 as amended: a run may name the costume-card form it
+ * started on. The reference is optional and additive — a run that names only its
+ * trainee is a complete run, not one missing data — and the card must belong to
+ * that same trainee, so the exists rule carries the join at the boundary.
+ */
+
+it('records the form a run was started on', function (): void {
+    $umamusume = Umamusume::factory()->create();
+    $card = CharacterCard::factory()->create(['umamusume_id' => $umamusume->id]);
+
+    // Model::create() rather than the factory: #[Fillable] does not constrain a
+    // factory, so only a create() proves this column is actually assignable.
+    $run = TrainingRun::create([
+        'umamusume_id' => $umamusume->id,
+        'character_card_id' => $card->id,
+        'status' => 'Active',
+    ]);
+
+    expect($run->characterCard->id)->toBe($card->id)
+        ->and($run->umamusume->id)->toBe($umamusume->id);
+});
+
+it('refuses a card that belongs to another trainee', function (): void {
+    $mine = Umamusume::factory()->create();
+    $theirs = Umamusume::factory()->create();
+    $card = CharacterCard::factory()->create(['umamusume_id' => $theirs->id]);
+
+    test()->post('/training-runs', [
+        'umamusume_id' => $mine->id,
+        'character_card_id' => $card->id,
+        'status' => 'Active',
+    ])->assertSessionHasErrors('character_card_id');
+
+    expect(TrainingRun::query()->count())->toBe(0);
+});
+
+it('still creates a run with only a trainee', function (): void {
+    $umamusume = Umamusume::factory()->create();
+
+    test()->post('/training-runs', [
+        'umamusume_id' => $umamusume->id,
+        'status' => 'Active',
+    ])->assertSessionHasNoErrors();
+
+    expect(TrainingRun::first()->character_card_id)->toBeNull();
 });
