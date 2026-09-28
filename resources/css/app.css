@@ -113,6 +113,31 @@
     --color-rank: #351F70;
 
     /*
+     * Mood tiers, as the client paints them (research §3.1, §6.17). `GREAT` and `GOOD` are
+     * probed off the HUD pill in a capture; `NORMAL`, `BAD` and `AWFUL` are derived by
+     * bisection to the mean luminance of those two anchors (0.3136) and are PROVISIONAL
+     * until the client's own three lower pill colours are captured (D-259).
+     *
+     * Deliberately not overridden in the dark block. These are chrome colours, not surfaces:
+     * the client's mood pill is the same pink whatever theme it sits in, and a theme-relative
+     * mood would make the tier read differently in two themes that mean the same thing.
+     *
+     * `--color-on-mood` exists because the theme's own dark ink does not clear these fills.
+     * `--color-ink-strong` #482720 on `--color-mood-great` is 4.29:1, under the 4.5:1 a tier
+     * label needs at this size; the same hue stepped to a near-black warm brown reaches
+     * 5.82:1 there and 6.62:1 on the best of the five. The ink moves, the pill does not
+     * shrink, because D-259 makes the arrow legible-or-not, and a smaller pill is the wrong
+     * fix for a contrast failure. Measured from the rendered element in both themes:
+     * `docs/design-research/verification/slice-6-2026-09-28.md` §2.
+     */
+    --color-mood-great: #FB5590;
+    --color-mood-good: #ED8036;
+    --color-mood-normal: #A0978E;
+    --color-mood-bad: #D48556;
+    --color-mood-awful: #D47E9E;
+    --color-on-mood: #1F1508;
+
+    /*
      * Delta pair. increase = orange, decrease = blue.
      * This is inverted from the web's green-up/red-down habit and was measured
      * twice, independently, in two different client frames

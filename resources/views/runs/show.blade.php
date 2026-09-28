@@ -65,6 +65,17 @@
                 class="mt-3"
             />
         @endif
+
+        {{-- Mood is the trainee's state, not a turn's detail, so it belongs in the region
+             that stays on screen. It reads the latest logged turn for the same reason the
+             band does. A turn that stored no tier says "not recorded" rather than defaulting
+             to NORMAL, which would be a claim about a trainee nobody asked about (D-220). --}}
+        @if ($band !== null)
+            <h2 class="mt-6 text-lg font-semibold text-ink-strong">Mood</h2>
+            <div class="mt-3">
+                <x-mood-pill :tier="$currentMood" unrecorded="not recorded" />
+            </div>
+        @endif
     </section>
 
     {{-- The log: everything that grows with the run, scrolling under the pinned state. --}}
@@ -140,7 +151,7 @@
                 <tr class="border-b border-rule text-left text-ink-muted">
                     <th class="py-1 pr-3">Turn</th><th class="pr-3">Speed</th><th class="pr-3">Stamina</th>
                     <th class="pr-3">Power</th><th class="pr-3">Guts</th><th class="pr-3">Wit</th>
-                    <th class="pr-3">SP</th><th class="pr-3">Condition</th>
+                    <th class="pr-3">SP</th><th class="pr-3">Condition</th><th class="pr-3">Mood</th>
                 </tr>
             </thead>
             <tbody>
@@ -168,6 +179,7 @@
                         <td class="pr-3">{{ $entry->wit }}</td>
                         <td class="pr-3">{{ $entry->sp ?? '' }}</td>
                         <td class="pr-3">{{ $entry->condition }}</td>
+                        <td class="pr-3"><x-mood-pill :tier="$entry->mood" unrecorded="not recorded" /></td>
                     </tr>
                 @endforeach
             </tbody>
@@ -237,14 +249,13 @@
                      so direction is the only ordinal signal the pill has (D-259,
                      DESIGN.md §6.17). `Practice Poor` is deliberately absent: it is a
                      failure condition from an event, not a mood tier (D-201). --}}
-                @php $moodArrows = ['GREAT' => '↑', 'GOOD' => '↑', 'NORMAL' => '→', 'BAD' => '↓', 'AWFUL' => '↓']; @endphp
                 <select name="mood" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
                     <option value="">not yet recorded</option>
                     @foreach (\App\Enums\MoodTier::cases() as $tier)
                         <option value="{{ $tier->value }}"
                                 @selected(($guided['values']['mood'] ?? null) === $tier->value
                                     || (($guided['values']['mood'] ?? null) === null && $guided['mood'] === $tier->value))>
-                            {{ $tier->value }} {{ $moodArrows[$tier->value] }}
+                            {{ $tier->value }} {{ $tier->arrow() }}
                         </option>
                     @endforeach
                 </select>

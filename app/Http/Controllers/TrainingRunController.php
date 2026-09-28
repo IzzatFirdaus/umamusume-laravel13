@@ -134,6 +134,10 @@ class TrainingRunController extends Controller
                 ],
                 'skillPoints' => $latest->sp,
             ],
+            // The run's mood is where the latest logged turn ended, handed over as the enum so
+            // the view renders a tier or says it is unrecorded and never has to map a string
+            // back to a case. Null when no turn exists: no turns, no claim about a trainee.
+            'currentMood' => $latest?->mood,
             'guided' => [
                 'scenario' => $run->scenarioKey(),
                 // Stage one asks what the turn did; stage two records how it ended.
