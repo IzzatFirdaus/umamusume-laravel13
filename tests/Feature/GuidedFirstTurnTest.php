@@ -55,9 +55,17 @@ function firstTurnPayload(array $overrides = []): array
 
 it('offers the confirm stage on a preview of the very first turn', function (): void {
     $run = firstTurnRun();
+    $payload = firstTurnPayload();
 
-    $html = test()->post("/training-runs/{$run->id}/turns", firstTurnPayload())
-        ->assertOk()
+    test()->post("/training-runs/{$run->id}/turns", $payload)
+        ->assertRedirect(route('runs.show', $run));
+
+    // PRG: the previewed screen is the redirect target, not the POST body. The controller
+    // flashes the submitted input plus the `previewed` flag it was told to set, so the
+    // carry below is what the browser actually arrives with.
+    $html = test()
+        ->withSession(['_old_input' => $payload + ['previewed' => '1']])
+        ->get(route('runs.show', $run))
         ->getContent();
 
     // A first turn previews to an empty delta list by arithmetic, so the only thing that
@@ -69,8 +77,15 @@ it('offers the confirm stage on a preview of the very first turn', function (): 
 
 it('says why the first turn has no deltas, rather than showing an empty preview', function (): void {
     $run = firstTurnRun();
+    $payload = firstTurnPayload();
 
-    $html = test()->post("/training-runs/{$run->id}/turns", firstTurnPayload())->getContent();
+    test()->post("/training-runs/{$run->id}/turns", $payload)
+        ->assertRedirect(route('runs.show', $run));
+
+    $html = test()
+        ->withSession(['_old_input' => $payload + ['previewed' => '1']])
+        ->get(route('runs.show', $run))
+        ->getContent();
 
     // D-220: an absent figure is a labelled absence. Five zeroed deltas, or a blank panel
     // with no explanation, would both be structure claiming to be data.
@@ -105,10 +120,18 @@ it('leaves a second turn previewing its deltas as before', function (): void {
         'power' => 100, 'guts' => 100, 'wit' => 100, 'sp' => 0, 'energy' => 88,
     ]);
 
-    $html = test()->post("/training-runs/{$run->id}/turns", firstTurnPayload([
+    $payload = firstTurnPayload([
         'turn' => 2, 'speed' => 150, 'stamina' => 100, 'power' => 100, 'guts' => 100,
         'wit' => 100, 'energy' => 74,
-    ]))->getContent();
+    ]);
+
+    test()->post("/training-runs/{$run->id}/turns", $payload)
+        ->assertRedirect(route('runs.show', $run));
+
+    $html = test()
+        ->withSession(['_old_input' => $payload + ['previewed' => '1']])
+        ->get(route('runs.show', $run))
+        ->getContent();
 
     expect($html)->toContain('+50 Speed')
         ->toContain('-14 Energy')
