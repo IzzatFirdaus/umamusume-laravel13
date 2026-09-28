@@ -87,7 +87,8 @@ recorded sha is dropped.
 | **4 — Implementation** | **Slice 8 Complete** | Panels and scenario widgets; KI-17, KI-18 filed |
 | **4 — Implementation** | **Slice 9 Complete** | `f7a59e8` (KI-18 closed), mood pill tokens |
 | **4 — Implementation** | **Slice 10 Complete** | Maintenance: R51 marker, R52 KI-18 bookkeeping, ADR-0009 draft, KI-19/KI-20 filed |
-| **4 — Implementation** | **Slice 11 Complete** | `c0a743f` (T1), `f0ae288` (T2), `70248b3` (T3), `5820e77` (T4), `65f8b92` (T5); KI-20 closed |
+| **4 — Implementation** | **Slice 11 Complete** | `c0a743f` (T1), `f0ae288` (T2), `70248b3` (T3), `5820e77` (T4), `65f8b92` (T5); KI-20 closed. Three claims corrected by Slice 12: the "pre-existing" failure label was a T4 regression, "297 rows / `ura_finale_slots.json`" is 296 rows across three real files, and R59's record commit was never made |
+| **4 — Implementation** | **Slice 12 Complete** | `c86ed9f` (T0 radiogroup regression fix), `2d0c1dc` (T1 tier audit), this commit (T2 register); suite green at 508 |
 | **5 — Verification** | Routine | Browser metrics: light 4.74 / dark 5.48 / badges 9.00+; energy bands 6.40 / 8.34 / 10.89 light and 12.60 / 10.57 / 6.88 dark, and the preview pairs, in `slice-5-2026-09-28.md` |
 | **6 — Iteration** | Unfrozen by Slice 2, **not started** | Owner instruction: the slice's commit unfreezes it; no Phase 6 anatomy in this session |
 
@@ -322,16 +323,79 @@ R60 (rulings are repo artifacts), R61 (fifth kind: free_race), R62 (lore-code pa
 | Task | Commit | Claim, with the thing that proves it |
 |---|---|---|
 | T1 source_key migration | `c0a743f` | `scenario_slots.source_key` nullable string; unique composite `(scenario_key, month, half, source_key)`; migration tested in `ScenarioSlotMigrationTest` |
-| T2 URA Finale seeder | `f0ae288` | `ScenarioSlotSeeder` reads `database/seeders/data/ura_finale_slots.json` (committed client export); 297 rows seeded; idempotent via upsert on composite key |
+| T2 URA Finale seeder | `f0ae288` | `ScenarioSlotSeeder` reads the three committed client-export files `database/seeders/data/{ura-races,race_instances,races}.json`; **296 rows** seeded on a clean scratch DB; idempotent via upsert on `(scenario_key, month, half, kind, source_key)` |
 | T3 multi-slot calendar | `70248b3` | `TrainingRun::calendarCells()` queries both `goal_race` and `free_race`; cells carry `['slots' => [...]]` arrays; priority state derivation; `race-calendar.blade.php` renders multiple slots per cell |
 | T4 free-race writer | `5820e77` | Two-path form (calendar/manual) in `race-panel.blade.php`; `StoreRaceEntryRequest` validates both paths; controller creates `ScenarioSlot(kind=free_race)` + `RaceEntry` atomically; `FreeRaceWriterTest` 8 tests; lore-code baseline stays 7 after R62 path exclusion |
 | T5 closures | `65f8b92` | Welcome page deleted, `/` redirects to `runs.index` (R57); KI-20 measured (light 10.04:1 PASS, dark 4.33:1 FAIL → stepped #FF6B7A to #FF7E8C = 4.77:1 PASS); KNOWN-ISSUES updated to 15 closed / 4 open |
 
-**Gates:** Pest 507 passed / 2 skipped / 1 pre-existing failure (`RunViewFrameTest` radiogroup count, confirmed pre-existing via `git stash`); Pint PASS; PHPStan PASS; lore-code baseline 7; Vite build clean.
+**Gates:** Pest 507 passed / 2 skipped / 1 failure recorded here as "pre-existing"; Pint PASS; PHPStan PASS; lore-code baseline 7; Vite build clean.
+
+**Erratum (Slice 12, R63).** Two claims in this row were wrong and are corrected rather than
+silently rewritten:
+
+- **The failure was not pre-existing.** It is T4's own regression. `0d2dbdc` and T3's `70248b3` both
+  PASS `RunViewFrameTest`; T4's `5820e77` FAILS it. T4 added a second `role="radiogroup"` to the
+  scrolling region, breaking D-40's one-guided-rail invariant. The Slice 11 check used `git stash`,
+  which reverts tracked *modifications* — the radiogroup was already committed at `5820e77`, so the
+  stash removed nothing relevant and the failure reproduced on a tree still containing the suspect.
+  Full bisect and the fix in `slice-12-2026-09-29.md` §2 and `c86ed9f`.
+- **"297 rows" and `ura_finale_slots.json`** were both wrong: the file does not exist, the seeder
+  reads three real export files, and a clean scratch DB seeds 296.
+- **R59's record half was not met.** The post-push `ls-remote` output was reported in chat and never
+  committed; `slice-11-2026-09-29.md` carries no push-verification section. Recorded in Slice 12.
 
 **Browser pass:** `/` → 302 redirect confirmed; `/training-runs/1` with free_race data → 200, "Naruta Kinpa Cup" rendered, "Trainer-entered" marker present, zero server errors.
 
-**Push cadence (R59):** One push at slice end, post-push `ls-remote` verification recorded in §T7.
+**Push cadence (R59):** One push at slice end (`4992282` → `origin/master`, verified in-session by
+`git ls-remote`). **R59's second half was not met:** no post-push record commit was made, so the
+verification lived in the chat transcript and in no artifact. Corrected in Slice 12, whose push is
+followed by a record commit carrying the `ls-remote` output. Evidence: `slice-12-2026-09-29.md` §4.
+
+---
+
+## Slice 12 Summary (2026-09-29) — Correction slice
+
+Brief: "master goes green first, then the seeded tier audit, then the register, then the maintenance
+pass. No new panels, no new tokens, no schema columns." Rulings R63-R66. Nothing in this slice adds a
+panel, declares or recolours a token, or touches schema — the seeder change is a value correction on
+an existing column, and the race-panel change is a control swap on an existing form.
+
+| Task | Commit | Claim, with the thing that proves it |
+|---|---|---|
+| T0 radiogroup regression | `c86ed9f` | Bisect in scratch worktrees: `0d2dbdc` PASS, `70248b3` PASS, `5820e77` FAIL, `65f8b92` FAIL. Entry-mode toggle moved from `role="radiogroup"` to banner buttons; hidden `entry_mode` input still posts, so `StoreRaceEntryRequest::isManualPath()` is untouched. Suite 508 passed / 2 skipped / 0 failed |
+| T1 tier audit | `2d0c1dc` | `GRADE_MAP` reduced to the two codes REFERENCE §1.2.6 pins (100→G1 from `skills.json` id 200311 client copy, 400→OP from three 「オープン」-named rows); 200/300/700 seed `tier = null` and keep `source_key`. Scratch DB seeds twice: 296 rows both times, G1 34 / OP 118 / null 144 unchanged |
+| T2 register + record | this commit | Slice-11 addendum corrects the "pre-existing" mislabel forward; KI-19 closed on the successful second `update` (engine v0.1.5), KI-11 re-closed on the Slice 8 epithet rows, ADR-0009 to RULED IN PART; PLAN gains the R54-R66 ledger below; header recomputed to 19 filed / 16 closed / 3 open |
+| T3 browser pass | (T4 commit) | Two-path race form and a manual row, both themes, resolved-property method |
+| T4 gates + push | (this commit / post-push record) | CONSTRAINTS order with pasted outputs, seeder idempotency numbers, G-16c grep; one push, `ls-remote` recorded in the post-push commit |
+
+**Shared master.** Two peer commits (`7897684`, `24f9b50`) sit inside this slice's push range because
+both sessions commit to `master` in one worktree. The push carries them; withholding them would mean
+rewriting shared history. Recorded in `slice-12-2026-09-29.md` §5.
+
+---
+
+## Owner Rulings Ledger (R54-R66)
+
+R60 makes a ruling a repo artifact rather than a transcript line, so the ledger records each ruling
+as the brief gave it. Where the brief supplied a full sentence it is quoted; where it supplied a
+parenthetical gloss the gloss is kept and marked as such, because inventing verbatim wording for a
+ruling is worse than recording it short.
+
+| ID | Slice | Ruling, as given | Provenance |
+|---|---|---|---|
+| R54 | 11 | Add `source_key` to `scenario_slots` so a half-month can hold more than one race; the unique composite includes it | gloss |
+| R55 | 11 | Seed URA Finale `scenario_slots` from the committed client export | gloss |
+| R56 | 11 | A Trainer can enter a race that is not on the calendar; the manual path creates one `scenario_slots` row per race, and that row is Trainer-entered | verbatim in brief |
+| R57 | 11 | Delete the welcome page | gloss |
+| R58 | 11 | Measure KI-20; a pass closes it with a §3.4 row, a fail steps the ink per the on-mood/on-green precedent | verbatim in brief |
+| R59 | 11 | Push once per slice, with the post-push `ls-remote` verification in the record commit | gloss |
+| R60 | 11 | Rulings are repo artifacts, not transcript lines | gloss |
+| R61 | 11 | `free_race` is the fifth `kind`; its cells take open-cell geometry and a Trainer-entered marker, never a Goal pennant | verbatim in brief |
+| R62 | 11 | Exclude `database/seeders/data/**` from the lore-code sweep: committed client export is source data under C-4 class 3 | gloss |
+| R63 | 12 | `RunViewFrameTest` is a T4 regression, not pre-existing; read the test's intent before choosing the fix, and correct the slice-11 record forward rather than editing it in place | verbatim in brief |
+| R64 | 12 | The slice-11 push verification is written from the outside, and the record says whether those lines were written before or after the push | verbatim in brief |
+| R65 | 12 | Any seeded row whose tier label has no per-row source gets `tier = null` and keeps `source_key`; the re-seed proves idempotency on a scratch DB | verbatim in brief |
+| R66 | 12 | Retry the Impeccable update once; on a second 404 record both attempt dates in KI-19 and run the detect pass at the current version over the Slice 11 surfaces only | verbatim in brief |
 
 ---
 

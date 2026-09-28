@@ -7,6 +7,14 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, Slice 12):** 19 issues filed. **16 resolved/closed** (KI-1–9, KI-11–14,
+KI-18–20). **3 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
+consecutive-race count cannot be derived from the log). Slice 11 closed KI-20 by measuring the pair
+and stepping the dark `--color-risk`; Slice 12 closed KI-19 on the successful second `update` attempt
+(engine v0.1.5) and re-closed KI-11 on current evidence, its deletion basis having been superseded by
+the sourced seeder at `f0ae288` and its token half now measured against the Slice 8 epithet rows.
+Counts read off `grep -c "^## KI-"` (19 headings; KI-16 was never filed, which is why the numbers run
+to KI-20). Prior:
 **Status (2026-09-29, Slice 11):** 19 issues filed. **15 resolved/closed** (KI-1–9, KI-11–14,
 KI-18, KI-20). **4 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
 consecutive-race count cannot be derived from the log), KI-19 (the impeccable tool cannot update
@@ -492,26 +500,42 @@ therefore an ADR, not a patch.
 
 ---
 
-## KI-11 Design-system debts left visible by the Slice 2 gate run — BOTH HALVES CLOSED 2026-09-28
+## KI-11 Design-system debts left visible by the Slice 2 gate run — CLOSED 2026-09-28, RE-CLOSED ON CURRENT EVIDENCE 2026-09-29 (Slice 12)
 
-- **CLOSED (`5c65597`). `database/seeders/ScenarioSlotSeeder.php` was an empty stub** —
-  `run()` contained only `//`, and `DatabaseSeeder` never called it. Against
+- **CLOSED (`5c65597`), superseded by `f0ae288`. `database/seeders/ScenarioSlotSeeder.php` was an
+  empty stub** — `run()` contained only `//`, and `DatabaseSeeder` never called it. Against
   `CONSTRAINTS.md`'s floor ("no unimplemented stubs") it was filled with sourced slot rows or
-  removed; the slot rows are fetch-engine work per ADR-0003 Amendment R3, so there was
-  nothing honest to put in it and the file is deleted. `scenario_slots` stays empty after a
-  clean seed by design, which is also what makes any `scenario_races` backfill vacuous: a
-  re-measured fresh scratch database seeds 24 tables and 10 skills and **0 slots**.
-- **CLOSED (`71bbb4b` + `d50a0ec`, measured in Slice 5). `--color-green-tint` now has its
-  committed consumer.** The goal cell moved to `bg-raised` in `bb6eec6` and the token was
-  referenced by no utility after that; retirement was refused under R14 on G-60 grounds, and
-  R23 settled the alternative - the Safe band word lands in Slice 5, or the token is retired
-  and the spec amended in the same slice. It landed: the energy band word renders `ink` on
-  `green-tint` on the run screen, and the pair measures **6.40:1 light / 12.60:1 dark** off the
-  rendered element (`docs/design-research/verification/slice-5-2026-09-28.md` §3). The token
-  is no longer a declared value awaiting a consumer, and the "unverified in practice" debt this
-  bullet recorded is paid.
+  removed; the slot rows were fetch-engine work per ADR-0003 Amendment R3, so there was
+  nothing honest to put in it and the file was deleted. `scenario_slots` stayed empty after a
+  clean seed by design, and a re-measured fresh scratch database seeded 24 tables, 10 skills and
+  **0 slots**.
 
-**Owner.** Design system. Both halves closed 2026-09-28.
+  **That closure basis no longer describes the tree.** Slice 11 restored the seeder with sourced
+  URA Finale rows read from the committed client export (R55, `f0ae288`), so the debt is now paid
+  by content rather than by deletion, and the "0 slots" measurement is withdrawn as stale. Three
+  files still cite that stale basis and should be corrected by their owners:
+  `app/Http/Controllers/TrainingRunController.php:78` ("Empty by design until the fetch engine
+  lands (KI-11)"), and the free-form-race notes at `slice-8-2026-09-28.md:127` and
+  `slice-9-2026-09-28.md:78`. The URA half is seeded; Trackblazer and Unity Cup still have zero
+  rows, so those two sentences are half-true and were written before R55.
+- **CLOSED (`71bbb4b` + `d50a0ec`, measured in Slice 5; second consumer measured in Slice 8).
+  `--color-green-tint` has committed consumers.** The goal cell moved to `bg-raised` in `bb6eec6`
+  and the token was referenced by no utility after that; retirement was refused under R14 on G-60
+  grounds, and R23 settled the alternative: the Safe band word lands in Slice 5, or the token is
+  retired and the spec amended in the same slice. It landed: the energy band word renders `ink` on
+  `green-tint` on the run screen, and the pair measures **6.40:1 light / 12.60:1 dark** off the
+  rendered element (`docs/design-research/verification/slice-5-2026-09-28.md` §3).
+
+  **The Slice 8 epithet rows are the second consumer, and they hold.**
+  `slice-8-2026-09-28.md` §4 measured the same token pair on two more surfaces from the new panels:
+  `ink` on `green-tint` at **6.40** on the earned epithet row (line 79), and `ink-muted` on
+  `green-tint` at **5.33 light / 6.58 dark** on the route-and-reward meta line (line 80). One
+  consumer could be an accident of a single component; three, on two different panels, is the token
+  doing a job. R23's promise is paid twice over, and the "unverified in practice" debt this bullet
+  recorded is closed on measurement rather than on the existence of a class name.
+
+**Owner.** Design system. First half closed 2026-09-28 by deletion and re-closed 2026-09-29 on
+sourced content; second half closed 2026-09-28 and re-measured against the Slice 8 epithet rows.
 
 ---
 
@@ -748,26 +772,41 @@ closes the bookkeeping, not the defect.
 
 ---
 
-## KI-19 The impeccable tool cannot update itself, so a maintenance slice cannot measure a version delta — FILED 2026-09-29 (Slice 10), OPEN
+## KI-19 The impeccable tool cannot update itself, so a maintenance slice cannot measure a version delta — FILED 2026-09-29 (Slice 10), RESOLVED 2026-09-29 (Slice 12, R66)
 
 **Symptom.** `C:/Users/exatf/.agents/skills/impeccable/scripts/impeccable.cmd check` and the same
 launcher's `update` both return `Could not verify skill bundle: HTTP 404. Nothing was installed`.
 `--version` reads `4.0.0` before and after, so Slice 10's re-audit ran on the incumbent build rather
 than an updated one. Upstream points the report at `pbakaus/impeccable` issue #479.
 
-**Second half of the finding.** The interface the brief names, `npx impeccable update`, is not this
-project's: `impeccable` is not in `package.json` and has no `node_modules/.bin` entry, so an `npx`
-run would fetch an unrelated package from the registry under that name. The launcher next to the
-installed skill is the real interface, and it is what was run.
+**Attempt log (both dated 2026-09-29, per R66).**
 
-**Consequence for the audit.** The score delta in `slice-10-2026-09-29.md` §4 is a same-version
-comparison. It is still a measurement, but it is not evidence that the new version would agree.
+| Attempt | Slice | Command | Result |
+|---|---|---|---|
+| 1 | Slice 10 | `impeccable.cmd update` | `Could not verify skill bundle: HTTP 404. Nothing was installed`. `--version` unchanged at 4.0.0 |
+| 2 | Slice 12 | `impeccable.cmd update` | Succeeded. Engine v0.1.5 (windows-x64) installed into `.kiro/` and `.opencode/` script bins; hooks installed into `.claude`, `.cursor`, `.agents`, `.github`, `.grok`. `--version` still reports 4.0.0 |
 
-**Required fix.** Nothing in this repository. Either the upstream bundle URL the launcher verifies
-moves, or the launcher is updated out-of-band; until then a slice that intends to compare versions
-must check `--version` first and say so when it does not change.
+**The version half of the finding stands.** `--version` reports the *skill bundle* version (4.0.0),
+not the engine version (v0.1.5), so a same-`--version` reading is not evidence that nothing changed.
+The engine binary is what runs `detect`, and it did move. What Slice 10 could not do — compare
+audits across a version delta — is now possible; the second attempt is what closes it.
 
-**Owner.** Whoever runs the tool update, outside this repo. Re-check at the next maintenance slice.
+**Second half of the finding, unchanged.** The interface the brief names, `npx impeccable update`, is
+still not this project's: `impeccable` is in no `package.json` and has no `node_modules/.bin` entry,
+so an `npx` run would fetch an unrelated registry package under that name. The launcher next to the
+installed skill is the real interface, and it is what was run both times.
+
+**Audit at the updated engine (R66).** `impeccable.cmd detect` over the two Slice 11 surfaces —
+`resources/views/components/race-panel.blade.php` and `resources/views/components/race-calendar.blade.php`
+— returns **1 finding**: `race-calendar.blade.php:148 [side-tab] border-l-5`. Not acted on: the left
+edge marks the mandatory goal race, so it carries information rather than decorating, which is the
+exception the rule itself names. Evidence in `slice-12-2026-09-29.md` §4.
+
+**Required fix.** Nothing in this repository. The upstream bundle URL resolves again as of the second
+attempt; if it 404s in a later slice, record both attempt dates rather than one, because a single
+date cannot distinguish a transient failure from a moved URL.
+
+**Owner.** Whoever runs the tool update, outside this repo. Closed by the successful second attempt.
 
 ---
 
