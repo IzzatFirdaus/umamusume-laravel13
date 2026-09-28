@@ -44,15 +44,19 @@ The Junior Year grid is not full. **Turns 1–11 (Early January through Early Ju
 
 | Code | Tier | Evidence | Domain |
 |---|---|---|---|
-| 100 | G1 | Client skill copy "G1 Averseness … decrease performance in G1 or otherwise important races" (`skills.json` id 200311), as already recorded in §1.2.6. | client text |
-| 200 | G2 | [uma.guide's race dataset](https://uma.guide/agenda-planner/) stores `grade` and `gradeName` together: `{"raceName":"Daily Hai Junior Stakes","grade":200,"gradeName":"G2"}`. | uma.guide |
-| 300 | G3 | Same dataset: `{"raceName":"Artemis Stakes","grade":300,"gradeName":"G3"}`. Its 76 rows at code 300 equal the export's 76. | uma.guide |
-| 400 | OP | Three export rows whose in-game names contain 「オープン」 carry grade 400 (§1.2.6). The same dataset labels the code `OP/L (Open/Listed)`; **`[Global]` prints Open and Listed together**, so a UI that shows only "OP" is collapsing two tiers the tool distinguishes. | client text + uma.guide |
-| 700 | Pre-OP | Same dataset: `{"raceName":"Aster Sho","grade":700,"gradeName":"Pre-OP"}`; 26 rows on both sides. Corroborated on its own terms: all 26 slots are Junior Year only and the names are the `…Sho`/`…Special` pattern. | uma.guide |
+| 100 | G1 | Client skill copy "G1 Averseness … decrease performance in G1 or otherwise important races" (`skills.json` id 200311), as already recorded in §1.2.6. Independently: [Game8's all-races table](https://game8.co/games/Umamusume-Pretty-Derby/archives/536131) prints tier `G1` for Asahi Hai Futurity Stakes and for Oka Sho. | client text + Game8 + uma.guide |
+| 200 | G2 | [uma.guide's race dataset](https://uma.guide/agenda-planner/) stores `grade` and `gradeName` together: `{"raceName":"Daily Hai Junior Stakes","grade":200,"gradeName":"G2"}`. Game8's all-races table prints **`G2` / "Early Nov Junior"** for the same race, which the export also places at Junior Turn 21. | uma.guide + Game8 |
+| 300 | G3 | Same dataset: `{"raceName":"Artemis Stakes","grade":300,"gradeName":"G3"}`; its 76 rows at code 300 equal the export's 76. Game8 prints **`G3` / "Late Oct Junior"** for Artemis Stakes, matching Junior Turn 20. | uma.guide + Game8 |
+| 400 | OP | Three export rows whose in-game names contain 「オープン」 carry grade 400 (§1.2.6). The same uma.guide dataset labels the code `OP/L (Open/Listed)`; **`[Global]` prints Open and Listed together**, so a UI that shows only "OP" is collapsing two tiers the tool distinguishes. Game8's all-races page carries **no `OP` or `Listed` row at all**, so this code stays single-domain. | client text + uma.guide only |
+| 700 | Pre-OP | Same dataset: `{"raceName":"Aster Sho","grade":700,"gradeName":"Pre-OP"}`; 26 rows on both sides. Corroborated on its own terms: all 26 slots are Junior Year only and the names are the `…Sho`/`…Special` pattern. Game8's all-races page carries **no `Pre-OP`/`Pre-Open` row**, so this code also stays single-domain. | uma.guide only |
 | 800 | Maiden | Client row name `Junior Maiden Race`, with the client rule quoted in the export: "You can't participate in any races listed here until you win either Debut or any of the Maiden Races". | client text |
 | 900 | Debut | Client row name `Junior Make Debut`, "mandatory for every character". | client text |
 
-**Read the Domain column before citing this table as multi-source.** Codes 200, 300 and 700 rest on **one** second domain — uma.guide — and the row-count identities at 76/119/26 are a consistency check between two scrapes of the same client data, not independent confirmation. The cross-check below is the one that adds a genuinely different kind of evidence, and it is arithmetic rather than transcription.
+**Read the Domain column before citing this table as multi-source.** Codes **100, 200 and 300 now rest on two independent publishers** — uma.guide's `gradeName` field and [Game8's all-races table (archives/536131, dated 2026-09-09)](https://game8.co/games/Umamusume-Pretty-Derby/archives/536131), which prints `G1` for Asahi Hai Futurity Stakes and Oka Sho, `G2` for Daily Hai Junior Stakes, and `G3` for Artemis Stakes. Game8's period strings for those same rows — "Early Nov Junior", "Late Oct Junior", "Early Dec Junior", "Early April Classic" — independently reproduce this file's turn mapping, which is a second confirmation of something other than the labels.
+
+**Codes 400 and 700 are still single-domain.** Game8's page is graded-races only: it carries **no `OP`, `Listed` or `Pre-OP` row at all**, so its silence is not agreement and cannot be read as corroboration. Those two labels stand on uma.guide plus, for 400 only, the 「オープン」 client names already cited in §1.2.6.
+
+Three spot-checks confirm the labels for **those three tiers**, not that every row's grade code is correctly assigned across the pool — the map is trusted, the per-row assignment is not independently audited. The cross-check below is the one that adds a different *kind* of evidence, and it is arithmetic rather than transcription.
 
 The 12-cell test, run against the `[Global]`-filtered career pool with the 23 rows carrying a `did_not_exist` marker excluded:
 
@@ -659,7 +663,8 @@ The remaining 14 supplied captures were read as a batch and not individually re-
 Two questions are now the owner's, and neither is answered by this file:
 
 - **Seed `scenario_slots` from this file, or fetch it through the engine?** R3's own conclusion was the fetch engine, and nothing here contradicts that; what changed is that the source R3 said was missing now exists.
-- **Where does the per-character Goal list live?** `scenario_slots` has no place for it, and the Goal banner is a per-trainee property rather than a scenario property — so the schema question is unchanged by this file and is not a data question.
+- **Tier enum scope**: the `[Global]` client prints one label where uma.guide's data sees two — its `gradeName` for code 400 is `OP/L (Open/Listed)`, while the client tier set is `Pre-OP / OP / G3 / G2 / G1`. Checked against the schema rather than assumed: `scenario_slots.tier` is a **nullable free-text string** commented `// G1, G2, OP, etc. (races only)` (`database/migrations/2026_09_27_153416_create_scenario_slots_table.php:46`), and there is **no race-tier enum in the codebase** — `app/Enums/MatchTier.php` is Exact/Alias/Fuzzy/None, which is candidate matching. So the distinction is storable today and governed by nothing: the column will accept either a five-label or a six-label set, and `etc.` in the comment is doing no work. The question is which set to commit to, and whether `tier` and `slot_label` (whose documented examples already include `'G1'`) should both exist.
+- **`is_mandatory` cannot express what the client's Goal banner means.** The table has a boolean `is_mandatory` on a scenario-scoped row, but the Goal races are per-character — four client panels, four different Goal sets (finding in "Read this before using the tables"). Only the Junior Make Debut and the scenario final are universally mandatory. A boolean at that level will be wrong for most of the rows it is set on, and the same table already shows the schema can model a real gate when it means to: `is_maiden_gated` maps cleanly onto the client's maiden rule.
 
 ## Appendix: every flagged race row in the export
 
@@ -738,7 +743,7 @@ Recorded rather than quietly deleted, because two of the three closed a claim th
 
 | Was | Now | What settled it |
 |---|---|---|
-| "codes 200/300/700 `❌ UNVERIFIED`" (inherited from §1.2.6) | G2 / G3 / Pre-OP | uma.guide's `gradeName` field, cross-checked by the 12-cell arithmetic. Single second domain, so the caveat stays in the Domain column above. |
+| "codes 200/300/700 `❌ UNVERIFIED`" (inherited from §1.2.6) | G2 / G3 pinned on **two** publishers; Pre-OP on **one** | uma.guide's `gradeName` field, then Game8's all-races tiers for 100/200/300. Game8 has no OP/Pre-OP row, so 400 and 700 stay single-domain and are marked as such. |
 | "the 17 `pre_nar` races are presumed on `[Global]`" | **Confirmed**, and dated to 2026-07-22 | `[Global]` client career titles for the four new racetracks (`en/missions/playertitle`, read directly), plus Game8's 17-race addition notice with 17/17 entry gates agreeing. |
 | "whether the uma.guide distribution table is a narrower universe or an older sub-table is not established" | **Older sub-table** | The guide's page is dated 2026-04-29; the regional races arrived 2026-07-22. Same universe, three months earlier. |
 | "the `[Global]` payout gap may mean Global lacks the content" | **Export coverage gap** | The content is confirmed live, so only the numbers are missing. |
