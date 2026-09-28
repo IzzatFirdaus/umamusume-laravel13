@@ -119,6 +119,75 @@ it('marks a slot this run has already raced as past', function (): void {
     expect($run->calendarCells()[10]['halves']['Late']['slots'][0]['state'])->toBe('past');
 });
 
+it('carries a Trainer-typed free race through the model as an open manual cell', function (): void {
+    // The existing "labels manual rows distinctly" check in RaceCalendarTest builds
+    // its cells array by hand and hands them to the component, so it cannot see the
+    // model drop the marker. This is the path that actually regresses: a real
+    // free_race row, read through calendarCells(). KI-22 suspected the rule had
+    // been lost during the read-path retarget; this is what proves it either way.
+    $run = runWithFans(20000);
+    $slot = ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'free_race',
+        'title' => 'Some Cup',
+        'slot_label' => 'Some Cup',
+        'month' => 8,
+        'half' => 'Late',
+        'tier' => null,
+        'is_mandatory' => false,
+        'is_manual' => true,
+    ]);
+
+    $cell = $run->fresh()->calendarCells()[7]['halves']['Late']['slots'][0];
+
+    expect($cell)->toMatchArray(['state' => 'open', 'label' => 'Some Cup', 'manual' => true])
+        // R61: a free race is never a goal, whatever the flags say.
+        ->not->toBe('goal');
+});
+
+it('keeps a free race out of the goal pennant even when it is marked mandatory', function (): void {
+    // The retarget passes an explicit `false` for mandatory on the free-race path
+    // rather than reading the column, so a mis-set flag cannot draw a pennant on a
+    // race the Trainer invented.
+    $run = runWithFans(20000);
+    ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'free_race',
+        'title' => 'Mislabeled Cup',
+        'slot_label' => 'Mislabeled Cup',
+        'month' => 9,
+        'half' => 'Early',
+        'is_mandatory' => true,
+        'is_manual' => true,
+    ]);
+
+    $cell = $run->fresh()->calendarCells()[8]['halves']['Early']['slots'][0];
+
+    expect($cell['state'])->toBe('open')->and($cell['manual'])->toBeTrue();
+});
+
+it('shows a catalogue race and a free race together in the same half-month', function (): void {
+    // The retarget reads two tables and merges them; the merge is the part a
+    // single-source test would never exercise.
+    $run = runWithFans(20000);
+    RaceCatalogSlot::factory()->create([
+        'year' => 1, 'month' => 8, 'half' => 'Early', 'turn' => 15, 'title' => 'Phoenix Sho',
+    ]);
+    ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'free_race',
+        'title' => 'Trainer Pick',
+        'slot_label' => 'Trainer Pick',
+        'month' => 8,
+        'half' => 'Early',
+        'is_manual' => true,
+    ]);
+
+    $labels = array_column($run->fresh()->calendarCells()[7]['halves']['Early']['slots'], 'label');
+
+    expect($labels)->toBe(['Phoenix Sho', 'Trainer Pick']);
+});
+
 it('composes the calendar only from the run own scenario', function (): void {
     $run = runWithFans(20000);
     ScenarioSlot::factory()->create([
