@@ -37,6 +37,8 @@ backup:
 lore:
 	git grep -inE "horse|sire|foal|🏇" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' || true
 	git grep -inwE "dam|mare|stable" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' || true
+	# 16 additional patterns from docs/design-research/CONSTRAINTS.md §3.1 (banned vocabulary for characters)
+	git grep -inwE "stallion|colt|filly|gelding|equine|pony|thoroughbred|breeding|pairing|bloodline|pedigree|lineage|hoof|mane|tail|withers" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' || true
 
 # Extended gate over shipped code, additive to `lore` rather than a replacement.
 #
