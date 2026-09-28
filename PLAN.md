@@ -1,7 +1,7 @@
 # Trainer Desk — Frontend Development Plan
 
-**Status:** Phase 4 (Implementation) active through Slice 2; Phase 6 unfrozen by the Slice 2 commit and **not started** — no Phase 6 work was done in the Slice 2 session.
-**Last Updated:** 2026-09-28 (Slice 2 complete; ADR-0003 Amendment R2 records why S1's rewire did not happen as written)
+**Status:** Phase 4 (Implementation) active through Slice 3. Slice 3's T8 (branch reconciliation) is **stopped, not done** — see KI-13. Phase 6 remains unfrozen and unstarted.
+**Last Updated:** 2026-09-28 (Slice 3 T1–T7 and T9 landed; `master` still at `83084ab` and now known-broken)
 
 ---
 
@@ -14,6 +14,16 @@
 3. **No open D-number violation in touched files** — `git grep -n D-XXX` in changed files returns zero unresolved hits.
 4. **No false/stale status lines** — plan doc re-baselined against tree in the same commit.
 5. **Atomic commit per concern** — code, docs, tests, ADRs separated; no mixed drift.
+6. **R17 fixture present** — any browser or contrast measurement in a slice runs against the
+   five-run fixture (populated URA, populated Unity Cup, populated Trackblazer, a no-scenario
+   run, and a run with an unpriceable entry) on an isolated scratch database. The shared
+   `database/database.sqlite` is never opened: `SESSION_DRIVER=database` writes a session row
+   per request. A claim about a panel that only one of the five states can produce is not
+   evidence — the no-scenario regression `32cd78b` is what that rule exists to catch.
+7. **Checkout coherence** — after the last commit of a slice, every file the committed code
+   resolves against is tracked: `git ls-tree -r HEAD database/migrations | wc -l` equals the
+   on-disk count, and `git grep -l <NewClass> HEAD` finds a definition, not only a reference.
+   Added because KI-13 shows a green suite can coexist with a branch that will not boot.
 
 ---
 
@@ -28,6 +38,7 @@
 | **3 — Spec Intake** | Completed | `FRONTEND-SPEC-DIVERGENCE.md`, `FRONTEND-BRIEF-AUDIT.md` |
 | **4 — Implementation** | **Slice 1 Complete** | `1e859e8` (T2+T3), `e9a944a` (T4), `c70967f` (T5), `b0bb0d5` (T7) |
 | **4 — Implementation** | **Slice 2 Complete** | S1 `9134206`, S2 `83084ab`, S3 `bb6eec6`, S4 `d53a4b1`, S5 `70f9218` + `9451659`, S6 (this commit) |
+| **4 — Implementation** | **Slice 3 Complete except T8** | T1 `ab915f8`, T2 `726f106` + `78697e9`, T3 `2816309`, T4 `725a5ff`, T5 `5c65597`, T6 `5548b9e`, T7 `ee97869` + `cc3f963` + `21f9906` + `ee6786c`, T8 blocked (KI-13), T9 (this commit) |
 | **5 — Verification** | Routine | Browser metrics: light 4.74 / dark 5.48 / badges 9.00+ |
 | **6 — Iteration** | Unfrozen by Slice 2, **not started** | Owner instruction: the slice's commit unfreezes it; no Phase 6 anatomy in this session |
 
@@ -94,6 +105,45 @@ lines). `vite build` → 69.05 kB CSS, all 52 colour tokens present in the sheet
 `docs/audit-remediation`, because a concurrent session created that branch from `83084ab`
 and moved this shared checkout onto it mid-slice. Nothing was rewritten; reconciling the
 branch is the owner's call and is the one thing this summary cannot close.
+
+---
+
+## Slice 3 Summary (2026-09-28)
+
+Stabilisation slice: it cleared the blockers Slice 2 filed, then tried to reconcile the branch.
+
+| Task | Commit | Evidence |
+|---|---|---|
+| T1: em-dash disclosure sweep (R12) | `ab915f8` | `RenderedCopyHygieneTest` sweeps every `.blade.php` under `resources/views`, strips three comment forms, fails on any en or em dash; a floor test catches the `getExtension() === 'blade'` mistake that would have scanned nothing |
+| T2: badge map keys the base letter (R13/R19) | `726f106` + `78697e9` | `StatBandTest` walks all 17 labels; `/design-preview` 200; 18 badge pairs measured in both themes, min 9.00 |
+| T3: meter gets three states (R18) | `2816309` | `gradeUnpricedCount()` drives "not yet totalled" with the count and the reason; "not yet recorded" only when nothing is logged |
+| T4: selection boundary split from fill (R15) | `725a5ff` | `--color-pick-line` 6.24 light / 8.46 dark on `raised`, 5.89 on light `panel`; four consumers moved; `border-pick` guard with `(?![-\w])` |
+| T5: seeder deleted, real skill names seeded (R14) | `5c65597` | `ScenarioSlotSeeder` removed; ten verbatim D-210 `[Global]` names with `sp_cost => null`; `--color-green-tint` retirement **refused** on G-60 grounds and left open |
+| T6: welcome page offline (KI-3) | `5548b9e` | both `<link>` lines deleted; live response 39,987 bytes with 0 `bunny` matches and every asset same-origin |
+| T7: gate portability (KI-4) | `ee97869`, `cc3f963`, `21f9906`, `ee6786c` | `composer lore` / `composer lore-code` via `tools/lore.php` (Process array, no shell); parity with the Makefile measured at 131/131 and 4/4; `LoreGateParityTest` proven non-vacuous by deleting a pattern |
+| T8: branch reconciliation (R11) | **not executed** | stopped on evidence; see KI-13 |
+| T9: gates + docs | this commit | `docs/design-research/verification/slice-3-2026-09-28.md` |
+
+**End state.** `php artisan test --compact` → 2 skipped, 255 passed, 796 assertions.
+`pint --dirty` → passed. `phpstan analyse --no-progress` → `[OK] No errors`.
+`composer lore` 131 / `composer lore-code` 4, both equal to the Makefile bodies run verbatim.
+`gate.py` → GATE PASS. `vite build` → 69.15 kB CSS, 55 tokens declared, 0 pruned.
+Migration gate: `migrate:fresh --seed` refused as destructive (5th time); forward `migrate` +
+`db:seed` on a fresh scratch DB instead — 24 tables, 10 skills, 0 slots.
+
+**T8 stopped rather than executed, and why.** The ruling said fast-forward `master` if the
+concurrent session is idle. Two things block it, both measured:
+
+1. The peer is not provably idle: 10 tracked files and 5 untracked source/migration files are
+   dirty in this shared tree, and `feat/scenario-races-is-manual` (`46b8d3e`) is unmerged while
+   its migration exists here under a different filename. Moving a ref under that is the case the
+   ruling named.
+2. The tip is not checkout-coherent. `app/Models/ScenarioSlot.php` and `app/Models/Preference.php`
+   and three migrations exist on **no ref** (`git log --all --` on them returns 0 commits), while
+   committed models and two committed tests reference `ScenarioSlot`. Fast-forwarding would put a
+   branch that cannot boot onto `master`. `master` already carries the same defect from `9134206`,
+   so this is not created by the move — it is enshrined by it. Filed as KI-13 with the owner's
+   three-step fix.
 
 ---
 

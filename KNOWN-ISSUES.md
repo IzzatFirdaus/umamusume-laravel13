@@ -112,7 +112,7 @@ fixed.
 
 **Status annotation (2026-09-28, docs audit).** Runtime verification pending after the current frontend dirty work lands. Feature tests cannot reproduce this because each test starts with an empty cache; the 500 requires stale cached rows from before the view's model switch. Evidence gap: runtime HTTP pass not executed in the audit/remediation turns. Close it with a real-server pass (`/umamusume` and `/training-runs` returning 200) or by confirming the cache-key version bump cleared old entries.
 
-## KI-3 `welcome.blade.php` breaks the offline requirement
+## KI-3 `welcome.blade.php` breaks the offline requirement — RESOLVED 2026-09-28
 
 **Evidence.**
 
@@ -128,6 +128,26 @@ first paint, and it loads `instrument-sans`, a font the app does not bundle.
 tag is now dead weight as well as illegal. Delete lines 10 and 11.
 
 **Status.** Already noted in `DESIGN.md` §7 as "a one-line fix nobody has applied". Still open.
+
+**Closed 2026-09-28 (`5548b9e`).** Both `<link>` lines are deleted; `welcome.blade.php`
+now loads its assets through `@vite` like every other page. Measured on a live server
+rather than inferred: the rendered document is 39,987 bytes, `grep -c bunny` returns 0
+against that response, and every asset the browser goes on to request is same-origin. The
+first measurement of that kind was a false pass — the server had died, so `grep -c` was
+counting an empty body — which is why the byte count is in the record.
+
+**Guard.** `tests/Feature/RenderedCopyHygieneTest.php` fails any Blade file that carries a
+remote `rel=stylesheet|preconnect|preload|dns-prefetch` link or a remote `<script src>`, so
+this cannot come back as a one-line fix nobody applies again. Anchor `href`s stay allowed: a
+link a Trainer chooses to click is not a dependency the page cannot render without.
+
+**Residual, not fixed.** The page's inline `<style>` block still declares
+`--font-sans:"Instrument Sans", ui-sans-serif, system-ui, …` inside a vendored Tailwind
+blob. Nothing loads Instrument Sans any more, so the stack falls through to the system
+fonts `DESIGN.md` §2.2 chose — the right outcome by accident rather than by editing the
+declaration. The blob also duplicates CSS the Vite build already ships. Left alone because
+the landing page's markup is not this slice's scope; worth a decision about whether
+`welcome.blade.php` should carry 38 KB of inlined CSS at all.
 
 ---
 
@@ -248,12 +268,12 @@ reads as a decision and not an oversight.
 
 ---
 
-## KI-7 Blocker: em dashes in rendered Blade copy
+## KI-7 Blocker: em dashes in rendered Blade copy — RESOLVED 2026-09-28
 
-Status: Open (handoff, not fixable from the docs side)  
+Status: Closed (`ab915f8`)  
 Severity: Blocker  
 Owner: Frontend  
-Do-not-land: Yes
+Do-not-land: No
 
 ### Evidence (2026-09-28 disk state)
 
@@ -268,7 +288,15 @@ Do-not-land: Yes
 
 ### Required fix
 
-Replace rendered em dashes with compliant punctuation (comma, colon, parentheses) or `N/A` + `title="..."` where the dash acts as a disclosure marker. `tools/gate.py` checks em dashes (D-79) only in prototype HTML, so no automated catch exists for shipped Blade today; that gap is registered in `docs/GATE-REGISTRY.md`.
+Replace rendered em dashes with compliant punctuation (comma, colon, parentheses) or `N/A` + `title="..."` where the dash acts as a disclosure marker.
+
+**Automated catch: added 2026-09-28.** `tools/gate.py` checks em dashes (D-79) only in
+prototype HTML, so `RenderedCopyHygieneTest` was written to cover shipped Blade: it walks
+every `.blade.php` under `resources/views`, strips Blade and both PHP comment forms, and
+fails on any en or em dash that can reach a Trainer. A companion test floors the sweep at
+12 views, because a first draft filtered on `getExtension() === 'blade'`, which matches
+nothing (`foo.blade.php` reports the extension `php`), and the guard would have passed
+having scanned zero files.
 
 ### Notes
 
@@ -277,7 +305,7 @@ Replace rendered em dashes with compliant punctuation (comma, colon, parentheses
 
 ---
 
-## KI-8 `/design-preview` 500s on a grade label the badge map has no entry for
+## KI-8 `/design-preview` 500s on a grade label the badge map has no entry for — RESOLVED 2026-09-28
 
 **Symptom.** `GET /design-preview` returns **500**: `Undefined array key "B+"` at
 `resources/views/components/stat-band.blade.php:99`.
@@ -303,9 +331,22 @@ is outside Slice 2's scope.
 
 **Owner.** The phase that owns `grade_banding` in `config/scenarios.php`.
 
+**Closed 2026-09-28 (`726f106`, R19).** The owner made the design-system call the entry
+asked for: the fill keys on the base letter with the modifier stripped, the badge prints the
+full label. A `B+` is a B's colour and the `+` is carried by the text, so nine fills serve
+seventeen labels without inventing eight tokens nobody sourced.
+
+The route returns **200** and every R17 fixture run returns 200 with zero console errors.
+The band now has a test file: `StatBandTest` walks all seventeen banding labels and asserts
+each one appears as a rendered badge, matched on the badge span rather than as a substring
+(`B` is inside `B+` and inside class names, so a plain `contains()` would pass a band that
+printed the wrong letter or none). `78697e9` measured the half Slice 2 could not: eighteen
+badge-fill pairs, minimum **9.00** against 4.5:1, and the bar fill at 4.20 light / 11.74
+dark against 3:1 — the claim `FRONTEND-SPEC-DIVERGENCE.md` §5 had carried unmeasured.
+
 ---
 
-## KI-9 The selection gold measures 1.59:1 against `raised` in the light theme
+## KI-9 The selection gold measures 1.59:1 against `raised` in the light theme — RESOLVED 2026-09-28
 
 **Symptom.** `--color-pick` (`#EFC96A` light) used as a 2px boundary on a `raised`
 surface reads **1.59:1** — under WCAG 1.4.11's 3:1 for non-text boundaries. Measured in
@@ -319,6 +360,27 @@ which is its own pass. Nothing is colour-only today — the current step also ca
 `aria-current` and heavier text, so D-12 holds and no user is left unable to read state.
 
 **Owner.** Design system, with the token-pair table in `DESIGN.md`.
+
+**Closed 2026-09-28 (`725a5ff`, R15).** The token was not re-stepped; the two jobs were
+split. `--color-pick` keeps the fill, where it is right (8.34 light, 10.57 dark under
+`--color-on-pick`), and `--color-pick-line` (`#7A5C10` light, an alias to `--color-pick` in
+dark, where that value already cleared) carries the 2px boundary. Measured on the rendered
+element's own `border-top-color` against the first opaque background beneath it, both
+themes: **6.24** light / **8.46** dark on `raised`, **5.89** on the ladder's light `panel`,
+against WCAG 1.4.11's 3:1. All four boundary consumers moved together — the calendar's
+`current` cell, the meter ladder's `aria-current` step, the guided step's selected card and
+its step links — and `::selection` plus the focus ring were re-measured to prove the split
+did not disturb them.
+
+Guard: `DesignTokensTest` fails any view that reaches back for `border-pick`, with
+`(?![-\w])` so it does not flag `border-pick-line` itself. The realistic regression is one
+component drifting back to the prettier token, not all four going wrong at once.
+
+Found while writing the docs, recorded not fixed: `DESIGN.md`'s `JapanOnly` row specified
+`--color-pick` **as text**, which is 1.59:1 — a text-contrast failure rather than a
+boundary one. Nothing implements it; the catalog renders that status as `--color-ink-muted`
+label text. The row now says so, so the next reader does not build the bug the spec
+described.
 
 ---
 
@@ -349,26 +411,29 @@ therefore an ADR, not a patch.
 
 ---
 
-## KI-11 Design-system debts left visible by the Slice 2 gate run
+## KI-11 Design-system debts left visible by the Slice 2 gate run — ONE HALF CLOSED 2026-09-28
 
-- **`database/seeders/ScenarioSlotSeeder.php` is an empty stub** — `run()` contains only
-  `//`, and `DatabaseSeeder` never calls it. Against `CONSTRAINTS.md`'s floor ("no
-  unimplemented stubs") it should be filled with sourced slot rows or removed. Left in
-  place because it belongs to another session's in-flight work; deleting a peer's file to
-  quiet a gate is not this slice's call. It is also the reason `scenario_slots` is empty
-  after a clean seed (see the verification record, §1.1), which is what makes any
-  `scenario_races` backfill vacuous.
-- **`--color-green-tint` is now referenced by no utility.** The goal cell moved to
-  `bg-raised` in `bb6eec6`. The token still resolves in both themes and all 52 declared
-  tokens survive `@theme static` (0 missing from the built sheet), so nothing breaks —
-  but a pair that renders nowhere is unverified in practice, not proven. Either retire it
-  with the token table or give it a consumer.
+- **CLOSED (`5c65597`). `database/seeders/ScenarioSlotSeeder.php` was an empty stub** —
+  `run()` contained only `//`, and `DatabaseSeeder` never called it. Against
+  `CONSTRAINTS.md`'s floor ("no unimplemented stubs") it was filled with sourced slot rows or
+  removed; the slot rows are fetch-engine work per ADR-0003 Amendment R3, so there was
+  nothing honest to put in it and the file is deleted. `scenario_slots` stays empty after a
+  clean seed by design, which is also what makes any `scenario_races` backfill vacuous: a
+  re-measured fresh scratch database seeds 24 tables and 10 skills and **0 slots**.
+- **OPEN. `--color-green-tint` is still referenced by no utility.** The goal cell moved to
+  `bg-raised` in `bb6eec6`. Re-measured against the built sheet: 55 custom properties
+  declared in `@theme static`, **0 pruned**, and the token resolves in both themes, so
+  nothing breaks. Retirement was refused under R14 on G-60 grounds — the pair is live spec in
+  `DESIGN.md` §6.15 for the unbuilt Safe-band colouring and the converged prototype uses it —
+  so it stays as a declared value awaiting its consumer rather than being deleted to quiet a
+  count. A pair that renders nowhere is unverified in practice, not proven: that is the
+  remaining debt, and it belongs to the phase that builds the Safe band.
 
 **Owner.** Design system.
 
 ---
 
-## KI-12 The Grade Point meter says nothing was entered when races were entered but cannot be priced
+## KI-12 The Grade Point meter says nothing was entered when races were entered but cannot be priced — RESOLVED 2026-09-28
 
 **Symptom.** A Trackblazer run holding two completed 1st-place races — one linked to a
 `G1` slot worth 100 points, one free-form with no slot — renders:
@@ -397,3 +462,71 @@ false number is drawn. The misleading part is the implication that the Trainer's
 not recorded.
 
 **Owner.** Design system with the Planner Domain Specialist, alongside KI-10.
+
+**Closed 2026-09-28 (`2816309`, R18).** The meter now has three states instead of two.
+`gradeEarned()` exposes the reason through `gradeUnpricedCount()`, and the component reads
+it: **"not yet totalled"** plus the count of logged results with no published Grade Point
+value, and "any total here would count less than this run earned" naming why the figure is
+withheld; **"not yet recorded"** only when no races are logged. The arithmetic did not move —
+withholding stayed correct per KI-10 — the sentence changed.
+
+The middle state is the one that matters and the one a two-state design loses: a Trainer who
+entered two first-place finishes is not the same case as a Trainer who entered nothing, and
+the old copy asserted the second over the first. KI-10 itself remains open: the placement
+ratio and the year bucket are unfixed, and this closure does not claim otherwise.
+
+---
+
+## KI-13 Blocker: the models and migrations this branch's own code resolves against exist on no ref
+
+**Severity:** Blocker — `master` and `docs/audit-remediation` are both affected
+**Owner:** Planner Domain Specialist with the concurrent frontend session
+**Do-not-land:** Yes — no branch move until this is closed
+
+**Symptom.** A clean checkout of `docs/audit-remediation` (`ee6786c`) or of `master`
+(`83084ab`) cannot boot the run surface, and its test suite cannot pass. The suite is green
+**here** only because the working tree carries files that no commit has ever contained.
+
+**Evidence.** Measured on the shared checkout, 2026-09-28:
+
+```
+$ git cat-file -e HEAD:app/Models/ScenarioSlot.php                      -> ABSENT
+$ git cat-file -e HEAD:app/Models/Preference.php                        -> ABSENT
+$ git log --all --oneline -- app/Models/ScenarioSlot.php \
+      database/migrations/2026_09_27_153416_create_scenario_slots_table.php   -> 0 commits
+```
+
+- Committed code references the missing class: `git grep -ln ScenarioSlot HEAD` names
+  `app/Models/RaceEntry.php`, `app/Models/TrainingRun.php`, `tests/Feature/RaceSlotPanelComposerTest.php`
+  and `tests/Feature/Schema/RaceEntrySlotLinkTest.php`.
+- `composer.json` maps `App\` to `app/`, so an absent class file is a fatal at resolve time,
+  not a soft miss.
+- `git ls-tree -r HEAD database/migrations` = 17 files; the disk has 20. `create_scenario_slots_table`,
+  `create_preferences_table` and `add_is_manual_to_scenario_races_table` are untracked, so a fresh
+  `migrate` from HEAD never creates `scenario_slots` or `preferences`.
+- First commit to depend on a file no ref has: `9134206` (Slice 2 S1). The defect is therefore at
+  least two slices old and is already on `master`.
+
+**Cause.** Pathspec commits. `git commit -F - -- <paths>` commits the working-tree state of the
+named paths and **silently ignores untracked files**, so a change that adds a model, its
+migration and a test lands the model's *references* while the new files stay invisible. The
+guard against it is mechanical: `git status --porcelain` after the commit must show nothing that
+the commit claimed to complete. This bit me in this very slice — T7's first commit attempt failed
+only because `tools/lore.php` was untracked, which is the loud version of the same mistake.
+
+**Complication for the fix.** These files sit in a working tree shared with a concurrent session
+and cannot be assumed idle: `app/Models/Preference.php`, its migration, `ScenarioSlot.php` and its
+migration are load-bearing for commits already on both branches, while
+`add_is_manual_to_scenario_races_table` (disk, 13:23:04) duplicates a *different-named* migration
+that is committed on the unmerged `feat/scenario-races-is-manual` (`46b8d3e`, 18:32:45). Two
+migrations for one column, on two refs, with different timestamps: whichever lands second errors
+or no-ops. Merging that branch without deleting one of the pair gives a schema that cannot migrate.
+
+**Required fix.** (1) the owner decides who commits the five source/migration files and on which
+branch; (2) the `is_manual` pair is reconciled to one migration; (3) then re-measure with
+`git ls-tree -r HEAD database/migrations | wc -l` equal to the on-disk count and
+`git grep -l ScenarioSlot HEAD` resolving. Until then T8's fast-forward is blocked, because
+moving `master` onto this tip would propagate a checkout that does not boot.
+
+**Owner.** Architect decides attribution; Planner Domain Specialist lands the slot and preference
+files; the schema half is ADR-0003's.
