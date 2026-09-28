@@ -322,7 +322,7 @@
                 {{-- The badge is green because §6.16 says the client's hint is green, and
                      the ink is `on-pick` because that is the only token in this system that
                      stays dark in both themes: `on-chrome` is white in light, and white on
-                     `--color-green` measured 1.99:1 here, which is the pairing D-3 forbids
+                     `--color-green` measured 1.99:1 here, which is the combination D-3 forbids
                      and DESIGN.md §8 already documents for the focus ring. The name is about
                      the gold fill; the property being borrowed is "the dark ink that sits on
                      a bright fill", which is 6.1:1 light and 9.51:1 dark. --}}
