@@ -50,7 +50,19 @@
 
     <main id="main" class="mx-auto max-w-5xl px-4 py-8">
         @if (session('status'))
-            <p class="mb-4 rounded border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-800">{{ session('status') }}</p>
+            {{-- The one confirmation surface, so the one place a status message is rendered.
+                 It is a status chip, not an action, and the tokens follow that: the
+                 tint-and-border treatment of DESIGN.md §3.4 ("the standard treatment for
+                 every coloured status chip") and the band table's `ink` on `green-tint`
+                 (§6.16 Safe). Not `bg-green` + `text-on-pick` — §3.4 splits every hue into a
+                 500 chrome step that is "fills, borders, rings, lattice, and anything
+                 non-text" and an ink-bearing step, and `green-500 #7FCC09` is absent from
+                 the approved text-pair table because white on it measures 1.99:1. The
+                 skeleton `green-50/300/800` this replaced also carried a light box into
+                 the dark theme, which is the same defect D-101 records for `bg-zinc-50`
+                 above, and `--color-green` is documented as "action and affordability
+                 only, never good" (app.css §Semantic roles). --}}
+            <p class="mb-4 rounded border border-green-line bg-green-tint px-3 py-2 text-sm text-ink">{{ session('status') }}</p>
         @endif
 
         {{ $slot }}
