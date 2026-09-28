@@ -30,6 +30,13 @@ class TurnEntryResource extends JsonResource
             'wit' => $this->wit,
             'sp' => $this->sp,
             'condition' => $this->condition,
+            // Appended after the original keys so a consumer reading the leading fields
+            // by position still gets the same ones. These three are logged by the guided
+            // form and shown on the run screen; omitting them meant the exported run was
+            // not the run the Trainer looked at (audit F-9).
+            'energy' => $this->energy,
+            'mood' => $this->mood?->value,
+            'fans' => $this->fans,
         ];
     }
 }

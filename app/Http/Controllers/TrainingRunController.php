@@ -468,10 +468,16 @@ class TrainingRunController extends Controller
         if ($format === 'json') {
             $content = json_encode(['data' => new TrainingRunResource($run)], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
         } else {
-            $rows = [['turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition']];
+            // Appended after the original eight rather than interleaved: the leading
+            // positions are unchanged, so a consumer keying on column order still reads
+            // the same fields. Energy, mood and fans are captured by the guided form and
+            // shown on the run screen, so leaving them out meant the exported run was not
+            // the run the Trainer had just looked at (audit F-9). `condition` stays --
+            // D-53 keeps the raw escape hatch reachable, and its column is real.
+            $rows = [['turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans']];
 
             foreach ($run->turnEntries as $entry) {
-                $rows[] = [$entry->turn, $entry->speed, $entry->stamina, $entry->power, $entry->guts, $entry->wit, $entry->sp, $entry->condition];
+                $rows[] = [$entry->turn, $entry->speed, $entry->stamina, $entry->power, $entry->guts, $entry->wit, $entry->sp, $entry->condition, $entry->energy, $entry->mood?->value, $entry->fans];
             }
 
             $content = implode("\n", array_map(fn (array $row): string => implode(',', array_map(fn ($cell): string => (string) ($cell ?? ''), $row)), $rows));
