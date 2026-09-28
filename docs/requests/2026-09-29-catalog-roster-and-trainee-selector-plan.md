@@ -275,7 +275,7 @@ Expected: all pass. `CatalogTest:33` `'shows a detail page with Japanese name an
 
 - [ ] **Step 7: File the KI entry**
 
-Add the next free `KI-nn` to `KNOWN-ISSUES.md` — **re-derive it at run time**, `grep -oE "^## KI-[0-9]+" KNOWN-ISSUES.md | sort -t- -k2 -n | tail -1`. It was KI-20 at `b387e07`, so KI-21 was this plan's number when written, but the peer session files KI entries in the same window (KI-19 and KI-20 both landed during planning) and taking a stale number means overwriting their entry. with: the symptom (fetched rows stored a null `name_ja`, leaving US-1's detail-page requirement unmet while the suite stayed green); the cause (the fixture was authored against a guessed key and carried `null`, and the one catalog test that asserts a Japanese name seeded it directly rather than fetching it); the fix (parser key, fixture keys, new parser assertion); and the standing lesson — **a fixture that agrees with the code instead of with the source proves nothing**. Follow the format of the neighbouring entries, including their `verified-against <SHA>` style header if present.
+Add the next free `KI-nn` to `KNOWN-ISSUES.md` — **re-derive it at run time**, `grep -oE "^## KI-[0-9]+" KNOWN-ISSUES.md | sort -t- -k2 -nr | head -1`. It was KI-20 at `b387e07`, so KI-21 was this plan's number when written, but the peer session files KI entries in the same window (KI-19 and KI-20 both landed during planning) and taking a stale number means overwriting their entry. with: the symptom (fetched rows stored a null `name_ja`, leaving US-1's detail-page requirement unmet while the suite stayed green); the cause (the fixture was authored against a guessed key and carried `null`, and the one catalog test that asserts a Japanese name seeded it directly rather than fetching it); the fix (parser key, fixture keys, new parser assertion); and the standing lesson — **a fixture that agrees with the code instead of with the source proves nothing**. Follow the format of the neighbouring entries, including their `verified-against <SHA>` style header if present.
 
 - [ ] **Step 8: Gates and commit**
 
@@ -415,12 +415,18 @@ support-card database."
 - Modify: `app/Services/DataPipeline/Contracts/SourceParser.php` (docblock only)
 - Modify: `lang/en/uma.php`
 - Modify: `tests/Feature/EnumLabelTest.php:22,26-31` (add cases; remove none)
+- Modify: `ARCHITECTURE.md` (§3 Catalog domain: the `character_cards` block and `umamusume.external_ref`)
+- Modify: `ARCHITECTURE-ESSENTIALS.md` (the schema digest line for `character_cards`)
 - Test: `tests/Feature/CharacterCardSchemaTest.php`
+
+`AGENTS.md` puts this in the Architect's rules: "Schema changes require a migration plus updated
+ESSENTIALS digest in the same change." Amendment A1 widened the table to twelve fillable columns, so both
+design documents move here rather than in a later doc pass. Step 13 does it.
 
 **Interfaces:**
 - Produces:
   - `Umamusume::cards(): HasMany<CharacterCard>`; column `umamusume.external_ref: string|null`.
-  - `CharacterCard` fillable `['card_id','umamusume_id','title','rarity','global_release_date','is_debut_form','unconfirmed']`; casts `rarity => CardRarity::class`, `global_release_date => 'date'`, `is_debut_form` and `unconfirmed` => `'boolean'`.
+  - `CharacterCard` fillable `['card_id','umamusume_id','title','rarity','global_release_date','is_debut_form','unconfirmed','source_url','snapshot_path','fetched_at','source_timezone','is_manual']` (Amendment A1: the last five are the inline provenance set plus the card's own stop sign); casts `rarity => CardRarity::class`, `global_release_date => 'date'`, `fetched_at => 'datetime'`, `is_debut_form`, `unconfirmed` and `is_manual` => `'boolean'`.
   - `CardRarity: int` with `OneStar = 1`, `TwoStar = 2`, `ThreeStar = 3`, `use HasLabel`, and `stars(): string`.
   - `PromoteMatchedRecord` persists `external_ref` on both create and update paths.
 
@@ -514,7 +520,7 @@ return new class extends Migration
         Schema::table('umamusume', function (Blueprint $table): void {
             /*
              * GametoraCharacterParser has emitted `gametora:char:{id}` since it was
-             * written and nothing stored it, so a promoted row lost its only stable
+             * written and nothing stored it, so a promoted row lost its only durable
              * link to the source (ADR-0008). Cards attach through this rather than
              * by re-matching on name: the name is what the match engine refuses to
              * guess about, the char id is what the source asserts.
@@ -564,7 +570,8 @@ return new class extends Migration
             // Derived from the earliest JP release among the trainee's cards, by the
             // same rule GametoraCharacterParser already applies to the debut form.
             $table->boolean('is_debut_form')->default(false);
-            // Tier B alone is not enough (SOURCE-OF-TRUTH.md §5:152). A card whose
+            // Tier B alone is not enough: ADR-0008's Provenance section ("Tier B
+            // data, Tier A witness") records the rule. A card whose
             // Global status did not reach two sources is stored flagged and hidden
             // by default, rather than dropped or quietly trusted.
             $table->boolean('unconfirmed')->default(false);
@@ -705,12 +712,16 @@ class CharacterCard extends Model
         return [
             'rarity' => CardRarity::class,
             'global_release_date' => 'date',
+            'fetched_at' => 'datetime',
             'is_debut_form' => 'boolean',
             'unconfirmed' => 'boolean',
+            'is_manual' => 'boolean',
         ];
     }
 }
 ```
+
+Amendment A1 put five new columns on the migration and only the model's docblock and `#[Fillable]` list absorbed them; two of them also need a cast, which is why they are in the block above. `fetched_at` must be `'datetime'`: without it the attribute returns a string, and Task 11 Step 5's `$card->fetched_at->timezone(config('uma.display_timezone'))->format('M j, Y')` calls `timezone()` on that string. `is_manual` must be `'boolean'` so the store's guard is an explicit truth test rather than a bet on how this driver represents a tinyint. Assert both in `CharacterCardSchemaTest`: a cast nobody asserts on is a cast that silently regresses.
 
 - [ ] **Step 9: Add the inverse relation and the link to `Umamusume`**
 
@@ -766,7 +777,20 @@ class CharacterCardFactory extends Factory
             'global_release_date' => fake()->dateTimeBetween('-2 years', 'now')->format('Y-m-d'),
             'is_debut_form' => false,
             'unconfirmed' => false,
+            // Amendment A1: source_url is NOT NULL in the migration, so a factory that
+            // omits it cannot insert. These four say "a fetch wrote this row"; the
+            // manual() state below is the human case.
+            'source_url' => 'https://gametora.test/character-cards.json',
+            'snapshot_path' => null,
+            'fetched_at' => now(),
+            'source_timezone' => 'Asia/Tokyo',
+            'is_manual' => false,
         ];
+    }
+
+    public function manual(): static
+    {
+        return $this->state(fn (): array => ['is_manual' => true]);
     }
 
     public function debut(): static
@@ -799,7 +823,31 @@ DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate --no-inte
 
 Expected: tests pass; `migrate:fresh --seed` succeeds **on the scratch file only** (C-5, and GATE-REGISTRY marks the shared dev file destructive); rollback drops both new migrations without error; re-migrating recreates them. Never aim these at `database/database.sqlite`.
 
-- [ ] **Step 13: Gates and commit**
+- [ ] **Step 13: Move the design docs with the migration**
+
+`AGENTS.md` (Architect) requires it: "Schema changes require a migration plus updated ESSENTIALS digest in
+the same change." `ARCHITECTURE.md` §3 and `ARCHITECTURE-ESSENTIALS.md` gained their `character_cards`
+shape in Task 3, and ADR-0008's dated erratum commit already widened both to the A1 column set, so this step
+is a reconciliation, not a rewrite: read the `character_cards` block, the paragraph that follows the
+Catalog fence, and the digest line against what Steps 4 and 5 actually write, and correct any column that
+disagrees. What must end up true, in both documents:
+
+- the table is `card_id`, `umamusume_id`, `title`, `rarity`, `global_release_date`, `is_debut_form`,
+  `unconfirmed`, `source_url` (not null), `snapshot_path` (nullable), `fetched_at` (nullable),
+  `source_timezone` (nullable) and `is_manual` (default false): twelve fillable columns plus `id` and
+  timestamps;
+- a card's provenance is **inline** on the card row, per `ADR-0003` Amendment R3, the convention
+  `scenario_races`, `scenario_slots` and `race_catalog_slots` already follow;
+- `data_sources` is unchanged in meaning: `umamusume_id`-scoped, the table behind FR-A-4 and the detail
+  page's Provenance section, and not where a card's provenance lives;
+- `is_manual` sits at card grain, so a Trainer's correction to one card's title is immutable to the engine
+  without claiming that trainee's whole record (FR-B-4).
+
+Then run `composer lore` (not `make lore`: GNU make is absent on this host, which is the KI-4 gap
+`LoreGateParityTest` exists to cover) and re-read both passages
+rather than trusting this step's own prose that they landed.
+
+- [ ] **Step 14: Gates and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -814,7 +862,8 @@ git add database/migrations/2026_09_29_1200*.php database/migrations/2026_09_29_
         app/Enums/CardRarity.php app/Models/CharacterCard.php app/Models/Umamusume.php \
         app/Actions/PromoteMatchedRecord.php app/Services/DataPipeline/Contracts/SourceParser.php \
         database/factories/CharacterCardFactory.php lang/en/uma.php \
-        tests/Feature/CharacterCardSchemaTest.php tests/Feature/EnumLabelTest.php
+        tests/Feature/CharacterCardSchemaTest.php tests/Feature/EnumLabelTest.php \
+        ARCHITECTURE.md ARCHITECTURE-ESSENTIALS.md
 git commit -m "feat(schema): the character-card table, its rarity enum, and the source link
 
 FR-A-6 / ADR-0008. Cards key on the source's own card_id so a re-fetch is
@@ -2694,8 +2743,8 @@ level below the brief's naming because the page already owns an h1."
 - Test: append to `tests/Feature/CatalogRosterTreeTest.php`
 
 **Interfaces:**
-- Consumes: `$umamusume->cards`, `$umamusume->dataSources`, `CharacterCard::$unconfirmed`.
-- Produces: a "Costume forms" section and a provenance line that names the source key, the tier and the fetch date.
+- Consumes: `$umamusume->cards` (including each card's own `source_url` and `fetched_at`, per Amendment A1), `$umamusume->dataSources` (character-level, unchanged), `CharacterCard::$unconfirmed`.
+- Produces: a "Costume forms" section where each row names the source and fetch date carried on that card, plus one sentence under the existing Provenance list that identifies it as the trainee's own fetch history and points at the Tier A cross-check file.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -2754,6 +2803,31 @@ it('keeps an unconfirmed card out of the detail list unless asked', function ():
         ->assertSee('[Solo Sourced]')
         ->assertSee('Not confirmed by two sources');
 });
+
+it('names each card the source its own row was read from', function (): void {
+    $u = Umamusume::factory()->create(['name' => 'Mayano Top Gun', 'slug' => 'mayano-top-gun']);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $u->id,
+        'card_id' => 199902,
+        'title' => '[Sample Revised Form]',
+        'is_debut_form' => true,
+        'source_url' => 'https://gametora.test/card-199902.json',
+        'fetched_at' => '2026-09-29 10:00:00',
+    ]);
+    // The trainee's own provenance row points at a different document on purpose:
+    // 'card-199902' appears nowhere else on the page, so a card line fed from
+    // data_sources fails this test instead of passing it by accident.
+    DataSource::factory()->create([
+        'umamusume_id' => $u->id,
+        'source_key' => 'gametora-characters',
+        'url' => 'https://gametora.test/characters.json',
+        'fetched_at' => '2026-01-01 00:00:00',
+    ]);
+
+    test()->get('/umamusume/mayano-top-gun')
+        ->assertOk()
+        ->assertSee('card-199902');
+});
 ```
 
 Add `use App\Models\DataSource;` to the file's imports.
@@ -2764,7 +2838,7 @@ Add `use App\Models\DataSource;` to the file's imports.
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php
 ```
 
-Expected: FAIL on the four new rows only; the earlier ones stay green.
+Expected: FAIL on the new rows that ask for a forms section and for per-card provenance; the hand-entered one at Step 1's third block already passes, and the earlier ones stay green.
 
 - [ ] **Step 3: Eager-load the cards on the detail route**
 
@@ -2829,19 +2903,33 @@ In `catalog/show.blade.php`, insert after the `<dl>` grid (which ends around lin
     @endif
 ```
 
-- [ ] **Step 5: Make the provenance line name tier and witness**
+- [ ] **Step 5: Name the per-card source, and keep the character list for what it is**
 
-The brief asks the detail page to name the source and the fetch date, and `SOURCE-OF-TRUTH` §5 to record that a Tier B fact needed an A-tier witness. One `meta`-weight sentence under the existing Provenance `<h2>` (D-33), driven by the rows already loaded rather than by new copy:
+The brief asks the detail page to name the source and the fetch date, and `SOURCE-OF-TRUTH` §5 to record that a Tier B fact needed an A-tier witness. Amendment A1 decides **which row answers that**: a card carries its own `source_url`, `snapshot_path`, `fetched_at` and `source_timezone`, so the per-card provenance prints from the card. `data_sources` is `umamusume_id`-scoped; it is the trainee's own fetch history behind FR-A-4, it is already rendered in full by the existing `<h2>Provenance</h2>` list (`resources/views/catalog/show.blade.php:56-70`, url plus `source_key` plus fetched date), and it is not a card's provenance.
+
+So add no second character-level provenance block. Add one span inside the Step 4 card loop, and one sentence under the existing list (D-33).
+
+In the Step 4 `<li>`, after the `<time>` element and inside the enclosing `<span class="flex items-baseline gap-3 text-xs text-ink-muted">`:
 
 ```blade
-    @if ($umamusume->dataSources->isNotEmpty())
+                        @if ($card->fetched_at)
+                            <span title="{{ $card->source_url }}">
+                                read {{ $card->fetched_at->timezone(config('uma.display_timezone'))->format('M j, Y') }}
+                            </span>
+                        @endif
+```
+
+Four things here are deliberate. The span carries no styling because it inherits `text-xs text-ink-muted` and the `gap-3` from its parent, so the row grows no second line and no new visual tier. `source_url` rides the `title` attribute so the exact URL is one hover away without shipping a clickable outbound link in a local-only tool; `{{ }}` escapes it, and a URL that arrived from fetched content is untrusted (`AGENTS.md`, Data Engineer). The conversion is `config('uma.display_timezone')`, the same expression the existing Provenance list already uses at `:65`, because US-7 makes a raw UTC render a defect; reuse that line rather than inventing a second formatting convention. And `fetched_at` is nullable, so the `@if` skips the span instead of printing an empty date.
+
+Then this sentence, after the `</ul>` in the existing `@else` branch of the Provenance section:
+
+```blade
         <p class="mt-2 text-xs text-ink-muted">
-            Read from {{ $umamusume->dataSources->first()->source_key }} (Tier B) on
-            {{ $umamusume->dataSources->first()->fetched_at->format('M j, Y') }}, confirmed
-            against the two Tier A sources listed in
+            The rows above are this trainee's own fetch history. Each costume form names the
+            source and the date its own row was read from, and every card on this page was
+            confirmed against the two Tier A sources listed in
             docs/data/2026-09-29-global-roster-crosscheck.md.
         </p>
-    @endif
 ```
 
 The JP and Global debut `<dt>` rows keep their existing markup: after Task 2 Step 3 both carry real dates for fetched rows, and the `N/A` disclosure already in the file covers a trainee with neither. Do not add a new fallback for a case that no longer exists.
@@ -2852,7 +2940,7 @@ The JP and Global debut `<dt>` rows keep their existing markup: after Task 2 Ste
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php tests/Feature/CatalogTest.php tests/Feature/DesignTokensTest.php tests/Feature/RenderedCopyHygieneTest.php
 ```
 
-Expected: all green. `CatalogTest:33` `'shows a detail page with Japanese name and provenance'` must still pass: it creates a `DataSource` with a `https://example.test/...` URL and no `source_key`, so the new sentence must tolerate a null `source_key` without printing nothing. Use `{{ $umamusume->dataSources->first()->source_key ?? 'the declared source' }}` and confirm that test stays green rather than editing it.
+Expected: all green. `CatalogTest:33` `'shows a detail page with Japanese name and provenance'` creates a `DataSource` with a `https://example.test/...` URL and no `source_key`, and the existing Provenance list at `:64` already prints that key bare, so the added sentence must not read `source_key` at all; that is why it does not. Confirm the test stays green rather than editing it. The per-card span needs no such tolerance because `CharacterCard::factory()` now sets `fetched_at` (Task 4 Step 11), but it does need the `@if`: a row stored before a fetch stamped it has `fetched_at` null, and `null->timezone()` is a fatal.
 
 - [ ] **Step 7: Gates and commit**
 

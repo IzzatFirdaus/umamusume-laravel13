@@ -45,8 +45,13 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 - A-5 [ADR-0004]: `Umamusume` stores the ten aptitude letters (turf, dirt, four distance bands, four running styles) exactly as the declared source publishes them, in that order. A `Scenario` record stores its five per-stat caps, the source's hard cap, both server start dates and provenance. Reference data only: nothing in this requirement computes a race or a training outcome (CLAUDE.md Planner Rule 6).
 - A-6 [ADR-0008]: `CharacterCard` record: the source's own card id (unique), its
   Umamusume, the `[Global]` client title verbatim including its brackets, rarity,
-  Global release date, and a debut-form flag derived from the earliest JP release
-  among that trainee's cards. Only cards carrying a Global release date are stored;
+  Global release date, a debut-form flag derived from the earliest JP release
+  among that trainee's cards, and an `unconfirmed` flag. Provenance is inline on the
+  card row, the way every other reference row in this schema carries it
+  (`ADR-0003` Amendment R3): `source_url`, `snapshot_path`, `fetched_at`,
+  `source_timezone`, plus the card's own `is_manual` so a hand-correction to one card
+  is immutable to the engine without claiming that trainee's whole record (B-4).
+  Only cards carrying a Global release date are stored;
   a trainee with no Global card does not appear in the catalog. A card confirmed by
   the Tier B source alone is stored flagged and hidden unless asked for.
 

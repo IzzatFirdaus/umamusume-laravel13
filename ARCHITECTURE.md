@@ -93,6 +93,11 @@ character_cards               (costume cards that reached [Global]; ADR-0008. Au
   global_release_date date (required: a card with no Global date is not a row here)
   is_debut_form bool default false (derived: earliest JP release among that trainee's cards; the export has no debut field to copy)
   unconfirmed bool default false (Tier B stands alone behind it: stored flagged, hidden by default)
+  source_url string          (not null: ADR-0003 Amendment R3 puts provenance on the reference row itself)
+  snapshot_path string nullable
+  fetched_at timestamp nullable
+  source_timezone string nullable (IANA, e.g. Asia/Tokyo)
+  is_manual bool default false (human-edited at card grain: fixing one card's title claims that card, not the whole trainee)
   timestamps
 
 skills
@@ -119,9 +124,13 @@ match_candidates              (review queue for Fuzzy/None matches)
 `2026_09_29_120000_add_external_ref_to_umamusume_table` and
 `2026_09_29_120100_create_character_cards_table` in the roster slice. Until those migrations land, a query
 against `character_cards` raises "no such table" and one against `umamusume.external_ref` raises "no such
-column", and no model exposes a `cards` relation. A card row's provenance is not inline: `data_sources`
-is `umamusume_id`-scoped, so a card inherits the provenance row written for its trainee under the card
-source key.
+column", and no model exposes a `cards` relation. A card row's provenance **is** inline:
+`source_url`, `snapshot_path`, `fetched_at`, `source_timezone` and the card's own `is_manual` sit on the
+card, which is what `ADR-0003` Amendment R3 requires of a reference row and what `scenario_races`,
+`scenario_slots` and `race_catalog_slots` each already do, while `scenarios` carries `source_url` and
+`fetched_at` inline per `ADR-0004:49-51` plus its own `is_manual`. `data_sources` keeps its own meaning: it is
+`umamusume_id`-scoped, the table behind FR-A-4 and the detail page's Provenance section, a trainee's fetch
+history rather than a card's.
 
 ### Trainer-data domain
 

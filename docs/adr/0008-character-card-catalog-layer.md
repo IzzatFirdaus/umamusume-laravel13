@@ -51,7 +51,7 @@ in both cases the ruling is on the record rather than inferred from silence.
 
 | Object | Shape | Why this shape |
 |---|---|---|
-| `character_cards` | one row per costume card that carries a Global release date: `card_id` (the source's own id, unique), `umamusume_id` FK cascade, `title` (the verbatim `[Global]` client string, brackets included), `rarity`, `global_release_date`, `is_debut_form`, `unconfirmed`, timestamps | Keyed by the source's id, not by name, so a re-fetch is idempotent by identity (FR-B-5). `title` is source data: `CONSTRAINTS.md:38` keeps a verbatim client name as data and puts the lore guard on the display path, so this column is never a place to normalize copy |
+| `character_cards` | one row per costume card that carries a Global release date: `card_id` (the source's own id, unique), `umamusume_id` FK cascade, `title` (the verbatim `[Global]` client string, brackets included), `rarity`, `global_release_date`, `is_debut_form`, `unconfirmed`, then the inline provenance set `source_url`, `snapshot_path`, `fetched_at`, `source_timezone` and the card's own `is_manual`, plus timestamps | Keyed by the source's id, not by name, so a re-fetch is idempotent by identity (FR-B-5). `title` is source data: `CONSTRAINTS.md:38` keeps a verbatim client name as data and puts the lore guard on the display path, so this column is never a place to normalize copy. The provenance five are `ADR-0003` Amendment R3's rule for a reference row, and the section below gives the reason they sit on the card rather than on its trainee |
 | `umamusume.external_ref` | nullable, indexed string holding `gametora:char:{char_id}` | The link the parser has emitted since it was written (`GametoraCharacterParser.php:101`) and the schema never kept, so promotion dropped it (erratum E-14). Cards attach through it rather than by re-matching on the name the engine is built not to guess about (FR-B-3) |
 | `training_runs.character_card_id` | nullable FK to `character_cards` | The form the run started on, which is the owner's ruling rather than the implementer's inference. `umamusume_id` stays NOT NULL and stays the owner of the run |
 | `unconfirmed` | bool, default false | Holds any card the Tier B source stands alone behind: stored flagged and hidden unless asked for, rather than dropped or quietly trusted |
@@ -102,7 +102,7 @@ scopes meet.**
 
 Also measured 2026-09-29, over all 68 Global trainees: the JP-earliest card, the Global-earliest card
 and the debut the parser picks are **the same card** in every case, with **no date ties**, and **no
-trainee is tagged `JapanOnly` while owning a Global card**. Those two facts are what make
+trainee is tagged `JapanOnly` while owning a Global card**. Those three facts are what make
 `where('release_status', GlobalReleased)->has('cards')` a safe roster filter today: the status predicate
 and the card predicate select the same 68 rows, so either one can carry the roster without the other
 silently disagreeing. Every existing card owns a trainee in that set, and the derivation has no ambiguity
@@ -122,22 +122,51 @@ Per erratum E-9, a live fetch creates **zero** trainee rows on its own:
 `CrossReferenceMatcher::match()` returns `None` for any name not already stored
 (`app/Services/DataPipeline/CrossReferenceMatcher.php:28-52`) and `PipelineRunner.php:92` routes
 `None` to `match_candidates`. `PRD.md` FR-B-3 is deliberate about it. Erratum E-15 records what that
-means in numbers for this export: 135 parsed records queue **133** candidates, not the 66 the original
-brief assumed. The roster therefore leaves the review queue through the existing
+means in numbers for this export: 135 parsed records queue **133** candidates, not the 68 erratum E-9
+records the brief as assuming; E-15's own 66 is the count that *becomes rows*, 67 staying in `/review`
+awaiting a verdict. The roster therefore leaves the review queue through the existing
 `app/Actions/ResolveMatchCandidate.php`, and the `JapanOnly` records stay in `/review` awaiting one. This
 ADR authorizes no bulk-promote path and no new button.
 
-### Provenance write and cross-check verdict are separate writes
+### Provenance is inline on the card; the cross-check verdict is a separate write
+
+*Rewritten 2026-09-29 following Amendment A1; the withdrawn wording is recorded in the erratum at the end
+of this document.*
 
 `is_manual` immutability (FR-B-4) and the Floor rule "no fact stored without provenance" are unchanged.
-Card rows carry no inline `source_url` / `fetched_at`, and that is a different choice from
-`ADR-0004:49-51` rather than the same one: `scenarios` carries those two columns inline because
-`data_sources` is `umamusume_id`-scoped (`ARCHITECTURE.md:102-106`) and generalising provenance was
-rejected there as scope creep, while every card **has** an owning trainee to hang its provenance on. So
-a card's provenance is the `data_sources` row written for its trainee under the card source key, and
-Task 11's detail-page source line prints
-itself out of exactly that row (`$umamusume->dataSources->first()->source_key`, plan Task 11).
-`unconfirmed` is a human cross-check verdict, not a source fact: it stays out of the upsert's update set
+What A1 changed is where a card's provenance lives: it sits on the card row. `character_cards` carries
+`source_url`, `snapshot_path`, `fetched_at`, `source_timezone` and its own `is_manual` beside the seven
+columns the Decision table already named, so the model is fillable over twelve columns plus `id` and
+timestamps.
+
+That is `ADR-0003` Amendment R3's standing rule for a reference row: "reference data arrives through the
+fetch engine with `source_url`, `snapshot_path`, `fetched_at` and `source_timezone` populated, and
+`is_manual` reserved for Trainer-entered rows"
+(`docs/adr/0003-consolidated-phase1-schema-expansion.md:222-224`, heading at `:206`). Trunk already
+follows it, table for table: `scenario_races`
+(`database/migrations/2026_09_27_093948_create_scenario_races_table.php:24-27`, `is_manual` at
+`2026_09_27_183245_add_is_manual_to_scenario_races_table.php:14`), `scenario_slots`
+(`2026_09_27_153416_create_scenario_slots_table.php:51-55`) and `race_catalog_slots`
+(`2026_09_28_180350_create_race_catalog_slots_table.php:80-84`) each carry all four fields plus their own
+`is_manual`; `scenarios` (`2026_09_27_090100_create_scenarios_table.php:34-36`) carries `source_url`,
+`fetched_at` and `is_manual`, the first two being precisely what `ADR-0004:49-51` asked for. A card is a
+reference row, so it follows
+the same convention rather than inventing a second one.
+
+This is the **same** choice `ADR-0004` made for `scenarios`, not a different one. That record rejects a
+generic polymorphic provenance table as scope creep and says the reference rows "carry `source_url` and
+`fetched_at` inline instead" (`ADR-0004:49-51`). A card is exactly such a row, so the precedent points at
+inline columns here too; the earlier draft of this section read its own conclusion backwards.
+
+`data_sources` keeps its existing meaning and is not a card's provenance: it is `umamusume_id`-scoped,
+the table behind FR-A-4 and the detail page's Provenance section (`ARCHITECTURE.md:107-111`). Borrowing
+the parent trainee's row would make "where did this card's release date come from" a question with no row
+that answers it, and borrowing her `is_manual` would mean a Trainer correcting one card's title claimed
+her whole character. So Task 11 prints each card's own `source_url` and `fetched_at` beside it, and the
+character-level `data_sources` section on that page stays what it always was: the trainee's own fetch
+history.
+
+`unconfirmed` is a human cross-check verdict, not a source fact: it stays out of the store's update set
 so a re-fetch cannot clear it, Task 8's file owns it, and Task 9 writes it (plan Tasks 7 to 9).
 
 ### FR-A-6's last clause, read narrowly
@@ -177,10 +206,11 @@ names. It is not, and does not authorize, the **support-card** database.
 `PRD.md` §6.9 ("No support-card database in Phase 1") stands whole, and `ADR-0005` is **DECLINED** by
 owner ruling R37 (2026-09-28). `support_cards`, `user_support_cards` and `deck_slots` remain forbidden:
 no table, no model, no factory, no route, and no slice may cite this ADR as permission for any of them.
-`ARCHITECTURE.md` §3's subsection "Support-card entities: proposed, not built" (`:159-162` at this
-commit) warns that an entity copied out of `ADR-0005` into a migration would silently reverse §6.9, and
-that warning is exactly why this section exists rather than a footnote: the two kinds of card are easy to
-confuse, and the same publisher ships both datasets (`docs/UMAMUSUME_REFERENCE.md:199` names
+`ARCHITECTURE.md` §3's subsection "Support-card entities: proposed, not built" (`:165-173` at this
+commit, the warning clause "would silently reverse §6.9" at `:173`) warns that an entity copied out of
+`ADR-0005` into a migration would silently reverse §6.9, and that warning is exactly why this section
+exists rather than a footnote: the two kinds of card are easy to confuse, and the same publisher ships
+both datasets (`docs/UMAMUSUME_REFERENCE.md:199` names
 `character-cards.json` and `support-cards.json` side by side). A costume card names what a trainee wears;
 a support card is one of six deck entries that change what a run produces. `training_runs.character_card_id`
 is a reference to the first kind. It is not a deck slot, and it does not narrow the gap §6.9 keeps.
@@ -230,7 +260,11 @@ rather than a verified read.
 This ADR adds no behaviour, so it ships no test. What proves it:
 
 - `php artisan test --compact tests/Feature/LoreGateParityTest.php tests/Feature/RenderedCopyHygieneTest.php`
-  and `make lore` over the tracked tree, both reported in the task record.
+  and the lore docs sweep over the tracked tree, both reported in the task record. What actually ran is
+  `composer lore`, the composer script that mirrors the `lore` Makefile target: GNU make is not installed
+  on this host, so `make lore` was never executed and its name should not be quoted as proof.
+  `LoreGateParityTest` exists precisely because the two must agree, and its docblock at `:8-9` records the
+  composer script as "the one that runs on a host without GNU make (KI-4)".
 - The citation greps of the plan's Task 3 Step 5: `A-6` and `ADR-0008` resolve in `PRD.md`,
   `ADR-0008` resolves in `docs/adr/`, `ARCHITECTURE.md` and `ARCHITECTURE-ESSENTIALS.md`,
   `character_cards` resolves in the design docs and in D-30, and exactly one file claims number 0008.
@@ -258,3 +292,46 @@ blanket-shifting every number by the insertion count.
 
 Line numbers in this document are hints to the reader, not load-bearing assertions. Where a
 claim depends on a location, it names the symbol as well as the line.
+
+---
+
+## Erratum, dated 2026-09-29: card provenance is inline, and the card owns its `is_manual`
+
+*Numbered by date, not by `E-n`: the roster request's own erratum table at
+`docs/requests/2026-09-29-catalog-roster-and-trainee-selector.md` §3 already uses E-1 through E-16 for
+different claims, and reusing one of those labels here would point a reader at the wrong row.*
+
+**What this ADR said when it was written** (`2064f5d`, in the section then titled "Provenance write and
+cross-check verdict are separate writes"): "Card rows carry no inline `source_url` / `fetched_at`, and
+that is a different choice from `ADR-0004:49-51` rather than the same one", and "a card's provenance is
+the `data_sources` row written for its trainee under the card source key, and Task 11's detail-page source
+line prints itself out of exactly that row (`$umamusume->dataSources->first()->source_key`, plan Task 11)."
+
+**Why it was wrong.** Two reasons, and they are not the same reason.
+
+1. It read `ADR-0004:49-51` backwards. That passage rejects a generic polymorphic provenance table as
+   scope creep *so that* scenario rows "carry `source_url` and `fetched_at` inline instead". It argues for
+   inline provenance on a reference row, which is the case this ADR said cards had made the opposite choice
+   from.
+2. Trunk's `e7b78a4` ("feat(pipeline): declare the race-catalog source and route it past matching", the
+   commit that added `app/Actions/StoreRaceCatalogSlots.php`) was not yet on this branch at `2064f5d`; it
+   arrived with the merge `9302e7d`, and it is the pattern the card store now copies.
+
+Point 2 is the one the amendment's own justification reached for, and it only partly holds:
+`ADR-0003` Amendment R3 was **already** in this branch's tree at `b387e07` and at the task base `e8ead2d`
+(`git show b387e07:docs/adr/0003-consolidated-phase1-schema-expansion.md` carries it), so the reference-row
+rule was available to the first draft and the draft disagreed with it. That is recorded here rather than
+smoothed over, because the lesson is not "the merge invalidated the ADR", it is "the ADR misread a rule it
+had".
+
+**What is now the rule.** A card row carries `source_url`, `snapshot_path`, `fetched_at`,
+`source_timezone` and its own `is_manual` inline, twelve fillable columns in all, because
+`ADR-0003` Amendment R3 requires the four on a reference row and `scenario_races`, `scenario_slots` and
+`race_catalog_slots` each already carry all four plus `is_manual`. The owner ruled "take trunk's
+convention" (plan Amendment A1, `8c3ac29`), and A1 stands: the schema is not being reverted. What changed
+is that `ADR-0008`, `PRD.md` FR-A-6, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md` and D-30 now describe
+the schema they authorize instead of the one this ADR first proposed.
+
+**Withdrawn.** "Card rows carry no inline `source_url` / `fetched_at`." Task 11's per-card provenance line
+does not read the trainee's `data_sources` row; it reads the card's own. The character-level
+`data_sources` section on the detail page keeps its existing meaning, unchanged.
