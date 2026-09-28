@@ -6,16 +6,20 @@ namespace App\Http\Controllers;
 
 use App\Enums\MoodTier;
 use App\Enums\TurnEventType;
+use App\Http\Requests\StoreRaceEntryRequest;
 use App\Http\Requests\StoreRunSkillRequest;
 use App\Http\Requests\StoreTrainingRunRequest;
 use App\Http\Requests\StoreTurnEntryRequest;
 use App\Http\Resources\TrainingRunResource;
+use App\Models\RaceEntry;
+use App\Models\ScenarioSlot;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\Umamusume;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -62,9 +66,29 @@ class TrainingRunController extends Controller
 
     public function show(TrainingRun $run): View
     {
-        $run->load(['umamusume', 'turnEntries', 'skills', 'turnEvents']);
+        $run->load(['umamusume', 'turnEntries', 'skills', 'turnEvents', 'raceEntries.scenarioSlot']);
 
         return view('runs.show', $this->showData($run));
+    }
+
+    /**
+     * The calendar rows a Trainer may enter a race against: this scenario's slots, in
+     * timeline order. Empty by design until the fetch engine lands (KI-11), which is why
+     * the form keeps the list out of the panel body and the panel body handles the
+     * absence (C-7, D-220).
+     *
+     * @return Collection<int, ScenarioSlot>
+     */
+    private function raceSlotsFor(TrainingRun $run): Collection
+    {
+        if (! $run->hasScenario()) {
+            return ScenarioSlot::query()->whereRaw('1 = 0')->get();
+        }
+
+        return ScenarioSlot::query()
+            ->where('scenario_key', $run->scenarioKey())
+            ->orderBy('sort_order')
+            ->get();
     }
 
     /**
@@ -123,6 +147,7 @@ class TrainingRunController extends Controller
             'run' => $run,
             'skills' => Skill::orderBy('name')->get(['id', 'name']),
             'scenarios' => $this->scenarioLabels(),
+            'raceSlots' => $this->raceSlotsFor($run),
             'band' => $latest === null ? null : [
                 'scenario' => $run->scenarioKey(),
                 'values' => [
@@ -311,6 +336,23 @@ class TrainingRunController extends Controller
         $run->update($request->validated());
 
         return redirect()->route('runs.show', $run);
+    }
+
+    /**
+     * Records what the Trainer did with one calendar slot (US-10, ADR-0003).
+     *
+     * The write goes through `RaceEntry::create`, not the factory, so the model's saving
+     * guards are the ones that decide whether circles or a period index are admissible
+     * here; a guard that only runs on the form path would be a guard that bulk writes
+     * walk straight past.
+     */
+    public function storeRace(StoreRaceEntryRequest $request, TrainingRun $run): RedirectResponse
+    {
+        $run->raceEntries()->create($request->validated());
+
+        return redirect()
+            ->route('runs.show', $run)
+            ->with('status', 'Race recorded.');
     }
 
     public function destroy(TrainingRun $run): RedirectResponse
