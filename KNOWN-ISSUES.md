@@ -7,6 +7,10 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-28, Slice 8):** 18 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
+**4 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the consecutive-race
+count cannot be derived from the log), KI-18 (the burst roster prints tool identifiers as UI copy).
+Nothing closed in Slice 8; it built the panels and filed what they exposed. Prior:
 **Status (2026-09-28, Slice 7):** 16 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
 **2 open.** KI-10 is split: its schema half (the objective bucket) closed with `e103122`, and its
 ratio half stays open because no source names the placement scaling. KI-15 is filed new: the three
@@ -690,3 +694,49 @@ choice is recorded here rather than made silently: adding it is a schema decisio
 was given two columns, not three.
 
 **Owner.** Planner Domain Specialist with the owner; the schema decision is the owner's alone.
+
+---
+
+## KI-17 The consecutive-race count cannot be derived from the log, so it is entered — FILED 2026-09-28 (Slice 8), OPEN
+
+**Symptom.** D-230 states that Trackblazer's Race Fatigue is safe to surface because "consecutive
+race count is already recoverable from `turn_entries`, and that premise is false as the schema
+stands. `race_entries` points at a `scenario_slots` row (month, half, tier) and never at a turn,
+and the guided flow offers no race choice, so no logged turn can be identified as a race turn.
+There is also no `race_entries.turn` to read and none was sanctioned.
+
+**Current behaviour is deliberate.** `TrainingRun::consecutiveRaceCount()` returns null and says
+why at `app/Models/TrainingRun.php:639-650`, and the chip renders "no consecutive-race reading
+recorded". The count is instead entered as `RaceFatiguePayload {consecutive_races}` on the turn it
+applies to, which keeps the fact without inventing a link, and the panel prints one qualitative
+word for the band (unlikely / possible / likely / certain) with the pointer to
+`docs/scenarios/05-trackblazer-gametora.md` §Race Fatigue, never the percentages: one source is
+not two (D-230).
+
+**Required fix.** Either a link from a race entry to the turn it happened on, or a guided choice
+that marks a race turn. Both are schema or flow decisions, so neither is taken here.
+
+**Owner.** Planner Domain Specialist with Architect.
+
+---
+
+## KI-18 The Spirit Burst roster prints tool identifiers where a Trainer reads a state — FILED 2026-09-28 (Slice 8), OPEN
+
+**Symptom.** `resources/views/components/spirit-burst-roster.blade.php` renders
+`$row['state']->value`, so the chip reads `NormalBurstSpent` and `ExtremeChargeable`. Those are
+this tool's backing values, not Global client strings: `app/Enums/SpiritBurstState.php:8-20` says
+the case values are deliberately not client copy and that a display slice owes a label map
+alongside them. This is that display slice, so the debt came due here.
+
+**Why it is not patched in this slice.** `SpiritBurstPayloadTest` and `ScenarioPanelUiTest` assert
+the six `value` strings appear in the rendered page, so a label map means changing the enum, the
+component and both tests together. The `/impeccable audit` raised it as its only P1 (score 16/20,
+`slice-8-2026-09-28.md` §5), and the audit ran under "score only, do not change code", so the
+finding is recorded here rather than absorbed silently into the same commit that reported it.
+
+**Required fix.** `SpiritBurstState::label()` returning words a Trainer reads ("charged", "held",
+"burst spent", "extreme chargeable", "extreme spent"), the roster printing the label, and the two
+tests asserting the label instead of the value. No new client string is invented: the words
+describe a machine this tool models, and the source names none of them.
+
+**Owner.** Frontend with the Lore Guardian, next pass on the Unity Cup panels.
