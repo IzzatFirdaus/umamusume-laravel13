@@ -6,7 +6,6 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TrainingRunController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\View\View;
 
 Route::view('/', 'welcome')->name('home');
 
