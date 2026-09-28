@@ -7,14 +7,15 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
-**Status (2026-09-29, Slice 10):** 17 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14,
-KI-18). **3 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
-consecutive-race count cannot be derived from the log). Slice 10 filed nothing; it closed KI-18,
-which `f7a59e8` had already fixed in Slice 9, and landed two register corrections against the
-Slice 7 commit `94db315`: KI-15 was written into this file twice, so the filed count is 17 rather
-than the 18 reported below, and the line below names `KI-1–9, KI-11–14` as 14 resolved when that
-range is 13 — the closed set was 13 until KI-18 joined it. Both counts now come from the headings
-in this file rather than from prose about them. Prior:
+**Status (2026-09-29, Slice 10):** 18 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14,
+KI-18). **4 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
+consecutive-race count cannot be derived from the log), KI-19 (the impeccable tool cannot update
+itself). Slice 10 closed KI-18, which `f7a59e8` had already fixed in Slice 9, and filed KI-19.
+Two register corrections ride with that closure, both against the Slice 7 commit `94db315`: KI-15
+was written into this file twice, so the line below was really counting 17 issues as 18; and the
+same line names `KI-1–9, KI-11–14` as 14 resolved when that range is 13, the closed set having
+been 13 until KI-18 joined it. Every figure here is now read off the headings in this file rather
+than asserted in prose about them. Prior:
 **Status (2026-09-28, Slice 8):** 18 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
 **4 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the consecutive-race
 count cannot be derived from the log), KI-18 (the burst roster prints tool identifiers as UI copy).
@@ -743,3 +744,26 @@ recomputed the register's status line, so the entry contradicted the commit that
 closes the bookkeeping, not the defect.
 
 **Owner.** Frontend with the Lore Guardian, next pass on the Unity Cup panels.
+
+---
+
+## KI-19 The impeccable tool cannot update itself, so a maintenance slice cannot measure a version delta — FILED 2026-09-29 (Slice 10), OPEN
+
+**Symptom.** `C:/Users/exatf/.agents/skills/impeccable/scripts/impeccable.cmd check` and the same
+launcher's `update` both return `Could not verify skill bundle: HTTP 404. Nothing was installed`.
+`--version` reads `4.0.0` before and after, so Slice 10's re-audit ran on the incumbent build rather
+than an updated one. Upstream points the report at `pbakaus/impeccable` issue #479.
+
+**Second half of the finding.** The interface the brief names, `npx impeccable update`, is not this
+project's: `impeccable` is not in `package.json` and has no `node_modules/.bin` entry, so an `npx`
+run would fetch an unrelated package from the registry under that name. The launcher next to the
+installed skill is the real interface, and it is what was run.
+
+**Consequence for the audit.** The score delta in `slice-10-2026-09-29.md` §4 is a same-version
+comparison. It is still a measurement, but it is not evidence that the new version would agree.
+
+**Required fix.** Nothing in this repository. Either the upstream bundle URL the launcher verifies
+moves, or the launcher is updated out-of-band; until then a slice that intends to compare versions
+must check `--version` first and say so when it does not change.
+
+**Owner.** Whoever runs the tool update, outside this repo. Re-check at the next maintenance slice.
