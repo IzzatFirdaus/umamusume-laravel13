@@ -94,3 +94,58 @@ it('sums entered coins and never a coin balance it cannot see', function (): voi
 
     expect(strip_tags($html))->toMatch('/Shop Coins: not yet recorded/i');
 });
+
+it('refuses a sixth copy of the same item', function (): void {
+    $run = shopRun();
+    $limit = (int) config('scenarios.scenarios.trackblazer.shop.max_copies_per_item');
+
+    for ($i = 1; $i <= $limit; $i++) {
+        $this->post('/training-runs/'.$run->id.'/purchases', [
+            'turn' => $i, 'item' => 'Glow Sticks', 'cost' => 15, 'effect' => 'Race fan gain +50%, 1 turn',
+        ])->assertSessionHasNoErrors();
+    }
+
+    expect($run->turnEvents()->count())->toBe($limit);
+
+    $this->post('/training-runs/'.$run->id.'/purchases', [
+        'turn' => 9, 'item' => 'Glow Sticks', 'cost' => 15, 'effect' => 'Race fan gain +50%, 1 turn',
+    ])->assertSessionHasErrors('item');
+});
+
+it('rejects an item the scenario does not sell and a price the catalogue disagrees with', function (): void {
+    $run = shopRun();
+
+    $this->post('/training-runs/'.$run->id.'/purchases', [
+        'turn' => 1, 'item' => 'Wit Manual', 'cost' => 15, 'effect' => '+7 Wit',
+    ])->assertSessionHasErrors('item');
+
+    // The catalogue rule is the payload's, and the write path goes through it.
+    $this->post('/training-runs/'.$run->id.'/purchases', [
+        'turn' => 1, 'item' => 'Vita 40', 'cost' => 40, 'effect' => 'Energy +40',
+    ])->assertStatus(500);
+});
+
+it('warns about the overwrite and the cap beside the purchase control', function (): void {
+    $run = shopRun();
+
+    $html = strip_tags($this->get('/training-runs/'.$run->id)->assertOk()->getContent());
+
+    // The panel's own line breaks fall inside these sentences, so the patterns match
+    // whitespace runs rather than single spaces.
+    expect($html)->toMatch('/A\s+higher-rank\s+buy\s+overwrites\s+the\s+lower\s+one/i')
+        ->and($html)->toMatch('/up\s+to\s+5\s+copies\s+of\s+an\s+item\s+can\s+be\s+held/i');
+});
+
+it('renders a purchase recorded through the writer in the panel', function (): void {
+    $run = shopRun();
+
+    $this->post('/training-runs/'.$run->id.'/purchases', [
+        'turn' => 4, 'item' => 'Royal Kale Juice', 'cost' => 70, 'effect' => 'Energy +100, Mood −1',
+    ])->assertSessionHasNoErrors();
+
+    $html = strip_tags($this->get('/training-runs/'.$run->id)->assertOk()->getContent());
+
+    expect($html)->toContain('Royal Kale Juice')
+        ->and($html)->toMatch('/70\s*coins/')
+        ->and($html)->toMatch('/Spent:\s*70\s*coins/i');
+});

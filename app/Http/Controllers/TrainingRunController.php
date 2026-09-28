@@ -8,6 +8,7 @@ use App\Enums\MoodTier;
 use App\Enums\TurnEventType;
 use App\Http\Requests\StoreRaceEntryRequest;
 use App\Http\Requests\StoreRunSkillRequest;
+use App\Http\Requests\StoreShopPurchaseRequest;
 use App\Http\Requests\StoreTrainingRunRequest;
 use App\Http\Requests\StoreTurnEntryRequest;
 use App\Http\Resources\TrainingRunResource;
@@ -16,6 +17,7 @@ use App\Models\ScenarioSlot;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\Umamusume;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
@@ -353,6 +355,35 @@ class TrainingRunController extends Controller
         return redirect()
             ->route('runs.show', $run)
             ->with('status', 'Race recorded.');
+    }
+
+    /**
+     * Records one shop purchase as a `turn_events` row (D-226, ADR-0003).
+     *
+     * The payload is built through `ShopPurchasePayload::make` so the catalogue and price
+     * rules are the same ones the saving guard enforces; the request has already turned a
+     * bad submission into field errors, so anything reaching here that the payload rejects
+     * is a bug rather than a user mistake.
+     */
+    public function storePurchase(StoreShopPurchaseRequest $request, TrainingRun $run): RedirectResponse
+    {
+        $validated = $request->validated();
+        $payload = ShopPurchasePayload::make(
+            (string) $validated['item'],
+            (int) $validated['cost'],
+            (string) $validated['effect'],
+        );
+
+        $run->turnEvents()->create([
+            'turn' => (int) $validated['turn'],
+            'event_type' => TurnEventType::Scenario,
+            'source_name' => 'Shop',
+            'deltas' => $payload->toArray(),
+        ]);
+
+        return redirect()
+            ->route('runs.show', $run)
+            ->with('status', 'Purchase recorded.');
     }
 
     public function destroy(TrainingRun $run): RedirectResponse

@@ -12,6 +12,12 @@
 
     $rotation = (int) config('scenarios.scenarios.'.$run->scenarioKey().'.shop.rotation_turns', 0);
 
+    // The form's option list is the catalogue the payload validates against, so the choice
+    // offered and the choice accepted cannot drift apart, and the cost read is typed rather
+    // than prefilled: the client's price is what the Trainer confirms against.
+    $catalogue = \App\Models\TurnEvents\ShopPurchasePayload::catalogueFor($run);
+    $maxCopies = (int) config('scenarios.scenarios.'.$run->scenarioKey().'.shop.max_copies_per_item', 0);
+
     // Purchases are events, not a table: read the typed payload off each turn_event and
     // ignore the events that carry a different shape (D-226, ADR-0003).
     $purchases = $run->turnEvents
@@ -80,6 +86,53 @@
         <span>Spent: <span class="font-mono tabular-nums text-ink">{{ number_format($run->shopSpendTotal()) }}</span> coins</span>
         <span>Shop Coins: not yet recorded</span>
     </div>
+
+    <form method="POST" action="{{ route('runs.purchases.store', $run) }}" class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-3 text-sm">
+        @csrf
+        <label class="flex flex-col gap-1">
+            <span class="font-medium text-ink">Turn</span>
+            <input type="number" name="turn" min="1" value="{{ (int) $run->turnEntries->max('turn', 0) ?: 1 }}"
+                   class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink" required>
+        </label>
+        <label class="flex flex-col gap-1">
+            <span class="font-medium text-ink">Item</span>
+            <select name="item" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink" required>
+                @foreach ($catalogue as $name => $row)
+                    <option value="{{ $name }}" data-cost="{{ $row['cost'] }}" data-effect="{{ $row['effect'] }}">
+                        {{ $name }} · {{ number_format($row['cost']) }} coins
+                    </option>
+                @endforeach
+            </select>
+        </label>
+        <label class="flex flex-col gap-1">
+            <span class="font-medium text-ink">Cost read</span>
+            <input type="number" name="cost" min="0" class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink" required>
+        </label>
+        <label class="flex flex-col gap-1 grow">
+            <span class="font-medium text-ink">Effect read</span>
+            <input type="text" name="effect" maxlength="255"
+                   class="rounded-md border border-rule bg-raised px-2 py-1 text-ink" required>
+        </label>
+        <button type="submit" class="rounded-full border-2 border-rule px-4 py-2 font-bold text-ink-strong">Record purchase</button>
+
+        {{-- Both warnings are shown before the commit, not after it: the overwrite is the
+             reason a cheap early buy can be a mistake, and the holding cap is the reason a
+             sixth copy is refused at all (D-232, `shop.max_copies_per_item`). --}}
+        <p class="w-full text-xs text-ink-muted">
+            A higher-rank buy overwrites the lower one, and up to {{ $maxCopies }} copies of an
+            item can be held at a time. Cost and effect are entered as read, and checked against
+            the catalogue this scenario sells.
+        </p>
+
+        @if ($errors->any())
+            <p class="w-full text-sm text-risk" role="alert">
+                {{ $errors->first('item', 'That item is not in this scenario\'s shop, or its holding cap is reached.') }}
+                {{ $errors->first('cost', 'The cost must be the number the client showed.') }}
+                {{ $errors->first('effect', 'The effect sentence is required, as read.') }}
+                {{ $errors->first('turn', 'A purchase belongs to a turn.') }}
+            </p>
+        @endif
+    </form>
 
     <form method="POST" action="{{ route('runs.update', $run) }}" class="mt-3 flex flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-3 text-sm">
         @csrf
