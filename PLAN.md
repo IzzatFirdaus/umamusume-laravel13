@@ -1,7 +1,7 @@
 # Trainer Desk — Frontend Development Plan
 
-**Status:** Phase 4 (Implementation) active through Slice 3. Slice 3's T8 (branch reconciliation) is **stopped, not done** — see KI-13. Phase 6 remains unfrozen and unstarted.
-**Last Updated:** 2026-09-28 (Slice 3 T1–T7 and T9 landed; `master` still at `83084ab` and now known-broken)
+**Status:** Phase 4 (Implementation) active through Slice 3. Slice 3's T8 (branch reconciliation) is **resolved** — see KI-13. Phase 6 remains unfrozen and unstarted. Slice 4 (repo-integrity only) completed.
+**Last Updated:** 2026-09-28 (Slice 3 T1–T7 and T9 landed; Slice 4 T1–T6 completed; `master` at `33949f5` equals tip; `feat/scenario-races-is-manual` merged at `dc13d8d`; `origin/docs/audit-remediation` at `9b774f9`, `origin/master` at `33949f5`)
 
 ---
 
@@ -20,10 +20,11 @@
    `database/database.sqlite` is never opened: `SESSION_DRIVER=database` writes a session row
    per request. A claim about a panel that only one of the five states can produce is not
    evidence — the no-scenario regression `32cd78b` is what that rule exists to catch.
-7. **Checkout coherence** — after the last commit of a slice, every file the committed code
+7. **Checkout coherence (boot files, not test coverage)** — after the last commit of a slice, every file the committed code
    resolves against is tracked: `git ls-tree -r HEAD database/migrations | wc -l` equals the
    on-disk count, and `git grep -l <NewClass> HEAD` finds a definition, not only a reference.
    Added because KI-13 shows a green suite can coexist with a branch that will not boot.
+8. **Every cited sha verified via `git cat-file -e` in-session** — a record's own sha is labelled self-citation.
 
 ---
 
@@ -38,7 +39,8 @@
 | **3 — Spec Intake** | Completed | `FRONTEND-SPEC-DIVERGENCE.md`, `FRONTEND-BRIEF-AUDIT.md` |
 | **4 — Implementation** | **Slice 1 Complete** | `1e859e8` (T2+T3), `e9a944a` (T4), `c70967f` (T5), `b0bb0d5` (T7) |
 | **4 — Implementation** | **Slice 2 Complete** | S1 `9134206`, S2 `83084ab`, S3 `bb6eec6`, S4 `d53a4b1`, S5 `70f9218` + `9451659`, S6 (this commit) |
-| **4 — Implementation** | **Slice 3 Complete except T8** | T1 `ab915f8`, T2 `726f106` + `78697e9`, T3 `2816309`, T4 `725a5ff`, T5 `5c65597`, T6 `5548b9e`, T7 `ee97869` + `cc3f963` + `21f9906` + `ee6786c`, T8 blocked (KI-13), T9 (this commit) |
+| **4 — Implementation** | **Slice 3 Complete** | T1 `ab915f8`, T2 `726f106` + `78697e9`, T3 `2816309`, T4 `725a5ff`, T5 `5c65597`, T6 `5548b9e`, T7 `ee97869` + `cc3f963` + `21f9906` + `ee6786c`, T8 `dc13d8d` + `35fb0c7`, T9 `33949f5` |
+| **4 — Implementation** | **Slice 4 Complete (repo-integrity)** | T1 `35fb0c7`, T2 `dc13d8d`, T3 coherence outputs (20/20 migrations, ScenarioSlot+Preference defs, 23 tables), T4 push shas `9b774f9`/`33949f5`, T5 docs commit, T6 gates |
 | **5 — Verification** | Routine | Browser metrics: light 4.74 / dark 5.48 / badges 9.00+ |
 | **6 — Iteration** | Unfrozen by Slice 2, **not started** | Owner instruction: the slice's commit unfreezes it; no Phase 6 anatomy in this session |
 
@@ -101,10 +103,7 @@ the base theme), KI-11 (empty `ScenarioSlotSeeder`, orphaned `--color-green-tint
 4 hits, all pre-existing (Laravel's SQS example URL; the three documented `Good-Luck Charm`
 lines). `vite build` → 69.05 kB CSS, all 52 colour tokens present in the sheet, 0 pruned.
 
-**Where the commits are.** `master` is at `83084ab` (S2). S3 onward sit on
-`docs/audit-remediation`, because a concurrent session created that branch from `83084ab`
-and moved this shared checkout onto it mid-slice. Nothing was rewritten; reconciling the
-branch is the owner's call and is the one thing this summary cannot close.
+**Where the commits are.** `master` is at `33949f5` (equals tip). `docs/audit-remediation` fast-forwarded to match. `feat/scenario-races-is-manual` merged at `dc13d8d`. `origin/docs/audit-remediation` at `9b774f9`, `origin/master` at `33949f5`. The branch reconciliation is complete.
 
 ---
 
@@ -121,8 +120,8 @@ Stabilisation slice: it cleared the blockers Slice 2 filed, then tried to reconc
 | T5: seeder deleted, real skill names seeded (R14) | `5c65597` | `ScenarioSlotSeeder` removed; ten verbatim D-210 `[Global]` names with `sp_cost => null`; `--color-green-tint` retirement **refused** on G-60 grounds and left open |
 | T6: welcome page offline (KI-3) | `5548b9e` | both `<link>` lines deleted; live response 39,987 bytes with 0 `bunny` matches and every asset same-origin |
 | T7: gate portability (KI-4) | `ee97869`, `cc3f963`, `21f9906`, `ee6786c` | `composer lore` / `composer lore-code` via `tools/lore.php` (Process array, no shell); parity with the Makefile measured at 131/131 and 4/4; `LoreGateParityTest` proven non-vacuous by deleting a pattern |
-| T8: branch reconciliation (R11) | **not executed** | stopped on evidence; see KI-13 |
-| T9: gates + docs | this commit | `docs/design-research/verification/slice-3-2026-09-28.md` |
+| T8: branch reconciliation (R11, R20–R21) | `dc13d8d` (merge) + `35fb0c7` (commit) | `feat/scenario-races-is-manual` merged (single commit `46b8d3e`); untracked `is_manual` duplicate deleted; five load-bearing files committed; coherence checks pass (20/20 migrations, ScenarioSlot+Preference defs, 23 tables on fresh scratch DB) |
+| T9: gates + docs | `33949f5` | `docs/design-research/verification/slice-3-2026-09-28.md` |
 
 **End state.** `php artisan test --compact` → 2 skipped, 255 passed, 796 assertions.
 `pint --dirty` → passed. `phpstan analyse --no-progress` → `[OK] No errors`.
@@ -131,21 +130,24 @@ Stabilisation slice: it cleared the blockers Slice 2 filed, then tried to reconc
 Migration gate: `migrate:fresh --seed` refused as destructive (5th time); forward `migrate` +
 `db:seed` on a fresh scratch DB instead — 24 tables, 10 skills, 0 slots.
 
-**T8 stopped rather than executed, and why.** The ruling said fast-forward `master` if the
-concurrent session is idle. Two things block it, both measured:
-
-1. The peer is not provably idle: 10 tracked files and 5 untracked source/migration files are
-   dirty in this shared tree, and `feat/scenario-races-is-manual` (`46b8d3e`) is unmerged while
-   its migration exists here under a different filename. Moving a ref under that is the case the
-   ruling named.
-2. The tip is not checkout-coherent. `app/Models/ScenarioSlot.php` and `app/Models/Preference.php`
-   and three migrations exist on **no ref** (`git log --all --` on them returns 0 commits), while
-   committed models and two committed tests reference `ScenarioSlot`. Fast-forwarding would put a
-   branch that cannot boot onto `master`. `master` already carries the same defect from `9134206`,
-   so this is not created by the move — it is enshrined by it. Filed as KI-13 with the owner's
-   three-step fix.
+**T8 resolved (Slice 4).** The ruling's three-step fix was executed:
+1. Five load-bearing untracked files committed on `docs/audit-remediation` (`35fb0c7`).
+2. Duplicate untracked `is_manual` migration deleted; `feat/scenario-races-is-manual` (single commit `46b8d3e`) merged at `dc13d8d`.
+3. Coherence re-measured: `git ls-tree -r HEAD database/migrations | wc -l` = 20 (disk = 20); `git grep -l "class ScenarioSlot" HEAD` → `app/Models/ScenarioSlot.php`, `database/factories/ScenarioSlotFactory.php`; `git grep -l "class Preference" HEAD` → `app/Models/Preference.php`, `database/factories/PreferenceFactory.php`; fresh scratch-DB `migrate:fresh --seed` → 23 tables including `preferences`, `scenario_slots`, `scenario_races` (with `is_manual`).
+4. `master` fast-forwarded to tip (`33949f5`); `origin/docs/audit-remediation` pushed (`9b774f9`); `origin/master` pushed (`33949f5`).
 
 ---
+
+## Slice 4 Summary (2026-09-28) — Repo Integrity Only
+
+| Task | Commit | Evidence |
+|---|---|---|
+| T1: commit five load-bearing files | `35fb0c7` | ScenarioSlot, Preference, factories, 2 migrations; authored by concurrent session, KI-13 |
+| T2: delete duplicate migration + merge feat branch | `dc13d8d` | `2026_09_27_132304_...` deleted; `feat/scenario-races-is-manual` (1 commit `46b8d3e`) merged |
+| T3: coherence checks | (this commit) | 20/20 migrations tracked; ScenarioSlot/Preference defs present; 23 tables on fresh scratch DB |
+| T4: fast-forward master + push both remotes | push shas | `origin/docs/audit-remediation` → `9b774f9`; `origin/master` → `33949f5` |
+| T5: docs commit (KI-13 resolved, PLAN/KNOWN-ISSUES updated) | (this commit) | KI-13 RESOLVED with shas + T3 outputs; PLAN topology + exit criteria updated; KI-11 gains Safe-band commitment; KNOWN-ISSUES count refreshed |
+| T6: gates | (this commit) | pest, pint --dirty, phpstan, composer lore, composer lore-code (parity), gate.py, npm run build |
 
 ## Evidence Traceability
 

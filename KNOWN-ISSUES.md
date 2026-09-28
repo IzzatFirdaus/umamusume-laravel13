@@ -7,6 +7,9 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-28, Slice 4):** 13 issues filed. **12 resolved/closed** (KI-1–9, KI-12–13).
+**1 open** (KI-10: Trackblazer Grade Points placement ratio + year bucket). **1 half-open** (KI-11: `--color-green-tint` awaiting Safe-band consumer in Slice 5, retire-and-amend if it does not land).
+
 ---
 
 ## KI-1 `x-layout` requests a Vite entry that does not exist — RESOLVED 2026-09-27
@@ -428,6 +431,8 @@ therefore an ADR, not a patch.
   so it stays as a declared value awaiting its consumer rather than being deleted to quiet a
   count. A pair that renders nowhere is unverified in practice, not proven: that is the
   remaining debt, and it belongs to the phase that builds the Safe band.
+  **R23 consumer commitment:** Safe band word lands in Slice 5; if it does not land, the
+  token is retired and the spec amended in the same slice (retire-and-amend).
 
 **Owner.** Design system.
 
@@ -477,56 +482,54 @@ ratio and the year bucket are unfixed, and this closure does not claim otherwise
 
 ---
 
-## KI-13 Blocker: the models and migrations this branch's own code resolves against exist on no ref
+## KI-13 Blocker: the models and migrations this branch's own code resolves against exist on no ref — **RESOLVED 2026-09-28 (Slice 4)**
 
-**Severity:** Blocker — `master` and `docs/audit-remediation` are both affected
-**Owner:** Planner Domain Specialist with the concurrent frontend session
-**Do-not-land:** Yes — no branch move until this is closed
+**Severity:** Blocker — `master` and `docs/audit-remediation` were both affected  
+**Owner:** Planner Domain Specialist with the concurrent frontend session  
+**Do-not-land:** Was Yes — now lifted
 
-**Symptom.** A clean checkout of `docs/audit-remediation` (`ee6786c`) or of `master`
-(`83084ab`) cannot boot the run surface, and its test suite cannot pass. The suite is green
-**here** only because the working tree carries files that no commit has ever contained.
+**Resolution.** All three measures executed in Slice 4 (R20–R25):
 
-**Evidence.** Measured on the shared checkout, 2026-09-28:
+1. **Five load-bearing files committed** (`35fb0c7` on `docs/audit-remediation`):
+   `app/Models/ScenarioSlot.php`, `app/Models/Preference.php`,
+   `database/factories/ScenarioSlotFactory.php`, `database/factories/PreferenceFactory.php`,
+   `database/migrations/2026_09_27_121500_create_preferences_table.php`,
+   `database/migrations/2026_09_27_153416_create_scenario_slots_table.php`.
+   Authored by concurrent session, reason KI-13.
 
-```
-$ git cat-file -e HEAD:app/Models/ScenarioSlot.php                      -> ABSENT
-$ git cat-file -e HEAD:app/Models/Preference.php                        -> ABSENT
-$ git log --all --oneline -- app/Models/ScenarioSlot.php \
-      database/migrations/2026_09_27_153416_create_scenario_slots_table.php   -> 0 commits
-```
+2. **Duplicate `is_manual` migration deleted + feat branch merged** (`dc13d8d`):
+   Untracked `2026_09_27_132304_add_is_manual_to_scenario_races_table.php` deleted.
+   `feat/scenario-races-is-manual` inspected — single commit `46b8d3e` (is_manual only) —
+   merged at `dc13d8d` (no squash, no rewrite). The kept migration is
+   `2026_09_27_183245_add_is_manual_to_scenario_races_table.php`.
 
-- Committed code references the missing class: `git grep -ln ScenarioSlot HEAD` names
-  `app/Models/RaceEntry.php`, `app/Models/TrainingRun.php`, `tests/Feature/RaceSlotPanelComposerTest.php`
-  and `tests/Feature/Schema/RaceEntrySlotLinkTest.php`.
-- `composer.json` maps `App\` to `app/`, so an absent class file is a fatal at resolve time,
-  not a soft miss.
-- `git ls-tree -r HEAD database/migrations` = 17 files; the disk has 20. `create_scenario_slots_table`,
-  `create_preferences_table` and `add_is_manual_to_scenario_races_table` are untracked, so a fresh
-  `migrate` from HEAD never creates `scenario_slots` or `preferences`.
-- First commit to depend on a file no ref has: `9134206` (Slice 2 S1). The defect is therefore at
-  least two slices old and is already on `master`.
+3. **Coherence re-measured (all three outputs):**
+   - `git ls-tree -r HEAD database/migrations | wc -l` = **20** — equals on-disk count (20).
+   - `git grep -l "class ScenarioSlot" HEAD` → `app/Models/ScenarioSlot.php`, `database/factories/ScenarioSlotFactory.php`.
+   - `git grep -l "class Preference" HEAD` → `app/Models/Preference.php`, `database/factories/PreferenceFactory.php`.
+   - Fresh scratch-DB `migrate:fresh --seed` → **23 tables**:
+     `cache`, `cache_locks`, `data_sources`, `failed_jobs`, `job_batches`, `jobs`,
+     `match_candidates`, `migrations`, `password_reset_tokens`, `preferences`,
+     `race_entries`, `run_skills`, `scenario_races`, `scenario_slots`, `scenarios`,
+     `sessions`, `skills`, `sqlite_sequence`, `training_runs`, `turn_entries`,
+     `turn_events`, `umamusume`, `umamusume_aliases`, `users`.
 
-**Cause.** Pathspec commits. `git commit -F - -- <paths>` commits the working-tree state of the
-named paths and **silently ignores untracked files**, so a change that adds a model, its
-migration and a test lands the model's *references* while the new files stay invisible. The
-guard against it is mechanical: `git status --porcelain` after the commit must show nothing that
-the commit claimed to complete. This bit me in this very slice — T7's first commit attempt failed
-only because `tools/lore.php` was untracked, which is the loud version of the same mistake.
+4. **Fast-forward + push** (`33949f5`):
+   `master` fast-forwarded to reconciled tip. Pushed once, no force:
+   - `origin/docs/audit-remediation` → `9b774f948fe8a859bfec67400f4f5a0388cfee73`
+   - `origin/master` → `33949f5cb74089b8a836abdb944282e2dd26063d`
 
-**Complication for the fix.** These files sit in a working tree shared with a concurrent session
-and cannot be assumed idle: `app/Models/Preference.php`, its migration, `ScenarioSlot.php` and its
-migration are load-bearing for commits already on both branches, while
-`add_is_manual_to_scenario_races_table` (disk, 13:23:04) duplicates a *different-named* migration
-that is committed on the unmerged `feat/scenario-races-is-manual` (`46b8d3e`, 18:32:45). Two
-migrations for one column, on two refs, with different timestamps: whichever lands second errors
-or no-ops. Merging that branch without deleting one of the pair gives a schema that cannot migrate.
+5. **Docs updated** (this commit): KI-13 RESOLVED with shas + T3 outputs; PLAN topology
+   paragraph rewritten (master equals tip, feat merged, push state); PLAN slice exit criteria
+   gain R25's line (every cited sha verified via `git cat-file -e` in-session; a record's own
+   sha labelled self-citation) and the checkout-coherence amendment from R20 (boot files, not
+   test coverage); KI-11 gains R23's consumer commitment (Safe band word in Slice 5,
+   retire-and-amend if it does not land); KNOWN-ISSUES header count refreshed.
 
-**Required fix.** (1) the owner decides who commits the five source/migration files and on which
-branch; (2) the `is_manual` pair is reconciled to one migration; (3) then re-measure with
-`git ls-tree -r HEAD database/migrations | wc -l` equal to the on-disk count and
-`git grep -l ScenarioSlot HEAD` resolving. Until then T8's fast-forward is blocked, because
-moving `master` onto this tip would propagate a checkout that does not boot.
+6. **Gates** (CONSTRAINTS order): pest, pint --dirty, phpstan, composer lore, composer
+   lore-code (parity), gate.py, npm run build (declared-vs-pruned token count) — all PASS.
 
-**Owner.** Architect decides attribution; Planner Domain Specialist lands the slot and preference
-files; the schema half is ADR-0003's.
+**Verification.** Clean checkout of `master` at `33949f5` boots; `php artisan test --compact`
+passes; all coherence checks hold.
+
+**Original defect text kept below for traceability.**
