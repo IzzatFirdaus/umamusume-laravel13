@@ -39,7 +39,23 @@
                         </select>
                         <button type="submit" class="enamel rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Resolve</button>
                     </form>
-                    @error('status')<p class="mt-1 text-sm text-risk">{{ $message }}</p>@enderror
+
+                    {{-- Every field this form can fail on, and the reasons are stacked rather
+                         than one-per-field-and-one-at-a-time: `ResolveMatchCandidateRequest`
+                         can return `umamusume_id` and `alias_language` together (an id that
+                         does not exist, on a verdict that demands a language), and a Trainer
+                         fixing one at a time re-submests blind to the other. Rendering only
+                         `status` left the two a Trainer hits most - an unknown id and the
+                         missing alias language - with a failed submit and no message at all,
+                         which reads as a broken button (D-56). --}}
+                    @php($verdictErrors = ['status', 'umamusume_id', 'alias_language'])
+                    @if ($errors->hasAny($verdictErrors))
+                        <ul class="mt-1 space-y-0.5 text-sm text-risk" role="alert">
+                            @foreach ($verdictErrors as $verdictError)
+                                @error($verdictError)<li>{{ $message }}</li>@enderror
+                            @endforeach
+                        </ul>
+                    @endif
                 </li>
             @endforeach
         </ul>
