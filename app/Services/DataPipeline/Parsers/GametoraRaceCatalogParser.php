@@ -159,6 +159,13 @@ final class GametoraRaceCatalogParser implements RaceCatalogSourceParser
             'fans_needed' => $this->intOrNull($instance['fans_needed'] ?? null, 0, PHP_INT_MAX),
             'fans_gain_curve' => $this->intOrNull($instance['fans_gain'] ?? null, 1, 255),
             'is_mandatory' => in_array($slotId, self::MANDATORY_SLOTS, true),
+            // The export states the maiden rule once, globally, on the maiden row —
+            // "You can't participate in any races listed here until you win either
+            // Debut or any of the Maiden Races" — and never per race. Asserting it
+            // row by row here would be this parser's reading of a rule the source
+            // does not encode per row, so it stays false and the question is filed
+            // as a gap rather than answered in a parser.
+            'is_maiden_gated' => false,
             'is_special_race' => (bool) ($instance['special_race'] ?? false),
             'did_not_exist' => is_string($instance['did_not_exist'] ?? null)
                 ? (string) $instance['did_not_exist']

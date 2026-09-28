@@ -37,6 +37,7 @@ interface RaceCatalogSourceParser
      *     fans_needed: int|null,
      *     fans_gain_curve: int|null,
      *     is_mandatory: bool,
+     *     is_maiden_gated: bool,
      *     is_special_race: bool,
      *     did_not_exist: string|null,
      *     external_ref: string|null,

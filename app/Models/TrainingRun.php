@@ -259,11 +259,13 @@ class TrainingRun extends Model
      *
      * @return list<array{halves: array<string, array<string, mixed>>}>
      */
-    public function calendarCells(): array
+    public function calendarCells(?int $year = null): array
     {
         if (! $this->hasScenario()) {
             return [];
         }
+
+        $year ??= $this->currentYear();
 
         $cells = [];
 
@@ -276,13 +278,23 @@ class TrainingRun extends Model
             ];
         }
 
-        $slots = ScenarioSlot::query()
-            ->where('scenario_key', $this->scenarioKey())
-            ->whereIn('kind', ['goal_race', 'free_race'])
+        // The career calendar is the shared 410-row catalogue; the scenario slot
+        // table is read only for what it alone can hold, which is the Trainer's own
+        // free races. See docs/design-research/HANDOFF-RACE-READ-PATH-2026-09-29.md.
+        $catalog = RaceCatalogSlot::query()
+            ->forScenario($this->scenarioKey())
+            ->inYear($year)
+            ->orderBy('turn')
             ->orderBy('sort_order')
             ->get();
 
-        if ($slots->isEmpty()) {
+        $free = ScenarioSlot::query()
+            ->where('scenario_key', $this->scenarioKey())
+            ->where('kind', 'free_race')
+            ->orderBy('sort_order')
+            ->get();
+
+        if ($catalog->isEmpty() && $free->isEmpty()) {
             // Nothing is catalogued for this scenario, so there is no grid to fill
             // and the panel's own message — which says what is missing and what to
             // do — is the honest content. Twenty-four cells reading "No race" would
@@ -290,31 +302,58 @@ class TrainingRun extends Model
             return [];
         }
 
-        $raced = $this->raceEntries()
+        $racedCatalog = $this->raceEntries()
+            ->whereNotNull('race_catalog_slot_id')
+            ->get()
+            ->keyBy('race_catalog_slot_id');
+
+        $racedFree = $this->raceEntries()
             ->whereNotNull('scenario_slot_id')
             ->get()
             ->keyBy('scenario_slot_id');
+
+        $fans = $this->stripValues()['fans'];
 
         $hasWon = $this->raceEntries()
             ->where('status', RaceEntryStatus::Completed)
             ->where('placement', 1)
             ->exists();
 
-        $fans = $this->stripValues()['fans'];
+        foreach ($catalog as $slot) {
+            $index = ($slot->month ?? 0) - 1;
 
-        foreach ($slots as $slot) {
-            // The table stores 1-12 and the component indexes from zero.
-            $index = $slot->month - 1;
-            $half = $slot->half === 'Late' ? 'Late' : 'Early';
+            if ($index < 0 || $index > 11) {
+                // The finale block sits outside the 24-turn grid by design.
+                continue;
+            }
+
+            $cells[$index]['halves'][$slot->half === 'Late' ? 'Late' : 'Early']['slots'][] = $this->calendarCell(
+                $slot->title,
+                $slot->fans_needed,
+                $slot->hasMaidenGate(),
+                $slot->is_mandatory,
+                $racedCatalog->get($slot->id),
+                $fans,
+                false,
+                $hasWon,
+            );
+        }
+
+        foreach ($free as $slot) {
+            $index = ((int) $slot->month) - 1;
 
             if ($index < 0 || $index > 11) {
                 continue;
             }
 
-            $cells[$index]['halves'][$half]['slots'][] = $this->calendarCell(
-                $slot,
-                $raced->get($slot->id),
+            $cells[$index]['halves'][$slot->half === 'Late' ? 'Late' : 'Early']['slots'][] = $this->calendarCell(
+                $slot->title,
+                null,
+                false,
+                false,
+                $racedFree->get($slot->id),
                 $fans,
+                true,
                 $hasWon,
             );
         }
@@ -323,37 +362,78 @@ class TrainingRun extends Model
     }
 
     /**
-     * One cell: what the run did here if it did anything, and otherwise which of
-     * the slot's gates this run has not cleared yet.
+     * Which of the three career years a career turn falls in.
+     *
+     * `turn_entries.turn` is a single monotonic counter — `nextTurn()` is
+     * max(turn) + 1 with no per-year reset — so the year is derived rather than
+     * stored. The divisor is the client's own grid: 24 turns per year, Early and
+     * Late for each of twelve months, corroborated against [Global] captures in
+     * docs/scenarios/09-global-race-calendar.md. Clamped because a Trainer can log
+     * a turn beyond the career and the grid has no fourth year to show it in.
+     */
+    public static function careerYearForTurn(int $turn): int
+    {
+        return min(RaceCatalogSlot::YEAR_SENIOR, max(RaceCatalogSlot::YEAR_JUNIOR, intdiv($turn - 1, 24) + 1));
+    }
+
+    public function currentYear(): int
+    {
+        $latest = (int) $this->turnEntries()->max('turn');
+
+        return $latest < 1 ? RaceCatalogSlot::YEAR_JUNIOR : self::careerYearForTurn($latest);
+    }
+
+    /**
+     * One cell: what the run did here if it did anything, and otherwise whether
+     * this turn's entry is still behind a fan gate.
+     *
+     * Deliberately silent on the Goal pennant. It used to come from
+     * `ScenarioSlot::isMandatoryGoal()`, which reads the scenario-scoped
+     * `is_mandatory` — and `f0ae288` seeds that false on every row, so the pennant
+     * has never actually rendered. Drawing it from a per-character Goal is the
+     * deferred fix and needs `trainee_goals`; until then an unearned pennant would
+     * be a worse lie than an absent one.
      *
      * @return array<string, mixed>
      */
-    private function calendarCell(ScenarioSlot $slot, ?RaceEntry $entry, ?int $fans, bool $hasWon): array
-    {
+    private function calendarCell(
+        string $title,
+        ?int $fansNeeded,
+        bool $maidenGated,
+        bool $mandatory,
+        ?RaceEntry $entry,
+        ?int $fans,
+        bool $manual,
+        bool $hasWon,
+    ): array {
         if ($entry !== null) {
-            return ['state' => 'past', 'label' => $slot->title];
+            return ['state' => 'past', 'label' => $title];
         }
 
-        if ($slot->isFreeRace()) {
-            // R61: free_race cells render with open-cell geometry plus the
-            // Trainer-entered marker and never a Goal pennant.
-            return ['state' => 'open', 'label' => $slot->title, 'manual' => true];
+        if ($manual) {
+            // R61: a free race is a Trainer's own entry, so it gets the open-cell
+            // geometry and the manual marker, and never a gate it does not have.
+            return ['state' => 'open', 'label' => $title, 'manual' => true];
         }
 
-        if ($slot->hasMaidenGate() && ! $hasWon) {
+        if ($maidenGated && ! $hasWon) {
             // No fan figure travels with this lock: the maiden gate clears on an
             // event, so a number here would send the Trainer off to grind toward
             // a target that decides nothing.
-            return ['state' => 'maiden_locked', 'label' => $slot->title];
+            return ['state' => 'maiden_locked', 'label' => $title];
         }
 
-        if ($slot->hasFanGate() && ($fans === null || $fans < $slot->fans_needed)) {
-            return ['state' => 'fan_locked', 'label' => $slot->title, 'fans_needed' => $slot->fans_needed];
+        if ($fansNeeded !== null && $fansNeeded > 0 && ($fans === null || $fans < $fansNeeded)) {
+            return ['state' => 'fan_locked', 'label' => $title, 'fans_needed' => $fansNeeded];
         }
 
+        // Still scenario-scoped, still the conflation the audit named: a career
+        // obligation is not a per-character Goal. Kept as-is so this commit only
+        // moves where the rows come from. The fix draws the pennant from
+        // trainee_goals and is offered to Slice 11 first — see the handoff note.
         return [
-            'state' => $slot->isMandatoryGoal() ? 'goal' : 'open',
-            'label' => $slot->title,
+            'state' => $mandatory ? 'goal' : 'open',
+            'label' => $title,
         ];
     }
 

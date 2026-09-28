@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\RaceEntryStatus;
+use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
@@ -25,14 +26,15 @@ function runWithFans(int $fans): TrainingRun
     return $run->fresh();
 }
 
-it('places a scenario slot in the calendar at its own month and half', function (): void {
+it('places a career-calendar slot in the grid at its own month and half', function (): void {
     $run = runWithFans(20000);
-    ScenarioSlot::factory()->create([
-        'scenario_key' => 'ura_finale',
-        'kind' => 'goal_race',
+    RaceCatalogSlot::factory()->create([
+        'scenario_key' => null,
+        'year' => 1,
         'title' => 'Tenno Sho (Spring)',
         'month' => 4,
         'half' => 'Late',
+        'turn' => 8,
         'is_mandatory' => true,
         'fans_needed' => 12000,
     ]);
@@ -47,12 +49,13 @@ it('places a scenario slot in the calendar at its own month and half', function 
 });
 
 it('locks a fan-gated race until this run has the fans it asks for', function (): void {
-    ScenarioSlot::factory()->create([
-        'scenario_key' => 'ura_finale',
-        'kind' => 'goal_race',
+    RaceCatalogSlot::factory()->create([
+        'scenario_key' => null,
+        'year' => 1,
         'title' => 'Oka Sho',
         'month' => 4,
         'half' => 'Early',
+        'turn' => 7,
         'is_mandatory' => false,
         'fans_needed' => 15000,
     ]);
@@ -67,12 +70,13 @@ it('locks a fan-gated race until this run has the fans it asks for', function ()
 });
 
 it('shows a maiden-gated race as a maiden lock until this run has won', function (): void {
-    ScenarioSlot::factory()->create([
-        'scenario_key' => 'ura_finale',
-        'kind' => 'goal_race',
+    RaceCatalogSlot::factory()->create([
+        'scenario_key' => null,
+        'year' => 1,
         'title' => 'Naruta Kinpa Cup',
         'month' => 5,
         'half' => 'Early',
+        'turn' => 9,
         'is_mandatory' => false,
         'is_maiden_gated' => true,
         'fans_needed' => 0,
@@ -95,18 +99,19 @@ it('shows a maiden-gated race as a maiden lock until this run has won', function
 
 it('marks a slot this run has already raced as past', function (): void {
     $run = runWithFans(20000);
-    $slot = ScenarioSlot::factory()->create([
-        'scenario_key' => 'ura_finale',
-        'kind' => 'goal_race',
+    $slot = RaceCatalogSlot::factory()->create([
+        'scenario_key' => null,
+        'year' => 1,
         'title' => 'Asahi Hai Futurity Stakes',
         'month' => 11,
         'half' => 'Late',
+        'turn' => 21,
         'is_mandatory' => true,
     ]);
 
     RaceEntry::create([
         'training_run_id' => $run->id,
-        'scenario_slot_id' => $slot->id,
+        'race_catalog_slot_id' => $slot->id,
         'status' => RaceEntryStatus::Completed,
         'placement' => 3,
     ]);
