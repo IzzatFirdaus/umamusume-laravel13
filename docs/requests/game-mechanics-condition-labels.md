@@ -47,7 +47,7 @@ of a placeholder awaiting drift.
 ## 4. Compliance clause for anything accepted
 
 Every returned string or colour used in UI must pass, before `DESIGN.md`/token
-adoption: C-4 lore gate (no equine framing in labels), R-02 (no em dashes in any
+adoption: C-4 lore gate (no equine framing in labels), R-02 (no em dashes in any <!-- lore-ignore-line class=1 cite=C-4 -->
 accompanying copy), the `N/A` disclosure ruling, and the provenance requirement
 (every fact stores source + fetched date; research D-285/D-286 apply: one
 correction must propagate to every copy of the literal).

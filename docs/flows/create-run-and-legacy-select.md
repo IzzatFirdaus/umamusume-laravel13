@@ -102,11 +102,11 @@ saved today; it cannot.
 
 ## 9. Lore-safe copy guidance
 
-- Characters are Umamusume (humanoid race); no equine vocabulary or iconography in
+- Characters are Umamusume (humanoid race); no equine vocabulary or iconography in <!-- lore-ignore-line class=1 cite=C-4 -->
   any label, tooltip, empty state, or export header (C-4, DESIGN §6).
 - Ancestors: "Parent A" / "Parent B", or "Legacy"/"Ancestor"; mechanic name
-  "Inspiration"; screen/widget name "Legacy Select". Never sire/dam/mare/foal or
-  breeding framing, including in `title` attributes and CSV headers.
+  "Inspiration"; screen/widget name "Legacy Select". Never sire/dam/mare/foal or <!-- lore-ignore-line class=1 cite=C-4 -->
+  breeding framing, including in `title` attributes and CSV headers. <!-- lore-ignore-line class=1 cite=C-4 -->
 - No unverified client strings as UI copy: words pass only when measured and
   provenance-recorded (D-20; MoodTier words are, pill colours are not).
 

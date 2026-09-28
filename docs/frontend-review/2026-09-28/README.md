@@ -332,10 +332,10 @@ design record. Counts below.
   no period entered against it**" — the verb agrees (`results have`) but the
   pronoun stays singular (`against it`); `grade-point-meter.blade.php:104-106`.
   Reproduced live on run 3 (light+dark captures).
-- Lore grep (banned equine terms, `🏇`) over `resources/views/**`: **zero
+- Lore grep (banned equine terms, `🏇`) over `resources/views/**`: **zero <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 -->
   matches**. All fixture seed strings and audit copy here were screened.
   ("Homestretch Haste", "Unstoppable" etc. are verbatim source skill names —
-  allowed on the data path, gated at display; no authored copy uses equine
+  allowed on the data path, gated at display; no authored copy uses equine <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 -->
   framing.)
 - KI-7 (em dashes in rendered Blade copy): **not reproduced** — no em dash
   renders in any captured page.

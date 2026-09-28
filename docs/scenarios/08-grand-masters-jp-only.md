@@ -37,9 +37,9 @@ develops a VR product, 「メガドリームサポーター」, and the three ar
 names**; 「三女神」 ("three goddesses") is Cygames' own wording for them.
 
 - Write them as **the three goddesses** or by name. Never as bloodlines, foundation stock, or any
-  breeding framing.
-- **Do not import the English wiki's reward title "Trail of Hooves"**, nor any equine vocabulary
-  attached to this scenario in fan translation. Where a fan rendering contains an equine noun, the
+  breeding framing. <!-- lore-ignore-line class=1 cite=C-4 -->
+- **Do not import the English wiki's reward title "Trail of Hooves"**, nor any equine vocabulary <!-- lore-ignore-line class=1 cite=C-4 -->
+  attached to this scenario in fan translation. Where a fan rendering contains an equine noun, the <!-- lore-ignore-line class=1 cite=C-4 -->
   Japanese string is the one to quote.
 - Note one JP-side spelling variance so a future pass does not "fix" it wrongly: some press renders
   the first goddess **ゴドルフィンアラビアン** rather than ゴドルフィンバルブ.

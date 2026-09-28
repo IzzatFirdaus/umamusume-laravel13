@@ -70,15 +70,15 @@ Evidence | Exceptions | Owner | Status
 ## C-4 allowed hit classes (grep proposes, Guardian decides)
 
 1. Naming the banned list to forbid it (rules files, this registry, ADR text).
-2. Substrings inside ordinary words or proper nouns: `damaged`, `desired`,
-   adjective `stable`, `Red Desire`, "La dama perfetta".
+2. Substrings inside ordinary words or proper nouns: `damaged`, `desired`, <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 -->
+   adjective `stable`, `Red Desire`, "La dama perfetta". <!-- lore-ignore-line class=2 cite=GATE-REGISTRY.md#C-4 -->
 3. Verbatim quoted game/client source data where the term is data, not framing
    (display path is the gated surface; dataset keys like `intelligence`,
    `friend` are out of scope per C-4's copy-and-framing boundary).
 4. A gate's own source: the pattern list in `tools/gate.py` and the grep list in
    `tools/lore.php` match `make lore` by construction, so each scanner is a permanent
-   self-hit. Expect them, do not clear them. Composition on the `21f9906` tree: the sweep
-   prints 131 match lines, of which 5 distinct `tools/lore.php` lines and 3
+   self-hit. Expect them, do not clear them. Composition on the `ebfc227` tree: the sweep
+   prints 98 match lines plus 49 exempt lines, of which 5 distinct `tools/lore.php` lines and 3
    `tools/gate.py` lines are the scanners naming their own patterns. The total counts
    prints, not distinct lines - a line matching two of the three greps prints twice - and
    it moves whenever a rules file quotes a banned word, so treat it as a measurement of
@@ -86,6 +86,42 @@ Evidence | Exceptions | Owner | Status
    path list.
 Ambiguous framing (a real violation vs a quote) requires a Lore Guardian or owner
 ruling before merge; the ruling is recorded next to the hit list.
+
+## lore-ignore-line, the line-scoped exemption (R51, 2026-09-29)
+
+A line that exists to state or itemize a lore ruling is the gate's own text, not a new hit every
+time the gate runs. `lore-ignore-line` makes that case explicit and auditable instead of
+re-counting it each slice.
+
+- Shape: an HTML comment on the line it exempts, carrying one allowed-hit class from above plus
+  the ruling it answers to - `<!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->`.
+- Scope: one line. Not a file, not a block, not a directory. Removing the marker restores the hit.
+- Where: `docs/` only. `LoreGateParityTest` fails on a marker anywhere else, and the `lore-code`
+  gate does not honour markers at all, so one planted outside `docs/` buys nothing - the line it
+  tried to hide still prints in the app-path sweep.
+- What it is not: a ruling. It records a class and a citation that already exist, and a marker
+  missing either is a test failure. The Guardian still decides the case; the marker only stops the
+  count from re-litigating a settled one.
+- Both runners honour it, and the two are measured against each other: `make lore` pipes each grep
+  through `grep -v` on the comment opener quoted above, `composer lore` skips the same literal in
+  docs mode. On the `ebfc227` tree the shell stages print 20 + 35 + 43 = 98 and the runner reports
+  98 with 49 exempt.
+
+Baseline moved 147 → 98 on 2026-09-29 by marking 41 ruling-table lines across 10 `docs/` files:
+the §3.1 vocabulary table and the §3.2 allowed-sense list in `design-research/CONSTRAINTS.md`, the
+two C-4 class rows here, the hit-itemization rows in the slice-3, slice-5, slice-6 and slice-9
+records, the rule lines in `flows/create-run-and-legacy-select.md`,
+`requests/game-mechanics-condition-labels.md` and the frontend-review grep report, and the JP-only
+warning in `scenarios/08`.
+
+What stays counted, on purpose: the 20 `docs/UMAMUSUME_REFERENCE.md` lines and the
+`docs/scenarios/*` guide rows that quote client and wiki vocabulary as source data; five
+`design-research/DESIGN.md` prose lines and the D-186 and D-268 lines in
+`design-research/CONSTRAINTS.md`, where a banned word is used as ordinary English rather than to
+name the ban; three `design-research/_scratch` patch scripts holding quoted doc text; ADR-0005's
+adjective use; and one PNG that matches as a binary file and cannot carry a comment. Those are
+reword-or-rule cases, not self-reference, and marking them would hide the question instead of
+answering it.
 
 ## Known gate gaps (recorded, not hidden)
 

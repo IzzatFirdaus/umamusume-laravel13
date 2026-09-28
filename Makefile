@@ -34,11 +34,14 @@ backup:
 
 # C-4 lore grep (CONTEXT.md CONSTRAINTS.md): violations are hard failures.
 # Words appear inside "damaged"/"stable weather"; each hit needs a context ruling.
+# A line carrying `lore-ignore-line class=<1-4> cite=<rule>` is a ruling already on the
+# page rather than a new hit, so it is filtered here (R51). tools/lore.php applies the
+# same filter; LoreGateParityTest fails if either copy stops honouring it.
 lore:
-	git grep -inE "horse|sire|foal|🏇" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' || true
-	git grep -inwE "dam|mare|stable" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' || true
+	git grep -inE "horse|sire|foal|🏇" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' | grep -v "<!-- lore-ignore-line" || true
+	git grep -inwE "dam|mare|stable" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' | grep -v "<!-- lore-ignore-line" || true
 	# 16 additional patterns from docs/design-research/CONSTRAINTS.md §3.1 (banned vocabulary for characters)
-	git grep -inwE "stallion|colt|filly|gelding|equine|pony|thoroughbred|breeding|pairing|bloodline|pedigree|lineage|hoof|mane|tail|withers" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' || true
+	git grep -inwE "stallion|colt|filly|gelding|equine|pony|thoroughbred|breeding|pairing|bloodline|pedigree|lineage|hoof|mane|tail|withers" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' | grep -v "<!-- lore-ignore-line" || true
 
 # Extended gate over shipped code, additive to `lore` rather than a replacement.
 #

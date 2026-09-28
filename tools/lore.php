@@ -26,6 +26,18 @@ declare(strict_types=1);
  * whether a hit is a violation (CONSTRAINTS.md §3, AGENTS.md), so the script's job is
  * to surface, not to fail. The exit code is always 0; the hit count is printed so a
  * caller can assert on it.
+ *
+ * Line marker (R51). A hit line carrying a `<!-- lore-ignore-line ... -->` comment is
+ * skipped and counted separately, which is what stops the gate's own ruling tables from
+ * inflating the total every time a slice records a new itemization row. The comment
+ * opener is part of the needle so prose about the mechanism is not mistaken for a
+ * directive. The marker is line-scoped, not file- or block-scoped: one marked row
+ * exempts that row and nothing else. It carries the allowed-sense class and the ruling
+ * it answers to, and `LoreGateParityTest` holds both halves of that shape plus the rule
+ * that markers live in `docs/` only. The `make lore` recipes filter the same literal, so
+ * the two runners cannot disagree about what was skipped. `lore-code` deliberately does
+ * not: a marker outside `docs/` is against the rule, and the hit it tried to hide still
+ * prints.
  */
 
 use Symfony\Component\Process\Process;
@@ -54,6 +66,7 @@ $runs = $mode === 'code'
     ];
 
 $total = 0;
+$exempt = 0;
 
 foreach ($runs as [$flags, $pattern, $paths, $untracked]) {
     $command = ['git', 'grep', $flags];
@@ -82,12 +95,25 @@ foreach ($runs as [$flags, $pattern, $paths, $untracked]) {
     $output = trim($process->getOutput());
 
     if ($output !== '') {
-        $lines = explode("\n", $output);
-        $total += count($lines);
-        echo $output."\n";
+        foreach (explode("\n", $output) as $hit) {
+            // A marked line is a ruling already on the page, not a new hit. Counted
+            // apart so the exemption is visible in the summary rather than silent, and
+            // only in docs mode: markers belong in `docs/` (R51), and a marker planted
+            // outside must buy nothing, so `code` mode never filters. The comment opener
+            // is part of the needle so prose and headings that merely name the directive
+            // are not mistaken for one.
+            if ($mode === 'docs' && str_contains($hit, '<!-- lore-ignore-line')) {
+                $exempt++;
+
+                continue;
+            }
+
+            $total++;
+            echo $hit."\n";
+        }
     }
 }
 
-echo "lore-{$mode}: {$total} hit(s)\n";
+echo "lore-{$mode}: {$total} hit(s)".($mode === 'docs' ? ", {$exempt} exempt line(s)" : '')."\n";
 
 exit(0);

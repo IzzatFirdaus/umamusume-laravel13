@@ -53,28 +53,28 @@ Grep case-insensitively across all UI text, identifiers, seed data, export heade
 
 | Banned | Why | Required instead |
 |---|---|---|
-| `horse`, `horses` | the core violation | Umamusume |
-| `sire`, `dam` | parental animal terms | inheritance parent, parent umamusume |
-| `mare`, `stallion`, `filly`, `colt`, `gelding` | sex-specific animal terms | umamusume, trainee |
-| `foal` | offspring term | trainee umamusume |
-| `equine`, `pony`, `thoroughbred` | animal framing | umamusume |
-| `stable` as a noun for a character container | animal framing | roster, catalog, collection |
-| `breeding`, `pairing`, `bloodline`, `pedigree`, `lineage` of characters | the cut PRD §6.3 system | inheritance (two parent references only) |
-| `🏇` and any horse/riding emoji | costume framing | none |
-| `hoof`, `mane`, `tail`, `withers`, `muzzle` | body-part animal framing | avoid; describe the garment or accessory if needed |
+| `horse`, `horses` | the core violation | Umamusume | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+| `sire`, `dam` | parental animal terms | inheritance parent, parent umamusume | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+| `mare`, `stallion`, `filly`, `colt`, `gelding` | sex-specific animal terms | umamusume, trainee | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+| `foal` | offspring term | trainee umamusume | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+| `equine`, `pony`, `thoroughbred` | animal framing | umamusume | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+| `stable` as a noun for a character container | animal framing | roster, catalog, collection | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+| `breeding`, `pairing`, `bloodline`, `pedigree`, `lineage` of characters | the cut PRD §6.3 system | inheritance (two parent references only) | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+| `🏇` and any horse/riding emoji | costume framing | none | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+| `hoof`, `mane`, `tail`, `withers`, `muzzle` | body-part animal framing | avoid; describe the garment or accessory if needed | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 | `jockey`, `rider`, `saddle`, `tack`, `reins`, `bit` | the human-animal control frame | Trainer (which is us, and means something different here) |
 | `paddock`, `herd`, `flock`, `pack` | collective animal nouns | roster, list, catalog |
-| "your horse", "your mount", "the animal", "the girl and her horse" | framing | your trainee, the umamusume |
+| "your horse", "your mount", "the animal", "the girl and her horse" | framing | your trainee, the umamusume | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 
 ### 3.2 Context-allowed senses (do not "fix" these)
 
 The grep will hit these. They are not violations, and the Guardian's ruling stands over the tool's count:
 
-- `dam` inside `damaged`, `demand`, `command`
-- `sire` inside `desired`, `surprise`, and the Umamusume name `Red Desire`
-- `stable` as an adjective: "stable growth", "keep the build stable", "a stable control identifier" (`tests/Feature/ReviewFormAccessibilityTest.php:39`, ruled 2026-09-28). The ban is on `stable` as a noun naming a character container; an adjective describing anything is the allowed sense.
-- `mare` inside `nightmare`
-- `tail` inside `detail`, `retail`, `curtail`
+- `dam` inside `damaged`, `demand`, `command` <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.2 -->
+- `sire` inside `desired`, `surprise`, and the Umamusume name `Red Desire` <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.2 -->
+- `stable` as an adjective: "stable growth", "keep the build stable", "a stable control identifier" (`tests/Feature/ReviewFormAccessibilityTest.php:39`, ruled 2026-09-28). The ban is on `stable` as a noun naming a character container; an adjective describing anything is the allowed sense. <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.2 -->
+- `mare` inside `nightmare` <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.2 -->
+- `tail` inside `detail`, `retail`, `curtail` <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.2 -->
 - `account` in the verb idiom "account for": "the list the template has to account for" (`tests/Feature/ReviewQueueTest.php:62`, ruled 2026-09-28). The bill and login senses are what the ban exists for, and `PRD.md` NFR-1 declares this tool has no account and no auth surface, so neither can appear as product language; "account for" means "cover", which is ordinary English in a code comment.
 - `account` inside Laravel's own shipped queue defaults: `your-account-id`, the AWS SQS env fallback at `config/queue.php:60` (ruled 2026-09-28). `account` and `login` sit in the `lore-code` word list to catch an auth surface being built, which is a scope question for the Planner Domain Specialist and Architect, not a lore question about a framework stub nobody wrote copy for.
 - Japanese source strings and quoted official notices: source data, never a violation in itself
@@ -110,7 +110,7 @@ UI labels must use the Global English client's words, not the JP client's and no
 | Finished character | Veteran Umamusume | Hall of Fame, graduated |
 | Inheritance unit | Spark | Factor (JP-side 因子 wording) |
 | Inheritance **system** | Inspiration | Inheritance as the English label (that is the JP 継承 word, not the `[Global]` one) |
-| Ancestors picked for a run | Legacies | Parents, grandparents, bloodline (D-267 bars these in copy) |
+| Ancestors picked for a run | Legacies | Parents, grandparents, bloodline (D-267 bars these in copy) | <!-- lore-ignore-line class=1 cite=D-267 -->
 | Energy | Energy | Stamina for the gauge (collides with the stat) |
 | Mood | Mood, with the five state words shown | Motivation (the JP guide gloss), Condition |
 | Scenario names | Ura Finale, Unity Cup, Brighter Together Our Grand Concert; Trackblazer or Twinkle Star Climax for the third | Make a new track!!, Climax bare |
@@ -229,8 +229,8 @@ Beyond the general `antislop` / `antislop-ui` gates, these are the specific ways
 **D-70. No purple-blue gradient.** It is the tell of an AI-generated dashboard and it appears nowhere in the corpus.
 **D-71. No glassmorphism, no blurred panels, no neon-on-charcoal.** Not present in the source material (`RAW-FINDINGS.md` §3.1).
 **D-72. No Inter, no default system-ui as the primary voice.** The client's letterforms are rounded (`DESIGN.md` §4.1).
-**D-73. No emoji as icons.** No 🏇, no 🐎, no ✨ sprinkled through labels.
-**D-74. No racetrack clip-art, no horseshoe motifs, no silhouette stock imagery.** Costume, and partly a lore violation.
+**D-73. No emoji as icons.** No 🏇, no 🐎, no ✨ sprinkled through labels. <!-- lore-ignore-line class=1 cite=D-73 -->
+**D-74. No racetrack clip-art, no horseshoe motifs, no silhouette stock imagery.** Costume, and partly a lore violation. <!-- lore-ignore-line class=1 cite=D-74 -->
 **D-75. Ornament budget: at most two motifs per visual region** (`DESIGN.md` §7). The client's density works against a character model we do not have.
 **D-76. No fake data presented as real.** Any trainee, skill, or turn appearing in a mockup or prototype is labelled sample data where the reader can see it. Two further requirements:
 - **Use real catalog names, not invented ones.** `Rice Shower`, `Oguri Cap`, `Mejiro McQueen`, `Special Week` and the skill names in `UMAMUSUME_REFERENCE.md` are real Global strings. Inventing a trainee named "Star Blazer" puts fabricated data into the catalog's shape and reads as filler.
@@ -238,7 +238,7 @@ Beyond the general `antislop` / `antislop-ui` gates, these are the specific ways
 
 **D-77. No lorem ipsum in a delivered artifact.** Placeholder copy is a review failure.
 
-**D-78. Do not design the cut features.** No support-card manager, no event calendar, no race planner, no breeding view. PRD §6.
+**D-78. Do not design the cut features.** No support-card manager, no event calendar, no race planner, no breeding view. PRD §6. <!-- lore-ignore-line class=1 cite=D-78 -->
 
 **D-79. No AI copy voice.** No "unleash", "seamless", "effortless", "level up your game", no exclamation-mark CTAs, no em dash in prose (`CLAUDE.md` Banned Patterns).
 
@@ -933,7 +933,7 @@ G-13 deserves its note: a sweep that only checks element presence and ARIA attri
 - Never add a schema column to make a mockup work. That is an Architect escalation with a PRD citation, or it does not happen.
 - Never add a dependency (font, icon pack, chart library, animation library) without approval. Root C-8.
 - Never ship a saturated chrome surface under text. D-3.
-- Never use equine vocabulary in any artifact, including a prototype that will be thrown away. NFR-6 has no scratch exemption.
+- Never use equine vocabulary in any artifact, including a prototype that will be thrown away. NFR-6 has no scratch exemption. <!-- lore-ignore-line class=1 cite=NFR-6 -->
 - Never promote an `❌ UNVERIFIED` reference item into UI copy. D-20.
 - Never seed a game numeric without a server qualifier and a source date, and never carry a JP value under a Global scenario name. D-227, D-228.
 - Never delete or stub a state view to pass a gate. Root floor: no stub bodies.
