@@ -7,6 +7,16 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, Slice 14):** **Unchanged — 21 filed, 18 closed, 3 open.** Slice 14 settled the
+tier-label question Slice 13 left contested: G1, G2 and G3 are now sourced **per race** from a dated
+two-publisher extraction (`329cec1`) and the seeder holds no code-to-label constant, so G-16c is green
+for `database/seeders/` and `config/`. That reaches none of the three open items — KI-10 is the Grade
+Point placement ratio, KI-15 which GP track applies, KI-17 the consecutive-race count — so all three
+stay open. No KI was filed for the two questions Slice 14 leaves, because neither is a defect: the 115
+Open rows resting on a disclosed code-level generalisation, and the parser's map unreconciled under
+R72's idle condition. Both are recorded with their reasoning in D-153 and in
+`docs/design-research/verification/slice-14-2026-09-29.md` §2.5 and §7, where a reader of the map will
+meet them. Prior:
 **Status (2026-09-29, Slice 13):** 21 issues filed. **18 resolved/closed** (KI-1–9, KI-11–14,
 KI-18–22). **3 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
 consecutive-race count cannot be derived from the log). Slice 13 closed KI-21 by rebuilding the race

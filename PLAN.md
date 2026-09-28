@@ -91,6 +91,7 @@ recorded sha is dropped.
 | **4 — Implementation** | **Slice 11 Complete** | `c0a743f` (T1), `f0ae288` (T2), `70248b3` (T3), `5820e77` (T4), `65f8b92` (T5); KI-20 closed. Three claims corrected by Slice 12: the "pre-existing" failure label was a T4 regression, "297 rows / `ura_finale_slots.json`" is 296 rows across three real files, and R59's record commit was never made |
 | **4 — Implementation** | **Slice 12 HALTED at T3** (corrected; it was recorded Complete in error) | `c86ed9f` (T0), `2d0c1dc` (T1), `b295d16` (T2), `37ccc08` (T3 findings + halt). T4 never ran: KI-21 and KI-22 filed, `origin/master` held at `4992282` all slice. KI-22 later found to be filed on a wrong cause |
 | **4 — Implementation** | **Slice 13 Complete** | `6c1969f` (T1+T2, KI-21 closed), `cb9b61f` + `5ed1ebd` (T3 pins), this commit (T5 docs). Suite 562 passed, all gates green, deferred push finally made |
+| **4 — Implementation** | **Slice 14 Complete** | `329cec1` (T1 tier join, G-16c green), `24e491c` (D-153/§1.2.6/G-16c dated), `3ae437d` (T2 quiet edge). Suite 569 passed. 118 tiers restored per race, none lost; parser left a documented dissent because R72's idle condition failed |
 | **5 — Verification** | Routine | Browser metrics: light 4.74 / dark 5.48 / badges 9.00+; energy bands 6.40 / 8.34 / 10.89 light and 12.60 / 10.57 / 6.88 dark, and the preview pairs, in `slice-5-2026-09-28.md` |
 | **6 — Iteration** | Unfrozen by Slice 2, **not started** | Owner instruction: the slice's commit unfreezes it; no Phase 6 anatomy in this session |
 
@@ -416,7 +417,7 @@ conditions.
 
 ---
 
-## Owner Rulings Ledger (R54-R71)
+## Owner Rulings Ledger (R54-R74)
 
 R60 makes a ruling a repo artifact rather than a transcript line, so the ledger records each ruling
 as the brief gave it. Where the brief supplied a full sentence it is quoted; where it supplied a
@@ -443,6 +444,36 @@ ruling is worse than recording it short.
 | R69 | 13 | Placement renders 1st, 2nd, 3rd, 4th, 11th, 12th, 13th, 21st, 22nd, 23rd correctly through a small helper, with a test table for those values | verbatim in brief |
 | R70 | 13 | The deferred push goes as one plain push carrying the interleaved peer commits, and the record names every sha that is not this slice's | verbatim in brief |
 | R71 | 13 | The disclosure test asserts the branch's fields by input name through the rendered DOM, must fail against HEAD, and the writer is additionally reached through the rendered form rather than a direct post | verbatim in brief |
+| R72 | 14 | Settle the tier question on evidence read in a rendering browser with location asserted before each read; commit a dated extraction and join per race; restore a label only where both publishers agree and a page date postdates 2026-07-01; reconcile the parser's map only if its file is clean and the peer session is confirmed idle | verbatim in brief |
+| R73 | 14 | Before a push, read every commit in the range it will carry that touches `database/`, `config/`, `app/Services/DataPipeline/` or the research corpus, starting with anything the peer lands during the slice | verbatim in brief |
+| R74 | 14 | Record the quiet-edge exception beside the §3.4 pair table with its measurements, its two precedents and its carrying cues; docs only, no token and no component change | verbatim in brief |
+
+---
+
+## Slice 14 Summary (2026-09-29) — Tier labels settled per race, quiet edge recorded
+
+Brief: verification and recording. No new dependency, no token change, no parser edit unless R72's
+coordination condition holds. Rulings R72-R74.
+
+| Task | Commit | Claim, with the thing that proves it |
+|---|---|---|
+| T0 opening push | `debc4d0` on origin | One plain push carrying the four Slice 13 docs-only commits; `ls-remote` = `debc4d0e6bda…` equals local HEAD. R73 read list: all four this session's |
+| T1 tier join | `329cec1`, `24e491c` | Both publishers read in a rendering browser with location asserted. **G1 34/34, G2 42/42, G3 76/76 agree per race; Open and Pre-OP do not** (Game8 is graded-only, uma.guide alone says "OP/L (Open/Listed)"). `GRADE_MAP` deleted; seeder joins on `database/seeders/data/race-tier-labels-2026-09-29.json` and stores the evidence date, not the seed moment. G-16c: no matches in seeder or config, exit 1, pinned by `TierLabelJoinTest`. Re-seed twice: 296 rows, G1 34 / G2 42 / G3 76 / OP 118 / null 26 — 118 restored, none lost, no row without a `source_url` |
+| T2 quiet edge | `3ae437d` | DESIGN.md §3.4 records R74 as three conditions, both precedents, and the numbers (1.22 / 1.37 unselected against 5.89 / 10.57 selected and a 4.83 pair difference) |
+| T3 rendered tiers | (record §4) | The calendar renders **no** tier text (grep 0, 0 tier nodes in `role="img"` cells, both themes), so no calendar pair was invented. Race panel: select 6.95 / 12.71, `G2` and `G3` 5.78 / 6.64, ordinal 6.64 dark, calendar marker 8.30 dark. Picker distribution read off the DOM matches the re-seed exactly |
+| T4 gates + push | (this commit) | Pest 569 passed / 2 skipped / 0 failed; Pint, PHPStan, gate.py, build clean; lore-docs 98/51; lore-code 7. Server stopped before the suite, so Slice 13's lock failure was not repeated |
+
+**Two things this slice deliberately did not do.** The parser's five-entry map stays a documented
+dissent: R72 requires the peer session confirmed idle, and its branch advanced twice during the slice
+even though the file itself was clean. And the 115 Open rows that rest on a generalisation from three
+client-glyph rows keep their label with that status written into the same row (`scope:
+code-level-client-naming-pin`, `per_row_sourced: false`) rather than being nulled by a strict reading —
+dropping a tier correct since Slice 11 to satisfy a grep is the owner's trade, recorded in D-153 and in
+`slice-14-2026-09-29.md` §2.5.
+
+**Register unchanged:** KI-10, KI-15 and KI-17 stay open. T1's evidence is about tier labels; KI-10 is
+the Grade Point placement ratio, KI-15 which GP track applies, KI-17 the consecutive-race count. None
+is touched. 21 filed / 18 closed / 3 open, unchanged from Slice 13.
 
 ---
 
