@@ -177,3 +177,26 @@ it('still creates a run with only a trainee', function (): void {
 
     expect(TrainingRun::first()->character_card_id)->toBeNull();
 });
+
+it('drops the form attribution, not the run, when the card it named is deleted', function (): void {
+    $umamusume = Umamusume::factory()->create();
+    $card = CharacterCard::factory()->create(['umamusume_id' => $umamusume->id]);
+
+    $run = TrainingRun::create([
+        'umamusume_id' => $umamusume->id,
+        'character_card_id' => $card->id,
+        'status' => 'Active',
+    ]);
+
+    // `character_cards` is engine-owned reference data, so this delete is a fetch or
+    // a correction dropping a card the Trainer is pointing at. The FK must null the
+    // optional attribution rather than refuse the delete or take the run with it --
+    // without `nullOnDelete()` the line below throws a foreign key violation here.
+    $card->delete();
+
+    $run->refresh();
+
+    expect($run->character_card_id)->toBeNull()
+        ->and($run->umamusume_id)->toBe($umamusume->id)
+        ->and(TrainingRun::query()->whereKey($run->id)->exists())->toBeTrue();
+});
