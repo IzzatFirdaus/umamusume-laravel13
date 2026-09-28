@@ -1,7 +1,13 @@
 # Trainer Desk — Frontend Development Plan
 
-**Status:** Phase 4 (Implementation) active through Slice 5. Slice 3's T8 (branch reconciliation) is **resolved** — see KI-13. Slice 4 (repo-integrity only) completed. Phase 6 remains unfrozen and unstarted. Slice 5 was frontend-only per R24: the band and the guided rail are mounted on the run screen, the screen has its two-region frame, and the flow is completable from the keyboard.
-**Last Updated:** 2026-09-28 (Slice 5 T0–T5 landed; `master` at `03a5d05` + this docs commit; `§Open Decisions` carries the measured Livewire case and `slice-5-2026-09-28.md` carries every number behind it. Prior: Slice 4 T1–T6; `feat/scenario-races-is-manual` merged at `dc13d8d`; `origin/master` at `33949f5` — nothing in Slice 5 was pushed)
+**Status:** Phase 4 (Implementation) active through Slice 6. Slice 6 is a closing slice: the six
+doc amendments landed, the Livewire question is decided rather than open, D-40's axis deviation is
+retired as a ruling, and the mood tier is finally rendered — as a pill with its arrow, on measured
+pairs. No new screens, no schema work, no dependency. Phase 6 remains unfrozen and unstarted.
+**Last Updated:** 2026-09-28 (Slice 6 T0–T5: lore rulings at `b81df3f`/`7da2d22`, doc amendments at
+`61f6165`, mood pill at `51d29d4`, `--color-on-green` at `e80c6f2`; `slice-6-2026-09-28.md` carries
+every measured pair. First push sent `e88bb7b..586e65f`. Prior: Slice 5 frontend-only per R24, band
+and rail mounted, two-region frame and keyboard path landed)
 
 ---
 
@@ -192,6 +198,31 @@ unreadable slivers - persistence, the rule the frame serves, is measured, and th
 open item. Escape moves focus rather than discarding typed values. `text-on-pick` is borrowed
 for the green Hint badge because it is the only ink in the system that stays dark in both themes, and adding
 `--color-on-green` is a design-system call this slice does not own.
+
+---
+
+## Slice 6 Summary (2026-09-28) — Closing slice, R26-R32
+
+Adjudicate what Slice 5 left in the air, land the doc amendments, finish the mood and token-hygiene
+residuals, push. Frontend and docs only: no schema, no config, no new screen, no dependency (C-8).
+
+| Task | Commit | What landed |
+|---|---|---|
+| T0: push, then the two `lore-code` hits | `b81df3f`, `7da2d22` | `e88bb7b..586e65f` pushed once, plain; `stable` (adjective) and `account` ("account for") ruled allowed and written into §3.2 with citations, plus the unexplained `config/queue.php` `your-account-id`; no violation, so no KI and no peer file touched |
+| T1: six doc amendments | `61f6165` | D-40 as region lifetimes; the radio clause reversed; controller inventory; Livewire **decided** with a reopen criterion; `aria-live` closed as correct-by-design; the two audit corrections recorded |
+| T2: mood tokens, pill, legibility | `51d29d4` | Five `--color-mood-*` + `--color-on-mood`; `x-mood-pill` with the D-259 arrow; `MoodTier::arrow()`; timeline column and state-region readout; pairs measured in both themes, floor 5.82:1 |
+| T3: the green ink borrow | `e80c6f2` | `--color-on-green` #1F1508, 9.02:1 measured in both themes; the advisory badge and two stale comments corrected; `TokenPairHygieneTest` pins the naming |
+| T4: gates + browser pass | this commit | 2 skipped, 374 passed (1,247 assertions); pint passed; PHPStan level 6 clean; `gate.py` PASS; lore 137 / lore-code 6 all explained; build 57.37 kB CSS, all seven new utilities in the bundle; token count 53 → 60 |
+| T5: record, second push | this commit + push | `docs/design-research/verification/slice-6-2026-09-28.md`; PLAN and KNOWN-ISSUES re-baselined |
+
+**Deviation the reviewer should look at first.** The mood pill does not use §3.4's tint-and-border
+pattern; it keeps the client's saturated fill and steps the ink. The pale-fill reading produced five
+near-whites that cannot order a scale and an arrow at 2.5-2.9:1. §3.4, §3.7 and §6.17 are amended to
+carry the measured numbers, and the reasoning is in `slice-6-2026-09-28.md` §6.
+
+**Still unmeasured:** whether a Trainer distinguishes `↑` from `→` at the shipped 12 px. The ratio
+floor is 5.82:1 and the geometry is recorded; the glyph legibility needs a human read, and no
+capture was taken.
 
 ---
 

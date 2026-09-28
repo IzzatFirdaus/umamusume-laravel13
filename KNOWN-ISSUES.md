@@ -7,10 +7,15 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
-**Status (2026-09-28, Slice 5):** 15 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
-**1 open** (KI-10: Trackblazer Grade Points placement ratio + year bucket). KI-11's
-`--color-green-tint` half closed with the Safe band landing and being measured, so the
-retire-and-amend clause of R23 does not trigger.
+**Status (2026-09-28, Slice 6):** 15 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
+**1 open** (KI-10: Trackblazer Grade Points placement ratio + year bucket). Slice 6 closed KI-14's
+last residual as correct-by-design rather than fixing it (`aria-live` on a flow that navigates, so
+there is no in-place change to announce), filed nothing, and moved no threshold. The two
+`lore-code` hits that arrived with the concurrent session's review-queue work were ruled allowed
+under C-4 and written into `docs/design-research/CONSTRAINTS.md` §3.2 with citations; neither was a
+violation, so neither became an entry here.
+Prior: **Status (2026-09-28, Slice 5):** KI-11's `--color-green-tint` half closed with the Safe band
+landing and being measured, so the retire-and-amend clause of R23 does not trigger.
 
 ---
 
