@@ -6,8 +6,10 @@ namespace App\Models;
 
 use App\Enums\TurnEventType;
 use App\Models\TurnEvents\NpcFriendshipPayload;
+use App\Models\TurnEvents\RaceFatiguePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\TurnEvents\SpiritBurstPayload;
+use App\Models\TurnEvents\TeamRankPayload;
 use Database\Factories\TurnEventFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -100,6 +102,34 @@ class TurnEvent extends Model
     }
 
     /**
+     * The Team Rank letter recorded on a turn, when one was (D-222).
+     */
+    public function teamRankPayload(): ?TeamRankPayload
+    {
+        $deltas = $this->deltas;
+
+        if (! is_array($deltas) || ! TeamRankPayload::matches($deltas)) {
+            return null;
+        }
+
+        return TeamRankPayload::fromArray($deltas);
+    }
+
+    /**
+     * The consecutive-race count recorded on a turn, when one was (D-230).
+     */
+    public function fatiguePayload(): ?RaceFatiguePayload
+    {
+        $deltas = $this->deltas;
+
+        if (! is_array($deltas) || ! RaceFatiguePayload::matches($deltas)) {
+            return null;
+        }
+
+        return RaceFatiguePayload::fromArray($deltas);
+    }
+
+    /**
      * Validate a payload on the way in, not on the way out.
      *
      * `deltas` is a json column, so any key set can be written to it and a typo becomes
@@ -130,6 +160,18 @@ class TurnEvent extends Model
 
             if (ShopPurchasePayload::matches($deltas)) {
                 $event->deltas = ShopPurchasePayload::fromArray($deltas, $event->trainingRun)->toArray();
+
+                return;
+            }
+
+            if (TeamRankPayload::matches($deltas)) {
+                $event->deltas = TeamRankPayload::fromArray($deltas)->toArray();
+
+                return;
+            }
+
+            if (RaceFatiguePayload::matches($deltas)) {
+                $event->deltas = RaceFatiguePayload::fromArray($deltas)->toArray();
             }
         });
     }

@@ -7,7 +7,10 @@ namespace App\Models;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
+use App\Enums\SpiritBurstState;
+use App\Models\TurnEvents\RaceFatiguePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
+use App\Models\TurnEvents\TeamRankPayload;
 use Database\Factories\TrainingRunFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
@@ -648,5 +651,171 @@ class TrainingRun extends Model
     public function consecutiveRaceCount(): ?int
     {
         return null;
+    }
+
+    /**
+     * Whether this run's scenario opens a given panel, read from the composition
+     * matrix so a fifth scenario needs a config entry and no code (D-240).
+     */
+    public function composesPanel(string $panel): bool
+    {
+        if (! $this->hasScenario()) {
+            return false;
+        }
+
+        return config('scenarios.scenarios.'.$this->scenarioKey().'.panels.'.$panel) === true;
+    }
+
+    /**
+     * The rank letter the Trainer most recently reported, or null while they have not.
+     */
+    public function latestTeamRank(): ?TeamRankPayload
+    {
+        if (! $this->composesPanel('team_rank_ladder')) {
+            return null;
+        }
+
+        return $this->turnEvents
+            ->sortByDesc('turn')
+            ->map(fn (TurnEvent $event): ?TeamRankPayload => $event->teamRankPayload())
+            ->filter()
+            ->first();
+    }
+
+    /**
+     * The facility level the reported rank grants, derived through the config mapping
+     * and never stored. `S+` sits above S and grants no higher facility (the config
+     * notes say so), so it has no level and the panel must not hand it one.
+     */
+    public function facilityLevel(?string $rank): ?int
+    {
+        if ($rank === null) {
+            return null;
+        }
+
+        foreach ((array) config('scenarios.scenarios.'.$this->scenarioKey().'.team_rank_ladder') as $rung) {
+            if (in_array($rank, (array) ($rung['ranks'] ?? []), true)) {
+                return (int) $rung['level'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The burst state each teammate was last recorded in, one row per teammate.
+     *
+     * The latest payload per key wins, because the states replace one another; an
+     * earlier row for the same teammate is history, not a second teammate.
+     *
+     * @return list<array{teammate: string, state: SpiritBurstState}>
+     */
+    public function spiritBurstRoster(): array
+    {
+        $roster = [];
+
+        foreach ($this->turnEvents->sortBy('turn') as $event) {
+            $payload = $event->burstPayload();
+
+            if ($payload !== null) {
+                $roster[$payload->teammate] = ['teammate' => $payload->teammate, 'state' => $payload->state];
+            }
+        }
+
+        return array_values($roster);
+    }
+
+    /**
+     * The consecutive-race reading the Trainer most recently reported.
+     */
+    public function latestFatigue(): ?RaceFatiguePayload
+    {
+        return $this->turnEvents
+            ->sortByDesc('turn')
+            ->map(fn (TurnEvent $event): ?RaceFatiguePayload => $event->fatiguePayload())
+            ->filter()
+            ->first();
+    }
+
+    /**
+     * Race names this run has actually completed, as entered against a slot.
+     *
+     * @return list<string>
+     */
+    public function completedRaceTitles(): array
+    {
+        return $this->raceEntries
+            ->where('status', RaceEntryStatus::Completed)
+            ->map(fn (RaceEntry $entry): ?string => $entry->scenarioSlot?->title)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * The epithet checklist, derived from entered race names against the config route
+     * table and labelled as derived wherever it renders.
+     *
+     * Three states per route, and the third one is the load-bearing one: a route the
+     * surface cannot see is `unverifiable`, not `unmet`. Showing an aggregate condition
+     * as unfinished would tell a Trainer they had not earned it on the evidence of a
+     * field this tool does not have (D-220, D-256).
+     *
+     * @return list<array{route: string, epithet: string, reward: string, state: string, missing: list<string>, note: string|null}>
+     */
+    public function epithetProgress(): array
+    {
+        if (! $this->composesPanel('epithet_routes')) {
+            return [];
+        }
+
+        $seen = array_map('strtolower', $this->completedRaceTitles());
+        $earned = [];
+        $progress = [];
+
+        // Prerequisites resolve in list order, which is how the guide prints them: every
+        // composite row names an epithet from an earlier line.
+        foreach ((array) config('scenarios.scenarios.'.$this->scenarioKey().'.epithet_routes') as $row) {
+            $races = (array) ($row['races'] ?? []);
+            $aggregate = $row['aggregate'] ?? null;
+
+            $missing = array_values(array_filter(
+                $races,
+                fn (string $race): bool => ! in_array(strtolower($race), $seen, true),
+            ));
+
+            $racesSeen = count($races) - count($missing);
+
+            $racesMet = $aggregate === null && $races !== [] && (
+                ($row['mode'] ?? 'all') === 'any' ? $racesSeen >= 1 : $missing === []
+            );
+
+            $prerequisites = (array) ($row['epithets'] ?? []);
+            $prerequisitesMet = $prerequisites === []
+                ? true
+                : count(array_intersect($prerequisites, $earned)) === count($prerequisites);
+
+            $state = match (true) {
+                $aggregate !== null => 'unverifiable',
+                $racesMet && $prerequisitesMet => 'earned',
+                default => 'open',
+            };
+
+            if ($state === 'earned') {
+                $earned[] = (string) $row['epithet'];
+            }
+
+            $progress[] = [
+                'route' => (string) $row['route'],
+                'epithet' => (string) $row['epithet'],
+                'reward' => (string) $row['reward'],
+                'state' => $state,
+                'missing' => $missing,
+                'note' => $aggregate,
+            ];
+        }
+
+        return $progress;
     }
 }
