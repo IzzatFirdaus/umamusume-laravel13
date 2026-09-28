@@ -1,7 +1,7 @@
 # Trainer Desk — Frontend Development Plan
 
-**Status:** Phase 4 (Implementation) active through Slice 3. Slice 3's T8 (branch reconciliation) is **resolved** — see KI-13. Phase 6 remains unfrozen and unstarted. Slice 4 (repo-integrity only) completed.
-**Last Updated:** 2026-09-28 (Slice 3 T1–T7 and T9 landed; Slice 4 T1–T6 completed; `master` at `33949f5` equals tip; `feat/scenario-races-is-manual` merged at `dc13d8d`; `origin/docs/audit-remediation` at `9b774f9`, `origin/master` at `33949f5`)
+**Status:** Phase 4 (Implementation) active through Slice 5. Slice 3's T8 (branch reconciliation) is **resolved** — see KI-13. Slice 4 (repo-integrity only) completed. Phase 6 remains unfrozen and unstarted. Slice 5 was frontend-only per R24: the band and the guided rail are mounted on the run screen, the screen has its two-region frame, and the flow is completable from the keyboard.
+**Last Updated:** 2026-09-28 (Slice 5 T0–T5 landed; `master` at `03a5d05` + this docs commit; `§Open Decisions` carries the measured Livewire case and `slice-5-2026-09-28.md` carries every number behind it. Prior: Slice 4 T1–T6; `feat/scenario-races-is-manual` merged at `dc13d8d`; `origin/master` at `33949f5` — nothing in Slice 5 was pushed)
 
 ---
 
@@ -41,7 +41,8 @@
 | **4 — Implementation** | **Slice 2 Complete** | S1 `9134206`, S2 `83084ab`, S3 `bb6eec6`, S4 `d53a4b1`, S5 `70f9218` + `9451659`, S6 (this commit) |
 | **4 — Implementation** | **Slice 3 Complete** | T1 `ab915f8`, T2 `726f106` + `78697e9`, T3 `2816309`, T4 `725a5ff`, T5 `5c65597`, T6 `5548b9e`, T7 `ee97869` + `cc3f963` + `21f9906` + `ee6786c`, T8 `dc13d8d` + `35fb0c7`, T9 `33949f5` |
 | **4 — Implementation** | **Slice 4 Complete (repo-integrity)** | T1 `35fb0c7`, T2 `dc13d8d`, T3 coherence outputs (20/20 migrations, ScenarioSlot+Preference defs, 23 tables), T4 push shas `9b774f9`/`33949f5`, T5 docs commit, T6 gates |
-| **5 — Verification** | Routine | Browser metrics: light 4.74 / dark 5.48 / badges 9.00+ |
+| **4 — Implementation** | **Slice 5 Complete (frontend only)** | T0 `cd0be38`, T1 `d50a0ec` + `2685a37` + `edeb8cd` + `03a5d05`, T2 `71bbb4b`, T3 `6a53c15`, T4/T5 this commit |
+| **5 — Verification** | Routine | Browser metrics: light 4.74 / dark 5.48 / badges 9.00+; energy bands 6.40 / 8.34 / 10.89 light and 12.60 / 10.57 / 6.88 dark, and the preview pairs, in `slice-5-2026-09-28.md` |
 | **6 — Iteration** | Unfrozen by Slice 2, **not started** | Owner instruction: the slice's commit unfreezes it; no Phase 6 anatomy in this session |
 
 ---
@@ -149,6 +150,51 @@ Migration gate: `migrate:fresh --seed` refused as destructive (5th time); forwar
 | T5: docs commit (KI-13 resolved, PLAN/KNOWN-ISSUES updated) | (this commit) | KI-13 RESOLVED with shas + T3 outputs; PLAN topology + exit criteria updated; KI-11 gains Safe-band commitment; KNOWN-ISSUES count refreshed |
 | T6: gates | (this commit) | pest, pint --dirty, phpstan, composer lore, composer lore-code (parity), gate.py, npm run build |
 
+## Slice 5 Summary (2026-09-28) — Frontend only, per R24
+
+Mount what was already built, frame the run screen, make the flow keyboard-completable. No
+model, no migration, no config, no dependency. Livewire stayed out and produced evidence
+instead (§Open Decisions).
+
+| Task | Commit | Evidence |
+|---|---|---|
+| T0: Livewire cost + baseline | `cd0be38` | `livewire/livewire` absent from `composer.json`; GET baseline median 0.047 s / p95 0.076 s, n=20; preview number appended here |
+| T1: band + rail on `runs/show` | `d50a0ec` | 24 tests in `GuidedTurnOnRunViewTest`; two-stage preview writes nothing; failure writes `turn_events`; mood, advisory, escape hatch |
+| T1b: comment leak | `2685a37` | `{# … #}` is not a Blade comment; the band had been printing its rationale as page text. Guard added to `RenderedCopyHygieneTest` |
+| T2: two-region frame | `71bbb4b` | `RunViewFrameTest` (DOM containment); strip box 992×92 at both ends of the scroll, 9/9 `elementFromPoint` probes inside the pinned region |
+| T3: keyboard path | `6a53c15` | `KeyboardPathTest`; skip link, digits, Escape; roving left to the native radio group and verified with pressed keys |
+| T1c/T1d: browser-found defects | `edeb8cd`, `03a5d05` | mood delta sign inverted; Hint badge white-on-green at 1.99:1 |
+| T4: gates + browser pass | this commit | `docs/design-research/verification/slice-5-2026-09-28.md` |
+| T5: docs + housekeeping | this commit | KI-11 both halves closed, KI-14 filed and closed, audit rows 7.2 and 9 updated, root scratch moved |
+
+**End state.** `php artisan test --compact` → 2 skipped, 292 passed (923 assertions).
+`pint --dirty` passed. PHPStan `[OK] No errors`. `composer lore` 133 = `make lore` verbatim 133;
+`composer lore-code` 4 = 4. `gate.py` GATE PASS. `npm run build` → 56.37 kB CSS, 55 tokens
+declared, 0 pruned. Migration gate on a fresh scratch DB: 21 migrations, 2 seeders, 24 tables.
+
+**Exit criteria, checked against the list above rather than asserted.** Gates green with pasted
+output: §1 of the record. Claims citing file:line or sha: every row in the table. No new
+D-violation in touched files: `composer lore` and `lore-code` at parity, and the one hit this
+slice introduced (a banned word used as ordinary English in a comment) was reworded rather
+than adjudicated. No stale status
+lines: KI-8's "rendered by this route and nothing else", KI-11's open half and audit rows 7.2
+and 9 were corrected in the same commit that closes them. Atomic commits per concern: seven.
+R17 fixture: every measurement ran on `.scratch-uma/slice5.sqlite`, rebuilt for this slice with
+mood, full stat lines and an Energy value chosen per band state; `database/database.sqlite` was
+never opened. Checkout coherence: `git cat-file -e HEAD:…` verified in-session for each new file
+(`tests/Feature/RunViewFrameTest.php`, `tests/Feature/KeyboardPathTest.php`,
+`resources/js/guided-flow.ts`).
+
+**Deviations, stated rather than absorbed.** `RunController.php` does not exist, so the shaping
+went into `TrainingRunController`. D-40 draws the two regions left and right at desktop; this
+slice stacks them, because a six-column band beside a timeline at `main`'s 64rem is six
+unreadable slivers - persistence, the rule the frame serves, is measured, and the axis is an
+open item. Escape moves focus rather than discarding typed values. `text-on-pick` is borrowed
+for the green Hint badge because it is the only ink in the system that stays dark in both themes, and adding
+`--color-on-green` is a design-system call this slice does not own.
+
+---
+
 ## Evidence Traceability
 
 | Gate | Command | Slice 1 Output |
@@ -202,8 +248,17 @@ above but the preview round trip measured against it, appended below once T1c ex
 rather than assume at ADR time: the Alpine bundling claim is from Livewire's published design, not
 measured here, because nothing Livewire is installed in this repo.)*
 
-**Appended after T1c landed:** *(fill in from the measurement in the Slice 5 verification record —
-two-stage preview round trip, same server, same fixture, option submit to preview render)*
+**Appended after T1c landed:** the same server, same fixture, same method (one warm-up request,
+n=20, loopback dev server, `APP_DEBUG=true`): the two-stage preview round trip - option submit to
+preview render - is **median 0.071 s, p95 0.091 s** (min 0.054, max 0.152), against the baseline
+page render above at 0.047 / 0.076. A selection costs about 24 ms more than loading the page, and
+ships 72,562 bytes because the whole shell is re-sent. So the case Livewire would have to make is
+not "47 ms is too slow" - it is the 72.5 kB re-parse per click and the stateful step chain, set
+against a C-8 dependency, a reversed vanilla-JS stack line, `PRE-MORTEM.md:73`'s existing cut, one
+loading and error state per wired region (C-7), the motion budget moving from CSS review into
+component review (D-90 to D-92), a D-66 loopback ruling, and re-verifying every recorded
+`getComputedStyle()` pair over a morphing DOM while the gate that would catch it is the one that
+skips. Full numbers and method: `docs/design-research/verification/slice-5-2026-09-28.md` §4.
 
 ---
 

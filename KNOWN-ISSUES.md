@@ -7,8 +7,10 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
-**Status (2026-09-28, Slice 4):** 13 issues filed. **12 resolved/closed** (KI-1–9, KI-12–13).
-**1 open** (KI-10: Trackblazer Grade Points placement ratio + year bucket). **1 half-open** (KI-11: `--color-green-tint` awaiting Safe-band consumer in Slice 5, retire-and-amend if it does not land).
+**Status (2026-09-28, Slice 5):** 15 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
+**1 open** (KI-10: Trackblazer Grade Points placement ratio + year bucket). KI-11's
+`--color-green-tint` half closed with the Safe band landing and being measured, so the
+retire-and-amend clause of R23 does not trigger.
 
 ---
 
@@ -321,11 +323,17 @@ Any stat that lands on a half-step dereferences a missing key.
 **Evidence.** Live server, 2026-09-28: `design-preview -> 500` while
 `umamusume -> 200` and `training-runs -> 200` on the same boot.
 
-**Impact.** `x-stat-band` is rendered by this route and nothing else, so the stat band
-has no reachable surface and **no test file at all** — its rendered contrast pairs could
+**Impact at the time.** `x-stat-band` was rendered by this route and nothing else, so the stat
+band had no reachable surface and **no test file at all** — its rendered contrast pairs could
 not be measured in Slice 2's manual pass. That pass still fixed the band's progress fill
 (`70f9218`, same 1.62:1 defect as the meter's bar) and guards it by reading both
 component sources, but makes no claim about unmeasured pairs.
+
+**Both halves of that impact are gone.** Slice 3 gave the band a test file and measured the
+pairs (`726f106`, `78697e9`), and Slice 5 mounted it on the run screen, which is the surface a
+Trainer reaches (`d50a0ec`): the band now renders on all four scenario-bearing R17 runs, and
+the claim "rendered by this route and nothing else" no longer describes the tree. The sentence
+above is kept because it is what Slice 2 measured, not because it is still true.
 
 **Decision needed, not made here.** Either collapse half-steps onto the base grade's fill
 (needs its ratio recorded per D-10 before it ships) or give the seventeen labels a map of
@@ -414,7 +422,7 @@ therefore an ADR, not a patch.
 
 ---
 
-## KI-11 Design-system debts left visible by the Slice 2 gate run — ONE HALF CLOSED 2026-09-28
+## KI-11 Design-system debts left visible by the Slice 2 gate run — BOTH HALVES CLOSED 2026-09-28
 
 - **CLOSED (`5c65597`). `database/seeders/ScenarioSlotSeeder.php` was an empty stub** —
   `run()` contained only `//`, and `DatabaseSeeder` never called it. Against
@@ -423,18 +431,17 @@ therefore an ADR, not a patch.
   nothing honest to put in it and the file is deleted. `scenario_slots` stays empty after a
   clean seed by design, which is also what makes any `scenario_races` backfill vacuous: a
   re-measured fresh scratch database seeds 24 tables and 10 skills and **0 slots**.
-- **OPEN. `--color-green-tint` is still referenced by no utility.** The goal cell moved to
-  `bg-raised` in `bb6eec6`. Re-measured against the built sheet: 55 custom properties
-  declared in `@theme static`, **0 pruned**, and the token resolves in both themes, so
-  nothing breaks. Retirement was refused under R14 on G-60 grounds — the pair is live spec in
-  `DESIGN.md` §6.15 for the unbuilt Safe-band colouring and the converged prototype uses it —
-  so it stays as a declared value awaiting its consumer rather than being deleted to quiet a
-  count. A pair that renders nowhere is unverified in practice, not proven: that is the
-  remaining debt, and it belongs to the phase that builds the Safe band.
-  **R23 consumer commitment:** Safe band word lands in Slice 5; if it does not land, the
-  token is retired and the spec amended in the same slice (retire-and-amend).
+- **CLOSED (`71bbb4b` + `d50a0ec`, measured in Slice 5). `--color-green-tint` now has its
+  committed consumer.** The goal cell moved to `bg-raised` in `bb6eec6` and the token was
+  referenced by no utility after that; retirement was refused under R14 on G-60 grounds, and
+  R23 settled the alternative - the Safe band word lands in Slice 5, or the token is retired
+  and the spec amended in the same slice. It landed: the energy band word renders `ink` on
+  `green-tint` on the run screen, and the pair measures **6.40:1 light / 12.60:1 dark** off the
+  rendered element (`docs/design-research/verification/slice-5-2026-09-28.md` §3). The token
+  is no longer a declared value awaiting a consumer, and the "unverified in practice" debt this
+  bullet recorded is paid.
 
-**Owner.** Design system.
+**Owner.** Design system. Both halves closed 2026-09-28.
 
 ---
 
@@ -533,3 +540,39 @@ ratio and the year bucket are unfixed, and this closure does not claim otherwise
 passes; all coherence checks hold.
 
 **Original defect text kept below for traceability.**
+
+---
+
+## KI-14 The guided rail declared radio semantics its elements did not have — RESOLVED 2026-09-28
+
+**Filed here rather than found in the wild.** This is the accessibility item R10 deferred out
+of Slice 2, and it had no entry to close, so it gets one now instead of a claim in a commit
+message. The audit line it resolves is
+`docs/design-research/FRONTEND-BRIEF-AUDIT.md` row "9 accessibility".
+
+**Symptom.** `x-guided-step` rendered a `role="radiogroup"` whose children were
+`<button type="button" role="radio" aria-checked>`. Two separate failures in one element: the
+group claimed a widget semantics its children did not implement (no roving focus, no
+arrow-key selection, no `aria-checked` state change without a script that was never written),
+and a `type="button"` carries no value on submit, so the rail could not post a choice at all.
+It was a picture of a radio group.
+
+**Resolution (`d50a0ec`, `6a53c15`).** The choices are now real `<input type="radio">`
+elements inside the `radiogroup`, each wrapped in the client's banner shape, so §6.10 and
+§8.6's "banner buttons, never radio inputs" hold for what a Trainer sees while the element
+carries the state. Consequences, all measured with pressed keys:
+
+- Arrow keys rove and select natively; `ArrowRight` from `training-Speed` lands on
+  `training-Wit` with `checked: true`. No roving-tabindex script was written, because the
+  platform already does it and a reimplementation would fight it.
+- The selection posts: `choice=training-Guts` reaches the request, which is what makes
+  D-51's two stages possible without a script.
+- Focus is visible where it previously could not be: the banner shows
+  `outline: 2px solid rgb(78, 121, 6)` (`--color-ring`) with `matches(':focus-visible')` true,
+  established with a real `Tab`, not `element.focus()`.
+- `role="radio"` and `aria-checked` are gone from the markup, so nothing claims what the
+  element does not do. `RunViewFrameTest` and `GuidedTurnOnRunViewTest` pin the group's shape.
+
+**Residual.** `aria-live` is still absent from the rail: the preview panel appears through a
+navigation, not an in-place update, so there is no live region to announce. That is a different
+item from the one closed here and stays unclosed.
