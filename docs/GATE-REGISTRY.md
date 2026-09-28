@@ -91,7 +91,11 @@ ruling before merge; the ruling is recorded next to the hit list.
 
 A line that exists to state or itemize a lore ruling is the gate's own text, not a new hit every
 time the gate runs. `lore-ignore-line` makes that case explicit and auditable instead of
-re-counting it each slice.
+re-counting it each slice. The recorded readings ran 131 → 132 → 133 → 137 → 140 → 144 → 147
+(`slice-3-2026-09-28.md:58,206`, `slice-5-2026-09-28.md:278`, `slice-6-2026-09-28.md:40,174`,
+`slice-7-2026-09-28.md:147`, `slice-9-2026-09-28.md:20`), and every step up was a rules file or a
+record writing the banned words into a table in order to rule on them. The 147 is this slice's
+opening reading, carried by `slice-10-2026-09-29.md`.
 
 - Shape: an HTML comment on the line it exempts, carrying one allowed-hit class from above plus
   the ruling it answers to - `<!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->`.
