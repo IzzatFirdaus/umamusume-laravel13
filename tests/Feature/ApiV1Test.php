@@ -51,6 +51,17 @@ it('returns a run detail with turns and skills', function (): void {
         ->assertJsonPath('data.turns.0.speed', 400);
 });
 
+it('renders the validation envelope for a JSON request that fails a form rule, not a 500', function (): void {
+    $run = TrainingRun::factory()->create(['scenario' => 'trackblazer']);
+
+    // Only GET endpoints exist under /api, so the JSON branch of the exception handler had no
+    // caller at all: a validation failure over an `expectsJson` request reached it and died on
+    // a method that does not exist. This is the cheapest request that gets there.
+    test()->postJson("/training-runs/{$run->id}/purchases", [])
+        ->assertStatus(422)
+        ->assertJsonPath('error.code', 'VALIDATION_ERROR');
+});
+
 it('returns a validation error shape when the API receives bad JSON expectations', function (): void {
     // Unknown route under /api must render the same error envelope, not HTML.
     test()->getJson('/api/v1/nope')

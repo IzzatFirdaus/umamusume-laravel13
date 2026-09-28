@@ -30,8 +30,15 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             if ($e instanceof ValidationException) {
+                // `message()` is not a method on ValidationException, so this branch 500s
+                // instead of returning the envelope it means to. The first field error is
+                // what a caller can act on; the field map stays out because ARCHITECTURE §4
+                // defines this envelope as {code, message}.
                 return response()->json([
-                    'error' => ['code' => 'VALIDATION_ERROR', 'message' => $e->message()],
+                    'error' => [
+                        'code' => 'VALIDATION_ERROR',
+                        'message' => $e->validator->errors()->first() ?: 'The given data was invalid.',
+                    ],
                 ], 422);
             }
 
