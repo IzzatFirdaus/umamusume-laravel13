@@ -8,7 +8,7 @@ use App\Http\Controllers\TrainingRunController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\View;
 
-Route::view('/', 'welcome')->name('home');
+Route::redirect('/', '/training-runs')->name('home');
 
 Route::get('/umamusume', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catalog.show');

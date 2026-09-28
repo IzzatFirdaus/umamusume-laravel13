@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use Tests\TestCase;
 
-it('returns a successful response for the home page', function () {
+it('redirects the home page to the runs index', function () {
     /** @var TestCase $this */
     $response = $this->get('/');
 
-    $response->assertStatus(200);
+    $response->assertRedirect(route('runs.index'));
 });

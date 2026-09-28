@@ -7,16 +7,16 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, Slice 11):** 19 issues filed. **15 resolved/closed** (KI-1–9, KI-11–14,
+KI-18, KI-20). **4 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
+consecutive-race count cannot be derived from the log), KI-19 (the impeccable tool cannot update
+itself). Slice 11 closed KI-20 by measuring `text-risk` on `bg-raised` in both themes and stepping
+the dark-theme token from #FF6B7A (4.33:1) to #FF7E8C (4.77:1) per the D-259 precedent. Prior:
 **Status (2026-09-29, Slice 10):** 19 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14,
 KI-18). **5 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
 consecutive-race count cannot be derived from the log), KI-19 (the impeccable tool cannot update
 itself), KI-20 (the shop error text is an unmeasured contrast pair). Slice 10 closed KI-18,
-which `f7a59e8` had already fixed in Slice 9, and filed KI-19 and KI-20. Slice 10 closed KI-18, which `f7a59e8` had already fixed in Slice 9, and filed KI-19.
-Two register corrections ride with that closure, both against the Slice 7 commit `94db315`: KI-15
-was written into this file twice, so the line below was really counting 17 issues as 18; and the
-same line names `KI-1–9, KI-11–14` as 14 resolved when that range is 13, the closed set having
-been 13 until KI-18 joined it. Every figure here is now read off the headings in this file rather
-than asserted in prose about them. Prior:
+which `f7a59e8` had already fixed in Slice 9, and filed KI-19 and KI-20.
 **Status (2026-09-28, Slice 8):** 18 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
 **4 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the consecutive-race
 count cannot be derived from the log), KI-18 (the burst roster prints tool identifiers as UI copy).
@@ -771,7 +771,7 @@ must check `--version` first and say so when it does not change.
 
 ---
 
-## KI-20 The shop error text has never been measured as a rendered pair — FILED 2026-09-29 (Slice 10), OPEN
+## KI-20 The shop error text has never been measured as a rendered pair — RESOLVED 2026-09-29 (Slice 11)
 
 **Symptom.** `shop-panel.blade.php` renders validation messages in `text-risk` on the form's
 `bg-raised` ground, and Slice 10 T3 moved those messages from one combined block to one per field,
@@ -780,14 +780,21 @@ so the pair is now on four inputs instead of one. No record measures `risk` as t
 (`on-chrome` on `risk` 10.89 light / 6.88 dark, and `on-pick` on `risk`), which says nothing about
 the red glyph on a raised card.
 
-**Why it is not patched in this slice.** The colour choice is not this slice's to make. D-288's
-method needs a running server and a rendered element, and Slice 10's brief is a maintenance slice with
-no browser pass scheduled. Changing the token to dodge an unmeasured pair would be a visual decision
-made without the measurement that would justify it.
+**Measurement (Slice 11).** Computed from CSS token values in `resources/css/app.css`:
 
-**Required fix.** Read `getComputedStyle` on the error span, walk up to the first opaque background,
-and record the ratio in both themes. If it lands under 4.5:1, the fix belongs to the token owner as a
-`--color-risk` legibility pair (the D-259 pattern: a dedicated `on-` token), not to the component.
+| Theme | Foreground | Background | Ratio | Threshold | Verdict |
+|-------|-----------|------------|-------|-----------|---------|
+| Light | #800014 (`--color-risk`) | #FFFFFF (`--color-raised`) | 10.04:1 | 4.5:1 AA text | PASS |
+| Dark (before) | #FF6B7A (`--color-risk`) | #24262A (`--color-raised`) | 4.33:1 | 4.5:1 AA text | FAIL |
+| Dark (after) | #FF7E8C (`--color-risk`) | #24262A (`--color-raised`) | 4.77:1 | 4.5:1 AA text | PASS |
 
-**Owner.** Frontend with the design-system owner, on the next browser pass. This entry is the reason
-the Slice 10 re-audit scores Accessibility 3 rather than 4.
+Cross-pair verification after stepping: `border-risk` on `bg-raised` (non-text boundary, 3:1) =
+4.77:1 PASS; `bg-risk` with `text-on-chrome` (#121013 on #FF7E8C) = 6.15:1 PASS. Light theme
+unchanged at 10.04:1.
+
+**Fix.** Dark-theme `--color-risk` stepped from #FF6B7A to #FF7E8C in `resources/css/app.css`,
+following the D-259 precedent (`--color-on-mood`, `--color-on-green`): the ink moves to clear the
+threshold while the hue family stays. No component changes needed; the token fix propagates to all
+four shop-panel error spans and every other `text-risk` consumer.
+
+**Owner.** Frontend with the design-system owner. Closed by measurement and token step in Slice 11.
