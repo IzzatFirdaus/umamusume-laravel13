@@ -31,6 +31,15 @@
     implementation status); this is the shared fix, not the whole migration.
 --}}
 <body class="min-h-screen bg-page text-ink">
+    {{-- D-55 and G-11: the flow must be completable without a pointer, and the first Tab
+         from a keyboard Trainer should not have to walk the whole nav to reach the work.
+         The link is visually hidden until it has focus, which is the only state in which it
+         is useful; `focus:not-sr-only` reveals it in place rather than leaving it invisible
+         to the person who just pressed Tab. --}}
+    <a href="#main"
+       class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:border-2 focus:border-rule focus:bg-raised focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-ink-strong">
+        Skip to content
+    </a>
     <nav class="border-b border-rule bg-panel">
         <div class="mx-auto flex max-w-5xl gap-6 px-4 py-3 text-sm font-medium">
             <a href="{{ route('catalog.index') }}" class="hover:underline">Catalog</a>
@@ -39,7 +48,7 @@
         </div>
     </nav>
 
-    <main class="mx-auto max-w-5xl px-4 py-8">
+    <main id="main" class="mx-auto max-w-5xl px-4 py-8">
         @if (session('status'))
             <p class="mb-4 rounded border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-800">{{ session('status') }}</p>
         @endif

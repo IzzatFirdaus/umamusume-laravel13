@@ -81,6 +81,16 @@
         <span class="ml-auto text-xs text-ink-muted">{{ $def['label'] }}</span>
     </div>
 
+    @if ($confirmRoute !== null && $choices !== [])
+        {{-- The shortcuts are only honest if they are on screen: a key binding nobody can
+             discover is folklore. The count comes from the choices themselves, so the line
+             cannot claim a key that the rail does not offer. --}}
+        <p class="-mt-1 mb-3 text-xs text-ink-muted">
+            Keys 1 to {{ count($choices) }} choose an activity, arrow keys move between them,
+            Enter previews the turn, Escape returns to the choices.
+        </p>
+    @endif
+
     @if ($choices !== [])
         {{--
             A real radio group wearing the client's banner shape, and both halves are load-
@@ -103,7 +113,12 @@
             @foreach ($choices as $choice)
                 @php $key = (string) ($choice['key'] ?? ''); @endphp
                 <label class="block">
-                    <input type="radio" name="choice" value="{{ $key }}" class="peer size-0 opacity-0"
+                    {{-- 1px, not 0. A zero-size box is "not visible" to every tool that
+                         measures visibility, Playwright's click included, which would make
+                         the rail untestable at the control that carries its state; `sr-only`
+                         uses the same 1px clip for the same reason. The banner is what a
+                         person sees and clicks, and the label forwards the click here. --}}
+                    <input type="radio" name="choice" value="{{ $key }}" class="peer size-px opacity-0"
                            @checked($key === $selected)>
                     <span class="flex cursor-pointer items-center gap-3 rounded-md border-2 border-rule bg-raised px-3 py-2.5 text-left
                                  hover:border-green-line
