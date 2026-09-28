@@ -43,7 +43,7 @@ class StoreTurnEntryRequest extends FormRequest
             'power' => ['required', 'integer', 'between:0,1200'],
             'guts' => ['required', 'integer', 'between:0,1200'],
             'wit' => ['required', 'integer', 'between:0,1200'],
-            'sp' => ['nullable', 'integer', 'between:0,1200'],
+            'sp' => ['nullable', 'integer', 'min:0'],
             'condition' => ['nullable', 'string', 'max:255'],
             // Energy is 0..100 (ADR-0001); mood is the client's five tiers, not
             // free text. The 0..1200 stat bound above is unchanged here:

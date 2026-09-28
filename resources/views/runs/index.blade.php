@@ -1,24 +1,42 @@
 <x-layout title="Training runs">
-    <div class="flex items-baseline justify-between">
-        <h1 class="text-2xl font-semibold">Training runs</h1>
-        <a href="{{ route('runs.create') }}" class="rounded bg-zinc-900 px-3 py-1.5 text-sm text-white">New run</a>
+    <div class="flex flex-wrap items-baseline justify-between gap-3">
+        <h1 class="text-2xl font-semibold text-ink-strong">Training runs</h1>
+        <a href="{{ route('runs.create') }}"
+           class="enamel rounded-full bg-chrome px-4 py-1.5 text-sm font-bold text-on-chrome">
+            New run
+        </a>
     </div>
 
     @if ($runs->count() === 0)
-        <p class="mt-8 rounded border border-dashed border-zinc-300 bg-white p-6 text-sm text-zinc-600">
-            No runs yet. Create one to start logging turns.
-        </p>
+        {{-- An empty list is a real state, not a failure, and it has to say what
+             happens next. "No data" alone would leave the Trainer guessing. --}}
+        <div class="mt-6 rounded-md border border-dashed border-rule bg-panel p-6">
+            <p class="text-sm font-semibold text-ink-strong">No runs yet</p>
+            <p class="mt-1 text-sm text-ink-muted">
+                A run holds the turns you log against one Umamusume in one scenario, so there is
+                nothing to list until you start one.
+            </p>
+        </div>
     @else
-        <ul class="mt-6 divide-y divide-zinc-200 rounded border border-zinc-200 bg-white">
+        <ul class="mt-6 divide-y divide-rule rounded-md border border-rule bg-panel">
             @foreach ($runs as $run)
-                <li class="flex items-baseline justify-between px-4 py-3 text-sm">
-                    <a href="{{ route('runs.show', $run) }}" class="font-medium hover:underline">
+                @php
+                    // The scenario key is a storage value; the label is config's. Printing
+                    // the key here would show an internal slug where a name belongs.
+                    $scenarioLabel = $run->scenario === null
+                        ? null
+                        : (config('scenarios.scenarios.'.$run->scenario.'.label') ?? $run->scenario);
+                @endphp
+                <li class="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 text-sm">
+                    <a href="{{ route('runs.show', $run) }}" class="font-semibold text-ink hover:underline">
                         {{ $run->umamusume->name }}
-                        @if ($run->scenario)
-                            <span class="text-zinc-500">· {{ $run->scenario }}</span>
+                        @if ($scenarioLabel !== null)
+                            <span class="font-normal text-ink-muted">· {{ $scenarioLabel }}</span>
                         @endif
                     </a>
-                    <span class="text-zinc-500">{{ $run->status->label() }} · {{ $run->created_at->toDateString() }}</span>
+                    <span class="font-mono text-xs tabular-nums text-ink-muted">
+                        {{ $run->status->label() }} · {{ $run->created_at->toDateString() }}
+                    </span>
                 </li>
             @endforeach
         </ul>
