@@ -319,7 +319,14 @@
                  arithmetic: the constant and the stored value that produced the line,
                  so a Trainer can check it (D-256, Planner Rule 5). --}}
             <p class="w-full rounded-md border border-rule bg-raised px-3 py-2 text-right text-xs text-ink">
-                <span class="mr-1.5 rounded bg-green px-1.5 font-bold text-on-chrome">Hint</span>
+                {{-- The badge is green because §6.16 says the client's hint is green, and
+                     the ink is `on-pick` because that is the only token in this system that
+                     stays dark in both themes: `on-chrome` is white in light, and white on
+                     `--color-green` measured 1.99:1 here, which is the pairing D-3 forbids
+                     and DESIGN.md §8 already documents for the focus ring. The name is about
+                     the gold fill; the property being borrowed is "the dark ink that sits on
+                     a bright fill", which is 6.1:1 light and 9.51:1 dark. --}}
+                <span class="mr-1.5 rounded bg-green px-1.5 font-bold text-on-pick">Hint</span>
                 Wit costs 0 Energy and you are at {{ (int) $energy }}. Rest returns about +30,
                 and a rest can backfire, so it is a choice rather than a safe button.
                 <span class="block text-ink-muted">GameWith guidance, 2026-09-25.</span>
