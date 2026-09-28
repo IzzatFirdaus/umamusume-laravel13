@@ -25,12 +25,13 @@ Token-efficient digest of ARCHITECTURE.md for agent context injection. If this f
 - Table `umamusume` (invariant plural); model `Umamusume`
 
 ## Schema (snake_case; enums TitleCase backed)
-- umamusume: slug uniq, name (EN), name_ja, match_key (NFKD-normalized, indexed), release_status (GlobalReleased|GlobalAnnounced|JapanOnly), jp_debut_date?, global_debut_date?, is_manual (engine never overwrites)
+- umamusume: slug uniq, name (EN), name_ja, match_key (NFKD-normalized, indexed), release_status (GlobalReleased|GlobalAnnounced|JapanOnly), jp_debut_date?, global_debut_date?, is_manual (engine never overwrites), external_ref? (source's own char id `gametora:char:{id}`, the link costume cards attach through — ADR-0008, authorized NOT migrated yet)
 - umamusume_aliases: umamusume_id FK, alias, language (Japanese|English|Romanized), uniq(alias, language)
+- character_cards (ADR-0008; costume cards that reached [Global]; authorized, **NOT migrated yet** — no table, model or `cards()` relation exists until the roster slice's migrations land): card_id uniq (the source's own id, so a re-fetch is idempotent by identity, FR-B-5), umamusume_id FK cascade, title (verbatim [Global] client string, brackets included — source data, never normalized copy), rarity (CardRarity: OneStar|TwoStar|ThreeStar), global_release_date (required: no Global date, no row), is_debut_form (derived from the earliest JP release among that trainee's cards; the export has no debut field), unconfirmed (Tier B stands alone behind it → stored flagged, hidden by default); provenance rides the trainee's `data_sources` row under the card source key, there is no inline url/fetched_at
 - skills: name, name_ja?, match_key?, sp_cost?, type?, is_unique
 - data_sources: umamusume_id FK, url, source_key, fetched_at, snapshot_path?, confidence?, source_timezone? (IANA)
 - match_candidates (review queue): source_key, proposed_name/_ja/_match_key, suggested_umamusume_id?, match_tier (Fuzzy|None), status (Pending|Confirmed|Aliased|Rejected), payload json
-- training_runs: umamusume_id FK, scenario?, status (Active|Completed|Retired), inheritance_parent_a_id?, inheritance_parent_b_id?, notes?
+- training_runs: umamusume_id FK, scenario?, status (Active|Completed|Retired), inheritance_parent_a_id?, inheritance_parent_b_id?, notes?, character_card_id? (ADR-0008: the costume form the run started on; `umamusume_id` stays the required owner; FR-C-1 as amended; authorized, **NOT migrated yet**)
 - `training_runs.scenario` is a free-text COLUMN but a validated VALUE: `StoreTrainingRunRequest` rules it against `config('scenarios.scenarios')` keys, blank normalises to null. No FK (owner ruling 2026-09-27). `TrainingRun::scenarioKey()` resolves null → `config('scenarios.baseline')`; `stripValues()` returns the latest turn's end-of-turn Energy/Fans (absolute totals, `reorder('turn','desc')` — NOT `latest()`, which the relation's ascending order would defeat) and omits keys the run has no column for
 - turn_entries: training_run_id FK cascade, turn, speed/stamina/power/guts/wit, sp?, condition?, uniq(run, turn); stats validated 0..1200, turn >= 1 [rev 0.2 — repo #4]
 - run_skills pivot: status (Suggested|Acquired|Skipped), turn_acquired? — Suggested = planned pre-run [rev 0.2 — repo #4]
@@ -84,6 +85,7 @@ Token-efficient digest of ARCHITECTURE.md for agent context injection. If this f
 ## Phase-1 non-goals (do not build without new PRD scope)
 - Auth/multi-user; SPA; breeding engine (inheritance = 2 nullable parent FKs only); EAV; Excel; event calendar; legacy DB import; MySQL/PG; support cards; deploy paths
 - [rev 0.2 — repo #4] race simulation/predictions/snapshots; dual storage modes or browser-side authoritative data; trainee image uploads; DB-level enum columns
+- `ADR-0008`'s `character_cards` is the **costume-card** table and reopens nothing above: §6.9 plus `ADR-0005` (DECLINED, owner ruling R37, 2026-09-28) still forbid `support_cards`, `user_support_cards` and `deck_slots`, and no slice may cite `ADR-0008` as permission for any of them
 
 ## Key doc citations
 - HTTP client: https://laravel.com/docs/13.x/http-client ; Locks: https://laravel.com/docs/13.x/cache#atomic-locks

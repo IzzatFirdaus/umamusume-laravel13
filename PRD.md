@@ -23,7 +23,7 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 
 | ID | Story | Priority | Acceptance test |
 |---|---|---|---|
-| US-1 | As a Trainer, I browse the catalog of Umamusume with names in English and Japanese, filtered by Global release status, so I can see who is available to me. | P0 | `GET /umamusume?status=GlobalReleased` lists only released entries; each detail page shows `name`, `name_ja`, release status, and provenance (source URL + fetched date). |
+| US-1 | As a Trainer, I browse the catalog of Umamusume with names in English and Japanese, filtered by Global release status, so I can see who is available to me. | P0 | `GET /umamusume?status=GlobalReleased` lists only released entries; each detail page shows `name`, `name_ja`, release status, and provenance (source URL + fetched date). `GET /umamusume` lists each Global-released trainee with her cards nested; each card row shows its client title, rarity and Global release date. |
 | US-2 | As a Trainer, I run a fetch that cross-references JP-source data against Global data, so new JP releases appear with a "JapanOnly" or "GlobalAnnounced" flag instead of silently missing. | P0 | `php artisan uma:fetch {source}` stores raw snapshots, creates or updates only Exact/Alias matches, routes Fuzzy/None to the review list, and never modifies rows with `is_manual = true`. |
 | US-3 | As a Trainer, I create a training run for an Umamusume and log stats per turn (Speed, Stamina, Power, Guts, Wit, SP), so the app keeps the history my spreadsheet used to. | P0 | Creating a run and posting turns 1..N renders the run page with all turns in order; duplicate turn number for the same run is rejected with a validation error; a stat outside 0..1200 is rejected [rev 0.2 — repo #4]. |
 | US-4 | As a Trainer, I record which skills I plan to acquire, actually acquired, or skipped during a run, so I can compare planned vs actual builds [rev 0.2 — repo #4]. | P1 | A skill can be attached to a run with status Suggested, Acquired, or Skipped and an optional turn number; the run page lists all three groups. |
@@ -43,6 +43,12 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 - A-3: Catalog index with filter by release status and text search over names and aliases (search on normalized keys, not raw display strings).
 - A-4: Every catalog record exposes its provenance: source URL, fetched timestamp, snapshot reference, match confidence.
 - A-5 [ADR-0004]: `Umamusume` stores the ten aptitude letters (turf, dirt, four distance bands, four running styles) exactly as the declared source publishes them, in that order. A `Scenario` record stores its five per-stat caps, the source's hard cap, both server start dates and provenance. Reference data only: nothing in this requirement computes a race or a training outcome (CLAUDE.md Planner Rule 6).
+- A-6 [ADR-0008]: `CharacterCard` record: the source's own card id (unique), its
+  Umamusume, the `[Global]` client title verbatim including its brackets, rarity,
+  Global release date, and a debut-form flag derived from the earliest JP release
+  among that trainee's cards. Only cards carrying a Global release date are stored;
+  a trainee with no Global card does not appear in the catalog. A card confirmed by
+  the Tier B source alone is stored flagged and hidden unless asked for.
 
 ### FR-B: Data-fetching & cross-reference engine
 - B-1: `uma:fetch {source}` console command; sources are declared in `config('uma.sources')`, each with a parser class.
@@ -53,7 +59,7 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 - B-6: JP-source datetimes convert from `Asia/Tokyo` to UTC at parse time; the source timezone is recorded.
 
 ### FR-C: Training-run domain (Trainer's own data)
-- C-1: `TrainingRun`: belongs to one Umamusume, optional scenario name, status enum (`Active`, `Completed`, `Retired`), optional two inheritance parents (Umamusume references), free-text notes.
+- C-1: `TrainingRun`: belongs to one Umamusume, optional scenario name, status enum (`Active`, `Completed`, `Retired`), optional two inheritance parents (Umamusume references), free-text notes, and since ADR-0008 an optional reference to the `CharacterCard` the run was started on. `umamusume_id` remains the required owner of a run.
 - C-2: `TurnEntry`: run + turn number (unique per run), five stat integers, SP integer, optional condition string. Stats validated 0..1200; turn >= 1 [rev 0.2 — repo #4].
 - C-3: Skill acquisition: run × skill with status (`Suggested`, `Acquired`, `Skipped`) and optional turn acquired [rev 0.2 — repo #4]. `Suggested` = planned before the run; `Acquired`/`Skipped` = outcome.
 - C-4: Runs and turns are creatable, editable, and deletable through the web UI; all writes validated by Form Requests.

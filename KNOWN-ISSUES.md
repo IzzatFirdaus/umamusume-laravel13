@@ -803,7 +803,9 @@ the Slice 10 re-audit scores Accessibility 3 rather than 4.
 ## KI-21 The character parser read a source key the GameTora export never published, so fetched trainees lost their Japanese name — FILED and RESOLVED 2026-09-29 (catalog roster, Task 2)
 
 **Symptom.** `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php:92` read
-`$card['name_ja']`. The `character-cards` export publishes `name_jp`: over its 268 rows `name_ja`
+`$card['name_ja']` — that line number is the defective line as it stood before the fix; `d755da3`
+replaced it with a comment plus the corrected read, so today's `:93` is the line being described. The
+`character-cards` export publishes `name_jp`: over its 268 rows `name_ja`
 appears 0 times and `name_jp` 268 — erratum E-12's count over the fetched export at
 `research-scratch/data/json/character-cards.json`, a scratch path this repo does not track, so the
 figure is cited rather than re-runnable from here. So every trainee `uma:fetch` created stored a null
@@ -828,15 +830,28 @@ the export's shape. Deliberately not written: `$card['name_jp'] ?? $card['name_j
 fallback chain accepts a body carrying neither key, which is how this defect stayed invisible: a null
 reads as "the source has no Japanese name" instead of "you are reading the wrong key".
 
+**Corrected 2026-09-29 by the review follow-up `e8ead2d`.** That ban was prose-only when this entry was
+written, and prose is not a guard. `tests/Feature/GametoraCharacterParserTest.php:113-128` now feeds a
+body carrying **only** `name_ja` and asserts the emitted `name_ja` is null, so reintroducing
+`$card['name_jp'] ?? $card['name_ja'] ?? null` fails a test instead of passing one. The same commit
+corrected the two `GametoraAptitudeTest` bodies to `name_jp` and added the persisted-column assertion at
+`:85`, as the Residual paragraph below records.
+
 **Standing lesson.** A fixture that agrees with the code instead of with the source proves nothing.
 Its keys and value shapes are a recording of the export, not a mirror of the parser beside it; where
 the two agree against the source, the pair has no coverage and still reports green. The same reasoning
 closes the second half: a test that seeds the value it claims to show is not evidence either, because
 US-1 is about a page the fetch built.
 
-**Residual.** `tests/Feature/GametoraAptitudeTest.php:20,67` still spell the source key `name_ja` in
-two inline bodies. Those tests assert aptitudes and never the name, so they pass either way. Out of
-this change's scope; rename on the next pass over that file.
+**Residual (withdrawn 2026-09-29 by `e8ead2d`).** This paragraph claimed that
+`tests/Feature/GametoraAptitudeTest.php:20,67` still spelled the source key `name_ja` in two inline
+bodies, that those tests asserted aptitudes and never the name, and that the rename was left for a later
+pass over that file. All three were true at `d755da3` and none survives `e8ead2d`: both lines now spell
+`name_jp`, and `tests/Feature/GametoraAptitudeTest.php:85` asserts the persisted column on the row the
+pipeline promoted (`->and($umamusume->name_ja)->toBe('スペシャルウィーク')`), which is the proof this entry
+was missing: source key read, record emitted, column stored. The history stands as written above;
+nothing is left over from it in that file.
 
-**Owner.** Data Engineer. Filed and closed by the same commit, because the fix and its proof landed
-together.
+**Owner.** Data Engineer. Filed and closed by the same commit (`d755da3`), because the fix and its proof
+landed together; the review follow-up `e8ead2d` strengthened that proof (and corrected the Residual
+paragraph above) rather than reopening the entry.
