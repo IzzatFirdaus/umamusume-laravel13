@@ -225,4 +225,15 @@
         @endif
         <span>Shop Coins: not yet recorded</span>
     </div>
+
+    {{-- R40, one line: the ladder printed above is the standard track, the rule that would
+         place a trainee on the dirt-leaning or limited-turf-range track is not sourced,
+         and the disagreement between the two guides is carried by KI-15. Naming which
+         track the numbers came from is the difference between a conservative target and
+         an unexplained one (D-256). --}}
+    <p class="mt-3 text-xs text-ink-muted">
+        Targets shown are the <span class="font-bold text-ink">standard</span> track. Which
+        trainee belongs on the dirt-leaning or limited-turf-range track is not sourced, and
+        KI-15 carries the disagreement.
+    </p>
 </div>

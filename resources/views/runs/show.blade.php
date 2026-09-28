@@ -117,6 +117,16 @@
              other scenario panels rather than with the turn log because it describes the
              run's resources, not one turn. --}}
         <x-shop-panel :run="$run" class="mt-3" />
+        {{-- Every panel below self-gates on the composition matrix, so a scenario that
+             does not open a mechanic renders nothing rather than an empty frame: these
+             are Trackblazer and Unity Cup surfaces, and an URA run must not show either
+             (D-221, D-241, gate G-34). --}}
+        <x-race-panel :run="$run" :slots="$raceSlots" class="mt-3" />
+        <x-team-rank-gauge :run="$run" class="mt-3" />
+        <x-spirit-burst-roster :run="$run" class="mt-3" />
+        <x-team-race-panel :run="$run" class="mt-3" />
+        <x-epithet-checklist :run="$run" class="mt-3" />
+        <x-race-fatigue-chip :run="$run" class="mt-3" />
     @endif
 
     <form method="POST" action="{{ route('runs.update', $run) }}" class="mt-4 flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-4 text-sm">
