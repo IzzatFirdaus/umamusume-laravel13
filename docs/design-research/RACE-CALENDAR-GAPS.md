@@ -1,0 +1,240 @@
+# Race calendar — gaps and open questions
+
+**Date:** 2026-09-29
+**Scope:** what the race read path does **not** know, what it knows twice, and what it was
+asked not to decide.
+**Not a to-do list.** Several entries are deliberately unresolved because resolving them is
+either an owner decision or another slice's call site. "Owner" below names who can close it,
+not who will.
+
+Companion documents: `docs/scenarios/09-global-race-calendar.md` (the data and its evidence),
+`docs/design-research/HANDOFF-RACE-READ-PATH-2026-09-29.md` (why the read path moved).
+
+---
+
+## 1. Two tables both hold goal races
+
+**Missing:** one home for the career race schedule.
+
+`race_catalog_slots` holds 410 rows keyed on `(scenario_key nullable, year, month, half, title)`.
+`scenario_slots` also holds `goal_race` rows — 296 of them seeded by `f0ae288` — keyed on
+`(scenario_key, month, half, kind, source_key)` after `c0a743f` widened it so several goal races
+could share a half-month.
+
+**Why not resolved here:** the two threads reached the same problem from different directions and
+each fixed the half it could see. `c0a743f` solved insert collision; `82959e9` moved the read path.
+Reconciling means deleting one side's rows, and neither session can judge the other's scope. The
+retarget note exists precisely so this is a known state rather than a surprise.
+
+**Needed to resolve:** decide which table the seeder writes, then drop the other's `goal_race`
+rows and remove the kind from `ScenarioSlot::VALID_KINDS`. `scenario_slots` still needs
+`team_race`, `grade_deadline`, `scripted_event` and `free_race` regardless — those are correctly
+its, and `free_race` in particular has no catalogue row by definition.
+
+**Owner:** Slice 11 / 12, with the read path's owner. Neither table's columns were removed by
+this pass, so the reconciliation can go either way without unwinding work.
+
+---
+
+## 2. Tier labels disagree between the seeder and the parser
+
+**Missing:** one standard for whether evidence outside the export counts as a label source.
+
+`races.json` carries a numeric `grade` and **no label field** — that part is correct and
+uncontested. From it, R65 concluded codes 200/300/700 have no source and made
+`ScenarioSlotSeeder` write `tier = null` for them.
+
+`GametoraRaceCatalogParser` maps all five codes, because two publishers outside the export name
+them: uma.guide's dataset stores `grade` and `gradeName` together
+(`{"raceName":"Daily Hai Junior Stakes","grade":200,"gradeName":"G2"}`), and Game8's all-races
+table independently prints `G2` for that race and `G3` for Artemis Stakes. `09` §"Tier labels"
+records the full chain including the 12-cell distance-band match, which is what rules out a
+swapped 200/300 mapping rather than merely preferring one.
+
+**Why not resolved here:** this is a standards question, not a data question, and it was not mine
+to settle. The parser's comment states the evidence and names the disagreement at the map itself,
+where someone editing it will meet it.
+
+**Consequence today:** the two tables render different tier coverage for the same race. It does
+**not** affect the read path — the grid and picker read `race_catalog_slots`.
+
+**Needed to resolve:** either accept out-of-export sources and restore the seeder's labels, or
+rule that only the export counts and null the parser's too. The second is self-consistent but
+throws away `G2`/`G3`/`Pre-OP` that two independent publishers assert.
+
+**Owner:** the owner, as a sourcing standard.
+
+---
+
+## 3. The maiden rule is global in the source and per-row in the schema
+
+**Missing:** a faithful encoding of when a race is maiden-locked.
+
+The export states the rule once, on the maiden row: *"You can't participate in any races listed
+here until you win either Debut or any of the Maiden Races."* That is a statement about every
+standard race, not a property of individual rows. The schema models it as `is_maiden_gated` per
+row, and both `f0ae288` and the parser set it `false` everywhere — so `maiden_locked` never fires
+in production data.
+
+**Why not resolved here:** the parser setting it `true` for all standard races would be asserting
+a per-row fact the source does not encode per row, and it would change rendering for every winless
+run. `RaceSlotPanelComposerTest` covers the state, so deleting the column would have removed
+tested behaviour instead.
+
+**Needed to resolve:** a product decision — either the column means "this race is maiden-gated"
+and is populated true for standard races, or the rule is a run-level state and the column should
+go away in favour of one check.
+
+**Owner:** whoever owns the maiden gate as a UI concept.
+
+---
+
+## 4. `careerYearForTurn()` is an inference, and the grid depends on it
+
+**Missing:** a stored career year.
+
+`turn_entries.turn` is a single monotonic counter — `nextTurn()` is `max(turn) + 1`, there is no
+per-year reset, and no cap on it exists anywhere in the codebase. So the year is derived:
+`min(3, max(1, intdiv(turn - 1, 24) + 1))`.
+
+The 24 is not a guess: it is the client's own grid, twelve months times Early and Late,
+corroborated against `[Global]` captures in `09`, where the debut at turn 12 lands on Late June of
+Junior year. But the derivation assumes a career is exactly three years of exactly 24 turns with no
+skipped or extra turns, and nothing in the schema enforces that.
+
+**Why it matters:** if the derivation is wrong anywhere, the grid silently shows the wrong year's
+races for a run — a wrong calendar is worse than a missing one, because it looks authoritative.
+
+**Needed to resolve:** either store the year on `turn_entries` at log time, or pin the derivation
+with a test against a real long-career capture. `RaceCalendarYearTabsTest` covers turn→year
+arithmetic including the clamp, which is the second option; it cannot substitute for the first.
+
+**Owner:** the schema's owner. This is a column decision, not a read-path one.
+
+---
+
+## 5. Track names and first-place fan figures are not resolvable
+
+**Verified this pass, and it is a real gap:** `config('uma.sources')` declares exactly two
+sources — `gametora-characters` and `gametora-race-catalog`. **Neither `racetracks_extended` nor
+`en/race-fans` is declared**, so neither can be fetched through the engine.
+
+Consequences in `race_catalog_slots`:
+
+- `track_id` is stored as the export's numeric id (e.g. `10008`). No track **name** is available.
+  `racetracks_extended` has it, and `09`'s tables were built from it.
+- `fans_gain_curve` is stored as the curve id. No **payout figure** is available. `en/race-fans`
+  maps curve → fans by finishing position, and it is where the nine unresolvable slots were
+  identified (curves 51–56 have no `[Global]` row).
+
+**Why not resolved here:** each needs its own declared source entry, which is the owner gate at
+`config/uma.php:31`, and the parser contract takes one body per source so joining three datasets
+needs a design the pipeline does not have yet.
+
+**Needed to resolve:** two more `uma.sources` entries plus either a join step in the persister or
+lookup tables populated from them. Until then the picker shows distance, surface, tier and fan
+gate — all of which are in `race_instances` — but not the venue name.
+
+**Owner:** Data Engineer scope, with the owner's approval on the two new sources.
+
+---
+
+## 6. Race picker and `trainee_goals`
+
+**Missing:** a way to choose among the up-to-12 races at a turn, and any record of a character's
+objectives.
+
+**Why not built:** `race-panel.blade.php` is under active rewrite (`6c1969f`, R67), and a picker
+belongs there. `KNOWN-ISSUES.md:851` still lists **KI-21 as OPEN** while `6c1969f` appears to have
+implemented its second option — server-driven disclosure rather than Alpine. That discrepancy is
+worth checking before either is filed as done.
+
+**Proposed `trainee_goals` shape, recorded so nobody re-derives it:**
+
+```
+trainee_goals
+├── umamusume_id          FK — Goals are per character, not per card. training_runs FKs
+│                         umamusume_id, and the four client panels in 09 show Goals
+│                         differing per trainee, not per costume variant.
+├── training_run_id       FK nullable — set when scoped to one run.
+├── goal_type             race | fan
+├── race_catalog_slot_id  FK nullable — race goals only. Points at race_catalog_slots,
+│                         which carries year, so (year, turn) resolves to a real row.
+├── year                  junior | classic | senior — deadline year for fan goals.
+├── turn                  int nullable — deadline turn for fan goals.
+├── required_placement    string nullable — '1st' | 'top 3' | 'top 5' | 'higher than 5th'
+│                         | free text. Race goals only, and per CHARACTER: the same race
+│                         carries different placement text for different trainees.
+├── fan_threshold         int nullable — fan goals only. No slot FK: a fan goal is not
+│                         a race and must not be forced into one.
+└── notes, timestamps
+```
+
+Two kinds, and they are genuinely different: a **race goal** is a specific race with a placement
+requirement; a **fan goal** is a threshold by a deadline and occupies no grid cell.
+
+**Needed to resolve:** KI-21 closed and `race-panel.blade.php` free; per-character Goal and
+placement text captured from client panels or guide transcription — **none of it is in the
+export**, which is why only four characters have any Goal data at all.
+
+**Owner:** blocked on KI-21.
+
+---
+
+## 7. The Goal pennant has no source
+
+**Resolved as a defect, still open as a feature.** `79ffad5` stopped drawing the pennant from
+`is_mandatory`, which was the audit's conflation: a career obligation is not a character's
+objective. The component still renders a `goal` cell with its D-181 treatment, so the fix is a
+wiring change and not a rewrite.
+
+**What is missing:** nothing can currently set the state, because `trainee_goals` does not exist.
+The grid therefore shows no pennants at all.
+
+**One correction on the evidence, because it was asserted the other way:** that the client shows a
+red banner on the debut, qualifier, semifinal and final is **not supported by the capture corpus**.
+Four panels were read cell by cell for `09`; every banner in them sits on a per-character race —
+NHK Mile Cup, Tokyo Yushun, Kikuka Sho, Tenno Sho (Autumn), Nikkei Sho, Takarazuka Kinen, Arima
+Kinen — and none on the debut or the final rounds. The change is safe under either reading, since
+the treatment is kept and only the model's authority to assert it was withdrawn.
+
+**Needed to resolve:** item 6.
+
+**Owner:** this thread, once `trainee_goals` exists.
+
+---
+
+## 8. `SourceFetcher` writes `.html` for JSON snapshots
+
+**Pre-existing, inherited by the new source, not introduced here.** Every row's `snapshot_path`
+ends in `.html` — for example
+`snapshots/gametora-race-catalog/2026-09-28/294424fc78e0058b…a3a24791.html` — for a body fetched as
+`application/json`.
+
+**Why not fixed here:** it is engine-level, shared with `gametora-characters`, and changing it
+alters paths already recorded on rows. Out of this pass's surface.
+
+**Needed to resolve:** derive the extension from the response content type, and decide whether
+existing recorded paths get rewritten or grandfathered.
+
+**Owner:** pipeline / engine cleanup.
+
+---
+
+## 9. A check that cannot fail for the reason it claims
+
+**Partly resolved, kept as a pattern.** `RaceCalendarTest:276` asserts the string
+`Trainer-entered` appears in the rendered HTML, but it **hand-builds** the cells array and passes
+it to the component — it never calls `calendarCells()`. So the model could stop emitting `manual`
+entirely and that test would stay green. Two independent sessions reached this conclusion: `5dcc06c`
+added model-path coverage, and Slice 13's `cb9b61f` named the same flaw in its own comment.
+
+The same class of error caused a false report earlier in this pass: a verification script reused one
+Laravel query builder across a year loop, and because `Builder::where()` mutates in place, every
+later count was scoped by the earlier one. It reported "zero rows for years 2 and 3" against
+perfectly good data. That trap is now a comment in `RaceCatalogSlotTest`'s header.
+
+**Needed to resolve:** none — recorded so the next report of breakage asks "would a test have
+caught it?" before assuming the code is fine or the report is wrong.
+
+**Owner:** nobody. It is a note about how to read the other nine entries.

@@ -176,6 +176,30 @@ fill is 5.82:1, which passes, and it is the darkest member of the ink family the
 uses. The pill never shrinks to buy the contrast: D-259 makes the arrow the part that has to stay
 readable, so a smaller pill is the wrong fix for a contrast failure.
 
+**R74 — the quiet-edge exception (recorded 2026-09-29, docs only; no token and no component changed).**
+A non-text boundary is allowed to sit under 3:1 against its own background where the state it marks is
+carried by other means, and this system has now done that twice on purpose.
+
+| Case | Quiet edge | Measured | What carries the state instead |
+|---|---|---|---|
+| Slice 2 lock cells | `border-rule` on a `sunken` fill | under 3:1 | the lock's own glyph and the fan figure in the cell text |
+| Slice 13 disclosure toggle, unselected | `border-rule` on the form's `raised` ground | **1.22 light / 1.37 dark** | the label's text contrast (12.49 selected vs 5.46 unselected light; 18.93 vs 8.30 dark), the `pick-line` border on the selected member at **4.83** against the quiet one, and `aria-pressed` |
+
+Both measurements are resolved-property reads from the rendered element, `getComputedStyle` against the
+first fully opaque ancestor, in a live server (`slice-13-2026-09-29.md` §5.2, `slice-14-2026-09-29.md`).
+
+The exception is narrow and it is not a licence. WCAG 1.4.11 asks for 3:1 on the visual information
+used to identify a component or its state; where a boundary is the *only* signal, it still fails and
+must be stepped. What this note permits is a deliberately quiet **inactive** state next to a loud
+active one, on three conditions: the selected member clears 3:1 on its own edge, the two are at least
+3:1 apart from each other, and the state is announced programmatically rather than drawn. A pair that
+loses any of the three has lost the exception with it.
+
+It is written here rather than only in a verification record because it is a rule about future
+tokens: the next quiet border someone is tempted to ship should meet this row and the two precedents,
+not rediscover them. The judgement about whether the treatment is the one the design system wants
+still belongs to the token owner, and R74 records the exception, not a blessing of any specific value.
+
 ### 3.5 Tailwind v4 theme block
 
 Tailwind v4 is CSS-first in this repo: the theme lives in an `@theme` block in `resources/css/app.css`, and there is deliberately no `tailwind.config.js` (`ARCHITECTURE-ESSENTIALS.md`). The block below is the contract, written for reference. **It is not applied to the app in this session** (scope limit; PRD §6 and the root `CONSTRAINTS.md` own any change to `resources/`).

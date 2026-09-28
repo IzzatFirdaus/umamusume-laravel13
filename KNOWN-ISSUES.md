@@ -7,17 +7,28 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
-**Status (2026-09-29, catalog roster merge):** 23 issues filed. **17 resolved/closed** (KI-1–5,
-KI-6–14, KI-18–20, KI-23). **6 open**: KI-10 (ratio half), KI-15, KI-17, KI-21, KI-22 (both still
-blocking Slice 12's T4), and KI-24 (a fresh clone or worktree has six red tests because the skill
-registry file is gitignored). Two entries arrived by merge: KI-23 is the `name_jp` parser defect,
-filed as KI-21 on branch `feat/catalog-roster-and-trainee-selector` and renumbered here because
-trunk took KI-21 and KI-22 for unrelated issues; KI-24 is new from that branch's Task 1. The
-counts above were derived by reading every `## KI-n` heading in this file, not carried forward from
-the block below: KI-5 reads FIXED and KI-10 reads "SCHEMA HALF CLOSED, RATIO HALF OPEN", so a
-keyword match on RESOLVED|CLOSED alone miscounts both.
+**Status (2026-09-29, catalog roster branch):** 23 issues filed. **19 resolved/closed** (KI-1–9, KI-11–14, KI-18–23). **4 open**: KI-10 (Grade Point ratio half), KI-15 (which GP track applies), KI-17 (the consecutive-race count), and KI-24 (a fresh clone or worktree has six red tests because the skill registry file is gitignored). Two entries came from this branch: KI-23 is the `name_jp` parser defect, filed as KI-21 at branch base `b387e07` and renumbered because trunk took KI-21 and KI-22 first; KI-24 is the fresh-clone gap from this branch's Task 1. Counts were read off this file's own `## KI-n` headings rather than carried forward: KI-5 reads FIXED (so it counts closed although the word RESOLVED is absent), KI-10 reads "SCHEMA HALF CLOSED, RATIO HALF OPEN" (so it counts open), and KI-16 was never filed — which is why the numbers run to KI-24 across 23 entries. A keyword match on RESOLVED|CLOSED alone miscounts all three.
 
-**Status (2026-09-29, Slice 12 T3):** 21 issues filed. **16 resolved/closed** (KI-1–9, KI-11–14,
+**Status (2026-09-29, Slice 14):** **Unchanged — 21 filed, 18 closed, 3 open.** Slice 14 settled the
+tier-label question Slice 13 left contested: G1, G2 and G3 are now sourced **per race** from a dated
+two-publisher extraction (`329cec1`) and the seeder holds no code-to-label constant, so G-16c is green
+for `database/seeders/` and `config/`. That reaches none of the three open items — KI-10 is the Grade
+Point placement ratio, KI-15 which GP track applies, KI-17 the consecutive-race count — so all three
+stay open. No KI was filed for the two questions Slice 14 leaves, because neither is a defect: the 115
+Open rows resting on a disclosed code-level generalisation, and the parser's map unreconciled under
+R72's idle condition. Both are recorded with their reasoning in D-153 and in
+`docs/design-research/verification/slice-14-2026-09-29.md` §2.5 and §7, where a reader of the map will
+meet them. Prior:
+**Status (2026-09-29, Slice 13):** 21 issues filed. **18 resolved/closed** (KI-1–9, KI-11–14,
+KI-18–22). **3 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
+consecutive-race count cannot be derived from the log). Slice 13 closed KI-21 by rebuilding the race
+entry form as server-driven disclosure (`6c1969f`, no dependency added) and pinning it with rendered
+DOM rather than HTML-source assertions. It closed KI-22 too, **but KI-22 was filed on a wrong cause
+and that is recorded in its own entry**: Slice 12 grepped for `isFreeRace`, did not find the
+`$manual` parameter that had replaced it, and read a missing identifier as a missing branch. The
+real defect was the marker on a finished free race, which the read path's owner fixed in `b6d68b6`.
+Counts read off `grep -c "^## KI-"` = 21; KI-16 was never filed, which is why the numbers run to
+KI-22. Prior:**Status (2026-09-29, Slice 12 T3):** 21 issues filed. **16 resolved/closed** (KI-1–9, KI-11–14,
 KI-18–20). **5 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
 consecutive-race count cannot be derived from the log), and two filed by the T3 browser pass —
 KI-21 (the race entry form is built on Alpine.js, which is not a dependency, so neither path renders)
@@ -858,90 +869,75 @@ four shop-panel error spans and every other `text-risk` consumer.
 
 ---
 
-## KI-21 The race entry form is built on Alpine.js, which is not a dependency, so neither path renders — FILED 2026-09-29 (Slice 12), OPEN
+## KI-21 The race entry form is built on Alpine.js, which is not a dependency, so neither path renders — FILED 2026-09-29 (Slice 12), CLOSED 2026-09-29 (Slice 13, R67)
 
-**Symptom.** On a live run screen, the race panel's two-path entry form renders no fields at all.
-Measured on an isolated scratch fixture (`slice-12-2026-09-29.md` §7.2):
+**Symptom.** On a live run screen, the race panel's two-path entry form rendered no fields at all:
+`window.Alpine` false, two `template[x-if]` branches inert, `scenario_slot_id` / `title` / `month` /
+`half` absent from the DOM, and the hidden `entry_mode` input posting the empty string. Measured in
+`slice-12-2026-09-29.md` §7.2.
 
-```
-window.Alpine                          → false
-template[x-if] count                   → 2        (both branches inert)
-select[name="scenario_slot_id"]        → absent
-input[name="title"]                    → absent
-select[name="month"], [name="half"]    → absent
-input[name="entry_mode"]               → present, value ""
-```
+**Cause.** `race-panel.blade.php` was written against Alpine, which is not in `package.json` and is
+not imported by `resources/js/app.ts`. A `<template>` element's children stay unrendered until a
+framework clones them out, so Blade emitted a form the browser never showed.
 
-**Cause.** `resources/views/components/race-panel.blade.php` was written against Alpine (`x-data`,
-`@click`, `:class`, `<template x-if>`). Alpine is not installed: `package.json` devDependencies are
-`@tailwindcss/vite`, `axios`, `concurrently`, `laravel-vite-plugin`, `tailwindcss`, `vite`, and
-`resources/js/app.ts` imports only `./bootstrap` and `./guided-flow`. A `<template>` element's
-children stay unrendered until a framework clones them out, so with no Alpine both branches stay
-inert and the hidden `entry_mode` input — which has `x-model` and no `value` attribute — posts the
-empty string. `prepareForValidation()` reads that as `calendar`, which then fails validation because
-the slot select was never rendered to submit. The manual path is unreachable by any means.
+**Fix (`6c1969f`, route 2 — no dependency).** The form is now server-driven disclosure, the shape
+`guided-step` already uses: the mode switch is two GET forms submitting `entry_mode` to the run
+screen, and the branch is chosen on the server before the response is sent. `old()` wins over the
+query default so a failed write returns to the branch being filled, and the entered values return
+with it — including placement, status, circles and period, which sit outside both branches and were
+retypeable before. `package.json` is untouched. The calendar session's own comment at
+`race-calendar.blade.php:89` — "there is no runtime JavaScript dependency in this project" — is the
+evidence this was the house stance and not just the permitted route.
 
-**Impact.** R56's free-race writer is unusable end-to-end. The controller, the Form Request, the
-fifth kind and the atomic slot+entry create all work; `FreeRaceWriterTest` proves that by posting the
-request directly. What does not exist is the ability of a Trainer to reach any of it.
+**Proof is the rendered DOM, not the HTML source (R71).** `RaceEntryDisclosureTest` resolves every
+field through `DOMDocument` and refuses any whose ancestor chain contains a `template` element. All
+8 tests failed against HEAD before the fix; `assertSee('name="title"')` would have passed against the
+broken code, which is why the original Slice 11 browser check missed this entirely. The file also
+writes a free race through the rendered form rather than posting directly, so the DOM path is proven
+end to end and not just the HTTP layer.
 
-**Why the suite and Slice 11's browser pass both missed it.** The tests exercise the HTTP layer, not
-the DOM, so they are correct and simply silent on the broken layer. Slice 11 §4 grepped rendered text
-and found "Naruta Kinpa Cup" eight times and "Trainer-entered" five — all true, and all from the
-server-rendered calendar and entries list, not from the form. Neither check can fail for the reason it
-is running.
+**Zero-Alpine grep.** `grep -n "x-data\|@click\|x-if\|template x-if\|x-model"
+resources/views/components/race-panel.blade.php` → no output, exit 1. Same across all of
+`resources/views`. A first attempt showed one hit, in my own comment quoting `template x-if`; a grep a
+comment can satisfy is not a check, so the comment moved.
 
-**Required fix — a decision, not a patch.** Two defensible routes, and the choice is the owner's:
-
-1. Add `alpinejs` to `package.json` and register it in the entry. This is a new dependency, so
-   `CONSTRAINTS.md` C-8 bars it without approval; `AGENTS.md` escalation 2 sends it to the human owner.
-2. Rewrite the two-path form framework-free: submit `entry_mode`, re-render server-side with that
-   branch's fields. No new dependency, and it matches the tool's existing post-redirect flow —
-   `guided-step` already works this way (R31's navigation model), so the interaction stays consistent.
-
-Route 2 is the smaller rule footprint and keeps NFR-1's local-only posture untouched. Route 1 buys
-in-place switching with no round trip. Neither is adopted silently.
-
-**Owner.** Human owner for the dependency call; Laravel Dev implements whichever is chosen. Blocks
-Slice 12's T4, because a green gate run would be reporting on a form that cannot be used.
+**Owner.** Closed by Slice 13.
 
 ---
 
-## KI-22 A free_race cell renders `state=past` without the Trainer-entered marker, so R61's calendar rule is no longer implemented — FILED 2026-09-29 (Slice 12), OPEN
+## KI-22 A free_race cell renders `state=past` without the Trainer-entered marker — FILED 2026-09-29 (Slice 12), CLOSED 2026-09-29 (Slice 13), FILED ON A WRONG CAUSE
 
-**Symptom.** A `free_race` slot at month 5 Early renders in the calendar as a past cell with no
-marker. Reading the model on the same fixture:
+**The filed cause was wrong, and the correction is the useful part.**
 
-```
-calendarCells()[4]['halves']['Early']['slots'] → [ { "state": "past", "label": "Naruta Kinpa Cup" } ]
-```
+What was reported: concurrent commit `82959e9` had deleted R61's free-race branch, evidenced by
+`grep -n "isFreeRace" app/Models/TrainingRun.php` returning nothing. What is true: `82959e9` did not
+remove the branch, it reshaped it into a `bool $manual` parameter, which `isFreeRace` cannot match.
+`git blame` attributes the current `if ($manual)` block to `82959e9` itself at lines 433-436. **A
+missing identifier was read as a missing branch** — the grep could not find what it was not looking
+for, exactly the failure KI-21 was filed against one section earlier.
 
-There is no `manual` key, so `race-calendar.blade.php`'s
-`collect($slotItems)->contains('manual', true)` gate never fires. The page contains exactly one
-"Trainer-entered" leaf and it is the race panel's (`class="ml-1 …"`), not the calendar's
-(`class="block …"`).
+The concurrent session reached the same conclusion independently in `5dcc06c`, which identifies what
+was genuinely missing: nothing tested the model.
 
-**Rule broken.** R61: `free_race` cells take open-cell geometry and a Trainer-entered marker, and
-never a Goal pennant. Both halves of that are now unimplemented in `HEAD`.
+**What the observation really caught**, and the only real defect here: `calendarCell()` checked the
+recorded entry before the manual flag, so a free race with a finish took the `past` return and lost
+its marker. Slice 13 measured it, declined to invent the requirement, and left the call to the read
+path's owner. That owner made it in `b6d68b6 fix(calendar): the Trainer-entered marker survives the
+finish`: `app/Models/TrainingRun.php:437` now returns `past` **and** `manual => true` for a free race
+with a recorded entry, because `free_race` is provenance about where the record came from, and
+provenance does not expire when the race is run.
 
-**Cause, and it is a collision rather than a bug in either session.** T4 added an `isFreeRace()`
-branch to `TrainingRun::calendarCell()` returning `['state' => 'open', …, 'manual' => true]`.
-Concurrent commit `82959e9 feat(calendar): read the grid from race_catalog_slots` rewrote that read
-path and the branch is gone — `grep -n "isFreeRace" app/Models/TrainingRun.php` returns nothing. The
-data layer still agrees with R61: `:293` still queries `where('kind', 'free_race')`, so free_race rows
-reach the grid. Only the presentation regressed. `TrainingRun.php` was dirty at this slice's opening
-snapshot, clean by §4 of the record, then committed at `82959e9`.
+**Pinned by rendering tests, not by the existing one.** `FreeRaceCalendarCellTest` (`cb9b61f`,
+`5ed1ebd`) creates a row, fetches the run over HTTP, and requires the marker inside a `role="img"`
+cell with the open dashed treatment, an `aria-label` naming the state, and zero `border-l-goal`
+pennants. `RaceCalendarTest.php:276`, which appeared to cover this, hand-writes
+`['state' => 'past', 'label' => 'Local Stakes (Trainer-entered)']` into the cells array and asserts
+the substring — it never calls `calendarCell()`, so it passes on label text whether or not the model
+emits `manual`.
 
-**Not repaired here.** Re-adding the branch means editing a read path another session is actively
-changing, in a shared worktree, with no way to tell whether their rewrite intends to reinstate it in a
-different shape. This is a coordination item, not a one-line fix.
+**Owner.** Closed by Slice 13 with the read path's own fix. Slice 12's §7.3 stands as filed and is
+corrected forward in `slice-13-2026-09-29.md` §4, not edited in place.
 
-**Required fix.** Restore open-cell geometry and the `manual` marker for `kind = free_race` in the
-race_catalog_slots read path, and pin it with a test that asserts the calendar cell's state and marker
-for a free_race slot — `slice-12-2026-09-29.md` §7.3 is the reproduction. The Goal-pennant half of
-R61 already holds and should stay.
-
-**Owner.** Planner Domain Specialist with the calendar session, on the shared `master`.
 ---
 
 ## KI-23 The character parser read a source key the GameTora export never published, so fetched trainees lost their Japanese name — FILED and RESOLVED 2026-09-29 (catalog roster, Task 2)

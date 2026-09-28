@@ -67,6 +67,7 @@ recorded sha is dropped.
    Added because KI-13 shows a green suite can coexist with a branch that will not boot.
 8. **Every cited sha verified via `git cat-file -e` in-session** — a record's own sha is labelled self-citation.
 9. **A commit's subject prefix names the slice its diff belongs to** — checked against the diffstat, not the intent: a commit that adds `slice-9-…md` is a Slice 9 commit. `68fa190` carried `docs(slice-7)` on Slice 9's work, which is why this is a criterion and not a convention; the erratum is `docs(plan)` at `ec0ee2f`. Prefixes are read by `git log --grep` when a slice is traced after the fact, so a wrong one is a false index, and the fix is recorded rather than rewritten when the commit is already on `origin/master`.
+10. **A UI claim is measured on the rendered DOM, not the HTML source or the HTTP layer (R71).** Three slices were wrong in a row for want of this. Slice 11 called a T4 regression "pre-existing" because `git stash` reverts tracked modifications only and the regression was already committed, so the probe could not have shown anything else. Slice 11's browser check said the free-race form worked because "Naruta Kinpa Cup" appeared eight times in the response — all server-rendered calendar text, none of it the form. Slice 12 reported R61's rule as deleted because `grep isFreeRace` missed the `$manual` parameter that had replaced it. Each check was soundly built for a different question. So: a rendered branch is asserted by resolving the field through a DOM parser and refusing any node whose ancestor chain holds a `template` (Blade emits a declarative branch and the browser is what makes it inert, so `assertSee('name="title"')` passes against markup nobody can reach); a form is exercised by submitting what the page actually rendered, not by posting the fields the component was meant to show; and a `grep` a comment can satisfy is not a check — reword the comment.
 
 ---
 
@@ -88,7 +89,9 @@ recorded sha is dropped.
 | **4 — Implementation** | **Slice 9 Complete** | `f7a59e8` (KI-18 closed), mood pill tokens |
 | **4 — Implementation** | **Slice 10 Complete** | Maintenance: R51 marker, R52 KI-18 bookkeeping, ADR-0009 draft, KI-19/KI-20 filed |
 | **4 — Implementation** | **Slice 11 Complete** | `c0a743f` (T1), `f0ae288` (T2), `70248b3` (T3), `5820e77` (T4), `65f8b92` (T5); KI-20 closed. Three claims corrected by Slice 12: the "pre-existing" failure label was a T4 regression, "297 rows / `ura_finale_slots.json`" is 296 rows across three real files, and R59's record commit was never made |
-| **4 — Implementation** | **Slice 12 Complete** | `c86ed9f` (T0 radiogroup regression fix), `2d0c1dc` (T1 tier audit), this commit (T2 register); suite green at 508 |
+| **4 — Implementation** | **Slice 12 HALTED at T3** (corrected; it was recorded Complete in error) | `c86ed9f` (T0), `2d0c1dc` (T1), `b295d16` (T2), `37ccc08` (T3 findings + halt). T4 never ran: KI-21 and KI-22 filed, `origin/master` held at `4992282` all slice. KI-22 later found to be filed on a wrong cause |
+| **4 — Implementation** | **Slice 13 Complete** | `6c1969f` (T1+T2, KI-21 closed), `cb9b61f` + `5ed1ebd` (T3 pins), this commit (T5 docs). Suite 562 passed, all gates green, deferred push finally made |
+| **4 — Implementation** | **Slice 14 Complete** | `329cec1` (T1 tier join, G-16c green), `24e491c` (D-153/§1.2.6/G-16c dated), `3ae437d` (T2 quiet edge). Suite 569 passed. 118 tiers restored per race, none lost; parser left a documented dissent because R72's idle condition failed |
 | **5 — Verification** | Routine | Browser metrics: light 4.74 / dark 5.48 / badges 9.00+; energy bands 6.40 / 8.34 / 10.89 light and 12.60 / 10.57 / 6.88 dark, and the preview pairs, in `slice-5-2026-09-28.md` |
 | **6 — Iteration** | Unfrozen by Slice 2, **not started** | Owner instruction: the slice's commit unfreezes it; no Phase 6 anatomy in this session |
 
@@ -353,28 +356,68 @@ followed by a record commit carrying the `ls-remote` output. Evidence: `slice-12
 
 ---
 
-## Slice 12 Summary (2026-09-29) — Correction slice
+## Slice 12 Summary (2026-09-29) — CORRECTED TO: halted at T3
 
-Brief: "master goes green first, then the seeded tier audit, then the register, then the maintenance
-pass. No new panels, no new tokens, no schema columns." Rulings R63-R66. Nothing in this slice adds a
-panel, declares or recolours a token, or touches schema — the seeder change is a value correction on
-an existing column, and the race-panel change is a control swap on an existing form.
+Slice 12 did not complete. **It halted at T3** with two blockers filed and T4 (gates plus push)
+never run. `origin/master` stayed at `4992282` for the whole slice.
 
-| Task | Commit | Claim, with the thing that proves it |
+| Task | Commit | Claim |
 |---|---|---|
-| T0 radiogroup regression | `c86ed9f` | Bisect in scratch worktrees: `0d2dbdc` PASS, `70248b3` PASS, `5820e77` FAIL, `65f8b92` FAIL. Entry-mode toggle moved from `role="radiogroup"` to banner buttons; hidden `entry_mode` input still posts, so `StoreRaceEntryRequest::isManualPath()` is untouched. Suite 508 passed / 2 skipped / 0 failed |
-| T1 tier audit | `2d0c1dc` | `GRADE_MAP` reduced to the two codes REFERENCE §1.2.6 pins (100→G1 from `skills.json` id 200311 client copy, 400→OP from three 「オープン」-named rows); 200/300/700 seed `tier = null` and keep `source_key`. Scratch DB seeds twice: 296 rows both times, G1 34 / OP 118 / null 144 unchanged |
-| T2 register + record | this commit | Slice-11 addendum corrects the "pre-existing" mislabel forward; KI-19 closed on the successful second `update` (engine v0.1.5), KI-11 re-closed on the Slice 8 epithet rows, ADR-0009 to RULED IN PART; PLAN gains the R54-R66 ledger below; header recomputed to 19 filed / 16 closed / 3 open |
-| T3 browser pass | (T4 commit) | Two-path race form and a manual row, both themes, resolved-property method |
-| T4 gates + push | (this commit / post-push record) | CONSTRAINTS order with pasted outputs, seeder idempotency numbers, G-16c grep; one push, `ls-remote` recorded in the post-push commit |
+| T0 radiogroup regression | `c86ed9f` | Slice 11's "pre-existing" label was wrong: bisect shows `0d2dbdc` PASS, `70248b3` PASS, `5820e77` FAIL. T4's `role="radiogroup"` on the mode switch broke D-40. Fixed with banner buttons |
+| T1 tier audit | `2d0c1dc`, superseded in part by `329cec1` (R72) | R65 concluded that only codes 100 and 400 have a label source, resting on REFERENCE §1.2.6's "no cited label map" for 200/300/700, and nulled those three. **That sentence described the corpus as then written, not the absence of a source.** Tested per race on 2026-09-29 in a rendering browser against two publishers: G1 agrees 34/34, G2 42/42, G3 76/76, so all three tiers are now sourced **per race** and the seeder holds no code-to-label constant at all. Open and Pre-OP are not settled: Game8's list is graded-only, so its silence is not agreement, and uma.guide alone calls Open 「OP/L (Open/Listed)」. Three Open rows are pinned per row by their own client glyph; 115 keep a disclosed code-level pin rather than being nulled, and that trade is flagged for the owner, not taken quietly. Pre-OP stays null. Re-seed twice: 296 rows, G1 34 / G2 42 / G3 76 / OP 118 / null 26 — 118 restored, none lost. Full evidence and page dates: `database/seeders/data/race-tier-labels-2026-09-29.json`, D-153 |
+| T2 register + record | `b295d16` | Slice-11 addendum, KI-19 closed on the second update attempt, KI-11 re-closed, ADR-0009 to RULED IN PART, R54-R66 ledger added |
+| T3 browser pass | `37ccc08` | Found **KI-21** and **KI-22**, and halted. Suite green, pairs measured, form unusable |
+| T4 gates + push | **NOT RUN** | A green gate over a form no Trainer can reach is not a gate. Blocked pending the owner's dependency call |
 
-**Shared master.** Two peer commits (`7897684`, `24f9b50`) sit inside this slice's push range because
-both sessions commit to `master` in one worktree. The push carries them; withholding them would mean
-rewriting shared history. Recorded in `slice-12-2026-09-29.md` §5.
+**The two blockers, and one correction to the second.** KI-21 was real: the race form was built on
+Alpine, which is not a dependency, so both branches sat in inert `template` elements. Slice 13
+closed it at `6c1969f`. KI-22 was **filed on a wrong cause** — Slice 12 grepped for `isFreeRace`,
+did not find the `$manual` parameter that had replaced it, and read a missing identifier as a
+missing branch; `git blame` attributes the branch to the very commit blamed for deleting it. The real
+defect was the marker on a finished free race. Both are closed in Slice 13; `slice-12-2026-09-29.md`
+carries the addendum, its §7.3 text left as written.
+
+**A lesson the register now records twice.** Slice 13 repeated Slice 12's error inside its own first
+pass at the same file — asserting the marker was still lost, from reading `calendarCell()` — and the
+browser pass is what disagreed. Reading code answers what a file says; only running it answers what
+the screen does. R71 exists because of this.
 
 ---
 
-## Owner Rulings Ledger (R54-R66)
+## Slice 13 Summary (2026-09-29) — Close KI-21, fix the ordinal, reconcile KI-22, push once
+
+Brief: "No new dependency, no new token, no schema change, no panel beyond the race panel." All four
+held: `package.json` untouched, no token declared or recoloured, no migration, one component changed.
+Rulings R67-R71.
+
+| Task | Commit | Claim, with the thing that proves it |
+|---|---|---|
+| T0 opening snapshot | (record §1) | R68's three named files checked individually, all CLEAN, so T3 ran. `HEAD` was `7895e74` while `origin/master` sat at `4992282` |
+| T1 server-driven disclosure | `6c1969f` | Two GET forms submit `entry_mode`; `showData()` reads the query the way design-preview reads `?step=`; `old()` wins so a failed write returns to its own branch with placement/status/circles/period preserved. `RaceEntryDisclosureTest` 8 tests, **all red against HEAD**, resolving fields through `DOMDocument` and refusing any inside a `template` (R71) |
+| T2 ordinal placements | `6c1969f` | `RaceEntry::placementOrdinal()` at `:437`-area; twelve values tabled including the 11/12/13 teens plus null → "no placement". `team-race-panel` prints a cardinal with the word that makes it one and is left alone |
+| T3 KI-22 reconciliation | `cb9b61f`, `5ed1ebd` | No production change: the rule was intact and Slice 12's cause was wrong. Added the rendered pins the existing test could not provide — `RaceCalendarTest:276` hand-writes its cell array and passes on label text without calling `calendarCell()` |
+| T4 browser pass | (record §5) | R17 fixture on `.scratch-uma/s13-browser.sqlite`, port 8233, shared DB never opened. Free race created **through the rendered form** by clicking the disclosure and pressing Record race. All 13 pairs clear; zero `template` elements; radiogroups still 1 |
+| T5 gates + deferred push | (this commit / post-push record) | Pest 562 passed, Pint passed, PHPStan no errors, lore-docs 98/51, lore-code 7, gate.py PASS, build clean. One plain push carrying 16 commits, 9 named as not this slice's |
+
+**Zero-Alpine grep:** `grep -n "x-data\|@click\|x-if\|template x-if\|x-model"` over the component →
+no output, exit 1; the same over all of `resources/views` → no output. A first attempt hit once, on my
+own comment quoting `template x-if`; a grep a comment can satisfy is not a check, so the comment moved.
+
+**Reported, not explained away:** the unselected disclosure's quiet border measures **1.22 light /
+1.37 dark** against its background, under 1.4.11's 3:1. The state is not carried by that border
+(text 12.49 vs 5.46, selected-vs-unselected border 4.83, `aria-pressed` both), so the exception for
+state conveyed otherwise plausibly applies — but whether this is the treatment the design system
+wants is the token owner's call, and this slice was told not to touch tokens. No KI filed, because
+nothing here is a demonstrated failure.
+
+**Gates, honestly:** the first Pest run reported 29 failures with `database is locked`. That was this
+slice's own `artisan serve` still running, not the tree. Stopped and re-ran: 562 passed. Recorded
+because a gate number produced beside a lingering dev server should not be quoted without its
+conditions.
+
+---
+
+## Owner Rulings Ledger (R54-R74)
 
 R60 makes a ruling a repo artifact rather than a transcript line, so the ledger records each ruling
 as the brief gave it. Where the brief supplied a full sentence it is quoted; where it supplied a
@@ -396,6 +439,41 @@ ruling is worse than recording it short.
 | R64 | 12 | The slice-11 push verification is written from the outside, and the record says whether those lines were written before or after the push | verbatim in brief |
 | R65 | 12 | Any seeded row whose tier label has no per-row source gets `tier = null` and keeps `source_key`; the re-seed proves idempotency on a scratch DB | verbatim in brief |
 | R66 | 12 | Retry the Impeccable update once; on a second 404 record both attempt dates in KI-19 and run the detect pass at the current version over the Slice 11 surfaces only | verbatim in brief |
+| R67 | 13 | The two-path race form becomes server-driven disclosure: the mode switch submits `entry_mode` and the server re-renders with that branch's fields, exactly as guided-step does. No new dependency | verbatim in brief |
+| R68 | 13 | Reconcile KI-22 only if T0 finds `race-calendar.blade.php`, `runs/show.blade.php` and `TrainingRun.php` clean; if any is dirty, skip T3 entirely and say so in the record with the dirty list | verbatim in brief |
+| R69 | 13 | Placement renders 1st, 2nd, 3rd, 4th, 11th, 12th, 13th, 21st, 22nd, 23rd correctly through a small helper, with a test table for those values | verbatim in brief |
+| R70 | 13 | The deferred push goes as one plain push carrying the interleaved peer commits, and the record names every sha that is not this slice's | verbatim in brief |
+| R71 | 13 | The disclosure test asserts the branch's fields by input name through the rendered DOM, must fail against HEAD, and the writer is additionally reached through the rendered form rather than a direct post | verbatim in brief |
+| R72 | 14 | Settle the tier question on evidence read in a rendering browser with location asserted before each read; commit a dated extraction and join per race; restore a label only where both publishers agree and a page date postdates 2026-07-01; reconcile the parser's map only if its file is clean and the peer session is confirmed idle | verbatim in brief |
+| R73 | 14 | Before a push, read every commit in the range it will carry that touches `database/`, `config/`, `app/Services/DataPipeline/` or the research corpus, starting with anything the peer lands during the slice | verbatim in brief |
+| R74 | 14 | Record the quiet-edge exception beside the §3.4 pair table with its measurements, its two precedents and its carrying cues; docs only, no token and no component change | verbatim in brief |
+
+---
+
+## Slice 14 Summary (2026-09-29) — Tier labels settled per race, quiet edge recorded
+
+Brief: verification and recording. No new dependency, no token change, no parser edit unless R72's
+coordination condition holds. Rulings R72-R74.
+
+| Task | Commit | Claim, with the thing that proves it |
+|---|---|---|
+| T0 opening push | `debc4d0` on origin | One plain push carrying the four Slice 13 docs-only commits; `ls-remote` = `debc4d0e6bda…` equals local HEAD. R73 read list: all four this session's |
+| T1 tier join | `329cec1`, `24e491c` | Both publishers read in a rendering browser with location asserted. **G1 34/34, G2 42/42, G3 76/76 agree per race; Open and Pre-OP do not** (Game8 is graded-only, uma.guide alone says "OP/L (Open/Listed)"). `GRADE_MAP` deleted; seeder joins on `database/seeders/data/race-tier-labels-2026-09-29.json` and stores the evidence date, not the seed moment. G-16c: no matches in seeder or config, exit 1, pinned by `TierLabelJoinTest`. Re-seed twice: 296 rows, G1 34 / G2 42 / G3 76 / OP 118 / null 26 — 118 restored, none lost, no row without a `source_url` |
+| T2 quiet edge | `3ae437d` | DESIGN.md §3.4 records R74 as three conditions, both precedents, and the numbers (1.22 / 1.37 unselected against 5.89 / 10.57 selected and a 4.83 pair difference) |
+| T3 rendered tiers | (record §4) | The calendar renders **no** tier text (grep 0, 0 tier nodes in `role="img"` cells, both themes), so no calendar pair was invented. Race panel: select 6.95 / 12.71, `G2` and `G3` 5.78 / 6.64, ordinal 6.64 dark, calendar marker 8.30 dark. Picker distribution read off the DOM matches the re-seed exactly |
+| T4 gates + push | (this commit) | Pest 569 passed / 2 skipped / 0 failed; Pint, PHPStan, gate.py, build clean; lore-docs 98/51; lore-code 7. Server stopped before the suite, so Slice 13's lock failure was not repeated |
+
+**Two things this slice deliberately did not do.** The parser's five-entry map stays a documented
+dissent: R72 requires the peer session confirmed idle, and its branch advanced twice during the slice
+even though the file itself was clean. And the 115 Open rows that rest on a generalisation from three
+client-glyph rows keep their label with that status written into the same row (`scope:
+code-level-client-naming-pin`, `per_row_sourced: false`) rather than being nulled by a strict reading —
+dropping a tier correct since Slice 11 to satisfy a grep is the owner's trade, recorded in D-153 and in
+`slice-14-2026-09-29.md` §2.5.
+
+**Register unchanged:** KI-10, KI-15 and KI-17 stay open. T1's evidence is about tier labels; KI-10 is
+the Grade Point placement ratio, KI-15 which GP track applies, KI-17 the consecutive-race count. None
+is touched. 21 filed / 18 closed / 3 open, unchanged from Slice 13.
 
 ---
 
