@@ -44,4 +44,4 @@ Grep, case-insensitive: `horse`, `horses`, `sire`, `dam`, `mare`, `foal`, `🏇`
 2. `php artisan test --compact` (narrow first, full at hand-off)
 3. `vendor/bin/pint --dirty --format agent`
 4. `vendor/bin/phpstan analyse --no-progress`
-5. `make lore`
+5. `make lore` (`composer lore` and `composer lore-code` run the same greps on a host without GNU make; `tools/lore.php` is the runner and `LoreGateParityTest` keeps its list equal to the Makefile's)

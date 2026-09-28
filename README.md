@@ -116,7 +116,7 @@ layer with its own docs.
 | Tests | `composer test` or `vendor/bin/pest --compact` |
 | Style | `composer lint` (check) / `vendor/bin/pint --dirty --format agent` (fix) |
 | Static analysis | `composer analyse` (PHPStan level 6; needs `--memory-limit=1G` on a 128M CLI default) |
-| Lore grep | `make lore` (hits need a context ruling, CONSTRAINTS.md) |
+| Lore grep | `make lore` / `composer lore`, and `make lore-code` / `composer lore-code` (hits need a context ruling, CONSTRAINTS.md) |
 | Migrations | `php artisan migrate:fresh --seed` |
 
 The full bar, including the no-suppression floor, is `CONSTRAINTS.md`.
