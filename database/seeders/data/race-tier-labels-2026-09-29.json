@@ -1,0 +1,4198 @@
+{
+  "schema": 1,
+  "purpose": "Per-race tier labels for the URA Finale schedule, joined by race identity rather than by the export numeric grade code, per R72.",
+  "fetched_at": "2026-09-29",
+  "publishers": {
+    "umaguide": {
+      "url": "https://uma.guide/agenda-planner/",
+      "asset": "https://uma.guide/assets/chunks/uma-data.41Q6sBmn.js",
+      "page_date": null,
+      "page_date_note": "none published: no Last-Modified header, no time element, no generated-at field in the chunk; only the fetch date is known",
+      "fetched_at": "2026-09-29"
+    },
+    "game8": {
+      "url": "https://game8.co/games/Umamusume-Pretty-Derby/archives/536131",
+      "page_date": "2026-09-09T05:19:19-04:00",
+      "page_date_text": "Last updated on: September 9, 2026 03:35 AM",
+      "fetched_at": "2026-09-29",
+      "covers": "graded races only (G1/G2/G3); carries no Open and no Pre-OP row"
+    }
+  },
+  "rule": "A row takes a label only where both publishers give the same single label for that race and at least one page date postdates 2026-07-01 (G1/G2/G3), or where the client name of the row itself carries the open glyph (three Open rows). Code 400 additionally keeps the existing code-level pin on the remaining rows, marked per_row_sourced false and scope code-level-client-naming-pin so the generalisation is visible per row. Pre-OP is labelled by one publisher only and so is null.",
+  "counts": {
+    "100": {
+      "rows": 34,
+      "G1": 34
+    },
+    "200": {
+      "rows": 42,
+      "G2": 42
+    },
+    "300": {
+      "rows": 76,
+      "G3": 76
+    },
+    "400": {
+      "rows": 118,
+      "OP": 118
+    },
+    "700": {
+      "rows": 26,
+      "null": 26
+    }
+  },
+  "rows": [
+    {
+      "name": "Arima Kinen",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Asahi Hai Futurity Stakes",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Champions Cup",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "February Stakes",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hanshin Juvenile Fillies",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hopeful Stakes",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "JBC Classic",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "JBC Ladies’ Classic",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "JBC Sprint",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Japan Cup",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Japan Dirt Derby",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Japanese Oaks",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kashiwa Kinen",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kawasaki Kinen",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kikuka Sho",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "M.C. Nambu Hai",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": "mile championship nambu hai",
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Mile Championship",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "NHK Mile Cup",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Oka Sho",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Osaka Hai",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Queen Elizabeth II Cup",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Satsuki Sho",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shuka Sho",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sprinters Stakes",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Takamatsunomiya Kinen",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Takarazuka Kinen",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Teio Sho",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tenno Sho (Autumn)",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tenno Sho (Spring)",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tokyo Daishoten",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tokyo Yushun (Japanese Derby)",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": "japanese derby (tokyo yushun)",
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Victoria Mile",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Yasuda Kinen",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Zen-Nippon Junior Yushun",
+      "export_grade": 100,
+      "tier": "G1",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G1"
+      ],
+      "game8": [
+        "G1"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "All Comers",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "American JCC",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": "american jcc (jockey club cup)",
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Aoba Sho",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Centaur Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Copa Republica Argentina",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Daily Hai Junior Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Diolite Kinen",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Empress Hai",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fillies' Revue",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Flora Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fuchu Umamusume Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fuji Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hanshin Cup",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hanshin Daishoten",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hanshin Umamusume Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kanto Oaks",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Keio Hai Junior Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Keio Hai Spring Cup",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kinko Sho",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kobe Shimbun Hai",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kyoto Daishoten",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kyoto Kinen",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kyoto Shimbun Hai",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Ladies' Prelude",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": "ladies prelude",
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Mainichi Okan",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Meguro Kinen",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Milers Cup",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": "milers cup (yomiuri)",
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Nakayama Kinen",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "New Zealand Trophy",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Nikkei Shinshun Hai",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Nikkei Sho",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Rose Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sapporo Kinen",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sazanka TV Hai",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Spring Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "St. Lite Kinen",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Stayers Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Swan Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tokai Stakes",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tokyo Hai",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tulip Sho",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Yayoi Sho",
+      "export_grade": 200,
+      "tier": "G2",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G2"
+      ],
+      "game8": [
+        "G2"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Aichi Hai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Antares Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Aoi Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Arlington Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Artemis Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "CBC Sho",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Capella Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Challenge Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Chukyo Kinen",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Chunichi Shimbun Hai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Cluster Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Diamond Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Elm Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Epsom Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fairy Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Falcon Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fantasy Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Flower Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fukushima Kinen",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fukushima Umamusume Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hakodate Junior Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hakodate Kinen",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hakodate Sprint Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hankyu Hai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Heian Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Ibis Summer Dash",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Keeneland Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Keihan Hai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Keisei Hai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Keisei Hai Autumn Handicap",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kisaragi Sho",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kitakyushu Kinen",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kokura Daishoten",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kokura Junior Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kokura Kinen",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kyodo News Hai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kyoto Junior Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kyoto Kimpai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kyoto Umamusume Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Leopard Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Lord Derby Challenge Trophy",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Mainichi Hai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "March Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Marine Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Mercury Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Mermaid Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Miyako Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Musashino Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Nakayama Kimpai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Nakayama Umamusume Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Naruo Kinen",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Negishi Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Niigata Daishoten",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Niigata Junior Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Niigata Kinen",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Ocean Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Procyon Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Queen Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Queen Sho",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Queen Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Radio Nikkei Sho",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sapporo Junior Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Saudi Arabia Royal Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sekiya Kinen",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shinzan Kinen",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shion Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Silk Road Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sirius Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sparking Lady Cup",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "TCK Jo-o Hai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tanabata Sho",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tokyo Shimbun Hai",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tokyo Sports Hai Junior Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tokyo Sprint",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Turquoise Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Unicorn Stakes",
+      "export_grade": 300,
+      "tier": "G3",
+      "scope": "two-publishers",
+      "per_row_sourced": true,
+      "umaguide": [
+        "G3"
+      ],
+      "game8": [
+        "G3"
+      ],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Akhalteke Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Aldebaran Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Andromeda Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Anemone Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Aso Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Autumn Leaf Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Azuchijo Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Azumakofuji Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "BSN Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Betelgeuse Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Brazil Cup",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Brilliant Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Canna Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Capital Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Carbuncle Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Cassiopeia Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Chiba Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Christmas Rose Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Chukyo Junior Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Clover Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Coral Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Cosmos Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Crocus Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Dahlia Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "December Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Elfin Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Enif Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fukuryu Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fukushima Junior Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fukushima Mimpo Hai",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fukushima Minyu Cup",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Fukushima TV Open",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "client-name-glyph",
+      "per_row_sourced": true,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": "福島テレビオープン"
+    },
+    {
+      "name": "Fuyo Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Galaxy Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Green Channel Cup",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hagi Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hosu Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hyacinth Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Idaten Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Ivy Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "January Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Junior Cup",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kanetsu Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Keiyo Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Keyaki Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kikyo Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kitakyushu Tankyori Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kobai Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kochi Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kokura Nikkei Open",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "client-name-glyph",
+      "per_row_sourced": true,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": "小倉日経オープン"
+    },
+    {
+      "name": "Kurama Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Lapis Lazuli Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Lumiere Autumn Dash",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Manyo Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Marguerite Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Marine Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "May Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Meitetsu Hai",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Metropolitan Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Miyakooji Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Momiji Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Muromachi Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "NST Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Nagatsuki Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "New Year Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Nigawa Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Nojigiku Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Oasis Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "October Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Onuma Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Opal Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Oro Cup",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Osakajo Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Paradise Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Phoenix Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Polaris Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Pollux Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Port Island Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Principal Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Radio Nippon Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Rakuyo Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Rigel Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Ritto Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Rokko Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sannomiya Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sapporo Nikkei Open",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "client-name-glyph",
+      "per_row_sourced": true,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": "札幌日経オープン"
+    },
+    {
+      "name": "Seiryu Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shimotsuki Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shinetsu Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shirafuji Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shirayuri Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shiwasu Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shoryu Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shunrai Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sleipnir Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sobu Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Subaru Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sumire Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Suzuran Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sweetpea Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tachibana Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tancho Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tango Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tanigawadake Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tanzanite Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tempozan Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tennozan Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Toki Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tomoe Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "UHB Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Uzumasa Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Valentine Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Wakaba Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Wakagoma Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Wasurenagusa Sho",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Yamato Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Yodo Tankyori Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Yonago Stakes",
+      "export_grade": 400,
+      "tier": "OP",
+      "scope": "code-level-client-naming-pin",
+      "per_row_sourced": false,
+      "umaguide": [
+        "OP/L (Open/Listed)"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Akamatsu Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Aster Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Begonia Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Cattleya Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Erica Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Habotan Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hiiragi Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Hyakunichiso Tokubetsu",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kantsubaki Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kigiku Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kimmokusei Tokubetsu",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Koyamaki Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Kuromatsu Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Manryo Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Mochinoki Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Nadeshiko Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Oxalis Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Platanus Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Rindo Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Saffron Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Sazanka Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Senryo Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shigiku Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shiragiku Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Shumeigiku Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    },
+    {
+      "name": "Tsuwabuki Sho",
+      "export_grade": 700,
+      "tier": null,
+      "scope": "no-per-row-source",
+      "per_row_sourced": false,
+      "umaguide": [
+        "Pre-OP"
+      ],
+      "game8": [],
+      "alias_applied": null,
+      "open_glyph_jp": null
+    }
+  ]
+}
