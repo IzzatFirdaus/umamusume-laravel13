@@ -164,6 +164,49 @@ Migration gate: `migrate:fresh --seed` refused as destructive (5th time); forwar
 
 ---
 
+## Open Decisions (unowned by any slice)
+
+Three calls stay with the owner and are untouched by Slice 5: theme default (light vs dark),
+rounded-font vs system stack (C-8 plus `DESIGN.md` §11), and mid-run "Change scenario"
+semantics. The fourth is below.
+
+### Should Livewire enter the stack? — evidence, not a proposal
+
+**Verdict for this slice: no, and the burden of proof sits with the round trip, which was
+fast.** T1 builds preview-before-commit server-rendered, and the evidence that decision needs is
+the latency of the request Livewire would remove. Measured on the run-detail page today, loopback
+`php artisan serve` on `127.0.0.1:8144` against the R17 fixture (`.scratch-uma/slice5.sqlite`,
+rebuilt isolated), `curl -w '%{time_starttransfer}'` after one warm-up request that compiles the
+Blade views, n=20, no writes: **median 0.047 s, p95 0.076 s**, min 0.039, max 0.111, and 39,156
+bytes of HTML per round trip. `php artisan serve` is the single-threaded dev server with
+`APP_DEBUG=true`, so a production host would be faster, not slower: these numbers are comparable
+between themselves, not portable to another machine. So what Livewire would buy is a preview
+without a round trip (the 47 ms above plus 39 kB of re-sent shell becomes a DOM patch), and a
+guided flow that holds its step state server-side instead of re-POSTing the form. What it costs is
+specific and already on the record: `livewire/livewire` is absent from `composer.json` and adding it
+is a C-8 dependency decision; Livewire 3 ships and boots Alpine.js, which reverses the stack line
+at `.ai/guidelines/custom/domain.md:9` and `ARCHITECTURE.md:225` ("vanilla JS only where needed"),
+and `docs/PRE-MORTEM.md:73` already cut a Livewire component tree on the finding that it "would add
+a dependency for zero new capability"; every `wire:` region owes its own loading and error state
+under C-7, which multiplies the state surfaces on one screen; `wire` transitions have to satisfy
+D-90 (nothing animates unless the Trainer caused it), D-91 (≤240 ms) and D-92 (reduce → 1 ms), so
+motion budgets move from a CSS review to a component review; and D-66 says an interaction "never
+fires a network request", which is a rule about the *search box* but needs an explicit loopback
+ruling before a per-keystroke `wire:model.live` could be called compliant with NFR-1's local-only
+promise. The cost this slice cannot pay in advance is re-verification: a morphing DOM invalidates
+every `getComputedStyle()` pair recorded in the verification files, and the browser half of
+`DesignTokensTest` - the only gate that would catch that invalidation - is the half that **skips**
+here (2 skipped, Playwright absent, C-8 forbids installing it), so contrast would be re-measured by
+hand on every commit that touches the flow. **The number that decides this is not the baseline
+above but the preview round trip measured against it, appended below once T1c exists.** *(To verify
+rather than assume at ADR time: the Alpine bundling claim is from Livewire's published design, not
+measured here, because nothing Livewire is installed in this repo.)*
+
+**Appended after T1c landed:** *(fill in from the measurement in the Slice 5 verification record —
+two-stage preview round trip, same server, same fixture, option submit to preview render)*
+
+---
+
 ## Doc Drift Closed (T8)
 
 | File | Line | Fix |
