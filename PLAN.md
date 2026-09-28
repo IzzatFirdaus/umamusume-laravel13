@@ -323,13 +323,21 @@ component review (D-90 to D-92), a D-66 loopback ruling, and re-verifying every 
 `getComputedStyle()` pair over a morphing DOM while the gate that would catch it is the one that
 skips. Full numbers and method: `docs/design-research/verification/slice-5-2026-09-28.md` §4.
 
-**Reopen criterion (R29, written down by the slice that closes the item).** Latency is not a
-reason to reopen. The measured round trip is 0.047 s median / 0.076 s p95 for a page render and
-0.071 s / 0.091 s for the two-stage preview (n=20 each, loopback dev server, `APP_DEBUG=true`), so
-"the server round trip is slow" is already contradicted by the evidence this decision rests on.
-What Livewire would buy is the other two numbers: 72,562 bytes of shell re-parsed on every click,
-and a step chain held server-side instead of re-POSTed. A reopen therefore arrives with all seven
-of these, in this order, and a request missing any one of them is not a reopen:
+**Reopen criterion, the owner's words (R34, 2026-09-28), quoted verbatim:**
+
+> "a UI need a full-navigation round trip cannot serve, such as in-place multi-step editing; never
+> latency alone"
+
+That sentence is the rule. The list below is the shape of a request that satisfies it: the trigger is
+a *need* the current interaction model cannot meet, and the seven items are what such a request then
+owes. This block's first draft, landed by the slice that closed the item, framed the trigger as "the
+72.5 kB re-parse per click and the stateful step chain" — the byte count is a cost of the present
+design, not a UI need, and on the owner's criterion it does not open the question. Latency alone
+never did: the measured round trip is 0.047 s median / 0.076 s p95 for a page render and 0.071 s /
+0.091 s for the two-stage preview (n=20 each, loopback dev server, `APP_DEBUG=true`), which is the
+evidence `slice-5-2026-09-28.md` §4 carries.
+
+**What a request that meets the criterion must arrive with,** in this order, all seven:
 
 1. C-8 approval from the owner for `livewire/livewire`, which is absent from `composer.json` today;
    no slice owns adding a package.
