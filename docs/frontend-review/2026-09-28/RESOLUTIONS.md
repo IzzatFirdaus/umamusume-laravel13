@@ -36,7 +36,7 @@ line would have been editing a comment.
 | F-4 | O | deferred | — | Vocabulary split (strip "N/A" vs panel "not yet totalled") is real but lives in copy the audit graded O; touching it means choosing one vocabulary, which is a design-record call, not a one-liner in a file I was already in. |
 | F-5 | O | deferred | — | Validation message "The umamusume id field is required." needs an attribute label in `StoreTrainingRunRequest`, which is outside the frontend fence for this slice. |
 | F-6 | O | **decision requested** | — | No column, no input path, permanently N/A. Needs schema work or widget removal. See `DECISIONS-NEEDED.md`. |
-| F-7 | N | **fixed — breaks 8 frozen tests** | `83db98c` | POST `stage=preview` now `302` + `Location: /training-runs/1`; target answers GET 200, so the 405 is unreachable. Bubbles recomputed (test). See §Frozen below. |
+| F-7 | N | **fixed; frozen tests updated in two phases** | `83db98c` code, `ad17d99` + `792b5cb` tests | POST `stage=preview` now `302` + `Location: /training-runs/1`; target answers GET 200, so the 405 is unreachable. All 8 frozen tests green; suite back to base parity at 6. See §Frozen below. |
 | F-8 | O | deferred | — | Out-of-range page reuses the zero-result sentence. Audit marked O; a distinct state needs new copy + a branch in `catalog/index.blade.php`, i.e. a new file opened to chase an observation, which the fence forbids here. |
 | F-9 | N | **fixed** | `3c8c830` | CSV header now `…,condition,energy,mood,fans`; row 1 = `1,480,300,355,210,95,240,,88,NORMAL,9000`. JSON turn keys carry the same three. Original 8 positions unchanged. Bodies in `resolutions/`. |
 | F-10 | N | **fixed** | `9419665` | `resources/views/errors/404.blade.php` renders through `x-layout`: nav, skip link, tokens, three routes back. Both 404 routes captured. |
@@ -54,7 +54,13 @@ line would have been editing a comment.
 (F-4, F-5, F-8, F-11, F-12, F-16, F-18), 2 decision-requested (F-6, F-19), 2 no-action
 (F-13, F-17).**
 
-## Frozen-test collision — needs your ruling (F-7)
+## Frozen-test collision — ruled, and how it was cleared (F-7)
+
+**Resolved.** The owner ruled that F-7 ships and authorized the unfreeze. All 8 tests are now
+green and the suite is back to base parity: **6 failed at `7d4b8cf`, 6 failed at `792b5cb`**, the
+same six `SkillAutomationTest` cases, with `passed` rising 336 → 342 — exactly the six rewrites,
+and no test removed. The original description of the collision is kept below, because it is the
+reason the freeze needed a ruling at all.
 
 8 tests in three frozen Phase 3A/3B files now fail, all on one line shape:
 
@@ -118,7 +124,7 @@ The audit's own PNGs and sidecars were not opened for writing; the two
 
 ---
 
-## Follow-up: the F-7 unfreeze, and why it stopped at 2 of 8
+## Follow-up: the F-7 unfreeze, in two phases — first attempt stopped at 2 of 8
 
 The owner ruled F-7 ships and authorized a narrow unfreeze of three frozen files, with each edit
 being `->assertOk()` → `->assertRedirect(route('runs.show', $run))->followRedirect()` and nothing
@@ -156,3 +162,31 @@ pre-existing `SkillAutomationTest` failures (now KI-17) plus these 6.** Base at 
 
 The stale `design-preview` claim in the `GuidedTurnOnRunViewTest` header comment was corrected in
 the same commit, comment-only, as authorized.
+
+### Phase two (`792b5cb`), and the idiom it left behind
+
+A reviewer reading only `ad17d99` would think the job was half done, which is why this is a
+separate commit and a separate paragraph. `ad17d99` cleared the 2 tests that read no response body;
+`792b5cb` cleared the remaining 6 that read the previewed HTML off the POST.
+
+The carry those 6 need is the reusable part, so it is written down rather than left to be
+rediscovered:
+
+```php
+$payload = previewPayload($run);
+
+$this->post('/training-runs/'.$run->id.'/turns', $payload)
+    ->assertRedirect(route('runs.show', $run));
+
+$html = $this->withSession(['_old_input' => $payload + ['previewed' => '1']])
+    ->get(route('runs.show', $run))
+    ->getContent();
+```
+
+Two things that snippet encodes, both easy to get wrong. `followRedirect()` does not exist on
+`TestResponse` in Laravel 13.32, so the redirect target is reached by an explicit second request.
+And the flashed bag must be `$payload + ['previewed' => '1']`, not `$payload`: the controller
+flashes `$validated + ['previewed' => '1']` and `showData()` gates the whole preview state on
+`$old['previewed'] === '1'`, so flashing the bare payload drops the rail back to step one and the
+assertions on `name="previewed"` and `Step 2 of` fail for a reason unrelated to what they test.
+Any future PRG test against this controller needs both halves.
