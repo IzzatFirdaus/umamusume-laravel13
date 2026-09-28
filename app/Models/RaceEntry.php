@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property int $training_run_id
  * @property int|null $scenario_race_id
  * @property int|null $scenario_slot_id
+ * @property int|null $race_catalog_slot_id
  * @property RaceEntryStatus $status
  * @property int|null $placement
  * @property int|null $fans_gain
@@ -36,9 +37,10 @@ use Illuminate\Support\Carbon;
  * @property-read TrainingRun $trainingRun
  * @property-read ScenarioRace|null $scenarioRace
  * @property-read ScenarioSlot|null $scenarioSlot
+ * @property-read RaceCatalogSlot|null $raceCatalogSlot
  */
 #[Table('race_entries')]
-#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'status', 'placement', 'fans_gain', 'objective_index', 'circles'])]
+#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'race_catalog_slot_id', 'status', 'placement', 'fans_gain', 'objective_index', 'circles'])]
 class RaceEntry extends Model
 {
     /** @use HasFactory<RaceEntryFactory> */
@@ -108,6 +110,19 @@ class RaceEntry extends Model
     public function scenarioSlot(): BelongsTo
     {
         return $this->belongsTo(ScenarioSlot::class, 'scenario_slot_id');
+    }
+
+    /**
+     * The slot in the shared career calendar this entry was run against.
+     *
+     * Null for a Trainer-typed free race, which has no catalogue row, and for a
+     * team race round, which belongs to the scenario rather than to the calendar.
+     *
+     * @return BelongsTo<RaceCatalogSlot, $this>
+     */
+    public function raceCatalogSlot(): BelongsTo
+    {
+        return $this->belongsTo(RaceCatalogSlot::class, 'race_catalog_slot_id');
     }
 
     /**
