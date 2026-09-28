@@ -72,9 +72,10 @@ The grep will hit these. They are not violations, and the Guardian's ruling stan
 
 - `dam` inside `damaged`, `demand`, `command`
 - `sire` inside `desired`, `surprise`, and the Umamusume name `Red Desire`
-- `stable` as an adjective: "stable growth", "keep the build stable"
+- `stable` as an adjective: "stable growth", "keep the build stable", "a stable control identifier" (`tests/Feature/ReviewFormAccessibilityTest.php:39`, ruled 2026-09-28). The ban is on `stable` as a noun naming a character container; an adjective describing anything is the allowed sense.
 - `mare` inside `nightmare`
 - `tail` inside `detail`, `retail`, `curtail`
+- `account` in the verb idiom "account for": "the list the template has to account for" (`tests/Feature/ReviewQueueTest.php:62`, ruled 2026-09-28). The bill and login senses are what the ban exists for, and `PRD.md` NFR-1 declares this tool has no account and no auth surface, so neither can appear as product language; "account for" means "cover", which is ordinary English in a code comment.
 - Japanese source strings and quoted official notices: source data, never a violation in itself
 - `docs/PRE-MORTEM.md` legacy quotations, exempt once each under root C-4
 
