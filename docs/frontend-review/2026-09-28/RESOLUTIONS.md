@@ -7,6 +7,27 @@ this slice opened; master has since moved to `ec0ee2f`, 16 commits ahead — see
 Audit README is treated as the historical record and was not edited. This file sits
 beside it.
 
+---
+
+## Read this before chasing F-3's citation
+
+The audit's F-3 entry cites **`resource-strip.blade.php:62`** and a
+**`$scenario ?? 'ura_finale'`** default. **That expression does not exist** — not on `master`
+(`7d4b8cf`) and not on `docs/frontend-review`. Verified with
+`git grep -n "ura_finale" -- app resources config routes` on both refs: the only hits are
+`config/scenarios.php:48` (`'baseline' => 'ura_finale'`), the scenario definition below it, and
+the deleted design-preview closure. Neither component names a scenario literal; both throw on an
+unknown key, deliberately.
+
+The real mechanism is **`TrainingRun::scenarioKey()`, `app/Models/TrainingRun.php:203`**:
+`return $this->scenario ?? (string) config('scenarios.baseline');`. The run screen passes that key
+into the strip at `runs/show.blade.php:52`, and the strip's Turn caption is `$def['label']` at
+`resource-strip.blade.php:59`, so the baseline's *name* reaches the screen through the composition
+fallback. **The finding is genuine and reproduced; the citation is not.** Anyone editing the cited
+line would have been editing a comment.
+
+---
+
 | ID | Sev | Status | Commit | Verification |
 |---|---|---|---|---|
 | F-1 | N | **fixed** | `7034c19` | `/` returns 200 with `data-theme="dark"` under a dark preference; response contains zero six-digit hex (was 26 in-file / 42 incl. shorthand), no `cloud.laravel.com`, no `fonts.bunny.net`. Test: *lands inside the product and honors the stored theme*. |
@@ -83,10 +104,55 @@ including the audit files themselves. Merging therefore needs a rebase, and
 ## Captures in `resolutions/`
 
 - `run-detail-no-scenario-light.png`, `run-detail-no-scenario-dark.png` — F-3, 1280×800
-- `error-404-run-light.png`, `error-404-catalog-light.png` — F-10
+- `error-404-run-light.png`, `error-404-catalog-light.png` — F-10. **These two files are
+  byte-identical on purpose**, not a copy mistake: both routes now resolve to the one
+  `errors/404.blade.php` template, so the pair *is* the evidence that a mistyped run id and a
+  mistyped slug render the same product chrome. They are kept as two files because the audit
+  captured them as two states, and collapsing them would lose that the fix covers both.
 - `export-csv-run1.txt`, `export-json-run1.txt` — F-9 bodies
 - `run-detail-guided-preview-prg.txt` — F-7 HTTP evidence, including an honest note
   that the bubble recomputation is proven by the automated test, not by curl
 
 The audit's own PNGs and sidecars were not opened for writing; the two
 `error-404-*-light.png` names are reused only inside `resolutions/`.
+
+---
+
+## Follow-up: the F-7 unfreeze, and why it stopped at 2 of 8
+
+The owner ruled F-7 ships and authorized a narrow unfreeze of three frozen files, with each edit
+being `->assertOk()` → `->assertRedirect(route('runs.show', $run))->followRedirect()` and nothing
+else. Two of the eight failing tests were converted exactly that way and now pass; the other six
+cannot be, and the reason is a framework fact worth recording before anyone retries it.
+
+**`Illuminate\Testing\TestResponse` has no `followRedirect()` on Laravel 13.32.** The class defines
+`assertRedirect()` at `vendor/laravel/framework/src/Illuminate/Testing/TestResponse.php:206` and no
+`followRedirect`. `TestResponse` proxies unknown methods to the underlying response through
+`ForwardsCalls`, so the prescribed chain does not fail an assertion — it dies earlier with
+`BadMethodCallException: Call to undefined method Illuminate\Http\RedirectResponse::followRedirect()`.
+Verified by applying the edit verbatim and reading the exception.
+
+That splits the eight into two groups:
+
+- **2 fixed.** `GuidedTurnStagesTest` *holds the row count at zero after stage one…* and *does not
+  let a repeated preview accumulate rows*. Neither reads a response body, so the status assertion
+  alone carries the test, and `->assertRedirect(route('runs.show', $run))` without the
+  `followRedirect()` half is sufficient. The file is now 4/4 green.
+- **6 not reachable by an assertion-line edit.** `GuidedFirstTurnTest` (3) and
+  `GuidedTurnOnRunViewTest` (3) each read the previewed **HTML** off the POST response, via
+  `->getContent()` on the post chain or off a stored `$response`. After PRG that body is a redirect
+  with no page in it, so the content assertions fail regardless of what the status line says. Four
+  of the six have no `assertOk()` on the POST at all — they are `post(...)->getContent()`
+  statements, which the unfreeze did not authorize touching. The fifth, *previews a turn without
+  writing it*, has `assertOk()` on line 145 but reads `$response->getContent()` on line 151 from
+  the same stored response, so fixing it means editing a second line. The sixth needs the same.
+
+Repairing those six is a rewrite, not a swap: each has to become an explicit
+`post(...)->assertRedirect(...)` followed by a separate request that carries the flashed input
+(`withSession(['_old_input' => $payload])`, the shape used in `FrontendAuditFixesTest.php`), because
+Laravel flashes input for exactly one request and a bare follow-up `get()` sees nothing. That is
+outside the granted fence, so it was not done. **Suite state: 12 failed at branch tip — the 6
+pre-existing `SkillAutomationTest` failures (now KI-17) plus these 6.** Base at `7d4b8cf` is 6.
+
+The stale `design-preview` claim in the `GuidedTurnOnRunViewTest` header comment was corrected in
+the same commit, comment-only, as authorized.

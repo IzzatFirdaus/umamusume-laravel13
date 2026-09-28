@@ -690,3 +690,39 @@ choice is recorded here rather than made silently: adding it is a schema decisio
 was given two columns, not three.
 
 **Owner.** Planner Domain Specialist with the owner; the schema decision is the owner's alone.
+
+## KI-16 The landing route is pinned to HTTP 200 by a stock test, and nothing records it — OPEN
+
+`tests/Feature/ExampleTest.php:7` asserts `$this->get('/')->assertStatus(200)`. That is the
+framework's own example test, left in place, and it is the only thing in the repository that
+constrains what `/` is allowed to be. The audit's F-1 offered two fixes for the skeleton splash
+- render it through the app shell, or delete the route and redirect `/` into the product - and the
+redirect option was rejected specifically because a 302 would fail that assertion, in a file the
+frontend slice was told not to edit. So a decision about the product's front door was made by a
+leftover framework test that never says it is doing that. The coupling is not wrong, exactly: a
+local tool answering 200 on `/` is defensible, and a hand-typed `localhost:8000` should not bounce.
+It is the silence that is the problem. **Required fix:** either the owner states the contract in
+`PRD.md` ("/` is a product surface and answers 200") and `ExampleTest` is replaced by an assertion
+that names it, or the coupling is accepted knowingly and this entry closes as a decision. Not fixed
+in `fix/frontend-audit-2026-09-28`, which chose the shell option and so kept the 200 either way.
+**Owner:** frontend, with the owner for the contract wording.
+
+## KI-17 Six `SkillAutomationTest` failures have no owner and predate the frontend audit — OPEN
+
+`tests/Feature/SkillAutomationTest.php` fails six tests: *discovers skills from the registry*,
+*matches skills to task descriptions by relevance*, *ranks the most relevant skill first*,
+*builds an execution plan in dependency order*, *executes a skill without parameters*,
+*auto-executes skills for a task and discloses matches*. They are not caused by any recent slice.
+Measured evidence: at `7d4b8cf` (base of `fix/frontend-audit-2026-09-28`) the full suite reports
+exactly these 6 failures and no others, and they were already present at `a292ef7`, where they were
+reproduced with unrelated work stashed. Nothing in `KNOWN-ISSUES.md`, `PLAN.md`, the ADRs or the
+2026-09-28 audit names an owner for them, which means every slice since has shipped against a red
+`CONSTRAINTS.md` C-1 gate and treated it as background noise. **This entry is a paper trail, not a
+fix.** The failures are untouched here: the frontend slice has no remit over
+`app/Services/SkillRegistry.php`, `SkillMatcher.php` or `SkillExecutor.php`, and guessing at a
+skill-matching contract without its author is how 6 become 8. **Required fix:** someone owns the
+skill-automation subsystem, states whether the six expectations are still the spec, and either
+repairs the code or retires the tests with a reason in the commit message, per the `CONSTRAINTS.md`
+floor on skipped tests. Until then C-1 cannot be reported green by any slice, and "6 failures are
+pre-existing" needs a citation rather than a shrug - that citation is this entry. **Owner:**
+unassigned; escalate to the human owner.
