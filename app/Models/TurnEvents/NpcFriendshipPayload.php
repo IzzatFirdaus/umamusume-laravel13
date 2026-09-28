@@ -53,7 +53,7 @@ final readonly class NpcFriendshipPayload
      * Read a stored payload, rejecting any shape this class does not own.
      *
      * The exact-key test is the point: a payload that arrives with an extra key, or
-     * arrives through a cast that dropped one, is a fact the tool cannot account for,
+     * arrives through a cast that dropped one, is a fact the tool cannot explain,
      * and quietly ignoring it is how a stored number goes missing without a failure.
      *
      * @param  array<string, mixed>  $deltas
