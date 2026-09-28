@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
+use App\Models\TurnEvents\ShopPurchasePayload;
 use Database\Factories\TrainingRunFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
@@ -34,13 +35,16 @@ use Illuminate\Support\Carbon;
  *                                             as no period rather than as zero
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property int|null $shop_resets_in turns until the shop rotation, as the Trainer
+ *                                    reports it; null renders the N/A disclosure and is
+ *                                    never computed from the turn number (D-232)
  * @property-read Collection<int, TurnEntry> $turnEntries
  * @property-read Collection<int, TurnEvent> $turnEvents
  * @property-read Collection<int, RaceEntry> $raceEntries
  * @property-read Collection<int, Skill> $skills
  * @property-read Umamusume $umamusume
  */
-#[Fillable(['umamusume_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'notes', 'current_objective_index'])]
+#[Fillable(['umamusume_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'notes', 'current_objective_index', 'shop_resets_in'])]
 class TrainingRun extends Model
 {
     /** @use HasFactory<TrainingRunFactory> */
@@ -57,6 +61,31 @@ class TrainingRun extends Model
         static::saving(function (self $run): void {
             if ($run->current_objective_index !== null) {
                 self::assertGradePeriod($run->current_objective_index, $run, 'current_objective_index');
+            }
+
+            $resets = $run->shop_resets_in;
+
+            if ($resets === null) {
+                return;
+            }
+
+            // Bound by the scenario's own rotation period, which is config and sourced
+            // (`shop.rotation_turns`), rather than by the column's numeric width. A
+            // countdown longer than the rotation is a misread, not a future fact.
+            $rotation = $run->hasScenario()
+                ? (int) config('scenarios.scenarios.'.$run->scenarioKey().'.shop.rotation_turns', 0)
+                : 0;
+
+            if ($rotation === 0) {
+                throw new \InvalidArgumentException(
+                    "Scenario [{$run->scenarioKey()}] has no shop, so it has no rotation countdown.",
+                );
+            }
+
+            if ($resets < 0 || $resets > $rotation) {
+                throw new \InvalidArgumentException(
+                    "shop_resets_in [{$resets}] is outside this scenario's rotation of {$rotation} turns.",
+                );
             }
         });
     }
@@ -572,6 +601,52 @@ class TrainingRun extends Model
         return [
             'status' => RunStatus::class,
             'current_objective_index' => 'integer',
+            'shop_resets_in' => 'integer',
         ];
+    }
+
+    /**
+     * Whether this run's scenario opens the Trackblazer shop at all.
+     */
+    public function composesShop(): bool
+    {
+        if (! $this->hasScenario()) {
+            return false;
+        }
+
+        return config('scenarios.scenarios.'.$this->scenarioKey().'.panels.shop') === true;
+    }
+
+    /**
+     * Coins spent on recorded purchases. A sum of entered costs, never a balance: the
+     * earning side of that arithmetic is not stored per turn, so "coins remaining" is a
+     * subtraction this tool cannot do honestly (D-232, Planner Rule 5).
+     */
+    public function shopSpendTotal(): int
+    {
+        if (! $this->composesShop()) {
+            return 0;
+        }
+
+        return $this->turnEvents
+            ->map(fn (TurnEvent $event): ?ShopPurchasePayload => $event->purchasePayload())
+            ->filter()
+            ->sum(fn (ShopPurchasePayload $payload): int => $payload->cost);
+    }
+
+    /**
+     * The consecutive-race count Race Fatigue keys on (D-230) — not derivable in this
+     * build, and this says so by returning null rather than inventing a link.
+     *
+     * D-230's premise is that the count "is already recoverable from `turn_entries`".
+     * It is not, as the schema stands: `race_entries` points at a `scenario_slots` row
+     * (month and half), never at a turn, and the guided flow offers no race choice, so
+     * no logged turn can be identified as a race turn. Counting anyway would mean
+     * either adding a link column this slice was not given or guessing from dates.
+     * The chip renders the reason (D-220), and KI-17 carries the gap.
+     */
+    public function consecutiveRaceCount(): ?int
+    {
+        return null;
     }
 }

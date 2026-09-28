@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\TurnEventType;
 use App\Models\TurnEvents\NpcFriendshipPayload;
+use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\TurnEvents\SpiritBurstPayload;
 use Database\Factories\TurnEventFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -82,12 +83,29 @@ class TurnEvent extends Model
     }
 
     /**
+     * The shop purchase this event recorded, when it recorded one (D-226).
+     *
+     * Resolved against the run's own catalogue, because the item set is a scenario
+     * property: the same key that is a real Trackblazer item is nonsense on an URA run.
+     */
+    public function purchasePayload(): ?ShopPurchasePayload
+    {
+        $deltas = $this->deltas;
+
+        if (! is_array($deltas) || ! ShopPurchasePayload::matches($deltas)) {
+            return null;
+        }
+
+        return ShopPurchasePayload::fromArray($deltas, $this->trainingRun);
+    }
+
+    /**
      * Validate a payload on the way in, not on the way out.
      *
      * `deltas` is a json column, so any key set can be written to it and a typo becomes
      * a row that reads as nothing. A failure event already writes its own shape
-     * (`penalty_kind`, `recorded`) and is not one of the two typed payloads, so it is
-     * left alone here rather than folded into a union neither class owns.
+     * (`penalty_kind`, `recorded`) and is not one of the typed payloads, so it is
+     * left alone here rather than folded into a union no class owns.
      */
     protected static function booted(): void
     {
@@ -106,6 +124,12 @@ class TurnEvent extends Model
 
             if (SpiritBurstPayload::matches($deltas)) {
                 $event->deltas = SpiritBurstPayload::fromArray($deltas)->toArray();
+
+                return;
+            }
+
+            if (ShopPurchasePayload::matches($deltas)) {
+                $event->deltas = ShopPurchasePayload::fromArray($deltas, $event->trainingRun)->toArray();
             }
         });
     }

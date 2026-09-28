@@ -69,6 +69,11 @@ class StoreTrainingRunRequest extends FormRequest
                     }
                 },
             ],
+            // The shop rotation countdown, as the Trainer reads it. The scenario's own
+            // `shop.rotation_turns` is the upper bound and the model guard applies it,
+            // because the bound lives in config and a static rule here would duplicate
+            // it with a number that can drift.
+            'shop_resets_in' => ['nullable', 'integer', 'min:0'],
         ];
     }
 

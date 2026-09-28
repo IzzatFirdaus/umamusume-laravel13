@@ -28,6 +28,9 @@ use Illuminate\Support\Carbon;
  *                                     as the Trainer reported it (1..4, US-10); null
  *                                     when the run composes no grade objectives or the
  *                                     Trainer has not said yet
+ * @property int|null $circles the client's circle estimate as the Trainer read it on a
+ *                             Team Race (0..5 this slice, D-225); null on every other
+ *                             slot, where the number does not exist
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read TrainingRun $trainingRun
@@ -35,7 +38,7 @@ use Illuminate\Support\Carbon;
  * @property-read ScenarioSlot|null $scenarioSlot
  */
 #[Table('race_entries')]
-#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'status', 'placement', 'fans_gain', 'objective_index'])]
+#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'status', 'placement', 'fans_gain', 'objective_index', 'circles'])]
 class RaceEntry extends Model
 {
     /** @use HasFactory<RaceEntryFactory> */
@@ -48,16 +51,45 @@ class RaceEntry extends Model
     public const MAX_OBJECTIVE_INDEX = 4;
 
     /**
+     * The circle ceiling for this slice, an owner validation bound rather than a
+     * published maximum: the corpus names 3 circles as a safety margin
+     * (`team_race.circles_guidance`) and never says how many a full display holds.
+     */
+    public const MAX_CIRCLES = 5;
+
+    /**
      * `objective_index` is entered, never inferred (D-270), and it is only ever
      * meaningful on a run whose scenario composes grade objectives. A column CHECK
      * could bound the number but cannot see the run's scenario, so the rule lives
      * here, the way `ScenarioSlot` carries its own kind and month checks.
+     *
+     * `circles` is entered too, and belongs to a Team Race only: URA and Trackblazer
+     * have no team race, so a circle count on one of their slots would be a Unity Cup
+     * fact pasted onto a scenario that cannot have it (D-221, D-220 for absence).
      */
     protected static function booted(): void
     {
         static::saving(function (self $entry): void {
             if ($entry->objective_index !== null) {
                 TrainingRun::assertGradePeriod($entry->objective_index, $entry->trainingRun, 'objective_index');
+            }
+
+            $circles = $entry->circles;
+
+            if ($circles === null) {
+                return;
+            }
+
+            if ($circles < 0 || $circles > self::MAX_CIRCLES) {
+                throw new \InvalidArgumentException(
+                    "circles [{$circles}] is outside the 0..".self::MAX_CIRCLES.' range this tool accepts.',
+                );
+            }
+
+            if ($entry->scenarioSlot?->kind !== 'team_race') {
+                throw new \InvalidArgumentException(
+                    'Circles can only be entered against a team race slot.',
+                );
             }
         });
     }
@@ -93,6 +125,7 @@ class RaceEntry extends Model
             'placement' => 'integer',
             'fans_gain' => 'integer',
             'objective_index' => 'integer',
+            'circles' => 'integer',
         ];
     }
 }
