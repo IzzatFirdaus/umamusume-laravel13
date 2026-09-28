@@ -583,6 +583,18 @@ Resolved: Global Unity Cup caps **are** `1300/1300/1300/1300/1800` and the 1,800
 
 **D-230. A probability may print as a number only when it is sourced from client data or from two independent sources — and then derive it from entered turns.** `ADR-0001` concluded training failure rates could not be sourced and had to ship as bands. Trackblazer's **Race Fatigue** table is a different case and is fully quantified: it keys on the count of **consecutive races** (1 race: 0-15% mood down; 2: 0-33%; 3: 60-90%+; **4+: 100%**, plus 33% Skin Outbreak and 40% for 3 random stats −10). Because consecutive-race count is already recoverable from `turn_entries`, this satisfies Planner Rule 4 — it is a pure function of logged turns, not a simulation.
 
+**Amended 2026-09-28 (R48), and the amendment narrows what this rule authorises.** The clause
+above is false as the schema stands: `race_entries` links to a `scenario_slots` row (month, half,
+tier) and never to a turn, and the guided flow offers no race choice, so no logged turn can be
+identified as a race turn. The count is therefore **entered**, as a `RaceFatiguePayload`
+(`{consecutive_races}`) on the turn the Trainer says it applies to, and KI-17 carries the gap so a
+later slice can close it with a real link rather than a guess. Two things do not change: the number
+is still a pure function of what the Trainer logged, so it is not a simulation, and the surface
+still prints one qualitative word for the band rather than the published percentages, because
+GameTora is one publisher and D-230 requires two. Entering the count instead of deriving it moves
+where the trust sits — from the tool's arithmetic to the Trainer's reading — which is the same
+trade D-270 already makes for Energy, mood and fans.
+
 **The opening clause is bounded on purpose, because as first written it was a general principle a future round could cite for any number.** "Genuinely sourced" here means **client data or two independent sources**, not "a guide I like". Race Fatigue clears that bar on *form* (a quantified table) but not on *count*: it comes from `04-trackblazer-umaguide.md`, **a single source**, so the table ships as a **provisional exception**, marked as such where it renders, and it is not precedent for the training-failure case — `ADR-0001` still governs there with bands. Also note the `90%+` cell: the `+` makes it a **lower bound, not a figure**, so a UI that prints "90%" states something no source claims. Either render the band as `≥90%` or keep that cell in band form.
 
 **D-231. Race Fatigue is switched off after Late December, and a sourced 0% must silence a warning rather than shrink it.** The fatigue events *"cannot occur after Late December"*, so the advisory has a hard calendar end and must disappear in the endgame stretch, not fade. Separately and more generally: when a mechanic sets a rate to zero — Race Fatigue after December, an **Extreme Spirit Burst's 0% failure at its facility**, or a purchased **Good-Luck Charm** (40 coins, one turn) — the risk affordance goes fully quiet. Rendering "low risk" where the game says "impossible" invents a warning the player is being told to ignore.
