@@ -26,6 +26,18 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class TrainingRunController extends Controller
 {
+    /**
+     * The inputs the guided rail stages, and therefore the only ones a failed submit
+     * should hand back to it. `condition` is absent because the rail has no field for it
+     * and rehydrating a key nothing reads would be a claim that the rail collects it.
+     *
+     * @var list<string>
+     */
+    private const STAGED_TURN_FIELDS = [
+        'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp',
+        'energy', 'fans', 'mood', 'choice', 'outcome', 'penalty_kind',
+    ];
+
     public function index(): View
     {
         return view('runs.index', [
@@ -73,12 +85,38 @@ class TrainingRunController extends Controller
      * run, and the escape hatch is by definition the path D-53 says must stay reachable
      * rather than default. The two cases are now named.
      *
+     * D-3. A failed validation redirects back to this page, and the rail used to come
+     * back empty: `show()` passed the default `$staged = []`, so every number the
+     * Trainer had typed was replaced by its placeholder and the whole turn had to be
+     * entered a second time. The raw escape hatch beside it rehydrates from `old()`
+     * per field, so the two paths to the same endpoint disagreed about what to do with
+     * input the server had just rejected - and the rail, which asks for more fields than
+     * the hatch, lost the most.
+     *
+     * The rehydration happens here rather than in the view so the GET, the staged
+     * preview and the redirect-back share one assembly. It is gated on the rail's own
+     * `stage` marker so a failed *raw form* submit does not also repopulate the rail
+     * from the eight fields it posted - the hatch already rehydrates itself, and two
+     * forms filling each other in would be a second way to be wrong.
+     *
      * @param  array<string, mixed>  $staged
      * @param  list<array{direction: string, text: string}>  $preview
      * @return array<string, mixed>
      */
     private function showData(TrainingRun $run, array $staged = [], array $preview = [], bool $previewed = false): array
     {
+        if ($staged === []) {
+            $old = request()->old();
+
+            if (is_array($old) && array_key_exists('stage', $old)) {
+                $staged = array_intersect_key($old, array_flip(self::STAGED_TURN_FIELDS));
+
+                // The flag came back with the input, so a confirm that failed validation
+                // comes back to the outcome step rather than to the choice cards.
+                $previewed = ($old['previewed'] ?? null) === '1';
+            }
+        }
+
         $latest = $run->turnEntries->sortByDesc('turn')->first();
 
         return [
