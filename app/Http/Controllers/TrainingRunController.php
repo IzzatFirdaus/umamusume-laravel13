@@ -64,11 +64,20 @@ class TrainingRunController extends Controller
      * always exists, because the door to logging the first turn has to be there before
      * the first turn is.
      *
+     * `$previewed` is a parameter rather than something read back off `$preview`, and that
+     * is the whole of the first-turn fix. An empty delta list meant two different things:
+     * "this response is the plain GET" and "this response is a preview of a first turn,
+     * which has nothing to subtract". The rail advanced its stage and revealed its confirm
+     * button on the first, so a run's first turn could never be committed through the
+     * guided rail at all - the Trainer had to drop to the raw escape hatch to start the
+     * run, and the escape hatch is by definition the path D-53 says must stay reachable
+     * rather than default. The two cases are now named.
+     *
      * @param  array<string, mixed>  $staged
      * @param  list<array{direction: string, text: string}>  $preview
      * @return array<string, mixed>
      */
-    private function showData(TrainingRun $run, array $staged = [], array $preview = []): array
+    private function showData(TrainingRun $run, array $staged = [], array $preview = [], bool $previewed = false): array
     {
         $latest = $run->turnEntries->sortByDesc('turn')->first();
 
@@ -90,7 +99,8 @@ class TrainingRunController extends Controller
             'guided' => [
                 'scenario' => $run->scenarioKey(),
                 // Stage one asks what the turn did; stage two records how it ended.
-                'current' => $preview === [] ? 'training' : 'outcome',
+                'current' => $previewed ? 'outcome' : 'training',
+                'previewed' => $previewed,
                 'choices' => $this->turnChoices(),
                 'values' => $staged,
                 'preview' => $preview,
@@ -287,10 +297,14 @@ class TrainingRunController extends Controller
         if (($validated['stage'] ?? null) === 'preview') {
             $run->load(['umamusume', 'turnEntries', 'skills', 'turnEvents']);
 
+            // This response *is* the preview, whatever it managed to compute: a first
+            // turn has no stored row to subtract, so the delta list is empty and the rail
+            // still has to be able to say "previewed, go ahead and confirm".
             return view('runs.show', $this->showData(
                 $run,
                 $validated,
                 $this->previewDeltas($validated, $this->previousTurn($run, (int) $validated['turn'])),
+                true,
             ));
         }
 

@@ -6,6 +6,11 @@
     'selected' => null,
     'choices' => [],
     'preview' => [],
+    // Whether this response *is* a preview. Deliberately not read off `preview`:
+    // a first turn previews to an empty delta list, because there is no stored row to
+    // subtract, and an empty list used to mean both "not a preview" and "a preview of
+    // nothing", which left a run's first turn uncommittable through the rail (D-1).
+    'previewed' => false,
     // null is a real state, not a missing one: a run that has logged no turn has no
     // Energy reading. Defaulting to 0 would tell the Trainer the trainee is exhausted,
     // and draw five empty cells to say it (D-220).
@@ -350,12 +355,19 @@
                     Preview this turn
                 </button>
 
-                @if ($preview !== [])
+                @if ($previewed)
                     {{-- The gate on confirming is a rendered marker, not a script: the field
                          only exists in a response that has already shown a preview. It is a
                          UX guard with no auth behind it, which is all NFR-1's local-only tool
                          can ask for, and it is enough to make D-51's "always" the server's
-                         rule instead of a suggestion. --}}
+                         rule instead of a suggestion.
+
+                         The condition is "this response is a preview", not "this response has
+                         deltas to show". A run's first turn has no previous row, so its
+                         preview is empty by arithmetic, and gating on the list made the first
+                         turn of every run uncommittable here - the Trainer had to use the raw
+                         escape hatch to start a run at all, which is the path D-53 requires to
+                         be reachable rather than default. --}}
                     <input type="hidden" name="previewed" value="1">
                     <button type="submit" name="stage" value="confirm"
                             class="enamel rounded-full bg-chrome px-5 py-2 text-sm font-bold text-on-chrome">

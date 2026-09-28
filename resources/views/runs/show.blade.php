@@ -192,6 +192,7 @@
         :choices="$guided['choices']"
         :selected="$guided['values']['choice'] ?? null"
         :preview="$guided['preview']"
+        :previewed="$guided['previewed']"
         :energy="$guided['energy']"
         :confirm-route="route('runs.turns.store', $run)"
         class="mt-6"
