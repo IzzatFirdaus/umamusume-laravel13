@@ -23,6 +23,17 @@ accurate statement today is that `character_cards` **exists and is empty**: a re
 zero rows, not a missing-table error. `tests/Feature/CharacterCardSchemaTest.php` pins the shipped column
 list against the schema itself, which is what keeps the Decision table below, `ARCHITECTURE.md` §3, the
 ESSENTIALS digest line and D-30 from drifting away from the migration unnoticed.
+**Second correction, dated 2026-09-29 — the same form again: the paragraph above stands as written, and
+what has moved since it was set is recorded here rather than patched into it.** Of the objects it left
+outstanding, one has landed: `2026_09_29_120200_add_character_card_id_to_training_runs_table` applied
+`training_runs.character_card_id` as a nullable FK to `character_cards.id`, with
+`TrainingRun::characterCard()`, a fillable `character_card_id` and a same-trainee `exists` rule on
+`StoreTrainingRunRequest`. The run half of that sentence is therefore false as written, while the card
+parser, its source registration and the card store action have indeed not landed: `character_cards`
+still **exists and is empty**. The column-list pin named above covers `character_cards` alone, so nothing
+read `training_runs` against these docs, which is how this ADR, `ARCHITECTURE.md` §3 and the ESSENTIALS
+digest line came to sit one migration behind the schema. Those lines move with this correction in the same
+change, which is what `AGENTS.md`'s Architect rule asks for.
 Date: 2026-09-29
 Deciders: product owner (ruling), Architect (this ADR and the `PRD.md` / `ARCHITECTURE.md` amendments)
 Relates to: `ADR-0004` (Tier B reference data promoted with provenance: the closest precedent),

@@ -126,8 +126,9 @@ match_candidates              (review queue for Fuzzy/None matches)
 `App\Models\CharacterCard`, `App\Enums\CardRarity`, `CharacterCardFactory` and `Umamusume::cards()`.
 `PromoteMatchedRecord` writes `external_ref` on both of its paths from this change onward, which is
 what makes the source link durable; the card table stays empty until the card parser and its declared
-source land, and `training_runs.character_card_id` is the next migration in the slice. A card row's
-provenance **is** inline:
+source land, and `training_runs.character_card_id` has since landed as `2026_09_29_120200`, with
+`TrainingRun::characterCard()` and a same-trainee `exists` rule on `StoreTrainingRunRequest`. A card
+row's provenance **is** inline:
 `source_url`, `snapshot_path`, `fetched_at`, `source_timezone` and the card's own `is_manual` sit on the
 card, which is what `ADR-0003` Amendment R3 requires of a reference row and what `scenario_races`,
 `scenario_slots` and `race_catalog_slots` each already do, while `scenarios` carries `source_url` and
@@ -141,7 +142,8 @@ history rather than a card's.
 training_runs
   id, umamusume_id FK->umamusume, scenario string nullable,
   character_card_id FK->character_cards nullable (ADR-0008: the form the run started on; umamusume_id
-    stays the required owner. Not migrated yet — lands as 2026_09_29_120200_add_character_card_id…)
+    stays the required owner. Migrated as 2026_09_29_120200_add_character_card_id_to_training_runs_table,
+    with TrainingRun::characterCard() and the same-trainee exists rule on StoreTrainingRunRequest)
   status string enum-backed (RunStatus: Active | Completed | Retired) default Active,
   inheritance_parent_a_id FK->umamusume nullable, inheritance_parent_b_id FK->umamusume nullable,
   notes text nullable, timestamps

@@ -200,3 +200,30 @@ it('drops the form attribution, not the run, when the card it named is deleted',
         ->and($run->umamusume_id)->toBe($umamusume->id)
         ->and(TrainingRun::query()->whereKey($run->id)->exists())->toBeTrue();
 });
+
+/*
+ * The join in `StoreTrainingRunRequest` has a second branch the three cases above
+ * never post: a request that names a card and names no trainee. The rule reads
+ * `umamusume_id` with `input()`, so an absent or null trainee leaves the card with
+ * nothing to match against, and a card that cannot be shown to belong to the
+ * submitted trainee is not a valid choice. This is the behaviour the request
+ * comment promises, asserted as required and not as a framework incidental: the
+ * pair is refused on both fields and no run row appears.
+ */
+it('refuses a named card when the request supplies no trainee', function (array $traineeKeys): void {
+    $umamusume = Umamusume::factory()->create();
+    $card = CharacterCard::factory()->create(['umamusume_id' => $umamusume->id]);
+
+    test()->post('/training-runs', $traineeKeys + [
+        'character_card_id' => $card->id,
+        'status' => 'Active',
+    ])->assertSessionHasErrors(['umamusume_id', 'character_card_id']);
+
+    // The card row is real, so the refusal on `character_card_id` is the
+    // same-trainee join failing rather than a card that never existed.
+    expect(CharacterCard::query()->whereKey($card->id)->exists())->toBeTrue()
+        ->and(TrainingRun::query()->count())->toBe(0);
+})->with([
+    'umamusume_id absent' => [[]],
+    'umamusume_id null' => [['umamusume_id' => null]],
+]);
