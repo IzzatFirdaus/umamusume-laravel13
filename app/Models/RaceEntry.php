@@ -143,4 +143,29 @@ class RaceEntry extends Model
             'circles' => 'integer',
         ];
     }
+
+    /**
+     * The finish as a Trainer reads it: 1st, 2nd, 3rd. R69.
+     *
+     * The teens carry the rule, not the last digit: 11/12/13 take `th` while the same final
+     * digits take `st/nd/rd` two numbers later, which is why the modulo-10 branch is checked
+     * against 11-13 first rather than folded into a suffix lookup.
+     */
+    public function placementOrdinal(): string
+    {
+        if ($this->placement === null) {
+            return 'no placement';
+        }
+
+        if (in_array($this->placement % 100, [11, 12, 13], true)) {
+            return $this->placement.'th';
+        }
+
+        return $this->placement.match ($this->placement % 10) {
+            1 => 'st',
+            2 => 'nd',
+            3 => 'rd',
+            default => 'th',
+        };
+    }
 }

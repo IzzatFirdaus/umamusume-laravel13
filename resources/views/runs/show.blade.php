@@ -132,7 +132,7 @@
              does not open a mechanic renders nothing rather than an empty frame: these
              are Trackblazer and Unity Cup surfaces, and an URA run must not show either
              (D-221, D-241, gate G-34). --}}
-        <x-race-panel :run="$run" :slots="$raceSlots" class="mt-3" />
+        <x-race-panel :run="$run" :slots="$raceSlots" :entry-mode="$entryMode" class="mt-3" />
         <x-team-rank-gauge :run="$run" class="mt-3" />
         <x-spirit-burst-roster :run="$run" class="mt-3" />
         <x-team-race-panel :run="$run" class="mt-3" />

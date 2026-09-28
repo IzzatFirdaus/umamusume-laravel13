@@ -145,8 +145,14 @@ class TrainingRunController extends Controller
 
         $latest = $run->turnEntries->sortByDesc('turn')->first();
 
+        // R67: which half of the race form is open is server state, read the same way the
+        // disclosure control supplies it. `old()` wins inside showData's caller below, so a
+        // failed write comes back to the branch the Trainer was filling in.
+        $entryMode = request()->query('entry_mode');
+
         return [
             'run' => $run,
+            'entryMode' => in_array($entryMode, ['calendar', 'manual'], true) ? $entryMode : 'calendar',
             'skills' => Skill::orderBy('name')->get(['id', 'name']),
             'scenarios' => $this->scenarioLabels(),
             'raceSlots' => $this->raceSlotsFor($run),

@@ -1,4 +1,4 @@
-@props(['run', 'slots'])
+@props(['run', 'slots', 'entryMode' => 'calendar'])
 
 @php
     // Only the scenarios that compose a race calendar, or a grade ladder that needs
@@ -14,6 +14,18 @@
 
     $calendarSlots = $slots->where('kind', '!=', 'free_race');
     $manualSlots = $slots->where('kind', 'free_race');
+
+    /*
+     * R67: server-driven disclosure, the shape guided-step already uses. The mode is a
+     * submitted value on a GET form, so switching branches is a navigation and not a
+     * mutation; `old()` wins because a failed write flashes its input, and the Trainer who
+     * mistyped a month comes back to the month field rather than to the other branch.
+     *
+     * The reason this is not a client-side branch toggle: that library is not a dependency
+     * (KI-21). A declarative branch is emitted by Blade and made inert by the browser, so the
+     * form existed in the HTML and nowhere a Trainer could reach it.
+     */
+    $mode = old('entry_mode', $entryMode) === 'manual' ? 'manual' : 'calendar';
 @endphp
 
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
@@ -21,26 +33,28 @@
         <span>Races</span>
     </div>
 
-    <form method="POST" action="{{ route('runs.races.store', $run) }}" class="flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-3 text-sm"
-          x-data="{ mode: '{{ old('entry_mode', 'calendar') }}' }">
+    {{-- The branch choice sits outside the record form: a form may not nest, and the choice
+         is not part of what gets recorded. Each control submits its own value to the screen
+         that knows how to render it. --}}
+    <div class="mb-3 flex flex-wrap gap-2" aria-label="Race entry mode">
+        @foreach (['calendar' => 'Calendar race', 'manual' => 'Race not on the calendar'] as $key => $label)
+            <form method="GET" action="{{ route('runs.show', $run) }}">
+                <input type="hidden" name="entry_mode" value="{{ $key }}">
+                <button type="submit" aria-pressed="{{ $mode === $key ? 'true' : 'false' }}"
+                        class="rounded-md border px-3 py-1.5 text-sm font-medium
+                               {{ $mode === $key ? 'border-pick-line bg-pick/10 text-ink-strong' : 'border-rule text-ink-muted' }}">
+                    {{ $label }}
+                </button>
+            </form>
+        @endforeach
+    </div>
+
+    <form method="POST" action="{{ route('runs.races.store', $run) }}" class="flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-3 text-sm">
         @csrf
-        <input type="hidden" name="entry_mode" x-model="mode">
+        <input type="hidden" name="entry_mode" value="{{ $mode }}">
 
-        <div class="flex w-full gap-2" aria-label="Race entry mode">
-            <button type="button" @click="mode = 'calendar'"
-                    :class="mode === 'calendar' ? 'border-pick-line bg-pick/10 text-ink-strong' : 'border-rule text-ink-muted'"
-                    class="rounded-md border px-3 py-1.5 text-sm font-medium transition-colors">
-                Calendar race
-            </button>
-            <button type="button" @click="mode = 'manual'"
-                    :class="mode === 'manual' ? 'border-pick-line bg-pick/10 text-ink-strong' : 'border-rule text-ink-muted'"
-                    class="rounded-md border px-3 py-1.5 text-sm font-medium transition-colors">
-                Race not on the calendar
-            </button>
-        </div>
-
-        {{-- Calendar path --}}
-        <template x-if="mode === 'calendar'">
+        @if ($mode === 'calendar')
+            {{-- Calendar path --}}
             <label class="flex flex-col gap-1">
                 <span class="font-medium text-ink">Calendar slot</span>
                 @if ($calendarSlots->isEmpty())
@@ -65,56 +79,52 @@
                     </select>
                 @endif
             </label>
-        </template>
-
-        {{-- Manual path --}}
-        <template x-if="mode === 'manual'">
-            <div class="flex flex-wrap items-end gap-3">
-                <label class="flex flex-col gap-1">
-                    <span class="font-medium text-ink">Race title</span>
-                    <input type="text" name="title" value="{{ old('title') }}" required maxlength="255"
-                           class="min-w-48 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
-                           placeholder="e.g. Practice Race">
-                </label>
-                <label class="flex flex-col gap-1">
-                    <span class="font-medium text-ink">Month</span>
-                    <select name="month" required class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
-                        <option value="">select</option>
-                        @foreach (range(1, 12) as $m)
-                            <option value="{{ $m }}" {{ old('month') == $m ? 'selected' : '' }}>{{ $m }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label class="flex flex-col gap-1">
-                    <span class="font-medium text-ink">Half</span>
-                    <select name="half" required class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
-                        <option value="">select</option>
-                        <option value="Early" {{ old('half') === 'Early' ? 'selected' : '' }}>Early</option>
-                        <option value="Late" {{ old('half') === 'Late' ? 'selected' : '' }}>Late</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-1">
-                    <span class="font-medium text-ink">Tier</span>
-                    <input type="text" name="tier" value="{{ old('tier') }}" maxlength="10"
-                           class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
-                           placeholder="optional">
-                    <span class="text-xs text-ink-muted">No prefill for manual races</span>
-                </label>
-            </div>
-        </template>
+        @else
+            {{-- Manual path --}}
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Race title</span>
+                <input type="text" name="title" value="{{ old('title') }}" required maxlength="255"
+                       class="min-w-48 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
+                       placeholder="e.g. Practice Race">
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Month</span>
+                <select name="month" required class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                    <option value="">select</option>
+                    @foreach (range(1, 12) as $m)
+                        <option value="{{ $m }}" {{ old('month') == $m ? 'selected' : '' }}>{{ $m }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Half</span>
+                <select name="half" required class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                    <option value="">select</option>
+                    <option value="Early" {{ old('half') === 'Early' ? 'selected' : '' }}>Early</option>
+                    <option value="Late" {{ old('half') === 'Late' ? 'selected' : '' }}>Late</option>
+                </select>
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Tier</span>
+                <input type="text" name="tier" value="{{ old('tier') }}" maxlength="10"
+                       class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
+                       placeholder="optional">
+                <span class="text-xs text-ink-muted">No prefill for manual races</span>
+            </label>
+        @endif
 
         <label class="flex flex-col gap-1">
             <span class="font-medium text-ink">Outcome</span>
             <select name="status" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
                 @foreach (\App\Enums\RaceEntryStatus::cases() as $status)
-                    <option value="{{ $status->value }}">{{ $status->value }}</option>
+                    <option value="{{ $status->value }}" {{ old('status') === $status->value ? 'selected' : '' }}>{{ $status->value }}</option>
                 @endforeach
             </select>
         </label>
 
         <label class="flex flex-col gap-1">
             <span class="font-medium text-ink">Placement</span>
-            <input type="number" name="placement" min="1" class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+            <input type="number" name="placement" min="1" value="{{ old('placement') }}" class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink">
         </label>
 
         @if ($teamRace)
@@ -123,7 +133,7 @@
                 <select name="circles" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
                     <option value="">not read</option>
                     @foreach (range(0, \App\Models\RaceEntry::MAX_CIRCLES) as $circles)
-                        <option value="{{ $circles }}">{{ $circles }}</option>
+                        <option value="{{ $circles }}" {{ old('circles') === (string) $circles ? 'selected' : '' }}>{{ $circles }}</option>
                     @endforeach
                 </select>
             </label>
@@ -135,7 +145,7 @@
                 <select name="objective_index" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
                     <option value="">no period</option>
                     @foreach ($run->gradeObjectives() as $objective)
-                        <option value="{{ $objective['index'] }}">{{ $objective['index'] }}. {{ $objective['name'] }}</option>
+                        <option value="{{ $objective['index'] }}" {{ old('objective_index') == $objective['index'] ? 'selected' : '' }}>{{ $objective['index'] }}. {{ $objective['name'] }}</option>
                     @endforeach
                 </select>
             </label>
@@ -173,7 +183,7 @@
                     </span>
                     <span class="flex flex-wrap gap-x-3 font-mono text-xs tabular-nums text-ink-muted">
                         <span>{{ $entry->scenarioSlot?->tier ?? 'no grade' }}</span>
-                        <span>{{ $entry->placement === null ? 'no placement' : $entry->placement.'th' }}</span>
+                        <span>{{ $entry->placementOrdinal() }}</span>
                         @if ($teamRace)
                             <span>{{ $entry->circles === null ? 'circles not read' : $entry->circles.' circles' }}</span>
                         @endif
