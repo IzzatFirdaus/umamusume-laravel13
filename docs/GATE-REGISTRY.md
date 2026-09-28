@@ -75,9 +75,11 @@ Evidence | Exceptions | Owner | Status
 3. Verbatim quoted game/client source data where the term is data, not framing
    (display path is the gated surface; dataset keys like `intelligence`,
    `friend` are out of scope per C-4's copy-and-framing boundary).
-4. A gate's own source: the pattern list and allow-list in `tools/gate.py` match
-   `make lore` by construction, so the scanner is a permanent self-hit. Expect
-   them, do not clear them.
+4. A gate's own source: the pattern list in `tools/gate.py` and the grep list in
+   `tools/lore.php` match `make lore` by construction, so each scanner is a permanent
+   self-hit. Expect them, do not clear them. Measured on the `cc3f963` tree: `make lore`
+   reports 130 lines, of which 7 are `tools/lore.php` naming its own patterns and 3 are
+   `tools/gate.py`. `lore-code` cannot self-hit — `tools/` is outside its path list.
 Ambiguous framing (a real violation vs a quote) requires a Lore Guardian or owner
 ruling before merge; the ruling is recorded next to the hit list.
 
@@ -85,9 +87,9 @@ ruling before merge; the ruling is recorded next to the hit list.
 
 | Gap | Consequence | Fix owner |
 |---|---|---|
-| `make lore` uses `git grep`: blind to untracked files (KI-4) | fresh, unstaged copy is unswept; the remediation sweep ran git-tracked + explicit-worktree greps to compensate | Pre-Dev (registry now tells reviewers to sweep dirty files) |
-| `make lore` vocabulary: extended list added on 2026-09-28 (16 extra patterns) but terminology (client-string bans) is gate.py's scope, not the Makefile's | two vocabularies exist; keep them from diverging by pointing both at `docs/design-research/CONSTRAINTS.md` §3.1 | Pre-Dev |
-| No automated em-dash check over shipped Blade | KI-7 class of defect recurs | Frontend + Pre-Dev: extend `tools/gate.py` D-79 pass to `resources/views/**` |
+| `make lore` uses `git grep` on tracked files: blind to untracked copy | fresh, unstaged copy is unswept by the repo-wide pass; `lore-code` reads untracked but only inside app paths, so an unsaved `docs/` edit is unseen by both | Pre-Dev (registry tells reviewers to sweep dirty files; KI-4 closed 2026-09-28 for the runner, not for this scope split) |
+| `make lore` vocabulary: 23 words over three greps (`ee97869`), while client-string terminology stays gate.py's scope | two vocabularies exist; both `make lore` and `composer lore` read one list, and `LoreGateParityTest` fails if the Makefile and `tools/lore.php` drift | Pre-Dev: point both at `docs/design-research/CONSTRAINTS.md` §3.1 |
+| The shipped-Blade dash check lives in the Pest suite, not in `tools/gate.py` | `composer test` fails on an en or em dash in any `.blade.php` under `resources/views` (`RenderedCopyHygieneTest`, which strips the three comment forms prose hides in); running `gate.py` alone still checks D-79 only in prototype HTML, so a scan-by-gate.py pass is not proof the Blade sweep ran | Pre-Dev: fold the view sweep into `gate.py` or cite the test wherever the scanner is the only gate |
 | G-60 scanner does not yet read a retired-value registry file | G-60 currently reviewer-enforced | Pre-Dev at next ADR amendment cycle |
 | C-7 loading-state enforcement is interpretive | per ADR-0007 clause 2; review checks the state enumeration | Frontend |
 | Stale mirrors: `.kilo/worktrees/giddy-chronometer/docs/design-research/_scratch/gate.py` exists | edits there are inert; never treat as the live gate | whoever prunes the worktree cache |

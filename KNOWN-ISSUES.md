@@ -131,7 +131,7 @@ tag is now dead weight as well as illegal. Delete lines 10 and 11.
 
 ---
 
-## KI-4 `make lore` cannot see untracked files, and checks no terminology
+## KI-4 `make lore` cannot see untracked files, and checks no terminology — RESOLVED 2026-09-28
 
 **Symptom.** A brand-new file passes the lore gate by being invisible to it.
 
@@ -158,6 +158,27 @@ warns against. `make lore` is left untouched.
 **Still open.** `make` itself is not installed in this environment (`make: command not
 found`), so neither target can be run as documented. The recipes were executed directly.
 Consider a composer script so the gate does not depend on a GNU make binary on Windows.
+
+**Closed 2026-09-28 (`cc3f963`).** `composer lore` and `composer lore-code` run both
+targets through `tools/lore.php`, which hands `git grep` an argument array instead of a
+shell string. That matters more than convenience: a composer script holding the Makefile's
+command text runs through `cmd.exe`, which does not quote with single quotes, so
+`-- ':!vendor'` reaches git still quoted, git errors, the recipe's `|| true` swallows it,
+and the gate prints nothing and exits 0. The failure mode this replaced was a gate that
+reported clean while matching no file at all.
+
+Parity is measured rather than claimed. The recipe bodies run verbatim report 123 hits and
+`composer lore` reports 123; the `lore-code` body and `composer lore-code` both report 4.
+`LoreGateParityTest` compares the pattern strings between the Makefile and the runner, and
+dropping `withers` from the script is what proves the guard bites. One side effect is
+recorded rather than hidden: tracking the runner made it a permanent self-hit, so the
+repo-wide count moved 123 → 130 and `docs/GATE-REGISTRY.md` allowed class 4 now names
+`tools/lore.php` beside `tools/gate.py`. The Makefile targets stay — `CONSTRAINTS.md` C-4
+names them — and `lore-code` cannot self-hit because `tools/` is outside its path list.
+
+The untracked-file half of this entry was never closed by the runner: `make lore` reads
+tracked files only by design, and `lore-code` reads untracked copy inside app paths only.
+That scope split is registered as a gap, not a fix.
 
 ---
 
