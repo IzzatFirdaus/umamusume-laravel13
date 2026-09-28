@@ -1,0 +1,1 @@
+﻿Page: http://127.0.0.1:8144/training-runs/5  [HTTP 200] Console messages captured during load: [LOG] Browser logger active (MCP server detected). Posting to: http://127.0.0.1:8144/_boost/browser-logs
