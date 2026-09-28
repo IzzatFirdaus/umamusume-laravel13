@@ -31,6 +31,7 @@ class ScenarioSlot extends Model
     protected $fillable = [
         'scenario_key',
         'kind',
+        'source_key',
         'slot_label',
         'title',
         'description',
