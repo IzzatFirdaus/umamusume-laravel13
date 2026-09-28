@@ -1,0 +1,74 @@
+{
+    "data": {
+        "id": 1,
+        "umamusume": {
+            "id": 1,
+            "slug": "special-week",
+            "name": "Special Week",
+            "nameJa": "スペシャルウィーク",
+            "releaseStatus": "GlobalReleased",
+            "jpDebutDate": null,
+            "globalDebutDate": null,
+            "isManual": false
+        },
+        "scenario": "ura_finale",
+        "status": "Active",
+        "notes": "R17: calendar with every cell state the client can show.",
+        "turns": [
+            {
+                "id": 1,
+                "turn": 1,
+                "speed": 480,
+                "stamina": 300,
+                "power": 355,
+                "guts": 210,
+                "wit": 95,
+                "sp": 240,
+                "condition": null,
+                "energy": 88,
+                "mood": "NORMAL",
+                "fans": 9000
+            },
+            {
+                "id": 2,
+                "turn": 2,
+                "speed": 550,
+                "stamina": 525,
+                "power": 601,
+                "guts": 75,
+                "wit": 0,
+                "sp": 190,
+                "condition": null,
+                "energy": 74,
+                "mood": "GREAT",
+                "fans": 12400
+            }
+        ],
+        "skills": [
+            {
+                "id": 1,
+                "name": "Gourmand",
+                "status": "Suggested",
+                "turnAcquired": null
+            },
+            {
+                "id": 2,
+                "name": "Unstoppable",
+                "status": "Acquired",
+                "turnAcquired": 2
+            },
+            {
+                "id": 3,
+                "name": "Up-Tempo",
+                "status": "Skipped",
+                "turnAcquired": 2
+            },
+            {
+                "id": 4,
+                "name": "Come What May, See Ya Later!",
+                "status": "Acquired",
+                "turnAcquired": 2
+            }
+        ]
+    }
+}
