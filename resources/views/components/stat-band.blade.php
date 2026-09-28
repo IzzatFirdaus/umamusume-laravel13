@@ -1,5 +1,8 @@
 @props([
-    'scenario' => 'ura_finale',
+    // No default. A named default put a scenario name in a view, which is the D-240 smell
+    // x-resource-strip already refuses: a band with no scenario has no cap set to read, and
+    // silently resolving to the baseline would rate a trainee against the wrong ceiling.
+    'scenario',
     'values' => [],
     'skillPoints' => null,
 ])

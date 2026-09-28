@@ -26,6 +26,21 @@
     <h2 class="mt-8 text-lg font-semibold text-ink-strong">Resources</h2>
     <x-resource-strip :scenario="$run->scenarioKey()" :run="$run->stripValues()" class="mt-3" />
 
+    {{-- The stat band is the trainee's current numbers, so it belongs beside the run's
+         current resources and above anything that talks about a single turn. It reads the
+         latest logged turn: the run's state is what the last turn ended at, not an average
+         of the log. No logged turn means no band at all, because five zeroes would be a
+         claim about a trainee nobody entered (D-220). --}}
+    @if ($band !== null)
+        <h2 class="mt-8 text-lg font-semibold text-ink-strong">Stats</h2>
+        <x-stat-band
+            :scenario="$band['scenario']"
+            :values="$band['values']"
+            :skill-points="$band['skillPoints']"
+            class="mt-3"
+        />
+    @endif
+
     {{--
         The goal panel, and there is at most one. A scenario with mandatory race
         goals gets the calendar; a scenario with Grade Point deadlines gets the
@@ -80,6 +95,14 @@
     </form>
 
     <h2 class="mt-8 text-lg font-semibold text-ink-strong">Turns</h2>
+    @php
+        // A recorded failure is an event, not a column: `turn_entries` holds the absolute
+        // values the client showed, and the failure that produced them belongs to
+        // `turn_events` (ADR-0003). Keyed by turn so one row cannot borrow another's chip.
+        $failures = $run->turnEvents
+            ->filter(fn ($event): bool => $event->event_type === \App\Enums\TurnEventType::Failure)
+            ->keyBy('turn');
+    @endphp
     @if ($run->turnEntries->isEmpty())
         <p class="mt-2 text-sm text-ink-muted">No turns logged yet. Add the first one below.</p>
     @else
@@ -93,8 +116,22 @@
             </thead>
             <tbody>
                 @foreach ($run->turnEntries as $entry)
+                    @php $failure = $failures[$entry->turn] ?? null; @endphp
                     <tr class="border-b border-rule">
-                        <td class="py-1 pr-3">{{ $entry->turn }}</td>
+                        <td class="py-1 pr-3">
+                            {{ $entry->turn }}
+                            @if ($failure !== null)
+                                {{-- The word carries what the colour carries (D-12), and the
+                                     kind is named because a penalty on Energy and a penalty
+                                     on a stat are different problems for a Trainer. Never a
+                                     bare zero, which would read as a stat nobody entered. --}}
+                                <span class="ml-1.5 rounded border border-risk px-1 text-xs font-bold text-risk">Failed</span>
+                                <span class="block text-xs text-ink-muted">
+                                    Penalty kind: {{ $failure->deltas['penalty_kind'] ?? 'not recorded' }}
+                                    · {{ $failure->source_name }}
+                                </span>
+                            @endif
+                        </td>
                         <td class="pr-3">{{ $entry->speed }}</td>
                         <td class="pr-3">{{ $entry->stamina }}</td>
                         <td class="pr-3">{{ $entry->power }}</td>
@@ -108,23 +145,144 @@
         </table>
     @endif
 
-    <form method="POST" action="{{ route('runs.turns.store', $run) }}" class="mt-4 grid max-w-3xl grid-cols-2 gap-3 rounded-md border border-rule bg-raised p-4 text-sm md:grid-cols-4">
-        @csrf
-        <label class="flex flex-col gap-1"><span>Turn *</span><input type="number" name="turn" min="1" required value="{{ old('turn', $run->turnEntries->count() + 1) }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
-        @foreach (['speed', 'stamina', 'power', 'guts', 'wit'] as $stat)
-            <label class="flex flex-col gap-1"><span>{{ ucfirst($stat) }} *</span><input type="number" name="{{ $stat }}" min="0" max="1200" required value="{{ old($stat) }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
-        @endforeach
-        <label class="flex flex-col gap-1"><span>SP</span><input type="number" name="sp" min="0" max="1200" value="{{ old('sp') }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
-        <label class="flex flex-col gap-1"><span>Condition</span><input type="text" name="condition" maxlength="255" value="{{ old('condition') }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
-        <button type="submit" class="self-end enamel rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Add turn</button>
-    </form>
-    @if ($errors->any())
+    {{--
+        The guided rail is the door. `x-guided-step` already carried the choice cards, the
+        preview panel and the gauge beside the control that spends it, and it had only ever
+        been rendered on the review surface; mounting it here is the whole of the review's
+        reframed finding. The numbers stay on this screen because they are what the tool
+        records, and the client's own projected gains are not: the preview is this turn's
+        entered values minus the stored ones, which a Trainer can check (D-256).
+
+        The previous turn's values are placeholders, never pre-filled: an input that arrives
+        with a number in it has already asserted that the stat did not change, and the
+        Trainer may have meant to type a different one (D-220).
+    --}}
+    <x-guided-step
+        :scenario="$guided['scenario']"
+        :current="$guided['current']"
+        :choices="$guided['choices']"
+        :selected="$guided['values']['choice'] ?? null"
+        :preview="$guided['preview']"
+        :energy="$guided['energy']"
+        :confirm-route="route('runs.turns.store', $run)"
+        class="mt-6"
+    >
+        <div class="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Turn</span>
+                <input type="number" name="turn" min="1" required value="{{ $guided['turn'] }}"
+                       class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+            </label>
+            @foreach (['speed', 'stamina', 'power', 'guts', 'wit'] as $stat)
+                <label class="flex flex-col gap-1">
+                    <span class="font-medium text-ink">{{ ucfirst($stat) }}</span>
+                    <input type="number" name="{{ $stat }}" min="0" max="1200" required
+                           value="{{ $guided['values'][$stat] ?? '' }}"
+                           placeholder="{{ $guided['previous']?->{$stat} ?? 'no logged turn' }}"
+                           class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                </label>
+            @endforeach
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Skill Points</span>
+                <input type="number" name="sp" min="0" value="{{ $guided['values']['sp'] ?? '' }}"
+                       placeholder="{{ $guided['previous']?->sp ?? 'no logged turn' }}"
+                       class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Energy</span>
+                <input type="number" name="energy" min="0" max="100" value="{{ $guided['values']['energy'] ?? '' }}"
+                       placeholder="{{ $guided['previous']?->energy ?? 'no logged turn' }}"
+                       class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Fans</span>
+                <input type="number" name="fans" min="0" value="{{ $guided['values']['fans'] ?? '' }}"
+                       placeholder="{{ $guided['previous']?->fans ?? 'no logged turn' }}"
+                       class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Mood</span>
+                {{-- The five tier words are the client's own strings and the arrow is not
+                     decoration: the three derived mood colours are not separable by hue,
+                     so direction is the only ordinal signal the pill has (D-259,
+                     DESIGN.md §6.17). `Practice Poor` is deliberately absent: it is a
+                     failure condition from an event, not a mood tier (D-201). --}}
+                @php $moodArrows = ['GREAT' => '↑', 'GOOD' => '↑', 'NORMAL' => '→', 'BAD' => '↓', 'AWFUL' => '↓']; @endphp
+                <select name="mood" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                    <option value="">not yet recorded</option>
+                    @foreach (\App\Enums\MoodTier::cases() as $tier)
+                        <option value="{{ $tier->value }}"
+                                @selected(($guided['values']['mood'] ?? null) === $tier->value
+                                    || (($guided['values']['mood'] ?? null) === null && $guided['mood'] === $tier->value))>
+                            {{ $tier->value }} {{ $moodArrows[$tier->value] }}
+                        </option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Outcome</span>
+                <select name="outcome" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                    @foreach (['Success', 'Failure'] as $outcome)
+                        <option value="{{ $outcome }}"
+                                @selected(($guided['values']['outcome'] ?? null) === $outcome)>{{ $outcome }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Penalty kind</span>
+                {{-- Only required when the outcome is a failure, which the server checks.
+                     It is not hidden behind a script, because nothing here runs one to hide
+                     it, and a field that is always visible cannot be missed. --}}
+                <select name="penalty_kind" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                    <option value="">none, or not a failure</option>
+                    @foreach (['energy' => 'Energy', 'mood' => 'Mood', 'stat' => 'A stat'] as $value => $kind)
+                        <option value="{{ $value }}"
+                                @selected(($guided['values']['penalty_kind'] ?? null) === $value)>{{ $kind }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </div>
+
+        @if ($guided['preview'] === [] && ! $guided['has_previous'])
+            <p class="mt-3 text-xs text-ink-muted">
+                This is the run's first turn, so there is no turn to compare against and the
+                preview will have nothing to subtract. The numbers above are what gets stored.
+            </p>
+        @endif
+    </x-guided-step>
+
+    @error('previewed')<p class="mt-2 max-w-3xl text-sm text-risk">{{ $message }}</p>@enderror
+    @if ($errors->any() && $errors->hasAny(['turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'energy', 'mood', 'fans', 'choice', 'outcome', 'penalty_kind', 'previewed']))
         <ul class="mt-2 max-w-3xl list-disc pl-6 text-sm text-risk">
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
             @endforeach
         </ul>
     @endif
+
+    {{-- D-53: the raw entry field exists, is reachable, and is not the default. It is the
+         door for correcting a mistyped turn or pasting a column from a spreadsheet, and the
+         summary says so rather than dressing it up as an alternative interface. --}}
+    <details class="mt-6 max-w-3xl">
+        <summary class="cursor-pointer text-sm font-semibold text-ink-muted hover:text-ink">
+            Correct a turn by hand
+        </summary>
+        <p class="mt-2 text-sm text-ink-muted">
+            Every field at once, for fixing a mistyped turn or importing values. It writes on
+            submit and shows no preview, so use the card above for a turn you are logging as
+            it happens.
+        </p>
+        <form method="POST" action="{{ route('runs.turns.store', $run) }}" class="mt-3 grid grid-cols-2 gap-3 rounded-md border border-rule bg-raised p-4 text-sm md:grid-cols-4">
+            @csrf
+            <label class="flex flex-col gap-1"><span>Turn *</span><input type="number" name="turn" min="1" required value="{{ old('turn', $run->turnEntries->count() + 1) }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
+            @foreach (['speed', 'stamina', 'power', 'guts', 'wit'] as $stat)
+                <label class="flex flex-col gap-1"><span>{{ ucfirst($stat) }} *</span><input type="number" name="{{ $stat }}" min="0" max="1200" required value="{{ old($stat) }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
+            @endforeach
+            <label class="flex flex-col gap-1"><span>SP</span><input type="number" name="sp" min="0" max="1200" value="{{ old('sp') }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
+            <label class="flex flex-col gap-1"><span>Condition</span><input type="text" name="condition" maxlength="255" value="{{ old('condition') }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
+            <button type="submit" class="self-end enamel rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Add turn</button>
+        </form>
+    </details>
 
     <h2 class="mt-10 text-lg font-semibold text-ink-strong">Skills</h2>
     @php

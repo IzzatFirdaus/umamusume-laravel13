@@ -6,7 +6,12 @@
     'selected' => null,
     'choices' => [],
     'preview' => [],
-    'energy' => 0,
+    // null is a real state, not a missing one: a run that has logged no turn has no
+    // Energy reading. Defaulting to 0 would tell the Trainer the trainee is exhausted,
+    // and draw five empty cells to say it (D-220).
+    'energy' => null,
+    // Present means this card is the live door and it owns a form. Absent means the
+    // review surface: same card, same states, nothing to submit to.
     'confirmRoute' => null,
 ])
 
@@ -34,10 +39,35 @@
 
     $index = array_search($current, $steps, true);
     $index = $index === false ? 0 : $index;
-    $segments = max(0, min(5, (int) round((int) $energy / 20)));
+    $segments = $energy === null ? null : max(0, min(5, (int) round((int) $energy / 20)));
+
+    /*
+     * The band word, its fill and its ink, in one table, so the treatment that is chosen
+     * here is the treatment the contrast pass measures (D-10). 50 is the only sourced
+     * Energy threshold (D-204); the 30 line is an owner ruling, which is why the Danger
+     * state has to say so out loud rather than let a red chip imply it is a game fact.
+     *
+     * `text-on-chrome` is not a mistake on a risk chip: it is the repo's one theme-flipping
+     * ink, white on the dark light-theme red and near-black on the light dark-theme red,
+     * which is the same job it does on the enamel button.
+     */
+    $band = $energy === null ? null : (match (true) {
+        $energy > 50 => ['word' => 'Safe', 'treat' => 'bg-green-tint text-ink'],
+        $energy >= 30 => ['word' => 'Caution', 'treat' => 'bg-pick text-on-pick'],
+        default => ['word' => 'Danger', 'treat' => 'bg-risk text-on-chrome'],
+    });
 @endphp
 
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
+    {{-- The form exists only when there is somewhere to send it. Stage one and stage two
+         are both POSTs to the same endpoint and differ by one submitted button's name,
+         which is what keeps D-51's "committing is a separate action" true with no script
+         loaded at all. --}}
+    @if ($confirmRoute !== null)
+        <form method="POST" action="{{ $confirmRoute }}">
+            @csrf
+    @endif
+
     <div class="mb-3 flex flex-wrap items-center gap-2">
         <div class="flex gap-1.5" role="group" aria-label="Guided turn progress">
             @foreach ($steps as $i => $step)
@@ -52,43 +82,70 @@
     </div>
 
     @if ($choices !== [])
+        {{--
+            A real radio group wearing the client's banner shape, and both halves are load-
+            bearing.
+
+            The radio: a `role="radio"` button carries no value on submit, so the rail could
+            only ever have been a picture of a form, and the audit's deferred accessibility
+            finding was exactly that - the group claimed a semantics its children did not
+            have. Native radios also rove focus with the arrow keys for free, which is the
+            half of D-55 a script would otherwise have to reimplement badly.
+
+            The banner: §6.10 and §8.6 both say choices are banner buttons and "never radio
+            inputs", which is a rule about the shape a Trainer reads, not about the element
+            that holds state. So the input is the zero-size semantic layer and the label is
+            the §6.1 banner, selected by `peer-checked` and ringed by `peer-focus-visible` -
+            the global `:focus-visible` rule would otherwise draw its outline on an element
+            with no box to draw on.
+        --}}
         <div class="flex flex-col gap-2" role="radiogroup" aria-label="Turn choice">
             @foreach ($choices as $choice)
                 @php $key = (string) ($choice['key'] ?? ''); @endphp
-                <button type="button" role="radio" aria-checked="{{ $key === $selected ? 'true' : 'false' }}"
-                        class="flex items-center gap-3 rounded-md border-2 px-3 py-2.5 text-left
-                               {{ $key === $selected ? 'border-pick-line bg-raised' : 'border-rule bg-raised hover:border-green-line' }}">
-                    <span class="grid size-6 shrink-0 place-items-center rounded border border-rule
-                                 bg-sunken text-xs font-bold text-ink-strong">{{ $loop->iteration }}</span>
-                    <span class="min-w-0 flex-1">
-                        <span class="block text-base font-bold text-ink-strong">{{ $choice['label'] ?? '' }}</span>
-                        @if (($choice['unverified'] ?? false) === true)
-                            {{-- The client label for a mood adjustment is not confirmed
-                                 as one string or the other, so the gap is shown rather
-                                 than resolved by picking one (D-20). --}}
-                            <span class="ml-1 inline-block rounded border border-down px-1 align-middle text-xs font-bold text-down"
-                                  title="Not confirmed as the Global client string">[Unverified]</span>
+                <label class="relative block">
+                    <input type="radio" name="choice" value="{{ $key }}" class="peer size-0 opacity-0"
+                           @checked($key === $selected)>
+                    <span class="flex cursor-pointer items-center gap-3 rounded-md border-2 border-rule bg-raised px-3 py-2.5 text-left
+                                 hover:border-green-line
+                                 peer-checked:border-pick-line
+                                 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring">
+                        <span class="grid size-6 shrink-0 place-items-center rounded border border-rule
+                                     bg-sunken text-xs font-bold text-ink-strong">{{ $loop->iteration }}</span>
+                        <span class="min-w-0 flex-1">
+                            <span class="block text-base font-bold text-ink-strong">{{ $choice['label'] ?? '' }}</span>
+                            @if (($choice['unverified'] ?? false) === true)
+                                {{-- The client label for a mood adjustment is not confirmed
+                                     as one string or the other, so the gap is shown rather
+                                     than resolved by picking one (D-20). --}}
+                                <span class="ml-1 inline-block rounded border border-down px-1 align-middle text-xs font-bold text-down"
+                                      title="Not confirmed as the Global client string">[Unverified]</span>
+                            @endif
+                            @isset($choice['detail'])
+                                <span class="block text-xs text-ink-muted">{{ $choice['detail'] }}</span>
+                            @endisset
+                        </span>
+                        @if (($choice['facility_level'] ?? null) !== null)
+                            <span class="rounded border border-rule px-2 py-0.5 text-xs font-semibold text-ink-muted">
+                                Lv {{ $choice['facility_level'] }}
+                            </span>
                         @endif
-                        @isset($choice['detail'])
-                            <span class="block text-xs text-ink-muted">{{ $choice['detail'] }}</span>
-                        @endisset
+                        @if (($choice['present'] ?? null) !== null)
+                            <span class="flex gap-0.5" role="img" aria-label="{{ $choice['present'] }} teammates on this tile">
+                                @for ($i = 0; $i < 5; $i++)
+                                    <span class="h-3 w-2 {{ $i < (int) $choice['present'] ? 'bg-up' : 'bg-idle' }}"></span>
+                                @endfor
+                            </span>
+                        @endif
                     </span>
-                    @if (($choice['facility_level'] ?? null) !== null)
-                        <span class="rounded border border-rule px-2 py-0.5 text-xs font-semibold text-ink-muted">
-                            Lv {{ $choice['facility_level'] }}
-                        </span>
-                    @endif
-                    @if (($choice['present'] ?? null) !== null)
-                        <span class="flex gap-0.5" role="img" aria-label="{{ $choice['present'] }} teammates on this tile">
-                            @for ($i = 0; $i < 5; $i++)
-                                <span class="h-3 w-2 {{ $i < (int) $choice['present'] ? 'bg-up' : 'bg-idle' }}"></span>
-                            @endfor
-                        </span>
-                    @endif
-                </button>
+                </label>
             @endforeach
         </div>
     @endif
+
+    {{-- Everything the mounted rail needs beyond the choice cards - the numbers, the mood,
+         the outcome - arrives as the slot, from the screen that knows the route. The card
+         stays a card; it does not learn what a turn entry costs. --}}
+    {{ $slot }}
 
     @if ($preview !== [])
         <div class="mt-3 rounded-md border border-rule bg-raised p-3">
@@ -214,25 +271,80 @@
 
     {{-- The gauge sits beside the control that spends it, never only in the header (D-171, G-30). --}}
     <div class="mt-3 flex flex-wrap items-center justify-end gap-4">
-        <div class="flex items-center gap-2.5">
-            <span class="flex gap-1" role="img" aria-label="Energy {{ (int) $energy }} of 100">
-                @for ($i = 0; $i < 5; $i++)
-                    <span class="h-2 w-6 rounded-sm {{ $i < $segments ? 'bg-green' : 'bg-idle' }}"></span>
-                @endfor
-            </span>
-            <span class="font-mono text-sm tabular-nums text-ink-muted">Energy {{ (int) $energy }}/100</span>
+        <div class="flex flex-wrap items-center gap-2.5">
+            @if ($segments === null)
+                {{-- Absent, not zero: an empty five-cell gauge would say the trainee is
+                     exhausted on a run that has not logged a turn (D-220). --}}
+                <span class="font-mono text-sm text-ink-muted">Energy not yet recorded</span>
+            @else
+                <span class="flex gap-1" role="img" aria-label="Energy {{ (int) $energy }} of 100">
+                    @for ($i = 0; $i < 5; $i++)
+                        <span class="h-2 w-6 rounded-sm {{ $i < $segments ? 'bg-green' : 'bg-idle' }}"></span>
+                    @endfor
+                </span>
+                <span class="font-mono text-sm tabular-nums text-ink-muted">Energy {{ (int) $energy }}/100</span>
+            @endif
+
+            @if ($band !== null)
+                <span class="rounded border border-transparent px-2 py-0.5 text-xs font-bold {{ $band['treat'] }}">
+                    {{ $band['word'] }}
+                </span>
+            @endif
         </div>
+
+        @if ($band !== null && $band['word'] === 'Danger')
+            <p class="w-full text-right text-xs text-ink-muted">
+                Danger starts below 30, and that line is this tool's own ruling: the client
+                publishes no Energy threshold below 50.
+            </p>
+        @endif
+
+        @if ($band !== null && (int) $energy < 50)
+            {{-- The advisory is dialogue, not a banner (§6.16), and it carries its
+                 arithmetic: the constant and the stored value that produced the line,
+                 so a Trainer can check it (D-256, Planner Rule 5). --}}
+            <p class="w-full rounded-md border border-rule bg-raised px-3 py-2 text-right text-xs text-ink">
+                <span class="mr-1.5 rounded bg-green px-1.5 font-bold text-on-chrome">Hint</span>
+                Wit costs 0 Energy and you are at {{ (int) $energy }}. Rest returns about +30,
+                and a rest can backfire, so it is a choice rather than a safe button.
+                <span class="block text-ink-muted">GameWith guidance, 2026-09-25.</span>
+            </p>
+        @endif
+
         <div class="flex gap-2">
-            <button type="button" class="rounded-full border-2 border-rule px-4 py-2 text-sm font-bold text-ink-strong">
-                Change
-            </button>
-            {{-- Enamel sheen: the client's buttons are glossy enamel, and this is the one
-                 primary action on the screen, so the sheen marks it rather than decorating.
-                 Hard-edged single split, never a feathered ramp (DESIGN.md §2.3, research §6.1). --}}
-            <button type="button"
-                    class="enamel rounded-full bg-chrome px-5 py-2 text-sm font-bold text-on-chrome">
-                Confirm turn
-            </button>
+            @if ($confirmRoute === null)
+                {{-- The review surface has no route to post to, so it shows the card's two
+                     footer shapes as shapes. On a mounted rail both become real submits. --}}
+                <button type="button" class="rounded-full border-2 border-rule px-4 py-2 text-sm font-bold text-ink-strong">
+                    Change
+                </button>
+                <button type="button"
+                        class="enamel rounded-full bg-chrome px-5 py-2 text-sm font-bold text-on-chrome">
+                    Confirm turn
+                </button>
+            @else
+                <button type="submit" name="stage" value="preview"
+                        class="rounded-full border-2 border-rule px-4 py-2 text-sm font-bold text-ink-strong">
+                    Preview this turn
+                </button>
+
+                @if ($preview !== [])
+                    {{-- The gate on confirming is a rendered marker, not a script: the field
+                         only exists in a response that has already shown a preview. It is a
+                         UX guard with no auth behind it, which is all NFR-1's local-only tool
+                         can ask for, and it is enough to make D-51's "always" the server's
+                         rule instead of a suggestion. --}}
+                    <input type="hidden" name="previewed" value="1">
+                    <button type="submit" name="stage" value="confirm"
+                            class="enamel rounded-full bg-chrome px-5 py-2 text-sm font-bold text-on-chrome">
+                        Confirm turn
+                    </button>
+                @endif
+            @endif
         </div>
     </div>
+
+    @if ($confirmRoute !== null)
+        </form>
+    @endif
 </div>
