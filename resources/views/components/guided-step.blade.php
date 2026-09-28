@@ -331,7 +331,7 @@
                      and DESIGN.md §8 already documents for the focus ring. The name is about
                      the gold fill; the property being borrowed is "the dark ink that sits on
                      a bright fill", which is 6.1:1 light and 9.51:1 dark. --}}
-                <span class="mr-1.5 rounded bg-green px-1.5 font-bold text-on-pick">Hint</span>
+                <span class="mr-1.5 rounded bg-green px-1.5 font-bold text-on-green">Hint</span>
                 Wit costs 0 Energy and you are at {{ (int) $energy }}. Rest returns about +30,
                 and a rest can backfire, so it is a choice rather than a safe button.
                 <span class="block text-ink-muted">GameWith guidance, 2026-09-25.</span>
