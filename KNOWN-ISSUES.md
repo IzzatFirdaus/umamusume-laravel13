@@ -279,6 +279,22 @@ reads as a decision and not an oversight.
 - **`APP_NAME` in `.env` is still `Laravel`**, while the product is Trainer Desk.
   Recorded in `DESIGN.md` §1.
 - **`PRD.md` still lists US-10 at P2**, although `ADR-0003` promoted it to P1.
+- **Run notes are create-only.** Severity: Low. Category: Product Question. The
+  training-run update form carries no `notes` field, so notes can be written at creation and
+  never corrected or added afterwards through the UI. The behaviour is untested as well as
+  unexposed: the update assertions in `tests/Feature/TrainingRunTest.php` cover the other
+  fields but not `notes`, and the update Form Request does not accept it. Update semantics are
+  technically correct as written, so this is not a defect — it is either an intentional
+  initial-context-only design or an oversight, and those two readings imply different work.
+  Not fixed in this phase; it needs a product decision. Owner: Product / Architect.
+- **`ApiV1Test.php:54` does not test what its title claims.** Severity: Low. Category:
+  Test-Integrity Defect. The test is titled "returns a validation error shape", but its body
+  probes the unknown route `/api/v1/nope` and asserts a 404 envelope, so the title advertises a
+  test that does not exist. The cause is structural rather than a slip: `routes/api.php`
+  declares only GET routes, so the `ValidationException` branch at `bootstrap/app.php:32` is
+  unreachable until a write endpoint exists. Not fixed now; it resolves when the first write
+  endpoint lands, at which point this case is either retitled or folded into
+  `ApiV1ValidationEnvelopeTest`. Owner: QA / Backend.
 
 ---
 
