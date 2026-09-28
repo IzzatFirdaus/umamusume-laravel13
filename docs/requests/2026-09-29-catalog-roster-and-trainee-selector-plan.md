@@ -576,15 +576,17 @@ return new class extends Migration
             // by default, rather than dropped or quietly trusted.
             $table->boolean('unconfirmed')->default(false);
             /*
-             * Inline provenance, the way every reference table in this repo does it.
+             * Inline provenance, the way the reference tables in this repo do it.
              * ADR-0003 Amendment R3 requires `source_url`, `snapshot_path`,
-             * `fetched_at` and `source_timezone` on the reference row itself, and
-             * `scenarios`, `scenario_races`, `scenario_slots` and `race_catalog_slots`
-             * all carry all four. `data_sources` stays what it always was: the
-             * character-level provenance table behind FR-A-4 and the detail page's
-             * Provenance section. A card is not a character, and borrowing the parent's
-             * provenance row would make "where did this release date come from" a
-             * question with no row that answers it.
+             * `fetched_at` and `source_timezone` on the reference row itself. Three of
+             * the four existing reference tables carry all four (`scenario_races`,
+             * `scenario_slots`, `race_catalog_slots`); `scenarios` predates the full set
+             * and carries `source_url`, `fetched_at` and `is_manual` only, which is
+             * `ADR-0004:50`'s own choice rather than a gap to copy. `data_sources` stays
+             * what it always was: the character-level provenance table behind FR-A-4 and
+             * the detail page's Provenance section. A card is not a character, and
+             * borrowing the parent's provenance row would make "where did this release
+             * date come from" a question with no row that answers it.
              */
             $table->string('source_url');
             $table->string('snapshot_path')->nullable();
