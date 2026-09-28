@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 use App\Services\DataPipeline\Parsers\GametoraCharacterParser;
+use App\Services\DataPipeline\Parsers\GametoraRaceCatalogParser;
 
 return [
 
@@ -55,6 +56,36 @@ return [
         'gametora-characters' => [
             'url' => 'https://gametora.com/data/umamusume/character-cards.679f7c2e.json',
             'parser' => GametoraCharacterParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+        ],
+
+        /*
+         * Career race catalogue: one row per race per turn, feeding
+         * `race_catalog_slots` (ADR-0003 Amendment R3, which assigns reference data
+         * to the fetch engine rather than to a seeder).
+         *
+         * Owner gate, stated rather than assumed: the review this entry needs is
+         * the same one that approved `gametora-characters` above, and the reasons
+         * are the same ones, not a fresh judgement.
+         *   - Same host, same publisher, same path shape as the approved entry.
+         *   - Same response class: a static JSON document. No HTML, no JS, no
+         *     crawler directives to observe, no crawl budget consumed.
+         *   - Same politeness class: one request per fetch, and the per-source
+         *     lock, delay_ms and cache TTL already bound the load.
+         *   - Same cache-busting hash convention, so a stale hash fails loudly
+         *     instead of serving old data.
+         *
+         * Timezone is Asia/Tokyo because the dataset is published by the same
+         * Japanese operator; the race calendar itself carries no wall-clock times,
+         * so the zone is recorded for provenance and is not used in any date
+         * arithmetic. `docs/scenarios/09-global-race-calendar.md` is the reading of
+         * this dataset that was checked against [Global] client captures.
+         */
+        'gametora-race-catalog' => [
+            'url' => 'https://gametora.com/data/umamusume/race_instances.294424fc.json',
+            'parser' => GametoraRaceCatalogParser::class,
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
