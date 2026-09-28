@@ -384,6 +384,21 @@ class TrainingRun extends Model
     }
 
     /**
+     * Where in the year the next logged turn lands, on the 1-24 grid the client
+     * labels, or null when nothing has been logged yet.
+     *
+     * A run with no turns has no current turn to highlight; rendering turn 1 would
+     * claim the Trainer is standing on Early January when they have not taken a
+     * single turn (D-220).
+     */
+    public function currentTurnNumber(): ?int
+    {
+        $latest = (int) $this->turnEntries()->max('turn');
+
+        return $latest < 1 ? null : ((($latest - 1) % 24) + 1);
+    }
+
+    /**
      * One cell: what the run did here if it did anything, and otherwise whether
      * this turn's entry is still behind a fan gate.
      *
