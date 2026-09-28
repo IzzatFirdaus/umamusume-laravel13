@@ -26,7 +26,30 @@ final class GametoraRaceCatalogParser implements RaceCatalogSourceParser
     /** Export sentinel: the value is decided at runtime, not fixed by the dataset. */
     public const UNRESOLVED = 99999;
 
-    /** Grade code to `[Global]` tier label. Pinned in `09` §"Tier labels". */
+    /**
+     * Grade code to `[Global]` tier label.
+     *
+     * Evidence chain, in full, at docs/scenarios/09-global-race-calendar.md
+     * §"Tier labels, and how each one was pinned". Short form, because this map is
+     * contested: `races.json` carries the numeric code and no label field, which is
+     * true of that file and is not the same as there being no label source.
+     *
+     *   100 G1    client copy, "G1 Averseness" in skills.json id 200311
+     *   200 G2    uma.guide gradeName + Game8's per-race tier, two publishers
+     *   300 G3    same two; uma.guide's row count at 300 equals this export's 76
+     *   400 OP    three client names containing 「オープン」, plus uma.guide
+     *   700 Pre-OP  uma.guide ONLY. Game8's table is graded-only and has no
+     *               Pre-OP row, so its silence is not agreement. Single-domain.
+     *
+     * What pins 200 and 300 rather than merely suggesting them is the 12-cell test:
+     * unique races per distance band per code match uma.guide's published
+     * distribution on all twelve cells, and a swapped 200/300 mapping fails every
+     * row. That is arithmetic across two different artifacts, not a label lookup.
+     *
+     * ScenarioSlotSeeder nulls 200/300/700 per R65, on the narrower reading that
+     * the export alone is the only admissible source. That disagreement is
+     * deliberate and unreconciled; see docs/design-research/RACE-CALENDAR-GAPS.md.
+     */
     private const TIER_BY_GRADE = [
         100 => 'G1',
         200 => 'G2',
