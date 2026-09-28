@@ -160,12 +160,11 @@ Approved text pairs, all computed:
 | `on-mood` `#1F1508` | `mood-awful` `#D47E9E` | 6.23 | AA |
 | `on-green` `#1F1508` | `green-500` `#7FCC09` | 9.02 | AAA |
 
-The last seven rows are measured from the rendered element in both themes on 2026-09-28
+The last six rows are measured from the rendered element in both themes on 2026-09-28
 (`slice-6-2026-09-28.md` §2 and §3), not computed from the table above, and they read the same in
 both themes because the five mood fills and `green-500` are chrome that does not move between
-themes: the client paints
-the same pink whatever surface it sits on, and `--color-green` is the same #7FCC09 in the dark
-block. Their ink rows are therefore single-valued.
+themes: the client paints the same pink whatever surface it sits on, and `--color-green` is the
+same #7FCC09 in the dark block. Their ink rows are therefore single-valued.
 
 **State pills use the tint-and-border pattern** for chips on a surface: a pale fill, a 2px border
 in the hue, `ink-strong` text. **Mood is the exception, ruled 2026-09-28.** The mood chip keeps the
