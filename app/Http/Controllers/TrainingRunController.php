@@ -114,6 +114,16 @@ class TrainingRunController extends Controller
                 // The flag came back with the input, so a confirm that failed validation
                 // comes back to the outcome step rather than to the choice cards.
                 $previewed = ($old['previewed'] ?? null) === '1';
+
+                // The bubbles are computed, not stored, so the GET recomputes them from
+                // the very input the preview posted. Guarded on the five required stats:
+                // a rejected submission rehydrates partial input and previewDeltas()
+                // subtracts against each of them. A first turn still yields an empty list,
+                // which is exactly the case `$previewed` exists to distinguish from "not a
+                // preview at all" (D-1), so the rail can still offer its confirm step.
+                if ($previewed && isset($staged['speed'], $staged['stamina'], $staged['power'], $staged['guts'], $staged['wit'])) {
+                    $preview = $this->previewDeltas($staged, $this->previousTurn($run, (int) ($staged['turn'] ?? 0)));
+                }
             }
         }
 
@@ -332,22 +342,20 @@ class TrainingRunController extends Controller
      * observed outcome with its deltas and a note (ADR-0003). A success writes no event,
      * because the turn row already says everything a success adds.
      */
-    public function storeTurn(StoreTurnEntryRequest $request, TrainingRun $run): View|RedirectResponse
+    public function storeTurn(StoreTurnEntryRequest $request, TrainingRun $run): RedirectResponse
     {
         $validated = $request->validated();
 
         if (($validated['stage'] ?? null) === 'preview') {
-            $run->load(['umamusume', 'turnEntries', 'skills', 'turnEvents']);
-
-            // This response *is* the preview, whatever it managed to compute: a first
-            // turn has no stored row to subtract, so the delta list is empty and the rail
-            // still has to be able to say "previewed, go ahead and confirm".
-            return view('runs.show', $this->showData(
-                $run,
-                $validated,
-                $this->previewDeltas($validated, $this->previousTurn($run, (int) $validated['turn'])),
-                true,
-            ));
+            // PRG, like every other write in this controller. The preview is a screen,
+            // not a response body: rendering it from the POST left the address bar on
+            // the endpoint, so refreshing re-issued the POST and the browser got a 405
+            // (audit F-7) -- the only write flow in the app that was not refresh-safe.
+            // The input travels in the session and `showData()` rebuilds the identical
+            // screen on the GET, so preview and plain show still share one assembly and
+            // cannot drift into two versions of the same page.
+            return redirect()->route('runs.show', $run)
+                ->withInput($validated + ['previewed' => '1']);
         }
 
         $entry = $run->turnEntries()->create($this->turnAttributes($validated));
