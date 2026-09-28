@@ -34,6 +34,22 @@ still **exists and is empty**. The column-list pin named above covers `character
 read `training_runs` against these docs, which is how this ADR, `ARCHITECTURE.md` §3 and the ESSENTIALS
 digest line came to sit one migration behind the schema. Those lines move with this correction in the same
 change, which is what `AGENTS.md`'s Architect rule asks for.
+**Third correction, dated 2026-09-29 — the same form: the two paragraphs above stand as written, and what
+one of them overstated is recorded here rather than patched into it. The pin named at `:23-25` is
+`tests/Feature/CharacterCardSchemaTest.php:56-81`, and it holds the `character_cards` column list and
+nothing else. The clause "which is what keeps the Decision table below, `ARCHITECTURE.md` §3, the
+ESSENTIALS digest line and D-30 from drifting away from the migration unnoticed" therefore described
+more than the file guards: neither the `training_runs` side nor the wording of those four docs. Both
+halves are guarded now, by `tests/Feature/DocSchemaDriftTest.php` — it pins `character_card_id` and
+`external_ref` into the shipped column listings of `training_runs` and `umamusume`, then reads the applied
+migration set from the `migrations` table and the real table-to-column inventory from the schema, and fails
+on any line of this ADR, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md` or `docs/design-research/CONSTRAINTS.md`
+that uses an un-landed wording for an object either source says is present. It is not a repo-wide
+doc/schema checker and says so: `PLAN.md`, `docs/scenarios/**`, `docs/UMAMUSUME_REFERENCE.md`,
+`KNOWN-ISSUES.md` and `docs/design-research/verification/**` sit outside it, because they record pending
+work and dated history; a wording invented fresh can slip past its three-phrase vocabulary; and the
+superseded paragraphs this header keeps as written (`:10-13`, `:21`) are exempt by design, since the
+correction convention above is what governs them.
 Date: 2026-09-29
 Deciders: product owner (ruling), Architect (this ADR and the `PRD.md` / `ARCHITECTURE.md` amendments)
 Relates to: `ADR-0004` (Tier B reference data promoted with provenance: the closest precedent),
