@@ -1,4 +1,21 @@
 <x-layout :title="'Run: '.$run->umamusume->name">
+    {{--
+        D-170 and D-41: turn, scenario, Energy and Fans are persistent, and the band never
+        scrolls away or collapses. A Trainer reading turn 24 needs the totals at the same
+        moment they read the entry, so they stay on screen while the log moves.
+
+        D-40 draws these two regions left and right at desktop. This is the vertical form -
+        a pinned state region above a scrolling log - because the stat band is a six-column
+        grid sized to the page, and side by side it becomes six unreadable slivers at the
+        width `main` allows. The rule the frame serves (persistence) holds either way; the
+        axis is a deviation from D-40 as written, recorded with the measurement rather than
+        smoothed over.
+
+        `lg:sticky` only, so a narrow screen stacks and scrolls as one column, which is what
+        D-40 asks for below 1024px. The negative top margin with matching padding is what
+        keeps the `main` gutter from letting scrolled content appear above a pinned header:
+        the sticky box owns that strip itself, with its own background.
+    --}}
     <div class="flex items-baseline justify-between">
         <h1 class="text-2xl font-semibold text-ink-strong">
             {{ $run->umamusume->name }}
@@ -20,26 +37,38 @@
         <p class="mt-2 text-sm text-ink-muted">{{ $run->notes }}</p>
     @endif
 
-    {{-- Composed from the run's scenario (D-220). A run that names no scenario
-         resolves to the baseline strip rather than to no strip at all, and a value
-         the run has not recorded renders as unrecorded rather than as a default. --}}
-    <h2 class="mt-8 text-lg font-semibold text-ink-strong">Resources</h2>
-    <x-resource-strip :scenario="$run->scenarioKey()" :run="$run->stripValues()" class="mt-3" />
+    {{-- The pinned region holds exactly what D-170 names: the turn, the scenario, Energy
+         and Fans in the strip, and the band under it. Measured before this narrowing,
+         pinning the identity block with them made the pinned box 613px tall on a 900px
+         viewport, which left a Trainer 287px of log to read - the frame meant to keep the
+         totals in view had instead taken the screen from the thing they are read against.
+         The h1 carries the same scenario word the strip already prints, so nothing named
+         by the rule is what gave way. --}}
+    <section aria-label="Run state" class="bg-page lg:sticky lg:top-0 lg:z-10 lg:py-3">
+        {{-- Composed from the run's scenario (D-220). A run that names no scenario
+             resolves to the baseline strip rather than to no strip at all, and a value
+             the run has not recorded renders as unrecorded rather than as a default. --}}
+        <h2 class="text-lg font-semibold text-ink-strong">Resources</h2>
+        <x-resource-strip :scenario="$run->scenarioKey()" :run="$run->stripValues()" class="mt-3" />
 
-    {{-- The stat band is the trainee's current numbers, so it belongs beside the run's
-         current resources and above anything that talks about a single turn. It reads the
-         latest logged turn: the run's state is what the last turn ended at, not an average
-         of the log. No logged turn means no band at all, because five zeroes would be a
-         claim about a trainee nobody entered (D-220). --}}
-    @if ($band !== null)
-        <h2 class="mt-8 text-lg font-semibold text-ink-strong">Stats</h2>
-        <x-stat-band
-            :scenario="$band['scenario']"
-            :values="$band['values']"
-            :skill-points="$band['skillPoints']"
-            class="mt-3"
-        />
-    @endif
+        {{-- The stat band is the trainee's current numbers, so it belongs beside the run's
+             current resources and above anything that talks about a single turn. It reads the
+             latest logged turn: the run's state is what the last turn ended at, not an average
+             of the log. No logged turn means no band at all, because five zeroes would be a
+             claim about a trainee nobody entered (D-220). --}}
+        @if ($band !== null)
+            <h2 class="mt-6 text-lg font-semibold text-ink-strong">Stats</h2>
+            <x-stat-band
+                :scenario="$band['scenario']"
+                :values="$band['values']"
+                :skill-points="$band['skillPoints']"
+                class="mt-3"
+            />
+        @endif
+    </section>
+
+    {{-- The log: everything that grows with the run, scrolling under the pinned state. --}}
+    <section aria-label="Turn log" class="mt-2">
 
     {{--
         The goal panel, and there is at most one. A scenario with mandatory race
@@ -326,4 +355,5 @@
         @method('DELETE')
         <button type="submit" class="rounded-full border-2 border-risk px-3 py-1.5 text-sm font-semibold text-risk">Delete run</button>
     </form>
+    </section>
 </x-layout>

@@ -102,7 +102,7 @@
         <div class="flex flex-col gap-2" role="radiogroup" aria-label="Turn choice">
             @foreach ($choices as $choice)
                 @php $key = (string) ($choice['key'] ?? ''); @endphp
-                <label class="relative block">
+                <label class="block">
                     <input type="radio" name="choice" value="{{ $key }}" class="peer size-0 opacity-0"
                            @checked($key === $selected)>
                     <span class="flex cursor-pointer items-center gap-3 rounded-md border-2 border-rule bg-raised px-3 py-2.5 text-left
