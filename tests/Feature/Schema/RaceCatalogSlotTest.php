@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Schema;
  * The grain test below is the reason this table exists rather than a column being
  * added to `scenario_slots`: one turn carries many races, and Early December in the
  * Classic year carries twelve of them (docs/scenarios/09-global-race-calendar.md).
+ *
+ * Measurement note, because it cost a false report once: Laravel's `Builder::where()`
+ * mutates in place. Reusing one builder across a year loop scopes every later count
+ * by the earlier `where`, which reads as "zero rows for year 3" against good data.
+ * Build a fresh query per assertion.
  */
 it('creates race_catalog_slots with the columns the grid and picker both read', function (): void {
     expect(Schema::hasTable('race_catalog_slots'))->toBeTrue()

@@ -331,7 +331,6 @@ class TrainingRun extends Model
                 $slot->title,
                 $slot->fans_needed,
                 $slot->hasMaidenGate(),
-                $slot->is_mandatory,
                 $racedCatalog->get($slot->id),
                 $fans,
                 false,
@@ -349,7 +348,6 @@ class TrainingRun extends Model
             $cells[$index]['halves'][$slot->half === 'Late' ? 'Late' : 'Early']['slots'][] = $this->calendarCell(
                 $slot->title,
                 null,
-                false,
                 false,
                 $racedFree->get($slot->id),
                 $fans,
@@ -402,12 +400,20 @@ class TrainingRun extends Model
      * One cell: what the run did here if it did anything, and otherwise whether
      * this turn's entry is still behind a fan gate.
      *
-     * Deliberately silent on the Goal pennant. It used to come from
-     * `ScenarioSlot::isMandatoryGoal()`, which reads the scenario-scoped
-     * `is_mandatory` — and `f0ae288` seeds that false on every row, so the pennant
-     * has never actually rendered. Drawing it from a per-character Goal is the
-     * deferred fix and needs `trainee_goals`; until then an unearned pennant would
-     * be a worse lie than an absent one.
+     * No Goal pennant is emitted, and that is a decision rather than an omission.
+     * The pennant used to be drawn from `ScenarioSlot::isMandatoryGoal()`, which
+     * reads the scenario-scoped `is_mandatory` — a career obligation, true for the
+     * debut and the final rounds. The client's red banner marks something else: a
+     * per-character objective. Four [Global] panels in
+     * docs/scenarios/09-global-race-calendar.md show four different Goal sets, and
+     * every banner in them sits on a race like NHK Mile Cup, Tokyo Yushun or
+     * Tenno Sho (Autumn) — not on the debut or the finals.
+     *
+     * So `is_mandatory` stays on the catalogue as the honest fact it is, and stops
+     * being a rendering input. The banner returns when `trainee_goals` exists to
+     * drive it; until then an unearned pennant is a worse claim than an absent one.
+     * The component still renders a `goal` state, so the treatment is not being
+     * deleted — only the model's authority to assert it.
      *
      * @return array<string, mixed>
      */
@@ -415,7 +421,6 @@ class TrainingRun extends Model
         string $title,
         ?int $fansNeeded,
         bool $maidenGated,
-        bool $mandatory,
         ?RaceEntry $entry,
         ?int $fans,
         bool $manual,
@@ -442,14 +447,7 @@ class TrainingRun extends Model
             return ['state' => 'fan_locked', 'label' => $title, 'fans_needed' => $fansNeeded];
         }
 
-        // Still scenario-scoped, still the conflation the audit named: a career
-        // obligation is not a per-character Goal. Kept as-is so this commit only
-        // moves where the rows come from. The fix draws the pennant from
-        // trainee_goals and is offered to Slice 11 first — see the handoff note.
-        return [
-            'state' => $mandatory ? 'goal' : 'open',
-            'label' => $title,
-        ];
+        return ['state' => 'open', 'label' => $title];
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use Illuminate\Support\Facades\Blade;
 
 /*
  * S2: the run-detail goal panels read from `scenario_slots` and this run's own
@@ -26,7 +27,7 @@ function runWithFans(int $fans): TrainingRun
     return $run->fresh();
 }
 
-it('places a career-calendar slot in the grid at its own month and half', function (): void {
+it('renders a mandatory career race as an open cell, not as a Goal pennant', function (): void {
     $run = runWithFans(20000);
     RaceCatalogSlot::factory()->create([
         'scenario_key' => null,
@@ -41,11 +42,32 @@ it('places a career-calendar slot in the grid at its own month and half', functi
 
     $cells = $run->calendarCells();
 
-    // The component indexes cells from zero (Jan = 0); the table stores 1-12.
-    expect($cells[3]['halves']['Late']['slots'][0]['state'])->toBe('goal')
+    // The cell indexes from zero (Jan = 0); the table stores 1-12.
+    //
+    // This is the audit's conflation, closed. `is_mandatory` is a scenario-scoped
+    // career obligation — the debut and the final rounds — while the client's red
+    // banner marks a per-character objective. Every Goal banner in the four
+    // [Global] panels recorded in 09 sits on a race like NHK Mile Cup or Tokyo
+    // Yushun, never on the debut or the finals. So the flag stays true on the row
+    // and stops being a rendering input until trainee_goals can drive it.
+    expect($cells[3]['halves']['Late']['slots'][0]['state'])->toBe('open')
         ->and($cells[3]['halves']['Late']['slots'][0]['label'])->toBe('Tenno Sho (Spring)')
         ->and($cells[0]['halves']['Early']['slots'])->toBe([])
         ->and(count($cells))->toBe(12);
+});
+
+it('keeps the debut pennant-free while it is mandatory but unGoal-ed', function (): void {
+    // State one of the two the fix needs: mandatory, no Goal seeded, no pennant.
+    $run = runWithFans(20000);
+    RaceCatalogSlot::factory()->debut()->create();
+
+    $html = Blade::render(
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" />',
+        ['cells' => $run->fresh()->calendarCells(1)]
+    );
+
+    expect($html)->toContain('Junior Make Debut')
+        ->and($html)->not->toContain('border-goal-line');
 });
 
 it('locks a fan-gated race until this run has the fans it asks for', function (): void {
@@ -186,6 +208,23 @@ it('shows a catalogue race and a free race together in the same half-month', fun
     $labels = array_column($run->fresh()->calendarCells()[7]['halves']['Early']['slots'], 'label');
 
     expect($labels)->toBe(['Phoenix Sho', 'Trainer Pick']);
+});
+
+it('keeps the goal treatment ready on the component while the model withholds it', function (): void {
+    // State two. There is no trainee_goals table yet, so the model cannot know a
+    // character's objective — but the treatment must not be deleted on the way
+    // past that, or the fix becomes a rewrite. A cell carrying the goal state
+    // still draws the pennant, which is exactly what a goals source will emit.
+    $html = Blade::render(
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="2" />',
+        ['cells' => [3 => ['halves' => [
+            'Late' => ['slots' => [['state' => 'goal', 'label' => 'Japanese Oaks']]],
+            'Early' => ['slots' => []],
+        ]]] + array_fill(0, 12, ['halves' => ['Early' => ['slots' => []], 'Late' => ['slots' => []]]])]
+    );
+
+    expect($html)->toContain('border-goal-line')
+        ->and($html)->toContain('Japanese Oaks');
 });
 
 it('composes the calendar only from the run own scenario', function (): void {

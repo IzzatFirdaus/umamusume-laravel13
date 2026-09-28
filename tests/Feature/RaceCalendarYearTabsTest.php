@@ -26,6 +26,25 @@ function runWithTurn(?int $turn, string $scenario = 'ura_finale'): TrainingRun
     return $run->fresh();
 }
 
+/**
+ * Twelve empty months with one goal race, so a priority question can be asked of
+ * the component without a Goals source behind the model.
+ *
+ * @return list<array{halves: array<string, array<string, mixed>>}>
+ */
+function calendarCellsWithGoal(int $monthIndex, string $half, string $label): array
+{
+    $cells = [];
+
+    for ($m = 0; $m < 12; $m++) {
+        $cells[$m] = ['halves' => ['Early' => ['slots' => []], 'Late' => ['slots' => []]]];
+    }
+
+    $cells[$monthIndex]['halves'][$half] = ['slots' => [['state' => 'goal', 'label' => $label]]];
+
+    return $cells;
+}
+
 it('derives the career year from a monotonic turn counter', function (int $turn, int $year): void {
     expect(TrainingRun::careerYearForTurn($turn))->toBe($year);
 })->with([
@@ -144,19 +163,14 @@ it('does not highlight a turn in a year the run is not in', function (): void {
     expect($html)->not->toContain('border-pick-line');
 });
 
-it('lets a goal cell stay a goal cell on the current turn', function (): void {
-    RaceCatalogSlot::factory()->create([
-        'year' => 1, 'month' => 6, 'half' => 'Late', 'turn' => 12,
-        'title' => 'Junior Make Debut', 'is_mandatory' => true,
-    ]);
-
+it('ranks a goal above the current-turn outline', function (): void {
+    // Priority is a component concern, so it is tested at the component. Going
+    // through the model would need a Goal source that does not exist yet.
     $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" :current-turn="12" />',
-        ['cells' => runWithTurn(12)->calendarCells(1)]
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="2" :current-turn="20" />',
+        ['cells' => calendarCellsWithGoal(9, 'Late', 'Tokyo Yushun (Japanese Derby)')]
     );
 
-    // `current` outranks fan_locked in the map but loses to goal: an obligation is
-    // still the more important fact about the cell than "you are standing here".
     expect($html)->toContain('border-goal-line')
         ->and(substr_count($html, 'border-pick-line'))->toBe(0);
 });
