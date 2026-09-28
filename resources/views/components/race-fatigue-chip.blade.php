@@ -6,7 +6,16 @@
     }
 
     $fatigue = $run->latestFatigue();
-    $hideAfter = config('scenarios.scenarios.'.$run->scenarioKey().'.race_fatigue.hide_after');
+    $hideAfterKey = config('scenarios.scenarios.'.$run->scenarioKey().'.race_fatigue.hide_after');
+
+    /*
+     * A map, not `str_replace('_', ' ', $key)`: `late_december` is this tool's identifier
+     * for a moment in the calendar, and reshaping it in the page leaks the storage name
+     * into prose. An unmapped key still renders as itself so a new value cannot silently
+     * disappear from the sentence (the same lesson KI-18 is about).
+     */
+    $hideAfterLabels = ['late_december' => 'late December'];
+    $hideAfterLabel = $hideAfterKey === null ? null : ($hideAfterLabels[$hideAfterKey] ?? $hideAfterKey);
 @endphp
 
 {{-- D-230 publishes the bands as percentages (0-15 / 0-33 / 60-90+ / 100) against 1 / 2 /
@@ -29,8 +38,8 @@
         The percentages and the countermeasures live in docs/scenarios/05 §Race Fatigue.
         The table stops being quoted after late December, and the final three races pay
         coins instead of fatigue
-        @if ($hideAfter !== null)
-            (this scenario's calendar hides the reading after {{ str_replace('_', ' ', $hideAfter) }})
+        @if ($hideAfterLabel !== null)
+            (this scenario's calendar hides the reading after {{ $hideAfterLabel }})
         @endif
         .
     </p>

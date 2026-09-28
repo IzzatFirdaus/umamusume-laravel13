@@ -45,7 +45,7 @@
                          drawn as a dead end, because an extreme burst follows on the next
                          Unity Training (D-223, D-12). --}}
                     <span class="shrink-0 rounded px-2 py-0.5 font-mono text-xs font-bold {{ $treatment['treat'] }}">
-                        {{ $treatment['mark'] }} {{ $row['state']->value }}
+                        {{ $treatment['mark'] }} {{ $row['state']->label() }}
                     </span>
                 </li>
             @endforeach

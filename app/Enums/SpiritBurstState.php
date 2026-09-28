@@ -35,4 +35,24 @@ enum SpiritBurstState: string
     {
         return $this === self::NormalBurstSpent || $this === self::ExtremeSpent;
     }
+
+    /**
+     * What a Trainer reads (KI-18). The backing values above are storage identifiers and
+     * the docblock says no client capture names these states, so a surface that prints a
+     * value is presenting this tool's identifier as the game's word (D-20).
+     *
+     * These words describe a machine this corpus documents; they are not claimed as
+     * Global client copy, and nothing here may be diffed against a capture as if it were.
+     */
+    public function label(): string
+    {
+        return match ($this) {
+            self::Chargeable => 'Chargeable',
+            self::Charged => 'Charged',
+            self::Held => 'Charged, held',
+            self::NormalBurstSpent => 'Burst spent',
+            self::ExtremeChargeable => 'Extreme chargeable',
+            self::ExtremeSpent => 'Extreme spent',
+        };
+    }
 }

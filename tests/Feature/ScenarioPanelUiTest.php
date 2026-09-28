@@ -12,6 +12,7 @@ use App\Models\TurnEvent;
 use App\Models\TurnEvents\RaceFatiguePayload;
 use App\Models\TurnEvents\SpiritBurstPayload;
 use App\Models\TurnEvents\TeamRankPayload;
+use Illuminate\Support\Facades\DB;
 
 /*
  * Slice 8 T2-T5 on the surface: the Unity Cup and Trackblazer panels, the race writer,
@@ -99,14 +100,18 @@ it('shows every burst state with a word, so no teammate is read by colour alone'
         recorded($run, $index + 1, 'Scenario', SpiritBurstPayload::make('mate_'.$index, $state)->toArray());
     }
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
+    $html = strip_tags($this->get('/training-runs/'.$run->id)->assertOk()->getContent());
 
     foreach (SpiritBurstState::cases() as $state) {
-        expect(strip_tags($html))->toContain($state->value);
+        expect($html)->toContain($state->label());
     }
 
-    // The state name is in the markup, not only in a class: D-12.
-    expect(substr_count($html, 'ExtremeSpent'))->toBeGreaterThanOrEqual(1);
+    // KI-18: the backing values are storage identifiers, not the words a Trainer reads.
+    // Three of the six differ from their label, so those three are the leak detector: a
+    // regression that prints `->value` again fails here rather than passing on substring.
+    expect($html)->not->toContain('NormalBurstSpent')
+        ->and($html)->not->toContain('ExtremeChargeable')
+        ->and($html)->not->toContain('ExtremeSpent');
 });
 
 it('renders the fatigue chip as a word and the source pointer', function (): void {
@@ -243,4 +248,33 @@ it('discloses which grade point track is being shown', function (): void {
 
     expect($html)->toMatch('/Targets shown are the standard track/i')
         ->and($html)->toMatch('/KI-15 carries the disagreement/i');
+});
+
+it('renders the four-period ladder from the loaded rows, not from four queries', function (): void {
+    $run = uiRun('trackblazer');
+    $run->update(['current_objective_index' => 2]);
+
+    foreach (['Oka Sho' => 2, 'Satsuki Sho' => 3] as $title => $period) {
+        RaceEntry::create([
+            'training_run_id' => $run->id,
+            'scenario_slot_id' => uiSlot('trackblazer', 'goal_race', $title, $period)->id,
+            'status' => RaceEntryStatus::Completed,
+            'placement' => 1,
+            'objective_index' => $period,
+        ]);
+    }
+
+    // The shape show() uses: the rows and their slots arrive in the page load, so the
+    // ladder that reads them must not ask the database anything at all.
+    $run->load(['raceEntries.scenarioSlot', 'turnEvents']);
+
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+    $periods = $run->gradePeriods();
+    $queries = count(DB::getQueryLog());
+
+    expect($periods)->toHaveCount(4)
+        ->and($periods[1]['earned'])->toBe(100)
+        ->and($periods[2]['earned'])->toBe(100)
+        ->and($queries)->toBe(0, 'gradePeriods() issued '.$queries.' queries against an already-loaded run');
 });

@@ -569,6 +569,23 @@ class TrainingRun extends Model
     }
 
     /**
+     * Completed races, read from the loaded collection.
+     *
+     * `show()` eager-loads `raceEntries.scenarioSlot`, so this is free on the run screen;
+     * `loadMissing` keeps it correct for a caller that did not load, and one query there
+     * instead of two per period. Before this, `gradePeriods()` asked the database four
+     * periods' worth of questions it could answer from rows already in memory.
+     *
+     * @return Collection<int, RaceEntry>
+     */
+    private function completedRaces(): Collection
+    {
+        $this->raceEntries->loadMissing('scenarioSlot');
+
+        return $this->raceEntries->where('status', RaceEntryStatus::Completed);
+    }
+
+    /**
      * @return array<string, int>|null the per-grade price table, or null when the
      *                                 run composes no grade objectives
      */
@@ -582,7 +599,7 @@ class TrainingRun extends Model
     }
 
     /**
-     * Completed races entered against one period, with the slot that carries the grade.
+     * Completed races entered against one period, filtered from the loaded rows.
      *
      * @return Collection<int, RaceEntry>
      */
@@ -592,11 +609,7 @@ class TrainingRun extends Model
             throw new \InvalidArgumentException("objective_index [{$objectiveIndex}] is not one of the four periods.");
         }
 
-        return $this->raceEntries()
-            ->where('status', RaceEntryStatus::Completed)
-            ->where('objective_index', $objectiveIndex)
-            ->with('scenarioSlot')
-            ->get();
+        return $this->completedRaces()->where('objective_index', $objectiveIndex);
     }
 
     protected function casts(): array
