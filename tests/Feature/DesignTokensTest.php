@@ -193,7 +193,11 @@ it('counts every colour token the static theme declares', function (): void {
 
     preg_match_all('/(--color-[a-z0-9-]+)\s*:/', $block, $matches);
 
-    expect(array_unique($matches[1]))->toHaveCount(53)
+    // 53 through Slice 5, plus the five mood fills, `--color-on-mood` and
+    // `--color-on-green` from Slice 6. The count is a tripwire for an undeclared
+    // token, not a budget: a new colour role is added here and in DESIGN.md §3.1
+    // together, and this row moves with it.
+    expect(array_unique($matches[1]))->toHaveCount(60)
         ->and($matches[1])->toContain('--color-goal')
         ->and($matches[1])->toContain('--color-goal-line');
 });
@@ -218,7 +222,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         }
     });
 
-    it('resolves all 53 tokens in both themes and fails on empty', function (): void {
+    it('resolves all 60 tokens in both themes and fails on empty', function (): void {
         // This test uses Pest Browser (Playwright) to:
         // 1. Visit each page in both light and dark themes
         // 2. Read getComputedStyle(document.documentElement) for every --color-* token
@@ -232,7 +236,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         // - Grade badges: 9.00+ in both themes
         //
         // Implementation notes:
-        // - Tokens: 53 --color-* custom properties from app.css @theme static, the
+        // - Tokens: 60 --color-* custom properties from app.css @theme static, the
         //   number asserted by the static count test above. 50 before the
         //   --color-goal pair landed in Slice 2, plus --color-pick-line in Slice 3.
         //   --color-ring, --color-on-pick
