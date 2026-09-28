@@ -4,17 +4,26 @@
     'scenario',
     // ['name' => 'End of Classic Year', 'required' => 300] per objective, in order.
     'objectives' => [],
-    // Index into $objectives of the objective being worked on right now.
-    'current' => 0,
-    // Grade Points logged against that objective, or null when the run has entered
+    // The 0-based position of the period the Trainer reports as live. Null means
+    // they have not said, and null is a state this panel has to render, not a
+    // missing argument: defaulting it to 0 would put every fresh Trackblazer run on
+    // the debut objective and draw a bar toward a target nobody chose (D-220).
+    'current' => null,
+    // Grade Points logged against that period, or null when the run has entered
     // none. The default is null and has to be: @props resolves a prop as
     // `$value ?? $default`, so a default of 0 would silently turn "nothing
     // entered" into "she is on zero points" for every caller that passes null.
     'earned' => null,
-    // How many completed races cannot be converted to points (R18). Zero plus a null
+    // How many completed races in that period cannot be converted to points (R18). Zero plus a null
     // $earned means nothing was logged; a positive count means the run did race and
     // the tool cannot price it. Those are different sentences.
     'unpricedCount' => 0,
+    // `gradePeriods()` from the model: each period with its own earned sum. Optional,
+    // because the ladder still renders for callers that only have the objectives.
+    'periods' => [],
+    // Completed races entered before any period was chosen for them. They belong to
+    // no total, and staying silent about them would read as "nothing recorded".
+    'unassignedCount' => 0,
 ])
 
 @php
@@ -45,17 +54,26 @@
      * so there are four separate deadlines and each one is judged alone. A running
      * total would show 660 against a 900 ceiling, which reads as "360 banked toward
      * next year" — a strategy the game does not permit. So $required is always the
-     * current objective alone, and the ladder below shows the others as dates, not
-     * as credit.
+     * current objective alone, and the ladder below shows the others as their own
+     * period with their own sum, never as credit toward anything.
      */
-    $index = max(0, min(count($objectives) - 1, (int) $current));
-    $objective = $objectives[$index];
-    $required = max(0, (int) ($objective['required'] ?? 0));
-    $logged = $earned !== null;
+    $reported = $current !== null;
+    $index = $reported ? max(0, min(count($objectives) - 1, (int) $current)) : null;
+    $objective = $index === null ? null : $objectives[$index];
+    $required = $objective === null ? 0 : max(0, (int) ($objective['required'] ?? 0));
+    $logged = $objective !== null && $earned !== null;
     $earned = $logged ? max(0, (int) $earned) : null;
     $over = $logged ? max(0, $earned - $required) : 0;
-    $remaining = max(0, $required - $earned);
+    $remaining = max(0, $required - (int) $earned);
     $percent = ! $logged || $required === 0 ? 0 : min(100, (int) round(($earned / $required) * 100));
+
+    // Ladder rows read their own sum by the objective's 1-based index when the model
+    // passed the periods through, which is the only number D-232 permits beside a
+    // deadline. Without `periods` the rows stay the plain target list they were.
+    $sums = [];
+    foreach ($periods as $row) {
+        $sums[(int) ($row['index'] ?? 0)] = $row;
+    }
 
     $rotation = config('scenarios.scenarios.'.$scenario.'.shop.rotation_turns');
 @endphp
@@ -69,6 +87,26 @@
     </div>
 
     <div class="rounded-md border border-rule bg-raised p-3">
+        @if ($objective === null)
+            {{-- The state T1c asks for and the one a fresh Trackblazer run is actually
+                 in. No target, no bar, no zero: `0 / 300` would assert both that a
+                 period is chosen and that the trainee stands on nothing, and neither
+                 is known (D-220). The races that exist without a period are named
+                 rather than silently dropped from every total. --}}
+            <p class="text-xs font-bold uppercase tracking-widest text-ink-muted">Grade Point period</p>
+            <p class="mt-0.5 text-sm text-ink">
+                <span class="font-bold text-ink">no period reported</span>: which deadline this run
+                is working toward is something the Trainer says, not something this tool infers
+                from a date, so there is no target to measure against yet.
+            </p>
+            @if ($unassignedCount > 0)
+                <p class="mt-1.5 text-xs text-ink-muted">
+                    {{ number_format($unassignedCount) }} logged
+                    {{ $unassignedCount === 1 ? 'result has' : 'results have' }} no period
+                    entered against it, so none of them counts toward any total below.
+                </p>
+            @endif
+        @else
         <p class="text-xs font-bold uppercase tracking-widest text-ink-muted">Working toward</p>
         <p class="mt-0.5 text-base font-bold text-ink-strong">{{ $objective['name'] ?? '' }}</p>
 
@@ -122,6 +160,7 @@
                 starts from zero whatever this one finishes at.
             </p>
         @endif
+        @endif
     </div>
 
     <p class="mt-3 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink">
@@ -156,6 +195,20 @@
                 </span>
                 <span class="shrink-0 font-mono text-xs tabular-nums text-ink-muted">
                     {{ number_format((int) ($item['required'] ?? 0)) }} pts
+                    @php $row = $sums[(int) ($item['index'] ?? ($i + 1))] ?? null; @endphp
+                    {{-- Each deadline carries its own sum and nothing else. A total of the
+                         four would be the banking arithmetic D-232 forbids, and an absent
+                         period says "not recorded" rather than 0 (D-220). --}}
+                    @if ($row !== null)
+                        ·
+                        @if ($row['earned'] !== null)
+                            {{ number_format((int) $row['earned']) }} earned
+                        @elseif ($row['unpriced'] > 0)
+                            not totalled
+                        @else
+                            not recorded
+                        @endif
+                    @endif
                 </span>
             </li>
         @endforeach

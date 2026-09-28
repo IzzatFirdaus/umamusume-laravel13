@@ -156,16 +156,21 @@ it('names no scenario race for a run that has not chosen one', function (): void
 it('lists the Grade Point objectives in order, named from the matrix', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'trackblazer']);
 
+    // Each row now carries the 1-based period a finish is entered against, so the
+    // number a Trainer says and the row it lands on cannot drift (US-10, ADR-0003).
     expect($run->gradeObjectives())->toBe([
-        ['name' => 'Debut race', 'required' => 0],
-        ['name' => 'End of Junior Year', 'required' => 60],
-        ['name' => 'End of Classic Year', 'required' => 300],
-        ['name' => 'End of Senior Year', 'required' => 300],
+        ['index' => 1, 'name' => 'Debut race', 'required' => 0],
+        ['index' => 2, 'name' => 'End of Junior Year', 'required' => 60],
+        ['index' => 3, 'name' => 'End of Classic Year', 'required' => 300],
+        ['index' => 4, 'name' => 'End of Senior Year', 'required' => 300],
     ]);
 });
 
 it('sums Grade Points only when every completed race can be priced', function (): void {
-    $run = TrainingRun::factory()->create(['scenario' => 'trackblazer']);
+    $run = TrainingRun::factory()->create([
+        'scenario' => 'trackblazer',
+        'current_objective_index' => 2,
+    ]);
     $slot = ScenarioSlot::factory()->create([
         'scenario_key' => 'trackblazer',
         'kind' => 'goal_race',
@@ -179,9 +184,13 @@ it('sums Grade Points only when every completed race can be priced', function ()
         'scenario_slot_id' => $slot->id,
         'status' => RaceEntryStatus::Completed,
         'placement' => 1,
+        'objective_index' => 2,
     ]);
 
-    // 100 for a G1 win, from config's `grade_point_by_grade` (docs/scenarios/05 §Grade Points).
+    // 100 for a G1 win, from config's `grade_point_by_grade` (docs/scenarios/05 §Grade
+    // Points). The race names the period and the run names the live one: `gradeEarned()`
+    // is period-aware now, so a finish entered against Junior is only a Classic figure
+    // when the Trainer says Classic is what they are working to (D-270, D-232).
     expect($run->fresh()->gradeEarned())->toBe(100);
 
     // Below first the points scale down, and no ratio for that is in our corpus, so
@@ -191,6 +200,7 @@ it('sums Grade Points only when every completed race can be priced', function ()
         'scenario_slot_id' => $slot->id,
         'status' => RaceEntryStatus::Completed,
         'placement' => 2,
+        'objective_index' => 2,
     ]);
 
     expect($run->fresh()->gradeEarned())->toBeNull();

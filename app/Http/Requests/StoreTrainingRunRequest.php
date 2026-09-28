@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Enums\RunStatus;
+use App\Models\RaceEntry;
+use App\Models\TrainingRun;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -39,6 +42,33 @@ class StoreTrainingRunRequest extends FormRequest
             'inheritance_parent_a_id' => ['nullable', 'integer', Rule::exists('umamusume', 'id')],
             'inheritance_parent_b_id' => ['nullable', 'integer', Rule::exists('umamusume', 'id')],
             'notes' => ['nullable', 'string', 'max:5000'],
+            /*
+             * The Grade Point period the Trainer reports as live (US-10, ADR-0003).
+             * Entered, never derived (D-270): nothing in the corpus names a formula
+             * that puts a career in a period, so "null until set" is the honest state
+             * and the meter says so rather than guessing. It is also only meaningful
+             * on a run whose scenario composes the panel, which is read from the
+             * composition matrix through the run's own scenario, including the one
+             * this same request is about to write.
+             */
+            'current_objective_index' => [
+                'nullable',
+                'integer',
+                Rule::in(range(1, RaceEntry::MAX_OBJECTIVE_INDEX)),
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($value === null) {
+                        return;
+                    }
+
+                    $run = $this->route('run');
+                    $scenario = $this->input('scenario', $run instanceof TrainingRun ? $run->scenario : null);
+
+                    if ($scenario === null || $scenario === ''
+                        || config('scenarios.scenarios.'.$scenario.'.panels.grade_objectives') !== true) {
+                        $fail('This scenario has no Grade Point periods, so there is no period to report.');
+                    }
+                },
+            ],
         ];
     }
 

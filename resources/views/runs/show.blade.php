@@ -106,8 +106,11 @@
         <x-grade-point-meter
             :scenario="$panelScenario"
             :objectives="$run->gradeObjectives()"
+            :current="$run->currentPeriodPosition()"
             :earned="$run->gradeEarned()"
             :unpriced-count="$run->gradeUnpricedCount()"
+            :periods="$run->gradePeriods()"
+            :unassigned-count="$run->gradeUnassignedCount()"
             class="mt-3"
         />
     @endif
@@ -133,6 +136,36 @@
         <button type="submit" class="rounded-full border-2 border-rule px-4 py-2 font-bold text-ink-strong">Change scenario</button>
         @error('scenario')<p class="w-full text-risk">{{ $message }}</p>@enderror
     </form>
+
+    @if ($run->composesGradeObjectives())
+        {{-- Its own form, because its own verb: this one says which deadline the Trainer
+             is working to, and a button reading "Change scenario" would promise something
+             else. The fields it is not editing are carried through so the shared request
+             does not blank them. The period is entered, never inferred (D-270), and
+             "not reported" is a real option rather than a placeholder: the meter renders
+             it as no period, not as zero (D-220). --}}
+        <form method="POST" action="{{ route('runs.update', $run) }}" class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-4 text-sm">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="umamusume_id" value="{{ $run->umamusume_id }}">
+            <input type="hidden" name="status" value="{{ $run->status->value }}">
+            <input type="hidden" name="scenario" value="{{ $run->scenario }}">
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Grade Point period</span>
+                <select name="current_objective_index" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                    <option value="">Not reported</option>
+                    @foreach ($run->gradeObjectives() as $objective)
+                        <option value="{{ $objective['index'] }}"
+                            @selected($run->current_objective_index === $objective['index'])>
+                            {{ $objective['index'] }}. {{ $objective['name'] }}
+                        </option>
+                    @endforeach
+                </select>
+            </label>
+            <button type="submit" class="rounded-full border-2 border-rule px-4 py-2 font-bold text-ink-strong">Report period</button>
+            @error('current_objective_index')<p class="w-full text-risk">{{ $message }}</p>@enderror
+        </form>
+    @endif
 
     <h2 class="mt-8 text-lg font-semibold text-ink-strong">Turns</h2>
     @php
