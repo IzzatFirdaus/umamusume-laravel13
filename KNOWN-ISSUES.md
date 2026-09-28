@@ -7,6 +7,12 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, catalog roster Task 2):** 20 issues filed. **15 resolved/closed** (KI-1–9,
+KI-11–14, KI-18, KI-21). **5 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies),
+KI-17 (the consecutive-race count cannot be derived from the log), KI-19 (the impeccable tool cannot
+update itself), KI-20 (the shop error text is an unmeasured contrast pair). KI-21 was filed and
+resolved in the same change: the character parser read `name_ja` where the GameTora export publishes
+`name_jp`, so fetched trainees stored a null Japanese name. Prior:
 **Status (2026-09-29, Slice 10):** 19 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14,
 KI-18). **5 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
 consecutive-race count cannot be derived from the log), KI-19 (the impeccable tool cannot update
@@ -791,3 +797,46 @@ and record the ratio in both themes. If it lands under 4.5:1, the fix belongs to
 
 **Owner.** Frontend with the design-system owner, on the next browser pass. This entry is the reason
 the Slice 10 re-audit scores Accessibility 3 rather than 4.
+
+---
+
+## KI-21 The character parser read a source key the GameTora export never published, so fetched trainees lost their Japanese name — FILED and RESOLVED 2026-09-29 (catalog roster, Task 2)
+
+**Symptom.** `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php:92` read
+`$card['name_ja']`. The `character-cards` export publishes `name_jp`: over its 268 rows `name_ja`
+appears 0 times and `name_jp` 268 — erratum E-12's count over the fetched export at
+`research-scratch/data/json/character-cards.json`, a scratch path this repo does not track, so the
+figure is cited rather than re-runnable from here. So every trainee `uma:fetch` created stored a null
+`name_ja`, and `PRD.md` US-1's acceptance test ("each detail page shows `name`, `name_ja`, release
+status, and provenance") went unmet for fetched data while the whole suite stayed green.
+
+**Cause.** Both guards over that one line were empty. The committed sample
+`tests/Fixtures/gametora-character-cards.sample.json` was authored against a guessed key and held
+`"name_ja": null` on every row, so the test loading it could only ever agree with the parser. And the
+one catalog test that asserts a Japanese name, `tests/Feature/CatalogTest.php:33`, seeds `name_ja`
+through the factory rather than fetching it, so it never reached the parser. Neither of them read the
+source.
+
+**Fix (this change).** The parser reads `$card['name_jp']` and still emits the record key `name_ja`,
+which is the contract `SourceParser`, `app/Actions/PromoteMatchedRecord.php:52,64` and
+`app/Services/DataPipeline/PipelineRunner.php:65` all read, and matches the `umamusume.name_ja`
+column; only the source-side key moved. The sample now spells the key `name_jp` and carries the
+client's real Japanese strings instead of `null`. `GametoraCharacterParserTest` gained a body-level
+test that the name arrives from `name_jp`, an assertion of `スペシャルウィーク` on the record loaded
+from the fixture, and its `card()` helper now emits `name_jp`, because that helper builds a body in
+the export's shape. Deliberately not written: `$card['name_jp'] ?? $card['name_ja'] ?? null`. A
+fallback chain accepts a body carrying neither key, which is how this defect stayed invisible: a null
+reads as "the source has no Japanese name" instead of "you are reading the wrong key".
+
+**Standing lesson.** A fixture that agrees with the code instead of with the source proves nothing.
+Its keys and value shapes are a recording of the export, not a mirror of the parser beside it; where
+the two agree against the source, the pair has no coverage and still reports green. The same reasoning
+closes the second half: a test that seeds the value it claims to show is not evidence either, because
+US-1 is about a page the fetch built.
+
+**Residual.** `tests/Feature/GametoraAptitudeTest.php:20,67` still spell the source key `name_ja` in
+two inline bodies. Those tests assert aptitudes and never the name, so they pass either way. Out of
+this change's scope; rename on the next pass over that file.
+
+**Owner.** Data Engineer. Filed and closed by the same commit, because the fix and its proof landed
+together.

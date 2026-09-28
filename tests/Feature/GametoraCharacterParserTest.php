@@ -19,7 +19,7 @@ function card(int $charId, int $cardId, string $en, ?string $jp, ?string $jpDate
         'char_id' => $charId,
         'card_id' => $cardId,
         'name_en' => $en,
-        'name_ja' => $jp,
+        'name_jp' => $jp,
         'release' => $jpDate,
         'release_en' => $enDate,
     ];
@@ -68,6 +68,7 @@ it('reads the committed sample of the real dataset without raising', function ()
     expect($records)->toBeArray()
         ->and(count($records))->toBeGreaterThan(0)
         ->and(array_column($records, 'name'))->toContain('Special Week', 'Vodka')
+        ->and($records[0]['name_ja'])->toBe('スペシャルウィーク')
         ->and(array_unique(array_column($records, 'external_ref')))->toHaveCount(count($records));
 });
 
@@ -90,4 +91,21 @@ it('ignores date strings that are not plain calendar dates', function (): void {
     expect($records[0]['jp_debut_date'])->toBeNull()
         ->and($records[0]['global_debut_date'])->toBeNull()
         ->and($records[0]['release_status'])->toBe(ReleaseStatus::JapanOnly->value);
+});
+
+it('reads the Japanese name from the key the export actually publishes', function (): void {
+    $body = json_encode([[
+        'char_id' => 1007,
+        'card_id' => 100701,
+        'name_en' => 'Gold Ship',
+        'name_jp' => 'ゴールドシップ',
+        'release' => '2021-02-24',
+        'release_en' => '2025-06-26',
+    ]], JSON_THROW_ON_ERROR);
+
+    $record = (new GametoraCharacterParser)->parse($body)[0];
+
+    // The export spells this key name_jp and never name_ja. Reading the wrong one
+    // stores a null, and the detail page loses the Japanese name US-1 promises.
+    expect($record['name_ja'])->toBe('ゴールドシップ');
 });

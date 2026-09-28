@@ -89,7 +89,8 @@ final class GametoraCharacterParser implements SourceParser
 
             $records[] = [
                 'name' => trim((string) $card['name_en']),
-                'name_ja' => $this->textOrNull($card['name_ja'] ?? null),
+                // GameTora publishes `name_jp`; `name_ja` is this app's own column name.
+                'name_ja' => $this->textOrNull($card['name_jp'] ?? null),
                 // A costume card can exist on [Global] while no debut form does; the
                 // debut date is what the catalog means by "released here".
                 'release_status' => $globalDebut === null
