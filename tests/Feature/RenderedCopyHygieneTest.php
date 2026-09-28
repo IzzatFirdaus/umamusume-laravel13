@@ -88,6 +88,41 @@ it('scans every Blade view, not just the top directory', function (): void {
     expect($count)->toBeGreaterThanOrEqual(12);
 });
 
+it('loads no remote stylesheet or font on first paint', function (): void {
+    // KI-3 / PRD NFR-1: this is a local-only tool, so a `<link>` to a font CDN is a
+    // network dependency in front of the first render. `welcome.blade.php` carried two
+    // to fonts.bunny.net, and DESIGN.md §7 had called it "a one-line fix nobody has
+    // applied" — a guard is what stops it being a two-line fix nobody applies next time.
+    //
+    // Anchor `href`s are allowed: a link someone can choose to click is not a
+    // dependency the page cannot render without.
+    $views = base_path('resources/views');
+    $walk = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($views, FilesystemIterator::SKIP_DOTS),
+    );
+
+    $offenders = [];
+
+    foreach ($walk as $file) {
+        if (! str_ends_with($file->getFilename(), '.blade.php')) {
+            continue;
+        }
+
+        $source = (string) file_get_contents($file->getPathname());
+
+        if (preg_match_all('#<(?:link[^>]*rel=["\'](?:stylesheet|preconnect|preload|dns-prefetch)["\'][^>]*>|script[^>]*src=["\']https?://)#i', $source, $hits) > 0) {
+            foreach ($hits[0] as $tag) {
+                // A same-origin or relative asset is not a network dependency.
+                if (preg_match('#(?:href|src)=["\'](https?://|//)#i', $tag) === 1) {
+                    $offenders[] = str_replace($views.DIRECTORY_SEPARATOR, '', $file->getPathname()).': '.substr($tag, 0, 90);
+                }
+            }
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});
+
 it('ships no em dash or en dash in rendered Blade copy', function (): void {
     $hits = renderedDashLines();
 
