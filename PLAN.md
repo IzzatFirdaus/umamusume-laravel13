@@ -1,6 +1,6 @@
 # Trainer Desk — Frontend Development Plan
 
-**Status:** Phase 4 (Implementation) active through Slice 9, the closing slice: the branch reconciled, the register landed, the audit findings fixed, and the shop given its writer. No new panels, no schema columns, no new tokens.
+**Status:** Phase 4 (Implementation) active through Slice 10, the maintenance and drift slice: the register corrected against its own commits, the lore gate given a line-scoped marker, the shop price answered at its field, and one bounded proposal written about `scenario_slots`. No panel work, no seeding migration, no new tokens.
 **Intent (R41), as the owner stated it:** "Slice 8 is the scenario panel set: the Unity Cup and
 Trackblazer surfaces built on Slice 7's payloads and buckets, plus the missing writers." Nothing
 about that intent needed a new table, and none was added: rank, fatigue and purchases ride
@@ -9,7 +9,15 @@ Slice 7 was the schema session. Slice 6 landed the
 frontend residuals; Slice 7 gave Grade Points the period they belong to (KI-10's schema half) and
 gave `turn_events.deltas` a typed shape (D-226), then declined ADR-0005 for Phase 1 per R37. Phase 6
 remains unfrozen and unstarted. Unity Cup and Trackblazer panel UI is Slice 8, not this slice.
-**Last Updated:** 2026-09-28 (Slice 9: KI-17 and KI-18 filed at `01a1091`, the burst label map and
+**Last Updated:** 2026-09-29 (Slice 10: the register's KI-18 closure and KI-15 de-duplication at
+`ebfc227`, the subject-prefix erratum and this file's own two repairs at `ec0ee2f`, the line marker
+with its three guards at `8c9faf9`, the count history on the registry at `11525ec`, KI-19 at
+`fe24dc0`, the validation envelope that had never rendered at `6aa81eb`, the cost field error at
+`3b15a6c`, KI-20 at `99f5784`, ADR-0009 proposed at `802d1b9`; `slice-10-2026-09-29.md` carries the
+same-version re-audit at 18/20, the marker measurements, and the gates pasted in CONSTRAINTS order.
+**Lore baseline, settled: `lore-docs` 98 hits with 51 exempt lines, `lore-code` 7.** The 147 it replaced
+was the gate quoting itself; a new itemization row in a rules table no longer moves the number.)
+Before it, 2026-09-28 (Slice 9: KI-17 and KI-18 filed at `01a1091`, the burst label map and
 the loaded-collection ladder at `f7a59e8`, the D-230 amendment at `4282146`, the purchase writer at
 `d73a449`; `slice-9-2026-09-28.md` carries the lore itemization, the coherence evidence and the
 branch attribution.) Before it, Slice 7: the Grade Point period columns and meter at `e103122`,
@@ -42,7 +50,7 @@ recorded sha is dropped.
 
 **Every slice must satisfy all of the following before being marked complete:**
 
-1. **Gates green with pasted output** — `pest`, `pint --test`, `phpstan --no-progress`, `make lore` (manual), `make lore-code` (manual), `npx vite build`, `DesignTokensTest` all pass; outputs recorded in commit message or linked CI run. **Migration gate:** `migrate:fresh --seed` is a destructive drop and is not run here; the equivalent evidence is `php artisan migrate` plus `db:seed` applied to a **fresh empty scratch DB** (`DB_DATABASE=/tmp/…`), which proves the same thing with no blast radius on the shared dev file.
+1. **Gates green with pasted output** — `pest`, `pint --test`, `phpstan --no-progress`, `make lore` (manual), `make lore-code` (manual), `npx vite build`, `DesignTokensTest` all pass; outputs recorded in commit message or linked CI run. **Migration gate:** `migrate:fresh --seed` is a destructive drop and is not run here; the equivalent evidence is `php artisan migrate` plus `db:seed` applied to a **fresh empty scratch DB** (`DB_DATABASE=/tmp/…`), which proves the same thing with no blast radius on the shared dev file. **Lore baseline (R51, 2026-09-29):** `lore-docs` 98 hits / 51 exempt lines, `lore-code` 7; a rules table quoting a banned word to rule on it carries a line marker naming `lore-ignore-line` with `class=` set to one of the four allowed-hit classes and `cite=` set to the rule it answers to (the exact form, with a worked example, is in `docs/GATE-REGISTRY.md`; markers are legal inside `docs/` and nowhere else), and `LoreGateParityTest` fails a marker outside `docs/`, one missing either half, or a runner that stops honouring the filter.
 2. **Every status claim cites file:line or commit sha** — no "done" without evidence.
 3. **No open D-number violation in touched files** — `git grep -n D-XXX` in changed files returns zero unresolved hits.
 4. **No false/stale status lines** — plan doc re-baselined against tree in the same commit.
@@ -58,6 +66,7 @@ recorded sha is dropped.
    on-disk count, and `git grep -l <NewClass> HEAD` finds a definition, not only a reference.
    Added because KI-13 shows a green suite can coexist with a branch that will not boot.
 8. **Every cited sha verified via `git cat-file -e` in-session** — a record's own sha is labelled self-citation.
+9. **A commit's subject prefix names the slice its diff belongs to** — checked against the diffstat, not the intent: a commit that adds `slice-9-…md` is a Slice 9 commit. `68fa190` carried `docs(slice-7)` on Slice 9's work, which is why this is a criterion and not a convention; the erratum is `docs(plan)` at `ec0ee2f`. Prefixes are read by `git log --grep` when a slice is traced after the fact, so a wrong one is a false index, and the fix is recorded rather than rewritten when the commit is already on `origin/master`.
 
 ---
 

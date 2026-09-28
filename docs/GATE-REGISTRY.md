@@ -102,7 +102,9 @@ opening reading, carried by `slice-10-2026-09-29.md`.
 - Scope: one line. Not a file, not a block, not a directory. Removing the marker restores the hit.
 - Where: `docs/` only. `LoreGateParityTest` fails on a marker anywhere else, and the `lore-code`
   gate does not honour markers at all, so one planted outside `docs/` buys nothing - the line it
-  tried to hide still prints in the app-path sweep.
+  tried to hide still prints in the app-path sweep. A consequence worth knowing before writing the
+  next rules file: a document outside `docs/` cannot show the full form, because writing it makes
+  it one. `PLAN.md` names this section instead.
 - What it is not: a ruling. It records a class and a citation that already exist, and a marker
   missing either is a test failure. The Guardian still decides the case; the marker only stops the
   count from re-litigating a settled one.
