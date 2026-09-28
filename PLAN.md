@@ -1,6 +1,6 @@
 `$PANELS`# Trainer Desk — Frontend Development Plan
 
-**Status:** Phase 4 (Implementation) active through Slice 8, the scenario panel set.
+**Status:** Phase 4 (Implementation) active through Slice 9, the closing slice: the branch reconciled, the register landed, the audit findings fixed, and the shop given its writer. No new panels, no schema columns, no new tokens.
 **Intent (R41), as the owner stated it:** "Slice 8 is the scenario panel set: the Unity Cup and
 Trackblazer surfaces built on Slice 7's payloads and buckets, plus the missing writers." Nothing
 about that intent needed a new table, and none was added: rank, fatigue and purchases ride
@@ -9,7 +9,7 @@ Slice 7 was the schema session. Slice 6 landed the
 frontend residuals; Slice 7 gave Grade Points the period they belong to (KI-10's schema half) and
 gave `turn_events.deltas` a typed shape (D-226), then declined ADR-0005 for Phase 1 per R37. Phase 6
 remains unfrozen and unstarted. Unity Cup and Trackblazer panel UI is Slice 8, not this slice.
-**Last Updated:** 2026-09-28 (Slice 8 T0–T7: columns and shop payload at `7d4b8cf`, rank and fatigue payloads at `4c6486a`, the epithet route table at `a031d9d`, the race writer at `5d7d10a`, the panel set and the meter disclosure at `d248ca5`; `slice-8-2026-09-28.md` carries the R38 snapshots, the measured pairs in both themes, and the `/impeccable` audit score of 16/20. Prior: Slice 7 schema session)
+**Last Updated:** 2026-09-28 (Slice 9: KI-17 and KI-18 filed at `01a1091`, the burst label map and the loaded-collection ladder at `f7a59e8`, the D-230 amendment at `4282146`, the purchase writer at `d73a449`; `slice-9-2026-09-28.md` carries the lore itemization, the coherence evidence and the branch attribution.)
 and meter at `e103122`, typed payloads at `17dbc54`/`8955394`, this re-baseline plus KI-15 and the
 ADR-0005 status at the docs commit; `slice-7-2026-09-28.md` carries the greps, the test names and the
 one thing stopped on. Prior: Slice 6 mood pill and pairs, `slice-6-2026-09-28.md`)
@@ -19,6 +19,7 @@ one thing stopped on. Prior: Slice 6 mood pill and pairs, `slice-6-2026-09-28.md
 ## Slice Exit Criteria
 
 Every slice now opens and closes with two mechanical lines, per R38. **Opening snapshot:** `git branch --show-current` and `git status --porcelain` recorded in the slice record before any edit, repeated before every commit and push. **Push verification:** after `git push`, `git ls-remote origin master` must equal the sha just pushed, and the line is recorded. Both were done in Slice 8; the record§1 holds the snapshot and §2 the incident the practice caught (a shared index let the peer's staged file into one commit).
+**Branch attribution (R44):** Slice 8 was built on `docs/frontend-review` after a concurrent session switched the shared worktree there mid-slice; `master` was fast-forwarded to `122d12b` at the start of Slice 9, so every Slice 8 commit is now on `master`. One of them, `4c6486a`, also carries `docs/scenarios/09-global-race-calendar.md`, which is that session’s file and their words: it entered through the shared index, and the attribution stands here rather than in a rewrite.
 
 **Every slice must satisfy all of the following before being marked complete:**
 
