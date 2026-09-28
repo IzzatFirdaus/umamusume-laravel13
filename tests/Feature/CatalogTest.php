@@ -6,6 +6,17 @@ use App\Enums\ReleaseStatus;
 use App\Models\DataSource;
 use App\Models\Umamusume;
 
+/*
+ * Catalog list, filter, search, detail and empty state.
+ *
+ * The Phase 3A mapping named this file's concern `CatalogFilterEdgeTest` - a file that
+ * does not exist, and creating it would have split one surface's coverage across two
+ * files that could then drift. It resolves here: the release-status filter, the search
+ * normalisation, and the empty state are the three cases below, and they are already the
+ * edges - a filter that drops the japan-only rows, a search that has to normalise before
+ * it can match, and a search that matches nothing at all.
+ */
+
 it('lists only global released umamusume when filtered by release status', function (): void {
     $released = Umamusume::factory()->create(['name' => 'Released One', 'slug' => 'released-one']);
     Umamusume::factory()->japanOnly()->create(['name' => 'Japan Only One', 'slug' => 'japan-only-one']);
