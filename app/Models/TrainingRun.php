@@ -270,8 +270,8 @@ class TrainingRun extends Model
         for ($month = 0; $month < 12; $month++) {
             $cells[$month] = [
                 'halves' => [
-                    'Early' => ['state' => 'empty'],
-                    'Late' => ['state' => 'empty'],
+                    'Early' => ['slots' => []],
+                    'Late' => ['slots' => []],
                 ],
             ];
         }
@@ -311,7 +311,7 @@ class TrainingRun extends Model
                 continue;
             }
 
-            $cells[$index]['halves'][$half] = $this->calendarCell(
+            $cells[$index]['halves'][$half]['slots'][] = $this->calendarCell(
                 $slot,
                 $raced->get($slot->id),
                 $fans,

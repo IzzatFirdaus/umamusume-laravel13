@@ -40,9 +40,9 @@ it('places a scenario slot in the calendar at its own month and half', function 
     $cells = $run->calendarCells();
 
     // The component indexes cells from zero (Jan = 0); the table stores 1-12.
-    expect($cells[3]['halves']['Late']['state'])->toBe('goal')
-        ->and($cells[3]['halves']['Late']['label'])->toBe('Tenno Sho (Spring)')
-        ->and($cells[0]['halves']['Early']['state'])->toBe('empty')
+    expect($cells[3]['halves']['Late']['slots'][0]['state'])->toBe('goal')
+        ->and($cells[3]['halves']['Late']['slots'][0]['label'])->toBe('Tenno Sho (Spring)')
+        ->and($cells[0]['halves']['Early']['slots'])->toBe([])
         ->and(count($cells))->toBe(12);
 });
 
@@ -61,9 +61,9 @@ it('locks a fan-gated race until this run has the fans it asks for', function ()
     $long = runWithFans(15000);
 
     // The figure travels with the lock: it is what the Trainer works toward (D-173).
-    expect($short->calendarCells()[3]['halves']['Early']['state'])->toBe('fan_locked')
-        ->and($short->calendarCells()[3]['halves']['Early']['fans_needed'])->toBe(15000)
-        ->and($long->calendarCells()[3]['halves']['Early']['state'])->toBe('open');
+    expect($short->calendarCells()[3]['halves']['Early']['slots'][0]['state'])->toBe('fan_locked')
+        ->and($short->calendarCells()[3]['halves']['Early']['slots'][0]['fans_needed'])->toBe(15000)
+        ->and($long->calendarCells()[3]['halves']['Early']['slots'][0]['state'])->toBe('open');
 });
 
 it('shows a maiden-gated race as a maiden lock until this run has won', function (): void {
@@ -80,9 +80,9 @@ it('shows a maiden-gated race as a maiden lock until this run has won', function
 
     $winless = runWithFans(3000);
 
-    expect($winless->calendarCells()[4]['halves']['Early']['state'])->toBe('maiden_locked')
+    expect($winless->calendarCells()[4]['halves']['Early']['slots'][0]['state'])->toBe('maiden_locked')
         // No fan figure: a maiden gate is decided by an event, not a quantity.
-        ->and($winless->calendarCells()[4]['halves']['Early'])->not->toHaveKey('fans_needed');
+        ->and($winless->calendarCells()[4]['halves']['Early']['slots'][0])->not->toHaveKey('fans_needed');
 
     RaceEntry::create([
         'training_run_id' => $winless->id,
@@ -90,7 +90,7 @@ it('shows a maiden-gated race as a maiden lock until this run has won', function
         'placement' => 1,
     ]);
 
-    expect($winless->fresh()->calendarCells()[4]['halves']['Early']['state'])->toBe('open');
+    expect($winless->fresh()->calendarCells()[4]['halves']['Early']['slots'][0]['state'])->toBe('open');
 });
 
 it('marks a slot this run has already raced as past', function (): void {
@@ -111,7 +111,7 @@ it('marks a slot this run has already raced as past', function (): void {
         'placement' => 3,
     ]);
 
-    expect($run->calendarCells()[10]['halves']['Late']['state'])->toBe('past');
+    expect($run->calendarCells()[10]['halves']['Late']['slots'][0]['state'])->toBe('past');
 });
 
 it('composes the calendar only from the run own scenario', function (): void {

@@ -104,14 +104,26 @@
                 @foreach ($monthLabels as $monthIndex => $month)
                     @php
                         $cell = $cells[$monthIndex]['halves'][$half] ?? [];
-                        $state = $cell['state'] ?? 'empty';
+                        $slotItems = $cell['slots'] ?? [];
+                        // Derive a single state for the cell's border treatment from
+                        // its slots: goal wins, then fan_locked, then maiden_locked,
+                        // then open, then past, then empty. Multiple slots share one
+                        // border; their labels stack inside.
+                        $state = 'empty';
+                        $priority = ['goal' => 6, 'current' => 5, 'fan_locked' => 4, 'maiden_locked' => 3, 'open' => 2, 'past' => 1];
+                        foreach ($slotItems as $s) {
+                            $p = $priority[$s['state'] ?? ''] ?? 0;
+                            if ($p > ($priority[$state] ?? 0)) {
+                                $state = $s['state'];
+                            }
+                        }
                         $state = array_key_exists($state, $stateClass) ? $state : 'empty';
-                        $label = $cell['label'] ?? null;
-                        // Only the fan gate has a number. A maiden lock renders one
-                        // only if a caller supplies a figure for it, because a fan
-                        // figure on a maiden cell would send the Trainer off to grind
-                        // toward eligibility that is decided by an event instead.
-                        $fans = $state === 'fan_locked' ? ($cell['fans_needed'] ?? null) : ($cell['maiden_fans_needed'] ?? null);
+                        $firstLabel = $slotItems[0]['label'] ?? null;
+                        $fans = $state === 'fan_locked' ? ($slotItems[0]['fans_needed'] ?? null) : null;
+                        $ariaSlots = count($slotItems);
+                        $ariaText = $ariaSlots > 1
+                            ? "{$ariaSlots} races: " . implode(', ', array_map(fn ($s) => $s['label'] ?? '', $slotItems))
+                            : ($firstLabel ?? $stateWord[$state]);
                     @endphp
                     {{-- The accessible name carries the month, the half and the state,
                          because a cell's state lives in its outline and its pennant and
@@ -123,7 +135,7 @@
                     <div class="col-span-1 rounded-md border px-1 text-center text-xs leading-tight
                                 {{ $stateClass[$state] }} relative"
                          role="img"
-                         aria-label="{{ $month }} {{ $half }}: {{ $stateWord[$state] }}{{ $label !== null ? ', '.$label : '' }}">
+                         aria-label="{{ $month }} {{ $half }}: {{ $stateWord[$state] }}, {{ $ariaText }}">
                         @if ($state === 'goal')
                             {{-- D-181: "A goal race announces itself with a Goal pennant, a
                                  heavier warm outline and greater height." The client's own
@@ -137,9 +149,19 @@
                                   aria-hidden="true"></span>
                         @endif
                         <span class="block font-mono text-xs tabular-nums text-ink-muted">{{ $half }}</span>
-                        <span class="block truncate font-semibold" title="{{ $label ?? $stateWord[$state] }}">
-                            {{ $label ?? $stateWord[$state] }}
-                        </span>
+                        @if ($ariaSlots > 1)
+                            <ul class="space-y-0.5">
+                                @foreach ($slotItems as $slotItem)
+                                    <li class="truncate font-semibold" title="{{ $slotItem['label'] ?? '' }}">
+                                        {{ $slotItem['label'] ?? $stateWord[$state] }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <span class="block truncate font-semibold" title="{{ $firstLabel ?? $stateWord[$state] }}">
+                                {{ $firstLabel ?? $stateWord[$state] }}
+                            </span>
+                        @endif
                         @if ($fans !== null)
                             <span class="block font-mono text-xs tabular-nums text-ink-muted">
                                 {{ number_format((int) $fans) }} fans
