@@ -30,7 +30,7 @@ Two premises in the commissioning brief do not survive contact with the data and
 | Senior | 18 | Late September | Sazanka TV Hai | 51 |
 | Senior | 23 | Early December | Queen Sho | 53 |
 
-Seven are the regional-racing slots added by the `[JP]` `pre_nar` update; the two Longchamp slots are the ones excluded from `[Global]` outright, so they carry a second reason to be ignored. The gap is explained in `[Global]` versus `[JP]` finding 3, and the ⚠️ markers in the year tables stay.
+Seven are regional-racing slots that reached `[Global]` on 2026-07-22 (finding 5) — the races are live, only their `[Global]` payout numbers are missing from the export. The two Longchamp slots are excluded from `[Global]` outright, so they carry a second reason to be ignored. The gap is explained in `[Global]` versus `[JP]` finding 3, and the ⚠️ markers in the year tables stay.
 
 ## How a career year is laid out
 
@@ -40,19 +40,19 @@ The Junior Year grid is not full. **Turns 1–11 (Early January through Early Ju
 
 ## Tier labels, and how each one was pinned
 
-`docs/UMAMUSUME_REFERENCE.md` §1.2.6 pinned `100 = G1` and `400 = OP` and left codes 200, 300 and 700 as `❌ UNVERIFIED`. That gap closes here.
+`docs/UMAMUSUME_REFERENCE.md` §1.2.6 pinned `100 = G1` and `400 = OP` and left codes 200, 300 and 700 as `❌ UNVERIFIED`. **That gap closes here**, on a direct code-to-label map rather than on inference.
 
-The export stores five grade codes for ordinary races plus three for special ones. `[Global]`'s published tier set has exactly five labels — Pre-OP, OP, G3, G2, G1 — so once four codes are pinned the fifth follows by elimination.
+| Code | Tier | Evidence | Domain |
+|---|---|---|---|
+| 100 | G1 | Client skill copy "G1 Averseness … decrease performance in G1 or otherwise important races" (`skills.json` id 200311), as already recorded in §1.2.6. | client text |
+| 200 | G2 | [uma.guide's race dataset](https://uma.guide/agenda-planner/) stores `grade` and `gradeName` together: `{"raceName":"Daily Hai Junior Stakes","grade":200,"gradeName":"G2"}`. | uma.guide |
+| 300 | G3 | Same dataset: `{"raceName":"Artemis Stakes","grade":300,"gradeName":"G3"}`. Its 76 rows at code 300 equal the export's 76. | uma.guide |
+| 400 | OP | Three export rows whose in-game names contain 「オープン」 carry grade 400 (§1.2.6). The same dataset labels the code `OP/L (Open/Listed)`; **`[Global]` prints Open and Listed together**, so a UI that shows only "OP" is collapsing two tiers the tool distinguishes. | client text + uma.guide |
+| 700 | Pre-OP | Same dataset: `{"raceName":"Aster Sho","grade":700,"gradeName":"Pre-OP"}`; 26 rows on both sides. Corroborated on its own terms: all 26 slots are Junior Year only and the names are the `…Sho`/`…Special` pattern. | uma.guide |
+| 800 | Maiden | Client row name `Junior Maiden Race`, with the client rule quoted in the export: "You can't participate in any races listed here until you win either Debut or any of the Maiden Races". | client text |
+| 900 | Debut | Client row name `Junior Make Debut`, "mandatory for every character". | client text |
 
-| Code | Tier | Evidence |
-|---|---|---|
-| 100 | G1 | Client skill copy "G1 Averseness … decrease performance in G1 or otherwise important races" (`skills.json` id 200311), as already recorded in §1.2.6. |
-| 200 | G2 | **Pinned by distribution match.** See the table below: the count of unique G2 races per distance band matches uma.guide's published `6 / 12 / 13 / 5` cell for cell. |
-| 300 | G3 | Same test: `18 / 33 / 17 / 1` matches exactly. |
-| 400 | OP | Three rows whose in-game names contain 「オープン」 carry grade 400 (§1.2.6). |
-| 700 | Pre-OP | By elimination from the five-label set, and consistent on its own terms: all 26 slots are Junior Year only, and the names are `…Sho`/`…Special`, the non-stakes pattern. |
-| 800 | Maiden | Client row name `Junior Maiden Race`, with the client rule quoted in the export: "You can't participate in any races listed here until you win either Debut or any of the Maiden Races". |
-| 900 | Debut | Client row name `Junior Make Debut`, "mandatory for every character". |
+**Read the Domain column before citing this table as multi-source.** Codes 200, 300 and 700 rest on **one** second domain — uma.guide — and the row-count identities at 76/119/26 are a consistency check between two scrapes of the same client data, not independent confirmation. The cross-check below is the one that adds a genuinely different kind of evidence, and it is arithmetic rather than transcription.
 
 The 12-cell test, run against the `[Global]`-filtered career pool with the 23 rows carrying a `did_not_exist` marker excluded:
 
@@ -62,9 +62,11 @@ The 12-cell test, run against the `[Global]`-filtered career pool with the 23 ro
 | Mile (1401–1800 m) | 10 | 12 | 33 |
 | Medium (1801–2400 m) | 14 | 13 | 17 |
 | Long (≥ 2401 m) | 3 | 5 | 1 |
-| **uma.guide published** | **3 / 10 / 14 / 3** | **6 / 12 / 13 / 5** | **18 / 33 / 17 / 1** |
+| **uma.guide published distribution** | **3 / 10 / 14 / 3** | **6 / 12 / 13 / 5** | **18 / 33 / 17 / 1** |
 
-Twelve of twelve cells agree with [uma.guide's Trackblazer guide, page last updated 2026-04-29](https://uma.guide/guides/trackblazer), as transcribed in `docs/scenarios/04-trackblazer-umaguide.md`. A swapped 200/300 mapping would fail every row. Including the `did_not_exist` rows breaks the match in each band where they add races, so the guide's table describes the same race universe as the base pool — whether because its sub-table predates those additions or because it counts a narrower set is **not established**, and is listed under Known gaps.
+Twelve of twelve cells agree with the distribution table in [uma.guide's Trackblazer guide, page last updated 2026-04-29](https://uma.guide/guides/trackblazer), as transcribed in `docs/scenarios/04-trackblazer-umaguide.md`. A swapped 200/300 mapping fails every row, which is the point: this test would catch a mislabelled map.
+
+Including the `did_not_exist` rows breaks the match in each band where they add races, and **that is now explained rather than open**: the guide's page is dated 2026-04-29 and the seventeen regional races reached `[Global]` on **2026-07-22** (finding 5), so the guide counted the pool as it stood before them. The base pool is not a narrower universe; it is the same universe three months earlier.
 
 Distance bands are the published ones: Sprint 1400 m and under, Mile 1401–1800, Medium 1801–2400, Long 2401 up.
 
@@ -599,7 +601,7 @@ The 48 graded-tier slots across the three years — Junior 4, Classic 22, Senior
 
 ## `[Global]` versus `[JP]` — what actually differs
 
-Four findings, in descending order of how much they matter to an importer.
+Five findings, ordered roughly by how much they matter to an importer. The fifth is the one that changed during this pass, and it is not the least of them.
 
 **1. Exactly two career slots are excluded from `[Global]`.** Prix Niel (Classic, Early September) and Prix Foy (Senior, Early September) carry `unreleased_servers: ['en']` and are the only rows in the whole career schedule flagged off Global. They are also the only two slots at a non-Japanese track in the pool — Longchamp. Everything else in the tables below is present on `[Global]` as far as the export's server flags show.
 
@@ -607,13 +609,20 @@ Four findings, in descending order of how much they matter to an importer.
 
 The trap in that pair of rows is the one worth naming: **the career race and the real race are different events.** The career Japan Cup is Tokyo / 2,400 m; the Nakayama / 2,200 m version is the `[JP]`-only row. Anyone filling a distance or track from real-world racing knowledge, or from a `[JP]` guide that uses the real fixture, will write the wrong course for `[Global]`. Take the course from the career slot's own row.
 
-**3. The `[Global]` fan-payout table is identical to `[JP]` wherever both have a row — and it stops short.** `en/race-fans` holds payout curves 1–50; `race-fans` holds 1–61. Every one of the 50 shared curves has byte-identical per-position values, so nothing in the visible fan economy moved between servers, and nothing in the 2026-07-01 rework moved it either, to the resolution this export allows. But **nine career slots ask for curves 51, 52, 53, 54 and 56, which `[Global]` has no row for**: the seven NAR slots (Zen-Nippon Junior Yushun, Sazanka TV Hai ×2, Queen Sho ×2, Diolite Kinen, Tokyo Sprint) and the two Longchamp slots. Those cells are marked ⚠️ in the tables. This is read two ways and the data cannot separate them: GameTora's `[Global]` export has not been extended for content `[Global]` does have, or `[Global]` genuinely does not pay those curves. Until it is resolved, **do not compute a fan projection that depends on those nine slots.**
+**3. The `[Global]` fan-payout table is identical to `[JP]` wherever both have a row — and it stops short.** `en/race-fans` holds payout curves 1–50; `race-fans` holds 1–61. Every one of the 50 shared curves has byte-identical per-position values, so nothing in the visible fan economy moved between servers, and nothing in the 2026-07-01 rework moved it either, to the resolution this export allows. But **nine career slots ask for curves 51, 52, 53, 54 and 56, which `[Global]` has no row for**: the seven regional-racing slots (Zen-Nippon Junior Yushun, Sazanka TV Hai ×2, Queen Sho ×2, Diolite Kinen, Tokyo Sprint) and the two Longchamp slots. Those cells are marked ⚠️ in the tables.
+
+This gap was originally written as undecidable between "GameTora has not extended its `[Global]` export" and "`[Global]` genuinely lacks the content". **The first reading is now the correct one**, because the races are independently confirmed live on `[Global]` (finding 5): a `[Global]` build that ships career titles for winning 200 races at Ooi, Kawasaki, Funabashi and Morioka is not a build missing those racecourses. So this is an **export coverage gap, not a game gap** — the payout numbers for those nine slots are simply unsourced, and **no fan projection may depend on them.**
 
 **4. The career-rank fan ladder is shorter on `[Global]`.** `en/db-files/single_mode_rank` has 98 bands and its top band starts at **71,400** fans; the `[JP]` table has 298 bands and tops out at **190,400**. The two agree band-for-band up to at least band 40, so this is a ceiling difference, not a value difference. It is consistent with the official `[Global]` Open League line ("Only Veteran Umamusume with a Career Rank of A+ or below can enter") against `[JP]`'s 「育成ランク[UC]まで」. The band-id → rank-name mapping is **not** in this export, so no rank label may be attached to a fan figure from this table alone.
 
-### Later-patch slots
+**5. The regional-racing slots are on `[Global]`, and they arrived on 2026-07-22, not 2026-03-12.** 23 race rows carry a `did_not_exist` marker — `pre_nar` for the regional-racing set (Kawasaki Kinen, Kashiwa Kinen, M.C. Nambu Hai, Zen-Nippon Junior Yushun, Ladies' Prelude, Tokyo Hai, Empress Hai, Kanto Oaks, Diolite Kinen, Sazanka TV Hai, TCK Jo-o Hai, Tokyo Sprint, Sparking Lady Cup, Marine Cup, Queen Sho, Mercury Cup, Cluster Cup) and `pre_2_5th_anni` for the Longchamp rows. The marker is a **timeline** note about when GameTora's schema gained the row, not a server statement, and none of the `pre_nar` races carries `unreleased_servers` — so the export alone could only ever have said "presumed present". Two non-export sources settle it:
 
-23 race rows carry a `did_not_exist` marker — `pre_nar` for the regional-racing set (Kawasaki Kinen, Kashiwa Kinen, M.C. Nambu Hai, Ladies' Prelude, Tokyo Hai, Empress Hai, Kanto Oaks, Diolite Kinen, Sazanka TV Hai, TCK Jo-o Hai, Tokyo Sprint, Sparking Lady Cup, Marine Cup, Queen Sho, Mercury Cup, Cluster Cup, Zen-Nippon Junior Yushun) and `pre_2_5th_anni` for the Longchamp rows. The marker is a **timeline** note about when GameTora's schema gained the row, not a server statement, and none of the `pre_nar` races carries `unreleased_servers`. They are kept in the tables and flagged in Notes. `[Global]` received the scenario that introduced regional racing on 2026-03-12, so presence is the expected reading — but it is the export's silence plus a launch date, not a `[Global]` confirmation, and it sits in Known gaps.
+* **Tier S, `[Global]` client strings.** Manifest key `en/missions/playertitle` ships career titles "Win 200 races at the Ooi racetrack", "…Kawasaki…", "…Funabashi…", "…Morioka…". The same dump scopes a scenario-bound title explicitly — "Win the Twinkle Star Climax once in 'Make a new track'" — so the four racetrack titles, which carry no scenario clause, are career-wide rather than Trackblazer-only. Read directly from the manifest on 2026-09-28.
+* **Tier A, `[Global]` race guide.** [Game8's "List of New Dirt Races" (archives/607096, dated 2026-07-25)](https://game8.co/games/Umamusume-Pretty-Derby/archives/607096) states "17 New Graded Dirt Races Added … All of these new races are featured in the Morioka, Funabashi, Oi, and Kawasaki racecourses", and its per-race entry gates agree with the export's `fans_needed` on **17 of 17**, once `Mile Championship Nambu Hai` is read as the export's `M.C. Nambu Hai`.
+
+The date matters more than the fact. [The July 2026 balance patch guide (archives/538351, dated 2026-07-23)](https://game8.co/games/Umamusume-Pretty-Derby/archives/538351) says of the 2026-07-01 rework, verbatim: "Note that the new Dirt racetracks and their corresponding skills don't appear to be available yet." The four courses went live with the **fourth scenario on 2026-07-22**, three weeks after the rework this repository dates everything else by. So: **the career race calendar did change on `[Global]` in July 2026, and the date is 2026-07-22.** An importer that treats 2026-07-01 as the calendar's effective date is wrong by three weeks and would drop 17 races — including the Junior-year G1 Zen-Nippon Junior Yushun at Turn 24.
+
+One correction to this file's first draft, recorded because the reasoning was plausible and wrong: the earlier version inferred arrival from Trackblazer's `[Global]` launch on 2026-03-12, on the grounds that Trackblazer is the scenario that introduced regional racing in `[JP]`. Global did not receive them that way. The conclusion held; the path to it did not.
 
 ## Scenario differences
 
@@ -703,20 +712,35 @@ All 31 rows in `races.json` carrying either server flag, with whether the row re
 | Scenario `start_en`, for the `[JP-Only]` ruling | GameTora `scenarios` | B | [scenarios.61b7c51c.json](https://gametora.com/data/umamusume/scenarios.61b7c51c.json) |
 | Career-rank fan ladders | GameTora `en/` and `[JP]` `db-files/single_mode_rank` | B | [en 98 bands](https://gametora.com/data/umamusume/en/db-files/single_mode_rank.d624caeb.json) · [JP 298 bands](https://gametora.com/data/umamusume/db-files/single_mode_rank.aa219d9e.json) |
 | Tier-label distribution test | uma.guide Trackblazer guide, page updated 2026-04-29, transcribed at `docs/scenarios/04` | A | https://uma.guide/guides/trackblazer |
+| Grade code → English label map | uma.guide race dataset behind the agenda planner | A | https://uma.guide/agenda-planner/ |
+| `[Global]` career titles naming the four regional racetracks | GameTora `en/missions/playertitle`, read live 2026-09-28 | S (client strings) | [en/missions/playertitle.f50b8a76.json](https://gametora.com/data/umamusume/en/missions/playertitle.f50b8a76.json) |
+| 17 new graded dirt races on `[Global]`, with entry gates | Game8 EN, page dated 2026-07-25 | A | https://game8.co/games/Umamusume-Pretty-Derby/archives/607096 |
+| July 2026 balance patch, and the line ruling the dirt courses not yet live on 2026-07-01 | Game8 EN, page dated 2026-07-23 | A | https://game8.co/games/Umamusume-Pretty-Derby/archives/538351 |
+| All-races `[Global]` calendar with tiers and year bands | Game8 EN, page dated 2026-09-09 | A | https://game8.co/games/Umamusume-Pretty-Derby/archives/536131 |
 | Goal vs Scheduled states, month-half grid, 21 race cells | `[Global]` client captures, `docs/game-screenshots/` | S | local corpus, 2026-07-14 / 2026-07-15 |
 
-Snapshot paths: `research-scratch/data/json/race_instances.json` and siblings, with `research-scratch/data/manifest.json` as the 2026-09-27 baseline. That directory is gitignored, so the URLs above are the durable citation and the snapshot is the local working copy.
+Snapshot paths: `research-scratch/data/json/race_instances.json` and siblings, with `research-scratch/data/manifest.json` as the 2026-09-27 baseline. That directory is gitignored, so the URLs above are the durable citation and the snapshot is the local working copy. The `[Global]`-source cross-check behind findings 3 and 5 and the tier-label map is written up at `research-scratch/global-race-sources.md` (225 lines, one section per question, with verbatim quotes and negative results); it is scratch, so treat the four Game8 and uma.guide URLs above as the citable record and that file as the working notes.
 
-**To reproduce:** resolve every key through [the live manifest](https://gametora.com/data/manifests/umamusume.json) rather than hardcoding a hash, and send a browser `User-Agent` with `Accept: application/json` — the data endpoint returns 403 to a plain client, which reads as a missing dataset and is not one. Join `race_instances[].instance` → `races[].id` for names and flags, `races[].track` → `racetracks_extended[].id` for track names, and `race_instances[].fans_gain` → `en/race-fans[].id` then `[].fans[].order == 1` for the first-place payout. Turn number is `(month − 1) × 2 + half`. The generator used for the tables is `research-scratch/gen_calendar.py`, output in `research-scratch/calendar-tables.md`.
+**To reproduce:** resolve every key through [the live manifest](https://gametora.com/data/manifests/umamusume.json) rather than hardcoding a hash, and send a browser `User-Agent` with `Accept: application/json` — the data endpoint returns 403 to a plain client, which reads as a missing dataset and is not one. Join `race_instances[].instance` → `races[].id` for names and flags, `races[].track` → `racetracks_extended[].id` for track names, and `race_instances[].fans_gain` → `en/race-fans[].id` then `[].fans[].order == 1` for the first-place payout. Turn number is `(month − 1) × 2 + half`. The pipeline is three scratch scripts, in order: `research-scratch/gen_calendar.py` renders every table to `research-scratch/calendar-tables.md`, and `research-scratch/resync_doc.py` replaces each table in this file by matching its section heading, leaving prose untouched. Re-running both is how a future refresh updates the data without hand-editing 400 rows, and it is what caught a real bug in the first pass: the ⚠️ payout-gap marker was documented as present in the cells but the generator was emitting `-`, so the tables and the prose disagreed until the re-sync forced them back together.
 
 ## Known gaps
 
-- ⚠️ **Nine slots have no `[Global]` payout curve** (curves 51–54, 56). Marked in the tables; do not project fans through them.
-- ⚠️ **`did_not_exist` is a timeline marker, not a server marker.** The 17 `pre_nar` career races are in these tables because nothing flags them off `[Global]`, not because a `[Global]` source names them. One Tier A or S confirmation of regional racing in a `[Global]` career would settle it.
+- ⚠️ **Nine slots have no `[Global]` payout curve** (curves 51–54, 56). Marked in the tables; do not project fans through them. Named in the preamble callout.
 - ❌ **Per-character Goal races are not in the export.** The client renders them; no GameTora key carries them. `characters_extended.json` is a name list and `character_profiles.json` is flavour text. Building a Goal list means either per-character guide transcription or client capture, and it is the missing input for any "next objective" widget.
-- ❌ **Whether the uma.guide distribution table is a narrower universe or simply an older sub-table.** The 12-cell match is exact on the base pool and breaks when later additions are included; which explanation holds is not established, and the two readings imply different things about `[Global]` race counts.
 - ❌ **`direction`, `course`, `season` and `group` are undecoded.** The export stores `direction` 1/2/4, `course` 1/2/3, `season` 0–5, `group` always 1. The official race line format ("Kyoto / Turf / 2,200m (Medium) / Right-Handed / Outer / Autumn / Sunny / Firm") implies handedness and inner/outer live in two of those fields, but no mapping is asserted here, so no table column uses them.
 - ❌ **Trackblazer's own race availability.** `03`/`04`/`05` describe Grade Points, rivals and fatigue; none states whether Trackblazer's picker offers the same 404 monthly slots as the tables above or a superset. This file's tables are the shared career schedule and are not claimed to be Trackblazer's full list.
+- ❌ **Codes 999 and 1000 in the uma.guide dataset** (`URA Finals`, 8 records; `Aoharu Cup`, 160 records) have no counterpart in the GameTora export's grade codes, which stop at 900 and model the finals as `special_race` rows instead. Two tools, two shapes for the same races. Nothing in this file depends on reconciling them, but an importer that expects one grade enum will be surprised.
 - ❌ **Grand Concert.** Unchanged from `07`: extraction suspended by owner decision, and this file adds only the `final_live` dataset row.
+
+### Resolved during this pass, and how
+
+Recorded rather than quietly deleted, because two of the three closed a claim this file itself had made.
+
+| Was | Now | What settled it |
+|---|---|---|
+| "codes 200/300/700 `❌ UNVERIFIED`" (inherited from §1.2.6) | G2 / G3 / Pre-OP | uma.guide's `gradeName` field, cross-checked by the 12-cell arithmetic. Single second domain, so the caveat stays in the Domain column above. |
+| "the 17 `pre_nar` races are presumed on `[Global]`" | **Confirmed**, and dated to 2026-07-22 | `[Global]` client career titles for the four new racetracks (`en/missions/playertitle`, read directly), plus Game8's 17-race addition notice with 17/17 entry gates agreeing. |
+| "whether the uma.guide distribution table is a narrower universe or an older sub-table is not established" | **Older sub-table** | The guide's page is dated 2026-04-29; the regional races arrived 2026-07-22. Same universe, three months earlier. |
+| "the `[Global]` payout gap may mean Global lacks the content" | **Export coverage gap** | The content is confirmed live, so only the numbers are missing. |
 
 Compiled 2026-09-28. Tables are generated from the export, not typed; every unverified item above is marked, and no race in the tables is inferred from a `[JP]` source.
