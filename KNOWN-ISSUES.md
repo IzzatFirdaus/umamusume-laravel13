@@ -7,6 +7,14 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, Slice 10):** 17 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14,
+KI-18). **3 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
+consecutive-race count cannot be derived from the log). Slice 10 filed nothing; it closed KI-18,
+which `f7a59e8` had already fixed in Slice 9, and landed two register corrections against the
+Slice 7 commit `94db315`: KI-15 was written into this file twice, so the filed count is 17 rather
+than the 18 reported below, and the line below names `KI-1–9, KI-11–14` as 14 resolved when that
+range is 13 — the closed set was 13 until KI-18 joined it. Both counts now come from the headings
+in this file rather than from prose about them. Prior:
 **Status (2026-09-28, Slice 8):** 18 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
 **4 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the consecutive-race
 count cannot be derived from the log), KI-18 (the burst roster prints tool identifiers as UI copy).
@@ -650,39 +658,6 @@ element does not support. The rule this does not weaken is `docs/design-research
 
 **Symptom.** `TrainingRun::gradeObjectives()` renders the `standard` track (60 / 300 / 300)
 for every Trackblazer run. For a dirt-leaning trainee the client asks 30 / 200 / 300, and for
-a turf trainee whose range outside short distances is weak it asks 60 / 200 / 300, so a meter
-can show a target that character cannot be held to.
-
-**Cause, and it is a source conflict rather than a missing number.** The two Trackblazer
-guides disagree about the same character class:
-
-- `docs/scenarios/04-trackblazer-umaguide.md:48` puts "Sprint Umas with poor aptitude in
-  other distances" on the **Dirt** requirement track.
-- `docs/scenarios/05-trackblazer-gametora.md:22-24` gives a turf character with poor aptitude
-  outside short distances a **third** track, in which only the Classic objective drops to 200.
-
-Neither names the aptitude letter or letters that place a trainee in a track. `umamusumes`
-does carry the ten aptitude letters (`ADR-0004`, closed by `PRD.md` OQ-4), so the data to
-build a rule exists; the rule itself does not, and any threshold this tool picked would be
-its own invention dressed as a game fact (D-20, D-256).
-
-**Current behaviour is deliberate.** `standard` is rendered and the code says so at
-`app/Models/TrainingRun.php:322-334`. A wrong denominator is worse than a conservative one
-because the Trainer cannot tell they were given the wrong track at all.
-
-**Required fix.** Either a capture or a dated secondary source that names the aptitude
-condition per track, or an owner ruling that ships a Trainer-entered track selector (a third
-column on `training_runs`, which is the D-270 pattern Slice 7 used for the period itself and
-is why that choice is recorded here rather than made silently).
-
-**Owner.** Planner Domain Specialist with the owner; the schema decision is the owner's alone.
-
----
-
-## KI-15 The three Grade Point tracks have no sourced rule for choosing one — FILED 2026-09-28 (Slice 7), OPEN
-
-**Symptom.** `TrainingRun::gradeObjectives()` renders the `standard` track (60 / 300 / 300)
-for every Trackblazer run. For a dirt-leaning trainee the client asks 30 / 200 / 300, and for
 a turf trainee whose range outside short distances is weak it asks 60 / 200 / 300, so the
 meter can show a target that character cannot be held to.
 
@@ -700,7 +675,7 @@ to build a rule exists; the rule does not, and any threshold this tool picked wo
 invention dressed as a game fact (D-20, D-256).
 
 **Current behaviour is deliberate.** `standard` is rendered and the code says so at
-`app/Models/TrainingRun.php:346-355`. A wrong denominator is worse than a conservative one,
+`app/Models/TrainingRun.php:378-385`. A wrong denominator is worse than a conservative one,
 because a Trainer cannot tell they were handed the wrong track at all.
 
 **Required fix.** Either a capture or a dated secondary source naming the aptitude condition
@@ -736,7 +711,7 @@ that marks a race turn. Both are schema or flow decisions, so neither is taken h
 
 ---
 
-## KI-18 The Spirit Burst roster prints tool identifiers where a Trainer reads a state — FILED 2026-09-28 (Slice 8), OPEN
+## KI-18 The Spirit Burst roster prints tool identifiers where a Trainer reads a state — RESOLVED by `f7a59e8` (Slice 9), MARKED CLOSED 2026-09-29 (Slice 10, R52)
 
 **Symptom.** `resources/views/components/spirit-burst-roster.blade.php` renders
 `$row['state']->value`, so the chip reads `NormalBurstSpent` and `ExtremeChargeable`. Those are
@@ -754,5 +729,17 @@ finding is recorded here rather than absorbed silently into the same commit that
 "burst spent", "extreme chargeable", "extreme spent"), the roster printing the label, and the two
 tests asserting the label instead of the value. No new client string is invented: the words
 describe a machine this tool models, and the source names none of them.
+
+**Resolution (`f7a59e8`, Slice 9).** All three parts shipped in one commit: `label()` on the enum
+mapping the six cases to `Chargeable`, `Charged`, `Charged, held`, `Burst spent`, `Extreme
+chargeable`, `Extreme spent`; `spirit-burst-roster.blade.php` printing `$row['state']->label()`;
+and `ScenarioPanelUiTest` asserting the labels while failing if a backing value reaches the
+response (`tests/Feature/ScenarioPanelUiTest.php:105-114`). The measured proof is
+`docs/design-research/verification/slice-9-2026-09-28.md` §5, whose browser row for the roster
+reads "all five labels present, zero backing values leaked". `value` stays the storage identifier.
+
+**Why it was still marked open here.** Slice 9 fixed it and closed it in its own record but never
+recomputed the register's status line, so the entry contradicted the commit that resolved it. R52
+closes the bookkeeping, not the defect.
 
 **Owner.** Frontend with the Lore Guardian, next pass on the Unity Cup panels.
