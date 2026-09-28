@@ -26,18 +26,18 @@
         @csrf
         <input type="hidden" name="entry_mode" x-model="mode">
 
-        <fieldset class="flex w-full gap-4" role="radiogroup" aria-label="Race entry mode">
-            <label class="flex items-center gap-1.5 text-sm">
-                <input type="radio" name="entry_mode_radio" value="calendar" x-model="mode"
-                       class="accent-pick-line">
-                <span class="text-ink">Calendar race</span>
-            </label>
-            <label class="flex items-center gap-1.5 text-sm">
-                <input type="radio" name="entry_mode_radio" value="manual" x-model="mode"
-                       class="accent-pick-line">
-                <span class="text-ink">Race not on the calendar</span>
-            </label>
-        </fieldset>
+        <div class="flex w-full gap-2" aria-label="Race entry mode">
+            <button type="button" @click="mode = 'calendar'"
+                    :class="mode === 'calendar' ? 'border-pick-line bg-pick/10 text-ink-strong' : 'border-rule text-ink-muted'"
+                    class="rounded-md border px-3 py-1.5 text-sm font-medium transition-colors">
+                Calendar race
+            </button>
+            <button type="button" @click="mode = 'manual'"
+                    :class="mode === 'manual' ? 'border-pick-line bg-pick/10 text-ink-strong' : 'border-rule text-ink-muted'"
+                    class="rounded-md border px-3 py-1.5 text-sm font-medium transition-colors">
+                Race not on the calendar
+            </button>
+        </div>
 
         {{-- Calendar path --}}
         <template x-if="mode === 'calendar'">
