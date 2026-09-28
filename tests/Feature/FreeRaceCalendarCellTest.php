@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Enums\RaceEntryStatus;
+use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
 
@@ -73,14 +75,51 @@ it('renders a persisted free_race row as an open manual cell on the run screen',
 });
 
 /*
- * Not asserted, and deliberately so: what happens to the marker once the free race has been run.
- * `calendarCell()` checks the recorded entry first (`app/Models/TrainingRun.php:429`) and returns
- * `past` with no `manual` key, so a completed Trainer-entered race loses its calendar marker.
- * Measured both ways in Slice 13: unrun renders the dashed open cell with the marker, completed
- * renders `past` without it.
- *
- * The entry row in the race panel still labels it, so provenance is not lost from the screen, and
- * R61 speaks about a cell the Trainer is deciding whether to enter. Whether the marker should
- * survive the finish is a question for the read path's owner. This slice does not invent the
- * requirement and then satisfy it by editing a file another session owns.
+ * The marker survives the finish. `calendarCell()` returns `['state' => 'past', ..., 'manual' =>
+ * true]` for a free race with a recorded entry (`app/Models/TrainingRun.php:437`), because
+ * `free_race` is a tool concept rather than a client one: the game never offers a race that is not
+ * in the calendar, so "this row came from the Trainer" is provenance about where the record came
+ * from, and Slice 13 measured that it reads better looking back over a finished career. Slice 12
+ * reported the marker as lost; the read path's owner made that call in the same window this slice
+ * ran, and the test below is what pins it.
  */
+it('keeps the Trainer-entered marker on a free_race cell after its finish is recorded', function (): void {
+    $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
+    $slot = ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'free_race',
+        'source_key' => null,
+        'slot_label' => 'Autumn Practice Stakes',
+        'title' => 'Autumn Practice Stakes',
+        'month' => 9,
+        'half' => 'Late',
+        'tier' => null,
+        'is_manual' => true,
+        'sort_order' => 1,
+    ]);
+    RaceEntry::create([
+        'training_run_id' => $run->id,
+        'scenario_slot_id' => $slot->id,
+        'status' => RaceEntryStatus::Completed,
+        'placement' => 1,
+    ]);
+
+    $html = $this->get(route('runs.show', $run))->content();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML($html);
+    $xpath = new DOMXPath($dom);
+
+    $markers = $xpath->query('//*[text()="Trainer-entered"][ancestor::*[@role="img"]]');
+
+    expect($markers->length)->toBe(1);
+
+    $cell = $xpath->query('ancestor::*[@role="img"]', $markers->item(0))->item(0);
+
+    // Past geometry: the run happened here. Provenance still named, and still no pennant.
+    expect($cell->getAttribute('class'))->toContain('bg-transparent')
+        ->and($cell->getAttribute('aria-label'))->toContain('Run')
+        ->and($cell->getAttribute('aria-label'))->toContain('Autumn Practice Stakes')
+        ->and($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " border-l-goal ")]')->length)
+        ->toBe(0);
+});
