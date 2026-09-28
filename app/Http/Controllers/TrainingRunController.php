@@ -216,6 +216,11 @@ class TrainingRunController extends Controller
      * Mood moves in tier steps, which is how the client's own panel counts it
      * (`DESIGN.md` §6.17: +20% at GREAT down to -20% at AWFUL), so the difference of two
      * recorded tiers is a number the Trainer can check rather than a scale invented here.
+     *
+     * The sign runs the good way up, which means subtracting the new tier from the old:
+     * `MoodTier::cases()` is ordered best to worst, so a raw index difference reads
+     * GREAT to BAD as +3 and paints a mood collapse in the colour of a gain. The browser
+     * pass found it; the first version of this method did not.
      */
     private function moodDelta(mixed $entered, ?MoodTier $stored): ?int
     {
@@ -229,8 +234,8 @@ class TrainingRunController extends Controller
             return null;
         }
 
-        return array_search($tier, MoodTier::cases(), true)
-            - array_search($stored, MoodTier::cases(), true);
+        return array_search($stored, MoodTier::cases(), true)
+            - array_search($tier, MoodTier::cases(), true);
     }
 
     /**

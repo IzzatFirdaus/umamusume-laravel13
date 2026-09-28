@@ -165,6 +165,19 @@ it('refuses to confirm a turn that was never previewed', function (): void {
     expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(1);
 });
 
+it('reads a mood drop as a drop, whatever the enum order says', function (): void {
+    $run = guidedRun();
+    guidedTurn($run, 1, ['mood' => 'GREAT']);
+
+    $html = $this->post('/training-runs/'.$run->id.'/turns', previewPayload($run, ['mood' => 'BAD']))->getContent();
+
+    // MoodTier::cases() is ordered best to worst, so subtracting in index order reports
+    // GREAT -> BAD as +3 and paints a mood collapse in the colour of a gain. The browser
+    // pass caught this on the rendered preview; the deltas above are the same arithmetic.
+    expect($html)->toMatch('/text-down[^>]*>\s*-3 Mood\s*</')
+        ->and($html)->not->toContain('+3 Mood');
+});
+
 it('confirms a previewed turn and stores it', function (): void {
     $run = guidedRun();
     guidedTurn($run, 1);
