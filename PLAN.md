@@ -1,13 +1,13 @@
 # Trainer Desk — Frontend Development Plan
 
-**Status:** Phase 4 (Implementation) active through Slice 6. Slice 6 is a closing slice: the six
-doc amendments landed, the Livewire question is decided rather than open, D-40's axis deviation is
-retired as a ruling, and the mood tier is finally rendered — as a pill with its arrow, on measured
-pairs. No new screens, no schema work, no dependency. Phase 6 remains unfrozen and unstarted.
-**Last Updated:** 2026-09-28 (Slice 6 T0–T5: lore rulings at `b81df3f`/`7da2d22`, doc amendments at
-`61f6165`, mood pill at `51d29d4`, `--color-on-green` at `e80c6f2`; `slice-6-2026-09-28.md` carries
-every measured pair. First push sent `e88bb7b..586e65f`. Prior: Slice 5 frontend-only per R24, band
-and rail mounted, two-region frame and keyboard path landed)
+**Status:** Phase 4 (Implementation) active through Slice 7, the schema session. Slice 6 landed the
+frontend residuals; Slice 7 gave Grade Points the period they belong to (KI-10's schema half) and
+gave `turn_events.deltas` a typed shape (D-226), then declined ADR-0005 for Phase 1 per R37. Phase 6
+remains unfrozen and unstarted. Unity Cup and Trackblazer panel UI is Slice 8, not this slice.
+**Last Updated:** 2026-09-28 (Slice 7 T0–T5: contract hygiene at `53fbe70`/`8fd127c`, period columns
+and meter at `e103122`, typed payloads at `17dbc54`/`8955394`, this re-baseline plus KI-15 and the
+ADR-0005 status at the docs commit; `slice-7-2026-09-28.md` carries the greps, the test names and the
+one thing stopped on. Prior: Slice 6 mood pill and pairs, `slice-6-2026-09-28.md`)
 
 ---
 
@@ -223,6 +223,27 @@ carry the measured numbers, and the reasoning is in `slice-6-2026-09-28.md` §6.
 **Still unmeasured:** whether a Trainer distinguishes `↑` from `→` at the shipped 12 px. The ratio
 floor is 5.82:1 and the geometry is recorded; the glyph legibility needs a human read, and no
 capture was taken.
+
+---
+
+## Slice 7 Summary (2026-09-28) — Schema session, R33-R37
+
+Three schema questions arrived as one set so the owner ruled once. No Unity Cup or Trackblazer
+panel UI (Slice 8), no new dependency, peer files untouched.
+
+| Task | Commit | Claim, with the thing that proves it |
+|---|---|---|
+| T0a §3.4 pair table | `53fbe70` | All six new pairs (five mood + `on-green`) were already rows in `docs/design-research/DESIGN.md:156-161` with their measured ratios; the count in the note under them said seven, and said six |
+| T0b Livewire criterion | `8fd127c` | R34's sentence is now quoted verbatim above the seven-item checklist, with this slice's byte-count framing named as not a trigger |
+| T0c zinc sweep | no commit; grep recorded | `grep -n "zinc-" resources/views/runs/index.blade.php` exits 1, no match. Repo-wide, `zinc-` survives only in three Blade comments that document the retired skeleton and in `welcome.blade.php:15`'s vendored Tailwind theme variable list |
+| T1 period columns | `e103122` | Migration `2026_09_28_122929_add_grade_point_period_columns.php`; `TrainingRun::assertGradePeriod()` guards both columns; `tests/Feature/GradePointPeriodTest.php` ran red on the missing columns first |
+| T1c meter, period-aware | `e103122` | `gradeEarnedFor()`, `gradeUnpricedFor()`, `gradePeriods()`; `gradeEarned()` is the reported period or null; the no-period state renders "no period reported" and the ladder rows carry their own sums |
+| T2 typed payloads | `17dbc54` | `SpiritBurstState` (six cases, no seventh), `NpcFriendshipPayload`, `SpiritBurstPayload`; `tests/Feature/TurnEventTypePayloadsTest.php` asserts the raw stored JSON and the three rejections |
+| T2 reword | `8955394` | `composer lore-code` back to 6 after one comment idiom was reworded |
+| T3 docs | this commit | ADR-0005 status DECLINED for Phase 1 with the reopen trigger named; KI-10 split and its schema half closed; KI-15 filed for the track-selection conflict; PLAN re-baselined |
+
+**Suite at the tip of this slice's code:** `php artisan test --compact` → 2 skipped, 390 passed
+(1,287 assertions); PHPStan level 6 `[OK] No errors`; Pint clean on the files this slice touched.
 
 ---
 

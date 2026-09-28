@@ -1,12 +1,20 @@
 # ADR-0005: Support card entities — proposed, and blocked on a PRD non-goal
 
-Status: **PROPOSED. Not accepted, not built.** This ADR exists because a brief dated 2026-09-27 asked
-for three support-card entities to be written into `ARCHITECTURE.md`, and `PRD.md` §6 item **9** says
-"**No support-card database in Phase 1.**" The two cannot both stand, so the entities are specified
-here for the owner's decision rather than adopted silently. `AGENTS.md` escalation 2 routes a
-non-goal request to the human owner, and the Architect "proposes scope changes to the human, never
-adopts them silently".
-Date: 2026-09-27
+Status: **DECLINED for Phase 1 (owner ruling R37, 2026-09-28).** Not built, and the question is
+closed rather than parked: `PRD.md` §6 item **9** ("No support-card database in Phase 1") stands whole,
+so none of the three options offered below is taken. The entity shapes in "Proposed shape" are
+**retained as later-phase reference** — they document the client's support-card effects, which stays
+true whatever the app stores — and they are reference only: no table, no model, no route, and no FR
+citation is added by this ruling.
+**Reopen trigger:** a new PRD story, written by the owner, that authorizes support-card entities and
+says which of the two domains it wants (reference data, or the Trainer's collection and deck). Until
+that story exists, an agent finding this ADR should treat the shapes as documentation and §6.9 as
+binding; this ADR does not reopen itself, and no slice may cite it as permission.
+It originally existed because a brief dated 2026-09-27 asked for three support-card entities to be
+written into `ARCHITECTURE.md` while §6.9 ruled them out; `AGENTS.md` escalation 2 routes a non-goal
+request to the human owner, and the Architect "proposes scope changes to the human, never adopts them
+silently". The proposal did its job: the owner answered.
+Date: 2026-09-27, status set 2026-09-28
 Deciders: product owner (decision outstanding), implementing agent (draft)
 Relates to: `ADR-0003` (Phase 1 schema expansion), `ADR-0004` (reference data with provenance),
 `PRD.md` §6.9 and §7, `UMAMUSUME_REFERENCE.md` §1.4.1, §1.4.2, §1.4.5, §1.4.7,

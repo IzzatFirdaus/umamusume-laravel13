@@ -7,15 +7,15 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
-**Status (2026-09-28, Slice 6):** 15 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
-**1 open** (KI-10: Trackblazer Grade Points placement ratio + year bucket). Slice 6 closed KI-14's
-last residual as correct-by-design rather than fixing it (`aria-live` on a flow that navigates, so
-there is no in-place change to announce), filed nothing, and moved no threshold. The two
-`lore-code` hits that arrived with the concurrent session's review-queue work were ruled allowed
-under C-4 and written into `docs/design-research/CONSTRAINTS.md` §3.2 with citations; neither was a
-violation, so neither became an entry here.
-Prior: **Status (2026-09-28, Slice 5):** KI-11's `--color-green-tint` half closed with the Safe band
-landing and being measured, so the retire-and-amend clause of R23 does not trigger.
+**Status (2026-09-28, Slice 7):** 16 issues filed. **14 resolved/closed** (KI-1–9, KI-11–14).
+**2 open.** KI-10 is split: its schema half (the objective bucket) closed with `e103122`, and its
+ratio half stays open because no source names the placement scaling. KI-15 is filed new: the three
+Grade Point tracks have no sourced rule for choosing one, and the two Trackblazer guides disagree
+about which track a sprint-only trainee belongs to.
+Prior: **Status (2026-09-28, Slice 6):** Slice 6 closed KI-14's last residual as
+correct-by-design, filed nothing, and moved no threshold; the two `lore-code` hits that arrived
+with the concurrent session's review-queue work were ruled allowed under C-4 and written into
+`docs/design-research/CONSTRAINTS.md` §3.2 with citations.
 
 ---
 
@@ -400,7 +400,42 @@ described.
 
 ---
 
-## KI-10 Trackblazer Grade Points cannot be totalled or bucketed from what is stored
+## KI-10 Trackblazer Grade Points cannot be totalled or bucketed from what is stored — SCHEMA HALF CLOSED 2026-09-28 (Slice 7), RATIO HALF OPEN
+
+**Half (b), the bucket, is closed.** Slice 7 added the two columns the attribution needed,
+both entered by the Trainer and neither derived (`e103122`):
+
+- `race_entries.objective_index`, nullable unsigned tinyint, 1..4: the period a finish
+  counts toward.
+- `training_runs.current_objective_index`, nullable unsigned tinyint, 1..4: the period the
+  Trainer reports as live.
+
+The range and the scenario-conditional rule are enforced in `TrainingRun::assertGradePeriod()`,
+called from both models' saving guards, and validated again at the HTTP boundary by
+`StoreTrainingRunRequest`. A column CHECK could bound the number but cannot see the run's
+scenario, so the guard is the load-bearing half (the precedent is `ScenarioSlot`'s own
+`saving` checks).
+
+**What the meter does with it now.** `gradeEarnedFor(i)` sums priced finishes inside period i
+alone; `gradeEarned()` is the reported period only and returns null while no period is
+reported, so the panel renders "no period reported" rather than a zero or a guessed target
+(D-220). Other periods render as collapsed ladder rows carrying their own sums, and no
+cumulative total appears anywhere, because D-232 says surplus dies at the deadline. Finishes
+entered with no period are counted in the disclosure rather than silently dropped from every
+total. Proven by `tests/Feature/GradePointPeriodTest.php`: cross-period independence, the
+null period, an unpriceable finish inside one period only, a G1 win landing in the period it
+was entered against, and a rejection for period 5.
+
+**Half (a), the placement ratio, stays open.** No source names the scaling below first, so the
+withholding rule is unchanged and is now scoped per period: an unpriceable finish inside the
+current period withholds that period's total and poisons none of the others. Closing it needs
+either a sourced ratio or an owner ruling that ships an `[Unverified]` placeholder, and neither
+has arrived.
+
+**Owner.** Design system with the Planner Domain Specialist, alongside KI-15 for the track
+question.
+
+**Original defect text kept below for traceability.**
 
 **Symptom.** `TrainingRun::gradeEarned()` returns `null` for any run holding a finish
 below first, and the meter shows "not yet recorded" even though races happened.
@@ -588,3 +623,70 @@ be a claim about the interaction that, like the `role="radio"` claims just remov
 element does not support. The rule this does not weaken is `docs/design-research/DESIGN.md:1406`
 (§10 Accessibility): a gain bubble that updates in place under a Trainer who stays put still owes
 `aria-live="polite"`, and there is no in-place gain bubble on this screen to give one.
+
+---
+
+## KI-15 The three Grade Point tracks have no sourced rule for choosing one — FILED 2026-09-28 (Slice 7), OPEN
+
+**Symptom.** `TrainingRun::gradeObjectives()` renders the `standard` track (60 / 300 / 300)
+for every Trackblazer run. For a dirt-leaning trainee the client asks 30 / 200 / 300, and for
+a turf trainee whose range outside short distances is weak it asks 60 / 200 / 300, so a meter
+can show a target that character cannot be held to.
+
+**Cause, and it is a source conflict rather than a missing number.** The two Trackblazer
+guides disagree about the same character class:
+
+- `docs/scenarios/04-trackblazer-umaguide.md:48` puts "Sprint Umas with poor aptitude in
+  other distances" on the **Dirt** requirement track.
+- `docs/scenarios/05-trackblazer-gametora.md:22-24` gives a turf character with poor aptitude
+  outside short distances a **third** track, in which only the Classic objective drops to 200.
+
+Neither names the aptitude letter or letters that place a trainee in a track. `umamusumes`
+does carry the ten aptitude letters (`ADR-0004`, closed by `PRD.md` OQ-4), so the data to
+build a rule exists; the rule itself does not, and any threshold this tool picked would be
+its own invention dressed as a game fact (D-20, D-256).
+
+**Current behaviour is deliberate.** `standard` is rendered and the code says so at
+`app/Models/TrainingRun.php:322-334`. A wrong denominator is worse than a conservative one
+because the Trainer cannot tell they were given the wrong track at all.
+
+**Required fix.** Either a capture or a dated secondary source that names the aptitude
+condition per track, or an owner ruling that ships a Trainer-entered track selector (a third
+column on `training_runs`, which is the D-270 pattern Slice 7 used for the period itself and
+is why that choice is recorded here rather than made silently).
+
+**Owner.** Planner Domain Specialist with the owner; the schema decision is the owner's alone.
+
+---
+
+## KI-15 The three Grade Point tracks have no sourced rule for choosing one — FILED 2026-09-28 (Slice 7), OPEN
+
+**Symptom.** `TrainingRun::gradeObjectives()` renders the `standard` track (60 / 300 / 300)
+for every Trackblazer run. For a dirt-leaning trainee the client asks 30 / 200 / 300, and for
+a turf trainee whose range outside short distances is weak it asks 60 / 200 / 300, so the
+meter can show a target that character cannot be held to.
+
+**Cause, and it is a source conflict rather than a missing number.** The two Trackblazer
+guides disagree about the same character class:
+
+- `docs/scenarios/04-trackblazer-umaguide.md:48` puts "Sprint Umas with poor aptitude in
+  other distances" on the **Dirt** requirement track.
+- `docs/scenarios/05-trackblazer-gametora.md:25` gives a turf character with poor aptitude
+  outside short distances a **third** track, in which only the Classic objective drops to 200.
+
+Neither names the aptitude letter or letters that place a trainee in a track. `umamusumes`
+does carry the ten aptitude letters (`ADR-0004`, `PRD.md` OQ-4 closed 2026-09-27), so the data
+to build a rule exists; the rule does not, and any threshold this tool picked would be its own
+invention dressed as a game fact (D-20, D-256).
+
+**Current behaviour is deliberate.** `standard` is rendered and the code says so at
+`app/Models/TrainingRun.php:346-355`. A wrong denominator is worse than a conservative one,
+because a Trainer cannot tell they were handed the wrong track at all.
+
+**Required fix.** Either a capture or a dated secondary source naming the aptitude condition
+per track, or an owner ruling that ships a Trainer-entered track selector — a third column on
+`training_runs`, which is the D-270 pattern Slice 7 used for the period itself. That is why the
+choice is recorded here rather than made silently: adding it is a schema decision, and Slice 7
+was given two columns, not three.
+
+**Owner.** Planner Domain Specialist with the owner; the schema decision is the owner's alone.
