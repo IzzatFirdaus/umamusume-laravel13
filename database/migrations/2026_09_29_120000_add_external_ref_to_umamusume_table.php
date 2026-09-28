@@ -13,10 +13,13 @@ return new class extends Migration
         Schema::table('umamusume', function (Blueprint $table): void {
             /*
              * GametoraCharacterParser has emitted `gametora:char:{id}` since it was
-             * written and nothing stored it, so a promoted row lost its only durable
-             * link to the source (ADR-0008). Cards attach through this rather than
-             * by re-matching on name: the name is what the match engine refuses to
-             * guess about, the char id is what the source asserts.
+             * written and no catalog row stored it — `match_candidates.external_ref`
+             * keeps it, but only for a record still sitting in the review queue
+             * (app/Services/DataPipeline/PipelineRunner.php:92-94) — so a promoted row
+             * lost its only durable link to the source (ADR-0008). Cards attach
+             * through this rather than by re-matching on name: the name is what the
+             * match engine refuses to guess about, the char id is what the source
+             * asserts.
              */
             $table->string('external_ref')->nullable()->index();
         });

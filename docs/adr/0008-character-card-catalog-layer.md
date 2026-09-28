@@ -11,6 +11,18 @@ number. **As of this commit the layer is authorized, not built:** no migration, 
 enum or parser exists yet. Tasks 4 to 7 of
 `docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md` carry the schema and the pipeline,
 and until they land, a reader who queries `character_cards` will find no such table.
+**Status corrected 2026-09-29, the day this ADR was accepted — a dated erratum, and the sentence above
+stands as written rather than being rewritten.** Of the four objects that sentence said did not exist,
+three now do and the table is queryable: migration `2026_09_29_120000` (`umamusume.external_ref`) and
+migration `2026_09_29_120100` (`character_cards`) have run, `App\Models\CharacterCard`,
+`App\Enums\CardRarity` and `Umamusume::cards()` are in the tree, and
+`app/Actions/PromoteMatchedRecord.php` persists `external_ref` on both of its paths. What has **not**
+landed is the fourth of them — the card parser — together with its source registration, the card store
+action, and `training_runs.character_card_id` (the slice's next migration, `2026_09_29_120200`). So the
+accurate statement today is that `character_cards` **exists and is empty**: a reader who queries it gets
+zero rows, not a missing-table error. `tests/Feature/CharacterCardSchemaTest.php` pins the shipped column
+list against the schema itself, which is what keeps the Decision table below, `ARCHITECTURE.md` §3, the
+ESSENTIALS digest line and D-30 from drifting away from the migration unnoticed.
 Date: 2026-09-29
 Deciders: product owner (ruling), Architect (this ADR and the `PRD.md` / `ARCHITECTURE.md` amendments)
 Relates to: `ADR-0004` (Tier B reference data promoted with provenance: the closest precedent),

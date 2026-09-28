@@ -52,6 +52,33 @@ it('stores the source character link the parser has always emitted', function ()
     expect(Schema::hasColumn('umamusume', 'external_ref'))->toBeTrue();
 });
 
+it('ships exactly the columns the card-layer docs list', function (): void {
+    // ADR-0008's Decision table, ARCHITECTURE.md §3's character_cards fence, the
+    // ESSENTIALS digest line and D-30 all name the same twelve fillable columns
+    // plus `id` and timestamps. This is the schema side of that agreement, and it
+    // is an exact pin rather than a `toContain` sweep on purpose: a column added
+    // to the migration without moving those four docs fails here, and a column
+    // they name that no longer ships fails too. Schema change and digest change
+    // then travel together, which is the AGENTS.md Architect rule made checkable.
+    expect(Schema::getColumnListing('character_cards'))->toBe([
+        'id',
+        'card_id',
+        'umamusume_id',
+        'title',
+        'rarity',
+        'global_release_date',
+        'is_debut_form',
+        'unconfirmed',
+        'source_url',
+        'snapshot_path',
+        'fetched_at',
+        'source_timezone',
+        'is_manual',
+        'created_at',
+        'updated_at',
+    ]);
+});
+
 it('reads fetched_at as a datetime so the card can be shown in the display zone', function (): void {
     // Task 11's card row prints $card->fetched_at->timezone(...)->format(...).
     // A 'timestamp' column without the cast hands back a string and that chain

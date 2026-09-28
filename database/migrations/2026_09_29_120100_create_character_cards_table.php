@@ -10,9 +10,13 @@ use Illuminate\Support\Facades\Schema;
  * Costume cards that reached `[Global]`, one row per card (PRD FR-A-6, ADR-0008).
  *
  * The trainee is modelled once, on `umamusume`; this table holds only what
- * differs between her forms. `GametoraCharacterParser` collapsed the cards away
- * until now, so nothing here is derived — every column is a source statement or
- * a provenance field about that statement.
+ * differs between her forms, and `GametoraCharacterParser` collapsed the cards
+ * away until now. Almost every column here is a source statement or a provenance
+ * field about that statement, with two exceptions a fetch must not paper over:
+ * `is_debut_form` is **derived by rule** (see its comment below — the export has
+ * no debut field to copy, so a parser computes it and never stores a source
+ * flag), and `is_manual` is neither kind of fact: it is the Trainer's own flag,
+ * not engine data (PRD FR-B-4).
  */
 return new class extends Migration
 {

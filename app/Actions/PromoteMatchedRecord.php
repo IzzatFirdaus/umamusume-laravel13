@@ -65,8 +65,10 @@ final class PromoteMatchedRecord
                     'name_ja' => $record['name_ja'] ?? $existing->name_ja,
                     'jp_debut_date' => $record['jp_debut_date'] ?? $existing->jp_debut_date,
                     'global_debut_date' => $record['global_debut_date'] ?? $existing->global_debut_date,
-                    // Same shape as the aptitudes line below: a record that says
-                    // nothing about the source link must not blank the stored one.
+                    // Same intent as the aptitudes line below — an absent fetched
+                    // value must not blank the stored one — but not the same
+                    // mechanism: aptitudes() omits keys the record does not carry,
+                    // this one names the stored value as the fallback.
                     'external_ref' => $record['external_ref'] ?? $existing->external_ref,
                     // Absent letters must not blank out grades an earlier fetch stored.
                     ...$this->aptitudes($record),
