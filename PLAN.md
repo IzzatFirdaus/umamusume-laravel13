@@ -1,10 +1,15 @@
-# Trainer Desk — Frontend Development Plan
+`$PANELS`# Trainer Desk — Frontend Development Plan
 
-**Status:** Phase 4 (Implementation) active through Slice 7, the schema session. Slice 6 landed the
+**Status:** Phase 4 (Implementation) active through Slice 8, the scenario panel set.
+**Intent (R41), as the owner stated it:** "Slice 8 is the scenario panel set: the Unity Cup and
+Trackblazer surfaces built on Slice 7's payloads and buckets, plus the missing writers." Nothing
+about that intent needed a new table, and none was added: rank, fatigue and purchases ride
+`turn_events` payloads, circles and the shop countdown ride columns on existing tables.
+Slice 7 was the schema session. Slice 6 landed the
 frontend residuals; Slice 7 gave Grade Points the period they belong to (KI-10's schema half) and
 gave `turn_events.deltas` a typed shape (D-226), then declined ADR-0005 for Phase 1 per R37. Phase 6
 remains unfrozen and unstarted. Unity Cup and Trackblazer panel UI is Slice 8, not this slice.
-**Last Updated:** 2026-09-28 (Slice 7 T0–T5: contract hygiene at `53fbe70`/`8fd127c`, period columns
+**Last Updated:** 2026-09-28 (Slice 8 T0–T7: columns and shop payload at `7d4b8cf`, rank and fatigue payloads at `4c6486a`, the epithet route table at `a031d9d`, the race writer at `5d7d10a`, the panel set and the meter disclosure at `d248ca5`; `slice-8-2026-09-28.md` carries the R38 snapshots, the measured pairs in both themes, and the `/impeccable` audit score of 16/20. Prior: Slice 7 schema session)
 and meter at `e103122`, typed payloads at `17dbc54`/`8955394`, this re-baseline plus KI-15 and the
 ADR-0005 status at the docs commit; `slice-7-2026-09-28.md` carries the greps, the test names and the
 one thing stopped on. Prior: Slice 6 mood pill and pairs, `slice-6-2026-09-28.md`)
@@ -12,6 +17,8 @@ one thing stopped on. Prior: Slice 6 mood pill and pairs, `slice-6-2026-09-28.md
 ---
 
 ## Slice Exit Criteria
+
+Every slice now opens and closes with two mechanical lines, per R38. **Opening snapshot:** `git branch --show-current` and `git status --porcelain` recorded in the slice record before any edit, repeated before every commit and push. **Push verification:** after `git push`, `git ls-remote origin master` must equal the sha just pushed, and the line is recorded. Both were done in Slice 8; the record§1 holds the snapshot and §2 the incident the practice caught (a shared index let the peer's staged file into one commit).
 
 **Every slice must satisfy all of the following before being marked complete:**
 
