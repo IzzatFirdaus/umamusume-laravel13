@@ -243,6 +243,47 @@ return [
                 ['name' => 'Miracle Cure', 'cost' => 40, 'effect' => 'Heals all negative conditions'],
             ],
             'race_fatigue' => ['hide_after' => 'late_december', 'final_races_pay_coins' => false],
+            /*
+            | Epithet routes, transcribed from
+            | docs/scenarios/04-trackblazer-umaguide.md §"Epithet Routes" (lines 86-125,
+            | uma.guide, dated after the 2026-07-01 rework). Each row states which
+            | condition the tool can actually evaluate:
+            |
+            |  - `races` are named races. A row is complete when every one appears among
+            |    the run's entered completed races, by the slot title the Trainer entered
+            |    the race against. `mode` is 'all' (default) or 'any'.
+            |  - `epithets` are prerequisite epithets from this same table, resolved in
+            |    list order.
+            |  - `aggregate` marks a condition this build cannot evaluate from entered
+            |    titles at all ("win 5 Dirt races", "all unique Mile Turf G1s", "both QEII
+            |    Cups"). The surface has no dirt flag and no race-tag list to read, so the
+            |    checklist renders the sentence and the word `unverifiable` rather than
+            |    implying the route is unmet (D-220, D-256).
+            |
+            | Nothing here is invented: a row is either a published requirement in the
+            | guide's own words or it is absent.
+            */
+            'epithet_routes' => [
+                ['route' => 'Tiara Route', 'epithet' => 'Lady', 'races' => ['Oka Sho', 'Japanese Oaks', 'Shuka Sho'], 'reward' => '+10 to 2 random stats'],
+                ['route' => 'Tiara Route', 'epithet' => 'Heroine', 'epithets' => ['Lady'], 'races' => ['Queen Elizabeth II Cup (Classic)'], 'reward' => '+10 to 2 random stats'],
+                ['route' => 'Tiara Route', 'epithet' => 'Goddess', 'epithets' => ['Lady'], 'races' => ['Victoria Mile', 'Hanshin Juvenile Fillies'], 'aggregate' => 'both QEII Cups', 'reward' => '+15 to 2 random stats'],
+                ['route' => 'Tiara Route', 'epithet' => 'Mile a Minute', 'aggregate' => 'win all unique Mile Turf G1s', 'reward' => 'Mile Straightaways hint +1'],
+                ['route' => 'Classic Route', 'epithet' => 'Stunning', 'races' => ['Satsuki Sho', 'Japanese Derby', 'Kikuka Sho'], 'reward' => '+10 to 2 random stats'],
+                ['route' => 'Classic Route', 'epithet' => 'Incredible', 'epithets' => ['Stunning'], 'races' => ['Japan Cup (Classic)', 'Arima Kinen (Classic)'], 'mode' => 'any', 'reward' => '+15 to 2 random stats'],
+                ['route' => 'Classic Route', 'epithet' => 'Phenomenal', 'epithets' => ['Stunning'], 'aggregate' => 'win 2 of Tenno Sho Spring, Takarazuka Kinen, Japan Cup, Tenno Sho Autumn, Osaka Hai, Arima Kinen', 'reward' => '+15 to 2 random stats'],
+                ['route' => 'Sprint/Mile Route', 'epithet' => 'Breakneck Miler', 'races' => ['NHK Mile Cup', 'Yasuda Kinen', 'Mile Championship'], 'reward' => '+15 to 2 random stats'],
+                ['route' => 'Sprint/Mile Route', 'epithet' => 'Sprint Go-Getter', 'races' => ['Takamatsunomiya Kinen', 'Sprinters Stakes'], 'reward' => '+10 to 2 random stats'],
+                ['route' => 'Sprint/Mile Route', 'epithet' => 'Sprint Speedster', 'aggregate' => 'win all four of the sprint and mile races above', 'reward' => '+15 to 2 random stats'],
+                ['route' => 'Spring/Autumn Route', 'epithet' => 'Spring Champion', 'races' => ['Osaka Hai', 'Tenno Sho Spring', 'Takarazuka Kinen'], 'reward' => '+10 to 2 random stats'],
+                ['route' => 'Spring/Autumn Route', 'epithet' => 'Fall Champion', 'races' => ['Tenno Sho Autumn', 'Japan Cup (Senior)', 'Arima Kinen (Senior)'], 'reward' => '+10 to 2 random stats'],
+                ['route' => 'Spring/Autumn Route', 'epithet' => 'Shield Bearer', 'races' => ['Tenno Sho Spring', 'Tenno Sho Autumn'], 'reward' => '+10 to 2 random stats'],
+                ['route' => 'Spring/Autumn Route', 'epithet' => 'Legendary', 'aggregate' => 'Lady or Stunning, plus both Champion epithets', 'reward' => 'Homestretch Haste hint +1'],
+                ['route' => 'Dirt Route', 'epithet' => 'Dirty Work', 'aggregate' => 'win 5 dirt races', 'reward' => '+5 to 2 stats'],
+                ['route' => 'Dirt Route', 'epithet' => 'Playing Dirty', 'aggregate' => 'win 10 dirt races', 'reward' => '+10 to 2 stats'],
+                ['route' => 'Dirt Route', 'epithet' => 'Eat My Dust', 'aggregate' => 'win 15 dirt races', 'reward' => '+10 to 2 stats'],
+                ['route' => 'Dirt Route', 'epithet' => 'Dirt G1 Achiever', 'aggregate' => 'win 3 dirt G1s', 'reward' => '+10 to 2 stats'],
+                ['route' => 'Dirt Route', 'epithet' => 'Dirt G1 Star', 'aggregate' => 'win 4 dirt G1s', 'reward' => '+10 to 2 stats'],
+            ],
             'finale' => ['kind' => 'points_league', 'races' => 3],
             'notes' => 'No mandatory race goals, so the race calendar is absent rather than empty, and no '
                 .'Scenario Link character exists here. Racing is the strategy in this scenario and is '
