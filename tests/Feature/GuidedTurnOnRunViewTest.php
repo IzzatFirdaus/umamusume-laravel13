@@ -9,10 +9,10 @@ use App\Models\TurnEntry;
  * The guided turn flow and the stat band, mounted on a real run.
  *
  * The review's reframe was that `x-stat-band` and `x-guided-step` are built, tested and
- * measured clean, and the defect is one thing: `design-preview` is the only surface that
- * renders them. These
+ * measured clean, and the defect was that only a preview surface rendered them. These
  * tests are the other half of that fix - a component nobody can reach has no behaviour to
- * guard, so the guards live on the route a Trainer actually uses.
+ * guard, so the guards live on the route a Trainer actually uses. That preview surface
+ * (`design-preview`) has since been deleted, so this file exercises the run screen only.
  *
  * Two rules decide most of what is asserted here:
  *   D-51 - committing is a separate action from selecting, and "preview before commit" is

@@ -42,7 +42,11 @@ it('holds the row count at zero after stage one and at one only after stage two'
 
     expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(0);
 
-    test()->post("/training-runs/{$run->id}/turns", stagedPayload())->assertOk();
+    // F-7 moved the preview to a redirect, so the status assertion moves with it. No
+    // followRedirect() here: this test reads no body, only the row count below, and
+    // Illuminate\Testing\TestResponse has no followRedirect() on Laravel 13.32.
+    test()->post("/training-runs/{$run->id}/turns", stagedPayload())
+        ->assertRedirect(route('runs.show', $run));
 
     expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(0);
 
@@ -73,7 +77,8 @@ it('does not let a repeated preview accumulate rows', function (): void {
     $run = stagedRun();
 
     foreach (range(1, 3) as $ignored) {
-        test()->post("/training-runs/{$run->id}/turns", stagedPayload())->assertOk();
+        test()->post("/training-runs/{$run->id}/turns", stagedPayload())
+            ->assertRedirect(route('runs.show', $run));
     }
 
     expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(0);
