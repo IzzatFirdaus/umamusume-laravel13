@@ -7,14 +7,22 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, Slice 12 T3):** 21 issues filed. **16 resolved/closed** (KI-1–9, KI-11–14,
+KI-18–20). **5 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
+consecutive-race count cannot be derived from the log), and two filed by the T3 browser pass —
+KI-21 (the race entry form is built on Alpine.js, which is not a dependency, so neither path renders)
+and KI-22 (a free_race cell renders `state=past` without the Trainer-entered marker, so R61's calendar
+rule is no longer implemented). Both block this slice's T4: gates would go green over a form nobody
+can use. KI-22 is a shared-master collision with concurrent commit `82959e9`, not a Slice 12 defect.
+Prior:
 **Status (2026-09-29, Slice 12):** 19 issues filed. **16 resolved/closed** (KI-1–9, KI-11–14,
 KI-18–20). **3 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
 consecutive-race count cannot be derived from the log). Slice 11 closed KI-20 by measuring the pair
 and stepping the dark `--color-risk`; Slice 12 closed KI-19 on the successful second `update` attempt
 (engine v0.1.5) and re-closed KI-11 on current evidence, its deletion basis having been superseded by
 the sourced seeder at `f0ae288` and its token half now measured against the Slice 8 epithet rows.
-Counts read off `grep -c "^## KI-"` (19 headings; KI-16 was never filed, which is why the numbers run
-to KI-20). Prior:
+Counts read off `grep -c "^## KI-"` (19 headings at that time; KI-16 was never filed, which is why the
+numbers run to KI-20). Prior:
 **Status (2026-09-29, Slice 11):** 19 issues filed. **15 resolved/closed** (KI-1–9, KI-11–14,
 KI-18, KI-20). **4 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
 consecutive-race count cannot be derived from the log), KI-19 (the impeccable tool cannot update
@@ -837,3 +845,90 @@ threshold while the hue family stays. No component changes needed; the token fix
 four shop-panel error spans and every other `text-risk` consumer.
 
 **Owner.** Frontend with the design-system owner. Closed by measurement and token step in Slice 11.
+
+---
+
+## KI-21 The race entry form is built on Alpine.js, which is not a dependency, so neither path renders — FILED 2026-09-29 (Slice 12), OPEN
+
+**Symptom.** On a live run screen, the race panel's two-path entry form renders no fields at all.
+Measured on an isolated scratch fixture (`slice-12-2026-09-29.md` §7.2):
+
+```
+window.Alpine                          → false
+template[x-if] count                   → 2        (both branches inert)
+select[name="scenario_slot_id"]        → absent
+input[name="title"]                    → absent
+select[name="month"], [name="half"]    → absent
+input[name="entry_mode"]               → present, value ""
+```
+
+**Cause.** `resources/views/components/race-panel.blade.php` was written against Alpine (`x-data`,
+`@click`, `:class`, `<template x-if>`). Alpine is not installed: `package.json` devDependencies are
+`@tailwindcss/vite`, `axios`, `concurrently`, `laravel-vite-plugin`, `tailwindcss`, `vite`, and
+`resources/js/app.ts` imports only `./bootstrap` and `./guided-flow`. A `<template>` element's
+children stay unrendered until a framework clones them out, so with no Alpine both branches stay
+inert and the hidden `entry_mode` input — which has `x-model` and no `value` attribute — posts the
+empty string. `prepareForValidation()` reads that as `calendar`, which then fails validation because
+the slot select was never rendered to submit. The manual path is unreachable by any means.
+
+**Impact.** R56's free-race writer is unusable end-to-end. The controller, the Form Request, the
+fifth kind and the atomic slot+entry create all work; `FreeRaceWriterTest` proves that by posting the
+request directly. What does not exist is the ability of a Trainer to reach any of it.
+
+**Why the suite and Slice 11's browser pass both missed it.** The tests exercise the HTTP layer, not
+the DOM, so they are correct and simply silent on the broken layer. Slice 11 §4 grepped rendered text
+and found "Naruta Kinpa Cup" eight times and "Trainer-entered" five — all true, and all from the
+server-rendered calendar and entries list, not from the form. Neither check can fail for the reason it
+is running.
+
+**Required fix — a decision, not a patch.** Two defensible routes, and the choice is the owner's:
+
+1. Add `alpinejs` to `package.json` and register it in the entry. This is a new dependency, so
+   `CONSTRAINTS.md` C-8 bars it without approval; `AGENTS.md` escalation 2 sends it to the human owner.
+2. Rewrite the two-path form framework-free: submit `entry_mode`, re-render server-side with that
+   branch's fields. No new dependency, and it matches the tool's existing post-redirect flow —
+   `guided-step` already works this way (R31's navigation model), so the interaction stays consistent.
+
+Route 2 is the smaller rule footprint and keeps NFR-1's local-only posture untouched. Route 1 buys
+in-place switching with no round trip. Neither is adopted silently.
+
+**Owner.** Human owner for the dependency call; Laravel Dev implements whichever is chosen. Blocks
+Slice 12's T4, because a green gate run would be reporting on a form that cannot be used.
+
+---
+
+## KI-22 A free_race cell renders `state=past` without the Trainer-entered marker, so R61's calendar rule is no longer implemented — FILED 2026-09-29 (Slice 12), OPEN
+
+**Symptom.** A `free_race` slot at month 5 Early renders in the calendar as a past cell with no
+marker. Reading the model on the same fixture:
+
+```
+calendarCells()[4]['halves']['Early']['slots'] → [ { "state": "past", "label": "Naruta Kinpa Cup" } ]
+```
+
+There is no `manual` key, so `race-calendar.blade.php`'s
+`collect($slotItems)->contains('manual', true)` gate never fires. The page contains exactly one
+"Trainer-entered" leaf and it is the race panel's (`class="ml-1 …"`), not the calendar's
+(`class="block …"`).
+
+**Rule broken.** R61: `free_race` cells take open-cell geometry and a Trainer-entered marker, and
+never a Goal pennant. Both halves of that are now unimplemented in `HEAD`.
+
+**Cause, and it is a collision rather than a bug in either session.** T4 added an `isFreeRace()`
+branch to `TrainingRun::calendarCell()` returning `['state' => 'open', …, 'manual' => true]`.
+Concurrent commit `82959e9 feat(calendar): read the grid from race_catalog_slots` rewrote that read
+path and the branch is gone — `grep -n "isFreeRace" app/Models/TrainingRun.php` returns nothing. The
+data layer still agrees with R61: `:293` still queries `where('kind', 'free_race')`, so free_race rows
+reach the grid. Only the presentation regressed. `TrainingRun.php` was dirty at this slice's opening
+snapshot, clean by §4 of the record, then committed at `82959e9`.
+
+**Not repaired here.** Re-adding the branch means editing a read path another session is actively
+changing, in a shared worktree, with no way to tell whether their rewrite intends to reinstate it in a
+different shape. This is a coordination item, not a one-line fix.
+
+**Required fix.** Restore open-cell geometry and the `manual` marker for `kind = free_race` in the
+race_catalog_slots read path, and pin it with a test that asserts the calendar cell's state and marker
+for a free_race slot — `slice-12-2026-09-29.md` §7.3 is the reproduction. The Goal-pennant half of
+R61 already holds and should stay.
+
+**Owner.** Planner Domain Specialist with the calendar session, on the shared `master`.
