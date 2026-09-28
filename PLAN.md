@@ -1,4 +1,4 @@
-`$PANELS`# Trainer Desk — Frontend Development Plan
+# Trainer Desk — Frontend Development Plan
 
 **Status:** Phase 4 (Implementation) active through Slice 9, the closing slice: the branch reconciled, the register landed, the audit findings fixed, and the shop given its writer. No new panels, no schema columns, no new tokens.
 **Intent (R41), as the owner stated it:** "Slice 8 is the scenario panel set: the Unity Cup and
@@ -9,10 +9,13 @@ Slice 7 was the schema session. Slice 6 landed the
 frontend residuals; Slice 7 gave Grade Points the period they belong to (KI-10's schema half) and
 gave `turn_events.deltas` a typed shape (D-226), then declined ADR-0005 for Phase 1 per R37. Phase 6
 remains unfrozen and unstarted. Unity Cup and Trackblazer panel UI is Slice 8, not this slice.
-**Last Updated:** 2026-09-28 (Slice 9: KI-17 and KI-18 filed at `01a1091`, the burst label map and the loaded-collection ladder at `f7a59e8`, the D-230 amendment at `4282146`, the purchase writer at `d73a449`; `slice-9-2026-09-28.md` carries the lore itemization, the coherence evidence and the branch attribution.)
-and meter at `e103122`, typed payloads at `17dbc54`/`8955394`, this re-baseline plus KI-15 and the
-ADR-0005 status at the docs commit; `slice-7-2026-09-28.md` carries the greps, the test names and the
-one thing stopped on. Prior: Slice 6 mood pill and pairs, `slice-6-2026-09-28.md`)
+**Last Updated:** 2026-09-28 (Slice 9: KI-17 and KI-18 filed at `01a1091`, the burst label map and
+the loaded-collection ladder at `f7a59e8`, the D-230 amendment at `4282146`, the purchase writer at
+`d73a449`; `slice-9-2026-09-28.md` carries the lore itemization, the coherence evidence and the
+branch attribution.) Before it, Slice 7: the Grade Point period columns and meter at `e103122`,
+typed payloads at `17dbc54`/`8955394`, that slice's re-baseline plus KI-15 and the ADR-0005 status
+at its docs commit; `slice-7-2026-09-28.md` carries the greps, the test names and the one thing
+stopped on. Before that, Slice 6's mood pill and measured pairs (`slice-6-2026-09-28.md`).
 
 ---
 
@@ -20,6 +23,22 @@ one thing stopped on. Prior: Slice 6 mood pill and pairs, `slice-6-2026-09-28.md
 
 Every slice now opens and closes with two mechanical lines, per R38. **Opening snapshot:** `git branch --show-current` and `git status --porcelain` recorded in the slice record before any edit, repeated before every commit and push. **Push verification:** after `git push`, `git ls-remote origin master` must equal the sha just pushed, and the line is recorded. Both were done in Slice 8; the record§1 holds the snapshot and §2 the incident the practice caught (a shared index let the peer's staged file into one commit).
 **Branch attribution (R44):** Slice 8 was built on `docs/frontend-review` after a concurrent session switched the shared worktree there mid-slice; `master` was fast-forwarded to `122d12b` at the start of Slice 9, so every Slice 8 commit is now on `master`. One of them, `4c6486a`, also carries `docs/scenarios/09-global-race-calendar.md`, which is that session’s file and their words: it entered through the shared index, and the attribution stands here rather than in a rewrite.
+
+**Subject-prefix erratum (R50, 2026-09-29):** `68fa190` is prefixed `docs(slice-7)` and is a Slice 9
+commit. Its diff adds `docs/design-research/verification/slice-9-2026-09-28.md` and re-baselines this
+file's Slice 9 header; nothing in it belongs to Slice 7, whose docs commit is `94db315`. The prefix is
+wrong on its face, so read the body and the diffstat, not the subject line, when a slice is traced
+through `git log --grep`. Left as shipped because the only other fix is rewriting a commit that is
+already on `origin/master`, and Slice 9's brief forbade a history rewrite. T5 of this slice adds the
+standing guard: an exit criterion that asserts a commit's subject prefix names the slice its diff
+actually belongs to.
+
+**Two PLAN repairs landed with the erratum**, both from earlier slices' edits to this file:
+the H1 on line 1 opened with a leaked shell placeholder, `` `$PANELS` `` glued in front of
+`# Trainer Desk`, from `5d2ddcc`; and Slice 9's re-baseline rewrote the first line of a multi-line
+"Last Updated" parenthetical and left the Slice 7 half-sentence stranded underneath it as an orphan
+sentence. Both are restored here, the second by re-chaining it as "Before it, Slice 7" so no
+recorded sha is dropped.
 
 **Every slice must satisfy all of the following before being marked complete:**
 
