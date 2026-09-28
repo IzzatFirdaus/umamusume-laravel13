@@ -21,7 +21,8 @@ E-11, E-12, E-14, E-15, E-16), `app/Services/DataPipeline/Parsers/GametoraCharac
 `app/Services/DataPipeline/PipelineRunner.php:61-74`, `config/uma.php:44-61`, `CONSTRAINTS.md` C-4 with
 its verbatim-name exemption at `:38`, `docs/design-research/CONSTRAINTS.md` §5 preamble and D-30,
 `docs/scenarios/09-global-race-calendar.md:655` (the Tier B confirmation rule, quoted there from
-`docs/SOURCE-OF-TRUTH.md` §5), and `docs/UMAMUSUME_REFERENCE.md` `:72-77` (the source tier table),
+`docs/SOURCE-OF-TRUTH.md` §5), and `docs/UMAMUSUME_REFERENCE.md` `:66-78` (the source registry that rates
+the tiers, including `:72` GameTora B and `:75-77` the tier A witnesses),
 `:199` (the export's card counts), §1.3.5 (`:388-394`), §1.4.4 (`:465`), conflict row 46 (`:2032`)
 
 ## Context
@@ -189,7 +190,7 @@ is a reference to the first kind. It is not a deck slot, and it does not narrow 
 GameTora is **Tier B** (`docs/UMAMUSUME_REFERENCE.md:72`). The rule this repo applies to it, quoted
 from the tracked file that cites it (`docs/scenarios/09-global-race-calendar.md:655`): "a Tier B dataset
 needs A- or S-tier confirmation before a claim becomes app data", per `docs/SOURCE-OF-TRUTH.md` §5. The
-two Tier A witnesses are `umamusu.wiki` and Game8, rated A in the same tier table
+two Tier A witnesses are `umamusu.wiki` and Game8, rated A in the same source registry
 (`docs/UMAMUSUME_REFERENCE.md:75-77`). Tier A is not infallible: conflict row 46
 (`docs/UMAMUSUME_REFERENCE.md:2032`) records the English `umamusu.wiki` Grand Masters table shifting the
 three goddess bonuses across characters against GameWith and Game8 JP, which agree with each other. Task
@@ -220,7 +221,7 @@ figures above are cited from dated measurements rather than re-runnable from a t
 One citation here is knowingly second-hand: `docs/SOURCE-OF-TRUTH.md` is where §5 lives, and the plan
 quotes it at `§5:152`, but that file is **not tracked in this branch tree**, so neither its line numbers
 nor its wording can be checked from here. The rule is quoted from `docs/scenarios/09-global-race-calendar.md:655`,
-which cites §5 by name, and from the tier table at `docs/UMAMUSUME_REFERENCE.md:72-77`. Whoever owns
+which cites §5 by name, and from the source registry at `docs/UMAMUSUME_REFERENCE.md:72-77`. Whoever owns
 `SOURCE-OF-TRUTH.md` should confirm the wording, and this ADR's §5 reference is marked as a quotation
 rather than a verified read.
 
