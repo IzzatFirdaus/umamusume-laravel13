@@ -227,6 +227,63 @@ it('keeps the goal treatment ready on the component while the model withholds it
         ->and($html)->toContain('Japanese Oaks');
 });
 
+it('keeps the Trainer-entered marker on a free race after it has been run', function (): void {
+    // Slice 13 measured this and deliberately did not assert it, routing the
+    // question to the read path (FreeRaceCalendarCellTest, R68). The answer is that
+    // the marker survives: free_race is a tool concept, so "this row came from the
+    // Trainer" is provenance about the record, not a state of the decision to enter.
+    $run = runWithFans(20000);
+    $slot = ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'free_race',
+        'title' => 'Autumn Practice Stakes',
+        'slot_label' => 'Autumn Practice Stakes',
+        'month' => 9,
+        'half' => 'Late',
+        'is_manual' => true,
+    ]);
+
+    RaceEntry::create([
+        'training_run_id' => $run->id,
+        'scenario_slot_id' => $slot->id,
+        'status' => RaceEntryStatus::Completed,
+        'placement' => 2,
+    ]);
+
+    $cell = $run->fresh()->calendarCells()[8]['halves']['Late']['slots'][0];
+
+    expect($cell)->toMatchArray(['state' => 'past', 'label' => 'Autumn Practice Stakes', 'manual' => true]);
+
+    $html = Blade::render(
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" />',
+        ['cells' => $run->fresh()->calendarCells(1)]
+    );
+
+    expect($html)->toContain('Trainer-entered')
+        // Past, not goal: the marker survives, the pennant still does not appear.
+        ->and($html)->not->toContain('border-goal-line');
+});
+
+it('does not give a calendar race the Trainer-entered marker once run', function (): void {
+    // The other half: surviving must not mean spreading. A catalogue race that has
+    // been run stays a plain past cell.
+    $run = runWithFans(20000);
+    $slot = RaceCatalogSlot::factory()->create([
+        'year' => 1, 'month' => 10, 'half' => 'Early', 'turn' => 19, 'title' => 'Artemis Stakes',
+    ]);
+
+    RaceEntry::create([
+        'training_run_id' => $run->id,
+        'race_catalog_slot_id' => $slot->id,
+        'status' => RaceEntryStatus::Completed,
+        'placement' => 1,
+    ]);
+
+    expect($run->fresh()->calendarCells()[9]['halves']['Early']['slots'][0])
+        ->toMatchArray(['state' => 'past', 'label' => 'Artemis Stakes'])
+        ->not->toHaveKey('manual');
+});
+
 it('composes the calendar only from the run own scenario', function (): void {
     $run = runWithFans(20000);
     ScenarioSlot::factory()->create([

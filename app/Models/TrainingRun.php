@@ -427,7 +427,15 @@ class TrainingRun extends Model
         bool $hasWon,
     ): array {
         if ($entry !== null) {
-            return ['state' => 'past', 'label' => $title];
+            // The marker survives the finish. `free_race` is a tool concept, not a
+            // client one: the game never offers a race that is not in the calendar,
+            // so "this row came from the Trainer" is provenance about where the
+            // record came from, and provenance does not expire when the race is run.
+            // If anything it matters more looking back over a finished career.
+            // Slice 13 measured the loss and left the call to the read path (R68).
+            return $manual
+                ? ['state' => 'past', 'label' => $title, 'manual' => true]
+                : ['state' => 'past', 'label' => $title];
         }
 
         if ($manual) {
