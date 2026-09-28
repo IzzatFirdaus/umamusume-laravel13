@@ -20,12 +20,14 @@ use Illuminate\Database\Seeder;
  */
 class ScenarioSlotSeeder extends Seeder
 {
+    /**
+     * Only codes pinned by client copy per REFERENCE §1.2.6. Codes 200, 300 and 700
+     * have no cited label map (❌ UNVERIFIED in §1.2.6 and triage row 12); rows with
+     * those codes seed with tier null so the tool does not assert a label it cannot source.
+     */
     private const array GRADE_MAP = [
         100 => 'G1',
-        200 => 'G2',
-        300 => 'G3',
         400 => 'OP',
-        700 => 'Pre-OP',
     ];
 
     private const array HALF_MAP = [
