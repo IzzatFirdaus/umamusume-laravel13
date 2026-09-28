@@ -573,6 +573,13 @@ carries the state. Consequences, all measured with pressed keys:
 - `role="radio"` and `aria-checked` are gone from the markup, so nothing claims what the
   element does not do. `RunViewFrameTest` and `GuidedTurnOnRunViewTest` pin the group's shape.
 
-**Residual.** `aria-live` is still absent from the rail: the preview panel appears through a
-navigation, not an in-place update, so there is no live region to announce. That is a different
-item from the one closed here and stays unclosed.
+**Residual, closed as correct-by-design 2026-09-28 (R31).** `aria-live` is absent from the rail,
+and that is the right answer rather than an unfinished one. The preview panel appears through a
+navigation: selecting an option submits, the server renders, the browser loads a new document, and
+focus and the announcement come from the platform's own handling of that load. A live region is for
+content that changes under a reader who has not moved; there is no such change here, so an
+`aria-live="polite"` wrapper would announce a panel the user is already being taken to, and would
+be a claim about the interaction that, like the `role="radio"` claims just removed above, the
+element does not support. The rule this does not weaken is `docs/design-research/DESIGN.md:1406`
+(§10 Accessibility): a gain bubble that updates in place under a Trainer who stays put still owes
+`aria-live="polite"`, and there is no in-place gain bubble on this screen to give one.

@@ -195,6 +195,38 @@ for the green Hint badge because it is the only ink in the system that stays dar
 
 ---
 
+## Controller Inventory
+
+Recorded because Slice 5's path scope named `app/Http/Controllers/RunController.php`, a file that
+does not exist and never did, and a scope line quoting an absent path is a scope line nobody can
+honour. This is the whole set on `7da2d22`, from `git ls-files app/Http/Controllers`:
+
+| File | Surface |
+|---|---|
+| `Controller.php` | abstract base, no routes |
+| `TrainingRunController.php` | the run surface: index, show, store, the two-stage guided turn, export |
+| `CatalogController.php` | umamusume catalog index and detail |
+| `ReviewController.php` | the match-candidate review queue |
+| `Api/V1/TrainingRunController.php` | JSON runs |
+| `Api/V1/UmamusumeController.php` | JSON catalog |
+
+The run surface is `TrainingRunController` (web and API v1). A future slice that means "shape the
+run page" should name that file. Renaming it to `RunController` would touch `routes/web.php`,
+which is out of every frontend slice's scope.
+
+## Corrections Owed to FRONTEND-BRIEF-AUDIT, Not Applied
+
+`docs/design-research/FRONTEND-BRIEF-AUDIT.md` is an untracked file authored by the concurrent
+session, so it is not this slice's to edit. Two of its §3 rows now describe a tree they did not
+see, and the owner or that session should land these before the audit is cited again:
+
+| Row | It says | It should say |
+|---|---|---|
+| §3 "5.1 two-region frame" | "**NOT BUILT** — `layout.blade.php:18` is one `max-w-5xl` column" | Built in Slice 5 at `71bbb4b`: a pinned state region over a scrolling work region on `runs/show`, persistence measured in `slice-5-2026-09-28.md` §3. `layout.blade.php` is still one column, which is correct: the frame belongs to the run screen, not the shell. |
+| §3 "9 accessibility" | "Still absent: `aria-live`." | Absent by design, not outstanding (R31): the preview arrives through a navigation, so there is no in-place change to announce. See KI-14's closure in `KNOWN-ISSUES.md`. |
+
+---
+
 ## Evidence Traceability
 
 | Gate | Command | Slice 1 Output |
@@ -214,12 +246,12 @@ for the green Hint badge because it is the only ink in the system that stays dar
 
 Three calls stay with the owner and are untouched by Slice 5: theme default (light vs dark),
 rounded-font vs system stack (C-8 plus `DESIGN.md` §11), and mid-run "Change scenario"
-semantics. The fourth is below.
+semantics. The fourth is no longer open.
 
-### Should Livewire enter the stack? — evidence, not a proposal
+### Should Livewire enter the stack? — DECIDED no, 2026-09-28 (R29)
 
-**Verdict for this slice: no, and the burden of proof sits with the round trip, which was
-fast.** T1 builds preview-before-commit server-rendered, and the evidence that decision needs is
+**Decided: no, and the burden of proof sits with the round trip, which was fast.** T1 builds
+preview-before-commit server-rendered, and the evidence that decision needs is
 the latency of the request Livewire would remove. Measured on the run-detail page today, loopback
 `php artisan serve` on `127.0.0.1:8144` against the R17 fixture (`.scratch-uma/slice5.sqlite`,
 rebuilt isolated), `curl -w '%{time_starttransfer}'` after one warm-up request that compiles the
@@ -259,6 +291,36 @@ loading and error state per wired region (C-7), the motion budget moving from CS
 component review (D-90 to D-92), a D-66 loopback ruling, and re-verifying every recorded
 `getComputedStyle()` pair over a morphing DOM while the gate that would catch it is the one that
 skips. Full numbers and method: `docs/design-research/verification/slice-5-2026-09-28.md` §4.
+
+**Reopen criterion (R29, written down by the slice that closes the item).** Latency is not a
+reason to reopen. The measured round trip is 0.047 s median / 0.076 s p95 for a page render and
+0.071 s / 0.091 s for the two-stage preview (n=20 each, loopback dev server, `APP_DEBUG=true`), so
+"the server round trip is slow" is already contradicted by the evidence this decision rests on.
+What Livewire would buy is the other two numbers: 72,562 bytes of shell re-parsed on every click,
+and a step chain held server-side instead of re-POSTed. A reopen therefore arrives with all seven
+of these, in this order, and a request missing any one of them is not a reopen:
+
+1. C-8 approval from the owner for `livewire/livewire`, which is absent from `composer.json` today;
+   no slice owns adding a package.
+2. A written amendment to the stack line at `.ai/guidelines/custom/domain.md:9` and
+   `ARCHITECTURE.md:225` ("vanilla JS only where needed"), because Livewire 3 ships and boots
+   Alpine.js.
+3. `docs/PRE-MORTEM.md:73` answered on its own terms: it cut a Livewire component tree for
+   "a dependency for zero new capability", so the capability has to be named.
+4. A loading state and an error state for every wired region, per C-7, each one a new surface to
+   review on one screen.
+5. The motion budget re-cleared per component rather than per stylesheet: D-90 (nothing animates
+   unless the Trainer caused it), D-91 (≤240 ms), D-92 (reduce → 1 ms).
+6. A D-66 ruling on a per-keystroke `wire:model.live` against NFR-1's local-only promise; D-66 says
+   an interaction "never fires a network request", and that needs an explicit loopback reading
+   before a wired input is compliant.
+7. A re-measured `getComputedStyle()` pair table. A morphing DOM invalidates every pair recorded in
+   `docs/design-research/verification/`, and the only gate that would catch the invalidation, the
+   browser half of `DesignTokensTest`, skips in this environment (Playwright absent, C-8 forbids
+   installing it), so the re-measure is hand work on every commit that touches the flow.
+
+The open question this line closes is a decision, not a gap: the evidence exists, it is on the
+record, and it says no.
 
 ---
 

@@ -164,7 +164,11 @@ Current requirements, pending `docs/adr/0002`:
 
 The persistent layout contract.
 
-**D-40. Two-region desktop frame.** Left region: run identity, turn chip, persistent stat band. Right region: the turn timeline. This mirrors the client's own two-window composition (`RAW-FINDINGS.md` §3.8) and PRD §2 fixes the tool to a desktop browser. Below 1024px the regions stack; the brief does not require mobile and no mobile-first compromise is accepted in exchange for desktop density.
+**D-40. Two-region desktop frame.** The frame has two regions with different lifetimes: a **state region** holding run identity, turn chip, resource strip and persistent stat band, and a **work region** holding the turn timeline and the guided step. The state region never scrolls away; the work region scrolls and groups by phase. That split is the rule, and it is the spec's own words: `docs/UX Behavior Specification - Umamusume Trainer Companion.md:136-141` names the two regions, lists what each contains, and gives them exactly those two behaviours ("Persistent, never collapses" / "Scrollable, grouped by phase"). This also mirrors the client's own two-window composition (`RAW-FINDINGS.md` §3.8), and PRD §2 fixes the tool to a desktop browser.
+
+**Axis is not the rule (amended 2026-09-28, R27).** The spec's table draws the regions left and right; the built frame stacks them, state region pinned above the work region at `lg:` and up. The reason is measured, not tasted: the stat band is six columns, and six columns beside a timeline inside `main`'s 64rem render as unreadable slivers, so a left/right frame satisfies the drawing and breaks the legibility the drawing exists to serve. `slice-5-2026-09-28.md` §3 records the persistence measurement that the rule actually gates on (the state region stays on screen through a full-page scroll). A left/right implementation is compliant only if it keeps the band's six columns readable at the widths this tool targets; nothing in this rule prefers one axis over the other.
+
+Below 1024px the two regions stack on the narrow axis. The brief does not require mobile and no mobile-first compromise is accepted in exchange for desktop density.
 
 **D-41. The stat band is persistent.** It does not scroll away and it is never collapsed. A Trainer reading turn 24 needs the totals at the same moment they read the entry, exactly as the client keeps the band on screen during training.
 
