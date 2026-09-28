@@ -167,6 +167,9 @@
                                 {{ number_format((int) $fans) }} fans
                             </span>
                         @endif
+                        @if (collect($slotItems)->contains('manual', true))
+                            <span class="block text-[10px] text-ink-muted">Trainer-entered</span>
+                        @endif
                     </div>
                 @endforeach
             @endforeach

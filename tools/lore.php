@@ -52,12 +52,17 @@ $mode = ($argv[1] ?? '') === 'code' ? 'code' : 'docs';
 // pattern changes, both copies change and LoreGateParityTest fails naming the diff.
 $excluded = [':!vendor', ':!node_modules', ':!docs/PRE-MORTEM.md'];
 $appPaths = ['app/**', 'config/**', 'resources/**', 'routes/**', 'database/**', 'tests/**', 'lang/**'];
+// R62: committed client-export prose inside database/seeders/data/ is source data,
+// exempt under C-4 class 3 (verbatim game/client source data where the term is data,
+// not framing). Excluding the whole directory rather than per-hit prose exemptions,
+// which would bury real hits — the failure the baseline exists to prevent.
+$appExcluded = [':!database/seeders/data/**'];
 
 $runs = $mode === 'code'
     ? [
-        ['-inwE', 'horse|horses|sire|sires|foal|foals|mare|mares|filly|jockey|saddle|bridle|hoof|hooves|mane|paddock|tack|reins|herd|mount', $appPaths, true],
-        ['-inwE', 'dam|stable|wisdom|motivation|strength|endurance|luck|agility|charisma|gacha|jewel|factor|grass|sand|friend|planned|archived|account|login', $appPaths, true],
-        ['-inE', 'condition gauge|pick-?up banner|share link', $appPaths, true],
+        ['-inwE', 'horse|horses|sire|sires|foal|foals|mare|mares|filly|jockey|saddle|bridle|hoof|hooves|mane|paddock|tack|reins|herd|mount', array_merge($appPaths, $appExcluded), true],
+        ['-inwE', 'dam|stable|wisdom|motivation|strength|endurance|luck|agility|charisma|gacha|jewel|factor|grass|sand|friend|planned|archived|account|login', array_merge($appPaths, $appExcluded), true],
+        ['-inE', 'condition gauge|pick-?up banner|share link', array_merge($appPaths, $appExcluded), true],
     ]
     : [
         ['-inE', 'horse|sire|foal|🏇', $excluded, false],

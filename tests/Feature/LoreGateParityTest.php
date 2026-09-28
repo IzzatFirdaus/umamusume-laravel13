@@ -226,3 +226,17 @@ it('requires a class and a citation on every line marker', function (): void {
 it('has the marker actually in use, so the guards above are not reading an empty list', function (): void {
     expect(loreMarkers())->not->toBeEmpty();
 });
+
+it('excludes database/seeders/data/ from lore-code in both implementations (R62)', function (): void {
+    $make = (string) file_get_contents(base_path('Makefile'));
+    $php = (string) file_get_contents(base_path('tools/lore.php'));
+
+    // R62: committed client-export prose is source data, exempt under C-4 class 3.
+    // The exclusion must exist in both copies and they must agree on the pathspec.
+    expect($make)->toContain(':!database/seeders/data/**')
+        ->and($php)->toContain(':!database/seeders/data/**');
+
+    // Count occurrences: three greps in each implementation, each carrying the exclusion.
+    expect(substr_count($make, ':!database/seeders/data/**'))->toBe(3)
+        ->and(substr_count($php, ':!database/seeders/data/**'))->toBeGreaterThanOrEqual(1);
+});

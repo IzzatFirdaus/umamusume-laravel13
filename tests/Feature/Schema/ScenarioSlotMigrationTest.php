@@ -45,11 +45,11 @@ it('has a scenario_slots table with the required columns', function (): void {
         ->toContain('updated_at');
 });
 
-it('stores kind as a constrained enum with the four canonical values', function (): void {
+it('stores kind as a constrained enum with the five canonical values', function (): void {
     // The enum is enforced at the application layer (model casts) and by a
-    // CHECK constraint in the migration. The four kinds cover every timeline
-    // slot type across all scenarios.
-    $kinds = ['goal_race', 'team_race', 'grade_deadline', 'scripted_event'];
+    // CHECK constraint in the migration. The five kinds cover every timeline
+    // slot type across all scenarios, plus Trainer-entered free races (R61).
+    $kinds = ['goal_race', 'team_race', 'grade_deadline', 'scripted_event', 'free_race'];
 
     foreach ($kinds as $kind) {
         $slot = ScenarioSlot::factory()->create(['kind' => $kind]);

@@ -278,7 +278,7 @@ class TrainingRun extends Model
 
         $slots = ScenarioSlot::query()
             ->where('scenario_key', $this->scenarioKey())
-            ->where('kind', 'goal_race')
+            ->whereIn('kind', ['goal_race', 'free_race'])
             ->orderBy('sort_order')
             ->get();
 
@@ -332,6 +332,12 @@ class TrainingRun extends Model
     {
         if ($entry !== null) {
             return ['state' => 'past', 'label' => $slot->title];
+        }
+
+        if ($slot->isFreeRace()) {
+            // R61: free_race cells render with open-cell geometry plus the
+            // Trainer-entered marker and never a Goal pennant.
+            return ['state' => 'open', 'label' => $slot->title, 'manual' => true];
         }
 
         if ($slot->hasMaidenGate() && ! $hasWon) {

@@ -11,6 +11,9 @@
     $teamRace = $run->composesPanel('team_race');
     $graded = $run->composesGradeObjectives();
     $entries = $run->raceEntries->sortBy(fn (App\Models\RaceEntry $e): int => $e->scenarioSlot?->sort_order ?? PHP_INT_MAX);
+
+    $calendarSlots = $slots->where('kind', '!=', 'free_race');
+    $manualSlots = $slots->where('kind', 'free_race');
 @endphp
 
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
@@ -18,29 +21,87 @@
         <span>Races</span>
     </div>
 
-    <form method="POST" action="{{ route('runs.races.store', $run) }}" class="flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-3 text-sm">
+    <form method="POST" action="{{ route('runs.races.store', $run) }}" class="flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-3 text-sm"
+          x-data="{ mode: '{{ old('entry_mode', 'calendar') }}' }">
         @csrf
-        <label class="flex flex-col gap-1">
-            <span class="font-medium text-ink">Calendar slot</span>
-            @if ($slots->isEmpty())
-                {{-- The honest empty state: the writer is here, the calendar is not.
-                     `scenario_slots` is empty until the fetch engine lands (KI-11), so a
-                     select with no options would read as a broken control rather than as
-                     an absent dataset. --}}
-                <input type="text" class="rounded-md border border-rule bg-sunken px-2 py-1 text-ink-muted"
-                       value="no calendar rows to enter against" disabled>
-                <span class="text-xs text-ink-muted">
-                    Races are fetched data, and this build has not fetched them.
-                </span>
-            @else
-                <select name="scenario_slot_id" required
-                        class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
-                    @foreach ($slots as $slot)
-                        <option value="{{ $slot->id }}">{{ $slot->title }} · {{ $slot->kind }} · {{ $slot->tier ?? 'no grade' }}</option>
-                    @endforeach
-                </select>
-            @endif
-        </label>
+        <input type="hidden" name="entry_mode" x-model="mode">
+
+        <fieldset class="flex w-full gap-4" role="radiogroup" aria-label="Race entry mode">
+            <label class="flex items-center gap-1.5 text-sm">
+                <input type="radio" name="entry_mode_radio" value="calendar" x-model="mode"
+                       class="accent-pick-line">
+                <span class="text-ink">Calendar race</span>
+            </label>
+            <label class="flex items-center gap-1.5 text-sm">
+                <input type="radio" name="entry_mode_radio" value="manual" x-model="mode"
+                       class="accent-pick-line">
+                <span class="text-ink">Race not on the calendar</span>
+            </label>
+        </fieldset>
+
+        {{-- Calendar path --}}
+        <template x-if="mode === 'calendar'">
+            <label class="flex flex-col gap-1">
+                <span class="font-medium text-ink">Calendar slot</span>
+                @if ($calendarSlots->isEmpty())
+                    <input type="text" class="rounded-md border border-rule bg-sunken px-2 py-1 text-ink-muted"
+                           value="no calendar rows to enter against" disabled>
+                    <span class="text-xs text-ink-muted">
+                        Races are fetched data, and this build has not fetched them.
+                    </span>
+                @else
+                    <select name="scenario_slot_id"
+                            class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                        @foreach ($calendarSlots as $slot)
+                            <option value="{{ $slot->id }}" data-tier="{{ $slot->tier ?? '' }}">{{ $slot->title }} · {{ $slot->tier ?? 'no grade' }}</option>
+                        @endforeach
+                        @if ($manualSlots->isNotEmpty())
+                            <optgroup label="Trainer-entered">
+                                @foreach ($manualSlots as $slot)
+                                    <option value="{{ $slot->id }}">{{ $slot->title }} · Trainer-entered</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+                    </select>
+                @endif
+            </label>
+        </template>
+
+        {{-- Manual path --}}
+        <template x-if="mode === 'manual'">
+            <div class="flex flex-wrap items-end gap-3">
+                <label class="flex flex-col gap-1">
+                    <span class="font-medium text-ink">Race title</span>
+                    <input type="text" name="title" value="{{ old('title') }}" required maxlength="255"
+                           class="min-w-48 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
+                           placeholder="e.g. Practice Race">
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="font-medium text-ink">Month</span>
+                    <select name="month" required class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                        <option value="">select</option>
+                        @foreach (range(1, 12) as $m)
+                            <option value="{{ $m }}" {{ old('month') == $m ? 'selected' : '' }}>{{ $m }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="font-medium text-ink">Half</span>
+                    <select name="half" required class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                        <option value="">select</option>
+                        <option value="Early" {{ old('half') === 'Early' ? 'selected' : '' }}>Early</option>
+                        <option value="Late" {{ old('half') === 'Late' ? 'selected' : '' }}>Late</option>
+                    </select>
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="font-medium text-ink">Tier</span>
+                    <input type="text" name="tier" value="{{ old('tier') }}" maxlength="10"
+                           class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
+                           placeholder="optional">
+                    <span class="text-xs text-ink-muted">No prefill for manual races</span>
+                </label>
+            </div>
+        </template>
 
         <label class="flex flex-col gap-1">
             <span class="font-medium text-ink">Outcome</span>
@@ -57,8 +118,6 @@
         </label>
 
         @if ($teamRace)
-            {{-- Circles only where the client draws them, and never as a default 0: the
-                 Trainer read a number or they did not (D-225, D-220). --}}
             <label class="flex flex-col gap-1">
                 <span class="font-medium text-ink">Circles read</span>
                 <select name="circles" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
@@ -86,7 +145,10 @@
 
         @if ($errors->any())
             <p class="w-full text-sm text-risk" role="alert">
-                {{ $errors->first('scenario_slot_id', 'That race is not on this run\'s calendar.') }}
+                {{ $errors->first('scenario_slot_id') }}
+                {{ $errors->first('title') }}
+                {{ $errors->first('month') }}
+                {{ $errors->first('half') }}
                 {{ $errors->first('circles', 'Circles are read as 0 to 5, on a team race only.') }}
                 {{ $errors->first('objective_index', 'A period index is one of the four objectives.') }}
                 {{ $errors->first('placement', 'Placement is a finish number, 1 or above.') }}
@@ -105,6 +167,9 @@
                     <span class="min-w-0 flex-1">
                         <span class="font-semibold text-ink-strong">{{ $entry->scenarioSlot?->title ?? 'a race with no calendar row' }}</span>
                         <span class="ml-1.5 text-xs text-ink-muted">{{ $entry->status->value }}</span>
+                        @if ($entry->scenarioSlot?->isFreeRace())
+                            <span class="ml-1 text-[10px] text-ink-muted">Trainer-entered</span>
+                        @endif
                     </span>
                     <span class="flex flex-wrap gap-x-3 font-mono text-xs tabular-nums text-ink-muted">
                         <span>{{ $entry->scenarioSlot?->tier ?? 'no grade' }}</span>

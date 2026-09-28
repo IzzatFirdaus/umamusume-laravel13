@@ -60,9 +60,9 @@ lore:
 # Each hit still needs a context ruling, same as `lore`: "dam" inside "damaged",
 # "stable" as an adjective, "friend" inside "friendship" are all allowed senses.
 lore-code:
-	git grep --untracked -inwE "horse|horses|sire|sires|foal|foals|mare|mares|filly|jockey|saddle|bridle|hoof|hooves|mane|paddock|tack|reins|herd|mount" -- 'app/**' 'config/**' 'resources/**' 'routes/**' 'database/**' 'tests/**' 'lang/**' || true
-	git grep --untracked -inwE "dam|stable|wisdom|motivation|strength|endurance|luck|agility|charisma|gacha|jewel|factor|grass|sand|friend|planned|archived|account|login" -- 'app/**' 'config/**' 'resources/**' 'routes/**' 'database/**' 'tests/**' 'lang/**' || true
-	git grep --untracked -inE "condition gauge|pick-?up banner|share link" -- 'app/**' 'config/**' 'resources/**' 'routes/**' 'database/**' 'tests/**' 'lang/**' || true
+	git grep --untracked -inwE "horse|horses|sire|sires|foal|foals|mare|mares|filly|jockey|saddle|bridle|hoof|hooves|mane|paddock|tack|reins|herd|mount" -- 'app/**' 'config/**' 'resources/**' 'routes/**' 'database/**' 'tests/**' 'lang/**' ':!database/seeders/data/**' || true
+	git grep --untracked -inwE "dam|stable|wisdom|motivation|strength|endurance|luck|agility|charisma|gacha|jewel|factor|grass|sand|friend|planned|archived|account|login" -- 'app/**' 'config/**' 'resources/**' 'routes/**' 'database/**' 'tests/**' 'lang/**' ':!database/seeders/data/**' || true
+	git grep --untracked -inE "condition gauge|pick-?up banner|share link" -- 'app/**' 'config/**' 'resources/**' 'routes/**' 'database/**' 'tests/**' 'lang/**' ':!database/seeders/data/**' || true
 
 audit:
 	composer audit
