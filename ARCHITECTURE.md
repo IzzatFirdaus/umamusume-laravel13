@@ -114,12 +114,14 @@ match_candidates              (review queue for Fuzzy/None matches)
   payload json (full parsed record), created_by_fetch_at datetime, timestamps
 ```
 
-`character_cards` and `umamusume.external_ref` are authorized by `docs/adr/0008-character-card-catalog-layer.md`
-and are **not applied yet**: they arrive with `2026_09_29_120000_add_external_ref_to_umamusume_table` and
-`2026_09_29_120100_create_character_cards_table` in the roster slice. Until those migrations land, a
-query against either raises "no such table" and no model exposes a `cards` relation. A card row's
-provenance is not inline: `data_sources` is `umamusume_id`-scoped, so a card inherits the provenance row
-written for its trainee under the card source key.
+`character_cards` and `umamusume.external_ref` are authorized by
+`docs/adr/0008-character-card-catalog-layer.md` and are **not applied yet**: they arrive with
+`2026_09_29_120000_add_external_ref_to_umamusume_table` and
+`2026_09_29_120100_create_character_cards_table` in the roster slice. Until those migrations land, a query
+against `character_cards` raises "no such table" and one against `umamusume.external_ref` raises "no such
+column", and no model exposes a `cards` relation. A card row's provenance is not inline: `data_sources`
+is `umamusume_id`-scoped, so a card inherits the provenance row written for its trainee under the card
+source key.
 
 ### Trainer-data domain
 
