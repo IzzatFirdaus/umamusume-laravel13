@@ -85,7 +85,7 @@ umamusume_aliases
   id, umamusume_id FK->umamusume cascade, alias string, language string enum-backed (AliasLanguage: Japanese | English | Romanized)
   unique(alias, language)
 
-character_cards               (costume cards that reached [Global]; ADR-0008. Authorized, not migrated yet)
+character_cards               (costume cards that reached [Global]; ADR-0008. Migrated as 2026_09_29_120100; empty until the card fetch lands)
   id, card_id unsigned int unique (the source's own card id, not this table's PK; a re-fetch is idempotent by identity, FR-B-5)
   umamusume_id FK->umamusume cascade
   title string            (verbatim [Global] client string, brackets included; source data, never normalized copy)
@@ -120,11 +120,14 @@ match_candidates              (review queue for Fuzzy/None matches)
 ```
 
 `character_cards` and `umamusume.external_ref` are authorized by
-`docs/adr/0008-character-card-catalog-layer.md` and are **not applied yet**: they arrive with
+`docs/adr/0008-character-card-catalog-layer.md` and **are applied**: they landed with
 `2026_09_29_120000_add_external_ref_to_umamusume_table` and
-`2026_09_29_120100_create_character_cards_table` in the roster slice. Until those migrations land, a query
-against `character_cards` raises "no such table" and one against `umamusume.external_ref` raises "no such
-column", and no model exposes a `cards` relation. A card row's provenance **is** inline:
+`2026_09_29_120100_create_character_cards_table` in the roster slice, together with
+`App\Models\CharacterCard`, `App\Enums\CardRarity`, `CharacterCardFactory` and `Umamusume::cards()`.
+`PromoteMatchedRecord` writes `external_ref` on both of its paths from this change onward, which is
+what makes the source link durable; the card table stays empty until the card parser and its declared
+source land, and `training_runs.character_card_id` is the next migration in the slice. A card row's
+provenance **is** inline:
 `source_url`, `snapshot_path`, `fetched_at`, `source_timezone` and the card's own `is_manual` sit on the
 card, which is what `ADR-0003` Amendment R3 requires of a reference row and what `scenario_races`,
 `scenario_slots` and `race_catalog_slots` each already do, while `scenarios` carries `source_url` and

@@ -37,13 +37,15 @@ use Illuminate\Support\Carbon;
  * @property string|null $aptitude_pace_chaser
  * @property string|null $aptitude_late_surger
  * @property string|null $aptitude_end_closer
+ * @property string|null $external_ref the source's own character id, `gametora:char:{id}` (ADR-0008)
  * @property-read Collection<int, UmamusumeAlias> $aliases
+ * @property-read Collection<int, CharacterCard> $cards
  * @property-read Collection<int, DataSource> $dataSources
  * @property-read Collection<int, TrainingRun> $trainingRuns
  * @property-read int|null $aliases_count
  */
 #[Table('umamusume')]
-#[Fillable(['slug', 'name', 'name_ja', 'match_key', 'release_status', 'jp_debut_date', 'global_debut_date', 'is_manual', 'aptitude_turf', 'aptitude_dirt', 'aptitude_sprint', 'aptitude_mile', 'aptitude_medium', 'aptitude_long', 'aptitude_front_runner', 'aptitude_pace_chaser', 'aptitude_late_surger', 'aptitude_end_closer'])]
+#[Fillable(['slug', 'name', 'name_ja', 'match_key', 'release_status', 'jp_debut_date', 'global_debut_date', 'is_manual', 'aptitude_turf', 'aptitude_dirt', 'aptitude_sprint', 'aptitude_mile', 'aptitude_medium', 'aptitude_long', 'aptitude_front_runner', 'aptitude_pace_chaser', 'aptitude_late_surger', 'aptitude_end_closer', 'external_ref'])]
 class Umamusume extends Model
 {
     /** @use HasFactory<UmamusumeFactory> */
@@ -55,6 +57,14 @@ class Umamusume extends Model
     public function aliases(): HasMany
     {
         return $this->hasMany(UmamusumeAlias::class);
+    }
+
+    /**
+     * @return HasMany<CharacterCard, $this>
+     */
+    public function cards(): HasMany
+    {
+        return $this->hasMany(CharacterCard::class);
     }
 
     /**

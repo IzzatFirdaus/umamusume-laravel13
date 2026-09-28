@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\PromoteMatchedRecord;
 use App\Enums\CandidateStatus;
 use App\Enums\MatchTier;
 use App\Models\DataSource;
@@ -145,4 +146,55 @@ it('reparses from the stored snapshot with zero network', function (): void {
     expect(DataSource::count())->toBe(1)
         ->and(Umamusume::count())->toBe(1)
         ->and(Umamusume::first()->name_ja)->toBe('第一回');
+});
+
+/*
+ * umamusume.external_ref is the durable link to the source row (ADR-0008): the
+ * parser has always emitted it and the card fetch attaches through it, so promote
+ * has to keep it on both of its paths. The create path is unreachable from
+ * uma:fetch — an Exact or Alias match names a row that already exists — which is
+ * why it is driven through the action the review queue calls.
+ */
+
+it('stores the source character link on the row it creates', function (): void {
+    $result = app(PromoteMatchedRecord::class)->handle(
+        record: ['name' => 'Brand New Trainee', 'external_ref' => 'gametora:char:1008'],
+        existing: null,
+        sourceKey: 'test-source',
+        url: FETCH_URL,
+    );
+
+    expect($result['created'])->toBeTrue()
+        ->and($result['umamusume']->external_ref)->toBe('gametora:char:1008')
+        ->and(Umamusume::firstOrFail()->external_ref)->toBe('gametora:char:1008');
+});
+
+it('stores the source link on the row it updates and keeps one a later fetch stops stating', function (): void {
+    $normalizer = app(NameNormalizer::class);
+    Umamusume::factory()->create([
+        'name' => 'Special Week',
+        'slug' => 'special-week',
+        'match_key' => $normalizer->normalize('Special Week'),
+    ]);
+
+    Http::preventStrayRequests();
+    // A second Http::fake() merges into the stub list instead of replacing it, so
+    // two runs of one source get their bodies off a sequence.
+    Http::fake([
+        'source.test/list' => Http::sequence()
+            ->push(json_encode([['name' => 'Special Week', 'external_ref' => 'gametora:char:1008']]))
+            ->push(json_encode([['name' => 'Special Week', 'name_ja' => 'スペシャルウィーク']])),
+    ]);
+
+    $this->artisan('uma:fetch', ['source' => 'test-source'])->assertExitCode(0);
+
+    expect(Umamusume::where('slug', 'special-week')->firstOrFail()->external_ref)
+        ->toBe('gametora:char:1008');
+
+    $this->artisan('uma:fetch', ['source' => 'test-source'])->assertExitCode(0);
+
+    $stored = Umamusume::where('slug', 'special-week')->firstOrFail();
+
+    expect($stored->external_ref)->toBe('gametora:char:1008')
+        ->and($stored->name_ja)->toBe('スペシャルウィーク');
 });

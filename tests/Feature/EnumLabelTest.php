@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\AliasLanguage;
+use App\Enums\CardRarity;
 use App\Enums\MatchTier;
 use App\Enums\ReleaseStatus;
 use App\Enums\RunStatus;
@@ -17,7 +18,7 @@ use App\Models\Umamusume;
  * `>text<` node and not the page as a whole, which must still contain the value.
  */
 
-it('labels every case of every rendered enum in human words', function (AliasLanguage|MatchTier|ReleaseStatus|RunStatus|SkillAcquisition $case): void {
+it('labels every case of every rendered enum in human words', function (AliasLanguage|MatchTier|ReleaseStatus|RunStatus|SkillAcquisition|CardRarity $case): void {
     expect($case->label())
         ->toBeString()
         ->not->toBeEmpty()
@@ -29,6 +30,7 @@ it('labels every case of every rendered enum in human words', function (AliasLan
     ...SkillAcquisition::cases(),
     ...AliasLanguage::cases(),
     ...MatchTier::cases(),
+    ...CardRarity::cases(),
 ]);
 
 it('names each release status in the words the Global trainer expects', function (): void {
