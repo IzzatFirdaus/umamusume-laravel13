@@ -17,7 +17,7 @@ it('emits the ten aptitude letters in the export order', function (): void {
         'char_id' => 1001,
         'card_id' => 100101,
         'name_en' => 'Special Week',
-        'name_ja' => 'スペシャルウィーク',
+        'name_jp' => 'スペシャルウィーク',
         'release' => '2021-02-24',
         'release_en' => '2025-06-26',
         'aptitude' => ['A', 'G', 'F', 'C', 'A', 'A', 'G', 'A', 'A', 'C'],
@@ -64,7 +64,7 @@ it('persists aptitudes through the pipeline onto an existing catalog row', funct
         'char_id' => 1001,
         'card_id' => 100101,
         'name_en' => 'Special Week',
-        'name_ja' => 'スペシャルウィーク',
+        'name_jp' => 'スペシャルウィーク',
         'release' => '2021-02-24',
         'release_en' => '2025-06-26',
         'aptitude' => ['A', 'G', 'F', 'C', 'A', 'A', 'G', 'A', 'A', 'C'],
@@ -82,6 +82,7 @@ it('persists aptitudes through the pipeline onto an existing catalog row', funct
     expect($counts['updated'])->toBe(1)
         ->and($umamusume->aptitude_turf)->toBe('A')
         ->and($umamusume->aptitude_end_closer)->toBe('C')
+        ->and($umamusume->name_ja)->toBe('スペシャルウィーク')
         ->and($umamusume->dataSources()->count())->toBe(1);
 })->name('promotion writes aptitude columns and keeps provenance');
 

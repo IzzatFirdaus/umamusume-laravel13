@@ -109,3 +109,20 @@ it('reads the Japanese name from the key the export actually publishes', functio
     // stores a null, and the detail page loses the Japanese name US-1 promises.
     expect($record['name_ja'])->toBe('ゴールドシップ');
 });
+
+it('never accepts the wrong source key as a silent fallback', function (): void {
+    $body = json_encode([[
+        'char_id' => 1007,
+        'card_id' => 100701,
+        'name_en' => 'Gold Ship',
+        'name_ja' => 'ゴールドシップ',
+        'release' => '2021-02-24',
+        'release_en' => '2025-06-26',
+    ]], JSON_THROW_ON_ERROR);
+
+    $record = (new GametoraCharacterParser)->parse($body)[0];
+
+    // This test exists to fail if someone reintroduces `$card['name_jp'] ??
+    // $card['name_ja'] ?? null`; that chain is what kept KI-21 invisible.
+    expect($record['name_ja'])->toBeNull();
+});
