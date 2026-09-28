@@ -131,6 +131,74 @@ it('ignores a stored theme it cannot honour rather than writing a dead attribute
 });
 
 /**
+ * The token inventory, measured from the stylesheet rather than remembered.
+ *
+ * The browser gate below names a count, and that count went stale twice: the
+ * suite said 41, then 43, while the tree had already grown past both. Counting
+ * the declarations here means a new token has to move this number, and a stale
+ * documented figure fails a test instead of sitting in a comment.
+ */
+it('draws every selection boundary with the line token, never the fill token', function (): void {
+    // KI-9 / R15. `--color-pick` is the gold used to paint a selection, and on a
+    // `raised` surface in the light theme it measures 1.59:1 — fine as a fill behind
+    // dark ink, useless as a 2px outline someone must see to know which row is live.
+    // So boundaries take `--color-pick-line` and the fill keeps `--color-pick`.
+    //
+    // Asserted across the view tree because the failure mode is one component
+    // drifting back to the prettier token, not all of them being wrong at once.
+    $walk = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(base_path('resources/views'), FilesystemIterator::SKIP_DOTS),
+    );
+
+    $offenders = [];
+
+    foreach ($walk as $file) {
+        if (! str_ends_with($file->getFilename(), '.blade.php')) {
+            continue;
+        }
+
+        $source = (string) file_get_contents($file->getPathname());
+
+        // `border-pick-line` is allowed; `border-pick` followed by anything but a
+        // hyphen is the fill token used as a boundary.
+        if (preg_match('/border-pick(?![-\w])/', $source) === 1) {
+            $offenders[] = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});
+
+it('counts every colour token the static theme declares', function (): void {
+    $css = (string) file_get_contents(base_path('resources/css/app.css'));
+    $theme = substr($css, strpos($css, '@theme static'));
+    $open = strpos($theme, '{');
+    $depth = 0;
+    $end = strlen($theme);
+
+    for ($i = $open; $i < strlen($theme); $i++) {
+        if ($theme[$i] === '{') {
+            $depth++;
+        } elseif ($theme[$i] === '}') {
+            $depth--;
+
+            if ($depth === 0) {
+                $end = $i;
+                break;
+            }
+        }
+    }
+
+    $block = preg_replace('#/\*.*?\*/#s', '', substr($theme, $open + 1, $end - $open - 1));
+
+    preg_match_all('/(--color-[a-z0-9-]+)\s*:/', $block, $matches);
+
+    expect(array_unique($matches[1]))->toHaveCount(53)
+        ->and($matches[1])->toContain('--color-goal')
+        ->and($matches[1])->toContain('--color-goal-line');
+});
+
+/**
  * Browser-based contrast and token-resolution gate (D-288, G-18).
  *
  * These tests require a Playwright browser driver. They are skipped when no
@@ -150,7 +218,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         }
     });
 
-    it('resolves all 43 tokens in both themes and fails on empty', function (): void {
+    it('resolves all 53 tokens in both themes and fails on empty', function (): void {
         // This test uses Pest Browser (Playwright) to:
         // 1. Visit each page in both light and dark themes
         // 2. Read getComputedStyle(document.documentElement) for every --color-* token
@@ -164,9 +232,14 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         // - Grade badges: 9.00+ in both themes
         //
         // Implementation notes:
-        // - Tokens: 43 --color-* custom properties from app.css @theme static
-        //   (41 before 2026-09-28, which added --color-ring and --color-on-pick;
-        //   both are theme-split, so a single-theme check would not catch a wrong pair)
+        // - Tokens: 53 --color-* custom properties from app.css @theme static, the
+        //   number asserted by the static count test above. 50 before the
+        //   --color-goal pair landed in Slice 2, plus --color-pick-line in Slice 3.
+        //   --color-ring, --color-on-pick
+        //   and --color-goal are all theme-split, so a single-theme check would not
+        //   catch a wrong pair. The 41 and 43 this note carried earlier were both
+        //   stale on arrival: the tint and line families had already grown the
+        //   block past them, which is why the count is measured now.
         // - Non-text boundary pairs must clear WCAG 1.4.11's 3:1, not 4.5:1: the focus
         //   ring measures 4.88/5.17 on light panel/raised and 9.51/7.61 on dark, while
         //   --color-green (the value this rule replaced) is 1.88 on the light panel.

@@ -1,5 +1,7 @@
 @props([
-    'scenario' => 'ura_finale',
+    // No default, for the same reason as x-guided-step: a named default puts a
+    // scenario in the view, and a panel for "no scenario chosen" is not a panel.
+    'scenario',
     'cells' => [],
     'monthLabels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 ])
@@ -23,18 +25,33 @@
 
     /*
      * Cell states. Full literal class strings so Tailwind's scanner sees them.
-     * The fan lock and the maiden lock are deliberately different treatments:
-     * one is a number you can work toward, the other is a rule about the trainee
-     * (D-152, gate G-28).
+     *
+     * The three that must never be confused are goal, fan lock and maiden lock,
+     * and D-173 makes their distinctness a review failure rather than a taste call:
+     *
+     *   goal          2px warm outline, raised fill, red `Goal` pennant, taller than
+     *                 its neighbours, and never dimmer than them
+     *   fan_locked    2px SOLID, sunken fill, and the number it needs
+     *   maiden_locked 2px DASHED, raised fill, and its own sentence
+     *
+     * The maiden gate is the reason the two locks are not one treatment. Its
+     * remedy is an event, not a quantity, so there is no number to show and a
+     * solid border beside the fan lock's solid border would be telling the Trainer
+     * to grind toward 0 fans.
      */
     $stateClass = [
-        'empty' => 'border-rule bg-sunken text-ink-muted',
-        'open' => 'border-dashed border-green-line bg-raised text-ink',
-        'goal' => 'border-green bg-green-tint text-ink-strong',
-        'fan_locked' => 'border-rule bg-sunken text-ink-muted',
-        'maiden_locked' => 'border-rule bg-panel text-ink-muted',
-        'past' => 'border-rule bg-transparent text-ink-muted',
-        'current' => 'border-pick bg-raised text-ink-strong',
+        'empty' => 'border border-rule bg-sunken text-ink-muted py-1.5',
+        'open' => 'border border-dashed border-green-line bg-raised text-ink py-1.5',
+        // D-181: a `Goal` pennant, a heavier warm outline and greater height. The
+        // padding is the height, and it only reads as height because the grid
+        // aligns cells to the top instead of stretching the row to its tallest.
+        // Not green: this cell does not mean "affordable", and not risk red either,
+        // which would call an obligation an error.
+        'goal' => 'border-2 border-goal-line bg-raised text-ink-strong py-3',
+        'fan_locked' => 'border-2 border-solid border-rule bg-sunken text-ink-muted py-1.5',
+        'maiden_locked' => 'border-2 border-dashed border-ink-muted bg-raised text-ink-muted py-1.5',
+        'past' => 'border border-rule bg-transparent text-ink-muted py-1.5',
+        'current' => 'border-2 border-pick-line bg-raised text-ink-strong py-1.5',
     ];
 
     $stateWord = [
@@ -46,6 +63,9 @@
         'past' => 'Run',
         'current' => 'Next',
     ];
+
+    // The caption counts in digits because a Trainer counts the turns against it.
+    $slotCount = count($monthLabels) * 2;
 @endphp
 
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
@@ -58,38 +78,82 @@
         <span>Race calendar</span>
     </div>
 
-    <div class="grid grid-cols-12 gap-1">
-        @foreach ($monthLabels as $index => $month)
-            <div class="col-span-1 text-center text-xs font-semibold text-ink-muted">{{ $month }}</div>
-        @endforeach
+    @if ($cells === [])
+        {{-- A bare "no data" line tells the Trainer nothing. The scenario owns this
+             calendar either way, so the structure stays; what is missing is their own
+             entries, and the panel has to say which and what to do about it. --}}
+        <p class="mb-3 rounded-md border border-dashed border-rule bg-raised px-3 py-2 text-sm text-ink">
+            No races entered for this run yet. The grid is the {{ $slotCount }} turn slots this
+            scenario runs on, so it renders even when empty; add a race on a turn to fill it.
+        </p>
+    @endif
 
-        @foreach (['Early', 'Late'] as $half)
-            @foreach ($monthLabels as $monthIndex => $month)
-                @php
-                    $cell = $cells[$monthIndex]['halves'][$half] ?? [];
-                    $state = $cell['state'] ?? 'empty';
-                    $label = $cell['label'] ?? null;
-                    $fans = $cell['fans_needed'] ?? null;
-                    $state = array_key_exists($state, $stateClass) ? $state : 'empty';
-                @endphp
-                <div class="col-span-1 rounded-md border px-1 py-1.5 text-center text-xs leading-tight
-                            {{ $stateClass[$state] }}">
-                    <span class="block font-mono text-xs tabular-nums text-ink-muted">{{ $half }}</span>
-                    <span class="block truncate font-semibold" title="{{ $label ?? $stateWord[$state] }}">
-                        {{ $label ?? $stateWord[$state] }}
-                    </span>
-                    @if ($fans !== null)
-                        <span class="block font-mono text-xs tabular-nums text-ink-muted">
-                            {{ number_format((int) $fans) }} fans
-                        </span>
-                    @endif
-                </div>
+    {{-- 24 cells across 12 columns does not fit a phone, and shrinking each cell
+         until it fits would make the lock treatments unreadable, which is the one
+         thing this grid exists to communicate. So the grid keeps its width and the
+         region scrolls, focusable for keyboard users. --}}
+    <div class="overflow-x-auto" role="region" aria-label="Race calendar, {{ $slotCount }} turn slots" tabindex="0">
+        {{-- 56rem on the spacing scale (224 × 0.25rem), not an arbitrary value: G-4 keeps
+             geometry on the scale so it moves with the token system. --}}
+        <div class="grid min-w-224 grid-cols-12 items-start gap-1">
+            @foreach ($monthLabels as $index => $month)
+                <div class="col-span-1 text-center text-xs font-semibold text-ink-muted">{{ $month }}</div>
             @endforeach
-        @endforeach
+
+            @foreach (['Early', 'Late'] as $half)
+                @foreach ($monthLabels as $monthIndex => $month)
+                    @php
+                        $cell = $cells[$monthIndex]['halves'][$half] ?? [];
+                        $state = $cell['state'] ?? 'empty';
+                        $state = array_key_exists($state, $stateClass) ? $state : 'empty';
+                        $label = $cell['label'] ?? null;
+                        // Only the fan gate has a number. A maiden lock renders one
+                        // only if a caller supplies a figure for it, because a fan
+                        // figure on a maiden cell would send the Trainer off to grind
+                        // toward eligibility that is decided by an event instead.
+                        $fans = $state === 'fan_locked' ? ($cell['fans_needed'] ?? null) : ($cell['maiden_fans_needed'] ?? null);
+                    @endphp
+                    {{-- The accessible name carries the month, the half and the state,
+                         because a cell's state lives in its outline and its pennant and
+                         the race name alone would not say whether it is open. D-181 keeps
+                         the *visual* signal, and this is the non-visual half of the same
+                         fact rather than a sentence on the screen. `role="img"` is what
+                         makes it a name at all: a label on a bare div is a property most
+                         technologies do not expose. --}}
+                    <div class="col-span-1 rounded-md border px-1 text-center text-xs leading-tight
+                                {{ $stateClass[$state] }} relative"
+                         role="img"
+                         aria-label="{{ $month }} {{ $half }}: {{ $stateWord[$state] }}{{ $label !== null ? ', '.$label : '' }}">
+                        @if ($state === 'goal')
+                            {{-- D-181: "A goal race announces itself with a Goal pennant, a
+                                 heavier warm outline and greater height." The client's own
+                                 red Goal flag, in the top-right corner. Only the filled
+                                 edge carries colour: `border-<color>` on its own sets all
+                                 four sides, and then whether the dead edges stay
+                                 transparent is Tailwind's sheet order rather than a
+                                 decision here. No caption and no tooltip: the treatment is
+                                 the message. --}}
+                            <span class="absolute top-0 right-0 h-0 w-0 border-t-3 border-b-3 border-l-5 border-t-transparent border-b-transparent border-l-goal"
+                                  aria-hidden="true"></span>
+                        @endif
+                        <span class="block font-mono text-xs tabular-nums text-ink-muted">{{ $half }}</span>
+                        <span class="block truncate font-semibold" title="{{ $label ?? $stateWord[$state] }}">
+                            {{ $label ?? $stateWord[$state] }}
+                        </span>
+                        @if ($fans !== null)
+                            <span class="block font-mono text-xs tabular-nums text-ink-muted">
+                                {{ number_format((int) $fans) }} fans
+                            </span>
+                        @endif
+                    </div>
+                @endforeach
+            @endforeach
+        </div>
     </div>
 
     <p class="mt-2 text-xs text-ink-muted">
-        Twenty-four turn slots, Early and Late for each month. A fan gate shows the number it needs;
-        a maiden rule is a different lock, because one is progress and the other is eligibility.
+        {{ $slotCount }} turn slots, Early and Late for each month. A fan gate shows the number it
+        needs; a maiden rule is a different lock and a dashed outline, because one is a quantity to
+        work toward and the other is an event to reach.
     </p>
 </div>

@@ -5,7 +5,7 @@ grep for them, which is the same practice the root CONSTRAINTS.md C-4 list and
 CLAUDE.md Banned Patterns already use. It adds no new vocabulary choice. Checks rendered text of the standalone prototypes against
 docs/design-research/CONSTRAINTS.md gates G-1..G-17 that are machine-checkable.
 
-Run:  python docs/design-research/_scratch/gate.py
+Run:  python tools/gate.py
 Exit 0 = all gates pass. Non-zero = failures listed.
 """
 import glob
@@ -17,7 +17,7 @@ import subprocess
 import sys
 import tempfile
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
 PROTO_DIR = os.path.join(ROOT, "design-research", "prototypes")
 
 # --- G-1 lore: banned vocabulary for characters (CONSTRAINTS 3.1) ---

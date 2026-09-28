@@ -128,6 +128,31 @@ it('composes the calendar only from the run own scenario', function (): void {
     expect($run->calendarCells())->toBe([]);
 });
 
+it('names no scenario race for a run that has not chosen one', function (): void {
+    // Found in the browser pass, not by the suite. `scenarioKey()` falls back to the
+    // baseline so the resource strip always has something to compose — an owner
+    // ruling about generic widgets. The goal panels are not generic: they name
+    // Oka Sho and Tenno Sho. Feeding them the fallback made a run whose header says
+    // "No scenario set" list URA's actual race schedule below it.
+    ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'goal_race',
+        'title' => 'Oka Sho',
+        'month' => 4,
+        'half' => 'Early',
+    ]);
+
+    $run = TrainingRun::factory()->create(['scenario' => null]);
+
+    expect($run->calendarCells())->toBe([])
+        ->and($run->gradeObjectives())->toBe([])
+        ->and($run->gradeEarned())->toBeNull()
+        ->and(test()->get("/training-runs/{$run->id}")->getContent())
+        ->not->toContain('Race calendar')
+        ->not->toContain('Grade Point')
+        ->not->toContain('Oka Sho');
+});
+
 it('lists the Grade Point objectives in order, named from the matrix', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'trackblazer']);
 
@@ -159,7 +184,7 @@ it('sums Grade Points only when every completed race can be priced', function ()
     // 100 for a G1 win, from config's `grade_point_by_grade` (docs/scenarios/05 §Grade Points).
     expect($run->fresh()->gradeEarned())->toBe(100);
 
-    // Below first the points scale down, and the factor is not in our corpus, so
+    // Below first the points scale down, and no ratio for that is in our corpus, so
     // the total is withheld rather than understated.
     RaceEntry::create([
         'training_run_id' => $run->id,

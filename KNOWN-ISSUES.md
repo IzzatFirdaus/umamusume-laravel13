@@ -45,7 +45,41 @@ KI-2, so fixing it alone would not make any page load. Fix the two together and 
 
 ---
 
-## KI-2 Catalog index passes strings where the view expects models
+## KI-2 Catalog pages die on a cache that cannot hand back models — RESOLVED 2026-09-28
+
+> **Resolved in `d53a4b1`.** The diagnosis below was written as a guess and both
+> halves of it were wrong, so they are corrected here rather than quietly dropped.
+>
+> - **Not** "the controller hands the view a collection of strings, or a
+>   `pluck()`-style list". The controller returned a real `Collection<Umamusume>`.
+>   The strings were made by the cache, not by the query.
+> - **Not** "Feature tests cannot reproduce this because each test starts with an
+>   empty cache; the 500 requires stale cached rows". That annotation would have
+>   stopped anyone trying. A test reproduces it deterministically in four lines:
+>   point `cache.default` at `database`, flush, visit once to write, visit again to
+>   read. No pre-existing rows are needed — the round-trip is the bug. That is
+>   `tests/Feature/CatalogCacheRenderTest.php`, and all three of its cases failed
+>   with this exact message before the fix.
+>
+> **Actual cause.** `config/cache.php:128` sets `serializable_classes => false`, so
+> `DatabaseStore::unserialize()` calls `unserialize($value, ['allowed_classes' =>
+> false])` and every object comes back as `__PHP_Incomplete_Class` (proved in tinker:
+> `returned class=__PHP_Incomplete_Class`). Blade iterating that yields strings, which
+> is the `->slug` error. The suite never saw it because `phpunit.xml:25` pins
+> `CACHE_STORE=array` while `.env` runs `CACHE_STORE=database`, and the array store
+> hands back the objects it was given.
+>
+> **Fix.** The cache now holds primitives — the page's ids and its total — and the
+> models are re-read from them; `show()` is not cached at all. The framework setting
+> was left alone: it is a deliberate refusal to revive objects from a persistent store,
+> and relaxing it to keep caching model graphs would trade a lore-scale safety default
+> for a micro-optimisation on a local SQLite read path.
+>
+> **Runtime pass, which the annotation asked for.** `php artisan serve` against the
+> real database cache: `/umamusume -> 200`, `/training-runs -> 200`. Recorded with the
+> rest of the slice in `docs/design-research/verification/slice-2-2026-09-28.md`. The
+> detail page had the same defect and was covered by neither this report nor the old
+> test.
 
 **Symptom.** `GET /umamusume` returns **500**. `GET /training-runs` also returns **500**.
 
@@ -76,7 +110,9 @@ fixed.
 
 ---
 
-## KI-3 `welcome.blade.php` breaks the offline requirement
+**Status annotation (2026-09-28, docs audit).** Runtime verification pending after the current frontend dirty work lands. Feature tests cannot reproduce this because each test starts with an empty cache; the 500 requires stale cached rows from before the view's model switch. Evidence gap: runtime HTTP pass not executed in the audit/remediation turns. Close it with a real-server pass (`/umamusume` and `/training-runs` returning 200) or by confirming the cache-key version bump cleared old entries.
+
+## KI-3 `welcome.blade.php` breaks the offline requirement — RESOLVED 2026-09-28
 
 **Evidence.**
 
@@ -93,9 +129,29 @@ tag is now dead weight as well as illegal. Delete lines 10 and 11.
 
 **Status.** Already noted in `DESIGN.md` §7 as "a one-line fix nobody has applied". Still open.
 
+**Closed 2026-09-28 (`5548b9e`).** Both `<link>` lines are deleted; `welcome.blade.php`
+now loads its assets through `@vite` like every other page. Measured on a live server
+rather than inferred: the rendered document is 39,987 bytes, `grep -c bunny` returns 0
+against that response, and every asset the browser goes on to request is same-origin. The
+first measurement of that kind was a false pass — the server had died, so `grep -c` was
+counting an empty body — which is why the byte count is in the record.
+
+**Guard.** `tests/Feature/RenderedCopyHygieneTest.php` fails any Blade file that carries a
+remote `rel=stylesheet|preconnect|preload|dns-prefetch` link or a remote `<script src>`, so
+this cannot come back as a one-line fix nobody applies again. Anchor `href`s stay allowed: a
+link a Trainer chooses to click is not a dependency the page cannot render without.
+
+**Residual, not fixed.** The page's inline `<style>` block still declares
+`--font-sans:"Instrument Sans", ui-sans-serif, system-ui, …` inside a vendored Tailwind
+blob. Nothing loads Instrument Sans any more, so the stack falls through to the system
+fonts `DESIGN.md` §2.2 chose — the right outcome by accident rather than by editing the
+declaration. The blob also duplicates CSS the Vite build already ships. Left alone because
+the landing page's markup is not this slice's scope; worth a decision about whether
+`welcome.blade.php` should carry 38 KB of inlined CSS at all.
+
 ---
 
-## KI-4 `make lore` cannot see untracked files, and checks no terminology
+## KI-4 `make lore` cannot see untracked files, and checks no terminology — RESOLVED 2026-09-28
 
 **Symptom.** A brand-new file passes the lore gate by being invisible to it.
 
@@ -122,6 +178,29 @@ warns against. `make lore` is left untouched.
 **Still open.** `make` itself is not installed in this environment (`make: command not
 found`), so neither target can be run as documented. The recipes were executed directly.
 Consider a composer script so the gate does not depend on a GNU make binary on Windows.
+
+**Closed 2026-09-28 (`cc3f963`).** `composer lore` and `composer lore-code` run both
+targets through `tools/lore.php`, which hands `git grep` an argument array instead of a
+shell string. That matters more than convenience: a composer script holding the Makefile's
+command text runs through `cmd.exe`, which does not quote with single quotes, so
+`-- ':!vendor'` reaches git still quoted, git errors, the recipe's `|| true` swallows it,
+and the gate prints nothing and exits 0. The failure mode this replaced was a gate that
+reported clean while matching no file at all.
+
+Parity is measured rather than claimed. On one tree, the recipe bodies run verbatim and
+`composer lore` report the same count, and the `lore-code` body and `composer lore-code`
+both report 4. `LoreGateParityTest` compares the pattern strings between the Makefile and
+the runner, and dropping `withers` from the script is what proves the guard bites. One side
+effect is recorded rather than hidden: tracking the runner made it a permanent self-hit, so
+the sweep now prints the scanner's own pattern lines beside `gate.py`'s, and
+`docs/GATE-REGISTRY.md` allowed class 4 names both files with their composition — counts
+there are dated, because any rules file quoting a banned word moves the total. The Makefile
+targets stay — `CONSTRAINTS.md` C-4 names them — and `lore-code` cannot self-hit because
+`tools/` is outside its path list.
+
+The untracked-file half of this entry was never closed by the runner: `make lore` reads
+tracked files only by design, and `lore-code` reads untracked copy inside app paths only.
+That scope split is registered as a gap, not a fix.
 
 ---
 
@@ -186,3 +265,268 @@ reads as a decision and not an oversight.
 - **`APP_NAME` in `.env` is still `Laravel`**, while the product is Trainer Desk.
   Recorded in `DESIGN.md` §1.
 - **`PRD.md` still lists US-10 at P2**, although `ADR-0003` promoted it to P1.
+
+---
+
+## KI-7 Blocker: em dashes in rendered Blade copy — RESOLVED 2026-09-28
+
+Status: Closed (`ab915f8`)  
+Severity: Blocker  
+Owner: Frontend  
+Do-not-land: No
+
+### Evidence (2026-09-28 disk state)
+
+- `resources/views/components/grade-point-meter.blade.php:94` (rendered; :43 is a PHPDoc comment, not shipped copy)
+- `resources/views/components/guided-step.blade.php:166`, `:202`, `:209` (rendered; :116 is inside a `{{-- --}}` Blade comment, not shipped copy)
+
+### Rule violated
+
+- Settled owner ruling (2026-09-28): the disclosure glyph is `N/A` with an optional `title` tooltip, never an em dash.
+- R-02 bans em dashes in shipped copy; the C-4/R-02 no-carve-out ruling applies.
+- Note: the dirty `ARCHITECTURE-ESSENTIALS.md` D-220 line currently documents rendering "as `—` / not yet recorded", which contradicts the settled ruling; it belongs to the in-flight frontend slice and must be reconciled to `N/A` wording when that slice commits.
+
+### Required fix
+
+Replace rendered em dashes with compliant punctuation (comma, colon, parentheses) or `N/A` + `title="..."` where the dash acts as a disclosure marker.
+
+**Automated catch: added 2026-09-28.** `tools/gate.py` checks em dashes (D-79) only in
+prototype HTML, so `RenderedCopyHygieneTest` was written to cover shipped Blade: it walks
+every `.blade.php` under `resources/views`, strips Blade and both PHP comment forms, and
+fails on any en or em dash that can reach a Trainer. A companion test floors the sweep at
+12 views, because a first draft filtered on `getExtension() === 'blade'`, which matches
+nothing (`foo.blade.php` reports the extension `php`), and the guard would have passed
+having scanned zero files.
+
+### Notes
+
+- Both files are uncommitted frontend work; the blocker exists in the working tree, not in HEAD for `guided-step` (tracked, dirty) and nowhere tracked for `grade-point-meter` (untracked).
+- **Currency (2026-09-28, Slice 2).** `grade-point-meter.blade.php` and its test are now tracked — they were committed in `70f9218`, which also re-lit that component's progress fill. `guided-step` remains uncommitted, so the em-dash blocker described above still stands for it.
+
+---
+
+## KI-8 `/design-preview` 500s on a grade label the badge map has no entry for — RESOLVED 2026-09-28
+
+**Symptom.** `GET /design-preview` returns **500**: `Undefined array key "B+"` at
+`resources/views/components/stat-band.blade.php:99`.
+
+**Cause.** `config('scenarios.grade_banding')` now emits half-step labels
+(`B+`, `A-` and friends — seventeen of them at `step => 50`), while the component's
+`$gradeClass` map has keys for the nine base grades only (G, F, E, D, C, B, A, S, SS).
+Any stat that lands on a half-step dereferences a missing key.
+
+**Evidence.** Live server, 2026-09-28: `design-preview -> 500` while
+`umamusume -> 200` and `training-runs -> 200` on the same boot.
+
+**Impact.** `x-stat-band` is rendered by this route and nothing else, so the stat band
+has no reachable surface and **no test file at all** — its rendered contrast pairs could
+not be measured in Slice 2's manual pass. That pass still fixed the band's progress fill
+(`70f9218`, same 1.62:1 defect as the meter's bar) and guards it by reading both
+component sources, but makes no claim about unmeasured pairs.
+
+**Decision needed, not made here.** Either collapse half-steps onto the base grade's fill
+(needs its ratio recorded per D-10 before it ships) or give the seventeen labels a map of
+seventeen tokens. Nine fills versus seventeen labels is a design-system decision, and it
+is outside Slice 2's scope.
+
+**Owner.** The phase that owns `grade_banding` in `config/scenarios.php`.
+
+**Closed 2026-09-28 (`726f106`, R19).** The owner made the design-system call the entry
+asked for: the fill keys on the base letter with the modifier stripped, the badge prints the
+full label. A `B+` is a B's colour and the `+` is carried by the text, so nine fills serve
+seventeen labels without inventing eight tokens nobody sourced.
+
+The route returns **200** and every R17 fixture run returns 200 with zero console errors.
+The band now has a test file: `StatBandTest` walks all seventeen banding labels and asserts
+each one appears as a rendered badge, matched on the badge span rather than as a substring
+(`B` is inside `B+` and inside class names, so a plain `contains()` would pass a band that
+printed the wrong letter or none). `78697e9` measured the half Slice 2 could not: eighteen
+badge-fill pairs, minimum **9.00** against 4.5:1, and the bar fill at 4.20 light / 11.74
+dark against 3:1 — the claim `FRONTEND-SPEC-DIVERGENCE.md` §5 had carried unmeasured.
+
+---
+
+## KI-9 The selection gold measures 1.59:1 against `raised` in the light theme — RESOLVED 2026-09-28
+
+**Symptom.** `--color-pick` (`#EFC96A` light) used as a 2px boundary on a `raised`
+surface reads **1.59:1** — under WCAG 1.4.11's 3:1 for non-text boundaries. Measured in
+the browser on the Grade Point ladder's `aria-current="step"` row and on the race
+calendar's `current` cell. Dark is fine (`#F5B73C` on `#24262A` = 8.46:1).
+
+**Why it is not fixed in passing.** `--color-pick` does three jobs at once: this
+boundary, `*::selection`'s background, and part of the focus/selection pair recorded in
+`DESIGN.md` §8. Re-stepping it means re-measuring all three surfaces in both themes,
+which is its own pass. Nothing is colour-only today — the current step also carries
+`aria-current` and heavier text, so D-12 holds and no user is left unable to read state.
+
+**Owner.** Design system, with the token-pair table in `DESIGN.md`.
+
+**Closed 2026-09-28 (`725a5ff`, R15).** The token was not re-stepped; the two jobs were
+split. `--color-pick` keeps the fill, where it is right (8.34 light, 10.57 dark under
+`--color-on-pick`), and `--color-pick-line` (`#7A5C10` light, an alias to `--color-pick` in
+dark, where that value already cleared) carries the 2px boundary. Measured on the rendered
+element's own `border-top-color` against the first opaque background beneath it, both
+themes: **6.24** light / **8.46** dark on `raised`, **5.89** on the ladder's light `panel`,
+against WCAG 1.4.11's 3:1. All four boundary consumers moved together — the calendar's
+`current` cell, the meter ladder's `aria-current` step, the guided step's selected card and
+its step links — and `::selection` plus the focus ring were re-measured to prove the split
+did not disturb them.
+
+Guard: `DesignTokensTest` fails any view that reaches back for `border-pick`, with
+`(?![-\w])` so it does not flag `border-pick-line` itself. The realistic regression is one
+component drifting back to the prettier token, not all four going wrong at once.
+
+Found while writing the docs, recorded not fixed: `DESIGN.md`'s `JapanOnly` row specified
+`--color-pick` **as text**, which is 1.59:1 — a text-contrast failure rather than a
+boundary one. Nothing implements it; the catalog renders that status as `--color-ink-muted`
+label text. The row now says so, so the next reader does not build the bug the spec
+described.
+
+---
+
+## KI-10 Trackblazer Grade Points cannot be totalled or bucketed from what is stored
+
+**Symptom.** `TrainingRun::gradeEarned()` returns `null` for any run holding a finish
+below first, and the meter shows "not yet recorded" even though races happened.
+
+**Cause.** Two independent gaps, both measured rather than assumed:
+
+1. `docs/scenarios/05-trackblazer-gametora.md` prices Grade Points for **1st place only**
+   (`grade_point_by_grade`: G1 100 … Pre-OP 20) and states that lower placements "scale
+   down proportionally (similar to how Fan gain scales)" without naming a ratio. No
+   placement scaling table for Grade Points exists in the corpus, and no fan-placement
+   table exists either, so there is nothing to derive it from.
+2. D-232 makes the four objectives separate deadlines judged alone, but `race_entries`
+   carries no turn, year, or objective bucket, so a race cannot be attributed to the
+   period it counts toward.
+
+**Current behaviour is deliberate.** Withholding beats understating: a partial sum shown
+as a total would be a false claim about a trainee (D-256).
+
+**Required fix.** (a) a sourced placement ratio, or a `[Unverified]` placeholder decision
+from the owner; (b) a turn or year bucket on `race_entries`, which is schema work and
+therefore an ADR, not a patch.
+
+**Owner.** Planner Domain Specialist with Data Engineer for the source.
+
+---
+
+## KI-11 Design-system debts left visible by the Slice 2 gate run — ONE HALF CLOSED 2026-09-28
+
+- **CLOSED (`5c65597`). `database/seeders/ScenarioSlotSeeder.php` was an empty stub** —
+  `run()` contained only `//`, and `DatabaseSeeder` never called it. Against
+  `CONSTRAINTS.md`'s floor ("no unimplemented stubs") it was filled with sourced slot rows or
+  removed; the slot rows are fetch-engine work per ADR-0003 Amendment R3, so there was
+  nothing honest to put in it and the file is deleted. `scenario_slots` stays empty after a
+  clean seed by design, which is also what makes any `scenario_races` backfill vacuous: a
+  re-measured fresh scratch database seeds 24 tables and 10 skills and **0 slots**.
+- **OPEN. `--color-green-tint` is still referenced by no utility.** The goal cell moved to
+  `bg-raised` in `bb6eec6`. Re-measured against the built sheet: 55 custom properties
+  declared in `@theme static`, **0 pruned**, and the token resolves in both themes, so
+  nothing breaks. Retirement was refused under R14 on G-60 grounds — the pair is live spec in
+  `DESIGN.md` §6.15 for the unbuilt Safe-band colouring and the converged prototype uses it —
+  so it stays as a declared value awaiting its consumer rather than being deleted to quiet a
+  count. A pair that renders nowhere is unverified in practice, not proven: that is the
+  remaining debt, and it belongs to the phase that builds the Safe band.
+
+**Owner.** Design system.
+
+---
+
+## KI-12 The Grade Point meter says nothing was entered when races were entered but cannot be priced — RESOLVED 2026-09-28
+
+**Symptom.** A Trackblazer run holding two completed 1st-place races — one linked to a
+`G1` slot worth 100 points, one free-form with no slot — renders:
+
+> **not yet recorded** — no Grade Points are entered for this run, so there is no progress
+> to show yet.
+
+**Evidence.** Browser pass, 2026-09-28, `/training-runs/2` on an isolated database with
+both entries present; `gradeEarned()` returns `null` while
+`raceEntries` holds `[{slot: 6, tier: "G1", placement: 1}, {slot: null, tier: null,
+placement: 1}]`.
+
+**Cause.** `gradeEarned()` withholds the whole total when any completed entry cannot be
+priced, which is the deliberate KI-10 rule: a partial sum shown as a total would
+understate. The *sentence* is the defect, not the arithmetic — it attributes the blank
+panel to the Trainer having entered nothing.
+
+**Not fixed here.** Withholding is correct and the copy needs to name the real reason, but
+the wording differs by cause ("nothing entered" versus "a recorded result whose point value
+is not published"), so the honest fix is for `gradeEarned()` to expose which case it is —
+a new prop on a component whose other consumers are pinned by three existing assertions.
+That is a copy decision with a schema consequence, and it belongs with KI-10's resolution.
+
+**Interim truthfulness of what is shown:** the panel claims nothing about points, so no
+false number is drawn. The misleading part is the implication that the Trainer's races were
+not recorded.
+
+**Owner.** Design system with the Planner Domain Specialist, alongside KI-10.
+
+**Closed 2026-09-28 (`2816309`, R18).** The meter now has three states instead of two.
+`gradeEarned()` exposes the reason through `gradeUnpricedCount()`, and the component reads
+it: **"not yet totalled"** plus the count of logged results with no published Grade Point
+value, and "any total here would count less than this run earned" naming why the figure is
+withheld; **"not yet recorded"** only when no races are logged. The arithmetic did not move —
+withholding stayed correct per KI-10 — the sentence changed.
+
+The middle state is the one that matters and the one a two-state design loses: a Trainer who
+entered two first-place finishes is not the same case as a Trainer who entered nothing, and
+the old copy asserted the second over the first. KI-10 itself remains open: the placement
+ratio and the year bucket are unfixed, and this closure does not claim otherwise.
+
+---
+
+## KI-13 Blocker: the models and migrations this branch's own code resolves against exist on no ref
+
+**Severity:** Blocker — `master` and `docs/audit-remediation` are both affected
+**Owner:** Planner Domain Specialist with the concurrent frontend session
+**Do-not-land:** Yes — no branch move until this is closed
+
+**Symptom.** A clean checkout of `docs/audit-remediation` (`ee6786c`) or of `master`
+(`83084ab`) cannot boot the run surface, and its test suite cannot pass. The suite is green
+**here** only because the working tree carries files that no commit has ever contained.
+
+**Evidence.** Measured on the shared checkout, 2026-09-28:
+
+```
+$ git cat-file -e HEAD:app/Models/ScenarioSlot.php                      -> ABSENT
+$ git cat-file -e HEAD:app/Models/Preference.php                        -> ABSENT
+$ git log --all --oneline -- app/Models/ScenarioSlot.php \
+      database/migrations/2026_09_27_153416_create_scenario_slots_table.php   -> 0 commits
+```
+
+- Committed code references the missing class: `git grep -ln ScenarioSlot HEAD` names
+  `app/Models/RaceEntry.php`, `app/Models/TrainingRun.php`, `tests/Feature/RaceSlotPanelComposerTest.php`
+  and `tests/Feature/Schema/RaceEntrySlotLinkTest.php`.
+- `composer.json` maps `App\` to `app/`, so an absent class file is a fatal at resolve time,
+  not a soft miss.
+- `git ls-tree -r HEAD database/migrations` = 17 files; the disk has 20. `create_scenario_slots_table`,
+  `create_preferences_table` and `add_is_manual_to_scenario_races_table` are untracked, so a fresh
+  `migrate` from HEAD never creates `scenario_slots` or `preferences`.
+- First commit to depend on a file no ref has: `9134206` (Slice 2 S1). The defect is therefore at
+  least two slices old and is already on `master`.
+
+**Cause.** Pathspec commits. `git commit -F - -- <paths>` commits the working-tree state of the
+named paths and **silently ignores untracked files**, so a change that adds a model, its
+migration and a test lands the model's *references* while the new files stay invisible. The
+guard against it is mechanical: `git status --porcelain` after the commit must show nothing that
+the commit claimed to complete. This bit me in this very slice — T7's first commit attempt failed
+only because `tools/lore.php` was untracked, which is the loud version of the same mistake.
+
+**Complication for the fix.** These files sit in a working tree shared with a concurrent session
+and cannot be assumed idle: `app/Models/Preference.php`, its migration, `ScenarioSlot.php` and its
+migration are load-bearing for commits already on both branches, while
+`add_is_manual_to_scenario_races_table` (disk, 13:23:04) duplicates a *different-named* migration
+that is committed on the unmerged `feat/scenario-races-is-manual` (`46b8d3e`, 18:32:45). Two
+migrations for one column, on two refs, with different timestamps: whichever lands second errors
+or no-ops. Merging that branch without deleting one of the pair gives a schema that cannot migrate.
+
+**Required fix.** (1) the owner decides who commits the five source/migration files and on which
+branch; (2) the `is_manual` pair is reconciled to one migration; (3) then re-measure with
+`git ls-tree -r HEAD database/migrations | wc -l` equal to the on-disk count and
+`git grep -l ScenarioSlot HEAD` resolving. Until then T8's fast-forward is blocked, because
+moving `master` onto this tip would propagate a checkout that does not boot.
+
+**Owner.** Architect decides attribution; Planner Domain Specialist lands the slot and preference
+files; the schema half is ADR-0003's.

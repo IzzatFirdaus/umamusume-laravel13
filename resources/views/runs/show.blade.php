@@ -38,15 +38,24 @@
         race log, the meter from the matrix's own ladder. The earned figure is not
         passed at all when the run cannot state one, and the component's `earned`
         prop then renders the absence as absence rather than as zero.
+
+        A run with no scenario chosen gets neither. `scenarioKey()` falls back to the
+        baseline so the resource strip always has generic widgets, but these panels
+        name specific races and specific deadlines, and borrowing the baseline's
+        schedule would tell a Trainer their race calendar is Oka Sho when they have
+        not picked a scenario at all (D-220, D-221).
     --}}
-    @php $panelScenario = $run->scenarioKey(); @endphp
-    <x-race-calendar :scenario="$panelScenario" :cells="$run->calendarCells()" class="mt-3" />
-    <x-grade-point-meter
-        :scenario="$panelScenario"
-        :objectives="$run->gradeObjectives()"
-        :earned="$run->gradeEarned()"
-        class="mt-3"
-    />
+    @if ($run->hasScenario())
+        @php $panelScenario = $run->scenarioKey(); @endphp
+        <x-race-calendar :scenario="$panelScenario" :cells="$run->calendarCells()" class="mt-3" />
+        <x-grade-point-meter
+            :scenario="$panelScenario"
+            :objectives="$run->gradeObjectives()"
+            :earned="$run->gradeEarned()"
+            :unpriced-count="$run->gradeUnpricedCount()"
+            class="mt-3"
+        />
+    @endif
 
     <form method="POST" action="{{ route('runs.update', $run) }}" class="mt-4 flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-4 text-sm">
         @csrf
@@ -60,7 +69,7 @@
             {{-- A select, because the value is now validated against the matrix:
                  free text here would only produce a rejected submission. --}}
             <select name="scenario" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
-                <option value="">Not set — baseline strip</option>
+                <option value="">Not set (baseline strip)</option>
                 @foreach ($scenarios as $key => $label)
                     <option value="{{ $key }}" @selected($run->scenario === $key)>{{ $label }}</option>
                 @endforeach

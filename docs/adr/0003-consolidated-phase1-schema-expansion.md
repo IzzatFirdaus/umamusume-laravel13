@@ -13,7 +13,8 @@ Related: `PRD.md` US-3, US-4, US-10, FR-C; `CLAUDE.md` Planner Rules 4, 5, 6
 4. **The maiden gate is a distinct lock state** from the fan gate, visually and mechanically. *Clarified 2026-09-27:* "mechanically distinct" means the two are different **kinds** of predicate, not two values of one. The maiden gate is a boolean over race history (`scenario_races.maiden_gated` below), and the fan gate is a numeric comparison against `fans_needed`. Collapsing them into a single `introductory_race_cleared` flag would delete the threshold, so the shape below is already the simplification that survives contact with the data; the visual half of the claim rests separately on D-152, D-173, G-16b and G-28, which are client observations and do not depend on this argument.
 5. **`scenario_races` is generalised to `scenario_slots` with a `kind` discriminator** (owner ruling, 2026-09-27, after the scenario work). Reason: **Trackblazer has no mandatory race goals at all.** A table named for races cannot hold a Grade Point deadline, and the tool must not break on the third scenario. `kind` takes `GoalRace`, `TeamRace`, `GradeDeadline` or `ScriptedEvent`, so one table and one timeline view serve all four scenarios. The section below keeps its original name and columns as the `GoalRace` case; the rename is a schema task, not a redesign, and it is **unfunded work** logged here so it is not lost.
    - **Read this reason narrowly, because the loose wording was challenged on 2026-09-27.** Trackblazer has no mandatory *race* goals — nothing designates "win the Satsuki Sho" — but it has three **mandatory Grade Point thresholds**, and those are objectives with the same run-ending force as a missed goal race: End of Junior Year 60 GP, End of Classic Year 300 GP, End of Senior Year 300 GP, with points consumed at each deadline and **no carry-over** (`docs/scenarios/04-trackblazer-umaguide.md:38-43`). Because racing is the only GP source, the deadline and the race schedule are one system, which is exactly why `kind = GradeDeadline` exists. Two requirements follow for whoever writes the `scenario_slots` definition:
-     - the `GradeDeadline` case must carry a **threshold** and a **deadline turn**, and the row must be able to be *missed* — a slot model that only records "what happened" cannot express a failed objective, and a Trainer who under-shot the Classic threshold has a result the tool must show rather than infer. The threshold is **not one number per scenario**: there are four objectives (Debut race at Late June Junior, then 60 / 300 / 300 Grade Points at the ends of Junior, Classic and Senior), and the three point thresholds split into **two aptitude tracks** — 30 / 200 / 300 for a high-dirt or low-turf character, 60 / 200 / 300 for a narrow-range turf character, with Haru Urara and Curren Chan as the guides' named examples (`docs/scenarios/04-trackblazer-umaguide.md:31-44`, `docs/scenarios/05-trackblazer-gametora.md:12-21`). A single `threshold` column is therefore insufficient; the row needs the track it belongs to, or the per-character resolution has to happen where aptitude is readable. Surplus points do not carry between periods, so each row is judged against zero.
+     - **Amended 2026-09-28.** An earlier revision of this bullet required the `GradeDeadline` row to carry a **threshold** and a **deadline turn**. That clause contradicts Ruling R1 item 1, which makes `config/scenarios.php` the authoritative source for grade objectives, and it is withdrawn: the slot row carries **calendar position and gates**, the figures stay in config, and no `threshold` or `track` column is to be added. The requirement that survives is the one the schema cannot skip — a deadline must be able to be **missed**, which is a state on the Trainer's side of the relationship, not a column on the reference row.
+     - The threshold is **not one number per scenario**. There are four objectives (Debut race by Late June of Junior Year, then 60 / 300 / 300 Grade Points at the ends of Junior, Classic and Senior), and the three point thresholds split into **three tracks, not two** — `standard` 60 / 300 / 300, `dirt_leaning` 30 / 200 / 300 for a high-dirt or low-turf character such as Haru Urara, and `limited_turf_range` 60 / 200 / 300 for a turf character whose range outside short distances is weak, such as Curren Chan (`docs/scenarios/04-trackblazer-umaguide.md:31-44`, `docs/scenarios/05-trackblazer-gametora.md:12-21`, and `config/scenarios.php` `grade_objectives`, which carries all three). An earlier revision of this bullet named two tracks and omitted the plain-turf 60 / 300 / 300 case; a UI that rendered `standard` for a dirt-leaning trainee would show an impossible target. Surplus points do not carry between periods, so each objective is judged against zero.
      - **Missing a threshold ends the career** (owner-supplied from in-game observation, 2026-09-27). It is a hard fail: the run terminates to the career-end screen and the player either accepts retirement or spends an **Alarm Clock** to retry. The item corroborates the category — `items.json` id 95, `[Global]` "Alarm Clock" / 目覚まし時計, client text "Lets you try again on a Career goal race", already recorded against a missed mandatory placing and a lost Team Race. ❌ Still unverified: **where** a retry resumes; "start of that semester" is recollection, not a sourced value, and the schema must not encode a resume point. What the schema *does* need is that a missed deadline is terminal rather than a deduction, so the `GradeDeadline` row's states are pending / met / **missed-terminal**, not met / unmet.
 6. **The stat bound moves to 0..2000** (owner ruling, 2026-09-27). `ADR-0002` option B, on the ground that `scenarios.json` carries `hard_caps = 2000` as a real field and the current 0..1200 bound has been rejecting live Global runs since the 2026-07-01 rework. The UI must keep the 1,200 halved-gains line and the scenario ceiling as two visible markers rather than silently raising one number; see `ADR-0002` amendment 2 and `DESIGN.md` §6.5.
    - **Amended 2026-09-27: 2000 is a value, not the rule.** The export carries `hard_caps = 2500` for scenarios 13 and 14 (`Beyond Dreams` and `らっしゃい！トレセン軒！`), so a flat `0..2000` constant is wrong in principle even though it is right for every scenario live on `[Global]` — both of those rows have `start_en = null`, i.e. they are `[JP]`-only, and this tool's audience is Global. The bound must therefore be **read from the scenario's own stored `scenarios.hard_cap`**, with 2000 as the value that happens to apply to all four Global scenarios today. This costs nothing to do correctly because the column already exists and the parser already populates it; it is only the *constant* that would be a mistake. Note also that `hard_caps` has a sixth element (9999, or 99999 on the newest `[JP]` rows) whose meaning is unverified — `ADR-0002` forbids labelling it as any stat on the strength of position, and it must not be read as a stat ceiling either.
@@ -141,3 +142,90 @@ the definition still needs to be written down before that column is migrated.
 
 Companion work recorded elsewhere: `ADR-0004` covers the ten aptitude letters and the `scenarios`
 reference table, and closes `PRD.md` OQ-4 for those two domains only.
+
+---
+
+## Amendment R2 — 2026-09-28: what Slice 2's S1 actually found, and what it did not do
+
+R1.4 listed three things the `RaceEntry` rewire would land with: a migration dropping
+`scenario_race_id` and its factory, a model change removing the `scenarioRace` relation,
+and a test asserting a race entry is created via `scenario_slot_id` **only**. Slice 2
+executed none of those three as written, and the reason is measured rather than
+preferential. This amendment records that so the ADR and the tree agree.
+
+**`scenario_slot_id` stays nullable, deliberately.** Four independent findings:
+
+1. **No source columns.** `scenario_slots` requires `month` (1-12, NOT NULL), `half`
+   (enum Early/Late, NOT NULL) and `kind`, under a unique composite on
+   (`scenario_key`, `month`, `half`, `kind`). `scenario_races` has none of the three —
+   `Schema::getColumnListing()` returns `slot_label`, a free-text field whose factory
+   value is `'Classic Year Late May'`. Reading a month, a half and a discriminator out of
+   that string is inventing client data, which D-20 forbids.
+2. **Nothing to move.** `scenario_races` holds 0 rows in the development database and 0
+   rows after a clean `migrate` + `db:seed`: `DatabaseSeeder` calls `UmamusumeSeeder` and
+   `SkillSeeder` only. A backfill is vacuous by construction.
+3. **SQLite cannot do it in place.** Measured on a scratch copy of the real database,
+   SQLite 3.49.1: `ALTER TABLE … ADD COLUMN … NOT NULL` without a default fails with
+   "Cannot add a NOT NULL column with default value NULL", and `DROP COLUMN
+   scenario_slot_id` fails with "unknown column … in foreign key definition". The
+   two-step plan has no in-place form on this engine.
+4. **NOT NULL would break a scenario.** `race_calendar` is true for `ura_finale` and
+   `unity_cup` only; Trackblazer has no fixed race list and derives Grade Points from the
+   race log the Trainer keeps. A mandatory slot reference makes a Trainer-picked race
+   impossible to store, which is exactly what D-221 exists to prevent.
+
+**What S1 did land** (`9134206`): `scenario_slot_id` was absent from `RaceEntry`'s
+`#[Fillable]`, so `RaceEntry::create([...])` dropped it in silence — the INSERT ran
+without the column, the `scenarioSlot()` relation could never resolve, and the rewire was
+a schema with no way in. That is fixed, and the nullability contract is pinned by tests
+rather than by this prose.
+
+**R1.3 was being violated by the factory, and is not any more** (`9451659`): `RaceEntryFactory` defaulted `scenario_race_id` to `ScenarioRace::factory()`,
+so every factory-built race entry wrote a row into the frozen table — including Trackblazer
+entries that have no calendar race. The default is now `null`. `Adr0003SchemaTest` still
+covers the retired column by naming it explicitly, including its `nullOnDelete` behaviour,
+so the freeze holds without deleting the history that proves it.
+
+**R1.4's third bullet is corrected as written.** "created via `scenario_slot_id` only"
+describes the common case and forbids the necessary one. What is true, and now tested in
+`tests/Feature/Schema/RaceEntrySlotLinkTest.php`, is: a slot-linked entry needs no
+`scenario_races` row, and a free-form entry needs no slot. Both are storable; neither is
+invented.
+
+**Dropped from scope, with reasons recorded.** Removing `scenario_race_id` and the
+`scenarioRace` relation is still the destination, but it is blocked behind (a) a populated
+`scenario_slots` having no populated rows outside a factory — the empty
+`ScenarioSlotSeeder` stub was deleted in Slice 3's T5, and slot population is recorded
+below as fetch-engine work —
+and (b) a decision about what a Trackblazer race points at once `gradeEarned()` can be
+attributed to an objective (KI-10). A migration that drops a column two tests still
+exercise, on a table that has never held a row outside a factory, would be schema theatre.
+
+---
+
+## Amendment R3 — 2026-09-28: `scenario_slots` is populated by the fetch engine, not a seeder
+
+Slice 3's T5 (R14) asked whether `ScenarioSlotSeeder` should be filled with URA Finale
+goal-race slots, conditional on every row carrying a server qualifier and a source date
+(D-227). The condition fails, so the stub is deleted and the rule is recorded here.
+
+**Why it cannot be filled today.** `docs/scenarios/01-ura-finale.md` contains no goal-race
+list. The only race row in the whole guide is `Junior Make Debut (race) | After 11 turns |
+Mandatory debut race` (line 87). There is no Oka Sho, no fan threshold, no month-and-half
+placement for any URA target — so a seeder would have to author the `month`, `half`,
+`tier` and `fans_needed` values that `scenario_slots` requires, which is inventing client
+data (D-20) and attaching no provenance to it (D-227). The race names that appear in this
+repository's tests and browser fixtures are factory sample data, and none of them is
+sourced as a URA goal race with a gate figure.
+
+**Where the rows come from instead.** The ADR-0004 pattern, which this table already
+follows for caps: reference data arrives through the fetch engine with `source_url`,
+`snapshot_path`, `fetched_at` and `source_timezone` populated, and `is_manual` reserved for
+Trainer-entered rows. `scenario_slots` carries all five columns already, so the schema is
+not the blocker — the source is. Slot population is therefore Data Engineer work against a
+declared fetch source, and the escalation in `AGENTS.md` applies: an uncertain source is
+stopped and surfaced, not seeded around.
+
+**What this does not unblock.** R2's decision to keep `race_entries.scenario_slot_id`
+nullable stands on its own grounds: Trackblazer's Trainer-chosen races have no slot in any
+future, sourced version of this table either.

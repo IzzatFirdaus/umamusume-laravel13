@@ -80,7 +80,8 @@ Implemented (verified against `routes/web.php` and committed views/tests):
 - Review queue: `/review` resolves Fuzzy/None match candidates (confirm, alias, reject).
 - Export: `GET /training-runs/{run}/export/csv|json`.
 - Fetch engine pipeline: `php artisan uma:fetch` / `uma:reparse` / `uma:backup`
-  (`config/uma.php`; the source list is empty by design, PRD OQ-2).
+  (`config/uma.php`; one owner-approved source, `gametora-characters`, 2026-09-27;
+  PRD OQ-2 partially resolved).
 - Read-only JSON API: `/api/v1/umamusume`, `/api/v1/training-runs` with the
   `{ data, pagination }` envelope and the `{ error: { code, message } }` shape.
 
@@ -94,11 +95,13 @@ Known gaps:
 - `resources/views/welcome.blade.php` (framework default) links an external font from
   fonts.bunny.net, which contradicts the offline constraint; the app's own layout
   component does not.
-- `config('uma.sources')` is empty: no concrete fetch sources are approved yet (OQ-2).
+- One fetch source is configured and approved (`gametora-characters`); its robots/live
+  availability verification is still outstanding (OQ-2, partially resolved).
 - The framework-default `users` table and `User` model remain unused.
 
 Open questions that bound the design (PRD §7): OQ-1 product name is **closed**
-(Trainer Desk, 2026-09-27). Still open: sources (OQ-2), fetch scheduling (OQ-3),
+(Trainer Desk, 2026-09-27). OQ-2 partially resolved (first source approved 2026-09-27,
+verification outstanding). Still open: remaining sources (OQ-2), fetch scheduling (OQ-3),
 planner reference data in catalog (OQ-4).
 
 ## Brand Commitments
@@ -107,7 +110,8 @@ Owner-confirmed 2026-09-27 (recorded in `DESIGN.md`):
 
 - Name "Trainer Desk"; tone is a serious single-user workspace, not a mobile
   companion or community platform.
-- "Tactical athletics" identity: utilitarian, data-dense, dark by default.
+- "Tactical athletics" identity: utilitarian, data-dense. Light base palette with
+  dark opt-in via preference resolution (ADR-0006).
   High-contrast muted surfaces, sharp functional accents, monospace numerals.
   No pastel gradients, no soft drop shadows, no equestrian/animal iconography.
 - Color anchors and the dark theme are the measured values from

@@ -6,6 +6,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TrainingRunController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\View;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -45,7 +46,7 @@ Route::post('/review/{candidate}', [ReviewController::class, 'resolve'])->name('
  * TrainingRun controller with an actual run, and it should reuse the four
  * components, not this page's data assembly.
  */
-Route::get('/design-preview', function (): \Illuminate\View\View {
+Route::get('/design-preview', function (): View {
     $scenarios = config('scenarios.scenarios');
     $stats = config('scenarios.stat_order');
 
@@ -82,7 +83,7 @@ Route::get('/design-preview', function (): \Illuminate\View\View {
         $states = [
             2 => ['Early' => ['state' => 'goal', 'label' => 'Fuwa Fuji Taima Stakes']],
             4 => ['Late' => ['state' => 'fan_locked', 'label' => 'Tenno Sho', 'fans_needed' => 12000]],
-            5 => ['Early' => ['state' => 'maiden_locked', 'label' => 'Naruta Kinpa Cup', 'fans_needed' => 0]],
+            5 => ['Early' => ['state' => 'maiden_locked', 'label' => 'Naruta Kinpa Cup']],
             3 => ['Late' => ['state' => 'open', 'label' => 'Entry open']],
             1 => ['Late' => ['state' => 'current', 'label' => 'Next']],
         ];
@@ -135,6 +136,26 @@ Route::get('/design-preview', function (): \Illuminate\View\View {
             ['direction' => 'down', 'text' => '-19 Energy'],
         ];
 
+        // The Grade Point ladder, composed from the same two config blocks the
+        // meter reads, so the review surface and the run screen cannot drift.
+        $labels = $def['grade_objective_labels'] ?? [];
+        $standard = $def['grade_objectives']['standard'] ?? [];
+
+        $objectives = array_merge(
+            [['name' => $labels['debut'] ?? 'Debut race', 'required' => 0]],
+            array_map(
+                fn (string $year, int $points): array => ['name' => $labels[$year] ?? $year, 'required' => $points],
+                array_keys($standard),
+                array_values($standard),
+            ),
+        );
+
+        // The step under review comes from ?step= so every scenario-owned step can
+        // be opened without editing this file. An unknown key falls back to the
+        // scenario's first step rather than rendering a step the scenario lacks.
+        $requested = request()->query('step');
+        $step = in_array($requested, $def['steps'], true) ? $requested : $def['steps'][0];
+
         $samples[$key] = [
             'label' => $def['label'],
             'live' => $def['live_on_global'],
@@ -145,6 +166,8 @@ Route::get('/design-preview', function (): \Illuminate\View\View {
             'sp' => 68,
             'calendar' => $calendar,
             'steps' => $def['steps'],
+            'step' => $step,
+            'objectives' => $objectives,
             'selected' => $choices[0]['key'],
             'choices' => $choices,
             'preview' => $preview,

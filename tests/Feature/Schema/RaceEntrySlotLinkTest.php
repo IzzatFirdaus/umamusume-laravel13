@@ -71,6 +71,17 @@ it('stores a Trackblazer race the Trainer picked, with no slot and no calendar r
         ->and($entry->placement)->toBe(1);
 });
 
+it('does not write a row into the frozen table when a race entry is built', function (): void {
+    // ADR-0003 R1.3 freezes `scenario_races`: no new rows, no queries from new
+    // code. The factory's default still named a `ScenarioRace::factory()` there,
+    // so every factory-built race entry — including a Trackblazer one that has no
+    // calendar race at all — wrote a row into the table being retired.
+    RaceEntry::factory()->create();
+
+    expect(ScenarioRace::count())->toBe(0)
+        ->and(RaceEntry::count())->toBe(1);
+});
+
 it('cannot backfill scenario_races into scenario_slots because the old table has no month, half or kind', function (): void {
     // The three columns scenario_slots needs as NOT NULL do not exist on the
     // table being retired. `slot_label` is free text such as

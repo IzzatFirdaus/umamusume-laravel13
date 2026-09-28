@@ -65,7 +65,33 @@
        chrome/on-chrome are, so components stay theme-agnostic (D-101). */
     --color-ring: #4E7906;
     --color-risk: #800014;
+    /*
+     * The mandatory goal race's own pair, split because D-181 asks for two colours on
+     * one cell: the client's red `Goal` pennant, and a heavier *warm* outline.
+     * Neither can borrow. Green is reserved for action and affordability, and
+     * `--color-risk` is an error state — a goal race is an obligation, not a fault.
+     * Both clear WCAG 1.4.11's 3:1 for non-text boundaries against the `raised` fill
+     * the contract gives the cell: red 5.74 and warm 5.02 on #FFFFFF here, red 5.51
+     * and warm 7.15 on the dark `raised` below.
+     */
+    --color-goal: #C81D25;
+    --color-goal-line: #B45309;
     --color-pick: #EFC96A;
+    /*
+     * The selection BOUNDARY, split from `--color-pick` because the two jobs pull
+     * in opposite directions. As a fill behind `--color-on-pick` the gold is right
+     * (that pair measures 8.34 here, 10.57 in dark). As a 2px outline on a `raised` surface it
+     * measures 1.59:1, and WCAG 1.4.11 wants 3:1 for a boundary someone has to see
+     * to know which row is live — the ladder's current step, the calendar's next
+     * race, the selected guided step. This is the deep end of the same gold hue, so
+     * a selection still reads as gold, at 6.24 on `raised` and 5.89 on `panel`.
+     *
+     * Known weakness, recorded rather than hidden: it sits 1.24:1 from
+     * `--color-goal-line` #B45309 in luminance, so a goal cell and a current cell in
+     * the same grid are separated by hue (41° against 27°) and by the goal's red
+     * pennant, not by lightness. D-12 holds because both states also carry words.
+     */
+    --color-pick-line: #7A5C10;
     /* The ink that goes ON the gold selection. Not `ink-strong`: that is #482720 here but
        #FFFFFF in the dark override, and white on amber measures 1.75:1. Selection keeps a
        dark ink in both themes, so it needs its own token (D-288: declared in `@theme static`
@@ -179,7 +205,17 @@ html[data-theme='dark'] {
     --color-on-chrome: #121013;
     --color-ring: #7FCC09;
     --color-risk: #FF6B7A;
+    /* Stepped for the dark surfaces, and deliberately not the risk red beside it:
+       4.49 on `raised` and 5.61 on `panel` for the pennant, 6.15 and 7.7 for the
+       warm outline. Neither value is `--color-up`, so a goal stops reading as a gain. */
+    --color-goal: #F2555A;
+    --color-goal-line: #E8912B;
     --color-pick: #F5B73C;
+    /* Aliases to `--color-pick` here on purpose. The defect was light-only: this gold
+       already measures 8.46 on the dark `raised` surface, well past the 3:1 a
+       boundary needs. The token still exists as its own name so a component never
+       has to know which theme it is in, the same way `--color-sp-ink` aliases below. */
+    --color-pick-line: #F5B73C;
     --color-on-pick: #121013;
     --color-sp: #4FC3F7;
     --color-sp-ink: #4FC3F7;

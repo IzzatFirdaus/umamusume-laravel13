@@ -52,6 +52,8 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "lore": "@php tools/lore.php",
+        "lore-code": "@php tools/lore.php code",
         "lint": "pint --test",
         "fix": "pint",
         "analyse": "phpstan analyse",

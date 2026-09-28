@@ -35,6 +35,7 @@ class TrainingRunController extends Controller
     {
         return view('runs.create', [
             'umamusumes' => Umamusume::orderBy('name')->get(['id', 'name']),
+            'scenarios' => $this->scenarioLabels(),
         ]);
     }
 
@@ -52,6 +53,7 @@ class TrainingRunController extends Controller
         return view('runs.show', [
             'run' => $run,
             'skills' => Skill::orderBy('name')->get(['id', 'name']),
+            'scenarios' => $this->scenarioLabels(),
         ]);
     }
 
@@ -113,6 +115,21 @@ class TrainingRunController extends Controller
         }
 
         return redirect()->route('runs.show', $run);
+    }
+
+    /**
+     * Scenario slug => the matrix's own display label, for the two forms that offer
+     * a choice. Composed from `config('scenarios.php')` rather than from a list
+     * here, so a fifth scenario appears without a controller edit (D-240).
+     *
+     * @return array<string, string>
+     */
+    private function scenarioLabels(): array
+    {
+        return array_map(
+            static fn (array $def): string => $def['label'],
+            config('scenarios.scenarios'),
+        );
     }
 
     /**

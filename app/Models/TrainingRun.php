@@ -149,6 +149,20 @@ class TrainingRun extends Model
     }
 
     /**
+     * Whether the Trainer has actually chosen a scenario.
+     *
+     * Distinct from `scenarioKey()`, which falls back to the baseline so the
+     * resource strip always has generic widgets to compose. The goal panels are not
+     * generic — they name particular races and particular deadlines — so they read
+     * this instead, and a run with no scenario shows neither rather than borrowing
+     * the baseline's schedule (D-220, D-221).
+     */
+    public function hasScenario(): bool
+    {
+        return $this->scenario !== null;
+    }
+
+    /**
      * The race calendar's cells, composed from this scenario's slots and this
      * run's own race log (D-221, D-240).
      *
@@ -165,6 +179,10 @@ class TrainingRun extends Model
      */
     public function calendarCells(): array
     {
+        if (! $this->hasScenario()) {
+            return [];
+        }
+
         $cells = [];
 
         for ($month = 0; $month < 12; $month++) {
@@ -267,6 +285,10 @@ class TrainingRun extends Model
      */
     public function gradeObjectives(): array
     {
+        if (! $this->hasScenario()) {
+            return [];
+        }
+
         $def = config('scenarios.scenarios.'.$this->scenarioKey());
         $labels = $def['grade_objective_labels'] ?? [];
         $standard = $def['grade_objectives']['standard'] ?? [];
@@ -295,12 +317,16 @@ class TrainingRun extends Model
      * the matrix's `grade_point_by_grade`, transcribed from
      * docs/scenarios/05-trackblazer-gametora.md §"Grade Points and Shop Coins".
      * That table prices a first place only; below first the corpus says points
-     * "scale down proportionally" and gives no factor. A run holding any finish
+     * "scale down proportionally" and names no ratio. A run holding any finish
      * below first therefore reports nothing rather than a total that understates
      * itself (D-256).
      */
     public function gradeEarned(): ?int
     {
+        if (! $this->hasScenario()) {
+            return null;
+        }
+
         $table = (array) config('scenarios.scenarios.'.$this->scenarioKey().'.grade_point_by_grade');
 
         $entries = $this->raceEntries()
@@ -325,6 +351,34 @@ class TrainingRun extends Model
         }
 
         return $total;
+    }
+
+    /**
+     * How many completed races cannot be turned into a Grade Point figure.
+     *
+     * R18 gives the meter a third state, and this is what distinguishes "nothing was
+     * logged" from "logged, but not convertible". A result is unpriceable when it
+     * finished below first, because `grade_point_by_grade` prices a 1st place only,
+     * or when it has no slot, because the grade lives on the slot and a free-form
+     * race records no grade. Neither is a data-entry failure by the Trainer, which is
+     * what the old single sentence implied.
+     */
+    public function gradeUnpricedCount(): int
+    {
+        if (! $this->hasScenario()) {
+            return 0;
+        }
+
+        $table = (array) config('scenarios.scenarios.'.$this->scenarioKey().'.grade_point_by_grade');
+
+        return $this->raceEntries()
+            ->where('status', RaceEntryStatus::Completed)
+            ->with('scenarioSlot')
+            ->get()
+            ->filter(fn (RaceEntry $entry): bool => $entry->placement !== 1
+                || $entry->scenarioSlot?->tier === null
+                || ! array_key_exists($entry->scenarioSlot->tier, $table))
+            ->count();
     }
 
     protected function casts(): array
