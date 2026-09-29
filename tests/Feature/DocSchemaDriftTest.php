@@ -31,10 +31,33 @@ use Illuminate\Support\Facades\Schema;
  *   `cd26d8d` diff. A fresh paraphrase slips past the pin; that is the price of a
  *   guard a human can read, and the vocabulary is one line to widen here when a
  *   paraphrase bites.
- * - The dated-erratum blocks this repo's own correction convention keeps. ADR-0008
- *   leaves each superseded paragraph standing as written and records the landing
- *   beside it, so the run column's placeholder wording at `:21` is governed by
- *   that convention rather than by this pin.
+ *
+ * There is NO dated-erratum exemption, and the guard does not have one. ADR-0008's
+ * superseded paragraphs (`:10-13`, `:21`) are preserved as written by this repo's
+ * correction convention, and they escape this pin only because their wording happens
+ * to sit outside the three-phrase vocabulary: `authorized, not built` and
+ * `the slice's next migration` match nothing here. That is coverage by accident, not
+ * a designed pass, and it is fragile in both directions. Forward: a future correction
+ * that quotes a guarded phrase about a landed object — quoting `NOT migrated yet` is
+ * exactly what a dated erratum exists to preserve — fails CI on prose the convention
+ * requires to stand, and the wrong fix would be to widen the vocabulary or delete the
+ * guard; the right fix is to restate the quotation so it names the state at the time
+ * (`was authorized while the schema did not yet have it`) and leave the pin alone.
+ * Backward: an exemption keyed on the marker cannot work, because the marker sits on
+ * the correction block while the text the convention protects is the earlier
+ * paragraph, which the correction identifies only in prose and with a varying count
+ * ("the sentence above", "the paragraph above", "the two paragraphs above"); keying on
+ * "a dated correction paragraph" instead would blind this guard to the three
+ * dated-correction paragraphs already standing in `docs/design-research/CONSTRAINTS.md`
+ * alone, none of which has anything to do with the schema. The test below pins the
+ * no-exemption behaviour so the claim and the code cannot drift apart again.
+ *
+ * Both helpers are line-scoped, and a wrapped phrase escapes them: the export reads
+ * each doc as separate lines, so a guarded wording that straddles a soft wrap
+ * (`not migrated` at the end of one line, `yet` at the start of the next) matches
+ * nothing. The four governance docs wrap prose at ~100 columns, so this is a real
+ * blind spot, disclosed rather than fixed — fixing it means joining paragraphs before
+ * matching, which would widen the guard's reach across every other line of them.
  */
 
 /**
@@ -71,6 +94,9 @@ function appliedMigrationFileNames(): array
  * Every shipped table with the columns it really has, the second way a doc can
  * name the object it is describing.
  *
+ * The framework's own tables are left out, by {@see frameworkTableNames()}, because
+ * their columns are ordinary English words rather than schema vocabulary.
+ *
  * @return array<string, list<string>>
  */
 function landedColumnsByTable(): array
@@ -80,7 +106,7 @@ function landedColumnsByTable(): array
     foreach (Schema::getTables() as $table) {
         $name = (string) ($table['name'] ?? '');
 
-        if ($name === '') {
+        if ($name === '' || in_array($name, frameworkTableNames(), true)) {
             continue;
         }
 
@@ -91,21 +117,57 @@ function landedColumnsByTable(): array
 }
 
 /**
- * Doc lines that call a landed schema object un-landed.
+ * The tables the `0001_01_01_*` skeleton migrations create, plus `migrations` itself,
+ * which the migrator writes.
  *
- * @param  list<string>  $applied  migration file names from the `migrations` table
- * @param  array<string, list<string>>  $landed  table name => its real columns
- * @return list<string> one entry per offending line: `path:line` then the line itself
+ * They are excluded because a column name is only evidence of a schema object when the
+ * word means itself: `migrations.id` and `jobs.queue` are the words `id` and `queue`,
+ * so a governance doc describing this guard's own inputs ("the applied migration set
+ * from the `migrations` table") would name a landed object on nothing but the word
+ * `id`, and a dated correction about the guard could trip the pin it is correcting. No
+ * governance doc here claims a framework table is un-landed, so the exclusion costs
+ * this pin nothing it can currently see.
+ *
+ * @return list<string>
  */
-function unlandedDocClaims(array $applied, array $landed): array
+function frameworkTableNames(): array
+{
+    return [
+        'cache',
+        'cache_locks',
+        'failed_jobs',
+        'job_batches',
+        'jobs',
+        'migrations',
+        'password_reset_tokens',
+        'sessions',
+        'users',
+    ];
+}
+
+/**
+ * The three un-landed wordings, in one pattern so widening the vocabulary stays the
+ * one-line edit the docblock above says it is.
+ */
+function unlandedClaimPattern(): string
 {
     // `authorized, NOT migrated yet` (the ARCHITECTURE-ESSENTIALS wording),
     // `the next migration in the slice` and `lands as 2026_…` (both
     // ARCHITECTURE.md §3's) - the three phrasings `cd26d8d` had to correct.
-    $unlandedClaim = '/\bnot (?:migrated yet|yet migrated)\b'
+    return '/\bnot (?:migrated yet|yet migrated)\b'
         .'|\bnext migration in the slice\b'
         .'|\blands? (?:as|in)\s+[`\']?\d{4}_\d{2}_\d{2}_\d{6}/i';
+}
 
+/**
+ * Doc lines that call a landed schema object un-landed, across the four governance docs.
+ *
+ * @param  list<string>  $applied  migration file names from the `migrations` table
+ * @param  array<string, list<string>>  $landed  table name => its real columns
+ * @return list<string> one entry per offending line: `path:line` then the phrase that matched
+ */
+function unlandedDocClaims(array $applied, array $landed): array
+{
     $offenders = [];
 
     foreach (governanceDocPaths() as $doc) {
@@ -115,19 +177,43 @@ function unlandedDocClaims(array $applied, array $landed): array
             continue;
         }
 
-        $lines = preg_split('/\R/', (string) file_get_contents(base_path($doc))) ?: [];
+        $offenders = [
+            ...$offenders,
+            ...unlandedClaimsInDoc($doc, (string) file_get_contents(base_path($doc)), $applied, $landed),
+        ];
+    }
 
-        foreach ($lines as $index => $line) {
-            if (preg_match($unlandedClaim, $line) !== 1) {
-                continue;
-            }
+    return $offenders;
+}
 
-            if (! namesLandedObject($line, $applied, $landed)) {
-                continue;
-            }
+/**
+ * The same pin over one doc body, so a planted claim can be tested without editing a
+ * tracked governance doc: the offender set is a property of the wording plus the
+ * schema, and both are inputs here.
+ *
+ * @param  list<string>  $applied
+ * @param  array<string, list<string>>  $landed
+ * @return list<string> one entry per offending line: `path:line` then the phrase that matched
+ */
+function unlandedClaimsInDoc(string $doc, string $body, array $applied, array $landed): array
+{
+    $offenders = [];
 
-            $offenders[] = $doc.':'.($index + 1).'  '.trim(substr($line, 0, 140));
+    foreach (preg_split('/\R/', $body) ?: [] as $index => $line) {
+        if (preg_match(unlandedClaimPattern(), $line, $matched) !== 1) {
+            continue;
         }
+
+        if (! namesLandedObject($line, $applied, $landed)) {
+            continue;
+        }
+
+        // The matched phrase and its line number, never a prefix of the line. The
+        // D-30 rule is one 1,794-byte line whose offending clause sits around byte
+        // 1,500, so `substr($line, 0, 140)` printed the rule's heading instead of the
+        // wording that broke the pin — and byte slicing can cut a multibyte character
+        // in half. The match is a whole token run, so it cannot.
+        $offenders[] = $doc.':'.($index + 1).'  matched “'.trim($matched[0]).'”';
     }
 
     return $offenders;
@@ -140,6 +226,13 @@ function unlandedDocClaims(array $applied, array $landed): array
  * tests cannot match a short column inside a longer identifier such as
  * `support_card_id`, which is what keeps prose about a genuinely un-landed column
  * out of the offender list.
+ *
+ * Residual, and disclosed rather than patched: the co-occurrence test is still a
+ * heuristic over app tables whose column names are ordinary English (`title`,
+ * `status`, `notes`), so a line that names such a table anywhere in prose counts as
+ * naming a landed object. Widening the table name requirement to backtick-quoted
+ * identifiers would blind the real drift this pin was written for, which arrives as
+ * plain prose in the ESSENTIALS digest, so the loose form stands.
  *
  * @param  list<string>  $applied
  * @param  array<string, list<string>>  $landed
@@ -196,7 +289,77 @@ it('keeps no governance doc describing an applied migration as un-landed', funct
         ->toContain('2026_09_29_120200_add_character_card_id_to_training_runs_table')
         ->and($trainingRunColumns)->toContain('character_card_id');
 
-    // Each entry is `path:line` plus the line's own text, so a breakage names the
-    // sentence to correct rather than just failing a count.
+    // Each entry is `path:line` plus the phrase that matched, so a breakage names the
+    // wording to correct rather than just failing a count.
     expect(unlandedDocClaims($applied, $landed))->toBe([]);
+});
+
+it('flags a planted un-landed claim and stays green on a pending one', function (): void {
+    // The four lines `cd26d8d` and `7539750` had to correct, planted here rather than
+    // back into the tracked docs: this is the proof the pin still catches real drift,
+    // and it does not need the tree to be wrong to demonstrate it. The expected set
+    // also shows the printing rule — the leftmost guarded phrase, not the line's head,
+    // which is what a 1,794-byte rule line could offer instead.
+    $applied = appliedMigrationFileNames();
+    $landed = landedColumnsByTable();
+    $body = <<<'MD'
+    # Digest
+
+    - training_runs: character_card_id? authorized, **NOT migrated yet**
+    - `training_runs.character_card_id` is the next migration in the slice
+    - stays the required owner. Not migrated yet — lands as 2026_09_29_120200_add_card…
+    - `character_card_id` FK->character_cards nullable, lands as 2026_09_29_120200_add…
+    - the card store action lands as 2099_01_01_000000_add_card_store_columns
+    MD;
+
+    expect(unlandedClaimsInDoc('digest.md', $body, $applied, $landed))->toBe([
+        'digest.md:3  matched “NOT migrated yet”',
+        'digest.md:4  matched “next migration in the slice”',
+        'digest.md:5  matched “Not migrated yet”',
+        'digest.md:6  matched “lands as 2026_09_29_120200”',
+    ])
+        // The last line is honest forward-looking prose: the same wording, for a
+        // migration the applied set does not carry. A guard that fired on it would be
+        // deleted within a task, which is why it is asserted green here rather than
+        // left to inference.
+        ->and(unlandedClaimsInDoc('digest.md', '- the card store action lands as 2099_01_01_000000_add_card_store_columns', $applied, $landed))->toBe([]);
+});
+
+it('exempts no dated correction paragraph, because the guard has no such path', function (): void {
+    // The docblock above claims there is no erratum exemption, and ADR-0008 :50-52
+    // used to claim the opposite. This test is what keeps the two honest: quote a
+    // guarded phrase about a landed object inside a dated correction, in the exact form
+    // this repo's convention writes one, and the pin still fires. If a vague
+    // "skip dated corrections" hole is ever added here, this test is what fails.
+    $applied = appliedMigrationFileNames();
+    $landed = landedColumnsByTable();
+    $body = <<<'MD'
+    **Second correction, dated 2026-09-29 — the earlier paragraph stands as written.**
+    It said `training_runs.character_card_id` was authorized and **not migrated yet**,
+    and named the slice's next migration for it. Both readings are false today.
+    MD;
+
+    expect(unlandedClaimsInDoc('0008-character-card-catalog-layer.md', $body, $applied, $landed))->toBe([
+        '0008-character-card-catalog-layer.md:2  matched “not migrated yet”',
+    ]);
+});
+
+it('does not read a framework table word as a landed schema object', function (): void {
+    // `migrations` is a real table and `id` is one of its columns, so before
+    // `frameworkTableNames()` excluded the skeleton tables, a correction describing
+    // this guard's own inputs matched on the ordinary words `migrations` and `id` and
+    // the pin tripped on itself.
+    $applied = appliedMigrationFileNames();
+    $landed = landedColumnsByTable();
+    $selfReference = '- the drift guard reads the applied set from the `migrations` table by `id`, which was not migrated yet as an app table';
+
+    expect(array_intersect(['migrations', 'users', 'jobs'], array_keys($landed)))->toBe([])
+        ->and(namesLandedObject($selfReference, $applied, $landed))->toBeFalse()
+        ->and(unlandedClaimsInDoc('drift.md', $selfReference, $applied, $landed))->toBe([]);
+
+    // The exclusion is narrow: drop the framework words and name an app table beside
+    // one of its real columns, and the same sentence fires again.
+    expect(unlandedClaimsInDoc('drift.md', '- `training_runs` holds `character_card_id`, which was not migrated yet', $applied, $landed))->toBe([
+        'drift.md:1  matched “not migrated yet”',
+    ]);
 });

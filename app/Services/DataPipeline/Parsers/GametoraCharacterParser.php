@@ -20,9 +20,9 @@ use JsonException;
 final class GametoraCharacterParser implements SourceParser
 {
     /**
-     * Sorts a card with no JP date last without breaking string comparison. Public
-     * because it is the export's placeholder rather than a date: a Global card whose
-     * only `release_en` is this value has not reached [Global], so it is not a row.
+     * Sorts a card with no JP date last without breaking string comparison. Public for the
+     * card grain's rule, which this class does not apply: there, a card whose only `release_en`
+     * is this placeholder has not reached [Global], so it is not a row. ADR-0008 §"The sentinel at two grains".
      */
     public const UNKNOWN_DATE = '9999-12-31';
 

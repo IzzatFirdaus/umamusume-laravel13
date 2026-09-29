@@ -47,9 +47,26 @@ on any line of this ADR, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md` or `doc
 that uses an un-landed wording for an object either source says is present. It is not a repo-wide
 doc/schema checker and says so: `PLAN.md`, `docs/scenarios/**`, `docs/UMAMUSUME_REFERENCE.md`,
 `KNOWN-ISSUES.md` and `docs/design-research/verification/**` sit outside it, because they record pending
-work and dated history; a wording invented fresh can slip past its three-phrase vocabulary; and the
-superseded paragraphs this header keeps as written (`:10-13`, `:21`) are exempt by design, since the
-correction convention above is what governs them.
+work and dated history; a wording invented fresh can slip past its three-phrase vocabulary. And the
+superseded paragraphs this header keeps as written (`:10-13`, `:21`) are **not exempt** — that is a
+correction to this ADR's own earlier claim that they were "exempt by design". `unlandedDocClaims()` has no
+erratum path and no block tracker: those two passages pass because their wording
+(`authorized, not built`, `the slice's next migration`) happens to fall outside the three guarded phrases,
+not because the guard steps aside for them. So the coverage is by phrase only, and fragile both ways. A
+future correction that quotes a guarded phrase about a landed object fails CI on prose this convention
+requires to stand; the fix there is to restate the quotation as a statement about the past
+(`was authorized while the schema did not yet carry it`), never to widen the vocabulary array or delete the
+guard. An exemption keyed on the correction marker cannot be built precisely: the marker sits on the
+correction block while the text the convention protects is the earlier paragraph, which the correction
+identifies only in prose and with a varying count ("the sentence above", "the paragraph above", "the two
+paragraphs above"), and keying instead on "any dated-correction paragraph" would blind the guard to three
+such paragraphs already standing in `docs/design-research/CONSTRAINTS.md` alone, none of them about the
+schema. `tests/Feature/DocSchemaDriftTest.php` names this and pins it: one of its tests plants a dated
+correction quoting `not migrated yet` beside a landed column and asserts it **still fires**, so the claim
+and the code cannot drift apart a third time. Two further limits are recorded there rather than here: the
+guard reads one line at a time, so a guarded wording that straddles a soft wrap matches nothing, and the
+framework's own tables (`migrations`, `users`, `jobs`) are excluded from its landed inventory because their
+column names are the ordinary words `id` and `queue`, which let a correction about the guard trip it.
 Date: 2026-09-29
 Deciders: product owner (ruling), Architect (this ADR and the `PRD.md` / `ARCHITECTURE.md` amendments)
 Relates to: `ADR-0004` (Tier B reference data promoted with provenance: the closest precedent),
@@ -139,6 +156,30 @@ double quotes; single quotes here are nesting, not rewording). A Global-only gua
 would delete exactly the rows that story exists to keep. So the scopes differ on purpose: the
 card table is Global-only, the character feed is not, and **the promotion verdict is where the two
 scopes meet.**
+
+### The sentinel at two grains
+
+`GametoraCharacterParser::UNKNOWN_DATE` (`9999-12-31`, declared at `:27`) is the export's placeholder for
+"a card with no JP date yet", and it sorts such a card last. The two grains read it differently, and the
+class docblock at `:22-26` says so rather than letting the wording imply otherwise:
+
+- **Card grain — refused.** `GametoraCharacterCardParser::parse()` at `:60` drops a card whose
+  `release_en` is the placeholder, so it never becomes a row. Pinned by `CharacterCardParserTest`'s
+  `[Sentinel]` case.
+- **Character grain — accepted.** `GametoraCharacterParser::dateOrNull()` at `:153` validates a date's
+  *shape*, and `9999-12-31` has that shape, so the debut loop at `:68` reads the placeholder as a Global
+  date. A debut card carrying only the placeholder would therefore yield
+  `release_status: GlobalReleased` and `global_debut_date: '9999-12-31'` while owning no card row at all.
+
+**This is an open question for the Architect against `PRD.md` FR-A-6, and it is deliberately not decided
+here.** Making `dateOrNull()` reject the placeholder is not a comment change: it moves `jp_debut_date`,
+`global_debut_date` and `release_status` together, on an input no existing test feeds to the character
+grain, so the refactor bracket would stay green across a real behaviour change. Whether the live export
+ever carries the placeholder **cannot be established from this tree** — the 2026-09-27 body is gitignored
+(erratum E-11) and no tracked fixture contains it — so Task 8's cross-check owns the measurement, and if
+the placeholder appears there this question becomes a defect report rather than a design choice. No test
+covers either half today: none feeds the placeholder to `GametoraCharacterParser`, and the card grain's
+refusal is the only sentinel behaviour pinned.
 
 ### The roster filter is safe as measured, and a later roster move can falsify it
 

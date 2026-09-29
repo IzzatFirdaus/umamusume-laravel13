@@ -119,6 +119,57 @@ it('skips a row with no usable card id, no client title, or no real Global date'
     expect((new GametoraCharacterCardParser)->parse($body))->toBe([]);
 });
 
+it('refuses a Global card with no client title rather than fall back to the Japanese-side string', function (): void {
+    $body = json_encode([[
+        'card_id' => 100702,
+        'char_id' => 1007,
+        'name_en' => 'Gold Ship',
+        'rarity' => 3,
+        'release' => '2022-07-29',
+        // Every guard before the title one passes: this is a real Global date and a real
+        // card id. Only `title_en_gl` is absent, and `title` is present — the exact row
+        // shape that makes `$card['title_en_gl'] ?? $card['title']` look harmless. It is
+        // not harmless: `title` here is "Run! Fun! Watergun!", the Japanese-side string,
+        // and the card ships on [Global] as "[RUN! RUIN! LAUNCHER!]". CONSTRAINTS.md:38
+        // forbids editing a verbatim client name, so a row carrying the wrong one of the
+        // two is a silent data error no later stage can detect.
+        'title' => 'Run! Fun! Watergun!',
+        'release_en' => '2026-07-02',
+    ]], JSON_THROW_ON_ERROR);
+
+    // This test exists to fail if someone reintroduces the chain, the sibling of
+    // GametoraCharacterParserTest's "never accepts the wrong source key as a silent
+    // fallback", which covers the name_jp / name_ja version of the same defect.
+    expect((new GametoraCharacterCardParser)->parse($body))->toBe([]);
+});
+
+it('emits cards for a trainee with no usable name_en and flags none of them as her debut form', function (): void {
+    // KNOWN GAP, pinned as behaviour rather than fixed. `debutForms()` skips any row whose
+    // `name_en` is blank or missing (GametoraCharacterParser `:111`), so no debut id is ever
+    // recorded for that char_id, while the card grain's own guards do not read `name_en` at
+    // all and emit her cards. The result is a trainee with card rows and no
+    // `is_debut_form: true` anywhere — against ADR-0008's "`is_debut_form` is derived,
+    // never copied" paragraph, which says the flag "is the earliest JP `release` among
+    // that trainee's cards", and against `PRD.md` FR-A-6, whose
+    // roster nests cards under a trainee. The consequence is display-shaped: a catalog tree
+    // with no heading form for her, and Task 7's store failing to resolve the ref she does
+    // own. Whether a nameless trainee is a data defect upstream or a row to tolerate is
+    // Task 8's cross-check question, so the parser is deliberately unchanged here.
+    $body = json_encode([
+        ['card_id' => 109901, 'char_id' => 1099, 'name_en' => '  ', 'title_en_gl' => '[First Form]', 'rarity' => 3, 'release' => '2024-01-09', 'release_en' => '2025-06-26'],
+        ['card_id' => 109902, 'char_id' => 1099, 'title_en_gl' => '[Second Form]', 'rarity' => 2, 'release' => '2025-03-01', 'release_en' => '2026-02-12'],
+    ], JSON_THROW_ON_ERROR);
+
+    $records = (new GametoraCharacterCardParser)->parse($body);
+
+    expect($records)->toHaveCount(2)
+        ->and(array_column($records, 'card_id'))->toBe([109901, 109902])
+        ->and(array_column($records, 'is_debut_form'))->toBe([false, false])
+        // The character grain, which is where the name is required, records nothing for her
+        // at all: two grains, two answers to "does this trainee exist".
+        ->and((new GametoraCharacterParser)->parse($body))->toBe([]);
+});
+
 it('treats a card id as a string or an int without losing its identity', function (): void {
     $body = json_encode([
         [
