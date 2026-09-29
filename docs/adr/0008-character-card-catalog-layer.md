@@ -67,6 +67,19 @@ and the code cannot drift apart a third time. Two further limits are recorded th
 guard reads one line at a time, so a guarded wording that straddles a soft wrap matches nothing, and the
 framework's own tables (`migrations`, `users`, `jobs`) are excluded from its landed inventory because their
 column names are the ordinary words `id` and `queue`, which let a correction about the guard trip it.
+**Fourth correction, dated 2026-09-29 — the same form: the paragraphs above stand as written, and one
+refusal in the section "What is deliberately not stored" has been withdrawn by a later owner ruling.**
+`ADR-0012` Decision 1 widens this ADR to carry a card's stat arrays, and withdraws the bullet it quotes
+verbatim, which reads "The stat arrays. `base_stats`, `four_star_stats`, `five_star_stats` and
+`stat_bonus` are rows of the same export (`docs/UMAMUSUME_REFERENCE.md` §1.3.5, `:388-394`), and they
+stay out". **The other four bullets in that section stand**, including the one that declines the
+**161** cards with no `release_en`. What survives from the withdrawn bullet is its `PRD.md` §6.11
+clause, which is now a constraint on *use* rather than a prohibition on storage, and its `ADR-0002`
+reference, which is unchanged: nothing here reopens the `0..2000` bound. The errata in `ADR-0012` also
+correct this ADR's own card counts, which stood at 105 and 163 where the export gives 107 and 161. The
+Decision table below and the schema test that pins the shipped column list are unaffected until the
+four columns land, at which point `CharacterCardSchemaTest` is expected to fail and be updated in the
+same change.
 Date: 2026-09-29
 Deciders: product owner (ruling), Architect (this ADR and the `PRD.md` / `ARCHITECTURE.md` amendments)
 Relates to: `ADR-0004` (Tier B reference data promoted with provenance: the closest precedent),
