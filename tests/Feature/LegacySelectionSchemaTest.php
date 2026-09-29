@@ -44,15 +44,21 @@ it('keeps the two inheritance parent foreign keys instead of adding a second pai
 
 it('mass-assigns a full Legacy Select read-back and reads it back unchanged', function (): void {
     // Through `create`, not the factory: a factory write reaches the columns regardless of the
-    // attribute, so only this path can show the payload is actually writable by the app.
+    // attribute, so only this path can show the payload is actually writable by the app. This is the
+    // brief's case — a run created with two legacy parents and a sparks payload — with the parents on
+    // the foreign keys the table already has rather than on a duplicated pair.
     $run = TrainingRun::create([
         'umamusume_id' => Umamusume::factory()->create()->id,
         'scenario' => 'ura_finale',
         'inheritance_parent_a_id' => Umamusume::factory()->create()->id,
+        'inheritance_parent_b_id' => Umamusume::factory()->create()->id,
         'legacy_selection' => legacyPayload(),
     ]);
 
-    expect($run->fresh()->legacy_selection)->toBe(legacyPayload());
+    expect($run->fresh()->legacy_selection)->toBe(legacyPayload())
+        ->and($run->inheritanceParentA)->not->toBeNull()
+        ->and($run->inheritanceParentB)->not->toBeNull()
+        ->and($run->legacySelection()->legacies[0]['sparks'])->toHaveCount(2);
 });
 
 it('exposes the stored payload as a typed object', function (): void {
