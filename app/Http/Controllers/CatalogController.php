@@ -166,7 +166,6 @@ class CatalogController extends Controller
 
         return view('catalog.show', [
             'umamusume' => $umamusume,
-            'showUnconfirmed' => $showUnconfirmed,
             'hiddenFormCount' => $showUnconfirmed ? 0 : $umamusume->cards()->where('unconfirmed', true)->count(),
         ]);
     }
@@ -226,7 +225,7 @@ class CatalogController extends Controller
      * `orderBy()` to the underlying Builder, so a closure declared to take and
      * return a `HasMany` would be a type the runtime does not honour. Mutating the
      * relation in place and returning nothing keeps the declared shape true, and
-     * the two paths still cannot drift because there is only one of them.
+     * the three paths still cannot drift because there is only one of them.
      *
      * Debut first, then the Global release date, then the source's own card id as
      * the tiebreak two same-dated forms need to keep the page repeatable.

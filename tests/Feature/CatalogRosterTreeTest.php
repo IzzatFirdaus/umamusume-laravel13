@@ -452,9 +452,51 @@ it('names each card the source its own row was read from', function (): void {
         'fetched_at' => '2026-01-01 00:00:00',
     ]);
 
+    // `assertSeeText` is the half that matters: `assertSee` compares against the raw
+    // response body, so a URL parked in a `title` attribute satisfies it while a Trainer
+    // reads nothing but `read <date>`. Stripping tags first is what puts "the source is on
+    // screen" under test rather than "the source is in the markup somewhere".
     test()->get('/umamusume/mayano-top-gun')
         ->assertOk()
-        ->assertSee('card-199902');
+        ->assertSee('card-199902')
+        ->assertSeeText('card-199902');
+});
+
+it('names the snapshot it was read from, and the URL where there is none', function (): void {
+    // The row reads `from <snapshot> · <url>` where a snapshot exists and `from <url>` where
+    // it does not: `source_url` is NOT NULL so it is always on screen, and the snapshot is
+    // preferred by coming first because it is the in-tree document this fetch actually read.
+    // Two cards on one trainee, so the pair is settled in a single render, and every
+    // assertion is on stripped text: a URL parked in a `title` attribute satisfies
+    // `assertSee` while showing a Trainer nothing.
+    // A trainee the suite already uses, deliberately: a fixture name is copy this repository
+    // owns rather than verbatim source data, so it must not add a hit to the `lore-code` gate.
+    $u = Umamusume::factory()->create(['name' => 'Special Week', 'slug' => 'special-week']);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $u->id,
+        'card_id' => 199903,
+        'title' => '[Snapshot Form]',
+        'source_url' => 'https://gametora.test/card-199903.json',
+        'snapshot_path' => 'snapshots/gametora-character-cards/2026-09-29/ab12cd.html',
+    ]);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $u->id,
+        'card_id' => 199904,
+        'title' => '[No Snapshot Form]',
+        'source_url' => 'https://gametora.test/card-199904.json',
+    ]);
+
+    test()->get('/umamusume/special-week')
+        ->assertOk()
+        ->assertSeeText('snapshots/gametora-character-cards/2026-09-29/ab12cd.html')
+        ->assertSeeText('https://gametora.test/card-199903.json')
+        ->assertSeeText('https://gametora.test/card-199904.json')
+        // The snapshot leads its own URL, which is what "preferred" has to mean here: a row
+        // that printed the two in the other order still shows both strings.
+        ->assertSeeTextInOrder([
+            'snapshots/gametora-character-cards/2026-09-29/ab12cd.html',
+            'https://gametora.test/card-199903.json',
+        ]);
 });
 
 it('says forms are hidden rather than that none were recorded', function (): void {
@@ -477,7 +519,10 @@ it('says forms are hidden rather than that none were recorded', function (): voi
         ->and($hidden)->toContain('2 forms hidden as unconfirmed')
         // The lever is on the page, not something to type into the address bar (G-11).
         ->and($hidden)->toContain('Show unconfirmed forms')
-        ->and($hidden)->not->toContain('[Hidden Alpha]');
+        // Both fixtures, not one: the same branch hides both titles, so pinning only the
+        // first would let a scope that leaked one of them through unchanged.
+        ->and($hidden)->not->toContain('[Hidden Alpha]')
+        ->and($hidden)->not->toContain('[Hidden Beta]');
 
     $shown = test()->get('/umamusume/gold-ship-detail?show_unconfirmed=1')->assertOk()->getContent();
 

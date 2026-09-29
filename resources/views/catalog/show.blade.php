@@ -34,8 +34,9 @@
          where did each of those rows come from", and Provenance below it answers the
          trainee-level half of the same question. Rows are `<h3>` under an `<h2>` section, the
          one-level-below correction catalog/index made and for the same reason. The debut note
-         and the rarity chip sit in the row's meta group, so a form reads identically on this
-         page and in the tree. --}}
+         and the rarity chip sit in the row's meta group, so a form's title, stars and debut
+         note read identically on this page and in the tree. The per-card source and read date
+         are this page's addition, and D-33 is what asks for them one level deeper. --}}
     <h2 class="mt-8 text-lg font-semibold text-ink-strong">Costume forms</h2>
 
     @if ($umamusume->cards->isEmpty())
@@ -51,15 +52,16 @@
         <ul class="mt-2 divide-y divide-rule rounded-md border border-rule bg-raised">
             @foreach ($umamusume->cards as $card)
                 <li class="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-2 text-sm">
-                    <h3 class="font-medium text-ink">{{ $card->title }}</h3>
+                    <h3 class="text-sm font-medium text-ink">{{ $card->title }}</h3>
                     <span class="flex items-baseline gap-3 text-xs text-ink-muted">
                         <x-rarity-chip :rarity="$card->rarity" />
                         @if ($card->is_debut_form)
                             <span>debut form</span>
                         @endif
-                        {{-- `text-risk` on `bg-raised` is the measured pair DESIGN.md §3.4
-                             records at 10.89 light / 6.22 dark. No second badge and no new
-                             token: the flag is words, and the chip names the stars. --}}
+                        {{-- `text-risk` on `bg-raised` is a pair DESIGN.md §3.4 measures and
+                             owns; the ratios live there and not here, so this line cannot go
+                             stale against them. No second badge and no new token: the flag is
+                             words, and the chip names the stars. --}}
                         @if ($card->unconfirmed)
                             <span class="font-semibold text-risk">Not confirmed by two sources</span>
                         @endif
@@ -70,16 +72,27 @@
                         </time>
                         {{-- This is the card's own fetch, not the trainee's: Amendment A1 put
                              `source_url` / `snapshot_path` / `fetched_at` on this row, so the
-                             row names the document it was actually read from. The URL rides a
-                             `title` attribute rather than a link, because a local-only tool
-                             should not ship an outbound click, and `{{ }}` escapes it because
-                             a URL that arrived from fetched content is untrusted. `fetched_at`
-                             is nullable, so an un-fetched row prints nothing instead of an
-                             empty date; a stored instant renders through the display zone. --}}
+                             row names in visible text the document it was read from. The
+                             `title` this replaces put that fact out of keyboard reach (G-11)
+                             while the sentence below states that every form names its source;
+                             this repo attaches a tooltip to a fact already on screen, never as
+                             the fact. The snapshot leads where one exists because it is the
+                             in-tree copy this fetch read, and it is a disk path rather than an
+                             address, so it is named and not linked. The URL always follows, as
+                             link text that is the address itself: provenance this engine wrote
+                             from `config('uma.sources')`, not a string read out of a fetched
+                             body. `fetched_at` is nullable, so an un-fetched row prints no read
+                             date instead of an empty one, and a stored instant renders through
+                             the display zone. --}}
+                        <span>
+                            from
+                            @if ($card->snapshot_path)
+                                {{ $card->snapshot_path }} ·
+                            @endif
+                            <a href="{{ $card->source_url }}" class="text-ink-strong underline">{{ $card->source_url }}</a>
+                        </span>
                         @if ($card->fetched_at)
-                            <span title="{{ $card->source_url }}">
-                                read {{ $card->fetched_at->timezone(config('uma.display_timezone'))->format('M j, Y') }}
-                            </span>
+                            <span>read {{ $card->fetched_at->timezone(config('uma.display_timezone'))->format('M j, Y') }}</span>
                         @endif
                     </span>
                 </li>
@@ -87,10 +100,12 @@
         </ul>
     @endif
 
-    {{-- A form behind the filter is not an absent form, and this line is the only place the
-         hidden half is visible on the page at all. The count prints only when it is above
-         zero, so it can never read as a bare 0, and the way to see them is a link a keyboard
-         can reach rather than something to type into the address bar. --}}
+    {{-- The disclosure half of the roster tree (PRD FR-A-6, US-1), the citation the tree's
+         test header and the `character_cards` migration both carry. A form behind the filter is
+         not an absent form, and this line is the only place the hidden half is visible on the
+         page at all. The count prints only when it is above zero, so it can never read as a
+         bare 0, and the way to see them is a link a keyboard can reach rather than something to
+         type into the address bar. --}}
     @if ($hiddenFormCount > 0)
         <p class="mt-2 text-xs text-ink-muted">
             {{ $hiddenFormCount }} {{ \Illuminate\Support\Str::plural('form', $hiddenFormCount) }} hidden as unconfirmed ·
@@ -137,14 +152,15 @@
         </ul>
         {{-- D-33, and the sentence that keeps the two provenances apart. This list is
              `data_sources`, which is scoped to the trainee; the form rows above carry their
-             own `source_url` / `fetched_at` from Amendment A1. "checked" rather than
-             "confirmed" on purpose: with `?show_unconfirmed=1` a row on this page says it was
-             not confirmed by two sources, and the sentence must not contradict it. --}}
+             own `source_url` / `snapshot_path` / `fetched_at` from Amendment A1. It claims
+             nothing about verification: `unconfirmed` is a boolean defaulting to false with no
+             verdict written onto any row yet, so "every card here was checked against the two
+             Tier A sources" would read as true for rows nobody cross-checked, and the file it
+             named is not in this tree. The per-row `Not confirmed by two sources` flag is the
+             data-driven version of that claim, and it is already on screen. --}}
         <p class="mt-2 text-xs text-ink-muted">
             The rows above are this trainee's own fetch history. Each costume form names the
-            source and the date its own row was read from, and every card on this page was
-            checked against the two Tier A sources listed in
-            docs/data/2026-09-29-global-roster-crosscheck.md.
+            source and the date its own row was read from.
         </p>
     @endif
 </x-layout>
