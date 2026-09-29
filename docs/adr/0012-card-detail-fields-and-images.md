@@ -1,7 +1,7 @@
-# ADR-0012: Card detail fields - basic information, images, and objectives
+# ADR-0012: Card detail fields - stat arrays, images, and objectives
 
 Status: **Accepted (owner ruling 2026-09-29).** The owner ruled on Decision 1 in session: widen
-`ADR-0008` to carry a card's basic information. Decisions 2 and 3 are recorded from the same session's
+`ADR-0008` to carry a card's stat arrays. Decisions 2 and 3 are recorded from the same session's
 measurements. **The layer is authorized, not built:** no migration, parser change, store action or
 view for any of the three decisions exists in this tree, and `character_cards` still carries the
 twelve columns `ADR-0008` named.
@@ -41,6 +41,19 @@ which `ADR-0008` declined to store. Measured on the 2026-09-29 body
 (`character-cards.e9e9ee6d.json`, gitignored, so cited as a dated measurement per erratum E-11's
 convention): 268 rows, 107 carrying a `release_en` date, 161 carrying none, spanning 68 distinct
 `char_id` for the Global set and 135 records through the parser.
+
+**What the profile source carries, and what no decision here addresses.** The card export is not the
+only GameTora dataset a detail page wants. `characters.c6676539` is keyed by `char_id` and carries the
+trainee's profile block - the Japanese name, a voice-actor field, `birth`, `height` and `three_sizes` -
+which is what the product clarification means by **basic information**, and it is a different thing from
+the stat arrays Decision 1 widens. Three things make it unaddressed rather than merely unbuilt: it is
+**not a declared source** in `config('uma.sources')`, so nothing in this tree fetches it; its coverage is
+partial and must be re-measured rather than trusted (recorded on 2026-09-29 as null on 36 rows for
+`three_sizes`, 26 for the voice-actor field and 17 for `birth`); and it is `char_id`-grain, so it joins
+the trainee and never the card. **No Decision row above covers it and this ADR does not authorize it.**
+It is named here in the same way Decision 2 names the media source, so that a reader knows the dataset
+exists, knows it is uncovered, and knows that building it is an `AGENTS.md` escalation-2 decision with
+its own citation requirement - not a field this document already granted.
 
 **What the images source carries.** The declared media source `character_media.36ab44f6` is keyed by
 `char_id`. It carries no `card_id`, so it cannot be joined to a costume card rather than to a trainee,
@@ -100,6 +113,20 @@ it that a card-detail reader will otherwise re-derive:
    detail page that wants a description must be given one by a later decision or a later source.
 
 ## Errata to earlier records, dated 2026-09-29
+
+**Erratum 3 - this ADR's own title and status line misnamed Decision 1, corrected 2026-09-29.** Both
+read, verbatim: "Card detail fields - basic information, images, and objectives" and "widen `ADR-0008`
+to carry a card's **basic information**". Decision 1 widens nothing of the kind: it withdraws
+`ADR-0008`'s refusal of `base_stats`, `four_star_stats`, `five_star_stats` and `stat_bonus`, which are
+the stat arrays. *Basic information* is the profile block - Japanese name, voice actor, birthday,
+height, three sizes - and it lives in a different dataset that no decision here addresses, as the
+Context now says out loud. The two are separate items on the same request list, and collapsing them
+let this ADR appear to authorize a source it never measured. **The widening stands exactly as ruled;
+only the naming is corrected**, which is why the title and status read "stat arrays" now. `ADR-0008`
+was right all along - its §72 already says "carry a card's stat arrays" - so the two records disagreed
+and this one was the wrong one. Cost of the error if it had stayed: a builder could cite this ADR as
+authority to fetch `characters.c6676539` and add profile columns, on a decision that never mentioned
+them and with no PRD citation behind it.
 
 **Erratum 1 - the card counts in `ADR-0008` are wrong by two, and `ADR-0008` contradicts itself about
 it.** `ADR-0008`'s section "The character feed does not become Global-only (measured 2026-09-29)"
