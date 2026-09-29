@@ -77,9 +77,12 @@
     @if ($skills->count() === 0)
         @if ($totalCount === 0)
             {{-- The state a Trainer meets before a fetch, stated as itself rather than as an empty result.
-                 This is the one screen state that names the fix, and it names the command that does it. --}}
+                 Both commands are named because one of them is a trap: the snapshot short-circuit keys on
+                 the document's hash under today's date in a disk shared by every database in the working
+                 tree, so a second database asked the same day is told "unchanged" and stays empty. KI-27. --}}
             <p class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted">
-                The skill catalog holds no rows yet. Run `php artisan uma:fetch gametora-skills` to fill it.
+                The skill catalog holds no rows yet. Run `php artisan uma:fetch gametora-skills` to fill it,
+                or `php artisan uma:reparse gametora-skills` if a fetch says the document is unchanged.
             </p>
         @else
             {{-- D-65's second state, and deliberately no link to the review queue. Skills bypass
@@ -107,7 +110,12 @@
                 <li class="flex flex-wrap items-baseline gap-x-2 gap-y-1 px-4 py-3 text-sm">
                     <span class="font-semibold text-ink-strong">{{ $skill->name }}</span>
 
-                    @if ($skill->name_ja)
+                    {{-- 18 of the 623 [Global] rows store the same string in both name columns, because the
+                         source's `jpname` for those skills is Latin script (`#LookatCurren`, `U=ma2`,
+                         `∴win Q.E.D.`). Printing the pair regardless repeats the name in the row, so the
+                         second slot only appears when it carries something the first does not. The data is
+                         left verbatim: this is a display rule, not an edit to what the source stated. --}}
+                    @if ($skill->name_ja !== null && $skill->name_ja !== $skill->name)
                         <span class="text-ink-muted">{{ $skill->name_ja }}</span>
                     @endif
 

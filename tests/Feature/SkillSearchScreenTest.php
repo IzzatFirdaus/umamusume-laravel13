@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\ReleaseStatus;
 use App\Models\MatchCandidate;
 use App\Models\Skill;
 use App\Models\TrainingRun;
@@ -262,6 +263,31 @@ it('badges both rows the client calls Indomitable and discloses what the badge i
         // reads its basis too (D-256: a derived value prints its rule and says whose derivation it is).
         ->and($this->get(route('skills.index', ['search' => 'indomitable']))->content())
         ->toMatch('/title="[^"]*class code[^"]*"/i');
+});
+
+it('prints the Japanese name only when it says something the client name does not', function (): void {
+    skillScreenImport();
+
+    // Found by rendering the filled database rather than the fixture: 18 of the 623 `[Global]` rows store
+    // the same string in both name columns, because the source's `jpname` for those skills is Latin script
+    // (`#LookatCurren`, `U=ma2`, `∴win Q.E.D.`), and the screen's first row printed it twice. The row here
+    // is created rather than imported because the rule is about two columns agreeing; the producer's own
+    // writing of `jpname` into `name_ja` is pinned in `GametoraSkillsParserTest`.
+    Skill::create([
+        'name' => '#LookatCurren',
+        'name_ja' => '#LookatCurren',
+        'match_key' => '#lookatcurren',
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+    ]);
+
+    $rows = skillScreenRows($this->get(route('skills.index', ['search' => 'lookatcurren']))->content());
+
+    expect($rows)->toHaveCount(1)
+        ->and(substr_count($rows[0], '#LookatCurren'))->toBe(1)
+        // And the pair still renders where the two differ, so this is a dedupe, not a suppression.
+        ->and(implode(' | ', skillScreenRows($this->get(route('skills.index', ['search' => 'averseness']))->content())))
+        ->toContain('G1 Averseness');
 });
 
 it('never prints a source translation, over the rendered page', function (): void {
