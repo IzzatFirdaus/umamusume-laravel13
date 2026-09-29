@@ -513,17 +513,24 @@ that does not exist yet — which ADR-0010 records as a debt with a name, not a 
 **One measurement corrected a belief mid-slice.** The mobile pass found `scrollWidth 476 > 390` and the
 first reading was that this slice broke mobile. Naming the offending element found the turn log table, nine
 columns wide — a pre-existing reflow this slice never touched (`git diff` shows one view changed, 22
-insertions, and it is not that one). Filed in the record, not in `KNOWN-ISSUES.md`, for the reason two lines
-down.
+insertions, and it is not that one). Filed as KI-25; see the register note below for why landing that
+commit meant carrying another session's lines.
 
-**Register: KI-10 schema half closed, KI-17 closed, Legacy Select landed** — against the tree at
-`72e5157` that is 21 filed / **19 closed / 2 open** (KI-10's ratio half and KI-15 remain). The
-`KNOWN-ISSUES.md` write is **deferred, not skipped**: the concurrent session had that file dirty with KI-23
-and KI-24 and an uncommitted count of its own, and in one shared working tree a status block can hold only
-one of the two totals. Staging the whole file would have pushed their unfinished work under this slice's
-message; staging only these hunks would have let their next `git add` delete them. The adjudication text,
-including the stale line reference to fix (`TrainingRun.php:639-650`, now `:760-774`), is in
-`slice-15-2026-09-29.md` §10.1 waiting for the register to be free.
+**Register: KI-10 schema half closed, KI-17 closed, Legacy Select landed.** `757be1d` re-baselines
+`KNOWN-ISSUES.md` at **24 filed / 19 closed / 5 open**, checked against the register's own headings rather
+than against this slice's memory of it — and that check is what surfaced a **KI-16 hole** (KI-15 to KI-17
+with nothing between), the same shape as the `ADR-0008` hole the record reports.
+
+The write **carries the concurrent session's uncommitted KI-23 and KI-24**, on the owner's direction that
+the register be landed rather than deferred. In one shared working tree the top status block can hold only
+one of two counts, so the alternative was a file reading two different ways at once; the cost accepted is
+that their prose reaches `origin` inside a commit that is not theirs, which is why their authorship is named
+in the message and their entries are quoted by number rather than rewritten here. If the skills session
+commits that file again, it is writing over published text and the reconciliation is its own.
+
+Two stale pointers were corrected on the way, both worth the line they cost: `consecutiveRaceCount()` has
+moved from the cited `TrainingRun.php:639-650` to `:811-826`, and the first draft of this paragraph claimed
+`21 filed / 2 open`, which was arithmetic on a register this slice had not finished reading.
 
 ---
 
