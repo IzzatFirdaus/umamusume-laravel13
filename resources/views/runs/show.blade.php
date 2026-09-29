@@ -437,6 +437,7 @@
              is the honest statement that the list is too long to scan, and it costs no new mechanism. --}}
             <a href="{{ route('skills.index') }}" class="underline">Search the skill catalog</a>
             to narrow that list before choosing here.
+    </p>
 
     <form method="POST" action="{{ route('runs.skills.sync', $run) }}" class="mt-4 max-w-3xl space-y-3 rounded-md border border-rule bg-raised p-4 text-sm">
         @csrf
