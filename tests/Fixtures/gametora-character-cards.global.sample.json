@@ -1,0 +1,13 @@
+[
+  {"char_id":1001,"card_id":100101,"name_en":"Special Week","name_jp":"スペシャルウィーク","title":"Special Dreamer","title_en_gl":"[Special Dreamer]","rarity":3,"release":"2021-02-24","release_en":"2025-06-26"},
+  {"char_id":1001,"card_id":100102,"name_en":"Special Week","name_jp":"スペシャルウィーク","title":"Hopping ♪ Vitamin Heart","title_en_gl":"[Hopp'n♪Happy Heart]","rarity":3,"release":"2021-07-29","release_en":"2025-10-14"},
+  {"char_id":1001,"card_id":100103,"name_en":"Special Week","name_jp":"スペシャルウィーク","title":"Supreme Commander of the Rising Sun","title_en_gl":"[Ruler of Japan]","rarity":3,"release":"2022-07-20","release_en":"2026-06-25"},
+  {"char_id":1007,"card_id":100701,"name_en":"Gold Ship","name_jp":"ゴールドシップ","title":"Red Strife","title_en_gl":"[Red Strife]","rarity":2,"release":"2021-02-24","release_en":"2025-06-26"},
+  {"char_id":1007,"card_id":100702,"name_en":"Gold Ship","name_jp":"ゴールドシップ","title":"Run! Fun! Watergun!","title_en_gl":"[RUN! RUIN! LAUNCHER!]","rarity":3,"release":"2022-07-29","release_en":"2026-07-02"},
+  {"char_id":1007,"card_id":100703,"name_en":"Gold Ship","name_jp":"ゴールドシップ","title":"La Mode 564","rarity":3,"release":"2023-08-31","release_en":null},
+  {"char_id":1003,"card_id":100301,"name_en":"Tokai Teio","name_jp":"トウカイテイオー","title":"Top of Joyful","title_en_gl":"[Peak Joy]","rarity":3,"release":"2021-02-24","release_en":"2025-06-26"},
+  {"char_id":1003,"card_id":100302,"name_en":"Tokai Teio","name_jp":"トウカイテイオー","title":"Beyond the Horizon","title_en_gl":"[Beyond the Horizon]","rarity":3,"release":"2021-03-30","release_en":"2025-07-16"},
+  {"char_id":1003,"card_id":100303,"name_en":"Tokai Teio","name_jp":"トウカイテイオー","title":"Dream Butterfly of Purple Clouds","rarity":3,"release":"2023-10-30","release_en":null},
+  {"char_id":1127,"card_id":112701,"name_en":"Fenomeno","name_jp":"フェノーメノ","title":"Black Flame of Righteousness","rarity":3,"release":"2025-04-21","release_en":null},
+  {"char_id":1127,"card_id":112702,"name_en":"Fenomeno","name_jp":"フェノーメノ","title":"Violet Flame of Fortitude","rarity":3,"release":"2026-08-31","release_en":null}
+]

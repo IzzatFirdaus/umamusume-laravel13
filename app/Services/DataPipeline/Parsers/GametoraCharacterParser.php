@@ -19,8 +19,12 @@ use JsonException;
  */
 final class GametoraCharacterParser implements SourceParser
 {
-    /** Sorts a card with no JP date last without breaking string comparison. */
-    private const UNKNOWN_DATE = '9999-12-31';
+    /**
+     * Sorts a card with no JP date last without breaking string comparison. Public
+     * because it is the export's placeholder rather than a date: a Global card whose
+     * only `release_en` is this value has not reached [Global], so it is not a row.
+     */
+    public const UNKNOWN_DATE = '9999-12-31';
 
     /**
      * Aptitude columns in the export's own element order: surface, then the four
@@ -56,6 +60,44 @@ final class GametoraCharacterParser implements SourceParser
             return [];
         }
 
+        $debutForms = self::debutForms($cards);
+
+        $records = [];
+
+        foreach ($debutForms as $charId => $card) {
+            $globalDebut = self::dateOrNull($card['release_en'] ?? null);
+            $jpDebut = self::dateOrNull($card['release'] ?? null);
+
+            $records[] = [
+                'name' => trim((string) $card['name_en']),
+                // GameTora publishes `name_jp`; `name_ja` is this app's own column name.
+                'name_ja' => $this->textOrNull($card['name_jp'] ?? null),
+                // A costume card can exist on [Global] while no debut form does; the
+                // debut date is what the catalog means by "released here".
+                'release_status' => $globalDebut === null
+                    ? ReleaseStatus::JapanOnly->value
+                    : ReleaseStatus::GlobalReleased->value,
+                'jp_debut_date' => $jpDebut === self::UNKNOWN_DATE ? null : $jpDebut,
+                'global_debut_date' => $globalDebut,
+                'external_ref' => 'gametora:char:'.$charId,
+                ...$this->aptitudes($card['aptitude'] ?? null),
+            ];
+        }
+
+        return $records;
+    }
+
+    /**
+     * The debut form of each trainee: the card with the earliest JP release, ties
+     * broken by first seen. Both the character-level and the card-level read call
+     * this, because the catalog's debut and a flagged debut form must be one fact
+     * rather than two rules that can drift apart.
+     *
+     * @param  iterable<mixed>  $cards  decoded rows; a row that is not an array is skipped, not fatal
+     * @return array<int, array<string, mixed>> char_id => debut card, in char_id order
+     */
+    public static function debutForms(iterable $cards): array
+    {
         $debutForms = [];
 
         foreach ($cards as $card) {
@@ -81,29 +123,7 @@ final class GametoraCharacterParser implements SourceParser
 
         ksort($debutForms);
 
-        $records = [];
-
-        foreach ($debutForms as $charId => $card) {
-            $globalDebut = $this->dateOrNull($card['release_en'] ?? null);
-            $jpDebut = $this->dateOrNull($card['release'] ?? null);
-
-            $records[] = [
-                'name' => trim((string) $card['name_en']),
-                // GameTora publishes `name_jp`; `name_ja` is this app's own column name.
-                'name_ja' => $this->textOrNull($card['name_jp'] ?? null),
-                // A costume card can exist on [Global] while no debut form does; the
-                // debut date is what the catalog means by "released here".
-                'release_status' => $globalDebut === null
-                    ? ReleaseStatus::JapanOnly->value
-                    : ReleaseStatus::GlobalReleased->value,
-                'jp_debut_date' => $jpDebut === self::UNKNOWN_DATE ? null : $jpDebut,
-                'global_debut_date' => $globalDebut,
-                'external_ref' => 'gametora:char:'.$charId,
-                ...$this->aptitudes($card['aptitude'] ?? null),
-            ];
-        }
-
-        return $records;
+        return $debutForms;
     }
 
     /**
@@ -130,7 +150,7 @@ final class GametoraCharacterParser implements SourceParser
         return $columns;
     }
 
-    private function dateOrNull(mixed $value): ?string
+    public static function dateOrNull(mixed $value): ?string
     {
         if (! is_string($value) || preg_match('/^\d{4}-\d{2}-\d{2}$/', trim($value)) !== 1) {
             return null;
