@@ -3,6 +3,7 @@
 declare(strict_types=1);
 use App\Services\DataPipeline\Parsers\GametoraCharacterCardParser;
 use App\Services\DataPipeline\Parsers\GametoraCharacterParser;
+use App\Services\DataPipeline\Parsers\GametoraCharacterProfileParser;
 use App\Services\DataPipeline\Parsers\GametoraRaceCatalogParser;
 use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
 
@@ -158,6 +159,61 @@ return [
                 'key' => 'skills',
             ],
             'parser' => GametoraSkillsParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+        ],
+        /*
+         * The trainee profile block: Japanese name, voice actor, birthday, height and three
+         * sizes — the "basic information" a character page shows.
+         *
+         * A **fourth document, not another grain of the card one.** Measured 2026-09-30 against
+         * the body: 163 rows keyed by `char_id`, carrying `jp_name`, `va_ja` / `va_en`,
+         * `birth_year` / `birth_month` / `birth_day`, `height` and a `three_sizes` object. It
+         * holds no aptitude, no rarity, no release date and no stat array, so it overlaps the
+         * card document on nothing but the trainee id. `ADR-0012` names it as unaddressed by any
+         * of its three decisions, and the owner confirmed on 2026-09-30 that "basic information"
+         * means this block rather than the card document's stat arrays.
+         *
+         * Owner approval, stated rather than assumed: the same review that approved
+         * `gametora-characters` on 2026-09-27, re-used the way `gametora-skills` re-used it. Same
+         * host, same publisher, one static JSON document, no HTML, no JS, no crawler directive to
+         * observe, no crawl budget consumed, and the politeness bounds already set by `delay_ms`,
+         * the per-source lock and the cache TTL.
+         *
+         * **Resolves through the manifest, so it issues two requests per fetch** — the same
+         * response to KI-24 that `gametora-skills` records. KI-24 measured that a pinned
+         * cache-busting hash does not fail when it goes stale: the withdrawn `679f7c2e` document
+         * still answered 200 with its old content, so a pinned URL serves silent stale data.
+         * `url` stays declared as the documented fallback for the same reason.
+         *
+         * Robots and rate limit: the question AGENTS.md escalation 5 raises for this host is
+         * still formally unanswered, exactly as the `gametora-characters` note records. What is
+         * bounded is the load: two requests per full `uma:fetch`, one second apart, against a
+         * static JSON document, with no crawl of the site itself. Re-measured 2026-09-30: the
+         * manifest answers 200 to this tool's own user agent
+         * (`UmamusumeTrainerCompanion/0.2`), so no browser-UA substitution was needed or used.
+         *
+         * `characters` is a near-miss of names in that same manifest, and the keys are not
+         * interchangeable: `characters_extended` (934 rows) carries only `char_id`, `name_en` and
+         * `name_ja`; `character_profiles` and `char_profiles` (173 rows each) carry only
+         * `char_id` and the four localised long-form texts. None of them is this block, and none
+         * is declared here. `meta/char_profile_art` (170 rows) is an art-existence index of
+         * per-character booleans with no asset path and no card grain; it is named in the report
+         * rather than declared, because `ADR-0012` Decision 2 defers images and a discovered art
+         * source is a re-decision rather than a detail.
+         *
+         * Order: after the character and card sources, because every row resolves its trainee
+         * through `umamusume.external_ref` and needs her to exist first.
+         */
+        'gametora-character-profiles' => [
+            'url' => 'https://gametora.com/data/umamusume/characters.c6676539.json',
+            'manifest' => [
+                'url' => 'https://gametora.com/data/manifests/umamusume.json',
+                'base' => 'https://gametora.com/data/umamusume/',
+                'key' => 'characters',
+            ],
+            'parser' => GametoraCharacterProfileParser::class,
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',

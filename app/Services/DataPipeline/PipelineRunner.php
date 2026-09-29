@@ -6,11 +6,13 @@ namespace App\Services\DataPipeline;
 
 use App\Actions\PromoteMatchedRecord;
 use App\Actions\StoreCharacterCards;
+use App\Actions\StoreCharacterProfiles;
 use App\Actions\StoreRaceCatalogSlots;
 use App\Enums\CandidateStatus;
 use App\Enums\MatchTier;
 use App\Models\MatchCandidate;
 use App\Services\DataPipeline\Contracts\CharacterCardSourceParser;
+use App\Services\DataPipeline\Contracts\ProfileSourceParser;
 use App\Services\DataPipeline\Contracts\RaceCatalogSourceParser;
 use App\Services\DataPipeline\Contracts\SourceParser;
 use Illuminate\Support\Facades\Cache;
@@ -30,6 +32,7 @@ final class PipelineRunner
         private readonly PromoteMatchedRecord $promote,
         private readonly StoreRaceCatalogSlots $storeRaceCatalog,
         private readonly StoreCharacterCards $storeCharacterCards,
+        private readonly StoreCharacterProfiles $storeCharacterProfiles,
     ) {}
 
     /**
@@ -103,6 +106,31 @@ final class PipelineRunner
                     Cache::increment('catalog:version');
                 }
             }
+
+            return [...$stored, 'review' => 0];
+        }
+
+        /*
+         * Profiles are the fourth kind: one row per trainee, keyed by the source's own
+         * `char_id`, joining the same way cards do and for the same reason. A profile row has no
+         * display name either — it has a Japanese name, a romanised one and two voice actors —
+         * so without this branch every one of its 163 rows would fail to match and be filed as a
+         * pending review candidate, turning the review queue into 163 trainees that are already
+         * in the catalog.
+         *
+         * It sits after the card branch because it shares the card branch's ref resolution and
+         * nothing else: a profile is not a card, and a card is not a profile, so neither store
+         * action is reachable from the other's contract.
+         */
+        if (is_a($parserClass, ProfileSourceParser::class, true)) {
+            /** @var ProfileSourceParser $parser */
+            $parser = app($parserClass);
+            $stored = $this->storeCharacterProfiles->handle(
+                $parser->parse($body),
+                $sourceConfig['url'],
+                $snapshotPath,
+                $sourceConfig['timezone'] ?? null,
+            );
 
             return [...$stored, 'review' => 0];
         }

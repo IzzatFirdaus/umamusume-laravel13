@@ -128,8 +128,8 @@ class CatalogController extends Controller
     }
 
     /**
-     * Detail page for one Umamusume by slug: her aliases, her last 10 provenance rows, and
-     * her costume forms in the order the tree uses. Renders catalog.show.
+     * Detail page for one Umamusume by slug: her aliases, her profile block, her last 10
+     * provenance rows, and her costume forms. Renders catalog.show.
      *
      * The two provenances are two answers. `dataSources` is this trainee's own fetch history
      * (FR-A-4); each card carries its own `source_url` / `fetched_at` from Amendment A1, so a
@@ -142,7 +142,14 @@ class CatalogController extends Controller
      * out: one bounded count on the same indexed key, taken after the 404 so an unknown slug
      * still costs one lookup, and skipped entirely when nothing is being hidden.
      *
-     * Not cached. This read is one indexed lookup, three bounded relation loads and at most
+     * `?form={card_id}` picks the active costume form, so a link into one form survives a
+     * reload and can be shared. It is the **local** `character_cards.id` and not the source's
+     * `card_id`, because the local key is the one a row on this page can name. An absent,
+     * unparseable or out-of-scope value falls back to the first form in `cardScope()` order
+     * rather than erroring: a stale shared link should show the trainee, not a 404, and the
+     * strip is a convenience rather than a route with its own error states.
+     *
+     * Not cached. This read is one indexed lookup, four bounded relation loads and at most
      * one bounded count on a local SQLite file, and the only thing a cache could hold for it
      * is the model graph itself — which `serializable_classes => false` will not hand back.
      * Leaving it out is the fix; see `cached()` for the same reason stated with the evidence
@@ -157,6 +164,7 @@ class CatalogController extends Controller
         $umamusume = Umamusume::where('slug', $slug)
             ->with([
                 'aliases',
+                'profile',
                 'dataSources' => fn ($q) => $q->latest('fetched_at')->limit(10),
                 'cards' => $this->cardScope($showUnconfirmed),
             ])
@@ -164,10 +172,44 @@ class CatalogController extends Controller
 
         abort_if($umamusume === null, 404);
 
+        $activeCard = $this->activeCard($request, $umamusume->cards);
+
         return view('catalog.show', [
             'umamusume' => $umamusume,
             'hiddenFormCount' => $showUnconfirmed ? 0 : $umamusume->cards()->where('unconfirmed', true)->count(),
+            'activeCard' => $activeCard,
+            // Passed rather than read off `$request` in the view: the tab strip has to carry the
+            // opt-in into its GET form, and a view reaching for the request would be the only
+            // place in this controller that did.
+            'showUnconfirmed' => $showUnconfirmed,
         ]);
+    }
+
+    /**
+     * The form the page opens on.
+     *
+     * Membership is checked against the *scoped* collection rather than re-queried, so a
+     * `?form=` naming a form the current `show_unconfirmed` setting hides falls back instead of
+     * revealing it: the query param is a convenience, and it must not become a way past the
+     * disclosure the list enforces too.
+     *
+     * @param  Collection<int, CharacterCard>  $cards  already ordered by cardScope()
+     */
+    private function activeCard(Request $request, Collection $cards): ?CharacterCard
+    {
+        if ($cards->isEmpty()) {
+            return null;
+        }
+
+        $requested = $request->query('form');
+
+        if ($requested === null || $requested === '' || ! is_numeric($requested)) {
+            return $cards->first();
+        }
+
+        $id = (int) $requested;
+
+        return $cards->firstWhere('id', $id) ?? $cards->first();
     }
 
     /**

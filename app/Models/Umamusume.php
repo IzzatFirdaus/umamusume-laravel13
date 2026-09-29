@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -40,6 +41,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $external_ref the source's own character id, `gametora:char:{id}` (ADR-0008)
  * @property-read Collection<int, UmamusumeAlias> $aliases
  * @property-read Collection<int, CharacterCard> $cards
+ * @property-read UmamusumeProfile|null $profile the profile block, when a fetch has written one
  * @property-read Collection<int, DataSource> $dataSources
  * @property-read Collection<int, TrainingRun> $trainingRuns
  */
@@ -64,6 +66,41 @@ class Umamusume extends Model
     public function cards(): HasMany
     {
         return $this->hasMany(CharacterCard::class);
+    }
+
+    /**
+     * The profile block, when the `characters` document has been fetched.
+     *
+     * A `HasOne` and not a `hasOne` behind a nullable join in the view: the row is optional (the
+     * source is not declared in every deployment, and 28 of its 163 rows name trainees this
+     * catalog does not track), so a trainee without one is a normal state the page renders in
+     * words rather than an exception.
+     *
+     * @return HasOne<UmamusumeProfile, $this>
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(UmamusumeProfile::class);
+    }
+
+    /**
+     * The name the Japanese client prints, preferring the profile document over the trainee column.
+     *
+     * Both columns hold the same fact about the same trainee, so reading one and falling back to
+     * the other is not the cross-document substitution the profile block's other fields refuse: it
+     * keeps the page's one piece of name data readable before `uma:fetch
+     * gametora-character-profiles` has ever run, and after a partial source row leaves `name_ja`
+     * null. Returns null only when neither carries it, which the view states in words (D-220).
+     */
+    public function japaneseName(): ?string
+    {
+        $profile = $this->profile;
+
+        if ($profile === null) {
+            return $this->name_ja;
+        }
+
+        return $profile->name_ja ?? $this->name_ja;
     }
 
     /**
