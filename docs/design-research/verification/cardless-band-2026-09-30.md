@@ -120,6 +120,10 @@ Three ways to close it, each costing something the ruling named:
 
 Recommendation: 3, then re-measure; 1 if the fold matters more than the ten.
 
+**Ruled 2026-09-30, by the owner: leave it, keep recent-10.** The band ships as measured — row 11 of 13 in
+the default paint, reachable with no typing, seam below the popup's scroll fold. The three options above
+stand as what was weighed, not as open work; nothing here is owed.
+
 ## 6. Gates
 
 Full suite after the last edit: **783 passed, 2 skipped (2729 assertions)**, exit 0. This file alone:
