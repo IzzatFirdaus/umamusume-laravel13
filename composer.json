@@ -50,12 +50,14 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
+            "npm run typecheck",
             "@php artisan test"
         ],
         "lore": "@php tools/lore.php",
         "lore-code": "@php tools/lore.php code",
         "lint": "pint --test",
         "fix": "pint",
+        "typecheck": "npm run typecheck",
         "analyse": "phpstan analyse",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
