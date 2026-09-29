@@ -56,19 +56,25 @@ class TrainingRunController extends Controller
     public function create(): View
     {
         /*
-         * One query, one payload, one truth. The catalog page and this selector read the
-         * same rows, so a card that exists in the dropdown cannot be absent from the
-         * catalog. Cards come with the trainees rather than in a second pass: at 68 and
-         * ~107 rows, an eager load is one query and a lazy one is sixty-nine.
+         * One query, two lists, one truth. The catalog page and this selector read the same
+         * rows, so a card that exists in the dropdown cannot be absent from the catalog. Cards
+         * come with the trainees rather than in a second pass: at 68 and ~107 rows, an eager
+         * load is one query and a lazy one is sixty-nine.
          *
-         * `whereHas` carries the same `unconfirmed` filter as the eager load, because a
-         * trainee whose only form is unconfirmed has nothing a Trainer may run: she would
-         * otherwise appear in the no-script select with no entry in the payload, which is
-         * a choice that leads nowhere.
+         * The two lists are not the same set, and the difference is the point. `character_card_id`
+         * is nullable and StoreTrainingRunRequest accepts a submission without it, so a Global
+         * trainee with no fetched card is still trainable: the no-script select lists every one of
+         * them, while the payload keeps the card requirement because its rows are costume cards
+         * and a trainee with none contributes nothing to filter. Gating the select on the card
+         * instead asks a Trainer to wait for a fetch before they can start a run at all, which is
+         * the enhancement failing on the path the enhancement exists for.
+         *
+         * An unconfirmed form stays out of the payload for the same reason the catalog hides it
+         * (FR-A-6, FR-B-4). Such a trainee is still in the select: she is runnable, it is her form
+         * that is not confirmed yet.
          */
-        $roster = Umamusume::query()
+        $trainees = Umamusume::query()
             ->where('release_status', ReleaseStatus::GlobalReleased->value)
-            ->whereHas('cards', fn ($query) => $query->where('unconfirmed', false))
             ->with(['cards' => fn ($query) => $query
                 ->where('unconfirmed', false)
                 ->orderBy('global_release_date')
@@ -76,9 +82,10 @@ class TrainingRunController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('runs.create', [
-            'umamusumes' => $roster,
-            'rosterJson' => $roster->map(fn (Umamusume $u): array => [
+        $roster = $trainees
+            ->filter(fn (Umamusume $u): bool => $u->cards->isNotEmpty())
+            ->values()
+            ->map(fn (Umamusume $u): array => [
                 'umamusumeId' => $u->id,
                 'trainee' => $u->name,
                 'traineeJa' => $u->name_ja,
@@ -96,7 +103,11 @@ class TrainingRunController extends Controller
                     'releaseDate' => $c->global_release_date->toDateString(),
                     'debut' => $c->is_debut_form,
                 ])->all(),
-            ])->all(),
+            ])->all();
+
+        return view('runs.create', [
+            'umamusumes' => $trainees,
+            'rosterJson' => $roster,
             'selectedLabel' => $this->selectedCardLabel(),
             'scenarios' => $this->scenarioLabels(),
         ]);

@@ -3,8 +3,10 @@
  *
  * ARIA combobox, not an invented pattern: the input carries role="combobox" with
  * aria-expanded, aria-autocomplete="list" and aria-activedescendant; the popup is a
- * role="listbox"; a trainee is a role="group" header that is deliberately not an option;
- * her cards are the role="option" items. See the WAI-ARIA APG "combobox with list".
+ * role="listbox"; her cards are the role="option" items, each one naming its own trainee
+ * because the header above them is presentation only and deliberately not an option. A
+ * heading inside the option list would be a row a Trainer could pick, and a group that owns
+ * no option names none. See the WAI-ARIA APG "combobox with list".
  *
  * Everything is additive. The page ships a working native <select>; this module disables
  * it and reveals its own controls only when it runs, so a Trainer with scripting off
@@ -130,6 +132,11 @@ const render = (
     query: string,
     listbox: HTMLUListElement,
     status: HTMLElement,
+    // The boot paints pass this: a polite live region is read out when it changes, so a page
+    // load that wrote "10 cards match" before anyone opened the popup was stating a fact about
+    // a list the Trainer had not asked for. Every paint that answers a keystroke, a focus or a
+    // click still speaks.
+    silent = false,
 ): Hit[] => {
     const matches = collect(rows, query);
     const visible = matches.slice(0, query.trim() === '' ? DEFAULT_VISIBLE : MAX_VISIBLE);
@@ -137,15 +144,19 @@ const render = (
     listbox.textContent = '';
 
     if (visible.length === 0) {
-        status.textContent = 'No trainee or card found.';
+        if (!silent) {
+            status.textContent = 'No trainee or card found.';
+        }
 
         return visible;
     }
 
-    status.textContent =
-        matches.length > visible.length
-            ? `${visible.length} of ${matches.length} (keep typing)`
-            : `${matches.length} ${matches.length === 1 ? 'card' : 'cards'} match`;
+    if (!silent) {
+        status.textContent =
+            matches.length > visible.length
+                ? `${visible.length} of ${matches.length} (keep typing)`
+                : `${matches.length} ${matches.length === 1 ? 'card' : 'cards'} match`;
+    }
 
     let lastTrainee: number | null = null;
 
@@ -154,7 +165,12 @@ const render = (
             lastTrainee = hit.trainee.umamusumeId;
 
             const header = document.createElement('li');
-            header.setAttribute('role', 'group');
+            // Presentation, not `role="group"`. A group has to own its options to name them and
+            // this header is a sibling of hers, so the group would be unnamed (ARIA does not take
+            // a group's name from its content) and a screen reader moving between her cards would
+            // hear a card title with no trainee in it. The header stays as sighted punctuation;
+            // the trainee's name goes into each option below, where navigation always picks it up.
+            header.setAttribute('role', 'presentation');
             header.setAttribute('data-group-header', '');
             header.className = 'px-3 pt-2 pb-1 text-xs font-semibold text-ink-muted';
             // textContent throughout: titles are source data and must never be parsed as
@@ -173,11 +189,18 @@ const render = (
         option.dataset.umamusumeId = String(hit.trainee.umamusumeId);
         option.className = 'cursor-pointer px-3 py-1.5 text-sm text-ink';
 
+        const detail = hit.card.debut ? 'debut' : hit.card.releaseDate;
+
         const title = document.createElement('span');
         title.textContent = hit.card.title;
         const date = document.createElement('span');
         date.className = 'ml-2 text-xs text-ink-muted';
-        date.textContent = hit.card.debut ? 'debut' : hit.card.releaseDate;
+        date.textContent = detail;
+
+        // Whose card this is, in the option's own accessible text: the header above it is
+        // presentation now. A middle dot, not a dash, because an accessible name is copy a
+        // screen reader speaks and R-02 and D-79 keep the dash out of copy.
+        option.setAttribute('aria-label', `${hit.trainee.trainee} · ${hit.card.title} ${detail}`);
 
         option.append(title, date);
         listbox.append(option);
@@ -217,14 +240,30 @@ export const initTraineeCombobox = (): void => {
 
     const rosterText = roster.textContent;
     let rows: TraineeRow[];
+    let visible: Hit[] = [];
 
+    /*
+     * The payload check is the whole shape, not just its syntax. `JSON.parse` accepts a string,
+     * a number, or an object that is not a list of trainees, and the cast below keeps that
+     * invisible to TypeScript until the first `flatMap` throws. So the array guard and the first
+     * paint both run in here, ahead of the handover: hand the form over on a payload that cannot
+     * paint and the page keeps neither picker, because the native select is disabled and the
+     * hidden pair is enabled and empty. An empty roster is the same case in a different shape, so
+     * the working select is left exactly as the server sent it. Silent, because the Trainer has
+     * not opened the list yet and this is the page speaking.
+     */
     try {
         rows = JSON.parse(rosterText) as TraineeRow[];
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+            return;
+        }
+
+        visible = render(rows, '', listbox, status, true);
     } catch {
         return; // leave the native select alone: a bad payload must not break the form
     }
 
-    let visible: Hit[] = [];
     let active = -1;
     let open = false;
 
@@ -246,7 +285,9 @@ export const initTraineeCombobox = (): void => {
      * The handover, in one block so it cannot half-apply: the fallback select stops
      * submitting and the two hidden fields start. Both carry name="umamusume_id", and a
      * display:none control still submits, so if this pair is split across two places a
-     * later edit can leave both enabled and the empty hidden value wins the POST.
+     * later edit can leave both enabled and the empty hidden value wins the POST. It sits
+     * below the first paint for the same reason in miniature: nothing is taken over from a
+     * payload that has not proven it can be drawn.
      */
     fallback.disabled = true;
     traineeField.disabled = false;
@@ -256,6 +297,18 @@ export const initTraineeCombobox = (): void => {
         open = value;
         listbox.hidden = !value;
         input.setAttribute('aria-expanded', String(value));
+
+        if (!value) {
+            /*
+             * A closed listbox owns no cursor. Escape, blur and commit all leave through here,
+             * and leaving `aria-activedescendant` pointing at a row inside a hidden listbox is
+             * the ARIA violation: the active descendant has to be reachable. It also fixes where
+             * the next ArrowDown lands, because `refresh()` parks the cursor on row zero and the
+             * arrow path adds one.
+             */
+            active = -1;
+            paintActive();
+        }
     };
 
     const options = (): HTMLLIElement[] =>
@@ -278,8 +331,8 @@ export const initTraineeCombobox = (): void => {
         input.setAttribute('aria-activedescendant', active >= 0 ? options()[active]?.id ?? '' : '');
     };
 
-    const refresh = (): void => {
-        visible = render(rows, chosen ? '' : input.value, listbox, status);
+    const refresh = (silent = false): void => {
+        visible = render(rows, chosen ? '' : input.value, listbox, status, silent);
         active = visible.length > 0 ? 0 : -1;
         paintActive();
     };
@@ -336,6 +389,15 @@ export const initTraineeCombobox = (): void => {
 
     input.addEventListener('focus', (): void => {
         refresh();
+        /*
+         * Open with no cursor, which is what the APG says for a combobox with a listbox, and for
+         * one reason in particular here: a refocused field that already holds a selection shows the
+         * default list, whose row zero is the newest card in the whole roster. Leave the cursor on
+         * it and the Enter a Trainer presses meaning "submit" silently re-picks somebody else's
+         * form. The pair it writes is self-consistent, so the server cannot catch it.
+         */
+        active = -1;
+        paintActive();
         setOpen(true);
         // A preselected label means the next keystroke replaces it instead of appending to
         // it, which is what keeps `chosen` from turning the field into a stuck filter.
@@ -378,6 +440,10 @@ export const initTraineeCombobox = (): void => {
 
             if (!open) {
                 refresh();
+                // Same rule as focus: a list that was closed has no cursor, so the increment
+                // below lands on row zero. `refresh()` alone would leave it on row zero and the
+                // increment would land on row one, which is a row the Trainer never asked for.
+                active = -1;
                 setOpen(true);
             }
 
@@ -437,7 +503,7 @@ export const initTraineeCombobox = (): void => {
             chosen = true;
         }
 
-        refresh();
+        refresh(true);
     }
 };
 

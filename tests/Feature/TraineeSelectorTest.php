@@ -138,6 +138,25 @@ function noScriptFields(string $html): array
     return $fields;
 }
 
+/**
+ * One construct's slice of the module source, between two markers, so a shape pin can say
+ * which construct carries the line it checks. A pin over the whole file would pass with the
+ * cursor reset sitting in the wrong function. The throw is the loud half: a marker that has
+ * moved fails naming the slice rather than returning a substring that asserts cleanly.
+ */
+function comboboxSection(string $start, string $end): string
+{
+    $source = (string) file_get_contents(base_path('resources/js/trainee-combobox.ts'));
+    $from = strpos($source, $start);
+    $to = $from === false ? false : strpos($source, $end, $from + strlen($start));
+
+    if ($from === false || $to === false) {
+        throw new RuntimeException("trainee-combobox.ts does not contain the slice {$start} ... {$end}");
+    }
+
+    return substr($source, $from, $to - $from);
+}
+
 // ---------------------------------------------------------------------------
 // RENDERED-DOM PROOFS
 // ---------------------------------------------------------------------------
@@ -160,14 +179,14 @@ it('advertises the combobox half of the ARIA surface on the rendered page', func
         ->and($xpath->query('//script[@id="trainee-roster"][@type="application/json"]')->length)->toBe(1);
 });
 
-it('names the combobox input explicitly, since it is not the label\'s first control', function (): void {
+it('names the combobox input explicitly, since no label reaches it', function (): void {
     selectorRoster();
 
     $xpath = selectorXPath(createPageHtml());
 
     // role="combobox" passes with no accessible name at all, so the attribute under test is
-    // the name itself: the <label> associates with the <select>, which is the first
-    // labelable descendant, and the input would otherwise be unnamed.
+    // the name itself: the <label> belongs to the select (one label names one control), the
+    // combobox is outside it, and the input would otherwise be unnamed.
     expect($xpath->query('//input[@data-combobox-input][@aria-label="Trainee or costume card name"]')->length)->toBe(1)
         // ...and the popup it opens is named too, since a listbox has no label of its own.
         ->and($xpath->query('//ul[@role="listbox"][@aria-label="Trainees and costume cards"]')->length)->toBe(1);
@@ -224,10 +243,10 @@ it('ships the whole roster to the page as data, and the select as trainees only'
         ->and($xpath->query('//select[.//option[contains(text(), "RUN! RUIN!")]]')->length)->toBe(0);
 });
 
-it('offers only Global trainees who have a confirmed costume card', function (): void {
+it('offers the payload only Global trainees with a confirmed card, and the select every Global trainee', function (): void {
     selectorRoster();
 
-    $unreached = Umamusume::factory()->create(['name' => 'No Cards', 'slug' => 'no-cards']);
+    $noCards = Umamusume::factory()->create(['name' => 'No Cards', 'slug' => 'no-cards']);
     $jpOnly = Umamusume::factory()->japanOnly()->create(['name' => 'Japan Only One', 'slug' => 'japan-only-one']);
     CharacterCard::factory()->create(['umamusume_id' => $jpOnly->id, 'card_id' => 109001]);
     $shadowed = Umamusume::factory()->create(['name' => 'Unconfirmed Only', 'slug' => 'unconfirmed-only']);
@@ -235,19 +254,89 @@ it('offers only Global trainees who have a confirmed costume card', function ():
 
     $payload = rosterFrom(createPageHtml());
 
-    // Two trainees, three cards. The trainee with no card, the [JP-Only] trainee, and the
-    // one whose only form is unconfirmed are all absent: a name she cannot run is not a
-    // choice, and an unconfirmed form is hidden here for the same reason the catalog hides
-    // it (FR-A-6, FR-B-4).
+    // Two trainees, three cards in the payload. The [JP-Only] trainee, the one whose only form
+    // is unconfirmed, and the one with no card row at all are absent from the card list: a
+    // payload row is a costume card, and these three offer none a Trainer may run (FR-A-6,
+    // FR-B-4). The card requirement lives here and nowhere else, because this is the list the
+    // combobox paints options from.
     expect($payload)->toHaveCount(2)
         ->and(collect($payload)->map(fn (array $trainee): int => count($trainee['cards']))->sum())->toBe(3)
         ->and(collect($payload)->pluck('trainee')->all())->toBe(['Fuji Kiseki', 'Gold Ship']);
 
     $xpath = selectorXPath(createPageHtml());
 
+    // The no-script select is gated on the trainee, not on her card. `character_card_id` is
+    // nullable and StoreTrainingRunRequest accepts a submission without it, so a Global trainee
+    // with no fetched card is still trainable and stays listed: one placeholder plus the four
+    // Global trainees. The [JP-Only] row stays out, because release status is a trainee-level
+    // gate this fix does not touch.
+    expect($xpath->query('//select[@name="umamusume_id"]/option')->length)->toBe(5)
+        ->and($xpath->query(sprintf('//option[@value="%d"]', $noCards->id))->length)->toBe(1)
+        ->and($xpath->query(sprintf('//option[@value="%d"]', $shadowed->id))->length)->toBe(1)
+        ->and($xpath->query(sprintf('//option[@value="%d"]', $jpOnly->id))->length)->toBe(0);
+});
+
+it('lists every Global trainee in the no-script select when the database holds no costume card at all', function (): void {
+    /*
+     * The shape of a freshly seeded dev database: `DatabaseSeeder` calls the Umamusume, Skill
+     * and ScenarioSlot seeders, and no seeder writes `character_cards`. That table is filled by
+     * a fetch which has not run yet, so every other test in this file is hand-creating card rows
+     * a Trainer's own database does not have. A trainee list gated on those rows leaves the rail
+     * uncompletable until the fetch lands, which is not progressive enhancement.
+     */
+    $first = Umamusume::factory()->create(['name' => 'Cardless One', 'slug' => 'cardless-one']);
+    $second = Umamusume::factory()->create(['name' => 'Cardless Two', 'slug' => 'cardless-two']);
+    $jpOnly = Umamusume::factory()->japanOnly()->create(['name' => 'Japan Only Cardless', 'slug' => 'japan-only-cardless']);
+
+    expect(CharacterCard::count())->toBe(0);
+
+    $html = createPageHtml();
+    $xpath = selectorXPath($html);
+
+    // Placeholder plus both Global trainees, and the release gate is still a gate.
     expect($xpath->query('//select[@name="umamusume_id"]/option')->length)->toBe(3)
-        ->and($xpath->query(sprintf('//option[@value="%d"]', $unreached->id))->length)->toBe(0)
-        ->and($xpath->query(sprintf('//option[@value="%d"]', $shadowed->id))->length)->toBe(0);
+        ->and($xpath->query(sprintf('//option[@value="%d"]', $first->id))->length)->toBe(1)
+        ->and($xpath->query(sprintf('//option[@value="%d"]', $second->id))->length)->toBe(1)
+        ->and($xpath->query(sprintf('//option[@value="%d"]', $jpOnly->id))->length)->toBe(0)
+        // The card filter stayed inside the payload: no card rows means an empty list there,
+        // not a missing key and not the trainee list emptied along with it.
+        ->and(rosterFrom($html))->toBe([]);
+
+    // Then the rail completes, posting the rendered form's own field set with the cardless
+    // trainee substituted for the placeholder. This is the C1 failure mode: a trainee with no
+    // card row used to be unpostable because she was not offered at all.
+    $fields = [];
+
+    foreach (noScriptFields($html) as $field) {
+        $fields[$field['name']] = $field['name'] === 'umamusume_id' ? (string) $first->id : $field['value'];
+    }
+
+    test()->post('/training-runs', $fields)->assertSessionHasNoErrors();
+
+    $run = TrainingRun::firstOrFail();
+
+    expect($run->umamusume_id)->toBe($first->id)
+        ->and($run->character_card_id)->toBeNull();
+});
+
+it('associates the caption with one control, and keeps the combobox out of that label', function (): void {
+    selectorRoster();
+
+    $xpath = selectorXPath(createPageHtml());
+
+    // A <label> may name exactly one labelable control, and an implicit association resolves to
+    // the first one in the tree, which here is the select this script disables. Wrapping both
+    // controls therefore gave the caption a click target that goes nowhere on the scripted path.
+    // Three clauses because any one of them passes with the wrong structure: the caption has to
+    // name the select by id, the combobox has to be outside every label, and no second labelable
+    // control may be left inside the caption's label.
+    expect($xpath->query('//label[@for="umamusume-select"]/select[@id="umamusume-select"]')->length)->toBe(1)
+        ->and($xpath->query('//label//input[@data-combobox-input]')->length)->toBe(0)
+        ->and($xpath->query(
+            '//label[@for="umamusume-select"]//input'.
+            '| //label[@for="umamusume-select"]//textarea'.
+            '| //label[@for="umamusume-select"]//select[not(@id="umamusume-select")]'
+        )->length)->toBe(0);
 });
 
 it('keeps a native select as the no-script path, and that path really submits', function (): void {
@@ -353,6 +442,36 @@ it('carries the chosen card back to the form when another field fails', function
 // ---------------------------------------------------------------------------
 // BEHAVIOUR PROOFS
 // ---------------------------------------------------------------------------
+
+it('restores the chosen scenario when the submission fails on another field', function (): void {
+    selectorRoster();
+
+    $goldShip = Umamusume::where('slug', 'gold-ship')->firstOrFail();
+    $card = CharacterCard::where('card_id', 100702)->firstOrFail();
+
+    // The scenario is the third control on this form and its stickiness was asserted nowhere.
+    // A valid scenario posted with a `status` the enum rejects is the shape of the mistake this
+    // answers: the form comes back for one bad field with the composition the Trainer chose
+    // still chosen. The brief's `assertSee('not_a_scenario', false)` could never have proven
+    // this, because a value outside the matrix matches no option, so nothing on the page can
+    // echo it back as selected. It is rendered-DOM in method, and its proof is a POST.
+    $xpath = selectorXPath(test()->withHeader('referer', url('/training-runs/create'))
+        ->followingRedirects()
+        ->post('/training-runs', [
+            'umamusume_id' => $goldShip->id,
+            'character_card_id' => $card->id,
+            'status' => 'Not A Status',
+            'scenario' => 'ura_finale',
+        ])
+        ->assertOk()
+        ->getContent());
+
+    // The selected option, read through the tree. A page that lost the scenario shows the
+    // empty option selected instead, which the second clause refuses.
+    expect($xpath->query('//select[@name="scenario"]/option[@value="ura_finale"][@selected]')->length)->toBe(1)
+        ->and($xpath->query('//select[@name="scenario"]/option[@selected][@value=""]')->length)->toBe(0)
+        ->and($xpath->query(sprintf('//select[@name="umamusume_id"]/option[@value="%d"][@selected]', $goldShip->id))->length)->toBe(1);
+});
 
 it('submits the local card id the payload carries, and refuses the source id', function (): void {
     selectorRoster();
@@ -464,13 +583,18 @@ it('filters on all three fields, caps the list, and adds no dependency', functio
         ->and($source)->not->toMatch('/from\s+["\'](?!\.)/');
 });
 
-it('builds the group and option roles the listbox needs, and takes the select over', function (): void {
+it('builds the option role the listbox needs, keeps the header out of the tree, and takes the select over', function (): void {
     $source = (string) file_get_contents(base_path('resources/js/trainee-combobox.ts'));
 
     // These roles live only in nodes the script creates, so the rendered page cannot show
-    // them and a shape pin is the only check available. The group header is deliberately
-    // not an option: a heading inside the option list would be a row a Trainer could pick.
-    expect($source)->toContain("'group'")
+    // them and a shape pin is the only check available. The header is deliberately not an
+    // option: a heading inside the option list would be a row a Trainer could pick. It is
+    // presentation rather than `role="group"` because a group has to own its options to name
+    // them, this header is a sibling of them, and `group` is not name-from-content in ARIA,
+    // so the shape as built was an unnamed group that carried no trainee either way. The name
+    // goes into each option instead, which the pin below holds.
+    expect($source)->toContain("'presentation'")
+        ->and($source)->not->toContain("'group'")
         ->and($source)->toContain("'option'")
         ->and($source)->toContain('aria-selected')
         ->and($source)->toContain('data-combobox-listbox')
@@ -482,11 +606,79 @@ it('builds the group and option roles the listbox needs, and takes the select ov
         ->and($source)->toMatch('/cardField\.disabled\s*=\s*false/');
 });
 
+it('opens and closes the listbox with no cursor, so Enter stays a submission', function (): void {
+    // SHAPE PIN, not a behaviour proof: the cursor lives in a JS runtime this suite cannot
+    // start (no JS runner, and C-8 forbids adding one). What would catch this in Task 13's
+    // browser pass is a rendered-DOM assertion that after focus the listbox is open with
+    // `aria-activedescendant=""` and no `aria-selected="true"` row, then one Enter posting the
+    // pair the field had already committed. These pins fail if a reset moves into the wrong
+    // construct, which is how the three cursor paths are held to one rule.
+    $focus = comboboxSection("input.addEventListener('focus'", "input.addEventListener('input'");
+    $close = comboboxSection('const setOpen =', 'const options =');
+    $arrow = comboboxSection('if (!open) {', 'const count = options().length');
+
+    // I2: opening from focus lands with no cursor. Without it, a refocused committed field shows
+    // the default list, whose row zero is the newest card in the whole roster, and the first
+    // Enter re-picks someone else's form instead of submitting. That pair is self-consistent, so
+    // StoreTrainingRunRequest's trainee-card join cannot see the disagreement.
+    expect($focus)->toContain('active = -1;')
+        ->and(strpos($focus, 'active = -1;'))->toBeLessThan((int) strpos($focus, 'setOpen(true);'))
+        // I6: Escape, blur and commit all close through here, and a closed listbox must own no
+        // cursor, because `aria-activedescendant` has to name a row a screen reader can reach.
+        ->and($close)->toContain('if (!value) {')
+        ->and(strpos($close, 'active = -1;'))->toBeGreaterThan((int) strpos($close, 'if (!value) {'))
+        ->and(strpos($close, 'paintActive();'))->toBeGreaterThan((int) strpos($close, 'active = -1;'))
+        // Reopening by arrow starts from no cursor too, so the increment below it lands on row
+        // zero rather than on row one.
+        ->and($arrow)->toContain('active = -1;');
+});
+
 it('names the empty and capped states in words a Trainer reads', function (): void {
     $source = (string) file_get_contents(base_path('resources/js/trainee-combobox.ts'));
 
     expect($source)->toContain('No trainee or card found.')
         ->and($source)->toContain('keep typing');
+});
+
+it('gives every option the trainee it belongs to in its own accessible name', function (): void {
+    $header = comboboxSection('const header = document.createElement', 'listbox.append(header)');
+    $option = comboboxSection('const option = document.createElement', 'listbox.append(option)');
+
+    // I4: the header cannot carry the grouping (see the roles pin), so navigating one trainee's
+    // cards has to say whose they are out of the option's own accessible text. The separator is
+    // the catalog's `·`, because an accessible name is copy a screen reader speaks.
+    expect($header)->toContain("setAttribute('role', 'presentation')")
+        ->and($option)->toContain('setAttribute(\'aria-label\', `${hit.trainee.trainee} · ')
+        ->and($option)->not->toMatch('/[\x{2013}\x{2014}]/u');
+});
+
+it('hands the form over only after a payload that paints', function (): void {
+    $source = (string) file_get_contents(base_path('resources/js/trainee-combobox.ts'));
+    $guard = comboboxSection('try {', 'leave the native select alone');
+
+    // I5: JSON.parse accepts a string, a number, or an object shaped nothing like a roster, and
+    // the `as TraineeRow[]` cast hides that from TypeScript until the first `flatMap` throws.
+    // The array guard and the first paint therefore sit in the same try as the parse, ahead of
+    // the handover. That is what makes the comment on that catch true: hand over first and the
+    // page keeps neither picker, because the native select is disabled and the hidden pair is
+    // enabled and empty.
+    expect($guard)->toContain('Array.isArray(rows)')
+        ->and($guard)->toContain('render(rows, \'\', listbox, status, true)')
+        ->and($guard)->toContain('rows.length === 0')
+        ->and(strpos($source, 'fallback.disabled = true'))->toBeGreaterThan((int) strpos($source, 'catch {'));
+});
+
+it('keeps the live region quiet until the Trainer opens the list', function (): void {
+    $source = (string) file_get_contents(base_path('resources/js/trainee-combobox.ts'));
+    $render = comboboxSection('const render = (', 'export const initTraineeCombobox');
+
+    // M5: some AT announce a mutation to a polite live region even when nobody opened the
+    // popup, so a page load writing "10 cards match" into it was stating a fact about a list
+    // the Trainer had not asked for. Both boot paints pass the flag; every status line after
+    // that one answers an action the Trainer took.
+    expect($render)->toContain('silent = false')
+        ->and(substr_count($render, 'if (!silent) {'))->toBe(2)
+        ->and($source)->toContain('refresh(true)');
 });
 
 it('joins a trainee to her card with a middle dot, never a dash', function (): void {

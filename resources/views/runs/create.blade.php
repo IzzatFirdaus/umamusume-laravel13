@@ -21,23 +21,30 @@
              a run naming the trainee but not the form. That is the honest ceiling for a
              path with no filtering script, not an oversight: character_card_id is nullable
              and Task 5's rule accepts a submission without it. --}}
-        <label class="block">
-            <span class="font-medium text-ink">Umamusume</span>
+        <div class="block">
+            {{-- A <label> may name exactly one labelable control, so it wraps the select and
+                 points at it by id, and the combobox block sits outside it. A label holding two
+                 labelable controls resolves to the first, which is the control this script
+                 disables, so wrapping both made the caption a click that goes nowhere on the
+                 path the script runs on. --}}
+            <label for="umamusume-select" class="block">
+                <span class="font-medium text-ink">Umamusume</span>
 
-            <select name="umamusume_id" required data-combobox-fallback
-                    class="mt-1 w-full rounded-md border border-rule bg-raised px-2 py-1 text-ink @error('umamusume_id') border-risk @enderror">
-                <option value="">Choose…</option>
-                @foreach ($umamusumes as $umamusume)
-                    <option value="{{ $umamusume->id }}" @selected(old('umamusume_id') == $umamusume->id)>
-                        {{ $umamusume->name }}
-                    </option>
-                @endforeach
-            </select>
+                <select id="umamusume-select" name="umamusume_id" required data-combobox-fallback
+                        class="mt-1 w-full rounded-md border border-rule bg-raised px-2 py-1 text-ink @error('umamusume_id') border-risk @enderror">
+                    <option value="">Choose…</option>
+                    @foreach ($umamusumes as $umamusume)
+                        <option value="{{ $umamusume->id }}" @selected(old('umamusume_id') == $umamusume->id)>
+                            {{ $umamusume->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </label>
 
             <div data-combobox class="mt-1 hidden">
-                {{-- aria-label is explicit because this input is not the first labelable
-                     descendant of the <label>, so the implicit association goes to the
-                     select and the combobox would otherwise have no accessible name. --}}
+                {{-- aria-label is explicit because this input is not inside the <label> above
+                     at all: a label names one control, and the caption belongs to the select.
+                     Without the attribute the combobox would have no accessible name. --}}
                 <input type="text" role="combobox" aria-expanded="false" aria-autocomplete="list"
                        aria-controls="trainee-listbox" aria-activedescendant=""
                        aria-label="Trainee or costume card name"
@@ -59,7 +66,7 @@
 
             @error('umamusume_id')<p class="mt-1 text-risk">{{ $message }}</p>@enderror
             @error('character_card_id')<p class="mt-1 text-risk">{{ $message }}</p>@enderror
-        </label>
+        </div>
 
         <script type="application/json" id="trainee-roster">@json($rosterJson)</script>
 
