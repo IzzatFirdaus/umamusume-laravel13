@@ -68,19 +68,46 @@ function cellClassFor(string $html, string $needle): string
     return $matches[1] ?? '';
 }
 
-it('draws twenty-four turn slots, Early and Late for each of twelve months', function (): void {
+/**
+ * The half-month captions, in the order the grid lays them out.
+ *
+ * Read off the rendered text rather than a marker attribute: the caption is what the
+ * Trainer uses to find a cell once the month header row is gone, so its wording and
+ * its order are the contract.
+ *
+ * @return list<string>
+ */
+function captionsOf(string $html): array
+{
+    preg_match_all(
+        '#>((?:Early|Late) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))</span>#',
+        $html,
+        $matches,
+    );
+
+    return $matches[1];
+}
+
+it('draws the client grid: four cells across, six rows, one row per month pair', function (): void {
     $html = renderCalendar('ura_finale', calendarCells());
 
-    // The grid is the structure the Trainer plans against, so its shape is the
-    // contract: twelve headers, then two rows of twelve. Counting the half labels
-    // with their tags avoids matching the caption, which also names both halves.
-    expect(substr_count($html, '>Early<'))->toBe(12)
-        ->and(substr_count($html, '>Late<'))->toBe(12)
-        ->and(substr_count($html, 'col-span-1 rounded-md border'))->toBe(24);
+    // The client's own panel (docs/game-screenshots/Screenshot 2026-07-17 230755.png) is four
+    // cells wide and six rows tall, each row the Early and Late halves of two consecutive months,
+    // with the half-month caption under the box. The build was the same 24 slots transposed into
+    // twelve columns and two rows, which is why it needed a scroll band a desktop tool cannot
+    // overflow at (`docs/UX Behavior Specification - Umamusume Trainer Companion.md` line 18).
+    expect($html)->toContain('grid-cols-4')
+        ->and($html)->not->toContain('grid-cols-12')
+        ->and($html)->not->toContain('min-w-224')
+        ->and(substr_count($html, 'w-full rounded-md border px-1'))->toBe(24);
 
-    foreach (['Jan', 'Jun', 'Dec'] as $month) {
-        expect($html)->toContain($month);
-    }
+    // Row order is the turn order: a Trainer reading down the left column walks the year.
+    $captions = captionsOf($html);
+
+    expect($captions)->toHaveCount(24)
+        ->and(array_slice($captions, 0, 4))->toBe(['Early Jan', 'Late Jan', 'Early Feb', 'Late Feb'])
+        ->and(array_slice($captions, 4, 4))->toBe(['Early Mar', 'Late Mar', 'Early Apr', 'Late Apr'])
+        ->and(array_slice($captions, 20, 4))->toBe(['Early Nov', 'Late Nov', 'Early Dec', 'Late Dec']);
 });
 
 it('draws a fan lock as a number you can work toward', function (): void {
@@ -132,7 +159,7 @@ it('keeps the two locks separable when the state word is stripped', function ():
     // Same assertion the reviewer makes: hide the labels, and the cells must still
     // differ by border style alone.
     $borders = [];
-    preg_match_all('/class="(col-span-1 rounded-md border[^"]*)"/', $html, $matches);
+    preg_match_all('/class="(w-full rounded-md border[^"]*)"/', $html, $matches);
 
     foreach ($matches[1] as $class) {
         $borders[] = str_contains($class, 'border-dashed') ? 'dashed' : 'solid';
@@ -147,11 +174,13 @@ it('names each cell with its month, half and state, not its race name alone', fu
     // A labelled cell's state lives in its border and tint, so a screen reader
     // hearing only "Tenno Sho" would not know the race is gated. D-181 keeps the
     // visual signal; this is the same fact in the accessible name.
+    // The accessible name leads with the same caption the cell is wearing, so what a screen
+    // reader says and what the Trainer reads are the same words in the same order.
     expect($html)
-        ->toContain('aria-label="Apr Late: Fan gate, Tenno Sho"')
-        ->toContain('aria-label="May Early: Maiden rule, Naruta Kinpa Cup"')
-        ->toContain('aria-label="Jan Early: Mandatory goal, Fuwa Fuji Taima Stakes"')
-        ->toContain('aria-label="Sep Late: No race, No race"');
+        ->toContain('aria-label="Late Apr: Fan gate, Tenno Sho"')
+        ->toContain('aria-label="Early May: Maiden rule, Naruta Kinpa Cup"')
+        ->toContain('aria-label="Early Jan: Mandatory goal, Fuwa Fuji Taima Stakes"')
+        ->toContain('aria-label="Late Sep: No race, No race"');
 });
 
 it('renders a red Goal pennant on mandatory goal cells', function (): void {
@@ -161,7 +190,7 @@ it('renders a red Goal pennant on mandatory goal cells', function (): void {
     // a heavier warm outline and greater height", and the pennant is the client's
     // own red Goal flag. The treatment, not a sentence, carries the mandate.
     expect($html)
-        ->toContain('aria-label="Jan Early: Mandatory goal, Fuwa Fuji Taima Stakes"')
+        ->toContain('aria-label="Early Jan: Mandatory goal, Fuwa Fuji Taima Stakes"')
         // A triangle needs the two dead sides transparent and only the filled edge
         // coloured. `border-green` on its own sets border-color on all four sides,
         // and which of it and `border-transparent` wins is Tailwind's sheet order,
@@ -200,7 +229,7 @@ it('renders nothing at all for a scenario with no race calendar', function (stri
     // markup — absence, not a disabled shell.
     $html = renderCalendar($scenario, calendarCells());
 
-    expect(trim($html))->toBe('')->not->toContain('Race calendar')->not->toContain('col-span-1');
+    expect(trim($html))->toBe('')->not->toContain('Race calendar')->not->toContain('w-full rounded-md border');
 })->with(['trackblazer', 'our_grand_concert']);
 
 it('renders the calendar for both scenarios that own race goals', function (string $scenario): void {
@@ -270,7 +299,7 @@ it('renders an empty cell when a half-month has no slots', function (): void {
     // September Late is already empty in the fixture.
     $html = renderCalendar('ura_finale', $cells);
 
-    expect($html)->toContain('Sep Late: No race, No race');
+    expect($html)->toContain('Late Sep: No race, No race');
 });
 
 it('labels manual (Trainer-entered) rows distinctly from seeded ones', function (): void {

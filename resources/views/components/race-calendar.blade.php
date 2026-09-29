@@ -115,70 +115,72 @@
         </p>
     @endif
 
-    {{-- 24 cells across 12 columns does not fit a phone, and shrinking each cell
-         until it fits would make the lock treatments unreadable, which is the one
-         thing this grid exists to communicate. So the grid keeps its width and the
-         region scrolls, focusable for keyboard users. --}}
-    <div class="overflow-x-auto" role="region" aria-label="Race calendar, {{ $year !== null ? \App\Models\RaceCatalogSlot::YEARS[$year].' year, ' : '' }}{{ $slotCount }} turn slots" tabindex="0">
-        {{-- 56rem on the spacing scale (224 × 0.25rem), not an arbitrary value: G-4 keeps
-             geometry on the scale so it moves with the token system. --}}
-        <div class="grid min-w-224 grid-cols-12 items-start gap-1">
-            @foreach ($monthLabels as $index => $month)
-                <div class="col-span-1 text-center text-xs font-semibold text-ink-muted">{{ $month }}</div>
-            @endforeach
+    {{-- Four cells across, six rows, one row per month pair: the client's own shape, measured off
+         docs/game-screenshots/Screenshot 2026-07-17 230755.png. The build was the same 24 slots
+         transposed into twelve columns and two rows, which needed a 56rem band and a horizontal
+         scroll to hold them. This tool is desktop-only (`docs/UX Behavior Specification - Umamusume
+         Trainer Companion.md` line 18) and four columns do not overflow at the 768px floor, so the
+         band went — and with it the `tabindex="0"` that existed to make a clipped region reachable
+         by keyboard (KI-25). A focus stop that scrolls nothing spends a keypress on nothing. --}}
+    <div class="grid grid-cols-4 items-start gap-x-3 gap-y-4" role="region" aria-label="Race calendar, {{ $year !== null ? \App\Models\RaceCatalogSlot::YEARS[$year].' year, ' : '' }}{{ $slotCount }} turn slots">
+        {{-- Reading down a column walks the year: a row is the Early and Late halves of two
+             consecutive months, so the DOM order is still the turn order. --}}
+        @foreach (array_chunk(range(0, 23), 4) as $row)
+            @foreach ($row as $slotIndex)
+                @php
+                    $monthIndex = intdiv($slotIndex, 2);
+                    $half = $slotIndex % 2 === 0 ? 'Early' : 'Late';
+                    $month = $monthLabels[$monthIndex];
+                    $cell = $cells[$monthIndex]['halves'][$half] ?? [];
+                    $slotItems = $cell['slots'] ?? [];
+                    // Derive a single state for the cell's border treatment from
+                    // its slots: goal wins, then fan_locked, then maiden_locked,
+                    // then open, then past, then empty. Multiple slots share one
+                    // border; their labels stack inside.
+                    $state = 'empty';
+                    $priority = ['goal' => 6, 'current' => 5, 'fan_locked' => 4, 'maiden_locked' => 3, 'open' => 2, 'past' => 1];
+                    // The row order above is the turn order, so the slot index is the
+                    // turn with one added: Junior Early January is turn 1.
+                    $cellTurn = $slotIndex + 1;
+                    $isCurrent = $currentTurn !== null && $currentTurn === $cellTurn;
+                    // The peer's priority map already ranked `current` between
+                    // goal and fan_locked; nothing ever fed it, so the state was
+                    // defined and unreachable. The current turn is a property of
+                    // the cell, not of any race in it, so it enters as one more
+                    // candidate for the same loop rather than as a slot.
+                    $candidates = array_map(fn (array $s): string => $s['state'] ?? '', $slotItems);
 
-            @foreach (['Early', 'Late'] as $half)
-                @foreach ($monthLabels as $monthIndex => $month)
-                    @php
-                        $cell = $cells[$monthIndex]['halves'][$half] ?? [];
-                        $slotItems = $cell['slots'] ?? [];
-                        // Derive a single state for the cell's border treatment from
-                        // its slots: goal wins, then fan_locked, then maiden_locked,
-                        // then open, then past, then empty. Multiple slots share one
-                        // border; their labels stack inside.
-                        $state = 'empty';
-                        $priority = ['goal' => 6, 'current' => 5, 'fan_locked' => 4, 'maiden_locked' => 3, 'open' => 2, 'past' => 1];
-                        $cellTurn = $monthIndex * 2 + ($half === 'Early' ? 1 : 2);
-                        $isCurrent = $currentTurn !== null && $currentTurn === $cellTurn;
-                        // The peer's priority map already ranked `current` between
-                        // goal and fan_locked; nothing ever fed it, so the state was
-                        // defined and unreachable. The current turn is a property of
-                        // the cell, not of any race in it, so it enters as one more
-                        // candidate for the same loop rather than as a slot.
-                        $candidates = array_map(fn (array $s): string => $s['state'] ?? '', $slotItems);
+                    if ($isCurrent) {
+                        $candidates[] = 'current';
+                    }
 
-                        if ($isCurrent) {
-                            $candidates[] = 'current';
+                    foreach ($candidates as $candidate) {
+                        if (($priority[$candidate] ?? 0) > ($priority[$state] ?? 0)) {
+                            $state = $candidate;
                         }
+                    }
+                    $state = array_key_exists($state, $stateClass) ? $state : 'empty';
+                    $firstLabel = $slotItems[0]['label'] ?? null;
+                    $fans = $state === 'fan_locked' ? ($slotItems[0]['fans_needed'] ?? null) : null;
+                    $ariaSlots = count($slotItems);
+                    $ariaText = $ariaSlots > 1
+                        ? "{$ariaSlots} races: " . implode(', ', array_map(fn ($s) => $s['label'] ?? '', $slotItems))
+                        : ($firstLabel ?? $stateWord[$state]);
 
-                        foreach ($candidates as $candidate) {
-                            if (($priority[$candidate] ?? 0) > ($priority[$state] ?? 0)) {
-                                $state = $candidate;
-                            }
-                        }
-                        $state = array_key_exists($state, $stateClass) ? $state : 'empty';
-                        $firstLabel = $slotItems[0]['label'] ?? null;
-                        $fans = $state === 'fan_locked' ? ($slotItems[0]['fans_needed'] ?? null) : null;
-                        $ariaSlots = count($slotItems);
-                        $ariaText = $ariaSlots > 1
-                            ? "{$ariaSlots} races: " . implode(', ', array_map(fn ($s) => $s['label'] ?? '', $slotItems))
-                            : ($firstLabel ?? $stateWord[$state]);
-
-                        if ($isCurrent) {
-                            $ariaText .= '; current turn';
-                        }
-                    @endphp
-                    {{-- The accessible name carries the month, the half and the state,
-                         because a cell's state lives in its outline and its pennant and
-                         the race name alone would not say whether it is open. D-181 keeps
-                         the *visual* signal, and this is the non-visual half of the same
-                         fact rather than a sentence on the screen. `role="img"` is what
-                         makes it a name at all: a label on a bare div is a property most
-                         technologies do not expose. --}}
-                    <div class="col-span-1 rounded-md border px-1 text-center text-xs leading-tight
+                    if ($isCurrent) {
+                        $ariaText .= '; current turn';
+                    }
+                @endphp
+                {{-- The caption sits under the box, as in the client capture, because the box's
+                     tint is the state and the label is not part of it. The accessible name leads
+                     with the same two words in the same order, so what a screen reader says and
+                     what the Trainer reads are one phrase. `role="img"` is what makes it a name at
+                     all: a label on a bare div is a property most technologies do not expose. --}}
+                <div class="flex flex-col items-center gap-1">
+                    <div class="w-full rounded-md border px-1 text-center text-xs leading-tight
                                 {{ $stateClass[$state] }} relative"
                          role="img"
-                         aria-label="{{ $month }} {{ $half }}: {{ $stateWord[$state] }}, {{ $ariaText }}">
+                         aria-label="{{ $half }} {{ $month }}: {{ $stateWord[$state] }}, {{ $ariaText }}">
                         @if ($state === 'goal')
                             {{-- D-181: "A goal race announces itself with a Goal pennant, a
                                  heavier warm outline and greater height." The client's own
@@ -191,7 +193,6 @@
                             <span class="absolute top-0 right-0 h-0 w-0 border-t-3 border-b-3 border-l-5 border-t-transparent border-b-transparent border-l-goal"
                                   aria-hidden="true"></span>
                         @endif
-                        <span class="block font-mono text-xs tabular-nums text-ink-muted">{{ $half }}</span>
                         @if ($ariaSlots > 1)
                             <ul class="space-y-0.5">
                                 @foreach ($slotItems as $slotItem)
@@ -214,9 +215,10 @@
                             <span class="block text-[10px] text-ink-muted">Trainer-entered</span>
                         @endif
                     </div>
-                @endforeach
+                    <span class="text-xs font-semibold text-ink-muted">{{ $half }} {{ $month }}</span>
+                </div>
             @endforeach
-        </div>
+        @endforeach
     </div>
 
     <p class="mt-2 text-xs text-ink-muted">

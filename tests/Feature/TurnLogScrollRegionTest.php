@@ -14,10 +14,11 @@ use App\Models\TurnEntry;
  * second half: the overflow happens, and a keyboard Trainer cannot traverse it. A scroll container
  * that is not focusable has no focus to scroll with, so those 86px are reachable by trackpad only.
  *
- * The race calendar already solved this, and it is the precedent rather than a coincidence: same
- * wide table, same small viewport, and its region carries `role="region"` + `tabindex="0"` + an
- * `aria-label`. This suite asserts the parity across both scroll regions, because the fix is a
- * convention and a convention with one instance is a one-off.
+ * The race calendar solved this the same way when it was a twelve-column band: `role="region"` +
+ * `tabindex="0"` + an `aria-label`. The calendar has since taken the client's four-column shape
+ * (docs/game-screenshots/Screenshot 2026-07-17 230755.png) and stopped overflowing at any width a
+ * desktop tool is used at, so it keeps the named region and gave the tab stop back. What is left of
+ * the convention is asserted per region: the one that clips is the one that must be traversable.
  *
  * What this file can prove is structure — the attributes exist on the element that wraps the
  * clipping table. That arrow keys actually scroll it is a runtime fact, verified in the T3 browser
@@ -86,7 +87,7 @@ it('wraps the turn log in a focusable scroll region', function (): void {
         ->and($turnLog['node']->getAttribute('class'))->toContain('overflow-x-auto');
 });
 
-it('keeps the race calendar focusable so the two regions stay one convention', function (): void {
+it('keeps the tab stop on the region that still clips and the name on the one that does not', function (): void {
     $doc = new DOMDocument;
     @$doc->loadHTML(scrollRegionHtml(), LIBXML_NOERROR);
     $xpath = new DOMXPath($doc);
@@ -95,16 +96,19 @@ it('keeps the race calendar focusable so the two regions stay one convention', f
 
     /** @var DOMElement $div */
     foreach ($xpath->query('//div[@role="region"]') as $div) {
-        $regions[] = $div->getAttribute('aria-label');
-
-        // A region without a tab stop is announced but not traversable, which is the exact
-        // half of the fix KI-25 was filed for.
-        expect($div->getAttribute('tabindex'))->toBe('0');
+        $regions[] = $div;
     }
 
-    // Both wide tables on this screen, named. A calendar that keeps its region while the turn
-    // log loses it is the drift this file exists to catch.
+    // A region that does not clip and still holds a tab stop spends a keypress on nothing, so the
+    // calendar's stop went with its overflow band. Its named region stays: that is what tells a
+    // screen reader which twenty-four slots it is standing in.
     expect($regions)->toHaveCount(2)
-        ->and($regions[0])->toStartWith('Race calendar')
-        ->and($regions[1])->toStartWith('Turn log');
+        ->and($regions[0]->getAttribute('aria-label'))->toStartWith('Race calendar')
+        ->and($regions[0]->getAttribute('class'))->not->toContain('overflow-x-auto')
+        ->and($regions[0]->hasAttribute('tabindex'))->toBeFalse()
+        // The turn log is the table that still overflows at the 768px floor, so both halves of
+        // KI-25 stand there: the region is named, and it is traversable.
+        ->and($regions[1]->getAttribute('aria-label'))->toStartWith('Turn log')
+        ->and($regions[1]->getAttribute('class'))->toContain('overflow-x-auto')
+        ->and($regions[1]->getAttribute('tabindex'))->toBe('0');
 });
