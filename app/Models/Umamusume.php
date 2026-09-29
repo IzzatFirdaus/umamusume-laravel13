@@ -42,7 +42,6 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, CharacterCard> $cards
  * @property-read Collection<int, DataSource> $dataSources
  * @property-read Collection<int, TrainingRun> $trainingRuns
- * @property-read int|null $aliases_count
  */
 #[Table('umamusume')]
 #[Fillable(['slug', 'name', 'name_ja', 'match_key', 'release_status', 'jp_debut_date', 'global_debut_date', 'is_manual', 'aptitude_turf', 'aptitude_dirt', 'aptitude_sprint', 'aptitude_mile', 'aptitude_medium', 'aptitude_long', 'aptitude_front_runner', 'aptitude_pace_chaser', 'aptitude_late_surger', 'aptitude_end_closer', 'external_ref'])]

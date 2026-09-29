@@ -54,15 +54,20 @@ class CatalogController extends Controller
             ->when(! $showAllStatus && $statusEnum === null, fn (Builder $q): Builder => $q->where('release_status', ReleaseStatus::GlobalReleased->value))
             ->when($statusEnum !== null, fn (Builder $q): Builder => $q->where('release_status', $statusEnum->value))
             ->when($searchKey !== null, function (Builder $q) use ($searchKey): void {
-                $q->where(function (Builder $sub) use ($searchKey): void {
+                // normalize() strips separators but not LIKE's own metacharacters, and
+                // the term is bound as a parameter, so without this escape a Trainer
+                // typing "%" or "_" gets a wildcard and the whole catalog back.
+                $like = '%'.addcslashes($searchKey, '%_\\').'%';
+
+                $q->where(function (Builder $sub) use ($like): void {
                     // Both sides of each comparison have to arrive at the same string:
                     // `match_key` is already normalized, so the title and the alias are
                     // folded at comparison time by `normalizedColumn()`. A card match
                     // still surfaces its trainee, because the trainee is the level this
                     // page is organised at.
-                    $sub->where('match_key', 'like', "%{$searchKey}%")
-                        ->orWhereHas('aliases', fn ($a) => $a->whereRaw($this->normalizedColumn('alias').' like ?', ["%{$searchKey}%"]))
-                        ->orWhereHas('cards', fn ($c) => $c->whereRaw($this->normalizedColumn('title').' like ?', ["%{$searchKey}%"]));
+                    $sub->where('match_key', 'like', $like)
+                        ->orWhereHas('aliases', fn ($a) => $a->whereRaw($this->normalizedColumn('alias').' like ?', [$like]))
+                        ->orWhereHas('cards', fn ($c) => $c->whereRaw($this->normalizedColumn('title').' like ?', [$like]));
                 });
             });
 
@@ -99,13 +104,17 @@ class CatalogController extends Controller
      * bound parameter in the caller.
      *
      * Known ceiling, stated rather than assumed away: this folds spaces, hyphens and
-     * middle dots, which every engine here can do. It cannot fold **diacritics**
-     * portably — SQLite's `lower()` is ASCII-only, so it neither maps `É` to `E` nor
-     * drops combining marks the way normalize() does. `[Nuit Étoilée de Scarlet]`
-     * therefore still will not answer `nuit etoilee`. The upgrade path for that is a
-     * normalized key stored beside `title` and `alias`, written by the pipeline the way
-     * `match_key` already is: durable, indexable, and honest on both sides. It is a
-     * schema change, so it is not this method's to make.
+     * middle dots, which every engine here can do. Two classes of difference it cannot
+     * fold portably. First, **diacritics**: SQLite's `lower()` is ASCII-only, so it
+     * neither maps `É` to `E` nor drops combining marks the way normalize() does, and
+     * `[Nuit Étoilée de Scarlet]` still will not answer `nuit etoilee`. Second, **width
+     * variants**, and in the awkward direction: NFKD rewrites full-width katakana to its
+     * halfwidth form on the term side while SQL leaves the stored column untouched, so a
+     * katakana alias or title is folded on one side and not the other and cannot match
+     * either. The upgrade path for both is the same: a normalized key stored beside
+     * `title` and `alias`, written by the pipeline the way `match_key` already is —
+     * durable, indexable, and honest on both sides. That is a schema change, so it is
+     * not this method's to make.
      */
     private function normalizedColumn(string $column): string
     {

@@ -136,12 +136,17 @@ it('defaults the release status filter to released on Global', function (): void
     expect($all)->toContain('Global One')->and($all)->toContain('Japan One');
 });
 
-it('filters the tree by a card title as well as a trainee name', function (): void {
-    $goldShip = Umamusume::factory()->create(['name' => 'Gold Ship', 'slug' => 'gold-ship']);
+it('filters the tree by a card title', function (): void {
+    // `match_key` is stated, not left to the factory's faker name, so the only clause
+    // that can possibly answer `ruin` is the card-title one. The trainee-name path is
+    // pinned by the ordering test and the badge test, each of which searches a name.
+    $goldShip = Umamusume::factory()->create([
+        'name' => 'Gold Ship', 'slug' => 'gold-ship', 'match_key' => 'goldship',
+    ]);
     CharacterCard::factory()->create([
         'umamusume_id' => $goldShip->id, 'card_id' => 100702, 'title' => '[RUN! RUIN! LAUNCHER!]',
     ]);
-    Umamusume::factory()->create(['name' => 'Unrelated One', 'slug' => 'unrelated-one']);
+    Umamusume::factory()->create(['name' => 'Unrelated One', 'slug' => 'unrelated-one', 'match_key' => 'unrelatedone']);
 
     // The card matches, so its trainee is the row that appears. The empty state still
     // says "No Umamusume match" when nothing at all matches, so that stays true.
@@ -149,6 +154,28 @@ it('filters the tree by a card title as well as a trainee name', function (): vo
         ->assertOk()
         ->assertSee('Gold Ship')
         ->assertDontSee('Unrelated One');
+});
+
+it('treats LIKE metacharacters in a search term as literal text', function (): void {
+    Umamusume::factory()->create([
+        'name' => 'Vodka', 'slug' => 'vodka', 'match_key' => 'vodka', 'name_ja' => 'ウオッカ',
+    ]);
+    Umamusume::factory()->create([
+        'name' => 'Tokai Teio', 'slug' => 'tokai-teio', 'match_key' => 'tokaiteio',
+    ]);
+
+    // normalize() strips separators but not `%` or `_`, and the term is bound as a
+    // parameter, so unescaped they reach the driver as wildcards: `?search=%` would
+    // answer every row in the catalog, and `_` every row of one letter. A search for a
+    // string no name or title contains must return the empty state, not everybody.
+    test()->get('/umamusume?search=%25')
+        ->assertOk()
+        ->assertDontSee('Vodka')
+        ->assertDontSee('Tokai Teio');
+    test()->get('/umamusume?search=_')
+        ->assertOk()
+        ->assertDontSee('Vodka')
+        ->assertDontSee('Tokai Teio');
 });
 
 it('keeps the card tree intact through the database cache store', function (): void {
