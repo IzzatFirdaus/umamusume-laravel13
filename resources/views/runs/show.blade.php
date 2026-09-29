@@ -204,44 +204,50 @@
     @if ($run->turnEntries->isEmpty())
         <p class="mt-2 text-sm text-ink-muted">No turns logged yet. Add the first one below.</p>
     @else
-        <table class="mt-3 w-full border-collapse text-sm">
-            <thead>
-                <tr class="border-b border-rule text-left text-ink-muted">
-                    <th class="py-1 pr-3">Turn</th><th class="pr-3">Speed</th><th class="pr-3">Stamina</th>
-                    <th class="pr-3">Power</th><th class="pr-3">Guts</th><th class="pr-3">Wit</th>
-                    <th class="pr-3">SP</th><th class="pr-3">Condition</th><th class="pr-3">Mood</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($run->turnEntries as $entry)
-                    @php $failure = $failures[$entry->turn] ?? null; @endphp
-                    <tr class="border-b border-rule">
-                        <td class="py-1 pr-3">
-                            {{ $entry->turn }}
-                            @if ($failure !== null)
-                                {{-- The word carries what the colour carries (D-12), and the
-                                     kind is named because a penalty on Energy and a penalty
-                                     on a stat are different problems for a Trainer. Never a
-                                     bare zero, which would read as a stat nobody entered. --}}
-                                <span class="ml-1.5 rounded border border-risk px-1 text-xs font-bold text-risk">Failed</span>
-                                <span class="block text-xs text-ink-muted">
-                                    Penalty kind: {{ $failure->deltas['penalty_kind'] ?? 'not recorded' }}
-                                    · {{ $failure->source_name }}
-                                </span>
-                            @endif
-                        </td>
-                        <td class="pr-3">{{ $entry->speed }}</td>
-                        <td class="pr-3">{{ $entry->stamina }}</td>
-                        <td class="pr-3">{{ $entry->power }}</td>
-                        <td class="pr-3">{{ $entry->guts }}</td>
-                        <td class="pr-3">{{ $entry->wit }}</td>
-                        <td class="pr-3">{{ $entry->sp ?? '' }}</td>
-                        <td class="pr-3">{{ $entry->condition }}</td>
-                        <td class="pr-3"><x-mood-pill :tier="$entry->mood" unrecorded="not recorded" /></td>
+        {{-- Nine columns do not fit a phone. The table scrolls rather than reflows, and the
+             wrapper is focusable because a scroll container nobody can tab into has no focus
+             for the arrow keys to scroll — the clipped columns would be trackpad-only (KI-25).
+             Same shape as the race calendar's region, one convention for both. --}}
+        <div class="mt-3 overflow-x-auto" role="region" tabindex="0" aria-label="Turn log">
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-rule text-left text-ink-muted">
+                        <th class="py-1 pr-3">Turn</th><th class="pr-3">Speed</th><th class="pr-3">Stamina</th>
+                        <th class="pr-3">Power</th><th class="pr-3">Guts</th><th class="pr-3">Wit</th>
+                        <th class="pr-3">SP</th><th class="pr-3">Condition</th><th class="pr-3">Mood</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach ($run->turnEntries as $entry)
+                        @php $failure = $failures[$entry->turn] ?? null; @endphp
+                        <tr class="border-b border-rule">
+                            <td class="py-1 pr-3">
+                                {{ $entry->turn }}
+                                @if ($failure !== null)
+                                    {{-- The word carries what the colour carries (D-12), and the
+                                         kind is named because a penalty on Energy and a penalty
+                                         on a stat are different problems for a Trainer. Never a
+                                         bare zero, which would read as a stat nobody entered. --}}
+                                    <span class="ml-1.5 rounded border border-risk px-1 text-xs font-bold text-risk">Failed</span>
+                                    <span class="block text-xs text-ink-muted">
+                                        Penalty kind: {{ $failure->deltas['penalty_kind'] ?? 'not recorded' }}
+                                        · {{ $failure->source_name }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="pr-3">{{ $entry->speed }}</td>
+                            <td class="pr-3">{{ $entry->stamina }}</td>
+                            <td class="pr-3">{{ $entry->power }}</td>
+                            <td class="pr-3">{{ $entry->guts }}</td>
+                            <td class="pr-3">{{ $entry->wit }}</td>
+                            <td class="pr-3">{{ $entry->sp ?? '' }}</td>
+                            <td class="pr-3">{{ $entry->condition }}</td>
+                            <td class="pr-3"><x-mood-pill :tier="$entry->mood" unrecorded="not recorded" /></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     @endif
 
     {{--

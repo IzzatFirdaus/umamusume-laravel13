@@ -7,6 +7,13 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, Slice 16):** **24 filed, 20 closed, 4 open.** **KI-25 closed** on R81's fallback
+branch: the turn log's nine columns now scroll inside a focusable region instead of pushing the page
+sideways, and `DESIGN.md` §2.3 states the rule that was missing — **768px is the supported minimum**, below
+which the two wide tables scroll rather than reflow. The four open items are KI-10's ratio half, KI-15, and
+the skills pass's KI-23 and KI-24. A heading grep reads 21 closed and 3 open, and the difference is KI-10:
+its schema halves are closed and its ratio half is not, so the register has counted it open since Slice 7
+rather than filing the same entry twice. Prior:
 **Status (2026-09-29, Slice 15):** **24 filed, 19 closed, 5 open.** The Schema Session landed all three
 items its brief named. **KI-17 is closed** on the link it asked for (`d06199c`): `race_entries` can now
 point at the turn a race was run on, and the closure carries its own limit — the count is still entered,
@@ -1096,7 +1103,30 @@ at which the pinning convention was about to be copied forward.
 
 ---
 
-## KI-25 The turn log forces the page into horizontal scroll at phone width — FILED 2026-09-29 (Slice 15 browser pass), OPEN
+## KI-25 The turn log forces the page into horizontal scroll at phone width — FILED 2026-09-29 (Slice 15 browser pass), CLOSED 2026-09-29 (Slice 16 T1) AS A DESIGNED FALLBACK, NOT A FIT
+
+**Closed as a designed fallback, which is not the same as fixed.** Slice 16 T1 (R81) scoped the horizontal
+scroll to the table instead of the page and gave the scroll container a tab stop: the nine-column log now
+sits inside `overflow-x-auto` with `role="region"`, `tabindex="0"` and `aria-label="Turn log"` — the shape
+the race calendar already carried. `DESIGN.md` §2.3 gained the contract this needed and did not have:
+**768px is the supported minimum**, and below it these two wide tables scroll rather than reflow. The
+476px-at-390px measurement below is the evidence for that line. The content is 476px and is not being
+squeezed into 390, because a column that wraps a stat value is a column a Trainer misreads.
+
+**What the closure is not.** No column was dropped, no stacked-card rendering was built, no breakpoint
+reflow was added. The ruling is about reachability: the columns past the edge are now reachable by arrow
+keys, which a scroll container without a tab stop could not promise, and that is the defect half this
+closes. `tests/Feature/TurnLogScrollRegionTest.php` asserts the shape of both regions in the rendered page
+and fails if either one loses its tab stop, so the convention cannot decay back into a one-off. That arrow
+keys actually move the container is a runtime fact, measured in the Slice 16 browser pass and recorded in
+`docs/design-research/verification/slice-16-2026-09-29.md`.
+
+**What would re-open it.** A stated target below 768px. If a phone width becomes a supported surface, the
+scroll container stops being the answer and the column-selection question in the original text below is.
+
+**Owner.** Frontend/Design-system with Architect, unchanged. R81 (2026-09-29) took the fallback branch.
+
+**Original defect text kept below for traceability.**
 
 **Symptom, measured rather than inferred.** At a 390 × 844 viewport the run screen's document reports
 `scrollWidth 476` against `innerWidth 390`, so the whole page scrolls sideways. Eleven elements sit past

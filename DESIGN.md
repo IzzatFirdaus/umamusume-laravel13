@@ -133,6 +133,15 @@ external fonts (offline constraint + C-8 dependency gate).
   for tables (Proposed; current views use `max-w-5xl`). Mobile must not
   break (R-03 floor: no overflow, tap targets via labeled controls) but is
   not a design driver (PRD §2, PRODUCT Operating Context).
+- **768px is the supported minimum (amended 2026-09-29, KI-25), and the floor above
+  is narrower than it read.** "No overflow" was measured and is false below 768px for
+  exactly two surfaces: the race calendar and the turn log are wide tables whose content
+  is 476px at the narrowest viewport tested. Neither is squeezed to fit and neither is
+  hidden — both scroll horizontally inside a focusable region (`overflow-x-auto` with
+  `role="region"`, `tabindex="0"` and an `aria-label`), so the clipped columns are
+  reachable by arrow keys and not by trackpad alone. Below 768px that is the contract for
+  these two regions: usable and scrolling, deliberately not reflowed. Everything else on
+  those screens still reflows as before.
 - Scale: Tailwind default 0.25rem increments, no arbitrary values
   (tailwindcss-development rule). Table rows `py-1.5 px-3`; forms
   `space-y-3`; cards `p-4`; section gaps `mt-8`.
