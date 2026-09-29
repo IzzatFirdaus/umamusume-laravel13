@@ -2562,23 +2562,23 @@ Then one card scope built once, so the list query and the cached re-read cannot 
             ->orderBy('card_id');
 
         $query = Umamusume::query()
-            ->withCount('aliases')
+            ->withCount('aliases')  // [SUPERSEDED 2026-09-29: dropped from both queries; nothing renders aliases_count]
             ->with(['cards' => $cardScope])
             ->when($statusEnum !== null, fn ($q) => $q->where('release_status', $statusEnum->value))
             ->when($searchKey !== null, function ($q) use ($searchKey): void {
                 $q->where(function ($sub) use ($searchKey): void {
-                    $sub->where('match_key', 'like', "%{$searchKey}%")
-                        ->orWhereHas('aliases', fn ($a) => $a->whereRaw('lower(alias) like ?', ["%{$searchKey}%"]))
+                    $sub->where('match_key', 'like', $like)  // [SUPERSEDED shape: see the note at the end of this step]
+                        ->orWhereHas('aliases', fn ($a) => $a->whereRaw($this->normalizedColumn('alias').' like ?', [$like]))  // [SUPERSEDED: folded column]
                         // A card match surfaces its trainee, because the trainee is the
                         // level this page is organised at.
-                        ->orWhereHas('cards', fn ($c) => $c->whereRaw('lower(title) like ?', ["%{$searchKey}%"]));
+                        ->orWhereHas('cards', fn ($c) => $c->whereRaw($this->normalizedColumn('title').' like ?', [$like]));  // [SUPERSEDED: folded column]
                 });
             });
 
-        [$items, $total] = $this->cached($query, $status, $searchKey, $page, $pageSize, $showUnconfirmed, $cardScope);
+        [$items, $total] = $this->cached($query, $status, $searchKey, $page, $pageSize, $showUnconfirmed)  // [SUPERSEDED: cached() takes no scope arg, it calls cardScope() itself];
 ```
 
-`use Closure;` and `use Illuminate\Database\Eloquent\Relations\HasMany;` as needed for the `$cardScope` parameter type; annotate it `Closure(HasMany): HasMany`.
+`use Closure;` and `use Illuminate\Database\Eloquent\Relations\HasMany;` as needed for the `$cardScope` parameter type. **[SUPERSEDED SHAPE, corrected 2026-09-29 after the fix rounds - what follows is what actually shipped.]** The briefed `Closure(HasMany): HasMany` is untrue at runtime, because `Relation::__call` forwards `when()` to the query Builder. What shipped is one private `cardScope(bool $showUnconfirmed)` returning `Closure(HasMany<CharacterCard, Umamusume>): void`, consumed by BOTH the list query and the cached re-read, which satisfies the real invariant (the two cannot drift) with honest typing and no suppression. Second, `lower(<col>) like "%<normalized term>%"` can never match a multi-word value: normalize() deletes spaces and hyphens, so "red strife" becomes "redstrife" while the stored title keeps its space, and card titles and aliases have no normalized column of their own. The fix folds the COLUMN at comparison time through `normalizedColumn()`, which nests REPLACE over lower() for exactly the characters `NameNormalizer::FOLDED_CHARACTERS` lists; that list is now the single source, read by normalize() and by the SQL builder alike, because two lists drifting apart is what produced the defect. Third, the bound term is escaped for LIKE metacharacters (percent, underscore, backslash) into one `$like` computed once and passed bound to all three clauses, because normalize() strips separators but not LIKE's own syntax, and unescaped a Trainer typing a percent sign receives the entire catalog. Proven against SQLite rather than by reverting the escape in a working tree: unescaped percent and underscore each match 2 of 2 fixture rows, escaped 0 of 2, and real terms match 1 of 2 either way. Commits `adfc7e9`, `bd0a1e6`, `5297fa2`, `f2c978b`. The durable answer for diacritics and full-width katakana is a stored normalized key beside `title` and `alias`, written by the pipeline the way `match_key` already is; that is a schema change no task here was authorized to make, so it is owed a register entry.
 
 The search stays **substring**, as it already was, while the selector is prefix. That is erratum E-10's reading, recorded not hidden: this page is a server-filtered list behind a submit, that one is a client filter over a fixed payload. `CatalogTest`'s `'finds an umamusume by normalized search text'` test stays green because `match_key` is still the first clause.
 
