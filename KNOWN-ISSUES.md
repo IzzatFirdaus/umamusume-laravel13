@@ -7,19 +7,14 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
-**Status (2026-09-29, trainee detail and skill selector pass):** **35 filed, 21 closed, 14 open.** Four
-entries land here, all from reading the two views rather than the brief: **KI-33** (a trainee's own
-innate and unique skills are published by the source and stored nowhere), **KI-35** (the trainee detail
-page is a metadata stub — ten parsed columns rendered on no page, no section for skills, forms or goals,
-and an absence vocabulary its own specification invented), **KI-36** (the run screen's skills editor wraps
-three controls in one label, so two of them have no accessible name — F-12, carried unfixed since the
-frontend audit), and **KI-37** (the run screen's controls measure 31/30/40px against §6.14's 44, a second
-surface and a separate entry because KI-29's heading names `/umamusume`). **KI-34 is a reservation, not a
-lost entry**: it is the per-character goal-race filing from the previous pass, deliberately not landed by
+**Status (2026-09-29, trainee detail and skill selector pass, updated with KI-26 closure):** **35 filed, 22 closed, 13 open.** Four
+entries land here from the design pass (KI-33, KI-35, KI-36, KI-37), and **KI-26 is closed** against `f2c978b`
+(unescaped `LIKE` in `CatalogController` fixed on master; register lagged by one commit). **KI-34 is a reservation,
+not a lost entry**: it is the per-character goal-race filing from the previous pass, deliberately not landed by
 this block's sequencing. Unlike KI-16 — which is a genuine renumbering hole, KI-30's pre-merge number —
-this gap has an owner and a next step. A heading grep reads 23 closed and 8 open where the register says
-21 and 10, and the two in between are KI-10 (schema halves closed, ratio half not) and KI-25 (its heading
-carries CLOSED inside a RE-OPENED sequence). Both are headings holding more history than a regex reads.
+this gap has an owner and a next step. A heading grep reads 25 closed and 14 open (including KI-10 and KI-25 which
+carry both words, plus KI-23b and KI-24b) where the register says 22 closed and 13 open (KI-10 ratio half counted
+open, KI-26 closed). Both are headings holding more history than a regex reads.
 Prior:
 **Status (2026-09-29, Screen D dark-theme pass):** **31 filed, 21 closed, 10 open**, one filed here.
 **KI-32** is the missing `color-scheme` declaration: native form controls keep painting light widgets on
@@ -1244,7 +1239,7 @@ does not currently record. Found while measuring something else: the browser pas
 contrast on the new turn control, and the overflow surfaced only because the same script read the viewport
 width too.
 
-## KI-26 A search of `%` returns the whole catalog, because `CatalogController` interpolates the query into a `LIKE` it never escapes — FILED 2026-09-29 (Screen D pass), OPEN
+## KI-26 A search of `%` returns the whole catalog, because `CatalogController` interpolates the query into a `LIKE` it never escapes — RESOLVED by `f2c978b`, CLOSED 2026-09-29
 
 **What is wrong.** `app/Http/Controllers/CatalogController.php:39` folds the `search` query through
 `NameNormalizer`, and `:44-49` interpolates the result into `match_key LIKE "%{key}%"` (and the same shape
@@ -1274,6 +1269,11 @@ the rows containing one and not the rows that merely exist. `Screen D`'s version
 `SkillController::query()` with `SkillSearchScreenTest`'s wildcard case, so a shared helper is the shape the
 fix probably takes — but that is two surfaces' behaviour to change together, and it belongs to whoever next
 owns `CatalogController`.
+
+**Closed 2026-09-29 against `f2c978b`.** The `LIKE` metacharacters are escaped at
+`CatalogController.php:60` and `:82`; `CatalogRosterTreeTest.php:159` pins `%` and `_` as
+literals. The fix commit named the defect in its subject and did not touch this file, so the
+register lagged the tree by one commit. No re-fix is owed.
 
 **Owner.** whoever picks up `CatalogController`; found while building the second server-driven filter
 surface and noticing the first one had no escape.
