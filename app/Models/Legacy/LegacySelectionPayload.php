@@ -27,11 +27,16 @@ use InvalidArgumentException;
  * - A Legacy's own rank is unbounded, because the corpus states that three stars guarantees a
  *   unique-skill Spark (§1.5.1) and states no ceiling on the character's own count; bounding it here
  *   would be inventing a number the sources do not carry.
- * - No Umamusume id travels in the payload. The two `training_runs.inheritance_parent_*_id` foreign
- *   keys already are that fact, and a second place to say it is a second way to be wrong. So
- *   `legacies` is ordered to match those keys: entry 0 is parent A, entry 1 is parent B.
+ * - `SPARK_KINDS` is the `[Global]` **display** vocabulary. The export underneath it uses a different
+ *   set, and the two do not line up: `REFERENCE` §1.5.2's Sources line names the dataset categories
+ *   as `blue, pink, skill, race, scenario, other`, while its table renders `[Global]` as Blue, Pink,
+ *   Green, White and Scenario Sparks — where one White row is the skill family and another is the
+ *   competition family. So `white` here is one label over two dataset categories, and `green` is a
+ *   dataset `skill`/unique-skill record under its screen name. A payload records what the Trainer read
+ *   on screen, which is why the display set won; anything that later joins these rows to the dataset
+ *   needs the mapping stated, not inferred, and no such join exists yet.
  * - `affinity` is one grade for the pair, which is what D-268 asks for. §1.5.4 grades each link in
- *   the diagram separately, and the four grandparent links are not modelled here.
+ *   the diagram separately, and the four deeper links are not modelled here.
  */
 final readonly class LegacySelectionPayload
 {
