@@ -19,7 +19,7 @@ function skillsFixtureBody(): string
 }
 
 /**
- * The declared entry, with the politeness delay zeroed so a suite of nine rows does not sleep twice.
+ * The declared entry, with the politeness delay zeroed so a suite of twelve rows does not sleep twice.
  *
  * @param  array<string, mixed>  $overrides
  * @return array<string, mixed>
@@ -37,7 +37,7 @@ const SKILLS_SNAPSHOT = 'storage/framework/testing/disks/local/snapshots/skills.
  * The literal Japanese renderings (`enname`) that differ from the client string on rows Global has.
  *
  * Read off the fixture rather than spelled out here, because the point of this file is that a test which
- * re-types a source value can agree with a bug in it (KI-23), and one of these five values carries a word
+ * re-types a source value can agree with a bug in it (KI-23), and one of these eight values carries a word
  * `[Global]` does not use for a stat, so typing it into a test to prove its absence fails the lore gate.
  *
  * @return list<string>
@@ -80,10 +80,10 @@ it('routes skills to the writer, not to character matching', function (): void {
         SKILLS_SNAPSHOT,
     );
 
-    expect($counts)->toMatchArray(['created' => 9, 'updated' => 0, 'review' => 0])
+    expect($counts)->toMatchArray(['created' => 12, 'updated' => 0, 'review' => 0])
         // The failure this branch exists to prevent: every skill filed as a character nobody could match.
         ->and(MatchCandidate::count())->toBe(0)
-        ->and(Skill::count())->toBe(9);
+        ->and(Skill::count())->toBe(12);
 });
 
 it('stamps R3 provenance and a normalized key on every row it writes', function (): void {
@@ -112,8 +112,8 @@ it('updates in place on a re-run instead of colliding with its own grain', funct
     $pipeline->run('gametora-skills', $config, skillsFixtureBody(), null);
     $second = $pipeline->run('gametora-skills', $config, skillsFixtureBody(), null);
 
-    expect($second)->toMatchArray(['created' => 0, 'updated' => 9])
-        ->and(Skill::count())->toBe(9);
+    expect($second)->toMatchArray(['created' => 0, 'updated' => 12])
+        ->and(Skill::count())->toBe(12);
 });
 
 it('adopts a seeded row no source has attributed, and only once', function (): void {
@@ -130,15 +130,15 @@ it('adopts a seeded row no source has attributed, and only once', function (): v
 
     $gourmand = Skill::where('name', 'Gourmand')->firstOrFail();
 
-    expect($counts)->toMatchArray(['created' => 8, 'updated' => 1])
-        ->and(Skill::count())->toBe(9)
+    expect($counts)->toMatchArray(['created' => 11, 'updated' => 1])
+        ->and(Skill::count())->toBe(12)
         ->and($gourmand->export_id)->toBe(201351)
         ->and($gourmand->sp_cost)->toBe(180);
 
     // A second run must not be able to repoint the now-attributed row at a different skill by name.
     $other = app(PipelineRunner::class)->run('gametora-skills', skillsSourceConfig(), skillsFixtureBody(), null);
-    expect($other)->toMatchArray(['created' => 0, 'updated' => 9])
-        ->and(Skill::count())->toBe(9);
+    expect($other)->toMatchArray(['created' => 0, 'updated' => 12])
+        ->and(Skill::count())->toBe(12);
 });
 
 it('never writes over a row the Trainer entered by hand', function (): void {
@@ -158,7 +158,7 @@ it('never writes over a row the Trainer entered by hand', function (): void {
 
     $manual = Skill::where('name', 'Gourmand')->firstOrFail();
 
-    expect($counts)->toMatchArray(['created' => 8, 'updated' => 0, 'skipped' => 1])
+    expect($counts)->toMatchArray(['created' => 11, 'updated' => 0, 'skipped' => 1])
         ->and($manual->sp_cost)->toBe(250)
         ->and($manual->export_id)->toBeNull();
 });
@@ -168,17 +168,22 @@ it('selects for a Trainer-facing surface exactly the rows the source calls clien
 
     $names = Skill::query()->availableOnGlobal()->orderBy('export_id')->pluck('name')->all();
 
-    // Six of the nine. Excluded for two different reasons, and the scope has to catch both: three rows
-    // the source marks unreleased on `en`, and within those one that has no client name at all.
+    // Nine of the twelve. Excluded for two different reasons, and the scope has to catch both: three rows
+    // the source marks unreleased on `en`, and within those one that has no client name at all. Two of the
+    // nine are the same client name (`Indomitable`), which is what the source states and what Screen D has
+    // to render; a scope that returned distinct names would silently drop one.
     expect($names)->toBe([
         'Red Ace',          // 10091,  rarity 3, client-named
         'Certain Victory',  // 110031, rarity 5
         'G1 Averseness',    // 200311, rarity 1
         'Corner Adept ×',   // 200333, rarity 1
+        'Indomitable',      // 200471, rarity 2, learnable
         'Gourmand',         // 201351, rarity 2
         'Master of the Sands', // 202001, rarity 2
+        "Givin' It 1000%",  // 202391, rarity 2, the row that makes a literal `%` search meaningful
+        'Indomitable',      // 300141, rarity 5, the row no card's list reaches
     ])
-        ->and(Skill::count())->toBe(9)
+        ->and(Skill::count())->toBe(12)
         // Neither of the two ways a row can fail the filter may leak through.
         ->and($names)->not->toContain('Check')             // no client name, unreleased
         ->and($names)->not->toContain('Gluttonous Ruler')  // client name, but unreleased (KI-24 §2)
@@ -220,7 +225,7 @@ it('refuses a manifest hash that is not eight hex characters and uses the pinned
 
     // The degradation is visible as data rather than only as console text: the rows carry the pinned
     // document's URL, because the manifest's answer could not be trusted to name a file.
-    expect(Skill::count())->toBe(9)
+    expect(Skill::count())->toBe(12)
         ->and(Skill::where('export_id', 200311)->value('source_url'))
         ->toBe('https://gametora.com/data/umamusume/skills.609afe88.json');
 });
@@ -237,8 +242,8 @@ it('uses the pinned URL when the manifest itself will not answer', function (): 
 
     $this->artisan('uma:fetch', ['source' => 'gametora-skills'])->assertExitCode(0);
 
-    expect(Skill::count())->toBe(9)
-        ->and(Skill::where('release_status', ReleaseStatus::GlobalReleased->value)->count())->toBe(6);
+    expect(Skill::count())->toBe(12)
+        ->and(Skill::where('release_status', ReleaseStatus::GlobalReleased->value)->count())->toBe(9);
 });
 
 it('offers the run screen picker only client-named Global skills, and states the cost', function (): void {
@@ -256,12 +261,12 @@ it('offers the run screen picker only client-named Global skills, and states the
         $options[] = trim((string) $option->textContent);
     }
 
-    // Six of the nine imported rows may be offered. `Check` and `Gluttonous Ruler` are excluded because
+    // Nine of the twelve imported rows may be offered. `Check` and `Gluttonous Ruler` are excluded because
     // the source marks them unreleased on `en`; the third excluded row carries a client-shaped English
     // name and is still not on Global, which is the case a filter on `name_en` alone would have leaked.
     expect($options)->toContain('Gourmand · 180 SP')
         ->and($options)->toContain('Certain Victory')
-        ->and($options)->toHaveCount(6)
+        ->and($options)->toHaveCount(9)
         ->and(implode(' | ', $options))->not->toMatch('/Gluttonous Ruler|Raise My Soul|Check/')
         // The ruling from conflict row 16 reaches the screen as an absence the Trainer can see.
         // Whitespace is folded because Blade's own line wrapping sits inside the sentence, and a
@@ -270,14 +275,14 @@ it('offers the run screen picker only client-named Global skills, and states the
         ->toContain('hint levels are not shown: no source in this repository settles the per-level reduction');
 
     // What the fixture's surviving translation is bought for: the run screen renders the client string for
-    // every row Global has, and none of these five renderings appear anywhere on it. Decoded first — a
+    // every row Global has, and none of these eight renderings appear anywhere on it. Decoded first — a
     // not-contains against escaped HTML could pass because an apostrophe or a `×` was entity-encoded,
     // which is the same failure KI-21 was filed against in the other direction.
     $visible = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-    expect(skillsFixtureGlobalRenderings())->toHaveCount(5)
-        // Same transformation, one string required present. Without it the five absences would pass on an
-        // extraction that saw nothing, and one of the five is `'`-escaped in the source markup, so this is
+    expect(skillsFixtureGlobalRenderings())->toHaveCount(8)
+        // Same transformation, one string required present. Without it the eight absences would pass on an
+        // extraction that saw nothing, and one of the eight is `'`-escaped in the source markup, so this is
         // also the control that proves the decode step is doing what it is claimed to do.
         ->and($visible)->toContain('Master of the Sands')
         ->and($visible)->not->toContain(...skillsFixtureGlobalRenderings());

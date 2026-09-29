@@ -207,5 +207,68 @@
         ]
       }
     ]
+  },
+  {
+    "id": 200471,
+    "name_en": "Indomitable",
+    "enname": "Indomitable Heart",
+    "jpname": "不屈の心",
+    "rarity": 2,
+    "cost": 170,
+    "condition_groups": [
+      {
+        "base_time": 0,
+        "condition": "phase==1&change_order_onetime>0",
+        "effects": [
+          {
+            "type": 9,
+            "value": 550
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 300141,
+    "name_en": "Indomitable",
+    "enname": "Dauntlessness",
+    "jpname": "不撓不屈",
+    "rarity": 5,
+    "condition_groups": [
+      {
+        "base_time": 30000,
+        "condition": "remain_distance>=350&remain_distance<=400",
+        "effects": [
+          {
+            "type": 27,
+            "value": 3500
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 202391,
+    "name_en": "Givin' It 1000%",
+    "enname": "1000% Output!",
+    "jpname": "出力1000％！",
+    "rarity": 2,
+    "cost": 180,
+    "condition_groups": [
+      {
+        "base_time": 27000,
+        "condition": "phase_firsthalf_random==1&running_style==1",
+        "effects": [
+          {
+            "type": 27,
+            "value": 4500
+          },
+          {
+            "type": 9,
+            "value": -400
+          }
+        ]
+      }
+    ]
   }
 ]

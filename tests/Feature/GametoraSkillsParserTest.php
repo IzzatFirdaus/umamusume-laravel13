@@ -6,7 +6,7 @@ use App\Enums\ReleaseStatus;
 use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
 
 /**
- * Nine records cut verbatim out of the live `skills` document (manifest hash `609afe88`, pulled
+ * Twelve records cut verbatim out of the live `skills` document (manifest hash `609afe88`, pulled
  * 2026-09-29) and committed as `tests/Fixtures/gametora-skills.sample.json`.
  *
  * **The fixture is copied from the source rather than written to match this parser, and that is the
@@ -27,6 +27,18 @@ use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
  * here: a client name that diverges from the literal rendering (`G1 Averseness` / `G1 Dislike`), a row
  * with no client name at all (202711), a row with a client name that is not on `[Global]` (100101111),
  * a negative effect on an otherwise mapped code (200311), and two categories in one skill (202001).
+ *
+ * 200471 and 300141 joined for Screen D. They are the two `[Global]` rows the client calls the same name,
+ * and 300141 is one of the four ids `ADR-0011` §5 names as beyond the card's own skill lists — so the
+ * collision a Unique badge has to render is something the producer writes, not something a test hand-builds
+ * (the KI-21 failure mode). Four of the twelve satisfy the class-code rule; three of those four are
+ * `[Global]`.
+ *
+ * 202391 joined for the same Screen D pass, and it earns its place twice over: it is the only `[Global]`
+ * row in the slice whose client name carries a literal `%`, which is what makes the search's wildcard
+ * escaping a test about the character rather than about an empty result set, and its second effect is
+ * code 9 at −400, so the sign rule (G-SK-18) leaves it unlabelled even though its first effect is a plain
+ * velocity gain.
  *
  * @return array<int, array<string, mixed>> keyed by the export's own skill id
  */
@@ -59,7 +71,7 @@ function parseSkillsFixture(): array
 }
 
 it('parses every record the document slice carries', function (): void {
-    expect(parseSkillsFixture())->toHaveCount(9);
+    expect(parseSkillsFixture())->toHaveCount(12);
 });
 
 it('reads the Japanese name from the key this document uses', function (): void {
@@ -67,7 +79,7 @@ it('reads the Japanese name from the key this document uses', function (): void 
     // document, and a fixture that agreed with a wrong guess is what let that live for a month.
     $fixture = skillsFixtureById();
     expect(array_filter($fixture, static fn (array $row): bool => array_key_exists('name_ja', $row)))->toBe([])
-        ->and(array_filter($fixture, static fn (array $row): bool => isset($row['jpname'])))->toHaveCount(9);
+        ->and(array_filter($fixture, static fn (array $row): bool => isset($row['jpname'])))->toHaveCount(12);
 
     foreach (parseSkillsFixture() as $record) {
         expect($record['name_ja'])->not->toBeNull();
@@ -115,8 +127,8 @@ it('states availability from the source flag and nowhere else', function (): voi
 
     // Every row absent `unreleased` is Global; the three with it are not. Sorted, so the expectation
     // reads in the order a reader can check it against the fixture.
-    expect($global)->toBe([10091, 110031, 200311, 200333, 201351, 202001])
-        ->and(count($global))->toBe(6);
+    expect($global)->toBe([10091, 110031, 200311, 200333, 200471, 201351, 202001, 202391, 300141])
+        ->and(count($global))->toBe(9);
 });
 
 it('name_is_client is exactly the intersection of a client name and availability on Global', function (): void {
@@ -138,7 +150,9 @@ it('keeps the export class code and emits no rarity word', function (): void {
         ->and($records[100101111]['rarity'])->toBe(6)
         // Six codes where the client has three rarities: nothing here is a label.
         ->and(array_column($records, 'rarity'))->toContain(6)
-        ->and(array_values(array_filter(array_column($records, 'rarity'), static fn (?int $v): bool => $v > 3)))->toHaveCount(3);
+        // Four rows sit above code 3 (110031, 100471, 100101111 and 300141), and that last one is the row
+        // `ADR-0011` §5 puts beyond the card join: the code rule badges it, no card list reaches it.
+        ->and(array_values(array_filter(array_column($records, 'rarity'), static fn (?int $v): bool => $v > 3)))->toHaveCount(4);
 
     // Six codes where the client has three rarities: nothing here is a label. Only three values appear
     // across the fixture, and one of them is null — the refusal is part of the result, not a gap in it.
