@@ -10,14 +10,30 @@ skill tables. Where a source is JP-side it is marked and its Global status is st
 **Do not re-derive numbers from this file.** The acquisition paths are the authority; every figure is
 only as good as the anchor beside it, and §2.2/§5 record the figures this repo has already declined.
 
-**Concurrent work on this tree (do not plan over it):** a parallel session is landing the Legacy Select
-read-back right now — `app/Models/Legacy/LegacySelectionPayload.php` and
-`database/migrations/2026_09_29_012615_add_legacy_selection_to_training_runs.php` are untracked, the
-migration's own docblock cites D-268 and an ADR-0010 that is not yet in `docs/adr/`, and
-`app/Models/TrainingRun.php` is dirty. That payload stores per-Legacy Spark kind, target and star rank
-plus an affinity grade. G-SK-5 is scoped against it below, and `docs/scenarios/01`, `02`, `07` are dirty
-with the same session. `docs/scenarios/03-trackblazer.md` is superseded and untouched, per its own rule
+**Concurrent work on this tree — corrected 2026-09-29, it is no longer concurrent.** This paragraph used to
+warn that the Legacy Select read-back was landing untracked alongside this file. It has landed:
+`app/Models/Legacy/LegacySelectionPayload.php`,
+`database/migrations/2026_09_29_012615_add_legacy_selection_to_training_runs.php` and
+`docs/adr/0010-legacy-selection-payload.md` are all tracked on master, and `training_runs.legacy_selection`
+is a nullable json column. What survives from the warning is the scope note it was there for: that payload
+stores per-Legacy Spark kind, target and star rank plus an affinity grade, and **G-SK-5 is scoped against
+it** — the skill join is still missing, and G-SK-22 is the same question from the other side.
+`docs/scenarios/03-trackblazer.md` remains superseded and untouched, per its own rule
 (`SOURCE-OF-TRUTH.md` §4.1).
+
+**The shape to look for, because four entries in this repository are the same defect wearing different
+clothes.** *A tool reports success against a target that is not the thing the claim is about, and the report
+reads as verification.* **KI-22**: `grep` looked for `isFreeRace`, found nothing, and a missing identifier
+was read as a missing branch — the search was over a name the code never used. **KI-23**: the fixture was
+authored to the parser's expectation, so the suite passed green against a document key that does not exist;
+the assertion was reading its own assumption. **KI-25**: the test asserted rendered attributes while the
+claim was keyboard behaviour, so it could not fail for the reason it was run. **KI-27**: `SourceFetcher`
+checks the document's hash on a disk shared by every database, and reports "unchanged" against a database it
+never wrote to — the check was about the wrong target. None of the four was caught by a gate; each was
+caught by someone noticing that a green result and the claim it was supposed to support were not about the
+same thing. So the question to ask of any check in this repo is not "did it pass" but **"what would have had
+to be true for this to fail, and is that the thing I am claiming?"** A fifth is coming, and it will look
+exactly like one of these.
 
 ---
 
@@ -590,7 +606,23 @@ predicts, reached through the browser's own form post rather than a request help
 with its caption link landing on `/skills`. Three findings came out of looking rather than asserting:
 **G-SK-24** (the flat badge), **G-SK-25** (the faithful `0 SP`, and the three name-suggests-type rows), and
 the form-control sizes, which measured **30/31/16px** against §6.14's 44 and are fixed on this screen —
-`/umamusume` measures the same 30/31/32 and is **KI-28**.
+`/umamusume` measures the same 30/31/32 and is **KI-29**. (This line read KI-28 when it was committed; KI-28
+is another session's SQLite hazard, and the control-size filing is KI-29. Corrected forward, not edited
+silently.)
+
+**Dark measured the same way, on the app's own path.** The shell has no in-page theme control: with no
+`preferences` row set, `layout.blade.php:15-22` emits an inline script that reads `prefers-color-scheme`, so
+the theme was driven by emulating that media feature rather than by poking `dataset.theme` — the same route a
+Trainer's machine takes. `data-theme="dark"` was on the document and the page background resolved to
+`#0D0C0F`. Contrast: `ink-muted` on the list **6.64**, on the page **8.55**, `h1` **19.51**, row name
+**15.15**, badge **17.61** — every pair better than its light-theme value and none near the 4.5 floor. No
+page-level overflow (`1265` at 1280, `375` at 390), the focus ring identical to light (`solid 2px
+rgb(127,204,9)`), the `Unspecified` facet still **288 of 623**, and the empty-database state names both
+commands. Light was re-measured after the size fix and is unchanged (5.78 / 5.15 / 11.79 / 10.74) with
+controls now 44/44/24. **One dark finding, filed not fixed:** no `color-scheme` is declared anywhere in
+`app.css`, so native controls keep the light UA skin on a dark page — the same unchecked checkbox computed
+`rgb(255,255,255)` on one load and `rgb(36,38,42)` on another. That is **KI-32**, and it is why this paragraph
+claims the theme was *measured* rather than that native widgets are correct.
 
 **Then it was filled for real, and two things came out of that.** `database/database.sqlite` had been
 migrated but never imported, so `uma:fetch gametora-skills` reported *unchanged since last snapshot* and
@@ -632,8 +664,24 @@ footnote: **`is_unique` 294** is the code rule (rarity 3/4/5) while the card joi
 - `PRD.md` §4 C-3 `:58`, FR-D `:62-64`, NFR-3 `:73`, §6 item 9 `:91`.
 - `docs/adr/0005` (support cards declined, R37), `0009` (committed client export precedent, Option A),
   and the unmerged ADR-0008 on the card branch.
-- `KNOWN-ISSUES.md` — KI-5 (a fabricated skill name, fixed) stands; no KI is filed here. These are gaps,
-  not defects.
+- `KNOWN-ISSUES.md` — KI-5 (a fabricated skill name, fixed) stands. **This register now files defects as
+  well as gaps**, and the four this thread opened are KI-26, KI-27, KI-29 and KI-32; KI-23 and KI-24 came
+  from the import pass. The earlier sentence here read "no KI is filed here", which was true when the
+  register held only gaps and stopped being true during the Screen D pass.
+
+**What the Screen D pass left open, and whose pen each one is (2026-09-29).** Four defects are filed and
+deliberately unfixed: **KI-26** (unescaped `LIKE`) and **KI-29** (30/31/32px controls) both live on
+`/umamusume` — `CatalogController` and `catalog/index.blade.php` — and go to whoever next owns that surface,
+which can clear both in one pass; **KI-27** (a fetch reporting "unchanged" against a database it never
+wrote to) needs the Architect, because the fix is a rule about every source rather than a patch to one;
+**KI-32** (no `color-scheme`, so native controls paint light on dark) is two declarations in the dark block
+`D-101` already owns, and belongs to design-system. Six gaps need a decision rather than code:
+**G-SK-3/G-SK-4** hint level (Architect for the column, copy already ruled), **FR-D-2's run-UI half**
+(owner: `<datalist>` versus a filter-param round trip), **G-SK-11** scenario-exclusive rows (Frontend with
+the Planner Domain Specialist), **G-SK-19/G-SK-20/G-SK-24** icon, description and the gradient chip (each
+blocked on a capture or a PRD amendment, not on effort), **G-SK-22** the Japanese search key (PRD amendment
+first, and the same question as G-SK-5), and the **D-63/D-65 amendment asks** in G-SK-23, which only the
+owner can write into `CONSTRAINTS.md`.
 
 ---
 
