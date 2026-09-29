@@ -99,6 +99,44 @@ it('attaches every card to the trainee its char ref names', function (): void {
         ->and($debut?->global_release_date?->toDateString())->toBe('2025-06-26');
 });
 
+it('re-parents a card to the trainee its char ref now names, reporting updated not created', function (): void {
+    $wrongParent = Umamusume::factory()->create(['external_ref' => 'gametora:char:1001']);
+    $rightParent = Umamusume::factory()->create(['external_ref' => 'gametora:char:1007']);
+    $card = CharacterCard::factory()->create([
+        'umamusume_id' => $wrongParent->id, 'card_id' => 100101,
+    ]);
+
+    // Pinned as it works today, not as a wish: `card_id` is the row's identity and
+    // the source owns the char-ref -> trainee mapping, so a re-store that names a
+    // different trainee moves the row. A Trainer's own correction is protected by
+    // the card-grain `is_manual` stop instead, and refusing to move would strand a
+    // mis-attached card with no repair path.
+    $record = [...cardsBySourceId()[100101], 'char_external_ref' => 'gametora:char:1007'];
+    $counts = (new StoreCharacterCards)->handle([$record], 'https://gametora.test/i.json', null, null);
+
+    expect($counts)->toMatchArray(['created' => 0, 'updated' => 1, 'skipped' => 0])
+        ->and($card->fresh()->umamusume_id)->toBe($rightParent->id)
+        // One row, the same one: a move is not a re-create.
+        ->and(CharacterCard::query()->count())->toBe(1);
+});
+
+it('skips a card whose char ref resolves to more than one trainee instead of picking one', function (): void {
+    // `external_ref` is indexed, not unique, and PromoteMatchedRecord leaves a stale
+    // ref on the old row when a renamed source row creates a new one, so a source
+    // rename can put two trainees behind one ref.
+    Umamusume::factory()->create(['external_ref' => 'gametora:char:1001']);
+    Umamusume::factory()->create(['external_ref' => 'gametora:char:1001']);
+
+    $counts = (new StoreCharacterCards)->handle(
+        specialWeekCardRecords(), 'https://gametora.test/j.json', null, null,
+    );
+
+    // Which row an unordered lookup returns is unspecified, so this asserts nothing
+    // is written at all rather than asserting which trainee would have won.
+    expect($counts)->toMatchArray(['created' => 0, 'updated' => 0, 'skipped' => 3])
+        ->and(CharacterCard::query()->count())->toBe(0);
+});
+
 it('is idempotent: a re-fetch updates the card it wrote instead of adding a second one', function (): void {
     Umamusume::factory()->create(['external_ref' => 'gametora:char:1001']);
     $records = specialWeekCardRecords();

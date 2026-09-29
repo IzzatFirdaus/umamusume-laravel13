@@ -78,7 +78,7 @@ class UmaFetch extends Command
             $counts = $pipeline->run($key, $sourceConfig, $fetched['body'], $fetched['snapshot_path']);
 
             $this->info(sprintf(
-                "'%s': %d updated, %d created, %d skipped (manual), %d to review.",
+                "'%s': %d updated, %d created, %d skipped (manual or unresolved), %d to review.",
                 $key,
                 $counts['updated'],
                 $counts['created'],

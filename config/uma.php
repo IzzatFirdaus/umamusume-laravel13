@@ -83,6 +83,11 @@ return [
          * had moved from `679f7c2e` to `e9e9ee6d`. This entry and
          * `gametora-characters` above carry the same one, so the two grains of one
          * document cannot be read from two different revisions.
+         *
+         * KI-24, measured 2026-09-29: the withdrawn `679f7c2e` document still answers
+         * 200 with its old content (251,242 bytes, 105 card records against 107 here),
+         * so a stale hash serves silent stale data, not the loud failure the other two
+         * notes in this file claim.
          */
         'gametora-character-cards' => [
             'url' => 'https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json',

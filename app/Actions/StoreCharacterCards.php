@@ -37,7 +37,23 @@ final class StoreCharacterCards
         $counts = ['created' => 0, 'updated' => 0, 'skipped' => 0];
 
         foreach ($records as $record) {
-            $trainee = Umamusume::where('external_ref', $record['char_external_ref'])->first();
+            $candidates = Umamusume::where('external_ref', $record['char_external_ref'])
+                ->get(['id', 'is_manual']);
+
+            /*
+             * `external_ref` is indexed, not unique, so a source rename that leaves a
+             * stale ref on the old row can put two trainees behind one char ref. That
+             * is a stop, not a tie-break: an ambiguous ref means the source's own
+             * mapping is broken, and attaching to whichever row an unordered lookup
+             * returns would bury the breakage under a full run of confident-looking cards.
+             */
+            if ($candidates->count() > 1) {
+                $counts['skipped']++;
+
+                continue;
+            }
+
+            $trainee = $candidates->first();
 
             // An absent trainee means the roster has not cleared the review queue for
             // her yet; a manual one is FR-B-4 at the character grain, so nothing is
