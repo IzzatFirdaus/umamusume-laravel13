@@ -25,9 +25,20 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class CatalogController extends Controller
 {
     /**
+     * The characters `NameNormalizer::normalize()` deletes from a search term, in the
+     * same order: the katakana middle dot, its halfwidth form, the hyphen, the space and
+     * the ideographic space. Kept here because the comparison side has to fold exactly
+     * this list; the two arrays drifting apart re-creates the bug this exists to fix.
+     *
+     * @var list<string>
+     */
+    private const FOLDED_CHARACTERS = ['・', '･', '-', ' ', '　'];
+
+    /**
      * Paginated roster tree, filterable by `status` (ReleaseStatus), `search` and
-     * `show_unconfirmed`. Search runs against the normalized match key, the aliases and
-     * the card titles, not raw display strings (matching rule, CLAUDE.md): a Trainer
+     * `show_unconfirmed`. Search compares a normalized term against the normalized match
+     * key, the aliases and the card titles — the last two folded to the term's shape at
+     * comparison time, see `normalizedColumn()` (matching rule, CLAUDE.md). A Trainer
      * searching a card must land on the trainee who owns it, so the card clause selects
      * the *parent* row. Unknown status values are ignored rather than erroring, and
      * `status=all` is the way back to the unfiltered list. Renders catalog.index.
@@ -54,13 +65,14 @@ class CatalogController extends Controller
             ->when($statusEnum !== null, fn (Builder $q): Builder => $q->where('release_status', $statusEnum->value))
             ->when($searchKey !== null, function (Builder $q) use ($searchKey): void {
                 $q->where(function (Builder $sub) use ($searchKey): void {
-                    // Normalized term against the normalized columns, per the matching
-                    // rule in CLAUDE.md. A card title is verbatim source data, but the
-                    // term that reaches it is normalized, and a card match surfaces its
-                    // trainee because the trainee is the level this page is organised at.
+                    // Both sides of each comparison have to arrive at the same string:
+                    // `match_key` is already normalized, so the title and the alias are
+                    // folded at comparison time by `normalizedColumn()`. A card match
+                    // still surfaces its trainee, because the trainee is the level this
+                    // page is organised at.
                     $sub->where('match_key', 'like', "%{$searchKey}%")
-                        ->orWhereHas('aliases', fn ($a) => $a->whereRaw('lower(alias) like ?', ["%{$searchKey}%"]))
-                        ->orWhereHas('cards', fn ($c) => $c->whereRaw('lower(title) like ?', ["%{$searchKey}%"]));
+                        ->orWhereHas('aliases', fn ($a) => $a->whereRaw($this->normalizedColumn('alias').' like ?', ["%{$searchKey}%"]))
+                        ->orWhereHas('cards', fn ($c) => $c->whereRaw($this->normalizedColumn('title').' like ?', ["%{$searchKey}%"]));
                 });
             });
 
@@ -81,6 +93,39 @@ class CatalogController extends Controller
             'showUnconfirmed' => $showUnconfirmed,
             'allStatusesLabel' => 'All statuses',
         ]);
+    }
+
+    /**
+     * Raw SQL that folds a stored string into the shape `NameNormalizer::normalize()`
+     * leaves a search term in, so a `like` between the two is a comparison and not a
+     * coincidence. Needed because `character_cards.title` and `umamusume_aliases.alias`
+     * carry verbatim source data with no normalized column behind them, and normalize()
+     * deletes the spaces that make most card epithets multi-word: `red strife` can only
+     * reach `[Red Strife]` if the column loses its space too.
+     *
+     * `$column` is interpolated rather than bound because SQL takes identifiers and
+     * literals where a placeholder cannot go. It is a string literal from this file at
+     * both call sites, never request input; the *term* is what varies, and it stays a
+     * bound parameter in the caller.
+     *
+     * Known ceiling, stated rather than assumed away: this folds spaces, hyphens and
+     * middle dots, which every engine here can do. It cannot fold **diacritics**
+     * portably — SQLite's `lower()` is ASCII-only, so it neither maps `É` to `E` nor
+     * drops combining marks the way normalize() does. `[Nuit Étoilée de Scarlet]`
+     * therefore still will not answer `nuit etoilee`. The upgrade path for that is a
+     * normalized key stored beside `title` and `alias`, written by the pipeline the way
+     * `match_key` already is: durable, indexable, and honest on both sides. It is a
+     * schema change, so it is not this method's to make.
+     */
+    private function normalizedColumn(string $column): string
+    {
+        $expression = "lower({$column})";
+
+        foreach (self::FOLDED_CHARACTERS as $character) {
+            $expression = "replace({$expression}, '{$character}', '')";
+        }
+
+        return $expression;
     }
 
     /**

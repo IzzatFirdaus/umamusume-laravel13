@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\AliasLanguage;
 use App\Enums\CardRarity;
 use App\Models\CharacterCard;
 use App\Models\Umamusume;
+use App\Models\UmamusumeAlias;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -20,7 +22,9 @@ use Illuminate\Support\Facades\DB;
  * A search fixture states its own `match_key` (see `CatalogTest.php:74`): the factory
  * derives one from a faker name inside `definition()`, so `create(['name' => ...])`
  * stores a key unrelated to the override, and a test that searches by name would be
- * searching nothing. Search reads normalized columns only, never a raw display string.
+ * searching nothing. Only `match_key` is a stored normalized column; the card title and
+ * the alias are verbatim display strings that the query folds to the same shape at
+ * comparison time, which is what the multi-word cases at the end of this file pin.
  *
  * Recorded deviation: the catalog row stopped displaying its alias count in this task.
  * The briefed row shape is name, Japanese name, max rarity and form count, so no row
@@ -230,9 +234,11 @@ it('never serves a page cached for one term to another term sharing its key', fu
         'name' => 'Tokai Teio', 'slug' => 'tokai-teio', 'match_key' => 'tokaiteio',
     ]);
     // A display name the one-word term reads verbatim and the double-spaced one does
-    // not, with a match key that says it is somebody else. Search reads only normalized
-    // columns, so it is out of both pages; the moment the query also read raw strings,
-    // this row's presence would depend on which of the two warmed the shared key.
+    // not, with a match key that says it is somebody else. Search reads the normalized
+    // match key, never the raw name, so it is out of both pages; the moment the query
+    // also matched on the name string, this row's presence would depend on which of the
+    // two warmed the shared key. (Titles and aliases do read display strings, folded -
+    // this row has neither, so the cache-key argument is untouched.)
     Umamusume::factory()->create([
         'name' => 'Tokaiteio Lookalike', 'slug' => 'tokaiteio-lookalike', 'match_key' => 'lookalike',
     ]);
@@ -270,4 +276,59 @@ it('keeps the active filters on every pagination link', function (): void {
 
     expect($matches[1])->not->toBeEmpty()
         ->and($dropped)->toBe([], 'a pagination link dropped an active filter');
+});
+
+it('finds a trainee through a two-word card epithet', function (): void {
+    $goldShip = Umamusume::factory()->create([
+        'name' => 'Gold Ship', 'slug' => 'gold-ship', 'match_key' => 'goldship',
+    ]);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $goldShip->id, 'card_id' => 100701, 'title' => '[Red Strife]',
+    ]);
+
+    // The one-word card search above survives because a single word has no space in it.
+    // This one does not: the term folds to `redstrife` and the title is verbatim source
+    // data with its space intact, so only a clause that folds the column too can reach
+    // it. `match_key` is `goldship`, so the name path cannot be what passes here, and
+    // the title itself is asserted because a row could otherwise render any other form.
+    test()->get('/umamusume?search=red%20strife')
+        ->assertOk()
+        ->assertSee('Gold Ship')
+        ->assertSee('[Red Strife]');
+});
+
+it('finds a trainee through a hyphenated card epithet', function (): void {
+    $digital = Umamusume::factory()->create([
+        'name' => 'Agnes Digital', 'slug' => 'agnes-digital', 'match_key' => 'agnesdigital',
+    ]);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $digital->id, 'card_id' => 110102, 'title' => '[Full-Color Fangirling]',
+    ]);
+
+    // The hyphen is folded on both sides, so the space the Trainer typed and the hyphen
+    // the source stored reach the same string. Same shape as the epithet case, and the
+    // title is a verbatim one rather than a fixture invented to have punctuation in it.
+    test()->get('/umamusume?search=full%20color')
+        ->assertOk()
+        ->assertSee('Agnes Digital')
+        ->assertSee('[Full-Color Fangirling]');
+});
+
+it('finds a trainee through a two-word alias', function (): void {
+    $nature = Umamusume::factory()->create([
+        'name' => 'Nice Nature', 'slug' => 'nice-nature', 'match_key' => 'nicenature',
+    ]);
+    // A fixture surface form, not attested data: aliases in this table are the alternate
+    // names the matcher reads (PRD FR-A-2), and two words is the case being pinned.
+    UmamusumeAlias::factory()->create([
+        'umamusume_id' => $nature->id,
+        'alias' => 'Nature Boy',
+        'language' => AliasLanguage::English,
+    ]);
+
+    // `natureboy` is nowhere in `nicenature`, so the alias clause is the only path that
+    // can return this row.
+    test()->get('/umamusume?search=nature%20boy')
+        ->assertOk()
+        ->assertSee('Nice Nature');
 });
