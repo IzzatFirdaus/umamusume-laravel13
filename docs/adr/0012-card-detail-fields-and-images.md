@@ -1,10 +1,14 @@
-# ADR-0012: Card detail fields - basic information, images, and objectives
+# ADR-0012: Card detail fields - stat arrays, images, and objectives
 
 Status: **Accepted (owner ruling 2026-09-29).** The owner ruled on Decision 1 in session: widen
-`ADR-0008` to carry a card's basic information. Decisions 2 and 3 are recorded from the same session's
-measurements. **The layer is authorized, not built:** no migration, parser change, store action or
-view for any of the three decisions exists in this tree, and `character_cards` still carries the
-twelve columns `ADR-0008` named.
+`ADR-0008` to carry a card's stat arrays (`base_stats`, `four_star_stats`, `five_star_stats`,
+`stat_bonus`). **"Basic information" is not Decision 1 and is not authorized here:** the owner
+clarified on 2026-09-30 that basic information is the trainee profile block (Japanese name, voice
+actor, release date, birthday, height, three sizes) on a different, undeclared source, named in
+Context below as unaddressed. The stat arrays are a separate item on that list. Decisions 2 and 3
+are recorded from the 2026-09-29 session's measurements. **The layer is authorized, not built:**
+no migration, parser change, store action or view for any of the three decisions exists in this
+tree, and `character_cards` still carries the twelve columns `ADR-0008` named.
 
 **As of this commit the three decisions below are records, not schema.** A reader who queries
 `character_cards` today gets zero rows for the stat arrays, no image column, and no objectives table.
@@ -50,6 +54,23 @@ is therefore not merely unbuilt, it is not addressable from the data that exists
 **What the objectives source carries.** `ura-objectives.74f80501` holds 135 rows, one per `char_id`,
 and carries no scenario key. An objectives model keyed by scenario cannot be built from this source at
 all; a per-character one can, and 135 matches the parser's record count exactly.
+
+**What an undeclared profile source carries, and why it is unaddressed.** A fourth source,
+`characters.c6676539`, was recorded by a session probe and is **not declared in `config/uma.php`, not
+authorized by any decision here, and covered by no row of the Decision table.** It is named so a
+reader knows it exists rather than rediscovering it. It is keyed by `char_id` like the sources above
+but is a different dataset from the stat arrays: it carries the trainee **profile** block -
+`name_ja`, a voice-actor field, a release date, `birth`, `height` and `three_sizes` - the six fields a
+Trainee sees under "basic information" on the GameTora character page. Measured 2026-09-29 on the
+probed body: 163 rows, with `three_sizes` null on 36, the voice-actor field null on 26 and `birth` null
+on 17. The coverage is partial, so a reader building against it has to handle absence per `D-220`
+rather than assume a value. **The owner confirmed the block's existence on 2026-09-30 and separately
+confirmed that "basic information" is this profile block, not the stat arrays**; confirming which
+fields a source carries is not authorizing storage for it. Storage of any of the six is a fresh
+decision against `AGENTS.md` escalation 2, and a PRD citation, because none of the three decisions
+below names it. The falsifier is named: a re-resolved manifest key whose hash or row count differs
+makes the measurements above stale, as does a source that stops being fetchable by the app's own user
+agent.
 
 ## Decision
 
