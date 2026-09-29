@@ -429,6 +429,10 @@
     <p class="mt-2 max-w-3xl text-xs text-ink-muted">
         SP is the cost the source states for that skill. Skill-point discounts from hint levels are not
         shown: no source in this repository settles the per-level reduction.
+        {{-- G-SK-13: this select lists every Global row, which is the reason Screen D exists. Linking out
+             is the honest statement that the list is too long to scan, and it costs no new mechanism. --}}
+            <a href="{{ route('skills.index') }}" class="underline">Search the skill catalog</a>
+            to narrow that list before choosing here.
 
     <form method="POST" action="{{ route('runs.skills.sync', $run) }}" class="mt-4 max-w-3xl space-y-3 rounded-md border border-rule bg-raised p-4 text-sm">
         @csrf

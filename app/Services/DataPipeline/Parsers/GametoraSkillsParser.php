@@ -92,15 +92,29 @@ final class GametoraSkillsParser implements SkillSourceParser
      */
     private const UNIQUE_CLASS_CODES = [3, 4, 5];
 
+    public const SPEED = 'Speed';
+
+    public const RECOVERY = 'Recovery';
+
+    public const PASSIVE = 'Passive';
+
+    /**
+     * The only three words this class is able to derive, so a screen offering a type filter reads them from
+     * here rather than copying the list. A facet copied per screen is the same drift `Skill::scopeAvailableOnGlobal()`
+     * exists to prevent, and here it would be worse: an option whose word the derivation cannot produce is a
+     * filter that always returns nothing.
+     */
+    public const CATEGORIES = [self::SPEED, self::RECOVERY, self::PASSIVE];
+
     /** Effect code to category, each justified by the English text in the same record. See the class docblock. */
     private const CATEGORY_BY_EFFECT_CODE = [
-        27 => 'Speed',
-        22 => 'Speed',
-        9 => 'Recovery',
-        28 => 'Recovery',
-        1 => 'Passive',
-        2 => 'Passive',
-        3 => 'Passive',
+        27 => self::SPEED,
+        22 => self::SPEED,
+        9 => self::RECOVERY,
+        28 => self::RECOVERY,
+        1 => self::PASSIVE,
+        2 => self::PASSIVE,
+        3 => self::PASSIVE,
     ];
 
     /**

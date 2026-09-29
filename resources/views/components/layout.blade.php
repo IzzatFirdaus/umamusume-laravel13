@@ -43,6 +43,10 @@
     <nav class="border-b border-rule bg-panel">
         <div class="mx-auto flex max-w-5xl gap-6 px-4 py-3 text-sm font-medium">
             <a href="{{ route('catalog.index') }}" class="hover:underline">Catalog</a>
+            {{-- Screen D sits beside the catalog because it is the same kind of thing: reference data the
+                 engine wrote, read-only here. A route nobody can reach is a defect, and this is the one
+                 entry point that does not depend on being inside a run. --}}
+            <a href="{{ route('skills.index') }}" class="hover:underline">Skills</a>
             <a href="{{ route('runs.index') }}" class="hover:underline">Training runs</a>
             <a href="{{ route('review.index') }}" class="hover:underline">Review</a>
         </div>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SkillController;
 use App\Http\Controllers\TrainingRunController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\View;
@@ -12,6 +13,9 @@ Route::redirect('/', '/training-runs')->name('home');
 
 Route::get('/umamusume', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catalog.show');
+
+// Screen D (PRD FR-D-2). Plural noun, no verb, read-only: the same shape as the two surfaces above.
+Route::get('/skills', [SkillController::class, 'index'])->name('skills.index');
 
 Route::get('/training-runs', [TrainingRunController::class, 'index'])->name('runs.index');
 Route::get('/training-runs/create', [TrainingRunController::class, 'create'])->name('runs.create');
