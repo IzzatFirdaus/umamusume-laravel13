@@ -512,6 +512,18 @@ not controls, because a filter over a code no Trainer can read is D-64's ornamen
 matching `/umamusume`, and the query is escaped before the `LIKE` — the older surface is not, which is
 **KI-26**, filed and left there deliberately.
 
+**Then it was filled for real, and two things came out of that.** `database/database.sqlite` had been
+migrated but never imported, so `uma:fetch gametora-skills` reported *unchanged since last snapshot* and
+wrote nothing — the snapshot check keys on the document hash under today's date in a `storage/` shared by
+every database in the tree, which is **KI-27**. `uma:reparse` (same bytes, no network) filled it: `7
+updated, 1903 created, 0 to review`, and the screen renders **623 of 623** with the type distribution the
+register states for a second database (null 288, `Speed` 199, `Passive` 82, `Recovery` 54) — G-SK-18's
+numbers reproduced outside the scratch DB that produced them. Rendering the filled table also found a
+display defect no fixture could have shown: **18 of the 623 `[Global]` rows store the same string in both
+name columns**, because the source's `jpname` for those skills is Latin script (`#LookatCurren`, `U=ma2`,
+`∴win Q.E.D.`), and the row printed the name twice. Fixed in the view by rendering `name_ja` only where it
+differs, with a test; the data stays verbatim, per C-4's split between copy and source.
+
 **G-SK-1 through G-SK-2, read with the above:** G-SK-2 (no skills import) is closed by this pass.
 G-SK-1 stays as written because it was the *correction* that mattered — the columns were already PRD-shaped,
 and what arrived is data, plus one authorized column. G-SK-3, G-SK-4 (hint level and its curve) are

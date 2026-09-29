@@ -54,6 +54,13 @@ availability from a source, and `Skill::availableOnGlobal()` (PRD FR-D-3, `ADR-0
 that a row may reach a Trainer. Run `php artisan uma:fetch gametora-skills` to fill it — 623 `[Global]`
 rows of 1,910 stored, as of the `609afe88` snapshot pulled 2026-09-29.
 
+If that reports **unchanged since last snapshot** while the screen is still empty, use
+`php artisan uma:reparse gametora-skills` instead. The snapshot short-circuit keys on the document's hash
+under today's date in a `storage/` directory shared by every database in the working tree, so the second
+database asked the same day is told nothing changed and stays empty (KI-27). Reparse reads the same stored
+snapshot with no network and is safe on a database that already holds the rows, because the writer upserts
+on `export_id`.
+
 ## Fetch engine
 
 Sources live in `config/uma.php`. One is owner-approved today (`gametora-characters`, structured JSON, recorded 2026-09-27; the approval used conservative politeness defaults, the robots/live check is still outstanding, PRD OQ-2). Adding any further source requires a robots/rate-limit review and one parser class:

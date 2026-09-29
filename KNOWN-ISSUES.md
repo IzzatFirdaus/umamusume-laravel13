@@ -7,11 +7,12 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
-**Status (2026-09-29, Screen D pass):** **25 filed, 19 closed, 6 open**, one filed and none closed here.
+**Status (2026-09-29, Screen D pass):** **26 filed, 19 closed, 7 open**, two filed and none closed here.
 **KI-26** is the unescaped `LIKE` on `/umamusume`: a search of `%` returns the whole catalog rather than the
 rows whose key contains that character. Reproduced through that controller, not by a hand-written query, and
 left unfixed here because `CatalogController` is not this pass's surface and the file is on master in a shared
-tree. Screen D escapes and tests the difference. Prior:
+tree. Screen D escapes and tests the difference. **KI-27** is the fetch that reports itself complete against a
+database it never wrote to, found by actually filling the real database rather than a scratch one. Prior:
 **Status (2026-09-29, Slice 16):** **24 filed, 19 closed, 5 open.** **KI-25 is back to OPEN** under R85.
 `b8c0a54` did land the focusable scroll region and its test, and that work is not being undone; what is
 being withdrawn is the closure, because the issue's **measurement half has never been read in a browser** —
@@ -1229,3 +1230,44 @@ owns `CatalogController`.
 
 **Owner.** whoever picks up `CatalogController`; found while building the second server-driven filter
 surface and noticing the first one had no escape.
+
+## KI-27 `uma:fetch` reports "unchanged since last snapshot" against a database it never wrote to — FILED 2026-09-29 (Screen D pass), OPEN
+
+**What is wrong.** `app/Services/DataPipeline/SourceFetcher.php:57-59` builds the snapshot path as
+`snapshots/{source}/{today}/{sha256(body)}.html` on `Storage::disk('local')` and sets
+`$unchanged = Storage::exists($path)`. Both halves of that key — the document's hash and the date — are
+properties of **the document**. The thing that actually decides whether rows must be written is **the
+database in front of the pipeline**, and that never enters the check. `storage/` is shared by every
+database in the working tree: `database/database.sqlite` and whatever `.scratch-uma/*.sqlite` a session
+points `DB_DATABASE` at. First fetcher writes the snapshot; every other database asked the same document the
+same day is told nothing changed, and stays empty.
+
+**Proof, from filling the real database rather than a scratch one.** After the import pass had written
+1,910 rows into `.scratch-uma/skills-c5.sqlite` at 10:37 today, `php artisan uma:fetch gametora-skills`
+against `database/database.sqlite` printed `'gametora-skills' unchanged since last snapshot; nothing
+written.` and `release_status='GlobalReleased' and name_is_client=1` still counted **0** there, with
+`storage/app/private/snapshots/gametora-skills/2026-09-29/609afe88…​.html` (2,502,242 bytes) already on disk.
+`php artisan uma:reparse gametora-skills` — same snapshot, zero network — then wrote
+`7 updated, 1903 created, 0 skipped (manual), 0 to review`, and `/skills` renders **623 of 623**.
+
+**Why it is worse than an idempotent no-op.** The message is true about the document and misleading about
+the Trainer's data, and NFR-2 promises a failed or skipped fetch leaves previous data intact rather than
+promising the rows exist. A Trainer who runs the command the screen itself names, reads "nothing written",
+and has no way to know a second command is the one that works. Screen D's empty state and the README both
+now name both commands, which treats the symptom in copy; the check is the thing that should change.
+
+**What fixing it needs.** The short-circuit has to be a property of the target, not only of the disk. Three
+shapes: compare against what the database already holds for that source; keep the snapshot as a body cache
+but continue into the pipeline anyway; or key the snapshot path per database. The middle one looks nearly
+free and there is evidence for it — `StoreSkills` upserts on `export_id` and the reparse above re-ran over
+seven adopted rows without duplicating anything, so re-running the pipeline on unchanged bytes is already
+safe. Choosing among them is Architect's, and it touches every source, not just skills.
+
+**One thing this ruled out, because it looked like a defect and is not.** The reparse path stamps
+`source_url` with the **pinned** URL rather than the manifest-resolved one (stated in `UmaReparse`'s
+docblock). Here the pin and the document agree — `skills.609afe88.json` against a snapshot whose sha256
+begins `609afe88` — so all 1,910 rows' provenance is accurate, and `snapshot_path` carries the full hash
+regardless. KI-24 is about the pin going stale; today it has not for this source.
+
+**Owner.** Data pipeline, with Architect for the decision. Found by doing the thing the screen tells a
+Trainer to do.
