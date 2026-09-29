@@ -46,7 +46,26 @@ $paths = [
     'tier-a' => 'research-scratch/data/json/tier-a-rows.json',
 ];
 
+/**
+ * The highest fold a witness may be matched on. `3` is the rule the cross-check ran under;
+ * `--max-tier=1` reproduces the brief's strict rule — brackets off, case folded, whitespace
+ * collapsed, nothing deeper — so the two count lines in the evidence file are both reproducible
+ * from one run rather than one of them being hand-derived prose.
+ */
+$maxTier = 3;
+
 foreach (array_slice($argv, 1) as $argument) {
+    if (preg_match('/^--max-tier=(\d)$/', $argument, $m) === 1) {
+        if ((int) $m[1] < 1 || (int) $m[1] > 3) {
+            fwrite(STDERR, "roster-crosscheck: --max-tier takes 1, 2 or 3, got {$m[1]}\n");
+            exit(1);
+        }
+
+        $maxTier = (int) $m[1];
+
+        continue;
+    }
+
     if (preg_match('/^--([a-z-]+)=(.*)$/', $argument, $m) === 1 && array_key_exists($m[1], $paths)) {
         $paths[$m[1]] = $m[2];
 
@@ -102,6 +121,35 @@ $indexRows = static function (array $rows, string $source): array {
 $wikiIndex = $indexRows($tierA, 'umamusu-wiki');
 $game8Index = $indexRows($tierA, 'game8');
 
+reportFoldAmbiguity($wikiIndex, 'umamusu.wiki', $maxTier);
+reportFoldAmbiguity($game8Index, 'Game8', $maxTier);
+
+// The other side of the bijection: two Global cards sharing a fold would let one witness stand
+// for both, so the check runs over the cards as well as over the source rows.
+$byCardKey = [];
+
+foreach ($cards as $card) {
+    foreach (foldKey((string) $card['title']) as $tier => $key) {
+        if ((int) $tier > $maxTier) {
+            continue;
+        }
+
+        $byCardKey[$tier][$key][] = (string) $card['card_id'];
+    }
+}
+
+for ($tier = 1; $tier <= $maxTier; $tier++) {
+    $shared = array_filter($byCardKey[$tier] ?? [], fn (array $ids): bool => count($ids) > 1);
+
+    if ($shared !== []) {
+        fwrite(STDERR, "roster-crosscheck: roster tier {$tier} has ".count($shared)." folded title(s) shared by more than one Global card:\n");
+
+        foreach ($shared as $key => $ids) {
+            fwrite(STDERR, "  key '{$key}' => card_ids ".implode(', ', $ids)."\n");
+        }
+    }
+}
+
 echo '| card_id | GameTora title | Game8 title | umamusu.wiki title | GameTora date | Tier A date | rarity | verdict |', "\n";
 echo '|', str_repeat('---|', 8), "\n";
 
@@ -110,8 +158,8 @@ $variants = [];
 $conflicts = [];
 
 foreach ($cards as $card) {
-    $wikiHit = firstTierHit($wikiIndex, (string) $card['title']);
-    $game8Hit = firstTierHit($game8Index, (string) $card['title']);
+    $wikiHit = firstTierHit($wikiIndex, (string) $card['title'], $maxTier);
+    $game8Hit = firstTierHit($game8Index, (string) $card['title'], $maxTier);
     $wikiRow = $wikiHit['row'];
     $tierADate = $wikiRow === null ? 'not listed' : (string) $wikiRow['global_release_date'];
     $tierARarity = $wikiRow === null ? null : $wikiRow['rarity'];
@@ -230,20 +278,51 @@ function foldKey(string $title): array
 }
 
 /**
- * The cheapest tier at which a title witnesses anything.
+ * The cheapest tier at which a title witnesses anything, at or below `$maxTier`.
  *
  * @param  array<int|string, list<array<string, mixed>>>  $index
  * @return array{tier: int, row: array<string, mixed>|null}
  */
-function firstTierHit(array $index, string $title): array
+function firstTierHit(array $index, string $title, int $maxTier): array
 {
     foreach (foldKey($title) as $tier => $key) {
+        if ((int) $tier > $maxTier) {
+            break;
+        }
+
         if (isset($index[$tier][$key][0])) {
             return ['tier' => (int) $tier, 'row' => $index[$tier][$key][0]];
         }
     }
 
     return ['tier' => 0, 'row' => null];
+}
+
+/**
+ * Say out loud when a folded key stops being one-to-one, because that is the property the
+ * deeper folds are safe on. `firstTierHit` takes the first row of a bucket, so once two
+ * source rows share a fold, or two Global cards do, a tier-2/3 match stops being a
+ * bijection and the verdict stops being defensible without reading which rows collided.
+ * Nothing in the 2026-09-29 bodies collides; this is the guard for the next hash.
+ *
+ * @param  array<int|string, list<array<string, mixed>>>  $index
+ */
+function reportFoldAmbiguity(array $index, string $label, int $maxTier): void
+{
+    for ($tier = 1; $tier <= $maxTier; $tier++) {
+        $shared = array_filter($index[$tier] ?? [], fn (array $rows): bool => count($rows) > 1);
+
+        if ($shared === []) {
+            continue;
+        }
+
+        fwrite(STDERR, "roster-crosscheck: {$label} tier {$tier} has ".count($shared)." folded key(s) matching more than one row:\n");
+
+        foreach ($shared as $key => $rows) {
+            $titles = array_map(fn (array $row): string => (string) $row['card_title_en'], $rows);
+            fwrite(STDERR, "  key '{$key}' => ".implode(' | ', $titles)."\n");
+        }
+    }
 }
 
 /**

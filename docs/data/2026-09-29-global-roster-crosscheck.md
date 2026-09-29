@@ -277,6 +277,17 @@ Under the brief's literal tier-1-only fold the same body reads
 below (`101002, 101401, 101902, 102401, 102801, 105201, 105601, 106201, 109801`). That is the cost
 of the deviation in one line: 9 flags either way, and both lists are named here.
 
+Both lines above are the tool's own, not prose derived by hand:
+
+```bash
+php tools/roster-crosscheck.php --max-tier=3 > docs/data/roster-crosscheck-table.md   # 101 + 2 + 4 + 0
+php tools/roster-crosscheck.php --max-tier=1 2>&1 >/dev/null | head -1                # 92 + 11 + 4 + 0
+```
+
+`--max-tier` is the highest fold a witness may be matched on, so the tier-1 run is the brief's rule
+and the tier-3 run is the one this file's table comes from. `--max-tier` outside 1..3 exits 1 rather
+than quietly meaning "deeper".
+
 ## Conflict log
 
 Every row that is not `two-source-confirmed`, plus every title that needed a deeper fold. Nothing
@@ -388,7 +399,23 @@ SELECT COUNT(*) FROM character_cards;                                   -- expec
 SELECT COUNT(*) FROM character_cards WHERE unconfirmed = 1;              -- expect 0
 SELECT card_id FROM character_cards WHERE is_manual = 1
    AND card_id IN (100103, 100702, 100802, 100902, 101303, 110001);      -- expect none; each hit is one card the guard below will not touch
+SELECT COUNT(*) FROM character_cards
+ WHERE card_id IN (100103, 100702, 100802, 100902, 101303, 110001);      -- expect 6
+SELECT source_url, COUNT(*) FROM character_cards GROUP BY source_url;    -- expect one row: the e9e9ee6d URL under Sources
 ```
+
+The last two are the checks the totals cannot do. A population can be exactly 107 rows and still be
+missing `100902`, because a hash rotation replaces cards as well as adding them — `COUNT(*)` agrees
+and the flag list is silently shorter than the six verdicts. And a `source_url` that is not the one
+this file names means the rows were written from a Tier B body this cross-check never read: the
+verdicts would then be about a stale roster, which is the exact failure `config/uma.php`'s pinned
+hash exists to make visible. If either returns something unexpected, stop and re-run
+`php tools/roster-crosscheck.php` against the body that produced those rows before applying anything.
+
+All five statements were run against `database/scratch-catalog.sqlite` and answered
+`107 / 0 / 6 / one source_url row, the e9e9ee6d body, 107 cards`. The third SELECT returns `100103`
+there and must return **none** on the database the owner applies to: the rehearsal below makes that
+one card `is_manual` on purpose, to show the guard refusing it.
 
 Apply — the id list is the six verdicts above, copied from this file rather than recomputed by the
 statement, so what the statement writes is exactly what was reviewed:
