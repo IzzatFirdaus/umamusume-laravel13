@@ -7,6 +7,11 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, Screen D browser pass):** **28 filed, 19 closed, 9 open**, one filed here. **KI-29** is
+`/umamusume`'s form controls measuring 30/31/32px against `DESIGN.md` §6.14's 44, found by measuring the
+rendered page rather than reading the classes; Screen D's own controls are fixed, the older surface is not.
+Two of this thread's three open items on that one file (KI-26, KI-29) can be cleared by whoever next owns
+`catalog/index.blade.php` and `CatalogController`. Prior:
 **Status (2026-09-29, catalogue fill pass):** **27 filed, 19 closed, 8 open**, one filed here. **KI-28**
 is the silent one: with a column absent from the schema, SQLite reads the quoted identifier inside
 `whereNotNull('col')` as a **string literal**, so the predicate is true for every row and nothing is
@@ -1321,3 +1326,30 @@ before trusting a zero from a linked-column count on a development database.
 
 **Owner.** nobody — hazard record. Filed so the next session whose `count()` succeeds against a column
 `PRAGMA` denies does not spend an afternoon on it.
+
+## KI-29 `/umamusume`'s form controls measure 30/31/32px against DESIGN.md §6.14's 44 — FILED 2026-09-29 (Screen D browser pass), OPEN
+
+**What is wrong.** `DESIGN.md` §6.14 is the tool's one deliberate extension of the client's interface ("the
+client has almost no text inputs, so this is our extension and it must not look like one") and it fixes an
+input at **height 44**, radius 8, `body` text in `ink`, with a 2px `green` focus border. The catalog
+index's controls are 30px and 31px tall. They are built from `rounded-md border border-rule bg-raised px-2
+py-1`, which sets no height, so the browser's intrinsic size wins and §6.14's number is simply absent.
+
+**Proof, measured in a rendered page at two widths.** `getBoundingClientRect` on `http://127.0.0.1:8123/umamusume`:
+`input[name=search]` **177×30**, `select[name=status]` **162×31**, `button[type=submit]` **56×32** — identical
+at 1280×800 and 390×844. Screen D was written by copying that markup, so it measured the same 30/31 until
+the browser pass caught it; its controls are now **44/44** (`h-11`, which is already this repository's idiom
+for a 44px row in `epithet-checklist`, `race-calendar` and `grade-point-meter`) and its checkbox is 24×24.
+
+**What it is not.** Not an accessibility failure: 30–32px clears WCAG 2.2 AA's 24px target floor, and the
+focus ring on that surface is present and 2px green. So the claim is bounded to what the file says — the
+surface does not meet the project's own written spec, and the reason §6.14 states for existing (not looking
+like a generic web form) is the reason it matters.
+
+**Why it is not fixed here.** Same posture as KI-26: `resources/views/catalog/index.blade.php` is on master,
+is not Screen D's surface, and the tree is shared with sessions actively editing views. Adding `h-11` there
+is a one-class change and it should go with whatever else that file's next owner does — which is also where
+the `LIKE` escape from KI-26 lives, in the controller behind it.
+
+**Owner.** whoever next owns `catalog/index.blade.php`. Found by measuring the new screen against the old one
+rather than trusting that copied classes produced a spec-compliant result.

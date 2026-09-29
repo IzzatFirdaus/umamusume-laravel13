@@ -233,7 +233,9 @@ Triage §4 `:88` already ruled the ~10% hint discount unsourced. None of these f
   has no source.
 - **What is needed:** coordinate with the Legacy owner on whether Spark target strings resolve through
   `match_key` at read time or through a stored `skill_id` at write time; then a second-domain source for
-  the inheritable rule.
+  the inheritable rule. **Same question as G-SK-22, from the other side:** a Spark target naming a skill in
+  Japanese has nothing to resolve against, because `match_key` is written from the client English name
+  (`StoreSkills.php:68`) — whichever way this join goes, it inherits the single-key answer.
 - **Owner:** Planner Domain Specialist with the Architect, after the Legacy work lands.
 
 ### G-SK-6 — Star rank and the card layer are on a branch, not on master
@@ -355,6 +357,10 @@ somebody skipped:
    `<datalist>` filled server-side would do it with no JS dependency, which is the one constraint here that
    no option may break.
 6. **The D-63 and D-65 amendment asks** (G-SK-23), including whether `skills` should have aliases at all.
+7. **The unique-row chip** (G-SK-24): §6.11's pink-to-blue gradient needs a measured pair from capture
+   `232345` and a material-fill token before it can be built. The flat pill on Screen D is a known deviation
+   from a section that rejects flat fills, and it is open because the hues are not in evidence, not because
+   nobody noticed.
 
 ---
 
@@ -389,6 +395,13 @@ idempotence covers this source too.
 - **G-SK-13 — the run screen's picker now lists 623 options.** That is the honest consequence of importing
   real data: the select was designed when the table held ten names. `FR-D-2` and `DESIGN.md` §8.4 (Screen D)
   are the designed answer and remain unbuilt; a `select` of this size is the reason they exist.
+  **Interim answer, landed with Screen D:** the run screen's skill caption now links to `/skills`
+  (`resources/views/runs/show.blade.php`), and the shell's nav carries the route, so a Trainer can narrow
+  623 rows before choosing. That is a way *out* of the select, not a replacement for it: the picker is still
+  an unsearchable `<select>` on the run screen itself, and FR-D-2's own words ("search/autocomplete **for
+  the run UI**") are still only half-met. A search-backed picker is the remaining build, and whatever replaces
+  it should reuse `skillsFixtureGlobalRenderings()` rather than re-derive the negative — third use, helper
+  time (G-SK-17).
 - **G-SK-14 — `rarity` and `type` are stored and not rendered.** `rarity` has no label to render (six codes,
   three client rarities). `type` has a derived word but it is this tool's reading of effect codes, and
   `Debuff` is unevidenced, so the panel footnotes the derivation instead of printing a taxonomy.
@@ -473,11 +486,19 @@ idempotence covers this source too.
   card join. `Carnival Bonus` is the other collision (1000011, 1001012, both class code 1, neither priced).
   So a Trainer searching `Indomitable` gets two rows, and the code rule badges exactly one of them.
   **Ruled 2026-09-29 (owner, option b of three):** ship the code rule, because it is what a one-document
-  parser can defend, and put the limit on the badge itself — `title="Marked from the source's skill class
-  code, not from a card's own skill list."` No count in the copy: 290-of-294 is a fact about one snapshot
-  and belongs here and in the ADR, not in UI text that will outlive it. The rejected alternatives were to
-  badge nothing (silently dropping the client's own signal) or to read the card document on this screen
-  (option c: a second source in the read path for four rows).
+  parser can defend, and put the limit on the badge itself. **The string, verbatim, at
+  `resources/views/skills/index.blade.php:125`:**
+
+  > `title="Marked from the source's skill class code, not from a card's own skill list."`
+
+  Checked against the three tests the ruling sets: it names no snapshot count a Trainer cannot verify (the
+  290-of-294 figure lives here and in `ADR-0011` §5, not in UI text that would outlive it); it states the
+  basis without performing a join; and its only label word, `Unique`, is §6.11's captured tag rather than
+  something invented here. **On the proposed shorter form — "Unique by code; no released card names this
+  skill" — that copy was rejected, and it is worth recording why:** it asserts a per-row fact. This screen
+  has no card document in its read path, so it can say *how the mark was derived* and cannot say *that no
+  card names this skill* — and for the 290 rows the join does reach, the shorter sentence would be false.
+  The disclosure is about the rule, which is the thing the surface actually knows.
   Both rows render, and they are distinguishable without a rarity word because cost and derived type differ.
   `SkillSearchScreenTest` pins the collision through the producer path, with both rows in the fixture
   verbatim, so it cannot be quietly "fixed" by a future dedupe.
@@ -491,6 +512,9 @@ idempotence covers this source too.
   column), which is a new column, which is a PRD amendment first. **What was not done instead:** matching on
   the `name_ja` display string directly, which the root Banned Patterns D-62 cites forbid, and which would
   have made the screen look right while breaking the rule that keeps case- and width-folded search honest.
+  **Cross-referenced from G-SK-5:** the Spark-target join asks the same question from the inheritance side,
+  so a second key (or a key derived from both names) settles both at once, and neither should be built
+  against the other's deadline.
 - **G-SK-23 — D-65's review-queue offer does not map to skills, and Screen D says so rather than linking to
   an empty place.** D-65's no-results state offers the review-queue path (US-5) because a missing skill is a
   data gap, not a user error — that half is true and is kept. The queue half is not reachable: `StoreSkills`
@@ -503,6 +527,41 @@ idempotence covers this source too.
   `umamusume`, whose `aliases` `CatalogController.php:47` searches), so "alias" is a field that does not
   exist on this entity. Either the clause gains a "where the backing exists" scope or skills gain aliases;
   neither is decided here.
+  **The rule this pair of asks produces, and it is a working rule, not a note:** *brief citations are
+  checked against the file, not adopted.* Two of this thread's briefs cited a constraint that turned out to
+  live elsewhere — D-65's review-queue offer, which does not map to an entity whose import bypasses the
+  queue, and D-220 for the `N/A` + `title` disclosure, which is the resource-strip rule in
+  `CONSTRAINTS.md` while the disclosure form actually lives at `ARCHITECTURE-ESSENTIALS.md:18`, beside the
+  ban on the em dash as the glyph. Both were caught by opening the file; neither would have been caught by
+  building what was written. If this deserves a place in `.ai/rules` it is the owner's call to record it,
+  not an agent's.
+
+- **G-SK-24 — §6.11's unique-row gradient chip is not implemented, and the flat pill on Screen D is the
+  revision that section already rejects.** §6.11 asks for a sparkle mark, a `Unique` text tag, and a
+  **pink-to-blue gradient chip fill** matching client capture `232345`, and it names the earlier flat
+  `indigo-50` attempt as losing "the single most legible affordance on the panel, since the gradient is what
+  makes a unique skill findable without reading". `resources/views/skills/index.blade.php` renders a flat
+  `bg-sunken` pill. **It was left flat because it cannot be built honestly here:**
+  `resources/css/app.css` has no pink or blue material token (its only pink is the mood pill at `:133`, and
+  its gradients are the enamel and lattice overlays), and §6.11 states no hex pair — the hues come from a
+  capture this repository has not measured. Inventing two hex values in a Blade class to satisfy a
+  screenshot would be D-102's failure with the numbers made up. What the screen does satisfy is **D-12**: the
+  state carries a word and a mark, not a colour alone. **Needed:** a measured pink-to-blue pair from
+  `232345`, a material-fill token beside the mood pill's, then the chip. Owner: design-system, with the
+  capture as the precondition. **Found in the browser pass, not in the tests** — a DOM assertion cannot see
+  that a flat grey pill is the rejected revision.
+- **G-SK-25 — two `[Global]` skills really do cost 0 SP, and `0 SP` is not the bare-zero defect.** The same
+  pass showed `99 Problems · 0 SP`, and a reader will reasonably suspect D-220's "never a default" being
+  broken. Checked against the document: `cost: 0` is stated on **9 rows**, two of which are `[Global]` and
+  client-named (`99 Problems`, `You're Not the Boss of Me!`). The parser copies what the source says, so the
+  render is faithful and **must not be "fixed"** into `N/A` — `N/A` now means something specific (no cost
+  stated for that class of skill), and collapsing a real zero into it would destroy the difference.
+  Same family, also browser-found: **3 of the 288 unlabelled rows carry a type word in their client name**
+  (`Corner Recovery ×`, `Greed for Speed`, `Speed Eater`), so the `Unspecified` facet shows rows that look
+  like they should have had a label. Each is voided by the derivation on a different clause — 200353 has
+  code 9 at **−200** (the sign rule), while 201081 and 201082 pair a positive code 27 with **code 21 at a
+  negative value**, the unmapped negative family G-SK-9 already tracks. The names are the client's; the
+  absence is this tool's refusal, and both are correct in the same row.
 
 **Landed with Screen D, 2026-09-29 (the same owner pass, decisions 1 to 5).** `GET /skills` is the second
 server-driven filter surface and the answer to G-SK-13's 623-option select: the run screen now links to it
@@ -510,7 +569,28 @@ and the shell's nav carries it, so the long list has a way out. Facets are **sea
 `Unspecified` for the 288 rows the sign rule withheld) and unique**; `rarity` and cost-present are columns,
 not controls, because a filter over a code no Trainer can read is D-64's ornament. The param is `search`,
 matching `/umamusume`, and the query is escaped before the `LIKE` — the older surface is not, which is
-**KI-26**, filed and left there deliberately.
+**KI-26**, filed and left there deliberately. D-65's two states were separated in the **view**, not softened
+in the test: the invitation now stops speaking once a query is in flight, and the assertion that caught it
+was right to stay as written.
+
+**Measured in a browser, 2026-09-29, against the filled `database/database.sqlite` (623 rows) at 1280×800
+and 390×844.** These are the numbers, because a server-render assertion cannot establish any of them:
+`documentElement.scrollWidth` **1265** at 1280 and **375** at 390, so no page-level horizontal overflow at
+either width, and zero elements crossing the right edge (the KI-25 class of defect, checked rather than
+assumed absent). Tab order is skip link → Catalog → **Skills** → Training runs → Review → search → type →
+unique → Filter → pagination pages, every control reachable, and each stop computes
+`outline: solid 2px` (green `rgb(127,204,9)` on the screen's own controls, `rgb(78,121,6)` on the shell's) —
+D-13 measured, not inherited from a class name. Contrast: `ink-muted` on `raised` **5.78:1**, on the page
+**5.15:1**, `h1` **11.79:1**, badge **10.74:1**, all above 4.5 at the 12–14px sizes actually used (light
+theme; the screen has no in-page theme control, so dark is unmeasured). The `Unspecified` facet returns
+**288 of 623** and the facet survives paging (`?type=Unspecified&page=2`, still 288) — the count G-SK-18
+predicts, reached through the browser's own form post rather than a request helper. Searching
+`indomitable` renders the G-SK-21 collision as two rows: `Indomitable | 不屈の心 | · Recovery · 170 SP` and
+`Indomitable | 不撓不屈 | ✦ Unique | · Speed · N/A`. The run screen's picker was counted at **623 options**
+with its caption link landing on `/skills`. Three findings came out of looking rather than asserting:
+**G-SK-24** (the flat badge), **G-SK-25** (the faithful `0 SP`, and the three name-suggests-type rows), and
+the form-control sizes, which measured **30/31/16px** against §6.14's 44 and are fixed on this screen —
+`/umamusume` measures the same 30/31/32 and is **KI-28**.
 
 **Then it was filled for real, and two things came out of that.** `database/database.sqlite` had been
 migrated but never imported, so `uma:fetch gametora-skills` reported *unchanged since last snapshot* and
