@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use App\Services\DataPipeline\Parsers\GametoraCharacterCardParser;
 use App\Services\DataPipeline\Parsers\GametoraCharacterParser;
 use App\Services\DataPipeline\Parsers\GametoraRaceCatalogParser;
 
@@ -54,8 +55,38 @@ return [
          * as silently old data.
          */
         'gametora-characters' => [
-            'url' => 'https://gametora.com/data/umamusume/character-cards.679f7c2e.json',
+            'url' => 'https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json',
             'parser' => GametoraCharacterParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+        ],
+
+        /*
+         * The same document as gametora-characters, at card grain (FR-A-6, ADR-0008).
+         *
+         * Declared as its own source because the engine's contract is one parser per
+         * source, and a trainee's rows and her cards have different identities: one
+         * cross-references on name through the review queue, the other keys on the
+         * source's own card id and never needs a guess. Keeping them apart is what
+         * lets each stay independently lockable and idempotent under FR-B-5.
+         *
+         * Cost, stated: the same ~250 kB is fetched twice per full `uma:fetch`, one
+         * second apart, against the host the owner approved on 2026-09-27. The robots
+         * and rate-limit question AGENTS.md escalation 5 raises for this host stays
+         * formally unanswered, exactly as the note above records it.
+         *
+         * Order matters: the character source is listed first, so its trainees exist
+         * by the time the card source resolves char refs through external_ref.
+         *
+         * Hash: re-read from the manifest above on 2026-09-29, and `character-cards`
+         * had moved from `679f7c2e` to `e9e9ee6d`. This entry and
+         * `gametora-characters` above carry the same one, so the two grains of one
+         * document cannot be read from two different revisions.
+         */
+        'gametora-character-cards' => [
+            'url' => 'https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json',
+            'parser' => GametoraCharacterCardParser::class,
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
