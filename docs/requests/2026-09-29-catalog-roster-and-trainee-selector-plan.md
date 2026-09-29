@@ -3219,7 +3219,7 @@ Replace `TrainingRunController::create()`:
          */
         $roster = Umamusume::query()
             ->where('release_status', App\Enums\ReleaseStatus::GlobalReleased->value)
-            ->has('cards')
+            // [REMOVED 2026-09-29, commit 1c44698 -- this link gated the TRAINEE list on card existence. No seeder writes character_cards, so on a migrated-and-seeded database the run form offered no trainee at all: an empty select with scripting off, an empty popup with it on. character_card_id is nullable by Task 5's own ruling, so a card is not a precondition for training a trainee, and the requirement that the rail stay completable outranks this line. The card filter belongs in the JSON payload only.]
             ->with(['cards' => fn ($q) => $q
                 ->where('unconfirmed', false)
                 ->orderBy('global_release_date')
@@ -3267,7 +3267,7 @@ Replace `TrainingRunController::create()`:
     }
 ```
 
-Import `App\Enums\ReleaseStatus`, `App\Models\CharacterCard` at the top rather than using fully-qualified names inline, matching the file's existing import block. `umamusumes` becomes the trainee collection so the no-JS `<select>` still iterates over it, now Global-only and card-bearing — a trainee with no Global card has nothing to select, and the brief says she does not appear.
+Import `App\Enums\ReleaseStatus`, `App\Models\CharacterCard` at the top rather than using fully-qualified names inline, matching the file's existing import block. `umamusumes` becomes the trainee collection so the no-JS `<select>` still iterates over it, Global-only, and **not** card-gated: a trainee with no Global card still appears in the no-JS select, because `character_card_id` is nullable per Task 5 and the rail must stay completable on a database that has no card rows at all -- which is every freshly seeded one, since no seeder writes `character_cards`. **[CORRECTED 2026-09-29, commit `1c44698`.** The briefed "she does not appear" is the FR-A-6 *catalog* rule about trainees whose cards are all JP-only; copying it onto the run form turned a display rule into a precondition for training a trainee, and the review caught it as Critical.] The card filter belongs inside the JSON payload only, so the searchable popup still lists forms; where a trainee has no confirmed form the payload simply carries none, and the native select remains the working control.
 
 - [ ] **Step 4: Replace the form markup**
 
