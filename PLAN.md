@@ -417,7 +417,7 @@ conditions.
 
 ---
 
-## Owner Rulings Ledger (R54-R74)
+## Owner Rulings Ledger (R54-R77)
 
 R60 makes a ruling a repo artifact rather than a transcript line, so the ledger records each ruling
 as the brief gave it. Where the brief supplied a full sentence it is quoted; where it supplied a
@@ -447,6 +447,9 @@ ruling is worse than recording it short.
 | R72 | 14 | Settle the tier question on evidence read in a rendering browser with location asserted before each read; commit a dated extraction and join per race; restore a label only where both publishers agree and a page date postdates 2026-07-01; reconcile the parser's map only if its file is clean and the peer session is confirmed idle | verbatim in brief |
 | R73 | 14 | Before a push, read every commit in the range it will carry that touches `database/`, `config/`, `app/Services/DataPipeline/` or the research corpus, starting with anything the peer lands during the slice | verbatim in brief |
 | R74 | 14 | Record the quiet-edge exception beside the §3.4 pair table with its measurements, its two precedents and its carrying cues; docs only, no token and no component change | verbatim in brief |
+| R75 | 15 | Nullify the 115 OP rows and the 26 Pre-OP rows in the seeder; the 3 client-pinned OP rows keep their label; remove the `per_row_sourced` disclosure flag, because a null tier is the honest state | verbatim in brief |
+| R76 | 15 | Add a test that deletes the extraction file and asserts the seeder completes with null tiers and a logged warning, rather than throwing | verbatim in brief |
+| R77 | 15 | **Reserved by the brief and never given.** "Rulings R75 to R77 govern" is the only appearance of the number in the message; it is attached to no task and no rule. Recorded as an unassigned reservation rather than filled with an invented sentence — see `slice-15-2026-09-29.md` §10.4 | verified absent from the brief |
 
 ---
 
@@ -479,6 +482,48 @@ dropping a tier correct since Slice 11 to satisfy a grep is the owner's trade, r
 **Register unchanged:** KI-10, KI-15 and KI-17 stay open. T1's evidence is about tier labels; KI-10 is
 the Grade Point placement ratio, KI-15 which GP track applies, KI-17 the consecutive-race count. None
 is touched. 21 filed / 18 closed / 3 open, unchanged from Slice 13.
+
+> **Superseded one slice later.** Slice 15 closed KI-17 and closed KI-10's schema half. The paragraph
+> above is what Slice 14 recorded against its own tree; `slice-15-2026-09-29.md` §10.1 carries the
+> disposition and the reason the register file itself lagged.
+
+---
+
+## Slice 15 Summary (2026-09-29) — the Schema Session: three long-waiting questions landed
+
+Brief: close KI-10, KI-17 and Legacy Select, and apply R75's strict nullification. No new panels, no new
+tokens, no new dependencies. Rulings R75-R77 — of which **R77 has no text in the brief** (ledger note).
+
+| Task | Commit | Claim, with the thing that proves it |
+|---|---|---|
+| T0 opening push | `72e5157` on origin | One plain push carrying the one-ahead docs commit; `ls-remote` = `72e5157f7ab4…` equals local HEAD. R73 read list: one commit, docs-only, this session's |
+| T1 R75 nullification | `40df14c` | Test rewritten **first**, `3 failed / 5 passed`. Re-seeded twice on a scratch DB: **G1 34 / G2 42 / G3 76 / OP 3 / null 141**, 296 rows both passes, idempotent. G-16c `exit 1`, no matches in `database/seeders/` or `config/`. The 3 surviving OP rows read back out of the database: Fukushima TV Open, Sapporo Nikkei Open, Kokura Nikkei Open. `per_row_sourced` removed from every row, not set to `false` |
+| T2 KI-17 | `d06199c` | `race_entries.turn_entry_id`, nullable FK, `nullOnDelete`; dropdown of the run's own turns in the race panel; 9 tests RED-then-green, covering the link, the null state, and a turn from **another run rejected with no row written**. `ESSENTIALS` gains the `race_entries` line it never had |
+| T3 KI-10 | `3711894` | `grade_points_earned`, priced **for a 1st place only** from `grade_point_by_grade` (G1 100 / G2 80 / G3 60 / OP 40 / Pre-OP 20); every other placement and every untiered race stores null, so **2nd in a G1 is null beside 4th**, which is what keeps KI-10's ratio half visibly open rather than quietly borrowed from the Shop Coins table. Tier read `race_catalog_slots` then `scenario_slots`, pinned by two slots that disagree. `GradePointPeriodTest`'s 9 tests pass untouched — the semantics-preservation evidence. 22 tests |
+| T4 Legacy Select | `26aa9fe`, `49bac80` | One `legacy_selection` json payload plus **ADR-0010**, because PRD §6.3's "nothing more" had to be narrowed for this to exist at all. The brief's `legacy_parent_a_id` / `_b_id` were **not** added — the table already has the two foreign keys, and a test asserts the duplicate pair is absent. 13 tests, including a run created with two legacy parents and a sparks payload |
+| T5 R76 | `952f41a` | A missing extraction now logs exactly one warning naming the file, and the seeder completes with every tier null. `1 failed / 3 passed` at RED (warning called 0 times). A third test asserts **no** warning when the file is present, without which the first two could be satisfied by warning unconditionally |
+| T6 gates + browser + record | (this commit) | Pest **618 passed / 2 skipped / 0 failed**; Pint, PHPStan clean; `lore-docs 98 hits / 55 exempt`, `lore-code 7`; `gate.py` PASS; build clean. Browser pass on a Trackblazer run built through the real forms: row reads `… G1 1st turn 1 period 2`, meter reads `100 of 60 toward End of Junior Year`, zero console errors, every new pair ≥ 5.78 light and ≥ 6.64 dark |
+
+**Three things this slice did not do, each named rather than left as a silence.** It did not derive the
+consecutive-race count: KI-17 closed on the link the issue asked for, and `consecutiveRaceCount()` still
+returns null, because an unnamed turn is not the same statement as a turn that did not race. It did not
+price a placement below first. And it built no Legacy Select UI, so the payload is storage for a screen
+that does not exist yet — which ADR-0010 records as a debt with a name, not a win.
+
+**One measurement corrected a belief mid-slice.** The mobile pass found `scrollWidth 476 > 390` and the
+first reading was that this slice broke mobile. Naming the offending element found the turn log table, nine
+columns wide — a pre-existing reflow this slice never touched (`git diff` shows one view changed, 22
+insertions, and it is not that one). Filed in the record, not in `KNOWN-ISSUES.md`, for the reason two lines
+down.
+
+**Register: KI-10 schema half closed, KI-17 closed, Legacy Select landed** — against the tree at
+`72e5157` that is 21 filed / **19 closed / 2 open** (KI-10's ratio half and KI-15 remain). The
+`KNOWN-ISSUES.md` write is **deferred, not skipped**: the concurrent session had that file dirty with KI-23
+and KI-24 and an uncommitted count of its own, and in one shared working tree a status block can hold only
+one of the two totals. Staging the whole file would have pushed their unfinished work under this slice's
+message; staging only these hunks would have let their next `git add` delete them. The adjudication text,
+including the stale line reference to fix (`TrainingRun.php:639-650`, now `:760-774`), is in
+`slice-15-2026-09-29.md` §10.1 waiting for the register to be free.
 
 ---
 
