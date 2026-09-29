@@ -63,7 +63,7 @@ on `export_id`.
 
 ## Fetch engine
 
-Sources live in `config/uma.php`. One is owner-approved today (`gametora-characters`, structured JSON, recorded 2026-09-27; the approval used conservative politeness defaults, the robots/live check is still outstanding, PRD OQ-2). Adding any further source requires a robots/rate-limit review and one parser class:
+Sources live in `config/uma.php`. **Three are declared today** — `gametora-characters`, `gametora-race-catalog`, and `gametora-skills` (the last resolved through the publisher's manifest with the pinned URL kept as the documented fallback; `docs/adr/0011-skills-reference-import.md`). The line this file carried before named one source, and that was simply stale. Adding any source requires owner approval plus a robots/rate-limit review and one parser class; the robots/live check on `gametora-characters` is still outstanding (PRD OQ-2):
 
 ```php
 'sources' => [
