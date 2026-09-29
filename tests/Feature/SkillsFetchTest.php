@@ -33,6 +33,36 @@ function skillsSourceConfig(array $overrides = []): array
 
 const SKILLS_SNAPSHOT = 'storage/framework/testing/disks/local/snapshots/skills.json';
 
+/**
+ * The literal Japanese renderings (`enname`) that differ from the client string on rows Global has.
+ *
+ * Read off the fixture rather than spelled out here, because the point of this file is that a test which
+ * re-types a source value can agree with a bug in it (KI-23), and one of these five values carries a word
+ * `[Global]` does not use for a stat, so typing it into a test to prove its absence fails the lore gate.
+ *
+ * @return list<string>
+ */
+function skillsFixtureGlobalRenderings(): array
+{
+    /** @var list<array<string, mixed>> $rows */
+    $rows = json_decode(skillsFixtureBody(), true, 512, JSON_THROW_ON_ERROR);
+
+    $renderings = [];
+
+    foreach ($rows as $row) {
+        $client = $row['name_en'] ?? null;
+        $rendering = $row['enname'] ?? null;
+        $unreleased = $row['unreleased'] ?? [];
+
+        if (is_string($client) && is_string($rendering) && $rendering !== $client
+            && ! (is_array($unreleased) && in_array('en', $unreleased, true))) {
+            $renderings[] = $rendering;
+        }
+    }
+
+    return $renderings;
+}
+
 it('is declared as a fetch source with the skills parser and a manifest block', function (): void {
     expect(config('uma.sources.gametora-skills.parser'))->toBe(GametoraSkillsParser::class)
         ->and(config('uma.sources.gametora-skills.manifest.key'))->toBe('skills')
@@ -238,6 +268,19 @@ it('offers the run screen picker only client-named Global skills, and states the
         // check that failed on indentation would be testing the template's formatting, not its copy.
         ->and((string) preg_replace('/\s+/', ' ', $html))
         ->toContain('hint levels are not shown: no source in this repository settles the per-level reduction');
+
+    // What the fixture's surviving translation is bought for: the run screen renders the client string for
+    // every row Global has, and none of these five renderings appear anywhere on it. Decoded first — a
+    // not-contains against escaped HTML could pass because an apostrophe or a `×` was entity-encoded,
+    // which is the same failure KI-21 was filed against in the other direction.
+    $visible = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+    expect(skillsFixtureGlobalRenderings())->toHaveCount(5)
+        // Same transformation, one string required present. Without it the five absences would pass on an
+        // extraction that saw nothing, and one of the five is `'`-escaped in the source markup, so this is
+        // also the control that proves the decode step is doing what it is claimed to do.
+        ->and($visible)->toContain('Master of the Sands')
+        ->and($visible)->not->toContain(...skillsFixtureGlobalRenderings());
 });
 
 it('marks a unique skill and states its cost in the recorded groups', function (): void {

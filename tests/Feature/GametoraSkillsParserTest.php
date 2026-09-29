@@ -19,8 +19,9 @@ use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
  * were dropped: that took the file from 22 KB to 4.5 KB and four `lore-code` hits down to one. It is the
  * KI-23 discipline pointed the other way — a fixture holds what the code touches, not whatever happened
  * to be sitting beside it in the source. The one surviving `lore-code` hit is the `enname` of export id
- * 202001 — a value this parser reads (it is the name fallback) and a value the test below proves it
- * never prints, so removing it would be editing the data to quiet a grep.
+ * 202001 — a value this parser reads (it is the name fallback), a value the test below proves this parser
+ * never emits, and a value `SkillsFetchTest.php` proves never reaches the run screen. Removing it would be
+ * editing the data to quiet a grep.
  *
  * Chosen to carry one case each that the source actually differs on, not one case per branch invented
  * here: a client name that diverges from the literal rendering (`G1 Averseness` / `G1 Dislike`), a row
