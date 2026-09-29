@@ -747,6 +747,17 @@ anatomy in `DESIGN.md` §6.27.
 
 **D-265. Spark category colours are contained to the Sparks list.** Measured fills: stat `#3CB4F0`, aptitude `#FC84B4`, Unique Skill `#90CC30`. These mean *category*, and they collide on sight with §3.3, where blue already means "this stat decreased". The containment rule: no delta, badge, status pill or chart may reuse these three fills, and the Sparks list is the only surface where they appear. They also never appear without their word and their star count, so the colour is a scanning aid rather than the carrier of meaning (P5, D-12).
 
+> **Withdrawn mapping (2026-09-29, R83).** While deciding how a Legacy Select form would label the Spark
+> kinds, a mapping was put to the owner that paired **aptitude with `#90CC30` green and Unique Skill with
+> `#FC84B4` pink** — the two fills transposed. It was approved in that form and is **withdrawn**: this
+> rule's measurements are the authority, and they read stat `#3CB4F0` blue, aptitude `#FC84B4` pink,
+> Unique Skill `#90CC30` green. The transposed mapping reached no tracked file — `git grep` over the
+> three fills returns only this rule, `DESIGN.md` §6's kind table and `MECHANICS-TRANSLATION-TRIAGE.md`,
+> all three already correct — so this note records the withdrawal where the fills live rather than
+> correcting a shipped line. It is filed here because D-265 is what a future reader checks the fills
+> against, and an approved-but-wrong mapping that leaves no trace is the one correction that cannot be
+> found by grepping.
+
 **D-266. Reproduce the client's own inconsistency rather than normalising it.** The slots read `Legacy 1` / `Legacy 2`; the Spark groups read `1st Legacy` / `2nd Legacy`. Two numbering styles for the same two objects in one screen. It is the client's inconsistency, not ours, and a Trainer reconciling the tool against the game needs the strings to match what they see. Invent a third form and the mapping breaks; silently unify the two and the labels no longer correspond to anything on screen.
 
 **D-267. The "parent" ban cannot be applied to the schema in a UI phase.** UI copy uses Legacy and Ancestor throughout, which is free. But the shipped columns are `inheritance_parent_a_id` and `inheritance_parent_b_id`, the relations are `inheritanceParentA()` and `inheritanceParentB()`, and Game8's Global guide itself glosses Legacies as "parents". Renaming columns is a migration with a PRD citation, out of a documentation and mockup phase. Recorded as a known divergence between the copy rule and the identifier rule, for the phase that owns the schema to settle.

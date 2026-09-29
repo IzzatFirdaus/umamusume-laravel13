@@ -449,7 +449,7 @@ ruling is worse than recording it short.
 | R74 | 14 | Record the quiet-edge exception beside the §3.4 pair table with its measurements, its two precedents and its carrying cues; docs only, no token and no component change | verbatim in brief |
 | R75 | 15 | Nullify the 115 OP rows and the 26 Pre-OP rows in the seeder; the 3 client-pinned OP rows keep their label; remove the `per_row_sourced` disclosure flag, because a null tier is the honest state | verbatim in brief |
 | R76 | 15 | Add a test that deletes the extraction file and asserts the seeder completes with null tiers and a logged warning, rather than throwing | verbatim in brief |
-| R77 | 15 | **Reserved by the brief and never given.** "Rulings R75 to R77 govern" is the only appearance of the number in the message; it is attached to no task and no rule. Recorded as an unassigned reservation rather than filled with an invented sentence — see `slice-15-2026-09-29.md` §10.4 | verified absent from the brief |
+| R77 | 15 | **Reserved and still unworded.** "Rulings R75 to R77 govern" is the only appearance of the number in that brief; it carries no task and no rule. Slice 16 then asked twice more for the row to be filled — once through R80, once through a directive headed "R77 (text supplied)" — and **neither message contained a sentence for it**. The row therefore records the absence rather than receiving an invented ruling: a line under `R77` would later be indistinguishable from a decision the owner actually made, which is the outcome R60 exists to prevent. See `slice-15-2026-09-29.md` §10.4 for the three candidate readings that were checked and rejected | verified absent from all three briefs |
 
 ---
 

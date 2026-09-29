@@ -7,13 +7,20 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
-**Status (2026-09-29, Slice 16):** **24 filed, 20 closed, 4 open.** **KI-25 closed** on R81's fallback
-branch: the turn log's nine columns now scroll inside a focusable region instead of pushing the page
-sideways, and `DESIGN.md` §2.3 states the rule that was missing — **768px is the supported minimum**, below
-which the two wide tables scroll rather than reflow. The four open items are KI-10's ratio half, KI-15, and
-the skills pass's KI-23 and KI-24. A heading grep reads 21 closed and 3 open, and the difference is KI-10:
-its schema halves are closed and its ratio half is not, so the register has counted it open since Slice 7
-rather than filing the same entry twice. Prior:
+**Status (2026-09-29, Slice 16):** **24 filed, 19 closed, 5 open.** **KI-25 is back to OPEN** under R85.
+`b8c0a54` did land the focusable scroll region and its test, and that work is not being undone; what is
+being withdrawn is the closure, because the issue's **measurement half has never been read in a browser** —
+arrow-key traversal of the two regions, the document-level `scrollWidth` after scoping the overflow to the
+table, and every column and region other than the one element originally probed are all unmeasured. The
+closed text also cited `docs/design-research/verification/slice-16-2026-09-29.md`, which does not exist. A
+register entry whose evidence is a dangling path is not a closed entry.
+**What re-closes it:** the responsive contract — D-40's "no mobile-first compromise" reconciled with the
+768px floor `b8c0a54` wrote into `DESIGN.md` §2.3 (that amend is itself held pending R82) — plus a read-only
+measurement pass whose numbers land beside the closure. The other four open items are KI-10's ratio half,
+KI-15, and the skills pass's KI-23 and KI-24. A heading grep reads 21 closed and 3 open; the register says
+19 and 5, and the two entries in between are known and named — KI-10, whose heading says CLOSED while its
+ratio half is not, and KI-25, whose heading now reads CLOSED *inside* a RE-OPENED sequence. Neither is a
+counting error to fix; both are headings that carry more history than a regex can read. Prior:
 **Status (2026-09-29, Slice 15):** **24 filed, 19 closed, 5 open.** The Schema Session landed all three
 items its brief named. **KI-17 is closed** on the link it asked for (`d06199c`): `race_entries` can now
 point at the turn a race was run on, and the closure carries its own limit — the count is still entered,
@@ -1103,28 +1110,47 @@ at which the pinning convention was about to be copied forward.
 
 ---
 
-## KI-25 The turn log forces the page into horizontal scroll at phone width — FILED 2026-09-29 (Slice 15 browser pass), CLOSED 2026-09-29 (Slice 16 T1) AS A DESIGNED FALLBACK, NOT A FIT
+## KI-25 The turn log forces the page into horizontal scroll at phone width — FILED 2026-09-29 (Slice 15 browser pass), CLOSED 2026-09-29 (Slice 16 T1), RE-OPENED 2026-09-29 (R85), OPEN
 
-**Closed as a designed fallback, which is not the same as fixed.** Slice 16 T1 (R81) scoped the horizontal
-scroll to the table instead of the page and gave the scroll container a tab stop: the nine-column log now
-sits inside `overflow-x-auto` with `role="region"`, `tabindex="0"` and `aria-label="Turn log"` — the shape
-the race calendar already carried. `DESIGN.md` §2.3 gained the contract this needed and did not have:
-**768px is the supported minimum**, and below it these two wide tables scroll rather than reflow. The
-476px-at-390px measurement below is the evidence for that line. The content is 476px and is not being
-squeezed into 390, because a column that wraps a stat value is a column a Trainer misreads.
+**Re-opened by R85, and the reason is the measurement half, not the markup.** `b8c0a54` landed the focusable
+scroll region: the nine-column log now sits inside `overflow-x-auto` with `role="region"`, `tabindex="0"`
+and `aria-label="Turn log"`, matching `race-calendar.blade.php`, and `tests/Feature/TurnLogScrollRegionTest.php`
+(2 tests, 12 assertions, passing) proves both regions carry those attributes in the rendered page. That work
+stands and is not being reverted. What is withdrawn is the closure, because **a PHP assertion can only read
+rendered attributes, and the claim being closed was about behaviour**:
 
-**What the closure is not.** No column was dropped, no stacked-card rendering was built, no breakpoint
-reflow was added. The ruling is about reachability: the columns past the edge are now reachable by arrow
-keys, which a scroll container without a tab stop could not promise, and that is the defect half this
-closes. `tests/Feature/TurnLogScrollRegionTest.php` asserts the shape of both regions in the rendered page
-and fails if either one loses its tab stop, so the convention cannot decay back into a one-off. That arrow
-keys actually move the container is a runtime fact, measured in the Slice 16 browser pass and recorded in
-`docs/design-research/verification/slice-16-2026-09-29.md`.
+- whether arrow keys actually scroll either region — never pressed in a browser;
+- whether scoping the overflow to the table removed the document-level sideways scroll at all, i.e. whether
+  `scrollWidth` is still 476 at a 390px viewport after the change — never re-read;
+- the other eight columns, the race calendar's own traversal, and every other region on the screen —
+  originally probed as one element and never swept;
+- and the closed text cited `docs/design-research/verification/slice-16-2026-09-29.md`, a file that does not
+  exist. A closure whose evidence is a dangling path is not a closure.
 
-**What would re-open it.** A stated target below 768px. If a phone width becomes a supported surface, the
-scroll container stops being the answer and the column-selection question in the original text below is.
+**What would re-close it.** Two things, in this order. First the **responsive contract**: D-40's standing
+sentence — "no mobile-first compromise is accepted in exchange for desktop density" — has to be reconciled
+with the 768px floor `b8c0a54` wrote into `DESIGN.md` §2.3, and that amend is itself held pending R82,
+because a contract the owner has not ratified cannot be the basis for closing a defect. Second, a
+**read-only browser measurement** whose numbers are recorded beside the closure rather than inferred from
+the attributes that make it possible.
 
-**Owner.** Frontend/Design-system with Architect, unchanged. R81 (2026-09-29) took the fallback branch.
+**The `DESIGN.md` §2.3 floor travels with this issue.** It was written on the strength of this closure, so
+until the measurement pass runs, "768px is the supported minimum" is a proposal resting on an attribute
+read, and §2.3 says so.
+
+**Owner.** Frontend/Design-system with Architect, unchanged: the fix needs a breakpoint decision the repo
+does not currently record. Found while measuring something else — the Slice 15 browser pass was sent to
+check contrast on a new turn control, and the overflow surfaced only because the same script read the
+viewport width too.
+
+**The 2026-09-29 closure text is kept below, struck as withdrawn rather than edited away, so the sequence
+is auditable.**
+
+~~**Closed as a designed fallback, which is not the same as fixed.** Slice 16 T1 (R81) scoped the horizontal~~
+~~scroll to the table instead of the page and gave the scroll container a tab stop… the disposition is a~~
+~~ruling about reachability.~~ Its two load-bearing sentences — that the columns past the edge "are now
+reachable by arrow keys", and that the runtime fact was "measured in the Slice 16 browser pass" — are
+withdrawn. Both rested on the rendered attributes the test reads, not on a browser read.
 
 **Original defect text kept below for traceability.**
 

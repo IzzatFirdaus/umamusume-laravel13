@@ -142,6 +142,13 @@ external fonts (offline constraint + C-8 dependency gate).
   reachable by arrow keys and not by trackpad alone. Below 768px that is the contract for
   these two regions: usable and scrolling, deliberately not reflowed. Everything else on
   those screens still reflows as before.
+- **Status of the line above (2026-09-29, R85):** the 768px minimum is a **proposal, not a ratified
+  contract**, and it rests on an attribute read rather than a browser measurement. It was written on the
+  strength of closing KI-25; KI-25 is re-opened, and the measurement that would justify the number —
+  arrow-key traversal, the document `scrollWidth` after scoping, the other columns and regions — has not
+  been taken. It also contradicts `docs/design-research/CONSTRAINTS.md` D-40's standing sentence that no
+  mobile-first compromise is accepted in exchange for desktop density; that reconciliation is a ruling
+  (R82) and is deliberately **not** made here. Read this bullet as held, not landed.
 - Scale: Tailwind default 0.25rem increments, no arbitrary values
   (tailwindcss-development rule). Table rows `py-1.5 px-3`; forms
   `space-y-3`; cards `p-4`; section gaps `mt-8`.
