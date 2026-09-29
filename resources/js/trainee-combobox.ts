@@ -71,6 +71,9 @@ const cardlessRow = (trainee: TraineeRow): CardRow => ({
 const rowsFor = (trainee: TraineeRow): CardRow[] =>
     trainee.cards.length > 0 ? trainee.cards : [cardlessRow(trainee)];
 
+// The one question the default list is built around: does this row name a confirmed costume card?
+const isCardless = (hit: Hit): boolean => hit.card.cardless === true;
+
 /*
  * Prefix on all three fields the request named: trainee English name, trainee Japanese
  * name, card epithet. The card test uses titleKey, the bracket-stripped form the server
@@ -121,6 +124,21 @@ const exactTraineeName = (rows: TraineeRow[], query: string): TraineeRow | null 
 const byDate = (a: CardRow, b: CardRow): number => a.releaseDate.localeCompare(b.releaseDate);
 const byTrainee = (a: TraineeRow, b: TraineeRow): number => a.trainee.localeCompare(b.trainee);
 
+/*
+ * The seam between the default list's two bands. Presentation like the per-trainee header, so it
+ * never joins `options()` and cannot be landed on by the cursor; the copy is a sentence, not a card
+ * title, and carries no dash (R-02, D-79).
+ */
+const bandDivider = (): HTMLLIElement => {
+    const rule = document.createElement('li');
+    rule.setAttribute('role', 'presentation');
+    rule.setAttribute('data-band-divider', '');
+    rule.className = 'border-t border-rule px-3 pt-3 pb-1 text-xs font-semibold text-ink-muted';
+    rule.textContent = 'No confirmed costume card yet';
+
+    return rule;
+};
+
 const sortHits = (left: Hit, right: Hit): number => {
     const traineeOrder = byTrainee(left.trainee, right.trainee);
 
@@ -129,13 +147,26 @@ const sortHits = (left: Hit, right: Hit): number => {
 
 const collect = (rows: TraineeRow[], query: string): Hit[] => {
     if (query.trim() === '') {
-        // Most recently released first. Uncapped here on purpose: `render` decides how many
-        // rows to build, and it needs the real total to say so. Capping here would make the
-        // live region read "10 matches" on a roster of 107, which is a claim about how many
-        // forms exist rather than about how many are on screen.
-        return rows
-            .flatMap((trainee) => rowsFor(trainee).map((card) => ({ trainee, card })))
+        /*
+         * Two bands, in the order `render` windows them: the most recently released cards first,
+         * then the trainees with nothing confirmed, each by her own name. The order is not a
+         * tie-break. A cardless row's `releaseDate` is empty, so one flat date sort puts every one
+         * of them below the cap the moment any confirmed card exists, which makes her reachable
+         * only by typing. Uncapped here on purpose: `render` decides how many rows to build, and it
+         * needs the real totals to say so. Capping here would make the live region read "10 matches"
+         * on a roster of 107, which is a claim about how many forms exist rather than about how
+         * many are on screen.
+         */
+        const hits = rows
+            .flatMap((trainee) => rowsFor(trainee).map((card) => ({ trainee, card })));
+
+        const carded = hits
+            .filter((hit) => !isCardless(hit))
             .sort((a, b) => b.card.releaseDate.localeCompare(a.card.releaseDate));
+
+        const cardless = hits.filter(isCardless).sort((a, b) => byTrainee(a.trainee, b.trainee));
+
+        return [...carded, ...cardless];
     }
 
     const hits = rows.flatMap((trainee) => {
@@ -152,6 +183,22 @@ const collect = (rows: TraineeRow[], query: string): Hit[] => {
         : [...rowsFor(exact).map((card) => ({ trainee: exact, card })), ...hits.filter((hit) => hit.trainee.umamusumeId !== exact.umamusumeId)];
 
     return banded.sort(sortHits);
+};
+
+/*
+ * How many rows a paint builds. A typed query gets one window over its hits. The default list gets
+ * one window per band, because a single slice of the banded `[...carded, ...cardless]` shows the
+ * recent cards and drops every cardless trainee off the popup on any roster that holds a card.
+ */
+const windowFor = (matches: Hit[], query: string): Hit[] => {
+    if (query.trim() !== '') {
+        return matches.slice(0, MAX_VISIBLE);
+    }
+
+    return [
+        ...matches.filter((hit) => !isCardless(hit)).slice(0, DEFAULT_VISIBLE),
+        ...matches.filter(isCardless).slice(0, DEFAULT_VISIBLE),
+    ];
 };
 
 const render = (
@@ -174,7 +221,7 @@ const render = (
     };
 
     const matches = collect(rows, query);
-    const visible = matches.slice(0, query.trim() === '' ? DEFAULT_VISIBLE : MAX_VISIBLE);
+    const visible = windowFor(matches, query);
 
     listbox.textContent = '';
 
@@ -193,8 +240,22 @@ const render = (
     );
 
     let lastTrainee: number | null = null;
+    let cardedBandSeen = false;
+    let bandDividerPainted = false;
 
     for (const hit of visible) {
+        if (isCardless(hit)) {
+            // The seam between the two bands, once, and only when a confirmed band precedes it:
+            // on a database that holds no costume card at all every row is cardless, and a divider
+            // above the first one would name a band that has no other side.
+            if (cardedBandSeen && !bandDividerPainted) {
+                bandDividerPainted = true;
+                listbox.append(bandDivider());
+            }
+        } else {
+            cardedBandSeen = true;
+        }
+
         if (hit.trainee.umamusumeId !== lastTrainee) {
             lastTrainee = hit.trainee.umamusumeId;
 
@@ -216,7 +277,12 @@ const render = (
         }
 
         const option = document.createElement('li');
-        option.id = `trainee-option-${hit.card.selectionId}`;
+        // A cardless row's `selectionId` is the placeholder 0, so it cannot also be her element
+        // id: paint three of them and all three answer to `trainee-option-0`, and
+        // `aria-activedescendant` resolves through `getElementById`, so the cursor would name the
+        // first one however many were on screen. A cardless row is identified by its trainee, so
+        // her id is the key.
+        option.id = `trainee-option-${isCardless(hit) ? `u${hit.trainee.umamusumeId}` : hit.card.selectionId}`;
         option.setAttribute('role', 'option');
         option.setAttribute('aria-selected', 'false');
         option.dataset.selectionId = String(hit.card.selectionId);

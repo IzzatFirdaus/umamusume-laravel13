@@ -1,14 +1,10 @@
 # ADR-0012: Card detail fields - stat arrays, images, and objectives
 
 Status: **Accepted (owner ruling 2026-09-29).** The owner ruled on Decision 1 in session: widen
-`ADR-0008` to carry a card's stat arrays (`base_stats`, `four_star_stats`, `five_star_stats`,
-`stat_bonus`). **"Basic information" is not Decision 1 and is not authorized here:** the owner
-clarified on 2026-09-30 that basic information is the trainee profile block (Japanese name, voice
-actor, release date, birthday, height, three sizes) on a different, undeclared source, named in
-Context below as unaddressed. The stat arrays are a separate item on that list. Decisions 2 and 3
-are recorded from the 2026-09-29 session's measurements. **The layer is authorized, not built:**
-no migration, parser change, store action or view for any of the three decisions exists in this
-tree, and `character_cards` still carries the twelve columns `ADR-0008` named.
+`ADR-0008` to carry a card's stat arrays. Decisions 2 and 3 are recorded from the same session's
+measurements. **The layer is authorized, not built:** no migration, parser change, store action or
+view for any of the three decisions exists in this tree, and `character_cards` still carries the
+twelve columns `ADR-0008` named.
 
 **As of this commit the three decisions below are records, not schema.** A reader who queries
 `character_cards` today gets zero rows for the stat arrays, no image column, and no objectives table.
@@ -35,9 +31,9 @@ export can overturn.
 detail page, and this Context does not reproduce its premises: the brief is not a tracked file in this
 repository and its wording was not carried into this ADR's authorship, so quoting it would be
 reconstruction rather than citation. What follows is therefore scoped to what the tree can prove. If
-the brief asked for a field none of the three decisions names, that field is unaddressed here and this
+the brief asked for a field none of the four decisions names, that field is unaddressed here and this
 ADR does not authorize it - `AGENTS.md` escalation 2 applies, and a reader holding the brief should
-check the three Decision rows against it before building.
+check the four Decision rows against it before building.
 
 **What the source carries.** The declared GameTora export holds one entry per costume card
 (`GametoraCharacterParser.php:15-18`), and the same export's rows carry the trainee's stat arrays,
@@ -45,6 +41,20 @@ which `ADR-0008` declined to store. Measured on the 2026-09-29 body
 (`character-cards.e9e9ee6d.json`, gitignored, so cited as a dated measurement per erratum E-11's
 convention): 268 rows, 107 carrying a `release_en` date, 161 carrying none, spanning 68 distinct
 `char_id` for the Global set and 135 records through the parser.
+
+**What the profile source carries, and what no decision here addresses.** The card export is not the
+only GameTora dataset a detail page wants. `characters.c6676539` is keyed by `char_id` and carries the
+trainee's profile block - the Japanese name, a voice-actor field, `birth`, `height` and `three_sizes` -
+which is what the product clarification means by **basic information**, and it is a different thing from
+the stat arrays Decision 1 widens. Three things make it unaddressed rather than merely unbuilt: it is
+**not a declared source** in `config('uma.sources')`, so nothing in this tree fetches it; its coverage is
+partial and must be re-measured rather than trusted (recorded on 2026-09-29 as null on 36 rows for
+`three_sizes`, 26 for the voice-actor field and 17 for `birth`); and it is `char_id`-grain, so it joins
+the trainee and never the card. **Decision 4 authorizes it, and it is the fourth decision rather than a
+part of the first:** the escalation-2 ruling it records is what turned this from an unaddressed source
+into a built one. It is named here in the same way Decision 2 names the media source, so that a reader
+knows the dataset exists and knows that its authority is an owner ruling on 2026-09-30 with a **partial**
+PRD citation - not a functional requirement, and not a field this document had already granted.
 
 **What the images source carries.** The declared media source `character_media.36ab44f6` is keyed by
 `char_id`. It carries no `card_id`, so it cannot be joined to a costume card rather than to a trainee,
@@ -55,23 +65,6 @@ is therefore not merely unbuilt, it is not addressable from the data that exists
 and carries no scenario key. An objectives model keyed by scenario cannot be built from this source at
 all; a per-character one can, and 135 matches the parser's record count exactly.
 
-**What an undeclared profile source carries, and why it is unaddressed.** A fourth source,
-`characters.c6676539`, was recorded by a session probe and is **not declared in `config/uma.php`, not
-authorized by any decision here, and covered by no row of the Decision table.** It is named so a
-reader knows it exists rather than rediscovering it. It is keyed by `char_id` like the sources above
-but is a different dataset from the stat arrays: it carries the trainee **profile** block -
-`name_ja`, a voice-actor field, a release date, `birth`, `height` and `three_sizes` - the six fields a
-Trainee sees under "basic information" on the GameTora character page. Measured 2026-09-29 on the
-probed body: 163 rows, with `three_sizes` null on 36, the voice-actor field null on 26 and `birth` null
-on 17. The coverage is partial, so a reader building against it has to handle absence per `D-220`
-rather than assume a value. **The owner confirmed the block's existence on 2026-09-30 and separately
-confirmed that "basic information" is this profile block, not the stat arrays**; confirming which
-fields a source carries is not authorizing storage for it. Storage of any of the six is a fresh
-decision against `AGENTS.md` escalation 2, and a PRD citation, because none of the three decisions
-below names it. The falsifier is named: a re-resolved manifest key whose hash or row count differs
-makes the measurements above stale, as does a source that stops being fetchable by the app's own user
-agent.
-
 ## Decision
 
 | # | Object | Shape | Why this shape |
@@ -79,6 +72,24 @@ agent.
 | 1 | **The card's stat arrays, on `character_cards`** | `base_stats`, `four_star_stats`, `five_star_stats` and `stat_bonus` as json columns alongside the existing twelve, each row carrying its own inline provenance as `ADR-0004` and `ADR-0003` Amendment R3 require of a reference row | **Widens `ADR-0008`**, which declined exactly these fields. Stored as the source's own numbers, displayed as numbers, and read by nothing else: see the use-side constraint below. The owner ruled the widening; this row is the record of it. |
 | 2 | **Card images** | **Nothing. No column, no URL, no uploader, no route.** | The source is `char_id`-grain and has no resolvable asset path, so there is no key to join on and no location to fetch from. Recorded as a finding rather than a refusal so a future source with `card_id` grain is a re-decision, not a re-litigation. |
 | 3 | **Objectives** | Per-**character**, one row per `char_id`, not per scenario and not per card | The source is `char_id`-grain with no scenario key. A per-scenario model would have to invent the scenario dimension the source does not carry, which is the second-authoritative-store problem `PRD.md` §6.12 rejects. This **revises the premise** the brief carried, and the revision is the decision. |
+| 4 | **The trainee profile block, on a sibling `umamusume_profiles` table** | One row per `char_id` carrying `name_ja`, `va_ja`, `va_en`, `birth_year`/`birth_month`/`birth_day`, `height` and the three `three_sizes` parts, with the same inline provenance set the card row carries, plus its own `is_manual` | **Authorized by the product owner on 2026-09-30 under `AGENTS.md` escalation 2**, which is the remedy Erratum 3 below names: storage of these six fields was a fresh decision requiring an owner ruling and a PRD citation, and this row is that record. Declared as source `gametora-character-profiles` in `config('uma.sources')` per **B-1**, routed as a fourth `is_a()` branch in `PipelineRunner` per **B-2**. Sibling table rather than columns on `umamusume` because the source is one document about one trainee. Provenance per **A-4**; stored and read as reference data only, on **A-5**'s precedent, so nothing here computes a run outcome and `PRD.md` §6.11 stays untouched. |
+
+### Decision 4's PRD citation is partial, and the shortfall is recorded rather than filled
+
+`AGENTS.md` requires every new table, column or class to cite a PRD requirement, and "no citation, no
+merge." This decision cites **A-1** for the Japanese name, **A-4** for the provenance set, **A-5** as
+precedent for the reference-data-only rule, and **B-1**/**B-2** for the declared source and the pipeline
+stage. **Those citations cover the shape, the grain and the discipline. They do not cover the content.**
+
+No functional requirement in `PRD.md` names a voice actor, a birthday, a height or a three-size
+measurement. `FR-A` A-1 through A-6 describe the trainee, aliases, the index, provenance, aptitudes and
+the card, and stop there. **So four of the six authorized fields have no PRD requirement behind them**;
+the owner's escalation-2 ruling is the whole of their authority. That is stated here because the failure
+mode Erratum 3 was written to prevent is exactly this one: a later reader finding a populated table and a
+green test and citing this row as if the PRD had asked for a birthday. It had not. If the PRD is ever
+amended to carry a profile requirement, this paragraph is where the citation is upgraded from an owner
+ruling to a requirement, and a reader who arrives before that amendment knows which of the six fields
+rest on what.
 
 ### The use-side constraint on Decision 1, which is the point of the ruling
 
@@ -121,6 +132,20 @@ it that a card-detail reader will otherwise re-derive:
    detail page that wants a description must be given one by a later decision or a later source.
 
 ## Errata to earlier records, dated 2026-09-29
+
+**Erratum 3 - this ADR's own title and status line misnamed Decision 1, corrected 2026-09-29.** Both
+read, verbatim: "Card detail fields - basic information, images, and objectives" and "widen `ADR-0008`
+to carry a card's **basic information**". Decision 1 widens nothing of the kind: it withdraws
+`ADR-0008`'s refusal of `base_stats`, `four_star_stats`, `five_star_stats` and `stat_bonus`, which are
+the stat arrays. *Basic information* is the profile block - Japanese name, voice actor, birthday,
+height, three sizes - and it lives in a different dataset that no decision here addresses, as the
+Context now says out loud. The two are separate items on the same request list, and collapsing them
+let this ADR appear to authorize a source it never measured. **The widening stands exactly as ruled;
+only the naming is corrected**, which is why the title and status read "stat arrays" now. `ADR-0008`
+was right all along - its §72 already says "carry a card's stat arrays" - so the two records disagreed
+and this one was the wrong one. Cost of the error if it had stayed: a builder could cite this ADR as
+authority to fetch `characters.c6676539` and add profile columns, on a decision that never mentioned
+them and with no PRD citation behind it.
 
 **Erratum 1 - the card counts in `ADR-0008` are wrong by two, and `ADR-0008` contradicts itself about
 it.** `ADR-0008`'s section "The character feed does not become Global-only (measured 2026-09-29)"

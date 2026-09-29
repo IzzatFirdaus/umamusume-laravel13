@@ -9,11 +9,12 @@ The quality bar for this repository, written as a contract. Agents: read this be
 | C-1 | Tests | All Pest tests pass; every behavior change ships a test | `php artisan test --compact` |
 | C-2 | Static analysis | PHPStan level 6 (Larastan), zero errors | `vendor/bin/phpstan analyse --no-progress` |
 | C-3 | Formatting | Pint clean | `vendor/bin/pint --dirty --format agent` then `vendor/bin/pint --test --format agent` |
-| C-4 | Lore | Zero unexplained hits of banned patterns (below) in tracked text | `make lore` |
+| C-4 | Lore | Zero unexplained hits of banned patterns (below) in tracked text | `composer lore` (and `composer lore-code`) — not `make lore`, which cannot run on this host (KI-4) |
 | C-5 | Migrations | Fresh migrate + seed succeeds; every migration has a working `down()` | `php artisan migrate:fresh --seed` |
 | C-6 | Performance (local budget) | Catalog index under 200 ms at ~1,000 Umamusume / ~2,000 skills (NFR-3) | manual benchmark per PRD §8; re-check when schema or query shape changes |
 | C-7 | UI states | Every data view renders empty, loading/refresh, and error states (§7, antislop R-27) | review checklist |
 | C-8 | Dependencies | No new package without human approval; `composer audit` and `npm audit` with no reachable critical/high | `composer audit`; `npm audit --omit=dev` |
+| C-9 | Frontend types | `resources/js/**/*.ts` compiles clean under `tsconfig.json`'s `strict` mode, which declares `noEmit` | `npm run typecheck` (also runs inside `composer test`) |
 
 > C-7 loading-state scope is interpreted by ADR-0007 (`docs/adr/0007-c7-loading-state-scope-for-server-rendered-views.md`): initial server-rendered navigation may rely on browser-native loading; user-initiated async operations require explicit loading states. Empty/error/data states remain mandatory. Gate tooling and G-number registration live in `docs/GATE-REGISTRY.md`.
 
