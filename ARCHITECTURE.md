@@ -78,11 +78,27 @@ umamusume                     (the character catalog)
   jp_debut_date     date nullable
   global_debut_date date nullable
   is_manual         bool default false     (human-edited: engine must never overwrite)
+  external_ref      string nullable index  (the source's own character id, `gametora:char:{id}`; the link costume cards attach through. ADR-0008)
   timestamps
 
 umamusume_aliases
   id, umamusume_id FK->umamusume cascade, alias string, language string enum-backed (AliasLanguage: Japanese | English | Romanized)
   unique(alias, language)
+
+character_cards               (costume cards that reached [Global]; ADR-0008. Migrated as 2026_09_29_120100; empty until the card fetch lands)
+  id, card_id unsigned int unique (the source's own card id, not this table's PK; a re-fetch is idempotent by identity, FR-B-5)
+  umamusume_id FK->umamusume cascade
+  title string            (verbatim [Global] client string, brackets included; source data, never normalized copy)
+  rarity unsigned tinyint enum-backed (CardRarity: OneStar | TwoStar | ThreeStar)
+  global_release_date date (required: a card with no Global date is not a row here)
+  is_debut_form bool default false (derived: earliest JP release among that trainee's cards; the export has no debut field to copy)
+  unconfirmed bool default false (Tier B stands alone behind it: stored flagged, hidden by default)
+  source_url string          (not null: ADR-0003 Amendment R3 puts provenance on the reference row itself)
+  snapshot_path string nullable
+  fetched_at timestamp nullable
+  source_timezone string nullable (IANA, e.g. Asia/Tokyo)
+  is_manual bool default false (human-edited at card grain: fixing one card's title claims that card, not the whole trainee)
+  timestamps
 
 skills
   id, name string, name_ja string nullable, match_key string nullable index,
@@ -103,11 +119,31 @@ match_candidates              (review queue for Fuzzy/None matches)
   payload json (full parsed record), created_by_fetch_at datetime, timestamps
 ```
 
+`character_cards` and `umamusume.external_ref` are authorized by
+`docs/adr/0008-character-card-catalog-layer.md` and **are applied**: they landed with
+`2026_09_29_120000_add_external_ref_to_umamusume_table` and
+`2026_09_29_120100_create_character_cards_table` in the roster slice, together with
+`App\Models\CharacterCard`, `App\Enums\CardRarity`, `CharacterCardFactory` and `Umamusume::cards()`.
+`PromoteMatchedRecord` writes `external_ref` on both of its paths from this change onward, which is
+what makes the source link durable; the card table stays empty until the card parser and its declared
+source land, and `training_runs.character_card_id` has since landed as `2026_09_29_120200`, with
+`TrainingRun::characterCard()` and a same-trainee `exists` rule on `StoreTrainingRunRequest`. A card
+row's provenance **is** inline:
+`source_url`, `snapshot_path`, `fetched_at`, `source_timezone` and the card's own `is_manual` sit on the
+card, which is what `ADR-0003` Amendment R3 requires of a reference row and what `scenario_races`,
+`scenario_slots` and `race_catalog_slots` each already do, while `scenarios` carries `source_url` and
+`fetched_at` inline per `ADR-0004:49-51` plus its own `is_manual`. `data_sources` keeps its own meaning: it is
+`umamusume_id`-scoped, the table behind FR-A-4 and the detail page's Provenance section, a trainee's fetch
+history rather than a card's.
+
 ### Trainer-data domain
 
 ```
 training_runs
   id, umamusume_id FK->umamusume, scenario string nullable,
+  character_card_id FK->character_cards nullable (ADR-0008: the form the run started on; umamusume_id
+    stays the required owner. Migrated as 2026_09_29_120200_add_character_card_id_to_training_runs_table,
+    with TrainingRun::characterCard() and the same-trainee exists rule on StoreTrainingRunRequest)
   status string enum-backed (RunStatus: Active | Completed | Retired) default Active,
   inheritance_parent_a_id FK->umamusume nullable, inheritance_parent_b_id FK->umamusume nullable,
   legacy_selection json nullable (ADR-0010: the Legacy Select read-back as the Trainer recorded it;
@@ -142,6 +178,14 @@ the scope question there. Read that ADR before adding any `support_cards`, `user
 `deck_slots` migration, model, factory or route: the game mechanics they would describe are documented
 and settled (`docs/UMAMUSUME_REFERENCE.md` §1.4.7), the schema is not, and an entity copied out of the
 ADR into a migration would silently reverse §6.9.
+
+**The two card words are not the same thing, and only one of them is authorized here.** `character_cards`
+(`docs/adr/0008-character-card-catalog-layer.md`, owner ruling 2026-09-29) is the **costume-card** table:
+the outfits a trainee can appear in, one row per card that reached `[Global]`. It authorizes nothing in
+the support-card direction. `support_cards`, `user_support_cards` and `deck_slots` stay forbidden by
+`PRD.md` §6.9, `ADR-0005` stays **DECLINED** (owner ruling R37, 2026-09-28), and no slice may cite
+`ADR-0008` as permission for any of them. `training_runs.character_card_id` names a costume, not a deck
+slot; neither ADR authorizes the other.
 
 ### Eloquent conventions (laravel-best-practices)
 

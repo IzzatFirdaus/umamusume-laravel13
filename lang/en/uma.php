@@ -47,6 +47,12 @@ return [
         'None' => 'None',
     ],
 
+    'card_rarity' => [
+        'OneStar' => 'One star',
+        'TwoStar' => 'Two stars',
+        'ThreeStar' => 'Three stars',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | JP to Global game-term map

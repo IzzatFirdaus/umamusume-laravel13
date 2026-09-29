@@ -25,7 +25,7 @@ final class PromoteMatchedRecord
     /**
      * Upsert one parsed catalog record with provenance. Never touches is_manual rows.
      *
-     * @param  array{name: string, name_ja?: string|null, release_status?: string|null, jp_debut_date?: string|null, global_debut_date?: string|null}  $record
+     * @param  array{name: string, name_ja?: string|null, release_status?: string|null, jp_debut_date?: string|null, global_debut_date?: string|null, external_ref?: string|null}  $record
      * @return array{umamusume: Umamusume, created: bool, skipped: bool}
      */
     public function handle(
@@ -54,6 +54,7 @@ final class PromoteMatchedRecord
                     'release_status' => $releaseStatus ?? ReleaseStatus::GlobalReleased,
                     'jp_debut_date' => $record['jp_debut_date'] ?? null,
                     'global_debut_date' => $record['global_debut_date'] ?? null,
+                    'external_ref' => $record['external_ref'] ?? null,
                     ...$this->aptitudes($record),
                 ]);
                 $umamusume->save();
@@ -64,6 +65,11 @@ final class PromoteMatchedRecord
                     'name_ja' => $record['name_ja'] ?? $existing->name_ja,
                     'jp_debut_date' => $record['jp_debut_date'] ?? $existing->jp_debut_date,
                     'global_debut_date' => $record['global_debut_date'] ?? $existing->global_debut_date,
+                    // Same intent as the aptitudes line below — an absent fetched
+                    // value must not blank the stored one — but not the same
+                    // mechanism: aptitudes() omits keys the record does not carry,
+                    // this one names the stored value as the fallback.
+                    'external_ref' => $record['external_ref'] ?? $existing->external_ref,
                     // Absent letters must not blank out grades an earlier fetch stored.
                     ...$this->aptitudes($record),
                 ]);

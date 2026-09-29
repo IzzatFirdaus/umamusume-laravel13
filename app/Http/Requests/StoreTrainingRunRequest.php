@@ -29,6 +29,17 @@ class StoreTrainingRunRequest extends FormRequest
         return [
             'umamusume_id' => ['required', 'integer', Rule::exists('umamusume', 'id')],
             /*
+             * A card is a valid choice only if it is one of the submitted trainee's
+             * forms. Carrying that join in the exists rule makes a mismatched pair a
+             * validation error at the boundary instead of a row that contradicts
+             * itself, so the combobox cannot be coaxed into naming a card its
+             * run's trainee does not own. Reading umamusume_id with input() keeps the
+             * join strict: when the trainee is absent or invalid the where falls to a
+             * null/never-matching comparison, never one a card could silently pass.
+             */
+            'character_card_id' => ['nullable', 'integer', Rule::exists('character_cards', 'id')
+                ->where('umamusume_id', $this->input('umamusume_id'))],
+            /*
              * The scenario is validated against the composition matrix's keys rather
              * than stored as an unconstrained name, because every scenario-aware
              * component resolves from those keys and a value outside them renders a

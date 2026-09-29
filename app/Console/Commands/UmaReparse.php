@@ -64,7 +64,7 @@ class UmaReparse extends Command
         $counts = $pipeline->run($key, $sources[$key], $body, $snapshot);
 
         $this->info(sprintf(
-            "'%s' reparsed from %s: %d updated, %d created, %d skipped (manual), %d to review.",
+            "'%s' reparsed from %s: %d updated, %d created, %d skipped (manual or unresolved), %d to review.",
             $key,
             $snapshot,
             $counts['updated'],

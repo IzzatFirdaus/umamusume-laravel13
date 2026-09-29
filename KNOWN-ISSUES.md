@@ -107,7 +107,7 @@ here: they are recorded in `docs/design-research/SKILLS-GAPS.md`, because a miss
 key that never matches is a defect. **These counts are superseded by the Slice 15 header above, which
 files KI-25 in the same shared tree while this pass held the file uncommitted: 24 filed, 19 closed,
 5 open.** Prior:
-**Status (2026-09-29, Slice 14):** **Unchanged — 21 filed, 18 closed, 3 open.** Slice 14 settled the
+**Status (2026-09-29, trainee detail and skill selector pass):** **35 filed, 21 closed, 14 open.** Four
 tier-label question Slice 13 left contested: G1, G2 and G3 are now sourced **per race** from a dated
 two-publisher extraction (`329cec1`) and the seeder holds no code-to-label constant, so G-16c is green
 for `database/seeders/` and `config/`. That reaches none of the three open items — KI-10 is the Grade
@@ -126,8 +126,7 @@ and that is recorded in its own entry**: Slice 12 grepped for `isFreeRace`, did 
 `$manual` parameter that had replaced it, and read a missing identifier as a missing branch. The
 real defect was the marker on a finished free race, which the read path's owner fixed in `b6d68b6`.
 Counts read off `grep -c "^## KI-"` = 21; KI-16 was never filed, which is why the numbers run to
-KI-22. Prior:
-**Status (2026-09-29, Slice 12 T3):** 21 issues filed. **16 resolved/closed** (KI-1–9, KI-11–14,
+KI-22. Prior:**Status (2026-09-29, Slice 12 T3):** 21 issues filed. **16 resolved/closed** (KI-1–9, KI-11–14,
 KI-18–20). **5 open**: KI-10 (ratio half), KI-15 (which Grade Point track applies), KI-17 (the
 consecutive-race count cannot be derived from the log), and two filed by the T3 browser pass —
 KI-21 (the race entry form is built on Alpine.js, which is not a dependency, so neither path renders)
@@ -1690,3 +1689,83 @@ ruling with a number, a scope and an instrument attached.
 **Owner.** Frontend with the design-system owner: the spec is the authority, and the run screen is the
 second surface to break it after the catalog index.
 
+---
+
+## KI-23b The character parser read a source key the GameTora export never published, so fetched trainees lost their Japanese name — FILED and RESOLVED 2026-09-29 (catalog roster, Task 2)
+
+Filed as KI-21 at branch base `b387e07`; renumbered to **KI-23b** on merge because trunk already holds KI-23 (the skills pass's parser-citation defect, a different entry) — the `b` suffix is the trail, since commits `d755da3` and `e8ead2d` say KI-21 in their messages and were not rewritten.
+**Symptom.** `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php:92` read
+`$card['name_ja']` — that line number is the defective line as it stood before the fix; `d755da3`
+replaced it with a comment plus the corrected read, so today's `:93` is the line being described. The
+`character-cards` export publishes `name_jp`: over its 268 rows `name_ja`
+appears 0 times and `name_jp` 268 — erratum E-12's count over the fetched export at
+`research-scratch/data/json/character-cards.json`, a scratch path this repo does not track, so the
+figure is cited rather than re-runnable from here. So every trainee `uma:fetch` created stored a null
+`name_ja`, and `PRD.md` US-1's acceptance test ("each detail page shows `name`, `name_ja`, release
+status, and provenance") went unmet for fetched data while the whole suite stayed green.
+
+**Line numbers re-derived 2026-09-29 by Task 6's extraction `db8603c`.** Both numbers above stay as filed
+because each names its own tree: `:92` was the defective read in the branch base `b387e07`, and `:93` the
+corrected line as `d755da3` left it. Task 6 moved the debut loop out of `GametoraCharacterParser::parse()`
+into the shared `debutForms()` member, so the comment-and-read pair this symptom describes is now at
+`:73-74` — `:74` is `'name_ja' => $this->textOrNull($card['name_jp'] ?? null)`. Nothing in the claim moved
+with the line: source key `name_jp`, record key `name_ja`, no fallback chain, still pinned by
+`tests/Feature/GametoraCharacterParserTest.php:113-128`.
+
+**Cause.** Both guards over that one line were empty. The committed sample
+`tests/Fixtures/gametora-character-cards.sample.json` was authored against a guessed key and held
+`"name_ja": null` on every row, so the test loading it could only ever agree with the parser. And the
+one catalog test that asserts a Japanese name, `tests/Feature/CatalogTest.php:33`, seeds `name_ja`
+through the factory rather than fetching it, so it never reached the parser. Neither of them read the
+source.
+
+**Fix (this change).** The parser reads `$card['name_jp']` and still emits the record key `name_ja`,
+which is the contract `SourceParser`, `app/Actions/PromoteMatchedRecord.php:52,64` and
+`app/Services/DataPipeline/PipelineRunner.php:65` all read, and matches the `umamusume.name_ja`
+column; only the source-side key moved. The sample now spells the key `name_jp` and carries the
+client's real Japanese strings instead of `null`. `GametoraCharacterParserTest` gained a body-level
+test that the name arrives from `name_jp`, an assertion of `スペシャルウィーク` on the record loaded
+from the fixture, and its `card()` helper now emits `name_jp`, because that helper builds a body in
+the export's shape. Deliberately not written: `$card['name_jp'] ?? $card['name_ja'] ?? null`. A
+fallback chain accepts a body carrying neither key, which is how this defect stayed invisible: a null
+reads as "the source has no Japanese name" instead of "you are reading the wrong key".
+
+**Corrected 2026-09-29 by the review follow-up `e8ead2d`.** That ban was prose-only when this entry was
+written, and prose is not a guard. `tests/Feature/GametoraCharacterParserTest.php:113-128` now feeds a
+body carrying **only** `name_ja` and asserts the emitted `name_ja` is null, so reintroducing
+`$card['name_jp'] ?? $card['name_ja'] ?? null` fails a test instead of passing one. The same commit
+corrected the two `GametoraAptitudeTest` bodies to `name_jp` and added the persisted-column assertion at
+`:85`, as the Residual paragraph below records.
+
+**Standing lesson.** A fixture that agrees with the code instead of with the source proves nothing.
+Its keys and value shapes are a recording of the export, not a mirror of the parser beside it; where
+the two agree against the source, the pair has no coverage and still reports green. The same reasoning
+closes the second half: a test that seeds the value it claims to show is not evidence either, because
+US-1 is about a page the fetch built.
+
+**Residual (withdrawn 2026-09-29 by `e8ead2d`).** This paragraph claimed that
+`tests/Feature/GametoraAptitudeTest.php:20,67` still spelled the source key `name_ja` in two inline
+bodies, that those tests asserted aptitudes and never the name, and that the rename was left for a later
+pass over that file. All three were true at `d755da3` and none survives `e8ead2d`: both lines now spell
+`name_jp`, and `tests/Feature/GametoraAptitudeTest.php:85` asserts the persisted column on the row the
+pipeline promoted (`->and($umamusume->name_ja)->toBe('スペシャルウィーク')`), which is the proof this entry
+was missing: source key read, record emitted, column stored. The history stands as written above;
+nothing is left over from it in that file.
+
+**Owner.** Data Engineer. Filed and closed by the same commit (`d755da3`), because the fix and its proof
+landed together; the review follow-up `e8ead2d` strengthened that proof (and corrected the Residual
+paragraph above) rather than reopening the entry.
+
+---
+
+## KI-24b A fresh clone or worktree has six red tests before anyone touches it, because the skill registry file is gitignored - FILED and OPEN 2026-09-29 (catalog roster, Task 1)
+
+**Symptom.** On a clean `git worktree add` or `git clone` of this repo, `php artisan test --compact` reports **6 failed / 364 passed / 2 skipped** at a commit where every other working tree sees green. All six failures are in `tests/Feature/SkillAutomationTest.php`, and the assertion that fails reads `Failed asserting that ... contains 'Route Inspector'`.
+
+**Cause.** `app/Services/SkillRegistry.php:23` resolves its path as `base_path('.agents/skills.json')`, and `app/Services/SkillExecutor.php:340` reads `base_path('.agents/config.json')`. `.gitignore:49` ignores `/.agents`, so that directory exists only in a working tree where some tool wrote it. `git worktree add` and `git clone` check out tracked files only, so a fresh tree has no registry and the tests that read it fail for a reason unrelated to the change under test.
+
+**Why it matters beyond one red run.** The failure is indistinguishable from a genuine regression at the exact moment a slice most needs a trustworthy baseline: Step 4 of any plan's setup task is "prove the gates are green before you start," and six red tests there means either stopping for a base that is not actually dirty, or proceeding with no baseline at all. Nothing in the output names the missing file, so the first response is to suspect the code.
+
+**Fix candidates, none chosen here.** (a) Move the registry default to a tracked path, or commit a minimal `.agents/skills.json` fixture, keeping any local overrides gitignored. (b) Have the suite skip those six tests with a named reason when the registry is absent, so a fresh baseline reads `6 skipped` rather than `6 failed`. (c) Document the copy step in `README.md`'s setup section. (a) is the smallest permanent fix; (c) is the cheapest and leaves the trap armed for the next worktree.
+
+**Owner.** Data Engineer with whoever owns `docs/SKILL_AUTOMATION.md`. Found by the catalog-roster plan's Task 1 provisioning step, which now copies `.agents` into its worktree; that copy is a workaround local to one branch and does not close this entry.

@@ -90,7 +90,7 @@ class UmaFetch extends Command
             );
 
             $this->info(sprintf(
-                "'%s': %d updated, %d created, %d skipped (manual), %d to review.",
+                "'%s': %d updated, %d created, %d skipped (manual or unresolved), %d to review.",
                 $key,
                 $counts['updated'],
                 $counts['created'],
