@@ -225,11 +225,47 @@ pattern every other screen copies.
 
 ### 4.2 Catalog detail `/umamusume/{slug}`
 
-- Definition list: status, JP/Global debut, Trainer-edited flag.
-- Provenance list is visible by default: URL, source key, fetched timestamp
-  rendered in `config('uma.display_timezone')` (PRODUCT principle 2).
-- JapanOnly renders the amber notice; dateless rows show "Unknown", never a
-  sentinel (CLAUDE.md data rules).
+~~Definition list: status, JP/Global debut, Trainer-edited flag.~~
+~~Provenance list is visible by default: URL, source key, fetched timestamp rendered in
+`config('uma.display_timezone')` (PRODUCT principle 2).~~
+~~JapanOnly renders the amber notice; dateless rows show "Unknown", never a sentinel (CLAUDE.md data
+rules).~~
+
+**Withdrawn 2026-09-29, and the page is not at fault.** `catalog/show.blade.php` implements all three
+lines faithfully. The specification under-designed the surface: it names three items for a page a Trainer
+opens to decide *which trainee to run*, and it converted `CLAUDE.md:23`'s storage rule — "no sentinel
+**dates** for 'unreleased' (use nullable date + `release_status`)" — into display copy, which is where the
+word "Unknown" on this page comes from. No other surface in the tool uses it. Its "amber notice" is
+likewise unimplementable: the token set has no caution chrome and `pick` measures 1.60:1 on the raised
+surface, so the notice is copy over `ink-faint` (3.26:1 light / 4.21:1 dark) as the view's own comment at
+`:33-38` records.
+
+**The trainee page is a workspace for that trainee.** Eight sections, in this order:
+
+1. **Identity** — name, Japanese name, release status, JP debut, Global debut, Trainer-edited flag.
+2. **Aptitudes** — Track (Turf, Dirt), Distance (Sprint, Mile, Medium, Long), Style (Front Runner, Pace
+   Chaser, Late Surger, End Closer), in `ADR-0004`'s element order, each cell letter **and** word (D-12).
+3. **Skills** — Her innate · Her unique · Her awakening ladder.
+4. **Costume forms** — bracketed title, rarity, debut marker, Global release date.
+5. **Goal races** — turn, race, tier, distance, required placement, in goal order.
+6. **Her runs** — her run rows and the page's **primary action**, "New run for <name>".
+7. **Aliases.**
+8. **Provenance** — URL, source key, fetched timestamp in `config('uma.display_timezone')`
+   (PRODUCT principle 2). Last, and quiet: it leads the page only when it is the page's content.
+
+**Absence has exactly two forms on this page.** A value the record does not carry renders as `N/A` with a
+`title` naming the kind of absence, per the reasoning already written into
+`resources/views/components/resource-strip.blade.php` — never `Unknown`, never a dash, never zero. A
+section the record cannot yet supply keeps its heading and says **"not yet recorded"**, which is the
+pattern every run-screen panel already uses. The heading is the honest part: a missing section states "she
+has none" where a heading with an empty body states "this tool has not recorded it", and on sections 3, 4
+and 5 the second sentence is the true one today.
+
+**A cell reading *absent* is a hard requirement, not an option** (D-220's rule, applied to a trainee
+rather than to a scenario). **The reason:** the page has existed since Phase 1 and its specification has
+never been revisited, so it under-specifies the one surface every other trainee-facing decision starts
+from. Sections 3-5 have no stored data on this ref; the sections are not blocked on it, and neither is the
+disclosure wording. Filed as KI-35.
 
 ### 4.3 Runs index and create `/training-runs`
 
