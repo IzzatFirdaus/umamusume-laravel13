@@ -166,6 +166,40 @@ both themes because the five mood fills and `green-500` are chrome that does not
 themes: the client paints the same pink whatever surface it sits on, and `--color-green` is the
 same #7FCC09 in the dark block. Their ink rows are therefore single-valued.
 
+**`text-risk` on `bg-raised` (added 2026-09-29, catalog roster tree).** The catalog's
+unconfirmed-card badge puts `--color-risk` on a card surface. KI-20 measured that pair for the shop
+panel and left no row here, so this is the pair's first entry in the contract. `resources/css/app.css`
+declares light `--color-risk: #800014` (`:78`) on `--color-raised: #FFFFFF` (`:41`), and dark
+`--color-risk: #FF7E8C` (`:243`) on `--color-raised: #24262A` (`:227`). Those two are the only
+`bg-raised` declarations in the theme, so they are the only grounds the badge can land on.
+
+Computed with the WCAG 2.1 relative-luminance formula, linearising each sRGB channel as
+`c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ^ 2.4` on the 0-1 component, then
+`L = 0.2126 R + 0.7152 G + 0.0722 B`, then `ratio = (L_lighter + 0.05) / (L_darker + 0.05)`:
+
+| Foreground | Background | Ratio | Level |
+|---|---|---|---|
+| `text-risk` `#800014` (light) | `bg-raised` `#FFFFFF` | 10.89 | AAA |
+| `text-risk` `#FF7E8C` (dark) | `bg-raised` `#24262A` | 6.22 | AA |
+
+Both clear AA for body text, so no token moves and no new colour role is introduced. The same
+calculator reproduces rows already in this section from their own named hex values, which is
+what makes these two worth trusting: `ink-body` `#6A5641` on `#FFFFFF` = 6.95 (row 3),
+`#ECEAF2` on `#24262A` = 12.71 (§3.7), and the white-on-`crimson-500` row above, which the
+formula also puts at 10.89. Measured on 2026-09-29 at tree `0fbff04`.
+
+The four ratios KI-20 records in `KNOWN-ISSUES.md:855-861` do not reproduce from the hex values they
+name, and all four are understated in the same direction: `#800014` on `#FFFFFF` computes to 10.89
+where 10.04 is recorded, `#FF6B7A` on `#24262A` to 5.51 where 4.33 is, `#FF7E8C` on the same ground to
+6.22 where 4.77 is, and its `bg-risk` cross-pair `#121013` on `#FF7E8C` to 7.77 where 6.15 is. No
+variant tried here (skipping the linearisation, averaging the three channels) yields the recorded set
+either, so those figures were not produced from those inputs by the formula this section states. The
+consequence is narrow and it is not a theme defect: under the corrected arithmetic the before-step
+value already cleared 4.5:1, so the `#FF6B7A` to `#FF7E8C` step was not required for this pair —
+though it moves in the improving direction, and D-259 may have had grounds beyond the ratios quoted
+in the register. Every combination passes either way, so no token moves here. KI-20's figures are its own
+closed-issue record and are left as written; only the two rows above are added.
+
 **State pills use the tint-and-border pattern** for chips on a surface: a pale fill, a 2px border
 in the hue, `ink-strong` text. **Mood is the exception, ruled 2026-09-28.** The mood chip keeps the
 client's flat saturated pill and steps the ink instead of the fill, because three of the five tiers
