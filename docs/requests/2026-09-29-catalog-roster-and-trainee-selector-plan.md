@@ -1061,7 +1061,7 @@ Cards come from the **same** GameTora document the character parser reads. Debut
   - `GametoraCharacterParser::debutForms(iterable $cards): array<int, array<string,mixed>>` — `char_id => debut card`; the single definition of "debut form".
   - `GametoraCharacterParser::dateOrNull(mixed $value): ?string`, now `public static`.
   - `CharacterCardSourceParser::parse(string $body): list<array{card_id:int, char_external_ref:string, title:string, rarity:int, global_release_date:string, is_debut_form:bool}>`.
-  - `char_external_ref` is exactly `'gametora:char:{char_id}'`, the string `GametoraCharacterParser.php:101` writes, so Task 7 can resolve the trainee.
+  - `char_external_ref` is exactly `'gametora:char:{char_id}'`, the string `GametoraCharacterParser::parse()` writes as its `external_ref` key (`:82` since Task 6's extraction, `:101` before it), so Task 7 can resolve the trainee.
 
 - [ ] **Step 1: Build the fixture from the live export, keeping the JP-only rows as the trap**
 
@@ -1107,15 +1107,16 @@ function globalCardRecords(): array
 
 function globalCardBody(): string
 {
-    return file_get_contents(test()->baseDir().'/tests/Fixtures/gametora-character-cards.global.sample.json') ?: '';
+    return file_get_contents(base_path('tests/Fixtures/gametora-character-cards.global.sample.json')) ?: '';
 }
 
 it('emits one record per Global card and drops every JP-only one', function (): void {
     $cardIds = array_column(globalCardRecords(), 'card_id');
 
-    // Eleven rows in, eight with a Global date: Gold Ship's La Mode 564, Tokai
-    // Teio's Dream Butterfly and both Fenomeno forms are [JP-Only].
-    expect($cardIds)->toHaveCount(8)
+    // Eleven rows in, seven with a Global date: 11 minus the four [JP-Only] forms this
+    // block itself names (La Mode 564, Dream Butterfly, both Fenomeno). It said eight
+    // until erratum E-17 re-counted the fixture: Special Week 3 + Gold Ship 2 + Tokai Teio 2.
+    expect($cardIds)->toHaveCount(7)
         ->and($cardIds)->not->toContain(100703)
         ->and($cardIds)->not->toContain(100303)
         ->and($cardIds)->not->toContain(112701)
@@ -1158,12 +1159,38 @@ it('links each card to its trainee by the ref the character parser writes', func
 });
 
 it('derives the debut through the same code path as the character catalog', function (): void {
+    $cards = json_decode(globalCardBody(), true, 512, JSON_THROW_ON_ERROR);
     $characters = (new GametoraCharacterParser)->parse(globalCardBody());
+    $debutForms = GametoraCharacterParser::debutForms($cards);
 
-    // Two parsers, one rule. The trainees the catalog lists and the forms her cards
-    // flag as debut can never disagree, because debutForms() is shared, not copied.
-    expect(array_column($characters, 'name'))->toBe(['Special Week', 'Gold Ship', 'Tokai Teio'])
-        ->and(array_column($characters, 'name'))->not->toContain('Fenomeno');
+    // Two parsers, one rule. The agreement worth pinning is the flag itself: each
+    // card row's debut equals the pick this trainee's cards get from the one
+    // derivation both grains call, because debutForms() is shared, not copied.
+    foreach (globalCardRecords() as $record) {
+        $charId = (int) str_replace('gametora:char:', '', $record['char_external_ref']);
+
+        expect($record['is_debut_form'])->toBe((int) $debutForms[$charId]['card_id'] === $record['card_id']);
+    }
+
+    // This block first read `->toBe(['Special Week', 'Gold Ship', 'Tokai Teio'])` and
+    // `->not->toContain('Fenomeno')`. Both halves are false at this grain, and the
+    // reason is the asymmetry between the two surfaces, not a parser bug:
+    // GametoraCharacterParser emits **all 135** trainees the export carries, recording
+    // one with no Global form as `JapanOnly` instead of dropping her, because `PRD.md`
+    // US-2 is P0 and its acceptance text asks for a flag rather than a missing row
+    // (erratum E-15; ADR-0008's "The character feed does not become Global-only").
+    // So Fenomeno IS in the character records, `release_status` JapanOnly, and she is
+    // absent from the card records because the card layer holds no row for her. Do not
+    // "fix" the parser to match the old sentence. The order is char_id order (`ksort`),
+    // which puts Tokai Teio before Gold Ship and is unchanged by the extraction.
+    expect(array_column($characters, 'name'))->toBe(['Special Week', 'Tokai Teio', 'Gold Ship', 'Fenomeno'])
+        ->and(array_column($characters, 'external_ref'))->toBe([
+            'gametora:char:1001',
+            'gametora:char:1003',
+            'gametora:char:1007',
+            'gametora:char:1127',
+        ])
+        ->and(array_column(globalCardRecords(), 'char_external_ref'))->not->toContain('gametora:char:1127');
 });
 
 it('returns nothing for a body that is not a JSON array', function (): void {
@@ -1180,7 +1207,7 @@ it('skips a row with no usable card id, no client title, or no real Global date'
         ['card_id' => 100105, 'char_id' => 1001, 'title_en_gl' => '[Bad Rarity]', 'rarity' => 7, 'release_en' => '2025-06-26'],
     ], JSON_THROW_ON_ERROR);
 
-    // 9999-12-31 is the export's own placeholder (GametoraCharacterParser:23), and a
+    // 9999-12-31 is the export's own placeholder (GametoraCharacterParser::UNKNOWN_DATE), and a
     // rarity outside 1..3 is a claim this app has no word for. Neither becomes a row.
     expect((new GametoraCharacterCardParser)->parse($body))->toBe([]);
 });
@@ -1394,7 +1421,7 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
 php artisan test --compact tests/Feature/CharacterCardParserTest.php tests/Feature/GametoraCharacterParserTest.php
 ```
 
-Expected: all pass. If the count is not 8, print the records (`dump($records)`, then delete the dump) and compare against the fixture. Do not adjust the assertion to match the output.
+Expected: all pass. If the count is not 7, print the records (`dump($records)`, then delete the dump) and compare against the fixture. Do not adjust the assertion to match the output.
 
 - [ ] **Step 9: Gates and commit**
 
@@ -1450,6 +1477,8 @@ must yield nothing, which holds the Global-only rule down with a test."
 
 The owner ruled the data arrives by live `uma:fetch` (spec §2), so the card dataset becomes a declared source. `config/uma.php:31-32` requires a config entry, one parser class, fixture tests (Task 6) and a robots note; `SourceFetcher` is the only outbound path and its allowlist is `config('uma.sources')`.
 
+**Runner note, added after Task 6 shipped (`db8603c`).** This task touches two lines of `PipelineRunner.php`, not one. `:29` types a source's parser in the `@param` shape as `class-string<SourceParser>`, and `:49` routes only the race-catalog kind (`is_a($parserClass, RaceCatalogSourceParser::class, true)`); everything else falls through to the name-match loop. `CharacterCardSourceParser` is a **third** interface, so the cards branch has to be added **and** `:29` widened — register a source pointing at `GametoraCharacterCardParser` without both, and it is typed as a `SourceParser` the class does not implement, then sent into a loop that reads `$record['name']`, a key card records never carry. Re-read both numbers before editing; plan line numbers are hints (`:40`).
+
 **Files:**
 - Modify: `config/uma.php` (the `'sources'` array, and the shape docblock at `:34-41`)
 - Modify: `app/Services/DataPipeline/PipelineRunner.php:20-33`
@@ -1496,7 +1525,7 @@ function cardsBySourceId(): array
 
 function cardSampleBody(): string
 {
-    return file_get_contents(test()->baseDir().'/tests/Fixtures/gametora-character-cards.global.sample.json') ?: '';
+    return file_get_contents(base_path('tests/Fixtures/gametora-character-cards.global.sample.json')) ?: '';
 }
 
 it('attaches a card to the trainee its char ref names', function (): void {

@@ -953,6 +953,14 @@ figure is cited rather than re-runnable from here. So every trainee `uma:fetch` 
 `name_ja`, and `PRD.md` US-1's acceptance test ("each detail page shows `name`, `name_ja`, release
 status, and provenance") went unmet for fetched data while the whole suite stayed green.
 
+**Line numbers re-derived 2026-09-29 by Task 6's extraction `db8603c`.** Both numbers above stay as filed
+because each names its own tree: `:92` was the defective read in the branch base `b387e07`, and `:93` the
+corrected line as `d755da3` left it. Task 6 moved the debut loop out of `GametoraCharacterParser::parse()`
+into the shared `debutForms()` member, so the comment-and-read pair this symptom describes is now at
+`:73-74` — `:74` is `'name_ja' => $this->textOrNull($card['name_jp'] ?? null)`. Nothing in the claim moved
+with the line: source key `name_jp`, record key `name_ja`, no fallback chain, still pinned by
+`tests/Feature/GametoraCharacterParserTest.php:113-128`.
+
 **Cause.** Both guards over that one line were empty. The committed sample
 `tests/Fixtures/gametora-character-cards.sample.json` was authored against a guessed key and held
 `"name_ja": null` on every row, so the test loading it could only ever agree with the parser. And the

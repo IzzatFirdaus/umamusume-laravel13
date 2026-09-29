@@ -69,8 +69,10 @@ the tiers, including `:72` GameTora B and `:75-77` the tier A witnesses),
 The catalog models the character, not the collectable card, and the parser says so out loud.
 `GametoraCharacterParser.php:15-18` records that the export "holds one entry per costume card", that
 several entries share a `char_id`, and that "Costume variants are therefore dropped, not merged."
-`:74-79` keeps the card with the earliest JP `release` as the debut form, and `:87-98` derives
-`release_status` from whether that debut carries a `release_en`.
+`GametoraCharacterParser::debutForms()` — `:74-79` inline when this section was written, `:99-127` since
+Task 6's extraction `db8603c` — keeps the card with the earliest JP `release` as the debut form, and
+`GametoraCharacterParser::parse()` at `:68-79` derives `release_status` from whether that debut carries a
+`release_en`. The debut rule is named by symbol here because that extraction has already moved it once.
 
 No requirement ever asked for the rest of them. `PRD.md` FR-A-1 defines the `Umamusume` record and
 stops; FR-A-5 (`ADR-0004`) added the aptitude letters and the scenario caps; nothing in `PRD.md` §3 or
@@ -91,15 +93,15 @@ in both cases the ruling is on the record rather than inferred from silence.
 | Object | Shape | Why this shape |
 |---|---|---|
 | `character_cards` | one row per costume card that carries a Global release date: `card_id` (the source's own id, unique), `umamusume_id` FK cascade, `title` (the verbatim `[Global]` client string, brackets included), `rarity`, `global_release_date`, `is_debut_form`, `unconfirmed`, then the inline provenance set `source_url`, `snapshot_path`, `fetched_at`, `source_timezone` and the card's own `is_manual`, plus timestamps | Keyed by the source's id, not by name, so a re-fetch is idempotent by identity (FR-B-5). `title` is source data: `CONSTRAINTS.md:38` keeps a verbatim client name as data and puts the lore guard on the display path, so this column is never a place to normalize copy. The provenance five are `ADR-0003` Amendment R3's rule for a reference row, and the section below gives the reason they sit on the card rather than on its trainee |
-| `umamusume.external_ref` | nullable, indexed string holding `gametora:char:{char_id}` | The link the parser has emitted since it was written (`GametoraCharacterParser.php:101`) and the schema never kept, so promotion dropped it (erratum E-14). Cards attach through it rather than by re-matching on the name the engine is built not to guess about (FR-B-3) |
+| `umamusume.external_ref` | nullable, indexed string holding `gametora:char:{char_id}` | The link the parser has emitted since it was written (the `external_ref` key `GametoraCharacterParser::parse()` builds at `:82`, `:101` before Task 6's extraction) and the schema never kept, so promotion dropped it (erratum E-14). Cards attach through it rather than by re-matching on the name the engine is built not to guess about (FR-B-3) |
 | `training_runs.character_card_id` | nullable FK to `character_cards` | The form the run started on, which is the owner's ruling rather than the implementer's inference. `umamusume_id` stays NOT NULL and stays the owner of the run |
 | `unconfirmed` | bool, default false | Holds any card the Tier B source stands alone behind: stored flagged and hidden unless asked for, rather than dropped or quietly trusted |
 
 `is_debut_form` is **derived, never copied**: the export has no debut field to read
 (`docs/requests/2026-09-29-catalog-roster-and-trainee-selector.md` E-4), so the flag is the earliest JP
-`release` among that trainee's cards, which is the same rule `GametoraCharacterParser.php:74-79` already
-applies to the trainee's own dates. `rarity` arrives as a `CardRarity` enum with TitleCase cases
-(`OneStar`, `TwoStar`, `ThreeStar`), matching the repo's enum convention rather than a DB-level enum,
+`release` among that trainee's cards, which is the same rule `GametoraCharacterParser::debutForms()`
+(`:99`) already applies to the trainee's own dates. `rarity` arrives as a `CardRarity` enum with TitleCase
+cases (`OneStar`, `TwoStar`, `ThreeStar`), matching the repo's enum convention rather than a DB-level enum,
 which `PRD.md` §6.8 keeps out.
 
 Cards arrive as a second declared source with its own parser class, per `AGENTS.md`'s Data Engineer
@@ -123,8 +125,9 @@ nothing to cross-reference and no reason to fill the review queue with it.
 
 ### The character feed does not become Global-only (measured 2026-09-29)
 
-A trainee's `release_status` still derives from her debut card (`GametoraCharacterParser.php:87-98`),
-and the parser still emits **one record per `char_id` across the whole export**. Measured on the export
+A trainee's `release_status` still derives from her debut card (`GametoraCharacterParser::parse()` at
+`:68-79`, was `:87-98` before Task 6's extraction), and the parser still emits **one record per `char_id`
+across the whole export**. Measured on the export
 body on 2026-09-29: 268 rows, of which **105** carry a `release_en` date and 163 carry none; those 105
 belong to **68** distinct `char_id`; the parser over the same body yields **135 records, 68
 `GlobalReleased` and 67 `JapanOnly`**. The same 268-and-105 counts, with a latest Global date of
@@ -227,8 +230,9 @@ trainee with no cards. Flagged for the owner rather than rewritten inside a cita
   the same export (`docs/UMAMUSUME_REFERENCE.md` §1.3.5, `:388-394`), and they stay out: `PRD.md` §6.11
   forbids a prediction or simulation engine to feed on them, and `ADR-0002` still owns the cap-bound
   question they would reopen.
-- **Aptitudes at card grain.** `GametoraCharacterParser.php:102` reads the `aptitude` array at trainee
-  grain under FR-A-5; a per-card copy would be a second, disagreeing answer to the same question.
+- **Aptitudes at card grain.** `GametoraCharacterParser::aptitudes()`, spread over the record at `:83`
+  (`:102` before Task 6's extraction), reads the `aptitude` array at trainee grain under FR-A-5; a
+  per-card copy would be a second, disagreeing answer to the same question.
 - **Card skill fields** (the unique-skill ids and the `hint_skills` / `hint_others` blocks recorded at
   `docs/UMAMUSUME_REFERENCE.md:465`). `PRD.md` FR-D is a flat skill catalog and US-4 attaches skills to
   runs; nothing asks for skills attached to a costume card.
@@ -331,6 +335,18 @@ blanket-shifting every number by the insertion count.
 
 Line numbers in this document are hints to the reader, not load-bearing assertions. Where a
 claim depends on a location, it names the symbol as well as the line.
+
+**Re-derived a second time on 2026-09-29, after Task 6's extraction `db8603c`.** The `:101` / `:102`
+attestation two paragraphs above is that merge pass's own record, measured against branch base `b387e07`,
+and it stands as filed. `db8603c` moved the debut loop out of `GametoraCharacterParser::parse()` into the
+shared `debutForms()` member, so the five body citations in this ADR — Context, the Decision table's
+`external_ref` row, the `is_debut_form` paragraph, Consequences'
+"The character feed does not become Global-only", and the aptitudes bullet in "What is deliberately not
+stored" — now read: `external_ref` at `GametoraCharacterParser.php:82` (was `:101`), the `aptitude` spread
+at `:83` (was `:102`), the debut rule as `GametoraCharacterParser::debutForms()` at `:99-127` with the
+comparison at `:119` (was the inline `:74-79`), and the `release_status` derivation at `parse()` `:68-79`
+(was `:87-98`). `:15-18` is the one cite that did not move. Each is now named by symbol wherever the
+construct has a name, because that is the only form of a citation that does not need re-deriving again.
 
 ---
 
