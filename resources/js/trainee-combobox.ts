@@ -25,6 +25,9 @@ interface CardRow {
     titleKey: string;
     releaseDate: string;
     debut: boolean;
+    // Present only on the row `cardlessRow` builds for a trainee with nothing confirmed. A payload
+    // row never carries the key, so its absence means a real costume card.
+    cardless?: boolean;
 }
 
 interface TraineeRow {
@@ -43,6 +46,30 @@ const MAX_VISIBLE = 10;
 const DEFAULT_VISIBLE = 10;
 
 const fold = (value: string): string => value.trim().toLowerCase();
+
+/*
+ * The payload's trainee set is the select's trainee set, so a Global trainee whose forms are all
+ * unconfirmed, or who has no fetched form at all, still arrives and still has to be pickable: she
+ * is runnable, it is her costume card that is not confirmed yet. This is her row. It names her, not
+ * a card, and says in words what is missing; `titleKey` is empty because there is no epithet to
+ * prefix-match, so she is reached by her own name and never by a card query. `selectionId: 0` is
+ * not a submit value, it is a placeholder for a field that stays empty.
+ */
+const cardlessRow = (trainee: TraineeRow): CardRow => ({
+    selectionId: 0,
+    sourceCardId: 0,
+    title: 'No costume card confirmed yet',
+    titleKey: '',
+    releaseDate: '',
+    debut: false,
+    cardless: true,
+});
+
+// Her confirmed cards, or the one synthetic row when there are none. Every list this module builds
+// goes through here, so a cardless trainee is a match exactly like a card is and the status line
+// cannot count rows the popup does not contain.
+const rowsFor = (trainee: TraineeRow): CardRow[] =>
+    trainee.cards.length > 0 ? trainee.cards : [cardlessRow(trainee)];
 
 /*
  * Prefix on all three fields the request named: trainee English name, trainee Japanese
@@ -67,7 +94,7 @@ const matchesQuery = (row: TraineeRow, query: string): CardRow[] | null => {
         fold(row.trainee).startsWith(q) || (row.traineeJa !== null && fold(row.traineeJa).startsWith(q));
 
     if (traineeHit) {
-        return row.cards;
+        return rowsFor(row);
     }
 
     const cards = row.cards.filter((card) => fold(card.titleKey).startsWith(q));
@@ -104,10 +131,10 @@ const collect = (rows: TraineeRow[], query: string): Hit[] => {
     if (query.trim() === '') {
         // Most recently released first. Uncapped here on purpose: `render` decides how many
         // rows to build, and it needs the real total to say so. Capping here would make the
-        // live region read "10 cards match" on a roster of 107, which is a claim about how
-        // many forms exist rather than about how many are on screen.
+        // live region read "10 matches" on a roster of 107, which is a claim about how many
+        // forms exist rather than about how many are on screen.
         return rows
-            .flatMap((trainee) => trainee.cards.map((card) => ({ trainee, card })))
+            .flatMap((trainee) => rowsFor(trainee).map((card) => ({ trainee, card })))
             .sort((a, b) => b.card.releaseDate.localeCompare(a.card.releaseDate));
     }
 
@@ -122,7 +149,7 @@ const collect = (rows: TraineeRow[], query: string): Hit[] => {
     // Exact first, then prefix, and grouped by trainee inside each band.
     const banded = exact === null
         ? hits
-        : [...exact.cards.map((card) => ({ trainee: exact, card })), ...hits.filter((hit) => hit.trainee.umamusumeId !== exact.umamusumeId)];
+        : [...rowsFor(exact).map((card) => ({ trainee: exact, card })), ...hits.filter((hit) => hit.trainee.umamusumeId !== exact.umamusumeId)];
 
     return banded.sort(sortHits);
 };
@@ -133,30 +160,37 @@ const render = (
     listbox: HTMLUListElement,
     status: HTMLElement,
     // The boot paints pass this: a polite live region is read out when it changes, so a page
-    // load that wrote "10 cards match" before anyone opened the popup was stating a fact about
-    // a list the Trainer had not asked for. Every paint that answers a keystroke, a focus or a
+    // load that wrote "10 matches" before anyone opened the popup was stating a fact about a
+    // list the Trainer had not asked for. Every paint that answers a keystroke, a focus or a
     // click still speaks.
     silent = false,
 ): Hit[] => {
+    // The live region's one writer, and it is the gated one, so the rule "a boot paint stays
+    // quiet" cannot come apart by adding a second status line beside the first.
+    const say = (text: string): void => {
+        if (!silent) {
+            status.textContent = text;
+        }
+    };
+
     const matches = collect(rows, query);
     const visible = matches.slice(0, query.trim() === '' ? DEFAULT_VISIBLE : MAX_VISIBLE);
 
     listbox.textContent = '';
 
     if (visible.length === 0) {
-        if (!silent) {
-            status.textContent = 'No trainee or card found.';
-        }
+        say('No trainee or card found.');
 
         return visible;
     }
 
-    if (!silent) {
-        status.textContent =
-            matches.length > visible.length
-                ? `${visible.length} of ${matches.length} (keep typing)`
-                : `${matches.length} ${matches.length === 1 ? 'card' : 'cards'} match`;
-    }
+    // "matches", never "cards match": a cardless trainee is one of the rows this number counts,
+    // so the noun has to describe what the list holds as exactly as the number does.
+    say(
+        matches.length > visible.length
+            ? `${visible.length} of ${matches.length} (keep typing)`
+            : `${matches.length} ${matches.length === 1 ? 'match' : 'matches'}`,
+    );
 
     let lastTrainee: number | null = null;
 
@@ -199,8 +233,10 @@ const render = (
 
         // Whose card this is, in the option's own accessible text: the header above it is
         // presentation now. A middle dot, not a dash, because an accessible name is copy a
-        // screen reader speaks and R-02 and D-79 keep the dash out of copy.
-        option.setAttribute('aria-label', `${hit.trainee.trainee} · ${hit.card.title} ${detail}`);
+        // screen reader speaks and R-02 and D-79 keep the dash out of copy. The detail drops when
+        // empty, which is only a cardless row: there is no release date to state for a card that
+        // has not been confirmed.
+        option.setAttribute('aria-label', `${hit.trainee.trainee} · ${hit.card.title}${detail === '' ? '' : ` ${detail}`}`);
 
         option.append(title, date);
         listbox.append(option);
@@ -249,8 +285,10 @@ export const initTraineeCombobox = (): void => {
      * paint both run in here, ahead of the handover: hand the form over on a payload that cannot
      * paint and the page keeps neither picker, because the native select is disabled and the
      * hidden pair is enabled and empty. An empty roster is the same case in a different shape, so
-     * the working select is left exactly as the server sent it. Silent, because the Trainer has
-     * not opened the list yet and this is the page speaking.
+     * the working select is left exactly as the server sent it - and after the payload's trainee
+     * set was made equal to the select's, an empty list means the database holds no Global trainee
+     * at all, which is the one case where a search box over an empty index would be the lie.
+     * Silent, because the Trainer has not opened the list yet and this is the page speaking.
      */
     try {
         rows = JSON.parse(rosterText) as TraineeRow[];
@@ -292,6 +330,13 @@ export const initTraineeCombobox = (): void => {
     fallback.disabled = true;
     traineeField.disabled = false;
     cardField.disabled = false;
+    // The caption follows the control the Trainer actually uses now. `for` still naming the
+    // select this line disables would make the word "Umamusume" a click that goes nowhere, which
+    // is the majority path; the combobox input carries the id, and keeps its own `aria-label`,
+    // which wins over a label for the accessible name, so the caption buys the pointer without
+    // renaming the field. `closest('label')` is the select's own caption, found through the tree
+    // rather than through a second id the page would have to keep in sync.
+    fallback.closest('label')?.setAttribute('for', input.id);
 
     const setOpen = (value: boolean): void => {
         open = value;
@@ -344,7 +389,10 @@ export const initTraineeCombobox = (): void => {
      */
     const commit = (trainee: TraineeRow, card: CardRow, suffix = ''): void => {
         traineeField.value = String(trainee.umamusumeId);
-        cardField.value = String(card.selectionId);
+        // A cardless row writes nothing: `character_card_id` is nullable and the request accepts a
+        // run naming the trainee alone, which is the only claim a trainee with no confirmed form
+        // can honestly make.
+        cardField.value = card.cardless ? '' : String(card.selectionId);
         // A middle dot, not an em dash: R-02 and D-79 keep the dash out of shipped copy,
         // and the label a failed submit redelivers is built the same way server-side.
         const committed = `${trainee.trainee} · ${card.title}${suffix}`;
@@ -376,13 +424,17 @@ export const initTraineeCombobox = (): void => {
             return false;
         }
 
-        const debut = exact.cards.find((card) => card.debut) ?? [...exact.cards].sort(byDate)[0];
+        // Her rows, so a trainee with nothing confirmed resolves to her synthetic row instead of
+        // failing here: typing her whole name and pressing Enter means "run her", and a run with
+        // no costume card is a legal one. `(debut)` only goes on a row that is a card.
+        const cards = rowsFor(exact);
+        const debut = cards.find((card) => card.debut) ?? [...cards].sort(byDate)[0];
 
         if (debut === undefined) {
             return false;
         }
 
-        commit(exact, debut, ' (debut)');
+        commit(exact, debut, debut.cardless ? '' : ' (debut)');
 
         return true;
     };
@@ -440,9 +492,10 @@ export const initTraineeCombobox = (): void => {
 
             if (!open) {
                 refresh();
-                // Same rule as focus: a list that was closed has no cursor, so the increment
-                // below lands on row zero. `refresh()` alone would leave it on row zero and the
-                // increment would land on row one, which is a row the Trainer never asked for.
+                // Same rule as focus: a list that was closed owns no cursor, which is what tells
+                // the step below that this press is an opening rather than a move. `refresh()`
+                // alone parks the cursor on row zero, so ArrowDown would land on row one and
+                // ArrowUp on the second-to-last row, skipping the newest card in the roster.
                 active = -1;
                 setOpen(true);
             }
@@ -453,7 +506,13 @@ export const initTraineeCombobox = (): void => {
                 return;
             }
 
-            active = event.key === 'ArrowDown' ? (active + 1) % count : (active - 1 + count) % count;
+            // The APG for a combobox that was closed: ArrowDown opens onto the first option,
+            // ArrowUp onto the last. Only once a cursor exists does the key move from it.
+            if (active < 0) {
+                active = event.key === 'ArrowDown' ? 0 : count - 1;
+            } else {
+                active = event.key === 'ArrowDown' ? (active + 1) % count : (active - 1 + count) % count;
+            }
             paintActive();
             options()[active]?.scrollIntoView({ block: 'nearest' });
 

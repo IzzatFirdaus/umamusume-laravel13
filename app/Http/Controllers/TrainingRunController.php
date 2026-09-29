@@ -61,17 +61,17 @@ class TrainingRunController extends Controller
          * come with the trainees rather than in a second pass: at 68 and ~107 rows, an eager
          * load is one query and a lazy one is sixty-nine.
          *
-         * The two lists are not the same set, and the difference is the point. `character_card_id`
-         * is nullable and StoreTrainingRunRequest accepts a submission without it, so a Global
-         * trainee with no fetched card is still trainable: the no-script select lists every one of
-         * them, while the payload keeps the card requirement because its rows are costume cards
-         * and a trainee with none contributes nothing to filter. Gating the select on the card
-         * instead asks a Trainer to wait for a fetch before they can start a run at all, which is
-         * the enhancement failing on the path the enhancement exists for.
+         * The two lists hold the same trainees, and that equality is load-bearing. The combobox
+         * disables the select and commits only trainees the payload carries, so a trainee the
+         * payload drops is unreachable *and* unpostable for as long as she is dropped: an
+         * unconfirmed form is not a pre-fetch transient, it is how the row sits until a fetch
+         * confirms it. A cardless row therefore ships with `cards: []`, and the module paints her
+         * one selectable row that says no costume card is confirmed yet, committing her with an
+         * empty `character_card_id` - which is nullable, and which the request accepts.
          *
-         * An unconfirmed form stays out of the payload for the same reason the catalog hides it
-         * (FR-A-6, FR-B-4). Such a trainee is still in the select: she is runnable, it is her form
-         * that is not confirmed yet.
+         * The card gate stayed where it belongs, inside the card list (FR-A-6, FR-B-4): an
+         * unconfirmed form is out of the payload the same way the catalog hides it, because it is
+         * her form that is not confirmed yet, not her place on the roster.
          */
         $trainees = Umamusume::query()
             ->where('release_status', ReleaseStatus::GlobalReleased->value)
@@ -83,8 +83,6 @@ class TrainingRunController extends Controller
             ->get();
 
         $roster = $trainees
-            ->filter(fn (Umamusume $u): bool => $u->cards->isNotEmpty())
-            ->values()
             ->map(fn (Umamusume $u): array => [
                 'umamusumeId' => $u->id,
                 'trainee' => $u->name,

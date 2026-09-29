@@ -44,8 +44,12 @@
             <div data-combobox class="mt-1 hidden">
                 {{-- aria-label is explicit because this input is not inside the <label> above
                      at all: a label names one control, and the caption belongs to the select.
-                     Without the attribute the combobox would have no accessible name. --}}
-                <input type="text" role="combobox" aria-expanded="false" aria-autocomplete="list"
+                     Without the attribute the combobox would have no accessible name. The `id` is
+                     the other half: the script moves the caption's `for` onto this input when it
+                     disables the select, so clicking the word "Umamusume" focuses the control the
+                     Trainer is actually using. aria-label still wins for the accessible name, so
+                     the caption buys the pointer without renaming the field. --}}
+                <input type="text" id="trainee-combobox" role="combobox" aria-expanded="false" aria-autocomplete="list"
                        aria-controls="trainee-listbox" aria-activedescendant=""
                        aria-label="Trainee or costume card name"
                        autocomplete="off" data-combobox-input
