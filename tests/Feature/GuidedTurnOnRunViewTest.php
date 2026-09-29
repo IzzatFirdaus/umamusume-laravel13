@@ -9,10 +9,10 @@ use App\Models\TurnEntry;
  * The guided turn flow and the stat band, mounted on a real run.
  *
  * The review's reframe was that `x-stat-band` and `x-guided-step` are built, tested and
- * measured clean, and the defect is one thing: `design-preview` is the only surface that
- * renders them. These
+ * measured clean, and the defect was that only a preview surface rendered them. These
  * tests are the other half of that fix - a component nobody can reach has no behaviour to
- * guard, so the guards live on the route a Trainer actually uses.
+ * guard, so the guards live on the route a Trainer actually uses. That preview surface
+ * (`design-preview`) has since been deleted, so this file exercises the run screen only.
  *
  * Two rules decide most of what is asserted here:
  *   D-51 - committing is a separate action from selecting, and "preview before commit" is
@@ -140,11 +140,20 @@ it('previews a turn without writing it', function (): void {
     $run = guidedRun();
     guidedTurn($run, 1);
 
-    $response = $this->post('/training-runs/'.$run->id.'/turns', previewPayload($run));
+    $payload = previewPayload($run);
 
-    $response->assertOk()->assertSee('Preview', false);
+    $this->post('/training-runs/'.$run->id.'/turns', $payload)
+        ->assertRedirect(route('runs.show', $run));
 
     expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(1);
+
+    // PRG: the previewed screen lives on the redirect target, and the carry below is the
+    // flashed input plus the `previewed` flag the controller adds, which is exactly what
+    // the browser arrives with. `assertSee('Preview')` moved with the body it reads.
+    $response = $this->withSession(['_old_input' => $payload + ['previewed' => '1']])
+        ->get(route('runs.show', $run));
+
+    $response->assertSee('Preview', false);
 
     // The deltas are the entered value minus the stored one, in the two prose colours
     // with the words present: orange up, blue down, never colour alone (D-12).
@@ -169,7 +178,14 @@ it('reads a mood drop as a drop, whatever the enum order says', function (): voi
     $run = guidedRun();
     guidedTurn($run, 1, ['mood' => 'GREAT']);
 
-    $html = $this->post('/training-runs/'.$run->id.'/turns', previewPayload($run, ['mood' => 'BAD']))->getContent();
+    $payload = previewPayload($run, ['mood' => 'BAD']);
+
+    $this->post('/training-runs/'.$run->id.'/turns', $payload)
+        ->assertRedirect(route('runs.show', $run));
+
+    $html = $this->withSession(['_old_input' => $payload + ['previewed' => '1']])
+        ->get(route('runs.show', $run))
+        ->getContent();
 
     // MoodTier::cases() is ordered best to worst, so subtracting in index order reports
     // GREAT -> BAD as +3 and paints a mood collapse in the colour of a gain. The browser
@@ -352,7 +368,14 @@ it('carries the turn being staged across both stages without a script', function
     $run = guidedRun();
     guidedTurn($run, 1);
 
-    $html = $this->post('/training-runs/'.$run->id.'/turns', previewPayload($run))->getContent();
+    $payload = previewPayload($run);
+
+    $this->post('/training-runs/'.$run->id.'/turns', $payload)
+        ->assertRedirect(route('runs.show', $run));
+
+    $html = $this->withSession(['_old_input' => $payload + ['previewed' => '1']])
+        ->get(route('runs.show', $run))
+        ->getContent();
 
     // Zero new JS means every value the second stage needs is in the first response:
     // re-posting the rail must not depend on anything the browser computed.

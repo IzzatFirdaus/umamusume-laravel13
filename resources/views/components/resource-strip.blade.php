@@ -3,6 +3,11 @@
     // the D-240 smell the whole component exists to avoid, and a strip with no
     // scenario has nothing to compose from.
     'scenario',
+    // Whether the Trainer actually named a scenario. `scenarioKey()` falls back to the
+    // baseline so this component always has widgets to compose, and that fallback is a
+    // composition device, not a fact about the run: captioning the turn count with the
+    // baseline's label stated a scenario the run does not have (audit F-3, D-220).
+    'declared' => true,
     /**
      * The run's own numbers, keyed by widget: turn, energy, fans, team_rank,
      * bursts, grade_points, shop_coins. A key a scenario does not own is never
@@ -56,7 +61,7 @@
             $recorded = $raw !== null && $raw !== '';
 
             [$label, $value, $sub] = match ($widget) {
-                'turn' => ['Turn', number_format((int) ($run['turn'] ?? 0)), $def['label']],
+                'turn' => ['Turn', number_format((int) ($run['turn'] ?? 0)), $declared ? $def['label'] : 'no scenario set'],
                 'energy' => ['Energy', $recorded ? ((int) $raw).'/100' : 'N/A', $recorded ? null : 'not yet recorded'],
                 'fans' => ['Fans', $recorded ? number_format((int) $raw) : 'N/A', $recorded ? $fansCaption : 'not yet recorded'],
                 'team_rank' => ['Team Rank', $recorded ? (string) $raw : 'N/A', $recorded ? 'drives facility level' : 'not yet recorded'],

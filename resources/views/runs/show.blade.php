@@ -49,7 +49,7 @@
              resolves to the baseline strip rather than to no strip at all, and a value
              the run has not recorded renders as unrecorded rather than as a default. --}}
         <h2 class="text-lg font-semibold text-ink-strong">Resources</h2>
-        <x-resource-strip :scenario="$run->scenarioKey()" :run="$run->stripValues()" class="mt-3" />
+        <x-resource-strip :scenario="$run->scenarioKey()" :declared="$run->hasScenario()" :run="$run->stripValues()" class="mt-3" />
 
         {{-- The stat band is the trainee's current numbers, so it belongs beside the run's
              current resources and above anything that talks about a single turn. It reads the
@@ -268,6 +268,7 @@
     --}}
     <x-guided-step
         :scenario="$guided['scenario']"
+        :declared="$run->hasScenario()"
         :current="$guided['current']"
         :choices="$guided['choices']"
         :selected="$guided['values']['choice'] ?? null"

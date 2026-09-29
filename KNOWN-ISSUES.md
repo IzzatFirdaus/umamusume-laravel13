@@ -7,6 +7,12 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, `fix/frontend-audit-2026-09-28` merge):** **30 filed, 21 closed, 9 open**, two filed here
+and both closed here, neither by this merge's own hand. The branch carried them as KI-16 and KI-17; both were
+renumbered to KI-30 and KI-31 because master's register already holds KI-17 and documents KI-16 as never
+filed. They arrive **closed**: the landing-route pin by R57's redirect, which `ExampleTest` now asserts by name,
+and the six `SkillAutomationTest` failures by measurement at `eb23fa8` — 7 passed there, 0 failing suite-wide —
+with the fixing commit deliberately left unnamed rather than guessed. Prior:
 **Status (2026-09-29, Screen D browser pass):** **28 filed, 19 closed, 9 open**, one filed here. **KI-29** is
 `/umamusume`'s form controls measuring 30/31/32px against `DESIGN.md` §6.14's 44, found by measuring the
 rendered page rather than reading the classes; Screen D's own controls are fixed, the older surface is not.
@@ -1353,3 +1359,68 @@ the `LIKE` escape from KI-26 lives, in the controller behind it.
 
 **Owner.** whoever next owns `catalog/index.blade.php`. Found by measuring the new screen against the old one
 rather than trusting that copied classes produced a spec-compliant result.
+---
+
+## KI-30 The landing route was pinned to HTTP 200 by a stock test, and nothing recorded it — FILED 2026-09-28 on `fix/frontend-audit-2026-09-28` (as KI-16), CLOSED 2026-09-29 (merged tip)
+
+**Renumbered on merge.** It arrived as `KI-16` on `fix/frontend-audit-2026-09-28`. The register's own recipe
+reads counts off `grep -c "^## KI-"` and states twice that **KI-16 was never filed**, which is why the numbers
+run past it — and `PLAN.md:521` plus two lines of the slice-15 verification record name that hole. Filling it
+would have retroactively falsified four written statements, so the entry lands at the end of the sequence and
+the hole stays a hole.
+
+`tests/Feature/ExampleTest.php:7` asserted `$this->get('/')->assertStatus(200)`. That was the framework's own
+example test, left in place, and it was the only thing in the repository constraining what `/` is allowed to
+be. The audit's F-1 offered two fixes for the skeleton splash — render it through the app shell, or delete the
+route and redirect `/` into the product — and the redirect option was rejected specifically because a 302 would
+fail that assertion, in a file the frontend slice was told not to edit. So a decision about the product's front
+door was being made by a leftover framework test that never says it is doing that. The coupling is not wrong,
+exactly: a local tool answering 200 on `/` is defensible, and a hand-typed `localhost:8000` should not bounce.
+It is the silence that is the problem. **Required fix:** either the owner states the contract in `PRD.md`
+("`/` is a product surface and answers 200") and `ExampleTest` is replaced by an assertion that names it, or
+the coupling is accepted knowingly and this entry closes as a decision. Not fixed in
+`fix/frontend-audit-2026-09-28`, which chose the shell option and so kept the 200 either way.
+
+**Closed by the owner's later ruling, not by this merge.** R57 made `/` a redirect into the product, and
+`ExampleTest` on the merged tip now reads `it('redirects the home page to the runs index')` asserting
+`assertRedirect(route('runs.index'))` — an assertion that names its own contract, which is the outcome this
+entry asked for. Verified against `eb23fa8`, not inferred from the branch. The `PRD.md` half of the Required
+fix is **not** done and is not claimed here; the coupling is now recorded rather than silent, which is what the
+entry actually gated on.
+
+**Owner:** closed. The `PRD.md` wording, if it is ever wanted, remains the owner's.
+
+---
+
+## KI-31 Six `SkillAutomationTest` failures had no owner and predated the frontend audit — FILED 2026-09-28 on `fix/frontend-audit-2026-09-28` (as KI-17), CLOSED 2026-09-29 (merged tip) ON MEASUREMENT, CAUSE NOT ESTABLISHED
+
+**Renumbered on merge, and this one was a real collision:** master's KI-17 is a different defect — the
+consecutive-race count, filed Slice 8 and closed Slice 15 — and carries thirteen references in the register.
+
+`tests/Feature/SkillAutomationTest.php` failed six tests: *discovers skills from the registry*,
+*matches skills to task descriptions by relevance*, *ranks the most relevant skill first*,
+*builds an execution plan in dependency order*, *executes a skill without parameters*,
+*auto-executes skills for a task and discloses matches*. They were not caused by any recent slice.
+Measured evidence: at `7d4b8cf` (base of `fix/frontend-audit-2026-09-28`) the full suite reported
+exactly those 6 failures and no others, and they were already present at `a292ef7`, where they were
+reproduced with unrelated work stashed. Nothing in `KNOWN-ISSUES.md`, `PLAN.md`, the ADRs or the
+2026-09-28 audit named an owner for them, which meant every slice since shipped against a red
+`CONSTRAINTS.md` C-1 gate and treated it as background noise. **This entry was a paper trail, not a
+fix.** The failures were untouched there: the frontend slice has no remit over
+`app/Services/SkillRegistry.php`, `SkillMatcher.php` or `SkillExecutor.php`, and guessing at a
+skill-matching contract without its author is how 6 become 8. **Required fix:** someone owns the
+skill-automation subsystem, states whether the six expectations are still the spec, and either
+repairs the code or retires the tests with a reason in the commit message, per the `CONSTRAINTS.md`
+floor on skipped tests.
+
+**Closed on measurement at the merged tip.** `php artisan test tests/Feature/SkillAutomationTest.php` at
+`eb23fa8` reports **7 passed (17 assertions)** and the full suite reports **676 passed, 2 skipped, 0 failed**,
+so C-1 is green for the first time in the thread this entry opened. **What turned it green is not established
+here.** The test file has not changed since it was added at `cf8021d`; the candidates are `aa5b05c` (the
+ADR-0011 skill catalogue rework, which rebuilt the data the matcher and executor read) and `f0f508c` (the
+PHPDoc pass across those same classes). Naming one without bisecting would be a guess, and this register's own
+KI-22 — "filed on a wrong cause" — is the reason not to. The ownership question stands unanswered: nobody has
+stated whether the six expectations are the spec; they simply pass now.
+
+**Owner:** unassigned for the subsystem. This closes as no-longer-reproducing, not as adopted.
+
