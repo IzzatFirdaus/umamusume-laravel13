@@ -14,7 +14,10 @@ not a lost entry**: it is the per-character goal-race filing from the previous p
 this block's sequencing. Unlike KI-16 — which is a genuine renumbering hole, KI-30's pre-merge number —
 this gap has an owner and a next step. A heading grep reads 25 closed and 14 open (including KI-10 and KI-25 which
 carry both words, plus KI-23b and KI-24b) where the register says 22 closed and 13 open (KI-10 ratio half counted
-open, KI-26 closed). Both are headings holding more history than a regex reads.
+open, KI-26 closed). Both are headings holding more history than a regex reads. A heading grep for `CLOSED` or
+`OPEN` over-counts, because a heading can name both states (KI-10's schema-half-closed/ratio-half-open, KI-25's
+closed-then-reopened). The three numbers in this block are the authoritative counts; a heading grep is indicative
+only.
 Prior:
 **Status (2026-09-29, Screen D dark-theme pass):** **31 filed, 21 closed, 10 open**, one filed here.
 **KI-32** is the missing `color-scheme` declaration: native form controls keep painting light widgets on
@@ -1472,6 +1475,13 @@ and a computed `solid 2px rgb(127,204,9)` focus ring, same as light.
 inside the existing `html[data-theme='dark']` block, which is the block `D-101` already owns. Not done here:
 `resources/css/app.css` is the design-system surface and other sessions are editing views and that file in
 this shared tree — the same posture as KI-26 and KI-29.
+
+**Where the two declarations actually live.** `color-scheme: light` sits in a `:root` rule at
+`resources/css/app.css:219`, beside the `@theme static` block rather than inside it; `color-scheme: dark` is
+at `:229` inside `html[data-theme='dark']`. Tailwind v4's `@theme` block rejects non-custom-property
+declarations (`@theme blocks must only contain custom properties or @keyframes`), so the light-theme
+declaration cannot go in the block and was never going to. A later reader following this entry's fix direction
+should not "fix" the `:root` rule back into `@theme`.
 
 **Owner.** design-system. Found while closing the dark-theme gap on Screen D, by measuring a native control
 rather than trusting that a token override covers everything drawn on the page.
