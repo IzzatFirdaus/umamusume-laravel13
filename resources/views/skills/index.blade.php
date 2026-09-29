@@ -15,6 +15,12 @@
 <x-layout title="Skill search">
     <h1 class="text-2xl font-semibold text-ink-strong">Skill search</h1>
 
+    {{-- Control sizes are measured, not assumed, and the numbers are the reason they are written this way.
+         DESIGN.md §6.14 fixes a form input at height 44, and `h-11` is already this repository's idiom (the
+         section headers and the guided-step rows use it). Copied straight from catalog/index's `px-2 py-1`
+         the controls arrived at 30px and 31px in a real browser, so §6.14 governs here and the older
+         surface stays as KI-28. The checkbox is the tool's first one, so it gets the WCAG 2.2 AA floor of
+         24px rather than a house precedent, with the label carrying the rest of the click area. --}}
     <form method="GET" action="{{ route('skills.index') }}" class="mt-4 flex flex-wrap items-end gap-3 text-sm">
         <label class="flex flex-col gap-1">
             <span class="text-ink">Search</span>
@@ -22,7 +28,7 @@
                 type="text"
                 name="search"
                 value="{{ $search }}"
-                class="rounded-md border border-rule bg-raised px-2 py-1 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
                 placeholder="Part of a skill name"
             >
         </label>
@@ -31,7 +37,7 @@
             <span class="text-ink">Type</span>
             <select
                 name="type"
-                class="rounded-md border border-rule bg-raised px-2 py-1 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
             >
                 <option value="">All</option>
                 @foreach ($types as $option)
@@ -48,7 +54,7 @@
                 type="checkbox"
                 name="unique"
                 value="1"
-                class="size-4 rounded border-rule bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="size-6 rounded border-rule bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
                 @checked($unique)
             >
             <span>Unique only</span>
