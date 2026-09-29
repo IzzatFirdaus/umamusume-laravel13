@@ -7,6 +7,11 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, Screen D dark-theme pass):** **31 filed, 21 closed, 10 open**, one filed here.
+**KI-32** is the missing `color-scheme` declaration: native form controls keep painting light widgets on
+the dark surface, observed as two different unchecked renderings of the same checkbox across loads. The
+dark pass itself is clean — every contrast pair, overflow and focus measurement on both themes is in
+`SKILLS-GAPS.md` §8. Prior:
 **Status (2026-09-29, `fix/frontend-audit-2026-09-28` merge):** **30 filed, 21 closed, 9 open**, two filed here
 and both closed here, neither by this merge's own hand. The branch carried them as KI-16 and KI-17; both were
 renumbered to KI-30 and KI-31 because master's register already holds KI-17 and documents KI-16 as never
@@ -17,7 +22,13 @@ with the fixing commit deliberately left unnamed rather than guessed. Prior:
 `/umamusume`'s form controls measuring 30/31/32px against `DESIGN.md` §6.14's 44, found by measuring the
 rendered page rather than reading the classes; Screen D's own controls are fixed, the older surface is not.
 Two of this thread's three open items on that one file (KI-26, KI-29) can be cleared by whoever next owns
-`catalog/index.blade.php` and `CatalogController`. Prior:
+`catalog/index.blade.php` and `CatalogController`.
+**Record, not a defect:** `b8a296f` carries `83086b0`'s subject line pasted in error; its body and content
+are correct (the three fixture rows Screen D renders — `200471`, `300141`, `202391`). Nothing downstream
+cites that SHA, so the mismatch is cosmetic and it is **not rewritten**: the commit sits 14 deep with
+concurrent sessions landing on top of it in a shared `.git`, and a rebase to fix one subject line is not
+worth the shared-history cost. The rebase stays possible whenever the tree is quiet; this line exists so a
+reader who hits the mismatch in `git log` meets the record instead of re-diagnosing it. Prior:
 **Status (2026-09-29, catalogue fill pass):** **27 filed, 19 closed, 8 open**, one filed here. **KI-28**
 is the silent one: with a column absent from the schema, SQLite reads the quoted identifier inside
 `whereNotNull('col')` as a **string literal**, so the predicate is true for every row and nothing is
@@ -1423,4 +1434,32 @@ KI-22 — "filed on a wrong cause" — is the reason not to. The ownership quest
 stated whether the six expectations are the spec; they simply pass now.
 
 **Owner:** unassigned for the subsystem. This closes as no-longer-reproducing, not as adopted.
+
+## KI-32 No `color-scheme` is declared, so native form controls paint light widgets on the dark theme — FILED 2026-09-29 (Screen D dark pass), OPEN
+
+**What is wrong.** `resources/css/app.css` declares no `color-scheme` anywhere (`grep -n "color-scheme" →
+no output`), so a browser keeps using its **light** UA skin for native controls — checkbox, `select`
+dropdown, scrollbars, any future date or number input — while the page around them is the dark theme. The
+dark theme here is a token override (`D-101`), and tokens do not reach a control the browser paints itself.
+
+**Proof, and its limit.** On `http://127.0.0.1:8123/skills` with `prefers-color-scheme: dark` emulated, the
+same unchecked `input[name=unique]` computed `backgroundColor: rgb(255,255,255)` on one load and
+`rgb(36, 38, 42)` — `#24262A`, this project's own dark surface anchor — on another, with nothing in the page
+different but the order in which the theme was applied during my measurement sequence. So the reproduction
+is "the same control paints two ways depending on load order", which is the defect's actual shape, and it is
+**not** a deterministic screenshot diff. The checked state is unambiguous either way: blue fill with a white
+tick, distinguishable from empty at 24px.
+
+**What it is not.** Not a contrast failure, and not a reason to hold the screen. Every pair measured on
+`/skills` in dark clears AA comfortably — `ink-muted` on the list **6.64**, on the page **8.55**, `h1`
+**19.51**, the ✦ badge **17.61**, row name **15.15** — with no page-level horizontal overflow at 1280 or 390
+and a computed `solid 2px rgb(127,204,9)` focus ring, same as light.
+
+**What fixing it needs.** Two declarations: `color-scheme: light` on the root and `color-scheme: dark`
+inside the existing `html[data-theme='dark']` block, which is the block `D-101` already owns. Not done here:
+`resources/css/app.css` is the design-system surface and other sessions are editing views and that file in
+this shared tree — the same posture as KI-26 and KI-29.
+
+**Owner.** design-system. Found while closing the dark-theme gap on Screen D, by measuring a native control
+rather than trusting that a token override covers everything drawn on the page.
 
