@@ -6,10 +6,12 @@ namespace App\Services\DataPipeline;
 
 use App\Actions\PromoteMatchedRecord;
 use App\Actions\StoreRaceCatalogSlots;
+use App\Actions\StoreSkills;
 use App\Enums\CandidateStatus;
 use App\Enums\MatchTier;
 use App\Models\MatchCandidate;
 use App\Services\DataPipeline\Contracts\RaceCatalogSourceParser;
+use App\Services\DataPipeline\Contracts\SkillSourceParser;
 use App\Services\DataPipeline\Contracts\SourceParser;
 use Illuminate\Support\Facades\Cache;
 
@@ -23,10 +25,15 @@ final class PipelineRunner
         private readonly CrossReferenceMatcher $matcher,
         private readonly PromoteMatchedRecord $promote,
         private readonly StoreRaceCatalogSlots $storeRaceCatalog,
+        private readonly StoreSkills $storeSkills,
     ) {}
 
     /**
-     * @param  array{url: string, parser: class-string<SourceParser>, timezone?: string|null}  $sourceConfig
+     * @param  array{url: string, parser: class-string, timezone?: string|null}  $sourceConfig
+     *                                                                                          `parser` is one of the three declared contracts — `SourceParser` for anything a
+     *                                                                                          Trainer's rows get cross-referenced against, `RaceCatalogSourceParser` and
+     *                                                                                          `SkillSourceParser` for reference data that is not a display name. Which one decides
+     *                                                                                          the route, so no source key is ever special-cased here.
      * @return array{updated: int, created: int, skipped: int, review: int}
      */
     public function run(string $sourceKey, array $sourceConfig, string $body, ?string $snapshotPath): array
@@ -50,6 +57,31 @@ final class PipelineRunner
             /** @var RaceCatalogSourceParser $parser */
             $parser = app($parserClass);
             $stored = $this->storeRaceCatalog->handle(
+                $parser->parse($body),
+                $sourceConfig['url'],
+                $snapshotPath,
+                $sourceConfig['timezone'] ?? null,
+            );
+
+            return [...$stored, 'review' => 0];
+        }
+
+        /*
+         * Skills take the same route for the same reason, and the flood this one prevents is
+         * the bigger one: read as `SourceParser` records, all 1,910 rows would fail to match an
+         * Umamusume and land in `match_candidates` as pending review rows — a review queue
+         * holding every skill in the game, filed as a character nobody could identify.
+         *
+         * Two branches of the same eight lines is duplication, and it stays because each writer
+         * owns a different grain: a race row collapses on (scenario, year, month, half, title),
+         * a skill row on the source's own id. A shared abstraction would be a third thing to
+         * read before either could be understood, and it would have no second implementation
+         * to justify it.
+         */
+        if (is_a($parserClass, SkillSourceParser::class, true)) {
+            /** @var SkillSourceParser $parser */
+            $parser = app($parserClass);
+            $stored = $this->storeSkills->handle(
                 $parser->parse($body),
                 $sourceConfig['url'],
                 $snapshotPath,

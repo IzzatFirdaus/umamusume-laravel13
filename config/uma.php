@@ -3,6 +3,7 @@
 declare(strict_types=1);
 use App\Services\DataPipeline\Parsers\GametoraCharacterParser;
 use App\Services\DataPipeline\Parsers\GametoraRaceCatalogParser;
+use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
 
 return [
 
@@ -86,6 +87,41 @@ return [
         'gametora-race-catalog' => [
             'url' => 'https://gametora.com/data/umamusume/race_instances.294424fc.json',
             'parser' => GametoraRaceCatalogParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+        ],
+
+        /*
+         * The skill catalogue (PRD FR-D-1 as amended 2026-09-29; ADR-0011).
+         *
+         * Owner approval, stated rather than assumed: the same review that approved
+         * `gametora-characters` above, re-used the way `gametora-race-catalog` re-used it.
+         * Same host, same publisher, one static JSON document, no HTML, no JS, no crawler
+         * directive to observe, no crawl budget consumed, and the politeness bounds already
+         * set by `delay_ms`, the per-source lock and the cache TTL.
+         *
+         * One difference is recorded instead of glossed: this source issues **two** requests
+         * per fetch, because the document URL is resolved through `manifest` first. That is
+         * the response to KI-24 — a pinned hash does not fail when it goes stale, it answers
+         * `200` with the superseded document, which is the opposite of what the comment above
+         * this block has been claiming since 2026-09-27.
+         *
+         * `url` stays declared as the fallback, because `uma:reparse` runs with zero network
+         * and a manifest outage must not turn into a source with no address at all. The hash
+         * read out of the manifest body is matched against `^[a-f0-9]{8}$` before it reaches a
+         * request, so the one value this file does not control can carry neither a path nor a
+         * host, and the SSRF floor (CONSTRAINTS.md: no fetch URL outside this allowlist) holds
+         * for a resolved URL exactly as it does for a pinned one.
+         */
+        'gametora-skills' => [
+            'url' => 'https://gametora.com/data/umamusume/skills.609afe88.json',
+            'manifest' => [
+                'url' => 'https://gametora.com/data/manifests/umamusume.json',
+                'base' => 'https://gametora.com/data/umamusume/',
+                'key' => 'skills',
+            ],
+            'parser' => GametoraSkillsParser::class,
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',

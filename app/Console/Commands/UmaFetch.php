@@ -75,7 +75,19 @@ class UmaFetch extends Command
                 return;
             }
 
-            $counts = $pipeline->run($key, $sourceConfig, $fetched['body'], $fetched['snapshot_path']);
+            if ($fetched['manifest_fallback']) {
+                $this->warn("  Manifest unavailable for '{$key}'; using the pinned URL, whose document may be stale (KI-24).");
+            }
+
+            // Provenance records the URL actually fetched, not the one declared. For a
+            // manifest-resolved source the two differ, and "which document did this come from" is
+            // the question a later reader has to be able to answer from the row alone.
+            $counts = $pipeline->run(
+                $key,
+                [...$sourceConfig, 'url' => $fetched['url']],
+                $fetched['body'],
+                $fetched['snapshot_path'],
+            );
 
             $this->info(sprintf(
                 "'%s': %d updated, %d created, %d skipped (manual), %d to review.",

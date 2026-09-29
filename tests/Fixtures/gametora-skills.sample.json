@@ -1,0 +1,211 @@
+[
+  {
+    "id": 200311,
+    "name_en": "G1 Averseness",
+    "enname": "G1 Dislike",
+    "jpname": "GⅠ苦手",
+    "rarity": 1,
+    "cost": 50,
+    "condition_groups": [
+      {
+        "base_time": -1,
+        "condition": "grade==100",
+        "effects": [
+          {
+            "type": 1,
+            "value": -400000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 201351,
+    "name_en": "Gourmand",
+    "enname": "Big Eater",
+    "jpname": "食いしん坊",
+    "rarity": 2,
+    "cost": 180,
+    "condition_groups": [
+      {
+        "base_time": 0,
+        "condition": "running_style==2&phase_random==1",
+        "effects": [
+          {
+            "type": 9,
+            "value": 550
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 110031,
+    "name_en": "Certain Victory",
+    "enname": "It's Going to Be Me",
+    "jpname": "絶対は、ボクだ",
+    "rarity": 5,
+    "condition_groups": [
+      {
+        "base_time": 50000,
+        "condition": "is_last_straight==1",
+        "effects": [
+          {
+            "type": 27,
+            "value": 4500
+          }
+        ],
+        "precondition": "is_finalcorner==1&is_overtake==1&order<=5&order_rate<=50&overtake_target_no_order_up_time>=2"
+      }
+    ]
+  },
+  {
+    "id": 202001,
+    "name_en": "Master of the Sands",
+    "enname": "Sand Expert",
+    "jpname": "砂の玄人",
+    "rarity": 2,
+    "cost": 200,
+    "condition_groups": [
+      {
+        "base_time": 18000,
+        "condition": "ground_type==2&phase_random==1&order_rate>=40",
+        "effects": [
+          {
+            "type": 9,
+            "value": 550
+          },
+          {
+            "type": 27,
+            "value": 3500
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 100101111,
+    "name_en": "Gluttonous Ruler",
+    "enname": "Hungry Commander",
+    "jpname": "はらぺこ大将",
+    "rarity": 6,
+    "unreleased": [
+      "en"
+    ],
+    "condition_groups": [
+      {
+        "base_time": 30000,
+        "condition": "phase_random==1",
+        "effects": [
+          {
+            "type": 9,
+            "value": 550
+          },
+          {
+            "type": 27,
+            "value": 1500
+          }
+        ],
+        "precondition": "running_style==2@running_style==3"
+      }
+    ]
+  },
+  {
+    "id": 202711,
+    "enname": "Check",
+    "jpname": "王手",
+    "rarity": 2,
+    "cost": 180,
+    "unreleased": [
+      "en"
+    ],
+    "condition_groups": [
+      {
+        "base_time": 9000,
+        "condition": "running_style==2&phase>=2&is_finalcorner==1&corner!=0&remain_distance>=600&order_rate<=70@running_style==3&phase>=2&is_finalcorner==1&corner!=0&remain_distance>=600&order_rate<=70",
+        "effects": [
+          {
+            "type": 31,
+            "value": 4000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 100471,
+    "name_en": "Raise My Soul's Blade!",
+    "enname": "Raise Thy Soul's Sword!",
+    "jpname": "掲げよ、己が魂の剣を！",
+    "rarity": 5,
+    "unreleased": [
+      "en"
+    ],
+    "condition_groups": [
+      {
+        "base_time": 50000,
+        "condition": "phase>=2&remain_distance<=401&remain_distance>=399&order_rate<=40&grade==100&popularity<=3",
+        "effects": [
+          {
+            "type": 27,
+            "value": 4500
+          }
+        ]
+      },
+      {
+        "base_time": 50000,
+        "condition": "phase>=2&remain_distance<=401&remain_distance>=399&order_rate<=40",
+        "effects": [
+          {
+            "type": 27,
+            "value": 3500
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 200333,
+    "name_en": "Corner Adept ×",
+    "enname": "Clever Cornerer ×",
+    "jpname": "コーナー巧者×",
+    "rarity": 1,
+    "cost": 100,
+    "condition_groups": [
+      {
+        "base_time": 24000,
+        "cd": 300000,
+        "condition": "all_corner_random==1",
+        "effects": [
+          {
+            "type": 21,
+            "value": -2000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 10091,
+    "name_en": "Red Ace",
+    "enname": "Red Ace",
+    "jpname": "レッドエース",
+    "rarity": 3,
+    "condition_groups": [
+      {
+        "base_time": 50000,
+        "condition": "distance_rate>=50&order==1&bashin_diff_behind<=1@distance_rate>=50&order==2&is_overtake==1",
+        "effects": [
+          {
+            "type": 27,
+            "value": 1500
+          },
+          {
+            "type": 31,
+            "value": 2000
+          }
+        ]
+      }
+    ]
+  }
+]

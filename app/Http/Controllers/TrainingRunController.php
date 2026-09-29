@@ -153,7 +153,12 @@ class TrainingRunController extends Controller
         return [
             'run' => $run,
             'entryMode' => in_array($entryMode, ['calendar', 'manual'], true) ? $entryMode : 'calendar',
-            'skills' => Skill::orderBy('name')->get(['id', 'name']),
+            // Availability is recorded at write time and applied at read time (ADR-0011 §2), so the
+            // picker offers only skills the source says are on `[Global]` **and** named by the client.
+            // Without the second half this select would offer `Gluttonous Ruler` — a real English string
+            // for a JP-only evolved skill — as if a Global Trainer could learn it. `sp_cost` comes along
+            // because the option label states it (FR-D-1).
+            'skills' => Skill::query()->availableOnGlobal()->orderBy('name')->get(['id', 'name', 'sp_cost']),
             'scenarios' => $this->scenarioLabels(),
             'raceSlots' => $this->raceSlotsFor($run),
             'band' => $latest === null ? null : [

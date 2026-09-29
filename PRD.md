@@ -60,8 +60,9 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 - C-5: CSV and JSON export per run.
 
 ### FR-D: Skill catalog (reference data)
-- D-1: `Skill`: English name, Japanese name (nullable until cross-referenced), match key, SP cost (nullable), type string (nullable), `is_unique` flag.
+- D-1: `Skill`: English name, Japanese name (nullable until cross-referenced), match key, SP cost (nullable), type string (nullable), `is_unique` flag. [amended 2026-09-29 by `ADR-0011`] adds **`rarity`**, **the export's own skill id**, and the provenance columns `ADR-0004` requires. Two limits are part of the amendment, not footnotes: `rarity` stores the source's class code and is **never** rendered as a client rarity word, because the source carries six class values where the client's three rarities live elsewhere; and `type` holds **this tool's derived classification** from the source's effect codes, never client copy (`CONSTRAINTS.md` D-20). The English name is the source's localized client string, not its literal rendering of the Japanese — the two differ on 535 of 623 rows.
 - D-2: Skill search/autocomplete for the run UI, on normalized keys.
+- D-3 [added 2026-09-29, `ADR-0011`]: Skills arrive through `uma:fetch` from a declared source, and the source's own server flag decides `[Global]` availability. The flag is **recorded at write time and applied at read time**: every row the source publishes is stored, and only rows the source states as available on `[Global]` may reach a Trainer-facing surface. Dropping the rest at import would leave the excluded population uncountable and the provenance unverifiable.
 
 ### FR-E: Local API (P2)
 - E-1: Versioned `/api/v1` read endpoints for catalog and runs, JSON via API Resources, one consistent error shape (`{ "error": { "code", "message" } }`), offset pagination on list endpoints.

@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\Storage;
  * Replays parse -> match -> promote from the newest stored snapshot with zero
  * network (ARCHITECTURE §6). The repair tool when a parser is fixed but the
  * source body is already on disk.
+ *
+ * One wrinkle the zero-network condition causes, stated rather than left to be found: a source that
+ * resolves through a manifest (`KI-24`) gets its `source_url` stamped from the *declared pin* here,
+ * because the URL that was actually fetched lived only in that earlier run. The snapshot path carries
+ * the content hash, so the row remains traceable to the exact body it was parsed from, and only the
+ * address is approximate. Persisting the resolved URL alongside the snapshot is the fix, and it is
+ * deliberately not smuggled into this command's scope.
  */
 class UmaReparse extends Command
 {

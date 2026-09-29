@@ -395,11 +395,34 @@
         @else
             <ul class="text-sm">
                 @foreach ($inGroup as $skill)
-                    <li>{{ $skill->name }}@if($skill->pivot->turn_acquired)<span class="text-ink-muted"> · turn {{ $skill->pivot->turn_acquired }}</span>@endif</li>
+                    <li>
+                        {{ $skill->name }}
+                        @if ($skill->is_unique)
+                            {{-- The sparkle is the client's own mark for a unique skill and means nothing
+                                 else in this system (DESIGN.md §6.0, §6.11), so it appears here and never
+                                 as ornament. The word rides beside it because D-12 bars a state that lives
+                                 only in a glyph or a colour. --}}
+                            <span class="text-ink-muted">✦ Unique</span>
+                        @endif
+                        @if ($skill->sp_cost !== null)
+                            <span class="text-ink-muted">· {{ $skill->sp_cost }} SP</span>
+                        @endif
+                        @if ($skill->pivot->turn_acquired)
+                            <span class="text-ink-muted">· turn {{ $skill->pivot->turn_acquired }}</span>
+                        @endif
+                    </li>
                 @endforeach
             </ul>
         @endif
     @endforeach
+
+    {{-- Two absences, said out loud rather than left to be inferred. SP is the cost the source states;
+         the class code the source carries is not rendered because six codes do not answer to the
+         client's three rarities (ADR-0011 §3), and no hint-level discount appears anywhere because
+         conflict row 16 bars encoding either candidate curve without an in-client check. --}}
+    <p class="mt-2 max-w-3xl text-xs text-ink-muted">
+        SP is the cost the source states for that skill. Skill-point discounts from hint levels are not
+        shown: no source in this repository settles the per-level reduction.
 
     <form method="POST" action="{{ route('runs.skills.sync', $run) }}" class="mt-4 max-w-3xl space-y-3 rounded-md border border-rule bg-raised p-4 text-sm">
         @csrf
@@ -407,7 +430,10 @@
             <span>Skill</span>
             <select name="skills[0][skill_id]" class="rounded-md border border-rule bg-raised text-ink px-2 py-1">
                 @foreach ($skills as $skill)
-                    <option value="{{ $skill->id }}">{{ $skill->name }}</option>
+                    {{-- The cost is in the label because the choice being made is a spending choice:
+                         a Trainer planning a build picks partly on what the skill costs, and the
+                         catalogue has been stating that figure since the import (FR-D-1). --}}
+                    <option value="{{ $skill->id }}">{{ $skill->name }}@if ($skill->sp_cost !== null) · {{ $skill->sp_cost }} SP @endif</option>
                 @endforeach
             </select>
             <select name="skills[0][status]" class="rounded-md border border-rule bg-raised text-ink px-2 py-1">
