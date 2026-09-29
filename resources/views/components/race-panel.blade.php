@@ -10,9 +10,13 @@
 
     $teamRace = $run->composesPanel('team_race');
     $graded = $run->composesGradeObjectives();
-    $entries = $run->raceEntries->sortBy(fn (App\Models\RaceEntry $e): int => $e->scenarioSlot?->sort_order ?? PHP_INT_MAX);
+    $entries = $run->raceEntries->sortBy(fn (App\Models\RaceEntry $e): int => $e->scenarioSlot?->sort_order ?? $e->raceCatalogSlot?->sort_order ?? PHP_INT_MAX);
 
-    $calendarSlots = $slots->where('kind', '!=', 'free_race');
+    // The calendar list is the career catalogue for the year this screen shows, which is
+    // the same year the grid above is drawn from. `scenario_slots` carries no year, so a
+    // list built from it offered a Senior G1 to a Trainer sitting in Junior.
+    $calendarYear = $run->careerYearForTab(request('year'));
+    $catalogSlots = $run->calendarRaceSlots($calendarYear);
     $manualSlots = $slots->where('kind', 'free_race');
 
     /*
@@ -54,31 +58,43 @@
         <input type="hidden" name="entry_mode" value="{{ $mode }}">
 
         @if ($mode === 'calendar')
-            {{-- Calendar path --}}
+            {{-- Calendar path. Each option names its half-month and grade, so a race cannot
+                 be chosen on its name alone, and the heading says which year is in scope. --}}
             <label class="flex flex-col gap-1">
-                <span class="font-medium text-ink">Calendar slot</span>
-                @if ($calendarSlots->isEmpty())
+                <span class="font-medium text-ink">Calendar race · {{ \App\Models\RaceCatalogSlot::YEARS[$calendarYear] }} year</span>
+                @if ($catalogSlots->isEmpty())
                     <input type="text" class="rounded-md border border-rule bg-sunken px-2 py-1 text-ink-muted"
-                           value="no calendar rows to enter against" disabled>
+                           value="no calendar races in this year" disabled>
                     <span class="text-xs text-ink-muted">
-                        Races are fetched data, and this build has not fetched them.
+                        Races are fetched data, and this career year has none of them.
                     </span>
                 @else
-                    <select name="scenario_slot_id"
+                    <select name="race_catalog_slot_id"
                             class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
-                        @foreach ($calendarSlots as $slot)
-                            <option value="{{ $slot->id }}" data-tier="{{ $slot->tier ?? '' }}">{{ $slot->title }} · {{ $slot->tier ?? 'no grade' }}</option>
+                        @foreach ($catalogSlots as $slot)
+                            <option value="{{ $slot->id }}" data-tier="{{ $slot->tier ?? '' }}" @selected(old('race_catalog_slot_id') == $slot->id)>
+                                {{ $slot->title }} · {{ $slot->slot_label }} · {{ $slot->tier ?? 'no grade' }}
+                            </option>
                         @endforeach
-                        @if ($manualSlots->isNotEmpty())
-                            <optgroup label="Trainer-entered">
-                                @foreach ($manualSlots as $slot)
-                                    <option value="{{ $slot->id }}">{{ $slot->title }} · Trainer-entered</option>
-                                @endforeach
-                            </optgroup>
-                        @endif
                     </select>
                 @endif
             </label>
+
+            {{-- A race the Trainer typed earlier is not a calendar race and lives in the other
+                 table, so it gets its own control: one select cannot carry two field names, and
+                 the validator refuses an entry that sets both. --}}
+            @if ($manualSlots->isNotEmpty())
+                <label class="flex flex-col gap-1">
+                    <span class="font-medium text-ink">Trainer-entered race</span>
+                    <select name="scenario_slot_id"
+                            class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                        <option value="">not a hand-entered race</option>
+                        @foreach ($manualSlots as $slot)
+                            <option value="{{ $slot->id }}" @selected(old('scenario_slot_id') == $slot->id)>{{ $slot->title }}</option>
+                        @endforeach
+                    </select>
+                </label>
+            @endif
         @else
             {{-- Manual path --}}
             <label class="flex flex-col gap-1">
@@ -175,6 +191,7 @@
 
         @if ($errors->any())
             <p class="w-full text-sm text-risk" role="alert">
+                {{ $errors->first('race_catalog_slot_id') }}
                 {{ $errors->first('scenario_slot_id') }}
                 {{ $errors->first('title') }}
                 {{ $errors->first('month') }}
@@ -196,14 +213,14 @@
             @foreach ($entries as $entry)
                 <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-md border border-rule bg-raised px-3 py-2 text-sm">
                     <span class="min-w-0 flex-1">
-                        <span class="font-semibold text-ink-strong">{{ $entry->scenarioSlot?->title ?? 'a race with no calendar row' }}</span>
+                        <span class="font-semibold text-ink-strong">{{ $entry->raceCatalogSlot?->title ?? $entry->scenarioSlot?->title ?? 'a race with no calendar row' }}</span>
                         <span class="ml-1.5 text-xs text-ink-muted">{{ $entry->status->value }}</span>
                         @if ($entry->scenarioSlot?->isFreeRace())
                             <span class="ml-1 text-[10px] text-ink-muted">Trainer-entered</span>
                         @endif
                     </span>
                     <span class="flex flex-wrap gap-x-3 font-mono text-xs tabular-nums text-ink-muted">
-                        <span>{{ $entry->scenarioSlot?->tier ?? 'no grade' }}</span>
+                        <span>{{ $entry->tierKey() ?? 'no grade' }}</span>
                         <span>{{ $entry->placementOrdinal() }}</span>
                         <span>{{ $entry->turnEntry === null ? 'turn not named' : 'turn '.$entry->turnEntry->turn }}</span>
                         @if ($teamRace)

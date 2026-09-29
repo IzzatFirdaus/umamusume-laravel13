@@ -68,7 +68,7 @@ class TrainingRunController extends Controller
 
     public function show(TrainingRun $run): View
     {
-        $run->load(['umamusume', 'turnEntries', 'skills', 'turnEvents', 'raceEntries.scenarioSlot', 'raceEntries.turnEntry']);
+        $run->load(['umamusume', 'turnEntries', 'skills', 'turnEvents', 'raceEntries.scenarioSlot', 'raceEntries.raceCatalogSlot', 'raceEntries.turnEntry']);
 
         return view('runs.show', $this->showData($run));
     }
@@ -389,7 +389,7 @@ class TrainingRunController extends Controller
             $run->raceEntries()->create($entryData);
         } else {
             $entryData = array_intersect_key($validated, array_flip([
-                'scenario_slot_id', 'status', 'placement', 'fans_gain', 'circles', 'objective_index', 'turn_entry_id',
+                'scenario_slot_id', 'race_catalog_slot_id', 'status', 'placement', 'fans_gain', 'circles', 'objective_index', 'turn_entry_id',
             ]));
 
             $run->raceEntries()->create($entryData);

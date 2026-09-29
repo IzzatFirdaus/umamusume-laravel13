@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\RaceEntryStatus;
+use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
@@ -70,18 +71,28 @@ function submittedEntryMode(string $html): ?string
 
 it('renders the calendar branch reachable, with no manual fields in the page', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
+    RaceCatalogSlot::factory()->create([
+        'year' => 1, 'month' => 5, 'half' => 'Late', 'turn' => 11, 'title' => 'Japanese Oaks',
+    ]);
     ScenarioSlot::factory()->create([
         'scenario_key' => 'ura_finale',
-        'kind' => 'goal_race',
-        'source_key' => 'src-1',
-        'title' => 'Japanese Oaks',
-        'is_manual' => false,
+        'kind' => 'free_race',
+        'title' => 'Autumn Practice Stakes',
+        'slot_label' => 'Autumn Practice Stakes',
+        'month' => 9,
+        'half' => 'Late',
+        'is_manual' => true,
     ]);
 
     $html = $this->get(route('runs.show', $run))->content();
     $names = reachableFieldNames($html);
 
-    expect($names)->toContain('scenario_slot_id')
+    // Two links, two controls. The calendar branch names a row of the career catalogue; a
+    // race the Trainer typed earlier keeps its own control, because one select cannot carry
+    // two field names. Neither reaches the manual fields, which sit on the other side of the
+    // disclosure.
+    expect($names)->toContain('race_catalog_slot_id')
+        ->and($names)->toContain('scenario_slot_id')
         ->and($names)->not->toContain('title')
         ->and($names)->not->toContain('month')
         ->and($names)->not->toContain('half');

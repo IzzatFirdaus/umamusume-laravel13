@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Enums\RaceEntryStatus;
+use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
@@ -18,9 +19,10 @@ use Illuminate\Validation\Rule;
  * creates a manual slot for a race not on the calendar (R56, R61).
  *
  * Two paths share one endpoint: `entry_mode` selects between them. The calendar
- * path requires a `scenario_slot_id`; the manual path requires `title`, `month`
- * and `half`. Both produce a `race_entries` row. The manual path also produces
- * a `scenario_slots` row with kind `free_race`.
+ * path names a row of the career catalogue with `race_catalog_slot_id`, or a race
+ * the Trainer typed earlier with `scenario_slot_id`; the manual path requires
+ * `title`, `month` and `half`. All three produce a `race_entries` row, and the
+ * manual path also produces a `scenario_slots` row with kind `free_race`.
  *
  * `turn_entry_id` (KI-17) belongs to neither branch: a race happened on a turn whichever way it
  * got onto the calendar, so the rule sits with the shared outcome fields above the split.
@@ -70,6 +72,40 @@ class StoreRaceEntryRequest extends FormRequest
             $rules['tier'] = ['nullable', 'string', 'max:10'];
             $rules['scenario_slot_id'] = ['prohibited'];
         } else {
+            // The calendar branch names a row of the shared career catalogue. The
+            // scenario-slot link stays valid because a Trainer-typed free race lives
+            // there and nowhere else, but one entry cannot carry both: it would put the
+            // same race on the grid twice, once from each source. `exclude_with` is not
+            // the rule for that — it drops the field from `validated()` silently, which
+            // would pick a winner instead of refusing the answer.
+            $rules['race_catalog_slot_id'] = [
+                'nullable',
+                'integer',
+                Rule::exists('race_catalog_slots', 'id'),
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($value === null) {
+                        return;
+                    }
+
+                    if ($this->filled('scenario_slot_id')) {
+                        $fail('A race is either a calendar race or one you entered by hand, not both.');
+
+                        return;
+                    }
+
+                    $run = $this->route('run');
+
+                    $onCalendar = $run instanceof TrainingRun
+                        && RaceCatalogSlot::query()
+                            ->forScenario($run->scenarioKey())
+                            ->whereKey((int) $value)
+                            ->exists();
+
+                    if (! $onCalendar) {
+                        $fail('That race is not on this run\'s calendar.');
+                    }
+                },
+            ];
             $rules['scenario_slot_id'] = [
                 'nullable',
                 'integer',
@@ -95,7 +131,7 @@ class StoreRaceEntryRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        foreach (['scenario_slot_id', 'placement', 'circles', 'objective_index', 'fans_gain', 'turn_entry_id'] as $key) {
+        foreach (['scenario_slot_id', 'race_catalog_slot_id', 'placement', 'circles', 'objective_index', 'fans_gain', 'turn_entry_id'] as $key) {
             if ($this->input($key) === '') {
                 $this->merge([$key => null]);
             }

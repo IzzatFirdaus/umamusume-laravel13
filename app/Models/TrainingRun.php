@@ -272,6 +272,45 @@ class TrainingRun extends Model
     }
 
     /**
+     * The career year a year tab selects.
+     *
+     * A request cannot widen the three years a run trains through, and a run that has
+     * logged nothing is in Junior, so both out-of-range inputs land on a year the grid
+     * can draw. `runs.show` clamps the same way for the tabs it renders.
+     */
+    public function careerYearForTab(int|string|null $tab): int
+    {
+        $year = is_numeric($tab) ? (int) $tab : $this->currentYear();
+
+        return min(RaceCatalogSlot::YEAR_SENIOR, max(RaceCatalogSlot::YEAR_JUNIOR, $year));
+    }
+
+    /**
+     * The calendar races a Trainer may record against in one career year.
+     *
+     * Read from the shared career catalogue rather than `scenario_slots`, because the
+     * scenario slot table holds no year: it could not answer "what may be entered in
+     * Junior", and the picker built on it offered every seeded race on whatever tab was
+     * open. Rows the catalogue holds for every scenario (`scenario_key` null) belong to
+     * this run as much as the rows tagged with its scenario key.
+     *
+     * @return Collection<int, RaceCatalogSlot>
+     */
+    public function calendarRaceSlots(int|string|null $tab): Collection
+    {
+        if (! $this->hasScenario()) {
+            return RaceCatalogSlot::query()->whereRaw('1 = 0')->get();
+        }
+
+        return RaceCatalogSlot::query()
+            ->forScenario($this->scenarioKey())
+            ->inYear($this->careerYearForTab($tab))
+            ->orderBy('turn')
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    /**
      * The race calendar's cells, composed from this scenario's slots and this
      * run's own race log (D-221, D-240).
      *
