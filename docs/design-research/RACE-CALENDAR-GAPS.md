@@ -298,3 +298,55 @@ creating a second one. That is a product call about `scenario_slots`, which this
 alone, and it is recorded rather than decided.
 
 **Owner:** the owner, as a data decision.
+
+---
+
+## 11. `tier_override` is validated and then dropped on the floor
+
+**Found while adding the catalogue link to the same validator (`37ed6c2`); not introduced
+there.** `StoreRaceEntryRequest` accepts `tier_override` (nullable string, max 10) on the
+calendar branch and `prepareForValidation()` blanks an empty submission to null. The
+controller's calendar branch then intersects the validated payload with a key list that does
+not name `tier_override`, so the field reaches no write. It is accepted, normalised, and
+discarded.
+
+**What each reading costs.** As a stub awaiting follow-through, the missing piece is a place
+for an entered tier to live: `race_entries` has no tier column, and a tier the Trainer states
+would have to override `race_catalog_slots.tier` **per entry** rather than rewrite a shared
+catalogue row that prices other runs. As dead code, it is one validation rule and one
+blanking line.
+
+**Why it is filed rather than deleted here:** no test asserts the field has an effect.
+`FreeRaceWriterTest` posts `tier_override` and then asserts the placement landed — it never
+reads the tier back, so the test passes whether or not anything stores it. That is item 9's
+pattern one more time, and deleting the rule on the strength of a test that cannot see it
+would be a guess dressed as a cleanup.
+
+**Needed to resolve:** decide stub-or-dead. Stub means a column plus a test that reads the
+entered tier back off the entry; dead means both lines go.
+
+**Owner:** whoever owns the race form's fields.
+
+---
+
+## 12. `data_sources` is per-character provenance, so the catalogue writing no row there is correct
+
+**Recorded so nobody "fixes" this.** An empty `data_sources` table looked like a missing write
+while the catalogue was being populated. It is not a missing write, and it is not a fetch log.
+
+The table is keyed on `foreignId('umamusume_id')->constrained('umamusume')->cascadeOnDelete()`
+(`2026_09_26_162819_create_data_sources_table.php`), and its only writer is
+`PromoteMatchedRecord`, which creates one row per source that contributed to a **promoted
+character record**. It is provenance attached to an entity — which is also why
+`Umamusume::dataSources()` is a `hasMany`.
+
+The race catalogue has no match or promote stage (ADR-0003 R3's reference dispatch bypasses
+both) and no owning `umamusume` row to attach to, so it carries provenance on its own rows
+instead: `source_key`, `source_url`, `snapshot_path`, `fetched_at`, `source_timezone`. After
+the fill pass all five are present on **410 of 410** rows.
+
+**Consequence for the next reader:** on a development database, `data_sources` being empty
+says nothing about whether a fetch ran. The proof a fetch ran is `race_catalog_slots`'s row
+count, the `snapshot_path` on those rows, and the file on the snapshots disk. A per-fetch write
+into this table would need the table reshaped away from the `umamusume_id` foreign key, which
+is a schema decision and not a gap to close quietly.
