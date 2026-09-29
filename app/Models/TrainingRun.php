@@ -560,9 +560,7 @@ class TrainingRun extends Model
      */
     public function gradeEarnedFor(int $objectiveIndex): ?int
     {
-        $table = $this->gradePointTable();
-
-        if ($table === null) {
+        if ($this->gradePointTable() === null) {
             return null;
         }
 
@@ -575,16 +573,30 @@ class TrainingRun extends Model
         $total = 0;
 
         foreach ($entries as $entry) {
-            $tier = $entry->scenarioSlot?->tier;
+            $points = $this->pointsOf($entry);
 
-            if ($entry->placement !== 1 || $tier === null || ! array_key_exists($tier, $table)) {
+            if ($points === null) {
                 return null;
             }
 
-            $total += (int) $table[$tier];
+            $total += $points;
         }
 
         return $total;
+    }
+
+    /**
+     * What one finish is worth, read from the column and priced only as a fallback.
+     *
+     * `race_entries.grade_points_earned` is written by the same rule, so the two normally agree and
+     * the column wins. The price is recomputed for a row written before the column existed: a local
+     * database carrying runs from Slice 7 has a G1 win that priced fine and no figure stored, and
+     * reading it as unpriced would take points away from a Trainer who had already earned them.
+     */
+    private function pointsOf(RaceEntry $entry): ?int
+    {
+        return $entry->grade_points_earned
+            ?? RaceEntry::gradePointsFor($this, $entry->tierKey(), $entry->placement);
     }
 
     /**
@@ -593,21 +605,17 @@ class TrainingRun extends Model
      * R18 gives the meter a third state, and this is what distinguishes "nothing was
      * logged in this period" from "logged, but not convertible". A result is
      * unpriceable when it finished below first, because `grade_point_by_grade` prices
-     * a 1st place only, or when it has no slot, because the grade lives on the slot
-     * and a free-form race records no grade.
+     * a 1st place only, or when it carries no tier, which since R75 is most races: the
+     * grade lives on the slot, and a slot no publisher settled has none.
      */
     public function gradeUnpricedFor(int $objectiveIndex): int
     {
-        $table = $this->gradePointTable();
-
-        if ($table === null) {
+        if ($this->gradePointTable() === null) {
             return 0;
         }
 
         return $this->periodEntries($objectiveIndex)
-            ->filter(fn (RaceEntry $entry): bool => $entry->placement !== 1
-                || $entry->scenarioSlot?->tier === null
-                || ! array_key_exists($entry->scenarioSlot->tier, $table))
+            ->filter(fn (RaceEntry $entry): bool => $this->pointsOf($entry) === null)
             ->count();
     }
 
@@ -687,7 +695,7 @@ class TrainingRun extends Model
      */
     private function completedRaces(): Collection
     {
-        $this->raceEntries->loadMissing('scenarioSlot');
+        $this->raceEntries->loadMissing(['scenarioSlot', 'raceCatalogSlot']);
 
         return $this->raceEntries->where('status', RaceEntryStatus::Completed);
     }
@@ -703,6 +711,21 @@ class TrainingRun extends Model
         }
 
         return (array) config('scenarios.scenarios.'.$this->scenarioKey().'.grade_point_by_grade');
+    }
+
+    /**
+     * What one grade pays a 1st place, or null when this scenario keeps no such table
+     * or the grade is not in it.
+     *
+     * `RaceEntry::gradePointsFor()` is the only caller that needs it per tier, so the table itself
+     * stays private: handing out the array would let a caller price a placement from it, which is
+     * the half of KI-10 nobody has a source for.
+     */
+    public function gradePointsForTier(string $tier): ?int
+    {
+        $table = $this->gradePointTable();
+
+        return $table === null ? null : ($table[$tier] ?? null);
     }
 
     /**

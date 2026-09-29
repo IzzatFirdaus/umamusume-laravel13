@@ -34,6 +34,10 @@ use Illuminate\Support\Carbon;
  * @property int|null $circles the client's circle estimate as the Trainer read it on a
  *                             Team Race (0..5 this slice, D-225); null on every other
  *                             slot, where the number does not exist
+ * @property int|null $grade_points_earned what this finish paid in Grade Points (KI-10), priced by
+ *                                         `gradePointsFor()` on a write and correctable by the
+ *                                         Trainer; null means no source prices this finish, which is
+ *                                         not the same claim as 0
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read TrainingRun $trainingRun
@@ -43,7 +47,7 @@ use Illuminate\Support\Carbon;
  * @property-read TurnEntry|null $turnEntry
  */
 #[Table('race_entries')]
-#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'race_catalog_slot_id', 'turn_entry_id', 'status', 'placement', 'fans_gain', 'objective_index', 'circles'])]
+#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'race_catalog_slot_id', 'turn_entry_id', 'status', 'placement', 'fans_gain', 'objective_index', 'circles', 'grade_points_earned'])]
 class RaceEntry extends Model
 {
     /** @use HasFactory<RaceEntryFactory> */
@@ -79,6 +83,8 @@ class RaceEntry extends Model
                 TrainingRun::assertGradePeriod($entry->objective_index, $entry->trainingRun, 'objective_index');
             }
 
+            $entry->priceGradePoints();
+
             $circles = $entry->circles;
 
             if ($circles === null) {
@@ -97,6 +103,75 @@ class RaceEntry extends Model
                 );
             }
         });
+    }
+
+    /**
+     * The tier this entry's price is read against: the career calendar first, the scenario slot
+     * second.
+     *
+     * The order is a ruling, not an accident of which relation happens to be loaded.
+     * `race_catalog_slots` publishes a tier per race in a dated year, which is where a tier is a
+     * per-race claim (R72); `scenario_slots` carries the seeded URA schedule and the free races a
+     * Trainer typed in, which have no catalogue row to point at.
+     */
+    public function tierKey(): ?string
+    {
+        // Spelled out rather than chained, because both links are optional: an entry with no
+        // catalogue row must fall through to the scenario slot instead of reading off null.
+        $catalogTier = $this->raceCatalogSlot?->tier;
+
+        if ($catalogTier !== null) {
+            return $catalogTier;
+        }
+
+        return $this->scenarioSlot?->tier;
+    }
+
+    /**
+     * Price this finish, unless the write already answered the question.
+     *
+     * Entered first, derived second. The guard skips when the caller set the figure itself, because
+     * that is the Trainer correcting the tool with what the client actually paid, and it skips a
+     * stored figure on an unrelated edit so changing the turn link does not re-price a race whose
+     * tier label has since moved. A placement change is the one edit that does re-price: the
+     * finish is what the price is a function of.
+     */
+    private function priceGradePoints(): void
+    {
+        if ($this->isDirty('grade_points_earned')) {
+            return;
+        }
+
+        if ($this->grade_points_earned !== null && ! $this->isDirty('placement')) {
+            return;
+        }
+
+        $this->grade_points_earned = self::gradePointsFor(
+            $this->trainingRun,
+            $this->tierKey(),
+            $this->placement,
+        );
+    }
+
+    /**
+     * The Grade Points a finish is worth, or null when nothing prices it.
+     *
+     * `docs/scenarios/05-trackblazer-gametora.md` §"Grade Points and Shop Coins — Exact Values"
+     * prices a 1st place and says only that lower placements "scale down proportionally", with no
+     * ratio named: that gap is KI-10's open half, so a 2nd place is unpriced rather than guessed at.
+     * The same page's 100/60/30/0 placement table is Shop Coins, which it says explicitly "do not
+     * depend on race grade at all" — borrowing those ratios would put a wrong number under a real
+     * citation. A race with no tier is unpriced for the same reason, which since R75 is most races.
+     *
+     * @return int|null null means "this tool cannot price this finish", never "this finish scored 0"
+     */
+    public static function gradePointsFor(?TrainingRun $run, ?string $tier, ?int $placement): ?int
+    {
+        if ($run === null || $placement !== 1 || $tier === null) {
+            return null;
+        }
+
+        return $run->gradePointsForTier($tier);
     }
 
     /**
