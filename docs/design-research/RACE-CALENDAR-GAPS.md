@@ -26,6 +26,12 @@ each fixed the half it could see. `c0a743f` solved insert collision; `82959e9` m
 Reconciling means deleting one side's rows, and neither session can judge the other's scope. The
 retarget note exists precisely so this is a known state rather than a surprise.
 
+**Update, `37ed6c2`:** the picker moved onto `race_catalog_slots` too, so nothing in the read path
+renders a seeded `goal_race` row any more. The rows are still seeded and still wrong-by-duplication;
+what changed is that they are now inert rather than user-visible. `free_race` rows remain a genuine
+`scenario_slots` concern — those have no catalogue row by definition, and the picker keeps a separate
+control for them.
+
 **Needed to resolve:** decide which table the seeder writes, then drop the other's `goal_race`
 rows and remove the kind from `ScenarioSlot::VALID_KINDS`. `scenario_slots` still needs
 `team_race`, `grade_deadline`, `scripted_event` and `free_race` regardless — those are correctly
@@ -80,6 +86,10 @@ in production data.
 a per-row fact the source does not encode per row, and it would change rendering for every winless
 run. `RaceSlotPanelComposerTest` covers the state, so deleting the column would have removed
 tested behaviour instead.
+
+**Status after `c320fc4`:** documented dead state, not a bug. The dashed outline and its sentence
+stay in the component with a comment naming the parser line that makes it unreachable, so the
+treatment survives until a source can drive it.
 
 **Needed to resolve:** a product decision — either the column means "this race is maiden-gated"
 and is populated true for standard races, or the rule is a run-level state and the column should
@@ -139,15 +149,24 @@ gate — all of which are in `race_instances` — but not the venue name.
 
 ---
 
-## 6. Race picker and `trainee_goals`
+## 6. `trainee_goals`, and the picker that no longer waits on it
 
-**Missing:** a way to choose among the up-to-12 races at a turn, and any record of a character's
-objectives.
+**Missing:** any record of a character's objectives. The picker half of this entry is **built**
+(`37ed6c2`), and it stays filed here because the `trainee_goals` shape below was derived while
+solving it and must not be re-derived by the next reader.
 
-**Why not built:** `race-panel.blade.php` is under active rewrite (`6c1969f`, R67), and a picker
-belongs there. `KNOWN-ISSUES.md:851` still lists **KI-21 as OPEN** while `6c1969f` appears to have
-implemented its second option — server-driven disclosure rather than Alpine. That discrepancy is
-worth checking before either is filed as done.
+**Correction, recorded rather than edited away:** this entry stated that `KNOWN-ISSUES.md` still
+listed **KI-21 as OPEN** while `6c1969f` appeared to have implemented its second option. Re-checked
+on 2026-09-29 before the picker was touched: **KI-21 is CLOSED** (Slice 13, R67, `6c1969f` —
+server-driven disclosure, no Alpine dependency), and `race-panel.blade.php` carries the comment that
+proves it. The gate was real; the register entry was stale.
+
+**What `37ed6c2` built:** the calendar branch of the race form reads `race_catalog_slots` through
+`TrainingRun::calendarRaceSlots()`, scoped to the career year the screen is showing, because
+`scenario_slots` carries no year and used to offer every seeded race on whatever tab was open. Each
+option names its half-month and grade, and a picked race records against `race_catalog_slot_id` so
+the cell it fills is findable again. A race the Trainer typed earlier keeps its own control and its
+`scenario_slot_id` link; an entry naming both is refused.
 
 **Proposed `trainee_goals` shape, recorded so nobody re-derives it:**
 
@@ -173,11 +192,11 @@ trainee_goals
 Two kinds, and they are genuinely different: a **race goal** is a specific race with a placement
 requirement; a **fan goal** is a threshold by a deadline and occupies no grid cell.
 
-**Needed to resolve:** KI-21 closed and `race-panel.blade.php` free; per-character Goal and
-placement text captured from client panels or guide transcription — **none of it is in the
-export**, which is why only four characters have any Goal data at all.
+**Needed to resolve:** per-character Goal and placement text captured from client panels or guide
+transcription — **none of it is in the export**, which is why only four characters have any Goal data
+at all.
 
-**Owner:** blocked on KI-21.
+**Owner:** this thread, once the Goal data exists. No longer blocked on KI-21.
 
 ---
 
@@ -190,6 +209,10 @@ wiring change and not a rewrite.
 
 **What is missing:** nothing can currently set the state, because `trainee_goals` does not exist.
 The grid therefore shows no pennants at all.
+
+**Status after `c320fc4`:** documented dead state, not a bug, and the markup is deliberately kept.
+The component's state comment names `79ffad5` and this entry so the D-181 treatment is not deleted
+by a reader who assumes an unreachable branch is dead code.
 
 **One correction on the evidence, because it was asserted the other way:** that the client shows a
 red banner on the debut, qualifier, semifinal and final is **not supported by the capture corpus**.
@@ -223,11 +246,15 @@ existing recorded paths get rewritten or grandfathered.
 
 ## 9. A check that cannot fail for the reason it claims
 
-**Partly resolved, kept as a pattern.** `RaceCalendarTest:276` asserts the string
-`Trainer-entered` appears in the rendered HTML, but it **hand-builds** the cells array and passes
-it to the component — it never calls `calendarCells()`. So the model could stop emitting `manual`
-entirely and that test would stay green. Two independent sessions reached this conclusion: `5dcc06c`
-added model-path coverage, and Slice 13's `cb9b61f` named the same flaw in its own comment.
+**Partly resolved, kept as a pattern.** The `RaceCalendarTest` case that labels manual rows
+distinctly asserts the string `Trainer-entered` appears in the rendered HTML, but it **hand-builds**
+the cells array and passes it to the component — it never calls `calendarCells()`. So the model could
+stop emitting `manual` entirely and that test would stay green. Two independent sessions reached this
+conclusion: `5dcc06c` added model-path coverage, and Slice 13's `cb9b61f` named the same flaw in its
+own comment.
+
+(The entry used to cite that test by line number. Two commits in this slice moved the lines, which
+is the argument for naming a test instead of numbering it.)
 
 The same class of error caused a false report earlier in this pass: a verification script reused one
 Laravel query builder across a year loop, and because `Builder::where()` mutates in place, every

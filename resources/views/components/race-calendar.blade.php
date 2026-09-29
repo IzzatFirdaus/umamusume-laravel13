@@ -44,9 +44,28 @@
      * remedy is an event, not a quantity, so there is no number to show and a
      * solid border beside the fan lock's solid border would be telling the Trainer
      * to grind toward 0 fans.
+     *
+     * Two of these seven cannot be reached from data today, and both are kept on
+     * purpose rather than deleted on the way past:
+     *
+     *   goal          79ffad5 withdrew `is_mandatory` as a rendering input, because the
+     *                 flag marks a career obligation while the client's banner marks a
+     *                 per-character objective. The pennant stays wired to the state so
+     *                 that `trainee_goals` has a treatment to emit into.
+     *   maiden_locked GametoraRaceCatalogParser writes `is_maiden_gated` false on every
+     *                 row, so no fetched race can raise this lock.
+     *
+     * Three client marks are absent by rule rather than by omission: the race artwork
+     * thumbnail (PRD §6.13 keeps images out of this tool), the padlock glyph on a fan
+     * gate (there is no icon set, and the figure is what the Trainer acts on), and the
+     * 55% dim §6.20 lists for both locks, which would take the fan figure below the
+     * contrast floor that is the reason for printing it.
      */
     $stateClass = [
-        'empty' => 'border border-rule bg-sunken text-ink-muted py-1.5',
+        // The client's empty half-month is a grey box with a muted plus and no words.
+        // The fill is the measured disabled cell #D0D1D0 (DESIGN.md §6.20); the words
+        // moved into the accessible name, where a screen reader still hears "No race".
+        'empty' => 'border border-rule bg-disabled text-ink-muted py-1.5',
         'open' => 'border border-dashed border-green-line bg-raised text-ink py-1.5',
         // D-181: a `Goal` pennant, a heavier warm outline and greater height. The
         // padding is the height, and it only reads as height because the grid
@@ -57,7 +76,9 @@
         'fan_locked' => 'border-2 border-solid border-rule bg-sunken text-ink-muted py-1.5',
         'maiden_locked' => 'border-2 border-dashed border-ink-muted bg-raised text-ink-muted py-1.5',
         'past' => 'border border-rule bg-transparent text-ink-muted py-1.5',
-        'current' => 'border-2 border-pick-line bg-raised text-ink-strong py-1.5',
+        // Pale yellow with a warm outline, which is this tool's own pick pair: the same
+        // fill and ink the selected year tab and a held spirit burst already use.
+        'current' => 'border-2 border-pick-line bg-pick text-on-pick py-1.5',
     ];
 
     $stateWord = [
@@ -66,7 +87,11 @@
         'goal' => 'Mandatory goal',
         'fan_locked' => 'Fan gate',
         'maiden_locked' => 'Maiden rule',
-        'past' => 'Run',
+        // The client's word for a slot a race has been put on is `Scheduled`, and the
+        // pink pill under the name says exactly that, so the accessible name says it
+        // too. The model state stays `past`: that is the fact about the entry, not the
+        // label the Trainer reads.
+        'past' => 'Scheduled',
         'current' => 'Next',
     ];
 
@@ -162,10 +187,20 @@
                     $state = array_key_exists($state, $stateClass) ? $state : 'empty';
                     $firstLabel = $slotItems[0]['label'] ?? null;
                     $fans = $state === 'fan_locked' ? ($slotItems[0]['fans_needed'] ?? null) : null;
+                    // Whether any race in this half-month has been put here by this run. It is
+                    // not the same question as the cell's border state: a cell holding one
+                    // entered race and one open one draws the open treatment, because that is
+                    // the stronger claim on the border, while the entered race is still
+                    // entered. The Trainer-entered marker below has the same shape.
+                    $entered = collect($slotItems)->contains(fn (array $s): bool => ($s['state'] ?? '') === 'past');
                     $ariaSlots = count($slotItems);
                     $ariaText = $ariaSlots > 1
                         ? "{$ariaSlots} races: " . implode(', ', array_map(fn ($s) => $s['label'] ?? '', $slotItems))
                         : ($firstLabel ?? $stateWord[$state]);
+
+                    if ($entered && $state !== 'past') {
+                        $ariaText .= '; one entered';
+                    }
 
                     if ($isCurrent) {
                         $ariaText .= '; current turn';
@@ -193,7 +228,13 @@
                             <span class="absolute top-0 right-0 h-0 w-0 border-t-3 border-b-3 border-l-5 border-t-transparent border-b-transparent border-l-goal"
                                   aria-hidden="true"></span>
                         @endif
-                        @if ($ariaSlots > 1)
+                        @if ($slotItems === [])
+                            {{-- A half-month with nothing in it carries the client's muted plus
+                                 and no word: twenty-four boxes each printing "No race" is the
+                                 grid describing itself rather than the calendar. The state is
+                                 still spoken, in the accessible name on this box. --}}
+                            <span class="block text-base leading-none text-ink-faint" aria-hidden="true">+</span>
+                        @elseif ($ariaSlots > 1)
                             <ul class="space-y-0.5">
                                 @foreach ($slotItems as $slotItem)
                                     <li class="truncate font-semibold" title="{{ $slotItem['label'] ?? '' }}">
@@ -205,6 +246,15 @@
                             <span class="block truncate font-semibold" title="{{ $firstLabel ?? $stateWord[$state] }}">
                                 {{ $firstLabel ?? $stateWord[$state] }}
                             </span>
+                        @endif
+                        @if ($entered)
+                            {{-- The client's pink `Scheduled` pill marks a race this run has put
+                                 on this half-month, and UX §2.11 says it is never dimmed. It sits
+                                 under the name because there is no thumbnail for it to sit over
+                                 (PRD §6.13), and it is keyed to the slot rather than to the cell's
+                                 border, because a shared half-month keeps the open border. Fill and
+                                 ink are the mood pill's existing pair. --}}
+                            <span class="mt-0.5 inline-block rounded-full bg-mood-great px-1.5 py-0.5 font-mono text-[10px] font-bold text-on-mood">Scheduled</span>
                         @endif
                         @if ($fans !== null)
                             <span class="block font-mono text-xs tabular-nums text-ink-muted">

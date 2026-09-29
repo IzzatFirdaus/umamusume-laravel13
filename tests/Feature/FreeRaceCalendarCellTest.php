@@ -16,7 +16,7 @@ use App\Models\TrainingRun;
  * model: a persisted free_race row reads back as `['state' => 'open', 'manual' => true]`.
  *
  * What nothing pinned was the rendered cell, and the one test that appeared to was
- * `RaceCalendarTest.php:276`, which hand-writes `['state' => 'past', 'label' => 'Local Stakes
+ * `RaceCalendarTest.php`, in the case that labels manual rows distinctly, which hand-writes `['state' => 'past', 'label' => 'Local Stakes
  * (Trainer-entered)']` into the cells array and then asserts the string `Trainer-entered` is in
  * the output. That passes on the label text alone; it would still pass if `calendarCell()` never
  * emitted `manual`, because it never calls `calendarCell()`. So the check could not fail for the
@@ -116,9 +116,11 @@ it('keeps the Trainer-entered marker on a free_race cell after its finish is rec
 
     $cell = $xpath->query('ancestor::*[@role="img"]', $markers->item(0))->item(0);
 
-    // Past geometry: the run happened here. Provenance still named, and still no pennant.
+    // Past geometry: the run happened here. Provenance still named, and still no
+    // pennant. The word is the client's `Scheduled`, which is what the pink pill on the
+    // cell says and therefore what the accessible name says too.
     expect($cell->getAttribute('class'))->toContain('bg-transparent')
-        ->and($cell->getAttribute('aria-label'))->toContain('Run')
+        ->and($cell->getAttribute('aria-label'))->toContain('Scheduled')
         ->and($cell->getAttribute('aria-label'))->toContain('Autumn Practice Stakes')
         ->and($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " border-l-goal ")]')->length)
         ->toBe(0);

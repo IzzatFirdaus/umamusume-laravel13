@@ -203,8 +203,10 @@ it('renders a red Goal pennant on mandatory goal cells', function (): void {
 it('renders a mandatory goal heavier, never dimmer', function (): void {
     $html = renderCalendar('ura_finale', calendarCells());
     $goal = cellClassFor($html, 'Fuwa Fuji Taima Stakes');
-    // The first cell that reads "No race" — Jan Late, since Jan Early is the goal.
-    $empty = cellClassFor($html, 'No race');
+    // The first cell carrying the empty-cell plus — Jan Late, since Jan Early is the
+    // goal. "No race" now lives in the accessible name, so the plus is what marks the
+    // box as the empty one.
+    $empty = cellClassFor($html, '+');
 
     // D-173: a goal race must not read as a weaker version of an empty slot. The
     // contract names a `raised` fill, a warm outline, and greater height, so all
@@ -311,4 +313,65 @@ it('labels manual (Trainer-entered) rows distinctly from seeded ones', function 
     $html = renderCalendar('ura_finale', $cells);
 
     expect($html)->toContain('Trainer-entered');
+});
+
+it('draws an empty half-month as the client does: a grey box and a muted plus, no words', function (): void {
+    $html = renderCalendar('ura_finale', calendarCells());
+    $empty = cellClassFor($html, '+');
+
+    // The measured empty cell is #D0D1D0 (DESIGN.md §6.20), which is this tool's
+    // `disabled` token. The words left the box because twenty-four of them describing
+    // nothing is the grid talking about itself; the state still travels in the
+    // accessible name, which is where a screen reader meets it.
+    expect($empty)->toContain('bg-disabled')
+        ->and($html)->toContain('aria-label="Late Jan: No race, No race"')
+        ->and($html)->not->toMatch('/>\s*No race\s*</');
+});
+
+it('draws the current turn in the client pale yellow with a warm outline', function (): void {
+    $html = renderCalendar('ura_finale', calendarCells());
+    $current = cellClassFor($html, 'Next');
+
+    // "Pale yellow fill with a warm outline" is the measured treatment, and `pick` is
+    // the pair this tool already uses for the selected year tab, so the fill and its
+    // ink come from one place rather than a new hex.
+    expect($current)
+        ->toContain('bg-pick')
+        ->toContain('text-on-pick')
+        ->toContain('border-pick-line')
+        ->and($html)->toContain('aria-label="Late Feb: Next, Next"');
+});
+
+it('marks a race this run has put on a slot with the client Scheduled pill, undimmed', function (): void {
+    $cells = calendarCells();
+    $cells[2]['halves']['Early'] = ['slots' => [
+        ['state' => 'past', 'label' => 'Oka Sho'],
+    ]];
+
+    $html = renderCalendar('ura_finale', $cells);
+    $cell = cellClassFor($html, 'Oka Sho');
+
+    // UX §2.11: completed and entered races use the client's own pink Scheduled pill
+    // and are never dimmed. The visible word and the spoken one are the same word, so
+    // the state list does not call this cell something the Trainer cannot see.
+    expect($html)->toContain('>Scheduled</span>')
+        ->and($html)->toContain('aria-label="Early Mar: Scheduled, Oka Sho"')
+        ->and($cell)->not->toMatch('/opacity-\d/');
+});
+
+it('still shows the Scheduled pill when a second race in the same half-month owns the border', function (): void {
+    $cells = calendarCells();
+    $cells[2]['halves']['Early'] = ['slots' => [
+        ['state' => 'open', 'label' => 'Asahi Hai'],
+        ['state' => 'past', 'label' => 'Oka Sho'],
+    ]];
+
+    $html = renderCalendar('ura_finale', $cells);
+
+    // The border follows the stronger claim on the cell; the pill follows the fact about
+    // the race. Keying the pill to the cell state made an entered race vanish from a
+    // shared half-month the moment anything else landed in it, which is the case the
+    // multiplicity fix exists to support.
+    expect($html)->toContain('>Scheduled</span>')
+        ->and($html)->toContain('Early Mar: Entry open, 2 races: Asahi Hai, Oka Sho; one entered');
 });
