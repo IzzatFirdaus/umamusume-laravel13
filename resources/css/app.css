@@ -215,6 +215,10 @@
     --color-anchor: #0B6FB8;
 }
 
+:root {
+    color-scheme: light;
+}
+
 /*
  * Dark theme override. Values are the measured raceboard anchors (research §3.7,
  * taken from the client's own raceboard screenshot), not an inversion of the default
@@ -222,6 +226,7 @@
  * because it was measured against surfaces like these.
  */
 html[data-theme='dark'] {
+    color-scheme: dark;
     --color-page: #0D0C0F;
     --color-panel: #121013;
     --color-raised: #24262A;
