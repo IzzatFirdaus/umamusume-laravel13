@@ -177,9 +177,9 @@ here.** Making `dateOrNull()` reject the placeholder is not a comment change: it
 grain, so the refactor bracket would stay green across a real behaviour change. Whether the live export
 ever carries the placeholder **cannot be established from this tree** — the 2026-09-27 body is gitignored
 (erratum E-11) and no tracked fixture contains it — so Task 8's cross-check owns the measurement, and if
-the placeholder appears there this question becomes a defect report rather than a design choice. No test
-covers either half today: none feeds the placeholder to `GametoraCharacterParser`, and the card grain's
-refusal is the only sentinel behaviour pinned.
+the placeholder appears there this question becomes a defect report rather than a design choice. Only the
+character half is uncovered: none feeds the placeholder to `GametoraCharacterParser`. The card grain's
+refusal is pinned — by the `[Sentinel]` row named above — and stays the only sentinel behaviour covered.
 
 ### The roster filter is safe as measured, and a later roster move can falsify it
 

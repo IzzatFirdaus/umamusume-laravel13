@@ -25,7 +25,7 @@ return new class extends Migration
              * request and `selectionId` in Task 12's payload all read the same key.
              *
              * The same precedent sets the delete rule, and it is a rule rather than a
-             * one-off: of every reference-pointer FK in this repo that states a delete
+             * one-off: of every nullable attribution pointer in this repo that states a delete
              * rule at all, every one of them nulls. Four, all measured here rather than
              * recalled --
              * `2026_09_26_162820_create_match_candidates_table.php:21`
@@ -36,7 +36,7 @@ return new class extends Migration
              * (`race_entries.scenario_slot_id`) and
              * `2026_09_28_191829_add_race_catalog_slot_id_to_race_entries.php:30-34`
              * (`race_entries.race_catalog_slot_id`) -- each pair `->nullable()` with
-             * `->nullOnDelete()`, and no FK in the directory restricts on delete. So
+             * `->nullOnDelete()`, and no FK in the directory states a restricting rule. So
              * `nullOnDelete()` is what consistency asks for here, not an
              * exception carved out for this column; semantics agree. `character_cards` is
              * engine-owned reference data that a later fetch or correction may delete, and
@@ -46,20 +46,20 @@ return new class extends Migration
              * its skill states survive, the direction every other Trainer-data-preservation
              * rule in this repo runs.
              *
-             * Two other FK shapes in the tree are not counterexamples, and naming them is
-             * what keeps the claim above honest rather than universal. Owned child rows
-             * cascade (`turn_entries.training_run_id` at
-             * `2026_09_26_162818_create_turn_entries_table.php:15`, `character_cards.umamusume_id`
-             * at `2026_09_29_120100_create_character_cards_table.php:34`) -- deleting the
-             * parent must delete the row that exists only for it, the opposite obligation
-             * from an attribution pointer. And three columns state no delete rule at all,
-             * taking the schema default: `training_runs.umamusume_id` at
-             * `2026_09_26_162817_create_training_runs_table.php:16` (required, so a rule
-             * that could null it is meaningless) and this table's
-             * `inheritance_parent_a_id` / `inheritance_parent_b_id` at `:19-20`, both
-             * written three seconds before the first nulled pointer and never revisited
-             * since. This column follows the four that state a rule, because the rule they
-             * state is the one that protects a Trainer's run.
+             * Three other FK shapes in the tree are not counterexamples. Owned child rows cascade
+             * (`turn_entries.training_run_id` at `2026_09_26_162818_create_turn_entries_table.php:15`,
+             * `character_cards.umamusume_id` at `2026_09_29_120100_create_character_cards_table.php:34`) --
+             * deleting the parent must delete the row that exists only for it, the opposite obligation from
+             * an attribution pointer. `run_skills.skill_id` at
+             * `2026_09_26_164640_create_run_skills_table.php:16` is the named counterexample, not a third
+             * rule: a Trainer's skill state aimed at engine-owned `skills`, cascading, unable to null (it is
+             * half of a composite primary key), so it is only arguably a row existing only for the skill.
+             * `database/seeders/SkillSeeder.php:66` does delete skills, so this is a live pre-existing gap
+             * this column neither copies nor fixes. Three columns state no rule and take the schema default:
+             * `training_runs.umamusume_id` at `2026_09_26_162817_create_training_runs_table.php:16`
+             * (required, so a rule that could null it is meaningless) and this table's
+             * `inheritance_parent_a_id` / `inheritance_parent_b_id` at `:19-20`. This column follows those
+             * four, whose rule is the one that protects a Trainer's run.
              */
             $table->foreignId('character_card_id')
                 ->nullable()

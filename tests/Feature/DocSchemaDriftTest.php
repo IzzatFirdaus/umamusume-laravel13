@@ -55,7 +55,7 @@ use Illuminate\Support\Facades\Schema;
  * Both helpers are line-scoped, and a wrapped phrase escapes them: the export reads
  * each doc as separate lines, so a guarded wording that straddles a soft wrap
  * (`not migrated` at the end of one line, `yet` at the start of the next) matches
- * nothing. The four governance docs wrap prose at ~100 columns, so this is a real
+ * nothing. All four governance docs hard-wrap prose, each at its own width, so this is a real
  * blind spot, disclosed rather than fixed — fixing it means joining paragraphs before
  * matching, which would widen the guard's reach across every other line of them.
  */
