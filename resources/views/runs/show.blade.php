@@ -105,14 +105,18 @@
             $panelScenario = $run->scenarioKey();
             // The year is address state, not view state: a Trainer should be able
             // to link "her Classic spring", and back should not drop the tab.
-            // Clamped because the query string is user input.
-            $calendarYear = min(3, max(1, (int) request('year', $run->currentYear())));
+            // Clamped because the query string is user input, in one place the race
+            // panel reads the same way.
+            $calendarYear = $run->careerYearForTab(request('year'));
+            // The turn being decided carries its own year, so the outline belongs to
+            // whichever tab holds it rather than to the year of the last logged turn.
+            $nextTurn = $run->nextTurnToPlay();
         @endphp
         <x-race-calendar
             :scenario="$panelScenario"
             :cells="$run->calendarCells($calendarYear)"
             :year="$calendarYear"
-            :current-turn="$calendarYear === $run->currentYear() ? $run->currentTurnNumber() : null"
+            :next-turn="$nextTurn !== null && $calendarYear === $nextTurn['year'] ? $nextTurn['turn'] : null"
             class="mt-3" />
         <x-grade-point-meter
             :scenario="$panelScenario"

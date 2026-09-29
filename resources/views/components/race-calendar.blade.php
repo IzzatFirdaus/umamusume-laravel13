@@ -6,9 +6,10 @@
     // Which of the three career years these 24 cells belong to. Null keeps the
     // panel as it was before the grid had a year to show: no tabs, no highlight.
     'year' => null,
-    // The run's turn within `year`, 1-24, or null when the run has logged nothing
-    // or the Trainer is looking at a year they are not in.
-    'currentTurn' => null,
+    // The turn the Trainer is deciding about, as its position within `year`, 1-24.
+    // Null when nothing has been logged or when the career has no turn left to take;
+    // the grid then shows no outline rather than falling back to the last turn played.
+    'nextTurn' => null,
     'monthLabels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 ])
 
@@ -167,15 +168,17 @@
                     // The row order above is the turn order, so the slot index is the
                     // turn with one added: Junior Early January is turn 1.
                     $cellTurn = $slotIndex + 1;
-                    $isCurrent = $currentTurn !== null && $currentTurn === $cellTurn;
+                    $isNext = $nextTurn !== null && $nextTurn === $cellTurn;
                     // The peer's priority map already ranked `current` between
                     // goal and fan_locked; nothing ever fed it, so the state was
-                    // defined and unreachable. The current turn is a property of
-                    // the cell, not of any race in it, so it enters as one more
-                    // candidate for the same loop rather than as a slot.
+                    // defined and unreachable. The turn being decided is a property
+                    // of the cell, not of any race in it, so it enters as one more
+                    // candidate for the same loop rather than as a slot. The state
+                    // key stays `current` -- it names the cell the Trainer stands on
+                    // -- while the prop and the spoken words name the turn to play.
                     $candidates = array_map(fn (array $s): string => $s['state'] ?? '', $slotItems);
 
-                    if ($isCurrent) {
+                    if ($isNext) {
                         $candidates[] = 'current';
                     }
 
@@ -202,8 +205,8 @@
                         $ariaText .= '; one entered';
                     }
 
-                    if ($isCurrent) {
-                        $ariaText .= '; current turn';
+                    if ($isNext) {
+                        $ariaText .= '; next turn to play';
                     }
                 @endphp
                 {{-- The caption sits under the box, as in the client capture, because the box's

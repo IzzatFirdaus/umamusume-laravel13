@@ -74,17 +74,29 @@ it('puts the debut at Junior Late June, where the client panel shows it', functi
         ->and(TrainingRun::careerYearForTurn(12))->toBe(1);
 });
 
-it('reports no current turn for a run that has logged nothing', function (): void {
-    expect(runWithTurn(null)->currentTurnNumber())->toBeNull();
+it('reports no turn to play for a run that has logged nothing', function (): void {
+    // The pin survives the semantics change with its reason intact: the next turn of
+    // an untouched run is arithmetically turn 1, and highlighting Early January would
+    // tell a Trainer who has not started that they are standing in it (D-220).
+    expect(runWithTurn(null)->nextTurnToPlay())->toBeNull();
 });
 
-it('counts the current turn within the year, not across the career', function (int $turn, int $expected): void {
-    expect(runWithTurn($turn)->currentTurnNumber())->toBe($expected);
+it('points at the turn being decided, not the turn just logged', function (int $logged, ?array $expected): void {
+    expect(runWithTurn($logged)->nextTurnToPlay())->toBe($expected);
 })->with([
-    [1, 1],
-    [24, 24],
-    [25, 1],
-    [40, 16],
+    // Turns through 3 are done, so the calendar is asking about turn 4: Early February.
+    [3, ['year' => 1, 'turn' => 4]],
+    [1, ['year' => 1, 'turn' => 2]],
+    // Junior Late December logged puts the next turn in Classic Early January. The
+    // answer carries the year with it, because the turn to play is not always in the
+    // year the last logged turn was.
+    [24, ['year' => 2, 'turn' => 1]],
+    // Turn 40 is Classic Late August; the turn to play is Late September.
+    [40, ['year' => 2, 'turn' => 17]],
+    // Senior Late December is turn 72. Nothing is left to take, so nothing is highlighted.
+    [72, null],
+    // A turn logged past the career has no next turn inside the grid either.
+    [80, null],
 ]);
 
 it('shows only the requested year of the catalogue in the grid', function (): void {
@@ -142,32 +154,64 @@ it('names the year in the region label so a screen reader is not told twelve mon
     expect($html)->toContain('Senior year, 24 turn slots');
 });
 
-it('highlights the current turn, which the component ranked but never received', function (): void {
+it('highlights the turn to play, which the component ranked but never received', function (): void {
     // 70248b3 put `current` at priority 5 in its own map; nothing fed it, so the
-    // state was defined and unreachable. The prop is the feed.
+    // state was defined and unreachable. The prop is the feed, and it now carries the
+    // turn being decided rather than the one just logged.
+    $run = runWithTurn(11);
+
     $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" :current-turn="12" />',
-        ['cells' => runWithTurn(1)->calendarCells(1)]
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" :next-turn="$turn" />',
+        ['cells' => $run->calendarCells(1), 'turn' => $run->nextTurnToPlay()['turn']]
     );
 
-    expect($html)->toContain('current turn')
+    // Turn 11 is logged and turn 12 is the one being asked about: Late June, where the
+    // debut sits. The spoken words name the new semantics instead of the old ones.
+    expect($html)->toContain('aria-label="Late Jun: Next, Next; next turn to play"')
         ->and(substr_count($html, 'border-pick-line'))->toBe(1);
 });
 
-it('does not highlight a turn in a year the run is not in', function (): void {
-    $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="2" :current-turn="$turn" />',
-        ['cells' => runWithTurn(1)->calendarCells(2), 'turn' => null]
+it('shows the outline on the year that holds the turn to play, not the year last logged', function (): void {
+    // Junior Late December is turn 24, so the turn to play is Classic Early January.
+    // The derivation carries its own year precisely so the tab that does not hold the
+    // turn stays plain instead of lighting up Early January of the wrong year.
+    $run = runWithTurn(24);
+    $next = $run->nextTurnToPlay();
+
+    $classic = Blade::render(
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="$year" :next-turn="$turn" />',
+        ['cells' => $run->calendarCells(RaceCatalogSlot::YEAR_CLASSIC), 'year' => $next['year'], 'turn' => $next['turn']]
+    );
+    $junior = Blade::render(
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" :next-turn="null" />',
+        ['cells' => $run->calendarCells(RaceCatalogSlot::YEAR_JUNIOR)]
     );
 
-    expect($html)->not->toContain('border-pick-line');
+    expect($next)->toBe(['year' => 2, 'turn' => 1])
+        ->and($classic)->toContain('Early Jan: Next, Next; next turn to play')
+        ->and($junior)->not->toContain('border-pick-line');
 });
 
-it('ranks a goal above the current-turn outline', function (): void {
+it('highlights nothing when the career has no turn left to play', function (): void {
+    // The edge the semantics change has to answer: a finished career shows no
+    // outline at all, rather than falling back to the last turn the Trainer played.
+    $run = runWithTurn(72);
+
+    $html = Blade::render(
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="3" :next-turn="$turn" />',
+        ['cells' => $run->calendarCells(RaceCatalogSlot::YEAR_SENIOR), 'turn' => $run->nextTurnToPlay()['turn'] ?? null]
+    );
+
+    expect($run->nextTurnToPlay())->toBeNull()
+        ->and($html)->not->toContain('border-pick-line')
+        ->and($html)->not->toContain('next turn to play');
+});
+
+it('ranks a goal above the next-turn outline', function (): void {
     // Priority is a component concern, so it is tested at the component. Going
     // through the model would need a Goal source that does not exist yet.
     $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="2" :current-turn="20" />',
+        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="2" :next-turn="20" />',
         ['cells' => calendarCellsWithGoal(9, 'Late', 'Tokyo Yushun (Japanese Derby)')]
     );
 

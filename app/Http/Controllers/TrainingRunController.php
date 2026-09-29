@@ -186,7 +186,7 @@ class TrainingRunController extends Controller
                 'preview' => $preview,
                 'energy' => $staged['energy'] ?? $latest?->energy,
                 'mood' => $staged['mood'] ?? $latest?->mood?->value,
-                'turn' => (int) ($staged['turn'] ?? $this->nextTurn($run)),
+                'turn' => (int) ($staged['turn'] ?? $run->nextTurnNumber()),
                 'has_previous' => $latest !== null,
                 'previous' => $latest,
             ],
@@ -232,11 +232,6 @@ class TrainingRunController extends Controller
         ];
 
         return $choices;
-    }
-
-    private function nextTurn(TrainingRun $run): int
-    {
-        return (int) $run->turnEntries->max('turn') + 1;
     }
 
     /**

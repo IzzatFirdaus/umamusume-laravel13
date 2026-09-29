@@ -60,6 +60,13 @@ class TrainingRun extends Model
     use HasFactory;
 
     /**
+     * Turns in one career year: the client's own grid, twelve months times Early and
+     * Late. A three-year career is therefore 72 turns, which is what `nextTurnToPlay()`
+     * reads as the end of the career.
+     */
+    public const TURNS_PER_YEAR = 24;
+
+    /**
      * The period the Trainer reports as live is entered, not inferred (D-270), and it
      * is only meaningful on a run whose scenario composes grade objectives. The HTTP
      * boundary validates the same range; this guard is what keeps a writer that is
@@ -311,17 +318,20 @@ class TrainingRun extends Model
     }
 
     /**
-     * The race calendar's cells, composed from this scenario's slots and this
-     * run's own race log (D-221, D-240).
+     * The race calendar's cells, composed from the career catalogue and this run's
+     * own race log (D-221, D-240).
      *
      * Twelve entries indexed from zero — January first — each holding its Early and
-     * Late half, which is the shape `x-race-calendar` reads. The slots say what a
-     * race asks for; the run says how far it has got against that.
+     * Late half, which is the shape `x-race-calendar` reads. The catalogue says what
+     * a race asks for; the run says how far it has got against that.
      *
-     * Only `goal_race` slots become cells. Team races, Grade Point deadlines and
-     * scripted events are timeline slots too, but the calendar carries no treatment
-     * for them, and drawing a deadline in a race cell would show a race the
-     * scenario does not have.
+     * Two sources, and the split is the retarget. Calendar races come from
+     * `race_catalog_slots` for the requested career year, because that is the table
+     * carrying a year; `scenario_slots` is read only for `free_race` rows, which are
+     * the Trainer's own and have no catalogue row by definition. Team races, Grade
+     * Point deadlines and scripted events are timeline slots too and stay out of the
+     * grid: the calendar carries no treatment for them, and drawing a deadline in a
+     * race cell would show a race the scenario does not have.
      *
      * @return list<array{halves: array<string, array<string, mixed>>}>
      */
@@ -428,7 +438,7 @@ class TrainingRun extends Model
     /**
      * Which of the three career years a career turn falls in.
      *
-     * `turn_entries.turn` is a single monotonic counter — `nextTurn()` is
+     * `turn_entries.turn` is a single monotonic counter — `nextTurnNumber()` is
      * max(turn) + 1 with no per-year reset — so the year is derived rather than
      * stored. The divisor is the client's own grid: 24 turns per year, Early and
      * Late for each of twelve months, corroborated against [Global] captures in
@@ -437,7 +447,7 @@ class TrainingRun extends Model
      */
     public static function careerYearForTurn(int $turn): int
     {
-        return min(RaceCatalogSlot::YEAR_SENIOR, max(RaceCatalogSlot::YEAR_JUNIOR, intdiv($turn - 1, 24) + 1));
+        return min(RaceCatalogSlot::YEAR_SENIOR, max(RaceCatalogSlot::YEAR_JUNIOR, intdiv($turn - 1, self::TURNS_PER_YEAR) + 1));
     }
 
     public function currentYear(): int
@@ -448,18 +458,47 @@ class TrainingRun extends Model
     }
 
     /**
-     * Where in the year the next logged turn lands, on the 1-24 grid the client
-     * labels, or null when nothing has been logged yet.
-     *
-     * A run with no turns has no current turn to highlight; rendering turn 1 would
-     * claim the Trainer is standing on Early January when they have not taken a
-     * single turn (D-220).
+     * The career turn number the next log lands on: one past the highest logged.
      */
-    public function currentTurnNumber(): ?int
+    public function nextTurnNumber(): int
     {
-        $latest = (int) $this->turnEntries()->max('turn');
+        return (int) $this->turnEntries()->max('turn') + 1;
+    }
 
-        return $latest < 1 ? null : ((($latest - 1) % 24) + 1);
+    /**
+     * The turn the Trainer is deciding about, as the year it falls in plus its
+     * position on that year's 1-24 grid — or null when there is no turn to decide.
+     *
+     * The client's calendar marks the turn being played, not the one just logged: a
+     * run through turn 3 is being asked about turn 4. Two answers are null. A run
+     * with nothing logged has no position to claim, and pointing at Early January
+     * would tell a Trainer who has not started that they are standing in it (D-220).
+     * A career with all 72 turns logged has no next turn inside the grid, and the
+     * finished run highlights nothing rather than falling back to the last turn
+     * played.
+     *
+     * The year travels with the position because they can disagree: turn 24 is Junior
+     * Late December, and the turn after it is Classic Early January, which sits on the
+     * tab the Trainer is not looking at.
+     *
+     * @return array{year: int, turn: int}|null
+     */
+    public function nextTurnToPlay(): ?array
+    {
+        if ($this->turnEntries()->doesntExist()) {
+            return null;
+        }
+
+        $next = $this->nextTurnNumber();
+
+        if (intdiv($next - 1, self::TURNS_PER_YEAR) + 1 > RaceCatalogSlot::YEAR_SENIOR) {
+            return null;
+        }
+
+        return [
+            'year' => self::careerYearForTurn($next),
+            'turn' => ((($next - 1) % self::TURNS_PER_YEAR) + 1),
+        ];
     }
 
     /**
