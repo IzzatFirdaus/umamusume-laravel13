@@ -2377,7 +2377,7 @@ guarantee that the engine never guesses."
 - Modify: `resources/views/catalog/index.blade.php:10-51` — the `<x-layout>` body from the page `<h1>` through the list's closing `@endif`, below the file's header comment
 - Modify: `app/Http/Controllers/CatalogController.php` — `index()` and `cached()`
 - Create: `resources/views/components/rarity-chip.blade.php`
-- Modify: `DESIGN.md` §3.4 (the G-5 contrast pair record)
+- Modify: `docs/design-research/DESIGN.md` §3.4 (the G-5 contrast pair record, at :113 of that file - NOT the root `DESIGN.md`, which only points here)
 - Test: `tests/Feature/CatalogRosterTreeTest.php`
 
 **Interfaces:**
@@ -2755,7 +2755,7 @@ G-5 and G-47 want every new text/background pair computed. The browser half of `
 grep -n -- '--color-ink:\|--color-ink-strong:\|--color-raised:\|--color-page:\|--color-risk:' resources/css/app.css
 ```
 
-For each pair: linearise each sRGB channel `c <= 0.03928 ? c/12.92 : ((c+0.055)/1.055)^2.4` on the 0-1 component, then `L = 0.2126 R + 0.7152 G + 0.0722 B`, then `ratio = (L_lighter + 0.05) / (L_darker + 0.05)`. Record in `DESIGN.md` §3.4: `text-ink` on `bg-raised` in light and dark, and `text-risk` on `bg-raised` in light and dark for the unconfirmed warning. `text-ink` on `bg-raised` is an existing measured pair, so the only genuinely new one is `text-risk` — that is the line to add, with its two numbers.
+For each pair: linearise each sRGB channel `c <= 0.03928 ? c/12.92 : ((c+0.055)/1.055)^2.4` on the 0-1 component, then `L = 0.2126 R + 0.7152 G + 0.0722 B`, then `ratio = (L_lighter + 0.05) / (L_darker + 0.05)`. Record in `docs/design-research/DESIGN.md` §3.4: `text-ink` on `bg-raised` in light and dark, and `text-risk` on `bg-raised` in light and dark for the unconfirmed warning. `text-ink` on `bg-raised` is an existing measured pair, so the only genuinely new one is `text-risk` — that is the line to add, with its two numbers. **Compute them yourself and print the formula, the four hex inputs and the read date next to them.** The three `text-risk` rows already in that section (10.04 light, 4.33 dark-before, 4.77 dark-after, from KI-20) do not reproduce from the very hex values they name under the WCAG formula above: recomputed on 2026-09-29 at `6a7236f` they are 10.89 / 5.51 / 6.22, and no plausible variant formula (no-gamma, simple-average) yields the recorded set either, so the recorded figures were not produced from those inputs. Every one of them still clears 4.5:1 under the correct arithmetic, so no token moves either way, but do not copy the recorded numbers into a new row and do not overwrite the old ones - flag the discrepancy as an open question for KI-20's author. Root cause is unfathomed, not minor: a contract row whose ratio cannot be reproduced from its own inputs is a check that cannot fail for the reason it states.
 
 - [ ] **Step 10: Gates and commit**
 
@@ -2763,7 +2763,7 @@ For each pair: linearise each sRGB channel `c <= 0.03928 ? c/12.92 : ((c+0.055)/
 vendor/bin/pint --dirty --format agent && vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 npm run build
 git add resources/views/catalog/index.blade.php resources/views/components/rarity-chip.blade.php \
-        app/Http/Controllers/CatalogController.php DESIGN.md tests/Feature/CatalogRosterTreeTest.php
+        app/Http/Controllers/CatalogController.php docs/design-research/DESIGN.md tests/Feature/CatalogRosterTreeTest.php
 git commit -m "feat(ui): the catalog as a trainee and card tree, filtered by default
 
 One heading per trainee, one per card beneath her, debut first then Global release
