@@ -58,9 +58,15 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 - A-7 [ADR-0012 Decision 4; owner ruling 2026-09-30 under `AGENTS.md` escalation 2]: a trainee
   profile block on the sibling `umamusume_profiles` table, one row per trainee, carrying **four**
   fields this PRD did not name before this line: **voice actor**, **birthday**, **height**, and
-  **three sizes**. Both casts are stored for the voice actor, because the source states a Japanese
-  and an English one and they disagree about who speaks for her. Every part is nullable: the source
-  omits `va_en` and `three_sizes` on 10 of the 135 roster rows and `birth_year` on 17 of 163, so a
+  **three sizes**. Both voice-actor fields are stored because the source records the credit in two
+  scripts of one name: `va_ja` the Japanese credit (`和氣あず未`) and `va_en` its romanisation
+  (`Azumi Waki`); where a stage name is already romanised the two hold the identical string, which no
+  separate dub cast could produce. *[Dated erratum 2026-09-30: the first draft of this line said the
+  source "states a Japanese and an English one and they disagree about who speaks for her." The body
+  refutes it — `va_en` is a romanisation, not a second cast — and a block that showed only `va_ja`
+  would render Japanese script to a Global reader.]* Every part is nullable: measured across the 105
+  `race === 'uma'` rows this source keeps, `va_en` is absent on 3, `three_sizes` on 7 and
+  `birth_year` on 7, so a
   NOT NULL column would make the parser invent a value, and an absent part renders as a named
   absence rather than a blank or a guess. Sibling table rather than columns on `umamusume` because
   the source is one document about one trainee. Provenance inline per **A-4**, with its own
