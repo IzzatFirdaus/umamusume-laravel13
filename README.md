@@ -42,10 +42,17 @@ Keep the app on loopback; it has no auth surface and must not be exposed.
 |---|---|
 | `/umamusume` | Catalog index: filter by release status, normalized search |
 | `/umamusume/{slug}` | Detail with aliases and provenance (source URL + fetched date) |
+| `/skills` | Skill search (Screen D): normalized search, derived-type and unique facets, paginated |
 | `/training-runs` | Trainer run CRUD, per-turn stat logging (0..1200 bounds), skill states Suggested/Acquired/Skipped |
 | `/training-runs/{run}/export/csv|.json` | Run download, no data lock-in (US-6) |
 | `/review` | Match review queue: confirm, alias, or reject engine proposals |
 | `/design-preview` | Component review surface for the design system (not a product flow) |
+
+**`/skills` reads fetched data, not seed data, and says which it has.** `php artisan migrate:fresh --seed`
+leaves it stating that the catalog holds no rows yet: the seeder's ten illustrative names carry no
+availability from a source, and `Skill::availableOnGlobal()` (PRD FR-D-3, `ADR-0011` §2) is what decides
+that a row may reach a Trainer. Run `php artisan uma:fetch gametora-skills` to fill it — 623 `[Global]`
+rows of 1,910 stored, as of the `609afe88` snapshot pulled 2026-09-29.
 
 ## Fetch engine
 

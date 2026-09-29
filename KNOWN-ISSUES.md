@@ -7,6 +7,11 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, Screen D pass):** **25 filed, 19 closed, 6 open**, one filed and none closed here.
+**KI-26** is the unescaped `LIKE` on `/umamusume`: a search of `%` returns the whole catalog rather than the
+rows whose key contains that character. Reproduced through that controller, not by a hand-written query, and
+left unfixed here because `CatalogController` is not this pass's surface and the file is on master in a shared
+tree. Screen D escapes and tests the difference. Prior:
 **Status (2026-09-29, Slice 16):** **24 filed, 19 closed, 5 open.** **KI-25 is back to OPEN** under R85.
 `b8c0a54` did land the focusable scroll region and its test, and that work is not being undone; what is
 being withdrawn is the closure, because the issue's **measurement half has never been read in a browser** —
@@ -1190,3 +1195,37 @@ smallest diff and the last loses data. None is chosen here.
 does not currently record. Found while measuring something else: the browser pass was sent to check
 contrast on the new turn control, and the overflow surfaced only because the same script read the viewport
 width too.
+
+## KI-26 A search of `%` returns the whole catalog, because `CatalogController` interpolates the query into a `LIKE` it never escapes — FILED 2026-09-29 (Screen D pass), OPEN
+
+**What is wrong.** `app/Http/Controllers/CatalogController.php:39` folds the `search` query through
+`NameNormalizer`, and `:44-49` interpolates the result into `match_key LIKE "%{key}%"` (and the same shape
+into `lower(alias) like ?`). `NameNormalizer` lowercases, NFKD-folds and strips marks, spaces and dashes —
+it does not touch `%` or `_`, and SQLite's `LIKE` has **no default escape character**, so both are pattern
+wildcards. A Trainer typing `%` is not asking for a skill whose name contains a percent sign; they are
+asking for every row, and the screen answers as though that were the intended question.
+
+**Proof, through the controller rather than a query I wrote.** `GET /umamusume?search=%` returns
+`total=2 of all=2` against the seeded catalog, and `?search=_` likewise, while `?search=zzzqqq` returns `0`.
+Two rows is the whole table, so the mechanism is visible even at seed size. Measured on the imported
+`skills` table, the same clause shape is the difference between **623 of 623** `[Global]` rows for an
+unescaped `%` and **1** row for an escaped one, which is the row whose client name really is
+`Givin' It 1000%`. The alias branch is the same defect one clause over.
+
+**Why it matters more than an odd empty result.** The screen does not say "this was treated as a pattern".
+It prints the total count and the pagination, so `%` reads as *every skill matches your search*, which is
+the failure this register keeps naming: a control that answers a question nobody asked.
+
+**Why it is not fixed here.** `CatalogController` is on master, is not Screen D's surface, and the tree is
+shared with at least one other session editing views. The new surface escapes and is tested; that is the
+whole of what this pass could do without reaching into another file's behaviour.
+
+**What fixing it needs.** Escape `%` and `_` (with `ESCAPE '\'`, or `addcslashes($key, '\%_')` into a named
+escape clause) in both the `match_key` and the alias branch, plus one test that a literal `%` query returns
+the rows containing one and not the rows that merely exist. `Screen D`'s version is
+`SkillController::query()` with `SkillSearchScreenTest`'s wildcard case, so a shared helper is the shape the
+fix probably takes — but that is two surfaces' behaviour to change together, and it belongs to whoever next
+owns `CatalogController`.
+
+**Owner.** whoever picks up `CatalogController`; found while building the second server-driven filter
+surface and noticing the first one had no escape.

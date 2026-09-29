@@ -340,6 +340,22 @@ code work on skills begins until (1) is answered.
 `rarity` authorized as a PRD amendment and stored as the source's code with no label; level with no
 percentage anywhere.
 
+**Still open after Screen D landed the same day** — these are the decisions nobody has made, not work
+somebody skipped:
+
+1. **Hint level** (G-SK-3, G-SK-4): a `run_skills.hint_level` column and conflict row 16's curve. Screen D
+   renders no hint anything, by ruling and by scope.
+2. **The fixture path exclusion** (G-SK-17): gate tooling, owner's pen, two facts recorded there.
+3. **Icon and description** (G-SK-19, G-SK-20): both are §6.11 elements with no source this repository
+   holds. A description column specifically needs a client-string source first, not a re-read of `desc_en`.
+4. **A Japanese search key** (G-SK-22): a new column, so a PRD amendment first.
+5. **FR-D-2's second word.** The PRD asks for "skill search/autocomplete **for the run UI**" while §8.4 makes
+   Screen D a surface of its own. The surface landed, and the run screen links to it, so a Trainer can narrow
+   623 rows before choosing. Whether the run screen *also* gets in-place autocomplete is unsettled; a native
+   `<datalist>` filled server-side would do it with no JS dependency, which is the one constraint here that
+   no option may break.
+6. **The D-63 and D-65 amendment asks** (G-SK-23), including whether `skills` should have aliases at all.
+
 ---
 
 ## 8. Landed 2026-09-29 (same pass, after the owner's three rulings)
@@ -355,10 +371,12 @@ documented fallback); `Contracts/SkillSourceParser`; `Parsers/GametoraSkillsPars
 D-210 addendum; and the run screen's filter plus `✦ Unique` / SP cost marks and the hint-level absence
 said out loud. `ADR-0011` carries the measurements; `KI-23`/`KI-24` carry the two defects found on the way.
 
-**Two commits post-date the `verified-against` SHA above** and are named so a reader does not grep that tree
-for them: `83086b0` adds the rendered-output absence check that G-SK-17 now leans on
-(`SkillsFetchTest::skillsFixtureGlobalRenderings()`), and `c3bdda3` records the two facts that path-exclusion
-ruling needs before it can be answered.
+**Everything after `acab4d8` on this branch is the Screen D pass**, and its own commits are three: the
+rendered-output absence check that G-SK-17 leans on (`83086b0`, `SkillsFetchTest::skillsFixtureGlobalRenderings()`)
+and the two register corrections (`c3bdda3`, `acab4d8`) already sit before that mark, so `git log acab4d8..HEAD`
+is the range rather than a list that goes stale. What the range carries: the fixture's three added rows, the
+`GET /skills` surface, G-SK-19 to G-SK-23, and **KI-26**. Listing the SHAs here instead of a range would mean
+a file that cites commits it cannot contain.
 
 **Measured on the first live import** (`uma:fetch gametora-skills`): 1,901 created, 9 adopted, 0 to
 review, 1,910 stored — **623** rows are `[Global]` and client-named, and those 623 are exactly what
@@ -419,7 +437,7 @@ idempotence covers this source too.
   exclusion in one place, the alternative is a captured-source folder, e.g.
   `tests/Fixtures/gametora/`, holding the document beside a sidecar note, with that **directory** excluded
   in both gate surfaces. Either way the assertion that carries the weight is the one in `SkillsFetchTest`:
-  five derived renderings forbidden over decoded page text, with the row's own client string required
+  eight derived renderings forbidden over decoded page text, with the row's own client string required
   present so the absence cannot pass on an extraction that saw nothing.
 - **G-SK-18 — the category derivation reads the sign, not only the code. Do not "simplify" this away.**
   Effect code 1 is an axis, not a meaning: `Right-Handed ◎` reads `+600000` on it and `G1 Averseness`
@@ -433,6 +451,66 @@ idempotence covers this source too.
   negative number in a fixture. **If a future slice refactors the derivation, keep the sign test or
   delete the derived `type` column; a taxonomy that quietly absorbs negatives is the failure this
   repository has been catching all session.**
+- **G-SK-19 — §6.11's skill icon has no source in this repository, so Screen D renders none.** The document
+  states `iconid` on **all 1,910 rows**, and nothing stores it: no column, no asset path, and no committed
+  manifest that names where an icon is served from. Landing it is two decisions before it is any code — a
+  PRD amendment for the column (FR-D-1's set is name, name_ja, match key, sp_cost, type, `is_unique`, plus
+  `ADR-0011` §3's rarity and provenance and FR-D-3's availability; an icon is outside all of that), and an
+  owner ruling on whether image assets are fetched at all, which `CONSTRAINTS.md` C-4 scope notes have kept
+  out of Phase 1. Screen D's rows carry the name, the Japanese name, the cost, the derived type and the
+  `is_unique` mark, which is the whole of what `D-30` permits and the whole of what the data holds.
+- **G-SK-20 — §6.11's description has no client string behind it, and the vocabulary is the proof.** See
+  G-SK-16 for the measurement: `desc_en` fails the terminology table 189 times (172 of them `endurance`) and
+  `endesc` fails it 72 times (52 `wisdom`, 16 `motivation`), so neither field is `[Global]` prose, and the
+  one that *looks* most like game copy is precisely the one that contradicts `SOURCE-OF-TRUTH.md` §3.
+  **The rule this entry exists to keep:** no description column may be added until a client-string source for
+  descriptions exists — an in-client capture, not a re-read of the export. A future pass should not reach for
+  `desc_en` because it reads better than `endesc`; that is D-20's failure mode with a flattering example.
+- **G-SK-21 — two `[Global]` skills share a client name, and the Unique badge falls on the one no card
+  names.** Measured on the imported document: 623 rows, **621 distinct client names**. `Indomitable` is
+  export **200471** (class code 2, learnable, 170 SP, derived `Recovery`) and export **300141** (class code
+  5, no SP cost, derived `Speed`) — and 300141 is one of the four rows `ADR-0011` §5 names as beyond the
+  card join. `Carnival Bonus` is the other collision (1000011, 1001012, both class code 1, neither priced).
+  So a Trainer searching `Indomitable` gets two rows, and the code rule badges exactly one of them.
+  **Ruled 2026-09-29 (owner, option b of three):** ship the code rule, because it is what a one-document
+  parser can defend, and put the limit on the badge itself — `title="Marked from the source's skill class
+  code, not from a card's own skill list."` No count in the copy: 290-of-294 is a fact about one snapshot
+  and belongs here and in the ADR, not in UI text that will outlive it. The rejected alternatives were to
+  badge nothing (silently dropping the client's own signal) or to read the card document on this screen
+  (option c: a second source in the read path for four rows).
+  Both rows render, and they are distinguishable without a rarity word because cost and derived type differ.
+  `SkillSearchScreenTest` pins the collision through the producer path, with both rows in the fixture
+  verbatim, so it cannot be quietly "fixed" by a future dedupe.
+- **G-SK-22 — a Japanese query cannot reach a skill, so D-63's "which field matched" has one answer today.**
+  `StoreSkills.php:68` writes `match_key` from `$record['name']`, which is the client English string, and
+  `NameNormalizer` does not transliterate. Measured against the live document: of 200 sampled `[Global]`
+  `jpname` values, **1** finds a row through `match_key LIKE` — and that one is export 200311-style noise, a
+  row whose `jpname` is the Latin string `U=ma2`. `DESIGN.md` §8.4 and D-62 both say a Japanese query may
+  return an English row; for skills it returns nothing. D-63's matched-field report therefore has exactly one
+  field to report. Fixing it means a normalized key derived from `name_ja` (or a second searchable key
+  column), which is a new column, which is a PRD amendment first. **What was not done instead:** matching on
+  the `name_ja` display string directly, which the root Banned Patterns D-62 cites forbid, and which would
+  have made the screen look right while breaking the rule that keeps case- and width-folded search honest.
+- **G-SK-23 — D-65's review-queue offer does not map to skills, and Screen D says so rather than linking to
+  an empty place.** D-65's no-results state offers the review-queue path (US-5) because a missing skill is a
+  data gap, not a user error — that half is true and is kept. The queue half is not reachable: `StoreSkills`
+  writes straight past `match_candidates` by design, and `SkillsFetchTest` asserts the queue holds zero
+  skills after a full import. So the screen states the gap in the fetched data and names
+  `php artisan uma:fetch gametora-skills` when the table is empty outright, and links to `/review` nowhere.
+  **Two amendment asks, both the owner's pen, because `CONSTRAINTS.md` is not this agent's file to widen:**
+  D-65's queue clause scoped to cross-referenced entities, and D-63's "skill name, Japanese name, or alias"
+  reduced to what `skills` can back — the table has no alias column and no alias relation (contrast
+  `umamusume`, whose `aliases` `CatalogController.php:47` searches), so "alias" is a field that does not
+  exist on this entity. Either the clause gains a "where the backing exists" scope or skills gain aliases;
+  neither is decided here.
+
+**Landed with Screen D, 2026-09-29 (the same owner pass, decisions 1 to 5).** `GET /skills` is the second
+server-driven filter surface and the answer to G-SK-13's 623-option select: the run screen now links to it
+and the shell's nav carries it, so the long list has a way out. Facets are **search, type (with
+`Unspecified` for the 288 rows the sign rule withheld) and unique**; `rarity` and cost-present are columns,
+not controls, because a filter over a code no Trainer can read is D-64's ornament. The param is `search`,
+matching `/umamusume`, and the query is escaped before the `LIKE` — the older surface is not, which is
+**KI-26**, filed and left there deliberately.
 
 **G-SK-1 through G-SK-2, read with the above:** G-SK-2 (no skills import) is closed by this pass.
 G-SK-1 stays as written because it was the *correction* that mattered — the columns were already PRD-shaped,
