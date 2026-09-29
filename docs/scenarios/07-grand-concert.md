@@ -17,6 +17,12 @@
 > extraction should be re-attempted until a primary source enters the corpus: a GameTora or Game8
 > scenario page read to completion, a `[Global]` notice, or a client capture. An earlier attempt at
 > the two pages named below was navigated away by a concurrent browser session and produced nothing.
+>
+> **Pointer, not an extraction (2026-09-28).** [`09-global-race-calendar.md`](09-global-race-calendar.md)
+> documents the shared `[Global]` career race schedule and records the one race-level row this
+> scenario has in the export: `URA Finals Final (Grand Live)`, tid `Md`, marked
+> `did_not_exist: pre_gl`. That is a dataset row, not a mechanic. The suspension above stands
+> unchanged, and nothing in 09 infers a Grand Concert goal list, finale structure or resource.
 
 ## Sourced facts
 

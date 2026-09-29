@@ -79,6 +79,12 @@ Even a stat-maxed trainee will lose if she runs out of stamina mid-race, so trea
 
 ## Full Fixed Event Calendar
 
+> **Race timing is not in this file.** The per-turn race schedule — which race exists at which
+> turn, its tier, distance, surface, track and entry fan gate — lives in
+> [`09-global-race-calendar.md`](09-global-race-calendar.md), generated from the export and
+> confirmed against `[Global]` client captures. The only race row this guide carries is the debut
+> line below, and it is not a calendar. Do not re-paste 09's tables here.
+
 ### Junior Year
 | Event | Timing/Requirement | Effect |
 |---|---|---|

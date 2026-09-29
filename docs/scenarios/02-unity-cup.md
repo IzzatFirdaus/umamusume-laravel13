@@ -17,6 +17,12 @@
 > Where this file states a figure that 06 also states, **06 is the source of truth**; the figures
 > below have been corrected to the post-rework values and the full tables deliberately live in one
 > place only. Do not re-paste 06's tables here — that duplication is what let this file drift.
+>
+> **Race timing lives in neither file.** Unity Cup draws the same per-turn career race schedule as
+> URA Finale, and that schedule is documented once, in
+> [`09-global-race-calendar.md`](09-global-race-calendar.md) — including the export row that is the
+> only structural difference between the two scenarios' calendars, the forked final
+> (`URA Finals Final (Aoharu)`). Team Race timing stays in 06.
 
 ## Overview
 
