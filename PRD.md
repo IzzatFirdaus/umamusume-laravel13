@@ -82,7 +82,7 @@ Explicitly not built, with the legacy feature they replace:
 
 1. **No authentication or multi-user anything** (replaces uma-tracker's Breeze stack, dormant Sanctum in two repos). One Trainer, one machine.
 2. **No SPA frontend** (replaces uma-companion's Vue 3 + Pinia scaffold). Blade + Tailwind v4.
-3. **No breeding/pairing engine** (replaces uma-companion's sire × dam system, whose vocabulary was also a lore violation). Inheritance is recorded as two optional parent references on a run, nothing more.
+3. **No breeding/pairing engine** (replaces uma-companion's sire × dam system, whose vocabulary was also a lore violation). Inheritance is recorded as two optional parent references on a run, nothing more. **Narrowed 2026-09-29 by `ADR-0010`:** "nothing more" caps *computation*, not *recording*. The engine stays banned — nothing predicts a Spark firing, an affinity payout, or an offspring — and `training_runs.legacy_selection` now stores what the Legacy Select screen displays, because `CONSTRAINTS.md` D-268 found the two references short of what that screen produces. No outcome is derived from it.
 4. **No EAV attribute storage** (replaces umamusume-tracker-app's legacy `attributes` table). Fixed stat columns.
 5. **No Excel export, no `maatwebsite/excel`** (replaces both Laravel 11/12 trackers' export stacks). CSV/JSON only.
 6. **No event/banner calendar in Phase 1** (uma-companion's events domain). Revisited in a later phase once the fetch engine has proven reliability.

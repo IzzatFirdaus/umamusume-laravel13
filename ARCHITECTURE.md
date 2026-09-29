@@ -110,6 +110,8 @@ training_runs
   id, umamusume_id FK->umamusume, scenario string nullable,
   status string enum-backed (RunStatus: Active | Completed | Retired) default Active,
   inheritance_parent_a_id FK->umamusume nullable, inheritance_parent_b_id FK->umamusume nullable,
+  legacy_selection json nullable (ADR-0010: the Legacy Select read-back as the Trainer recorded it;
+    see App\Models\Legacy\LegacySelectionPayload for the shape and what it deliberately omits),
   notes text nullable, timestamps
 
 turn_entries

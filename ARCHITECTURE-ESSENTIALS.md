@@ -30,7 +30,7 @@ Token-efficient digest of ARCHITECTURE.md for agent context injection. If this f
 - skills: name, name_ja?, match_key?, sp_cost?, type?, is_unique
 - data_sources: umamusume_id FK, url, source_key, fetched_at, snapshot_path?, confidence?, source_timezone? (IANA)
 - match_candidates (review queue): source_key, proposed_name/_ja/_match_key, suggested_umamusume_id?, match_tier (Fuzzy|None), status (Pending|Confirmed|Aliased|Rejected), payload json
-- training_runs: umamusume_id FK, scenario?, status (Active|Completed|Retired), inheritance_parent_a_id?, inheritance_parent_b_id?, notes?
+- training_runs: umamusume_id FK, scenario?, status (Active|Completed|Retired), inheritance_parent_a_id?, inheritance_parent_b_id?, legacy_selection? (json), notes?
 - `training_runs.scenario` is a free-text COLUMN but a validated VALUE: `StoreTrainingRunRequest` rules it against `config('scenarios.scenarios')` keys, blank normalises to null. No FK (owner ruling 2026-09-27). `TrainingRun::scenarioKey()` resolves null → `config('scenarios.baseline')`; `stripValues()` returns the latest turn's end-of-turn Energy/Fans (absolute totals, `reorder('turn','desc')` — NOT `latest()`, which the relation's ascending order would defeat) and omits keys the run has no column for
 - turn_entries: training_run_id FK cascade, turn, speed/stamina/power/guts/wit, sp?, condition?, uniq(run, turn); stats validated 0..1200, turn >= 1 [rev 0.2 — repo #4]
 - run_skills pivot: status (Suggested|Acquired|Skipped), turn_acquired? — Suggested = planned pre-run [rev 0.2 — repo #4]

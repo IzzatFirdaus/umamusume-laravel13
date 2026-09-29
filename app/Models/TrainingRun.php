@@ -8,6 +8,7 @@ use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\SpiritBurstState;
+use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\TurnEvents\RaceFatiguePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\TurnEvents\TeamRankPayload;
@@ -31,6 +32,11 @@ use Illuminate\Support\Carbon;
  * @property RunStatus $status
  * @property int|null $inheritance_parent_a_id
  * @property int|null $inheritance_parent_b_id
+ * @property array<array-key, mixed>|null $legacy_selection the Legacy Select read-back as the
+ *                                                          Trainer recorded it (D-260, D-268,
+ *                                                          ADR-0010); null when they never opened
+ *                                                          that screen. `legacySelection()` is the
+ *                                                          typed view of this bag
  * @property string|null $notes
  * @property int|null $current_objective_index the Grade Point period the Trainer
  *                                             reports as live (1..4, US-10); null
@@ -47,7 +53,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Skill> $skills
  * @property-read Umamusume $umamusume
  */
-#[Fillable(['umamusume_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'notes', 'current_objective_index', 'shop_resets_in'])]
+#[Fillable(['umamusume_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'notes', 'current_objective_index', 'shop_resets_in'])]
 class TrainingRun extends Model
 {
     /** @use HasFactory<TrainingRunFactory> */
@@ -146,6 +152,27 @@ class TrainingRun extends Model
     public function inheritanceParentB(): BelongsTo
     {
         return $this->belongsTo(Umamusume::class, 'inheritance_parent_b_id');
+    }
+
+    /**
+     * The Legacy Select read-back as the Trainer recorded it, or null when they never
+     * opened that screen (D-260, D-268, ADR-0010).
+     *
+     * Null and an empty payload are different statements, and the render path has to tell them
+     * apart: "no Legacy Select on this run" is a disclosure, and "a Legacy Select with no Legacies
+     * in it" would be a claim about a game screen that cannot be reached with zero ancestors.
+     *
+     * A malformed stored payload throws rather than reading as nothing. The shape is validated on
+     * the way in by `LegacySelectionPayload`, so a row that fails here means a write got past it,
+     * which is the fact worth an exception and not a blank panel.
+     */
+    public function legacySelection(): ?LegacySelectionPayload
+    {
+        if ($this->legacy_selection === null) {
+            return null;
+        }
+
+        return LegacySelectionPayload::fromArray($this->legacy_selection);
     }
 
     /**
@@ -748,6 +775,7 @@ class TrainingRun extends Model
             'status' => RunStatus::class,
             'current_objective_index' => 'integer',
             'shop_resets_in' => 'integer',
+            'legacy_selection' => 'array',
         ];
     }
 

@@ -7,12 +7,12 @@ namespace App\Models\TurnEvents;
 /**
  * How many races in a row the Trainer says this run has just run (D-230, ADR-0003).
  *
- * Race Fatigue keys on the count of consecutive races and on nothing else, and the
- * count is entered here rather than derived: `race_entries` points at a timeline slot,
- * never at a turn, and no guided choice marks a race turn, so the run of consecutive
- * races is not recoverable from the log as the schema stands. D-230's premise that it
- * is recoverable from `turn_entries` is recorded as not holding, and KI-17 carries the
- * gap; this payload is the honest way to keep the fact without inventing a link.
+ * Race Fatigue keys on the count of consecutive races and on nothing else. The count is entered
+ * here rather than derived. Slice 15 (KI-17) added the link that premise needed — `race_entries`
+ * now carries a `turn_entry_id` — but a missing link means "the Trainer has not named the turn",
+ * not "this turn had no race", and a run of consecutive races read off that absence would be a
+ * guess (D-270). D-230's premise is therefore no longer false as the schema stands, and still not
+ * something this tool computes; KI-17's register entry carries the distinction.
  *
  * The word is a label over the sourced bands, not a probability. `docs/scenarios/05`
  * §Race Fatigue publishes 0-15 / 0-33 / 60-90+ / 100 percent mood-down ranges against
