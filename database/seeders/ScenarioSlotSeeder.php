@@ -25,8 +25,11 @@ class ScenarioSlotSeeder extends Seeder
     /**
      * R72: a tier is a per-race claim, so it is read per race from a dated two-publisher
      * extraction rather than derived here from the export's numeric grade code. The file records
-     * for each row what uma.guide and Game8 said, each page's own date, and whether the label is
-     * per-row evidence or the disclosed code-level pin that Open still rests on.
+     * for each row what uma.guide and Game8 said, each page's own date, and the scope the label
+     * was earned at.
+     *
+     * R75: a row the publishers do not settle is null. There is no disclosed-generalisation tier
+     * and no flag beside one; the absence of a label is the disclosure.
      *
      * There is deliberately no grade-code to label constant in this class. That is what G-16c
      * guards, and `TierLabelJoinTest` fails the file if one reappears.

@@ -471,6 +471,11 @@ code-level-client-naming-pin`, `per_row_sourced: false`) rather than being nulle
 dropping a tier correct since Slice 11 to satisfy a grep is the owner's trade, recorded in D-153 and in
 `slice-14-2026-09-29.md` §2.5.
 
+> **Reversed by Slice 15 T1 (R75), 2026-09-29.** The owner took the trade the other way: the 115 are
+> null and the disclosure flag is removed rather than set to `false`, because a null tier is itself the
+> honest state. The paragraph above is left as what Slice 14 decided when it decided it; the count in
+> its T1 row (OP 118 / null 26) is superseded by Slice 15's (OP 3 / null 141).
+
 **Register unchanged:** KI-10, KI-15 and KI-17 stay open. T1's evidence is about tier labels; KI-10 is
 the Grade Point placement ratio, KI-15 which GP track applies, KI-17 the consecutive-race count. None
 is touched. 21 filed / 18 closed / 3 open, unchanged from Slice 13.

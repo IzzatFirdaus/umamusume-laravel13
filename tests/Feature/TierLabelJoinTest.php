@@ -49,14 +49,18 @@ it('leaves a Pre-OP race unlabelled because one publisher is silent about it', f
         ->and($slot->source_key)->not->toBeNull();
 });
 
-it('keeps the Open label on rows where it is a disclosed code-level pin, per row', function (): void {
+it('keeps the Open label only where the client name of that row carries the open glyph', function (): void {
     $this->seed(ScenarioSlotSeeder::class);
 
-    $perRow = ScenarioSlot::where('scenario_key', 'ura_finale')->where('title', 'Fukushima TV Open')->first();
+    $pinned = ScenarioSlot::where('scenario_key', 'ura_finale')->where('title', 'Fukushima TV Open')->first();
     $generalised = ScenarioSlot::where('scenario_key', 'ura_finale')->where('title', 'Anemone Stakes')->first();
 
-    expect($perRow)->not->toBeNull()->and($perRow->tier)->toBe('OP')
-        ->and($generalised)->not->toBeNull()->and($generalised->tier)->toBe('OP');
+    // R75: Anemone Stakes is Open by export grade, but no publisher names it Open per row, and the
+    // client glyph 「オープン」 is absent from its own name. A generalisation from three pinned rows
+    // is not per-race evidence, so the honest state is null rather than a labelled row that
+    // discloses in a sidecar flag that it is not sourced.
+    expect($pinned)->not->toBeNull()->and($pinned->tier)->toBe('OP')
+        ->and($generalised)->not->toBeNull()->and($generalised->tier)->toBeNull();
 });
 
 it('dates a labelled row to the evidence, not to the moment the seed ran', function (): void {
@@ -87,7 +91,7 @@ it('holds no grade-code to tier-label constant, which is what G-16c guards', fun
         ->and($source)->not->toMatch('/GRADE_MAP/');
 });
 
-it('seeds the restored graded tiers without losing the Open ones', function (): void {
+it('seeds only per-race sourced tiers, so Open is down to its three client-pinned rows', function (): void {
     $this->seed(ScenarioSlotSeeder::class);
 
     $byTier = ScenarioSlot::where('scenario_key', 'ura_finale')
@@ -99,6 +103,26 @@ it('seeds the restored graded tiers without losing the Open ones', function (): 
     expect($byTier->get('G1'))->toBe(34)
         ->and($byTier->get('G2'))->toBe(42)
         ->and($byTier->get('G3'))->toBe(76)
-        ->and($byTier->get('OP'))->toBe(118)
-        ->and($byTier->get('null'))->toBe(26);
+        ->and($byTier->get('OP'))->toBe(3)
+        ->and($byTier->get('null'))->toBe(141);
+});
+
+it('carries no disclosure flag beside a null tier, because null is the disclosure', function (): void {
+    $doc = json_decode(
+        (string) file_get_contents(database_path('seeders/data/race-tier-labels-2026-09-29.json')),
+        true,
+        flags: JSON_THROW_ON_ERROR,
+    );
+
+    // R75: `per_row_sourced` existed to keep a generalised label on the row while admitting it was
+    // a generalisation. With the generalisation gone the flag says nothing a null tier does not.
+    $withFlag = array_filter(
+        $doc['rows'],
+        fn (array $r): bool => array_key_exists('per_row_sourced', $r),
+    );
+
+    expect($withFlag)->toBe([])
+        ->and($doc['counts']['400']['null'])->toBe(115)
+        ->and($doc['counts']['400']['OP'])->toBe(3)
+        ->and($doc['counts']['700']['null'])->toBe(26);
 });

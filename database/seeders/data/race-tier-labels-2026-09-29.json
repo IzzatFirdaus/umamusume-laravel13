@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "purpose": "Per-race tier labels for the URA Finale schedule, joined by race identity rather than by the export numeric grade code, per R72.",
+  "purpose": "Per-race tier labels for the URA Finale schedule, joined by race identity rather than by the export numeric grade code, per R72. A row with no per-race source is null, per R75.",
   "fetched_at": "2026-09-29",
   "publishers": {
     "umaguide": {
@@ -18,7 +18,7 @@
       "covers": "graded races only (G1/G2/G3); carries no Open and no Pre-OP row"
     }
   },
-  "rule": "A row takes a label only where both publishers give the same single label for that race and at least one page date postdates 2026-07-01 (G1/G2/G3), or where the client name of the row itself carries the open glyph (three Open rows). Code 400 additionally keeps the existing code-level pin on the remaining rows, marked per_row_sourced false and scope code-level-client-naming-pin so the generalisation is visible per row. Pre-OP is labelled by one publisher only and so is null.",
+  "rule": "A row takes a label only where both publishers give the same single label for that race and at least one page date postdates 2026-07-01 (G1/G2/G3), or where the client name of the row itself carries the open glyph (three Open rows). Every other row is null, including the 115 code-400 rows that the export grade alone would call Open and the 26 Pre-OP rows that one publisher alone labels. Per R75 a tier implied by the numeric grade but not stated for that race by a source is not seeded, and is not kept on a disclosure flag either: a null tier is the honest state.",
   "counts": {
     "100": {
       "rows": 34,
@@ -34,7 +34,8 @@
     },
     "400": {
       "rows": 118,
-      "OP": 118
+      "null": 115,
+      "OP": 3
     },
     "700": {
       "rows": 26,
@@ -47,7 +48,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -62,7 +62,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -77,7 +76,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -92,7 +90,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -107,7 +104,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -122,7 +118,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -137,7 +132,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -152,7 +146,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -167,7 +160,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -182,7 +174,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -197,7 +188,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -212,7 +202,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -227,7 +216,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -242,7 +230,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -257,7 +244,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -272,7 +258,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -287,7 +272,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -302,7 +286,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -317,7 +300,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -332,7 +314,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -347,7 +328,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -362,7 +342,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -377,7 +356,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -392,7 +370,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -407,7 +384,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -422,7 +398,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -437,7 +412,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -452,7 +426,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -467,7 +440,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -482,7 +454,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -497,7 +468,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -512,7 +482,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -527,7 +496,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -542,7 +510,6 @@
       "export_grade": 100,
       "tier": "G1",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G1"
       ],
@@ -557,7 +524,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -572,7 +538,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -587,7 +552,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -602,7 +566,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -617,7 +580,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -632,7 +594,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -647,7 +608,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -662,7 +622,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -677,7 +636,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -692,7 +650,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -707,7 +664,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -722,7 +678,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -737,7 +692,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -752,7 +706,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -767,7 +720,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -782,7 +734,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -797,7 +748,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -812,7 +762,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -827,7 +776,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -842,7 +790,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -857,7 +804,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -872,7 +818,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -887,7 +832,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -902,7 +846,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -917,7 +860,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -932,7 +874,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -947,7 +888,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -962,7 +902,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -977,7 +916,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -992,7 +930,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1007,7 +944,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1022,7 +958,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1037,7 +972,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1052,7 +986,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1067,7 +1000,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1082,7 +1014,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1097,7 +1028,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1112,7 +1042,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1127,7 +1056,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1142,7 +1070,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1157,7 +1084,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1172,7 +1098,6 @@
       "export_grade": 200,
       "tier": "G2",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G2"
       ],
@@ -1187,7 +1112,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1202,7 +1126,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1217,7 +1140,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1232,7 +1154,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1247,7 +1168,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1262,7 +1182,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1277,7 +1196,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1292,7 +1210,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1307,7 +1224,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1322,7 +1238,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1337,7 +1252,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1352,7 +1266,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1367,7 +1280,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1382,7 +1294,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1397,7 +1308,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1412,7 +1322,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1427,7 +1336,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1442,7 +1350,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1457,7 +1364,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1472,7 +1378,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1487,7 +1392,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1502,7 +1406,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1517,7 +1420,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1532,7 +1434,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1547,7 +1448,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1562,7 +1462,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1577,7 +1476,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1592,7 +1490,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1607,7 +1504,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1622,7 +1518,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1637,7 +1532,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1652,7 +1546,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1667,7 +1560,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1682,7 +1574,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1697,7 +1588,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1712,7 +1602,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1727,7 +1616,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1742,7 +1630,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1757,7 +1644,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1772,7 +1658,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1787,7 +1672,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1802,7 +1686,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1817,7 +1700,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1832,7 +1714,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1847,7 +1728,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1862,7 +1742,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1877,7 +1756,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1892,7 +1770,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1907,7 +1784,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1922,7 +1798,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1937,7 +1812,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1952,7 +1826,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1967,7 +1840,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1982,7 +1854,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -1997,7 +1868,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2012,7 +1882,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2027,7 +1896,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2042,7 +1910,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2057,7 +1924,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2072,7 +1938,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2087,7 +1952,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2102,7 +1966,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2117,7 +1980,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2132,7 +1994,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2147,7 +2008,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2162,7 +2022,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2177,7 +2036,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2192,7 +2050,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2207,7 +2064,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2222,7 +2078,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2237,7 +2092,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2252,7 +2106,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2267,7 +2120,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2282,7 +2134,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2297,7 +2148,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2312,7 +2162,6 @@
       "export_grade": 300,
       "tier": "G3",
       "scope": "two-publishers",
-      "per_row_sourced": true,
       "umaguide": [
         "G3"
       ],
@@ -2325,9 +2174,8 @@
     {
       "name": "Akhalteke Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2338,9 +2186,8 @@
     {
       "name": "Aldebaran Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2351,9 +2198,8 @@
     {
       "name": "Andromeda Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2364,9 +2210,8 @@
     {
       "name": "Anemone Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2377,9 +2222,8 @@
     {
       "name": "Aso Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2390,9 +2234,8 @@
     {
       "name": "Autumn Leaf Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2403,9 +2246,8 @@
     {
       "name": "Azuchijo Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2416,9 +2258,8 @@
     {
       "name": "Azumakofuji Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2429,9 +2270,8 @@
     {
       "name": "BSN Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2442,9 +2282,8 @@
     {
       "name": "Betelgeuse Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2455,9 +2294,8 @@
     {
       "name": "Brazil Cup",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2468,9 +2306,8 @@
     {
       "name": "Brilliant Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2481,9 +2318,8 @@
     {
       "name": "Canna Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2494,9 +2330,8 @@
     {
       "name": "Capital Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2507,9 +2342,8 @@
     {
       "name": "Carbuncle Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2520,9 +2354,8 @@
     {
       "name": "Cassiopeia Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2533,9 +2366,8 @@
     {
       "name": "Chiba Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2546,9 +2378,8 @@
     {
       "name": "Christmas Rose Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2559,9 +2390,8 @@
     {
       "name": "Chukyo Junior Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2572,9 +2402,8 @@
     {
       "name": "Clover Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2585,9 +2414,8 @@
     {
       "name": "Coral Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2598,9 +2426,8 @@
     {
       "name": "Cosmos Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2611,9 +2438,8 @@
     {
       "name": "Crocus Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2624,9 +2450,8 @@
     {
       "name": "Dahlia Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2637,9 +2462,8 @@
     {
       "name": "December Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2650,9 +2474,8 @@
     {
       "name": "Elfin Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2663,9 +2486,8 @@
     {
       "name": "Enif Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2676,9 +2498,8 @@
     {
       "name": "Fukuryu Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2689,9 +2510,8 @@
     {
       "name": "Fukushima Junior Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2702,9 +2522,8 @@
     {
       "name": "Fukushima Mimpo Hai",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2715,9 +2534,8 @@
     {
       "name": "Fukushima Minyu Cup",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2730,7 +2548,6 @@
       "export_grade": 400,
       "tier": "OP",
       "scope": "client-name-glyph",
-      "per_row_sourced": true,
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2741,9 +2558,8 @@
     {
       "name": "Fuyo Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2754,9 +2570,8 @@
     {
       "name": "Galaxy Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2767,9 +2582,8 @@
     {
       "name": "Green Channel Cup",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2780,9 +2594,8 @@
     {
       "name": "Hagi Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2793,9 +2606,8 @@
     {
       "name": "Hosu Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2806,9 +2618,8 @@
     {
       "name": "Hyacinth Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2819,9 +2630,8 @@
     {
       "name": "Idaten Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2832,9 +2642,8 @@
     {
       "name": "Ivy Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2845,9 +2654,8 @@
     {
       "name": "January Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2858,9 +2666,8 @@
     {
       "name": "Junior Cup",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2871,9 +2678,8 @@
     {
       "name": "Kanetsu Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2884,9 +2690,8 @@
     {
       "name": "Keiyo Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2897,9 +2702,8 @@
     {
       "name": "Keyaki Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2910,9 +2714,8 @@
     {
       "name": "Kikyo Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2923,9 +2726,8 @@
     {
       "name": "Kitakyushu Tankyori Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2936,9 +2738,8 @@
     {
       "name": "Kobai Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2949,9 +2750,8 @@
     {
       "name": "Kochi Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2964,7 +2764,6 @@
       "export_grade": 400,
       "tier": "OP",
       "scope": "client-name-glyph",
-      "per_row_sourced": true,
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2975,9 +2774,8 @@
     {
       "name": "Kurama Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -2988,9 +2786,8 @@
     {
       "name": "Lapis Lazuli Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3001,9 +2798,8 @@
     {
       "name": "Lumiere Autumn Dash",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3014,9 +2810,8 @@
     {
       "name": "Manyo Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3027,9 +2822,8 @@
     {
       "name": "Marguerite Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3040,9 +2834,8 @@
     {
       "name": "Marine Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3053,9 +2846,8 @@
     {
       "name": "May Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3066,9 +2858,8 @@
     {
       "name": "Meitetsu Hai",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3079,9 +2870,8 @@
     {
       "name": "Metropolitan Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3092,9 +2882,8 @@
     {
       "name": "Miyakooji Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3105,9 +2894,8 @@
     {
       "name": "Momiji Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3118,9 +2906,8 @@
     {
       "name": "Muromachi Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3131,9 +2918,8 @@
     {
       "name": "NST Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3144,9 +2930,8 @@
     {
       "name": "Nagatsuki Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3157,9 +2942,8 @@
     {
       "name": "New Year Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3170,9 +2954,8 @@
     {
       "name": "Nigawa Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3183,9 +2966,8 @@
     {
       "name": "Nojigiku Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3196,9 +2978,8 @@
     {
       "name": "Oasis Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3209,9 +2990,8 @@
     {
       "name": "October Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3222,9 +3002,8 @@
     {
       "name": "Onuma Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3235,9 +3014,8 @@
     {
       "name": "Opal Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3248,9 +3026,8 @@
     {
       "name": "Oro Cup",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3261,9 +3038,8 @@
     {
       "name": "Osakajo Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3274,9 +3050,8 @@
     {
       "name": "Paradise Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3287,9 +3062,8 @@
     {
       "name": "Phoenix Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3300,9 +3074,8 @@
     {
       "name": "Polaris Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3313,9 +3086,8 @@
     {
       "name": "Pollux Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3326,9 +3098,8 @@
     {
       "name": "Port Island Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3339,9 +3110,8 @@
     {
       "name": "Principal Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3352,9 +3122,8 @@
     {
       "name": "Radio Nippon Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3365,9 +3134,8 @@
     {
       "name": "Rakuyo Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3378,9 +3146,8 @@
     {
       "name": "Rigel Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3391,9 +3158,8 @@
     {
       "name": "Ritto Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3404,9 +3170,8 @@
     {
       "name": "Rokko Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3417,9 +3182,8 @@
     {
       "name": "Sannomiya Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3432,7 +3196,6 @@
       "export_grade": 400,
       "tier": "OP",
       "scope": "client-name-glyph",
-      "per_row_sourced": true,
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3443,9 +3206,8 @@
     {
       "name": "Seiryu Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3456,9 +3218,8 @@
     {
       "name": "Shimotsuki Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3469,9 +3230,8 @@
     {
       "name": "Shinetsu Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3482,9 +3242,8 @@
     {
       "name": "Shirafuji Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3495,9 +3254,8 @@
     {
       "name": "Shirayuri Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3508,9 +3266,8 @@
     {
       "name": "Shiwasu Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3521,9 +3278,8 @@
     {
       "name": "Shoryu Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3534,9 +3290,8 @@
     {
       "name": "Shunrai Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3547,9 +3302,8 @@
     {
       "name": "Sleipnir Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3560,9 +3314,8 @@
     {
       "name": "Sobu Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3573,9 +3326,8 @@
     {
       "name": "Subaru Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3586,9 +3338,8 @@
     {
       "name": "Sumire Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3599,9 +3350,8 @@
     {
       "name": "Suzuran Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3612,9 +3362,8 @@
     {
       "name": "Sweetpea Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3625,9 +3374,8 @@
     {
       "name": "Tachibana Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3638,9 +3386,8 @@
     {
       "name": "Tancho Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3651,9 +3398,8 @@
     {
       "name": "Tango Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3664,9 +3410,8 @@
     {
       "name": "Tanigawadake Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3677,9 +3422,8 @@
     {
       "name": "Tanzanite Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3690,9 +3434,8 @@
     {
       "name": "Tempozan Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3703,9 +3446,8 @@
     {
       "name": "Tennozan Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3716,9 +3458,8 @@
     {
       "name": "Toki Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3729,9 +3470,8 @@
     {
       "name": "Tomoe Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3742,9 +3482,8 @@
     {
       "name": "UHB Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3755,9 +3494,8 @@
     {
       "name": "Uzumasa Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3768,9 +3506,8 @@
     {
       "name": "Valentine Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3781,9 +3518,8 @@
     {
       "name": "Wakaba Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3794,9 +3530,8 @@
     {
       "name": "Wakagoma Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3807,9 +3542,8 @@
     {
       "name": "Wasurenagusa Sho",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3820,9 +3554,8 @@
     {
       "name": "Yamato Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3833,9 +3566,8 @@
     {
       "name": "Yodo Tankyori Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3846,9 +3578,8 @@
     {
       "name": "Yonago Stakes",
       "export_grade": 400,
-      "tier": "OP",
-      "scope": "code-level-client-naming-pin",
-      "per_row_sourced": false,
+      "tier": null,
+      "scope": "no-per-row-source",
       "umaguide": [
         "OP/L (Open/Listed)"
       ],
@@ -3861,7 +3592,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -3874,7 +3604,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -3887,7 +3616,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -3900,7 +3628,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -3913,7 +3640,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -3926,7 +3652,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -3939,7 +3664,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -3952,7 +3676,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -3965,7 +3688,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -3978,7 +3700,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -3991,7 +3712,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4004,7 +3724,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4017,7 +3736,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4030,7 +3748,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4043,7 +3760,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4056,7 +3772,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4069,7 +3784,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4082,7 +3796,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4095,7 +3808,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4108,7 +3820,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4121,7 +3832,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4134,7 +3844,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4147,7 +3856,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4160,7 +3868,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4173,7 +3880,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
@@ -4186,7 +3892,6 @@
       "export_grade": 700,
       "tier": null,
       "scope": "no-per-row-source",
-      "per_row_sourced": false,
       "umaguide": [
         "Pre-OP"
       ],
