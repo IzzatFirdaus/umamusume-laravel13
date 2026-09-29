@@ -7,6 +7,20 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, trainee detail and skill selector pass):** **35 filed, 21 closed, 14 open.** Four
+entries land here, all from reading the two views rather than the brief: **KI-33** (a trainee's own
+innate and unique skills are published by the source and stored nowhere), **KI-35** (the trainee detail
+page is a metadata stub — ten parsed columns rendered on no page, no section for skills, forms or goals,
+and an absence vocabulary its own specification invented), **KI-36** (the run screen's skills editor wraps
+three controls in one label, so two of them have no accessible name — F-12, carried unfixed since the
+frontend audit), and **KI-37** (the run screen's controls measure 31/30/40px against §6.14's 44, a second
+surface and a separate entry because KI-29's heading names `/umamusume`). **KI-34 is a reservation, not a
+lost entry**: it is the per-character goal-race filing from the previous pass, deliberately not landed by
+this block's sequencing. Unlike KI-16 — which is a genuine renumbering hole, KI-30's pre-merge number —
+this gap has an owner and a next step. A heading grep reads 23 closed and 8 open where the register says
+21 and 10, and the two in between are KI-10 (schema halves closed, ratio half not) and KI-25 (its heading
+carries CLOSED inside a RE-OPENED sequence). Both are headings holding more history than a regex reads.
+Prior:
 **Status (2026-09-29, Screen D dark-theme pass):** **31 filed, 21 closed, 10 open**, one filed here.
 **KI-32** is the missing `color-scheme` declaration: native form controls keep painting light widgets on
 the dark surface, observed as two different unchecked renderings of the same checkbox across loads. The
@@ -1462,4 +1476,217 @@ this shared tree — the same posture as KI-26 and KI-29.
 
 **Owner.** design-system. Found while closing the dark-theme gap on Screen D, by measuring a native control
 rather than trusting that a token override covers everything drawn on the page.
+
+## KI-33 A trainee's own innate and unique skills are published by the source and stored nowhere, so a run cannot pre-populate them — FILED 2026-09-29 (per-trainee skill scoping pass), OPEN
+
+**Symptom.** A run created for a trainee renders "None." in its Skills section
+(`resources/views/runs/show.blade.php:405`) because nothing in the schema records which skills are hers.
+The picker cannot group by "her skills", and D-44's `Suggested` state — planned *before* the run — has no
+data to be planned from, so the plan-versus-actual comparison the screen exists to show is empty on turn
+one and only becomes real after the Trainer types the list by hand.
+
+**Cause, stated against the ref it was measured on.** `GametoraCharacterParser` reads `char_id`, the name
+fields, the release fields and the ten aptitude columns, and **none of the six `skills_*` keys** — they
+arrive in the document and are dropped at parse time. There is also no table to put them in on `master`:
+`character_cards`, `CharacterCard` and `ADR-0008` live on `feat/catalog-roster-and-trainee-selector`
+(tip `cf5fc75`) and are absent from this ref, which is what `SKILLS-GAPS.md` G-SK-6 records. One
+prerequisite, then two consequences: the card layer merges, the parser keeps the lists, the columns exist.
+The merge gates the rest and is not this entry's to make.
+
+**Fix direction, in dependency order.**
+1. Land the card layer (the G-SK-6 merge decision — Architect).
+2. `character_cards` gains `skills_innate` as a **json list**, not a scalar: the live document carries
+   exactly three innate ids on all 268 records. `skills_unique` is also **a list, not one nullable id** —
+   22 records carry two (card `100701` holds `10071` and `100071`), so a scalar column would silently drop
+   one of her uniques.
+3. The parser reads the keys and the writer stores them, honouring `is_manual` (FR-B-4) like every other
+   reference writer.
+4. Run creation pre-populates `run_skills` at status `Suggested` from the chosen card's innate and unique
+   lists. `skills_evo`'s `{new, old}` pairs and `skills_awakening_en` are the awakening ladder and are
+   **out of scope for the pre-populate** — an awakened skill is reached mid-run, not chosen at start.
+
+**Two sub-findings that belong to this entry, not to the design brief that found them (owner ruling
+2026-09-29).**
+
+- **The skills form has no repeater, and the pre-populate needs one.** `resources/views/runs/show.blade.php`
+  hard-indexes `skills[0]` three times (`:447`, `:455`, `:460`): one row, one submit, no "add another". A
+  build pre-populated with four or five rows cannot be *edited* in a one-row form, which is the job the
+  pre-populate exists for. This is a **required part** of the entry, not an optional follow-on — a slice
+  that lands the storage and skips the repeater has shipped data nobody can plan against. It also edits
+  the same seventeen lines as **KI-36**, so the two land together or the label defect is reproduced once
+  per row.
+- **`syncSkills` is an upsert named as a sync.** `TrainingRunController::syncSkills` (`:546-557`) calls
+  `setSkillStatus` per submitted row and never detaches, despite the route being `runs.skills.sync`. That
+  is why a save will not wipe a pre-populated row today — a side effect, not a guarantee, and the
+  difference becomes a data-loss question the moment the repeater above submits several rows at once. This
+  entry's owner decides whether the route is renamed or a `detach` is added; the design brief for the
+  selector only records the behaviour so nobody reads the name as replace-all.
+
+**No backfill into an existing run.** A run in progress has actual rows the Trainer entered; deriving
+`Suggested` into it after the fact overwrites memory with plan, and every figure on the screen is
+Trainer-entered by rule (D-270).
+
+**Source citation.** Live document `character-cards`, resolved through
+`https://gametora.com/data/manifests/umamusume.json` to hash **`e9e9ee6d`**, fetched **2026-09-29**, HTTP
+200, 251,294 bytes, 268 records, 34 top-level keys. Verified on three cards across three trainees:
+`100101` Special Week (`skills_innate [200512, 201352, 200732]`, `skills_unique [100011]`), `100701`
+Gold Ship (`[201591, 201212, 201472]`, `[10071, 100071]`), `112701` Fenomeno (`[200742, 202772, 202482]`,
+`[101271]`). **Join measured at verification time:** the document references 1,513 distinct skill ids and
+**all 1,513 exist in `skills.export_id`** — innate 289/289, unique 290/290 — so this is about storage, not
+about a key that fails to match, which is what KI-23 is. The 290 independently reproduces the figure
+`ADR-0011` §5 reconciles against `is_unique` 294.
+
+**Availability caveat, recorded so nobody inherits it silently.** Card `112701` has `release_en: null` and
+a populated `skills_awakening`: a card form can hold skill data while not being on `[Global]`. The
+innate and unique lists are therefore not a Global statement, and the pre-populate must read the same
+availability rule `Skill::scopeAvailableOnGlobal()` (`app/Models/Skill.php:80-85`) applies — otherwise the
+run screen offers a Global Trainer a skill their client cannot show.
+
+**Owner.** Data Engineer for the parser and the columns, with Architect for the card-layer merge; Planner
+Domain Specialist for the pre-populate writer and the repeater at run creation, which is a controller and
+form change with its own tests.
+
+**Downstream.** This is the prerequisite `G-SK-13` names: a picker that filters to "her skills" cannot
+work until "her skills" is a stored fact, so slicing the picker first reproduces the same defect one level
+up.
+
+## KI-35 The trainee detail page is a metadata stub: ten parsed columns rendered nowhere, no section for skills, forms or goals, and an absence vocabulary its own specification invented — FILED 2026-09-29 (trainee detail and skill selector design pass), OPEN
+
+**Symptom.** `resources/views/catalog/show.blade.php` renders four things and stops: a name header with a
+"Back to catalog" link, a four-cell metadata card, an aliases list, a provenance list. That is the whole
+page (`:1-71`). A Trainer deciding *which trainee to run* cannot see whether she is Sprint or Long, Turf
+or Dirt, Front or End, because the ten aptitude columns are not on it; and no section exists that would
+hold her skills, her costume forms or her goal races. The page has **no primary action** — its only
+outbound link goes backwards (`:11`) — which contradicts `DESIGN.md` §2.3's one-primary-action-per-screen.
+
+**Three defect classes, and they do not share a cause. Do not let the easiest one carry the other two.**
+
+**Class A — the view renders none of what the schema supports.** `umamusume` carries ten `char(1)`
+aptitude columns (`ADR-0004`), documented at `app/Models/Umamusume.php:30-39` and fillable at `:46`, and
+`GametoraCharacterParser` already reads all ten keys (`:31-40`, spread at `:101`), with
+`tests/Feature/GametoraAptitudeTest.php` on the mapping. `grep -rn aptitude resources/views/` returns
+**zero hits**. Measured against the only database in the tree, though: `umamusume` holds **2 rows and all
+ten columns are NULL on both**. So the accurate statement is *parsed, schema-ready, unimported, and
+unrendered* — and two consequences follow, the second of which a designer meets first. The fix needs a
+view and one fetch, no pipeline work at all; and on any database nobody has imported into, this section's
+first impression is ten absences, which is a state to design rather than to wait out.
+
+**Class B — sections that should exist while they hold nothing.** Skills, costume forms and goal races
+are not stored facts on `master`: the card layer is on its branch (G-SK-6) and `ura-objectives` is
+verified but not ingested. None of that blocks a heading. The run screen carries the pattern already and
+uses it heavily — "not yet recorded" at `grade-point-meter.blade.php:149`, `:226` and
+`guided-step.blade.php:212`, `:247`, `:275`, `:303`; "not recorded" at `grade-point-meter.blade.php:209`
+and `mood-pill.blade.php:3`; `N/A` with its reason written down at `resource-strip.blade.php:52-57`. The
+trainee page has no such pattern, so what it offers is silence, and silence on a page that lists no
+skills reads as "she has none" — false, and the same statement error D-220's matrix warns about for
+widgets.
+
+**Class C — three defects in what *is* rendered, and the first is a specification defect, not a view one.**
+
+1. **"Unknown" as a value for JP debut and Global debut** (`:21`, `:25`) is the view obeying its contract,
+   not straying from it: `DESIGN.md` §4.2 said *"dateless rows show 'Unknown', never a sentinel (CLAUDE.md
+   data rules)"*, and `CLAUDE.md:23`'s actual rule is *"no sentinel **dates** for 'unreleased' (use
+   nullable date + `release_status`)"* — a storage rule about what goes in a column. §4.2 turned it into
+   display copy, and "Unknown" is what fell out. It reads as a state the trainee is in; every other
+   absence in the app is worded as a state of the record. **The correction belongs in §4.2** (landed with
+   this entry, same block), and a view fixed before its specification is amended fails review against the
+   contract it is meant to satisfy.
+2. **§4.2's "amber notice" is unimplementable and the view already says so.** `:33-38` records that the
+   token set has no caution chrome, `up` means increase and `risk` means failure, and `pick` measures
+   1.60:1 on the raised surface so it cannot carry a boundary; the JapanOnly notice is copy over
+   `ink-faint` (3.26:1 light / 4.21:1 dark). Implementation right, specification stale, second clause in
+   the same paragraph.
+3. **Provenance is the longest sentence on a page with nothing else** (`:58`). A real disclosure — NFR-2
+   and US-1 depend on it, and it stays — but as the dominant text it makes the emptiness louder than the
+   trainee. The defect is proportion, not presence; and it is already the last section, so the fix is
+   quieting, not moving.
+
+**Also in scope, small.** `:47`'s "No aliases yet." is a fourth absence vocabulary on a page already
+running a second one. Unify it when the section is next touched.
+
+**What the page should be: a workspace for that trainee, in eight ordered sections.** Identity (same
+fields, `N/A` + `title` instead of "Unknown") → Aptitudes grid → Skills → Costume forms → Goal races →
+Her runs → Aliases → Provenance, last and quiet. **No brief file is cited for the detail, because none
+has been written yet:** the section-by-section states, each section's prerequisite (stored now / frame
+ships now / awaits the merge) and the primary-action choice were delivered in the 2026-09-29 design pass
+report and live nowhere in the tree. They belong in `docs/design-research/` beside
+`replan-mobile-first.md`, in a commit that writes that file — not in a citation that points at it early,
+which is the defect KI-25's withdrawn closure was caught for. The eight-section structure itself is
+recorded above, and §4.2 now carries it, so this entry stands on its own until the brief is filed.
+
+**Owner.** Frontend with the design-system owner. The disclosure wording is the §4.2 amendment landing in
+this block, the aptitude grid is a view change against columns that already exist, and the three empty
+section frames need only vocabulary the run screen already uses. The *data* behind sections 3-5 is someone
+else's — the card-layer merge (G-SK-6) and the goal ingest this entry deliberately leaves to **KI-34** —
+and none of it blocks a section, because a UI/UX deliverable is a section, its states and its copy, while
+a data deliverable is what fills them.
+
+## KI-36 The run screen's skills editor wraps three controls in one label, so two of them have no accessible name — FILED 2026-09-29 (skill selector design pass, as F-12), OPEN
+
+**Symptom.** `resources/views/runs/show.blade.php:445-461` puts a single `<label>` around three controls:
+the skill `<select>` (`:447`), the acquisition-status `<select>` (`:455`) and the turn
+`<input type="number">` (`:460`). An implicit label association binds to the **first** labelable
+descendant, so only the skill picker is named. A screen reader announcing the row hears one named control,
+one **unnamed** combobox whose only content is the three option words (`Suggested` / `Acquired` /
+`Skipped`), and a number field whose visible name is `placeholder="Turn"` — which disappears the moment
+the field holds a value, so the control that is *filled* is the one that has *lost* its label. This is
+F-12 in `docs/frontend-review/2026-09-28/README.md:302-310`, filed against this same block, and it has
+been carried unfixed through every pass that has touched the file since. The review noted the contrast
+itself: "the create form labels every field, so the gap is local to this block."
+
+**Why it survived.** Every check that runs here looks at the rule rather than the name. G-13's
+rendered-text sweep finds `undefined` and `NaN`, not an absent accessible name. A server-render assertion
+sees three controls with correct `name=` attributes and passes, because `name` is the form key, not the
+label. And the row *has* a visible "Skill" caption, which is exactly what makes the other two read as
+labelled to anyone skimming the HTML.
+
+**Fix direction.** One `<label>` per control, or `label` + `id` pairs; keep the visual layout
+(`flex flex-wrap items-center gap-2`) unchanged, since appearance was never the defect. The status select
+needs a name a Trainer reads as its purpose — "Acquisition status" — and the turn input keeps its
+placeholder as a hint while gaining a real name, so the two do not trade places. **Same block, same
+commit, deliberately:** KI-33's required repeater replaces `skills[0]` with N rows across these same
+seventeen lines, and doing the repeater without the labels reproduces this defect once per row instead of
+once per form.
+
+**Owner.** Frontend. Small, local, and the whole fix is inside one `<form>` element.
+
+## KI-37 The run screen's form controls measure 31/30/40px against DESIGN.md §6.14's 44 — FILED 2026-09-29 (skill selector design pass), OPEN
+
+**Symptom, measured.** The run screen's skills editor was read in a browser at a 390px viewport: the
+`<select>` at `resources/views/runs/show.blade.php:447` computes **31.0px** tall, the
+`<input type="number">` at `:460` **30.0px**, and `button[type=submit]` ("Save skill status", `:462`)
+**40.0px**. The specification says **height 44** for a form field
+(`docs/design-research/DESIGN.md` §6.14, `:849`). The same reading across the page found 12 selects at
+31px, 20 number inputs at 30px and 11 submit buttons at 40px — the run screen's default, not one control.
+
+**Why this is a separate entry and not a widening of KI-29.** KI-29's heading names its own surface:
+*"`/umamusume`'s form controls measure 30/31/32px against DESIGN.md §6.14's 44"* (`KNOWN-ISSUES.md:1347`).
+Folding the run screen behind that number would leave a reader of the catalog-index entry waiting for a
+fix that was never made there, and would let one surface close the other by proximity. Two surfaces, two
+entries, one shared cause.
+
+**The precedent that shows it is cheap.** `5ff7aca` ("size Screen D's form controls to DESIGN.md 6.14's
+44, and the checkbox to the AA floor") moved the same 30/31/16px readings to 44/44/24 with no token
+change, no layout change and no new utility. So §6.14's 44 is implementable against the existing token
+set and this is copy-forward, not design work. The controls here carry `px-2 py-1` and no height — the
+shape Screen D had before that commit.
+
+**What the fix has to say, not only do.** Raising a row from 30px to 44px grows the guided-turn block, the
+skills editor and the race form, and `docs/design-research/CONSTRAINTS.md:171` refuses mobile compromise
+in exchange for desktop density — so the change belongs with the density question rather than as a quiet
+CSS edit. It does **not** belong with dropping columns or shrinking the stat band. **And it is not a
+floor question at all:** the accepted replan addendum (`docs/design-research/replan-mobile-first.md` §1,
+accepted 2026-09-29 and not yet in D-40) names 768px as the supported minimum and refuses to drop a
+column below it, whereas a control below its own specified height fails at 1280px exactly as it fails at
+390px. Saying so keeps a reader from folding "make it work at phone width" into "make the control meet §6.14
+at every width", and keeps this fix from being parked behind the replan.
+
+**Not asserted.** No target-size *standard* is claimed here. The repository's accessibility mandate is
+**WCAG 2.1 AA** (D-10), and 2.1 has no minimum-target-size criterion; 24×24 is WCAG 2.2 SC 2.5.8 and is
+not an obligation in this project. This entry is measured against **§6.14**, a design-system rule the
+repository wrote for itself and Screen D already honours. Adopting 2.5.8 as a gate would be a separate
+ruling with a number, a scope and an instrument attached.
+
+**Owner.** Frontend with the design-system owner: the spec is the authority, and the run screen is the
+second surface to break it after the catalog index.
 
