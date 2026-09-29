@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Models\ScenarioSlot;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Seeds scenario_slots from the committed client export (R55).
@@ -58,6 +59,22 @@ class ScenarioSlotSeeder extends Seeder
     private function tierLabels(): array
     {
         $doc = $this->loadJson(self::TIER_LABELS_FILE);
+
+        if ($doc === []) {
+            // R76: the extraction is evidence, not a dependency. Without it no row earns a label,
+            // which is the honest state rather than a failure — but 155 labels going missing in
+            // silence is the same outcome as a crash wearing a green exit code, so it is said out
+            // loud. The schedule, the fan figures and the ordering all come from the client export
+            // and are unaffected.
+            Log::warning(
+                'The tier-label extraction '.self::TIER_LABELS_FILE.' is missing or unreadable, so every '
+                .'scenario slot is seeded with a null tier. Re-run the join to get the labels back; the '
+                .'race schedule itself is unaffected (R76).'
+            );
+
+            return [];
+        }
+
         $map = [];
 
         foreach ($doc['rows'] ?? [] as $row) {
