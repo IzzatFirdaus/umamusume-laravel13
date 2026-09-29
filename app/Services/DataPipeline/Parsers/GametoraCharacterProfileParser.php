@@ -45,9 +45,22 @@ use JsonException;
  * page shows come from `umamusume.global_debut_date` and `character_cards.global_release_date`,
  * which are already stored (ADR-0008), so nothing here duplicates them.
  *
- * **`sex` and `race` are parsed by nobody.** The document carries both. Neither is one of the six
- * fields the block shows, and CONSTRAINTS.md C-4 governs how this tool names these characters, so
- * neither becomes a column (see the migration for the same reasoning).
+ * **`sex` is read by nobody; `race` is read only to scope the document, never stored.** The
+ * document carries both. `race` selects the trainee rows: a row is kept only when it equals the
+ * verbatim `'uma'`, which is 105 of the 163 — the other 58 being the real-world namesakes (`false`,
+ * 17), humans (4), unknowns (2) and key-absent entries (35) the profile block must not describe.
+ * Neither field becomes a column, because CONSTRAINTS.md C-4 governs how this tool names these
+ * characters, and `race` is read to decide scope, not to emit (see the migration for the same
+ * reasoning on `sex`).
+ *
+ * **The ten-key projection is load-bearing, not defensive.** Every one of the 105 trainee rows
+ * carries an `rl` object — the record of the real-world namesake a character is drawn from — and
+ * 78 of them (74.3%) carry a non-null `rl.death`. So the projection this shape invites,
+ * `foreach ($row as $key => $value)`, would put a death date on roughly three of every four profile
+ * blocks a Trainer reads. Only the ten named keys are ever emitted; `rl`, `sex`, `race` and the
+ * other refused source keys have no place to land. The uma rows split into eight distinct key sets,
+ * which is why a missing field is read as null and never as a coalesced `0` or `''`: with a
+ * different key set per row, a value-defaulting read would fabricate what the source never said.
  *
  * **A row is kept even when it describes almost nothing**, because dropping it would be a second
  * way of inventing absence: the trainee is known, the block says the document says little about
@@ -109,6 +122,15 @@ final class GametoraCharacterProfileParser implements ProfileSourceParser
         $charId = (int) $character['char_id'];
 
         if ($charId <= 0) {
+            return null;
+        }
+
+        // A row is a trainee only when the source labels its `race` the verbatim string 'uma'.
+        // `false`, `human`, `unknown` and an absent key all mark the real-world namesake or an
+        // unlabelled entry, not the character, so a row guard is the second point of failure beside
+        // the field allowlist: without it `StoreCharacterProfiles` would attach a profile block —
+        // and, because `rl` rides the same row, potentially a death date — to a non-trainee.
+        if (! array_key_exists('race', $character) || $character['race'] !== 'uma') {
             return null;
         }
 

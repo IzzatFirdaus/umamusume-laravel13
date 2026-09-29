@@ -31,14 +31,15 @@ function profileRow(GametoraCharacterProfileParser $parser, string $body, int $c
     test()->fail("no parsed row for char_id {$charId}");
 }
 
-it('resolves every row through the same external_ref shape the character parser writes', function (): void {
+it('resolves every trainee row through the same external_ref shape the character parser writes', function (): void {
     $rows = $this->parser->parse($this->body);
 
-    expect($rows)->toHaveCount(4)
+    // The fixture is four real rows, but 1095 "Believe" carries `"race": false` — a real-world
+    // namesake, not a trainee — so the race filter drops it and three profile rows come out.
+    expect($rows)->toHaveCount(3)
         ->and(array_column($rows, 'char_external_ref'))
         ->toBe([
             'gametora:char:1001',
-            'gametora:char:1095',
             'gametora:char:2001',
             'gametora:char:9040',
         ]);
@@ -61,20 +62,23 @@ it('reads the six profile fields off a complete row', function (): void {
 
 it('reads three_sizes as the object the body carries, not a rendering of it', function (): void {
     // The earlier probe reported three_sizes as a space-separated string. The body is an object,
-    // and a parser reading a string here would find nothing and silently store nothing.
-    $row = profileRow($this->parser, $this->body, 1095);
+    // and a parser reading a string here would find nothing and silently store nothing. 2001 Happy
+    // Meek is a trainee (race 'uma') that carries no three_sizes, so its part reads as null.
+    $row = profileRow($this->parser, $this->body, 2001);
 
     expect($row['three_sizes_b'])->toBeNull()
         ->and(profileRow($this->parser, $this->body, 1001)['three_sizes_b'])->toBeInt();
 });
 
-it('keeps the Japanese voice actor and drops the absent English one', function (): void {
-    // Believe is one of the 26 of 163 source rows with no va_en. The field the page shows is
-    // va_ja, and that one is present on every roster row — so the two casts cannot share a rule.
-    $row = profileRow($this->parser, $this->body, 1095);
+it('refuses the real-world namesake row the fixture carries, dropping it before the store', function (): void {
+    // Believe (1095) is the fixture's one non-uma row: `"race": false` marks the real-world
+    // namesake a character is drawn from, not a trainee. The filter drops it, so no profile record
+    // reaches a view for a row that is not a trainee — the C-4 point of the whole projection.
+    $refs = array_column($this->parser->parse($this->body), 'char_external_ref');
 
-    expect($row['va_ja'])->toBe('秋山実咲')
-        ->and($row['va_en'])->toBeNull();
+    expect($refs)->not->toContain('gametora:char:1095')
+        // Its va_ja survives in the source but must not appear anywhere in the kept output.
+        ->and($refs)->toContain('gametora:char:9040');
 });
 
 it('stores va_en as the romanisation of va_ja, never a separate English dub cast', function (): void {
@@ -139,7 +143,7 @@ it('reports a missing year as a missing year rather than assembling a date', fun
 
 it('emits three nulls for a two-thirds three_sizes rather than a partial measurement', function (): void {
     $body = json_encode([
-        ['char_id' => 7, 'jp_name' => 'テスト', 'three_sizes' => ['b' => 80, 'h' => 80]],
+        ['char_id' => 7, 'race' => 'uma', 'jp_name' => 'テスト', 'three_sizes' => ['b' => 80, 'h' => 80]],
     ], JSON_UNESCAPED_UNICODE);
 
     $row = $this->parser->parse((string) $body)[0];
@@ -175,7 +179,7 @@ it('skips a row with no char_id and a row that is not an array', function (): vo
         ['jp_name' => 'no id here'],
         'not an array',
         ['char_id' => 0, 'jp_name' => 'zero id'],
-        ['char_id' => '4242', 'jp_name' => 'kept'],
+        ['char_id' => '4242', 'race' => 'uma', 'jp_name' => 'kept'],
     ], JSON_UNESCAPED_UNICODE);
 
     $rows = $this->parser->parse((string) $body);
@@ -187,4 +191,24 @@ it('skips a row with no char_id and a row that is not an array', function (): vo
 it('returns nothing for a body that is not JSON', function (): void {
     expect($this->parser->parse('{ not json'))->toBe([])
         ->and($this->parser->parse('"a string"'))->toBe([]);
+});
+
+it('keeps only rows whose race is exactly "uma", refusing false, human, unknown and absent', function (): void {
+    // D-220's absent-vs-zero rule has a row-level twin: a row with no `race` key is not a trainee,
+    // and neither is one labelled false, human or unknown — all of which mark the real-world
+    // namesake or an unlabelled entry. Only the verbatim value 'uma' passes. Measured 2026-09-30:
+    // 105 of 163 rows are 'uma'; the other 58 are 17 false, 4 human, 2 unknown, 35 key-absent.
+    // Feeding one of each and asserting TWO records survive proves the filter keeps the trainees
+    // and drops the rest, rather than keeping the first row or none at all.
+    $body = (string) json_encode([
+        ['char_id' => 1, 'race' => 'uma', 'jp_name' => 'kept one'],
+        ['char_id' => 2, 'race' => 'uma', 'jp_name' => 'kept two'],
+        ['char_id' => 3, 'race' => false, 'jp_name' => 'a real-world namesake'],
+        ['char_id' => 4, 'race' => 'human', 'jp_name' => 'a human'],
+        ['char_id' => 5, 'race' => 'unknown', 'jp_name' => 'unknown'],
+        ['char_id' => 6, 'jp_name' => 'no race key at all'],
+    ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+
+    expect(array_column($this->parser->parse($body), 'char_external_ref'))
+        ->toBe(['gametora:char:1', 'gametora:char:2']);
 });
