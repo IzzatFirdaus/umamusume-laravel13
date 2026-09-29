@@ -2777,7 +2777,7 @@ level below the brief's naming because the page already owns an h1."
 
 ## Task 11: The detail page names its source and lists her forms
 
-`catalog/show.blade.php` renders "JP debut" and "Global debut", which after Tasks 2 and 9 carry real dates, and a Provenance `<h2>` that currently reads *"No fetched sources. This record was seeded or entered by hand."* for the seeded rows. Task 9 gives it real rows. The brief wants the forms here too, and D-33 wants every engine-sourced fact at `meta` weight with its URL and fetched date.
+`catalog/show.blade.php` renders "JP debut" and "Global debut", which after Tasks 2 and 9 carry real dates, and a Provenance [PREMISE PARTLY FALSE, measured 2026-09-29: that line is ALREADY conditional on dataSources->isEmpty() at show.blade.php:125-126, so it was suppressed for fetched rows before this task began. Task 11 review found the briefed red set overstates the work by one test; the forms section and the per-card provenance are the real new surface.] `<h2>` that currently reads *"No fetched sources. This record was seeded or entered by hand."* for the seeded rows. Task 9 gives it real rows. The brief wants the forms here too, and D-33 wants every engine-sourced fact at `meta` weight with its URL and fetched date.
 
 **Files:**
 - Modify: `resources/views/catalog/show.blade.php`
@@ -2955,7 +2955,7 @@ In the Step 4 `<li>`, after the `<time>` element and inside the enclosing `<span
 
 ```blade
                         @if ($card->fetched_at)
-                            <span title="{{ $card->source_url }}">
+                            <span title="{{ $card->source_url }}"> [SUPERSEDED SHAPE: a title attribute is not keyboard-reachable, so the fact was invisible without a pointer while the paragraph beside it claimed each form names its source. What shipped instead prints the source as visible text in the row and keeps the tooltip only as a qualifier, matching how guided-step.blade.php and stat-band.blade.php use title in this repo. Commit 8b08e42.]
                                 read {{ $card->fetched_at->timezone(config('uma.display_timezone'))->format('M j, Y') }}
                             </span>
                         @endif
@@ -2970,7 +2970,7 @@ Then this sentence, after the `</ul>` in the existing `@else` branch of the Prov
             The rows above are this trainee's own fetch history. Each costume form names the
             source and the date its own row was read from, and every card on this page was
             confirmed against the two Tier A sources listed in
-            docs/data/2026-09-29-global-roster-crosscheck.md.
+            docs/data/2026-09-29-global-roster-crosscheck.md. [CLAUSE REMOVED, not merely reworded: docs/data/ does not exist in this tree because Task 8 is blocked, AND the blanket claim it carried was false on its own terms -- unconfirmed defaults to false with no verdict written onto any row yet, so "every card here was checked" rendered for data nobody had cross-checked. The honest statement is the per-row "Not confirmed by two sources" the page already prints. Do not reintroduce a file_exists() guard: it puts a filesystem stat on a provenance claim and vanishes silently when the file lands.]
         </p>
 ```
 
@@ -2982,7 +2982,7 @@ The JP and Global debut `<dt>` rows keep their existing markup: after Task 2 Ste
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php tests/Feature/CatalogTest.php tests/Feature/DesignTokensTest.php tests/Feature/RenderedCopyHygieneTest.php
 ```
 
-Expected: all green. `CatalogTest`'s `'shows a detail page with Japanese name and provenance'` test creates a `DataSource` with a `https://example.test/...` URL and no `source_key`, and the existing Provenance list's `fetched_at` line already prints that key bare, so the added sentence must not read `source_key` at all; that is why it does not. Confirm the test stays green rather than editing it. The per-card span needs no such tolerance because `CharacterCard::factory()` now sets `fetched_at` (Task 4 Step 11), but it does need the `@if`: a row stored before a fetch stamped it has `fetched_at` null, and `null->timezone()` is a fatal.
+Expected: all green. `CatalogTest`'s `'shows a detail page with Japanese name and provenance'` test creates a `DataSource` with a `https://example.test/...` URL and no `source_key`, and the existing Provenance list [STATED WRONG, corrected 2026-09-29: DataSourceFactory supplies source_key => "test", so a test-created row DOES print a key. The instruction is unchanged and still correct -- the added sentence must not read source_key at all -- but it is not justified by the reason above it. Confirm the test stays green rather than editing it, as briefed.]'s `fetched_at` line already prints that key bare, so the added sentence must not read `source_key` at all; that is why it does not. Confirm the test stays green rather than editing it. The per-card span needs no such tolerance because `CharacterCard::factory()` now sets `fetched_at` (Task 4 Step 11), but it does need the `@if`: a row stored before a fetch stamped it has `fetched_at` null, and `null->timezone()` is a fatal.
 
 - [ ] **Step 7: Gates and commit**
 
