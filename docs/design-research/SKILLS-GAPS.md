@@ -410,12 +410,17 @@ idempotence covers this source too.
 
 - **G-SK-13 — the run screen's picker now lists 623 options.** That is the honest consequence of importing
   real data: the select was designed when the table held ten names. `FR-D-2` and `DESIGN.md` §8.4 (Screen D)
-  are the designed answer and remain unbuilt; a `select` of this size is the reason they exist.
-  **Interim answer, landed with Screen D:** the run screen's skill caption now links to `/skills`
-  (`resources/views/runs/show.blade.php`), and the shell's nav carries the route, so a Trainer can narrow
-  623 rows before choosing. That is a way *out* of the select, not a replacement for it: the picker is still
-  an unsearchable `<select>` on the run screen itself, and FR-D-2's own words ("search/autocomplete **for
-  the run UI**") are still only half-met. A search-backed picker is the remaining build, and whatever replaces
+  are the designed answer, and **Screen D has since landed** (`route('skills.index')`,
+  `resources/views/skills/index.blade.php`); what remains unbuilt is the run-UI half of FR-D-2 — the
+  selector on the run screen, which is what this entry is about. A `select` of this size is the reason both
+  exist.
+  **Interim answer, landed with Screen D:** the run screen's skill caption links to `/skills`
+  (`resources/views/runs/show.blade.php:439`) and the shell's nav carries the route. That link stays when
+  the selector lands, but its role changes: it becomes the "see the full catalogue" escape hatch from the
+  selector's no-match state, not the run screen's way out of a broken control. Until then it is exactly
+  what it looks like — a way *out*, not a replacement — and the picker is still an unsearchable `<select>`
+  over every Global row on the run screen itself, so FR-D-2's own words ("search/autocomplete **for the
+  run UI**") are still only half-met. A search-backed picker is the remaining build, and whatever replaces
   it should reuse `skillsFixtureGlobalRenderings()` rather than re-derive the negative — third use, helper
   time (G-SK-17).
 - **G-SK-14 — `rarity` and `type` are stored and not rendered.** `rarity` has no label to render (six codes,
