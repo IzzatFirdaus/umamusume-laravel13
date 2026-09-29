@@ -5,6 +5,21 @@ declare(strict_types=1);
 use App\Services\SkillExecutor;
 use App\Services\SkillMatcher;
 use App\Services\SkillRegistry;
+use Illuminate\Support\Facades\File;
+
+beforeEach(function () {
+    if (! File::exists(base_path('.agents/skills.json'))) {
+        $this->markTestSkipped(
+            'SkillRegistry resolves its input to .agents/skills.json, which .gitignore:49 excludes, '
+            .'so this suite can only run in a tree where some tool wrote that directory. A fresh clone '
+            .'or worktree has no registry and these tests would fail for a reason unrelated to the '
+            .'change under test. The general form of this trap: a test whose input lives in a gitignored '
+            .'path passes in the developer tree and fails in every fresh clone. Detect it with '
+            .'`git ls-files --error-unmatch .agents/skills.json` -- an untracked input makes the test '
+            .'prove nothing anywhere. See KI-24b.'
+        );
+    }
+});
 
 it('discovers skills from the registry', function () {
     $registry = new SkillRegistry;

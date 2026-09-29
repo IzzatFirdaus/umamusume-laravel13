@@ -1770,15 +1770,26 @@ paragraph above) rather than reopening the entry.
 
 ---
 
-## KI-24b A fresh clone or worktree has six red tests before anyone touches it, because the skill registry file is gitignored - FILED and OPEN 2026-09-29 (catalog roster, Task 1)
+## KI-24b A fresh clone or worktree has six red tests before anyone touches it, because the skill registry file is gitignored - FILED 2026-09-29 (catalog roster, Task 1), CLOSED 2026-09-30 (option b: the suite skips on an absent registry)
 
-**Symptom.** On a clean `git worktree add` or `git clone` of this repo, `php artisan test --compact` reports **6 failed / 364 passed / 2 skipped** at a commit where every other working tree sees green. All six failures are in `tests/Feature/SkillAutomationTest.php`, and the assertion that fails reads `Failed asserting that ... contains 'Route Inspector'`.
+**Symptom.** On a clean `git worktree add` or `git clone` of this repo, `php artisan test --compact` reports **6 failed / 364 passed / 2 skipped** at a commit where every other working tree sees green. All six failures are in `tests/Feature/SkillAutomationTest.php` (the file's seven tests; six of them fail without the registry and the seventh asserts an unknown-skill error, which an empty registry already produces), and the assertion that fails reads `Failed asserting that ... contains 'Route Inspector'`. The six-of-seven split was re-measured on 2026-09-30 rather than carried forward: with the fix reverted and the registry moved aside, the file reports `6 failed, 1 passed (7 assertions)`, the pass being the unknown-skill test, which an empty registry already satisfies. That is the whole reason the heading says six and the skip below says seven — they are two different measurements and must not be rounded into each other.
 
 **Cause.** `app/Services/SkillRegistry.php:23` resolves its path as `base_path('.agents/skills.json')`, and `app/Services/SkillExecutor.php:340` reads `base_path('.agents/config.json')`. `.gitignore:49` ignores `/.agents`, so that directory exists only in a working tree where some tool wrote it. `git worktree add` and `git clone` check out tracked files only, so a fresh tree has no registry and the tests that read it fail for a reason unrelated to the change under test.
 
 **Why it matters beyond one red run.** The failure is indistinguishable from a genuine regression at the exact moment a slice most needs a trustworthy baseline: Step 4 of any plan's setup task is "prove the gates are green before you start," and six red tests there means either stopping for a base that is not actually dirty, or proceeding with no baseline at all. Nothing in the output names the missing file, so the first response is to suspect the code.
 
-**Fix candidates, none chosen here.** (a) Move the registry default to a tracked path, or commit a minimal `.agents/skills.json` fixture, keeping any local overrides gitignored. (b) Have the suite skip those six tests with a named reason when the registry is absent, so a fresh baseline reads `6 skipped` rather than `6 failed`. (c) Document the copy step in `README.md`'s setup section. (a) is the smallest permanent fix; (c) is the cheapest and leaves the trap armed for the next worktree.
+**Fix chosen, option (b): the suite skips, with a named reason.** (a) and (c) were rejected: (c) leaves the trap armed for the next worktree, and (a) cannot be honestly done here, because `.agents/` is not project config. Measured on 2026-09-30, it holds `mcp_config.json` (secret-adjacent by category), a vendored Python package under `jev-ultrafast-mcp/` whose 245 `__pycache__` directories are build output, a compiled Windows binary at `skills/impeccable/scripts/bin/windows-x64/impeccable.exe`, and other tools' vendored source and LICENSE files — 4,431 files in all. It is also not the only copy: the same vendored tree is already present at `.github/skills/`, byte-identical for that binary (sha256 `477E544FC8880A5E…` in both), and `git ls-files` returns **0 files for both paths**, so `.agents/` is a second on-disk copy of a tool cache that is itself untracked, not a project asset. Committing any of that is not a registry fixture, so a tracked `skills.json` would have to be a synthetic one, and a synthetic registry makes the assertions below test the fixture rather than the matcher.
+
+`tests/Feature/SkillAutomationTest.php` now carries one `beforeEach` guard that calls `markTestSkipped` with a named reason when `base_path('.agents/skills.json')` is absent, so the seven tests report `skipped` on a fresh tree instead of `failed`. One guard rather than seven calls, so a future eighth test in this file inherits the skip rather than forgetting it. Measured in both states on 2026-09-30, with the file moved aside and restored:
+
+    registry present (developer tree)  ->  7 passed
+    registry absent  (fresh clone)      ->  7 skipped, 0 failed
+
+**The class, because the instance is not the part that recurs.** A test whose input lives in a gitignored path passes in the developer's tree and fails in every fresh clone. The detection is one command, and it should be run against any test that reads a `base_path(...)` under an ignored directory:
+
+    git ls-files --error-unmatch .agents/skills.json
+
+Non-zero exit means the input is untracked, and the test proves nothing anywhere — it is not merely unrunnable in CI. `.gitignore:46-55` ignores `/.agents`, `/.claude`, `/.cursor`, `/.grok`, `/CLAUDE.md` and others, so any test reaching into those inherits this shape. This is the same failure as KI-39 (`SkillFactory` deriving `match_key` with a different algorithm than production) one grain up: a test that passes while exercising something other than the thing under test.
 
 **Owner.** Data Engineer with whoever owns `docs/SKILL_AUTOMATION.md`. Found by the catalog-roster plan's Task 1 provisioning step, which now copies `.agents` into its worktree; that copy is a workaround local to one branch and does not close this entry.
 
@@ -1854,3 +1865,20 @@ Over all 135 trainee names, 3 differ: `Mr. C.B.`, `K.S.Miracle`, `Curren Bouquet
 **Fix candidates, none chosen here.** (a) Add `->orderBy('id')` as a tiebreaker, which makes the order total by construction and costs one clause. (b) Add a unique index on the normalized name, which is an Architect decision and would also constrain manual rows. (a) is the smaller change and does not constrain what a Trainer may write.
 
 **Owner.** Architect, or Laravel Dev under (a). Found by the Task 13 browser pass, where the wrap behaviour was verified from both ends of the list.
+
+---
+
+## KI-42 Nothing runs the gates on push, so a defect that only a fresh checkout can see is found by whoever remembers to look - FILED 2026-09-30 (catalog roster, review of the two near-misses below), OPEN, backlog only
+
+**Symptom.** `.github/` exists and holds agents, hooks, prompts and skills, but there is no `.github/workflows/` directory: `Test-Path .github\workflows` is `False`, so no job runs on any push or pull request. The full gate is a local command, `composer test`, which runs `npm run typecheck` and then Pest (`composer.json`). It is therefore run only when a person in one working tree chooses to run it.
+
+**Why this is filed rather than left as a preference.** Two defects from this session would have been caught on the commit that introduced them, had anything run the gate against a clean checkout. They were caught anyway, which is the actual problem, because both were caught by accident rather than by a control:
+
+1. **An untracked gate input** - `.agents/skills.json` is gitignored, so `tests/Feature/SkillAutomationTest.php` was green in every developer tree and red in every fresh clone. Filed as KI-24b, which is now closed by a named skip rather than by a fixture, so this instance is spent; the shape recurs for any test reading a `base_path(...)` under an ignored directory.
+2. **A commit measured on the wrong tree** - `d192fa1` added `resources/js/types/global.d.ts` on the belief that a tracked declaration was missing. It was not; `resources/js/bootstrap.ts:3-7` already declares `Window.axios`. The local gate caught it in the same session and `85b37a4` reverted it. To be exact about what this instance is: it is **not** a live defect and **not** something CI missed, because the file was never merged. It is a worked example of the same wrong-tree error that also produced the branch-freshness miscount and the KI-39 factory drift, all of which passed a check that had not fingerprinted what it was checking.
+
+**The common cause is not the missing workflow.** It is that every gate in this repo runs inside one developer's working tree, on demand, where ignored files exist and only one commit is checked out. A clean-checkout run on push is what makes the ignored-input and wrong-tree classes visible without a person noticing them, and the two instances above were caught by a person noticing.
+
+**Fix candidate, deliberately not chosen here, and deliberately not built on this branch.** Add a GitHub Actions workflow running `composer install --no-interaction`, `npm ci`, `npm run build`, and `composer test` on every push and pull request. This is an owner decision, not an implementation detail, for three reasons that are measurable today: the project is local-only by intent (`AGENTS.md`, Phase 1 non-goals in `PRD.md` §6), so enabling a hosted runner may be out of scope entirely; `.agents/` and `.github/skills/` are untracked in this tree, so a hosted runner has no skill registry and any future test that reads one will need KI-24b's skip rather than the file; and `node_modules` and `vendor` are absent from a fresh clone, so the first CI run is also a first-install run. Nothing about the scope change is decided here. Recorded as backlog so the decision is not re-litigated per slice.
+
+**Owner.** Human owner, with the Architect, because the answer may be "no CI in Phase 1" rather than a workflow. Raised by the review of the two instances above; both are already resolved in the tree, so this entry carries no failing gate today.

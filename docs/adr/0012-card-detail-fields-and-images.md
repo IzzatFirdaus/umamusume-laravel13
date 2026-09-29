@@ -91,6 +91,15 @@ amended to carry a profile requirement, this paragraph is where the citation is 
 ruling to a requirement, and a reader who arrives before that amendment knows which of the six fields
 rest on what.
 
+**Upgrade recorded, 2026-09-30.** The amendment has landed: `PRD.md` **A-7** names the four fields
+(voice actor, birthday, height, three sizes), cross-references this decision, the view test and the
+migration, and states the three grains separately rather than collapsing them. So voice actor,
+birthday, height and three sizes now rest on a functional requirement; `name_ja` always rested on
+**A-1**; and the two fields the detail view sets beside the profile — `Japanese name` and
+`Release date` — are **A-1**'s, not this table's. The paragraph above is deliberately left as
+written, because the shortfall it records is the reason the amendment had to be written, and a
+reader deciding whether to trust a field needs the reason to still be there.
+
 ### The use-side constraint on Decision 1, which is the point of the ruling
 
 `PRD.md` §6.11 forbids a prediction or simulation engine. It is **still binding and this ADR does not

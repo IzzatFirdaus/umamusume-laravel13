@@ -55,6 +55,31 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
   Only cards carrying a Global release date are stored;
   a trainee with no Global card does not appear in the catalog. A card confirmed by
   the Tier B source alone is stored flagged and hidden unless asked for.
+- A-7 [ADR-0012 Decision 4; owner ruling 2026-09-30 under `AGENTS.md` escalation 2]: a trainee
+  profile block on the sibling `umamusume_profiles` table, one row per trainee, carrying **four**
+  fields this PRD did not name before this line: **voice actor**, **birthday**, **height**, and
+  **three sizes**. Both casts are stored for the voice actor, because the source states a Japanese
+  and an English one and they disagree about who speaks for her. Every part is nullable: the source
+  omits `va_en` and `three_sizes` on 10 of the 135 roster rows and `birth_year` on 17 of 163, so a
+  NOT NULL column would make the parser invent a value, and an absent part renders as a named
+  absence rather than a blank or a guess. Sibling table rather than columns on `umamusume` because
+  the source is one document about one trainee. Provenance inline per **A-4**, with its own
+  `is_manual` per **B-4**. Reference data only, on **A-5**'s precedent: nothing here computes a run
+  outcome and §6.11 stays untouched. Declared as source `gametora-character-profiles` per **B-1**,
+  routed as a fourth branch in `PipelineRunner` per **B-2**. `name_ja` is stored for the same reason
+  the card row keeps its own fields, but it is **A-1** that requires the Japanese name to exist on
+  the `Umamusume` record, not this line.
+  **Three grains, deliberately not collapsed.** The four named above are this requirement's grain.
+  The detail view renders **six** rows, because the page sets the profile beside two fields the
+  profile does not own: `Japanese name` from the `Umamusume` record and `Release date` from
+  `global_debut_date`, both per **A-1**. `tests/Feature/CatalogDetailPageTest.php` asserts all six.
+  Storage splits further still: the migration
+  `2026_09_29_182820_create_umamusume_profiles_table.php` carries `name_ja`, `va_ja`, `va_en`,
+  `birth_year`/`birth_month`/`birth_day`, `height` and `three_sizes_b`/`_h`/`_w`, plus the
+  provenance set and `is_manual` — and whether the birthday triple counts as one field or three is a
+  column choice this requirement does not make. `docs/adr/0012-card-detail-fields-and-images.md`
+  Decision 4 is the ruling; its "Decision 4's PRD citation is partial" paragraph is the record this
+  line upgrades from an owner ruling to a requirement.
 
 ### FR-B: Data-fetching & cross-reference engine
 - B-1: `uma:fetch {source}` console command; sources are declared in `config('uma.sources')`, each with a parser class.
