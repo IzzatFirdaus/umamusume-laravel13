@@ -31,8 +31,8 @@ export can overturn.
 detail page, and this Context does not reproduce its premises: the brief is not a tracked file in this
 repository and its wording was not carried into this ADR's authorship, so quoting it would be
 reconstruction rather than citation. What follows is therefore scoped to what the tree can prove. If
-the brief asked for a field none of the four decisions names, that field is unaddressed here and this
-ADR does not authorize it - `AGENTS.md` escalation 2 applies, and a reader holding the brief should
+the brief asked for a field none of the four decisions names, that field is not addressed by Decisions 1, 2 or 3, and the trainee profile source is the one
+dataset none of them names: its authorization now lives in `ADR-0013`, not in this document, so `AGENTS.md` escalation 2 applies, and a reader holding the brief should
 check the four Decision rows against it before building.
 
 **What the source carries.** The declared GameTora export holds one entry per costume card
@@ -72,6 +72,25 @@ all; a per-character one can, and 135 matches the parser's record count exactly.
 | 1 | **The card's stat arrays, on `character_cards`** | `base_stats`, `four_star_stats`, `five_star_stats` and `stat_bonus` as json columns alongside the existing twelve, each row carrying its own inline provenance as `ADR-0004` and `ADR-0003` Amendment R3 require of a reference row | **Widens `ADR-0008`**, which declined exactly these fields. Stored as the source's own numbers, displayed as numbers, and read by nothing else: see the use-side constraint below. The owner ruled the widening; this row is the record of it. |
 | 2 | **Card images** | **Nothing. No column, no URL, no uploader, no route.** | The source is `char_id`-grain and has no resolvable asset path, so there is no key to join on and no location to fetch from. Recorded as a finding rather than a refusal so a future source with `card_id` grain is a re-decision, not a re-litigation. |
 | 3 | **Objectives** | Per-**character**, one row per `char_id`, not per scenario and not per card | The source is `char_id`-grain with no scenario key. A per-scenario model would have to invent the scenario dimension the source does not carry, which is the second-authoritative-store problem `PRD.md` §6.12 rejects. This **revises the premise** the brief carried, and the revision is the decision. |
+> **SUPERSEDED — withdrawn. See ADR-0013.**
+>
+> - `ADR-0013-character-profile-source.md` is the authority. It is accepted with owner rulings dated
+>   2026-09-30. The Decision 4 row below is withdrawn and must not be cited as authority for the
+>   profile fields.
+> - ADR-0013 refuses a `name_ja` column on the profile table, because `jp_name` is already on
+>   `umamusume.name_ja` and duplicating it gives two sources for one field. This branch adds that
+>   column, and the `Umamusume::japaneseName()` accessor on this branch exists only to reconcile the
+>   duplication.
+> - ADR-0013 uses the measurement columns `height_cm`, `bust_cm`, `waist_cm`, `hip_cm`. This branch
+>   uses `height`, `three_sizes_b`, `three_sizes_h`, `three_sizes_w`. The source's `three_sizes`
+>   object is confirmed to map `b` to bust, `w` to waist and `h` to hip, measured 2026-09-30 against
+>   the saved body at `research-scratch/data/json/characters.c6676539.json`.
+> - This branch's parser has no filter on `race === 'uma'`. Measured 2026-09-30 on that saved body,
+>   163 rows carry the `race` key and only 105 of them carry the value `uma`; the remainder are 17
+>   with `race` false, 4 labelled `human`, 2 labelled `unknown` and 35 with no `race` key at all. All
+>   105 uma rows carry an `rl` object, and 78 of them carry a non-null `death` inside it, so an
+>   unfiltered parser reads a real-animal death record on roughly three quarters of the rows a
+>   profile block displays.
 | 4 | **The trainee profile block, on a sibling `umamusume_profiles` table** | One row per `char_id` carrying `name_ja`, `va_ja`, `va_en`, `birth_year`/`birth_month`/`birth_day`, `height` and the three `three_sizes` parts, with the same inline provenance set the card row carries, plus its own `is_manual` | **Authorized by the product owner on 2026-09-30 under `AGENTS.md` escalation 2**, which is the remedy Erratum 3 below names: storage of these six fields was a fresh decision requiring an owner ruling and a PRD citation, and this row is that record. Declared as source `gametora-character-profiles` in `config('uma.sources')` per **B-1**, routed as a fourth `is_a()` branch in `PipelineRunner` per **B-2**. Sibling table rather than columns on `umamusume` because the source is one document about one trainee. Provenance per **A-4**; stored and read as reference data only, on **A-5**'s precedent, so nothing here computes a run outcome and `PRD.md` §6.11 stays untouched. |
 
 ### Decision 4's PRD citation is partial, and the shortfall is recorded rather than filled
