@@ -805,6 +805,57 @@ it('paints a trainee with no confirmed costume card as one row she can pick', fu
         ->and($commit)->toContain("card.cardless ? '' : String(card.selectionId)");
 });
 
+it('puts the cardless band in the default list, under a divider, with no typing', function (): void {
+    /*
+     * The owner's ruling of 2026-09-30: a separate band, not the bottom of the list. The previous
+     * shape was defensible but buried her. `collect` sorted every row by release date descending
+     * and `render` took one slice of ten, and a cardless row's `releaseDate` is the empty string,
+     * so on any roster that holds even one confirmed card she lands below the cap and the only way
+     * to see her is to type her name. Set parity and name-reachability are proven from the rendered
+     * page above; what is pinned here is the ordering and the window, because those are what put
+     * the row on screen. What the browser pass adds, and only a browser can add: focus the field on
+     * a database that holds cards for some trainees and none for others, type nothing, and read the
+     * popup top to bottom. `docs/design-research/verification/` carries that evidence.
+     */
+    $collect = comboboxSection('const collect =', 'const windowFor =');
+    $window = comboboxSection('const windowFor =', 'const render = (');
+    $divider = comboboxSection('const bandDivider =', 'const sortHits =');
+    $loop = comboboxSection('let cardedBandSeen = false;', 'if (hit.trainee.umamusumeId !== lastTrainee)');
+    $paint = comboboxSection('const option = document.createElement', 'option.setAttribute(');
+    $predicate = comboboxSection('const isCardless =', 'const matchesQuery =');
+
+    expect($predicate)->toContain('hit.card.cardless === true')
+        // One definition of the question the whole default list turns on, so the band order in
+        // `collect`, the two windows in `windowFor`, the seam in the loop and the element id cannot
+        // each spell it a slightly different way and drift.
+        ->and($collect)->toContain('.filter((hit) => !isCardless(hit))')
+        ->and($collect)->toContain('.filter(isCardless)')
+        // Carded first, then cardless: the order is the band, and `windowFor` reads it back off
+        // the flag rather than off a position, so the two cannot drift apart silently.
+        ->and($collect)->toContain('[...carded, ...cardless]')
+        // Two windows, one per band, both at the existing cap. One `.slice()` over the combined
+        // list is the shape that hid her, so the count of caps in this section is the assertion.
+        ->and(substr_count($window, 'DEFAULT_VISIBLE'))->toBe(2)
+        ->and($window)->toContain('.filter(isCardless).slice(0, DEFAULT_VISIBLE)')
+        ->and($window)->toContain('matches.slice(0, MAX_VISIBLE)')
+        // The seam is presentation, not an option: `options()` selects `li[role="option"]`, and a
+        // row the cursor can land on and then commit would be a row with no card id to commit.
+        ->and($divider)->toContain("setAttribute('role', 'presentation')")
+        ->and($divider)->toContain('data-band-divider')
+        ->and($divider)->toContain('No confirmed costume card yet')
+        ->and($divider)->not->toMatch('/[\x{2013}\x{2014}]/u')
+        // Painted once, and only behind a confirmed band. On a database with no costume card at
+        // all every row is cardless, and a divider naming "these" would have no other side.
+        ->and($loop)->toContain('cardedBandSeen && !bandDividerPainted')
+        ->and(substr_count($loop, 'bandDividerPainted = true'))->toBe(1)
+        // Found by the browser pass, not by reading: a cardless row's `selectionId` is the
+        // placeholder 0 and the element id was built from it, so the three cardless rows in one
+        // paint all answered to `trainee-option-0`. `aria-activedescendant` is set from
+        // `options()[active].id`, which a screen reader resolves by id, so the row the cursor was
+        // on and the row announced were different elements. She is keyed on her trainee id now.
+        ->and($paint)->toContain('`u${hit.trainee.umamusumeId}` : hit.card.selectionId');
+});
+
 it('hands the form over only after a payload that paints', function (): void {
     $source = (string) file_get_contents(base_path('resources/js/trainee-combobox.ts'));
     $guard = comboboxSection('try {', 'leave the native select alone');
