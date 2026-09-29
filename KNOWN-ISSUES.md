@@ -36,7 +36,9 @@ live `gametora-characters` pin behind the publisher's current document (KI-24). 
 this pass; both were reachable only by comparing the parsers against a captured source. The three Slice 14
 open items — KI-10, KI-15, KI-17 — are untouched by any of this. The skills gaps themselves are not filed
 here: they are recorded in `docs/design-research/SKILLS-GAPS.md`, because a missing surface is a gap and a
-key that never matches is a defect. Prior:
+key that never matches is a defect. **These counts are superseded by the Slice 15 header above, which
+files KI-25 in the same shared tree while this pass held the file uncommitted: 24 filed, 19 closed,
+5 open.** Prior:
 **Status (2026-09-29, Slice 14):** **Unchanged — 21 filed, 18 closed, 3 open.** Slice 14 settled the
 tier-label question Slice 13 left contested: G1, G2 and G3 are now sourced **per race** from a dated
 two-publisher extraction (`329cec1`) and the seeder holds no code-to-label constant, so G-16c is green
@@ -1081,6 +1083,13 @@ dated-snapshot policy already covers how a reader should treat them.
 sources: manifest resolution at fetch time, a documented pinned fallback, and the resolved hash recorded on
 `data_sources` so a later reader can tell which document a fact came from. The `config/uma.php` comment is
 then corrected to state what actually happens.
+
+**Scope as it stands after `ADR-0011`: this is half-fixed, deliberately.** `gametora-skills` resolves
+through the manifest now. The two older sources still pin, and re-measured the same day: `character-cards`
+is pinned at `679f7c2e` while the manifest publishes `e9e9ee6d`, so **the characters import is serving a
+superseded document today**; `race_instances` is pinned at `294424fc`, which matches the manifest right now
+and will therefore go stale silently at its next republish, the same way the characters pin already did. A
+reader who concludes the pinning problem was solved with the new source has read it wrong.
 
 **Owner.** Architect with the Data Engineer. Discovered while approving a third source, which is the point
 at which the pinning convention was about to be copied forward.
