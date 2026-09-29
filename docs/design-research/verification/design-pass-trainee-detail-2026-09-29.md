@@ -62,9 +62,17 @@ the sequence is the evidence.
   closure was caught for, and filing a second one in the same week, in the pass that was writing the rule
   about it, would have been the pass's own worst exhibit.
 
-The point of four rather than one: D-289 was exercised four times before it could be cited, and every one
-was caught by opening a file instead of trusting a sentence. That is what the rule looks like in operation,
-which is why it is recorded here rather than only asserted in `CONSTRAINTS.md`.
+The point of listing these rather than one: D-289 was exercised five times around the pass that wrote it,
+and every one was caught by opening a file instead of trusting a sentence. That is what the rule looks like
+in operation, which is why it is recorded here rather than only asserted in `CONSTRAINTS.md`.
+
+- **The fifth was caught after this record was committed, and it was caught in this record.** `KI-37` cited
+  `KNOWN-ISSUES.md:1347` for KI-29's heading, and §5 below cited `:1375` for KI-30's; both were correct
+  when written and both rotted **thirteen lines** inside the same commit set, because step 2's status block
+  inserted thirteen lines at the top of the file. `KI-37` and §5 now cite the headings by name. The rule's
+  own text says a line number is the fastest-decaying fact in a document anyone edits, and the proof is
+  that the pass writing that sentence decayed two of its own citations before the sentence finished
+  landing — no gate saw it, because no literal changed and nothing was wrong except a pointer.
 
 ---
 
@@ -103,7 +111,7 @@ to run to prove the rest of the corpus's reading discipline is real rather than 
 
 The register carries a numbering hole: `grep -oE '^## KI-[0-9]+'` returns KI-1..15 and KI-17..37, with
 **KI-16 missing because it was renamed** — `KI-30` was *filed as* KI-16 on
-`fix/frontend-audit-2026-09-28` and renumbered at merge (`KNOWN-ISSUES.md:1375`), and the renumbering left
+`fix/frontend-audit-2026-09-28` and renumbered at merge (the `KI-30` heading), and the renumbering left
 the old number behind. The hole read, for several slices, as a lost entry, because nothing claimed it.
 
 **KI-34 is the opposite shape and the record notes the difference.** It is not missing and not lost: it is
@@ -122,7 +130,7 @@ selector onto `master`. Three consequences, and they are the live demonstration 
 about it:
 
 - **KI-33's cause sentence is already stale; its finding is not.** The entry says `character_cards`,
-  `CharacterCard` and `ADR-0008` "are absent from this ref" (`KNOWN-ISSUES.md:1491`). They are now present:
+  `CharacterCard` and `ADR-0008` "are absent from this ref" (inside `KI-33`'s cause paragraph). They are now present:
   `app/Models/CharacterCard.php`, `database/migrations/2026_09_29_120100_create_character_cards_table.php`,
   `docs/adr/0008-character-card-catalog-layer.md`. The table's columns are `card_id, umamusume_id, title,
   rarity, global_release_date, is_debut_form, unconfirmed` plus the provenance set — **no `skills_innate`

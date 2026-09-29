@@ -1659,10 +1659,12 @@ once per form.
 31px, 20 number inputs at 30px and 11 submit buttons at 40px — the run screen's default, not one control.
 
 **Why this is a separate entry and not a widening of KI-29.** KI-29's heading names its own surface:
-*"`/umamusume`'s form controls measure 30/31/32px against DESIGN.md §6.14's 44"* (`KNOWN-ISSUES.md:1347`).
+*"`/umamusume`'s form controls measure 30/31/32px against DESIGN.md §6.14's 44"* (the `KI-29` heading).
 Folding the run screen behind that number would leave a reader of the catalog-index entry waiting for a
 fix that was never made there, and would let one surface close the other by proximity. Two surfaces, two
-entries, one shared cause.
+entries, one shared cause. (KI-29's heading is quoted above; it is cited by number rather than by line,
+because a line citation in this file rotted within one commit of being written — adding this very entry
+shifted it thirteen lines.)
 
 **The precedent that shows it is cheap.** `5ff7aca` ("size Screen D's form controls to DESIGN.md 6.14's
 44, and the checkbox to the AA floor") moved the same 30/31/16px readings to 44/44/24 with no token
