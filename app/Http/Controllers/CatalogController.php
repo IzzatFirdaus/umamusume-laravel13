@@ -25,16 +25,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class CatalogController extends Controller
 {
     /**
-     * The characters `NameNormalizer::normalize()` deletes from a search term, in the
-     * same order: the katakana middle dot, its halfwidth form, the hyphen, the space and
-     * the ideographic space. Kept here because the comparison side has to fold exactly
-     * this list; the two arrays drifting apart re-creates the bug this exists to fix.
-     *
-     * @var list<string>
-     */
-    private const FOLDED_CHARACTERS = ['・', '･', '-', ' ', '　'];
-
-    /**
      * Paginated roster tree, filterable by `status` (ReleaseStatus), `search` and
      * `show_unconfirmed`. Search compares a normalized term against the normalized match
      * key, the aliases and the card titles — the last two folded to the term's shape at
@@ -121,7 +111,7 @@ class CatalogController extends Controller
     {
         $expression = "lower({$column})";
 
-        foreach (self::FOLDED_CHARACTERS as $character) {
+        foreach (NameNormalizer::FOLDED_CHARACTERS as $character) {
             $expression = "replace({$expression}, '{$character}', '')";
         }
 
