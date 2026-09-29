@@ -22,11 +22,20 @@ use JsonException;
  *    `birth_day` separately. Only `birth_year` is ever null (17 of 163 rows); month and day are
  *    present on all 163. An earlier reading of a single `birth` would have had to invent a year
  *    for those 17 rows.
- * 2. **The voice actor is two fields, and the one with 26 nulls is the English one.** `va_ja` is
- *    the romanised Japanese cast the character page shows and is present on 163 of 163. `va_en` is
- *    the English dub cast and is null on 26. The earlier probe recorded "a voice-actor field on 26
- *    rows" without saying which; it is `va_en`, and the field the page actually shows is the one
- *    that is never missing.
+ * 2. **The voice actor is one person written in two scripts, not a dub cast.** `va_ja` carries the
+ *    Japanese credit (`和氣あず未`) and `va_en` its romanisation (`Azumi Waki`); they name the same
+ *    performer, and `va_ko` on the same rows is a third script of that one name. Where a stage name
+ *    is already romanised (`Machico`, `Lynn`) all three fields hold the identical string, which no
+ *    separate English cast could produce. So the 26 `va_en` nulls across the 163-row document (3 of
+ *    the 105 `race === 'uma'` rows) are missing romanisations, not missing dub credits, and a
+ *    profile block that showed only `va_ja` would render Japanese script to a Global reader when a
+ *    romanisation already sits in the same row. `va_ko` and `va_zh_tw` are refused: two casts are
+ *    what `ADR-0012` Decision 4 stores, not four.
+ *
+ *    *[Dated erratum, 2026-09-30]* An earlier revision of this docblock recorded this backwards:
+ *    "the one with 26 nulls is the English one ... `va_en` is the English dub cast and `va_ja` is
+ *    the romanised Japanese cast." The body refutes that reading, so it is quoted here and
+ *    superseded rather than silently rewritten.
  * 3. **`three_sizes` is an object, not a string.** It arrives as `{"b":81,"h":81,"w":56}`. A
  *    space-separated rendering is what a spreadsheet-style viewer shows, and parsing that instead
  *    of the body would have been reading a presentation.

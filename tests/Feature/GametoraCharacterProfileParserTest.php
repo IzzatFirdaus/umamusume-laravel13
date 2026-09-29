@@ -77,6 +77,39 @@ it('keeps the Japanese voice actor and drops the absent English one', function (
         ->and($row['va_en'])->toBeNull();
 });
 
+it('stores va_en as the romanisation of va_ja, never a separate English dub cast', function (): void {
+    // Dated erratum 2026-09-30 corrects an earlier docblock reading that called va_en "the English
+    // dub cast." The body says otherwise: on Special Week va_ja '和氣あず未', va_en 'Azumi Waki' and
+    // va_ko '와키 아즈미' are one performer in three scripts. This pins the reading the parser must
+    // keep — both casts stored verbatim, no field preferred over the other — so a future "show the
+    // English one only" branch fails here rather than rendering Japanese script to a Global reader.
+    $week = profileRow($this->parser, $this->body, 1001);
+
+    expect($week['va_ja'])->toBe('和氣あず未')
+        ->and($week['va_en'])->toBe('Azumi Waki')
+        // The two are the same person, and the parser carries both without collapsing or preferring.
+        ->and($week['va_ja'])->not->toBe($week['va_en'])
+        // va_ko is refused: two casts are stored, not four scripts of one name.
+        ->and(array_keys($week))->not->toContain('va_ko');
+
+    // Where the stage name is already romanised, all three source fields hold the identical string
+    // — the proof that they are scripts of one name, not three casts. Built in-memory because the
+    // fixture has no such row, and race 'uma' so the row still parses under the coming filter.
+    $teio = (new GametoraCharacterProfileParser)->parse((string) json_encode([
+        [
+            'char_id' => 1002,
+            'race' => 'uma',
+            'jp_name' => 'トウカイテイオー',
+            'va_ja' => 'Machico',
+            'va_en' => 'Machico',
+            'va_ko' => 'Machico',
+        ],
+    ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE))[0];
+
+    expect($teio['va_ja'])->toBe('Machico')
+        ->and($teio['va_en'])->toBe('Machico');
+});
+
 it('keeps a row whose every optional field is absent', function (): void {
     // Darley Arabian: no va_en, no three_sizes, no birth_year. A parser that dropped this row
     // would be inventing absence, and the page would then say "not fetched" rather than the
