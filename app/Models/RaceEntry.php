@@ -22,6 +22,8 @@ use Illuminate\Support\Carbon;
  * @property int|null $scenario_race_id
  * @property int|null $scenario_slot_id
  * @property int|null $race_catalog_slot_id
+ * @property int|null $turn_entry_id the logged turn this race was run on, as the Trainer named it
+ *                                   (KI-17); null when they have not tied the race to a turn
  * @property RaceEntryStatus $status
  * @property int|null $placement
  * @property int|null $fans_gain
@@ -38,9 +40,10 @@ use Illuminate\Support\Carbon;
  * @property-read ScenarioRace|null $scenarioRace
  * @property-read ScenarioSlot|null $scenarioSlot
  * @property-read RaceCatalogSlot|null $raceCatalogSlot
+ * @property-read TurnEntry|null $turnEntry
  */
 #[Table('race_entries')]
-#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'race_catalog_slot_id', 'status', 'placement', 'fans_gain', 'objective_index', 'circles'])]
+#[Fillable(['training_run_id', 'scenario_race_id', 'scenario_slot_id', 'race_catalog_slot_id', 'turn_entry_id', 'status', 'placement', 'fans_gain', 'objective_index', 'circles'])]
 class RaceEntry extends Model
 {
     /** @use HasFactory<RaceEntryFactory> */
@@ -126,6 +129,20 @@ class RaceEntry extends Model
     }
 
     /**
+     * The logged turn this race was run on, as the Trainer named it (KI-17).
+     *
+     * Null on a race the Trainer has not tied to a turn, which is a complete row: the gap KI-17
+     * filed was the absence of the link, not the presence of unlinked entries. Nothing derives a
+     * turn from a race date here or anywhere else (D-270).
+     *
+     * @return BelongsTo<TurnEntry, $this>
+     */
+    public function turnEntry(): BelongsTo
+    {
+        return $this->belongsTo(TurnEntry::class, 'turn_entry_id');
+    }
+
+    /**
      * @return BelongsTo<ScenarioRace, $this>
      */
     public function scenarioRace(): BelongsTo
@@ -141,6 +158,7 @@ class RaceEntry extends Model
             'fans_gain' => 'integer',
             'objective_index' => 'integer',
             'circles' => 'integer',
+            'turn_entry_id' => 'integer',
         ];
     }
 

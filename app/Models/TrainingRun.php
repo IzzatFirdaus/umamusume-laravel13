@@ -758,15 +758,16 @@ class TrainingRun extends Model
     }
 
     /**
-     * The consecutive-race count Race Fatigue keys on (D-230) — not derivable in this
-     * build, and this says so by returning null rather than inventing a link.
+     * The consecutive-race count Race Fatigue keys on (D-230) — still not derived in this build.
      *
-     * D-230's premise is that the count "is already recoverable from `turn_entries`".
-     * It is not, as the schema stands: `race_entries` points at a `scenario_slots` row
-     * (month and half), never at a turn, and the guided flow offers no race choice, so
-     * no logged turn can be identified as a race turn. Counting anyway would mean
-     * either adding a link column this slice was not given or guessing from dates.
-     * The chip renders the reason (D-220), and KI-17 carries the gap.
+     * D-230's premise is that the count "is already recoverable from `turn_entries`". Slice 15 T2
+     * (KI-17) added the link that premise needs: a `race_entries` row can now point at the turn it
+     * was run on. What the link does not buy is the count itself. The link is nullable, so an entry
+     * with none is "the Trainer has not named the turn", which is not the same statement as "this
+     * turn had no race", and deriving a run of consecutive races from turns that may or may not have
+     * been raced would be guessing from absence (D-270). So the count stays entered on the turn it
+     * applies to, as `RaceFatiguePayload {consecutive_races}`, and the chip renders the reason
+     * (D-220) rather than a number this tool has not been told.
      */
     public function consecutiveRaceCount(): ?int
     {

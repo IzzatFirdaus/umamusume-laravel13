@@ -8,6 +8,7 @@ use App\Enums\RaceEntryStatus;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
+use App\Models\TurnEntry;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -20,6 +21,9 @@ use Illuminate\Validation\Rule;
  * path requires a `scenario_slot_id`; the manual path requires `title`, `month`
  * and `half`. Both produce a `race_entries` row. The manual path also produces
  * a `scenario_slots` row with kind `free_race`.
+ *
+ * `turn_entry_id` (KI-17) belongs to neither branch: a race happened on a turn whichever way it
+ * got onto the calendar, so the rule sits with the shared outcome fields above the split.
  */
 class StoreRaceEntryRequest extends FormRequest
 {
@@ -42,6 +46,21 @@ class StoreRaceEntryRequest extends FormRequest
             'fans_gain' => ['nullable', 'integer', 'min:0'],
             'circles' => ['nullable', 'integer', Rule::in(range(0, RaceEntry::MAX_CIRCLES))],
             'objective_index' => ['nullable', 'integer', Rule::in(range(1, RaceEntry::MAX_OBJECTIVE_INDEX))],
+            // KI-17: the turn this race was run on, named by the Trainer. A turn logged on another
+            // run is not a turn of this run, and the dropdown cannot be trusted to have kept them
+            // apart — a stale tab or a hand-edited post reaches this validator either way.
+            'turn_entry_id' => ['nullable', 'integer', function (string $attribute, mixed $value, Closure $fail): void {
+                if ($value === null) {
+                    return;
+                }
+
+                $run = $this->route('run');
+                $turn = TurnEntry::find($value);
+
+                if ($turn === null || ! $run instanceof TrainingRun || $turn->training_run_id !== $run->id) {
+                    $fail('That turn was not logged on this run.');
+                }
+            }],
         ];
 
         if ($mode === 'manual') {
@@ -76,7 +95,7 @@ class StoreRaceEntryRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        foreach (['scenario_slot_id', 'placement', 'circles', 'objective_index', 'fans_gain'] as $key) {
+        foreach (['scenario_slot_id', 'placement', 'circles', 'objective_index', 'fans_gain', 'turn_entry_id'] as $key) {
             if ($this->input($key) === '') {
                 $this->merge([$key => null]);
             }

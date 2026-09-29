@@ -127,6 +127,26 @@
             <input type="number" name="placement" min="1" value="{{ old('placement') }}" class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink">
         </label>
 
+        {{-- KI-17: the turn this race was run on. A race entry used to point only at a month and a
+             half, so no logged turn could be identified as a race turn, and D-230's premise that the
+             consecutive-race count is "already recoverable from turn_entries" was false. The Trainer
+             names the turn; nothing guesses it from a race date (D-270). --}}
+        <label class="flex flex-col gap-1">
+            <span class="font-medium text-ink">Logged turn</span>
+            @if ($run->turnEntries->isEmpty())
+                <input type="text" class="rounded-md border border-rule bg-sunken px-2 py-1 text-ink-muted"
+                       value="no turns logged to name" disabled>
+                <span class="text-xs text-ink-muted">Log the turn first, then name it on its race.</span>
+            @else
+                <select name="turn_entry_id" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                    <option value="">not named</option>
+                    @foreach ($run->turnEntries->sortBy('turn') as $turn)
+                        <option value="{{ $turn->id }}" {{ old('turn_entry_id') == $turn->id ? 'selected' : '' }}>Turn {{ $turn->turn }}</option>
+                    @endforeach
+                </select>
+            @endif
+        </label>
+
         @if ($teamRace)
             <label class="flex flex-col gap-1">
                 <span class="font-medium text-ink">Circles read</span>
@@ -162,6 +182,7 @@
                 {{ $errors->first('circles', 'Circles are read as 0 to 5, on a team race only.') }}
                 {{ $errors->first('objective_index', 'A period index is one of the four objectives.') }}
                 {{ $errors->first('placement', 'Placement is a finish number, 1 or above.') }}
+                {{ $errors->first('turn_entry_id', 'That turn was not logged on this run.') }}
             </p>
         @endif
     </form>
@@ -184,6 +205,7 @@
                     <span class="flex flex-wrap gap-x-3 font-mono text-xs tabular-nums text-ink-muted">
                         <span>{{ $entry->scenarioSlot?->tier ?? 'no grade' }}</span>
                         <span>{{ $entry->placementOrdinal() }}</span>
+                        <span>{{ $entry->turnEntry === null ? 'turn not named' : 'turn '.$entry->turnEntry->turn }}</span>
                         @if ($teamRace)
                             <span>{{ $entry->circles === null ? 'circles not read' : $entry->circles.' circles' }}</span>
                         @endif
