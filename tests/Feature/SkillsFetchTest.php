@@ -87,8 +87,8 @@ it('updates in place on a re-run instead of colliding with its own grain', funct
 });
 
 it('adopts a seeded row no source has attributed, and only once', function (): void {
-    // The ten SkillSeeder rows arrive with a name and a match key and no export id. Adoption by name
-    // is what stops the import growing a second row for the same skill.
+    // The SkillSeeder rows arrive with a name and a match key and no export id. Adoption by name is
+    // what stops the import growing a second row for the same skill.
     Skill::create(['name' => 'Gourmand', 'match_key' => 'gourmand']);
 
     $counts = app(PipelineRunner::class)->run(
