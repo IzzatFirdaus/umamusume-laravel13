@@ -7,6 +7,36 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, Slice 15):** **24 filed, 19 closed, 5 open.** The Schema Session landed all three
+items its brief named. **KI-17 is closed** on the link it asked for (`d06199c`): `race_entries` can now
+point at the turn a race was run on, and the closure carries its own limit — the count is still entered,
+because a turn with no named link is not a turn that did not race. **KI-10's second schema half closed**
+with `grade_points_earned` (`3711894`), which gives each finish a figure of its own; its **ratio half stays
+open**, since nothing below first is priced and no source names the scaling. **Legacy Select landed as
+schema only** — one `legacy_selection` json payload under `ADR-0010`, with no screen and no computation
+(`26aa9fe`), which closes D-268 as a storage question and leaves it open as a UI one. **KI-25 is filed** by
+this slice's browser pass: the turn log table overflows a 390px viewport, measured, and it is not a Slice 15
+defect — the diff that slice is one view file, and it is not the table's.
+
+**Two sessions, one register, one commit — said plainly rather than hidden in a count.** This block was
+written while the skills pass still held this file uncommitted in the same shared working tree, and the
+commit that carries it (`781e2b9` onward) therefore also carries **KI-23 and KI-24, their status block, and
+their `ADR-0011` prose, all authored by that session and not by this one.** The owner directed the register
+be written rather than deferred; authorship is named here so provenance survives the merge, and the counts
+above fold in their two filings because KI-23 and KI-24 are in the file this block tallies. The mobile
+finding in KI-25 was left out of their block deliberately: their status line says "The three Slice 14 open
+items — KI-10, KI-15, KI-17 — are untouched by any of this", which was true of their pass and is now true
+no longer. Prior:
+**Status (2026-09-29, skills pass):** **23 filed, 18 closed, 5 open.** The skills audit pass filed
+KI-23 and KI-24 while measuring the export the skills import would read, and both are about the existing
+fetch path rather than the new one: the characters parser reads a key the live document does not have and
+its own fixture repeats that key so the suite cannot see it (KI-23), and a stale cache-busting hash answers
+`200` with stale content, which falsifies the safety claim written in `config/uma.php:50-54` and leaves the
+live `gametora-characters` pin behind the publisher's current document (KI-24). Neither was introduced by
+this pass; both were reachable only by comparing the parsers against a captured source. The three Slice 14
+open items — KI-10, KI-15, KI-17 — are untouched by any of this. The skills gaps themselves are not filed
+here: they are recorded in `docs/design-research/SKILLS-GAPS.md`, because a missing surface is a gap and a
+key that never matches is a defect. Prior:
 **Status (2026-09-29, Slice 14):** **Unchanged — 21 filed, 18 closed, 3 open.** Slice 14 settled the
 tier-label question Slice 13 left contested: G1, G2 and G3 are now sourced **per race** from a dated
 two-publisher extraction (`329cec1`) and the seeder holds no code-to-label constant, so G-16c is green
@@ -466,7 +496,23 @@ described.
 
 ---
 
-## KI-10 Trackblazer Grade Points cannot be totalled or bucketed from what is stored — SCHEMA HALF CLOSED 2026-09-28 (Slice 7), RATIO HALF OPEN
+## KI-10 Trackblazer Grade Points cannot be totalled or bucketed from what is stored — SCHEMA HALVES CLOSED 2026-09-28 (Slice 7) AND 2026-09-29 (Slice 15), RATIO HALF OPEN
+
+**Half (c), the figure itself, is closed — and closing it did not touch half (a).** Slice 15 added
+`race_entries.grade_points_earned`, a nullable unsigned integer written by `RaceEntry`'s existing saving
+guard (`3711894`), so a finish now carries the number it paid instead of having it recomputed from a slot
+on every read. That is the schema half the Slice 15 brief counted as this issue's remaining one. It is
+**not** the ratio: the column is priced for a 1st place and null below first, for the same missing-source
+reason as before. Two consequences worth stating, because both are easy to read backwards:
+
+- The meter sums the column through one private `pointsOf()`, which falls back to pricing a row written
+  before the column existed. A local database holding runs from Slice 7 therefore keeps the points it
+  already showed rather than losing them to a null column — a migration that silently de-prices existing
+  wins would be a regression dressed as a schema change.
+- `grade_point_by_grade` and `shop_coins_by_placement` sit three lines apart in `config/scenarios.php` and
+  the second has the 100/60/30/0 shape a placement ratio would need. It is not one: the source document
+  says Shop Coins "do not depend on race grade at all". `GradePointsEarnedTest` asserts 2nd-in-a-G1 stores
+  null beside 4th-in-a-G1 so the borrow cannot be made quietly later.
 
 **Half (b), the bucket, is closed.** Slice 7 added the two columns the attribution needed,
 both entered by the Trainer and neither derived (`e103122`):
@@ -490,13 +536,17 @@ cumulative total appears anywhere, because D-232 says surplus dies at the deadli
 entered with no period are counted in the disclosure rather than silently dropped from every
 total. Proven by `tests/Feature/GradePointPeriodTest.php`: cross-period independence, the
 null period, an unpriceable finish inside one period only, a G1 win landing in the period it
-was entered against, and a rejection for period 5.
+was entered against, and a rejection for period 5. **Those nine tests pass unchanged after
+Slice 15, which is the evidence that reading from the column preserved the semantics rather
+than redefining them.**
 
 **Half (a), the placement ratio, stays open.** No source names the scaling below first, so the
 withholding rule is unchanged and is now scoped per period: an unpriceable finish inside the
 current period withholds that period's total and poisons none of the others. Closing it needs
 either a sourced ratio or an owner ruling that ships an `[Unverified]` placeholder, and neither
-has arrived.
+has arrived. What Slice 15 changes is where a placeholder would go: it would now be a value on
+the row, per finish, rather than a rule applied at read time to every period at once — which is
+a strictly better shape for a decision of that kind and is the one lasting gain of half (c).
 
 **Owner.** Design system with the Planner Domain Specialist, alongside KI-15 for the track
 question.
@@ -742,7 +792,13 @@ was given two columns, not three.
 
 ---
 
-## KI-17 The consecutive-race count cannot be derived from the log, so it is entered — FILED 2026-09-28 (Slice 8), OPEN
+## KI-17 The consecutive-race count cannot be derived from the log, so it is entered — FILED 2026-09-28 (Slice 8), CLOSED 2026-09-29 (Slice 15) ON THE LINK, NOT ON THE COUNT
+
+**Closed on the fix this issue named, and the closure is narrower than its title.** The brief for Slice 15
+directed "KI-17 closed", and the link the Required fix below asked for now exists. What does **not** exist is
+a derived count: `consecutiveRaceCount()` still returns null and the figure is still entered, because the
+link's absence is not evidence of a turn without a race. A reader who takes this title to mean Race Fatigue
+now has a number behind it will be wrong, which is why the limit is in the heading rather than only below.
 
 **Symptom.** D-230 states that Trackblazer's Race Fatigue is safe to surface because "consecutive
 race count is already recoverable from `turn_entries`, and that premise is false as the schema
@@ -751,15 +807,36 @@ and the guided flow offers no race choice, so no logged turn can be identified a
 There is also no `race_entries.turn` to read and none was sanctioned.
 
 **Current behaviour is deliberate.** `TrainingRun::consecutiveRaceCount()` returns null and says
-why at `app/Models/TrainingRun.php:639-650`, and the chip renders "no consecutive-race reading
+why at `app/Models/TrainingRun.php:811-826`, and the chip renders "no consecutive-race reading
 recorded". The count is instead entered as `RaceFatiguePayload {consecutive_races}` on the turn it
 applies to, which keeps the fact without inventing a link, and the panel prints one qualitative
 word for the band (unlikely / possible / likely / certain) with the pointer to
 `docs/scenarios/05-trackblazer-gametora.md` §Race Fatigue, never the percentages: one source is
 not two (D-230).
 
+*(The range this entry originally cited was `:639-650`. It has moved twice since — once before
+Slice 15 and once inside it — and the number a `file:line` carried when a defect was filed is not a
+fact worth preserving, while a wrong pointer to read is. So it is updated, and the original is named
+here rather than quietly replaced.)*
+
 **Required fix.** Either a link from a race entry to the turn it happened on, or a guided choice
 that marks a race turn. Both are schema or flow decisions, so neither is taken here.
+
+**Closed by `d06199c` (Slice 15 T1 of the Schema Session), on the first of the two options.**
+
+- **Delivered.** `race_entries.turn_entry_id`, a nullable foreign key to `turn_entries` with
+  `nullOnDelete`, entered by the Trainer from a dropdown of that run's own turns in the race panel. A turn
+  belonging to another run is rejected at the Form Request and no row is written. `RaceEntry::tierKey()` and
+  the KI-17 tests are the proof; `slice-15-2026-09-29.md` §3 records the RED run.
+- **Still true of the symptom.** The count is not derived. A null link states "the Trainer has not named the
+  turn", which is not the proposition "this turn held no race", and a run of consecutive races inferred from
+  that gap would be a guess printed as a reading (D-270). So `consecutiveRaceCount()` remains `return null`,
+  and `RaceFatiguePayload {consecutive_races}` remains the way the fact is kept. Both docblocks said the
+  link column had not been given, which stopped being true at this commit, and now say what is actually
+  missing instead.
+- **What would close the remaining half.** Not schema. It needs a flow ruling on whether an unnamed turn may
+  be read as a non-race turn at all — which is D-230's premise revisited, and belongs to the Planner Domain
+  Specialist with Architect, not to a slice that was given the link.
 
 **Owner.** Planner Domain Specialist with Architect.
 
@@ -936,3 +1013,115 @@ emits `manual`.
 
 **Owner.** Closed by Slice 13 with the read path's own fix. Slice 12's §7.3 stands as filed and is
 corrected forward in `slice-13-2026-09-29.md` §4, not edited in place.
+
+## KI-23 `uma:fetch` never fills `umamusume.name_ja`, and its own fixture repeats the parser's wrong key — FILED 2026-09-29 (skills pass), OPEN
+
+**The defect is a key name, and the reason it survived is that the test was written from the parser
+rather than from the source.**
+
+`app/Services/DataPipeline/Parsers/GametoraCharacterParser.php:92` emits
+`'name_ja' => $this->textOrNull($card['name_ja'] ?? null)`. The live document has no `name_ja` key.
+Measured 2026-09-29 against the manifest's current `character-cards.e9e9ee6d.json` (268 records): the
+name-bearing keys are `name_en`, `name_jp`, `name_ko`, `name_tw`, `url_name` — `name_jp` is populated on
+268 of 268, `name_ja` on **0**. The expression therefore always yields null, and every character promoted
+by `uma:fetch` stores no Japanese name. `PRD.md` FR-A-1's "Japanese name (nullable until
+cross-referenced)" is being satisfied by the nullability rather than by the fetch.
+
+**Why the suite cannot see it.** `tests/Feature/GametoraCharacterParserTest.php:22` builds its rows
+through a `card()` helper that writes `'name_ja' => $jp`, and the committed
+`tests/Fixtures/gametora-character-cards.sample.json` carries the same key. Both inputs were authored to
+the parser's expectation, so the assertion at `:39` — `name_ja` is `エピファネイア` — passes against a
+shape the source does not produce. The sample fixture holds 7 of the live document's 33 keys; `aptitude`,
+`skills_innate`, `skills_unique`, `title_en_gl` and the rest are absent from it, so it is a sketch of the
+document, not a capture of it. This is the KI-22 failure mode one layer down: a test that hand-writes the
+producer's input cannot falsify the producer.
+
+**Why a seeded database looks correct.** `php artisan tinker` reports `umamusume` rows = 2, rows with
+`name_ja` = 2 — both from `UmamusumeSeeder`, which writes the value directly. The seeder fills the column
+the fetch leaves empty, so local inspection confirms the wrong thing.
+
+**What fixing it needs.** Read `name_jp`. Rebuild the fixture from a slice of the live document so the key
+names belong to the source, and add an assertion that a live-shaped row yields a **non-null** `name_ja` —
+without that direction, a corrected key and a broken one both satisfy a fixture written to match.
+`ADR-0011` records that the skills parser does not inherit the pattern (it reads `name_en` and `jpname`,
+and its fixture is cut from the live document).
+
+**Owner.** Data Engineer. Out of the skills pass's scope because it edits the characters parser and its
+fixture, not the skills path; filed here because the skills import was only found by measuring the same
+document family, and the next reader of `GametoraCharacterParser` should not have to rediscover it.
+
+## KI-24 A stale source hash answers 200 with stale content, so a pinned URL fails silently — FILED 2026-09-29 (skills pass), OPEN
+
+**The comment's safety claim is the defect.** `config/uma.php:50-54` states, of the cache-busting token in
+each source URL: *"it rotates when the source republishes, so a stale hash surfaces as a fetch failure and
+not as silently old data."* Measured 2026-09-29, it does the opposite:
+
+| URL | HTTP | Body |
+|---|---|---|
+| `skills.f4a1e02d.json` (the hash every `UMAMUSUME_REFERENCE.md` citation names) | **200** | 1,910 rows, 621 stated available on `[Global]` |
+| `skills.609afe88.json` (today's manifest value) | 200 | 1,910 rows, 623 available, **68 rows differ in content** |
+| `character-cards.679f7c2e.json` (**live `gametora-characters` pin**) | 200 | 251,242 bytes |
+| `character-cards.e9e9ee6d.json` (today's manifest value) | 200 | 251,294 bytes |
+
+Old hashes keep serving, so a pin does not fail loudly — it quietly fetches an outdated document forever.
+The characters source is in that state now: `uma:fetch` pulls a roster three days behind the publisher's
+current document with nothing to report. Nothing in `ARCHITECTURE.md` §5 requires the pin either; its only
+hash language is snapshot-content hashing for idempotence (`:192`, `:212`), so a write-up that cites §5 for
+"resolve through the manifest rather than hardcoding" is citing a sentence the file does not contain.
+
+**Two consequences, one of them about the corpus.** `ADR-0011` §1 resolves the skills URL through
+`https://gametora.com/data/manifests/umamusume.json` at fetch time for exactly this reason, and records the
+resolved hash as provenance. Separately, the corpus's `[B]`-tier citations
+("`skills.f4a1e02d.json`", "`character-cards.679f7c2e.json`") point at documents that still resolve and
+are no longer current — which is **anchor drift, not a wrong fact**: the hash in a citation is provenance
+about when the claim was measured, so the citations must not be rewritten to the new hashes. `D-254`'s
+dated-snapshot policy already covers how a reader should treat them.
+
+**What fixing it needs.** An owner decision on the engine's URL model, because it changes both existing
+sources: manifest resolution at fetch time, a documented pinned fallback, and the resolved hash recorded on
+`data_sources` so a later reader can tell which document a fact came from. The `config/uma.php` comment is
+then corrected to state what actually happens.
+
+**Owner.** Architect with the Data Engineer. Discovered while approving a third source, which is the point
+at which the pinning convention was about to be copied forward.
+
+---
+
+## KI-25 The turn log forces the page into horizontal scroll at phone width — FILED 2026-09-29 (Slice 15 browser pass), OPEN
+
+**Symptom, measured rather than inferred.** At a 390 × 844 viewport the run screen's document reports
+`scrollWidth 476` against `innerWidth 390`, so the whole page scrolls sideways. Eleven elements sit past
+the right edge and all eleven trace to one root: the turn log `table.mt-3 w-full border-collapse text-sm`
+in `resources/views/runs/show.blade.php`, measured 460px wide across its nine columns (Turn, Speed,
+Stamina, Power, Guts, Wit, SP, Condition, Mood). `w-full` cannot shrink a table whose columns demand more
+than the container gives them, so the width is the content's, not the stylesheet's.
+
+**This is not a Slice 15 defect, and the way to say that is the diff, not the assertion.**
+`git diff 72e5157..HEAD -- resources/views/` for this slice is one file,
+`resources/views/components/race-panel.blade.php`, 22 insertions — the turn dropdown and the read-back
+chip, which measured `x=42, w=106` and sits fully inside its own panel at 390px. The table was not
+touched by any commit in the range.
+
+**Why it was filed at all, when the first reading blamed this slice.** The mobile probe's own output was
+`horizontalOverflow: true` on a page this slice had just edited, and the next thought was to fix what had
+just been written. Naming the overflowing element is what replaced that guess with a measurement, and it
+is the same correction Slice 12 and Slice 13 record in `slice-15-2026-09-29.md` §8.4: reach for the cause
+the instrument reports, not the one that fits the story.
+
+**Current behaviour is unverified rather than verified-safe.** No screen width below 476 CSS px has ever
+been a stated target for this tool — `CONSTRAINTS.md` and `DESIGN.md` carry no breakpoint contract for the
+run screen — so this may be a known and accepted shape rather than a regression. It is filed because a
+Trainer on a phone cannot read the log without dragging the page, and nothing in the repo says that is
+intended.
+
+**What fixing it needs.** A decision about which of the nine columns the log actually shows at phone
+width, and that is a layout ruling on a component this issue's author does not own:
+`resources/views/runs/show.blade.php` belongs to the frontend surface, and `DESIGN.md` carries the
+responsive rules. The mechanical options are a horizontally scrollable container scoped to the table
+rather than the page, a stacked card rendering below a breakpoint, or fewer columns; the first is the
+smallest diff and the last loses data. None is chosen here.
+
+**Owner.** Frontend/Design-system owner with Architect, since the fix needs a breakpoint decision the repo
+does not currently record. Found while measuring something else: the browser pass was sent to check
+contrast on the new turn control, and the overflow surfaced only because the same script read the viewport
+width too.
