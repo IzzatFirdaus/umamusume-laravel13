@@ -355,6 +355,11 @@ documented fallback); `Contracts/SkillSourceParser`; `Parsers/GametoraSkillsPars
 D-210 addendum; and the run screen's filter plus `✦ Unique` / SP cost marks and the hint-level absence
 said out loud. `ADR-0011` carries the measurements; `KI-23`/`KI-24` carry the two defects found on the way.
 
+**Two commits post-date the `verified-against` SHA above** and are named so a reader does not grep that tree
+for them: `83086b0` adds the rendered-output absence check that G-SK-17 now leans on
+(`SkillsFetchTest::skillsFixtureGlobalRenderings()`), and `c3bdda3` records the two facts that path-exclusion
+ruling needs before it can be answered.
+
 **Measured on the first live import** (`uma:fetch gametora-skills`): 1,901 created, 9 adopted, 0 to
 review, 1,910 stored — **623** rows are `[Global]` and client-named, and those 623 are exactly what
 `availableOnGlobal()` returns. `is_unique` 294, cost present on 906, derived type Speed 913 / Passive 120 /
