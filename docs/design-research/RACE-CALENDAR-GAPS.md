@@ -141,6 +141,16 @@ Consequences in `race_catalog_slots`:
 `config/uma.php:31`, and the parser contract takes one body per source so joining three datasets
 needs a design the pipeline does not have yet.
 
+**Measured against the populated catalogue** (410 rows from the `294424fc…` snapshot, 2026-09-29): eight
+rows carry a null `fans_gain_curve`, and the same eight carry a null `fans_needed` — Junior Make Debut
+(turn 12), Junior Maiden Race (turn 13), and the six year-4 finale rows, which sit outside the 24-cell
+grid. The **seven** regional ⚠️ slots `09` names are **not** among them: each stores a curve id (51–54)
+and it is the payout that `en/race-fans` would have to resolve, which is this item's gap rather than a
+null on the row. The two Longchamp rows `09` also marks ⚠️ are not in the corpus at all (`Prix Niel`,
+`Prix Foy`: 0 rows), which is correct — they never reached `[Global]`. So the grid can hold exactly two
+cells whose fan figure must render as nothing rather than `0`, and "nine slots render null fan-gain" is
+true of the document's tables and not of the rendered grid.
+
 **Needed to resolve:** two more `uma.sources` entries plus either a join step in the persister or
 lookup tables populated from them. Until then the picker shows distance, surface, tier and fan
 gate — all of which are in `race_instances` — but not the venue name.
@@ -264,4 +274,27 @@ perfectly good data. That trap is now a comment in `RaceCatalogSlotTest`'s heade
 **Needed to resolve:** none — recorded so the next report of breakage asks "would a test have
 caught it?" before assuming the code is fine or the report is wrong.
 
-**Owner:** nobody. It is a note about how to read the other nine entries.
+**Owner:** nobody. It is a note about how to read the entries above it.
+
+---
+
+## 10. Two identical free races sit in the development database
+
+**What is there.** `scenario_slots` 297 and 298 are the same row twice: `kind = free_race`,
+`scenario_key = ura_finale`, `title = 'Naruta Kinpa Cup'`, `tier = 'G3'`, `month = 5`, `half = 'Early'`,
+`is_manual = 1`, with no `source_url` and no `source_key`. `race_entries` #1 points at 298. The grid
+draws Early May as a two-race cell, and its accessible name reads
+`"Early May: Entry open, 2 races: Naruta Kinpa Cup, Naruta Kinpa Cup; one entered"`.
+
+**Why this is not a code defect.** The name is a design-prototype sample
+(`docs/design-research/prototypes/screen-a-scenario-v10.html:489`), not a race in the export or in `09`,
+and the `G3` was typed into the manual form rather than derived — which is why a diagnosis that read it
+as the catalogue mislabelling a Kimpai race came out the other way. Both Kimpai races are G3 in every
+source this repository holds; the G2 in that cluster is Nikkei Shinshun Hai.
+
+**What it does raise.** Writing the same free race twice is what the manual path does when it is used
+twice, so the open question is whether the manual path should adopt an identical existing row instead of
+creating a second one. That is a product call about `scenario_slots`, which this slice was told to leave
+alone, and it is recorded rather than decided.
+
+**Owner:** the owner, as a data decision.

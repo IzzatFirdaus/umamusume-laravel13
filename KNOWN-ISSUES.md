@@ -7,6 +7,18 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-29, catalogue fill pass):** **27 filed, 19 closed, 8 open**, one filed here. **KI-28**
+is the silent one: with a column absent from the schema, SQLite reads the quoted identifier inside
+`whereNotNull('col')` as a **string literal**, so the predicate is true for every row and nothing is
+raised. It surfaced because a count of linked race entries returned 1 against a `race_entries` whose
+`PRAGMA table_info` lists no such column — and the unquoted spelling of the same query threw
+`no such column`. An un-migrated database therefore drops every catalogue↔entry link without
+complaining. The mitigation is the record itself: no `Schema::hasColumn` guard goes into the query
+path, because the trap is SQLite's behaviour and every future column addition inherits it. This pass
+also **met KI-27 in the wild** while filling the catalogue — `uma:fetch` reported "unchanged since last
+snapshot; nothing written" against a database holding 0 rows, because a throwaway fetch had already put
+the same document on the shared `storage/` disk — and the reparse workaround KI-27 names is what wrote
+the 410 rows. That is a second reproduction of an open entry, not a new one. Prior:
 **Status (2026-09-29, Screen D pass):** **26 filed, 19 closed, 7 open**, two filed and none closed here.
 **KI-26** is the unescaped `LIKE` on `/umamusume`: a search of `%` returns the whole catalog rather than the
 rows whose key contains that character. Reproduced through that controller, not by a hand-written query, and
@@ -1271,3 +1283,41 @@ regardless. KI-24 is about the pin going stale; today it has not for this source
 
 **Owner.** Data pipeline, with Architect for the decision. Found by doing the thing the screen tells a
 Trainer to do.
+
+## KI-28 SQLite reads an unknown double-quoted identifier as a string literal, so a missing column fails silently — FILED 2026-09-29 (catalogue fill pass), OPEN as a hazard; the record is the mitigation
+
+**The hazard.** SQLite degrades unknown double-quoted identifiers to string literals. With a column
+absent from the schema, `whereNotNull('col')` does not throw — SQLite parses `"col"` as the literal
+string `"col"`, which is never null, so the predicate is always true. An un-migrated dev database will
+silently drop every catalogue↔entry link without erroring. Post-migrate this trap goes away, but any
+future column addition has the same failure mode.
+
+**Proof, from the fill pass.** `database/database.sqlite` had six pending migrations and
+`PRAGMA table_info(race_entries)` listed 11 columns with no `race_catalog_slot_id`. In one process, in
+this order:
+
+| Query | Result |
+| --- | --- |
+| `DB::table('race_entries')->whereNotNull('race_catalog_slot_id')->count()` | **1**, no error. Laravel quotes identifiers with `"`, so SQLite read the column name as a string and matched every row. |
+| `select race_catalog_slot_id from race_entries limit 1` — unquoted | `General error: 1 no such column: race_catalog_slot_id` |
+| `select "race_catalog_slot_id" as v from race_entries limit 1` | returns the **string** `race_catalog_slot_id` as column `v` |
+
+The two readings that looked contradictory during the diagnosis — a count that succeeds against a
+column the schema denies — are the same query with and without the quoting style that decides which of
+SQLite's two interpretations fires.
+
+**Why it matters more than a missing column usually does.** A read that throws is a screen that fails
+and gets filed. This one returns a plausible number: `TrainingRun::calendarCells()` calls
+`whereNotNull('race_catalog_slot_id')` and, on an unmigrated database, receives **every** race entry
+keyed by a null attribute — so no catalogue cell finds its entry and the grid quietly reports races as
+never run, on a page that returns 200. The write path is louder for once: an `INSERT` naming a column
+that is not there is a hard error, which is why `uma:fetch` has to follow `php artisan migrate` and not
+the other way round.
+
+**What this does not need.** No `Schema::hasColumn` guards in the query path. The trap is SQLite's
+behaviour rather than the code's, and a guard per query is a tax paid forever against one database that
+was behind its own migrations. The record is the mitigation: read `php artisan migrate:status --pending`
+before trusting a zero from a linked-column count on a development database.
+
+**Owner.** nobody — hazard record. Filed so the next session whose `count()` succeeds against a column
+`PRAGMA` denies does not spend an afternoon on it.
