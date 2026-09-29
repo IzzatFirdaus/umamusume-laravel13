@@ -60,7 +60,7 @@
         @if ($mode === 'calendar')
             {{-- Calendar path. Each option names its half-month and grade, so a race cannot
                  be chosen on its name alone, and the heading says which year is in scope. --}}
-            <label class="flex flex-col gap-1">
+            <label class="flex min-w-0 flex-col gap-1">
                 <span class="font-medium text-ink">Calendar race · {{ \App\Models\RaceCatalogSlot::YEARS[$calendarYear] }} year</span>
                 @if ($catalogSlots->isEmpty())
                     <input type="text" class="rounded-md border border-rule bg-sunken px-2 py-1 text-ink-muted"
@@ -69,8 +69,12 @@
                         Races are fetched data, and this career year has none of them.
                     </span>
                 @else
+                    {{-- A select is as wide as its longest option, and the option now names the
+                         half-month and the grade. Without the shrink allowance the whole panel is
+                         pushed past a narrow window: measured 385px of content in a 341px box at
+                         390px viewport. --}}
                     <select name="race_catalog_slot_id"
-                            class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                            class="w-full min-w-0 max-w-full rounded-md border border-rule bg-raised px-2 py-1 text-ink">
                         @foreach ($catalogSlots as $slot)
                             <option value="{{ $slot->id }}" data-tier="{{ $slot->tier ?? '' }}" @selected(old('race_catalog_slot_id') == $slot->id)>
                                 {{ $slot->title }} · {{ $slot->slot_label }} · {{ $slot->tier ?? 'no grade' }}
@@ -84,10 +88,10 @@
                  table, so it gets its own control: one select cannot carry two field names, and
                  the validator refuses an entry that sets both. --}}
             @if ($manualSlots->isNotEmpty())
-                <label class="flex flex-col gap-1">
+                <label class="flex min-w-0 flex-col gap-1">
                     <span class="font-medium text-ink">Trainer-entered race</span>
                     <select name="scenario_slot_id"
-                            class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                            class="w-full min-w-0 max-w-full rounded-md border border-rule bg-raised px-2 py-1 text-ink">
                         <option value="">not a hand-entered race</option>
                         @foreach ($manualSlots as $slot)
                             <option value="{{ $slot->id }}" @selected(old('scenario_slot_id') == $slot->id)>{{ $slot->title }}</option>
