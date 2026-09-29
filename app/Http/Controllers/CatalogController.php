@@ -26,11 +26,11 @@ class CatalogController extends Controller
 {
     /**
      * Paginated roster tree, filterable by `status` (ReleaseStatus), `search` and
-     * `show_unconfirmed`. Search runs against the normalized match key, the display
-     * names and the card titles: a Trainer searching a card must land on the trainee
-     * who owns it, so the card clause selects the *parent* row. Unknown status values
-     * are ignored rather than erroring, and `status=all` is the way back to the
-     * unfiltered list. Renders catalog.index.
+     * `show_unconfirmed`. Search runs against the normalized match key, the aliases and
+     * the card titles, not raw display strings (matching rule, CLAUDE.md): a Trainer
+     * searching a card must land on the trainee who owns it, so the card clause selects
+     * the *parent* row. Unknown status values are ignored rather than erroring, and
+     * `status=all` is the way back to the unfiltered list. Renders catalog.index.
      *
      * The default status is Released (Global), not "everything": a catalog whose first
      * screen is half JP-only rows is not the Global English tool PRD §1 describes.
@@ -44,43 +44,40 @@ class CatalogController extends Controller
 
         /** @var ReleaseStatus|null $statusEnum */
         $statusEnum = $status !== null ? ReleaseStatus::tryFrom((string) $status) : null;
-        $showAll = $status === 'all';
+        $showAllStatus = $status === 'all';
         $showUnconfirmed = $request->boolean('show_unconfirmed');
         $searchKey = $search !== null && $search !== '' ? $normalizer->normalize((string) $search) : null;
 
         $query = Umamusume::query()
-            ->withCount('aliases')
             ->with(['cards' => $this->cardScope($showUnconfirmed)])
-            ->when(! $showAll && $statusEnum === null, fn (Builder $q): Builder => $q->where('release_status', ReleaseStatus::GlobalReleased->value))
+            ->when(! $showAllStatus && $statusEnum === null, fn (Builder $q): Builder => $q->where('release_status', ReleaseStatus::GlobalReleased->value))
             ->when($statusEnum !== null, fn (Builder $q): Builder => $q->where('release_status', $statusEnum->value))
-            ->when($searchKey !== null, function (Builder $q) use ($searchKey, $search): void {
-                $raw = trim((string) $search);
-
-                $q->where(function (Builder $sub) use ($searchKey, $raw): void {
+            ->when($searchKey !== null, function (Builder $q) use ($searchKey): void {
+                $q->where(function (Builder $sub) use ($searchKey): void {
                     // Normalized term against the normalized columns, per the matching
-                    // rule in CLAUDE.md.
+                    // rule in CLAUDE.md. A card title is verbatim source data, but the
+                    // term that reaches it is normalized, and a card match surfaces its
+                    // trainee because the trainee is the level this page is organised at.
                     $sub->where('match_key', 'like', "%{$searchKey}%")
-                        ->orWhereHas('aliases', fn ($a) => $a->whereRaw('lower(alias) like ?', ["%{$searchKey}%"]));
-
-                    // Verbatim term against the verbatim columns. `match_key` is a stored
-                    // column, so a Trainer who types "tokai teio" with the space in it can
-                    // only reach her display name, card title, or an alias.
-                    $sub->orWhere('name', 'like', "%{$raw}%")
-                        ->orWhere('name_ja', 'like', "%{$raw}%")
-                        ->orWhereHas('cards', fn ($c) => $c->whereRaw('lower(title) like ?', ["%{$raw}%"]));
+                        ->orWhereHas('aliases', fn ($a) => $a->whereRaw('lower(alias) like ?', ["%{$searchKey}%"]))
+                        ->orWhereHas('cards', fn ($c) => $c->whereRaw('lower(title) like ?', ["%{$searchKey}%"]));
                 });
             });
 
         [$items, $total] = $this->cached($query, $status, $searchKey, $page, $pageSize, $showUnconfirmed);
 
-        $umamusumes = new LengthAwarePaginator($items, $total, $pageSize, $page, ['path' => route('catalog.index')]);
+        // `withQueryString()` because the paginator is built by hand here: without it the
+        // pager links carry a bare `?page=N` and paging silently reverts status, search
+        // and the unconfirmed opt-in.
+        $umamusumes = (new LengthAwarePaginator($items, $total, $pageSize, $page, ['path' => route('catalog.index')]))
+            ->withQueryString();
 
         return view('catalog.index', [
             'umamusumes' => $umamusumes,
             'statuses' => ReleaseStatus::cases(),
             'currentStatus' => $statusEnum,
             'search' => $search,
-            'showAll' => $showAll,
+            'showAllStatus' => $showAllStatus,
             'showUnconfirmed' => $showUnconfirmed,
             'allStatusesLabel' => 'All statuses',
         ]);
@@ -129,7 +126,10 @@ class CatalogController extends Controller
     {
         $version = (int) Cache::remember('catalog:version', 3600, fn () => 0);
         $ttl = (int) config('uma.cache.ttl', 900);
-        // The unconfirmed flag changes which rows exist, so it belongs in the key.
+        // Defensive key separation, not a live dependency: the flag changes which cards a
+        // row shows, not which parent rows exist or how many there are, because
+        // `cardScope()` constrains only the eager load. It stays in the key so a future
+        // scope that filters parents by card state cannot reuse a page cached without it.
         $base = "catalog:list:v{$version}:".md5("{$status}|{$searchKey}|".($showUnconfirmed ? '1' : '0'));
 
         /** @var list<int> $ids */
@@ -141,13 +141,10 @@ class CatalogController extends Controller
 
         $total = Cache::remember("{$base}:count", $ttl, fn () => $query->count());
 
-        // Re-read the page by id. `aliases_count` is asked for again rather than
-        // cached: it is a live count, and the cache's job here is the identity of
-        // the page, not the numbers drawn on it. The card tree is re-read through
-        // the same `cardScope()` the list query used, so a cache hit cannot hand
+        // Re-read the page by id rather than caching the models. The card tree is loaded
+        // through the same `cardScope()` the list query used, so a cache hit cannot hand
         // back trainees whose forms went missing (KI-2's failure shape).
         $items = Umamusume::query()
-            ->withCount('aliases')
             ->with(['cards' => $this->cardScope($showUnconfirmed)])
             ->whereIn('id', $ids)
             ->orderBy('name')

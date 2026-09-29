@@ -16,6 +16,15 @@ use Illuminate\Support\Facades\DB;
  * the shape of the page depends on and nothing else checks: the nesting, the card-title
  * search, the two opt-out filters (`status=all`, `show_unconfirmed=1`), and the default
  * release status.
+ *
+ * A search fixture states its own `match_key` (see `CatalogTest.php:74`): the factory
+ * derives one from a faker name inside `definition()`, so `create(['name' => ...])`
+ * stores a key unrelated to the override, and a test that searches by name would be
+ * searching nothing. Search reads normalized columns only, never a raw display string.
+ *
+ * Recorded deviation: the catalog row stopped displaying its alias count in this task.
+ * The briefed row shape is name, Japanese name, max rarity and form count, so no row
+ * asks for `aliases_count` and the index queries dropped the subselect with it.
  */
 
 it('nests each card under its trainee', function (): void {
@@ -43,7 +52,9 @@ it('nests each card under its trainee', function (): void {
 });
 
 it('orders the debut first, then by Global release date ascending', function (): void {
-    $teio = Umamusume::factory()->create(['name' => 'Tokai Teio', 'slug' => 'tokai-teio']);
+    $teio = Umamusume::factory()->create([
+        'name' => 'Tokai Teio', 'slug' => 'tokai-teio', 'match_key' => 'tokaiteio',
+    ]);
     foreach ([
         ['[Beyond the Horizon]', '2025-07-16', false, 100302],
         ['[Peak Joy]', '2025-06-26', true, 100301],
@@ -77,7 +88,9 @@ it('orders the debut first, then by Global release date ascending', function ():
 });
 
 it('never prints a bare zero when a trainee has no forms', function (): void {
-    Umamusume::factory()->create(['name' => 'Cardless One', 'slug' => 'cardless-one']);
+    Umamusume::factory()->create([
+        'name' => 'Cardless One', 'slug' => 'cardless-one', 'match_key' => 'cardlessone',
+    ]);
 
     $html = test()->get('/umamusume?search=cardless')->assertOk()->getContent();
 
@@ -173,16 +186,18 @@ it('loads the tree in a fixed number of queries, not one per trainee', function 
         static fn (array $q): bool => ! str_contains($q['query'], 'from "preferences"'),
     ));
 
-    // Four, whatever the page size: the ids and the total, the page re-read with its
-    // `aliases_count` subselect, and one eager load carrying every form on screen. The
-    // fixture is 4 trainees with 3 forms each; loading a trainee's forms per row would
-    // be 4 more, and 68 trainees on a page would be 68.
+    // Four, whatever the page size: the ids and the total, the page re-read, and one
+    // eager load carrying every form on screen. The fixture is 4 trainees with 3 forms
+    // each; loading a trainee's forms per row would be 4 more, and 68 trainees on a page
+    // would be 68.
     expect($tree)->toHaveCount(4)
         ->and(count($log))->toBe(5, 'the shell added a query the tree does not own');
 })->group('perf');
 
 it('reads a trainee badge off the cards the filter let through', function (): void {
-    $nature = Umamusume::factory()->create(['name' => 'Nice Nature', 'slug' => 'nice-nature']);
+    $nature = Umamusume::factory()->create([
+        'name' => 'Nice Nature', 'slug' => 'nice-nature', 'match_key' => 'nicenature',
+    ]);
     CharacterCard::factory()->confirmed()->create([
         'umamusume_id' => $nature->id, 'card_id' => 118001, 'title' => '[Two Star, Attested]',
         'rarity' => CardRarity::TwoStar, 'is_debut_form' => true,
@@ -208,4 +223,51 @@ it('reads a trainee badge off the cards the filter let through', function (): vo
     expect($shown)->toContain('Three stars')
         ->and($shown)->toContain('★★★')
         ->and($shown)->toContain('2 forms');
+});
+
+it('never serves a page cached for one term to another term sharing its key', function (): void {
+    Umamusume::factory()->create([
+        'name' => 'Tokai Teio', 'slug' => 'tokai-teio', 'match_key' => 'tokaiteio',
+    ]);
+    // A display name the one-word term reads verbatim and the double-spaced one does
+    // not, with a match key that says it is somebody else. Search reads only normalized
+    // columns, so it is out of both pages; the moment the query also read raw strings,
+    // this row's presence would depend on which of the two warmed the shared key.
+    Umamusume::factory()->create([
+        'name' => 'Tokaiteio Lookalike', 'slug' => 'tokaiteio-lookalike', 'match_key' => 'lookalike',
+    ]);
+
+    test()->get('/umamusume?search=tokaiteio')->assertOk();
+    $html = test()->get('/umamusume?search=TOKAI%20%20TEIO')->assertOk()->getContent();
+
+    expect($html)->toContain('Tokai Teio')
+        ->and($html)->not->toContain('Tokaiteio Lookalike');
+});
+
+it('keeps the active filters on every pagination link', function (): void {
+    Umamusume::factory()->create([
+        'name' => 'Tokai Teio', 'slug' => 'tokai-teio', 'match_key' => 'tokaiteio',
+    ]);
+    Umamusume::factory()->create([
+        'name' => 'Teio Alternate', 'slug' => 'teio-alternate', 'match_key' => 'teioalternate',
+    ]);
+
+    // Two rows at one per page, so page 2 renders and its pager links with it.
+    $html = test()->get('/umamusume?status=all&search=teio&show_unconfirmed=1&pageSize=1&page=2')
+        ->assertOk()
+        ->getContent();
+
+    preg_match_all('/href="([^"]*page=\d+)"/', $html, $matches);
+
+    // A bare `/umamusume?page=1` silently reverts status, search and the unconfirmed
+    // opt-in the moment a Trainer pages, so no pager link may drop one of the three.
+    $dropped = array_values(array_filter(
+        $matches[1],
+        static fn (string $href): bool => ! str_contains($href, 'status=all')
+            || ! str_contains($href, 'search=teio')
+            || ! str_contains($href, 'show_unconfirmed=1'),
+    ));
+
+    expect($matches[1])->not->toBeEmpty()
+        ->and($dropped)->toBe([], 'a pagination link dropped an active filter');
 });

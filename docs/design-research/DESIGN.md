@@ -184,7 +184,7 @@ Computed with the WCAG 2.1 relative-luminance formula, linearising each sRGB cha
 
 Both clear AA for body text, so no token moves and no new colour role is introduced. The same
 calculator reproduces rows already in this section from their own named hex values, which is
-what makes these two worth trusting: `ink-body` `#6A5641` on `#FFFFFF` = 6.95 (row 3),
+what makes these two worth trusting: the `ink-body` `#6A5641` on `#FFFFFF` pair = 6.95,
 `#ECEAF2` on `#24262A` = 12.71 (§3.7), and the white-on-`crimson-500` row above, which the
 formula also puts at 10.89. Measured on 2026-09-29 at tree `0fbff04`.
 

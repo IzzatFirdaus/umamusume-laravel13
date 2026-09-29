@@ -17,7 +17,7 @@
         <label class="flex flex-col gap-1">
             <span class="text-ink-muted">Release status</span>
             <select name="status" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
-                <option value="all" @selected($showAll)>{{ $allStatusesLabel }}</option>
+                <option value="all" @selected($showAllStatus)>{{ $allStatusesLabel }}</option>
                 @foreach ($statuses as $status)
                     <option value="{{ $status->value }}" @selected($currentStatus === $status)>{{ $status->label() }}</option>
                 @endforeach
@@ -37,6 +37,10 @@
             No Umamusume match. The catalog is filled by seed data or `php artisan uma:fetch`.
         </p>
     @else
+        {{-- No collapse control ships with this tree, decided by row count: 68 trainees at
+             the 25-per-page default is three pages, each already fully expanded, so a
+             disclosure widget would hide nothing while adding a keyboard stop (G-11). The
+             lever if that ever changes is the `pageSize` clamp, already at 100. --}}
         <ul class="mt-6 space-y-4">
             @foreach ($umamusumes as $umamusume)
                 <li class="rounded-md border border-rule bg-raised">
