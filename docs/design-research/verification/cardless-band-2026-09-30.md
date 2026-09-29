@@ -131,4 +131,5 @@ Full suite after the last edit: **783 passed, 2 skipped (2729 assertions)**, exi
 clean; `npm run build` clean; `vendor/bin/pint` passed on the changed test; PHPStan level 6
 `[OK] No errors`, run against this slice's tree (`app/` carries no change in it, which is why the gate
 is quoted rather than re-run per edit). `composer lore` 115 hits / 57 exempt and `composer lore-code` 8,
-both unchanged from the recorded baseline; the new copy carries no dash and no equine term.
+both unchanged from the recorded baseline; the new copy carries no dash and no banned term. (The first
+draft of this line used the banned word for the category, which is how the count went up by one.)
