@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\MoodTier;
+use App\Enums\ReleaseStatus;
 use App\Enums\TurnEventType;
 use App\Http\Requests\StoreRaceEntryRequest;
 use App\Http\Requests\StoreRunSkillRequest;
@@ -12,6 +13,7 @@ use App\Http\Requests\StoreShopPurchaseRequest;
 use App\Http\Requests\StoreTrainingRunRequest;
 use App\Http\Requests\StoreTurnEntryRequest;
 use App\Http\Resources\TrainingRunResource;
+use App\Models\CharacterCard;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\Skill;
@@ -53,10 +55,70 @@ class TrainingRunController extends Controller
 
     public function create(): View
     {
+        /*
+         * One query, one payload, one truth. The catalog page and this selector read the
+         * same rows, so a card that exists in the dropdown cannot be absent from the
+         * catalog. Cards come with the trainees rather than in a second pass: at 68 and
+         * ~107 rows, an eager load is one query and a lazy one is sixty-nine.
+         *
+         * `whereHas` carries the same `unconfirmed` filter as the eager load, because a
+         * trainee whose only form is unconfirmed has nothing a Trainer may run: she would
+         * otherwise appear in the no-script select with no entry in the payload, which is
+         * a choice that leads nowhere.
+         */
+        $roster = Umamusume::query()
+            ->where('release_status', ReleaseStatus::GlobalReleased->value)
+            ->whereHas('cards', fn ($query) => $query->where('unconfirmed', false))
+            ->with(['cards' => fn ($query) => $query
+                ->where('unconfirmed', false)
+                ->orderBy('global_release_date')
+                ->orderBy('card_id')])
+            ->orderBy('name')
+            ->get();
+
         return view('runs.create', [
-            'umamusumes' => Umamusume::orderBy('name')->get(['id', 'name']),
+            'umamusumes' => $roster,
+            'rosterJson' => $roster->map(fn (Umamusume $u): array => [
+                'umamusumeId' => $u->id,
+                'trainee' => $u->name,
+                'traineeJa' => $u->name_ja,
+                'cards' => $u->cards->map(fn (CharacterCard $c): array => [
+                    // The local primary key, which is what `character_card_id` is a
+                    // foreign key to and what StoreTrainingRunRequest's `exists` rule
+                    // reads. The source's own `card_id` rides along for matching and
+                    // display only; submitting it would name a row that does not exist.
+                    'selectionId' => $c->id,
+                    'sourceCardId' => $c->card_id,
+                    'title' => $c->title,
+                    // Brackets stripped so `RUN` can prefix-match `[RUN! RUIN! LAUNCHER!]`,
+                    // whose verbatim string starts with `[`. The label renders `title`.
+                    'titleKey' => preg_replace('/^\[|\]$/', '', $c->title) ?? $c->title,
+                    'releaseDate' => $c->global_release_date->toDateString(),
+                    'debut' => $c->is_debut_form,
+                ])->all(),
+            ])->all(),
+            'selectedLabel' => $this->selectedCardLabel(),
             'scenarios' => $this->scenarioLabels(),
         ]);
+    }
+
+    /**
+     * The selection a failed submit has to hand back. Read from `old()` so the visible
+     * label names the same card the hidden fields still carry, not one the Trainer has to
+     * pick again. Joined with a middle dot: R-02, D-79 and RenderedCopyHygieneTest keep an
+     * em or en dash out of copy that reaches a Trainer.
+     */
+    private function selectedCardLabel(): ?string
+    {
+        $cardId = old('character_card_id');
+
+        if (! is_numeric($cardId)) {
+            return null;
+        }
+
+        $card = CharacterCard::with('umamusume')->find((int) $cardId);
+
+        return $card === null ? null : $card->umamusume->name.' · '.$card->title;
     }
 
     public function store(StoreTrainingRunRequest $request): RedirectResponse
