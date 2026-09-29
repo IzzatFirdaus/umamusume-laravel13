@@ -1781,3 +1781,76 @@ paragraph above) rather than reopening the entry.
 **Fix candidates, none chosen here.** (a) Move the registry default to a tracked path, or commit a minimal `.agents/skills.json` fixture, keeping any local overrides gitignored. (b) Have the suite skip those six tests with a named reason when the registry is absent, so a fresh baseline reads `6 skipped` rather than `6 failed`. (c) Document the copy step in `README.md`'s setup section. (a) is the smallest permanent fix; (c) is the cheapest and leaves the trap armed for the next worktree.
 
 **Owner.** Data Engineer with whoever owns `docs/SKILL_AUTOMATION.md`. Found by the catalog-roster plan's Task 1 provisioning step, which now copies `.agents` into its worktree; that copy is a workaround local to one branch and does not close this entry.
+
+---
+
+## KI-38 A card with the source's placeholder title is stored and rendered as a real Global costume - FILED 2026-09-29 (catalog roster, Task 13 browser pass), OPEN
+
+**Symptom.** `character_cards` row `card_id = 103601` (Air Shakur, `char_id 1036`) carries `title = "[unsigned]"` alongside a real `release_en` of `2026-06-18` and `rarity = 3`. The catalog list, the trainee detail page and the run-form selector all print `[unsigned]` as though it were the costume's name, with a date and a star rating beside it. Measured on the live export: over its 268 rows, `title` equals the literal string `unsigned` on exactly one, so this is one card and not a pattern.
+
+**Cause, and why a parser must not "fix" it.** The placeholder is the source's own value, so rewriting it in `GametoraCharacterCardParser` would be the engine editing a stated fact - the rule `ADR-0004` and D-33 both turn on. The real cause is the admission rule: `character_cards` is Global-only, and this card qualifies because it has a `release_en`. Nothing checks that it also has a *name*, so a row can satisfy the table's one stated precondition while carrying no displayable content.
+
+**Why it matters.** D-220 says a widget with no mechanic is absent rather than an empty slot, and has no way to say "this row has no title yet". A Trainer sees a dated, rated costume that does not exist under that name, and the run form offers it as a selection. G-16 governs fixture names being real client strings; this is the stored-data equivalent, and it is currently invisible to every gate because the string is a legitimate bracketed title in form.
+
+**Fix candidates, none chosen here.** (a) Treat a placeholder title as absent for display and search while keeping the row, so the card is reachable from her detail page but not offered by name in the selector. (b) Flag the card `unconfirmed` so the cross-check queue surfaces it, and let a human verdict decide whether the release date is trustworthy at all. (c) Accept it as a dated snapshot of an upstream placeholder and render it with a marker. (a) is the smallest change that stops a placeholder reaching a selection; (b) is the only one that also asks whether the date deserves trust.
+
+**Owner.** Data Engineer, with the Lore Guardian consulted on (c) since it puts a non-client string on a display path. Found by the Task 13 browser pass against `http://127.0.0.1:8099/umamusume`.
+
+---
+
+## KI-39 `SkillFactory` derives `match_key` with a different algorithm than production, so search tests prove nothing - FILED 2026-09-29 (catalog roster, Task 13), OPEN
+
+**Symptom.** `database/factories/SkillFactory.php:24` computes the match key as `mb_strtolower(str_replace('-', '', Str::slug($name)))`. Production computes it with `NameNormalizer::normalize()`, which is NFKD, then strip combining marks, then strip the five characters in `NameNormalizer::FOLDED_CHARACTERS`. `Str::slug` transliterates punctuation to nothing; the normalizer keeps it. Measured over 200 sampled `name_is_client` skills, **119 produce a different key**:
+
+| Name | Factory key | Normalizer key |
+|---|---|---|
+| `Warning Shot!` | `warningshot` | `warningshot!` |
+| `Empress's Pride` | `empressspride` | `empress'spride` |
+| `1st Place Kiss` + star glyph | `1stplacekiss` | `1stplacekiss` + star glyph |
+| `Class Rep + Speed = Bakushin` | `classrepspeedbakushin` | `classrep+speed=bakushin` |
+
+Over all 135 trainee names, 3 differ: `Mr. C.B.`, `K.S.Miracle`, `Curren Bouquetd'or`.
+
+**Cause.** The factory was written as a convenience and reimplemented the normalizer's intent rather than calling it. It is the same class of defect as `KI-23b`, where a factory-seeded `name_ja` meant the parser's wrong source key stayed invisible: the fixture agreed with the code because both were wrong in the same direction.
+
+**Why it matters.** Any search test that seeds a skill through the factory asserts against a key production never writes. It passes whether or not `normalize()` is correct, and it fails for the wrong reason the moment `normalize()` changes. The divergence is largest exactly where punctuation is richest, which is the Global skill set.
+
+**Fix candidates, none chosen here.** (a) Have `SkillFactory` call `NameNormalizer` through the container, so one algorithm exists. This changes keys in every test that seeds a skill, so it needs a full-suite run and an honest count of what moved. (b) Delete `match_key` from the factory and let the model or an observer derive it, which closes the "two places compute it" shape permanently. (a) is the smaller diff; (b) is the one that cannot drift back.
+
+**Owner.** Laravel Dev. Measured 2026-09-29 with a tinker script comparing both algorithms over the imported `skills` table and the whole `umamusume` table.
+
+---
+
+## KI-40 `NameNormalizer`'s fold has a Unicode ceiling, and the failure mode reads as "no such trainee" - FILED 2026-09-29 (catalog roster, Task 13), OPEN as a hazard
+
+**Symptom.** `NameNormalizer::normalize()` folds by NFKD, removes combining marks, then removes exactly the five characters in `FOLDED_CHARACTERS`. NFKD does not decompose the Latin ligature and stroked letters, and none of them are in that list, so they survive into the key. Measured pairs:
+
+| Pair | Result |
+|---|---|
+| `Cafe` / `Cafe` + acute | match |
+| `El Condor` / `El Condor` + acute | match |
+| `Tokai` / `Tokai` + macron | match |
+| `Straights` / `Str` + ae ligature + `ight` | **no match** |
+| `Odawara` / `O` + stroke + `dawara` | **no match** |
+
+**Severity today, measured rather than assumed.** The ae ligature appears 375 times in the 268-row `character-cards` export, but only in `name_tw` (144 rows), `title_tw` (81), `title_jp` (45) and `title_ko` (4) - **none of which this tool stores or searches**. `O`-stroke, `D`-stroke, `L`-stroke, thorn, sharp-s and oe-ligature appear **0 times**. No `[Global]` English name currently folds wrong.
+
+**Why it is still filed.** The failure mode is silent and wrong-looking: a name that fails to match presents as "no such trainee" or "no trainee or card found", not as a normalizer that does not cover this letter. The ceiling becomes live the moment a source adds a `[Global]` name carrying one of these letters, or the day this tool starts indexing `name_tw` - and the second is a plausible future scope, since the export has been carrying those fields all along.
+
+**Fix candidates, none chosen here.** (a) Add a transliteration step for the Latin-1 letters NFKD leaves alone, so the fold is defined by a class rather than a list of five. (b) Record the ceiling as a known limit next to `FOLDED_CHARACTERS` and add a test that pins the pairs that do not match, so a future source that trips it is a test failure rather than a support question. (b) costs one test and converts a silent wrong answer into a loud one; (a) is the real fix and needs a decision on which letters are in scope.
+
+**Owner.** Data Engineer. The ceiling is a property of the normalizer, so any fix belongs with the fold's own owner rather than with a caller.
+
+---
+
+## KI-41 The run form's roster is ordered by `name` with no tiebreaker, so the order is total by accident - FILED 2026-09-29 (catalog roster, Task 13), OPEN as a latent hazard
+
+**Symptom.** `app/Http/Controllers/TrainingRunController.php:82` ends the roster query with `->orderBy('name')` and no secondary key. SQLite resolves ties by row order, which can change across a re-import or a vacuum, so two trainees whose names compare equal could swap places between two page loads of the same data.
+
+**Severity today, measured.** 0 duplicate names in `umamusume`, and 135 distinct normalized names across 135 trainees, so the order is total in fact. This is filed as a hazard, not a live bug: the property holds because the data happens to be unique, not because the query guarantees it, and nothing in the test suite would fail if a future import introduced a tie.
+
+**Why it matters for the surface it feeds.** The combobox groups options under trainee headers and its empty state is "10 most recently released cards, newest first", so a Trainer reads the group order as meaningful. An unstable order would make the same query return two different screens, which reads as a bug in the selector rather than in the query.
+
+**Fix candidates, none chosen here.** (a) Add `->orderBy('id')` as a tiebreaker, which makes the order total by construction and costs one clause. (b) Add a unique index on the normalized name, which is an Architect decision and would also constrain manual rows. (a) is the smaller change and does not constrain what a Trainer may write.
+
+**Owner.** Architect, or Laravel Dev under (a). Found by the Task 13 browser pass, where the wrap behaviour was verified from both ends of the list.
