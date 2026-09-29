@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Populate the catalog with the complete Global roster (68 trainees, 105 costume cards nested under them) and replace the "New training run" trainee `<select>` with a keyboard-operable ARIA combobox that prefix-matches trainee names and card epithets.
+**Goal:** Populate the catalog with the complete Global roster (68 trainees, 107 costume cards nested under them) and replace the "New training run" trainee `<select>` with a keyboard-operable ARIA combobox that prefix-matches trainee names and card epithets.
 
 **Architecture:** A new `character_cards` table becomes the single card-level source of truth. It is filled by a second declared GameTora source through the existing fetch engine, keyed to its trainee by a new `umamusume.external_ref` link, and the 68 trainees reach the catalog through the existing review-queue promotion path rather than new promotion code. The catalog renders the trainee/card tree server-side; the selector ships that same tree as a JSON payload and filters it synchronously in vanilla TypeScript.
 
@@ -62,7 +62,7 @@ Every task satisfies all of these. Exact values, verbatim from `CONSTRAINTS.md`,
 |---|---|
 | `app/Services/DataPipeline/Contracts/CharacterCardSourceParser.php` | Third parser contract, beside `SourceParser` and `ScenarioSourceParser`. |
 | `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php` | Emits one record per Global card; debut derived, never guessed. |
-| `app/Actions/UpsertCharacterCard.php` | Idempotent card upsert by `card_id` plus its provenance row. |
+| `app/Actions/StoreCharacterCards.php` | Idempotent card upsert by `card_id` plus its provenance row. |
 
 **Modified PHP**
 
@@ -608,7 +608,7 @@ return new class extends Migration
 };
 ```
 
-No explicit index on `umamusume_id` beyond the FK: the table holds 105 rows and the catalog reads it in one `whereIn`. Add the index when the roster is a few thousand rows, not before.
+No explicit index on `umamusume_id` beyond the FK: the table holds ~107 rows (measured 2026-09-29) and the catalog reads it in one `whereIn`. Add the index when the roster is a few thousand rows, not before.
 
 - [ ] **Step 6: Write the enum**
 
@@ -1470,9 +1470,9 @@ must yield nothing, which holds the Global-only rule down with a test."
 >
 > In `config/uma.php`, the new source is `url`, `parser`, `delay_ms`, `timeout_s`, `timezone` — nothing else. Its comment keeps the cost disclosure (the same document fetched twice per full `uma:fetch`) and the ordering note (characters first so `external_ref` exists), and the statement that `AGENTS.md` escalation 5's robots question for this host stays formally unanswered as recorded above it.
 >
-> **Test changes A1 forces.** The five `UpsertCharacterCard` cases in Step 1 become `StoreCharacterCards` cases taking a list: the provenance test asserts the four **columns on the returned card**, not a `DataSource` row; the `is_manual` test sets `is_manual` on the card row itself and asserts its title survives while an unlocked sibling in the same call is updated; add one case asserting `unconfirmed => true` on an existing card stays true after a re-store. The runner case keeps its counts (`created 3 / skipped 5 / review 0`) and gains `MatchCandidate::count() === 0`.
+> **Test changes A1 forces.** The five `UpsertCharacterCard` cases in Step 1 become `StoreCharacterCards` cases taking a list: the provenance test asserts the four **columns on the returned card**, not a `DataSource` row; the `is_manual` test sets `is_manual` on the card row itself and asserts its title survives while an unlocked sibling in the same call is updated; add one case asserting `unconfirmed => true` on an existing card stays true after a re-store. The runner case keeps its counts (`created 3 / skipped 5 / review 0`) **[WRONG — measured 4, see the Task 7 addendum at the foot of this plan and spec E-21]** and gains `MatchCandidate::count() === 0`.
 >
-> **Task 4 and 11 follow from A1.** `CharacterCardFactory` gains `'is_manual' => false`, `'source_url' => 'https://gametora.test/character-cards.json'`, and a `manual()` state. Task 11's card provenance sentence reads the card's own `source_url` and `fetched_at`, which is what the brief asked for anyway — "name the source and fetch date" per card, not per character.
+> **Task 4 and 11 follow from A1.** `CharacterCardFactory` gains `'is_manual' => false`, `'source_url' => 'https://gametora.test/character-cards.json'`, and a `manual()` state. Task 11's card provenance sentence reads the card's own `source_url` and `fetched_at`, which is what the brief asked for anyway — "name the source and fetch date" per card, not per character. **[EXECUTED at 545e719 + fe9694b — three things in the steps below did not ship as written; read the Task 7 addendum at the foot of this plan before re-running this task.]**
 
 
 The owner ruled the data arrives by live `uma:fetch` (spec §2), so the card dataset becomes a declared source. the header comment over `config/uma.php`'s `'sources'` array requires a config entry, one parser class, fixture tests (Task 6) and a robots note; `SourceFetcher` is the only outbound path and its allowlist is `config('uma.sources')`.
@@ -1894,9 +1894,9 @@ cards too, and a re-fetch cannot clear a cross-check verdict it did not write."
 
 ---
 
-## Task 8: Tier A cross-check of all 105 cards
+## Task 8: Tier A cross-check of all 107 cards
 
-`SOURCE-OF-TRUTH.md` §5:152 — "A Tier B dataset (GameTora) needs A- or S-tier confirmation before a claim becomes app data." The owner ruled **all 105**, not a spot-check. This task produces the evidence file Task 9 reads when it sets `character_cards.unconfirmed`.
+`SOURCE-OF-TRUTH.md` §5:152 — "A Tier B dataset (GameTora) needs A- or S-tier confirmation before a claim becomes app data." The owner ruled **all 107**, not a spot-check. This task produces the evidence file Task 9 reads when it sets `character_cards.unconfirmed`.
 
 **Files:**
 - Create: `docs/data/2026-09-29-global-roster-crosscheck.md`
@@ -1918,7 +1918,7 @@ Quote all three URLs: the MediaWiki page name contains a colon, which breaks nai
 mkdir -p research-scratch/data/json research-scratch/data/html
 curl -sS --compressed \
   -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' -H 'Accept: application/json' \
-  'https://gametora.com/data/umamusume/character-cards.679f7c2e.json' \
+  'https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json' \
   -o research-scratch/data/json/character-cards.json
 curl -sS --compressed -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' \
   'https://umamusu.wiki/Game:List_of_Trainees' \
@@ -1935,11 +1935,11 @@ Expected: the JSON around 251 kB with 268 rows, and both HTML files far above 10
 php -r '$r=json_decode(file_get_contents("research-scratch/data/json/character-cards.json"),true); printf("rows=%d global=%d trainees=%d\n",count($r),count(array_filter($r,fn($c)=>is_string($c["release_en"]??null))),count(array_unique(array_column(array_filter($r,fn($c)=>is_string($c["release_en"]??null)),"char_id"))));'
 ```
 
-Expected: `rows=268 global=105 trainees=68`. A different number is not a plan bug, it is the roster having moved since 2026-09-29: stop and re-report the counts before anything downstream quotes 68 and 105.
+Expected: `rows=268 global=107 trainees=68`. A different number is not a plan bug, it is the roster having moved since 2026-09-29: stop and re-report the counts before anything downstream quotes 68 and 107.
 
 The wikis render server-side, so a plain fetch suffices — do not conclude "no data" from a short body without looking. Keep all three out of any path the app reads: only the derived table lands in the repo.
 
-If the JSON 403s or either page 403s, returns a stub, or will not parse: **stop and report it.** A missing Tier A witness changes the deliverable rather than quietly becoming 105 `single-source` rows, and `AGENTS.md` escalation 5 makes a source question the owner's.
+If the JSON 403s or either page 403s, returns a stub, or will not parse: **stop and report it.** A missing Tier A witness changes the deliverable rather than quietly becoming 107 `single-source` rows, and `AGENTS.md` escalation 5 makes a source question the owner's.
 
 - [ ] **Step 2: Extract the Tier A rows**
 
@@ -1967,7 +1967,7 @@ $verdict = match (true) {
 // 'conflict' regardless of how many pages carry the card at all.
 ```
 
-Compare titles on the bracket-stripped, case-folded form and say so in the file's method note: a wiki that prints `Special Dreamer` and GameTora that prints `[Special Dreamer]` are making the same claim, and comparing raw strings would report 105 false conflicts. Keep the script a dumb formatter: it compares strings, classifies, prints. It fetches nothing and writes nothing to the database.
+Compare titles on the bracket-stripped, case-folded form and say so in the file's method note: a wiki that prints `Special Dreamer` and GameTora that prints `[Special Dreamer]` are making the same claim, and comparing raw strings would report 107 false conflicts. Keep the script a dumb formatter: it compares strings, classifies, prints. It fetches nothing and writes nothing to the database.
 
 - [ ] **Step 4: Classify every disagreement in writing before deciding anything**
 
@@ -1985,8 +1985,8 @@ Expect real conflicts. Each becomes a row in the file's conflict-log section, ne
 
 - the two source URLs and the date each was read;
 - the method note (bracket-stripped case-folded comparison; the three verdict definitions; the conflict rules above, numbered);
-- the full 105-row table from Step 3;
-- counts by verdict, with the arithmetic visible (`two-source-confirmed + single-source + conflict + unwitnessed = 105`);
+- the full 107-row table from Step 3;
+- counts by verdict, with the arithmetic visible (`two-source-confirmed + single-source + conflict + unwitnessed = 107`);
 - the conflict log;
 - a closing line that GameTora is Tier B and these two are Tier A per `SOURCE-OF-TRUTH.md` §5:142-148, and that the file is a **dated observation**, matching the repo's dated-snapshot policy — a later reader needs to know what day this was true, because banner cycles move.
 
@@ -1997,14 +1997,14 @@ grep -c '^| ' docs/data/roster-crosscheck-table.md
 grep -c 'two-source-confirmed' docs/data/2026-09-29-global-roster-crosscheck.md
 ```
 
-Expected: the row count equals 105 (plus one header row per table, so adjust by the headers you wrote). If it does not, the fixture or the extraction dropped a card; find it before continuing rather than shipping a short table.
+Expected: the row count equals 107 (plus one header row per table, so adjust by the headers you wrote). If it does not, the fixture or the extraction dropped a card; find it before continuing rather than shipping a short table.
 
 - [ ] **Step 7: Commit**
 
 ```bash
 git add docs/data/2026-09-29-global-roster-crosscheck.md docs/data/roster-crosscheck-table.md tools/roster-crosscheck.php
 git status --short   # research-scratch/ must not appear: it is gitignored
-git commit -m "docs(data): two-source cross-check of all 105 Global cards
+git commit -m "docs(data): two-source cross-check of all 107 Global cards
 
 SOURCE-OF-TRUTH 5:152 will not let a Tier B field become app data on its own
 say-so. Every card, every name, date, rarity and title, against umamusu.wiki and
@@ -2022,8 +2022,8 @@ The load-bearing finding, restated because it is the premise of the owner's ruli
 - No application code changes at all in this task.
 
 **Interfaces:**
-- Consumes: `uma:fetch`, `MatchCandidate`, `ResolveMatchCandidate`, `UmamusumeAlias`, `UpsertCharacterCard`, Task 8's verdict table.
-- Produces: 68 trainees carrying `external_ref` and `name_ja`, 105 cards, and the two count numbers every later task and the final report quote.
+- Consumes: `uma:fetch`, `MatchCandidate`, `ResolveMatchCandidate`, `UmamusumeAlias`, `StoreCharacterCards`, Task 8's verdict table.
+- Produces: 68 trainees carrying `external_ref` and `name_ja`, 107 cards, and the two count numbers every later task and the final report quote.
 
 - [ ] **Step 1: Build the worktree's own database — the shared dev file is unreachable from here**
 
@@ -2250,13 +2250,13 @@ php artisan uma:fetch gametora-character-cards
 php artisan tinker --execute 'echo CharacterCard::count();'
 ```
 
-Expected: `gametora-character-cards: 0 updated, 105 created, 0 skipped (manual), 0 to review.` and `105`. Any nonzero `skipped` means a `char_external_ref` failed to resolve; find which cards before continuing:
+Expected: `gametora-character-cards: 0 updated, 107 created, 0 skipped (manual or unresolved), 0 to review.` and `107`. Any nonzero `skipped` means a `char_external_ref` failed to resolve; find which cards before continuing:
 
 ```bash
 php artisan tinker --execute '
 $missing = array_values(array_filter(
     app(App\Services\DataPipeline\Parsers\GametoraCharacterCardParser::class)
-        ->parse(file_get_contents("https://gametora.com/data/umamusume/character-cards.679f7c2e.json") ?: "[]"),
+        ->parse(file_get_contents("https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json") ?: "[]"),
     fn ($r) => Umamusume::where("external_ref", $r["char_external_ref"])->doesntExist(),
 ));
 echo count($missing)." unresolved char refs";
@@ -2291,8 +2291,8 @@ Fill and paste into the slice record:
 |---|---|---|
 | Trainees with at least one card | 68 | |
 | Trainees with zero cards | 0 | |
-| Cards stored | 105 | |
-| Distinct `card_id` | 105 (no duplicates) | |
+| Cards stored | 107 | |
+| Distinct `card_id` | 107 (no duplicates) | |
 | Debut flags set, in total | 68 (one per trainee) | |
 | Trainees with exactly one debut | 68 | |
 | Cards with no Global date | 0 (structural: the column is NOT NULL) | |
@@ -2334,7 +2334,7 @@ echo "JP-only card ids present in the table: ".count(array_intersect($jpOnly, $s
 '
 ```
 
-Expected: the two counts equal (105 = 105) and the leak count is `0`. Resolve `PLACEHOLDER` to the real snapshot filename with `ls storage/app/private/snapshots/gametora-character-cards/` first; `uma:reparse` reads the same path, so this is the pipeline's own evidence rather than a fresh download. A nonzero leak count is the single most important failure in this plan: it means the Global-only gate is not where everyone thinks it is.
+Expected: the two counts equal (107 = 107) and the leak count is `0`. Resolve `PLACEHOLDER` to the real snapshot filename with `ls storage/app/private/snapshots/gametora-character-cards/` first; `uma:reparse` reads the same path, so this is the pipeline's own evidence rather than a fresh download. A nonzero leak count is the single most important failure in this plan: it means the Global-only gate is not where everyone thinks it is.
 
 - [ ] **Step 9: Apply Task 8's verdicts**
 
@@ -2347,7 +2347,7 @@ echo "flagged ".CharacterCard::where("unconfirmed", true)->count()." of ".Charac
 '
 ```
 
-Expected: `flagged N of 105`. Put the list of `N` card ids in the slice record alongside the verdict table that produced it. If N is `0`, state which second source confirmed each row — "nothing unverified" is a claim needing evidence like any other, and it is the kind of number that gets cited later.
+Expected: `flagged N of 107`. Put the list of `N` card ids in the slice record alongside the verdict table that produced it. If N is `0`, state which second source confirmed each row — "nothing unverified" is a claim needing evidence like any other, and it is the kind of number that gets cited later.
 
 - [ ] **Step 10: Write the run record**
 
@@ -2358,7 +2358,7 @@ In `docs/design-research/verification/slice-11-2026-09-29.md`: the `git branch -
 ```bash
 git add docs/design-research/verification/slice-11-2026-09-29.md
 git status --short   # nothing under database/ or storage/ is committable; both are ignored
-git commit -m "data(catalog): the Global roster lands, 68 trainees and 105 cards
+git commit -m "data(catalog): the Global roster lands, 68 trainees and 107 cards
 
 Fetched live through the two declared sources. The trainees reach the catalog by
 way of ResolveMatchCandidate, the same action /review drives, because FR-B-3 lets
@@ -3213,7 +3213,7 @@ Replace `TrainingRunController::create()`:
          * One query, one payload, one truth. The catalog page and this selector read the
          * same rows, so a card that exists in the dropdown cannot be absent from the
          * catalog. Cards come with the trainees rather than in a second pass: at 68 and
-         * 105 rows, an eager load is one query and a lazy one is sixty-nine.
+         * ~107 rows, an eager load is one query and a lazy one is sixty-nine.
          */
         $roster = Umamusume::query()
             ->where('release_status', App\Enums\ReleaseStatus::GlobalReleased->value)
@@ -3806,7 +3806,7 @@ echo "source verified: {$count} trainees, ".App\Models\CharacterCard::count()." 
 '
 ```
 
-Expected: `source verified: 68 trainees, 105 cards`, and only then the `cp`. If it refuses, the sequencing broke — fix the sequencing or copy in the other direction, rather than flattening a scratch database that another step depends on.
+Expected: `source verified: 68 trainees, 107 cards`, and only then the `cp`. If it refuses, the sequencing broke — fix the sequencing or copy in the other direction, rather than flattening a scratch database that another step depends on.
 
 Expected after serving: `200`. If the port is taken, probe by PID and pick another; do not kill a listener you did not start, since a peer session is working in this tree.
 
@@ -3886,7 +3886,7 @@ Expected: fresh migrate and seed succeed; three migrations roll back cleanly, pr
 `docs/requests/2026-09-29-catalog-roster-report.md`, with these sections and **real numbers, each traceable to a command output already pasted in the slice record**:
 
 1. **What landed** — trainees added, cards added, the two sources, the migration list.
-2. **Counts against the export** — the Task 9 Step 7 table, filled, including the H1 count against the export's distinct Global `char_id` count (68) and the H2 count against the export's `release_en` row count (105).
+2. **Counts against the export** — the Task 9 Step 7 table, filled, including the H1 count against the export's distinct Global `char_id` count (68) and the H2 count against the export's `release_en` row count (107).
 3. **Sources and tier** — GameTora `character-cards` (Tier B) as the machine-readable source; `umamusu.wiki` and Game8 (Tier A) as witnesses; the cross-check file and its verdict counts.
 4. **Unverified entries** — every `unconfirmed` card id with the reason, or an explicit "none, and here is the second source for each".
 5. **Deviations from the request** — the erratum table's items that changed shipped behaviour: 105 cards not ~140; `Fe` and `Fenomeno` returning nothing; the `·` separator instead of an em dash; `N/A`/words instead of `0 forms`; heading levels one below the brief's naming; the catalog filter staying server-side behind a submit; no collapse control, with the row count as the reason; the double fetch of one document; JP per-card dates not stored.
@@ -3917,7 +3917,7 @@ The brief's Part 3 table, with errata E-5 and E-6 applied. Use this in Task 13 S
 
 | Input | Result |
 |---|---|
-| (empty) | ~10 most recently released cards, not all 105 |
+| (empty) | ~10 most recently released cards, not all 107 |
 | `F` | Fine Motion, Fuji Kiseki, plus the 9 F-initial card titles; capped with the keep-typing line |
 | `Fe` | "No trainee or card found." |
 | `Fenomeno` | "No trainee or card found." — both her forms are `[JP-Only]` |
@@ -3928,3 +3928,62 @@ The brief's Part 3 table, with errata E-5 and E-6 applied. Use this in Task 13 S
 | `zzz` | "No trainee or card found." |
 
 ---
+
+## Addendum: Task 7 as executed (2026-09-29, commits `545e719` and `fe9694b`)
+
+Appended at the foot of the file rather than inserted into Task 7 on purpose: an insertion anywhere
+before line 3930 shifts every plan-line citation the spec's erratum table already carries (E-19 quotes
+Task 7 Step 1 at `:1528`), and the plan's own hints-not-anchors bullet is there to forgive drift, not to
+invite it. Read this before re-running Task 7. Three things in the steps above are not what shipped, and
+none of them is the implementer's error — the brief was stale and Amendment A1 said so in some places
+and not others.
+
+1. **`created 3 / skipped 5` is wrong, in A1's own summary line as well as in Step 1.** The parser emits
+   **7** records for `tests/Fixtures/gametora-character-cards.global.sample.json` —
+   `gametora:char:1001` x3, `1007` x2, `1003` x2 — and the runner test stores one trainee, so the shipped
+   expectation is **`created 3 / updated 0 / skipped 4 / review 0`**. Step 1's justification
+   parenthetical ("Gold Ship x2, Tokai Teio x2, no trainee rows yet") sums to 4, which is how this was
+   caught: the comment and the number contradicted each other and the comment was the true one. Pinned
+   by `tests/Feature/CharacterCardFetchTest.php`'s `routes the card source past the match stage and into
+   the card table` test, which asserts the whole counts array rather than picking two keys.
+   See spec **E-21**.
+2. **`UpsertCharacterCard`, the `'records' => 'cards'` config key and `runCards()` did not ship**, all
+   three superseded by A1 before dispatch. What shipped is `app/Actions/StoreCharacterCards` taking the
+   whole list and returning counts, routed by
+   `is_a($parserClass, CharacterCardSourceParser::class, true)` inline in `PipelineRunner::run()` beside
+   the race-catalog branch, mirroring `StoreRaceCatalogSlots`. No source config entry gained a `records`
+   key, so the `Shape:` comment still names exactly five keys, and a fourth parser interface would route
+   the same way.
+3. **Step 5's expected hash had already rotated.** It predicted `"character-cards":"679f7c2e"`; the
+   manifest answered `e9e9ee6d` the same day. Step 5's own escape clause ("if it now differs, use the
+   new hash in **both** source entries and record the date") is what was followed, and both
+   `config/uma.php` entries now pin `e9e9ee6d`. Step 6's code block above still shows the withdrawn URL
+   — it is a record of what was briefed, not a value to copy. See spec **E-20**, which also carries the
+   finding that the withdrawn URL still answers 200: a stale hash serves silent stale data, which is
+   trunk's **KI-24** and is pointed at from the new entry's hash note.
+
+Two behaviours the brief did not name, settled in review and now pinned by tests, because a later task
+will meet them and should not rediscover them:
+
+- **A card re-parents when its char ref resolves elsewhere.** `umamusume_id` is in the update payload, so
+  a card whose `char_external_ref` now names a different trainee moves and reports `updated`, not
+  `created`. Accepted for engine-owned rows: `card_id` is the identity, the source owns the mapping, a
+  Trainer's own correction is already protected by the card-grain `is_manual` skip, and refusing to move
+  would strand a mis-attached card with no repair path but a manual edit. Consequence **Task 8 must
+  decide**: `unconfirmed` is never written by a fetch, so a card that moves keeps a human verdict
+  recorded about the *old* association. Invalidate it on ownership change, key the verdict on
+  `(card_id, umamusume_id)`, or accept and document — do not solve it by refusing to move.
+- **An ambiguous char ref is a stop, not a tie-break.** `umamusume.external_ref` is indexed and
+  **nullable, not unique** (`2026_09_29_120000_add_external_ref_to_umamusume_table.php`), and
+  `PromoteMatchedRecord` preserves the ref on the old row while creating a new one, so a source rename
+  can put two trainees behind one ref. The store resolves with `->get(['id', 'is_manual'])` and skips the
+  record when more than one row answers. Ordering was rejected as a fix: a deterministic coin-flip still
+  attaches up to 107 cards to the wrong woman, confidently. A unique index is Architect's call, not this
+  task's.
+
+And one knock-on for Task 9's own reading of its output: `UmaFetch` and `UmaReparse` no longer print
+`skipped (manual)`. On the cards path the same integer folds four reasons — roster-absent, trainee
+manual, card manual, ref ambiguous — so both commands now say `skipped (manual or unresolved)`. Task 9's
+"any nonzero skipped means a char ref failed to resolve" instruction is closer to true than it was, and
+still not exactly true; if it has to act differently on "a Trainer wrote this" versus "the source mapping
+is broken", the cheap form is one extra integer in the counts array, not a counter per reason.

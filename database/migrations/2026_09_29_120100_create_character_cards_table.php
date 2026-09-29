@@ -28,9 +28,9 @@ return new class extends Migration
             // re-fetch matches on, so a fetch is idempotent by identity rather than
             // by name (PRD FR-B-5).
             $table->unsignedInteger('card_id')->unique();
-            // ponytail: no index on umamusume_id beyond the FK. The table holds 105
-            // cards and the catalog reads them in one whereIn; add the index when the
-            // roster is a few thousand rows, not before.
+            // ponytail: no index on umamusume_id beyond the FK. The table held 105
+            // cards on 2026-09-29 and 107 after that day's rotation, and the catalog
+            // reads them in one whereIn; add the index when the roster is thousands, not before.
             $table->foreignId('umamusume_id')->constrained('umamusume')->cascadeOnDelete();
             // Verbatim [Global] client string, brackets included. CONSTRAINTS.md:38
             // keeps such names as source data and puts the lore guard on the display

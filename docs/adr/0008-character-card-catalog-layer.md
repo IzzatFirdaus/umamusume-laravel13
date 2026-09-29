@@ -313,7 +313,7 @@ and the other spelling is recorded as differing; on a date, a rarity or any othe
 no preference-based pick, and the card is flagged rather than quietly aligned
 (`docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md`, Task 8 Step 4).
 
-The owner ruled the confirmation **deep**: all 105 Global cards, not a spot-check. Task 8 produces
+The owner ruled the confirmation **deep**: all 105 Global cards (107 from the same day's hash rotation), not a spot-check. Task 8 produces
 `docs/data/2026-09-29-global-roster-crosscheck.md` with one verdict per `card_id`, the two URLs and the
 read date, stated as a dated observation, and Task 9 writes `single-source` and `conflict` into
 `unconfirmed = true`. The state this ruling sets is therefore explicit: a card the Tier B source stands
