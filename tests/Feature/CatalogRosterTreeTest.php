@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\AliasLanguage;
 use App\Enums\CardRarity;
 use App\Models\CharacterCard;
+use App\Models\DataSource;
 use App\Models\Umamusume;
 use App\Models\UmamusumeAlias;
 use Illuminate\Support\Facades\Cache;
@@ -358,4 +359,171 @@ it('finds a trainee through a two-word alias', function (): void {
     test()->get('/umamusume?search=nature%20boy')
         ->assertOk()
         ->assertSee('Nice Nature');
+});
+
+/*
+ * The same trainee, one page deeper (PRD FR-A-6, D-33).
+ *
+ * The detail page's Provenance `<h2>` could only ever say the record was seeded, because
+ * nothing on it named a source per fact. The rows below pin what it now answers: her costume
+ * forms, where each form's own row was read from, and the fetch date of that row.
+ *
+ * The two provenances answer different questions. Amendment A1 put `source_url` /
+ * `fetched_at` on the card row, so a form's provenance is its own, while `data_sources`
+ * stays the trainee-level fetch history behind FR-A-4. Feeding a card line off
+ * `data_sources` would print a URL the card was never read from, the exact defect A1 exists
+ * to prevent, so the fifth fixture gives the two levels different documents.
+ *
+ * The page inherits the list's hide-by-default rule rather than showing everything: `show()`
+ * scopes `cards` through the same `cardScope()` the tree uses, so `?show_unconfirmed=1` is
+ * the only way a solo-sourced form reaches either page.
+ */
+
+it('lists the trainee\'s forms on her detail page', function (): void {
+    $u = Umamusume::factory()->create(['name' => 'Mejiro McQueen', 'slug' => 'mejiro-mcqueen']);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $u->id, 'card_id' => 101301, 'title' => '[Frontline Elegance]',
+        'rarity' => CardRarity::ThreeStar, 'global_release_date' => '2025-11-06', 'is_debut_form' => true,
+    ]);
+
+    test()->get('/umamusume/mejiro-mcqueen')
+        ->assertOk()
+        ->assertSee('[Frontline Elegance]')
+        ->assertSee('Costume forms')
+        ->assertSee('debut form');
+});
+
+it('names the source and the fetch date instead of the seeded-data line', function (): void {
+    $u = Umamusume::factory()->create(['name' => 'Silence Suzuka', 'slug' => 'silence-suzuka']);
+    DataSource::factory()->create([
+        'umamusume_id' => $u->id,
+        'source_key' => 'gametora-character-cards',
+        'url' => 'https://gametora.test/character-cards.json',
+        'fetched_at' => '2026-09-29 10:00:00',
+    ]);
+
+    // The exact sentence the request quotes has to go away for fetched rows, while
+    // staying for genuinely hand-entered ones. That is the deliverable, tested.
+    test()->get('/umamusume/silence-suzuka')
+        ->assertOk()
+        ->assertSee('gametora.test')
+        ->assertSee('gametora-character-cards')
+        ->assertDontSee('No fetched sources');
+});
+
+it('still says a hand-entered record has no fetched source', function (): void {
+    Umamusume::factory()->manual()->create(['name' => 'Local Entry', 'slug' => 'local-entry']);
+
+    test()->get('/umamusume/local-entry')
+        ->assertOk()
+        ->assertSee('seeded or entered by hand');
+});
+
+it('keeps an unconfirmed card out of the detail list unless asked', function (): void {
+    $u = Umamusume::factory()->create(['name' => 'Vodka', 'slug' => 'vodka']);
+    CharacterCard::factory()->unconfirmed()->create([
+        'umamusume_id' => $u->id, 'card_id' => 199901, 'title' => '[Solo Sourced]', 'is_debut_form' => true,
+    ]);
+
+    test()->get('/umamusume/vodka')->assertOk()->assertDontSee('[Solo Sourced]');
+    test()->get('/umamusume/vodka?show_unconfirmed=1')
+        ->assertOk()
+        ->assertSee('[Solo Sourced]')
+        ->assertSee('Not confirmed by two sources');
+});
+
+it('names each card the source its own row was read from', function (): void {
+    $u = Umamusume::factory()->create(['name' => 'Mayano Top Gun', 'slug' => 'mayano-top-gun']);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $u->id,
+        'card_id' => 199902,
+        'title' => '[Sample Revised Form]',
+        'is_debut_form' => true,
+        'source_url' => 'https://gametora.test/card-199902.json',
+        'fetched_at' => '2026-09-29 10:00:00',
+    ]);
+    // The trainee's own provenance row points at a different document on purpose:
+    // 'card-199902' appears nowhere else on the page, so a card line fed from
+    // data_sources fails this test instead of passing it by accident.
+    DataSource::factory()->create([
+        'umamusume_id' => $u->id,
+        'source_key' => 'gametora-characters',
+        'url' => 'https://gametora.test/characters.json',
+        'fetched_at' => '2026-01-01 00:00:00',
+    ]);
+
+    test()->get('/umamusume/mayano-top-gun')
+        ->assertOk()
+        ->assertSee('card-199902');
+});
+
+it('says forms are hidden rather than that none were recorded', function (): void {
+    // Constraint C: a filtered value gets the truth, not a false absence. Two solo-sourced
+    // forms is the whole fixture, so "2 forms hidden as unconfirmed" re-counts from it, and
+    // the section cannot read "No Global costume cards recorded for this trainee yet" while
+    // rows sit behind the filter.
+    $u = Umamusume::factory()->create(['name' => 'Gold Ship', 'slug' => 'gold-ship-detail']);
+    CharacterCard::factory()->unconfirmed()->create([
+        'umamusume_id' => $u->id, 'card_id' => 199905, 'title' => '[Hidden Alpha]',
+    ]);
+    CharacterCard::factory()->unconfirmed()->create([
+        'umamusume_id' => $u->id, 'card_id' => 199906, 'title' => '[Hidden Beta]',
+    ]);
+
+    $hidden = test()->get('/umamusume/gold-ship-detail')->assertOk()->getContent();
+
+    expect($hidden)->not->toContain('No Global costume cards recorded')
+        ->and($hidden)->toContain('Every costume form recorded for this trainee is hidden as unconfirmed.')
+        ->and($hidden)->toContain('2 forms hidden as unconfirmed')
+        // The lever is on the page, not something to type into the address bar (G-11).
+        ->and($hidden)->toContain('Show unconfirmed forms')
+        ->and($hidden)->not->toContain('[Hidden Alpha]');
+
+    $shown = test()->get('/umamusume/gold-ship-detail?show_unconfirmed=1')->assertOk()->getContent();
+
+    expect($shown)->toContain('[Hidden Alpha]')
+        ->and($shown)->toContain('[Hidden Beta]')
+        ->and($shown)->not->toContain('hidden as unconfirmed');
+});
+
+it('reads a card on the display date and keeps a date-only value date-only', function (): void {
+    // US-7 / AGENTS Planner rule: `fetched_at` is a stored instant, so it renders through
+    // `config('uma.display_timezone')`, while `global_release_date` is a date and must not
+    // move when the zone does. Sep 29 20:00 UTC is Sep 30 in Tokyo, which is the pair only a
+    // conversion can tell apart, and Mar 1 is the release date the fixture states.
+    config(['uma.display_timezone' => 'Asia/Tokyo']);
+
+    $u = Umamusume::factory()->create(['name' => 'Winning Ticket', 'slug' => 'winning-ticket']);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $u->id,
+        'card_id' => 199907,
+        'title' => '[Late Evening Form]',
+        'global_release_date' => '2025-03-01',
+        'source_url' => 'https://gametora.test/card-199907.json',
+        'fetched_at' => '2026-09-29 20:00:00',
+    ]);
+
+    test()->travelTo('2026-09-29 12:00:00', function (): void {
+        test()->get('/umamusume/winning-ticket')
+            ->assertOk()
+            ->assertSee('read Sep 30, 2026')
+            ->assertDontSee('read Sep 29, 2026')
+            ->assertSee('Released (Global) Mar 1, 2025');
+    });
+});
+
+it('names each form rarity through the shared chip rather than a second badge', function (): void {
+    $u = Umamusume::factory()->create(['name' => 'Mejiro McQueen', 'slug' => 'mcqueen-second-form']);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $u->id, 'card_id' => 101302, 'title' => '[Second Form]',
+        'rarity' => CardRarity::TwoStar,
+    ]);
+
+    $html = test()->get('/umamusume/mcqueen-second-form')->assertOk()->getContent();
+
+    // One fixture card, so exactly one chip. The accessible name is asserted with the glyphs
+    // because a bare star run is noise to a screen reader, and a second badge would put the
+    // same words on the page for the wrong reason.
+    expect($html)->toContain('★★')
+        ->and(substr_count($html, 'aria-label="Two stars"'))->toBe(1, 'the detail row grew a second rarity badge');
 });

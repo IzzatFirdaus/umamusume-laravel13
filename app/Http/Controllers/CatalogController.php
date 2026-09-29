@@ -128,26 +128,47 @@ class CatalogController extends Controller
     }
 
     /**
-     * Detail page for one Umamusume by slug (aliases + last 10 provenance
-     * rows). Renders catalog.show.
+     * Detail page for one Umamusume by slug: her aliases, her last 10 provenance rows, and
+     * her costume forms in the order the tree uses. Renders catalog.show.
      *
-     * Not cached. This read is one indexed lookup plus two bounded relation
-     * loads on a local SQLite file, and the only thing a cache could hold for it
-     * is the model graph itself — which `serializable_classes => false` will not
-     * hand back. Leaving it out is the fix; see `cached()` for the same reason
-     * stated with the evidence (KI-2).
+     * The two provenances are two answers. `dataSources` is this trainee's own fetch history
+     * (FR-A-4); each card carries its own `source_url` / `fetched_at` from Amendment A1, so a
+     * form names the document its row was actually read from. The page prints both, and never
+     * one in place of the other.
+     *
+     * Forms are scoped by the same `cardScope()` the list uses, so a solo-sourced form is
+     * hidden here exactly as it is there, and `?show_unconfirmed=1` is the lever on both.
+     * Hiding is not the same as having none, so the page also gets the count the scope left
+     * out: one bounded count on the same indexed key, taken after the 404 so an unknown slug
+     * still costs one lookup, and skipped entirely when nothing is being hidden.
+     *
+     * Not cached. This read is one indexed lookup, three bounded relation loads and at most
+     * one bounded count on a local SQLite file, and the only thing a cache could hold for it
+     * is the model graph itself — which `serializable_classes => false` will not hand back.
+     * Leaving it out is the fix; see `cached()` for the same reason stated with the evidence
+     * (KI-2).
      *
      * @throws NotFoundHttpException when the slug is unknown
      */
-    public function show(string $slug): View
+    public function show(Request $request, string $slug): View
     {
+        $showUnconfirmed = $request->boolean('show_unconfirmed');
+
         $umamusume = Umamusume::where('slug', $slug)
-            ->with(['aliases', 'dataSources' => fn ($q) => $q->latest('fetched_at')->limit(10)])
+            ->with([
+                'aliases',
+                'dataSources' => fn ($q) => $q->latest('fetched_at')->limit(10),
+                'cards' => $this->cardScope($showUnconfirmed),
+            ])
             ->first();
 
         abort_if($umamusume === null, 404);
 
-        return view('catalog.show', ['umamusume' => $umamusume]);
+        return view('catalog.show', [
+            'umamusume' => $umamusume,
+            'showUnconfirmed' => $showUnconfirmed,
+            'hiddenFormCount' => $showUnconfirmed ? 0 : $umamusume->cards()->where('unconfirmed', true)->count(),
+        ]);
     }
 
     /**
@@ -198,10 +219,10 @@ class CatalogController extends Controller
     }
 
     /**
-     * Which cards a row of the tree shows, and in what order.
+     * Which cards a page shows, and in what order.
      *
-     * One method called by both the list query and the cache re-read rather than a
-     * closure threaded between them: `Relation::__call` forwards `when()` and
+     * One method called by the list query, the cache re-read, and the detail page rather than
+     * a closure threaded between them: `Relation::__call` forwards `when()` and
      * `orderBy()` to the underlying Builder, so a closure declared to take and
      * return a `HasMany` would be a type the runtime does not honour. Mutating the
      * relation in place and returning nothing keeps the declared shape true, and
