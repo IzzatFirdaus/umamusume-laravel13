@@ -37,11 +37,11 @@ asked for already existed (`makes the payload trainee set the same set the no-sc
 
 ## 2. The state it was measured against
 
-`database/scratch-ui.sqlite` (gitignored; `database/database.sqlite` was not opened, read or written):
-the rehearsed 107-card scratch state, with each trainee's `name`/`name_ja` replaced by the strings the
-**shipped** `GametoraCharacterParser` reads from the same body (`name_en` / `name_jp`, joined on the same
-`external_ref` the card store resolves through), and three cards set `unconfirmed = 1` so their trainees
-hold no confirmed form. The rehearsal database itself names every trainee by her ref
+`database/scratch-ui.sqlite` (gitignored; `database/database.sqlite` was not opened, read or written),
+built by `research-scratch/make-ui-db.php`: the rehearsed 107-card scratch state, with each trainee's
+`name`/`name_ja` replaced by the strings the **shipped** `GametoraCharacterParser` reads from the same body
+(joined on the same `external_ref` the card store resolves through), and three cards set `unconfirmed = 1`
+so their trainees hold no confirmed form. The rehearsal database itself names every trainee by her ref
 (`research-scratch/rehearse-apply.php:69`, `'name' => $ref`), which is why it could not be used for a
 read of the UI as a Trainer would see it.
 
