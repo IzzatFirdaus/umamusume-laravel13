@@ -385,11 +385,23 @@ idempotence covers this source too.
   `desc_en` strings and one `enname`. Those fields are not read by anything, so they went: `id, name_en,
   enname, jpname, rarity, cost, unreleased, condition_groups` is the whole of it now, 22 KB to 4.5 KB,
   142 assertions still passing, `lore-code` 15 hits down to 8. The survivor is `"enname": "Sand Expert"` —
-  a value the parser genuinely reads (it is the name fallback) and a value the test proves it never
-  prints, so removing it would be editing the data to quiet a grep. The class is the one `R62` already
-  ruled on for `database/seeders/data/**`, and code mode filters no marker, so any remedy is a **path**
-  exclusion in `tools/lore.php` **and** the Makefile with a docblock naming the class — gate tooling, with
+  a value the parser genuinely reads (it is the name fallback), which `GametoraSkillsParserTest` pins out
+  of parser output and `SkillsFetchTest` now pins out of the **rendered run screen**, so removing it would
+  be editing the data to quiet a grep. The class is the one `R62` already ruled on for
+  `database/seeders/data/**`, and code mode filters no marker, so any remedy is a **path** exclusion in
+  `tools/lore.php` **and** the Makefile with a docblock naming the class — gate tooling, with
   `LoreGateParityTest` holding the two in step, and still the owner's call. Not touched here.
+  **Two facts the owner needs before ruling, both measured after the review asked for them.** A path
+  exclusion must name `tests/Fixtures/gametora-skills.sample.json` and nothing wider; `tests/**` would
+  re-open the exact class `KI-23` came from, a filter that quietly stops seeing the thing it guards. And
+  the provenance clause cannot sit in the fixture itself — JSON has no comment slot, which is why the
+  capture note (source, manifest hash `609afe88`, pulled 2026-09-29, cut verbatim) reads in
+  `GametoraSkillsParserTest.php`'s docblock instead. If the owner would rather have provenance and
+  exclusion in one place, the alternative is a captured-source folder, e.g.
+  `tests/Fixtures/gametora/`, holding the document beside a sidecar note, with that **directory** excluded
+  in both gate surfaces. Either way the assertion that carries the weight is the one in `SkillsFetchTest`:
+  five derived renderings forbidden over decoded page text, with the row's own client string required
+  present so the absence cannot pass on an extraction that saw nothing.
 - **G-SK-18 — the category derivation reads the sign, not only the code. Do not "simplify" this away.**
   Effect code 1 is an axis, not a meaning: `Right-Handed ◎` reads `+600000` on it and `G1 Averseness`
   reads `−400000`. A derivation that switched on the code alone would print `Passive` beside a skill whose
