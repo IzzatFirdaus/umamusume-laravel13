@@ -377,19 +377,33 @@ idempotence covers this source too.
 - **G-SK-15 — `/api/v1` and the CSV/JSON export are unchanged.** `TrainingRunResource` still emits
   `id / name / status / turnAcquired`. Widening a published shape is its own decision, not a side effect
   of the import.
-- **G-SK-16 — `desc_en` is publisher prose, not client text, and belongs in the same drawer as `enname`.**
-  The export's English descriptions name the recovered stat with a word `[Global]` does not use for it
-  (`SOURCE-OF-TRUTH.md` §3 fixes the stat as Stamina). So the file carries **two** fields that look English
-  and are not client copy — `enname`, a literal rendering of the name, and `desc_en`/`endesc`, a
-  translation of the body — against one that is: `name_en`. The fixture's `lore-code` hits are the
-  evidence for the finding, not noise beside it: a field this repository's own gate rejects as a synonym
-  is by definition not client text, and the parser's category table reads exactly those descriptions to
-  decide what an effect code does. Descriptions may therefore be **evidence** and never **copy**.
-- **G-SK-17 — the fixture was cut to the keys the parser reads, and one verbatim hit remains.** It shipped
-  first as nine whole document records, which put four banned-term hits into `tests/Fixtures/` — three
-  `desc_en` strings and one `enname`. Those fields are not read by anything, so they went: `id, name_en,
-  enname, jpname, rarity, cost, unreleased, condition_groups` is the whole of it now, 22 KB to 4.5 KB,
-  142 assertions still passing, `lore-code` 15 hits down to 8. The survivor is `"enname": "Sand Expert"` —
+- **G-SK-16 — neither English description field in the skills document is client text, and the gate proves
+  it twice over.** `SOURCE-OF-TRUTH.md` §3 pins the stat as Stamina, the second stat as Wit and the gauge
+  word as Mood. Run the gate's own code-mode patterns over the document (measured 2026-09-29 while auditing
+  Screen D, because `DESIGN.md` §6.11 puts a description in the skill row):
+  `desc_en` matches **189** times, 172 of them `endurance`; `endesc` matches **72** times, 52 `wisdom` and
+  16 `motivation`. Two fields, two independent vocabulary tells, and both are the §3 banned-synonym set —
+  so neither is the client's prose, whichever one reads more like game copy. `desc_en` sits on 985 rows
+  (exactly the `name_en` population, and all 623 `[Global]` rows); `endesc` sits on all 1,910. They differ
+  on **every** row carrying both — 0 identical of 985.
+  The consequence is a rule, not a preference: **descriptions are evidence and never copy.** The parser's
+  category table reads them to decide what an effect code does (that is how code 9 is known to be a
+  recovery) and quotes none of them into a label, and no description column is authorized by this register.
+  By the same logic `name_en` is *not* suspect in the way the descriptions are: its hits are verbatim
+  client skill names — `Paddock Fright`, `Wisdom of the Sun`, `Master of the Sands` — which C-4 gates on
+  the display path rather than in the data, while `endurance` and `wisdom` in a description are the field
+  itself using the wrong word for a stat.
+- **G-SK-17 — the fixture was cut to the keys the parser reads, and one verbatim hit remains.** It was
+  drafted as nine whole document records including their description keys, which put four banned-term hits
+  into `tests/Fixtures/` — and that draft **never reached a commit**: the file has one commit, `aa5b05c`, at
+  4,472 bytes. So the 22 KB to 4.5 KB cut and the `lore-code` 15-hits-down-to-8 are measurements of a
+  working tree, not of shipped history, and no reader should go looking for the wide version in `git log`.
+  They are also measurements the register cannot re-derive: the description strings are gone, so which four
+  hits they were is not recoverable — what is recoverable is G-SK-16's counts over the live document (189 in
+  `desc_en`, 72 in `endesc`), which explain why cutting those keys moved the number at all. Those fields are
+  not read by anything, so they went: `id, name_en, enname, jpname, rarity, cost, unreleased,
+  condition_groups` is the whole of it now, with the skills pair still passing (145 assertions as of
+  `83086b0`). The survivor is `"enname": "Sand Expert"` —
   a value the parser genuinely reads (it is the name fallback), which `GametoraSkillsParserTest` pins out
   of parser output and `SkillsFetchTest` now pins out of the **rendered run screen**, so removing it would
   be editing the data to quiet a grep. The class is the one `R62` already ruled on for
