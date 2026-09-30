@@ -232,8 +232,9 @@ of this document.*
 `is_manual` immutability (FR-B-4) and the Floor rule "no fact stored without provenance" are unchanged.
 What A1 changed is where a card's provenance lives: it sits on the card row. `character_cards` carries
 `source_url`, `snapshot_path`, `fetched_at`, `source_timezone` and its own `is_manual` beside the seven
-columns the Decision table already named, so the model is fillable over twelve columns plus `id` and
-timestamps.
+columns the Decision table already named, so the model was fillable over twelve columns plus `id` and
+timestamps. `dd90330` (2026-09-30) added `skills_innate` and `skills_unique`, so `#[Fillable]` now lists
+fourteen. The seven-plus-five count this paragraph describes is unchanged; the widening came after it.
 
 That is `ADR-0003` Amendment R3's standing rule for a reference row: "reference data arrives through the
 fetch engine with `source_url`, `snapshot_path`, `fetched_at` and `source_timezone` populated, and
@@ -434,7 +435,8 @@ smoothed over, because the lesson is not "the merge invalidated the ADR", it is 
 had".
 
 **What is now the rule.** A card row carries `source_url`, `snapshot_path`, `fetched_at`,
-`source_timezone` and its own `is_manual` inline, twelve fillable columns in all, because
+`source_timezone` and its own `is_manual` inline, twelve fillable columns in all as Amendment A1 left it,
+fourteen since `dd90330` (2026-09-30) added `skills_innate` and `skills_unique`, because
 `ADR-0003` Amendment R3 requires the four on a reference row and `scenario_races`, `scenario_slots` and
 `race_catalog_slots` each already carry all four plus `is_manual`. The owner ruled "take trunk's
 convention" (plan Amendment A1, `8c3ac29`), and A1 stands: the schema is not being reverted. What changed

@@ -3,8 +3,9 @@
 Status: **Accepted (owner ruling 2026-09-29).** The owner ruled on Decision 1 in session: widen
 `ADR-0008` to carry a card's stat arrays. Decisions 2 and 3 are recorded from the same session's
 measurements. **The layer is authorized, not built:** no migration, parser change, store action or
-view for any of the three decisions exists in this tree, and `character_cards` still carries the
-twelve columns `ADR-0008` named.
+view for any of the three decisions exists in this tree, and `character_cards` carries the twelve
+columns `ADR-0008` named plus `skills_innate` and `skills_unique`, which `dd90330` (2026-09-30) added for a
+run's own skill lists — neither of those two is one of the three decisions below.
 
 **As of this commit the three decisions below are records, not schema.** A reader who queries
 `character_cards` today gets zero rows for the stat arrays, no image column, and no objectives table.
@@ -69,7 +70,7 @@ all; a per-character one can, and 135 matches the parser's record count exactly.
 
 | # | Object | Shape | Why this shape |
 |---|---|---|---|
-| 1 | **The card's stat arrays, on `character_cards`** | `base_stats`, `four_star_stats`, `five_star_stats` and `stat_bonus` as json columns alongside the existing twelve, each row carrying its own inline provenance as `ADR-0004` and `ADR-0003` Amendment R3 require of a reference row | **Widens `ADR-0008`**, which declined exactly these fields. Stored as the source's own numbers, displayed as numbers, and read by nothing else: see the use-side constraint below. The owner ruled the widening; this row is the record of it. |
+| 1 | **The card's stat arrays, on `character_cards`** | `base_stats`, `four_star_stats`, `five_star_stats` and `stat_bonus` as json columns alongside the existing set — twelve when this ruling was made, fourteen now that `dd90330` (2026-09-30) added `skills_innate` and `skills_unique` — each row carrying its own inline provenance as `ADR-0004` and `ADR-0003` Amendment R3 require of a reference row | **Widens `ADR-0008`**, which declined exactly these fields. Stored as the source's own numbers, displayed as numbers, and read by nothing else: see the use-side constraint below. The owner ruled the widening; this row is the record of it. |
 | 2 | **Card images** | **Nothing. No column, no URL, no uploader, no route.** | The source is `char_id`-grain and has no resolvable asset path, so there is no key to join on and no location to fetch from. Recorded as a finding rather than a refusal so a future source with `card_id` grain is a re-decision, not a re-litigation. |
 | 3 | **Objectives** | Per-**character**, one row per `char_id`, not per scenario and not per card | The source is `char_id`-grain with no scenario key. A per-scenario model would have to invent the scenario dimension the source does not carry, which is the second-authoritative-store problem `PRD.md` §6.12 rejects. This **revises the premise** the brief carried, and the revision is the decision. |
 | 4 | **The trainee profile block, on a sibling `umamusume_profiles` table** | One row per `char_id` carrying `name_ja`, `va_ja`, `va_en`, `birth_year`/`birth_month`/`birth_day`, `height` and the three `three_sizes` parts, with the same inline provenance set the card row carries, plus its own `is_manual` | **Authorized by the product owner on 2026-09-30 under `AGENTS.md` escalation 2**, which is the remedy Erratum 3 below names: storage of these six fields was a fresh decision requiring an owner ruling and a PRD citation, and this row is that record. Declared as source `gametora-character-profiles` in `config('uma.sources')` per **B-1**, routed as a fourth `is_a()` branch in `PipelineRunner` per **B-2**. Sibling table rather than columns on `umamusume` because the source is one document about one trainee. Provenance per **A-4**; stored and read as reference data only, on **A-5**'s precedent, so nothing here computes a run outcome and `PRD.md` §6.11 stays untouched. |
