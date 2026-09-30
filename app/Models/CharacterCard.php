@@ -32,10 +32,12 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $fetched_at
  * @property string|null $source_timezone
  * @property bool $is_manual the Trainer's own correction; the engine's stop sign (FR-B-4)
+ * @property list<int>|null $skills_innate the source's own export ids, as the document lists them
+ * @property list<int>|null $skills_unique one **or two** ids: 22 cards carry two uniques (KI-33)
  * @property-read Umamusume $umamusume
  */
 #[Table('character_cards')]
-#[Fillable(['card_id', 'umamusume_id', 'title', 'rarity', 'global_release_date', 'is_debut_form', 'unconfirmed', 'source_url', 'snapshot_path', 'fetched_at', 'source_timezone', 'is_manual'])]
+#[Fillable(['card_id', 'umamusume_id', 'title', 'rarity', 'global_release_date', 'is_debut_form', 'unconfirmed', 'source_url', 'snapshot_path', 'fetched_at', 'source_timezone', 'is_manual', 'skills_innate', 'skills_unique'])]
 class CharacterCard extends Model
 {
     /** @use HasFactory<CharacterCardFactory> */
@@ -58,6 +60,11 @@ class CharacterCard extends Model
             'is_debut_form' => 'boolean',
             'unconfirmed' => 'boolean',
             'is_manual' => 'boolean',
+            // A null column stays null through this cast — Eloquent does not hand back `[]` for a
+            // null attribute. The pre-populate reads that as "nothing to seed" rather than letting
+            // a foreach decide, and `TrainingRunTest` pins the case.
+            'skills_innate' => 'array',
+            'skills_unique' => 'array',
         ];
     }
 }

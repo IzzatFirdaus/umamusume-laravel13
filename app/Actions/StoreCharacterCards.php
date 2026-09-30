@@ -84,6 +84,12 @@ final class StoreCharacterCards
                 'rarity' => $record['rarity'],
                 'global_release_date' => $record['global_release_date'],
                 'is_debut_form' => $record['is_debut_form'],
+                // KI-33's two lists. Written here rather than by spreading the record because the
+                // projection above is deliberate: a re-fetch that publishes no lists for a card it
+                // used to list them for writes `[]`, which is the source's own answer, and a
+                // missing-key record fails here loudly instead of leaving the old list in place.
+                'skills_innate' => $record['skills_innate'],
+                'skills_unique' => $record['skills_unique'],
                 ...$this->provenance($url, $snapshotPath, $timezone),
             ];
 

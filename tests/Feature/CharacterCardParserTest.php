@@ -196,3 +196,64 @@ it('treats a card id as a string or an int without losing its identity', functio
         ->and($records[0]['rarity'])->toBe(2)
         ->and($records[0]['is_debut_form'])->toBeTrue();
 });
+
+/*
+ * KI-33: the source publishes a trainee's own skill lists and this parser used to drop them, which is
+ * why `run_skills` could not be pre-populated and D-44's `Suggested` state had nothing to seed from
+ * from. The two fixture rows below carry the ids `KNOWN-ISSUES.md` KI-33 cites from the live
+ * `character-cards` document at hash `e9e9ee6d` — cited, not re-fetched — and Gold Ship is the row
+ * that decides the column's shape: she carries **two** uniques, so a scalar column would silently
+ * drop one of them and no later stage could tell.
+ */
+it('keeps the innate and unique lists the source publishes, as lists', function (): void {
+    $byCard = [];
+
+    foreach (globalCardRecords() as $record) {
+        $byCard[$record['card_id']] = $record;
+    }
+
+    expect($byCard[100101]['skills_innate'])->toBe([200512, 201352, 200732])
+        ->and($byCard[100101]['skills_unique'])->toBe([100011])
+        ->and($byCard[100701]['skills_innate'])->toBe([201591, 201212, 201472])
+        // Two values, both kept, in the source's own order.
+        ->and($byCard[100701]['skills_unique'])->toBe([10071, 100071]);
+});
+
+it('emits an empty list rather than a null for a card the document gives no lists', function (): void {
+    $byCard = [];
+
+    foreach (globalCardRecords() as $record) {
+        $byCard[$record['card_id']] = $record;
+    }
+
+    // 100102 is a real Global card the fixture carries without either key. `[]` and `null` are
+    // different claims downstream — one is "she has none", the other is "nobody looked" — and the
+    // pre-populate reads this column, so the shape has to be pinned here.
+    expect($byCard[100102]['skills_innate'])->toBe([])
+        ->and($byCard[100102]['skills_unique'])->toBe([]);
+});
+
+it('refuses to turn a malformed skill list into a crash or a half-row', function (mixed $value, array $expected, string $why): void {
+    $body = json_encode([[
+        'card_id' => 100101,
+        'char_id' => 1001,
+        'name_en' => 'Special Week',
+        'title_en_gl' => '[Special Dreamer]',
+        'rarity' => 3,
+        'release_en' => '2025-06-26',
+        'skills_unique' => $value,
+    ]], JSON_THROW_ON_ERROR);
+
+    $records = (new GametoraCharacterCardParser)->parse($body);
+
+    expect($records)->toHaveCount(1)
+        ->and($records[0]['skills_unique'])->toBe($expected, $why)
+        // The card itself still lands: a bad list is not a reason to lose the row.
+        ->and($records[0]['card_id'])->toBe(100101);
+})->with([
+    'a string' => ['not an array', [], 'a scalar where a list belongs is not one skill, it is no skill'],
+    'a nested array' => [[[10071], [100071]], [], 'ints only; a nested array has no id at its top level'],
+    'a mixed list' => [[10071, '100071', 0, -5, null, 'x'], [10071, 100071], 'numeric strings are ids, zero and negatives are not'],
+    'an associative array' => [['a' => 10071], [10071], 'keys are not part of the contract, values are'],
+    'null' => [null, [], 'absent is empty, not a null column'],
+]);

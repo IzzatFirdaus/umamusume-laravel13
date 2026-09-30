@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\MoodTier;
 use App\Enums\ReleaseStatus;
+use App\Enums\SkillAcquisition;
 use App\Enums\TurnEventType;
 use App\Http\Requests\StoreRaceEntryRequest;
 use App\Http\Requests\StoreRunSkillRequest;
@@ -24,6 +25,7 @@ use App\Models\Umamusume;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -132,9 +134,61 @@ class TrainingRunController extends Controller
 
     public function store(StoreTrainingRunRequest $request): RedirectResponse
     {
-        $run = TrainingRun::create($request->validated());
+        $validated = $request->validated();
+
+        // The run and the skills seeded onto it land together or not at all (NFR-4): a half-created
+        // run would show an empty Skills section that the Trainer then has to reason about alone.
+        $run = DB::transaction(function () use ($validated): TrainingRun {
+            $run = TrainingRun::create($validated);
+            $this->prePopulateSkills($run);
+
+            return $run;
+        });
 
         return redirect()->route('runs.show', $run)->with('status', 'Run created.');
+    }
+
+    /**
+     * Seed a new run's `Suggested` skills from the card it was started on (KI-33).
+     *
+     * A run that names no card has nothing to seed from, and a card whose lists are null was
+     * published without them — `array` does not coerce a null column to `[]`, so both cases return
+     * here rather than meeting a `foreach` over null.
+     *
+     * **The card's list is not a Global statement.** KI-33 names card `112701` as holding skill
+     * data while its `release_en` is null, so every id resolves through
+     * `Skill::scopeAvailableOnGlobal()` — the same read-path filter the picker and Screen D use —
+     * and a skill the source has not released on `[Global]` is dropped rather than offered.
+     *
+     * Creation only, never a backfill: a run already in progress holds Trainer-entered rows, and
+     * deriving `Suggested` into it overwrites memory with plan, which D-270 and Planner Rule 4
+     * both forbid. `TrainingRunTest` pins that against a second creation from the same card.
+     *
+     * `setSkillStatus` upserts through `syncWithoutDetaching`, so seeding is idempotent and a skill
+     * the Trainer already recorded on this run keeps the state they gave it.
+     */
+    private function prePopulateSkills(TrainingRun $run): void
+    {
+        $card = $run->characterCard;
+
+        if ($card === null) {
+            return;
+        }
+
+        // The union, deduped: an id should not appear on both lists, and if the source ever says so
+        // the run gets one row rather than two fighting over the same pivot key.
+        $exportIds = array_values(array_unique([
+            ...($card->skills_innate ?? []),
+            ...($card->skills_unique ?? []),
+        ]));
+
+        if ($exportIds === []) {
+            return;
+        }
+
+        foreach (Skill::query()->availableOnGlobal()->whereIn('export_id', $exportIds)->get() as $skill) {
+            $run->setSkillStatus($skill, SkillAcquisition::Suggested);
+        }
     }
 
     public function show(TrainingRun $run): View

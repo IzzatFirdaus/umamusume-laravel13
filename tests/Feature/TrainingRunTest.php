@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Enums\ReleaseStatus;
+use App\Enums\SkillAcquisition;
+use App\Models\CharacterCard;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
@@ -215,4 +218,155 @@ it('sends the export as a download named for the run', function (): void {
     test()->get("/training-runs/{$run->id}/export/csv")
         ->assertOk()
         ->assertHeader('Content-Disposition', "attachment; filename=\"run-{$run->id}.csv\"");
+});
+
+/*
+ * KI-33: a run started on a costume card pre-populates its `Suggested` skills from that card's own
+ * innate and unique lists. Before this the lists were published by the source and stored nowhere, so
+ * D-44's Suggested-before-the-run state had nothing to seed from and the Skills section read
+ * "None." on a trainee who ships with four skills.
+ *
+ * Every row offered here resolves through `Skill::scopeAvailableOnGlobal()`, because a card's list is
+ * not a Global statement: KI-33 names Fenomeno's card `112701` as holding skill data while
+ * `release_en` is null. The pre-populate inherits the same read-path filter the picker and Screen D
+ * use, so a Global Trainer is never offered a skill their client cannot show.
+ */
+function ki33GlobalSkill(int $exportId): Skill
+{
+    return Skill::create([
+        'export_id' => $exportId,
+        'name' => 'Ki33 Skill '.$exportId,
+        'match_key' => 'ki33skill'.$exportId,
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+    ]);
+}
+
+function ki33JapanOnlySkill(int $exportId): Skill
+{
+    return Skill::create([
+        'export_id' => $exportId,
+        'name' => 'Ki33 JP Skill '.$exportId,
+        'match_key' => 'ki33jpskill'.$exportId,
+        'release_status' => ReleaseStatus::JapanOnly->value,
+        'name_is_client' => false,
+    ]);
+}
+
+function ki33Card(?array $innate, ?array $unique): CharacterCard
+{
+    return CharacterCard::factory()->create([
+        'umamusume_id' => Umamusume::factory()->create()->id,
+        'skills_innate' => $innate,
+        'skills_unique' => $unique,
+    ]);
+}
+
+it('pre-populates the chosen card\'s innate and unique skills as Suggested', function (): void {
+    $innate = [ki33GlobalSkill(200512), ki33GlobalSkill(201352), ki33GlobalSkill(200732)];
+    $unique = ki33GlobalSkill(100011);
+    $card = ki33Card([200512, 201352, 200732], [100011]);
+
+    $this->post('/training-runs', [
+        'umamusume_id' => $card->umamusume_id,
+        'character_card_id' => $card->id,
+        'status' => 'Active',
+    ])->assertSessionHasNoErrors();
+
+    $run = TrainingRun::firstWhere('character_card_id', $card->id);
+
+    expect($run)->not->toBeNull()
+        ->and($run->skills()->count())->toBe(4)
+        // Every one of them suggested, none of them acquired: turn one has not happened.
+        ->and($run->skills()->pluck('run_skills.status')->unique()->all())->toBe([SkillAcquisition::Suggested->value])
+        ->and($run->skills()->pluck('run_skills.turn_acquired')->unique()->all())->toBe([null])
+        ->and($run->skills()->pluck('skills.export_id')->sort()->values()->all())
+        ->toBe([100011, 200512, 200732, 201352]);
+
+    // The rows are the catalogue's own, not copies: the same skill id the picker would offer.
+    expect($run->skills->pluck('id')->all())->toContain($innate[0]->id, $unique->id);
+});
+
+it('pre-populates nothing for a run that names no card', function (): void {
+    $trainee = Umamusume::factory()->create();
+    ki33GlobalSkill(200512);
+
+    $this->post('/training-runs', ['umamusume_id' => $trainee->id, 'status' => 'Active'])
+        ->assertSessionHasNoErrors();
+
+    expect(TrainingRun::first()->skills()->count())->toBe(0);
+});
+
+it('drops a card skill the source has not released on Global', function (): void {
+    ki33GlobalSkill(201591);
+    ki33GlobalSkill(201212);
+    ki33GlobalSkill(201472);
+    // Gold Ship really carries two uniques; one of them is not on Global in this fixture.
+    ki33JapanOnlySkill(100071);
+    $card = ki33Card([201591, 201212, 201472], [10071, 100071]);
+    ki33GlobalSkill(10071);
+
+    $this->post('/training-runs', [
+        'umamusume_id' => $card->umamusume_id,
+        'character_card_id' => $card->id,
+        'status' => 'Active',
+    ])->assertSessionHasNoErrors();
+
+    $run = TrainingRun::firstWhere('character_card_id', $card->id);
+
+    // Five ids on the card, four of them Global: 100071 is the Japan-only unique and is filtered
+    // rather than offered, while 10071 is Global and lands. The count is the proof the filter ran on
+    // the list rather than dropping the card's skills wholesale.
+    expect($run->skills()->count())->toBe(4)
+        ->and($run->skills()->pluck('skills.export_id')->sort()->values()->all())
+        ->toBe([10071, 201212, 201472, 201591]);
+});
+
+it('treats a card with no lists stored as a card with nothing to seed', function (): void {
+    // The columns are nullable and the `array` cast does not coerce null to [], so this is the
+    // shape a pre-existing card row has after the migration lands. A foreach over null here would
+    // be a 500 on run creation, and the run is the thing the Trainer was trying to start.
+    $card = ki33Card(null, null);
+
+    $this->post('/training-runs', [
+        'umamusume_id' => $card->umamusume_id,
+        'character_card_id' => $card->id,
+        'status' => 'Active',
+    ])->assertSessionHasNoErrors();
+
+    expect(TrainingRun::firstWhere('character_card_id', $card->id)->skills()->count())->toBe(0);
+});
+
+it('refuses to backfill an existing run when a later run is created from the same card', function (): void {
+    // D-270: every figure on a run in progress is Trainer-entered. Deriving Suggested rows into a
+    // run that already exists overwrites memory with plan, so the pre-populate belongs to creation
+    // only — and the guard has to be tested against a second creation, not just asserted in a comment.
+    ki33GlobalSkill(200512);
+    $card = ki33Card([200512], []);
+
+    $existing = TrainingRun::create([
+        'umamusume_id' => $card->umamusume_id,
+        'character_card_id' => $card->id,
+        'status' => 'Active',
+    ]);
+    $existing->setSkillStatus(Skill::firstWhere('export_id', 200512), SkillAcquisition::Acquired, 7);
+
+    $before = $existing->skills()->withPivot('status', 'turn_acquired')->get()->pluck(
+        'skills.export_id',
+        'run_skills.status'
+    )->all();
+
+    // A second run for the same trainee on the same card, through the real route.
+    $this->post('/training-runs', [
+        'umamusume_id' => $card->umamusume_id,
+        'status' => 'Active',
+    ])->assertSessionHasNoErrors();
+
+    $existing->refresh();
+
+    expect($existing->skills()->count())->toBe(1)
+        ->and($existing->skills()->pluck('run_skills.status')->all())->toBe([SkillAcquisition::Acquired->value])
+        ->and($existing->skills()->pluck('run_skills.turn_acquired')->all())->toBe([7])
+        ->and($before)->toHaveCount(1)
+        ->and(TrainingRun::query()->count())->toBe(2);
 });

@@ -61,6 +61,13 @@ it('ships exactly the columns the card-layer docs list', function (): void {
     // to the migration without moving those four docs fails here, and a column
     // they name that no longer ships fails too. Schema change and digest change
     // then travel together, which is the AGENTS.md Architect rule made checkable.
+    //
+    // KI-33 adds `skills_innate` and `skills_unique`, so the list below is fourteen
+    // fillable columns. **The four docs named above have not moved** — the brief
+    // governing this change bars edits to any ADR, to `CONSTRAINTS.md` and to
+    // `ARCHITECTURE*`, and `DocSchemaDriftTest` only pins `training_runs` columns,
+    // so no gate catches the gap. It is recorded here and in the pass report rather
+    // than closed by an edit this session is not allowed to make.
     expect(Schema::getColumnListing('character_cards'))->toBe([
         'id',
         'card_id',
@@ -75,9 +82,40 @@ it('ships exactly the columns the card-layer docs list', function (): void {
         'fetched_at',
         'source_timezone',
         'is_manual',
+        // SQLite's `ALTER TABLE ADD COLUMN` appends, so a column added by a later migration sits
+        // after the timestamps rather than before them. This list is physical order, which is what
+        // `getColumnListing` returns — not declaration order in the migration files.
         'created_at',
         'updated_at',
+        'skills_innate',
+        'skills_unique',
     ]);
+});
+
+it('stores the two skill lists as nullable json and reads them back as arrays', function (): void {
+    $card = CharacterCard::create([
+        'umamusume_id' => Umamusume::factory()->create()->id,
+        'card_id' => 900801,
+        'title' => '[Red Strife]',
+        'rarity' => CardRarity::TwoStar,
+        'global_release_date' => '2025-06-26',
+        'source_url' => 'https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json',
+        'skills_innate' => [201591, 201212, 201472],
+        // Two uniques on one card: Gold Ship is the case a scalar column would drop.
+        'skills_unique' => [10071, 100071],
+    ])->fresh();
+
+    expect($card->skills_innate)->toBe([201591, 201212, 201472])
+        ->and($card->skills_unique)->toBe([10071, 100071]);
+
+    // Nullable, because a card the document gives no lists for is a real card. And the
+    // `array` cast does **not** coerce a stored null into `[]` — Eloquent returns null
+    // for a null attribute whatever the cast says. So the read side has to treat null
+    // as "no lists" explicitly; a `foreach` over the raw attribute would be iterating
+    // null, and the pre-populate test below is where that is pinned instead of here.
+    $bare = CharacterCard::factory()->create(['skills_innate' => null, 'skills_unique' => null])->fresh();
+
+    expect($bare->skills_innate)->toBeNull();
 });
 
 it('reads fetched_at as a datetime so the card can be shown in the display zone', function (): void {

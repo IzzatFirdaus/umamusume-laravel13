@@ -11,6 +11,7 @@ use App\Services\DataPipeline\Parsers\GametoraCharacterCardParser;
 use App\Services\DataPipeline\PipelineRunner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 /*
@@ -334,4 +335,43 @@ it('is declared as a fetch source with the card-grain parser', function (): void
         'timezone' => 'Asia/Tokyo',
     ])->and(config('uma.sources.gametora-character-cards.parser'))
         ->toBe(GametoraCharacterCardParser::class);
+});
+
+it('writes the two skill lists onto the card row, and a re-fetch updates them instead of doubling them', function (): void {
+    // KI-33's store half: the parser now emits `skills_innate` and `skills_unique`, and this pins
+    // that they reach the row verbatim. Gold Ship is in here on purpose — she is the card whose
+    // unique list holds two ids, so a scalar column or a `first()` somewhere would show up here as
+    // a one-element array rather than as a crash.
+    Umamusume::factory()->create(['external_ref' => 'gametora:char:1001']);
+    Umamusume::factory()->create(['external_ref' => 'gametora:char:1007']);
+
+    $cards = cardsBySourceId();
+    $records = array_values(array_filter(
+        $cards,
+        static fn (array $r): bool => in_array($r['card_id'], [100101, 100701], true),
+    ));
+
+    $first = (new StoreCharacterCards)->handle($records, 'https://gametora.test/lists.json', null, null);
+
+    expect($first)->toMatchArray(['created' => 2, 'updated' => 0])
+        // `Builder::value()` runs the model's cast, so this is the shape the read path consumes...
+        ->and(CharacterCard::where('card_id', 100101)->value('skills_innate'))->toBe([200512, 201352, 200732])
+        ->and(CharacterCard::where('card_id', 100101)->value('skills_unique'))->toBe([100011])
+        ->and(CharacterCard::where('card_id', 100701)->value('skills_unique'))->toBe([10071, 100071])
+        // ...and the query builder below bypasses the cast, which is what proves the column is json
+        // storage rather than a cast faking a list over a string.
+        ->and(DB::table('character_cards')->where('card_id', 100701)->value('skills_unique'))
+        ->toBe('[10071,100071]');
+
+    $second = (new StoreCharacterCards)->handle($records, 'https://gametora.test/lists.json', null, null);
+
+    // A card the next fetch gives no lists for writes `[]`, not a null and not the old value: the
+    // source's silence is a fact about the source, and it is recorded rather than inherited.
+    $stripped = array_map(static fn (array $r): array => [...$r, 'skills_innate' => [], 'skills_unique' => []], $records);
+    $third = (new StoreCharacterCards)->handle($stripped, 'https://gametora.test/empty.json', null, null);
+
+    expect($second)->toMatchArray(['created' => 0, 'updated' => 2])
+        ->and(CharacterCard::query()->count())->toBe(2)
+        ->and($third)->toMatchArray(['created' => 0, 'updated' => 2])
+        ->and(CharacterCard::firstWhere('card_id', 100101)->skills_innate)->toBe([]);
 });
