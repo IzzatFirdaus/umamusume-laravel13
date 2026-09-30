@@ -2290,3 +2290,21 @@ so the fix and its citation land together. Not applied in a Slice 4 follow-up.
 **Owner.** Docs Writer, as owner of digest currency. Suggested landing: one edit covering **both** lines above,
 each citing `ADR-0015`, since fixing only the ESSENTIALS line leaves `ARCHITECTURE.md:158` stating the same
 wrong bound.
+
+## KI-49 Three source bodies are untracked, so three pipelines cannot be re-run from a fresh clone. Filed, not fixed.
+
+**Gap.** `database/seeders/data/skills.609afe88.json`, `database/seeders/data/characters.c6676539.json` and `database/seeders/data/gametora-characters.e9e9ee6d.json` exist on disk, are in no commit, and are not ignored. Verified 2026-10-01, each with its own command:
+
+- `git ls-files --error-unmatch` on all three returns no, so none is tracked.
+- `git check-ignore -q` on all three returns no, so this is not a deliberate ignore. The files were simply never added.
+- Sizes on disk: 4,399,937, 2,068,129 and 2,791,919 bytes.
+
+**Why it matters now, and not only in principle.** `config/uma.php` names all three bodies through `seed_file` keys (`config/uma.php:75`, `:113`, `:180` in the working copy). `git show HEAD:config/uma.php` greps **0** matches for `seed_file`, so the keys exist only inside an uncommitted peer diff. Neither the pointers nor the bodies are on any ref. Three consumers depend on them: the skills import, which `app/Enums/ReleaseStatus.php` and `ADR-0011` govern; the characters import and roster crosscheck; and the Batch 2 extraction at `docs/design-research/skill-facts-2026-10-01.md`, whose 623 rows cannot be regenerated from a fresh clone because the file it read is not in history. The extraction document says so in its own provenance warning, but a warning in a derived document does not make the source durable.
+
+**Adjacent findings, deliberately not folded in.** KI-24b is a gitignored skill registry, and P-6 with N-3 in `docs/design-research/slice-6-currency-2026-10-01.md` concern one citation pointing at `factors.json`. Those are single pointers into ignored scratch. This is three data bodies with no rule and no commit, so the failure mode differs: a pipeline that is green in one working tree and unrunnable in every other checkout.
+
+**Fix options, owner's call.** Either (a) track the three bodies, about 9 MB together, as the committed source truth for these pipelines, or (b) declare them ephemeral and retarget each pipeline to a source that a ref can resolve, recording manifest hash and fetch date so provenance survives the move. What must not stand is the current middle state, where `seed_file` names bodies no ref carries.
+
+**Not acted on here.** This dispatch's fence forbids adding the files, and a decision to commit or discard 9 MB of source data is the owner's, not an agent's. Filed only.
+
+**Owner.** Data Engineer for the pipeline retarget, with the owner deciding between (a) and (b). Docs Writer owns the correction to `ADR-0011`'s provenance line if option (a) is taken, since that ADR currently cites the manifest hash as though it were retrievable.
