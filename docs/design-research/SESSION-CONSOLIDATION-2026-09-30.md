@@ -123,6 +123,65 @@ On §1.1.4, the refutation answered a narrower question than session 3 asked. Ag
 
 On §1.1.8 and §3.4, the premise was wrong and the finding survives in a different shape. The `sp` ceiling was not removed during the audit's working period. `9b774f9` (IzzatFirdaus, 2026-09-28 14:19:04, `feat(schema,providers): Preference store, ScenarioSlot matrix, scenario-key validation`) changed `'sp' => ['nullable', 'integer', 'between:0,1200']` to `min:0` two days earlier, and that commit is the tip of `origin/docs/audit-remediation`, so the change is already published. No live session overrode a pending ruling. What remains true is a separate hygiene finding: a bound change rode inside a three-purpose feature commit whose message never names SP, bounds or ceilings.
 
+### 3.9.1 — The rescue ref was renamed to `archive/` on 2026-10-01 (owner ruling; the last unexecuted item of the §3.2 resolution)
+
+**Everything above keeps the name it was written under.** `rescue/profiles-chain` appears at §3.9, in the
+§6 Phase-A measurement row and in the merge-discipline row, and those sentences are left verbatim per the
+erratum convention now stated in `docs/adr/README.md` — they were true of the ref under the name they use, and
+rewriting them would destroy the record that the ref existed under that name at all. This subsection is the
+correction.
+
+The rename, executed once:
+
+```
+git branch -m rescue/profiles-chain archive/profiles-chain
+```
+
+Lowercase `-m`, so the rename is a move, not a forced overwrite. Verified after the fact rather than assumed
+from a clean exit:
+
+- `git rev-parse archive/profiles-chain` → `8ffab6363492e81f50043f90460f2909f94a3767`, the same tip §3.9 records
+  as the rescue anchor. The commits did not move.
+- `git rev-parse --verify rescue/profiles-chain` → `fatal: Needed a single revision`. The old name is gone, so
+  nothing can silently keep resolving to it.
+- `git branch -v` lists `archive/profiles-chain 8ffab63` and no `rescue/` row.
+
+**A correction to §3.9's own verification, found while checking this rename, and the more important half of
+the entry.** §3.9 records that the rescue was "verified by `git rev-list rescue/profiles-chain --not --all
+--count` returning 0", and reads that as nothing-at-risk. **That command cannot return anything but 0 for any
+branch that exists, because `--all` includes the branch being measured.** The check is self-satisfying, which
+puts it in the same class as the `->check()` no-op and the schema-less test elsewhere in this file: it reports
+success while proving nothing. Measured properly — excluding the ref under test — the truth is the opposite of
+what the number implied:
+
+```
+git branch --contains 8ffab63                ->  archive/profiles-chain   (and nothing else)
+git rev-list archive/profiles-chain --not <every other head and remote> --count  ->  8
+```
+
+So **the eight commits are unique to this single ref.** No other branch protects them, which means §3.9's
+exposure analysis stands in full — one `git gc --prune=now` while the ref is absent destroys the chain, and
+the `gc.pruneExpire` horizon it computed (roughly 2026-10-14) is live — and it means **the rename was not a
+zero-risk operation the way this subsection first claimed.** It was safe only because `-m` moves the ref
+atomically rather than deleting and recreating it, and because the tip sha is recorded above and below. The
+first draft of this entry asserted "the chain is reachable through
+`feat/catalog-roster-and-trainee-selector`… so renaming the ref carried no GC risk." That sentence was wrong,
+inferred from `--not --all` returning 0, and it is the exact error the ref has now been mis-stated around
+three times. Anyone re-running that verification should use the excluded form; the inclusive form will always
+say the chain is safe.
+
+**Recovery anchor, now load-bearing rather than belt-and-braces:**
+`git branch archive/profiles-chain 8ffab6363492e81f50043f90460f2909f94a3767` recreates the tip under either
+name from a sha, which is the only durable form given that no other ref holds these commits. Record the sha,
+not just the name.
+
+**Why the rename is worth a record at all:** this ref has now been miscited from both directions inside one
+session. §6's merge-discipline row records a pass that reported `rescue/profiles-chain` as peer work landing
+mid-turn when it had existed since an earlier authorization, and a later ruling cited `archive/profiles-chain`
+as a rename that had failed to land when no rename had ever been queued. Both are the same error — reasoning
+about a ref's state from the prose in front of you instead of from `git branch -a`. The check that settles it
+ costs one command and was run before and after here.
+
 **Appended 2026-09-30 after the lineage check — the schema pick and the lineage pick are one decision, and the lineage pick comes first.** `92670ff`'s parent is `7cc6283`, the tip of `feat/catalog-roster-and-trainee-selector`, so the profiles chain continues that branch rather than forking from master. The chain is therefore ten commits off an unmerged local branch that is 2 ahead of and 17 behind master, and the real question is whether the roster+profiles lineage merges as a unit, is rebased onto master with the roster commits dropped, or is abandoned. `name_ja` plus `three_sizes_*` against `height_cm`/`bust_cm`/`waist_cm`/`hip_cm` cannot be answered before that, because the two candidate trees already carry divergent migrations and the schema lives inside the tree choice.
 
 ## 4. Blocked without a decision
