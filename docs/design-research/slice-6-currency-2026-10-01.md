@@ -101,6 +101,12 @@ Each line is `file:line` plus the evidence, per instruction. **Filed, not fixed.
   reports both figures: the per-label Global counts in its coverage table and the whole-export counts in the
   reconciliation paragraph beneath it.
 
+  **Closed as a verification question, 2026-10-01.** Re-measured independently against the same body: 1,910 records
+  give 107, 220, 166 and 115, and the 623 records with no `unreleased` key give 26, 35, 33 and 27. All four style
+  values were observed in the data, which is the canary that makes both counts real rather than a pattern that
+  cannot fire. The finding is confirmed. What remains is the fix itself, one clause naming the denominator, and
+  that is Docs Writer work. It is not changed by this closure.
+
 **Checked and clean — recording these because a currency pass that names nothing checked is unauditable.**
 
 - **All 10 `§` references resolve.** Internal: `§3`, `§5`, `§6` (`PRD.md:35–37`), `§6.9` (`:37,90`), `§6.11`
