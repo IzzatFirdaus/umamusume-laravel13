@@ -9,6 +9,8 @@ use App\Actions\StoreCharacterCards;
 use App\Actions\StoreCharacterProfiles;
 use App\Actions\StoreRaceCatalogSlots;
 use App\Actions\StoreSkills;
+use App\Actions\StoreSupportCards;
+use App\Actions\StoreSupportEffects;
 use App\Enums\CandidateStatus;
 use App\Enums\MatchTier;
 use App\Models\MatchCandidate;
@@ -17,15 +19,17 @@ use App\Services\DataPipeline\Contracts\ProfileSourceParser;
 use App\Services\DataPipeline\Contracts\RaceCatalogSourceParser;
 use App\Services\DataPipeline\Contracts\SkillSourceParser;
 use App\Services\DataPipeline\Contracts\SourceParser;
+use App\Services\DataPipeline\Contracts\SupportCardSourceParser;
+use App\Services\DataPipeline\Contracts\SupportEffectSourceParser;
 use Illuminate\Support\Facades\Cache;
 
 /**
  * Parse -> normalize -> match -> promote|review stage runner (PRD FR-B-2).
  * Shared by uma:fetch (network) and uma:reparse (snapshots only).
  *
- * Reference rows that carry their own identity — a race catalogue, a skill, a card,
- * a trainee profile — route past the match stage instead, on their parser's contract.
- * See `run()`'s four `is_a()` branches.
+ * Reference rows that carry their own identity route past the match stage instead, on their parser's
+ * contract: a race catalogue, a skill, a card, a trainee profile, a support card, a support effect.
+ * See `run()`'s six `is_a()` branches.
  */
 final class PipelineRunner
 {
@@ -36,6 +40,8 @@ final class PipelineRunner
         private readonly StoreSkills $storeSkills,
         private readonly StoreCharacterCards $storeCharacterCards,
         private readonly StoreCharacterProfiles $storeCharacterProfiles,
+        private readonly StoreSupportCards $storeSupportCards,
+        private readonly StoreSupportEffects $storeSupportEffects,
     ) {}
 
     /**
@@ -106,8 +112,9 @@ final class PipelineRunner
          * ambiguous, so nothing goes to review — and card records carry no `name` key
          * at all, which is what the loop below reads first.
          *
-         * The four contracts this method can meet — `SourceParser`,
-         * `RaceCatalogSourceParser`, `SkillSourceParser`, `CharacterCardSourceParser` — are
+         * The seven contracts this method can meet — `SourceParser`,
+         * `RaceCatalogSourceParser`, `SkillSourceParser`, `CharacterCardSourceParser`,
+         * `ProfileSourceParser`, `SupportCardSourceParser`, `SupportEffectSourceParser` — are
          * siblings, not subtypes: none extends another, so no one `class-string<T>` names all
          * of them. That is why `run()`'s `@param` types `parser` as a bare `class-string` and
          * each branch narrows it to the contract it calls.
@@ -159,6 +166,45 @@ final class PipelineRunner
                 $snapshotPath,
                 $sourceConfig['timezone'] ?? null,
             );
+
+            return [...$stored, 'review' => 0];
+        }
+
+        /*
+         * Support cards leave the match stage for the same reason the four above do (ADR-0014): a
+         * card's identity is the export's own `support_id`, and the export publishes no single display
+         * name to cross-reference, only a character name and an epithet that `SupportCard::displayName()`
+         * composes at read time. Read as `SourceParser` records, all 559 rows would fail to name an
+         * Umamusume and land in `match_candidates` as a review queue holding the whole support-card
+         * catalogue.
+         *
+         * `catalog:version` is not bumped, unlike the card branch above. That key feeds
+         * CatalogController::cached(), which pages the trainable roster; support cards are not in that
+         * list, so a fetch that landed 559 of them has to invalidate nothing.
+         *
+         * `$snapshotPath` and `$timezone` are not passed down: `support_cards` has neither column, so
+         * the two provenance fields it does have are the pair `StoreSupportCards` stamps. ADR-0003
+         * Amendment R3's four are two here, and that is a schema gap rather than this branch's call.
+         */
+        if (is_a($parserClass, SupportCardSourceParser::class, true)) {
+            /** @var SupportCardSourceParser $parser */
+            $parser = app($parserClass);
+            $stored = $this->storeSupportCards->handle($parser->parse($body), $sourceConfig['url']);
+
+            return [...$stored, 'review' => 0];
+        }
+
+        /*
+         * The effect dictionary is the last routed kind, and it is separate from the card branch above
+         * for the reason `CharacterCardSourceParser` is separate from `SkillSourceParser`: one row per
+         * effect keyed on the export's `id`, no cross-reference, a different table and a different
+         * writer. Its records carry no `name` key either, which is what the fall-through loop reads
+         * first.
+         */
+        if (is_a($parserClass, SupportEffectSourceParser::class, true)) {
+            /** @var SupportEffectSourceParser $parser */
+            $parser = app($parserClass);
+            $stored = $this->storeSupportEffects->handle($parser->parse($body), $sourceConfig['url']);
 
             return [...$stored, 'review' => 0];
         }
