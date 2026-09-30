@@ -1,10 +1,15 @@
 <x-layout title="Training runs">
     <div class="flex flex-wrap items-baseline justify-between gap-3">
         <h1 class="text-2xl font-semibold text-ink-strong">Training runs</h1>
-        <a href="{{ route('runs.create') }}"
-           class="enamel rounded-full bg-chrome px-4 py-1.5 text-sm font-bold text-on-chrome">
-            New run
-        </a>
+        <div class="flex items-center gap-3">
+            {{-- Import sits beside New run rather than in a menu: it creates a run too, and a Trainer
+                 with a finished career in a file has to find it on the same glance. --}}
+            <a href="{{ route('runs.import') }}" class="text-sm text-ink-muted hover:underline">Import a historical run</a>
+            <a href="{{ route('runs.create') }}"
+               class="enamel rounded-full bg-chrome px-4 py-1.5 text-sm font-bold text-on-chrome">
+                New run
+            </a>
+        </div>
     </div>
 
     @if ($runs->count() === 0)

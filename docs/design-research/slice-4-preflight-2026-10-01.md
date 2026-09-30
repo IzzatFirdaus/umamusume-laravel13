@@ -95,3 +95,29 @@ by keystroke, so it needs its own pair on `training_runs`.
 ADR-0017 · one migration adding `imported_at`/`import_source` to `training_runs` · `ImportHistoricalRun`
 action · a web import page with preview-before-commit · a one-line "imported" indicator on the run screen ·
 tests that export a run and import it back · a browser pass on a scratch database. **No API endpoint.**
+
+## Forward correction, appended when Slice 4 was built (2026-10-01)
+
+Everything above stands as written at pre-flight time, except one line in §B, which the build overruled on
+evidence. Recorded here rather than edited in place, because the file is committed at `cff8f46` and its
+reasoning is the point of a pre-flight.
+
+**§B, mood row: "an unknown word stays null rather than failing the row" is not what was built.**
+`ImportHistoricalRunRequest::parse()` upper-cases the mood cell and leaves an unrecognised word untouched,
+so `Rule::enum(MoodTier::class)` rejects it with its own message and the Trainer sees which row said it. The
+preflight's version would have stored a blank mood for a sheet that stated one — a false statement about the
+run, indistinguishable from a turn that recorded no mood. A rejected file is recoverable by fixing the word;
+a silently nulled observation is not. `ADR-0017` carries the decision and this reason.
+
+**One addition the pre-flight did not anticipate.** `str_getcsv()` is called with its `$escape` argument
+explicit on PHP 8.5, where relying on the default is deprecated. This is not cosmetic here: an empty escape
+is the correct reading of `export()`, which emits bare commas and no backslash quoting, so passing it keeps
+the parser symmetrical with the emitter instead of merely silencing a notice.
+
+**One finding the build surfaced that is not Slice 4's to fix.** A run with no scenario renders its stat
+bands at 1,400 while its own form enforces 1,200 — the display path resolves `null` to the baseline scenario
+and inherits URA Finale's bonus, while `ScenarioCaps::forRun()` deliberately refuses that bonus. That is the
+disagreement `ADR-0015` exists to prevent, alive on the no-scenario branch, and the import reaches it on its
+main path because paper sheets rarely recorded a scenario. Measured and filed as **KI-47**, escalated to the
+human owner; not corrected inside this slice, since it changes a rendered ceiling on another slice's surface.
+

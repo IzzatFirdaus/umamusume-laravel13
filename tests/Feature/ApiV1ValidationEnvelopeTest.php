@@ -67,6 +67,7 @@ it('never answers an api request with html, whatever the failure', function (): 
 });
 
 it('leaves the 422 branch unreachable, because the api has no write', function (): void {
+    // Slice 4's CSV import (ADR-0017) is a web route by choice rather than an omission, so no API write unlocks this branch.
     $routes = collect(app('router')->getRoutes()->getRoutesByMethod())
         ->flatten()
         ->filter(fn ($route): bool => str_starts_with($route->uri(), 'api/'));

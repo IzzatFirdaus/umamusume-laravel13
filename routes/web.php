@@ -19,6 +19,11 @@ Route::get('/skills', [SkillController::class, 'index'])->name('skills.index');
 Route::get('/training-runs', [TrainingRunController::class, 'index'])->name('runs.index');
 Route::get('/training-runs/create', [TrainingRunController::class, 'create'])->name('runs.create');
 Route::post('/training-runs', [TrainingRunController::class, 'store'])->name('runs.store');
+// Registered before the {run} routes below, which would otherwise match the literal segment
+// "import" as a run id and 404 on a model binding instead of showing the form.
+Route::get('/training-runs/import', [TrainingRunController::class, 'importForm'])->name('runs.import');
+Route::post('/training-runs/import', [TrainingRunController::class, 'importStore'])->name('runs.import.store');
+Route::post('/training-runs/import/preview', [TrainingRunController::class, 'importPreview'])->name('runs.import.preview');
 Route::get('/training-runs/{run}', [TrainingRunController::class, 'show'])->name('runs.show');
 Route::put('/training-runs/{run}', [TrainingRunController::class, 'update'])->name('runs.update');
 Route::delete('/training-runs/{run}', [TrainingRunController::class, 'destroy'])->name('runs.destroy');

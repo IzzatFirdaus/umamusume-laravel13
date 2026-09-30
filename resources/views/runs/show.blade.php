@@ -46,6 +46,14 @@
             <a href="{{ route('runs.export', ['run' => $run, 'format' => 'csv']) }}" class="hover:underline">Export CSV</a>
             <a href="{{ route('runs.export', ['run' => $run, 'format' => 'json']) }}" class="hover:underline">Export JSON</a>
         </div>
+        {{-- Provenance stated rather than implied (ADR-0017): a run that arrived by file is not the
+             Trainer's own typing, so the gaps in it belong to the sheet rather than to their memory.
+             A typed run says nothing, which is the honest default. --}}
+        @if ($run->imported_at)
+            <p class="mt-1 text-xs text-ink-muted">
+                Imported {{ $run->imported_at->timezone(config('uma.display_timezone'))->format('M j, Y') }} from {{ $run->import_source ?: 'a CSV' }}
+            </p>
+        @endif
     </div>
 
     @if ($run->notes)

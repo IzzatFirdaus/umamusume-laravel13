@@ -58,7 +58,7 @@ use Illuminate\Support\Carbon;
  * @property-read Umamusume $umamusume
  * @property-read CharacterCard|null $characterCard
  */
-#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'notes', 'current_objective_index', 'shop_resets_in'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'notes', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source'])]
 class TrainingRun extends Model
 {
     /** @use HasFactory<TrainingRunFactory> */
@@ -885,6 +885,7 @@ class TrainingRun extends Model
             'current_objective_index' => 'integer',
             'shop_resets_in' => 'integer',
             'legacy_selection' => 'array',
+            'imported_at' => 'datetime',
         ];
     }
 

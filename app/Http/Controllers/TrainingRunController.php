@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\ImportHistoricalRun;
 use App\Enums\MoodTier;
 use App\Enums\ReleaseStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\TurnEventType;
+use App\Http\Requests\ImportHistoricalRunRequest;
 use App\Http\Requests\StoreDeckRequest;
 use App\Http\Requests\StoreRaceEntryRequest;
 use App\Http\Requests\StoreRunSkillRequest;
@@ -717,6 +719,60 @@ class TrainingRunController extends Controller
     }
 
     /**
+     * The import form: pick the trainee and the scenario, paste or choose the run's CSV (ADR-0017).
+     *
+     * No costume card here, though `create()` asks for one. `character_card_id` is nullable, and a paper
+     * sheet records the trainee rather than which of her forms was equipped; collecting it would offer a
+     * field the source cannot fill and invite a guess that then reads as the Trainer's own record.
+     */
+    public function importForm(): View
+    {
+        return view('runs.import', $this->importChoices());
+    }
+
+    /**
+     * Show what the file contains before any of it is written.
+     *
+     * The same request validates this step and the commit step, so the preview is not a trust boundary:
+     * nothing here is carried forward as already-checked, and editing the flashed CSV to something invalid
+     * fails on the second POST rather than reaching the action. The rows are handed over as raw strings
+     * straight from the parse, which is also what makes a rejected cell point at the row that held it.
+     */
+    public function importPreview(ImportHistoricalRunRequest $request): View
+    {
+        $validated = $request->validated();
+
+        return view('runs.import', array_merge($this->importChoices(), [
+            'preview' => [
+                'csv' => (string) $validated['csv'],
+                'turns' => $validated['turns'],
+                'run' => $request->only(['umamusume_id', 'scenario', 'status', 'notes']),
+            ],
+        ]));
+    }
+
+    /**
+     * Write the imported run, then return to it.
+     *
+     * Re-validates rather than accepting a token from the preview, which keeps the flow two POSTs and no
+     * session state. A run and its turns land in one transaction (`ImportHistoricalRun`), so a file that
+     * fails halfway leaves no partial history behind.
+     */
+    public function importStore(ImportHistoricalRunRequest $request, ImportHistoricalRun $import): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        // The request keeps the browser's filename when there was one and folds a pasted body to a short
+        // hash of its own content, so the column always names something the Trainer can point at.
+        $source = $request->sourceLabel((string) $validated['csv']);
+
+        $run = $import->handle($validated, $validated['turns'], $source);
+
+        return redirect()->route('runs.show', $run)
+            ->with('status', 'Imported '.count($validated['turns']).' turns.');
+    }
+
+    /**
      * Scenario slug => the matrix's own display label, for the two forms that offer
      * a choice. Composed from `config('scenarios.php')` rather than from a list
      * here, so a fifth scenario appears without a controller edit (D-240).
@@ -729,6 +785,26 @@ class TrainingRunController extends Controller
             static fn (array $def): string => $def['label'],
             config('scenarios.scenarios'),
         );
+    }
+
+    /**
+     * The two lists the import page renders, shared by its form and its preview step.
+     *
+     * Narrower than `create()`'s trainee query on purpose: the import collects no costume card, so it
+     * selects no cards and carries no `unconfirmed` gate. A global roster would list a trainee the run
+     * cannot be created for.
+     *
+     * @return array{umamusumes: Collection<int, Umamusume>, scenarios: array<string, string>}
+     */
+    private function importChoices(): array
+    {
+        return [
+            'umamusumes' => Umamusume::query()
+                ->where('release_status', ReleaseStatus::GlobalReleased->value)
+                ->orderBy('name')
+                ->get(['id', 'name', 'name_ja']),
+            'scenarios' => $this->scenarioLabels(),
+        ];
     }
 
     /**
