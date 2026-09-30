@@ -232,6 +232,14 @@ class TrainingRun extends Model
             ->using(RunSkill::class);
     }
 
+    /**
+     * @return HasMany<DeckSlot, $this>
+     */
+    public function deckSlots(): HasMany
+    {
+        return $this->hasMany(DeckSlot::class)->orderBy('slot_position');
+    }
+
     public function setSkillStatus(Skill $skill, SkillAcquisition $status, ?int $turnAcquired = null): void
     {
         $this->skills()->syncWithoutDetaching([
