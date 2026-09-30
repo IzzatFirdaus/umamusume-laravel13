@@ -2,21 +2,50 @@
     // No default. A named default put a scenario name in a view, which is the D-240 smell
     // x-resource-strip already refuses: a band with no scenario has no cap set to read, and
     // silently resolving to the baseline would rate a trainee against the wrong ceiling.
+    //
+    // That rule was enforced inside this component and violated one call site before it, which
+    // is KI-47: the controller resolved null to `ura_finale` and handed the result here, so the
+    // band dutifully derived URA Finale's ceiling for a run that never chose it. The `scenario`
+    // prop is now only the truth of the label and the footer's bonus breakdown. The ceilings come
+    // in on `caps`, from `ScenarioCaps::forRun()` — the same call the validator makes — so this
+    // component can no longer rate a trainee against a bonus it was told not to invent.
+    // `null`, not omitted. Blade leaves a defaultless prop undefined when the caller does not
+    // pass it — measured, not assumed: with `'caps',` alone the guard below never ran, because
+    // reading `$caps` raised "Undefined variable" first and the page failed with a message about
+    // a PHP notice instead of the one this component wrote for exactly this mistake. A null
+    // default is not the D-240 smell above, which was about a *scenario name* living in a view.
     'scenario',
+    'caps' => null,
     'values' => [],
     'skillPoints' => null,
 ])
 
 @php
     $config = config('scenarios');
-    $def = $config['scenarios'][$scenario] ?? null;
 
-    if ($def === null) {
+    /** @var list<string> $order */
+    $order = $config['stat_order'];
+
+    // Fail before rendering anything, rather than drawing a bar with no ceiling and a division
+    // by zero: a caller that forgets `caps` is the same class of mistake KI-47 was, and the
+    // silent version of it is a band that renders plausible numbers.
+    $missing = array_values(array_diff($order, array_keys(is_array($caps) ? $caps : [])));
+
+    if ($missing !== []) {
+        throw new InvalidArgumentException(
+            'x-stat-band requires a ceiling for every rated stat; missing '.implode(', ', $missing).'.'
+        );
+    }
+
+    // A run with no scenario has no bonus row to break down. Null is the honest state, and it is
+    // not an unknown scenario: the guard is for a key that was named and does not exist.
+    $def = $scenario === null ? null : ($config['scenarios'][$scenario] ?? null);
+
+    if ($scenario !== null && $def === null) {
         throw new InvalidArgumentException("Unknown scenario [{$scenario}] for x-stat-band.");
     }
 
     $base = $config['base_cap'];
-    $order = $config['stat_order'];
 
     /*
      * Full literal class strings, keyed rather than interpolated. Tailwind v4
@@ -81,10 +110,12 @@
         @foreach ($order as $stat)
             @php
                 $value = (int) ($values[$stat] ?? 0);
-                // The same ceiling the turn form validates against, from one owner. The
-                // band used to compute base + bonus inline, which is how the two could
-                // disagree: this showed a cap that screen refused to accept (ADR-0015).
-                $cap = \App\Services\ScenarioCaps::stat($scenario, $stat);
+                // The ceiling the turn form validated this value against, read from the payload
+                // rather than re-derived here. The band first computed base + bonus inline (that
+                // was the ADR-0002 disagreement ADR-0015 closed), then derived it from a scenario
+                // key the caller had already resolved — which is how KI-47 survived: one owner for
+                // the arithmetic, two different arguments passed to it.
+                $cap = (int) $caps[$stat];
                 $pct = min(100, $cap > 0 ? $value / $cap * 100 : 0);
                 $softPct = min(100, $cap > 0 ? $base / $cap * 100 : 100);
                 $atCeiling = $cap <= $base;
@@ -161,8 +192,15 @@
     </div>
 
     <div class="px-3 pb-3 font-mono text-xs tabular-nums text-ink-muted">
-        {{ $base }} base
-        + @foreach ($order as $stat){{ $stat }} +{{ $def['cap_bonus'][$stat] }}@if (! $loop->last), @endif @endforeach
+        @if ($def === null)
+            {{-- No bonus row exists to print, so the arithmetic is stated as what it is instead of
+                 borrowing a scenario's numbers to explain itself. This is the line a Trainer reads
+                 to understand why every bar ends at 1,200. --}}
+            {{ $base }} base, no scenario set: every ceiling here is the base cap and no bonus applies.
+        @else
+            {{ $base }} base
+            + @foreach ($order as $stat){{ $stat }} +{{ $def['cap_bonus'][$stat] ?? 0 }}@if (! $loop->last), @endif @endforeach
+        @endif
         breakthrough not tracked.
         Hard cap {{ number_format($config['hard_cap']) }}.
         {{-- Checked rather than assumed: the five 「限界値アップ」 effects (ids 20 to 24) that would

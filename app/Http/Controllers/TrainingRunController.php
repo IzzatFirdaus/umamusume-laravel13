@@ -26,6 +26,7 @@ use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\Umamusume;
+use App\Services\ScenarioCaps;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
@@ -307,7 +308,23 @@ class TrainingRunController extends Controller
             'scenarios' => $this->scenarioLabels(),
             'raceSlots' => $this->raceSlotsFor($run),
             'band' => $latest === null ? null : [
-                'scenario' => $run->scenarioKey(),
+                /*
+                 * The run's own scenario or null, and the ceilings, handed over together.
+                 *
+                 * This used to pass `$run->scenarioKey()`, which resolves null to the baseline
+                 * scenario, and the band then derived its ceilings from that key — so a run that
+                 * named no scenario was rated against URA Finale's +200 on screen while its own
+                 * turn form enforced 1200. `ScenarioCaps::forRun()` refuses that bonus for exactly
+                 * that reason, and the display path was the one reader that never went through it.
+                 *
+                 * The scenario is still passed, because it is the truth of the label and the footer
+                 * breaks a bonus down from it; what it may no longer do is supply a ceiling. Ceilings
+                 * arrive from `forRun()`, the same call the validator makes, so the page cannot show
+                 * a number the form would reject. Recorded as KI-47, and deferred here by name in
+                 * `docs/design-research/verification/slice-1-stat-ceilings-2026-09-30.md` §3.
+                 */
+                'scenario' => $run->hasScenario() ? $run->scenario : null,
+                'caps' => ScenarioCaps::forRun($run),
                 'values' => [
                     'Speed' => $latest->speed,
                     'Stamina' => $latest->stamina,

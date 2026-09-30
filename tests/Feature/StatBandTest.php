@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\TrainingRun;
+use App\Services\ScenarioCaps;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\ViewException;
 
@@ -40,11 +42,22 @@ function badgeLabels(string $html): array
     return $matches[1];
 }
 
-function renderBand(array $values): string
+function renderBand(array $values, ?string $scenario = 'ura_finale'): string
 {
+    // Caps arrive the way the controller sends them now: from ScenarioCaps, not derived inside
+    // the component. Passing the scenario alone used to be enough because the band re-derived,
+    // and that re-derivation is what KI-47 was.
+    $caps = $scenario === null
+        ? ScenarioCaps::forRun(new TrainingRun(['scenario' => null]))
+        : ScenarioCaps::caps($scenario);
+
     return Blade::render(
-        '<x-stat-band :scenario="$scenario" :values="$values" />',
-        ['scenario' => 'ura_finale', 'values' => $values],
+        '<x-stat-band :scenario="$scenario" :caps="$caps" :values="$values" />',
+        [
+            'scenario' => $scenario,
+            'caps' => $caps,
+            'values' => $values,
+        ],
     );
 }
 
@@ -100,4 +113,39 @@ it('says the grade is derived and not read from the client', function (): void {
     // D-256 with G-46: the banding is this tool's own reading of pixels, not a
     // client string, and a badge that looks like game data has to say otherwise.
     expect($html)->toContain('Derived from the entered value, not read from the client');
+});
+
+it('renders the base cap when told there is no scenario, and says so in the footer', function (): void {
+    $html = renderBand(['Speed' => 600, 'Stamina' => 600, 'Power' => 600, 'Guts' => 600, 'Wit' => 600], null);
+
+    // The component used to reach for `config('scenarios')` by itself and was handed a resolved
+    // key, so this is the state it could never express: a band with no bonus row at all. Both
+    // halves matter — the ceiling the bar ends at, and the arithmetic line that explains it.
+    expect($html)->toContain('/ 1,200')
+        ->and($html)->toContain('no scenario set: every ceiling here is the base cap and no bonus applies.');
+});
+
+it('refuses to draw a band it was given no ceilings for', function (): void {
+    // A caller that forgets `caps` must not get a rendered page. The band once derived its own
+    // numbers, which is how a wrong one survived every passing test beside it; a silent fallback
+    // here would reintroduce the same failure with a friendlier error rate.
+    expect(fn () => Blade::render(
+        '<x-stat-band :scenario="$scenario" :values="$values" />',
+        ['scenario' => 'ura_finale', 'values' => ['Speed' => 600]],
+    ))->toThrow(ViewException::class, 'x-stat-band requires a ceiling for every rated stat');
+});
+
+it('still refuses a scenario that was named and does not exist', function (): void {
+    // Caps are supplied for a scenario that does exist so the service cannot be what throws:
+    // the message has to come from this component's own guard, and asserting the suffix proves
+    // which file raised it. Rendering the helper instead would have passed by testing
+    // ScenarioCaps, which is a different unit with a similar error.
+    expect(fn () => Blade::render(
+        '<x-stat-band :scenario="$scenario" :caps="$caps" :values="$values" />',
+        [
+            'scenario' => 'grand_masters',
+            'caps' => ScenarioCaps::caps('ura_finale'),
+            'values' => ['Speed' => 600],
+        ],
+    ))->toThrow(ViewException::class, 'Unknown scenario [grand_masters] for x-stat-band');
 });

@@ -131,6 +131,36 @@ it('puts the scenario ceiling in the form, not a hardcoded 1200', function (): v
     expect($html)->not->toContain('name="sp" min="0" max=');
 });
 
+it('draws the band at the ceiling its own form enforces when the run names no scenario', function (): void {
+    $run = capRun(null);
+    $run->turnEntries()->create(capPayload(['speed' => 600]));
+
+    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
+
+    // KI-47. `showData()` passed `scenarioKey()` into the band, and scenarioKey() resolves null
+    // to ura_finale, so a run this tool holds to 1,200 displayed a bar ending at 1,400 — the
+    // number the same page's form refuses. A rendered ceiling is a promise about what can be
+    // entered, so it has to come from the same call the validator makes.
+    expect($html)->toContain('/ 1,200')
+        ->and($html)->not->toContain('/ 1,400')
+        ->and($html)->toContain('no scenario set: every ceiling here is the base cap and no bonus applies.');
+});
+
+it('still honours the bonus a scenario the Trainer actually chose', function (): void {
+    $run = capRun('ura_finale');
+    $run->turnEntries()->create(capPayload(['speed' => 600]));
+
+    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
+
+    // The guard against over-correcting. The defect was inventing a bonus for a run that named
+    // nothing, not reading a bonus that was named; if this assertion fails, the fix threw the
+    // baby out. The footer's breakdown is asserted too, because it reads $def and would fatal on
+    // the null branch if the two states had been collapsed rather than separated.
+    expect($html)->toContain('/ 1,400')
+        ->and($html)->toContain('Speed +200')
+        ->and($html)->not->toContain('no scenario set');
+});
+
 it('holds both forms to the same ceilings the validator uses', function (): void {
     $run = capRun('unity_cup');
 

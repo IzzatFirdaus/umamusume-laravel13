@@ -83,6 +83,7 @@
             <h2 class="mt-6 text-lg font-semibold text-ink-strong">Stats</h2>
             <x-stat-band
                 :scenario="$band['scenario']"
+                :caps="$band['caps']"
                 :values="$band['values']"
                 :skill-points="$band['skillPoints']"
                 class="mt-3"
