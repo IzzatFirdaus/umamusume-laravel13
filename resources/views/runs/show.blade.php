@@ -440,25 +440,58 @@
             to narrow that list before choosing here.
     </p>
 
+    {{-- One row per skill the run already carries, plus a spare row to add another (KI-33's
+         repeater). The form used to hard-index `skills[0]`, which was fine while the table held ten
+         names and a run held one or two skills; a build pre-populated with four or five rows from a
+         card cannot be *edited* in a one-row form, and editing is the job the pre-populate exists
+         to serve. `syncSkills` upserts and never detaches, so the rows below describe what is on
+         the run today and the spare is where the next one goes. --}}
+    @php
+        $skillRows = $run->skills->sortBy('name')->values();
+        $rowTotal = max(1, $skillRows->count() + 1);
+    @endphp
+
     <form method="POST" action="{{ route('runs.skills.sync', $run) }}" class="mt-4 max-w-3xl space-y-3 rounded-md border border-rule bg-raised p-4 text-sm">
         @csrf
-        <label class="flex flex-wrap items-center gap-2">
-            <span>Skill</span>
-            <select name="skills[0][skill_id]" class="rounded-md border border-rule bg-raised text-ink px-2 py-1">
-                @foreach ($skills as $skill)
-                    {{-- The cost is in the label because the choice being made is a spending choice:
-                         a Trainer planning a build picks partly on what the skill costs, and the
-                         catalogue has been stating that figure since the import (FR-D-1). --}}
-                    <option value="{{ $skill->id }}">{{ $skill->name }}@if ($skill->sp_cost !== null) · {{ $skill->sp_cost }} SP @endif</option>
-                @endforeach
-            </select>
-            <select name="skills[0][status]" class="rounded-md border border-rule bg-raised text-ink px-2 py-1">
-                @foreach (\App\Enums\SkillAcquisition::cases() as $acquisition)
-                    <option value="{{ $acquisition->value }}">{{ $acquisition->label() }}</option>
-                @endforeach
-            </select>
-            <input type="number" name="skills[0][turn_acquired]" min="1" placeholder="Turn" class="w-20 rounded-md border border-rule bg-raised text-ink px-2 py-1">
-        </label>
+        @for ($row = 0; $row < $rowTotal; $row++)
+            @php $entry = $skillRows->get($row); @endphp
+            {{-- KI-36. Each control gets its own `<label for>`: the wrapper label used to name the
+                 group, which left the status select and the turn input with no accessible name at
+                 all, and a placeholder is not a name — it disappears exactly when the field has a
+                 value, which is every row on a pre-populated run. --}}
+            <div class="flex flex-wrap items-end gap-3">
+                <div class="flex flex-col gap-1">
+                    <label for="skill-{{ $row }}-id" class="text-ink-muted">Skill</label>
+                    <select id="skill-{{ $row }}-id" name="skills[{{ $row }}][skill_id]" class="rounded-md border border-rule bg-raised text-ink px-2 py-1">
+                        <option value="">Choose a skill</option>
+                        @foreach ($skills as $skill)
+                            {{-- The cost is in the label because the choice being made is a spending
+                                 choice: a Trainer planning a build picks partly on what the skill
+                                 costs, and the catalogue has been stating that figure since the
+                                 import (FR-D-1). --}}
+                            <option value="{{ $skill->id }}" @selected($entry !== null && $entry->id === $skill->id)>{{ $skill->name }}@if ($skill->sp_cost !== null) · {{ $skill->sp_cost }} SP @endif</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label for="skill-{{ $row }}-status" class="text-ink-muted">Acquisition status</label>
+                    <select id="skill-{{ $row }}-status" name="skills[{{ $row }}][status]" class="rounded-md border border-rule bg-raised text-ink px-2 py-1">
+                        @foreach (\App\Enums\SkillAcquisition::cases() as $acquisition)
+                            <option value="{{ $acquisition->value }}" @selected($entry !== null && $entry->pivot->status === $acquisition->value)>{{ $acquisition->label() }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label for="skill-{{ $row }}-turn" class="text-ink-muted">Turn acquired</label>
+                    <input type="number" id="skill-{{ $row }}-turn" name="skills[{{ $row }}][turn_acquired]" min="1"
+                           value="{{ $entry?->pivot->turn_acquired }}" placeholder="Turn"
+                           class="w-20 rounded-md border border-rule bg-raised text-ink px-2 py-1">
+                </div>
+            </div>
+        @endfor
+
         <button type="submit" class="enamel rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Save skill status</button>
     </form>
 

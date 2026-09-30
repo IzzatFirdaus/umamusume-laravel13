@@ -21,6 +21,30 @@ class StoreRunSkillRequest extends FormRequest
     }
 
     /**
+     * The form always ships one row nobody has filled in — that is how a Trainer adds the next
+     * skill without a second submit. An empty picker is not a missing skill, so the row goes before
+     * validation rather than turning every honest save into a `required` failure.
+     *
+     * `array_values` re-indexes, so a submit whose spare row was row 0 still validates its rows as
+     * a list and `syncSkills` walks what actually arrived.
+     */
+    protected function prepareForValidation(): void
+    {
+        $skills = $this->input('skills');
+
+        if (! is_array($skills)) {
+            return;
+        }
+
+        $this->merge([
+            'skills' => array_values(array_filter(
+                $skills,
+                static fn (mixed $row): bool => is_array($row) && ($row['skill_id'] ?? '') !== '',
+            )),
+        ]);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function rules(): array

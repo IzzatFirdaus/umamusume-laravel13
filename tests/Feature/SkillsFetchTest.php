@@ -266,7 +266,10 @@ it('offers the run screen picker only client-named Global skills, and states the
     // name and is still not on Global, which is the case a filter on `name_en` alone would have leaked.
     expect($options)->toContain('Gourmand · 180 SP')
         ->and($options)->toContain('Certain Victory')
-        ->and($options)->toHaveCount(9)
+        // Ten, not nine: the nine Global rows plus the blank "Choose a skill" option the repeater's
+        // spare row needs in order to submit nothing (KI-33's repeater, landed with KI-36's labels).
+        // The XPath is scoped to `skills[0][skill_id]`, so the three later rows cannot inflate this.
+        ->and($options)->toHaveCount(10)
         ->and(implode(' | ', $options))->not->toMatch('/Gluttonous Ruler|Raise My Soul|Check/')
         // The ruling from conflict row 16 reaches the screen as an absence the Trainer can see.
         // Whitespace is folded because Blade's own line wrapping sits inside the sentence, and a
