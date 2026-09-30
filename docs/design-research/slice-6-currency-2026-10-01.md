@@ -192,10 +192,13 @@ Named, not fixed. Each has a different remit.
   `ARCHITECTURE-ESSENTIALS.md:36` both list `turn_entries` fields without them, which is the same
   under-reporting as N-1 at the schema layer. **Deliberately not fixed**: the fence limits those files to
   KI-48's two lines, and this is not a consequence of `ADR-0015`. Remits to the Docs Writer with N-1.
-- **N-3 — `factors.json` is cited from the PRD but is not tracked.** (P-6.) Remits to the **Data Engineer**:
-  either commit the body under `database/seeders/data/` with a `seed_file` entry — which is the peer's
-  in-flight pattern — or retarget the PRD citation to the tracked aptitude columns. The second is smaller and
-  needs no data decision.
+- **N-3 — `factors.json` is cited from the PRD but is not tracked.** (P-6.) **Remits to the Docs Writer, not
+  the Data Engineer — owner's ruling 2026-10-01, correcting this entry's first draft.** The fix is a citation
+  change, not a data change. Two paths were weighed: commit the body under `database/seeders/data/` with a
+  `seed_file` entry, which is the peer's in-flight pattern and would collide with `config/uma.php`'s current
+  state; or retarget `PRD.md:184` to the tracked aptitude columns — `aptitude_front_runner`,
+  `aptitude_pace_chaser`, `aptitude_late_surger`, `aptitude_end_closer` — which carry the same four styles on
+  tracked content. **The second is smaller, needs no data decision, and is the one to take.**
 - **N-4 — the `FR-` prefix notation drift.** (P-1.) Remits to whoever owns `AGENTS.md:25`. One clause fixes
   it; doing it in the PRD instead means re-prefixing ~30 list markers, which is a larger and worse change.
 - **N-5 — the product question surfaced while filing OQ-5, preserved here so it is not lost with the
