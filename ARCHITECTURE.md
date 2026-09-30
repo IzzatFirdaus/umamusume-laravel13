@@ -156,6 +156,13 @@ turn_entries
   sp unsigned smallint nullable, condition string nullable
   unique(training_run_id, turn)
   -- stats validated 0..1200, turn >= 1 (StoreTurnEntryRequest) [rev 0.2 — repo #4]
+  -- BOUND CORRECTED 2026-10-01, dated erratum; the line above stands as the state as written.
+  -- ADR-0015 (owner decision 5, 2026-09-30, landed in 8bda7db) replaced the flat 0..1200 with the run's
+  -- own per-stat scenario ceiling: base_cap (1200) + that scenario's cap_bonus for that stat, clamped to
+  -- hard_cap (2000), read through App\Services\ScenarioCaps. So 1400 on URA Finale, 1800 on Unity Cup Wit,
+  -- 1900 on Trackblazer Stamina, 1600 on Our Grand Concert Speed. The 1200 is the ceiling only where the run
+  -- names no scenario, which is the one case the line above still states correctly. PRD.md carried this
+  -- supersession from the start; the architecture documents did not. Both carriers are recorded as KI-48.
 
 run_skills                    (pivot with payload)
   training_run_id FK cascade, skill_id FK,
