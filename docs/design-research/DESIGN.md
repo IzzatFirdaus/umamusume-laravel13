@@ -188,7 +188,8 @@ what makes these two worth trusting: the `ink-body` `#6A5641` on `#FFFFFF` pair 
 `#ECEAF2` on `#24262A` = 12.71 (§3.7), and the white-on-`crimson-500` row above, which the
 formula also puts at 10.89. Measured on 2026-09-29 at tree `0fbff04`.
 
-The four ratios KI-20 records in `KNOWN-ISSUES.md:855-861` do not reproduce from the hex values they
+The four ratios KI-20 records in `KNOWN-ISSUES.md` (the `KI-20` heading — cited by heading, not by line,
+because line anchors in that register move under it) do not reproduce from the hex values they
 name, and all four are understated in the same direction: `#800014` on `#FFFFFF` computes to 10.89
 where 10.04 is recorded, `#FF6B7A` on `#24262A` to 5.51 where 4.33 is, `#FF7E8C` on the same ground to
 6.22 where 4.77 is, and its `bg-risk` cross-pair `#121013` on `#FF7E8C` to 7.77 where 6.15 is. No
