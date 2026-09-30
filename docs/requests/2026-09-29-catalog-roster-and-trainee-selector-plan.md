@@ -827,6 +827,13 @@ Expected: tests pass; `migrate:fresh --seed` succeeds **on the scratch file only
 
 - [ ] **Step 13: Move the design docs with the migration**
 
+    > **NOTE (2026-09-30): the target table widened after this step was written.** `dd90330` added
+    > `skills_innate` and `skills_unique`, so `#[Fillable]` in `app/Models/CharacterCard.php` now lists
+    > **fourteen** columns, not the twelve named in the acceptance criterion below. Reconcile to the
+    > current `#[Fillable]` list, not to the count this step was drafted against. `ARCHITECTURE.md` §3 and
+    > `ARCHITECTURE-ESSENTIALS.md` still carry the twelve-name list as of this date; that gap closes when
+    > this step fires, and only here.
+
 `AGENTS.md` (Architect) requires it: "Schema changes require a migration plus updated ESSENTIALS digest in
 the same change." `ARCHITECTURE.md` §3 and `ARCHITECTURE-ESSENTIALS.md` gained their `character_cards`
 shape in Task 3, and ADR-0008's dated erratum commit already widened both to the A1 column set, so this step
@@ -837,7 +844,8 @@ disagrees. What must end up true, in both documents:
 - the table is `card_id`, `umamusume_id`, `title`, `rarity`, `global_release_date`, `is_debut_form`,
   `unconfirmed`, `source_url` (not null), `snapshot_path` (nullable), `fetched_at` (nullable),
   `source_timezone` (nullable) and `is_manual` (default false): twelve fillable columns plus `id` and
-  timestamps;
+  timestamps as this plan was drafted, **fourteen** now that `dd90330` (2026-09-30) added `skills_innate`
+  and `skills_unique` — reconcile against the live `#[Fillable]` list, which is authoritative;
 - a card's provenance is **inline** on the card row, per `ADR-0003` Amendment R3, the convention
   `scenario_races`, `scenario_slots` and `race_catalog_slots` already follow;
 - `data_sources` is unchanged in meaning: `umamusume_id`-scoped, the table behind FR-A-4 and the detail
