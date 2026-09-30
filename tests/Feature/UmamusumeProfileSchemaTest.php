@@ -101,12 +101,15 @@ it('ships exactly the columns the migration enumerates', function (): void {
     expect(Schema::getColumnListing('umamusume_profiles'))->toBe($expected);
 });
 
-it('carries no column for sex or race', function (): void {
-    // The document has both on every row. Neither is one of the six fields the block shows, and
-    // CONSTRAINTS.md C-4 governs what this tool calls these characters — so a column nothing
-    // renders is where that rule would be easiest to breach.
+it('carries no column for any refused source key, most of all rl', function (): void {
+    // The document publishes `rl` (the real-world namesake's own record, `death` included), `sex`,
+    // `race`, `va_link` and `jp_name_real` on its rows, and none is one of the four fields this
+    // block shows. CONSTRAINTS.md C-4 governs what this tool says about these characters, and 78 of
+    // the 105 trainee rows carry a non-null `rl.death` — so the column list is where that rule is
+    // easiest to breach. Stated as an intersect against the whole refused set, not a key-by-key
+    // `not->toContain`, so it cannot pass the day the document grows an unlisted fourteenth key.
+    // (This replaces the earlier 'carries no column for sex or race', same guard, wider net.)
     $listing = Schema::getColumnListing('umamusume_profiles');
 
-    expect($listing)->not->toContain('sex')
-        ->and($listing)->not->toContain('race');
+    expect(array_intersect(['rl', 'sex', 'race', 'va_link', 'jp_name_real'], $listing))->toBe([]);
 });

@@ -6,6 +6,7 @@ use App\Actions\StoreCharacterProfiles;
 use App\Models\Umamusume;
 use App\Models\UmamusumeProfile;
 use App\Services\DataPipeline\Parsers\GametoraCharacterProfileParser;
+use Illuminate\Database\Eloquent\Model;
 
 /*
  * The store action: the join through `external_ref`, the two `is_manual` gates, and the
@@ -133,4 +134,65 @@ it('stores a null from the source rather than merging around it', function (): v
     $this->action->handle(parsedProfiles($this->body), $this->url, null, 'Asia/Tokyo');
 
     expect($umamusume->fresh()->profile->va_en)->toBeNull();
+});
+
+it('drops a refused key a record should not carry instead of spreading it into the write', function (): void {
+    // The store projects named columns; it never spreads a record. Feed a real parsed record and
+    // graft on the keys the parser is forbidden to emit — `rl` with a death date, plus `sex`,
+    // `race`, `va_link`, `jp_name_real` — and the `char_external_ref` lookup key that is not a
+    // column. Under preventSilentlyDiscardingAttributes() a spread would throw before the row
+    // lands, so writing one clean row with none of the refused keys persisted is the store-side
+    // half of the allowlist: the parser refuses to emit them, the store refuses to persist them.
+    $wasPreventing = Model::preventsSilentlyDiscardingAttributes();
+    Model::preventSilentlyDiscardingAttributes(true);
+
+    try {
+        Umamusume::factory()->create(['external_ref' => 'gametora:char:1001']);
+
+        $records = parsedProfiles($this->body);
+        $records[0]['rl'] = ['death' => '2018-04-27'];
+        $records[0]['sex'] = 1;
+        $records[0]['race'] = 'a value no column can hold';
+        $records[0]['va_link'] = 'https://example.invalid/never-followed';
+        $records[0]['jp_name_real'] = 'a real person\'s pseudonym';
+
+        $counts = $this->action->handle($records, $this->url, null, null);
+    } finally {
+        Model::preventSilentlyDiscardingAttributes($wasPreventing);
+    }
+
+    $profile = UmamusumeProfile::where('umamusume_id', Umamusume::sole()->id)->sole();
+
+    expect($counts)->toMatchArray(['created' => 1])
+        ->and($profile->getAttribute('rl'))->toBeNull()
+        ->and($profile->getAttribute('sex'))->toBeNull()
+        ->and($profile->getAttribute('va_link'))->toBeNull()
+        ->and($profile->getAttribute('jp_name_real'))->toBeNull();
+});
+
+it('writes a null for every value column of an all-null record, never a coerced 0', function (): void {
+    // The store's contract is records, not JSON, so this builds an in-memory record rather than a
+    // fabricated source row: inventing a document the source never published would test a
+    // hypothetical, and the fixture cannot reach this path because the source always carries
+    // height, the name and the birth day/month, so no row here has a null in those columns. Every
+    // value column null must persist as null — an (int) cast on any of them would write 0, and
+    // that is D-220's exact error: "the source did not say" is not "the source said 0".
+    Umamusume::factory()->create(['external_ref' => 'gametora:char:9999']);
+
+    $record = array_fill_keys([
+        'char_external_ref', 'name_ja', 'va_ja', 'va_en', 'birth_year', 'birth_month', 'birth_day',
+        'height', 'three_sizes_b', 'three_sizes_h', 'three_sizes_w',
+    ], null);
+    $record['char_external_ref'] = 'gametora:char:9999';
+
+    $counts = $this->action->handle([$record], $this->url, null, null);
+
+    $profile = UmamusumeProfile::where('umamusume_id', Umamusume::sole()->id)->sole();
+
+    expect($counts)->toMatchArray(['created' => 1, 'updated' => 0, 'skipped' => 0])
+        ->and(array_filter(array_map(
+            fn (string $column): bool => $profile->getAttribute($column) !== null,
+            ['name_ja', 'va_ja', 'va_en', 'birth_year', 'birth_month', 'birth_day',
+                'height', 'three_sizes_b', 'three_sizes_h', 'three_sizes_w'],
+        )))->toBe([]);
 });
