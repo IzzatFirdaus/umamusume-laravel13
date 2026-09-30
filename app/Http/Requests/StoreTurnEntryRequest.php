@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Enums\MoodTier;
+use App\Models\TrainingRun;
+use App\Services\ScenarioCaps;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * Validates one turn entry (PRD FR-C-2). Turn numbers are unique per run;
- * stat bounds come from the legacy planner's confirmed cap, not a guess.
+ * Validates one turn entry (PRD FR-C-2). Turn numbers are unique per run; a stat's ceiling
+ * is the run's own scenario ceiling, read from the same matrix the stat band renders
+ * (ADR-0015).
  *
  * The guided rail posts five keys the raw form never sends: `stage`, `previewed`,
  * `choice`, `outcome` and `penalty_kind`. They are all conditional on `stage` being
@@ -27,7 +30,14 @@ class StoreTurnEntryRequest extends FormRequest
     }
 
     /**
-     * Stat bounds 0..1200 from legacy planner MAX_STAT_VALUE (PRD FR-C-2, Pre-Mortem §4.3).
+     * Each stat is bounded by the run's own scenario ceiling, not a flat number
+     * (ADR-0015, superseding ADR-0002's flat framing and implementing ADR-0003 decision 6).
+     *
+     * The bound was 0..1200 for every stat since the legacy planner's MAX_STAT_VALUE, while
+     * the matrix has always carried the bonus each scenario adds to that base - the figure
+     * `x-stat-band` prints as the cap. So the form rejected numbers the same screen showed
+     * as reachable. A run with no scenario keeps 1200: it claims no scenario's bonus, and
+     * `ScenarioCaps::forRun()` says why in one place rather than here.
      *
      * @return array<string, mixed>
      */
@@ -36,6 +46,7 @@ class StoreTurnEntryRequest extends FormRequest
         $run = $this->route('run');
         $turn = $this->route('turn');
         $staged = $this->input('stage') !== null;
+        $caps = ScenarioCaps::forRun($run instanceof TrainingRun ? $run : null);
 
         return [
             'turn' => [
@@ -46,11 +57,14 @@ class StoreTurnEntryRequest extends FormRequest
                     ->where(fn ($q) => $q->where('training_run_id', $run?->id))
                     ->ignore($turn),
             ],
-            'speed' => ['required', 'integer', 'between:0,1200'],
-            'stamina' => ['required', 'integer', 'between:0,1200'],
-            'power' => ['required', 'integer', 'between:0,1200'],
-            'guts' => ['required', 'integer', 'between:0,1200'],
-            'wit' => ['required', 'integer', 'between:0,1200'],
+            'speed' => ['required', 'integer', 'between:0,'.$caps['Speed']],
+            'stamina' => ['required', 'integer', 'between:0,'.$caps['Stamina']],
+            'power' => ['required', 'integer', 'between:0,'.$caps['Power']],
+            'guts' => ['required', 'integer', 'between:0,'.$caps['Guts']],
+            'wit' => ['required', 'integer', 'between:0,'.$caps['Wit']],
+            // No source in the corpus puts a ceiling on skill points, so the upper bound is
+            // absent rather than invented (ADR-0015). The non-negative floor stays, and the
+            // absence is stated here so a future 99999 report lands on a decision, not a gap.
             'sp' => ['nullable', 'integer', 'min:0'],
             'condition' => ['nullable', 'string', 'max:255'],
             // Energy is 0..100 (ADR-0001); mood is the client's five tiers, not

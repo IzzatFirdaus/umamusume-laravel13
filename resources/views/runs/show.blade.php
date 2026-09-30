@@ -16,7 +16,19 @@
         keeps the `main` gutter from letting scrolled content appear above a pinned header:
         the sticky box owns that strip itself, with its own background.
     --}}
-    <div class="flex items-baseline justify-between">
+    @php
+    /*
+     * The ceiling each stat input will accept, from the same owner that answers the
+     * POST. These forms used to hardcode max="1200", which meant a Trackblazer Trainer
+     * could not type the 1,900 Stamina the band showed as this scenario's own ceiling -
+     * the browser refused it before the request was ever sent (ADR-0015). SP keeps no
+     * max at all: no source states an SP ceiling, and the field used to carry a
+     * recycled 1200 that contradicted the rule the server applies.
+     */
+    $statCaps = \App\Services\ScenarioCaps::forRun($run);
+@endphp
+
+<div class="flex items-baseline justify-between">
         <h1 class="text-2xl font-semibold text-ink-strong">
             {{ $run->umamusume->name }}
             {{-- The matrix label, not the raw slug, and "not set" rather than a
@@ -287,7 +299,7 @@
             @foreach (['speed', 'stamina', 'power', 'guts', 'wit'] as $stat)
                 <label class="flex flex-col gap-1">
                     <span class="font-medium text-ink">{{ ucfirst($stat) }}</span>
-                    <input type="number" name="{{ $stat }}" min="0" max="1200" required
+                    <input type="number" name="{{ $stat }}" min="0" max="{{ $statCaps[ucfirst($stat)] }}" required
                            value="{{ $guided['values'][$stat] ?? '' }}"
                            placeholder="{{ $guided['previous']?->{$stat} ?? 'no logged turn' }}"
                            class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
@@ -386,9 +398,9 @@
             @csrf
             <label class="flex flex-col gap-1"><span>Turn *</span><input type="number" name="turn" min="1" required value="{{ old('turn', $run->turnEntries->count() + 1) }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
             @foreach (['speed', 'stamina', 'power', 'guts', 'wit'] as $stat)
-                <label class="flex flex-col gap-1"><span>{{ ucfirst($stat) }} *</span><input type="number" name="{{ $stat }}" min="0" max="1200" required value="{{ old($stat) }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
+                <label class="flex flex-col gap-1"><span>{{ ucfirst($stat) }} *</span><input type="number" name="{{ $stat }}" min="0" max="{{ $statCaps[ucfirst($stat)] }}" required value="{{ old($stat) }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
             @endforeach
-            <label class="flex flex-col gap-1"><span>SP</span><input type="number" name="sp" min="0" max="1200" value="{{ old('sp') }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
+            <label class="flex flex-col gap-1"><span>SP</span><input type="number" name="sp" min="0" value="{{ old('sp') }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
             <label class="flex flex-col gap-1"><span>Condition</span><input type="text" name="condition" maxlength="255" value="{{ old('condition') }}" class="rounded-md border border-rule bg-raised text-ink px-2 py-1"></label>
             <button type="submit" class="self-end enamel rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Add turn</button>
         </form>

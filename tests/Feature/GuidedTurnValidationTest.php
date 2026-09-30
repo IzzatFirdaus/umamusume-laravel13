@@ -48,8 +48,9 @@ it('hands the typed numbers back after a rejected submit', function (): void {
         'power' => 355, 'guts' => 210, 'wit' => 95, 'sp' => 0, 'energy' => 88,
     ]);
 
-    // A stat above the 1200 cap is a stage-one failure, and it is the one a Trainer hits
-    // by mistyping rather than by misunderstanding the flow.
+    // A stat above the scenario's own ceiling is a stage-one failure, and it is the one a
+    // Trainer hits by mistyping rather than by misunderstanding the flow. This run is URA
+    // Finale, whose Speed ceiling is 1400, so 1500 is out by a hundred and still rejected.
     $payload = validationPayload(['speed' => 1500, 'stage' => 'confirm']);
 
     test()->withHeader('referer', url("/training-runs/{$run->id}"))

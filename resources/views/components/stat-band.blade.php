@@ -81,7 +81,10 @@
         @foreach ($order as $stat)
             @php
                 $value = (int) ($values[$stat] ?? 0);
-                $cap = $base + (int) $def['cap_bonus'][$stat];
+                // The same ceiling the turn form validates against, from one owner. The
+                // band used to compute base + bonus inline, which is how the two could
+                // disagree: this showed a cap that screen refused to accept (ADR-0015).
+                $cap = \App\Services\ScenarioCaps::stat($scenario, $stat);
                 $pct = min(100, $cap > 0 ? $value / $cap * 100 : 0);
                 $softPct = min(100, $cap > 0 ? $base / $cap * 100 : 100);
                 $atCeiling = $cap <= $base;

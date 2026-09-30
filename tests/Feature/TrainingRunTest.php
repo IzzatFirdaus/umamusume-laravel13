@@ -62,7 +62,7 @@ it('rejects a duplicate turn number for the same run', function (): void {
         ->assertSessionHasErrors('turn');
 });
 
-it('rejects a stat above the 1200 cap', function (): void {
+it('rejects a stat above the base cap when the run names no scenario', function (): void {
     $run = TrainingRun::factory()->create();
 
     test()->post("/training-runs/{$run->id}/turns", [
