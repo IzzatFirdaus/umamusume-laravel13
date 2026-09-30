@@ -154,6 +154,7 @@ turn_entries
   id, training_run_id FK->training_runs cascade, turn unsigned int,
   speed, stamina, power, guts, wit unsigned smallint,
   sp unsigned smallint nullable, condition string nullable
+  energy unsigned smallint nullable, mood string(20) nullable, fans unsigned int nullable
   unique(training_run_id, turn)
   -- stats validated 0..1200, turn >= 1 (StoreTurnEntryRequest) [rev 0.2 — repo #4]
   -- BOUND CORRECTED 2026-10-01, dated erratum; the line above stands as the state as written.
