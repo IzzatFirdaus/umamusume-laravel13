@@ -2056,3 +2056,63 @@ main-file copy, not a backup. Its size equals the "main" figure above. Do not tr
 
 **Owner.** Every agent and human working in this repo; the rule is operational rather than design. Filed so
 that the next session does not re-derive it from a corrupted scratch file.
+
+## KI-45 `race_catalog_slots` has no offline population path, so any feature keyed on a race's distance or surface is unbuildable today - FILED 2026-10-01 (Slice 3 pre-flight data check), OPEN, blocking Slice 3
+
+**Symptom.** `race_catalog_slots` is the only table in the schema carrying `distance`, `distance_band`,
+`surface` and `grade_code` for a race, and it holds **0 rows**. `scenario_slots`, the table a run's
+`race_entries` actually reference, has **no distance or surface column at all**. There is therefore no path
+from "the next race on this run's calendar" to "what this race asks of her", which is the input any
+readiness or aptitude comparison needs.
+
+**Why it stays empty.** It is fetch-only, and nothing seeds it:
+
+```
+grep -rln "race_catalog_slots" database/seeders/ app/Console/Commands/     # → no files
+```
+
+`uma:fetch` with `GametoraRaceCatalogParser` is the only writer, and the source has no `seed_file` key, so
+`migrate --seed` cannot reproduce it offline. A peer session's fresh `migrate:fresh --seed` produced 296
+`scenario_slots` and 0 `race_catalog_slots` for exactly that reason. The upstream bodies are already on disk
+(`research-scratch/data/json/races.json` 125,292 B, `race_instances.json` 213,813 B,
+`racetracks.json` 107,466 B), so the data exists and only the offline path to it is missing.
+
+**Second, independent gap on the same table.** `scenario_slots.tier` is NULL on **141 of 296** rows, and the
+155 that have a tier carry only G1 (34), G2 (42), G3 (76) and OP (3) — no `Pre-OP`, no `EX`. That is
+R75's strict nullification working as designed (`docs/design-research/verification/slice-15-2026-09-29.md`
+§2: an uncorroborated grade is worse than an absent one), and it means config and table do not share a grade
+vocabulary: `config('scenarios.php')` `grade_point_by_grade` carries `Pre-OP`, and D-153 records `EX` as a
+sixth label. Any code that maps a slot's tier to a grade weight will silently miss 48% of rows.
+
+**What is NOT missing, so nobody re-checks it.** `scenario_slots.fans_needed` is non-null on 296 of 296, so
+the fan gate is computable today. All 67 `umamusume` rows carry all ten aptitude letters, with **0 NULL cells
+across those ten columns**, and `x-aptitude-grid` renders them as the export's A–G. The trainee side of any
+such comparison is complete; the requirement side is not.
+
+**A near-miss recorded, because the column reads as populated and is not.** `is_maiden_gated` is non-null on
+all 296 rows, which looks like a working gate — but **0 of the 296 are set to true**, so a maiden restriction
+read from that column evaluates correctly and never fires. Column presence is not signal presence; the count
+that matters is the non-zero one. Anything that builds a gate on it needs the per-row flag to arrive from the
+source rather than from a default.
+
+**Consequence.** Slice 3 (qualitative next-race readiness) is held. `docs/adr/0016-next-race-readiness-open-question.md`
+records the measurement, the three candidate shapes and the fact that none was chosen; `PRD.md` §6.11 stands
+unamended, so "no prediction engine" is currently a requirement this repository **satisfies**. A future
+slice that reads the Slice 3 brief as live authorization would have to invent the requirements to finish it,
+which fails the provenance floor and Planner Rule 5.
+
+**Re-verify in three commands** (read-only, against any populated database):
+
+```
+SELECT COUNT(*) FROM race_catalog_slots;                              -- 0 today
+SELECT COUNT(*) FROM scenario_slots WHERE tier IS NULL;               -- 141 of 296
+SELECT COUNT(*) FROM umamusume WHERE aptitude_turf IS NULL;           -- 0; aptitudes are fine
+```
+
+**Fix candidates.** Give the race-catalog source a committed `seed_file` and a seeder, which is the narrow
+change and unlocks the whole feature; or add `distance_band` and `surface` to `scenario_slots` at the
+`ScenarioSlotSeeder` layer, which duplicates a fact `race_catalog_slots` already owns and needs a reason; or
+scope the surface to gates only, which needs no data at all but is a smaller product. Not chosen here.
+
+**Owner.** Human owner, with the Data Engineer, because the first candidate is a source-and-seed decision and
+touches `config/uma.php`, which currently carries a concurrent session's uncommitted `seed_file` work.
