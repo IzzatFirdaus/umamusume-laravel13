@@ -106,6 +106,43 @@ makes that the owner's call rather than this slice's.
   their stated reason: `TrainingRunTest` now names the base cap, and `GuidedTurnValidationTest` names
   the scenario ceiling of 1400 instead of "the 1200 cap".
 
+## Erratum, 2026-10-01: the first consequence did not hold
+
+> - The bound a Trainer sees as a bar end is the bound the form enforces. One owner, `ScenarioCaps`.
+
+**That sentence was written on 2026-09-30 and it was false on the no-scenario branch until `04658f2` landed
+on 2026-10-01. It is kept verbatim because it states the intent, and the intent was not achieved by the
+mechanism chosen to achieve it.**
+
+`ADR-0015` moved both readers onto `App\Services\ScenarioCaps`, and that half worked: the arithmetic has one
+owner and the inline `base + bonus` sum is gone from the view. What it did not unify was **the argument each
+reader passes in**. The validator calls `forRun($run)`, which refuses a bonus to a run that named no scenario.
+`TrainingRunController::showData()` built the band payload from `$run->scenarioKey()`, which resolves null to
+`config('scenarios.baseline')` — `ura_finale` — and the band then called `ScenarioCaps::stat()` on *that*. So a
+no-scenario run displayed a bar ending at **1,400** while its own form carried `max="1200"`, and the one owner
+supplied both numbers correctly. The disagreement survived inside `ScenarioCaps`, not beside it, which is why
+reading the ADR was not enough to find it: the file describes a single owner, and there was one.
+
+`x-stat-band`'s own `@props` comment had already named the hazard — a named default was removed because
+"silently resolving to the baseline would rate a trainee against the wrong ceiling" — and the component honoured
+that rule perfectly while the caller resolved the value one line earlier. A guard on the consumer does not
+survive a producer that resolves before the boundary.
+
+**The fix, and its shape.** The band no longer derives a ceiling at all. It takes a required `caps` map and a
+`scenario` that is only the truth of the label and the footer's bonus breakdown; the caller passes
+`ScenarioCaps::forRun($run)` and the run's real scenario or null. A run with no scenario now renders `/ 1,200`
+on all five bars and states `1200 base, no scenario set: every ceiling here is the base cap and no bonus
+applies`, and the footer for a chosen scenario keeps its `Speed +200, …` breakdown unchanged. The original
+ruling anticipated a one-line call-site edit; it became a props-contract change for the reason above — passing
+caps alone would have left the footer reading bonuses off a scenario key, which is the same coupling that
+caused the bug. `docs/design-research/verification/slice-1-stat-ceilings-2026-09-30.md` §3 had already named
+this defect and deferred it as the owner's call; that deferral is discharged here.
+
+**The durable rule for the next single-owner refactor:** unifying the function is not unifying the call. Where
+one number is read by a validator and a renderer, the record should say which *argument* both must pass, not
+only which helper both must call. ADR-0015's consequence list is the place a future reader checks first, so the
+qualification belongs here rather than only in the issue register.
+
 Date: 2026-09-30
 Relates to: `ADR-0002` (bound superseded here), `ADR-0003` decision 6 (intent implemented),
 `ADR-0004` (aptitude and cap reference data), `PRD.md` US-3 / FR-C-2 / C-2, `CONSTRAINTS.md` D-31,

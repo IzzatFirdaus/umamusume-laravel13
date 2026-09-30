@@ -2140,7 +2140,7 @@ rather than fixed inside Slice 4 because the fix is not a one-line rename and th
 
 **Owner.** Docs Writer / Lore Guardian with the Laravel Dev, on the next pass that touches import copy.
 
-## KI-47 A run with no scenario shows a ceiling 200 higher than the one its own form enforces — the disagreement ADR-0015 exists to prevent, alive on the no-scenario branch - FILED 2026-10-01 (Slice 4 browser pass), **RULED 2026-10-01 by the human owner: the band is wrong.** OPEN as a defect; the decision is no longer open
+## KI-47 A run with no scenario shows a ceiling 200 higher than the one its own form enforces — the disagreement ADR-0015 exists to prevent, alive on the no-scenario branch - FILED 2026-10-01 (Slice 4 browser pass), **RULED 2026-10-01 by the human owner: the band is wrong. CLOSED 2026-10-01 by `04658f2`.**
 
 **Symptom, seen in a real browser.** `http://127.0.0.1:8123/training-runs/4` — a run whose `scenario` column
 is `NULL`, holding two logged turns — renders every stat band as **`/ 1,400`**. The turn form on that same
@@ -2222,6 +2222,39 @@ now documented in two places, so a reader of the band should not have to redisco
 
 **Owner.** Architect (`ADR-0015`, `ScenarioCaps`) owns the ruling; Laravel Dev applies the one-line view
 change on the next slice that touches that branch. Filed by the Slice 4 browser pass.
+
+**CLOSED 2026-10-01 by `04658f2`.** The band takes a required `caps` map as its only ceiling source and the
+`scenario` prop is now the truth of the label plus the footer's bonus breakdown; `showData()` passes
+`ScenarioCaps::forRun($run)` and the run's real scenario or null. Verified in a browser on a scratch database:
+a no-scenario run with `speed = 1250` renders `/ 1,200` five times and `/ 1,400` zero times, and the same
+value under `ura_finale` still renders `/ 1,400` with its `+200` breakdown intact — the fix removes an invented
+bonus, not a chosen one.
+
+**Two corrections to this entry's own forward-looking parts, recorded rather than quietly edited:**
+
+1. **"One line at the call site" — both in the ruling and in the fix candidate above — was wrong.** The
+   ruling was sound (stop the band deriving its own number) but the edit is a props-contract change, because
+   passing `caps` alone would have left the footer still reading `cap_bonus` off a scenario key: a no-scenario
+   page would then print a `+ Speed +200` breakdown beside bars capped at 1200. That is the same coupling that
+   caused KI-47, relocated one line down the page. The footer needed a no-bonus branch, and the component an
+   up-front guard, so the wrong state became unrepresentable rather than merely unlikely at this call site.
+2. **A third shape of the same bug surfaced while fixing it.** Blade in this Laravel version leaves a
+   defaultless `@props` entry *undefined* when the caller omits it. The first cut used `'caps',`, and the
+   guard never ran — reading `$caps` raised `Undefined variable` and the page failed with a PHP notice instead
+   of the message the component was written to emit. `caps` therefore takes a `null` default, which is not the
+   D-240 smell the `scenario` comment warns about (that was a scenario *name* living in a view), so the guard
+   fires as intended. Anyone adding a required prop to a component should give it a null default *and* check
+   it, because the silent version of this failure is a guard that never executes.
+
+**Also checked, no finding:** `x-guided-step` reads the scenario for step ordering and panel flags and derives
+no ceiling, and already carries a separate `declared` flag for the absence case — so it does not have this
+defect and was not changed. `x-resource-strip` keeps `scenarioKey()` because it composes a descriptor, not a
+number. `ScenarioCaps` itself is unchanged, as the ruling required.
+
+**Evidence trail.** `ADR-0015` carries the dated erratum for the consequence its own list asserted but did not
+achieve. `docs/design-research/verification/slice-1-stat-ceilings-2026-09-30.md` §3 had already named this
+defect and deferred it as the owner's call; that deferral is discharged, and the five tests added in `04658f2`
+are what stops it reopening.
 
 
 
