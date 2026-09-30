@@ -17,7 +17,11 @@ The review asked for the fingerprint as proof rather than assertion. Recorded be
 | Slice 1 hand-off (as recorded in that pass) | 1,667,072 | 2026-09-30 19:11 |
 | This slice, before any work | 409,600 | 2026-09-30 22:51:41 |
 | Mid-slice observation | 1,179,648 | 2026-09-30 23:59:43 |
-| After all slice work | see §8 | — |
+| After all slice work | 1,179,648 | 2026-09-30 23:59:43 (unchanged since the mid-slice read) |
+
+The "after" value is identical to the mid-slice one, and the table counts match it exactly
+(`tables=30`, `migrations=37`, `support_cards=0`). Nothing in this slice advanced the file: its last
+movement was 23:59:43, and every command this slice ran against a database named a scratch path instead.
 
 **This slice did not write `database/database.sqlite`, and the file is not stable underneath it.** Two
 findings, neither of them mine to resolve:
@@ -262,22 +266,38 @@ All five run against the working tree with every file in place.
 
 | Gate | Command | Result |
 |---|---|---|
-| Tests | `php artisan test --compact` | **972 passed, 2 skipped, 0 failed** (16,232 assertions, 70.98 s) |
+| Tests | `php artisan test --compact` | **972 passed, 2 skipped, 0 failed** (16,232 assertions, 65.53 s) — the working tree, import files included |
 | Static analysis | `vendor/bin/phpstan analyse --no-progress` | **[OK] No errors** (level 6) |
 | Formatting | `vendor/bin/pint --test --format agent <my files>` | **passed** |
 | Lore | `composer lore` | **exit 0** |
 | Lore (code) | `composer lore-code` | **exit 0** |
 
+**Two numbers, because the commit and the working tree differ (§12).** The 972 above counts the four
+import test files, which are on disk but not committed:
+
+```
+GametoraSupportCardParserTest    10 passed (12,524 assertions — it walks all 559 records)
+GametoraSupportEffectParserTest   9 passed (   277 assertions)
+StoreSupportCardsTest             9 passed (    73 assertions)
+SupportCardFetchTest              8 passed (    41 assertions)
+                                 ─────────  ─────────
+                                 36 passed
+```
+
+So the committed subset alone is **936 passed**. Both figures were run, not derived; `972 − 36 = 936` is
+stated because the two files that would have isolated `HEAD` (a stash, or a second worktree) are unsafe to
+use in a tree another session is writing.
+
 PHPStan caught two of my own errors, both real: `$this->rarity?->value` and
 `$this->fetched_at?->toIso8601String()` used nullsafe operators on columns the schema declares NOT NULL.
 Fixed to `->` rather than suppressed, per the floor on suppressions.
 
-Pint and PHPStan were run **read-only** (`--test`, no `--dirty`). The working tree carries another
-session's uncommitted files, and `pint --dirty` would have rewritten them.
+Pint and PHPStan were run **read-only** (`--test`, no `--dirty`) on an explicit file list. The working tree
+carries another session's uncommitted files, and `pint --dirty` would have rewritten them; it did need to
+fix four of mine once I added the `@property` blocks and the `?:` change.
 
-Suite baseline movement: 869 (Slice 1 hand-off) → 887 → **972**. The 85-test rise is this slice's
-`SupportCardTest` (36), `ApiV1SupportCardTest` (13), `RunDeckTest` (17) and the import suite (18), plus the
-blank-scenario case.
+Suite baseline movement: 869 (Slice 1 hand-off) → 887 → **972**. The rise is this slice's `SupportCardTest`
+(36), `ApiV1SupportCardTest` (13), `RunDeckTest` (17), the import suite (36), and the blank-scenario case.
 
 ## 12. What this slice did NOT commit, and why
 
