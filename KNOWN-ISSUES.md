@@ -7,6 +7,15 @@ the command or file that proves it, not just the symptom.
 Discovered 2026-09-27. None of these were introduced by the component work; the component
 work is what made them visible, because the prototype phase had no running server to hit.
 
+**Status (2026-09-30, KI-33 / KI-36 pass):** **35 filed, 24 closed, 11 open**, nothing filed here and two
+closed. KI-33 closes across `dd90330` (the two json lists, the parser that keeps them, the pre-populate at
+run creation) and `4902f1d` (the repeater it called a required part); KI-36 closes in the same `4902f1d`,
+which is the same-commit grouping R-3 asked for rather than two commits touching one block. Both closures name what
+they do not cover: KI-33's four-group picker is unblocked by the storage and still unbuilt, and the
+`skills_innate` / `skills_unique` columns are not yet in ADR-0008, `ARCHITECTURE.md` §3, the ESSENTIALS
+digest or D-30, because this session was barred from those files and `DocSchemaDriftTest` only pins
+`training_runs`. That doc gap is the next register pass's business, not a reason to hold the schema.
+Prior:
 **Status (2026-09-29, trainee detail and skill selector pass, updated with KI-26 closure):** **35 filed, 22 closed, 13 open.** Four
 entries land here from the design pass (KI-33, KI-35, KI-36, KI-37), and **KI-26 is closed** against `f2c978b`
 (unescaped `LIKE` in `CatalogController` fixed on master; register lagged by one commit). **KI-34 is a reservation,
@@ -1486,7 +1495,7 @@ should not "fix" the `:root` rule back into `@theme`.
 **Owner.** design-system. Found while closing the dark-theme gap on Screen D, by measuring a native control
 rather than trusting that a token override covers everything drawn on the page.
 
-## KI-33 A trainee's own innate and unique skills are published by the source and stored nowhere, so a run cannot pre-populate them — FILED 2026-09-29 (per-trainee skill scoping pass), OPEN
+## KI-33 A trainee's own innate and unique skills are published by the source and stored nowhere, so a run cannot pre-populate them — FILED 2026-09-29 (per-trainee skill scoping pass), CLOSED 2026-09-30 (Slice A storage and pre-populate, Slice B repeater)
 
 **Symptom.** A run created for a trainee renders "None." in its Skills section
 (`resources/views/runs/show.blade.php:405`) because nothing in the schema records which skills are hers.
@@ -1559,6 +1568,42 @@ form change with its own tests.
 work until "her skills" is a stored fact, so slicing the picker first reproduces the same defect one level
 up.
 
+**Closed 2026-09-30 across two commits.** `dd90330` adds `skills_innate` and `skills_unique` to
+`character_cards` as **nullable json lists** and makes `GametoraCharacterCardParser` keep them:
+`intList()` filters on each element's type rather than coercing it, because `intval()` of a nested array
+returns `1`, so the sketch of a helper that mapped `intval` over the list would have stored the skill id
+`1` twice for a malformed value and parsed clean. The store writes both keys through its named projection,
+and `TrainingRunController::store()` seeds `run_skills` at `Suggested` inside the same transaction as the
+run — creation only, every id resolving through `Skill::scopeAvailableOnGlobal()` because a card's list is
+not a Global statement (Fenomeno's `112701` is this entry's own case), and `setSkillStatus` upserts so a
+seed cannot duplicate a row. `4902f1d` lands the repeater this entry called a required part.
+
+**Both lists, not one.** The 22 records carrying two uniques are the reason the columns are json: a
+nullable `skills_unique_id` would have stored Gold Ship's `10071` and lost `100071` with nothing
+downstream able to tell. `CharacterCardParserTest` pins the two-value case on the fixture row this entry
+cites, and `TrainingRunTest` pins the four-into-three filtering case — a card with five ids, four of them
+Global, seeds four rows.
+
+**The no-backfill rule is tested, not asserted.** `it refuses to backfill an existing run when a later run
+is created from the same card` creates a run, sets one skill to `Acquired` at turn 7, creates a *second*
+run through the real route, and requires the first run's pivot to be untouched. D-270 says every figure on
+a run in progress is Trainer-entered; a pre-populate that reached backwards would overwrite memory with
+plan, and only the second creation exposes that behaviour rather than the first.
+
+**What this entry's own text now supersedes.** Its Cause paragraph says `character_cards`, `CharacterCard`
+and ADR-0008 "are absent from this ref" and puts the card-layer merge as step 1 of the fix. That landed
+before this closure: all three are on master, and `git ls-tree` at `dd90330`'s parent shows the migration,
+model, enum, contract, parser, store, factory and three test files. Step 1 was therefore already done, and
+the paragraph is kept as written by this repo's convention that a superseded claim becomes an erratum
+rather than a silent edit.
+
+**One open end, and it is not this entry's.** The four-group picker (`G-SK-13` / D-3, the combobox that
+would group "her innate / her unique / her awakening / everything else") is unbuilt. Reusing
+`resources/js/trainee-combobox.ts` for it means generalising a single-instance module hardwired to the
+trainee payload, which is a refactor on another session's surface rather than the one-Blade-file change the
+brief budgeted. The storage this entry needed is now in place, so that slice is unblocked; it is not
+closed here.
+
 ## KI-35 The trainee detail page is a metadata stub: ten parsed columns rendered nowhere, no section for skills, forms or goals, and an absence vocabulary its own specification invented — FILED 2026-09-29 (trainee detail and skill selector design pass), OPEN
 
 **Symptom.** `resources/views/catalog/show.blade.php` renders four things and stops: a name header with a
@@ -1630,7 +1675,7 @@ else's — the card-layer merge (G-SK-6) and the goal ingest this entry delibera
 and none of it blocks a section, because a UI/UX deliverable is a section, its states and its copy, while
 a data deliverable is what fills them.
 
-## KI-36 The run screen's skills editor wraps three controls in one label, so two of them have no accessible name — FILED 2026-09-29 (skill selector design pass, as F-12), OPEN
+## KI-36 The run screen's skills editor wraps three controls in one label, so two of them have no accessible name — FILED 2026-09-29 (skill selector design pass, as F-12), CLOSED 2026-09-30 (with KI-33's repeater)
 
 **Symptom.** `resources/views/runs/show.blade.php:445-461` puts a single `<label>` around three controls:
 the skill `<select>` (`:447`), the acquisition-status `<select>` (`:455`) and the turn
@@ -1658,6 +1703,21 @@ seventeen lines, and doing the repeater without the labels reproduces this defec
 once per form.
 
 **Owner.** Frontend. Small, local, and the whole fix is inside one `<form>` element.
+
+**Closed 2026-09-30 by `4902f1d`, together with KI-33's repeater as this entry asked.** One
+`<label for>` per control across every row: `Skill`, `Acquisition status`, `Turn acquired`, with the
+status select named in the words the entry proposed and the turn input keeping its placeholder as a
+hint. `tests/Feature/RunSkillRowLabelsTest.php` reads the rendered document through `DOMDocument` and
+walks every control in the form, asserting each has an `id`, that exactly one `<label for>` names it,
+and that the three names are distinct — a `for` pointing at nothing, or three labels all reading
+"Skill", fails there. The substring route was refused deliberately: `assertSee` on a label word passes
+on a `for` that resolves to no control.
+
+One deviation from the fix direction, stated rather than left to be noticed: the entry asked to keep
+`flex flex-wrap items-center gap-2`. Per-control labels put the caption above each field, which is
+what `DESIGN.md` §6.14 specifies for a form field anyway ("label above at `label`, `ink`"), so the row
+is now `items-end` with three stacked label/control pairs. Appearance was never the defect; the entry's
+point was that the fix must not be *carried* by an appearance change, and it is not.
 
 ## KI-37 The run screen's form controls measure 31/30/40px against DESIGN.md §6.14's 44 — FILED 2026-09-29 (skill selector design pass), OPEN
 
