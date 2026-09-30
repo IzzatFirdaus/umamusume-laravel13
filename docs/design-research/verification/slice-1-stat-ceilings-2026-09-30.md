@@ -77,3 +77,22 @@ See "Defects found" second item.
 - `vendor/bin/phpstan analyse` (level 6) — no errors.
 - Lore grep on every authored file — clean. The only hits in `PRD.md` are pre-existing lines that
   describe the ban itself.
+
+## Reproducibility note, appended 2026-10-01 by the Slice 2 review
+
+`.scratch-uma/verify-slice1.sqlite` **no longer exists**, and neither do the two `tinker` scripts that
+seeded its runs. Checked rather than assumed: `grep -ln "1900|1480" .scratch-uma/*.php` returns nothing, and
+no file in `.scratch-uma/` carries a modification time in the 19:00–21:00 Sep 30 window this record was
+written in. The `Setup` block above records the `migrate --seed` and `serve` commands but never recorded the
+seeding itself, so what survives is the prose description of the two rows, not a way to rebuild them.
+
+What that costs, stated precisely: **the conclusions are unaffected** — the 19 tests in
+`ScenarioStatCapsTest` and the three rendered-attribute tests pin the same behaviour in the suite, which is
+the durable artifact — but **the browser pass is not re-runnable** as written. Re-deriving it means
+re-authoring the fixture from the two bullets above.
+
+Housekeeping rule going forward, which this record is the first to state: a verification record that depends
+on a scratch database must either commit the fixture *shape* (a seeder script, a tinker script, or a shell
+command that reproduces the rows) or say in the record that the artifact is ephemeral and name what would
+have to be re-authored. Naming the file is not enough; a path under an ignored scratch directory is a
+temporary path.
