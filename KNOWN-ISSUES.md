@@ -2116,3 +2116,85 @@ scope the surface to gates only, which needs no data at all but is a smaller pro
 
 **Owner.** Human owner, with the Data Engineer, because the first candidate is a source-and-seed decision and
 touches `config/uma.php`, which currently carries a concurrent session's uncommitted `seed_file` work.
+
+## KI-46 The import's per-stat error names the internal array path (`turns.0.speed`) to the Trainer - FILED 2026-10-01 (Slice 4 browser pass), OPEN
+
+**Observed, rendered in a real browser** (`.scratch-uma/slice4.sqlite` served on `127.0.0.1:8123`, one row of
+`speed = 9999` under URA Finale):
+
+> A speed value is outside what this scenario allows: The turns.0.speed field must be between 0 and 1400.
+
+The ceiling and the column are right. `turns.0.speed` is the Form Request's internal nested key, and it is the
+only part of the sentence that tells the Trainer **which row** broke.
+
+**Why it is still there rather than fixed.** Laravel's `attributes()` maps a wildcard key to one string, so
+`turns.*.speed => 'speed'` renames every row's error to the same word and the row identification is lost.
+Keeping Laravel's default path is what keeps the row number visible. The fix is a message that carries the
+row explicitly, which is a `withValidator()` pass over the parsed rows rather than a rename, and it is copy
+work on a message that is already truthful and already actionable — the CSV stays in the textarea, so the
+Trainer can find row 0 and correct it.
+
+**Consequence.** None for correctness. It is a voice violation: `AGENTS.md` gates copy, and an internal
+identifier in a Trainer-facing sentence is the kind of string the Lore Guardian would flag on sight. Recorded
+rather than fixed inside Slice 4 because the fix is not a one-line rename and the message does not mislead.
+
+**Owner.** Docs Writer / Lore Guardian with the Laravel Dev, on the next pass that touches import copy.
+
+## KI-47 A run with no scenario shows a ceiling 200 higher than the one its own form enforces — the disagreement ADR-0015 exists to prevent, alive on the no-scenario branch - FILED 2026-10-01 (Slice 4 browser pass), OPEN, **escalated to the human owner**
+
+**Symptom, seen in a real browser.** `http://127.0.0.1:8123/training-runs/4` — a run whose `scenario` column
+is `NULL`, holding two logged turns — renders every stat band as **`/ 1,400`**. The turn form on that same
+page refuses any stat above **`1,200`**. A Trainer who trusts the band and types 1,300 is rejected by the
+server, which is precisely the failure ADR-0015's own text names: *"the disagreement was the defect ADR-0002
+recorded and ADR-0015 closes, where a Trainer could see a reachable cap the form rejected."*
+
+**Measured, replayable** (`.scratch-uma/cap-probe.php`, run against `.scratch-uma/slice4.sqlite`):
+
+```
+run 4 (scenario NULL)
+  stored scenario=NULL  hasScenario=false  scenarioKey()=ura_finale
+  forRun()  Speed=1200, Stamina=1200, Power=1200, Guts=1200, Wit=1200
+  band()    Speed=1400, Stamina=1400, Power=1400, Guts=1400, Wit=1400
+  disagree: YES
+run 3 (ura_finale)
+  forRun()  Speed=1400 …   band()  Speed=1400 …   disagree: NO
+config: base_cap=1200 hard_cap=2000 baseline=ura_finale ura bonus Speed=200
+```
+
+**Root cause, named.** `ADR-0015` moved both readers onto `App\Services\ScenarioCaps`, and that half worked:
+there is one owner of the arithmetic. It did not make the two readers **call it with the same argument**.
+
+- The form and the validator call `ScenarioCaps::forRun($run)`, which returns the base cap with **no bonus**
+  when `! $run->hasScenario()`. That refusal is deliberate and documented in the same file: *"a bonus belongs
+  to a scenario the Trainer chose, and lending URA Finale's +200 to a run that never picked it would accept
+  a number the tool has no source for (D-220, D-221)."*
+- `resources/views/runs/show.blade.php:310` and `:325` hand the band `$run->scenarioKey()`, and
+  `scenarioKey()` resolves `null` to `config('scenarios.baseline')` = `ura_finale`. `x-stat-band` then calls
+  `ScenarioCaps::stat('ura_finale', …)` at line 87 and gets **1,400**.
+
+So the run that never chose a scenario is lent URA Finale's bonus by the display path — the exact thing
+`forRun()` was written to refuse. `ScenarioCaps` eliminated duplicate arithmetic, not duplicate inputs, and
+the split survived inside the single owner.
+
+**Why the import makes it urgent rather than marginal.** A historical run arriving from a paper sheet very
+often names no scenario — the sheets recorded the trainee and the turns, not the career's scenario (that is
+why the import form offers "Not set (baseline strip)" as its default). Slice 4 therefore produces
+`scenario = NULL` runs on its main path, and every one of them lands on the page where the two numbers
+disagree. Pre-existing, but newly reached at volume.
+
+**Fix candidate, and why it is not applied here.** `show.blade.php:28` already computes the correct number
+into `$statCaps` via `ScenarioCaps::forRun($run)` and does not pass it to the band. Handing the band those
+caps instead of a scenario key is the narrow correction, and it makes the page structurally unable to show a
+number the form disagrees with. It is **not** applied in Slice 4 because it changes a rendered ceiling on
+every no-scenario run page, which is `ADR-0015`'s surface and the Architect's call, not a slice-local
+cleanup. Escalated per `AGENTS.md` escalation path 1.
+
+**Open question for the owner, stated both ways.** Either the band is wrong and a no-scenario run should
+display 1,200 — which is what `forRun()` and the validator assert; or `scenarioKey()`'s null-to-baseline
+resolution is the truth and a no-scenario run *is* URA Finale, in which case `forRun()`'s refusal is wrong
+and the validator has been rejecting legal turns. The two positions imply different numbers on the same
+page, so one of them has to lose. This file takes neither side.
+
+**Owner.** Human owner, then Architect (`ADR-0015`, `ScenarioCaps`) and Laravel Dev for the view change.
+
+
