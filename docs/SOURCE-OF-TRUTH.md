@@ -2,6 +2,42 @@
 
 **Governance infrastructure for the Umamusume Trainer Desk repository.** This document consolidates the binding rules from `PRD.md`, `ARCHITECTURE.md`, `CLAUDE.md`, `CONSTRAINTS.md`, `AGENTS.md`, `UMAMUSUME_REFERENCE.md`, and `SKILL.md` into a single source of truth for agents and human developers. Violations are hard failures.
 
+> ## Derivation and regeneration trigger
+>
+> **This file is derived, not authored.** Every rule in it comes from another document, and none of
+> them is restated here with independent authority. It was last reconciled at `2033434`
+> (2026-09-29, `docs: track the source tier ladder`). Two of its thirteen sections carry seven
+> contradictions against the tree today, and both sections are ones an agent reads first: the ADR
+> index and the file map.
+>
+> **Drift measured on 2026-09-30 at snapshot `c1e14a3`, by the documentation inventory:**
+>
+> | Section | What it says | What the tree says |
+> |---|---|---|
+> | 10. ADR Index | lists 0001 to 0006 | 13 ADRs are tracked: 0001 to 0013. Seven are missing, including ADR-0007, which narrows C-7, and ADR-0012, which superseded ADR-0013 |
+> | 10. ADR-0005 row | "Proposed, not built" | **DECLINED for Phase 1**, owner ruling R37, 2026-09-28, in `docs/adr/0005-support-card-entities.md`'s own Status line |
+> | 10. ADR-0002 row | "Validation bound widened to 0..2000" | Accepted as a decision and **not implemented**: `app/Http/Requests/StoreTurnEntryRequest.php:49-50` still validates `between:0,1200` |
+> | 12. Scenario guides | `docs/scenarios/01`–`08` | Nine files. `09-global-race-calendar.md` is 751 lines and is the read path the race grid and picker now use |
+> | 12. Lore rules | `CLAUDE.md` (top section) | `.gitignore:52` ignores `/CLAUDE.md`. A fresh clone has no such file. `AGENTS.md:5` names it as "Coding rules for assistants", and 20 other tracked files cite it, two of them PHP |
+> | 12. Skill registry | `.agents/skills/skills.json` (machine), `SKILL.md` (human summary) | `.agents/` is ignored, and root `SKILL.md` is a hand-counted registry written 2026-09-27 and never updated |
+> | 12. Migrations | `2026_09_26_162814`–`2026_09_27_121500` | 34 migration files are tracked, running to `2026_09_29_182820_create_umamusume_profiles_table.php` |
+>
+> Section 12's "46 conflict rows" claim about `docs/UMAMUSUME_REFERENCE.md` was not verified by the
+> inventory and is listed here as unchecked rather than as wrong.
+>
+> **Regenerate this file when any of these happens.** Each one is a command, not a judgment:
+>
+> 1. A new file lands in `docs/adr/`. Check: `git ls-files docs/adr/ | wc -l` against section 10's row count.
+> 2. Any ADR's Status line changes. Check: `grep -m1 "^Status" docs/adr/*.md`.
+> 3. A validation bound in `app/Http/Requests/` changes, or an accepted ADR ships.
+> 4. A file is added to `docs/scenarios/`. Check: `ls docs/scenarios/ | wc -l`.
+> 5. `.gitignore` changes for any path this file names as a source.
+> 6. `database/migrations/` gains a file. Section 12's range is a snapshot of a count, and counts go stale first.
+>
+> Acting on that trigger is a Docs Writer duty (`AGENTS.md`, per-agent instructions). An agent that
+> reads this file and finds a row above contradicted by the tree should fix the row in the same
+> change, not follow the stale rule.
+
 ---
 
 ## 1. Product Identity & Scope
