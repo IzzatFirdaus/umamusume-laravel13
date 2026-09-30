@@ -81,6 +81,26 @@ Each line is `file:line` plus the evidence, per instruction. **Filed, not fixed.
   Filed for the next PRD pass: retarget the citation to the aptitude columns. Not edited here, because the
   fence says the PRD is read, not rewritten.
 
+- **P-7: the four running-style counts at `UMAMUSUME_REFERENCE.md:231-234` do not state their denominator.**
+  The column "Skills gated to it" reads 107, 220, 166 and 115. Measured over the whole export body
+  `database/seeders/data/skills.609afe88.json`, which holds 1,910 records, counting skills whose condition set
+  pins exactly one `running_style` value gives 107, 220, 166, 115. Those four numbers reproduce, so the table
+  is not wrong. Measured over the 623 records that carry no `unreleased` key, the same definition gives 26, 35,
+  33, 27. The caption at `:236` names the predicate, "skills whose condition set pins exactly one
+  `running_style` value", and cites the export, but never names the set the count runs over, so a reader cannot
+  tell which of the two it is. Every consumer downstream shows the smaller list: `app/Enums/ReleaseStatus.php`
+  renders Global states only, and `docs/design-research/skill-facts-2026-10-01.md` covers exactly the 623. So
+  the reference's numbers would sit beside a list a third their size with nothing on the page saying so. Fix is
+  one clause stating the denominator. Do not change the figures; they are correct for what they count. This is
+  a Docs Writer item and not a KI, because no shipped behaviour reads those four cells. Filed here beside P-6
+  rather than in the register, since it is the same class of citation-hygiene defect and P-6 already anchors the
+  pair. Measurement: parse `database/seeders/data/skills.609afe88.json`, collect the distinct
+  `running_style==N` values from `condition_groups[].condition` and `.precondition` per record, and count
+  records whose set has exactly one member, once over all 1,910 records and once over the 623 with no
+  `unreleased` key. The script that ran it is `skill-facts-2026-10-01.md`'s generator, and that document
+  reports both figures: the per-label Global counts in its coverage table and the whole-export counts in the
+  reconciliation paragraph beneath it.
+
 **Checked and clean — recording these because a currency pass that names nothing checked is unauditable.**
 
 - **All 10 `§` references resolve.** Internal: `§3`, `§5`, `§6` (`PRD.md:35–37`), `§6.9` (`:37,90`), `§6.11`
