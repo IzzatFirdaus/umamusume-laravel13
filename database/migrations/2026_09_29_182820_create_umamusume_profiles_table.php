@@ -62,10 +62,14 @@ return new class extends Migration
             // reads this row and does not fall back, because one source filling another's gap
             // silently is the defect D-220 exists to prevent.
             $table->string('name_ja')->nullable();
-            // `va_ja` is the romanised Japanese voice actor the character page shows, and it is
-            // the one this document never omits (163/163). `va_en` is the English dub cast and
-            // is the field that is null on 26 of the 163. Both are stored because the block
-            // shows both and they disagree about who speaks for a trainee.
+            // `va_ja` carries the Japanese credit (present on all 163 rows); `va_en` is its
+            // romanisation, absent on 26 of 163 file-wide and on 3 of the 105 race === 'uma' rows the
+            // parser keeps. They name one performer in two scripts, not two casts — where a stage name
+            // is already romanised both fields hold the identical string. Both are stored because the
+            // Global page wants the romanisation and the source is complete in Japanese only.
+            // [Dated erratum 2026-09-30: this comment first read va_en as "the English dub cast" that
+            // "disagrees" with va_ja. The body refutes it; see GametoraCharacterProfileParser, A-7 and
+            // docs/data/2026-09-30-characters-source-probe.md.]
             $table->string('va_ja')->nullable();
             $table->string('va_en')->nullable();
             $table->unsignedSmallInteger('birth_year')->nullable();
