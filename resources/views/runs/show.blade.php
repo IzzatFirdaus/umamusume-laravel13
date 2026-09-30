@@ -33,10 +33,13 @@
             {{ $run->umamusume->name }}
             {{-- The matrix label, not the raw slug, and "not set" rather than a
                  scenario name when the run has none: a run with no scenario does
-                 not declare itself to be the baseline scenario. --}}
+                 not declare itself to be the baseline scenario. The absence is read
+                 from `hasScenario()` rather than re-tested here, because a third
+                 spelling of "is a scenario set" is how a blank column slipped past
+                 two of them and rendered an empty caption. --}}
             <span class="ml-2 text-sm font-normal text-ink-muted">
                 {{ $run->status->label() }} ·
-                {{ $run->scenario === null ? 'No scenario set' : ($scenarios[$run->scenario] ?? $run->scenario) }}
+                {{ $run->hasScenario() ? ($scenarios[$run->scenario] ?? $run->scenario) : 'No scenario set' }}
             </span>
         </h1>
         <div class="flex gap-3 text-sm">
@@ -207,6 +210,12 @@
             @error('current_objective_index')<p class="w-full text-risk">{{ $message }}</p>@enderror
         </form>
     @endif
+
+    {{-- The deck sits with the run's own record rather than inside the `hasScenario()` cluster: every
+         scenario has six support card slots, so a run that names no scenario still had a deck, and
+         gating it would hide the one piece of setup that explains the turns below. --}}
+    <h2 class="mt-8 text-lg font-semibold text-ink-strong">Support deck</h2>
+    <x-deck-panel :run="$run" :cards="$deckCards" class="mt-3" />
 
     <h2 class="mt-8 text-lg font-semibold text-ink-strong">Turns</h2>
     @php

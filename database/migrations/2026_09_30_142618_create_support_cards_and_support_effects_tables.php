@@ -4,6 +4,14 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Superseded in part by `2026_09_30_151945_correct_support_card_schema_and_constraints`.
+ *
+ * The four `->check(...)` calls below render no SQL at all: `check` is a column modifier the SQLite
+ * grammar ignores and `Blueprint` has no table-level `check()`, so the tables this migration creates
+ * carry no CHECK constraints. The follow-up rebuilds them in raw SQL. Read with that in mind, and note
+ * that `support_cards.char_id` is not a foreign key to `umamusume.id` either.
+ */
 return new class extends Migration
 {
     /**

@@ -84,9 +84,10 @@ Token-efficient digest of ARCHITECTURE.md for agent context injection. If this f
 - tests/Feature/{Catalog, TrainingRun, ApiV1, FetchPipeline, CrossReferenceMatcher, Adr0003Schema, DesignTokens, ResourceStrip, ResourceStripOnRunDetail, GuidedStepScenarioComposition}; tests/Unit/NameNormalizer (pure)
 
 ## Phase-1 non-goals (do not build without new PRD scope)
-- Auth/multi-user; SPA; breeding engine (inheritance = 2 nullable parent FKs only); EAV; Excel; event calendar; legacy DB import; MySQL/PG; support cards; deploy paths
+- Auth/multi-user; SPA; breeding engine (inheritance = 2 nullable parent FKs only); EAV; Excel; event calendar; legacy DB import; MySQL/PG; support-card **collection**; deploy paths
 - [rev 0.2 — repo #4] race simulation/predictions/snapshots; dual storage modes or browser-side authoritative data; trainee image uploads; DB-level enum columns
-- `ADR-0008`'s `character_cards` is the **costume-card** table and reopens nothing above: §6.9 plus `ADR-0005` (DECLINED, owner ruling R37, 2026-09-28) still forbid `support_cards`, `user_support_cards` and `deck_slots`, and no slice may cite `ADR-0008` as permission for any of them
+- Support cards split in two, 2026-09-30. `ADR-0014` supersedes `ADR-0005` (DECLINED, owner ruling R37) and authorizes `support_cards`, `support_effects` and `deck_slots` — reference data plus the six cards a run was equipped with, per `PRD.md` **FR-A-8**, **FR-A-9**, **FR-C-6**, **US-12**. `ADR-0005`'s re-verification already exercised the cross-reference these deferral text named, on all 559 records. What stays cut is the collection: no `user_support_cards`, no level, limit break or Unique Perk state. Card **tier** labels are held for want of a current Global source, not for want of authorization; `ADR-0014` records that R75 governs race tiers and does not reach this.
+- `ADR-0008`'s `character_cards` is the **costume-card** table and still authorizes nothing in the support-card direction: `training_runs.character_card_id` names a costume, `deck_slots.support_card_id` names a training companion, and the two keys are not interchangeable (`character_cards.umamusume_id` is a local FK; `support_cards.char_id` is the source's own id as a plain column)
 
 ## Key doc citations
 - HTTP client: https://laravel.com/docs/13.x/http-client ; Locks: https://laravel.com/docs/13.x/cache#atomic-locks

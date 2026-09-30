@@ -22,10 +22,13 @@
             @foreach ($runs as $run)
                 @php
                     // The scenario key is a storage value; the label is config's. Printing
-                    // the key here would show an internal slug where a name belongs.
-                    $scenarioLabel = $run->scenario === null
-                        ? null
-                        : (config('scenarios.scenarios.'.$run->scenario.'.label') ?? $run->scenario);
+                    // the key here would show an internal slug where a name belongs. The
+                    // absence comes from `hasScenario()`, the model's one ruling: testing
+                    // `=== null` here let a blank scenario through and printed a bare
+                    // "· " separator with no name after it.
+                    $scenarioLabel = $run->hasScenario()
+                        ? (config('scenarios.scenarios.'.$run->scenario.'.label') ?? $run->scenario)
+                        : null;
                 @endphp
                 <li class="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 text-sm">
                     <a href="{{ route('runs.show', $run) }}" class="font-semibold text-ink hover:underline">

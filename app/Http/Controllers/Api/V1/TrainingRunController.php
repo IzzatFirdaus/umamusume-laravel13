@@ -35,7 +35,7 @@ class TrainingRunController extends Controller
 
     public function show(TrainingRun $run): JsonResponse
     {
-        $run->load(['umamusume', 'turnEntries', 'skills']);
+        $run->load(['umamusume', 'turnEntries', 'skills', 'deckSlots.supportCard']);
 
         return response()->json(['data' => new TrainingRunResource($run)]);
     }

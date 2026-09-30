@@ -34,6 +34,7 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 | US-9 | As a Trainer, I query a local JSON API (`/api/v1`) for catalog and run data. | P2 | API Resources return the documented shapes; version prefix is enforced. |
 | US-10 | As a Trainer, I track race goals and predictions per run. | P1 | Race calendar and fan gating via `scenario_slots` (ADR-0003); mandatory/optional races with fan/maiden gates per scenario. Predictions (user-entered aptitude grades, race-day snapshots) remain deferred per §6.11. Acceptance: (1) `scenario_slots` seeded for all scenarios with `kind` ∈ {goal_race, team_race, grade_deadline, scripted_event}; (2) `RaceEntry` references `scenario_slot_id`; (3) Run detail renders the calendar panel with gates and the grade meter where applicable; (4) No prediction engine or simulation. |
 | US-11 | As a Trainer, my UI preferences survive a restart, so the app looks and behaves the way I left it. Authorized 2026-09-27 for two keys only: the theme (`light` / `dark` / follow the OS) and the numeric failure-estimate toggle (off by default, `ADR-0001` §3). | P1 | A preference written through the app is stored in the `preferences` table and read back on the next request; **no preference is stored in browser storage**, because §6 non-goal 12 cuts a second source of truth; the stored theme is rendered server-side by `components/layout.blade.php` so the first paint is already correct. The display timezone is **not** covered by this story — US-7 owns it — and the key set is a contract, not a free-form blob. |
+| US-12 | As a Trainer, I record which six support cards a run was equipped with, so a logged run can be re-read later instead of relying on memory. Authorized 2026-09-30 by the owner's Slice 2 ruling, which supersedes `ADR-0005` and lifts the first half of §6.9 (`ADR-0014`). | P1 | The run page shows a Support deck block with one picker per slot; saving stores six rows at their positions and re-saving moves a card without leaving it in the slot it left; the same card in two slots is refused with the client's own reason; slot six is labelled `Friends` whichever card sits there; a card linked to the run's scenario is badged from the scenario list, not from a stored flag; a run with nothing recorded names the absence rather than showing empty frames; and no card level, limit break or Unique Perk state is stored anywhere (`ADR-0014`: identity, not collection). |
 
 ## 4. Functional Requirements
 
@@ -86,6 +87,33 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
   column choice this requirement does not make. `docs/adr/0012-card-detail-fields-and-images.md`
   Decision 4 is the ruling; its "Decision 4's PRD citation is partial" paragraph is the record this
   line upgrades from an owner ruling to a requirement.
+- A-8 [ADR-0014; owner authorization 2026-09-30 lifting §6.9's first half]: `SupportCard` record: the
+  source's own `support_id` (unique), the export's `char_id` **as a plain column**, the character name
+  and the card's bracketed title as two separate fields, rarity (the source's 1/2/3), type (one of the
+  seven export keys `speed`, `stamina`, `power`, `guts`, `intelligence`, `friend`, `group`), both server
+  release dates, and the effect anchor vector verbatim. `SupportEffect` is the 35-row dictionary that
+  names those anchors.
+  **Three limits are part of this line, not footnotes.** (i) `char_id` addresses the *source's* character
+  space and is never a foreign key to `umamusume.id`: that column is a local surrogate, the source id
+  lives in `external_ref`, and 23 of the 559 records name 9000-block staff who are not trainees at all.
+  Those 23 are also the records a Scenario Link is derived from, so the constraint would have deleted the
+  evidence rather than cleaned the data. (ii) **No composed card name is stored**, because the source
+  publishes none; the label is assembled at the view boundary from the two fields it does publish.
+  (iii) **Effect levels are not expanded.** The eleven anchors per effect are stored as the source sends
+  them and any intermediate value is interpolated on read; a materialised per-level table would be derived
+  rows that can silently disagree with the rule that produced them.
+  The client's rarity word (`R`/`SR`/`SSR`) and type word (`Wit` for `intelligence`, `Pal` for `friend`)
+  are display mappings, not stored values — **A-1**'s precedent. Availability follows **D-3**'s rule: every
+  record the source publishes is stored, and a Global-facing surface offers only rows carrying a Global
+  release date. Provenance inline per **A-4**, with its own `is_manual` per **B-4**. Reference data only, on
+  **A-5**'s precedent: no card tier, no strength score, no training-yield calculation, and nothing here
+  touches §6.11.
+- A-9 [ADR-0014]: The Scenario Link is **derived on read**, never stored on the card. It is the card's
+  character being on the running scenario's linked list, so the same card is linked in one scenario and
+  not in another, and a flag on the row would be wrong the moment the run's scenario changed. The list is
+  held in `config('scenarios.php')` keyed by character name. Known and accepted gap: a `group` card
+  represents several characters but carries one, so a group card badged on a member who is not its
+  representative would be missed; no captured frame yet shows one badged.
 
 ### FR-B: Data-fetching & cross-reference engine
 - B-1: `uma:fetch {source}` console command; sources are declared in `config('uma.sources')`, each with a parser class.
@@ -101,6 +129,15 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
 - C-3: Skill acquisition: run × skill with status (`Suggested`, `Acquired`, `Skipped`) and optional turn acquired [rev 0.2 — repo #4]. `Suggested` = planned before the run; `Acquired`/`Skipped` = outcome.
 - C-4: Runs and turns are creatable, editable, and deletable through the web UI; all writes validated by Form Requests.
 - C-5: CSV and JSON export per run.
+- C-6 [ADR-0014; owner authorization 2026-09-30]: `DeckSlot`: run × support card at a `slot_position` of
+  one to six, unique per (run, position). The deck is written as a whole — the six slots are replaced in
+  one transaction — because a slot is a *position*: a card moving from two to three must leave two, and an
+  upsert keyed on the card would leave it in both. Position six is the friend slot and **the role belongs
+  to the slot, never to the card**: the client labels that position `Friends` and any card may occupy it,
+  so a stat card parked at six is a legal deck and no `is_friend_card` flag exists. Two copies of one card
+  cannot be equipped together, so a duplicate submission is refused rather than stored. An empty deck is a
+  valid state and renders as a named absence: the deck is something only the Trainer can supply, and every
+  run that predates this requirement has no deck recorded.
 
 ### FR-D: Skill catalog (reference data)
 - D-1: `Skill`: English name, Japanese name (nullable until cross-referenced), match key, SP cost (nullable), type string (nullable), `is_unique` flag. [amended 2026-09-29 by `ADR-0011`] adds **`rarity`**, **the export's own skill id**, and the provenance columns `ADR-0004` requires. Two limits are part of the amendment, not footnotes: `rarity` stores the source's class code and is **never** rendered as a client rarity word, because the source carries six class values where the client's three rarities live elsewhere; and `type` holds **this tool's derived classification** from the source's effect codes, never client copy (`CONSTRAINTS.md` D-20). The English name is the source's localized client string, not its literal rendering of the Japanese — the two differ on 535 of 623 rows.
@@ -132,7 +169,7 @@ Explicitly not built, with the legacy feature they replace:
 6. **No event/banner calendar in Phase 1** (uma-companion's events domain). Revisited in a later phase once the fetch engine has proven reliability.
 7. **No legacy database migration tooling.** The legacy apps keep their own data; Trainers export from them by hand if needed. No promise to import `uma_musumes`, `plans`, or EAV rows. Repo #4 does contain working CSV/JSON importers (including for a fifth app's `uma-run-tracker` JSON shape); they are INVESTIGATE reference code, located and cited if import is ever requested, not carried into Phase 1 [rev 0.2 — repo #4].
 8. **No MySQL/PostgreSQL support.** SQLite only; the legacy MySQL-only DDL (stored/virtual columns, `ALTER TABLE ... COMMENT`) is not carried over. Repo #4's DB-level enum columns are likewise not carried: string columns + PHP backed enums instead [rev 0.2 — repo #4].
-9. **No support-card database in Phase 1.** Promised by uma-tracker's abandoned PRD, never built anywhere (repo #4's support-card component is an empty stub with no backing model); deferred until the cross-reference engine is proven on characters and skills [rev 0.2 — repo #4].
+9. **No support-card database in Phase 1.** Promised by uma-tracker's abandoned PRD, never built anywhere (repo #4's support-card component is an empty stub with no backing model); deferred until the cross-reference engine is proven on characters and skills [rev 0.2 — repo #4]. **Partly lifted 2026-09-30 by the owner's Slice 2 authorization, recorded in `ADR-0014` which supersedes `ADR-0005`:** `support_cards` (reference data), `support_effects` (the effect dictionary) and `deck_slots` (the six cards a Trainer equipped for one run) are now in scope. What stays cut is the half this item was really about — **no collection**: no `user_support_cards`, no card levels, limit breaks or Unique Perk states, because that is uma-tracker's abandoned promise and no user story replaced it. The cross-reference engine the deferral hinged on is proven: `character_cards` landed under `ADR-0008`, and `ADR-0005`'s re-verification exercised the `char_id` join against all 559 support-card records. Card *tier* labels remain held, for want of a current Global source rather than for want of authorization.
 10. **No hosting, deployment, or cloud path.** `deploying-to-cloud` and friends do not apply. The deliverable is a local `composer run dev`.
 11. **No race simulation, prediction engine, or race-day snapshots** [rev 0.2 — repo #4]. Repo #4's manual aptitude-grade predictions and immutable snapshots are cut (Pre-Mortem §4.1); run math stays deterministic over Trainer-entered turns.
 12. **No dual storage modes, no browser-side authoritative data** [rev 0.2 — repo #4]. Repo #4's localStorage-vs-account split is cut; SQLite is the single store.

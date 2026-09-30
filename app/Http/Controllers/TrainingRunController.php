@@ -8,6 +8,7 @@ use App\Enums\MoodTier;
 use App\Enums\ReleaseStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\TurnEventType;
+use App\Http\Requests\StoreDeckRequest;
 use App\Http\Requests\StoreRaceEntryRequest;
 use App\Http\Requests\StoreRunSkillRequest;
 use App\Http\Requests\StoreShopPurchaseRequest;
@@ -18,6 +19,7 @@ use App\Models\CharacterCard;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\Skill;
+use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvents\ShopPurchasePayload;
@@ -193,7 +195,7 @@ class TrainingRunController extends Controller
 
     public function show(TrainingRun $run): View
     {
-        $run->load(['umamusume', 'turnEntries', 'skills', 'turnEvents', 'raceEntries.scenarioSlot', 'raceEntries.raceCatalogSlot', 'raceEntries.turnEntry']);
+        $run->load(['umamusume', 'turnEntries', 'skills', 'turnEvents', 'deckSlots.supportCard', 'raceEntries.scenarioSlot', 'raceEntries.raceCatalogSlot', 'raceEntries.turnEntry']);
 
         return view('runs.show', $this->showData($run));
     }
@@ -294,6 +296,12 @@ class TrainingRunController extends Controller
             // for a JP-only evolved skill — as if a Global Trainer could learn it. `sp_cost` comes along
             // because the option label states it (FR-D-1).
             'skills' => Skill::query()->availableOnGlobal()->orderBy('name')->get(['id', 'name', 'sp_cost']),
+            // The deck picker offers the `[Global]` releases, which is the audience every other picker
+            // here already serves (the 2026-09-27 Global-only ruling). The other ~300 records in the
+            // catalogue are JP-only and a Global Trainer cannot own them. A card this run already uses
+            // is added back by the panel itself, so logging an older deck never shows a slot the
+            // Trainer cannot re-select their own card in.
+            'deckCards' => SupportCard::query()->whereNotNull('release_global')->orderBy('char_name')->get(),
             'scenarios' => $this->scenarioLabels(),
             'raceSlots' => $this->raceSlotsFor($run),
             'band' => $latest === null ? null : [
@@ -677,6 +685,33 @@ class TrainingRunController extends Controller
                 $run->setSkillStatus($skill, $request->acquisitionFor($entry), $entry['turn_acquired'] ?? null);
             }
         }
+
+        return redirect()->route('runs.show', $run);
+    }
+
+    /**
+     * Replace the run's equipped deck with the slots submitted (ADR-0014).
+     *
+     * Delete-then-insert rather than an upsert, because a deck slot is a *position*: when a card moves
+     * from slot two to slot three it has to leave slot two, and a write keyed on the card alone would
+     * leave it standing in both. The rows all land together or not at all (NFR-4), so a run is never
+     * left half-cleared by a failure halfway through.
+     *
+     * A deck with no rows is a true statement about a run whose Trainer does not remember what they
+     * equipped, which is why every slot may be left blank rather than the form refusing to submit.
+     */
+    public function syncDeck(StoreDeckRequest $request, TrainingRun $run): RedirectResponse
+    {
+        DB::transaction(function () use ($request, $run): void {
+            $run->deckSlots()->delete();
+
+            foreach ($request->slotsByCardId() as $position => $cardId) {
+                $run->deckSlots()->create([
+                    'support_card_id' => $cardId,
+                    'slot_position' => (int) $position,
+                ]);
+            }
+        });
 
         return redirect()->route('runs.show', $run);
     }

@@ -53,6 +53,23 @@ it('mounts neither panel for a run with no scenario chosen', function (): void {
         ->not->toContain('Grade Point</span>');
 });
 
+it('renders the same absence for a blank scenario as for a null one', function (): void {
+    // Found by the Slice 2 browser pass, not by the suite. `hasScenario()` read `!== null`, so the empty
+    // string counted as a declared scenario, `stat-band` looked its caps up under
+    // `scenarios.scenarios.` and got nothing, and the run page returned Laravel's exception screen at
+    // 950 KB instead of the run. The web form normalises '' to null so this could not arrive through the
+    // UI, which is exactly why no test covered it: the historical-run import will insert
+    // Trainer-supplied rows, and a blank column must render the baseline rather than fatal.
+    $html = goalPanelHtml('');
+
+    expect($html)
+        ->toContain('No scenario set')
+        ->not->toContain('Race calendar')
+        ->not->toContain('Grade Point</span>')
+        ->not->toContain('Whoops')
+        ->not->toContain('cap_bonus');
+});
+
 it('mounts the meter and not the calendar where point deadlines exist', function (): void {
     $html = goalPanelHtml('trackblazer');
 

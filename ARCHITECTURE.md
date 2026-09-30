@@ -169,23 +169,27 @@ Planner-domain boundary [rev 0.2 — repo #4]: repo #4's career-run planner maps
 
 Framework defaults (`users`, `cache`, `jobs`) remain untouched; `users` is unused by design (no auth).
 
-### Support-card entities: proposed, not built
+### Support-card entities: built under `ADR-0014`
 
-No support-card table exists, and `PRD.md` §6.9 lists a support-card database as a Phase 1 non-goal.
-The entity shapes that a 2026-09-27 brief asked for are specified in `docs/adr/0005-support-card-entities.md`
-with the evidence that corrects them, and they are **not** part of this design until the owner settles
-the scope question there. Read that ADR before adding any `support_cards`, `user_support_cards` or
-`deck_slots` migration, model, factory or route: the game mechanics they would describe are documented
-and settled (`docs/UMAMUSUME_REFERENCE.md` §1.4.7), the schema is not, and an entity copied out of the
-ADR into a migration would silently reverse §6.9.
+`support_cards`, `support_effects` and `deck_slots` exist, authorized 2026-09-30 by the owner's Slice 2
+ruling recorded in `docs/adr/0014-support-card-entities.md`, which supersedes `ADR-0005` and lifts the
+first half of `PRD.md` §6.9. Requirements: **FR-A-8** and **FR-A-9** for the reference data and the derived
+badge, **FR-C-6** for the deck, **US-12** for the surface.
 
-**The two card words are not the same thing, and only one of them is authorized here.** `character_cards`
-(`docs/adr/0008-character-card-catalog-layer.md`, owner ruling 2026-09-29) is the **costume-card** table:
-the outfits a trainee can appear in, one row per card that reached `[Global]`. It authorizes nothing in
-the support-card direction. `support_cards`, `user_support_cards` and `deck_slots` stay forbidden by
-`PRD.md` §6.9, `ADR-0005` stays **DECLINED** (owner ruling R37, 2026-09-28), and no slice may cite
-`ADR-0008` as permission for any of them. `training_runs.character_card_id` names a costume, not a deck
-slot; neither ADR authorizes the other.
+What §6.9 still forbids is the **collection**: there is no `user_support_cards` table, no card level, no
+limit-break count and no Unique Perk state. A deck records card *identity*, not ownership. `ADR-0005`'s
+corrections that were about the shape rather than the scope all stand, and were re-verified against the
+559-record export during implementation; four of them produced schema corrections the first pass had got
+wrong, listed in `ADR-0014` under "Corrections the data forced".
+
+**The two card words are still not the same thing.** `character_cards`
+(`docs/adr/0008-character-card-catalog-layer.md`) is the **costume-card** table: the outfits a trainee can
+appear in, one row per card that reached `[Global]`, keyed by `umamusume_id`. `support_cards` is a training
+companion, keyed by the source's `char_id` as a **plain column with no foreign key** — that id addresses the
+source's character space, which includes 9000-block staff who are not trainees, while `umamusume.id` is a
+local surrogate and the source id lives in `umamusume.external_ref`. `training_runs.character_card_id` names
+a costume; `deck_slots.support_card_id` names a companion. Neither table authorizes the other, and neither
+join is interchangeable with the other.
 
 ### Eloquent conventions (laravel-best-practices)
 

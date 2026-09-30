@@ -163,8 +163,13 @@
     <div class="px-3 pb-3 font-mono text-xs tabular-nums text-ink-muted">
         {{ $base }} base
         + @foreach ($order as $stat){{ $stat }} +{{ $def['cap_bonus'][$stat] }}@if (! $loop->last), @endif @endforeach
-        breakthrough not tracked + deck untracked.
+        breakthrough not tracked.
         Hard cap {{ number_format($config['hard_cap']) }}.
+        {{-- Checked rather than assumed: the five 「限界値アップ」 effects (ids 20 to 24) that would
+             raise a run's starting ceiling are carried by zero of the 559 records in
+             `support-cards.json`, so a deck cannot move the ceilings drawn here (§1.4.8). Naming the
+             deck below without saying this would leave a reader wondering which way the bars shift. --}}
+        Deck recorded under Support deck; no card in the catalogue raises these ceilings.
     </div>
 
     <div class="border-t border-rule px-3 py-2">

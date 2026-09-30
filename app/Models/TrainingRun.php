@@ -261,7 +261,9 @@ class TrainingRun extends Model
      */
     public function scenarioKey(): string
     {
-        return $this->scenario ?? (string) config('scenarios.baseline');
+        // `?:` rather than `??`, for the same reason as hasScenario(): '' is a blank, and a blank must
+        // resolve to the baseline instead of being handed to `config('scenarios.scenarios.')` as a key.
+        return $this->scenario ?: (string) config('scenarios.baseline');
     }
 
     /**
@@ -299,7 +301,12 @@ class TrainingRun extends Model
      */
     public function hasScenario(): bool
     {
-        return $this->scenario !== null;
+        // `filled`, not `!== null`. A blank string reads as a declared scenario to the null test, and
+        // every self-gating component then looks its numbers up under `scenarios.scenarios.` and gets
+        // nothing back: `stat-band` fatalled on `$def['cap_bonus']` with a run whose scenario column was
+        // ''. `runs/show.blade.php` already guards this way (`! $run->scenario`), so the model and the
+        // view disagreed about the same value, and the view's reading is the one that renders.
+        return filled($this->scenario);
     }
 
     /**
