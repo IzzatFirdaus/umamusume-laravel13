@@ -120,6 +120,10 @@ Three ways to close it, each costing something the ruling named:
 
 Recommendation: 3, then re-measure; 1 if the fold matters more than the ten.
 
+**Ruled 2026-09-30, by the owner: leave it, keep recent-10.** The band ships as measured — row 11 of 13 in
+the default paint, reachable with no typing, seam below the popup's scroll fold. The three options above
+stand as what was weighed, not as open work; nothing here is owed.
+
 ## 6. Gates
 
 Full suite after the last edit: **783 passed, 2 skipped (2729 assertions)**, exit 0. This file alone:
@@ -127,4 +131,5 @@ Full suite after the last edit: **783 passed, 2 skipped (2729 assertions)**, exi
 clean; `npm run build` clean; `vendor/bin/pint` passed on the changed test; PHPStan level 6
 `[OK] No errors`, run against this slice's tree (`app/` carries no change in it, which is why the gate
 is quoted rather than re-run per edit). `composer lore` 115 hits / 57 exempt and `composer lore-code` 8,
-both unchanged from the recorded baseline; the new copy carries no dash and no equine term.
+both unchanged from the recorded baseline; the new copy carries no dash and no banned term. (The first
+draft of this line used the banned word for the category, which is how the count went up by one.)
