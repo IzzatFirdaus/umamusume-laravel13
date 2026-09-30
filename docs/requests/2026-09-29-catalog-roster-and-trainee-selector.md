@@ -5,6 +5,13 @@
 **Plan:** `2026-09-29-catalog-roster-and-trainee-selector-plan.md`
 **Status:** planned, not built.
 
+> **Read in order.** This file is step 1 of three for one workstream: this request, then
+> [`…-plan.md`](2026-09-29-catalog-roster-and-trainee-selector-plan.md) (the task-by-task plan), then
+> [`…-report.md`](2026-09-29-catalog-roster-report.md) (the closing measurements). The three filenames
+> differ only by suffix, so read the status line here before deciding which one is current: the
+> request says "planned, not built" and the report says the branch closed. The report is the later
+> document.
+
 ## 1. What was asked
 
 Two frontend deliverables:

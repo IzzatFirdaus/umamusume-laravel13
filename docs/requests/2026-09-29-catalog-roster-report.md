@@ -1,5 +1,11 @@
 # Catalog roster and trainee selector — closing report
 
+> **Read in order.** Step 3 of three, and the latest word on this workstream. It closes
+> [`…-and-trainee-selector.md`](2026-09-29-catalog-roster-and-trainee-selector.md), the request, and
+> measures the outcome of
+> [`…-selector-plan.md`](2026-09-29-catalog-roster-and-trainee-selector-plan.md), the plan. If you
+> reach any one of the three first, this is the file that says what actually shipped.
+
 Date: 2026-09-29
 Slice: the `feat/catalog-roster-and-trainee-selector` branch, closing as `236e3a5`
 Scope: Task 13, the branch's closing gate. Every number below was measured on this machine on

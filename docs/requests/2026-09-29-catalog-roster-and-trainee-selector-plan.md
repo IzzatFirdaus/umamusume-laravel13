@@ -1,5 +1,14 @@
 # Global Catalog Roster and Searchable Trainee Selector — Implementation Plan
 
+> **Read in order.** Step 2 of three for one workstream. It executes
+> [`…-and-trainee-selector.md`](2026-09-29-catalog-roster-and-trainee-selector.md), the request that
+> authorized it, and its outcome is measured in
+> [`…-report.md`](2026-09-29-catalog-roster-report.md), the closing report. This file is the plan, not
+> the status, and right now the two disagree: `grep -c "^- \[ \]"` returns 116 unchecked steps with 0
+> checked, while `app/Models/CharacterCard.php`, `database/migrations/2026_09_29_120100_create_character_cards_table.php`
+> and `resources/js/trainee-combobox.ts` are all tracked on master. Read the report for what landed.
+> Re-ticking these 116 boxes is a separate pass with its own owner, not a side effect of this note.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Populate the catalog with the complete Global roster (68 trainees, 107 costume cards nested under them) and replace the "New training run" trainee `<select>` with a keyboard-operable ARIA combobox that prefix-matches trainee names and card epithets.
