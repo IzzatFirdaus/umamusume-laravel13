@@ -22,7 +22,7 @@ Lore gate (all roles, non-negotiable): the characters are Umamusume, a humanoid 
 
 ### Architect
 - Owns `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, migrations, enum cases, API shapes.
-- Every new table, column, or class must cite a PRD requirement (FR-x / US-x). No citation, no merge.
+- Every new table, column, or class must cite a PRD requirement (FR-x / US-x). The PRD writes its own markers as `- C-1:` under a `### FR-C:` heading, so a citation `FR-C-1` resolves by stripping the prefix and matching the bullet's number. No citation, no merge.
 - Schema changes require a migration plus updated ESSENTIALS digest in the same change.
 - Guards the Phase 1 non-goals list (`PRD.md` §6); proposes scope changes to the human, never adopts them silently.
 
