@@ -2,6 +2,8 @@
 
 Status: **Withdrawn — superseded by ADR-0012 Decision 4 and the branch's 2026-09-30 probe record.**
 
+Forward note (2026-10-01): the same ADR number exists on `archive/profiles-chain` as that branch's live record; the branch is preserved, not proposed, and this file remains the authoritative status for master.
+
 This ADR was drafted on `feat/umamusume-detail-page` for the same `umamusume_profiles` table that
 `master` had already authorized and landed under `ADR-0012` **Decision 4**. The 2026-09-30 port resolves
 the collision in `ADR-0012`'s favour, and this paragraph is where the pieces go: its **field inventory,
