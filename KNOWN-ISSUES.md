@@ -209,6 +209,16 @@ updated with it.
 KI-2, so fixing it alone would not make any page load. Fix the two together and verify
 `/umamusume` returns 200.
 
+**Forward, 2026-09-30 (documentation inventory, snapshot `c1e14a3`).** The layout half landed:
+`layout.blade.php` now reads `@vite(['resources/css/app.css', 'resources/js/app.ts'])` at line 24,
+so this entry stays resolved. Two things in the record above no longer resolve, and neither was
+edited when it stopped being true. The citation `resources/views/welcome.blade.php:15` points at a
+view deleted at `65f8b92` on 2026-09-29 while closing KI-20. And `resources/js/app.js` is still
+described as the current entrypoint by two live guidance files, `.ai/guidelines/framework/core.md`
+and `.ai/skills/tailwindcss-development/SKILL.md`, both of which quote the
+`@vite(['resources/css/app.css', 'resources/js/app.js'])` boilerplate. Nothing guards that pair:
+this entry's own resolution test checks HTTP status, not documentation strings.
+
 ---
 
 ## KI-2 Catalog pages die on a cache that cannot hand back models — RESOLVED 2026-09-28
@@ -314,6 +324,14 @@ fonts `DESIGN.md` §2.2 chose — the right outcome by accident rather than by e
 declaration. The blob also duplicates CSS the Vite build already ships. Left alone because
 the landing page's markup is not this slice's scope; worth a decision about whether
 `welcome.blade.php` should carry 38 KB of inlined CSS at all.
+
+**Forward, 2026-09-30 (documentation inventory, snapshot `c1e14a3`).** That question is closed by
+deletion rather than by answer: `Route::view('/', 'welcome')` became a redirect to `runs.index`,
+`welcome.blade.php` was deleted, and KI-20 closed, all in `65f8b92` on 2026-09-29. `ExampleTest`
+asserts the redirect by name. The 38 KB blob went with the file. The `**Evidence.**` block above
+keeps its line numbers as recorded, because it is the output of a grep that ran on 2026-09-28
+against a file that existed then; a reader who runs it today gets no match, and that is the
+expected result, not a broken gate.
 
 ---
 
