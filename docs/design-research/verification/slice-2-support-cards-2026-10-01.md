@@ -17,28 +17,51 @@ The review asked for the fingerprint as proof rather than assertion. Recorded be
 | Slice 1 hand-off (as recorded in that pass) | 1,667,072 | 2026-09-30 19:11 |
 | This slice, before any work | 409,600 | 2026-09-30 22:51:41 |
 | Mid-slice observation | 1,179,648 | 2026-09-30 23:59:43 |
-| After all slice work | 1,179,648 | 2026-09-30 23:59:43 (unchanged since the mid-slice read) |
+| At this slice's own close | 1,179,648 | 2026-09-30 23:59:43 (unchanged across my whole pass) |
+| Later still, reported by a peer session | 783,616 + `-wal` + `-shm` | 2026-10-01 00:30 |
 
-The "after" value is identical to the mid-slice one, and the table counts match it exactly
-(`tables=30`, `migrations=37`, `support_cards=0`). Nothing in this slice advanced the file: its last
-movement was 23:59:43, and every command this slice ran against a database named a scratch path instead.
+Nothing in this slice advanced the file between 22:51:41 and my close: the size and mtime are identical
+across those readings, and every command this slice ran against a database named a scratch path instead.
+The last row is **not mine** — it arrived in a concurrent report after my own final reading, and it means
+the file moved again after this slice stopped watching. Recorded so the table is not read as the end state.
 
-**This slice did not write `database/database.sqlite`, and the file is not stable underneath it.** Two
-findings, neither of them mine to resolve:
+**This slice did not write `database/database.sqlite`, and that file was actively changing during the pass —
+confirmed by fingerprint, not inferred.** Two findings, neither of them mine to resolve:
 
-1. **A live `artisan serve` is attached to the shared database.** `Get-CimInstance` shows PID 19272
+1. **A live `artisan serve` was attached to the shared database** for part of the pass: PID 19272
    `php artisan serve` (started 22:56:26) and PID 18736 `php -S 127.0.0.1:8000`, plus PID 21232
    `php artisan boost:mcp`. The file's mtime advanced between two of my own reads (22:51:41 → 22:53:47)
    with no command of mine in between.
-2. **A peer's `migrate` applied my *uncommitted* correction migration to the shared file.** It now carries
-   37 migrations, all in batch 1, and `PRAGMA foreign_key_list(support_cards)` returns empty on it. The
-   working tree is shared, so a file I had not committed was visible to that run. The schema that landed is
-   the correct one, but it landed without the owner's migrate decision, and the size dropped from
-   1,667,072 to 409,600 first, which means the file was **rebuilt**, not only migrated.
+2. **A peer's `migrate` applied my *uncommitted* correction migration to the shared file.** It carried
+   37 migrations, all in batch 1, and `PRAGMA foreign_key_list(support_cards)` came back empty on it. The
+   working tree is shared, so a file I had not committed was visible to that run.
 
-Consequence recorded rather than acted on: every browser and import measurement in this file was taken
-against a scratch database on a throwaway port, because the shared file cannot be treated as a stable
-fixture while a dev server is writing to it.
+**Attribution confirmed after this section was first written.** A peer report states it stopped the dev
+server *in order to* run `migrate:fresh --seed` against the shared file. The rebuild was intentional, not a
+silent loss; Slice 2 had inferred a rebuild from the size drop, correctly, but framed it as someone losing a
+fixture, which was not what happened.
+
+**The "real data" premise does not survive checking, and I record that against my own escalation rather
+than letting it stand.** All three files in `storage/app/backups/` hold `training_runs = 0` and
+`turn_entries = 0`:
+
+| Backup (filename time is UTC; mtime is local) | Size | runs | umamusume | skills | migrations |
+|---|---|---|---|---|---|
+| `uma-backup-20260929-153038` (09-29 23:30) | 1,536,000 | **0** | 135 | 1,910 | 33 |
+| `uma-backup-20260930-145151` (09-30 22:51) | 409,600 | **0** | 2 | 9 | 36 |
+| `uma-backup-20260930-155251` (09-30 23:52) | 1,179,648 | **0** | 67 | 1,910 | 37 |
+
+So the shared database never held Trainer-authored run data at any snapshot. What a rebuild discarded was
+regenerable reference data, which `migrate:fresh --seed` reproduces offline — the peer's stated purpose.
+Slice 1's fixture lived in `verify-slice1.sqlite`, not here. Two further traps the comparison exposes: the
+`155251` name is **UTC** while its mtime is local, so ordering these files by filename mis-orders them; and
+that newest backup matches the live file's size without being byte-identical to it (md5 `41e1ea87…` against
+`27f3dccc…`), because the WAL had not been checkpointed when it was taken. A same-size backup is not a
+same-content backup.
+
+Nothing was restored, and restoration is the owner's call. **What remains true is the hazard:** shared state
+changed under a running measurement, no announcement preceded it, and no fence prevents it. Filed in
+`SESSION-CONSOLIDATION-2026-09-30.md` §4 as a decision for the owner, and §6 as the escalation row.
 
 ## 2. The corrupted scratch database — cause named
 
@@ -48,9 +71,24 @@ cause is worth naming, because it is a repeatable trap:
 - The corrupted file was **`.scratch-uma/test.db`**, created by this session. It was **not**
   `.scratch-uma/verify-slice1.sqlite`, which the Slice 1 record names.
 - It was produced by `cp database/database.sqlite .scratch-uma/test.db`. A bare file copy of a SQLite
-  database that is open by a writer in WAL mode copies the main file without its `-wal` sidecar, and the
-  result reads back as `database disk image is malformed`. Confirmed present on this host: `testing-wal`
-  and `testing-shm` sat in the repo root at session start, from the suite run that was in flight.
+  database in WAL mode takes the main file without its `-wal`, and this one read back as
+  `database disk image is malformed`.
+- **The cause is now reproduced deliberately, not inferred from one accident.** `.scratch-uma/wal-probe.php`
+  migrates a throwaway file, writes one row, and copies only the main file: main = 4,096 B against
+  `-wal` = 1,751,032 B, and the copy does not even declare the table (`no such table: support_cards`).
+  After `PRAGMA wal_checkpoint(TRUNCATE)` the same copy reports the row. So the symptom varies with where
+  the WAL sat at copy time — mine said `malformed`, the probe says `no such table`, and the quietest
+  variant is a valid-looking empty database. Only the loudest one announces itself.
+- **WAL is declared here, not environmental.** `config/database.php:42` sets
+  `journal_mode => env('DB_JOURNAL_MODE', 'wal')` and line 41 `busy_timeout` 10000, both present since the
+  initial skeleton commit `fda6ff0` (verified: that is the only commit ever to touch the file, and
+  `git log -S"journal_mode"` returns it). A concurrent report claiming no setting in this repository enables
+  WAL mode is wrong about the config while being right about the effect.
+- Filed as **KI-44**, which cites `app/Console/Commands/UmaBackup.php:32` (`wal_checkpoint(TRUNCATE)`
+  before `copy()`) as the in-repo reference for doing this correctly.
+- No longer relevant but recorded for accuracy: the `testing-wal` / `testing-shm` files observed in the repo
+  root at session start belonged to the old `DB_DATABASE=testing` file. `phpunit.xml` has since moved to
+  `:memory:`, so the suite no longer creates them.
 - So the corruption was a symptom of an unsafe copy method, not a pre-existing defect and not a shared-DB
   write. **Every database in this pass was created by `php artisan migrate` against a new file path.
   Nothing was copied.**
@@ -344,4 +382,66 @@ which is how work gets lost. The exclusion list above is the honest boundary.
 | No tier labels until a current Global source is confirmed | **Honoured.** No tier column, no tier copy. ADR-0014 states the hold and its real reason. |
 | No ADR-0013 dual-state resolution | **Honoured.** Not touched. |
 | No new dependency | **Honoured.** `composer.lock` and `package.json` unchanged. |
+
+## 14. Second pass: the five gates
+
+Run after the review returned. Each was asked for; each is reported with what it actually produced, which
+in one case is not what was expected.
+
+**Import committed at `30b3a08`** — 13 files, +1,630. `config/uma.php` and `PipelineRunner.php` were left
+out as ruled, so the commit message names the dependency: `uma:import:support-cards` and the four import
+test files all read the two uncommitted source keys and fail against a clean checkout until the peer's
+config commit lands.
+
+**Gate 2 — the `->check(` scan.** `git grep -n -- "->check(" -- database/migrations app` returns only this
+slice's own migration (four call sites at lines 27, 42, 43, 66) and the two files that discuss them. **No
+other migration in the repository ever used the method**, so the defect does not extend and no separate
+slice is owed. Recorded as its own row in `SESSION-CONSOLIDATION-2026-09-30.md` §6.
+
+**Gate 3 — page weight filed as KI-43.** Measured rather than estimated; `.scratch-uma/measure-deck-weight.php`
+replays it against the saved pages:
+
+| Run state | Page | Deck block | Share |
+|---|---|---|---|
+| six equipped | 360,492 B | 296,537 B | 82.3% |
+| two equipped | 363,341 B | 293,021 B | 80.6% |
+| **nothing equipped** | 329,355 B | 291,547 B | **88.5%** |
+
+The last row is what makes it a finding rather than a cost: an empty deck still ships 1,512 `<option>`
+elements, 207,504 B, 57.6% of the page. The panel did not add a section to the run screen, it became it.
+Not fixed this slice, per ruling. The WAL rule was filed alongside as **KI-44**, with the probe numbers in
+§2, because §6's oldest row already gestures at the hazard without naming its mechanism.
+
+**Gate 4 — the PHPStan attribution conflict resolves clean.** Targeted run:
+
+```
+vendor/bin/phpstan analyse --no-progress app/Models/SupportCard.php app/Http/Resources/SupportCardResource.php
+ → [OK] No errors
+```
+
+So the peer read a pre-fix snapshot. Slice 2's fixes did land: the `@property` blocks are what moved
+`rarity` from `int` to `CardRarity` and cleared the `match` and undefined-property errors. No stale error
+survives at the current tip.
+
+**Gate 5 could not run as specified, and the substitution is reported rather than the gap.**
+`vendor/bin/paratest --processes=4` does not execute the suite. ParaTest 7.20.0 on PHPUnit 12.5.33 prints
+`Please run [./vendor/bin/pest] instead.` and exits. **It exits 0**, which is its own trap: an earlier
+invocation of the same command was about to be recorded as a pass on the strength of its exit code while
+having run nothing. The refusal is Pest 4's custom runner, not a configuration slip — `-p, --processes` is
+the correct flag, and re-running with the flag fixed and a JUnit log still produces the refusal and still
+runs nothing.
+
+The question the gate was asked to answer is answerable another way, so it was answered that way:
+cross-*process* isolation cannot be tested while paratest refuses, but `:memory:` closes it by construction
+(one private database per process, no file, no sidecars), and cross-*test* dependence — the failure that
+would actually surface — was tested by running the whole suite in a shuffled order:
+
+```
+vendor/bin/pest --order-by=random --random-order-seed=4321
+  Tests: 2 skipped, 972 passed (16232 assertions), Duration: 92.34s
+```
+
+Identical counts to the sequential run, same assertion total. No test depends on another test's rows.
+The gate's intent is satisfied; its literal command is not available in this project, and that is worth
+knowing before anything schedules paratest against this tree.
 

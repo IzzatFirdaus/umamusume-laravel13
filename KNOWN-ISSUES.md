@@ -1960,3 +1960,99 @@ Over all 135 trainee names, 3 differ: `Mr. C.B.`, `K.S.Miracle`, `Curren Bouquet
 **Fix candidate, deliberately not chosen here, and deliberately not built on this branch.** Add a GitHub Actions workflow running `composer install --no-interaction`, `npm ci`, `npm run build`, and `composer test` on every push and pull request. This is an owner decision, not an implementation detail, for three reasons that are measurable today: the project is local-only by intent (`AGENTS.md`, Phase 1 non-goals in `PRD.md` §6), so enabling a hosted runner may be out of scope entirely; `.agents/` and `.github/skills/` are untracked in this tree, so a hosted runner has no skill registry and any future test that reads one will need KI-24b's skip rather than the file; and `node_modules` and `vendor` are absent from a fresh clone, so the first CI run is also a first-install run. Nothing about the scope change is decided here. Recorded as backlog so the decision is not re-litigated per slice.
 
 **Owner.** Human owner, with the Architect, because the answer may be "no CI in Phase 1" rather than a workflow. Raised by the review of the two instances above; both are already resolved in the tree, so this entry carries no failing gate today.
+
+## KI-43 The run detail page is now 80-89% support-deck markup, because six selects each repeat all 252 Global cards - FILED 2026-10-01 (Slice 2 browser pass), OPEN
+
+**Symptom.** `resources/views/components/deck-panel.blade.php` renders one `<select>` per slot over the
+whole Global catalogue. Six slots times the shipped catalogue is 1,512 `<option>` elements on every run
+screen, equipped or not. Measured from the fetched pages against the imported 559-card catalogue
+(`.scratch-uma/measure-deck-weight.php`, replayable):
+
+| Run state | Page | Deck block | Block share |
+|---|---|---|---|
+| six cards equipped | 360,492 B | 296,537 B | 82.3% |
+| two cards equipped | 363,341 B | 293,021 B | 80.6% |
+| **nothing equipped** | 329,355 B | 291,547 B | **88.5%** |
+
+The options alone are 207,504 B, 57.6% of the page. Longest single label is 71 characters.
+
+**The last row is the finding.** A run with an empty deck still carries 291 KB of picker, because an
+unfilled `<select>` holds the same 252 options as a filled one. The cost is not the Trainer's data; it is
+the choice list, paid on every run page whether or not anyone is choosing. Before this slice the same
+pages rendered 51-99 KB with an eight-card catalogue, so the panel did not add a section, it became the
+section.
+
+**Why filed rather than fixed in the slice.** No gate covers it. C-6 budgets catalog-index latency at
+~1,000 Umamusume (NFR-3), not rendered page weight, and the suite is green at 972. The fix is a design
+change, not a bug fix: it alters how a Trainer finds one card among 252, which is `DESIGN.md` territory and
+touches the combobox precedent already set for the trainee picker.
+
+**Fix candidates, not chosen here.**
+
+1. **Search-first picker**, the shape `resources/js/trainee-combobox.ts` already implements for trainees:
+   a text input over a JSON payload, with six selects reserved as the no-JS fallback and `disabled` until
+   the script claims them. Reuses an existing component pattern rather than inventing one; the same
+   disabled-input reasoning at `runs/create.blade.php:9-23` applies unchanged.
+2. **Filtered shortlist.** Offer the five stat types matching the run's deck need plus the Pal slot, so the
+   list is ~40 cards rather than 252, with an explicit "show every card" disclosure for the rare case.
+   Cheaper to build, but it decides for the Trainer which cards are worth being able to find.
+3. Leave it. On a local-only tool with one Trainer and no network round-trip, 360 KB is parsed rather than
+   downloaded. Defensible, and the reason this is filed rather than escalated.
+
+**Owner.** Human owner with the designer, because option 2 makes a product decision about what a Trainer
+should be able to reach, and option 1 decides whether the deck is the second surface to adopt the
+combobox pattern or the test case for generalising it.
+
+## KI-44 A copied SQLite file is not the database: WAL is declared in config, and the main file can hold nothing at all - FILED 2026-10-01 (Slice 2 scratch-database incident, confirmed by a probe), OPEN
+
+**Rule.** Do not `cp` a SQLite database in this repository. An open WAL-mode database is **three files** —
+`x.sqlite`, `x.sqlite-wal`, `x.sqlite-shm` — and the main file is not self-contained. Move or delete all
+three together, or do not move any of them. To obtain a single-file copy, checkpoint first:
+`VACUUM INTO 'target'`, or `PRAGMA wal_checkpoint(TRUNCATE)` and then copy. To obtain a working test
+database, run `php artisan migrate` against a new path.
+
+**This is not an accident of someone's environment.** `config/database.php:42` declares
+`'journal_mode' => env('DB_JOURNAL_MODE', 'wal')`, and line 41 declares `busy_timeout` 10000. Both arrived
+in the initial skeleton commit `fda6ff0` and are still there. A claim circulating in a peer report that
+"no setting in this repository enables WAL mode" is wrong at the config layer; the observation that WAL is
+in effect was right, and the reason is written into the connection array.
+
+**Measured, on a throwaway file (`.scratch-uma/wal-probe.php`, replayable):**
+
+```
+after migrate + one Eloquent insert:
+  main = 4,096 B   -wal = 1,751,032 B   -shm = 32,768 B
+
+copy of the main file alone:
+  -> SQLSTATE[HY000]: General error: 1 no such table: support_cards
+     (the live database at that moment held 1 row)
+
+after PRAGMA wal_checkpoint(TRUNCATE), the same copy reports 1 row.
+```
+
+99.8% of the bytes were in the WAL, and the copied main file did not even **declare the table**. The copy
+is not a stale snapshot of the database; it is a different, nearly empty database that opens without
+complaint.
+
+**Two distinct symptoms, same cause.** Slice 2 hit this for real: `cp database/database.sqlite
+.scratch-uma/test.db` produced a file every later command rejected as `database disk image is malformed`.
+The probe above produces the quieter outcome, `no such table`. Which one you get depends on where the WAL
+was in its lifecycle when the copy was taken. **The malformed case at least announces itself; the
+missing-table case, and the empty-but-valid case between them, are silent** — they read as a database that
+legitimately has nothing in it, which is how a fixture ends up reporting zero rows for a population that
+exists.
+
+**Read-only access on a WAL database is a separate trap and reports as corruption.** Opening the main file
+without write permission to the directory yields `SQLSTATE[HY000]: disk I/O error`. That is a permissions
+condition, not damage. Do not respond to it by deleting or rebuilding the file.
+
+**Reference implementation already in the repo.** `app/Console/Commands/UmaBackup.php:32` runs
+`PRAGMA wal_checkpoint(TRUNCATE);` before `copy()` at line 43, which is exactly the right sequence, and its
+own docblock at lines 11-13 says so. Anything else in this repo that copies a database should call that
+checkpoint or use `VACUUM INTO`; a bare `copy()` of the live file is the bug.
+
+**Related decoy.** `database/database.sqlite.bak` is 4,096 bytes — one empty page — and is a WAL-mode
+main-file copy, not a backup. Its size equals the "main" figure above. Do not treat it as a restore point.
+
+**Owner.** Every agent and human working in this repo; the rule is operational rather than design. Filed so
+that the next session does not re-derive it from a corrupted scratch file.
