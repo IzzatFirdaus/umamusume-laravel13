@@ -2140,7 +2140,7 @@ rather than fixed inside Slice 4 because the fix is not a one-line rename and th
 
 **Owner.** Docs Writer / Lore Guardian with the Laravel Dev, on the next pass that touches import copy.
 
-## KI-47 A run with no scenario shows a ceiling 200 higher than the one its own form enforces — the disagreement ADR-0015 exists to prevent, alive on the no-scenario branch - FILED 2026-10-01 (Slice 4 browser pass), OPEN, **escalated to the human owner**
+## KI-47 A run with no scenario shows a ceiling 200 higher than the one its own form enforces — the disagreement ADR-0015 exists to prevent, alive on the no-scenario branch - FILED 2026-10-01 (Slice 4 browser pass), **RULED 2026-10-01 by the human owner: the band is wrong.** OPEN as a defect; the decision is no longer open
 
 **Symptom, seen in a real browser.** `http://127.0.0.1:8123/training-runs/4` — a run whose `scenario` column
 is `NULL`, holding two logged turns — renders every stat band as **`/ 1,400`**. The turn form on that same
@@ -2193,8 +2193,67 @@ cleanup. Escalated per `AGENTS.md` escalation path 1.
 display 1,200 — which is what `forRun()` and the validator assert; or `scenarioKey()`'s null-to-baseline
 resolution is the truth and a no-scenario run *is* URA Finale, in which case `forRun()`'s refusal is wrong
 and the validator has been rejecting legal turns. The two positions imply different numbers on the same
-page, so one of them has to lose. This file takes neither side.
+page, so one of them has to lose. This file takes neither side. **(Answered — see the ruling below. The
+paragraph is kept as the record of what was escalated, not as an open question.)**
 
-**Owner.** Human owner, then Architect (`ADR-0015`, `ScenarioCaps`) and Laravel Dev for the view change.
+**RULING, 2026-10-01, human owner: the band is wrong.** Three independent pieces of evidence, in the
+owner's framing:
+
+1. `ScenarioCaps::forRun()` refuses the bonus for a no-scenario run **in writing**, with its reasoning
+   attached ("a bonus belongs to a scenario the Trainer chose").
+2. **Both** write-side validators call `forRun()`. The turn form rejects 1,201 on a no-scenario run.
+3. `x-stat-band`'s own `@props` comment records that a named default was removed *precisely because*
+   "silently resolving to the baseline would rate a trainee against the wrong ceiling."
+
+So the band is displaying the thing its own contract forbids. The tie-break the owner names is a
+citation-count one, and it is decisive rather than stylistic: **the validator's contract is cited in three
+places and the band's in one comment, so the band loses** — which is also why this is characterised as a
+fix, not a preference. Either the band lies about the validator or the validator lies about the band, and
+only one of them is corroborated.
+
+**Fix, as ruled.** Pass the already-computed `$statCaps` from `resources/views/runs/show.blade.php:28` into
+the band instead of a scenario key. One line at the call site.
+
+**Who owes it, and when.** Not Slice 4, and **not Slice 4's successor either** — this is `ADR-0015`'s
+surface, and it is the exact class of follow-up that ADR-0015's own register chapter was written to enable.
+It goes to the Architect, and the fix lands in **whichever slice next touches `runs/show.blade.php` on the
+no-scenario branch**. Explicitly **not** to be parked in a review queue: the source of the disagreement is
+now documented in two places, so a reader of the band should not have to rediscover it.
+
+**Owner.** Architect (`ADR-0015`, `ScenarioCaps`) owns the ruling; Laravel Dev applies the one-line view
+change on the next slice that touches that branch. Filed by the Slice 4 browser pass.
 
 
+
+## KI-48 The architecture docs still state the flat `0..1200` stat bound that ADR-0015 superseded — filed, not fixed - FILED 2026-10-01 (owner ruling after the Slice 4 report), OPEN
+
+**Gap.** Two governance documents assert a validation bound the code no longer applies:
+
+- `ARCHITECTURE-ESSENTIALS.md:36` — `turn_entries: … stats validated 0..1200, turn >= 1`
+- `ARCHITECTURE.md:158` — `-- stats validated 0..1200, turn >= 1 (StoreTurnEntryRequest)`
+
+`ADR-0015` replaced that flat bound with the run's own per-stat scenario ceiling, and `PRD.md` already carries
+the supersession in two places — `:28` ("**Superseded in part 2026-09-30 by `ADR-0015`: the flat 0..1200 test
+becomes a per-stat, per-scenario ceiling**") and `:128` ("`ADR-0015`, which supersedes the flat 0..1200
+recorded here"). The PRD was corrected forward; the architecture docs were not.
+
+**Why it matters more than a stale number.** `0..1200` is the exact value a **no-scenario** run is held to, so
+the sentence reads as correct to anyone looking at one, and is wrong for every run that names a scenario —
+Unity Cup Wit goes to 1,800, Trackblazer Stamina to 1,900. A reader who takes the digest at face value
+builds a form that rejects legal gameplay data, which is `CONSTRAINTS.md` D-31's original complaint
+(*"A real run cannot be recorded … this is a product blocker, not a display question"*) resurrected by
+documentation rather than by code. It is also the sibling of **KI-47** on the read side: KI-47 is a rendered
+number that disagrees with the validator, this is a documented number that disagrees with it.
+
+**Class.** This is the same drift shape as the Slice 2 twelve-column issue, which took three passes to close:
+one document corrected forward while a peer document kept the old value, and each pass finding one more
+carrier. `DocSchemaDriftTest` reads four governance docs for guarded wording but does not compare this kind of
+prose bound against the rules the request classes actually apply, so nothing fails when the digest lags.
+
+**Filed rather than fixed here, on the owner's instruction.** The correction belongs to whoever owns
+`ARCHITECTURE-ESSENTIALS.md` and `ARCHITECTURE.md`, in the same change that names the ADR-0015 supersession,
+so the fix and its citation land together. Not applied in a Slice 4 follow-up.
+
+**Owner.** Docs Writer, as owner of digest currency. Suggested landing: one edit covering **both** lines above,
+each citing `ADR-0015`, since fixing only the ESSENTIALS line leaves `ARCHITECTURE.md:158` stating the same
+wrong bound.
