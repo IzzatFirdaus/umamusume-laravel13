@@ -2500,3 +2500,19 @@ decision is the owner's, because it moves a path that other documents cite by na
 **Do not restore from git yet.** The held-aside name suggests an intentional intermediate state; restoring blindly could overwrite a peer's intended change.
 
 **Related.** This is the fourth instance of the shared-DB write pattern (§6 `SESSION-CONSOLIDATION-2026-09-30.md`), and the second session to modify a seeder data file in-place without coordination.
+
+## KI-54 The `.held-aside` fixture now collides with the path that restores it: `git restore` recreates the tracked file, then the resilience test's `rename()` warning aborts the test before its `finally` ever runs, failing 11 tests and possibly leaving a second move unrestored - FILED 2026-10-01, OPEN
+
+**Symptom.** Eleven tests fail against the working tree while `database/seeders/data/race-tier-labels-2026-09-29.json` is deleted: 4 in `tests/Feature/ScenarioSlotSeederResilienceTest`, 1 in `tests/Feature/ScenarioSlotSeederTest`, 6 in `tests/Feature/TierLabelJoinTest`. This matches the counts KI-53 recorded, so KI-53's numbers stand.
+
+**Mechanism.** `tests/Feature/ScenarioSlotSeederResilienceTest.php:32` and `:55` call `withTierLabelsFileAbsent()` **outside** the `try`, and the helper's `rename($file, $file.'.held-aside')` at `:105` is not guarded. Once the tracked path is gone, `rename()` on a missing source emits a PHP warning and Pest fails the test before it reaches the `finally` block that would call `restoreTierLabelsFile()` (`:41-45`, `:58-62`). Restoring the file from git is not a free fix either: `restoreTierLabelsFile()` (`:111-120`) renames `.held-aside` back to the tracked path, so with both present the helper's move creates a second `.held-aside` collision, and `git restore` while a peer holds its own intent for that sibling is exactly the race KI-53 warned about.
+
+**Do not restore the file from git yet.** Identified hazard: `git restore database/seeders/data/race-tier-labels-2026-09-29.json` while the peer's `.held-aside` file is still in place.
+
+**Measurement at filing (2026-10-01, this session, read-only).** `git hash-object` on the held-aside file returns `84fe09424fed5e8ad7d53213ed01e7facaeab046`, identical to the `HEAD` blob at the same path (`git rev-parse HEAD:database/seeders/data/race-tier-labels-2026-09-29.json`). So the held-aside content is the committed fixture, unmodified, not a peer's edited replacement. A plain move-back would therefore not overwrite peer work as of this measurement, but the measurement is a snapshot: a live peer process was present at the time, so this note does not lift the do-not-restore instruction.
+
+**Owner options.** (a) Move `.held-aside` back to the tracked path once the owner confirms no peer edit is in progress against it (content is provably HEAD-identical at filing, so the move is lossless), or (b) guard `withTierLabelsFileAbsent()`, for example check `file_exists` before the rename or move the call inside the `try`, so the suite survives the missing-file state until the fixture decision is made. Option (b) is the smaller diff and does not touch the file the peer named.
+
+**Attribution.** Same suspected actor as KI-53 (`ScenarioSlotSeederResilienceTest` helper leaves the renamed state when a run dies mid-suite). KI-54 records the collision the repair now has, not a second suspect.
+
+**Related.** Follows KI-53. The `.held-aside` naming is the repo's own term from that helper; it is not a git convention.
