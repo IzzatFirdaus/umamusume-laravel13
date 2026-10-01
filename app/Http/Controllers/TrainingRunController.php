@@ -521,36 +521,41 @@ class TrainingRunController extends Controller
     {
         $validated = $request->validated();
 
-        if ($request->isManualPath()) {
-            $maxSort = ScenarioSlot::where('scenario_key', $run->scenarioKey())
-                ->max('sort_order') ?? 0;
+        // The slot and the entry that names it land together or not at all (NFR-4), the way `store`
+        // above treats the run and its seeded skills. A slot written on its own is a calendar row
+        // pointing at a race nobody recorded, and it survives as one because nothing revisits it.
+        DB::transaction(function () use ($request, $run, $validated): void {
+            if ($request->isManualPath()) {
+                $maxSort = ScenarioSlot::where('scenario_key', $run->scenarioKey())
+                    ->max('sort_order') ?? 0;
 
-            $slot = ScenarioSlot::create([
-                'scenario_key' => $run->scenarioKey(),
-                'kind' => 'free_race',
-                'source_key' => null,
-                'slot_label' => $validated['title'],
-                'title' => $validated['title'],
-                'month' => (int) $validated['month'],
-                'half' => $validated['half'],
-                'tier' => $validated['tier'] ?? null,
-                'is_manual' => true,
-                'sort_order' => $maxSort + 1,
-            ]);
+                $slot = ScenarioSlot::create([
+                    'scenario_key' => $run->scenarioKey(),
+                    'kind' => 'free_race',
+                    'source_key' => null,
+                    'slot_label' => $validated['title'],
+                    'title' => $validated['title'],
+                    'month' => (int) $validated['month'],
+                    'half' => $validated['half'],
+                    'tier' => $validated['tier'] ?? null,
+                    'is_manual' => true,
+                    'sort_order' => $maxSort + 1,
+                ]);
 
-            $entryData = array_intersect_key($validated, array_flip([
-                'status', 'placement', 'fans_gain', 'circles', 'objective_index', 'turn_entry_id',
-            ]));
-            $entryData['scenario_slot_id'] = $slot->id;
+                $entryData = array_intersect_key($validated, array_flip([
+                    'status', 'placement', 'fans_gain', 'circles', 'objective_index', 'turn_entry_id',
+                ]));
+                $entryData['scenario_slot_id'] = $slot->id;
 
-            $run->raceEntries()->create($entryData);
-        } else {
-            $entryData = array_intersect_key($validated, array_flip([
-                'scenario_slot_id', 'race_catalog_slot_id', 'status', 'placement', 'fans_gain', 'circles', 'objective_index', 'turn_entry_id',
-            ]));
+                $run->raceEntries()->create($entryData);
+            } else {
+                $entryData = array_intersect_key($validated, array_flip([
+                    'scenario_slot_id', 'race_catalog_slot_id', 'status', 'placement', 'fans_gain', 'circles', 'objective_index', 'turn_entry_id',
+                ]));
 
-            $run->raceEntries()->create($entryData);
-        }
+                $run->raceEntries()->create($entryData);
+            }
+        });
 
         return redirect()
             ->route('runs.show', $run)
@@ -621,35 +626,40 @@ class TrainingRunController extends Controller
                 ->withInput($validated + ['previewed' => '1']);
         }
 
-        $entry = $run->turnEntries()->create($this->turnAttributes($validated));
+        // The turn row and its failure event are one write (NFR-4): a turn that says `Failure` with no
+        // event behind it is the half state, and nothing later reconciles it. A success writes the one
+        // row it needs, inside the same transaction.
+        DB::transaction(function () use ($run, $validated): void {
+            $entry = $run->turnEntries()->create($this->turnAttributes($validated));
 
-        if (($validated['outcome'] ?? null) === 'Failure') {
-            $label = $this->choiceLabel((string) ($validated['choice'] ?? ''));
-            $kind = (string) $validated['penalty_kind'];
-            $previous = $this->previousTurn($run, (int) $entry->turn);
+            if (($validated['outcome'] ?? null) === 'Failure') {
+                $label = $this->choiceLabel((string) ($validated['choice'] ?? ''));
+                $kind = (string) $validated['penalty_kind'];
+                $previous = $this->previousTurn($run, (int) $entry->turn);
 
-            $penalties = [];
+                $penalties = [];
 
-            foreach ($this->previewDeltas($validated, $previous) as $delta) {
-                if ($delta['direction'] === 'down') {
-                    $penalties[$delta['text']] = true;
+                foreach ($this->previewDeltas($validated, $previous) as $delta) {
+                    if ($delta['direction'] === 'down') {
+                        $penalties[$delta['text']] = true;
+                    }
                 }
-            }
 
-            $run->turnEvents()->create([
-                'turn' => $entry->turn,
-                'event_type' => TurnEventType::Failure,
-                'source_name' => $label,
-                'choice_label' => $label,
-                'deltas' => [
-                    'penalty_kind' => $kind,
-                    'recorded' => array_keys($penalties),
-                ],
-                'origin_note' => 'The Trainer recorded this turn as a failure of '.$label.', '
-                    .'with a '.$kind.' penalty. Logged from the client, not modelled: '
-                    .'no source in this repository publishes a failure chance.',
-            ]);
-        }
+                $run->turnEvents()->create([
+                    'turn' => $entry->turn,
+                    'event_type' => TurnEventType::Failure,
+                    'source_name' => $label,
+                    'choice_label' => $label,
+                    'deltas' => [
+                        'penalty_kind' => $kind,
+                        'recorded' => array_keys($penalties),
+                    ],
+                    'origin_note' => 'The Trainer recorded this turn as a failure of '.$label.', '
+                        .'with a '.$kind.' penalty. Logged from the client, not modelled: '
+                        .'no source in this repository publishes a failure chance.',
+                ]);
+            }
+        });
 
         return redirect()->route('runs.show', $run);
     }
