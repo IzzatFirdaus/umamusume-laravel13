@@ -239,20 +239,28 @@ final class PipelineRunner
                 continue;
             }
 
-            MatchCandidate::create([
-                'source_key' => $sourceKey,
-                'external_ref' => $record['external_ref'] ?? null,
-                'proposed_name' => $record['name'],
-                'proposed_name_ja' => $record['name_ja'] ?? null,
-                'proposed_match_key' => $this->matcher->matchKey($record['name']),
-                'suggested_umamusume_id' => $match['umamusume']?->id,
-                'match_tier' => $match['tier']->value,
-                'status' => CandidateStatus::Pending->value,
-                'payload' => [...$record, 'url' => $sourceConfig['url']],
-                'created_by_fetch_at' => now(),
-            ]);
+            $matchKey = $this->matcher->matchKey($record['name']);
 
-            $counts['review']++;
+            $candidate = MatchCandidate::updateOrCreate(
+                [
+                    'source_key' => $sourceKey,
+                    'external_ref' => $record['external_ref'] ?? null,
+                    'proposed_match_key' => $matchKey,
+                ],
+                [
+                    'proposed_name' => $record['name'],
+                    'proposed_name_ja' => $record['name_ja'] ?? null,
+                    'suggested_umamusume_id' => $match['umamusume']?->id,
+                    'match_tier' => $match['tier']->value,
+                    'status' => CandidateStatus::Pending->value,
+                    'payload' => [...$record, 'url' => $sourceConfig['url']],
+                    'created_by_fetch_at' => now(),
+                ]
+            );
+
+            if ($candidate->wasRecentlyCreated) {
+                $counts['review']++;
+            }
         }
 
         if ($counts['created'] > 0 || $counts['updated'] > 0) {

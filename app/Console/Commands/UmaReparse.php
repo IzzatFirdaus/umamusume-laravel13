@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use App\Services\DataPipeline\PipelineRunner;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -39,40 +40,52 @@ class UmaReparse extends Command
             return self::FAILURE;
         }
 
-        $directory = "snapshots/{$key}";
+        $lock = Cache::lock("uma-fetch:{$key}", (int) config('uma.fetch.lock_timeout', 60));
 
-        if (! Storage::disk('local')->exists($directory)) {
-            $this->error("No snapshot stored for '{$key}' yet. Run uma:fetch first.");
-
-            return self::FAILURE;
-        }
-
-        $newest = collect(Storage::disk('local')->allFiles($directory))
-            ->filter(fn (string $path): bool => str_ends_with($path, '.html'))
-            ->sortBy(fn (string $path): int => Storage::disk('local')->lastModified($path))
-            ->last();
-
-        if ($newest === null) {
-            $this->error("No snapshot files under {$directory}.");
+        if (! $lock->get()) {
+            $this->warn("Source '{$key}' is already being fetched or reparsed; skipping.");
 
             return self::FAILURE;
         }
 
-        $snapshot = $newest;
-        $body = (string) Storage::disk('local')->get($snapshot);
+        try {
+            $directory = "snapshots/{$key}";
 
-        $counts = $pipeline->run($key, $sources[$key], $body, $snapshot);
+            if (! Storage::disk('local')->exists($directory)) {
+                $this->error("No snapshot stored for '{$key}' yet. Run uma:fetch first.");
 
-        $this->info(sprintf(
-            "'%s' reparsed from %s: %d updated, %d created, %d skipped (manual or unresolved), %d to review.",
-            $key,
-            $snapshot,
-            $counts['updated'],
-            $counts['created'],
-            $counts['skipped'],
-            $counts['review'],
-        ));
+                return self::FAILURE;
+            }
 
-        return self::SUCCESS;
+            $newest = collect(Storage::disk('local')->allFiles($directory))
+                ->filter(fn (string $path): bool => str_ends_with($path, '.html'))
+                ->sortBy(fn (string $path): int => Storage::disk('local')->lastModified($path))
+                ->last();
+
+            if ($newest === null) {
+                $this->error("No snapshot files under {$directory}.");
+
+                return self::FAILURE;
+            }
+
+            $snapshot = $newest;
+            $body = (string) Storage::disk('local')->get($snapshot);
+
+            $counts = $pipeline->run($key, $sources[$key], $body, $snapshot);
+
+            $this->info(sprintf(
+                "'%s' reparsed from %s: %d updated, %d created, %d skipped (manual or unresolved), %d to review.",
+                $key,
+                $snapshot,
+                $counts['updated'],
+                $counts['created'],
+                $counts['skipped'],
+                $counts['review'],
+            ));
+
+            return self::SUCCESS;
+        } finally {
+            $lock->release();
+        }
     }
 }

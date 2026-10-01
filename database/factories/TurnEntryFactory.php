@@ -20,14 +20,16 @@ class TurnEntryFactory extends Factory
      */
     public function definition(): array
     {
+        $hardCap = (int) config('scenarios.hard_cap', 2000);
+
         return [
             'training_run_id' => TrainingRun::factory(),
             'turn' => fake()->unique()->numberBetween(1, 9999),
-            'speed' => fake()->numberBetween(0, 1200),
-            'stamina' => fake()->numberBetween(0, 1200),
-            'power' => fake()->numberBetween(0, 1200),
-            'guts' => fake()->numberBetween(0, 1200),
-            'wit' => fake()->numberBetween(0, 1200),
+            'speed' => fake()->numberBetween(0, $hardCap),
+            'stamina' => fake()->numberBetween(0, $hardCap),
+            'power' => fake()->numberBetween(0, $hardCap),
+            'guts' => fake()->numberBetween(0, $hardCap),
+            'wit' => fake()->numberBetween(0, $hardCap),
             'sp' => fake()->numberBetween(0, 300),
             'condition' => null,
         ];

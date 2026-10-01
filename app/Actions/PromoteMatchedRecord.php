@@ -83,15 +83,19 @@ final class PromoteMatchedRecord
                 $created = false;
             }
 
-            DataSource::create([
-                'umamusume_id' => $umamusume->id,
-                'url' => $url,
-                'source_key' => $sourceKey,
-                'fetched_at' => now(),
-                'snapshot_path' => $snapshotPath,
-                'confidence' => $confidence,
-                'source_timezone' => $sourceTimezone,
-            ]);
+            DataSource::updateOrCreate(
+                [
+                    'umamusume_id' => $umamusume->id,
+                    'source_key' => $sourceKey,
+                    'url' => $url,
+                ],
+                [
+                    'fetched_at' => now(),
+                    'snapshot_path' => $snapshotPath,
+                    'confidence' => $confidence,
+                    'source_timezone' => $sourceTimezone,
+                ]
+            );
 
             return ['umamusume' => $umamusume, 'created' => $created, 'skipped' => false];
         });

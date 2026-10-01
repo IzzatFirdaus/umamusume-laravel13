@@ -269,14 +269,14 @@ sequenceDiagram
 
 ### Scheduling & queueing
 
-Default: manual `php artisan uma:fetch` (PRD OQ-3). When scheduled, the command dispatches `FetchSourceJob` (database queue, `ShouldQueue`, `uniqueId = source_key`, `ShouldBeUnique`) so web-triggered refresh and scheduled fetch cannot double-run. Ref: https://laravel.com/docs/13.x/queues#job-middleware, https://laravel.com/docs/13.x/cache#atomic-locks
+Default: manual `php artisan uma:fetch` (PRD OQ-3). Concurrency is controlled by `Cache::lock("uma-fetch:{source}")` in `UmaFetch::fetchOne()` (line 55) so web-triggered refresh and scheduled fetch cannot double-run. Ref: https://laravel.com/docs/13.x/cache#atomic-locks
 
 ## 6. Integration Pattern (scraping → normalization → storage → cache)
 
 - **Politeness:** per-source `delay_ms` and `timeout_s` in `config/uma.php`; retry with exponential backoff max 2; a descriptive User-Agent identifying the tool; sources list is an allowlist (SSRF posture: the engine only ever requests hosts from config, never from user input or fetched content).
 - **Snapshots:** raw bodies streamed to `storage/app/private/snapshots/` (local disk), path recorded in `data_sources`. Snapshots are the replay corpus: `uma:reparse {source}` re-runs parser→match→promote from disk with zero network.
 - **Read cache:** catalog index/show wrapped in `Cache::remember` (database store, TTL from config, default 15 min). Invalidation is write-triggered: promotion bumps a `catalog:version` key used in cache keys (versioned-keys strategy, no per-row invalidation). Trainer-data reads are never cached (cheap, must be fresh).
-- **Stale-while-revalidate:** a manual refresh dispatches the job and returns immediately; UI shows last-fetched time from `data_sources`.
+- **Stale-while-revalidate:** a manual refresh runs the fetch synchronously and returns; UI shows last-fetched time from `data_sources`.
 
 ## 7. Frontend
 

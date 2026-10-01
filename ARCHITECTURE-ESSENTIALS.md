@@ -46,7 +46,7 @@ Token-efficient digest of ARCHITECTURE.md for agent context injection. If this f
 - CrossReferenceMatcher tiers: Exact (match_key =) | Alias (alias hit) → auto-promote; Fuzzy (levenshtein ≥ config threshold, default 85%) | None → match_candidates only
 - Promotion: upsert engine-owned columns, skip is_manual, one data_sources row per fact, DB::transaction per batch
 - Idempotent: unchanged snapshot hash short-circuits; re-run writes nothing
-- Concurrency: Cache::lock("uma-fetch:{source}") + ShouldBeUnique FetchSourceJob (uniqueId=source_key); web refresh dispatches and returns (stale-while-revalidate)
+- Concurrency: Cache::lock("uma-fetch:{source}") in UmaFetch; web refresh runs synchronously (stale-while-revalidate)
 - Timezone: JP datetimes parsed Asia/Tokyo → stored UTC, source_timezone recorded; date-only stays date
 - Commands: uma:fetch {source}, uma:reparse {source} (from snapshots, zero network), uma:backup (WAL checkpoint + file copy)
 - HTTP: allowlisted hosts from config('uma.sources') ONLY (SSRF), limited redirects, per-source delay_ms/timeout_s, retry backoff max 2, descriptive UA
