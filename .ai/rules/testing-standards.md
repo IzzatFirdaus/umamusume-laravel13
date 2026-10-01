@@ -16,18 +16,19 @@ This project uses **Pest 4** as its test runner. All tests live under `tests/Uni
 
 ## Database & Transactions
 
-- Use the `RefreshDatabase` trait in feature tests to seed and migrate a fresh testing database:
+- Feature tests get their test case and database from one global binding in `tests/Pest.php`. Do not add a trait or a `uses()` call to an individual test file:
 
-<code-snippet name="refresh-database" lang="php">
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Pest\TestCases\TestCase;
-
-class SomeFeatureTest extends TestCase
-{
-    use RefreshDatabase;
-}
+<code-snippet name="pest-global-binding" lang="php">
+uses(TestCase::class, RefreshDatabase::class)
+    ->in('Feature')
+    ->beforeEach(function (): void {
+        $this->withoutVite();
+    });
 </code-snippet>
 
+- The binding is scoped to `Feature`; `tests/Unit` runs without a database.
+- `withoutVite()` is applied globally to feature tests — do not repeat it per file.
+- Authenticate a feature test with the `actingAsAdmin()` helper from `tests/Pest.php`.
 - The test environment uses an in-memory SQLite database (see `phpunit.xml`).
 - Always create models via **factories** rather than direct `new` instantiation.
 - Use `$this->faker` or `fake()` for test data generation.
