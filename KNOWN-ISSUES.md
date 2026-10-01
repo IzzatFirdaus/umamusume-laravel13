@@ -1778,7 +1778,7 @@ what `DESIGN.md` §6.14 specifies for a form field anyway ("label above at `labe
 is now `items-end` with three stacked label/control pairs. Appearance was never the defect; the entry's
 point was that the fix must not be *carried* by an appearance change, and it is not.
 
-## KI-37 The run screen's form controls measure 31/30/40px against DESIGN.md §6.14's 44 — FILED 2026-09-29 (skill selector design pass), OPEN
+## KI-37 The run screen's form controls measure 31/30/40px against DESIGN.md §6.14's 44 — FILED 2026-09-29 (skill selector design pass), CLOSED 2026-10-01
 
 **Symptom, measured.** The run screen's skills editor was read in a browser at a 390px viewport: the
 `<select>` at `resources/views/runs/show.blade.php:447` computes **31.0px** tall, the
@@ -1849,6 +1849,36 @@ the 31/31/30/32 set this entry replaced.
 **Rides with.** The next slice that stands up a browser scratch database. The class assertion holds until
 then, and the entry stays OPEN on the measurement rather than on the fix: `c17e63b` changed the four
 controls, and no number in this register yet records the four heights after the change.
+
+**Measured 44, 44, 44, 44 at 1280x800 on 2026-10-01, and the same four at 390x844. This supersedes the
+two paragraphs above, which are kept as written because they were accurate when they landed.** The
+dispatch that asked for the measurement stood up the stack the previous one had scoped out: a migrated
+scratch database at a run-unique path (`.scratch-uma/skq3-406-1790844478.sqlite`, 307,200 bytes, built by
+`DB_DATABASE=<path> php artisan migrate --force`, one `TrainingRun` created, removed after the reading),
+`npm run build` so the page served the current stylesheet (`assets/app-CctMJ1Cr.css`, the hash the page
+itself links), and `php artisan serve` on port 8243 against that file only. `database/database.sqlite`
+was not opened: its SHA-256 read identical either side of the pass.
+
+Heights read with `getBoundingClientRect().height` through Playwright, at both viewports: skill select
+**44**, status select **44**, turn input **44**, submit button **44**. `documentElement.scrollWidth` did
+not exceed the 390px viewport, so the taller rows cost vertical height and no horizontal overflow, which
+is the density argument this entry's own "What the fix has to say" paragraph was making.
+
+Two canaries, because a reading of 44 from an instrument that reports 44 for everything is not a
+measurement. The deck panel's select, on the same page and never touched by `c17e63b`, read **31** at both
+viewports: the instrument distinguishes the unsized control from the sized one. `getComputedStyle` reported
+`font-size: 16px` on the root and `box-sizing: border-box` on the sized select, so the mechanism the
+paragraph above predicted is measured rather than assumed: `h-11` is 2.75rem at a 16px root and the 1px
+`--color-rule` border sits inside the 44.
+
+**What is still not asserted.** The turn input carries `step="1"`, verified as an attribute in
+`RunSkillRowLabelsTest.php` and in the rendered DOM, but the visibility of the native spinner was not read,
+and §6.14 asks number inputs to match §6.11's cost stepper. That component does not exist in shipped code:
+every `type="number"` control in `resources/views/` is a bare input. Building it is a separate decision, not
+a sizing one. Two further lines of this entry remain unrepaired and are named rather than edited here: the
+heading's `31/30/40px` is the set that did not reproduce, and `race-panel.blade.php` still passes a literal
+as the second argument to `MessageBag::first()` for `objective_index` and `placement`, which is the defect
+found while proving the circles refusal renders.
 
 ---
 
