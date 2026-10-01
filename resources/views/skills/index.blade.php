@@ -16,11 +16,13 @@
     <h1 class="text-2xl font-semibold text-ink-strong">Skill search</h1>
 
     {{-- Control sizes are measured, not assumed, and the numbers are the reason they are written this way.
-         DESIGN.md §6.14 fixes a form input at height 44, and `h-11` is already this repository's idiom (the
-         section headers and the guided-step rows use it). Copied straight from catalog/index's `px-2 py-1`
-         the controls arrived at 30px and 31px in a real browser, so §6.14 governs here and the older
-         surface stays as KI-28. The checkbox is the tool's first one, so it gets the WCAG 2.2 AA floor of
-         24px rather than a house precedent, with the label carrying the rest of the click area. --}}
+         `docs/design-research/DESIGN.md` §6.14 fixes a form input at height 44, and `h-11` is already this
+         repository's idiom for the value (the scenario panels' capsule headers carry it, and
+         `runs/show.blade.php`'s skills form was moved onto it with KI-37). Copied straight from
+         catalog/index's `px-2 py-1` the controls arrived at 30px and 31px in a real browser, so §6.14
+         governs here and the older surface stays as KI-29. The checkbox is the tool's first one, so it gets
+         the WCAG 2.2 AA floor of 24px rather than a house precedent, with the label carrying the rest of
+         the click area. --}}
     <form method="GET" action="{{ route('skills.index') }}" class="mt-4 flex flex-wrap items-end gap-3 text-sm">
         <label class="flex flex-col gap-1">
             <span class="text-ink">Search</span>
