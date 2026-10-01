@@ -483,6 +483,26 @@
 
     <form method="POST" action="{{ route('runs.skills.sync', $run) }}" class="mt-4 max-w-3xl space-y-3 rounded-md border border-rule bg-raised p-4 text-sm">
         @csrf
+
+        {{-- KI-37, measured in a browser: `px-2 py-1` with no height put the two selects at 31, the turn
+             input at 30 and the submit at 32 against `docs/design-research/DESIGN.md` §6.14's 44. The four
+             now carry `h-11`, this repository's idiom for the value (the scenario panels' capsule headers),
+             and the three field controls take Screen D's focus ring (`skills/index.blade.php`:31). The turn
+             input also gains `step="1"`: §6.14's last bullet asks number inputs to carry steppers, and the
+             browser review confirmed the attribute was absent (`step` was `null`). --}}
+
+        @if ($skills->isEmpty())
+            {{-- KI-51's UI consequence: on a fresh clone no tracked writer produces an offerable skill
+                 (the tracked seeder sets neither `release_status` nor `name_is_client`), so this is the
+                 ordinary first state rather than an error. The two commands are Screen D's own
+                 (`skills/index.blade.php`:89-92), named here rather than re-worded. --}}
+            <p class="text-xs text-ink-muted">
+                No skills are available to choose yet. Run `php artisan uma:fetch gametora-skills` to fill
+                the catalogue, or `php artisan uma:reparse gametora-skills` if a fetch says the document is
+                unchanged.
+            </p>
+        @endif
+
         @for ($row = 0; $row < $rowTotal; $row++)
             @php
                 $entry = $skillRows->get($row);
@@ -515,7 +535,7 @@
             <div class="flex flex-wrap items-end gap-3">
                 <div class="flex flex-col gap-1">
                     <label for="skill-{{ $row }}-id" class="text-ink-muted">Skill</label>
-                    <select id="skill-{{ $row }}-id" name="skills[{{ $row }}][skill_id]" class="rounded-md border border-rule bg-raised text-ink px-2 py-1">
+                    <select id="skill-{{ $row }}-id" name="skills[{{ $row }}][skill_id]" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green">
                         <option value="">Choose a skill</option>
                         @foreach ($skills as $skill)
                             {{-- The cost is in the label because the choice being made is a spending
@@ -532,7 +552,7 @@
 
                 <div class="flex flex-col gap-1">
                     <label for="skill-{{ $row }}-status" class="text-ink-muted">Acquisition status</label>
-                    <select id="skill-{{ $row }}-status" name="skills[{{ $row }}][status]" class="rounded-md border border-rule bg-raised text-ink px-2 py-1">
+                    <select id="skill-{{ $row }}-status" name="skills[{{ $row }}][status]" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green">
                         @foreach (\App\Enums\SkillAcquisition::cases() as $acquisition)
                             <option value="{{ $acquisition->value }}" @selected((string) $selectedStatus === (string) $acquisition->value)>{{ $acquisition->label() }}</option>
                         @endforeach
@@ -544,9 +564,9 @@
 
                 <div class="flex flex-col gap-1">
                     <label for="skill-{{ $row }}-turn" class="text-ink-muted">Turn acquired</label>
-                    <input type="number" id="skill-{{ $row }}-turn" name="skills[{{ $row }}][turn_acquired]" min="1"
+                    <input type="number" id="skill-{{ $row }}-turn" name="skills[{{ $row }}][turn_acquired]" min="1" step="1"
                            value="{{ $selectedTurn }}" placeholder="Turn"
-                           class="w-20 rounded-md border border-rule bg-raised text-ink px-2 py-1">
+                           class="h-11 w-20 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green">
                     @error($turnError)
                         <p class="text-risk">{{ $message }}</p>
                     @enderror
@@ -554,7 +574,7 @@
             </div>
         @endfor
 
-        <button type="submit" class="enamel rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Save skill status</button>
+        <button type="submit" class="enamel h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Save skill status</button>
     </form>
 
     <form method="POST" action="{{ route('runs.destroy', $run) }}" class="mt-10" onsubmit="return confirm('Delete this run and all its turns?');">

@@ -309,3 +309,78 @@ it('adds a skill through the spare row without disturbing the rows above it', fu
         ->and($run->skills->firstWhere('id', $extra->id)->pivot->status)->toBe('Suggested')
         ->and($run->skills->firstWhere('id', $skills[2]->id)->pivot->turn_acquired)->toBe(11);
 });
+
+it('sizes every control in the skills form to the 44 of DESIGN.md 6.14, and steps the turn input', function (): void {
+    // KI-37. The screen shipped `px-2 py-1` with no height, so a real browser measured the selects at 31,
+    // the turn input at 30 and the submit button at 32 against `docs/design-research/DESIGN.md` §6.14's
+    // height of 44. `h-11` is this repository's idiom for that value (the scenario panels' capsule headers
+    // carry it), so this test pins the class rather than a pixel: a DOM parser cannot measure, and the
+    // earlier entry's own numbers are what rotted, so re-asserting a number here would repeat its failure.
+    // What it can pin is that every control was moved and that the missing `step` was added, which is what
+    // §6.14's last bullet asks for and what the browser review confirmed was absent (`step` was `null`).
+    $run = labelledRun();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML($this->get(route('runs.show', $run))->content());
+    $xpath = new DOMXPath($dom);
+
+    $form = $xpath->query('//form[@action and .//select[starts-with(@name, "skills[")]]')->item(0);
+    expect($form)->not->toBeNull('the skills form is not on the page');
+
+    // The count is asserted so the class loop below cannot pass over an empty set: a loop that checks
+    // nothing is the failure this repository has filed repeatedly. Three seeded skills plus the spare,
+    // three controls each, plus one submit button.
+    $rows = $xpath->query('.//select[starts-with(@name, "skills[")][contains(@name, "[skill_id]")]', $form)->length;
+    expect($rows)->toBe(4);
+
+    $checked = 0;
+
+    foreach ($xpath->query('.//select|.//input|.//button[@type="submit"]', $form) as $control) {
+        /** @var DOMElement $control */
+        if ($control->getAttribute('type') === 'hidden') {
+            continue; // the CSRF field is not a Trainer-facing control
+        }
+
+        // `toContain`'s second argument is a second needle, not a failure message (the same trap the
+        // `toHaveKey` note at the top of this file records), so the check goes through `str_contains` and
+        // the message rides on `toBeTrue`.
+        expect(str_contains($control->getAttribute('class'), 'h-11'))
+            ->toBeTrue("{$control->nodeName} {$control->getAttribute('name')} is not sized to h-11");
+        $checked++;
+    }
+
+    expect($checked)->toBe($rows * 3 + 1);
+
+    $turn = $xpath->query('.//input[@type="number"]', $form)->item(0);
+    expect($turn)->not->toBeNull()
+        ->and($turn->getAttribute('step'))->toBe('1');
+
+    // §10's focus ring, the same treatment Screen D's controls already carry
+    // (`resources/views/skills/index.blade.php`:31, `:40`). The button is excluded on purpose: Screen D's
+    // button does not carry the ring either, and this change copies that surface rather than inventing.
+    foreach ($xpath->query('.//select|.//input[@type="number"]', $form) as $control) {
+        expect($control->getAttribute('class'))->toContain('focus-visible:outline-2');
+    }
+});
+
+it('names the two catalogue commands when no skill is offerable, and still renders a submittable form', function (): void {
+    // KI-51's UI consequence, and the state this section had no copy for at all. On a fresh clone
+    // `DatabaseSeeder` reaches `SkillSeeder`, which writes nine rows and sets neither `release_status` nor
+    // `name_is_client` (its own docblock says the omission is deliberate), so the scope at
+    // `Skill::scopeAvailableOnGlobal()` matches none of them and no tracked writer in this tree produces a
+    // row this picker can offer. The empty picker is therefore the ordinary first state, not an edge case,
+    // and Screen D already names both commands for it (`resources/views/skills/index.blade.php`:89-92).
+    $run = TrainingRun::factory()->create();
+
+    $html = $this->get(route('runs.show', $run))->content();
+
+    expect($html)->toContain('uma:fetch gametora-skills')
+        ->and($html)->toContain('uma:reparse gametora-skills');
+
+    // And the state must not be a dead control: the placeholder option is present and the spare row is
+    // the one the repeater always ships, so the form still renders and still submits.
+    $controls = skillsFormControls($html);
+
+    expect($controls)->not->toBe([])
+        ->and(collect($controls)->pluck('name'))->toContain('skills[0][skill_id]');
+});
