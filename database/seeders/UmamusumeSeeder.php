@@ -14,7 +14,16 @@ use Illuminate\Database\Seeder;
 /**
  * Illustrative development data (PRD OQ-2 pending): two well-known Umamusume so the
  * catalog UI and Alias-tier matching have something to render on a fresh install.
- * Engine-owned facts arrive only through uma:fetch with provenance, never from here.
+ *
+ * This class stays deliberately small. The engine-owned roster — 68 promoted
+ * trainees with their aptitudes, debut dates, `external_ref` and provenance — is built
+ * by `UmamusumeRosterSeeder` from the committed source body, and the two rows below
+ * exist to be *adopted* by it: both names are in that document, so the roster seeder
+ * matches them on the first pass and fills in what this file cannot know.
+ *
+ * Nothing here carries provenance, and nothing here should: a `data_sources` row is
+ * what the Provenance panel reads, and this file has no source to attribute. Any fact
+ * that needs a citation belongs to the roster seeder, not to this one.
  */
 class UmamusumeSeeder extends Seeder
 {

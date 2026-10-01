@@ -6,6 +6,8 @@ use App\Services\DataPipeline\Parsers\GametoraCharacterParser;
 use App\Services\DataPipeline\Parsers\GametoraCharacterProfileParser;
 use App\Services\DataPipeline\Parsers\GametoraRaceCatalogParser;
 use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
+use App\Services\DataPipeline\Parsers\GametoraSupportCardParser;
+use App\Services\DataPipeline\Parsers\GametoraSupportEffectParser;
 
 return [
 
@@ -42,7 +44,15 @@ return [
      *       'delay_ms' => 1000,
      *       'timeout_s' => 15,
      *       'timezone' => 'Asia/Tokyo', // source's announcement zone, recorded on provenance
+     *       'seed_file' => 'example.json', // committed body under database/seeders/data/
      *   ],
+     *
+     * `seed_file` names the committed copy of this source's body, relative to
+     * database/seeders/data/, so `migrate --seed` can rebuild the catalogue offline.
+     * Fetched snapshots live in storage/app/private/snapshots and are gitignored by
+     * design, so without this key a fresh clone has no body to seed from and the only
+     * way to populate the reference tables is the network. Two sources may share one
+     * file when the publisher ships one document at two grains.
      */
     'sources' => [
         /*
@@ -62,6 +72,7 @@ return [
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'gametora-characters.e9e9ee6d.json',
         ],
 
         /*
@@ -97,6 +108,9 @@ return [
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
+            // Same body as `gametora-characters` above, read at the other grain — hence the
+            // same committed file rather than a second copy of it.
+            'seed_file' => 'gametora-characters.e9e9ee6d.json',
         ],
 
         /*
@@ -127,6 +141,7 @@ return [
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'race_instances.json',
         ],
 
         /*
@@ -162,6 +177,7 @@ return [
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'skills.609afe88.json',
         ],
         /*
          * The trainee profile block: Japanese name, voice actor, birthday, height and three
@@ -217,6 +233,83 @@ return [
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'characters.c6676539.json',
+        ],
+
+        /*
+         * The support-card catalogue and its effect dictionary (ADR-0014, owner ruling 2026-09-30,
+         * which lifted `PRD.md` §6.9 for reference data and run linkage while leaving collection
+         * tracking out of scope).
+         *
+         * Two entries because the publisher ships two documents and the engine's contract is one parser
+         * per source: the card rows are 559 records keyed on `support_id`, the dictionary 35 records
+         * keyed on `id`. They are declared adjacently, dictionary second, because `support_cards.effects`
+         * holds the ids the dictionary names and a Trainer reading a half-imported deck panel is better
+         * served by a missing card than by an anchor that resolves to no label. There is no foreign key
+         * between the two tables, so neither order is required by the schema; this one is required by
+         * nothing but legibility, and it is stated so a later reader does not read a dependency into it.
+         *
+         * Owner approval, stated rather than assumed: the same review that approved
+         * `gametora-characters` on 2026-09-27, re-used the way `gametora-skills` and
+         * `gametora-character-profiles` re-used it. Same host, same publisher, two static JSON
+         * documents, no HTML, no JS, no crawler directive to observe, no crawl budget consumed, and the
+         * politeness bounds already set by `delay_ms`, the per-source lock and the cache TTL. The
+         * robots.txt and rate-limit question AGENTS.md escalation 5 raises for this host is still
+         * formally unanswered, exactly as those entries record it.
+         *
+         * Both resolve through the manifest, so each issues two requests per fetch, and both keep a
+         * pinned `url` as the documented fallback. That is the KI-24 reading, not a repeat of the
+         * claim this file made before KI-24 measured it: a stale cache-busting hash answers `200` with
+         * the superseded document, so a pin alone serves silent stale data.
+         *
+         * The hashes below were read out of `https://gametora.com/data/manifests/umamusume.json` as
+         * captured in `research-scratch/data/json/manifest.live.json` (keys `support-cards` and
+         * `support_effects`), and each committed body is byte-identical to the revision its pin names:
+         * the first eight hex digits of the file's own sha256 are `88dea522` and `ca447e53`, the same
+         * convention `skills.609afe88.json` and `gametora-characters.e9e9ee6d.json` follow. Note the
+         * manifest's own key spelling differs between the two (`support-cards` hyphenated,
+         * `support_effects` underscored); `SourceFetcher::fromManifest()` builds the file name from the
+         * key, so the difference is load-bearing and neither entry may tidy it.
+         *
+         * Timezone is Asia/Tokyo for provenance only, as with every other entry here. This document
+         * publishes `release` and `release_en` as `Y-m-d` strings rather than the epochs the scenario
+         * document carries, so the parser passes the dates through and no zone is applied to them.
+         */
+        'gametora-support-cards' => [
+            'url' => 'https://gametora.com/data/umamusume/support-cards.88dea522.json',
+            'manifest' => [
+                'url' => 'https://gametora.com/data/manifests/umamusume.json',
+                'base' => 'https://gametora.com/data/umamusume/',
+                'key' => 'support-cards',
+            ],
+            'parser' => GametoraSupportCardParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'support-cards.88dea522.json',
+        ],
+
+        /*
+         * The support-effect dictionary: 35 rows naming the effect ids that appear at position 0 of
+         * every anchor vector on `support_cards.effects`.
+         *
+         * Approval, manifest resolution, politeness and timezone are as stated on
+         * `gametora-support-cards` immediately above; that comment is the one that reasons about this
+         * host, and repeating it per entry is how a note like KI-24 ends up corrected in three files and
+         * wrong in one.
+         */
+        'gametora-support-effects' => [
+            'url' => 'https://gametora.com/data/umamusume/support_effects.ca447e53.json',
+            'manifest' => [
+                'url' => 'https://gametora.com/data/manifests/umamusume.json',
+                'base' => 'https://gametora.com/data/umamusume/',
+                'key' => 'support_effects',
+            ],
+            'parser' => GametoraSupportEffectParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'support_effects.ca447e53.json',
         ],
     ],
 
