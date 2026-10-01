@@ -168,3 +168,25 @@ No product-specific WCAG mandate has been set by the owner. Enforced floor inste
 `CONSTRAINTS.md` C-7 requires empty, loading, and error states on every data view
 (antislop R-27), and the shipped views use labeled controls, semantic tables and lists,
 and one h1 per page. `DESIGN.md` records the current state and the gaps.
+
+## Corrections 2026-10-02
+
+Dated corrections appended rather than edits in place, because the sections above are regenerated
+by the `impeccable` plugin and a hand edit there is overwritten on its next run. Everything above
+this section stands as written on 2026-09-27.
+
+- Stat validation is no longer `0..1200` in shipped code, and the bound is not the flat `0..2000`
+  that `ADR-0002` ruled either. `ADR-0015`, accepted 2026-09-30, replaced both with the run's own
+  per-scenario ceiling: `base_cap` (1200) plus that scenario's `cap_bonus` for that stat, clamped
+  to the engine `hard_cap` (2000). `StoreTurnEntryRequest` reads it through
+  `ScenarioCaps::forRun()`, so the line above saying the change is "not yet implemented" is the
+  part that is now wrong. The 1200 halved-gains marker and the scenario ceiling stay two separate
+  visible markers.
+- `docs/PRE-MORTEM.md` no longer exists. Its content lives in
+  `docs/research-scratch/GOVERNANCE.md` as the PRE-MORTEM section, including the §4 planner
+  cut/keep rulings this file cites.
+- `docs/design-research/DESIGN.md` and `docs/design-research/CONSTRAINTS.md` no longer exist.
+  Both are embedded in `docs/research-scratch/DESIGN-CORPUS.md` under their own section headings.
+- `docs/GATE-REGISTRY.md` no longer exists as a file; the gate table is in `GOVERNANCE.md`. Verify
+  any path in this document against `python tools/doc_census.py`, which reports dead links as GONE
+  or UNTRACKED at the sha it prints.
