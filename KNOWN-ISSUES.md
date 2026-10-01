@@ -2346,3 +2346,39 @@ The tracked seeder surface at `HEAD` is four files: `DatabaseSeeder.php`, `Scena
 **Not acted on here.** The fence on this dispatch forbids tracking source files, and the decision is the owner's. Filed only, with the measurement commands above so the state can be re-checked rather than re-argued.
 
 **Owner.** Data Engineer for the loader and the roster seeder, with the owner deciding between (a) and (b) alongside the KI-49 decision. The two should be ruled together, since either answer on one changes the cost of the other.
+
+## KI-52 Two files share the basename `DESIGN.md` with disjoint section numbering, and citations do not say which one they mean. Filed, not fixed.
+
+**Symptom.** The repository carries two documents with the same basename and different structures.
+`DESIGN.md` at the root (394 lines, 27,646 bytes, mtime 2026-09-29) is the **surface specification**: §2
+"Visual identity" with §2.3 "Spacing and layout", §3 "Component inventory (actual committed Blade)", §4
+"Surface specifications" including §4.2 "Catalog detail `/umamusume/{slug}`", §5 "Data display rules".
+`docs/design-research/DESIGN.md` (1,640 lines, 152,232 bytes, mtime 2026-09-30) is the **design system**:
+§3 "Colour", §6 "Component anatomy" including §6.11, §6.14 and §6.16, §8 "UX architecture" including
+§8.4, §10 "Accessibility". Neither file announces the other, and a reader cannot disambiguate a citation
+by grepping its section number, because the number exists in only one of the two.
+
+**Measured, one instance.** A dispatch this session asked for "`DESIGN.md` §6.14 (form field spec), §2.3
+(screen structure), §6.5 (stat band markers)" and named the `docs/design-research/` path. §6.14 and §6.5
+are real there. **§2.3 is not in that file at all**, and the section the dispatch described as "screen
+structure" does not exist in either: the root file's §2.3 is spacing and layout. So the citation resolves
+in neither file to the thing named. A register entry inherits the same unreachable pointer: KI-35's
+symptom attributes a rule to "`DESIGN.md` §2.3's one-primary-action-per-screen".
+
+**Why it matters.** Every design dispatch, register entry, ADR and review that cites a `DESIGN.md`
+section without the path is ambiguous, and the ambiguity is silent: the citation looks resolvable, and a
+reader who opens the wrong file finds either nothing or, worse, a different rule at a similar number. The
+same failure shape as KI-49 and KI-51, where a path that looked canonical turned out not to be the one
+that carries the content.
+
+**Fix options, owner's call.** Either (a) rename one file, and the smaller diff is the root file, since
+the `docs/design-research/` corpus is already one namespace and the root name is the one borrowed from
+convention; or (b) keep both names and make the path qualification mandatory in prose, with each file's
+opening lines naming the other. Whichever is chosen, a grep for `DESIGN.md` across the corpus will still
+need a pass, since the broken citations are already written.
+
+**Not acted on here.** The dispatch's fence forbids renaming either file and forbids edits to the design
+record. Filed only, with the measurements above so the state can be re-checked rather than re-argued.
+
+**Owner.** Docs Writer for the cross-reference line and the sweep of existing citations; the rename
+decision is the owner's, because it moves a path that other documents cite by name.
