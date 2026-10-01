@@ -4017,7 +4017,7 @@ Rounded rect in one of three measured states: unavailable `#D0D1D0` with a muted
 
 ### 6. Web cross-reference
 
-Measured from the official properties on 2026-09-27 through a real browser, because both sites are JS-rendered SPAs and a plain fetch returns an empty shell. Full data with per-element values: `_scratch/WEB-FINDINGS.md` (390 lines) and seven 1440x900 captures in `_scratch/web/` (`en-home-hero`, `en-home-news-section`, `en-home-characters-bento`, `en-news-listing`, `en-characters-grid`, `jp-home-hero`, `jp-home-news-and-contents`). The study was run twice independently and returned the same core measurements, which is the strongest evidence in this document for the Roboto and no-gradient findings.
+Measured from the official properties on 2026-09-27 through a real browser, because both sites are JS-rendered SPAs and a plain fetch returns an empty shell. Full data with per-element values: this file's `## WEB-FINDINGS.md` section (390 lines, folded from `_scratch/WEB-FINDINGS.md` on 2026-10-02) and seven 1440x900 captures in `_scratch/web/` (`en-home-hero`, `en-home-news-section`, `en-home-characters-bento`, `en-news-listing`, `en-characters-grid`, `jp-home-hero`, `jp-home-news-and-contents`). The study was run twice independently and returned the same core measurements, which is the strongest evidence in this document for the Roboto and no-gradient findings.
 
 **The headline result is that the web properties and the game client are two different design languages, and the differences are systematic, not incidental.**
 

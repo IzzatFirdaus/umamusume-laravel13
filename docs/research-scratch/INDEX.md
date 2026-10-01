@@ -32,6 +32,14 @@ This index maps content types to their master consolidation files under `docs/re
 |--------|---------|---------|
 | `SCENARIO-PUBLISHER-REFERENCES.md` | Owner-supplied Trackblazer and Unity Cup publisher guides: uma.guide strategy take, GameTora Trackblazer mechanics, GameTora Unity Cup (post-2026-07-01 rework). Repo-authored guides 01/02/03/07/08 are not part of this set. | 3 sources from `docs/scenarios/04`–`06`, embedded verbatim with a Disagreements section (KI-15) |
 
+### Round 4 (2026-10-02)
+
+| Master | Content | Sources |
+|--------|---------|---------|
+| `UX-DELIVERABLES.md` | The three triaged UX write-ups, embedded verbatim with headings demoted one level per part and each file's own NOT MERGED banner preserved. Promoted with the owner's written authorization, which file discipline requires for a new master | 3 sources from `docs/`, deleted by the consolidation in `22e5135`; this master is their only working-tree copy and they stay recoverable from `4ab5ada` |
+
+Round 4 also folded `WEB-FINDINGS.md` (390 lines) into `DESIGN-CORPUS.md` as its tenth source rather than leaving it tracked inside `docs/design-research/_scratch/`, which G-60 lists as ignored scratch.
+
 ## Routing Table
 
 | If you need... | Read |
@@ -67,6 +75,19 @@ This index maps content types to their master consolidation files under `docs/re
 | Mobile-first replan | `PLANS-AND-BRIEFS.md` (replan section) |
 | D-30 amendment draft | `PLANS-AND-BRIEFS.md` (d-30-amendment section) |
 | Audit verification (18 findings) | `AUDIT-AND-VERIFICATION.md` |
+| UX deliverables, the three triaged write-ups | `UX-DELIVERABLES.md` |
+| Legacy deprecated PDFs and what was ruled about them | `docs/deprecated/README.md`, reviewed in `docs/deprecated/REVIEW-2026-09-30.md` |
+
+### Deliberate exceptions, outside the masters
+
+Two files stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass
+does not "consolidate" them and destroy the reason they exist.
+
+| File | Why it stays |
+|---|---|
+| `docs/SKILL_AUTOMATION.md` (90 lines) | Documents the skill layer that lives in `.ai/skills/`, so it belongs with tooling, not with research. Cited by `KNOWN-ISSUES.md` |
+| `docs/design-research/prototypes/superseded/README.md` (16 lines) | Its whole job is to stand in a directory of four retired prototypes and say they are not the current design |
+| `docs/deprecated/` (3 PDFs, review, README) | Binary originals that no gate can read and a dated review of them. Restored 2026-10-02 from the agent checkpoint `9a38915` after the consolidation deleted the folder, and now tracked so it cannot be lost the same way twice |
 
 ## File discipline
 
@@ -75,3 +96,26 @@ New findings, slice records, errata, and requests are appended to the relevant m
 Future agents must update these master files instead of creating new top-level markdown files. The master files are the canonical entry points for all documentation content. Source files consolidated into these masters are deleted after verification and should not be cited as live sources. When citing a fact from the consolidated set, cite the master file and part anchor as the reference.
 
 Content that does not fit any existing master should be proposed to the owner with a recommendation for which master to extend, rather than creating a new file. The Provenance section of each master should be updated whenever new content is appended to record the addition.
+
+### Root directory (owner instruction 2026-10-02)
+
+No new documentation file is created in the repository root, and no new documentation content is added there either: it goes into the relevant master above. The root files the repo's documentation precedence and role ownership already name form a standing set and stay put: `AGENTS.md`, `CLAUDE.md`, `PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `CONSTRAINTS.md`, `DESIGN.md`, `KNOWN-ISSUES.md`, `PLAN.md`, `README.md`. That list is exhaustive; a root markdown file not in it is unconsolidated by definition.
+
+The standing set is documentation. Two root files are generated tooling artifacts and are exempt from this clause by type, not by name: `PRODUCT.md`, owned by the `impeccable` plugin, which carries `<!-- impeccable:product-schema 1 -->` and rewrites the file on its next pass, and `SKILL.md`, the human-readable half of the skill registry pair recorded in `GOVERNANCE.md` ("`.agents/skills/skills.json` (machine), `SKILL.md` (human)"). Neither is documentation to consolidate, and hand-editing either one loses to the generator. `PRODUCT.md` is refreshed by the plugin; `SKILL.md` is rebuilt by `refresh-skill-registry`, which scans every skill scope from disk, because the file's own description claims a complete roster while its content omits `~/.qoder/skills` and every plugin skill.
+
+`source.md` (171 lines, a pasted Laravel bootstrap prompt) was deleted on 2026-10-02. It was neither documentation nor a tooling artifact, and the only substantive sentence about it, `docs/UMAMUSUME_REFERENCE.md:2135`, is a ruling that it never was a source registry. That ruling stays verbatim with the deletion recorded beside it. Other apparent citations were substring noise inside `ADR-0013-character-profile-source.md`.
+
+### Disposition of the strays (executed 2026-10-02)
+
+24 tracked markdown files measured outside `docs/research-scratch/`, excluding `docs/adr/` (19, governance by design) and `.ai/**` (14, generated). Ten are the root governance set, six are the repo-authored scenario guides `01`, `02`, `03`, `07`, `08`, `09` that the publisher-references round left alone, one is `docs/UMAMUSUME_REFERENCE.md`, named off-limits by the roster workstream's own fence (`CATALOG-ROSTER-WORKSTREAM.md:161`) and cited by 53 tracked files, and three were root files handled above. That accounts for 20.
+
+Four files were unclassified. They are resolved, not merely recorded, and the resolution for three of the four was to leave the file where it is and register it here, because a file whose job is locational stops working when it moves.
+
+| File | Resolution |
+|---|---|
+| `docs/_UMAMUSUME UX DELIVERABLES - MERGED.md` | Promoted to master `16`, now `docs/research-scratch/UX-DELIVERABLES.md`. It held the only working-tree copies of three write-ups the consolidation deleted, so folding it into an existing master would have produced a 25,000-line file and leaving it `_`-prefixed in `docs/` put it outside the index. Byte-identical move; sha256 unchanged; 25 lines of provenance and erratum added, zero body lines deleted. |
+| `docs/design-research/_scratch/WEB-FINDINGS.md` | Folded into `DESIGN-CORPUS.md` as `## WEB-FINDINGS.md`, then deleted. It was tracked inside a directory G-60 lists as ignored historical scratch. 335 non-blank lines verified present, 22 headings demoted with no depth errors, and the corpus's own pointer to it repointed at the embedded section. |
+| `docs/SKILL_AUTOMATION.md` | **Deliberate exception, left in place.** 90 lines, cited by `KNOWN-ISSUES.md`. It documents automation for the skill layer that lives in `.ai/skills/`, so it belongs with the code-side tooling tree, not in a research master. Registered in the Routing Table below. |
+| `docs/design-research/prototypes/superseded/README.md` | **Deliberate exception, left in place.** 16 lines whose entire function is to stand in a directory of four retired prototypes and say they are not the current design. Moving it destroys the warning it exists to give. Registered in the Routing Table below. |
+
+No repo-level protected-file registry exists to check future strays against: the pre-consolidation inventory that carried one is, per `CONSOLIDATION-LOG.md`, absent from disk and from all git history. The reproducible census in `CONSOLIDATION-LOG.md` §Census is the substitute.
