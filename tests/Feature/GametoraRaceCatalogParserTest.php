@@ -211,3 +211,9 @@ it('skips a malformed row without discarding the valid ones beside it', function
     expect($rows)->toHaveCount(1)
         ->and($rows[0]['title'])->toBe('Tenno Sho (Autumn)');
 });
+
+it('does not emit export_slot_id because the column does not exist in the schema', function (): void {
+    $row = parseRaceRow();
+
+    expect($row)->not->toHaveKey('export_slot_id');
+});

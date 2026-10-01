@@ -19,7 +19,6 @@ interface RaceCatalogSourceParser
 {
     /**
      * @return list<array{
-     *     export_slot_id: string,
      *     scenario_key: string|null,
      *     year: int,
      *     month: int|null,

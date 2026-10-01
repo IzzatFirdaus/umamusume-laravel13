@@ -160,7 +160,6 @@ final class GametoraRaceCatalogParser implements RaceCatalogSourceParser
         $grade = (int) ($details['grade'] ?? 0);
 
         return [
-            'export_slot_id' => $slotId,
             'scenario_key' => self::GLOBAL_FINALS_BY_SLOT[$slotId] ?? null,
             'year' => $year,
             'month' => $month,
