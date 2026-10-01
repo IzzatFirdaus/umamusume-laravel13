@@ -2483,3 +2483,20 @@ record. Filed only, with the measurements above so the state can be re-checked r
 
 **Owner.** Docs Writer for the cross-reference line and the sweep of existing citations; the rename
 decision is the owner's, because it moves a path that other documents cite by name.
+
+## KI-53 A peer session deleted `database/seeders/data/race-tier-labels-2026-09-29.json` and left it as `.held-aside`, breaking eleven tests — FILED 2026-10-01, OPEN
+
+**Symptom.** `git status` shows `D  database/seeders/data/race-tier-labels-2026-09-29.json` and `??  database/seeders/data/race-tier-labels-2026-09-29.json.held-aside`. Eleven tests fail without the tracked file:
+- `tests/Feature/ScenarioSlotSeederResilienceTest` (4 tests)
+- `tests/Feature/ScenarioSlotSeederTest` (1 test)
+- `tests/Feature/TierLabelJoinTest` (6 tests)
+
+`ScenarioSlotSeederResilienceTest` is the suspected deleter per its `withTierLabelsFileAbsent()` helper, which renames the file to `.held-aside` and does not restore it in a failing path.
+
+**State.** The tracked file is deleted in the working tree; the held-aside variant exists at the same path prefix. A fresh checkout would restore the file, but the peer's intent for the held-aside name is unknown, and restoring could race a peer's in-progress edit.
+
+**Owner options.** (a) The peer restores the file and removes the held-aside, or (b) the tests are re-pointed at the new path and the original deletion becomes deliberate. The KI records the state; the fix is the owner's call.
+
+**Do not restore from git yet.** The held-aside name suggests an intentional intermediate state; restoring blindly could overwrite a peer's intended change.
+
+**Related.** This is the fourth instance of the shared-DB write pattern (§6 `SESSION-CONSOLIDATION-2026-09-30.md`), and the second session to modify a seeder data file in-place without coordination.

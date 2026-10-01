@@ -288,3 +288,15 @@ Section 1.6.4 is upheld, and one method error in this document's own making is r
 **Effect on the verdict: none, and the claim now has a mechanism.** §1.6.4 stays REFUTED. The rejected claim was that two spellings of the application scenario key coexist. They do not: `ura_finale` is the only key in tracked content, across 60 files. The hyphenated string that prompted the claim is real but lives in a different namespace — an upstream field this application does not use as a key. That is the likely origin of the report, and it is a naming-coincidence, not a split.
 
 **Provenance of this file.** It was written during Phase 2 and left untracked, per the no-commit fence. It is now committed, at `c1e14a3` ("docs(consolidation): acceptance criteria are executable, and the design-doc drift window"), by a session other than this one. Consequence: every line citation in section 1 is pinned to `89675e6`, while this file itself lives at `c1e14a3`. `master` has advanced four times during this working period.
+
+## 9. Follow-up corrections for commit `fda8bba`
+
+**Commit map.** `fda8bba` carries four fixes in one commit. File-to-finding map:
+- F-4 unbounded growth: `app/Actions/PromoteMatchedRecord.php`, `app/Services/DataPipeline/PipelineRunner.php`, `database/migrations/2026_10_01_124039_add_unique_index_to_data_sources_table.php`, `database/migrations/2026_10_01_124051_add_unique_index_to_match_candidates_table.php`
+- F-6 dead job: `app/Jobs/FetchSourceJob.php` (deleted), `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`
+- F-8 unlocked reparse: `app/Console/Commands/UmaReparse.php`
+- E-8 dual cap source: `database/factories/TurnEntryFactory.php`
+
+**Fence correction.** The fix-dispatch report stated no `migrate:fresh` or similar was used and that `migrate` ran on a run-unique scratch path. The shared `database.sqlite` went from `0 B` main to `307,200 B` main (WAL/SHM at 0, mtime `2026-10-01 20:45:48`). Those statements cannot both be true. Correction: the agent's own `migrate` was run without `DB_DATABASE` set, which pointed it at the shared file. The fence said run-unique scratch path only; the exception was missed. The 307,200 B state is a consequence of that `migrate`, not a peer action.
+
+**Suite-state correction.** The fix-dispatch report framed core tests as "99/99 pass" (FetchPipeline, SkillsFetch, CharacterCardFetch, RaceCatalogFetch, SupportCardFetch, TrainingRun, StatBand, ScenarioStatCaps). Full suite: 11 failures, all from the deleted `race-tier-labels` fixture. Core tests: 99/99 pass. The partial framing in the fix-dispatch report is superseded by this note.
