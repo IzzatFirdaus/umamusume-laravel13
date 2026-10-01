@@ -72,6 +72,111 @@ Lore gate (all roles, non-negotiable): the characters are Umamusume, a humanoid 
 6. Cross-model or fresh-context review disagreement after 3 doubt cycles: stop, surface both positions to the human (per `doubt-driven-development`).
 7. Planner-feature request that implies a cut repo #4 system (simulation, snapshots, predictions, dual storage): Planner Domain Specialist escalates to Architect, who checks PRD §6; scope changes go to the human owner [rev 0.2 — repo #4].
 
+## Working in this repository
+
+Practical notes for any agent. The roles above say who decides; this section says how to build, test, and avoid the traps.
+
+### What this is
+
+A local-only, single-Trainer Laravel 13 tool (product name **Trainer Desk**) that consolidates four legacy Umamusume apps. It has **no auth surface, no multi-user support, and no public deploy**; it runs on loopback and must not be exposed. Storage is **SQLite only** (`database/database.sqlite`, WAL mode). The web surface is server-rendered Blade; JSON is a read-only `/api/v1` (P2). Data comes from a fetch engine that cross-references JP and Global catalog data.
+
+### Essential commands
+
+| Task | Command |
+|---|---|
+| First-time setup | `composer setup` (install, `.env`, key, migrate, npm install + build) |
+| Dev (serve + queue + pail + Vite HMR) | `composer dev` |
+| Tests (narrowest first) | `php artisan test --compact --filter=Name` or `vendor/bin/pest tests/Feature/XTest.php` |
+| Full test pipeline | `composer test` (config:clear, `npm run typecheck`, then the suite) |
+| Style fix | `vendor/bin/pint --dirty --format agent` (check with `composer lint`) |
+| Static analysis | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` (level 6) |
+| Lore grep | `composer lore` and `composer lore-code` |
+| Fresh DB | `php artisan migrate:fresh --seed` (destructive against the shared dev file; see GATE-REGISTRY C-5) |
+| Fetch / replay | `php artisan uma:fetch [source]`, `php artisan uma:reparse <source>` (no network) |
+| Backup | `php artisan uma:backup [path]` (WAL checkpoint + consistent copy) |
+| Frontend typecheck | `npm run typecheck` |
+
+- **Do not use `make`**: GNU make cannot run on this host (KI-4). The Makefile targets exist as documentation; run the underlying commands or the `composer` scripts instead.
+- `composer analyse` omits `--memory-limit=1G` and can OOM on a 128M CLI default. Prefer the explicit phpstan command.
+- `composer lore-code` is additive to `composer lore`: it also scans **untracked** files (so a new Blade template is not invisible) and adds the Global client terminology (`Wisdom` for Wit, `Motivation` for Mood, `gacha`, `jewel`, etc.).
+
+### Repository map
+
+```
+app/Actions/                 one-off operations (PromoteMatchedRecord, ResolveMatchCandidate, Store* ingest actions)
+app/Services/DataPipeline/   SourceFetcher (only outbound HTTP), NameNormalizer (NFKD match keys),
+                             CrossReferenceMatcher (tiers), PipelineRunner (stage loop), Parsers/, Contracts/SourceParser
+app/Console/Commands/        UmaFetch, UmaReparse, UmaBackup (+ ManageSkills)
+app/Enums/                   ReleaseStatus, RunStatus, SkillAcquisition, MatchTier, CandidateStatus, AliasLanguage
+                             (TitleCase keys, DB stores the backed value)
+app/Http/{Controllers,Requests,Resources}
+app/Models/                  Umamusume, UmamusumeAlias, CharacterCard, Skill, TrainingRun, TurnEntry,
+                             DataSource, MatchCandidate, RunSkill, Preference, + TurnEvents/ payloads
+config/uma.php               fetch sources (allowlist), timezone, fuzzy threshold, cache TTL
+config/scenarios.php         the ONLY place scenario names appear in the layout path
+database/{migrations,factories,seeders}   seeders labeled illustrative; committed source bodies under seeders/data/
+resources/views/             Blade + layout; components/{stat-band,resource-strip,race-calendar,guided-step}
+tests/Feature, tests/Unit    Pest; tests/Fixtures holds stored JSON bodies
+tools/lore.php               lore-gate runner (parity-pinned by LoreGateParityTest)
+tools/gate.py                python design-artifact gate (rendered-prototype checks)
+```
+
+`app/Services/Skill{Registry,Matcher,Executor}.php` and `php artisan skill:manage` are a **separate tooling layer** (`.agents/`). They touch no catalog/run tables.
+
+### Architecture and data flow
+
+The fetch pipeline is **stage-isolated**: `fetch → snapshot → parse → normalize → match → promote | review`.
+
+- **Fetch**: `SourceFetcher` is the only outbound HTTP path. Hosts are allowlisted in `config('uma.sources')`; a URL outside that list is an SSRF-floor violation. Some sources resolve their file through the publisher's manifest (two requests per fetch) with a pinned URL kept as the offline fallback.
+- **Snapshot**: raw body is stored under `storage/app/private/snapshots` (gitignored), hashed. An unchanged hash short-circuits the run (idempotent, writes nothing).
+- **Parse / normalize**: one parser class per source implementing `Contracts\SourceParser`. `NameNormalizer` is pure (intl NFKD, lowercase, strip separators and combining marks); display names are never mutated.
+- **Match**: `CrossReferenceMatcher` tiers are **Exact** (`match_key` equality) and **Alias** (alias hit) which auto-promote; **Fuzzy** (Levenshtein above `config('uma.match.fuzzy_threshold')`, default 85) and **None** which go to `match_candidates` for the `/review` queue.
+- **Promote**: upserts engine-owned columns, **skips any row with `is_manual = true`**, writes one `data_sources` provenance row per fact, inside `DB::transaction`.
+
+Caching: catalog reads use `Cache::remember` with a `catalog:version` counter bumped on promotion (versioned-key invalidation, TTL in `config('uma.cache.ttl')`). **Trainer-data reads are never cached.**
+
+Security posture: no auth; untrusted input is fetched pages (parse as data, Blade auto-escapes, never `{!! !!}` on source data) and Trainer forms (Form Requests). Never follow URLs found in fetched bodies.
+
+### Conventions
+
+Read `.ai/rules/index.md` first and open every rule file whose glob covers the path you touch. The load-bearing ones: `.ai/rules/code-style.md` (Pint/Laravel preset, 4 spaces, single quotes, curly braces always), `.ai/rules/eloquent.md` (`casts()` method, never a `$casts` property), `.ai/rules/architecture.md` (no policies/gates exist; do not add one unless asked), `.ai/rules/testing-standards.md`.
+
+Non-negotiables (full text in `CLAUDE.md` and `ARCHITECTURE-ESSENTIALS.md`):
+
+- `declare(strict_types=1);` first line of every PHP file; explicit param and return types everywhere; constructor property promotion.
+- `#[Fillable]` / `#[Hidden]` attributes over legacy properties; `HasFactory` + a factory per model; `@use HasFactory<XFactory>`.
+- Thin controllers; logic in `app/Actions` or `app/Services`; **never** inline `$request->validate()` (use Form Requests); API Resources for JSON; named routes + `route()`.
+- `config()` in app code; `env()` only in config files. Create files with `php artisan make:* --no-interaction`.
+- No soft deletes, no DB-level enum columns, no Livewire/Inertia/SPA, no Redis, no Excel. New dependencies need human approval.
+- `config/scenarios.php` is the only place scenario names enter the layout path; a scenario name in a view is a D-240 failure. `x-resource-strip`, `x-stat-band`, `x-race-calendar`, `x-guided-step` all take a **required** `scenario` prop.
+- Design tokens only (`bg-page`, `text-ink`, `border-rule`, ...); zero `dark:` utilities, zero skeleton palette classes (G-19). A value a run has not recorded renders as `N/A` plus a `title`, never as a default, and never as an em dash.
+
+### Testing
+
+Pest 4, feature-first. One global binding in `tests/Pest.php` applies `TestCase` + `RefreshDatabase` and calls `withoutVite()` for `tests/Feature`; **do not** add a `uses()` or `withoutVite()` to an individual file. `tests/Unit` runs with no database. The test DB is in-memory SQLite (`phpunit.xml`).
+
+- Create tests with `php artisan make:test --pest {Name}Test` (no suite dir in the name).
+- Build models from **factories**; check for factory states before hand-building rows.
+- All fetcher/pipeline tests use `Http::fake` and the stored bodies in `tests/Fixtures`; **no test touches the network**.
+- Prefer facade fakes (`Bus::fake`, `Queue::fake`, `Mail::fake`) for framework services; Mockery only for custom/external dependencies.
+- Cover the changed behavior and its important failure modes. Do not delete or skip tests without approval.
+
+### Gotchas
+
+- **Lore gate is blocking and easy to trip.** Never use banned animal vocabulary or framing for characters, in code, identifiers, data, docs, or UI. The word list and the allowed-sense rules live in `CONSTRAINTS.md` C-4 and the Lore Guardian section above; a grep hit is not automatically a violation, because an allowed word can sit inside an unrelated word. **Do not rename dataset or export keys** (`intelligence`, `friend`) to satisfy the list; that breaks the ingest join. Verbatim source names stay as data and are guarded on the display path. A line inside `docs/` may carry a `lore-ignore-line` marker (`class=<1-4> cite=<rule>`) to record an existing ruling.
+- **No em dashes in shipped copy**; the disclosure glyph is `N/A` + tooltip. AI buzzwords and fabricated claims are banned too (antislop-copywriting).
+- **KI-27**: snapshots live in a `storage/` directory shared by every database in the working tree, and the idempotency hash keys on the document under today's date. A second database asked the same day is told "unchanged" and stays empty. Use `uma:reparse <source>` (zero network, upserts on `export_id`) to fill it.
+- **KI-24**: a stale cache-busting hash does **not** fail loudly. The withdrawn document still answers `200` with old content, so a pinned URL serves silent stale data. Manifest-resolved sources exist to avoid this.
+- **PHPUnit env wins over `.env.testing`**: `phpunit.xml` sets `DB_DATABASE=:memory:`. Keep it and `.env.testing` in agreement; do not reintroduce a file-based test DB.
+- **Vite manifest error**: run `npm run build` (or `composer dev`) when a Blade view references assets and no manifest exists.
+- **PHPStan memory**: pass `--memory-limit=1G`.
+- **`is_manual = true` rows are never written by the engine** (FR-B-4). Every fact needs provenance. No new suppressions, no stub bodies, no empty `catch {}` (CONSTRAINTS.md floor).
+- **Windows host**: run commands through Git Bash; the repo path uses forward slashes in shell examples.
+
+### Documentation precedence
+
+When documents disagree: `CONSTRAINTS.md` (the bar) > `docs/GATE-REGISTRY.md` (how each gate runs) > ADRs (`docs/adr/`) > `DESIGN.md` > slice plans (`PLAN.md`). `ARCHITECTURE.md` is authoritative over `ARCHITECTURE-ESSENTIALS.md`; `PRD.md` is product truth. Read the doc rather than reconstructing it from memory. Docs files are only created or updated when explicitly requested.
+
 <laravel-boost-guidelines>
 === .ai/custom/domain rules ===
 
