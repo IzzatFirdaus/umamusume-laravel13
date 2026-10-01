@@ -484,7 +484,30 @@
     <form method="POST" action="{{ route('runs.skills.sync', $run) }}" class="mt-4 max-w-3xl space-y-3 rounded-md border border-rule bg-raised p-4 text-sm">
         @csrf
         @for ($row = 0; $row < $rowTotal; $row++)
-            @php $entry = $skillRows->get($row); @endphp
+            @php
+                $entry = $skillRows->get($row);
+                // Rehydrated from `old()` so a refused submit does not discard the edit the Trainer
+                // just made. The deck form has done this since D-3, on the same reasoning: the rail
+                // and this form disagreed about what to do with input the server had refused.
+                //
+                // The accessors are dotted, and have to be. `old()` resolves through `Arr::get`,
+                // which splits on dots and treats `skills[0][skill_id]` as one literal key that the
+                // nested `_old_input` array does not contain, so the bracketed spelling returns the
+                // default and the form renders the stored value with no visible cause. The `name`
+                // attributes stay bracketed; only the lookup is dotted. The cast to string is D-3's
+                // too, because `old()` hands back a string and the pivot hands back an int, and a
+                // row that keeps its stored value has to keep rendering too.
+                $selectedSkillId = old("skills.{$row}.skill_id", $entry?->id);
+                $selectedStatus = old("skills.{$row}.status", $entry?->pivot->status);
+                $selectedTurn = old("skills.{$row}.turn_acquired", $entry?->pivot->turn_acquired);
+                // `@error` compiles its argument to a single-quoted PHP string, so a key written as
+                // "skills.{$row}.turn_acquired" reaches the error bag as that literal and matches
+                // nothing. The keys are built here, where the file is still plain PHP, and the
+                // directive is handed the finished string.
+                $skillIdError = "skills.{$row}.skill_id";
+                $statusError = "skills.{$row}.status";
+                $turnError = "skills.{$row}.turn_acquired";
+            @endphp
             {{-- KI-36. Each control gets its own `<label for>`: the wrapper label used to name the
                  group, which left the status select and the turn input with no accessible name at
                  all, and a placeholder is not a name — it disappears exactly when the field has a
@@ -499,25 +522,34 @@
                                  choice: a Trainer planning a build picks partly on what the skill
                                  costs, and the catalogue has been stating that figure since the
                                  import (FR-D-1). --}}
-                            <option value="{{ $skill->id }}" @selected($entry !== null && $entry->id === $skill->id)>{{ $skill->name }}@if ($skill->sp_cost !== null) · {{ $skill->sp_cost }} SP @endif</option>
+                            <option value="{{ $skill->id }}" @selected((string) $selectedSkillId === (string) $skill->id)>{{ $skill->name }}@if ($skill->sp_cost !== null) · {{ $skill->sp_cost }} SP @endif</option>
                         @endforeach
                     </select>
+                    @error($skillIdError)
+                        <p class="text-risk">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="flex flex-col gap-1">
                     <label for="skill-{{ $row }}-status" class="text-ink-muted">Acquisition status</label>
                     <select id="skill-{{ $row }}-status" name="skills[{{ $row }}][status]" class="rounded-md border border-rule bg-raised text-ink px-2 py-1">
                         @foreach (\App\Enums\SkillAcquisition::cases() as $acquisition)
-                            <option value="{{ $acquisition->value }}" @selected($entry !== null && $entry->pivot->status === $acquisition->value)>{{ $acquisition->label() }}</option>
+                            <option value="{{ $acquisition->value }}" @selected((string) $selectedStatus === (string) $acquisition->value)>{{ $acquisition->label() }}</option>
                         @endforeach
                     </select>
+                    @error($statusError)
+                        <p class="text-risk">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="flex flex-col gap-1">
                     <label for="skill-{{ $row }}-turn" class="text-ink-muted">Turn acquired</label>
                     <input type="number" id="skill-{{ $row }}-turn" name="skills[{{ $row }}][turn_acquired]" min="1"
-                           value="{{ $entry?->pivot->turn_acquired }}" placeholder="Turn"
+                           value="{{ $selectedTurn }}" placeholder="Turn"
                            class="w-20 rounded-md border border-rule bg-raised text-ink px-2 py-1">
+                    @error($turnError)
+                        <p class="text-risk">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
         @endfor

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\ReleaseStatus;
 use App\Enums\SkillAcquisition;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -51,7 +52,21 @@ class StoreRunSkillRequest extends FormRequest
     {
         return [
             'skills' => ['present', 'array'],
-            'skills.*.skill_id' => ['required', 'integer', Rule::exists('skills', 'id')],
+            // Scoped to the rows a Global Trainer can meet, using the same scope every read path
+            // starts from (ADR-0011 §2). Unscoped, this accepted any id in the table, so a skill the
+            // form can never offer could be pinned to a run by posting its id. The predicate is
+            // repeated here rather than shared with the controller on purpose: a `Rule::exists`
+            // cannot call a model scope, and a constraint extracted for two callers would be one
+            // more place for the two to drift apart.
+            'skills.*.skill_id' => [
+                'required',
+                'integer',
+                Rule::exists('skills', 'id')->where(
+                    fn ($query) => $query
+                        ->where('release_status', ReleaseStatus::GlobalReleased->value)
+                        ->where('name_is_client', true),
+                ),
+            ],
             'skills.*.status' => ['required', Rule::enum(SkillAcquisition::class)],
             'skills.*.turn_acquired' => ['nullable', 'integer', 'min:1'],
         ];

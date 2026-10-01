@@ -164,6 +164,84 @@ it('preselects each existing skill with the status and turn the Trainer gave it'
         ->and((int) $turnValue)->toBe(9);
 });
 
+it('keeps the typed edits when a submit is refused', function (): void {
+    // The last thing a Trainer does before hitting save is re-read a row they just fixed. When the
+    // server refuses the submit for some other row, the re-rendered form used to hand back the
+    // *stored* values instead, so the fix they just made vanished and the row they were re-reading
+    // said the opposite. The deck form has rehydrated from `old()` since D-3; this form never did.
+    $run = labelledRun();
+    $skills = Skill::orderBy('export_id')->get();
+
+    // Every row from 0 up is filled, deliberately. `prepareForValidation` filters the unused rows
+    // out and re-indexes with `array_values`, so a submit that skips a middle row validates one
+    // index while the flashed old input keeps the index the Trainer sent, and the two stop
+    // describing the same row. That misalignment is a separate defect from the one under test here,
+    // so it is reported on its own rather than folded into this fix.
+    //
+    // Within the payload: row 0 is edited to a different skill, a different status, and a turn; row
+    // 1 carries the refusal (`min:1` refuses a turn of 0), so the rejection is genuine and row 0's
+    // edits are the input at risk. The Referer is sent because a real browser sends one from the
+    // form page and `back()` has no other way to find the run. Nothing gets filtered, so the
+    // re-index is a no-op and the error key and the old-input key are the same key.
+    //
+    // One round trip with `followingRedirects()`, because that is what the browser does and it is
+    // the only way the flashed `old()` input and the error bag reach the rendered form. Issuing a
+    // separate `get()` after the post leaves the form rendering the stored values, which reads as
+    // the defect this test is about while actually being a harness artefact; `RunDeckTest` records
+    // the same trap for the deck form.
+    $response = $this->followingRedirects()
+        ->post(
+            route('runs.skills.sync', $run),
+            [
+                'skills' => [
+                    0 => ['skill_id' => $skills[2]->id, 'status' => 'Acquired', 'turn_acquired' => 17],
+                    1 => ['skill_id' => $skills[0]->id, 'status' => 'Suggested', 'turn_acquired' => 0],
+                    2 => ['skill_id' => $skills[1]->id, 'status' => 'Suggested', 'turn_acquired' => null],
+                ],
+            ],
+            ['HTTP_REFERER' => route('runs.show', $run)],
+        );
+
+    $response->assertOk();
+
+    $html = $response->content();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML($html);
+    $xpath = new DOMXPath($dom);
+
+    $selectedSkill = $xpath->evaluate('string(//select[@name="skills[0][skill_id]"]/option[@selected]/@value)');
+    $selectedStatus = trim($xpath->evaluate('string(//select[@name="skills[0][status]"]/option[@selected])'));
+    $turnValue = $xpath->evaluate('string(//input[@name="skills[0][turn_acquired]"]/@value)');
+
+    expect((int) $selectedSkill)->toBe($skills[2]->id)
+        ->and($selectedStatus)->toBe(SkillAcquisition::Acquired->value)
+        ->and((int) $turnValue)->toBe(17);
+
+    // The refused row keeps the number the Trainer typed rather than being quietly corrected to
+    // something valid, because the reason it was refused is about to be printed under it.
+    expect($xpath->evaluate('string(//input[@name="skills[1][turn_acquired]"]/@value)'))->toBe('0');
+
+    // And the refusal has to be visible on the row that caused it, or the Trainer is left staring
+    // at a form that looks like it saved. `text-risk` is what the deck form uses for this, so the
+    // class is part of the fact being asserted, and the message has to land inside *this* form
+    // rather than somewhere else on the page.
+    $errorText = array_map(
+        static fn (DOMNode $node): string => trim(preg_replace('/\s+/', ' ', $node->textContent) ?? ''),
+        iterator_to_array($xpath->query('//form[.//select[starts-with(@name, "skills[")]]//p[contains(@class, "text-risk")]')),
+    );
+
+    expect($errorText)->toHaveCount(1)
+        ->and($errorText[0])->toContain('at least 1');
+
+    // The refusal must not have half-written either: the row the edit was aimed at still holds what
+    // the pre-populate gave it, because validation runs before the controller body.
+    $run->refresh();
+
+    expect($run->skills->firstWhere('id', $skills[0]->id)->pivot->status)->toBe('Suggested')
+        ->and($run->skills->firstWhere('id', $skills[0]->id)->pivot->turn_acquired)->toBeNull();
+});
+
 it('saves several rows in one submit', function (): void {
     $run = labelledRun();
     $skills = Skill::orderBy('export_id')->get();

@@ -698,7 +698,10 @@ class TrainingRunController extends Controller
     public function syncSkills(StoreRunSkillRequest $request, TrainingRun $run): RedirectResponse
     {
         foreach ($request->validated()['skills'] as $entry) {
-            $skill = Skill::find((int) $entry['skill_id']);
+            // The same scope the request rule applies, so the two cannot disagree about which rows
+            // are writable. The request is what refuses an ineligible skill; this is the second
+            // gate behind it, and the null check stays because `find()` is nullable.
+            $skill = Skill::availableOnGlobal()->find((int) $entry['skill_id']);
 
             if ($skill !== null) {
                 $run->setSkillStatus($skill, $request->acquisitionFor($entry), $entry['turn_acquired'] ?? null);

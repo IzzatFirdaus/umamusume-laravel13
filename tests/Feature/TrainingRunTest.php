@@ -72,9 +72,16 @@ it('rejects a stat above the base cap when the run names no scenario', function 
 
 it('records suggested acquired and skipped skills on a run', function (): void {
     $run = TrainingRun::factory()->create();
-    $suggested = Skill::factory()->create(['name' => 'Certain Victory']);
-    $taken = Skill::factory()->create(['name' => '1st Place Kiss☆']);
-    $missed = Skill::factory()->create(['name' => 'Feel the Burn!']);
+
+    // The two availability columns are stated rather than left to the factory, because a bare
+    // `Skill::factory()` row is not one the catalogue would offer and the write path now refuses
+    // those. This test is about three statuses being recorded, not about which rows are writable, so
+    // the fixture names the rows it means to write.
+    $offerable = ['release_status' => ReleaseStatus::GlobalReleased->value, 'name_is_client' => true];
+
+    $suggested = Skill::factory()->create(['name' => 'Certain Victory', ...$offerable]);
+    $taken = Skill::factory()->create(['name' => '1st Place Kiss☆', ...$offerable]);
+    $missed = Skill::factory()->create(['name' => 'Feel the Burn!', ...$offerable]);
 
     test()->post("/training-runs/{$run->id}/skills", [
         'skills' => [
@@ -94,6 +101,33 @@ it('records suggested acquired and skipped skills on a run', function (): void {
         ->assertSee('1st Place Kiss☆')
         ->assertSee('Feel the Burn!');
 });
+
+it('refuses to pin a skill the Global catalogue does not offer', function (array $attributes): void {
+    // The read path filters through `scopeAvailableOnGlobal` (ADR-0011 §2), and the write path did
+    // not: `Rule::exists('skills', 'id')` and `Skill::find()` both accept any row in the table, so a
+    // skill the form can never offer could be pinned to a run by posting its id. Nothing else
+    // about the payload is wrong, so before this was scoped the request returned a plain redirect,
+    // reported no errors, and wrote the row.
+    //
+    // Both halves of the scope are covered, because they are two independent columns and a fix that
+    // applied only the release status would still let a suppressed client name through.
+    $run = TrainingRun::factory()->create();
+    $ineligible = Skill::factory()->create($attributes);
+
+    test()->from("/training-runs/{$run->id}")
+        ->post("/training-runs/{$run->id}/skills", [
+            'skills' => [
+                ['skill_id' => $ineligible->id, 'status' => 'Acquired', 'turn_acquired' => 2],
+            ],
+        ])
+        ->assertSessionHasErrors('skills.0.skill_id');
+
+    expect($run->refresh()->skills()->count())->toBe(0);
+})->with([
+    'not released on Global' => [['name' => 'Japan Only Skill', 'release_status' => ReleaseStatus::JapanOnly->value, 'name_is_client' => true]],
+    'announced but not released' => [['name' => 'Announced Skill', 'release_status' => ReleaseStatus::GlobalAnnounced->value, 'name_is_client' => true]],
+    'not a client name' => [['name' => 'Suppressed Skill', 'release_status' => ReleaseStatus::GlobalReleased->value, 'name_is_client' => false]],
+]);
 
 it('exports a run as csv and json', function (): void {
     $run = TrainingRun::factory()->create();
