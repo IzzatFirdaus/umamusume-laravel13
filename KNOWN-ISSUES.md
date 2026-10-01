@@ -2499,7 +2499,7 @@ decision is the owner's, because it moves a path that other documents cite by na
 
 **Do not restore from git yet.** The held-aside name suggests an intentional intermediate state; restoring blindly could overwrite a peer's intended change.
 
-**Related.** This is the fourth instance of the shared-DB write pattern (§6 `SESSION-CONSOLIDATION-2026-09-30.md`), and the second session to modify a seeder data file in-place without coordination.
+**Related.** Related but distinct from the shared-database write pattern recorded in `SESSION-CONSOLIDATION-2026-09-30.md` §6; this KI is about a tracked fixture, not the database file.
 
 ## KI-54 The `.held-aside` fixture now collides with the path that restores it: `git restore` recreates the tracked file, then the resilience test's `rename()` warning aborts the test before its `finally` ever runs, failing 11 tests and possibly leaving a second move unrestored - FILED 2026-10-01, OPEN
 
