@@ -1693,6 +1693,47 @@ else's — the card-layer merge (G-SK-6) and the goal ingest this entry delibera
 and none of it blocks a section, because a UI/UX deliverable is a section, its states and its copy, while
 a data deliverable is what fills them.
 
+**Erratum 2026-10-01.** Landed by the Phase B2 follow-up dispatch. Two of this entry's Class A
+measurements are superseded, and the follow-up's own draft understated the second one, so the correction
+is recorded against the measurement rather than against the draft.
+
+**The row count.** Class A records `umamusume` as holding "2 rows and all ten columns are NULL on both".
+A read-only PDO query on 2026-10-01 returns **67 rows**, with all ten `aptitude_*` columns non-null on all
+67. The new rows sit behind the shared database's write-ahead log, not in its main file: the main file
+holds at 1,310,720 bytes and 2026-10-01 02:41:21 while `database/database.sqlite-wal` moved from 168,952
+bytes at 03:03:21 to 337,872 at 14:49:02 the same day. That is why a session fingerprinting the main file's
+SHA-256 sees no change while a query sees 67 trainees, and it is the WAL shape §6's `cp` row warns about,
+read from the other side.
+
+**"Rendered nowhere" is superseded too, and this is the half the follow-up's draft asserted the opposite
+of.** Class A cites `grep -rn aptitude resources/views/` returning **zero hits**. On 2026-10-01 that grep
+returns three files: `resources/views/components/aptitude-grid.blade.php`, which renders all ten letters;
+`resources/views/catalog/partials/form-detail.blade.php:56`, which invokes `<x-aptitude-grid
+:umamusume="$trainee" />`; and `resources/views/components/form-tabs.blade.php`. `git log --diff-filter=A`
+dates the grid to `555b0cb`, 2026-09-30 03:44, the same commit that landed the profile block and the
+costume form tabs, and that is the morning after this entry was filed on 2026-09-29. Class A was accurate
+when written. The entry's own Owner paragraph already planned for it, calling the grid "a view change
+against columns that already exist", so the grid is the entry's predicted fix arriving, not a contradiction
+of its finding.
+
+**What still holds, and what does not.** Class A's `grep` half no longer holds. The heading's "ten parsed
+columns rendered nowhere" no longer holds. Class B's costume-forms half no longer holds, since `555b0cb`
+shipped form tabs. What stands: Class B's skills half, because `resources/views/catalog/show.blade.php:225-229`
+still tells Trainers the card skill arrays "are not stored" while `dd90330` (2026-09-30 16:09) stores two of
+the four, and the page still carries no skills section; Class B's goal-races half; and Class C's first
+defect, because `catalog/show.blade.php:158` and `:162` still print `Unknown` for the two debut dates.
+
+**Status.** OPEN, and not re-statused here. Class A is superseded in full, Class B is reduced to two of its
+three cases, Class C stands. Narrowing the heading is the owner's pen, and this entry deliberately does not
+close, because the false Trainer-facing sentence the heading's second half describes is still on master.
+
+**Commands that re-test every claim above.** `php -r` with a PDO read of
+`select count(*) from umamusume` and one `where aptitude_<c> is not null` per column;
+`grep -rn aptitude resources/views/`; `git log --diff-filter=A --format='%h %ad %s' --date=short --
+resources/views/components/aptitude-grid.blade.php`; `stat -c '%s %y' database/database.sqlite
+database/database.sqlite-wal`; `grep -n 'Unknown' resources/views/catalog/show.blade.php`;
+`git show HEAD:resources/views/catalog/show.blade.php | grep -n 'Skill lists are not shown'`.
+
 ## KI-36 The run screen's skills editor wraps three controls in one label, so two of them have no accessible name — FILED 2026-09-29 (skill selector design pass, as F-12), CLOSED 2026-09-30 (with KI-33's repeater)
 
 **Symptom.** `resources/views/runs/show.blade.php:445-461` puts a single `<label>` around three controls:
@@ -1778,6 +1819,36 @@ ruling with a number, a scope and an instrument attached.
 
 **Owner.** Frontend with the design-system owner: the spec is the authority, and the run screen is the
 second surface to break it after the catalog index.
+
+**Measurement owed, recorded 2026-10-01.** The `h-11` fix landed in `c17e63b` and is asserted at the DOM
+level: `RunSkillRowLabelsTest.php` checks the class on every control in the skills form, counts the controls
+it checked so the loop cannot pass over an empty set, and asserts `step="1"` on the turn input. A browser
+measurement of `getBoundingClientRect().height` at 1280x800 against a scratch database was **not** taken, and
+the reason has two parts, because naming only the first would repeat the error this register's own
+second-order erratum rows warn about, where a correction gave a true half of a mechanism and got believed
+anyway.
+
+1. `browser-testing-with-devtools` is installed but not registered in the session that landed the fix. It
+   sits at `~/.qoder/skills/browser-testing-with-devtools`, a symlink to `~/.agents/skills/` of the same
+   name, and the Skill tool returns `Skill "browser-testing-with-devtools" not found`. So this is an
+   environment gap, not an absent skill, and a future dispatcher should not treat the name as unavailable
+   in general.
+2. The tool that was available is the reason not to blame the skill alone: the Playwright MCP server was
+   connected in that session, so a measurement was reachable. It was not taken because measuring needs a
+   scratch database, a built asset bundle and a running server, and the dispatch authorised the class
+   assertion as the fallback. The gap is a scoping decision, not a missing instrument.
+
+**What the measurement must confirm, and why 44 is expected rather than assumed.** `h-11` is `height:
+2.75rem`, which is 44px at a 16px root. `resources/css/app.css:1` is `@import 'tailwindcss'`, so preflight's
+`box-sizing: border-box` applies and the 1px `--color-rule` border sits inside the 44 rather than adding to
+it; no root `font-size` override is present in that file. That is the mechanism, not the measurement. The
+number the register should eventually carry is four read heights, and it should be read against a scratch
+database with a run-unique name, at 1280x800 and 390x844, the way the skills-section review's section E read
+the 31/31/30/32 set this entry replaced.
+
+**Rides with.** The next slice that stands up a browser scratch database. The class assertion holds until
+then, and the entry stays OPEN on the measurement rather than on the fix: `c17e63b` changed the four
+controls, and no number in this register yet records the four heights after the change.
 
 ---
 
