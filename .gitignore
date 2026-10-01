@@ -59,6 +59,7 @@ Homestead.yaml
 /.continue/
 /.copilot/
 /.crush/
+/.crushrc
 /.factory/
 /.gemini/
 /.hermes/
@@ -89,6 +90,8 @@ Homestead.yaml
 /testing
 /database/*.sqlite*
 *.sql
+# IDE language-server scratch files written into the framework cache directory
+/storage/framework/lsp-*.php
 
 # Impeccable design skill (generated scratch)
 /.impeccable/
