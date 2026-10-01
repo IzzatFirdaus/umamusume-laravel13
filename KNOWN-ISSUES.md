@@ -2497,9 +2497,9 @@ decision is the owner's, because it moves a path that other documents cite by na
 
 **Owner options.** (a) The peer restores the file and removes the held-aside, or (b) the tests are re-pointed at the new path and the original deletion becomes deliberate. The KI records the state; the fix is the owner's call.
 
-**Do not restore from git yet.** The held-aside name suggests an intentional intermediate state; restoring blindly could overwrite a peer's intended change.
+**Do not restore from git yet.** The held-aside name suggests an intentional intermediate state; restoring blindly could overwrite a peer's intended change. Do not run `git restore` on `database/seeders/data/race-tier-labels-2026-09-29.json` until the helper is guarded. Restoring the tracked path triggers the same rename warning that KI-53's deletion already produces, because `withTierLabelsFileAbsent()` is called outside the `try` and the `rename()` at `:105` fires before the `finally` restore.
 
-**Related.** Related but distinct from the shared-database write pattern recorded in `SESSION-CONSOLIDATION-2026-09-30.md` §6; this KI is about a tracked fixture, not the database file.
+**Related.** but distinct from the shared-database write pattern recorded in `SESSION-CONSOLIDATION-2026-09-30.md` §6; this KI is about a tracked fixture, not the database file.
 
 ## KI-54 The `.held-aside` fixture now collides with the path that restores it: `git restore` recreates the tracked file, then the resilience test's `rename()` warning aborts the test before its `finally` ever runs, failing 11 tests and possibly leaving a second move unrestored - FILED 2026-10-01, OPEN
 
