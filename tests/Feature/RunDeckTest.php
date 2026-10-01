@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\DeckSlot;
 use App\Models\SupportCard;
+use App\Models\SupportEffect;
 use App\Models\TrainingRun;
 
 /*
@@ -263,4 +264,57 @@ it('shows the deck panel on a run that names no scenario', function (): void {
         ->assertOk()
         ->assertSee('Support deck')
         ->assertSee('deck[1][support_card_id]', false);
+});
+
+it('lists an equipped card effect at its highest stated anchor and names that basis', function (): void {
+    // The vector is the export's own shape: id then eleven anchors at levels 1, 5, 10 ... 50, and the
+    // highest stated here is level 45, not level 50. The figure must not read as a level this run holds,
+    // so the panel carries the basis sentence beside it (D-256).
+    $run = deckRun();
+    SupportEffect::factory()->create(['effect_id' => 1, 'name_en' => 'Friendship Bonus', 'symbol' => 'percent']);
+    $card = SupportCard::factory()->create([
+        'char_name' => 'Quiet Star',
+        'release_global' => '2025-06-26',
+        'effects' => [[1, 10, -1, -1, -1, -1, 20, 20, -1, -1, 25, -1]],
+    ]);
+    DeckSlot::factory()->atPosition(1)->create(['training_run_id' => $run->id, 'support_card_id' => $card->id]);
+
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertSee('Friendship Bonus 25%', false)
+        ->assertSee('highest stated anchor', false);
+});
+
+it('marks an anchor with no dictionary row instead of inventing a label', function (): void {
+    // D-20: a gap is shown as a gap. The id is the source's own number, so printing it states a fact
+    // rather than guessing a word for an effect the dictionary does not name.
+    $run = deckRun();
+    $card = SupportCard::factory()->create([
+        'char_name' => 'Quiet Star',
+        'release_global' => '2025-06-26',
+        'effects' => [[77, -1, -1, -1, -1, -1, -1, -1, -1, -1, 5, -1]],
+    ]);
+    DeckSlot::factory()->atPosition(1)->create(['training_run_id' => $run->id, 'support_card_id' => $card->id]);
+
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertSee('[Unverified] effect 77', false);
+});
+
+it('renders no effect line for a card whose vector states nothing at any level', function (): void {
+    // An all-`-1` vector is a card the source gives no figure for. A line of nothing would read as a
+    // fact about the effect rather than as an absence, so the row carries no line at all.
+    $run = deckRun();
+    SupportEffect::factory()->create(['effect_id' => 2, 'name_en' => 'Mood Effect', 'symbol' => 'percent']);
+    $card = SupportCard::factory()->create([
+        'char_name' => 'Quiet Star',
+        'release_global' => '2025-06-26',
+        'effects' => [[2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]],
+    ]);
+    DeckSlot::factory()->atPosition(1)->create(['training_run_id' => $run->id, 'support_card_id' => $card->id]);
+
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertSee('Quiet Star')
+        ->assertDontSee('Mood Effect', false);
 });

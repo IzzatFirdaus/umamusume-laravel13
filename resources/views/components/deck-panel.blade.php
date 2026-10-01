@@ -10,6 +10,11 @@
     $slots = $run->deckSlots->keyBy('slot_position');
     $scenarioKey = $run->scenarioKey();
 
+    // The effect dictionary is read once for the panel, not once per slot: six equipped cards ask the
+    // same 35 rows the same question, and a query per card here is the N+1 the catalog reads avoid
+    // elsewhere by loading the small table once and keying it in PHP.
+    $effectNames = \App\Services\SupportCardEffects::dictionary();
+
     // A card already equipped is offered even when it is not Global-released, so a Trainer logging an
     // older or JP-only deck is never shown a slot they cannot re-select their own card in.
     $options = $cards->concat($run->deckSlots->pluck('supportCard')->filter())
@@ -49,6 +54,21 @@
                             <span class="font-bold text-ink-strong">Scenario Link</span>
                         @endif
                     </span>
+                    {{-- The effect facts sit on the record of the choice, not in the picker: a repeater
+                         pays their bytes once per row, this list pays them once per equipped card
+                         (`skills-section-phase-b2-2026-10-01.md` §3.1 and §11). A card whose vector states
+                         nothing renders no line, because an empty line is a control that says nothing. --}}
+                    @php $effects = \App\Services\SupportCardEffects::atCap($slot->supportCard, $effectNames); @endphp
+                    @if ($effects !== [])
+                        <span class="flex w-full flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-ink-muted">
+                            @foreach ($effects as $effect)
+                                {{-- A dictionary row that is absent is marked, not labelled: the id is the
+                                     source's own number, so naming it states a fact rather than inventing a
+                                     word (D-20, UMAMUSUME_REFERENCE.md §1.4.8). --}}
+                                <span>{{ $effect['name'] ?? '[Unverified] effect '.$effect['effect_id'] }} {{ $effect['display'] }}</span>
+                            @endforeach
+                        </span>
+                    @endif
                 </li>
             @endforeach
         </ul>
@@ -100,5 +120,10 @@
     <p class="mt-3 font-mono text-xs text-ink-muted">
         {{ $options->count() }} card{{ $options->count() === 1 ? '' : 's' }} offered · Global releases plus any card this run already uses ·
         hard limit of one copy per card, so a duplicate is refused rather than silently kept.
+        {{-- D-256: a displayed figure names the rule behind it. The figure is a stated anchor, so the
+             rule is that it is the card's highest published value and not the value at some level this
+             run holds, because no level is stored (ADR-0014: identity, not collection). --}}
+        Effect figures are each card's highest stated anchor, the value the source publishes at its top
+        level, not a figure for a level this run records.
     </p>
 </div>
