@@ -137,7 +137,7 @@ it('reparses from the stored snapshot with zero network', function (): void {
 
     $body = json_encode([['name' => 'Special Week', 'name_ja' => '第一回']]);
     $hash = hash('sha256', $body);
-    Storage::disk('local')->put("snapshots/test-source/2026-09-27/{$hash}.html", $body);
+    Storage::disk('local')->put("snapshots/test-source/{$hash}.html", $body);
 
     Http::preventStrayRequests(); // any HTTP call in this test now throws
 

@@ -54,7 +54,10 @@ final class SourceFetcher
 
         $body = $response;
         $hash = hash('sha256', $body);
-        $snapshotPath = "snapshots/{$sourceKey}/".now()->toDateString()."/{$hash}.html";
+        // The name is the content's own identity, so the path holds nothing else. A date segment here
+        // made the existence test below answer a different question than it looked like it was asking:
+        // the same document fetched tomorrow missed it, was stored a second time, and was re-parsed.
+        $snapshotPath = "snapshots/{$sourceKey}/{$hash}.html";
 
         $unchanged = Storage::disk('local')->exists($snapshotPath);
 
