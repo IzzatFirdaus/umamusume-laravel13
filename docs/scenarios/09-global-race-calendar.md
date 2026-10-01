@@ -3,7 +3,7 @@
 **Server:** `[Global]`
 **Status:** Active — source of truth for career race timing, tier, and entry gates
 **Last Verified:** 2026-09-28 (export re-resolved against the live manifest; zero hash drift against the 2026-09-27 snapshot)
-**Superseded By:** nothing for timing data. Team Race timing lives in `06-unity-cup-gametora.md`; Trackblazer Grade Point deadlines live in `04`/`05`. Those tables are deliberately **not** re-pasted here — `02-unity-cup.md` records what duplication did to this file set once already.
+**Superseded By:** nothing for timing data. Team Race timing lives in `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Unity Cup (GameTora)"; Trackblazer Grade Point deadlines live in its Trackblazer sections. Those tables are deliberately **not** re-pasted here — `02-unity-cup.md` records what duplication did to this file set once already.
 
 ---
 
@@ -68,7 +68,7 @@ The 12-cell test, run against the `[Global]`-filtered career pool with the 23 ro
 | Long (≥ 2401 m) | 3 | 5 | 1 |
 | **uma.guide published distribution** | **3 / 10 / 14 / 3** | **6 / 12 / 13 / 5** | **18 / 33 / 17 / 1** |
 
-Twelve of twelve cells agree with the distribution table in [uma.guide's Trackblazer guide, page last updated 2026-04-29](https://uma.guide/guides/trackblazer), as transcribed in `docs/scenarios/04-trackblazer-umaguide.md`. A swapped 200/300 mapping fails every row, which is the point: this test would catch a mislabelled map.
+Twelve of twelve cells agree with the distribution table in [uma.guide's Trackblazer guide, page last updated 2026-04-29](https://uma.guide/guides/trackblazer), as transcribed in `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Trackblazer (uma.guide)". A swapped 200/300 mapping fails every row, which is the point: this test would catch a mislabelled map.
 
 Including the `did_not_exist` rows breaks the match in each band where they add races, and **that is now explained rather than open**: the guide's page is dated 2026-04-29 and the seventeen regional races reached `[Global]` on **2026-07-22** (finding 5), so the guide counted the pool as it stood before them. The base pool is not a narrower universe; it is the same universe three months earlier.
 
@@ -633,7 +633,7 @@ One correction to this file's first draft, recorded because the reasoning was pl
 | Scenario | Career race calendar | Finale row | What differs |
 |---|---|---|---|
 | URA Finale | the tables above | URA Finals Qualifier → Semifinal → **Final (URA)** | Nothing at the race layer. `01-ura-finale.md` calls it a "scripted race-goal calendar". |
-| Unity Cup | the tables above | … → **Final (Aoharu)** | Same slots, different final row. Team Races are a separate schedule and belong to `06-unity-cup-gametora.md`. |
+| Unity Cup | the tables above | … → **Final (Aoharu)** | Same slots, different final row. Team Races are a separate schedule and belong to `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Unity Cup (GameTora)". |
 | Trackblazer | the tables above | … → **Twinkle Star Climax** | Same slots, different final. Progress is measured in Grade Points, not race goals — `03`/`04`/`05`. |
 | Our Grand Concert | the tables above | … → **Final (Grand Live)** | ⚠️ Tier B only. See below. |
 
@@ -716,7 +716,7 @@ All 31 rows in `races.json` carrying either server flag, with whether the row re
 | `[JP]` fan payouts, for the 1–50 identity test | GameTora `race-fans` | B | [race-fans.82ab7152.json](https://gametora.com/data/umamusume/race-fans.82ab7152.json) |
 | Scenario `start_en`, for the `[JP-Only]` ruling | GameTora `scenarios` | B | [scenarios.61b7c51c.json](https://gametora.com/data/umamusume/scenarios.61b7c51c.json) |
 | Career-rank fan ladders | GameTora `en/` and `[JP]` `db-files/single_mode_rank` | B | [en 98 bands](https://gametora.com/data/umamusume/en/db-files/single_mode_rank.d624caeb.json) · [JP 298 bands](https://gametora.com/data/umamusume/db-files/single_mode_rank.aa219d9e.json) |
-| Tier-label distribution test | uma.guide Trackblazer guide, page updated 2026-04-29, transcribed at `docs/scenarios/04` | A | https://uma.guide/guides/trackblazer |
+| Tier-label distribution test | uma.guide Trackblazer guide, page updated 2026-04-29, transcribed at `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` | A | https://uma.guide/guides/trackblazer |
 | Grade code → English label map | uma.guide race dataset behind the agenda planner | A | https://uma.guide/agenda-planner/ |
 | `[Global]` career titles naming the four regional racetracks | GameTora `en/missions/playertitle`, read live 2026-09-28 | S (client strings) | [en/missions/playertitle.f50b8a76.json](https://gametora.com/data/umamusume/en/missions/playertitle.f50b8a76.json) |
 | 17 new graded dirt races on `[Global]`, with entry gates | Game8 EN, page dated 2026-07-25 | A | https://game8.co/games/Umamusume-Pretty-Derby/archives/607096 |

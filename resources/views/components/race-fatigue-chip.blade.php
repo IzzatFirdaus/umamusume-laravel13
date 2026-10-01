@@ -35,7 +35,7 @@
         @endif
     </p>
     <p class="mt-1 text-xs text-ink-muted">
-        The percentages and the countermeasures live in docs/scenarios/05 §Race Fatigue.
+        The percentages and the countermeasures live in docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section "Gameplay Flow & Race Fatigue".
         The table stops being quoted after late December, and the final three races pay
         coins instead of fatigue
         @if ($hideAfterLabel !== null)

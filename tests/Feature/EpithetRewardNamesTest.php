@@ -12,7 +12,7 @@ use App\Models\Skill;
  * the `reward` value verbatim beside the route name. One of those strings, `Mile Straightaways hint +1`,
  * names a skill the catalogue does not hold: `[Global]` has `Mile Straightaways ◎` (export 201031) and
  * `Mile Straightaways ○` (201032), and a bare stem matches neither. The scenario source that supplied
- * the reward, `docs/scenarios/04-trackblazer-umaguide.md:94`, names no tier, so the fix cannot pick one
+ * the reward, `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Epithets (Race Route Bonuses)", names no tier, so the fix cannot pick one
  * without inventing a provenance, which is the move `ADR-0011` §5 and the `Traightaways` withdrawal at
  * `CONSTRAINTS.md` D-210 both refuse. The reward therefore names the family and says the tier is not
  * published.

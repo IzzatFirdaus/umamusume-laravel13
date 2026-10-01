@@ -18,7 +18,7 @@ use App\Models\TrainingRun;
  *
  * The 0..5 bound is the owner's ruling for this slice. The corpus names 3 circles as a
  * safety margin (`config/scenarios.php` `team_race.circles_guidance`, from
- * docs/scenarios/06 §109) and never names a maximum, so the upper bound is a validation
+ * docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section "Unity Cup Team Races") and never names a maximum, so the upper bound is a validation
  * ceiling, not a claimed game fact, and nothing renders it as a meter of five.
  *
  * `training_runs.shop_resets_in` is the countdown the shop panel shows. It is entered,

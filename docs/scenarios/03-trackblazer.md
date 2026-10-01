@@ -3,7 +3,7 @@
 **Server:** `[Global]`
 **Status:** Superseded (pre-release snapshot)
 **Last Verified:** 2026-09-27 (metadata pass)
-**Superseded By:** `04-trackblazer-umaguide.md` and `05-trackblazer-gametora.md`
+**Superseded By:** `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` sections "Trackblazer (uma.guide)" and "Trackblazer (GameTora)"
 
 > **Superseded 2026-09-27.** Trackblazer shipped on Global on **2026-03-12** (`05` is dated to its
 > launch day; `04` was updated 2026-04-29). Everything below is the pre-release view, preserved as

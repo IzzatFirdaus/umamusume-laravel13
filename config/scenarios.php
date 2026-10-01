@@ -107,7 +107,7 @@ return [
             'team_training_energy_penalty' => false,
             'wit_burst_energy_bonus' => 5,
             /*
-            | Team Race opponent selection (docs/scenarios/06-unity-cup-gametora.md
+            | Team Race opponent selection (docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md
             | and 02-unity-cup.md). Three NPC teams, strongest to weakest, and
             | beating a stronger one moves league rank further.
             |
@@ -127,11 +127,11 @@ return [
                     ['name' => 'The Turf Queens', 'tier' => 'middle'],
                     ['name' => 'Novice Squad', 'tier' => 'weakest'],
                 ],
-                // 06:109 — aim for at least 3 circles as a safety margin, because
+                // publisher master, section "Unity Cup Team Races" — aim for at least 3 circles as a safety margin, because
                 // losing decreases league rank. A margin, not a win condition.
                 'circles_guidance' => 3,
                 'loss_lowers_league_rank' => true,
-                // 06:110 — the 2026-07-01 rework added a retry with an Alarm Clock
+                // publisher master, section "July 1, 2026 Update" — the 2026-07-01 rework added a retry with an Alarm Clock
                 // item; older guidance treats a loss as permanent and is wrong.
                 'loss_retryable_with_alarm_clock' => true,
             ],
@@ -197,7 +197,7 @@ return [
             | The static catalogue behind the shop step.
             |
             | Every cost and effect below is transcribed from
-            | docs/scenarios/05-trackblazer-gametora.md §"Full Shop Item List"
+            | docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section "Full Shop Item List"
             | (GameTora, 2026). Nothing here is invented and nothing is a
             | placeholder: a row is either a real client item at its real price or
             | it is absent from the list.
@@ -233,7 +233,7 @@ return [
                 ['name' => 'Coaching Megaphone', 'cost' => 40, 'effect' => 'Training bonus +20% for 4 turns'],
                 ['name' => 'Motivating Megaphone', 'cost' => 55, 'effect' => 'Training bonus +40% for 3 turns'],
                 ['name' => 'Empowering Megaphone', 'cost' => 70, 'effect' => 'Training bonus +60% for 2 turns'],
-                // 05:114 — there is no Wit version. The tool must not offer one.
+                // publisher master, section "Full Shop Item List" — there is no Wit version. The tool must not offer one.
                 ['name' => 'Ankle Weights', 'cost' => 50, 'effect' => '+50% training bonus for that stat, +20% Energy cost, 1 turn'],
                 ['name' => 'Good-Luck Charm', 'cost' => 40, 'effect' => 'Training failure rate 0% for 1 turn'],
                 ['name' => 'Artisan Cleat Hammer', 'cost' => 25, 'effect' => 'Race bonus +20%, 1 turn'],
@@ -245,7 +245,7 @@ return [
             'race_fatigue' => ['hide_after' => 'late_december', 'final_races_pay_coins' => false],
             /*
             | Epithet routes, transcribed from
-            | docs/scenarios/04-trackblazer-umaguide.md §"Epithet Routes" (lines 86-125,
+            | docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section "Epithets (Race Route Bonuses)" (
             | uma.guide, dated after the 2026-07-01 rework). Each row states which
             | condition the tool can actually evaluate:
             |
@@ -269,7 +269,7 @@ return [
                 ['route' => 'Tiara Route', 'epithet' => 'Goddess', 'epithets' => ['Lady'], 'races' => ['Victoria Mile', 'Hanshin Juvenile Fillies'], 'aggregate' => 'both QEII Cups', 'reward' => '+15 to 2 random stats'],
                 /*
                  * The source states the reward as a hint toward `Mile Straightaways` and names no tier
-                 * (`docs/scenarios/04-trackblazer-umaguide.md:94`), while `[Global]` holds two client
+                 * (`docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Epithets (Race Route Bonuses)"), while `[Global]` holds two client
                  * rows of that name, `Mile Straightaways ◎` (201031) and `Mile Straightaways ○` (201032).
                  * Naming one of them would be guessing at a provenance, which is how `Traightaways` was
                  * handled at D-210 rather than swapped for a plausible neighbour. So the row states the

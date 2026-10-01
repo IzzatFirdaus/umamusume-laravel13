@@ -156,7 +156,7 @@ class RaceEntry extends Model
     /**
      * The Grade Points a finish is worth, or null when nothing prices it.
      *
-     * `docs/scenarios/05-trackblazer-gametora.md` §"Grade Points and Shop Coins — Exact Values"
+     * `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Grade Points and Shop Coins - Exact Values"
      * prices a 1st place and says only that lower placements "scale down proportionally", with no
      * ratio named: that gap is KI-10's open half, so a 2nd place is unpriced rather than guessed at.
      * The same page's 100/60/30/0 placement table is Shop Coins, which it says explicitly "do not

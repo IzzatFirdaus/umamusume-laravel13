@@ -14,7 +14,7 @@ use App\Models\TrainingRun;
  * shape is {item, cost, effect}, all as the Trainer entered them.
  *
  * The catalogue is the validator. `config/scenarios.php` `shop_items` is transcribed
- * from docs/scenarios/05 §"Full Shop Item List", so an item name the scenario does not
+ * from docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section "Full Shop Item List", so an item name the scenario does not
  * sell is rejected at save time rather than becoming a row that renders as nothing and
  * a coin total that quietly excludes it (D-256). Cost is checked against the same
  * table because a price the client does not charge is a fabricated fact, and the effect

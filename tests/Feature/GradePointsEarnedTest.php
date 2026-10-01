@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Schema;
  * `race_entries.grade_points_earned` is that figure, stored per row.
  *
  * The price table is `config('scenarios.*.grade_point_by_grade')`, transcribed from
- * docs/scenarios/05-trackblazer-gametora.md §"Grade Points and Shop Coins — Exact Values", which
+ * docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section "Grade Points and Shop Coins - Exact Values", which
  * prices a 1st place and nothing else. Every placement below first is therefore null here, not
  * zero: KI-10's ratio half is still open, and the same page's 100/60/30/0 table is Shop Coins,
  * which that document says explicitly "do not depend on race grade at all". Borrowing it would be

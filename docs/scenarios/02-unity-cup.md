@@ -3,7 +3,7 @@
 **Server:** `[Global]`
 **Status:** Superseded (pre-2026-07-01 mechanic numbers; strategy prose remains useful)
 **Last Verified:** 2026-09-27 (metadata pass)
-**Superseded By:** `06-unity-cup-gametora.md` for all mechanics numbers
+**Superseded By:** `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Unity Cup (GameTora)" for all mechanics numbers
 
 
 > ## ⚠️ Currency of this file — read before using any number in it
@@ -11,7 +11,7 @@
 > **`[Global]` reworked Unity Cup on 2026-07-01** (the same rework that raised stat caps and added
 > purple Spirit Bursts; it corresponds to `[JP]`'s 2023-01-20 revision). This file's strategy and
 > structure are still sound, but several of its mechanic numbers predate that patch, and
-> `docs/scenarios/06-unity-cup-gametora.md` (GameTora, last updated **2026-07-20**, written against
+> `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Unity Cup (GameTora)" (GameTora, last updated **2026-07-20**, written against
 > the post-rework Global build) **supersedes it wherever the two disagree**.
 >
 > Where this file states a figure that 06 also states, **06 is the source of truth**; the figures
@@ -67,7 +67,7 @@ Unlike URA Finale's fairly rigid "4-Speed" template, Unity Cup supports **severa
 
 ## Core Mechanic: Special (Unity) Training & Spirit Bursts
 
-This is the mechanical heart of Unity Cup and the biggest departure from URA Finale. **All values below are the post-2026-07-01 `[Global]` values; the full per-facility tables live in `06-unity-cup-gametora.md`.**
+This is the mechanical heart of Unity Cup and the biggest departure from URA Finale. **All values below are the post-2026-07-01 `[Global]` values; the full per-facility tables live in `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Unity Cup (GameTora)".**
 
 ### How a teammate gets charged
 

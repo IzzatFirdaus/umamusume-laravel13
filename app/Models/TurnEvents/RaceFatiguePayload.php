@@ -14,7 +14,7 @@ namespace App\Models\TurnEvents;
  * guess (D-270). D-230's premise is therefore no longer false as the schema stands, and still not
  * something this tool computes; KI-17's register entry carries the distinction.
  *
- * The word is a label over the sourced bands, not a probability. `docs/scenarios/05`
+ * The word is a label over the sourced bands, not a probability. `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md`
  * §Race Fatigue publishes 0-15 / 0-33 / 60-90+ / 100 percent mood-down ranges against
  * 1 / 2 / 3 / 4+ consecutive races, and one source is not two, so the panel prints the
  * word and the pointer and never a percentage (D-230).

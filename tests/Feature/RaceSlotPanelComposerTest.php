@@ -357,7 +357,7 @@ it('sums Grade Points only when every completed race can be priced', function ()
         'objective_index' => 2,
     ]);
 
-    // 100 for a G1 win, from config's `grade_point_by_grade` (docs/scenarios/05 §Grade
+    // 100 for a G1 win, from config's `grade_point_by_grade` (docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section "Grade
     // Points). The race names the period and the run names the live one: `gradeEarned()`
     // is period-aware now, so a finish entered against Junior is only a Classic figure
     // when the Trainer says Classic is what they are working to (D-270, D-232).

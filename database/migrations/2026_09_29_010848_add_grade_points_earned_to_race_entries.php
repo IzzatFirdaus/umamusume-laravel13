@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Schema;
  * figure per row (PRD US-10, "I track race goals and predictions per run"; ADR-0003 `race_entries`).
  *
  * Null means "not priced", and it is doing real work rather than standing in for zero.
- * `docs/scenarios/05-trackblazer-gametora.md` §"Grade Points and Shop Coins — Exact Values" prices
+ * `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Grade Points and Shop Coins - Exact Values" prices
  * a 1st place only (G1 100, G2 80, G3 60, OP 40, Pre-OP 20) and says the rest "scale down
  * proportionally" without naming a ratio: that is KI-10's open half. The same page's 100/60/30/0
  * placement table is Shop Coins, which that document says explicitly "do not depend on race grade at

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Blade;
  *      must not be reachable from a Unity Cup turn, and Unity Cup's team race must
  *      not be reachable from a Trackblazer turn.
  *   2. Every number on the step is sourced. Coin costs and the rotation timer come
- *      from config, which is fed from docs/scenarios/05. The win-odds circles are
+ *      from config, which is fed from docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md. The win-odds circles are
  *      the one thing that is *not* printed as a number, because the estimate is the
  *      client's and computing it would be simulation (Planner Rule 1).
  *

@@ -652,7 +652,7 @@ below first, and the meter shows "not yet recorded" even though races happened.
 
 **Cause.** Two independent gaps, both measured rather than assumed:
 
-1. `docs/scenarios/05-trackblazer-gametora.md` prices Grade Points for **1st place only**
+1. `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` (Trackblazer, GameTora) prices Grade Points for **1st place only**
    (`grade_point_by_grade`: G1 100 … Pre-OP 20) and states that lower placements "scale
    down proportionally (similar to how Fan gain scales)" without naming a ratio. No
    placement scaling table for Grade Points exists in the corpus, and no fan-placement
@@ -862,9 +862,9 @@ meter can show a target that character cannot be held to.
 **Cause, and it is a source conflict rather than a missing number.** The two Trackblazer
 guides disagree about the same character class:
 
-- `docs/scenarios/04-trackblazer-umaguide.md:48` puts "Sprint Umas with poor aptitude in
+- `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Grade Points (Replacing Career Goals)" puts "Sprint Umas with poor aptitude in
   other distances" on the **Dirt** requirement track.
-- `docs/scenarios/05-trackblazer-gametora.md:25` gives a turf character with poor aptitude
+- `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Basic Information" gives a turf character with poor aptitude
   outside short distances a **third** track, in which only the Classic objective drops to 200.
 
 Neither names the aptitude letter or letters that place a trainee in a track. `umamusumes`
@@ -905,7 +905,7 @@ why at `app/Models/TrainingRun.php:811-826`, and the chip renders "no consecutiv
 recorded". The count is instead entered as `RaceFatiguePayload {consecutive_races}` on the turn it
 applies to, which keeps the fact without inventing a link, and the panel prints one qualitative
 word for the band (unlikely / possible / likely / certain) with the pointer to
-`docs/scenarios/05-trackblazer-gametora.md` §Race Fatigue, never the percentages: one source is
+`docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Gameplay Flow & Race Fatigue", never the percentages: one source is
 not two (D-230).
 
 *(The range this entry originally cited was `:639-650`. It has moved twice since — once before

@@ -10,7 +10,8 @@ tactical-athletic language, dial ENERGY 1 / RHYTHM 1 / MOTION 1.
 (Reason: the only viewer is the owner mid-planning; decoration costs reading
 speed and buys nothing. R-31.)
 
-Relationship to `docs/design-research/DESIGN.md`: that document is the
+Relationship to `docs/research-scratch/DESIGN-CORPUS.md` section "DESIGN.md" (the
+consolidated research package, formerly `docs/design-research/DESIGN.md`): that document is the
 screenshot-anchored research package (measured color ramps, contrast tables,
 cap-stack rendering spec §6.21). This file does not re-derive it. **Amended
 2026-09-27:** the app default is now the research package's measured **light**
@@ -44,7 +45,7 @@ genuinely new here, it is marked `Proposed`.
 
 Tokens live in the `@theme static` block of `resources/css/app.css`
 (Tailwind v4 CSS-first). Source of truth for full ramps and contrast math:
-`docs/design-research/DESIGN.md` §3. **Light is the base palette** (owner ruling
+`docs/research-scratch/DESIGN-CORPUS.md` section "DESIGN.md" §3. **Light is the base palette** (owner ruling
 2026-09-27, reversing the earlier dark-first promotion) because the client is a
 high-key light interface — research D-100. Dark ships as
 `html[data-theme='dark']` and is a measured palette of its own, not an inversion.
@@ -146,7 +147,7 @@ external fonts (offline constraint + C-8 dependency gate).
   contract**, and it rests on an attribute read rather than a browser measurement. It was written on the
   strength of closing KI-25; KI-25 is re-opened, and the measurement that would justify the number —
   arrow-key traversal, the document `scrollWidth` after scoping, the other columns and regions — has not
-  been taken. It also contradicts `docs/design-research/CONSTRAINTS.md` D-40's standing sentence that no
+  been taken. It also contradicts `docs/research-scratch/DESIGN-CORPUS.md` section "CONSTRAINTS.md" D-40's standing sentence that no
   mobile-first compromise is accepted in exchange for desktop density; that reconciliation is a ruling
   (R82) and is deliberately **not** made here. Read this bullet as held, not landed.
 - Scale: Tailwind default 0.25rem increments, no arbitrary values
@@ -327,8 +328,8 @@ disclosure wording. Filed as KI-35.
   `docs/UMAMUSUME_REFERENCE.md` §1.5): the system is **Inspiration**, the two
   ancestors picked for a run are **Legacies**, inheritable traits are
   **Sparks**, and the pre-run pick screen/widget is labeled **Legacy Select**
-  (rules D-260 through D-268, `docs/design-research/CONSTRAINTS.md` §10q;
-  anatomy in that file's DESIGN.md §6.27). Never "sire" / "dam", never
+  (rules D-260 through D-268, `docs/research-scratch/DESIGN-CORPUS.md` section "CONSTRAINTS.md" §10q;
+  anatomy in that master's "DESIGN.md" section §6.27). Never "sire" / "dam", never
   family-tree-with-animal-motifs (PRD §6.3). Two caveats carried with the
   ruling: shipped identifiers stay `inheritance_parent_a_id` /
   `inheritanceParentA()` while copy uses Legacy (D-267, identifier rename is
@@ -385,9 +386,11 @@ a contrast rule must name its second colour).
   prunes any custom property no utility class references yet, an undefined
   `var()` silently inherits instead of failing, and a contrast check then reports
   a pass on a token that is not in the stylesheet (research `CONSTRAINTS.md` D-288).
-- `docs/design-research/DESIGN.md`: measured ramps, contrast tables,
+- `docs/research-scratch/DESIGN-CORPUS.md` section "DESIGN.md" (formerly
+  `docs/design-research/DESIGN.md`): measured ramps, contrast tables,
   cap-stack rendering spec (§6.21), and the light theme that is now the app default.
-- `docs/design-research/CONSTRAINTS.md`: the research-phase design rules
+- `docs/research-scratch/DESIGN-CORPUS.md` section "CONSTRAINTS.md" (formerly
+  `docs/design-research/CONSTRAINTS.md`): the research-phase design rules
   (D-numbers) this file cites (D-12, D-20, D-101).
 - Proposed values in this file (scale numbers, `max-w-6xl`, the mono stack) need
   owner sign-off before they become tokens. The Announced-cyan proposal is now a

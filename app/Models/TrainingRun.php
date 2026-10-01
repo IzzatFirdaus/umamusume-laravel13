@@ -620,9 +620,9 @@ class TrainingRun extends Model
      *
      * The standard track is the only one selected. The matrix also carries
      * `dirt_leaning` and `limited_turf_range`, and the two sources disagree about
-     * where a sprint-only trainee lands: `docs/scenarios/04` puts "Sprint Umas with
+     * where a sprint-only trainee lands: `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Grade Points (Replacing Career Goals)" puts "Sprint Umas with
      * poor aptitude in other distances" on the **Dirt** track, while
-     * `docs/scenarios/05` gives the same character class a third track with only the
+     * `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Basic Information" gives the same character class a third track with only the
      * Classic objective reduced. Neither names the aptitude letter that places a
      * trainee in one, so picking a track here would be a guess printed as a target
      * (D-256, KI-15).
@@ -685,7 +685,7 @@ class TrainingRun extends Model
      *
      * Points scale with race grade — 100 for a G1 down to 20 for a Pre-OP, from the
      * matrix's `grade_point_by_grade`, transcribed from
-     * docs/scenarios/05-trackblazer-gametora.md §"Grade Points and Shop Coins". That
+     * docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section "Grade Points and Shop Coins - Exact Values". That
      * table prices a first place only; below first the corpus says points "scale down
      * proportionally" and names no ratio, so a period holding any finish below first
      * reports nothing rather than a total that understates itself (D-256, KI-10's open

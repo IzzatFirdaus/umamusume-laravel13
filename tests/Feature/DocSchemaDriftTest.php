@@ -71,7 +71,7 @@ function governanceDocPaths(): array
         'docs/adr/0008-character-card-catalog-layer.md',
         'ARCHITECTURE.md',
         'ARCHITECTURE-ESSENTIALS.md',
-        'docs/design-research/CONSTRAINTS.md',
+        'docs/research-scratch/DESIGN-CORPUS.md',
     ];
 }
 
