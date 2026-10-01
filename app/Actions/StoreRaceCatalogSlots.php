@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Models\RaceCatalogSlot;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Persist parsed race-catalogue rows with their provenance attached.
@@ -18,6 +19,9 @@ use Illuminate\Support\Carbon;
  * Rows are matched on the same null-coalescing grain the unique index uses, so a
  * re-run updates in place instead of colliding. A row a Trainer wrote by hand is
  * never touched: `is_manual` is the engine's stop sign (PRD FR-B-4).
+ *
+ * All rows land in one transaction, the way `StoreSkills` does it, so a batch that throws halfway
+ * through leaves the calendar as it was instead of keeping the slots written before the failure.
  */
 final class StoreRaceCatalogSlots
 {
@@ -27,31 +31,33 @@ final class StoreRaceCatalogSlots
      */
     public function handle(array $records, string $url, ?string $snapshotPath, ?string $timezone): array
     {
-        $counts = ['created' => 0, 'updated' => 0, 'skipped' => 0];
+        return DB::transaction(function () use ($records, $url, $snapshotPath, $timezone): array {
+            $counts = ['created' => 0, 'updated' => 0, 'skipped' => 0];
 
-        foreach ($records as $record) {
-            $existing = $this->find($record);
+            foreach ($records as $record) {
+                $existing = $this->find($record);
 
-            if ($existing !== null && $existing->is_manual) {
-                $counts['skipped']++;
+                if ($existing !== null && $existing->is_manual) {
+                    $counts['skipped']++;
 
-                continue;
+                    continue;
+                }
+
+                $payload = [...$record, ...$this->provenance($url, $snapshotPath, $timezone)];
+
+                if ($existing === null) {
+                    RaceCatalogSlot::create($payload);
+                    $counts['created']++;
+
+                    continue;
+                }
+
+                $existing->update($payload);
+                $counts['updated']++;
             }
 
-            $payload = [...$record, ...$this->provenance($url, $snapshotPath, $timezone)];
-
-            if ($existing === null) {
-                RaceCatalogSlot::create($payload);
-                $counts['created']++;
-
-                continue;
-            }
-
-            $existing->update($payload);
-            $counts['updated']++;
-        }
-
-        return $counts;
+            return $counts;
+        });
     }
 
     /**

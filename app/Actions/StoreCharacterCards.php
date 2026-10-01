@@ -7,6 +7,7 @@ namespace App\Actions;
 use App\Models\CharacterCard;
 use App\Models\Umamusume;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Persist parsed character-card rows with their provenance attached.
@@ -25,6 +26,9 @@ use Illuminate\Support\Carbon;
  * does not get to clear a flag it did not set. `is_manual` (PRD FR-B-4) is read at
  * both grains — a trainee the Trainer wrote by hand receives no cards at all, and a
  * single card she corrected by hand is skipped while her unlocked siblings update.
+ *
+ * All rows land in one transaction, the way `StoreSkills` does it: a batch that throws halfway through
+ * leaves the catalog as it was instead of keeping the cards that got written before the failure.
  */
 final class StoreCharacterCards
 {
@@ -34,77 +38,79 @@ final class StoreCharacterCards
      */
     public function handle(array $records, string $url, ?string $snapshotPath, ?string $timezone): array
     {
-        $counts = ['created' => 0, 'updated' => 0, 'skipped' => 0];
+        return DB::transaction(function () use ($records, $url, $snapshotPath, $timezone): array {
+            $counts = ['created' => 0, 'updated' => 0, 'skipped' => 0];
 
-        foreach ($records as $record) {
-            $candidates = Umamusume::where('external_ref', $record['char_external_ref'])
-                ->get(['id', 'is_manual']);
+            foreach ($records as $record) {
+                $candidates = Umamusume::where('external_ref', $record['char_external_ref'])
+                    ->get(['id', 'is_manual']);
 
-            /*
-             * `external_ref` is indexed, not unique, so a source rename that leaves a
-             * stale ref on the old row can put two trainees behind one char ref. That
-             * is a stop, not a tie-break: an ambiguous ref means the source's own
-             * mapping is broken, and attaching to whichever row an unordered lookup
-             * returns would bury the breakage under a full run of confident-looking cards.
-             */
-            if ($candidates->count() > 1) {
-                $counts['skipped']++;
+                /*
+                 * `external_ref` is indexed, not unique, so a source rename that leaves a
+                 * stale ref on the old row can put two trainees behind one char ref. That
+                 * is a stop, not a tie-break: an ambiguous ref means the source's own
+                 * mapping is broken, and attaching to whichever row an unordered lookup
+                 * returns would bury the breakage under a full run of confident-looking cards.
+                 */
+                if ($candidates->count() > 1) {
+                    $counts['skipped']++;
 
-                continue;
+                    continue;
+                }
+
+                $trainee = $candidates->first();
+
+                // An absent trainee means the roster has not cleared the review queue for
+                // her yet; a manual one is FR-B-4 at the character grain, so nothing is
+                // attached under her — not even a card she has no row for yet.
+                if ($trainee === null || $trainee->is_manual) {
+                    $counts['skipped']++;
+
+                    continue;
+                }
+
+                $existing = $this->find($record);
+
+                if ($existing !== null && $existing->is_manual) {
+                    $counts['skipped']++;
+
+                    continue;
+                }
+
+                /*
+                 * The columns this table owns, projected by name. A record also carries
+                 * `char_external_ref`, which is a lookup key and not a column: spreading
+                 * the record would drop it silently today and throw the day the app turns
+                 * on Model::preventSilentlyDiscardingAttributes().
+                 */
+                $payload = [
+                    'umamusume_id' => $trainee->id,
+                    'title' => $record['title'],
+                    'rarity' => $record['rarity'],
+                    'global_release_date' => $record['global_release_date'],
+                    'is_debut_form' => $record['is_debut_form'],
+                    // KI-33's two lists. Written here rather than by spreading the record because the
+                    // projection above is deliberate: a re-fetch that publishes no lists for a card it
+                    // used to list them for writes `[]`, which is the source's own answer, and a
+                    // missing-key record fails here loudly instead of leaving the old list in place.
+                    'skills_innate' => $record['skills_innate'],
+                    'skills_unique' => $record['skills_unique'],
+                    ...$this->provenance($url, $snapshotPath, $timezone),
+                ];
+
+                if ($existing === null) {
+                    CharacterCard::create([...$payload, 'card_id' => $record['card_id']]);
+                    $counts['created']++;
+
+                    continue;
+                }
+
+                $existing->update($payload);
+                $counts['updated']++;
             }
 
-            $trainee = $candidates->first();
-
-            // An absent trainee means the roster has not cleared the review queue for
-            // her yet; a manual one is FR-B-4 at the character grain, so nothing is
-            // attached under her — not even a card she has no row for yet.
-            if ($trainee === null || $trainee->is_manual) {
-                $counts['skipped']++;
-
-                continue;
-            }
-
-            $existing = $this->find($record);
-
-            if ($existing !== null && $existing->is_manual) {
-                $counts['skipped']++;
-
-                continue;
-            }
-
-            /*
-             * The columns this table owns, projected by name. A record also carries
-             * `char_external_ref`, which is a lookup key and not a column: spreading
-             * the record would drop it silently today and throw the day the app turns
-             * on Model::preventSilentlyDiscardingAttributes().
-             */
-            $payload = [
-                'umamusume_id' => $trainee->id,
-                'title' => $record['title'],
-                'rarity' => $record['rarity'],
-                'global_release_date' => $record['global_release_date'],
-                'is_debut_form' => $record['is_debut_form'],
-                // KI-33's two lists. Written here rather than by spreading the record because the
-                // projection above is deliberate: a re-fetch that publishes no lists for a card it
-                // used to list them for writes `[]`, which is the source's own answer, and a
-                // missing-key record fails here loudly instead of leaving the old list in place.
-                'skills_innate' => $record['skills_innate'],
-                'skills_unique' => $record['skills_unique'],
-                ...$this->provenance($url, $snapshotPath, $timezone),
-            ];
-
-            if ($existing === null) {
-                CharacterCard::create([...$payload, 'card_id' => $record['card_id']]);
-                $counts['created']++;
-
-                continue;
-            }
-
-            $existing->update($payload);
-            $counts['updated']++;
-        }
-
-        return $counts;
+            return $counts;
+        });
     }
 
     /**
