@@ -1,5 +1,24 @@
 # Umamusume: Pretty Derby — Merged UX Deliverables
 
+## Provenance
+
+This document consolidates the following source files verbatim (no summarization, no deduplication):
+
+- `docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md` (2,144 lines)
+- `docs/UX Behavior Specification - Umamusume Trainer Companion.md` (576 lines)
+- `docs/Scenario-Specific User Flows & Frontend Specifications.md` (1,174 lines)
+
+All three were added to the repository in `4ab5ada` and deleted by the consolidation in
+`22e5135`, which left this merge as the only working-tree copy of their content. They are
+recoverable from history: `git checkout 4ab5ada -- "<path>"`. Each was triaged on 2026-09-27
+and never adopted, which is why the triage banners are reproduced in every part rather than
+cleaned up. Headings were demoted one level per part; no source line was edited, and the
+byte-level check that proves it is recorded in the commit that moved this file here.
+
+This is the sixteenth master. Creating it required the owner's written authorization under
+`INDEX.md` §File discipline, given on 2026-10-02. `## Source Documents` below is the
+per-part mapping; this section is the file-level provenance the other masters use.
+
 ## Source Documents
 
 - `UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md` (Part 1: UMAMUSUME: PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES)
@@ -9,6 +28,12 @@
 The three source files remain on disk beside this document. This merge is a
 reading aid that puts them in one place; it is not a replacement, and it resolves none
 of the disagreements between them. Each source's own triage banner is carried below.
+
+Erratum, 2026-10-02. The sentence above was true when it was written and is false now: the
+consolidation in `22e5135` deleted all three sources, so this file holds their only surviving
+copies in the working tree. What still holds is the rest of the paragraph: this is a reading
+aid, not a replacement, and it resolves none of the disagreements. The sources' conflicting
+figures are reproduced side by side in the parts below and are for a human to adjudicate.
 
 ---
 
