@@ -267,7 +267,17 @@ return [
                 ['route' => 'Tiara Route', 'epithet' => 'Lady', 'races' => ['Oka Sho', 'Japanese Oaks', 'Shuka Sho'], 'reward' => '+10 to 2 random stats'],
                 ['route' => 'Tiara Route', 'epithet' => 'Heroine', 'epithets' => ['Lady'], 'races' => ['Queen Elizabeth II Cup (Classic)'], 'reward' => '+10 to 2 random stats'],
                 ['route' => 'Tiara Route', 'epithet' => 'Goddess', 'epithets' => ['Lady'], 'races' => ['Victoria Mile', 'Hanshin Juvenile Fillies'], 'aggregate' => 'both QEII Cups', 'reward' => '+15 to 2 random stats'],
-                ['route' => 'Tiara Route', 'epithet' => 'Mile a Minute', 'aggregate' => 'win all unique Mile Turf G1s', 'reward' => 'Mile Straightaways hint +1'],
+                /*
+                 * The source states the reward as a hint toward `Mile Straightaways` and names no tier
+                 * (`docs/scenarios/04-trackblazer-umaguide.md:94`), while `[Global]` holds two client
+                 * rows of that name, `Mile Straightaways ◎` (201031) and `Mile Straightaways ○` (201032).
+                 * Naming one of them would be guessing at a provenance, which is how `Traightaways` was
+                 * handled at D-210 rather than swapped for a plausible neighbour. So the row states the
+                 * family it hints and says the tier is not published, and
+                 * `tests/Feature/EpithetRewardNamesTest.php` refuses any reward that names a skill the
+                 * catalogue cannot point at.
+                 */
+                ['route' => 'Tiara Route', 'epithet' => 'Mile a Minute', 'aggregate' => 'win all unique Mile Turf G1s', 'reward' => 'Mile Straightaways hint +1 (tier not stated by the source)'],
                 ['route' => 'Classic Route', 'epithet' => 'Stunning', 'races' => ['Satsuki Sho', 'Japanese Derby', 'Kikuka Sho'], 'reward' => '+10 to 2 random stats'],
                 ['route' => 'Classic Route', 'epithet' => 'Incredible', 'epithets' => ['Stunning'], 'races' => ['Japan Cup (Classic)', 'Arima Kinen (Classic)'], 'mode' => 'any', 'reward' => '+15 to 2 random stats'],
                 ['route' => 'Classic Route', 'epithet' => 'Phenomenal', 'epithets' => ['Stunning'], 'aggregate' => 'win 2 of Tenno Sho Spring, Takarazuka Kinen, Japan Cup, Tenno Sho Autumn, Osaka Hai, Arima Kinen', 'reward' => '+15 to 2 random stats'],
