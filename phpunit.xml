@@ -18,18 +18,58 @@
         </include>
     </source>
     <php>
-        <env name="APP_ENV" value="testing"/>
-        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
-        <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="BROADCAST_CONNECTION" value="null"/>
-        <env name="CACHE_STORE" value="array"/>
-        <env name="DB_DATABASE" value="testing"/>
-        <env name="DB_URL" value=""/>
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="array"/>
-        <env name="PULSE_ENABLED" value="false"/>
-        <env name="TELESCOPE_ENABLED" value="false"/>
-        <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="APP_ENV" value="testing" force="true"/>
+        <!--
+            Every <env> entry below is mirrored as a <server> entry, and the mirror is not
+            decoration. php-dotenv resolves values from $_SERVER before $_ENV/getenv, so a
+            variable exported in the host OS environment (for example a machine-level
+            APP_ENV=local) shadows <env> alone and the suite silently boots the `local`
+            app against the real dev database. PHPUnit writes <server> entries into
+            $_SERVER unconditionally, which closes that hole.
+        -->
+        <server name="APP_ENV" value="testing"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file" force="true"/>
+        <server name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4" force="true"/>
+        <server name="BCRYPT_ROUNDS" value="4"/>
+        <env name="BROADCAST_CONNECTION" value="null" force="true"/>
+        <server name="BROADCAST_CONNECTION" value="null"/>
+        <env name="CACHE_STORE" value="array" force="true"/>
+        <server name="CACHE_STORE" value="array"/>
+        <!--
+            :memory: is deliberate, and it was not always here.
+
+            This used to be `testing`, a bare relative path. Laravel resolves it against
+            the current working directory, so the suite created a real SQLite file named
+            `testing` in the project root, alongside the `testing-wal` and `testing-shm`
+            sidecars that WAL mode writes while a connection is open. Nothing tracked
+            them, nothing cleaned them, and they reappeared on every run.
+
+            It also silently defeated `.env.testing`, which sets `DB_DATABASE=:memory:`
+            and says so in a comment: PHPUnit injects the `<env>` values above before the
+            application boots, so this file won and the file-based database was used
+            instead. Keeping the two in agreement is the point — `.env.testing` states the
+            intent, and this line must not contradict it.
+        -->
+        <env name="DB_DATABASE" value=":memory:" force="true"/>
+        <server name="DB_DATABASE" value=":memory:"/>
+        <env name="DB_CONNECTION" value="sqlite" force="true"/>
+        <server name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_URL" value="" force="true"/>
+        <server name="DB_URL" value=""/>
+        <env name="APP_KEY" value="base64:r0nOaRHty4Kqd0huXBE6VsNjsV5MtQZ7qLQfiB3fTA0=" force="true"/>
+        <server name="APP_KEY" value="base64:r0nOaRHty4Kqd0huXBE6VsNjsV5MtQZ7qLQfiB3fTA0="/>
+        <env name="MAIL_MAILER" value="array" force="true"/>
+        <server name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <server name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array" force="true"/>
+        <server name="SESSION_DRIVER" value="array"/>
+        <env name="PULSE_ENABLED" value="false" force="true"/>
+        <server name="PULSE_ENABLED" value="false"/>
+        <env name="TELESCOPE_ENABLED" value="false" force="true"/>
+        <server name="TELESCOPE_ENABLED" value="false"/>
+        <env name="NIGHTWATCH_ENABLED" value="false" force="true"/>
+        <server name="NIGHTWATCH_ENABLED" value="false"/>
     </php>
 </phpunit>
