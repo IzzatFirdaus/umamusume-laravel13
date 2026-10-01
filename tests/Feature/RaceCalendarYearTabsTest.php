@@ -218,3 +218,25 @@ it('ranks a goal above the next-turn outline', function (): void {
     expect($html)->toContain('border-goal-line')
         ->and(substr_count($html, 'border-pick-line'))->toBe(0);
 });
+
+it('keeps the career year when the entry mode is switched, which the mode form used to drop', function (): void {
+    // The year tabs are links built through `request()->fullUrlWithQuery`, so they carry `entry_mode`
+    // for free. The mode buttons are the mirror image and were not the mirror fix: the submitted fields
+    // of a GET form replace the action's query string whole, so pressing "Race not on the calendar"
+    // from the Classic tab sent `entry_mode` and nothing else, and the panel answered with the year the
+    // run has actually reached rather than the tab the Trainer was sitting in. A GET form keeps state it
+    // is not itself about by carrying it as a field, which is what the tabs cannot need and this can.
+    $run = runWithTurn(1);
+
+    // Through the screen rather than a bare component render: the panel reads `$errors`, which only
+    // exists on a request, and the year arrives the way a Trainer's does, as a query parameter.
+    $html = $this->get(route('runs.show', $run).'?year=2')->content();
+
+    // Two mode buttons, so two carriers. The value is the resolved tab year rather than the raw
+    // query parameter, because `careerYearForTab` is the one place that decides which year is in view.
+    expect(substr_count($html, 'name="year" value="2"'))
+        ->toBe(2)
+        // The branch the panel actually drew is the Classic one, which is the same fact seen from the
+        // heading the calendar path prints above its select.
+        ->and($html)->toContain('Classic year');
+});

@@ -46,7 +46,27 @@ class StoreRaceEntryRequest extends FormRequest
             'status' => ['required', Rule::enum(RaceEntryStatus::class)],
             'placement' => ['nullable', 'integer', 'min:1', 'max:99'],
             'fans_gain' => ['nullable', 'integer', 'min:0'],
-            'circles' => ['nullable', 'integer', Rule::in(range(0, RaceEntry::MAX_CIRCLES))],
+            // B1. Circles are a team race read, so the value belongs to a `team_race` slot and to
+            // nothing else. That rule used to live only in `RaceEntry`, which enforces it by
+            // throwing, while the panel that offers the control cannot offer a team race slot: its
+            // picker is the career catalogue plus the run's hand-entered `free_race` rows. So the
+            // one path a Trainer can take ended in a 500 instead of a refusal, and `0` ended there
+            // too, because the model reads null as "not recorded" and every other value as a claim.
+            // A refused field is recoverable and an exception is not, so the gate moves to where the
+            // rest of this payload's rules already live. The model guard stays behind this one for
+            // writes that never pass through a Form Request.
+            'circles' => ['nullable', 'integer', Rule::in(range(0, RaceEntry::MAX_CIRCLES)), function (string $attribute, mixed $value, Closure $fail): void {
+                if ($value === null) {
+                    return; // "not read" is an answer, and it is the one the empty option sends
+                }
+
+                $named = $this->input('scenario_slot_id');
+                $slot = $named === null || $named === '' ? null : ScenarioSlot::find((int) $named);
+
+                if ($slot === null || $slot->kind !== 'team_race') {
+                    $fail('Circles can only be read against a team race.');
+                }
+            }],
             'objective_index' => ['nullable', 'integer', Rule::in(range(1, RaceEntry::MAX_OBJECTIVE_INDEX))],
             // KI-17: the turn this race was run on, named by the Trainer. A turn logged on another
             // run is not a turn of this run, and the dropdown cannot be trusted to have kept them

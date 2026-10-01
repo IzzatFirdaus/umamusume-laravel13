@@ -44,6 +44,13 @@
         @foreach (['calendar' => 'Calendar race', 'manual' => 'Race not on the calendar'] as $key => $label)
             <form method="GET" action="{{ route('runs.show', $run) }}">
                 <input type="hidden" name="entry_mode" value="{{ $key }}">
+                {{-- A GET form submits its own fields and nothing else: the action's query string is
+                     replaced whole, so without this line the switch answers with `entry_mode` alone and
+                     the panel falls back to the year the run has actually reached. A Trainer reading the
+                     Classic tab who changes branch lands back in Junior. The year tabs keep the mode for
+                     free because they are links built through `fullUrlWithQuery`; this is the same
+                     bargain, paid by hand because a form cannot borrow it. --}}
+                <input type="hidden" name="year" value="{{ $calendarYear }}">
                 <button type="submit" aria-pressed="{{ $mode === $key ? 'true' : 'false' }}"
                         class="rounded-md border px-3 py-1.5 text-sm font-medium
                                {{ $mode === $key ? 'border-pick-line bg-pick/10 text-ink-strong' : 'border-rule text-ink-muted' }}">
@@ -200,7 +207,13 @@
                 {{ $errors->first('title') }}
                 {{ $errors->first('month') }}
                 {{ $errors->first('half') }}
-                {{ $errors->first('circles', 'Circles are read as 0 to 5, on a team race only.') }}
+                {{-- The second argument of `MessageBag::first()` is a format string, not a default, so
+                     a literal there prints nothing whether or not the field has an error: there is no
+                     `:message` token to substitute. This line therefore swallowed every circles refusal
+                     it was written to show. The refusal is the point of B1, so it goes out as written
+                     by the validator. The two lines below still pass a literal the same way and stay
+                     reported rather than silently edited in a dispatch about something else. --}}
+                {{ $errors->first('circles') }}
                 {{ $errors->first('objective_index', 'A period index is one of the four objectives.') }}
                 {{ $errors->first('placement', 'Placement is a finish number, 1 or above.') }}
                 {{ $errors->first('turn_entry_id', 'That turn was not logged on this run.') }}
