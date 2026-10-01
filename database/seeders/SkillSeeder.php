@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Models\Skill;
 use App\Services\DataPipeline\NameNormalizer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Seeder;
 
 /**
@@ -58,25 +59,31 @@ class SkillSeeder extends Seeder
         ];
 
         foreach ($skills as $name) {
-            Skill::updateOrCreate(
+            // `firstOrCreate`, not `updateOrCreate`. A row the import already filled carries `sp_cost`,
+            // `is_unique` and the provenance columns; writing nulls over them would replace a sourced
+            // number with a blank, which is the opposite of the paragraph above. The seeder's job is
+            // that the name exists on a fresh database, and a re-run has nothing else to assert.
+            Skill::firstOrCreate(
                 ['name' => $name],
-                [
-                    'match_key' => $normalizer->normalize($name),
-                    'sp_cost' => null,
-                    'is_unique' => false,
-                ],
+                ['match_key' => $normalizer->normalize($name)],
             );
         }
 
-        // `updateOrCreate` adds and updates; it never removes. Without this the retired names survive a
+        // `firstOrCreate` adds what is missing; it never removes. Without this the retired names survive a
         // re-seed and keep appearing in the run-detail select — the invented strings from the first
         // version, and `Traightaways`, which the source does not carry under either name field. On a
         // fresh install these are no-ops; on a development database they are the whole fix.
+        // `is_manual` gates the delete (CONSTRAINTS.md:26, PRD FR-B-4): a Trainer who corrected one of
+        // these rows by hand keeps it, and the name clauses are grouped so the guard applies to each of
+        // them rather than only the last.
         Skill::query()
-            ->where('name', 'like', 'Illustrative %')
-            ->orWhere('name', 'Come What May, See Ya Later!')
-            ->orWhere('name', 'Playtime\'s Over')
-            ->orWhere('name', 'Traightaways')
+            ->where('is_manual', false)
+            ->where(function (Builder $query): void {
+                $query->where('name', 'like', 'Illustrative %')
+                    ->orWhere('name', 'Come What May, See Ya Later!')
+                    ->orWhere('name', 'Playtime\'s Over')
+                    ->orWhere('name', 'Traightaways');
+            })
             ->delete();
     }
 }
