@@ -2325,4 +2325,24 @@ wrong bound.
 
 **Owner.** Architect for the choice between the test and the grep, with QA owning whichever guard is chosen.
 
+## KI-51 The seeder code that reads the untracked bodies is itself untracked, so the skills and roster pipelines have no implementation on any ref. Filed, not fixed.
+
+**Gap.** Three PHP classes under `database/seeders/` exist on disk, are in no commit, and match no `.gitignore` rule. Verified 2026-10-01, all by per-file `git ls-files --error-unmatch` and `git check-ignore`:
+
+- `database/seeders/ReadsCommittedSource.php`, 2,284 bytes, mtime 2026-09-30 23:19. Untracked, not ignored.
+- `database/seeders/SourceDocumentSeeder.php`, 4,389 bytes, mtime 23:17. Untracked, not ignored.
+- `database/seeders/UmamusumeRosterSeeder.php`, 5,416 bytes, mtime 23:13. Untracked, not ignored.
+
+The tracked seeder surface at `HEAD` is four files: `DatabaseSeeder.php`, `ScenarioSlotSeeder.php`, `SkillSeeder.php`, `UmamusumeSeeder.php`.
+
+**The wiring is missing too, and that is the part a reader will otherwise get wrong.** `git show HEAD:database/seeders/DatabaseSeeder.php` contains **0** references to the three untracked classes. The working copy contains **5**, so the only thing that invokes this loader is an uncommitted peer diff. The sole tracked mentions of `SourceDocumentSeeder` at `HEAD` are prose in comments, at `app/Console/Commands/UmaImportSupportCards.php:93` and `tests/Feature/SupportCardFetchTest.php:152`, and `ReadsCommittedSource` is named nowhere in tracked content at all. `SkillSeeder.php` is tracked but independent of this path: it seeds nine hardcoded names through `NameNormalizer`, states in its own docblock that `sp_cost` and `type` are deliberately left for the import, and does not read a body.
+
+**Consequence, stated asymmetrically because the asymmetry is the finding.** A fresh clone gets the schema, the models, the views and a tracked seeder that does not touch the source bodies. It does not get the loader, the roster seeder, or the invocation. It does get a working support-card path, because `support-cards.88dea522.json` and `support_effects.ca447e53.json` are tracked and `UmaImportSupportCards.php` is tracked. So the pipelines split in two: one committed end to end, and one whose code, data and wiring are all off-ref. This is KI-49's subject two layers deeper, and it is not the same finding. KI-49 is about bodies. Committing the bodies would not make the skills pipeline run, because nothing on a ref reads them.
+
+**Fix options, owner's call.** Either (a) track the three classes and the invocation in `DatabaseSeeder.php`, or (b) fold the loader back into tracked code so the tracked seeder reads the bodies directly. Option (a) plus KI-49 option (a) is the only combination that makes a fresh clone able to seed offline. What must not stand is the current shape, where the tracked entry point is unaware of an untracked implementation that three untracked files depend on.
+
+**Not acted on here.** The fence on this dispatch forbids tracking source files, and the decision is the owner's. Filed only, with the measurement commands above so the state can be re-checked rather than re-argued.
+
+**Owner.** Data Engineer for the loader and the roster seeder, with the owner deciding between (a) and (b) alongside the KI-49 decision. The two should be ruled together, since either answer on one changes the cost of the other.
+
 **Mechanism, measured on 2026-10-01 rather than quoted from this entry's heading.** The heading says `Blueprint::check()`, and that name is imprecise in two ways, both verified against the installed framework. `vendor/laravel/framework/src/Illuminate/Database/Schema/Blueprint.php` has 2,036 lines and **0** of them contain `check`, and the class defines no `__call`. So there is no `Blueprint::check()` at all, table-level or otherwise. The four calls in `142618` sit on the column object: `addColumn` returns a `ColumnDefinition`, which extends `Illuminate\Support\Fluent`, and `Fluent::__call` at `vendor/laravel/framework/src/Illuminate/Support/Fluent.php:130` stores any unknown method name as an attribute. `SQLiteGrammar.php` has exactly **1** line containing `check`, line 876, which is the return value of `typeEnum()`, and it defines no `modifyCheck`. The attribute is therefore set, read by nothing, and dropped without an error. Two consequences for whoever fixes this. First, the accurate sentence is: a `->check()` call on a column lands on the column's Fluent object and stores an attribute no SQLite grammar modifier reads. Second, the only path by which this framework writes a CHECK on SQLite is an `enum` column, which is why the constraints in the live DDL come from `151945`'s hand-written SQL and not from any Laravel construct. A gate built on either assumption must test against built DDL, because source text shows neither.
