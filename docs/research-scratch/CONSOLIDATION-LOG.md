@@ -93,3 +93,33 @@ fails gates that this run did **not** author:
   round-1/round-2 files (`docs/PRE-MORTEM.md`, `docs/GATE-REGISTRY.md`,
   `docs/SOURCE-OF-TRUTH.md`, `docs/design-research/*`). Repointing these touches the quality
   bar and gate tooling; deferred to the owner pending the Do-Not-Touch list.
+
+## Census, added 2026-10-02
+
+The inventory this log was written against is gone from disk and from all git history, so the
+filesystem survey substituted for it is now the only source of truth of its kind. A survey that
+lives in prose goes wrong the moment history moves, which is exactly what happened to the
+paragraph above it. `tools/doc_census.py` is the reproducible replacement: run
+`python tools/doc_census.py` and it prints, at the sha it names, the tracked markdown count by
+directory, every master with its line total and inbound citations, the files outside the masters,
+and dead markdown links split into GONE (cited and absent from disk) and UNTRACKED (on disk, not
+in git).
+
+Measured at the sha this commit lands on: 72 tracked markdown files, 16 masters totalling 28,351
+lines, 23 documented files outside the masters excluding `docs/adr/` and `.ai/**`, and 495 dead
+links, of which 488 are GONE and 7 UNTRACKED. The most-cited dead targets are
+`docs/design-research/CONSTRAINTS.md` (53), `docs/design-research/DESIGN.md` (40),
+`docs/GATE-REGISTRY.md` (20), `RAW-FINDINGS.md` (19), `SKILLS-GAPS.md` (18),
+`docs/PRE-MORTEM.md` (17) and `docs/SOURCE-OF-TRUTH.md` (16). Most of those mentions are
+historical citations inside masters naming the sources they absorbed, which are records and must
+not be repointed. The live ones are in `AGENTS.md`, `README.md`, `ARCHITECTURE*.md`, `Makefile`,
+`tools/lore.php`, `tools/gate.py` and `tools/roster-crosscheck.php`, and they are the owner's
+decision, unchanged from the section above.
+
+Correction to the section above, forward-looking rather than by deletion. It states that
+`tests/Feature/DocSchemaDriftTest.php:74` reads `docs/design-research/CONSTRAINTS.md` and that its
+absence fails a gate. That was true when written. The test's governance list now reads
+`docs/research-scratch/DESIGN-CORPUS.md`, and `php artisan test --compact
+tests/Feature/DocSchemaDriftTest.php` returns 5 passed (12 assertions). The deferred item is
+therefore partly closed: the drift guard was repointed, the prose citations in the root and tooling
+files were not.
