@@ -1,1 +1,0 @@
-﻿Page: http://127.0.0.1:8144/umamusume/special-week  [HTTP 200] Document + subresource requests (all same-origin 127.0.0.1:8144):   GET http://127.0.0.1:8144/umamusume/special-week => 200   GET http://127.0.0.1:8144/build/assets/app-*.css => 200   GET http://127.0.0.1:8144/build/assets/app-*.js => 200 Off-origin (external) requests: NONE

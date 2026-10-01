@@ -1,3 +1,0 @@
-turn,speed,stamina,power,guts,wit,sp,condition
-1,480,300,355,210,95,240,
-2,550,525,601,75,0,190,

@@ -1,2 +1,0 @@
-﻿Page: http://127.0.0.1:8144/design-preview  [HTTP 200] Console messages captured during load: [LOG] Browser logger active (MCP server detected). Posting to: http://127.0.0.1:8144/_boost/browser-logs
-[SCRIPT] inline theme pre-paint script present; reads localStorage key 'uma-theme' (ADR-0006 violation).
