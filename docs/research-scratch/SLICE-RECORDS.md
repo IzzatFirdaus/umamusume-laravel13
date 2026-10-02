@@ -4690,3 +4690,60 @@ invented sentence under `R77` would be indistinguishable later from a ruling the
 which is the one outcome worse than a gap â€” R60 exists precisely so a ruling is a repo artifact with
 provenance, and provenance here is absent.
 
+
+## ws1-control-sizing-2026-10-02.md
+
+M1, Workstream 1: the 44px control contract on the catalog index, measured in a browser rather than read
+from the source. The source had already been changed (`9cba3ee` sized the three controls), but "the class is
+present" and "the control measures 44px in a rendered page" are different claims, and KI-29 is about the
+second one.
+
+**Setup.** `php artisan serve` on **127.0.0.1:8125** against a scratch database
+(`.scratch-uma/slice4.sqlite`, three trainees), never the shared development file. Measured with a real
+browser at two viewports, `getBoundingClientRect()` plus the computed `height`, which catches a class that is
+present but overridden.
+
+**Measured, `http://127.0.0.1:8125/umamusume`:**
+
+| Viewport | Control | Selector | Size (w × h) | Computed height | Contract |
+|---|---|---|---|---|---|
+| 1280×800 | search input | `input[name=search]` | 188 × **44** | `44px` | `h-11` ✓ |
+| 1280×800 | status select | `select[name=status]` | 163 × **44** | `44px` | `h-11` ✓ |
+| 1280×800 | submit button | `button[type=submit]` | 58.23 × **44** | `44px` | `h-11` ✓ |
+| 390×844 | search input | `input[name=search]` | 188 × **44** | `44px` | `h-11` ✓ |
+| 390×844 | status select | `select[name=status]` | 163 × **44** | `44px` | `h-11` ✓ |
+| 390×844 | submit button | `button[type=submit]` | 58.23 × **44** | `44px` | `h-11` ✓ |
+
+All six measurements are exactly 44.00px, which is `h-11` at the default 16px root — so the class is doing the
+work and nothing overrides it. `h-11` is the mandatory control size in `DESIGN-CORPUS.md`'s gate table
+(the `DESIGN.md` §6.14 rule, `:904`), and the standard this entry measures against.
+
+**Two further observations, both from the same run:**
+
+1. **No horizontal overflow at 390px.** `document.documentElement.scrollWidth` is 390, equal to
+   `window.innerWidth`, so the page does not scroll sideways at phone width. The three controls keep their
+   desktop widths (188 / 163 / 58.23) and all start at x=16, so they stack inside the viewport rather than
+   being squeezed — the form does not reflow, but nothing is clipped either.
+2. **Zero console errors** at either viewport.
+
+**Screenshots** (viewport captures, CSS scale): `docs/design-research/verification/ws1-2026-10-02-1280x800.png`
+(1280×800) and `docs/design-research/verification/ws1-2026-10-02-390x844.png` (390×844). Both verified as valid
+PNGs at the claimed dimensions rather than assumed from the tool's success message.
+
+**They are deliberately not committed, and that is the repository's policy rather than an omission.**
+`.gitignore:101` excludes `/docs/design-research/**/*.png` under the comment "Research screenshot assets (local
+reference; ~870 MB, not history material)", and no image of any kind is tracked anywhere in this repository
+(`git ls-files` filtered to png/jpg/jpeg/gif/webp returns zero). Committing these two would mean `git add -f`
+against an explicit exclusion, so they are left as local artifacts and this table is the durable evidence.
+The dispatch that asked for them attached to a record and this policy conflict; the measurement is the part
+that survives, and it is written out above rather than left inside a picture.
+
+**KI-29 stays OPEN.** Its full resolution requires the fix to be on `origin/master`, and the push is owner
+gate O-1 (local master is ahead). This record is the browser evidence that the sizing is correct in the
+working tree; it is not a closure, and the entry keeps whatever status its own heading carries.
+
+**Tooling note for the next measurement pass.** The Playwright MCP server resolves a relative screenshot
+filename against the *user home*, not the repository root, and its success message does not say so — the two
+captures first landed in `C:\Users\exatf\docs\design-research\verification\` and were copied in. Absolute
+paths, or a copy step, are required. The stray home copies were left in place rather than deleted, because
+removing files outside the workspace is blocked by the permission guard and should be.
