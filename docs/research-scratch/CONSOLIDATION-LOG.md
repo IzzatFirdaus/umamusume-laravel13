@@ -143,3 +143,36 @@ absence fails a gate. That was true when written. The test's governance list now
 tests/Feature/DocSchemaDriftTest.php` returns 5 passed (12 assertions). The deferred item is
 therefore partly closed: the drift guard was repointed, the prose citations in the root and tooling
 files were not.
+
+## Plans deliberately NOT consolidated (decided 2026-10-02)
+
+A request arrived to fold `docs/PLAN-DOC-SYNC-2026-10-02.md` and `docs/PLAN-UI-UX-2026-10-02.md`
+into the masters. Both stay where they are, and the reason is measurable rather than stylistic.
+
+- Both are open work: 21 and 62 unchecked steps respectively, against 22 and 17 checked.
+  `INDEX.md` routes each of them to its live path in `docs/`, while the one plan this repository
+  has already finished consolidating, the scratch-tree reorganization, routes to
+  `PROCESS-PLANS.md` and its original file is gone. Routing target is the record of state: a plan
+  that is still being executed is not a source that has been absorbed.
+- File discipline says consolidated sources are deleted **after verification**, and there is no end
+  state to verify while checkboxes move. Copying them in without deleting the originals would put
+  two live accounts of one task list in the tree, and the second is stale the next time either plan
+  is committed. That duplication is the failure this whole pass exists to remove.
+- The DOC-SYNC plan is load-bearing tooling documentation right now, not just a to-do list: the
+  citation gate `tests/Feature/DocCitationParityTest.php` names its Task 5 triage rule in a code
+  comment as the procedure for lowering the dead-citation count. Moving the text would break the
+  citation a gate depends on.
+- Concurrency is the immediate hazard. At the time of this decision `5b21582` (the DOC-SYNC
+  disposition commit) was the tip of `master`, so the owning session was working from these files
+  within minutes of the request.
+
+**Condition to consolidate:** every unchecked step closed or explicitly struck, owner gates O-1 to
+O-3 resolved, and the disposition recorded in the plan itself. Then embed each under its own
+`## <FILENAME>.md` wrapper with headings demoted one level, verify line-by-line that no non-heading
+source line is missing, update the Provenance list, delete the source, and repoint the two
+`INDEX.md` routing rows to the master. Expected destination is `PROCESS-PLANS.md`, which already
+carries the completed plan precedent.
+
+Census at this commit: 615 dead citations against the `DOC_CITATION_BASELINE = 621` ratchet. This
+section adds none: the two plan paths it names exist, and they are cited as plain text rather than
+as links to be followed.
