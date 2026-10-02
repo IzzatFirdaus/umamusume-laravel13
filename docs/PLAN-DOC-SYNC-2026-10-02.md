@@ -240,7 +240,7 @@ git commit -m "docs(agent-map): point the precedence chain at documents that exi
 
 ---
 
-### Task 5: Repoint the live citations, in density order, triaged by hand
+### Task 5: Repoint the live citations, in density order, triaged by hand — **PARTIALLY EXECUTED, see the disposition note inside** — the measurement and the worklist are done and committed; the per-file triage of 200 refs across 29 files was scoped down to what a single pass could do without bulk-editing dated records, and the residual is the next pass
 
 **Files:**
 - Modify: the masters and root docs named below, section-internal edits only.
@@ -250,19 +250,19 @@ git commit -m "docs(agent-map): point the precedence chain at documents that exi
 - Consumes: Task 1 (map), Task 2 (ruling), and Task 7's ratchet (the baseline is recorded here, enforced there).
 - Produces: a dead-link count that Task 7 pins.
 
-- [ ] **Step 1: Record the pre-repair baseline so the ratchet has a floor and progress is measurable.**
+- [x] **Step 1: Record the pre-repair baseline so the ratchet has a floor and progress is measurable.**
 
 ```bash
 python tools/doc_census.py 2>&1 | grep 'dead markdown links' | tee /tmp/dead-baseline.txt
 ```
 
-- [ ] **Step 2: Generate the per-target worklist instead of guessing at it.**
+- [x] **Step 2: Generate the per-target worklist instead of guessing at it.**
 
 ```bash
 python tools/doc_census.py 2>&1 | sed -n '/most-cited dead targets/,$p'
 ```
 
-- [ ] **Step 3: Apply the known absorption map to the eight densest targets.** Verified section anchors:
+- [ ] **Step 3: Apply the known absorption map to the eight densest targets.** — **SCOPED DOWN:** the two O-2-gated targets (36 + 32 hits) cannot be repointed until the ruling; the convention fix (Task 6) was chosen over bulk editing because KNOWN-ISSUES.md entries are dated records and may not be edited in place, and most of DESIGN-CORPUS / SKILLS-MECHANICS hits are provenance lines the census overcounts. Measured precisely: 200 actionable refs across 29 files (`python .scratch-uma/task5-worklist.py`). Verified section anchors:
 
 | Cited path | Hits | Repoint to |
 |---|---|---|
@@ -275,7 +275,7 @@ python tools/doc_census.py 2>&1 | sed -n '/most-cited dead targets/,$p'
 | `docs/SOURCE-OF-TRUTH.md` | 17 | `docs/research-scratch/GOVERNANCE.md` §`SOURCE-OF-TRUTH.md` (`:16`) |
 | `docs/design-research/verification/slice-*.md` | 15 files | `docs/research-scratch/SLICE-RECORDS.md` §`slice-NN-YYYY-MM-DD.md` |
 
-- [ ] **Step 4: Work the densest citing files first, one file per commit**, in this order: `CATALOG-ROSTER-WORKSTREAM.md` (57), `SKILLS-MECHANICS.md` (44), `SLICE-RECORDS.md` (29), `KNOWN-ISSUES.md` (26), `RACE-AND-SLICE-RESEARCH.md` (18), `GOVERNANCE.md` (16), `docs/adr/0008*` (16), `DESIGN-CORPUS.md` (15), `PROCESS-PLANS.md` (14), `PLAN.md` (11), `PLANS-AND-BRIEFS.md` (10).
+- [ ] **Step 4: Work the densest citing files first, one file per commit** — **NOT STARTED as a bulk pass**; the register (10 refs) resolved by convention rather than by edit for the same dated-record reason. Remaining: SKILLS-MECHANICS 34, DESIGN-CORPUS 25, CONSOLIDATION-LOG 12, SLICE-RECORDS 12, CATALOG-ROSTER 12, plus ~24 lighter files; PRODUCT.md is machine-generated and excluded, docs/UMAMUSUME_REFERENCE.md was peer-dirty during this pass., in this order: `CATALOG-ROSTER-WORKSTREAM.md` (57), `SKILLS-MECHANICS.md` (44), `SLICE-RECORDS.md` (29), `KNOWN-ISSUES.md` (26), `RACE-AND-SLICE-RESEARCH.md` (18), `GOVERNANCE.md` (16), `docs/adr/0008*` (16), `DESIGN-CORPUS.md` (15), `PROCESS-PLANS.md` (14), `PLAN.md` (11), `PLANS-AND-BRIEFS.md` (10).
 
 - [ ] **Step 5: Keep the rules distinct per file class.**
   - Masters and ADRs: replace a followed pointer inline only where the sentence directs a reader; where the line is a dated record, append a dated erratum instead and leave the original path visible.
@@ -366,7 +366,7 @@ git commit -am "docs(citations): resolve the KI-16 and KI-34 id defects and fix 
 - Consumes: Task 5's post-repair baseline.
 - Produces: a gate every future doc edit hits, mirroring `tests/Feature/LoreGateParityTest.php` (which pins `tools/lore.php`) and `tests/Feature/DocSchemaDriftTest.php`.
 
-- [ ] **Step 1: Write the failing test first.** It pins the count at the post-repair number Task 5 Step 6 measured, so the figure may fall and never rise. The single value below is filled from that measurement (`grep 'dead markdown links' /tmp/dead-post.txt`), exactly as `LoreGateParityTest:125` pins the composer script strings it guards:
+- [x] **Step 1: Write the failing test first.** It pins the count at the post-repair number Task 5 Step 6 measured, so the figure may fall and never rise. The single value below is filled from that measurement (`grep 'dead markdown links' /tmp/dead-post.txt`), exactly as `LoreGateParityTest:125` pins the composer script strings it guards:
 
 ```php
 <?php
@@ -386,13 +386,13 @@ it('keeps dead markdown citations from rising above the recorded baseline', func
 
 Define `DOC_CITATION_BASELINE` as an `int` constant at the top of the file, set to the measured number.
 
-- [ ] **Step 2: Run it and confirm it fails against the pre-repair count and passes at the baseline**
+- [x] **Step 2: Run it and confirm it fails against the pre-repair count and passes at the baseline**
 
 ```bash
 php artisan test --compact --filter=DocCitationParityTest
 ```
 
-- [ ] **Step 3: Register the script beside `lore` in `composer.json`.** Existing entries are `"lore": "@php tools/lore.php"` and `"lint": "pint --test"`, so a plain shell command is the correct form here (`@` is only valid for composer's own aliases such as `@php`; there is no `@python`):
+- [x] **Step 3: Register the script beside `lore` in `composer.json`.** Existing entries are `"lore": "@php tools/lore.php"` and `"lint": "pint --test"`, so a plain shell command is the correct form here (`@` is only valid for composer's own aliases such as `@php`; there is no `@python`):
 
 ```json
 "docs": "python tools/doc_census.py",
@@ -400,9 +400,9 @@ php artisan test --compact --filter=DocCitationParityTest
 
 Verify with `composer docs`. Deliberately **not** mirrored into the `Makefile`: GNU make cannot run on this host (KI-4) and the Makefile targets are documentation, so the `make`/composer parity assertion in `LoreGateParityTest:101-116` is left unextended for `docs`. Record that reason in the test's comment so a later reader does not "fix" the asymmetry by adding a dead target.
 
-- [ ] **Step 4: Note the truncation limit so the test is not mistaken for a full report** — `tools/doc_census.py:112` prints only `dead[:20]`, so the count is the signal and the per-target summary is the worklist. Record that in the test's comment; do not print 500 lines in a gate.
+- [x] **Step 4: Note the truncation limit so the test is not mistaken for a full report** — `tools/doc_census.py:112` prints only `dead[:20]`, so the count is the signal and the per-target summary is the worklist. Record that in the test's comment; do not print 500 lines in a gate.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/Feature/DocCitationParityTest.php composer.json
@@ -420,18 +420,18 @@ git commit -m "feat(docs): ratchet dead citation counts in a Pest gate"
 **Interfaces:**
 - Consumes: nothing; blocks the census seeing this plan (it reads `git ls-files`, so an uncommitted file is invisible to its own gate).
 
-- [ ] **Step 1: For each of the seven UNTRACKED citations, commit the target or withdraw the pointer.** `.agents/` is a tooling layer the repo map already documents; `.copilot/instructions.md` is machine-local and should be withdrawn from `docs/SKILL_AUTOMATION.md:29` rather than committed. Ask before adding files to git; do not un-ignore `research-scratch/` without the owner, since the folder holds scratch bodies by design.
+- [ ] **Step 1: For each of the seven UNTRACKED citations, commit the target or withdraw the pointer.** — **PENDING O-3** (24 UNTRACKED remain; the two plans are no longer among them — both tracked now) `.agents/` is a tooling layer the repo map already documents; `.copilot/instructions.md` is machine-local and should be withdrawn from `docs/SKILL_AUTOMATION.md:29` rather than committed. Ask before adding files to git; do not un-ignore `research-scratch/` without the owner, since the folder holds scratch bodies by design.
 
-- [ ] **Step 2: Decide the root `research-scratch/` disposition with the owner.** It contains the governing inventory and cited scrape files. Options: promote the durable ones into `docs/research-scratch/` as registered masters, or leave them ignored and mark every citation as scratch-only. Leaving it ignored while docs cite into it is the state that produced A-10.
+- [ ] **Step 2: Decide the root `research-scratch/` disposition with the owner.** — **PENDING O-3** It contains the governing inventory and cited scrape files. Options: promote the durable ones into `docs/research-scratch/` as registered masters, or leave them ignored and mark every citation as scratch-only. Leaving it ignored while docs cite into it is the state that produced A-10.
 
-- [ ] **Step 3: Commit and register both plans**
+- [x] **Step 3: Commit and register both plans**
 
 ```bash
 git add docs/PLAN-UI-UX-2026-10-02.md docs/PLAN-DOC-SYNC-2026-10-02.md docs/research-scratch/INDEX.md
 git commit -m "docs: register the UI/UX and documentation-sync plans in the index"
 ```
 
-- [ ] **Step 4: Verify the census now sees them**
+- [x] **Step 4: Verify the census now sees them**
 
 ```bash
 python tools/doc_census.py 2>&1 | grep -E 'tracked markdown|dead markdown links'
