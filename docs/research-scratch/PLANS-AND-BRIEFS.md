@@ -321,3 +321,83 @@ consistent with `INDEX.md`'s record that these files were absorbed.
 **Held pending ruling:** Task 4 (`AGENTS.md:5,94,178`, `README.md:18`), Task 5's 22 + 19 citation rows, and
 the confirmation that the gate table's C-1 wording is `php artisan test --compact` everywhere it is cited as
 an instruction.
+
+## Owner gate O-2 package, extended 2026-10-02 (M1 dispatch): measured hits, the Makefile defect, and the proposed edits
+
+Extension of the restore-or-repoint brief above. **Still no ruling recorded and nothing applied.** Every number
+here was re-measured on the working tree, because the counts in the first brief were taken before the M1 batch
+added files that cite the same paths.
+
+**Measured hit counts (`python tools/doc_census.py`, dead citations per target):**
+
+| Target | Hits | Notes |
+|---|---|---|
+| `docs/GATE-REGISTRY.md` | **36** | was 22 when the first brief was written; the M1 batch added citations |
+| `docs/PRE-MORTEM.md` | **32** | was 19 |
+| `docs/SOURCE-OF-TRUTH.md` | **20** | absorbed into `GOVERNANCE.md` §`SOURCE-OF-TRUTH.md` (`:16`) |
+| `agents.md` (case variant) | **7** | see O-3 below — not a missing file |
+
+`AGENTS.md` cites the first two at `:5` (risk record), `:94` ("see GATE-REGISTRY C-5") and `:178` (precedence
+chain, ranks GATE-REGISTRY second of five).
+
+**A defect the first brief did not have: the lore exclusion names a deleted path.** `tools/lore.php:53` and the
+Makefile's `lore` target both exclude `docs/PRE-MORTEM.md`. That file no longer exists, and its content was
+absorbed into `GOVERNANCE.md` §`PRE-MORTEM.md` (`:512`), which is **not** excluded. Consequence, measured:
+`GOVERNANCE.md` contributes **22 lore hits**, every one of them a quotation of the ban itself — the banned-word
+list at `:90` and `:92`, the legacy-repo violations at `:610`, the `sire`-inside-`desired` note at `:96`. Those
+are precisely the class the whole-file exclusion existed to permit, so the gate is now counting its own
+documentation as violations. Two effects: the reported count is inflated, and an inflated count is how a gate
+becomes ignorable. **The fix is not to restore the file** — it is to move the exclusion onto the absorbed copy,
+or better, to drop the whole-file exclusion in favour of R51's line-scoped `lore-ignore-line` markers, which do
+not care which file the quotation lives in. Any change must move `tools/lore.php` and the Makefile together, or
+`LoreGateParityTest` fails (it pins the two copies against each other).
+
+**Proposed edits, per branch. Not applied; O-2 decides which.**
+
+Under **Repoint** (the recommendation), three edits plus one optional:
+1. `AGENTS.md:178` — replace `docs/GATE-REGISTRY.md` with `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md".
+2. `AGENTS.md:5` — replace `docs/PRE-MORTEM.md` with `docs/research-scratch/GOVERNANCE.md` §"PRE-MORTEM.md".
+3. `AGENTS.md:94` — same substitution for the C-5 pointer.
+4. Optional, and recommended: `tools/lore.php:53` + the Makefile's three `':!docs/PRE-MORTEM.md'` exclusions →
+   point at `GOVERNANCE.md`, or convert to `lore-ignore-line` markers.
+
+Under **Restore**, `git checkout 22e5135^ -- docs/GATE-REGISTRY.md docs/PRE-MORTEM.md` plus a currency pass on
+the restored C-1 row (it says `vendor/bin/pest --compact`, which `CONSTRAINTS.md` supersedes), and the lore
+exclusion becomes live again with no edit.
+
+**Blocked on the ruling:** Task 4 of the doc-sync plan, and the 68 citations into these two paths.
+
+## Owner gate O-3 package, 2026-10-02: the 24 UNTRACKED citations, categorized
+
+Enumerated with a read-only script (`.scratch-uma/untracked-citations.py`). "UNTRACKED" means the census finds
+the path on disk but not in `git ls-files`, so the citation works on this machine and breaks on a fresh clone.
+
+| Ref | Cites | Ignored by | Disposition |
+|---|---|---|---|
+| `agents.md` | 7 | **nothing — case variant** | **Withdraw/repoint, no commit.** Git tracks `AGENTS.md`; `agents.md` resolves here only because NTFS is case-insensitive. On a case-sensitive checkout these seven break. They sit in `KNOWN-ISSUES.md` KI-55 (a dated entry) and the UI/UX plan (living), so the register ones need an erratum rather than an edit. |
+| `research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` | 5 | `.gitignore:87` | **Owner decision (O-3).** The governing inventory. Either promote it into `docs/research-scratch/` as a registered master, or declare every citation into the root scratch folder scratch-only. Leaving it ignored while five citations point at it is the state that produced A-10. |
+| `.agents/README.md` | 4 | `.gitignore:49` | **Withdraw the pointer or commit the file.** `.agents/` is a tooling layer the repo map already describes; the citations are from `README.md:122` and the doc-sync plan. |
+| `.copilot/instructions.md` | 4 | `.gitignore:60` | **Withdraw.** Machine-local by design; `docs/SKILL_AUTOMATION.md:29` should not cite it. |
+| `research-scratch/scrape-game8-scenarios.md` | 1 | `.gitignore:87` | **Owner decision (O-3).** Cited from `docs/UMAMUSUME_REFERENCE.md:1007` (fenced). |
+| `research-scratch/scrape-training-heuristics.md` | 1 | `.gitignore:87` | Same, from `:1055`. |
+| `research-scratch/global-race-sources.md` | 1 | `.gitignore:87` | Same, from `docs/scenarios/09-global-race-calendar.md:727`. |
+| `research-scratch/calendar-tables.md` | 1 | `.gitignore:87` | Same, from `:729`. |
+
+**Target commands, displayed and NOT executed** (three of the four targets are on dirty or fenced paths):
+
+```
+# agents.md -> AGENTS.md (case fix), after the O-2 ruling on register errata:
+#   do not run; KNOWN-ISSUES.md entries are dated records and take errata, not edits.
+
+# root scratch promotion (O-3), one shape:
+#   git add -f research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md   # -f defeats .gitignore
+#   then move it under docs/research-scratch/ and register it in INDEX.md
+#   NOT run: the folder is ignored by design and the owner has not chosen promotion.
+
+# pointer withdrawal (.copilot):
+#   edit docs/SKILL_AUTOMATION.md:29 to drop the citation
+#   NOT run: SKILL_AUTOMATION.md is not in this dispatch's edit scope.
+```
+
+**What is not at risk:** none of the four `research-scratch/*.md` bodies is cited as an instruction a reader
+follows; three are provenance citations inside a dated record or a fenced file.
