@@ -191,6 +191,13 @@ screen). Subject to that document's own staleness flags; re-verify dated claims 
    declared, versioned constant set, and the constants used are shown where the number appears
    (`ADR-0001`). No race simulation, no race-result prediction, no race-day snapshot (PRD §6.11).
 
+## Accessibility & Inclusion
+
+No product-specific WCAG mandate has been set by the owner. Enforced floor instead:
+`CONSTRAINTS.md` C-7 requires empty, loading/refresh, and error states on every data view
+(antislop R-27), with the loading-state scope interpreted for server-rendered views by
+`ADR-0007`. `DESIGN.md` records the current state and the gaps.
+
 ## Record history
 
 - 2026-09-27: first record, from codebase evidence plus owner decisions taken the same day.
