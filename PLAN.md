@@ -699,3 +699,13 @@ record, and it says no.
 | `docs/design-research/CONSTRAINTS.md` | 900 (G-21) | Ruling B5 exemption recorded |
 | `KNOWN-ISSUES.md` | 158 | KI-6 closed as decision |
 | `PLAN.md` | header | Slice exit criteria added |
+## Open frontend work (2026-10-02, documentation-sync pass)
+
+Copy and control-size defects that are live on a Trainer-facing surface and owned by nobody else's slice. This
+section is the registration `KNOWN-ISSUES.md`'s never-cited entries needed; it is a living list, so entries
+leave it when their fix lands.
+
+| State | ID | Work |
+|---|---|---|
+| Open | KI-46 | The import's per-stat validation error prints the internal array path to the Trainer: "A speed value is outside what this scenario allows: The turns.0.speed field must be between 0 and 1400." `turns.0.speed` is the Form Request's nested key and is the only part of the sentence naming which row broke. Needs a message rewrite in `ImportHistoricalRunRequest` that carries the row explicitly, not a display patch; filing (not fixing) was the ruling because Laravel's `attributes()` maps a wildcard key to one string, so renaming it loses the row. |
+| Open | KI-29/KI-37 follow-on | The 44px control contract is now stated at `DESIGN-CORPUS.md:904`; the catalog index was resized at `9cba3ee`. Remaining surfaces citing the old bare `DESIGN.md §6.14` form should be re-measured, not assumed covered. |

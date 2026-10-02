@@ -2560,6 +2560,15 @@ record. Filed only, with the measurements above so the state can be re-checked r
 **Owner.** Docs Writer for the cross-reference line and the sweep of existing citations; the rename
 decision is the owner's, because it moves a path that other documents cite by name.
 
+**Corrected forward 2026-10-02 (documentation-sync pass).** The convention this entry asks for is written at
+`docs/research-scratch/DESIGN-CORPUS.md` §"Convention (2026-10-02…)": a bare `DESIGN.md` citation means the
+root contract, and a corpus section is cited as `DESIGN-CORPUS.md §"DESIGN.md" §6.14`. That resolves this
+entry's own measured instance without editing either heading below it: KI-29's and KI-37's `DESIGN.md §6.14`
+citations name a rule that lives at `DESIGN-CORPUS.md:904`, and they stay as filed. The entry stays OPEN on
+its wider question (a rename versus a convention, and the ~40 existing citations that predate the rule),
+because the convention guides new writing and does not repair the corpus retroactively — the masters'
+provenance lines are merge records, not reader pointers.
+
 ## KI-53 A peer session deleted `database/seeders/data/race-tier-labels-2026-09-29.json` and left it as `.held-aside`, breaking eleven tests — FILED 2026-10-01, CLOSED 2026-10-02
 
 **Symptom.** `git status` shows `D  database/seeders/data/race-tier-labels-2026-09-29.json` and `??  database/seeders/data/race-tier-labels-2026-09-29.json.held-aside`. Eleven tests fail without the tracked file:
