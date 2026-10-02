@@ -4606,3 +4606,22 @@ In `./web/`, copied from `C:\Users\exatf\.playwright-mcp\`, viewport 1440×900, 
 - `en-characters-grid.png` — EN `/characters/`: 7-col grid, per-record accent, condensed name/VA labels, SVG underline bar
 - `jp-home-hero.png` — JP `/` wordmark nav + KV
 - `jp-home-news-and-contents.png` — JP `/` two-column: pink news panel with `[追記]` ribbon, two-part bilingual tabs
+
+## Convention (2026-10-02, documentation-sync pass): which `DESIGN.md` a citation means
+
+A bare `DESIGN.md` citation means the **root contract** (`DESIGN.md`, the surface specification). A section of
+this corpus is cited as `DESIGN-CORPUS.md §"DESIGN.md" §6.14`. Register headings KI-29 and KI-37 predate this
+convention and name `DESIGN.md §6.14` for the 44px control rule that lives at `DESIGN-CORPUS.md:904`; they are
+left exactly as filed, and this convention is the correction forward that KI-52 asks for.
+
+The reason the bare form is ambiguous is measured, not assumed: root `DESIGN.md` is a 394-line surface
+specification whose section numbering stops well before 6.14, while `docs/design-research/DESIGN.md` (1,640
+lines) was absorbed into this corpus as `§"DESIGN.md"` and carries the full design-system numbering including
+§6.14. Neither basename is tracked at `docs/design-research/` any more, so a reader following a bare citation
+that means the design-system half lands nowhere. The same ambiguity applies to `CONSTRAINTS.md` (root gate
+table vs `§"CONSTRAINTS.md"` at `:1665`) and to `RAW-FINDINGS.md`, `SKILLS-GAPS.md` and `SOURCE-OF-TRUTH.md`,
+each of which is absorbed into exactly one master under a section heading of its own name.
+
+Not applied retroactively: the corpus's own provenance lines name the source files they absorbed, and those
+are records of the merge, not pointers a reader follows. Only lines that direct a reader to a rule should carry
+the `DESIGN-CORPUS.md §"…"` form after this convention.
