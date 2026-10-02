@@ -49,7 +49,8 @@ final class StoreSupportCards
     /**
      * @param  list<array{support_id: int, char_id: int, char_name: string|null, name_ja: string|null,
      *                   title_en: string|null, title_ja: string|null, rarity: int, type: string,
-     *                   release_jp: string|null, release_global: string|null, effects: list<list<int>>}>  $records
+     *                   release_jp: string|null, release_global: string|null, effects: list<list<int>>,
+     *                   hint_skills: list<int>|null, event_skills: list<int>|null}>  $records
      * @return array{created: int, updated: int, skipped: int}
      */
     public function handle(array $records, string $url): array
@@ -77,6 +78,8 @@ final class StoreSupportCards
                     'release_jp' => $record['release_jp'],
                     'release_global' => $record['release_global'],
                     'effects' => $record['effects'],
+                    'hint_skills' => $record['hint_skills'],
+                    'event_skills' => $record['event_skills'],
                     ...$this->provenance($url),
                 ];
 

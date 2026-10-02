@@ -162,7 +162,7 @@ it('names the absence rather than showing an empty frame when nothing is recorde
         ->assertSee('No support cards recorded for this run', false);
 });
 
-it('lists an equipped card with its slot, its type and its rarity word', function (): void {
+it('lists an equipped card with its slot, its type, its rarity word and a link to its own page', function (): void {
     $run = deckRun();
     $card = SupportCard::factory()->ssr()->wit()->create([
         'char_name' => 'Quiet Star',
@@ -175,7 +175,11 @@ it('lists an equipped card with its slot, its type and its rarity word', functio
         ->assertOk()
         ->assertSee('Quiet Star [Osenai Dancer]')
         ->assertSee('Slot 4')
-        ->assertSee('SSR Wit');
+        ->assertSee('SSR Wit')
+        // The panel is the entry point a Trainer actually reaches a card from: they logged the deck, now
+        // they want the effect figures behind it. Asserted as the raw href, since the visible text above
+        // is already pinned and a `<span>` would render identically to a Trainer and to a name check.
+        ->assertSee(route('support-cards.show', $card), false);
 });
 
 it('labels slot six Friends even when a stat card sits there', function (): void {

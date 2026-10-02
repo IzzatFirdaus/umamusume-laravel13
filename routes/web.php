@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SkillController;
+use App\Http\Controllers\SupportCardController;
 use App\Http\Controllers\TrainingRunController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,10 @@ Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catal
 // Screen D (PRD FR-D-2). Plural noun, no verb, read-only: the same shape as the two surfaces above.
 Route::get('/skills', [SkillController::class, 'index'])->name('skills.index');
 Route::get('/skills/{skill}', [SkillController::class, 'show'])->name('skills.show');
+
+// The card catalog (PRD FR-B; ADR-0014). Same plural-noun, read-only shape as the two surfaces above.
+Route::get('/support-cards', [SupportCardController::class, 'index'])->name('support-cards.index');
+Route::get('/support-cards/{card}', [SupportCardController::class, 'show'])->name('support-cards.show');
 
 Route::get('/training-runs', [TrainingRunController::class, 'index'])->name('runs.index');
 Route::get('/training-runs/create', [TrainingRunController::class, 'create'])->name('runs.create');

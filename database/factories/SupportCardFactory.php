@@ -37,6 +37,12 @@ class SupportCardFactory extends Factory
             'release_jp' => '2021-02-24',
             'release_global' => '2025-06-26',
             'effects' => [[1, 5, -1, -1, 10, 10, -1, -1, 15, -1, -1, -1]],
+            // The same record's two skill lists, verbatim. Neither is null: the document carries both
+            // keys on all 559 records, so null is a state only a hand-seeded row reaches, and a factory
+            // default that made the common case look like the rare one would hide the distinction the
+            // detail page renders.
+            'hint_skills' => [200162, 200232, 200512, 200612, 200732, 201352, 201542],
+            'event_skills' => [200762],
             'source_url' => 'https://gametora.com/data/umamusume/support-cards.json',
             'fetched_at' => now(),
             'is_manual' => false,

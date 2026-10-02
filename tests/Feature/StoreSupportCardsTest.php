@@ -150,6 +150,22 @@ it('round-trips an anchor vector as twelve wide and keeps -1 as no anchor', func
     expect(json_decode((string) $raw, true))->toBe($record['effects']);
 });
 
+it('round-trips both skill lists, and keeps a stored null from becoming an empty list', function (): void {
+    // The projection is by name, so a key the writer forgets is a silent column that never fills. The
+    // null half matters more than the list half: `hint_skills` null and `[]` render as two different
+    // sentences on the card page, and a JSON column that stored null as `[]` would collapse them.
+    $record = importedSupportCards()[0];
+
+    (new StoreSupportCards)->handle([$record, [...$record, 'support_id' => 90030, 'hint_skills' => null, 'event_skills' => []]], supportCardImportUrl());
+
+    $card = SupportCard::where('support_id', 10001)->firstOrFail();
+
+    expect($card->hint_skills)->toBe($record['hint_skills'])
+        ->and($card->event_skills)->toBe($record['event_skills'])
+        ->and(DB::table('support_cards')->where('support_id', 90030)->value('hint_skills'))->toBeNull()
+        ->and(SupportCard::where('support_id', 90030)->firstOrFail()->event_skills)->toBe([]);
+});
+
 it('writes no card at all when one record carries a type the column refuses', function (): void {
     // Nothing here invents an in-domain value for an out-of-domain type: the parser drops such a record,
     // which `GametoraSupportCardParserTest` pins. This pins the layer behind it, because the CHECK is

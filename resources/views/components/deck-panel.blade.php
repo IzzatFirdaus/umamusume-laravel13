@@ -42,9 +42,9 @@
                 @php $slot = $slots->get($position); @endphp
                 @continue($slot === null)
                 <li class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 rounded-md border border-rule bg-raised px-3 py-2 text-sm">
-                    <span class="font-semibold text-ink-strong">
+                    <a href="{{ route('support-cards.show', $slot->supportCard) }}" class="font-semibold text-ink-strong hover:underline">
                         {{ $slot->supportCard->displayName() }}
-                    </span>
+                    </a>
                     <span class="flex shrink-0 flex-wrap items-baseline gap-3 font-mono text-xs text-ink-muted">
                         {{-- Position is the slot's own identity, and six is the friend slot whatever
                              card sits in it (ADR-0014 correction 1). --}}

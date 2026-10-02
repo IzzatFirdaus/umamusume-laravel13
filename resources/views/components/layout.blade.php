@@ -47,6 +47,9 @@
                  engine wrote, read-only here. A route nobody can reach is a defect, and this is the one
                  entry point that does not depend on being inside a run. --}}
             <a href="{{ route('skills.index') }}" class="hover:underline">Skills</a>
+            {{-- The card catalog sits beside Skills for the same reason: reference data the engine wrote,
+                 read-only here, reachable without being inside a run. --}}
+            <a href="{{ route('support-cards.index') }}" class="hover:underline">Support cards</a>
             <a href="{{ route('runs.index') }}" class="hover:underline">Training runs</a>
             <a href="{{ route('review.index') }}" class="hover:underline">Review</a>
         </div>

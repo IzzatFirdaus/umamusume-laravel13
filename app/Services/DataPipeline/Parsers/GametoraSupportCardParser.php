@@ -49,6 +49,14 @@ use JsonException;
  * read as levels 1, 5 and 10 and print a wrong number with confidence. Measured: 5,114 anchor rows in
  * the document, all twelve wide, none dropped.
  *
+ * **Both skill lists are read as ids, and a missing key is not an empty list.** `hints.hint_skills` and
+ * `event_skills` are the two lists a Trainer meets in the game: what a card's hints level up and what its
+ * story events grant. Measured on the body, both keys are present on all 559 records (32 and 4 of them an
+ * empty list), every element is an integer, and all 3,971 hint ids and 1,528 event ids resolve against
+ * `skills.export_id`. Null is kept distinct from `[]` because the read side renders them as two different
+ * sentences, and `hints.hint_others` is still not stored: it is a numeric hint economy with no surface and
+ * no readable code, so printing it would be this tool inventing vocabulary (D-20).
+ *
  * **`type` and `rarity` are checked against the domains the columns can hold, and a record outside one
  * is not emitted.** The CHECK written by `2026_09_30_151945` refuses both, and it refuses them inside
  * the store's transaction, so one record outside the domain would cost the Trainer all 559.
@@ -72,7 +80,8 @@ final class GametoraSupportCardParser implements SupportCardSourceParser
     /**
      * @return list<array{support_id: int, char_id: int, char_name: string|null, name_ja: string|null,
      *                   title_en: string|null, title_ja: string|null, rarity: int, type: string,
-     *                   release_jp: string|null, release_global: string|null, effects: list<list<int>>}>
+     *                   release_jp: string|null, release_global: string|null, effects: list<list<int>>,
+     *                   hint_skills: list<int>|null, event_skills: list<int>|null}>
      */
     public function parse(string $body): array
     {
@@ -102,7 +111,8 @@ final class GametoraSupportCardParser implements SupportCardSourceParser
     /**
      * @return array{support_id: int, char_id: int, char_name: string|null, name_ja: string|null,
      *               title_en: string|null, title_ja: string|null, rarity: int, type: string,
-     *               release_jp: string|null, release_global: string|null, effects: list<list<int>>}|null
+     *               release_jp: string|null, release_global: string|null, effects: list<list<int>>,
+     *               hint_skills: list<int>|null, event_skills: list<int>|null}|null
      */
     private function row(mixed $card): ?array
     {
@@ -147,7 +157,46 @@ final class GametoraSupportCardParser implements SupportCardSourceParser
             // reading: a missing key is "not released there", not a value to look for elsewhere.
             'release_global' => $this->date($card['release_en'] ?? null),
             'effects' => $this->anchors($card['effects'] ?? null),
+            // Two skill-id lists the parser dropped until 2026-10-02. `hint_skills` is nested one level
+            // under `hints`, beside the `hint_others` pairs this class still leaves on the floor.
+            'hint_skills' => $this->idList($card['hints']['hint_skills'] ?? null),
+            'event_skills' => $this->idList($card['event_skills'] ?? null),
         ];
+    }
+
+    /**
+     * A clean list of positive integer skill ids, or null when there is no list to read.
+     *
+     * **The null and the empty list are different facts and are kept different.** `[]` is the source
+     * stating the card hints no skills; null is no list at all, which is what a hand-seeded row or a
+     * future body without the key holds. Returning `[]` for both would let the read side print "this
+     * card hints nothing" over a row nobody read.
+     *
+     * Not `GametoraCharacterCardParser::intList`, which accepts a numeric string because that document
+     * writes card ids that way. Measured on this one, all 3,971 hint ids and all 1,528 event ids are
+     * integers, so accepting a string here would admit a shape this publisher does not send and hide the
+     * revision that started sending one. The filter is on the element's type rather than on a coercion of
+     * it, for the reason that class records: `intval([[200162]])` is `1`, and a helper mapping `intval`
+     * over a malformed list stores the skill id `1` and looks like it worked.
+     *
+     * @param  mixed  $value  mixed because the caller is reading a document, not a schema
+     * @return list<int>|null
+     */
+    private function idList(mixed $value): ?array
+    {
+        if (! is_array($value)) {
+            return null;
+        }
+
+        $ids = [];
+
+        foreach ($value as $item) {
+            if (is_int($item) && $item > 0) {
+                $ids[] = $item;
+            }
+        }
+
+        return $ids;
     }
 
     /**

@@ -92,22 +92,72 @@ it('keeps the seven types and three rarities in the counts the document publishe
 it('emits only the columns the table holds, so a published key cannot reach a write', function (): void {
     $columns = [
         'support_id', 'char_id', 'char_name', 'name_ja', 'title_en', 'title_ja',
-        'rarity', 'type', 'release_jp', 'release_global', 'effects',
+        'rarity', 'type', 'release_jp', 'release_global', 'effects', 'hint_skills', 'event_skills',
     ];
 
     foreach (parsedSupportCards() as $record) {
         expect(array_keys($record))->toBe($columns);
     }
 
-    // Read by the document and deliberately not stored, because no column holds them: `hints` and
-    // `event_skills` describe the hint and skill economy ADR-0014 leaves out of Phase 1, `obtained` is
-    // the gacha path, and the `_ko` / `_tw` fields are the same strings on two other servers.
+    // Read by the document and deliberately not stored, because no column holds them: `hints.hint_others`
+    // is a numeric hint economy with no surface and no readable code (D-20), `obtained` is the gacha path,
+    // and the `_ko` / `_tw` fields are the same strings on two other servers. `hints.hint_skills` and
+    // `event_skills` were on this list until 2026-10-02 and are now the two columns above.
     $row = supportCardsDocument()[10001];
 
-    expect($row)->toHaveKey('hints')
+    expect($row['hints'])->toHaveKey('hint_others')
         ->and($row)->toHaveKey('obtained')
         ->and($row)->toHaveKey('name_ko')
         ->and($row)->toHaveKey('url_name');
+});
+
+it('reads both skill lists as ids, and keeps an empty list distinct from no list', function (): void {
+    $records = parsedSupportCards();
+    $document = supportCardsDocument();
+
+    // Measured on the body: both keys are present on all 559 records, `hint_skills` non-empty on 527 and
+    // empty on 32, `event_skills` non-empty on 555 and empty on 4. Every element is an integer and every
+    // id resolves against `skills.export_id`, so a reader that coerced or dropped one would be the only
+    // thing standing between the column and a wrong number.
+    expect(array_filter($records, fn (array $r): bool => $r['hint_skills'] === null))->toBe([])
+        ->and(array_filter($records, fn (array $r): bool => $r['event_skills'] === null))->toBe([])
+        ->and(array_filter($records, fn (array $r): bool => $r['hint_skills'] === []))->toHaveCount(32)
+        ->and(array_filter($records, fn (array $r): bool => $r['event_skills'] === []))->toHaveCount(4)
+        ->and(array_sum(array_map('count', array_column($records, 'hint_skills'))))->toBe(3971)
+        ->and(array_sum(array_map('count', array_column($records, 'event_skills'))))->toBe(1528);
+
+    foreach ($records as $record) {
+        $row = $document[$record['support_id']];
+
+        expect($record['hint_skills'])->toBe($row['hints']['hint_skills'])
+            ->and($record['event_skills'])->toBe($row['event_skills']);
+    }
+});
+
+it('stores no list for a card whose skill key is absent, rather than an empty one', function (): void {
+    $base = [
+        'support_id' => 90020, 'char_id' => 1001, 'char_name' => 'Special Week', 'name_jp' => '名',
+        'rarity' => 1, 'type' => 'speed', 'release' => '2021-02-24',
+    ];
+
+    $records = (new GametoraSupportCardParser)->parse((string) json_encode([
+        // No `hints` key at all, and `event_skills` present but empty: the two facts stay separate.
+        [...$base, 'event_skills' => []],
+        // A key that is not a list is no list. `hints` as a string is the case the document has never
+        // sent, and reading it as `[]` would state an absence the source did not state.
+        [...$base, 'support_id' => 90021, 'hints' => 'not a list', 'event_skills' => 'not a list'],
+        // Zero, a negative and a numeric string are not ids this document publishes; a nested list is
+        // refused rather than coerced, because `intval([[200162]])` is `1` and would store the skill id
+        // `1` and look like it worked.
+        [...$base, 'support_id' => 90022, 'hints' => ['hint_skills' => [0, -5, '200162', [200162], 200162]]],
+    ]));
+
+    expect($records)->toHaveCount(3)
+        ->and($records[0]['hint_skills'])->toBeNull()
+        ->and($records[0]['event_skills'])->toBe([])
+        ->and($records[1]['hint_skills'])->toBeNull()
+        ->and($records[1]['event_skills'])->toBeNull()
+        ->and($records[2]['hint_skills'])->toBe([200162]);
 });
 
 it('takes the Japanese name from name_jp, which is what this document calls it', function (): void {

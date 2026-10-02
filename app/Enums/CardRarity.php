@@ -21,4 +21,19 @@ enum CardRarity: int
     {
         return str_repeat('★', $this->value);
     }
+
+    /**
+     * The client's rarity word, which is not `label()`: `label()` reads "Three Star" (the order signal
+     * `x-rarity-chip` puts in its aria-label) while the word the Global client prints is R / SR / SSR
+     * (UMAMUSUME_REFERENCE.md §1.4.2). On the enum rather than on `SupportCard` because a filter facet
+     * has to name a rarity that is not a row yet, and two copies of the mapping would drift.
+     */
+    public function word(): string
+    {
+        return match ($this) {
+            self::OneStar => 'R',
+            self::TwoStar => 'SR',
+            self::ThreeStar => 'SSR',
+        };
+    }
 }

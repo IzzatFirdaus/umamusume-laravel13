@@ -30,6 +30,10 @@ interface SupportCardSourceParser
      * three `CardRarity` cases; a record outside either domain is not emitted at all, because the
      * column CHECK would refuse the write and the whole run would roll back.
      *
+     * `hint_skills` and `event_skills` are the card's two skill-id lists, and a null is not an empty
+     * list: `[]` is the source stating the card carries none, null is no list stored for that card.
+     * The read side renders the two absences differently, so the distinction survives the contract.
+     *
      * @return list<array{
      *     support_id: int,
      *     char_id: int,
@@ -41,7 +45,9 @@ interface SupportCardSourceParser
      *     type: string,
      *     release_jp: string|null,
      *     release_global: string|null,
-     *     effects: list<list<int>>
+     *     effects: list<list<int>>,
+     *     hint_skills: list<int>|null,
+     *     event_skills: list<int>|null
      * }>
      */
     public function parse(string $body): array;
