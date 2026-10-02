@@ -4779,6 +4779,7 @@ well: the `scenario` relation above, and the aptitude grid's location — the pl
 the only structural gap, but aptitudes were rendering inside every costume-form panel, so a trainee with
 several forms drew the same ten-letter grid once per form.
 
-**Nineteen of the twenty-two WS-2 acceptance boxes are ticked** in `docs/PLAN-UI-UX-2026-10-02.md`. The three
+**Nineteen of the twenty-two WS-2 acceptance boxes are ticked** in `docs/research-scratch/PROCESS-PLANS.md`
+(section PLAN-UI-UX-2026-10-02.md, moved there from `docs/` on 2026-10-03). The three
 left open are contrast measurement (G-5), the `DESIGN.md` §4.2 review against the rendered page, and KI-35's
 closure, which is gated on `origin/master` (owner gate O-1).

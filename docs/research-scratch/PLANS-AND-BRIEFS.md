@@ -276,7 +276,8 @@ Everything else reproduced: the two D-30 entries and their omissions, the migrat
 2. **Nothing guards this list against the next drift.** `DocSchemaDriftTest` pins only `training_runs`.
 ## GATE-REGISTRY / PRE-MORTEM restore-or-repoint brief (2026-10-02, doc-sync plan Task 2)
 
-Owner gate O-2, from `docs/PLAN-DOC-SYNC-2026-10-02.md` Tasks 2, 4 and 5. **No ruling recorded yet; nothing
+Owner gate O-2, from Tasks 2, 4 and 5 of the DOC-SYNC plan, now the section PLAN-DOC-SYNC-2026-10-02.md in
+`PROCESS-PLANS.md` (those tasks at lines 1228, 1332 and 1372). **No ruling recorded yet; nothing
 has been changed on either branch of it.** This section is the decision brief; Task 4's chain repair and 41 of
 the census's 505 dead links (22 `docs/GATE-REGISTRY.md` + 19 `docs/PRE-MORTEM.md`) wait on it.
 

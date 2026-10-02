@@ -146,6 +146,14 @@ files were not.
 
 ## Plans deliberately NOT consolidated (decided 2026-10-02)
 
+**Corrected forward 2026-10-03 (HEAD `53cc960`).** The owner reversed this decision the next day. Both
+plans are now embedded in `PROCESS-PLANS.md` (in the sections named PLAN-DOC-SYNC-2026-10-02.md and
+PLAN-UI-UX-2026-10-02.md) and both working files were deleted in the same commit, so each section is the
+executable copy and open steps continue there. Measured at `53cc960` rather than carried from this record:
+DOC-SYNC 22 closed and 21 open, UI/UX 37 closed and 42 open, against the 22/21 and 17/62 counted on
+2026-10-02. The text below stays verbatim because it is the record of what was decided that day and of the
+numbers current then.
+
 A request arrived to fold `docs/PLAN-DOC-SYNC-2026-10-02.md` and `docs/PLAN-UI-UX-2026-10-02.md`
 into the masters. Both stay where they are, and the reason is measurable rather than stylistic.
 

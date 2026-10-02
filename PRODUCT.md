@@ -171,7 +171,7 @@ screen). Subject to that document's own staleness flags; re-verify dated claims 
   customers, or usage claims.
 - Run state a Trainer has not entered is reported as not recorded, never defaulted to zero and
   never drawn as a dash (G-19 and the absence vocabulary ruling in
-  `docs/PLAN-UI-UX-2026-10-02.md:225`).
+  `docs/research-scratch/PROCESS-PLANS.md:574`, moved there from `docs/PLAN-UI-UX-2026-10-02.md:225` on 2026-10-03).
 
 ## Product Principles
 
