@@ -54,8 +54,10 @@ def inbound_per_master(masters):
 def dead_links():
     """Backticked .md references that no longer resolve. A deletion without a repoint shows up here.
 
-    A bare name is tried as written, under `docs/`, and beside the citing file, because this
-    corpus cites root files, docs files and masters with the same shorthand.
+    A bare name is tried as written, under `docs/`, under `docs/research-scratch/`, and beside the
+    citing file, because this corpus cites root files, docs files and masters with the same
+    shorthand. Bare master names such as `GOVERNANCE.md` resolve under the masters directory, so
+    counting them as dead was a resolver gap rather than citation rot.
     """
     bad = []
     listing = set(git("ls-files").splitlines())
@@ -67,7 +69,8 @@ def dead_links():
                 cand = ref.replace("\\", "/").lstrip("/")
                 tries = [cand]
                 if "/" not in cand:
-                    tries += [f"docs/{cand}", f"{near}/{cand}" if near else cand, cand]
+                    tries += [f"docs/{cand}", f"{MASTERS_DIR}/{cand}",
+                              f"{near}/{cand}" if near else cand]
                 else:
                     tries += [f"docs/{cand}"]
                 if not any(t in listing for t in tries):
