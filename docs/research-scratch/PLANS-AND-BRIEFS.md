@@ -274,3 +274,50 @@ Everything else reproduced: the two D-30 entries and their omissions, the migrat
 
 1. **Two of the four files in the routing sentence are still silent.** `KNOWN-ISSUES.md:15-17` routes the two columns to `ADR-0008`, `ARCHITECTURE.md` §3, the ESSENTIALS digest and D-30 together. `ADR-0008` and `ADR-0012` have since recorded them, this draft covers D-30, and `skills-mechanics-audit-verification-2026-10-01.md:84-86` measured `ARCHITECTURE.md` and `ARCHITECTURE-ESSENTIALS.md` as still naming neither.
 2. **Nothing guards this list against the next drift.** `DocSchemaDriftTest` pins only `training_runs`.
+## GATE-REGISTRY / PRE-MORTEM restore-or-repoint brief (2026-10-02, doc-sync plan Task 2)
+
+Owner gate O-2, from `docs/PLAN-DOC-SYNC-2026-10-02.md` Tasks 2, 4 and 5. **No ruling recorded yet; nothing
+has been changed on either branch of it.** This section is the decision brief; Task 4's chain repair and 41 of
+the census's 505 dead links (22 `docs/GATE-REGISTRY.md` + 19 `docs/PRE-MORTEM.md`) wait on it.
+
+**What is actually missing.** Both paths are dead on a fresh clone: `AGENTS.md:178` ranks
+`docs/GATE-REGISTRY.md` second of five authorities, `AGENTS.md:5` names `docs/PRE-MORTEM.md` as the risk
+record, `AGENTS.md:94` says "see GATE-REGISTRY C-5", and `README.md:18` maps `docs/PRE-MORTEM.md`. Neither
+file is on disk. Both are recoverable: `git show 22e5135^:docs/GATE-REGISTRY.md` is 159 lines,
+`git show 22e5135^:docs/PRE-MORTEM.md` is 98 lines.
+
+**What the absorbed master already carries — the decisive measurement.** `GOVERNANCE.md` (Round 1) absorbed
+both in full, as named sections, not as prose summaries:
+
+- `## GATE-REGISTRY.md` at `:350`, with the complete C-1..C-8 table — including **C-5 in its fullest form**
+  at `:381` (scratch-DB-first, `migrate:fresh --seed` against the shared file named as destructive and needing
+  approval). That row is *richer* than the old file's own `:32`, which is the same rule in its earlier shape.
+- `## PRE-MORTEM.md` at `:512`, carrying the report including the repo #4 addendum that `AGENTS.md` §"risk
+  record" points at, with `Pre-Mortem §4` non-goal references intact at `:67` and `:101`.
+- Both sections carry their own provenance headers under `## Provenance` at `:3`.
+
+**Option A — Restore.** `git checkout 22e5135^ -- docs/GATE-REGISTRY.md docs/PRE-MORTEM.md`. Clears all 41
+citations at once and keeps `AGENTS.md`'s chain verbatim. Cost: two more root files in a corpus that was
+deliberately consolidated to sixteen masters, and a **second copy** of content whose home is `GOVERNANCE.md`
+— which is the exact twin-name and dual-source problem that produced `KI-52` and the `DESIGN.md` collision.
+Restoring also forks the gate registry: the old C-1 row says `vendor/bin/pest --compact` while
+`CONSTRAINTS.md:9` and current practice use `php artisan test --compact`, so a restored file would need a
+currency pass of its own before it was safe to cite.
+
+**Option B — Repoint.** Edit `AGENTS.md:5`, `AGENTS.md:94`, `AGENTS.md:178` and `README.md:18` to name
+`docs/research-scratch/GOVERNANCE.md` with its section anchors (`§"GATE-REGISTRY.md"` at `:350`,
+`§"PRE-MORTEM.md"` at `:512`), and let Task 5 repoint the remaining 41 citations into those sections. Cost: the
+41 citations are reviewed by hand rather than healed by a checkout, and the precedence chain loses the named
+"#2" document in favour of a named *section* of a master. Benefit: no second copy, no fork, and the chain
+resolves on a fresh clone without a consolidation record contradicting the file it names as absorbed.
+
+**Recommendation (pending the owner's ruling; nothing applied):** **Option B**, on the plan's own test. The
+plan says restore only if the absorbed `GOVERNANCE.md` sections are incomplete for C-5 and the pre-mortem §4
+addendum. They are not incomplete — C-5's absorbed row is the most current of the three copies, and the §4
+addendum is present. Restoring would also put a stale C-1 command back on disk at a path `AGENTS.md` ranks
+above the files that state the current one. Repointing is the smaller, non-forking change, and it is the one
+consistent with `INDEX.md`'s record that these files were absorbed.
+
+**Held pending ruling:** Task 4 (`AGENTS.md:5,94,178`, `README.md:18`), Task 5's 22 + 19 citation rows, and
+the confirmation that the gate table's C-1 wording is `php artisan test --compact` everywhere it is cited as
+an instruction.
