@@ -64,7 +64,6 @@ Round 4 also folded `WEB-FINDINGS.md` (390 lines) into `DESIGN-CORPUS.md` as its
 | C-5 down() enforcement gap | `PROCESS-PLANS.md` (C-5 section) |
 | The UI/UX plan (milestones, workstreams, gates) | `docs/PLAN-UI-UX-2026-10-02.md` |
 | Documentation-register sync plan (analysis A-1..A-12, owner gates O-1..O-3) | `docs/PLAN-DOC-SYNC-2026-10-02.md` |
-| PRD revision draft: the uncited shipped surface (P-2/P-3/P-4, R-02) | `docs/design-research/slice-7-prd-revision-draft-2026-10-01.md` (DRAFT) |
 | Design system tokens, theme | `DESIGN-CORPUS.md` (DESIGN section) |
 | Design-research CONSTRAINTS (D-rules) | `DESIGN-CORPUS.md` (CONSTRAINTS section) |
 | Frontend spec divergence | `DESIGN-CORPUS.md` (FRONTEND-SPEC-DIVERGENCE section) |
