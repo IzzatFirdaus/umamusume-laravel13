@@ -3294,6 +3294,16 @@ The translation itself is the valuable part, and most of it survives.
 4. Nothing in §3 or §4 of this file becomes a UI requirement, a seed value, or a piece of copy.
    The one exception is a *negative* one: the numbers stay in this file as rejected claims, so a
    future round does not re-introduce them from the same source.
+5. Note filed 2026-10-03 by the owner's dispatch, Report 1 closeout. The brief that produced the
+   eight-component library (committed unwired at `8985575`) and its mandated CSS values (a rounded
+   Nunito / M PLUS Rounded stack and a `--shadow-violet`) is downstream of *this triaged-incoming
+   material*: Part 1 of `UX-DELIVERABLES.md`, the Comprehensive UX Deliverables document triaged
+   above and never adopted. D-283 governs exactly this case: the write-up supplies patterns, never
+   values or copy. The components, as a pattern, are kept as an unwired library pending call
+   sites. The CSS values, as values, are reversed: neither the font stack nor the shadow token
+   ever reached a commit, so `HEAD` is already the reverted state, and the working-tree edits in
+   `resources/css/app.css` belong to the peer session that flagged them CONFLICT and stays
+   untouched under the dispatch's file-isolation rule.
 
 ---
 
