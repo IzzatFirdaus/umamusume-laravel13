@@ -188,29 +188,46 @@ class CatalogController extends Controller
             ->limit(10)
             ->get();
 
-        // WS-2 Task 2.2: the skill id arrays resolve to rows through `skills.export_id`. Resolved
-        // here for the same reason as the runs, and keyed so the view can render the lists in the
-        // source's own order rather than the query's.
+        // WS-2 Task 2.2, widened to the four lists the card document publishes. The arrays decide
+        // which band a skill sits in and nothing else, which is the use D-30's 2026-10-02 amendment
+        // admits, and the skill detail page reads the same four columns in reverse, so the two
+        // surfaces cannot drift about what a band means. Resolved here rather than in the view for
+        // the same reason as the runs, and keyed so each group renders in the source's own order.
         //
         // The null branch is real, not defensive: a trainee with no Global card has no form to read
         // skill lists from, and the page's Costume forms section says exactly that. The arrays are
-        // themselves nullable (`skills_innate` is null until the parser keeps the key), which is why
-        // the inner `??` is there too.
+        // themselves nullable, which is why the inner `??` is there too. `is_unique` is selected
+        // because `x-skill-row` draws the Unique pill from it, and the column was never fetched
+        // here, so the pill could not render on a trainee page for any card.
         $card = $activeCard ?? $umamusume->cards->first();
-        $uniqueIds = $card === null ? [] : ($card->skills_unique ?? []);
-        $innateIds = $card === null ? [] : ($card->skills_innate ?? []);
-        $skillIds = array_merge($uniqueIds, $innateIds);
+
+        $skillLists = [
+            ['label' => 'Her unique skills', 'absent' => 'No unique skill recorded for this form.', 'ids' => $card === null ? [] : ($card->skills_unique ?? [])],
+            ['label' => 'Her innate skills', 'absent' => 'No innate skills recorded for this form.', 'ids' => $card === null ? [] : ($card->skills_innate ?? [])],
+            ['label' => 'Her awakening skills', 'absent' => 'No awakening skills recorded for this form.', 'ids' => $card === null ? [] : ($card->skills_awakening ?? [])],
+            ['label' => 'Her event skills', 'absent' => 'No event skills recorded for this form.', 'ids' => $card === null ? [] : ($card->skills_event ?? [])],
+        ];
+
+        $skillIds = collect($skillLists)->flatMap(static fn (array $list): array => $list['ids'])->all();
         $skillsByExportId = $skillIds === []
             ? collect()
-            : Skill::query()->whereIn('export_id', $skillIds)->get(['id', 'export_id', 'name', 'sp_cost'])->keyBy('export_id');
+            : Skill::query()->whereIn('export_id', $skillIds)->get(['id', 'export_id', 'name', 'sp_cost', 'is_unique', 'release_status', 'name_is_client'])->keyBy('export_id');
+
+        foreach ($skillLists as $index => $list) {
+            $list['skills'] = collect($list['ids'])
+                ->map(static fn ($id) => $skillsByExportId->get($id))
+                ->filter()
+                ->values();
+
+            $skillLists[$index] = $list;
+        }
 
         return view('catalog.show', [
             'umamusume' => $umamusume,
             'hiddenFormCount' => $showUnconfirmed ? 0 : $umamusume->cards()->where('unconfirmed', true)->count(),
             'activeCard' => $activeCard,
             'runs' => $runs,
-            'uniqueSkills' => collect($uniqueIds)->map(fn ($id) => $skillsByExportId->get($id))->filter()->values(),
-            'innateSkills' => collect($innateIds)->map(fn ($id) => $skillsByExportId->get($id))->filter()->values(),
+            'skillLists' => $skillLists,
             'scenarioLabels' => array_map(static fn (array $def): string => $def['label'], config('scenarios.scenarios')),
             // Passed rather than read off `$request` in the view: the tab strip has to carry the
             // opt-in into its GET form, and a view reaching for the request would be the only

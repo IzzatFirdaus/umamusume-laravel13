@@ -1,12 +1,14 @@
 @props([
     'skill',
+    'linked' => true,
 ])
 
 {{--
     One row in the trainee detail page's Skills section (WS-2 Task 2.2).
 
     The row prints only what the source states: the name, whether the skill is this character's
-    unique one, and its SP cost, and the name links to the skill's own detail page. **No `turn`
+    unique one, and its SP cost, and the name links to the skill's own detail page unless `linked`
+    says that route would refuse it. **No `turn`
     column**, because a field that is `N/A` on every row
     until the Phase B2 storage decision lands is noise on every row; it arrives with that decision.
 
@@ -15,7 +17,14 @@
     Phase A verdict closed the `best_for` question, and a row that implied "good" would reopen it.
 --}}
 <li class="flex flex-wrap items-baseline gap-2 border-b border-rule py-1.5 last:border-b-0">
-    <a href="{{ route('skills.show', $skill) }}" class="text-ink hover:underline">{{ $skill->name }}</a>
+    @if ($linked)
+        <a href="{{ route('skills.show', $skill) }}" class="text-ink hover:underline">{{ $skill->name }}</a>
+    @else
+        {{-- A skill the [Global] client has not shipped has no page to open: the detail route
+             serves only rows `Skill::availableOnGlobal()` accepts, so the name prints and a link
+             that would 404 on it does not. --}}
+        <span class="text-ink">{{ $skill->name }}</span>
+    @endif
 
     @if ($skill->is_unique)
         <span

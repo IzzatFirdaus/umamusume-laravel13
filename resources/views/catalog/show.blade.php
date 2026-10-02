@@ -226,13 +226,14 @@
              as empty sections (D-220's one permitted exception, because the absence is itself
              the answer to "what does this form give me").
 
-             **Skills have moved out of this note.** The card document's `skills_unique` and
-             `skills_innate` id arrays *are* stored on `character_cards` (casts at
-             `CharacterCard.php`), and the Skills section below resolves them to names through
-             `skills.export_id`. This paragraph used to say the opposite, which was true before
-             that storage landed and has been stale since. What stays unrecorded is
-             `skills_awakening` and `skills_event`, and the Skills section says so in the same
-             place a reader looks for the lists.
+             **Skills have moved out of this note.** The card document's `skills_unique`,
+             `skills_innate`, `skills_awakening` and `skills_event` id arrays *are* stored on
+             `character_cards` (casts at `CharacterCard.php`), and the Skills section below
+             resolves all four to names through `skills.export_id`. `skills_evo` is stored too and
+             deliberately not listed there, for the reason that section states under its own
+             heading. What is not kept is `skills_awakening_en`, which the document carries on 5 of
+             its 268 records. This paragraph used to say the opposite about the lists, which was
+             true before that storage landed and has been stale since.
 
              **Objectives and images are the two ADR-0012 decisions**, and both are recorded there
              with the reason. Objectives are per-character in a source with no scenario key; images
@@ -267,40 +268,53 @@
         </p>
     @endif
 
-    {{-- Skills, between Costume forms and Goal races per the binding order (WS-2 Task 2.2). The
-         lists are the form's own `skills_unique` / `skills_innate` arrays, resolved by the
-         controller through `skills.export_id` and rendered by `x-skill-row`. No `turn` column:
-         it is `N/A` on every row until the Phase B2 storage decision, and a column of absences is
-         noise. Nothing here ranks a skill — the ✦ pill classifies, it does not recommend. --}}
+    {{-- Skills, between Costume forms and Goal races per the binding order (WS-2). The lists are
+         the form's own four `skills_*` arrays, resolved by the controller through `skills.export_id`
+         and rendered by `x-skill-row`, so this section and the skill detail page's holder groups read
+         the same columns in opposite directions. No `turn` column: it is `N/A` on every row until the
+         Phase B2 storage decision, and a column of absences is noise. Nothing here ranks a skill: the
+         ✦ pill classifies, it does not recommend. --}}
     <section class="mt-8" aria-labelledby="skills">
         <h2 id="skills" class="text-lg font-semibold text-ink-strong">Skills</h2>
 
-        @if ($uniqueSkills->isEmpty() && $innateSkills->isEmpty())
+        @if (collect($skillLists)->every(static fn (array $list): bool => $list['ids'] === []))
             <p class="mt-2 text-sm text-ink-muted">No skill lists are recorded for this form.</p>
         @else
-            @if ($uniqueSkills->isNotEmpty())
-                <h3 class="mt-4 text-xs font-bold uppercase tracking-widest text-ink-muted">Her unique skills</h3>
+            @foreach ($skillLists as $list)
+                <h3 class="mt-4 text-xs font-bold uppercase tracking-widest text-ink-muted">{{ $list['label'] }}</h3>
                 <ul class="mt-1">
-                    @foreach ($uniqueSkills as $skill)
-                        <x-skill-row :skill="$skill" />
-                    @endforeach
+                    @if ($list['skills']->isNotEmpty())
+                        @foreach ($list['skills'] as $skill)
+                            {{-- The detail route serves only rows `Skill::availableOnGlobal()`
+                                 accepts, so a JapanOnly or third-party-named skill prints its name
+                                 without a link that would 404 on it. --}}
+                            <x-skill-row
+                                :skill="$skill"
+                                :linked="$skill->release_status === \App\Enums\ReleaseStatus::GlobalReleased && $skill->name_is_client"
+                            />
+                        @endforeach
+                    @elseif ($list['ids'] === [])
+                        {{-- A list the form does not carry at all. Each group says for itself rather
+                             than leaving a heading over a blank, which is D-220's rule for a value the
+                             data does not hold. --}}
+                        <li class="py-1.5 text-sm text-ink-muted">{{ $list['absent'] }}</li>
+                    @else
+                        {{-- The card lists ids and the catalogue names none of them, which is a
+                             different claim from an empty list: measured on the committed bodies, 1 of
+                             the 1,273 event ids resolves to no skill row. The export id is not printed
+                             (D-30: no export id reaches a screen). --}}
+                        <li class="py-1.5 text-sm text-ink-muted">Recorded on this form but not in the skill catalog yet.</li>
+                    @endif
                 </ul>
-            @endif
-
-            @if ($innateSkills->isNotEmpty())
-                <h3 class="mt-4 text-xs font-bold uppercase tracking-widest text-ink-muted">Her innate skills</h3>
-                <ul class="mt-1">
-                    @foreach ($innateSkills as $skill)
-                        <x-skill-row :skill="$skill" />
-                    @endforeach
-                </ul>
-            @endif
+            @endforeach
         @endif
 
         <p class="mt-2 text-xs text-ink-muted">
-            From this form's stored <code>skills_innate</code> and <code>skills_unique</code> lists.
-            <code>skills_awakening</code> and <code>skills_event</code> are not recorded yet; they
-            appear here once the parser keeps those keys.
+            From this form's stored <code>skills_unique</code>, <code>skills_innate</code>,
+            <code>skills_awakening</code> and <code>skills_event</code> lists.
+            <code>skills_evo</code> is recorded on the card and not listed here: most of its ids name
+            a skill [Global] has not shipped, and the skill pages refuse those rows rather than link
+            to a missing page.
         </p>
     </section>
 
