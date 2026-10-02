@@ -138,7 +138,7 @@ Owner-confirmed 2026-09-27 (recorded in `DESIGN.md`):
   platform.
 - "Tactical athletics" identity: utilitarian, data-dense. Light base palette with dark opt-in via
   preference resolution (`ADR-0006`). High-contrast muted surfaces, sharp functional accents,
-  monospace numerals. No pastel gradients, no soft drop shadows, no animal or riding iconography.
+  monospace numerals. No pastel gradients, no soft drop shadows, no equestrian/animal iconography.
 - Color anchors and the dark theme are the measured values preserved in
   `docs/research-scratch/DESIGN-CORPUS.md` under its `DESIGN.md` section (promoted to default by
   owner decision), not a newly invented palette.
