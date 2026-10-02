@@ -37,7 +37,7 @@ This ADR does not itself change the governing documents, and the design must not
 - `PRD.md` §6.11: narrow to race outcomes, and add a functional requirement for Energy. Nothing in FR-A through FR-E currently covers it.
 - `CLAUDE.md` Planner Rules 1, 4, 5: Rule 1 must permit action recommendation; Rule 4 must permit derivation from declared external constants, not entered turns alone; Rule 5 must permit an advisory figure whose formula is shown.
 - `AGENTS.md`: the Planner Domain Specialist role description says "no race predictions… deterministic run math". That line needs the same narrowing.
-- `docs/PRE-MORTEM.md` §4.1 records why the legacy prediction system was cut. Re-read it against this decision rather than assuming it still applies unchanged.
+- `docs/research-scratch/GOVERNANCE.md` §"PRE-MORTEM.md" §4.1 records why the legacy prediction system was cut. Re-read it against this decision rather than assuming it still applies unchanged.
 
 ### 2. Rule 4 cannot be satisfied literally, so it is replaced by a disclosure requirement
 
@@ -113,6 +113,6 @@ The recommender is deterministic arithmetic over a declared table, so it is stra
 - `PRD.md` §6.11, FR-C-2, US-3
 - `CLAUDE.md` Planner Domain Rules 1, 4, 5, 6
 - `AGENTS.md` Planner Domain Specialist, escalation paths 2 and 4
-- `docs/PRE-MORTEM.md` §4.1
+- `docs/research-scratch/GOVERNANCE.md` §"PRE-MORTEM.md" §4.1
 - `docs/UMAMUSUME_REFERENCE.md` §1.1.1, §1.1.5, §1.1.6, Source Conflict Log row 2
 - `docs/design-research/CONSTRAINTS.md` D-20, D-35, D-36

@@ -401,3 +401,9 @@ the path on disk but not in `git ls-files`, so the citation works on this machin
 
 **What is not at risk:** none of the four `research-scratch/*.md` bodies is cited as an instruction a reader
 follows; three are provenance citations inside a dated record or a fenced file.
+
+---
+
+## Owner gate O-2 resolved 2026-10-03: repoint, not restore
+
+The owner chose the repoint path: the citations naming `docs/GATE-REGISTRY.md` and `docs/PRE-MORTEM.md` are updated to point at `docs/research-scratch/GOVERNANCE.md` and its absorbed-source sections. The consolidation's absorption stands; the two files are not restored. Two consequences carried forward: `AGENTS.md:178`'s precedence chain no longer names a standalone #2 authority, and any future reader who follows a `GATE-REGISTRY.md` citation arrives inside `GOVERNANCE.md` rather than at a dedicated file.

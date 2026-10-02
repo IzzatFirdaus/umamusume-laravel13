@@ -16,7 +16,7 @@ The quality bar for this repository, written as a contract. Agents: read this be
 | C-8 | Dependencies | No new package without human approval; `composer audit` and `npm audit` with no reachable critical/high | `composer audit`; `npm audit --omit=dev` |
 | C-9 | Frontend types | `resources/js/**/*.ts` compiles clean under `tsconfig.json`'s `strict` mode, which declares `noEmit` | `npm run typecheck` (also runs inside `composer test`) |
 
-> C-7 loading-state scope is interpreted by ADR-0007 (`docs/adr/0007-c7-loading-state-scope-for-server-rendered-views.md`): initial server-rendered navigation may rely on browser-native loading; user-initiated async operations require explicit loading states. Empty/error/data states remain mandatory. Gate tooling and G-number registration live in `docs/GATE-REGISTRY.md`.
+> C-7 loading-state scope is interpreted by ADR-0007 (`docs/adr/0007-c7-loading-state-scope-for-server-rendered-views.md`): initial server-rendered navigation may rely on browser-native loading; user-initiated async operations require explicit loading states. Empty/error/data states remain mandatory. Gate tooling and G-number registration live in `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md".
 
 ## Floor (never, in any change)
 

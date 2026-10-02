@@ -4,7 +4,7 @@ Status: **ACCEPTED** (owner ruling 2026-09-28, recorded here)
 Date: 2026-09-28
 Deciders: product owner (ruling), pre-dev agent (recording)
 Supersedes: nothing; narrows the interpretation of `CONSTRAINTS.md` C-7
-Related: `CONSTRAINTS.md` C-7, `docs/GATE-REGISTRY.md` (C-7 entry), root `DESIGN.md` §3/§7, antislop R-27
+Related: `CONSTRAINTS.md` C-7, `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md" (C-7 entry), root `DESIGN.md` §3/§7, antislop R-27
 
 ## Context
 

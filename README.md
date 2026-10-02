@@ -15,7 +15,7 @@ The characters are Umamusume, a humanoid race. Repository text and code never us
 | `DESIGN.md` | Visual system contract: theme, tokens, components, surface specs |
 | `ARCHITECTURE.md` | Full system design: schema, fetch engine, API contract, security model |
 | `ARCHITECTURE-ESSENTIALS.md` | Token-efficient digest of the above for agent context |
-| `docs/PRE-MORTEM.md` | Risk record; §4 covers the fourth (planner) repository |
+| `docs/research-scratch/GOVERNANCE.md` §"PRE-MORTEM.md" | Risk record; §4 covers the fourth (planner) repository |
 | `CONSTRAINTS.md` | Quality bar with thresholds and commands; read before writing code |
 | `AGENTS.md` | Agent roles, escalation paths, Laravel Boost guidelines |
 | `CLAUDE.md` | Coding rules for assistants (gitignored by design, machine-local) |

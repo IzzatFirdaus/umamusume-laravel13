@@ -2,7 +2,7 @@
 
 Revision 0.2: sections changed by the fourth legacy repository (`uma_musume_race_planner`) are marked [rev 0.2 — repo #4]; everything else is unchanged from revision 0.1.
 
-Consolidated Umamusume Trainer companion. Local-only Laravel 13 tool. Condensed version for agent context: `ARCHITECTURE-ESSENTIALS.md`. Decisions that cut legacy features: `PRD.md` §6 and `docs/PRE-MORTEM.md` (§4 for repo #4).
+Consolidated Umamusume Trainer companion. Local-only Laravel 13 tool. Condensed version for agent context: `ARCHITECTURE-ESSENTIALS.md`. Decisions that cut legacy features: `PRD.md` §6 and `docs/research-scratch/GOVERNANCE.md` §"PRE-MORTEM.md" (§4 for repo #4).
 
 ## 1. Tech Stack (version pins)
 

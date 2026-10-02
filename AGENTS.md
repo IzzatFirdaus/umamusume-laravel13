@@ -2,7 +2,7 @@
 
 Read `CONSTRAINTS.md` before writing code. Do not weaken it to make a change pass.
 
-This repository consolidates four legacy Umamusume apps (three trackers plus the `uma_musume_race_planner` career-run planner [rev 0.2 — repo #4]) into one local-only Laravel 13 tool for Trainers of the Global English version of *Umamusume Pretty Derby*. Product truth: `PRD.md`. System design: `ARCHITECTURE.md` (digest: `ARCHITECTURE-ESSENTIALS.md`). Risk record: `docs/PRE-MORTEM.md` (§4 = repo #4 addendum). Coding rules for assistants: `CLAUDE.md`. Mechanics corpus: `docs/UMAMUSUME_REFERENCE.md` — **eight sections**, and its own preamble carries the current map, so read that rather than reconstructing one from an incoming write-up — with per-scenario guides in `docs/scenarios/01`–`08` (`07` is a known-gap stub, `08` is `[JP-Only]` and must not be imported).
+This repository consolidates four legacy Umamusume apps (three trackers plus the `uma_musume_race_planner` career-run planner [rev 0.2 — repo #4]) into one local-only Laravel 13 tool for Trainers of the Global English version of *Umamusume Pretty Derby*. Product truth: `PRD.md`. System design: `ARCHITECTURE.md` (digest: `ARCHITECTURE-ESSENTIALS.md`). Risk record: `docs/research-scratch/GOVERNANCE.md` §"PRE-MORTEM.md" (§4 = repo #4 addendum). Coding rules for assistants: `CLAUDE.md`. Mechanics corpus: `docs/UMAMUSUME_REFERENCE.md` — **eight sections**, and its own preamble carries the current map, so read that rather than reconstructing one from an incoming write-up — with per-scenario guides in `docs/scenarios/01`–`08` (`07` is a known-gap stub, `08` is `[JP-Only]` and must not be imported).
 
 Lore gate (all roles, non-negotiable): the characters are Umamusume, a humanoid race. Never use equine vocabulary ("horse(s)", sire, dam, mare, foal) or animal framing for them in code, identifiers, data, docs, or UI. Violations are a hard failure; the Lore Guardian audits every change. Scope is in `CONSTRAINTS.md` C-4: the ban governs **copy and framing**, so it does not reach dataset keys (`intelligence`, `friend`), a mechanic that shares a word ("Bad Conditions", the failure formula's condition correction), or a **verbatim** skill/race/card name kept as source data — those are gated on the display path, never by editing the data. The greps are a floor, not the rule.
 
@@ -91,7 +91,7 @@ A local-only, single-Trainer Laravel 13 tool (product name **Trainer Desk**) tha
 | Style fix | `vendor/bin/pint --dirty --format agent` (check with `composer lint`) |
 | Static analysis | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` (level 6) |
 | Lore grep | `composer lore` and `composer lore-code` |
-| Fresh DB | `php artisan migrate:fresh --seed` (destructive against the shared dev file; see GATE-REGISTRY C-5) |
+| Fresh DB | `php artisan migrate:fresh --seed` (destructive against the shared dev file; see `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md" C-5) |
 | Fetch / replay | `php artisan uma:fetch [source]`, `php artisan uma:reparse <source>` (no network) |
 | Backup | `php artisan uma:backup [path]` (WAL checkpoint + consistent copy) |
 | Frontend typecheck | `npm run typecheck` |
@@ -175,7 +175,7 @@ Pest 4, feature-first. One global binding in `tests/Pest.php` applies `TestCase`
 
 ### Documentation precedence
 
-When documents disagree: `CONSTRAINTS.md` (the bar) > `docs/GATE-REGISTRY.md` (how each gate runs) > ADRs (`docs/adr/`) > `DESIGN.md` > slice plans (`PLAN.md`). `ARCHITECTURE.md` is authoritative over `ARCHITECTURE-ESSENTIALS.md`; `PRD.md` is product truth. Read the doc rather than reconstructing it from memory. Docs files are only created or updated when explicitly requested.
+When documents disagree: `CONSTRAINTS.md` (the bar) > `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md" (how each gate runs) > ADRs (`docs/adr/`) > `DESIGN.md` > slice plans (`PLAN.md`). `ARCHITECTURE.md` is authoritative over `ARCHITECTURE-ESSENTIALS.md`; `PRD.md` is product truth. Read the doc rather than reconstructing it from memory. Docs files are only created or updated when explicitly requested.
 
 <laravel-boost-guidelines>
 === .ai/custom/domain rules ===
