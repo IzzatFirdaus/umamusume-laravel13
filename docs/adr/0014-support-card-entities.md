@@ -45,7 +45,18 @@ reasons it cannot work:
   2026-10-01: this paragraph first cited `characters.json` and its 163 records. That file is not the
   trainee feed and it does hold 17 ids in the 9000 block; the measurement was taken against an `id` key
   the file does not have, so every row read back as zero and the range printed as `0 .. -`. The
-  conclusion is unchanged, the evidence named was wrong.]*
+  conclusion is unchanged, the evidence named was wrong.]* *[Dated erratum 2026-10-03: the 23 above is
+  the staff-block count and nothing more, and it was later read as the answer to a different question.
+  The support-card dispatch asked how many cards resolve to no trainee through
+  `umamusume.external_ref = 'gametora:char:{char_id}'`, and that number has never been 23. Measured
+  against the working database on 2026-10-03, after the card source was re-run from its committed body:
+  322 of the 559 resolve and 237 do not, being the 23 staff cards above plus 214 whose character the
+  feed documents but this catalogue does not hold a row for. The 23 stands as written; the dispatch
+  premise that reached three code comments as "41 of the 559 resolve to nobody" was wrong in its figure
+  and wrong in its source, since it cited this bullet for a claim this bullet does not make. All three
+  comments now name the two reasons and print no count, because the second of them moves with the
+  roster. Measurement and wording: `docs/research-scratch/PLANS-AND-BRIEFS.md`
+  §"D-30 widening proposal, 2026-10-03: the support-card catalog surface".]*
 
 The second reason is the one that matters. Those 23 cards are **precisely the records the Scenario Link is
 derived from**: 10 of the 13 scenarios in `scenarios.json` list a 9000-block id in
