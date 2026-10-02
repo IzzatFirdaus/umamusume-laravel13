@@ -4747,3 +4747,38 @@ filename against the *user home*, not the repository root, and its success messa
 captures first landed in `C:\Users\exatf\docs\design-research\verification\` and were copied in. Absolute
 paths, or a copy step, are required. The stray home copies were left in place rather than deleted, because
 removing files outside the workspace is blocked by the permission guard and should be.
+
+## ws2-trainee-detail-2026-10-03.md
+
+M1, Workstream 2: the trainee detail page restructured to the eight-section contract. Written because the
+commit that landed it has a message defect, and a reader of `git log` needs the missing fragments.
+
+**The commit message defect on `80caefd`, corrected here rather than by amending** (this repository's standing
+rule is new-commits-only, so the commit itself is untouched). Two fragments of that message were stripped
+before it was recorded, because they were written inside unquoted backticks in a shell command substitution:
+the message now reads "the plan's Task 2.4 query says .  is a COLUMN" and "is kept, so the section is two
+queries". The two fragments that were lost are:
+
+1. **`with(['scenario', 'turnEntries'])`** — the query the plan prescribed.
+2. **`withCount('turnEntries')`** — the call that replaced it.
+
+With those restored, the sentence reads: the plan's Task 2.4 query says `with(['scenario', 'turnEntries'])`;
+`scenario` is a column, not a relation, so that call would have thrown; `withCount('turnEntries')` is kept so
+the section is two queries rather than one plus ten times the rows. The commit's content is correct and
+unaffected — only the message was garbled.
+
+**What the slice landed.** `80caefd`, five files: eight sections rendered in the binding order (Identity,
+Aptitudes, Costume forms, Skills, Goal races, Her runs, Aliases, Provenance); a new `x-skill-row` component;
+the retired "skill lists are not stored" copy replaced with copy that names the stored keys and the unrecorded
+ones; `Unknown` replaced by `N/A` with a `title` on the debut dates; and the per-form aptitude grid promoted
+to one trainee-level section. Ten new tests in `CatalogDetailPageTest`; the stale-copy pin was replaced rather
+than deleted.
+
+**Two premise corrections against the plan**, both verified before implementing and recorded in the commit as
+well: the `scenario` relation above, and the aptitude grid's location — the plan assumed a Skills section was
+the only structural gap, but aptitudes were rendering inside every costume-form panel, so a trainee with
+several forms drew the same ten-letter grid once per form.
+
+**Nineteen of the twenty-two WS-2 acceptance boxes are ticked** in `docs/PLAN-UI-UX-2026-10-02.md`. The three
+left open are contrast measurement (G-5), the `DESIGN.md` §4.2 review against the rendered page, and KI-35's
+closure, which is gated on `origin/master` (owner gate O-1).
