@@ -119,7 +119,8 @@ final class GametoraSkillsParser implements SkillSourceParser
 
     /**
      * @return list<array{export_id: int, name: string, name_ja: string|null, name_is_client: bool,
-     *                   release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null}>
+     *                   release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null,
+     *                   condition_groups: list<array<string, mixed>>}>
      */
     public function parse(string $body): array
     {
@@ -150,7 +151,8 @@ final class GametoraSkillsParser implements SkillSourceParser
      * @param  mixed  $skill  mixed, not array: a body that decodes to a map yields scalars here, and a
      *                        fetch must not throw over it
      * @return array{export_id: int, name: string, name_ja: string|null, name_is_client: bool,
-     *               release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null}|null
+     *               release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null,
+     *               condition_groups: list<array<string, mixed>>}|null
      */
     private function row(mixed $skill): ?array
     {
@@ -187,6 +189,7 @@ final class GametoraSkillsParser implements SkillSourceParser
             'is_unique' => $rarity !== null && in_array($rarity, self::UNIQUE_CLASS_CODES, true),
             'sp_cost' => isset($skill['cost']) && is_int($skill['cost']) ? $skill['cost'] : null,
             'type' => $this->category($skill['condition_groups'] ?? null),
+            'condition_groups' => $this->conditionGroups($skill['condition_groups'] ?? null),
         ];
     }
 
@@ -239,6 +242,67 @@ final class GametoraSkillsParser implements SkillSourceParser
         }
 
         return count($categories) === 1 ? (string) array_key_first($categories) : null;
+    }
+
+    /**
+     * A group's base time in milliseconds, or null when the source states no duration.
+     *
+     * Measured on the committed body: 1,943 groups carry a positive value, 112 carry `0`, and 259
+     * carry `-1`, the only negative the document writes. A negative is not a duration, so it is
+     * dropped rather than rendered as `-1 ms`; `0` is kept, because the source states it and this
+     * class has no evidence it means anything other than itself.
+     */
+    private function baseTime(mixed $value): ?int
+    {
+        return is_int($value) && $value >= 0 ? $value : null;
+    }
+
+    /**
+     * The activation predicate and effect vector, projected to the shape the column stores.
+     *
+     * `[]` when the source states none. A group missing `effects`, and an effect whose code or value is
+     * not an integer, are dropped rather than coerced: the column is rendered as the source's own
+     * expression, and a coerced `0` would print a value the source never stated. `condition` and
+     * `precondition` keep the engine's own `&`/`@` syntax verbatim — translating it would be inventing
+     * a reading this class cannot evidence.
+     *
+     * @return list<array{base_time: int|null, condition: string|null, precondition: string|null, effects: list<array{type: int, value: int}>}>
+     */
+    private function conditionGroups(mixed $groups): array
+    {
+        if (! is_array($groups)) {
+            return [];
+        }
+
+        $projected = [];
+
+        foreach ($groups as $group) {
+            if (! is_array($group)) {
+                continue;
+            }
+
+            $effects = [];
+            $rawEffects = $group['effects'] ?? null;
+
+            foreach (is_array($rawEffects) ? $rawEffects : [] as $effect) {
+                if (! is_array($effect)
+                    || ! is_int($effect['type'] ?? null)
+                    || ! is_int($effect['value'] ?? null)) {
+                    continue;
+                }
+
+                $effects[] = ['type' => $effect['type'], 'value' => $effect['value']];
+            }
+
+            $projected[] = [
+                'base_time' => $this->baseTime($group['base_time'] ?? null),
+                'condition' => $this->textOrNull($group['condition'] ?? null),
+                'precondition' => $this->textOrNull($group['precondition'] ?? null),
+                'effects' => $effects,
+            ];
+        }
+
+        return $projected;
     }
 
     private function textOrNull(mixed $value): ?string

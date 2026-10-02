@@ -32,6 +32,9 @@ use Illuminate\Support\Carbon;
  * @property string|null $match_key
  * @property int|null $sp_cost
  * @property string|null $type
+ * @property list<array{base_time: int|null, condition: string|null, precondition: string|null,
+ *                     effects: list<array{type: int, value: int}>}>|null $condition_groups
+ *           The source's own activation predicate and effect vector, as it states them.
  * @property bool $is_unique
  * @property int|null $export_id The skill id in the declared source, not this table's primary key.
  * @property int|null $rarity The source's class code. Never rendered as a client rarity word.
@@ -50,6 +53,7 @@ use Illuminate\Support\Carbon;
     'match_key',
     'sp_cost',
     'type',
+    'condition_groups',
     'is_unique',
     'export_id',
     'rarity',
@@ -88,6 +92,7 @@ class Skill extends Model
     {
         return [
             'sp_cost' => 'integer',
+            'condition_groups' => 'array',
             'is_unique' => 'boolean',
             'export_id' => 'integer',
             'rarity' => 'integer',

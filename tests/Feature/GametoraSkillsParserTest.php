@@ -208,3 +208,52 @@ it('drops a body that is not a list of records instead of throwing', function (s
     'rows without an id' => ['[{"name_en": "No Id"}]', 'a row this table cannot key'],
     'rows with no name at all' => ['[{"id": 1}]', 'a row whose display name would be a number'],
 ]);
+
+/*
+ * The activation predicate and effect vector, added 2026-10-03. Measured on the committed body
+ * (`skills.609afe88.json`, 1,910 records): `condition_groups` is present and non-empty on every record,
+ * at most two groups per skill and 404 skills with two. The fixture's twelve rows carry the key because
+ * the fixture is a verbatim slice, so the projection is checked against the source's own shape rather
+ * than one invented here.
+ */
+it('keeps the activation predicate and effect vector the record publishes', function (): void {
+    $records = parseSkillsFixture();
+
+    expect($records[110031]['condition_groups'])->toBe([[
+        'base_time' => 50000,
+        'condition' => 'is_last_straight==1',
+        'precondition' => 'is_finalcorner==1&is_overtake==1&order<=5&order_rate<=50&overtake_target_no_order_up_time>=2',
+        'effects' => [['type' => 27, 'value' => 4500]],
+    ]]);
+});
+
+it('refuses to coerce a malformed condition group or effect', function (mixed $groups, array $expected, string $why): void {
+    $body = json_encode([[
+        'id' => 900001,
+        'name_en' => 'Test Skill',
+        'condition_groups' => $groups,
+    ]], JSON_THROW_ON_ERROR);
+
+    $records = (new GametoraSkillsParser)->parse($body);
+
+    expect($records)->toHaveCount(1)
+        ->and($records[0]['condition_groups'])->toBe($expected, $why);
+})->with([
+    'no groups' => [null, [], 'absent is empty, not a crash'],
+    'a scalar' => ['nope', [], 'a scalar where a list belongs names no condition'],
+    'a group without effects' => [
+        [['condition' => 'phase>=2']],
+        [['base_time' => null, 'condition' => 'phase>=2', 'precondition' => null, 'effects' => []]],
+        'the predicate survives without an effect vector',
+    ],
+    'an effect whose value is a string' => [
+        [['condition' => 'x', 'effects' => [['type' => 27, 'value' => '4500'], ['type' => 27, 'value' => 4500]]]],
+        [['base_time' => null, 'condition' => 'x', 'precondition' => null, 'effects' => [['type' => 27, 'value' => 4500]]]],
+        'a numeric string is not a value the source stated as an integer',
+    ],
+    'a negative base time' => [
+        [['condition' => 'x', 'base_time' => -1]],
+        [['base_time' => null, 'condition' => 'x', 'precondition' => null, 'effects' => []]],
+        'a negative base time is the sentinel the document writes, not a duration',
+    ],
+]);

@@ -30,7 +30,8 @@ interface SkillSourceParser
      *     rarity: int|null,
      *     is_unique: bool,
      *     sp_cost: int|null,
-     *     type: string|null
+     *     type: string|null,
+     *     condition_groups: list<array<string, mixed>>
      * }>
      */
     public function parse(string $body): array;

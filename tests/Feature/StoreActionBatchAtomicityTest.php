@@ -48,18 +48,21 @@ it('rolls the whole character-card batch back when a row in the middle fails', f
             'rarity' => 3,
             'global_release_date' => '2026-01-05', 'is_debut_form' => true,
             'skills_innate' => [], 'skills_unique' => [],
+            'skills_awakening' => [], 'skills_event' => [], 'skills_evo' => [],
         ],
         [
             'card_id' => 502, 'char_external_ref' => 'char:1001', 'title' => 'Second Card',
             'rarity' => 3,
             'global_release_date' => '2026-01-05', 'is_debut_form' => true,
             'skills_innate' => [], 'skills_unique' => [],
+            'skills_awakening' => [], 'skills_event' => [], 'skills_evo' => [],
         ],
         [
             'card_id' => 503, 'char_external_ref' => 'char:1001', 'title' => 'Third Card',
             'rarity' => 5,
             'global_release_date' => '2026-02-16', 'is_debut_form' => false,
             'skills_innate' => [], 'skills_unique' => [],
+            'skills_awakening' => [], 'skills_event' => [], 'skills_evo' => [],
         ],
     ];
 

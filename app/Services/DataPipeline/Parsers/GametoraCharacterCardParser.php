@@ -22,7 +22,9 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
     /**
      * @return list<array{card_id: int, char_external_ref: string, title: string,
      *                          rarity: int, global_release_date: string, is_debut_form: bool,
-     *                          skills_innate: list<int>, skills_unique: list<int>}>
+     *                          skills_innate: list<int>, skills_unique: list<int>,
+     *                          skills_awakening: list<int>, skills_event: list<int>,
+     *                          skills_evo: list<array{new: int, old: int}>}>
      */
     public function parse(string $body): array
     {
@@ -91,6 +93,11 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
                 // the only reason the column is json and not a nullable foreign id.
                 'skills_innate' => $this->intList($card['skills_innate'] ?? null),
                 'skills_unique' => $this->intList($card['skills_unique'] ?? null),
+                // The three keys this class dropped until 2026-10-02. `skills_evo` is a list of
+                // `{new, old}` pairs, not ids, so it takes its own reader rather than `intList`.
+                'skills_awakening' => $this->intList($card['skills_awakening'] ?? null),
+                'skills_event' => $this->intList($card['skills_event'] ?? null),
+                'skills_evo' => $this->evoPairs($card['skills_evo'] ?? null),
             ];
         }
 
@@ -98,15 +105,67 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
     }
 
     /**
+     * The `{new, old}` id pairs the source publishes, or `[]`.
+     *
+     * Both halves are required and each must be an export id: a pair with one side missing names no
+     * evolution, and storing half of it would render a direction the source never stated. Measured on
+     * the committed body, every id in either half resolves against `skills.export_id`.
+     *
+     * @return list<array{new: int, old: int}>
+     */
+    private function evoPairs(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $pairs = [];
+
+        foreach ($value as $pair) {
+            if (! is_array($pair)) {
+                continue;
+            }
+
+            $new = $this->positiveIntOrNull($pair['new'] ?? null);
+            $old = $this->positiveIntOrNull($pair['old'] ?? null);
+
+            if ($new !== null && $old !== null) {
+                $pairs[] = ['new' => $new, 'old' => $old];
+            }
+        }
+
+        return $pairs;
+    }
+
+    /**
+     * One export id, or null when the value is not one.
+     *
+     * The single reader both list shapes go through, so a numeric string is accepted here exactly as it
+     * is in `intList`: the source has written ids that way in this same document, and two readers that
+     * disagreed about it would be a difference nobody could see until a fetch stopped filling a column.
+     */
+    private function positiveIntOrNull(mixed $value): ?int
+    {
+        if (is_int($value) && $value > 0) {
+            return $value;
+        }
+
+        if (is_string($value) && ctype_digit($value) && (int) $value > 0) {
+            return (int) $value;
+        }
+
+        return null;
+    }
+
+    /**
      * A clean list of positive integer export ids, or `[]`.
      *
-     * Written once and used by both keys. The contract is that a malformed value cannot crash the
-     * parse and cannot land a partial row, so the filter is on the element's type rather than on a
-     * coercion of it: `intval([[10071], [100071]])` returns `1` for each nested array, and a helper
-     * that mapped `intval` over the list would store the skill id `1` twice and look like it worked.
-     * A numeric string is accepted because the source has written ids that way elsewhere in this
-     * same document (the card id case above), while `0`, a negative and a non-numeric string are not
-     * ids at all.
+     * The contract is that a malformed value cannot crash the parse and cannot land a partial row, so
+     * the filter is on the element's type rather than on a coercion of it: `intval([[10071], [100071]])`
+     * returns `1` for each nested array, and a helper that mapped `intval` over the list would store the
+     * skill id `1` twice and look like it worked. A numeric string is accepted because the source has
+     * written ids that way elsewhere in this same document (the card id case above), while `0`, a
+     * negative and a non-numeric string are not ids at all.
      *
      * @return list<int>
      */
@@ -119,14 +178,10 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
         $ids = [];
 
         foreach ($value as $item) {
-            if (is_int($item) && $item > 0) {
-                $ids[] = $item;
+            $id = $this->positiveIntOrNull($item);
 
-                continue;
-            }
-
-            if (is_string($item) && ctype_digit($item) && (int) $item > 0) {
-                $ids[] = (int) $item;
+            if ($id !== null) {
+                $ids[] = $id;
             }
         }
 

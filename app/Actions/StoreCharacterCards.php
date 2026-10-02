@@ -95,6 +95,12 @@ final class StoreCharacterCards
                     // missing-key record fails here loudly instead of leaving the old list in place.
                     'skills_innate' => $record['skills_innate'],
                     'skills_unique' => $record['skills_unique'],
+                    // The other three lists the card document publishes, projected by name for the
+                    // same reason as the two above: a re-fetch that stops publishing a list writes
+                    // `[]`, which is the source's own answer.
+                    'skills_awakening' => $record['skills_awakening'],
+                    'skills_event' => $record['skills_event'],
+                    'skills_evo' => $record['skills_evo'],
                     ...$this->provenance($url, $snapshotPath, $timezone),
                 ];
 

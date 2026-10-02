@@ -257,3 +257,77 @@ it('refuses to turn a malformed skill list into a crash or a half-row', function
     'an associative array' => [['a' => 10071], [10071], 'keys are not part of the contract, values are'],
     'null' => [null, [], 'absent is empty, not a null column'],
 ]);
+
+/*
+ * The three lists this parser dropped until 2026-10-03: `skills_awakening`, `skills_event` and
+ * `skills_evo`. The values below are Gold Ship's, read verbatim out of the committed body
+ * (`gametora-characters.e9e9ee6d.json`, card 100701) rather than invented: the card fixture predates
+ * these keys, so a value typed from memory here would be a value the source never stated.
+ */
+it('keeps the awakening, event and evolution lists the source publishes', function (): void {
+    $body = json_encode([[
+        'card_id' => 100701,
+        'char_id' => 1007,
+        'name_en' => 'Gold Ship',
+        'title_en_gl' => '[Red Strife]',
+        'rarity' => 2,
+        'release' => '2021-02-24',
+        'release_en' => '2025-06-26',
+        'skills_awakening' => [201482, 201471, 200622, 201481],
+        'skills_event' => [200052, 200142, 200433],
+        'skills_evo' => [['new' => 100701111, 'old' => 201471], ['new' => 100701211, 'old' => 201481]],
+    ]], JSON_THROW_ON_ERROR);
+
+    $records = (new GametoraCharacterCardParser)->parse($body);
+
+    expect($records)->toHaveCount(1)
+        ->and($records[0]['skills_awakening'])->toBe([201482, 201471, 200622, 201481])
+        ->and($records[0]['skills_event'])->toBe([200052, 200142, 200433])
+        // The pairs keep their direction: `new` replaces `old`, and a flat int list would lose it.
+        ->and($records[0]['skills_evo'])->toBe([
+            ['new' => 100701111, 'old' => 201471],
+            ['new' => 100701211, 'old' => 201481],
+        ]);
+});
+
+it('emits an empty list for the three lists a card does not carry', function (): void {
+    $byCard = [];
+
+    foreach (globalCardRecords() as $record) {
+        $byCard[$record['card_id']] = $record;
+    }
+
+    // The card fixture predates these keys, which makes it exactly the shape a document that stops
+    // publishing a list produces. `[]` and `null` are different claims downstream, so both are pinned.
+    expect($byCard[100101]['skills_awakening'])->toBe([])
+        ->and($byCard[100101]['skills_event'])->toBe([])
+        ->and($byCard[100101]['skills_evo'])->toBe([]);
+});
+
+it('refuses a malformed evolution pair rather than storing half of it', function (mixed $value, array $expected, string $why): void {
+    $body = json_encode([[
+        'card_id' => 100101,
+        'char_id' => 1001,
+        'name_en' => 'Special Week',
+        'title_en_gl' => '[Special Dreamer]',
+        'rarity' => 3,
+        'release_en' => '2025-06-26',
+        'skills_evo' => $value,
+    ]], JSON_THROW_ON_ERROR);
+
+    $records = (new GametoraCharacterCardParser)->parse($body);
+
+    expect($records)->toHaveCount(1)
+        ->and($records[0]['skills_evo'])->toBe($expected, $why);
+})->with([
+    'a string' => ['nope', [], 'a scalar where a list belongs names no evolution'],
+    'a missing half' => [[['new' => 100701111]], [], 'a pair with no `old` names no direction'],
+    'a non-numeric id' => [[['new' => 'evolve', 'old' => 201471]], [], 'a string that is not a number is not an id'],
+    'numeric strings are ids' => [[['new' => '100701111', 'old' => '201471']], [['new' => 100701111, 'old' => 201471]], 'the same allowance intList makes in this document'],
+    'zero and negatives' => [[['new' => 0, 'old' => -5]], [], 'zero and negatives are not ids'],
+    'a good pair among bad ones' => [
+        [['new' => 100701111, 'old' => 201471], ['new' => null, 'old' => 201471]],
+        [['new' => 100701111, 'old' => 201471]],
+        'a bad pair is dropped and the good one lands',
+    ],
+]);

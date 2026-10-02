@@ -62,12 +62,15 @@ it('ships exactly the columns the card-layer docs list', function (): void {
     // they name that no longer ships fails too. Schema change and digest change
     // then travel together, which is the AGENTS.md Architect rule made checkable.
     //
-    // KI-33 adds `skills_innate` and `skills_unique`, so the list below is fourteen
-    // fillable columns. **The four docs named above have not moved** — the brief
-    // governing this change bars edits to any ADR, to `CONSTRAINTS.md` and to
-    // `ARCHITECTURE*`, and `DocSchemaDriftTest` only pins `training_runs` columns,
-    // so no gate catches the gap. It is recorded here and in the pass report rather
-    // than closed by an edit this session is not allowed to make.
+    // KI-33 adds `skills_innate` and `skills_unique`, and the 2026-10-02 slice adds
+    // `skills_awakening`, `skills_event` and `skills_evo`, so the list below is seventeen
+    // fillable columns. **The four docs named above have not moved** — the briefs governing
+    // these changes bar edits to any ADR, to `CONSTRAINTS.md` and to the design corpus, and
+    // `DocSchemaDriftTest` only pins `training_runs` columns, so no gate catches the gap. The
+    // `ARCHITECTURE-ESSENTIALS.md` digest line was moved for the card lists, because AGENTS.md
+    // requires the digest to travel with a schema change; `ADR-0008`, `ARCHITECTURE.md` §3 and
+    // D-30 still name the pre-KI-33 set, and that residual is recorded in the pass report rather
+    // than closed by an edit those briefs do not allow.
     expect(Schema::getColumnListing('character_cards'))->toBe([
         'id',
         'card_id',
@@ -89,6 +92,9 @@ it('ships exactly the columns the card-layer docs list', function (): void {
         'updated_at',
         'skills_innate',
         'skills_unique',
+        'skills_awakening',
+        'skills_event',
+        'skills_evo',
     ]);
 });
 

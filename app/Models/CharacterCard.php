@@ -34,10 +34,14 @@ use Illuminate\Support\Carbon;
  * @property bool $is_manual the Trainer's own correction; the engine's stop sign (FR-B-4)
  * @property list<int>|null $skills_innate the source's own export ids, as the document lists them
  * @property list<int>|null $skills_unique one **or two** ids: 22 cards carry two uniques (KI-33)
+ * @property list<int>|null $skills_awakening the ids her awakening levels grant
+ * @property list<int>|null $skills_event the ids her events grant
+ * @property list<array{new: int, old: int}>|null $skills_evo the evolved/base id pairs the source
+ *                                                            publishes, `new` replacing `old`
  * @property-read Umamusume $umamusume
  */
 #[Table('character_cards')]
-#[Fillable(['card_id', 'umamusume_id', 'title', 'rarity', 'global_release_date', 'is_debut_form', 'unconfirmed', 'source_url', 'snapshot_path', 'fetched_at', 'source_timezone', 'is_manual', 'skills_innate', 'skills_unique'])]
+#[Fillable(['card_id', 'umamusume_id', 'title', 'rarity', 'global_release_date', 'is_debut_form', 'unconfirmed', 'source_url', 'snapshot_path', 'fetched_at', 'source_timezone', 'is_manual', 'skills_innate', 'skills_unique', 'skills_awakening', 'skills_event', 'skills_evo'])]
 class CharacterCard extends Model
 {
     /** @use HasFactory<CharacterCardFactory> */
@@ -65,6 +69,9 @@ class CharacterCard extends Model
             // a foreach decide, and `TrainingRunTest` pins the case.
             'skills_innate' => 'array',
             'skills_unique' => 'array',
+            'skills_awakening' => 'array',
+            'skills_event' => 'array',
+            'skills_evo' => 'array',
         ];
     }
 }

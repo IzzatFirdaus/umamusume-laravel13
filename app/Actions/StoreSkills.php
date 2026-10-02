@@ -43,7 +43,8 @@ final class StoreSkills
 
     /**
      * @param  list<array{export_id: int, name: string, name_ja: string|null, name_is_client: bool,
-     *                   release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null}>  $records
+     *                   release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null,
+     *                   type: string|null, condition_groups: list<array<string, mixed>>}>  $records
      * @return array{created: int, updated: int, skipped: int}
      */
     public function handle(array $records, string $url, ?string $snapshotPath, ?string $timezone): array
