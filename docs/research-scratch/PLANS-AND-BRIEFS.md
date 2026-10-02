@@ -408,3 +408,19 @@ follows; three are provenance citations inside a dated record or a fenced file.
 ## Owner gate O-2 resolved 2026-10-03: repoint, not restore
 
 The owner chose the repoint path: the citations naming `docs/GATE-REGISTRY.md` and `docs/PRE-MORTEM.md` are updated to point at `docs/research-scratch/GOVERNANCE.md` and its absorbed-source sections. The consolidation's absorption stands; the two files are not restored. Two consequences carried forward: `AGENTS.md:178`'s precedence chain no longer names a standalone #2 authority, and any future reader who follows a `GATE-REGISTRY.md` citation arrives inside `GOVERNANCE.md` rather than at a dedicated file.
+
+---
+
+## D-30 widening proposal, 2026-10-03: the skill mechanics and the card's other skill lists
+
+**Status: proposed. `DESIGN-CORPUS.md` §5 is unchanged.** The 2026-10-03 skill-content slice stored two things D-30's current entries do not name and rendered them on the skill detail page, by the dispatch's own order; this section is the text the owner would land in §5 to authorise that render. No other surface reads the new columns.
+
+**`Skill` gains `condition_groups`.** A json list of one or two groups, each `{base_time, condition, precondition, effects[{type, value}]}`: the activation predicate and effect vector the skill record itself publishes, non-empty on all 1,910 committed records. The detail page renders it verbatim as the source's engine expressions and engine effect codes, under a caption saying they are not client labels, and derives no effect word beyond the `type` word D-30 already admits. D-20 and D-256 hold: the page prints the source's own code rather than a guess at what it means.
+
+**`CharacterCard` gains `skills_awakening`, `skills_event` and `skills_evo`**, alongside the `skills_innate` and `skills_unique` the 2026-10-02 amendment admitted. The permitted use widens from "grouping a card's own skills" to "grouping a card's own skills, and answering which cards list a given skill": the skill detail page reads the lists in reverse to name the trainees that hold a skill, grouped by which list holds it. `skills_evo` is stored but not rendered, because it is a list of `{new, old}` id pairs and only 421 of its 1,250 ids name a `[Global]`-released skill, so a link to an evolved form would 404 for most of them under the route's `availableOnGlobal()` refusal. That render decision is the owner's to revisit.
+
+Neither clause authorises a schema change beyond the two migrations that already landed (`2026_10_02_193559_add_condition_groups_to_skills_table` and `2026_10_02_193601_add_awakening_event_evo_to_character_cards_table`), and neither reaches a skill's description, which stays barred by G-SK-20 until a client-string source exists.
+
+**The four permitted holder groups:** `As her unique skill`, `Among her innate skills`, `Among her awakening skills`, `Among her event skills`. The reverse-lookup use is demonstrated on `/skills/{skill}`, where each group lists the trainees whose confirmed forms carry the skill in that one list.
+
+**Measured basis for the G-SK-20 bar, re-read 2026-10-03, no new source consulted.** `desc_en` fails the [Global] terminology table 189 times (172 of them `endurance`) and `endesc` fails it 72 times (52 `wisdom`, 16 `motivation`), so neither field is client prose. The skills body carries no other description key: across its 30 fields the prose is `endesc`, `jpdesc`, `desc_en`, `desc_ko` and `desc_tw`, and nothing else. GameTora is exhausted as a client-string source: `/umamusume/skills/{id}`, `/{id}-{slug}` and `/{id}/{slug}` each answer 404, the index answers 200 but is JS-rendered with no skill href in its static HTML, and a browser navigation to it timed out at 30s. A reachable page would in any case be the site displaying the same export this tool imports, which is a re-read of the export rather than the in-client capture G-SK-20 asks for. No description column is added, and none is proposed here.

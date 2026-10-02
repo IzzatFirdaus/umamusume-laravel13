@@ -2639,3 +2639,17 @@ One block, seven dispositions, so the sweep can be checked as one pass. Every cl
 **Owner.** Docs Writer for the re-pointing; the owner decides restore versus re-point versus cut, since both names are load-bearing in the precedence chain.
 
 **Related.** Peer commit `220ed67` ("docs(briefs): put the GATE-REGISTRY and PRE-MORTEM restore-or-repoint choice to the owner") raises the same two absent documents from the briefs side. This entry is the register side of the same question, filed so the dead citations are recorded where the precedence chain lives; the two artifacts should be resolved together.
+
+## KI-56 `db:seed` is not re-runnable: the roster seeder re-queues candidates a unique index now rejects - FILED 2026-10-03, OPEN
+
+**Gap.** `UmamusumeRosterSeeder` writes a `match_candidates` row for every trainee the source marks JapanOnly, unconditionally, on every run. `2026_10_01_124051_add_unique_index_to_match_candidates_table` added `match_candidates_source_external_match_unique` on `(source_key, external_ref)`, so a second run of the same body violates it. Measured 2026-10-03 on a scratch database, `php artisan migrate` then `php artisan db:seed --force` twice: the first pass seeds clean, the second throws `SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: index 'match_candidates_source_external_match_unique'`, the insert naming `gametora:char:1043` (Shinko Windy).
+
+Running `php artisan db:seed --class=UmamusumeRosterSeeder --force` twice on that same database reproduces it alone, so the fault is in that seeder and not in the seeding order. Before the unique index the duplicate row was written silently, so the defect is older than the failure; the index turned a silent duplicate into a loud one.
+
+**Why it matters.** `php artisan migrate --seed` and `db:seed` now abort on any database that already holds the queued candidates, and the three seeders after `UmamusumeRosterSeeder` in `DatabaseSeeder` (`SkillSeeder`, `SourceDocumentSeeder`, `ScenarioSlotSeeder`) do not run. A re-seed therefore leaves the catalogue as it was and exits non-zero. KI-45 and KI-49 both record a successful offline `migrate --seed`; that was a first run against an empty database, which is the case that still works.
+
+**Fix options, owner's call.** Either make the roster seeder upsert its candidate rows on the source identity the way every store action does (`updateOrCreate` on `source_key` plus `external_ref`), or skip a candidate whose row already exists, or scope the queue write to a first run. The first is the shape the rest of the pipeline already uses and the smallest change.
+
+**Not acted on here.** The 2026-10-03 skill-content slice found this while proving its own seeders idempotent (`SourceDocumentSeeder` run twice: `0 created, 1910 updated` for `gametora-skills`, `0 created, 106 updated` for `gametora-character-cards`). `UmamusumeRosterSeeder` is outside that slice's fence, so this is filed and not fixed.
+
+**Owner.** Data Engineer, with the owner deciding the shape if the first option is not taken.

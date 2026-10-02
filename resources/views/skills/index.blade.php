@@ -116,7 +116,7 @@
                 {{-- §6.11's row, reduced to what D-30 permits and what the data holds. The mark and the word
                      both carry Unique, so the state survives without the hue (D-12). --}}
                 <li class="flex flex-wrap items-baseline gap-x-2 gap-y-1 px-4 py-3 text-sm">
-                    <span class="font-semibold text-ink-strong">{{ $skill->name }}</span>
+                    <a href="{{ route('skills.show', $skill) }}" class="font-semibold text-ink-strong hover:underline">{{ $skill->name }}</a>
 
                     {{-- 18 of the 623 [Global] rows store the same string in both name columns, because the
                          source's `jpname` for those skills is Latin script (`#LookatCurren`, `U=ma2`,

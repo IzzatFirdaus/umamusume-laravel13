@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SkillSearchRequest;
+use App\Models\CharacterCard;
 use App\Models\Skill;
+use App\Models\Umamusume;
 use App\Services\DataPipeline\NameNormalizer;
 use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 /**
@@ -60,6 +63,28 @@ class SkillController extends Controller
             'unique' => $request->boolean('unique'),
             'totalCount' => $this->availableCount(),
             'askedFor' => $this->describeAsk($search, $type, $request->boolean('unique')),
+        ]);
+    }
+
+    /**
+     * The detail page for one Global skill: the fields D-30 permits a Skill surface, the
+     * trainees whose forms carry the skill, and the absences the data holds.
+     *
+     * The read starts from `availableOnGlobal()` for the reason index() states: no row
+     * reaches a Trainer-facing surface that the scope rejects, and an unknown id is the
+     * same refusal. The parameter is the local `skills.id`, the key a row on this tree
+     * can name, not the source's export id, which no screen prints.
+     */
+    public function show(string $skill): View
+    {
+        $model = Skill::query()->availableOnGlobal()->findOrFail((int) $skill);
+
+        return view('skills.show', [
+            'skill' => $model,
+            'uniqueHolders' => $this->holders($model, 'skills_unique'),
+            'innateHolders' => $this->holders($model, 'skills_innate'),
+            'awakeningHolders' => $this->holders($model, 'skills_awakening'),
+            'eventHolders' => $this->holders($model, 'skills_event'),
         ]);
     }
 
@@ -123,5 +148,34 @@ class SkillController extends Controller
     private function availableCount(): int
     {
         return Skill::query()->availableOnGlobal()->count();
+    }
+
+    /**
+     * The trainees whose confirmed forms list this skill's export id on one card column,
+     * one entry per trainee, ordered by name.
+     *
+     * The lookup reads the card-grain lists in reverse: `skills_unique`, `skills_innate`,
+     * `skills_awakening` and `skills_event`, the four lists the 2026-10-02 D-30 amendment
+     * admits for grouping a card's own skills, read the other way. Unconfirmed forms sit
+     * behind the same disclosure the catalog list applies, so a form that list hides cannot
+     * surface here either.
+     *
+     * @return Collection<int, Umamusume>
+     */
+    private function holders(Skill $skill, string $column): Collection
+    {
+        if ($skill->export_id === null) {
+            return collect();
+        }
+
+        return CharacterCard::query()
+            ->where('unconfirmed', false)
+            ->whereJsonContains($column, $skill->export_id)
+            ->with('umamusume:id,slug,name')
+            ->get()
+            ->sortBy(fn (CharacterCard $card): string => $card->umamusume->name)
+            ->unique('umamusume_id')
+            ->map(fn (CharacterCard $card): Umamusume => $card->umamusume)
+            ->values();
     }
 }

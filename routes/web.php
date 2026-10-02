@@ -15,6 +15,7 @@ Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catal
 
 // Screen D (PRD FR-D-2). Plural noun, no verb, read-only: the same shape as the two surfaces above.
 Route::get('/skills', [SkillController::class, 'index'])->name('skills.index');
+Route::get('/skills/{skill}', [SkillController::class, 'show'])->name('skills.show');
 
 Route::get('/training-runs', [TrainingRunController::class, 'index'])->name('runs.index');
 Route::get('/training-runs/create', [TrainingRunController::class, 'create'])->name('runs.create');
