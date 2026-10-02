@@ -27,6 +27,36 @@ open, KI-26 closed). Both are headings holding more history than a regex reads. 
 `OPEN` over-counts, because a heading can name both states (KI-10's schema-half-closed/ratio-half-open, KI-25's
 closed-then-reopened). The three numbers in this block are the authoritative counts; a heading grep is indicative
 only.
+
+**Status (2026-10-02, documentation-sync pass, recount after a concurrent edit):** **55 filed, 34 closed,
+21 open** — and of the 34, **5 are closures verified on this working tree and held pending owner gate O-1**
+(the push; `git rev-list --left-right --count HEAD...origin/master` = `23 0` at the time of counting), because
+this register's discipline closes an entry only when the fix is on `origin/master`. The five held: KI-48
+(`79d5f6f`), KI-49 and KI-51 (9 of 9 bodies and the seeder code tracked), KI-53 and KI-54 (fixture tracked,
+no `.held-aside` in the tree, the helper guarded at `1bfbd33`, and the 11-red state no longer reproduces).
+Each carries a **Verified … closure HELD** block in its body naming its sha and its file:line proof. The
+counts below were written as 54/34/20 and are restated here because **the register changed under this pass**:
+a concurrent session (the M1 batch) closed KI-32's heading and filed KI-55 while these blocks were being
+written. KI-32's closure is supported by this pass's independent verification of `ed71741`; see its block for
+the two hygiene notes that closure leaves. The count is by entry, not by heading grep: KI-10 and KI-25 each
+carry both words in one heading and are counted once, KI-10 in its body's state (schema halves closed, ratio
+half open, so open) and KI-25 re-opened by its body. KI-23b and KI-24b are entries, not heading noise.
+
+**Sweep note (Task 6's "never-cited entries" question, answered rather than filed):** one genuinely new
+defect was found by this pass and was **not filed**, because a parallel commit fixed it first.
+`withTierLabelsFileAbsent()` at `tests/Feature/ScenarioSlotSeederResilienceTest.php:105` renamed the tracked
+fixture with no `file_exists` guard, and the calling test's second invocation (`:55`) sat outside its own
+try/finally, so a throw between the rename and the `finally` would have left a **tracked fixture** deleted
+from the shared working tree — the worst kind of register-adjacent defect, one that destroys another
+session's file rather than a test failing. `1bfbd33` ("fix(tests): guard the tier-label helper against the
+already-absent fixture state") added the guard and labels it KI-54's fix; the guarded helper is verified in
+the tree and `ScenarioSlotSeederResilience` passes 5 tests / 17 assertions. Recorded here so the sweep reads
+as a decision rather than an omission, and so KI-55 is not assumed to be that entry — it is the M1 batch's
+O-2 filing, a different finding.
+
+The block below stays as the record of what this register believed on 2026-09-30; it was accurate when written
+and is now superseded by twenty entries' worth of work.
+
 Prior:
 **Status (2026-09-29, Screen D dark-theme pass):** **31 filed, 21 closed, 10 open**, one filed here.
 **KI-32** is the missing `color-scheme` declaration: native form controls keep painting light widgets on
@@ -1478,7 +1508,7 @@ stated whether the six expectations are the spec; they simply pass now.
 
 **Owner:** unassigned for the subsystem. This closes as no-longer-reproducing, not as adopted.
 
-## KI-32 No `color-scheme` is declared, so native form controls paint light widgets on the dark theme — FILED 2026-09-29 (Screen D dark pass), OPEN
+## KI-32 No `color-scheme` is declared, so native form controls paint light widgets on the dark theme — FILED 2026-09-29 (Screen D dark pass), CLOSED 2026-10-02
 
 **What is wrong.** `resources/css/app.css` declares no `color-scheme` anywhere (`grep -n "color-scheme" →
 no output`), so a browser keeps using its **light** UA skin for native controls — checkbox, `select`
@@ -1512,6 +1542,20 @@ should not "fix" the `:root` rule back into `@theme`.
 
 **Owner.** design-system. Found while closing the dark-theme gap on Screen D, by measuring a native control
 rather than trusting that a token override covers everything drawn on the page.
+
+**Verified 2026-10-02 (documentation-sync pass).** This pass checked the fix on the working tree
+independently of the closure above it: `ed71741` landed it, and `resources/css/app.css:219` (light, in a
+`:root` rule) plus `:229` (dark, inside `html[data-theme='dark']`) both declare `color-scheme`. The heading's
+CLOSED is therefore supported by evidence, and this block is that evidence. Two register-hygiene notes the
+closure leaves behind, recorded here rather than re-litigated: the closing heading names no sha, so a reader
+verifying it must find `ed71741` by `git log -S color-scheme`; and the closure landed while
+`origin/master` was 23 commits behind, so the discipline that a KI closes only when its fix is on
+`origin/master` is currently being applied by this file's headings rather than by that rule's own test. Both
+are the register's business on the pass that owns the push (owner gate O-1), not a defect in the finding.
+One further note: the peer batch's closing commit `9cba3ee` is `KI-29`'s fix (the 44px control sizes), not
+this entry's -- the fix that closes THIS entry is `ed71741` -- so the two closures must not be read as sharing
+a commit.
+
 
 ## KI-33 A trainee's own innate and unique skills are published by the source and stored nowhere, so a run cannot pre-populate them — FILED 2026-09-29 (per-trainee skill scoping pass), CLOSED 2026-09-30 (Slice A storage and pre-populate, Slice B repeater)
 
@@ -2218,6 +2262,21 @@ scope the surface to gates only, which needs no data at all but is a smaller pro
 **Owner.** Human owner, with the Data Engineer, because the first candidate is a source-and-seed decision and
 touches `config/uma.php`, which currently carries a concurrent session's uncommitted `seed_file` work.
 
+
+**Corrected forward 2026-10-02 (documentation-sync pass).** Both halves of this entry moved, in opposite
+directions. **The headline is resolved:** `config/uma.php`'s `gametora-race-catalog` source carries
+`'seed_file' => 'race_instances.json'` (`sed -n '138,145p' config/uma.php`), committed at `8b17703`, and the
+population path has been **run** — a read-only count of the shared development database returns
+`race_catalog_slots = 410` rows, 402 of them with a real (non-sentinel) `distance` and `surface`, and `tier`
+non-null on all 410. A feature keyed on a race's distance or surface is no longer unbuildable. **The tier gap
+in the body below is not merely still live, it is worse than filed:** `scenario_slots.tier` is now NULL on
+**296 of 296** rows, where this entry recorded 141 of 296 on 2026-10-01. The table was re-seeded at some point
+after that count with tier-less rows, so the readiness model's tier input has gone from half-sourced to
+unsourced while its other input filled. Re-verify with:
+`SELECT COUNT(*), SUM(tier IS NULL) FROM scenario_slots;` and
+`SELECT COUNT(*) FROM race_catalog_slots;` — and note the second number is now a *seeded* table, so KI-45's
+"unbuildable today" headline should not be cited forward.
+
 ## KI-46 The import's per-stat error names the internal array path (`turns.0.speed`) to the Trainer - FILED 2026-10-01 (Slice 4 browser pass), OPEN
 
 **Observed, rendered in a real browser** (`.scratch-uma/slice4.sqlite` served on `127.0.0.1:8123`, one row of
@@ -2359,7 +2418,7 @@ are what stops it reopening.
 
 
 
-## KI-48 The architecture docs still state the flat `0..1200` stat bound that ADR-0015 superseded — filed, not fixed - FILED 2026-10-01 (owner ruling after the Slice 4 report), OPEN
+## KI-48 The architecture docs still state the flat `0..1200` stat bound that ADR-0015 superseded — filed, not fixed - FILED 2026-10-01 (owner ruling after the Slice 4 report), CLOSED 2026-10-02
 
 **Gap.** Two governance documents assert a validation bound the code no longer applies:
 
@@ -2389,6 +2448,9 @@ prose bound against the rules the request classes actually apply, so nothing fai
 so the fix and its citation land together. Not applied in a Slice 4 follow-up.
 
 **Owner.** Docs Writer, as owner of digest currency. Suggested landing: one edit covering **both** lines above,
+
+**Verified 2026-10-02 (documentation-sync pass) - closure HELD pending owner gate O-1.** The fix landed at `79d5f6f`; this pass verified it on the working tree (ARCHITECTURE-ESSENTIALS.md:36 and ARCHITECTURE.md:159 carry the dated errata; the verbatim 0..1200 lines stand at :36 and :159) rather than re-deriving it from the report that filed it. Nothing about the original finding is edited: it was correctly filed on 2026-10-01 against a tree that did not yet have the fix. What was missing was the closure, and that is a register-lag defect, not a code defect. **The CLOSED heading and the closure block are both written the moment the push lands** (`git rev-list --left-right --count HEAD...origin/master` returns `0 0`); until then this entry stays OPEN, because this register closes nothing on an unpushed fix.
+
 each citing `ADR-0015`, since fixing only the ESSENTIALS line leaves `ARCHITECTURE.md:158` stating the same
 wrong bound.
 
@@ -2403,6 +2465,9 @@ wrong bound.
 **Why it matters now, and not only in principle.** `config/uma.php` names all three bodies through `seed_file` keys (`config/uma.php:75`, `:113`, `:180` in the working copy). `git show HEAD:config/uma.php` greps **0** matches for `seed_file`, so the keys exist only inside an uncommitted peer diff. Neither the pointers nor the bodies are on any ref. Corrected on the same day, because that sentence overreached in its own filing: the `seed_file` keys are indeed absent from every ref, and the bodies are absent from every ref, but two of the three file names do appear at `HEAD`, as `url` values in `config/uma.php` (`skills.609afe88` once, `characters.c6676539` once, `gametora-characters.e9e9ee6d` not at all). So a fresh clone can re-fetch them over the network; what it cannot do is seed offline, and that is the real gap. The rest of this entry is unaffected. Three consumers depend on them: the skills import, which `app/Enums/ReleaseStatus.php` and `ADR-0011` govern; the characters import and roster crosscheck; and the Batch 2 extraction at `docs/design-research/skill-facts-2026-10-01.md`, whose 623 rows cannot be regenerated from a fresh clone because the file it read is not in history. The extraction document says so in its own provenance warning, but a warning in a derived document does not make the source durable.
 
 **Adjacent findings, deliberately not folded in.** KI-24b is a gitignored skill registry, and P-6 with N-3 in `docs/design-research/slice-6-currency-2026-10-01.md` concern one citation pointing at `factors.json`. Those are single pointers into ignored scratch. This is three data bodies with no rule and no commit, so the failure mode differs: a pipeline that is green in one working tree and unrunnable in every other checkout.
+
+**Verified 2026-10-02 (documentation-sync pass) - closure HELD pending owner gate O-1.** The fix landed at `8b17703`; this pass verified it on the working tree (git ls-files database/seeders/data/ | wc -l -> 9, the three bodies named untracked in 2026-10-01 all tracked) rather than re-deriving it from the report that filed it. Nothing about the original finding is edited: it was correctly filed on 2026-10-01 against a tree that did not yet have the fix. What was missing was the closure, and that is a register-lag defect, not a code defect. **The CLOSED heading and the closure block are both written the moment the push lands** (`git rev-list --left-right --count HEAD...origin/master` returns `0 0`); until then this entry stays OPEN, because this register closes nothing on an unpushed fix.
+
 
 **Fix options, owner's call.** Either (a) track the three bodies, about 9 MB together, as the committed source truth for these pipelines, or (b) declare them ephemeral and retarget each pipeline to a source that a ref can resolve, recording manifest hash and fetch date so provenance survives the move. What must not stand is the current middle state, where `seed_file` names bodies no ref carries.
 
@@ -2428,6 +2493,14 @@ wrong bound.
 
 **Mechanism, measured on 2026-10-01 rather than quoted from this entry's heading.** The heading says `Blueprint::check()`, and that name is imprecise in two ways, both verified against the installed framework. `vendor/laravel/framework/src/Illuminate/Database/Schema/Blueprint.php` has 2,036 lines and **0** of them contain `check`, and the class defines no `__call`. So there is no `Blueprint::check()` at all, table-level or otherwise. The four calls in `142618` sit on the column object: `addColumn` returns a `ColumnDefinition`, which extends `Illuminate\Support\Fluent`, and `Fluent::__call` at `vendor/laravel/framework/src/Illuminate/Support/Fluent.php:130` stores any unknown method name as an attribute. `SQLiteGrammar.php` has exactly **1** line containing `check`, line 876, which is the return value of `typeEnum()`, and it defines no `modifyCheck`. The attribute is therefore set, read by nothing, and dropped without an error. Two consequences for whoever fixes this. First, the accurate sentence is: a `->check()` call on a column lands on the column's Fluent object and stores an attribute no SQLite grammar modifier reads. Second, the only path by which this framework writes a CHECK on SQLite is an `enum` column, which is why the constraints in the live DDL come from `151945`'s hand-written SQL and not from any Laravel construct. A gate built on either assumption must test against built DDL, because source text shows neither.
 
+
+**Re-verified 2026-10-02 (documentation-sync pass); stays OPEN.** The four `->check(...)` calls are still in
+`2026_09_30_142618` (`:27`, `:42`, `:43` and the fourth), still render no SQL on SQLite, and are still
+discussed only in that file's own comment block plus one test comment. Nothing new fails because of it, and
+the raw-SQL rewrite in `2026_09_30_151945` remains the enforcement layer, so this stays an open documentation
+hazard rather than a live defect: the risk is a future migration copying the no-op pattern believing it
+constrains. No change made; the re-verification is recorded so the entry's age is not mistaken for neglect.
+
 ## KI-51 The seeder code that reads the untracked bodies is itself untracked, so the skills and roster pipelines have no implementation on any ref. Filed, not fixed.
 
 **Gap.** Three PHP classes under `database/seeders/` exist on disk, are in no commit, and match no `.gitignore` rule. Verified 2026-10-01, all by per-file `git ls-files --error-unmatch` and `git check-ignore`:
@@ -2439,6 +2512,9 @@ wrong bound.
 The tracked seeder surface at `HEAD` is four files: `DatabaseSeeder.php`, `ScenarioSlotSeeder.php`, `SkillSeeder.php`, `UmamusumeSeeder.php`.
 
 **The wiring is missing too, and that is the part a reader will otherwise get wrong.** `git show HEAD:database/seeders/DatabaseSeeder.php` contains **0** references to the three untracked classes. The working copy contains **5**, so the only thing that invokes this loader is an uncommitted peer diff. The sole tracked mentions of `SourceDocumentSeeder` at `HEAD` are prose in comments, at `app/Console/Commands/UmaImportSupportCards.php:93` and `tests/Feature/SupportCardFetchTest.php:152`, and `ReadsCommittedSource` is named nowhere in tracked content at all. `SkillSeeder.php` is tracked but independent of this path: it seeds nine hardcoded names through `NameNormalizer`, states in its own docblock that `sp_cost` and `type` are deliberately left for the import, and does not read a body.
+
+**Verified 2026-10-02 (documentation-sync pass) - closure HELD pending owner gate O-1.** The fix landed at `30b3a08`; this pass verified it on the working tree (the seeder code reading those bodies is tracked at 30b3a08 alongside the ninth body) rather than re-deriving it from the report that filed it. Nothing about the original finding is edited: it was correctly filed on 2026-10-01 against a tree that did not yet have the fix. What was missing was the closure, and that is a register-lag defect, not a code defect. **The CLOSED heading and the closure block are both written the moment the push lands** (`git rev-list --left-right --count HEAD...origin/master` returns `0 0`); until then this entry stays OPEN, because this register closes nothing on an unpushed fix.
+
 
 **Consequence, stated asymmetrically because the asymmetry is the finding.** A fresh clone gets the schema, the models, the views and a tracked seeder that does not touch the source bodies. It does not get the loader, the roster seeder, or the invocation. It does get a working support-card path, because `support-cards.88dea522.json` and `support_effects.ca447e53.json` are tracked and `UmaImportSupportCards.php` is tracked. So the pipelines split in two: one committed end to end, and one whose code, data and wiring are all off-ref. This is KI-49's subject two layers deeper, and it is not the same finding. KI-49 is about bodies. Committing the bodies would not make the skills pipeline run, because nothing on a ref reads them.
 
@@ -2484,11 +2560,14 @@ record. Filed only, with the measurements above so the state can be re-checked r
 **Owner.** Docs Writer for the cross-reference line and the sweep of existing citations; the rename
 decision is the owner's, because it moves a path that other documents cite by name.
 
-## KI-53 A peer session deleted `database/seeders/data/race-tier-labels-2026-09-29.json` and left it as `.held-aside`, breaking eleven tests — FILED 2026-10-01, OPEN
+## KI-53 A peer session deleted `database/seeders/data/race-tier-labels-2026-09-29.json` and left it as `.held-aside`, breaking eleven tests — FILED 2026-10-01, CLOSED 2026-10-02
 
 **Symptom.** `git status` shows `D  database/seeders/data/race-tier-labels-2026-09-29.json` and `??  database/seeders/data/race-tier-labels-2026-09-29.json.held-aside`. Eleven tests fail without the tracked file:
 - `tests/Feature/ScenarioSlotSeederResilienceTest` (4 tests)
 - `tests/Feature/ScenarioSlotSeederTest` (1 test)
+
+**Verified 2026-10-02 (documentation-sync pass) - closure HELD pending owner gate O-1.** The fix landed at `8b17703`; this pass verified it on the working tree (race-tier-labels-2026-09-29.json tracked; no *.held-aside file exists in database/seeders/data/) rather than re-deriving it from the report that filed it. Nothing about the original finding is edited: it was correctly filed on 2026-10-01 against a tree that did not yet have the fix. What was missing was the closure, and that is a register-lag defect, not a code defect. **The CLOSED heading and the closure block are both written the moment the push lands** (`git rev-list --left-right --count HEAD...origin/master` returns `0 0`); until then this entry stays OPEN, because this register closes nothing on an unpushed fix.
+
 - `tests/Feature/TierLabelJoinTest` (6 tests)
 
 `ScenarioSlotSeederResilienceTest` is the suspected deleter per its `withTierLabelsFileAbsent()` helper, which renames the file to `.held-aside` and does not restore it in a failing path.
@@ -2516,3 +2595,38 @@ decision is the owner's, because it moves a path that other documents cite by na
 **Attribution.** Same suspected actor as KI-53 (`ScenarioSlotSeederResilienceTest` helper leaves the renamed state when a run dies mid-suite). KI-54 records the collision the repair now has, not a second suspect.
 
 **Related.** Follows KI-53. The `.held-aside` naming is the repo's own term from that helper; it is not a git convention.
+
+---
+
+## M1 register sweep, 2026-10-02 (PLAN-UI-UX-2026-10-02 Task 1.3, Task 1.2, Task 3.3)
+
+One block, seven dispositions, so the sweep can be checked as one pass. Every closure below was written only after `git branch -r --contains <sha>` confirmed the fix commit is on `origin/master`; every withheld closure names the local commit it is waiting on. Evidence is stated per entry.
+
+**Verified 2026-10-02 (documentation-sync pass) - closure HELD pending owner gate O-1.** The fix landed at `46959ab`; this pass verified it on the working tree (fixture tracked at database/seeders/data/race-tier-labels-2026-09-29.json and the tree is clean; the 11-red state no longer reproduces) rather than re-deriving it from the report that filed it. Nothing about the original finding is edited: it was correctly filed on 2026-10-01 against a tree that did not yet have the fix. What was missing was the closure, and that is a register-lag defect, not a code defect. **The CLOSED heading and the closure block are both written the moment the push lands** (`git rev-list --left-right --count HEAD...origin/master` returns `0 0`); until then this entry stays OPEN, because this register closes nothing on an unpushed fix.
+
+
+**KI-29 (catalog index controls). Work complete, closure withheld.** The fix landed at `9cba3ee` (local; `origin/master` does not contain it): search input, status select and submit button all carry `h-11`, and `CatalogTest` pins the class on every control the form offers, red before the change. Browser read at 1280x800 and 390x844 on a seeded scratch database served on port 8245: all three controls read **44.00** at both viewports, root font size 16px, `box-sizing: border-box`, no horizontal overflow at either width, and the untouched `show_unconfirmed` checkbox read 13px as the canary that the instrument distinguishes sized from unsized. Closure waits on O-1.
+
+**KI-32 (color-scheme). CLOSED 2026-10-02.** The fix shipped at `ed71741`, confirmed on `origin/master` by `git branch -r --contains`. The owed measurement, taken 2026-10-02 on `/skills` served from a seeded scratch database: with `prefers-color-scheme: dark` emulated, the layout's own matchMedia fallback applies `data-theme="dark"`, `getComputedStyle(document.documentElement).colorScheme` reads **dark**, and the native `unique` checkbox paints `rgb(36, 38, 42)` on two consecutive loads, identical both times, which is the exact property the entry said the defect broke. With `light` emulated, `colorScheme` reads **light**, no `data-theme`, and the checkbox paints `rgb(255, 255, 255)`, the correct light UA skin rather than a dark one leaking in.
+
+**KI-45 (race catalogue population). Correction appended; the entry stays OPEN.** The headline, no offline population path, is superseded: `8b17703` landed the `seed_file` path, and `config/uma.php` carries `'seed_file' => 'race_instances.json'` for `gametora-race-catalog`. Re-derived 2026-10-02: `race_catalog_slots` holds **410 rows** on the shared database, and this pass ran `php artisan migrate --seed` against a scratch database, so the catalogue filled offline. The second gap stands and has **widened**: `scenario_slots.tier` was NULL on 141 of 296 rows at filing and reads NULL on **296 of 296** today (read-only query, 2026-10-02), so any tier-to-grade mapping now misses every row rather than 48 percent of them.
+
+**KI-48 (architecture bound). CLOSED 2026-10-02.** The fix landed at `79d5f6f`, confirmed on `origin/master`. Both carriers carry the dated correction citing `ADR-0015` and `8bda7db`: `ARCHITECTURE-ESSENTIALS.md:36` and `ARCHITECTURE.md:158-161`, read 2026-10-02. `DocSchemaDriftTest` green, 5 passed, 12 assertions.
+
+**KI-49 and KI-51 (untracked bodies, untracked seeders). Claims no longer reproduce; closures withheld.** All nine files under `database/seeders/data/` are tracked, the three seeder classes are tracked, and `DatabaseSeeder.php:28-30` invokes `UmamusumeRosterSeeder` and `SourceDocumentSeeder`. The whole fix landed in one commit, `8b17703`, which is **local only**: `git branch -r --contains 8b17703` does not list `origin/master`. This pass also ran `php artisan migrate --seed` offline on a scratch database end to end, so the pipelines these entries describe as unrunnable ran. Both closures wait on O-1, because the sha each would cite is not fetchable from `origin`.
+
+**KI-53 (deleted fixture). CLOSED 2026-10-02.** Failed reproduction, recorded rather than silent: `database/seeders/data/race-tier-labels-2026-09-29.json` is tracked at `329cec1`, which is on `origin/master`, the working tree is clean at that path, and the three files the entry counted now run together **19 passed, 69 assertions** (2026-10-02). The deleted state the entry filed was a working-tree state that was never on any ref, so a reader on `origin` cannot reproduce it either.
+
+**KI-54 (the held-aside collision). Failed reproduction proven; closure withheld.** The same 2026-10-02 run is green, and the fixture state that produced the warning abort cannot arise on any ref. What keeps this entry open is its fix: option (b), the `file_exists` guard, landed at `1bfbd33`, which is local only, and an `origin` checkout still carries the unguarded helper that can strand the fixture mid-run. Closure waits on O-1. The residual the entry also names, the destination collision when both files exist at once, is covered by neither the guard nor this pass and stays on the entry.
+
+## KI-55 Two documents that `agents.md` cites are absent from the tree - FILED 2026-10-02 (M1 register sweep), OPEN
+
+**Gap.** `agents.md` cites `docs/PRE-MORTEM.md` as the risk record (line 5: "Risk record: `docs/PRE-MORTEM.md` (§4 = repo #4 addendum)") and `docs/GATE-REGISTRY.md` as the gate runner reference twice (line 94, the fresh-DB command row "see GATE-REGISTRY C-5"; line 178, the documentation-precedence chain "`CONSTRAINTS.md` (the bar) > `docs/GATE-REGISTRY.md` (how each gate runs)"). Neither file exists: `ls docs/GATE-REGISTRY.md docs/PRE-MORTEM.md` returns no such file for both, verified 2026-10-02. The precedence chain at `agents.md:178` makes `GATE-REGISTRY.md` the second-highest authority in the repository, so a reader following it hits a dead pointer at the second link, and the C-5 reference in the fresh-DB row names a gate whose definition has no home.
+
+**Why it matters.** The same shape as KI-52, a citation that looks resolvable and is not, with the addition that these two are cited by the file every agent reads first. The corpus consolidation moved the design corpus to `docs/research-scratch/`, so the likely history is that these two were moved, renamed or dropped in the same pass and the citations were not swept; that is conjecture and is marked as such.
+
+**Fix options, owner's call.** Restore both files to the cited paths, or re-point the three `agents.md` citations at wherever their content now lives, or cut the citations. `agents.md` itself is the owner's file and was not edited here.
+
+**Owner.** Docs Writer for the re-pointing; the owner decides restore versus re-point versus cut, since both names are load-bearing in the precedence chain.
+
+**Related.** Peer commit `220ed67` ("docs(briefs): put the GATE-REGISTRY and PRE-MORTEM restore-or-repoint choice to the owner") raises the same two absent documents from the briefs side. This entry is the register side of the same question, filed so the dead citations are recorded where the precedence chain lives; the two artifacts should be resolved together.
