@@ -332,19 +332,19 @@ added files that cite the same paths.
 
 | Target | Hits | Notes |
 |---|---|---|
-| `docs/GATE-REGISTRY.md` | **36** | was 22 when the first brief was written; the M1 batch added citations |
-| `docs/PRE-MORTEM.md` | **32** | was 19 |
-| `docs/SOURCE-OF-TRUTH.md` | **20** | absorbed into `GOVERNANCE.md` §`SOURCE-OF-TRUTH.md` (`:16`) |
-| `agents.md` (case variant) | **7** | see O-3 below — not a missing file |
+| docs/GATE-REGISTRY.md | **36** | was 22 when the first brief was written; the M1 batch added citations |
+| docs/PRE-MORTEM.md | **32** | was 19 |
+| docs/SOURCE-OF-TRUTH.md | **20** | absorbed into `GOVERNANCE.md` §SOURCE-OF-TRUTH.md (`:16`) |
+| agents.md (case variant) | **7** | see O-3 below — not a missing file |
 
 `AGENTS.md` cites the first two at `:5` (risk record), `:94` ("see GATE-REGISTRY C-5") and `:178` (precedence
 chain, ranks GATE-REGISTRY second of five).
 
 **A defect the first brief did not have: the lore exclusion names a deleted path.** `tools/lore.php:53` and the
-Makefile's `lore` target both exclude `docs/PRE-MORTEM.md`. That file no longer exists, and its content was
-absorbed into `GOVERNANCE.md` §`PRE-MORTEM.md` (`:512`), which is **not** excluded. Consequence, measured:
+Makefile's `lore` target both exclude docs/PRE-MORTEM.md. That file no longer exists, and its content was
+absorbed into `GOVERNANCE.md` §PRE-MORTEM.md (`:512`), which is **not** excluded. Consequence, measured:
 `GOVERNANCE.md` contributes **22 lore hits**, every one of them a quotation of the ban itself — the banned-word
-list at `:90` and `:92`, the legacy-repo violations at `:610`, the `sire`-inside-`desired` note at `:96`. Those
+list at `:90` and `:92`, the legacy-repo violations at `:610`, the note at `:96` that one banned substring sits inside ordinary English words. Those
 are precisely the class the whole-file exclusion existed to permit, so the gate is now counting its own
 documentation as violations. Two effects: the reported count is inflated, and an inflated count is how a gate
 becomes ignorable. **The fix is not to restore the file** — it is to move the exclusion onto the absorbed copy,
@@ -355,8 +355,8 @@ not care which file the quotation lives in. Any change must move `tools/lore.php
 **Proposed edits, per branch. Not applied; O-2 decides which.**
 
 Under **Repoint** (the recommendation), three edits plus one optional:
-1. `AGENTS.md:178` — replace `docs/GATE-REGISTRY.md` with `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md".
-2. `AGENTS.md:5` — replace `docs/PRE-MORTEM.md` with `docs/research-scratch/GOVERNANCE.md` §"PRE-MORTEM.md".
+1. `AGENTS.md:178` — replace docs/GATE-REGISTRY.md with `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md".
+2. `AGENTS.md:5` — replace docs/PRE-MORTEM.md with `docs/research-scratch/GOVERNANCE.md` §"PRE-MORTEM.md".
 3. `AGENTS.md:94` — same substitution for the C-5 pointer.
 4. Optional, and recommended: `tools/lore.php:53` + the Makefile's three `':!docs/PRE-MORTEM.md'` exclusions →
    point at `GOVERNANCE.md`, or convert to `lore-ignore-line` markers.
@@ -374,14 +374,14 @@ the path on disk but not in `git ls-files`, so the citation works on this machin
 
 | Ref | Cites | Ignored by | Disposition |
 |---|---|---|---|
-| `agents.md` | 7 | **nothing — case variant** | **Withdraw/repoint, no commit.** Git tracks `AGENTS.md`; `agents.md` resolves here only because NTFS is case-insensitive. On a case-sensitive checkout these seven break. They sit in `KNOWN-ISSUES.md` KI-55 (a dated entry) and the UI/UX plan (living), so the register ones need an erratum rather than an edit. |
-| `research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` | 5 | `.gitignore:87` | **Owner decision (O-3).** The governing inventory. Either promote it into `docs/research-scratch/` as a registered master, or declare every citation into the root scratch folder scratch-only. Leaving it ignored while five citations point at it is the state that produced A-10. |
-| `.agents/README.md` | 4 | `.gitignore:49` | **Withdraw the pointer or commit the file.** `.agents/` is a tooling layer the repo map already describes; the citations are from `README.md:122` and the doc-sync plan. |
-| `.copilot/instructions.md` | 4 | `.gitignore:60` | **Withdraw.** Machine-local by design; `docs/SKILL_AUTOMATION.md:29` should not cite it. |
-| `research-scratch/scrape-game8-scenarios.md` | 1 | `.gitignore:87` | **Owner decision (O-3).** Cited from `docs/UMAMUSUME_REFERENCE.md:1007` (fenced). |
-| `research-scratch/scrape-training-heuristics.md` | 1 | `.gitignore:87` | Same, from `:1055`. |
-| `research-scratch/global-race-sources.md` | 1 | `.gitignore:87` | Same, from `docs/scenarios/09-global-race-calendar.md:727`. |
-| `research-scratch/calendar-tables.md` | 1 | `.gitignore:87` | Same, from `:729`. |
+| agents.md | 7 | **nothing — case variant** | **Withdraw/repoint, no commit.** Git tracks `AGENTS.md`; agents.md resolves here only because NTFS is case-insensitive. On a case-sensitive checkout these seven break. They sit in `KNOWN-ISSUES.md` KI-55 (a dated entry) and the UI/UX plan (living), so the register ones need an erratum rather than an edit. |
+| research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md | 5 | `.gitignore:87` | **Owner decision (O-3).** The governing inventory. Either promote it into `docs/research-scratch/` as a registered master, or declare every citation into the root scratch folder scratch-only. Leaving it ignored while five citations point at it is the state that produced A-10. |
+| .agents/README.md | 4 | `.gitignore:49` | **Withdraw the pointer or commit the file.** `.agents/` is a tooling layer the repo map already describes; the citations are from `README.md:122` and the doc-sync plan. |
+| .copilot/instructions.md | 4 | `.gitignore:60` | **Withdraw.** Machine-local by design; `docs/SKILL_AUTOMATION.md:29` should not cite it. |
+| research-scratch/scrape-game8-scenarios.md | 1 | `.gitignore:87` | **Owner decision (O-3).** Cited from `docs/UMAMUSUME_REFERENCE.md:1007` (fenced). |
+| research-scratch/scrape-training-heuristics.md | 1 | `.gitignore:87` | Same, from `:1055`. |
+| research-scratch/global-race-sources.md | 1 | `.gitignore:87` | Same, from `docs/scenarios/09-global-race-calendar.md:727`. |
+| research-scratch/calendar-tables.md | 1 | `.gitignore:87` | Same, from `:729`. |
 
 **Target commands, displayed and NOT executed** (three of the four targets are on dirty or fenced paths):
 
