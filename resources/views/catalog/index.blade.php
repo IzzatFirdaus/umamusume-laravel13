@@ -12,11 +12,11 @@
     <form method="GET" action="{{ route('catalog.index') }}" class="mt-4 flex flex-wrap items-end gap-3 text-sm">
         <label class="flex flex-col gap-1">
             <span class="text-ink-muted">Search</span>
-            <input type="text" name="search" value="{{ $search }}" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink" placeholder="Trainee or card name">
+            <input type="text" name="search" value="{{ $search }}" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink" placeholder="Trainee or card name">
         </label>
         <label class="flex flex-col gap-1">
             <span class="text-ink-muted">Release status</span>
-            <select name="status" class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+            <select name="status" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink">
                 <option value="all" @selected($showAllStatus)>{{ $allStatusesLabel }}</option>
                 @foreach ($statuses as $status)
                     <option value="{{ $status->value }}" @selected($currentStatus === $status)>{{ $status->label() }}</option>
@@ -29,7 +29,7 @@
             <input type="checkbox" name="show_unconfirmed" value="1" @checked($showUnconfirmed) class="rounded border-rule">
             <span class="text-ink-muted">Show unconfirmed cards</span>
         </label>
-        <button type="submit" class="enamel rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Filter</button>
+        <button type="submit" class="enamel h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Filter</button>
     </form>
 
     @if ($umamusumes->count() === 0)
