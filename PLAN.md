@@ -9,7 +9,8 @@ Slice 7 was the schema session. Slice 6 landed the
 frontend residuals; Slice 7 gave Grade Points the period they belong to (KI-10's schema half) and
 gave `turn_events.deltas` a typed shape (D-226), then declined ADR-0005 for Phase 1 per R37. Phase 6
 remains unfrozen and unstarted. Unity Cup and Trackblazer panel UI is Slice 8, not this slice.
-**Last Updated:** 2026-09-29 (Slice 10: the register's KI-18 closure and KI-15 de-duplication at
+**Last Updated:** 2026-10-02 (documentation-sync dispatch: the trainee detail page restructured to the WS-2 contract at `80caefd` — eight sections in binding order, the canonical absence vocabulary, the retired "skill lists are not stored" copy replaced, and the per-form aptitude grid promoted to one trainee-level section; the doc-sync register and citation work at `30202bb`, `ee93b38`, `1bd8eb1`, `0c42168`; the O-2/O-3 owner packages at `220ed67`, `a3f6df9`. Three owner gates remain open and nothing above is pushed.)
+**Last Updated (prior):** 2026-09-29 (Slice 10: the register's KI-18 closure and KI-15 de-duplication at
 `ebfc227`, the subject-prefix erratum and this file's own two repairs at `ec0ee2f`, the line marker
 with its three guards at `8c9faf9`, the count history on the registry at `11525ec`, KI-19 at
 `fe24dc0`, the validation envelope that had never rendered at `6aa81eb`, the cost field error at

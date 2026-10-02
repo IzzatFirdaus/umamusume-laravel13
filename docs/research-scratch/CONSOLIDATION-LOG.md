@@ -176,3 +176,22 @@ carries the completed plan precedent.
 Census at this commit: 615 dead citations against the `DOC_CITATION_BASELINE = 621` ratchet. This
 section adds none: the two plan paths it names exist, and they are cited as plain text rather than
 as links to be followed.
+
+## Plans deliberately NOT consolidated (2026-10-02)
+
+Three plan-shaped documents sit outside the master set on purpose. Consolidating any of them now would freeze
+a status that is still moving, and `PROCESS-PLANS.md` is the wrong home for a document whose acceptance boxes
+are open.
+
+| Document | Why it stays out |
+|---|---|
+| `docs/PLAN-DOC-SYNC-2026-10-02.md` | Task 4 is held on owner gate O-2 and Task 5 is partially executed; Tasks 1, 2, 3, 6, 7 and 8 are complete or scoped. Consolidating a plan with one held task would record a false completion. |
+| `docs/PLAN-UI-UX-2026-10-02.md` | Milestone 1 is partly shipped (WS-1 controls, and the M1 register sweep), WS-2 landed at `80caefd`, and WS-3 through WS-6 are open. It owns its own workstreams and the register entries those workstreams close. |
+| `docs/design-research/slice-7-prd-revision-draft-2026-10-01.md` | A DRAFT awaiting an owner ruling on PRD shape and on R-02's scope. It is deliberately uncommitted, so it is not a tracked master and cannot be registered in `INDEX.md` without defeating its own review gate. |
+
+**The condition for consolidating any of them:** every acceptance box closed or struck, and gates O-1 (push),
+O-2 (GATE-REGISTRY/PRE-MORTEM restore-or-repoint) and O-3 (root `research-scratch/` disposition) resolved.
+Until then `PROCESS-PLANS.md` stays as it is, and these three are cited by path rather than absorbed.
+
+Recorded because the alternative — leaving the three uncited — is the state A-10 and A-11 describe: a document
+that exists, is relied on, and is invisible to the census's own gate.
