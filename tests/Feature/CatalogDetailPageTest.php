@@ -239,7 +239,7 @@ it('does not tell the trainer that skill lists are not stored', function (): voi
         ->assertDontSee('Skill lists are not stored');
 });
 
-it('names the skill lists it does store and the two it does not record yet', function (): void {
+it('names the card skill lists its Skills section reads from', function (): void {
     $umamusume = detailTrainee(1);
 
     // The replacement copy has to be specific rather than merely not-stale: it names the two
