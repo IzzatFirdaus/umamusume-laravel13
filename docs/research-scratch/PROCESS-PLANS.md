@@ -6,6 +6,15 @@ This document consolidates the following source files verbatim (no summarization
 
 - `docs/requests/2026-10-01-scratch-tree-reorganization-plan.md`
 - `docs/requests/reports/2026-09-30-c5-down-enforcement-gap.md`
+- `docs/PLAN-UI-UX-2026-10-02.md` (frozen snapshot 2026-10-02; the live plan is not deleted and stays authoritative)
+
+**The snapshot above breaks the convention on purpose.** File discipline embeds a source and deletes it
+after verification, but this plan still had 42 open steps at capture, so there was no finished state to
+absorb and the working file must stay executable. The section carries its capture sha and counts, which
+makes divergence visible instead of silent. `docs/PLAN-DOC-SYNC-2026-10-02.md` is deliberately not
+embedded: its 37 dead citations against a 31-citation headroom would push
+`tests/Feature/DocCitationParityTest.php` from 590 to 627, past its 621 ceiling. Repointing those refs
+is that plan's own Task 5 and Task 6, and the embed can follow once it lands.
 
 **Placement note:** The C-5 enforcement gap file (`2026-09-30-c5-down-enforcement-gap.md`) was listed in Group A in the original consolidation plan. It is placed here in Group F (Process/Plans) because it is an engineering process finding about an enforcement gap, not governance or register material. This decision preserves the intent that Group A contains binding rules and gate definitions, while Group F holds process analyses and implementation plans.
 
@@ -318,3 +327,782 @@ all migrations.
 
 Surfaced while closing the detail-page port (report: `2026-09-30-port-and-cleanup.md`, §10). The port is
 complete and green at `8c16edc`; this record does not block it.
+
+---
+
+## PLAN-UI-UX-2026-10-02.md
+
+> Snapshot 2026-10-02 at `3d5c26a`, 37 steps closed and 42 open. The live file `docs/PLAN-UI-UX-2026-10-02.md` is not deleted and stays executable; this copy is frozen.
+
+UI/UX Frontend Development Update Plan
+
+**Version:** 1.2
+**Date:** 2026-10-02
+**Status:** Draft for owner approval (v1.2: restructured after a second review pass)
+**Basis:** The 16 consolidated files in `docs/research-scratch/`, the register (`KNOWN-ISSUES.md`), and the tree at `e18a032`. Every current-state claim below was re-derived against the tree on 2026-10-02. Historical v1.0 commentary is kept in Appendix D, out of the task briefs.
+
+**Read order:** this page is the owner summary and the decision list. Task briefs start at Section 2. If you are executing a task, jump to its workstream; if you are approving, stop after Section 0.
+
+**Note on dashes:** R-02 (no em dash) governs shipped user-visible copy. This plan and the review record use `->` and `-` throughout so the same text can be pasted into a commit message, a gate output, or a ticket without re-encoding.
+
+---
+
+### 0. Owner Summary
+
+**What this is.** Six workstreams of outstanding UI/UX work, ordered by dependency, expressed as task briefs an agent can execute. Roughly 33-50 working days across five milestones, of which M5 is blocked on an owner ratification and every M1/M2/M3 register closure is blocked on the push order.
+
+**What dominates the sequencing:**
+
+1. **Data must precede display.** The skills section and the skill picker render card skill lists, which D-30 does not yet permit. Building UI against an unratified schema is the failure mode documented in KI-47.
+2. **The register is the source of truth for open work.** A workstream may not close a KI it did not satisfy, and a KI whose fix already shipped must still be closed in the register with the sha. See KI-22 (filed on a wrong cause) and KI-25 (re-opened on a measurement gap).
+3. **The push is a gate, not an afterthought (O-1).** Local master is 17 commits ahead of `origin/master`, which carries none of this plan's basis documents. Register discipline closes a KI only when the fix is on `origin/master`, so every closure in M1 and M2 is blocked on the owner's push decision.
+
+**Recommended sequencing:** M1 (sizing fixes + D-30 amendment + register sweep) -> M2 (trainee detail page) -> M3 (skill selector combobox) -> M4 (support deck panel) -> M5 (responsive contract).
+
+#### 0.1 Decisions needed from the owner
+
+| ID | Decision | Recommended default | Blocks |
+|---|---|---|---|
+| O-1 | Push order: local master is 17 ahead of `origin/master`, which carries none of this plan's basis docs | **Push local master to `origin/master` first.** The basis documents are the evidence every task brief cites; leaving them local-only means each closure has to cite a commit a reviewer cannot fetch. Reversible if the owner prefers a branch, but then closure wording must say "local-only citation". | Every register closure in M1/M2/M3 |
+| O-2 | WS-5 KI-43 fix: Option A (search-first combobox), Option B (filtered shortlist), Option C (accept and document) | **Option A**, the register's own fix candidate 1 (`KNOWN-ISSUES.md`), reusing the M3 combobox factory | M4's task start only |
+| O-3 | R82 ratification: the 768px floor in `DESIGN.md` §2.3 rests on an unratified proposal | **Ratify R82 as drafted**; it already matches the 390px measurement work in M5 | M5 only |
+| O-4 | §3.1 lineage pick in `SESSION-CONSOLIDATION-2026-09-30.md` | **No action needed for this plan.** It gates the alternate lineage chain, not any page here; the master lineage shipped at `555b0cb` | Nothing in this plan |
+
+**Not a decision:** the plan's own scope. Section 7 lists what is deliberately excluded; nothing outside it is scheduled.
+
+#### 0.2 Top risks
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Push order (O-1) unsettled, so closures cannot be written and M1's exit cannot be met | High | High | Owner decides before M1 opens. Every closure task verifies `git branch -r --contains <sha>` before writing the closure line. |
+| Combobox generalization breaks the trainee selector | Medium | High | The existing `TraineeSelectorTest` suite must pass unchanged before the skill call site is written; it is the regression net for the extraction. |
+| Owner ratification of the 768px floor delayed | Medium | Medium | M5 waits. Do not build against an unratified contract. |
+| Shared worktree collisions | High | Medium | `gstack:careful`; stage named paths only; `git status --short` before every commit. |
+| Seeded DB does not populate `race_catalog_slots` offline | Medium | Low | Task 6.2 verifies the row count first; the fallback measures the turn log only and records the deferral. |
+| Register sweep verdicts contested | Low | Low | Each disposition records the evidence read; the owner overrides in writing. |
+
+---
+
+### Legend of identifiers used in this plan
+
+Short names appear throughout the briefs. Definitions:
+
+| Short name | What it is | Where it lives |
+|---|---|---|
+| R73 | The "read these before touching the run screen" list | `docs/research-scratch/SLICE-RECORDS.md:3613` |
+| R82 | The unratified proposal for a 768px responsive floor | `docs/research-scratch/PLANS-AND-BRIEFS.md:186+` |
+| R85 | The re-open record for KI-25 (scroll measurement gap) | `KNOWN-ISSUES.md` (KI-25 entry) |
+| D-30 | The design-corpus clause that fixes which columns a card or trainee row may render | `docs/research-scratch/DESIGN-CORPUS.md:1805` |
+| D-31 | The design-corpus clause that describes the 0..1200 stat bound as a live defect | `DESIGN-CORPUS.md:1806` |
+| D-40 | The design-corpus clause holding the responsive-floor rule | `DESIGN-CORPUS.md:1834` |
+| D-289 | The errata-forward rule (supersede with a dated note; never edit historical text in place) | `DESIGN-CORPUS.md` gate table |
+| G-SK-13 | The four-band skill-picker gate, currently a clause inside KI-33 rather than its own entry | `KNOWN-ISSUES.md:1585,:1618` |
+| KI-nn | A register entry in `KNOWN-ISSUES.md` (known issue) | root `KNOWN-ISSUES.md` |
+| C-n | A constraint in root `CONSTRAINTS.md` | root `CONSTRAINTS.md` |
+| G-n | A design gate in the `DESIGN-CORPUS.md` gate table | `DESIGN-CORPUS.md:~:2558-2615` |
+| Slice 13 | The verified run-screen slice (skill combobox precedent) | `docs/research-scratch/SLICE-RECORDS.md` §"slice-13-2026-09-29.md" |
+| "Slice N" in the current-state table | A numbered product slice, not a git ref; each maps to a `slice-NN-YYYY-MM-DD.md` record | `SLICE-RECORDS.md` |
+| WS-n / M-n | Workstream / milestone in this plan | this document |
+
+#### Lore baseline movement
+
+v1.0 recorded 98 hits / 55 exempt. v1.1 measured 181 hits / 55 exempt. Exempt held steady, so the movement is a change in what is *scanned*, not a change in rulings: the exemptions are per-line markers that did not move, while the hit total rose because `composer lore-code` was extended to untracked files and the Global client terminology list (Wisdom, Motivation, gacha, jewel) was added to the same run. Both numbers are dated measurements, recorded as relative acceptance criteria rather than baselines.
+
+---
+
+---
+
+### 1. Current State Assessment
+
+#### 1.1 What exists and works
+
+| Surface | State | Evidence |
+|---|---|---|
+| Catalog index + detail | Renders; aptitude grid and form tabs landed | `555b0cb`; `catalog/show.blade.php` |
+| Run screen (dashboard) | Renders with stat band, guided rail, timeline, calendar | Slice 5, 8, 13 verified |
+| Run screen skills editor | Repeater with per-control labels landed; still one native `<select>` per row with 623 options each | `4902f1d`; `runs/show.blade.php` (rows `:479-481`, select `:538-547`) |
+| Skill search (Screen D) | Renders, escaped, paginated, dark-theme clean | Slice 15 browser pass |
+| Trainee combobox (run create) | WAI-ARIA APG combobox, prefix match, grouped | `trainee-combobox.ts`; `TraineeSelectorTest.php` |
+| Support deck panel | Six pickers, Scenario Link derived, effect lines at "highest stated anchor" | Slice 2, ADR-0014; `deck-panel.blade.php:61,126` |
+| `color-scheme` declarations | Shipped | `ed71741`; `resources/css/app.css:219,:229` |
+| Lore gate | 181 hits / 55 exempt; lore-code 42 (measured 2026-10-02 at `e18a032`) | `composer lore`, `composer lore-code` |
+
+#### 1.2 What is broken, incomplete, or unverified
+
+| ID | Priority (plan-assigned; the register assigns none) | Surface | State |
+|---|---|---|---|
+| KI-25 | Medium | Turn log at 390px | RE-OPENED (R85); arrow-key scroll + `scrollWidth` re-read never measured in a browser; D-40/768px reconciliation held on R82 |
+| KI-29 | Low | Catalog index controls | `catalog/index.blade.php:15,:19,:32` carry no `h-11`; the 44px rule is `DESIGN-CORPUS.md:904` |
+| KI-32 | Low | Dark theme native controls | Fix shipped (`ed71741`); register entry still OPEN and owes the closure with the browser read |
+| KI-35 | High | Trainee detail page | Five of the eight target sections render (Basic info, Aliases, Costume forms with aptitude grid, Provenance); Skills, Goal races, Her runs absent; stale copy claims skill lists "are not stored" (`catalog/show.blade.php:226`) |
+| KI-43 | Medium | Support deck panel | Deck block 296,537 B with six equipped; 88.5% of the page with none; `<option>` payload alone 207,504 B (57.6%) |
+| KI-48 | Low | Architecture docs | Fix shipped (`79d5f6f`, dated errata citing ADR-0015 and `8bda7db`); register entry still OPEN |
+| KI-49, KI-51 | Medium | Source bodies / seeders | Bodies tracked since `8b17703` / `30b3a08`; entries stale, owe verify-and-close |
+| KI-53, KI-54 | Medium | `race-tier-labels` fixture | Fixture tracked at HEAD, tree clean, the 11-red state no longer reproduces; entries stale; the `withTierLabelsFileAbsent()` helper (`ScenarioSlotSeederResilienceTest.php:102`) is still unguarded |
+| KI-45 | Medium | Race calendar data | Headline (no offline population path) superseded by `8b17703` (`seed_file`); second gap stands: `scenario_slots.tier` NULL on 141/296 |
+| G-SK-13 | Medium | Skill picker on run screen | Lives inside KI-33 (`KNOWN-ISSUES.md:1585,:1618`), not its own entry; four-band picker unbuilt; 623 available skills |
+| Phase B2 | Medium | Skill facts on read rows | Design drafted (`SKILLS-MECHANICS.md:3383-3386`); storage decision outstanding (Data Engineer / Architect) |
+| D-31 | Low | Design-corpus clause | `DESIGN-CORPUS.md:1806` still describes the 0..1200 bound as a live defect though ADR-0015 landed |
+| Doc drift | Low | Referenced docs absent | `docs/GATE-REGISTRY.md` and `docs/PRE-MORTEM.md` are both cited by `agents.md` but absent from the tree |
+
+#### 1.3 Skills available
+
+`SKILL.md` no longer holds a roster. The scanner is the authority; the commands live in Appendix B (defined once, referenced from here). Agents run the scanner before dispatching any task and attach the output to the dispatch record.
+
+**Two shas appear in this plan, and they are not the same measurement.** The basis tree is `e18a032`: every current-state claim in Section 1 was read there. The scanner counts (`205 skills, 4 errors, 62 warnings`) were taken at `31592ac`, a later commit that moved the tree but did not change this plan's subject matter. Treat the scanner numbers as a dated reading of a later tree, not as a claim about `e18a032`.
+
+**The 4 errors are not a blocker and are not this plan's to fix.** The scanner reports them for the whole workspace, including registries outside `docs/research-scratch/`. Action for a task agent: record the counts in the dispatch record, and if a task's own skills appear in the error list, name that in the task record. Do not edit another workstream's registry to make a count go down.
+
+The skills most relevant to this plan:
+
+| Skill | Use |
+|---|---|
+| `doubt-driven-development` | Every claim in a task brief is re-derived, not carried |
+| `source-driven-development` | Every current-state claim cites `file:line` or a commit |
+| `code-review-and-quality` | Six-axis review on every PR |
+| `testing-best-practices` / `test-driven-development` | RED before GREEN |
+| `antislop-copywriting` | R-02 (no em dash), no AI voice |
+| `gstack:careful` | Shared-worktree discipline |
+| `laravel-best-practices` | Thin controllers, actions, form requests |
+
+---
+
+### 2. Workstreams and Tasks
+
+#### Workstream 1 - Sizing Fix and Register Sweep (M1)
+
+**Owner:** Frontend engineer
+**Lore Guardian:** every WS-1 change (the count check is lore acceptance criteria, not a formality)
+**Blast radius:** one view file; register entries; (optionally) one test helper, per Task 1.3's decision below
+**Gates touched:** C-1..C-4, C-6, lore (relative)
+**Depends on:** O-1 for every register closure
+
+##### Task 1.1 - Fix KI-29 (catalog index controls)
+
+**Brief:**
+- File: `resources/views/catalog/index.blade.php`
+- Change: add `h-11` to the search input (`:15`), status select (`:19`), submit button (`:32`)
+- Reference: `skills/index.blade.php:33,:42` carry `h-11` on input and select
+- Screen D's submit button does not, so the submit is governed by the KI-29 measurement, not by precedent
+- Do not add tokens. Do not change layout beyond control height.
+
+**Test (RED first)** - the selector covers untyped, `text` and `search` inputs, every `select`, and submit buttons, so a control with no `type` attribute or a `type="search"` cannot slip through:
+```php
+it('sizes every catalog control to the design contract\'s 44px', function (): void {
+    $html = $this->get('/umamusume')->assertOk()->getContent();
+    $dom = new DOMDocument(); @$dom->loadHTML($html);
+    $xpath = new DOMXPath($dom);
+    $controls = $xpath->query(
+        '//input[not(@type) or @type="text" or @type="search"]'
+        .' | //select | //button[not(@type) or @type="submit"]'
+    );
+    expect($controls->length)->toBeGreaterThan(0);
+    foreach ($controls as $node) {
+        expect($node->getAttribute('class'))->toContain('h-11');
+    }
+});
+```
+
+**Note on the 44px claim:** `h-11` is `2.75rem`. That is 44px only while the root font size is 16px. The browser read in the acceptance list is what proves the contract; the class assertion proves the token was applied, not the rendered height.
+
+**Acceptance:**
+- [x] `grep -c 'h-11' resources/views/catalog/index.blade.php` >= 3
+- [x] `php artisan test --filter=CatalogTest` green
+- [x] Browser read at 1280x800 and 390x844 confirms 44px on all three controls (screenshots attached to the task record)
+- [x] `composer lore` and `composer lore-code` counts unchanged from the task's own pre-run capture (do not hardcode dated numbers in the record)
+- [ ] KI-29 closes in `KNOWN-ISSUES.md` once the fix is on `origin/master` (O-1)
+
+**Commit:**
+```
+fix(ui): size catalog index controls to the design contract
+
+KI-29. The catalog index's search field, status filter and submit
+button measured 30/31/32px against the 44px control height in
+DESIGN-CORPUS.md. The run screen took the same fix at c17e63b;
+this is the second surface.
+```
+
+##### Task 1.2 - Close KI-32 with the owed measurement
+
+**Brief:**
+- No code change: the declarations shipped at `ed71741` (`app.css:219` `color-scheme: light`, `:229` `color-scheme: dark`)
+- Remaining work: the browser read the register entry still names, then the closure
+- Load `/skills` with `prefers-color-scheme: dark`; read `getComputedStyle(document.documentElement).colorScheme`; assert `dark` in dark theme and `light` in light theme; assert the same native checkbox paints identically on two consecutive loads
+
+**Acceptance:**
+- [x] Browser measurement attached to the task record
+- [x] KI-32 closes in `KNOWN-ISSUES.md` naming `ed71741` and the measurement (closure waits on O-1 per register discipline)
+
+##### Task 1.3 - Register reconciliation sweep
+
+**Brief:**
+- For each entry below: re-derive the claim against the tree, then close or correct forward. A KI that fails to reproduce closes with the failed reproduction recorded, not silently.
+- KI-49 / KI-51: bodies tracked (`8b17703`, `30b3a08`); verify `git ls-files database/seeders/data/` shows all nine JSON files, then close
+- KI-53 / KI-54: fixture tracked at HEAD, tree clean, 11-red no longer reproduces; record the failed reproduction
+- The unguarded `withTierLabelsFileAbsent()` helper (`ScenarioSlotSeederResilienceTest.php:102` renames with no `file_exists` guard) is **fixed in this sweep**, not filed: the fix is a one-line `file_exists` guard, which is smaller than the paperwork for a new KI and keeps the sweep's blast radius honest. This is the one code change WS-1 makes outside its view file; the blast radius at the workstream head says so.
+- KI-45: headline superseded by `8b17703` (`config/uma.php:138-145`); append a dated correction naming the commit, keep the entry open on the remaining gap (141/296 NULL `scenario_slots.tier`)
+- Doc drift: file one KI naming the two absent docs (`docs/GATE-REGISTRY.md`, `docs/PRE-MORTEM.md`), both still cited by `agents.md`
+
+**Acceptance:**
+- [x] Every closure cites the sha and states the fix is on `origin/master` (O-1 resolved first)
+- [x] No historical register text edited in place; corrections appended
+- [x] Sweep record lists each entry, its disposition, and the evidence read
+
+---
+
+#### Workstream 2 - Trainee Detail Page (KI-35)
+
+**Owner:** Frontend + design-system owner
+**Lore Guardian:** every WS-2 change (new user-visible copy on the detail page)
+**Blast radius:** `catalog/show.blade.php`, new `skill-row` component
+**Gates touched:** C-1..C-4, G-4, G-5, G-13, G-47, lore
+**Depends on:** WS-3 Task 3.1 (D-30 amendment) landing in M1
+
+**Absence vocabulary (binding on every task in WS-2).** One canonical form: **"not recorded"**. Two shapes are legal and both use that wording:
+- A kept heading with a body sentence ("Goal races are not recorded. The source publishes per-trainee goal races; this tool does not record them.")
+- A disclosed field rendered `N/A` with a `title` attribute
+
+Never "Unknown", never "not stored", never "not yet recorded" as a third variant. This is what keeps Task 2.1's stale-copy check and Task 2.3's new body from colliding: the check below targets the exact stale sentence, and the replacement wording is a different phrase, so the two can coexist on one page.
+
+**Section order (binding).** The rendered order is Identity, Aptitudes, Costume forms, **Skills**, **Goal races**, **Her runs**, Aliases, Provenance. Task 2.5's checklist below is an unordered set and is listed alphabetically only so it reads as a verification sweep; the brief here is the authority on order.
+
+##### Task 2.1 - Replace the stale copy on the detail page
+
+**Brief:**
+- File: `resources/views/catalog/show.blade.php`
+- Replace the visible sentence at `:225-229` and the Blade comment at `:209-224`, which claim skill lists "are not stored" and that ADR-0012 keeps them off the card row
+- Use the drafted copy in `SKILLS-MECHANICS.md` §"skills-section-phase-b2-2026-10-01.md" §9.4, adjusted to the canonical absence vocabulary above
+
+**Test (RED first)** - the assertion targets the exact stale sentence, not the word "stored", so Task 2.3's body copy cannot fail it:
+```php
+it('does not tell the trainer that skill lists are not stored', function (): void {
+    $u = Umamusume::factory()->create(['slug' => 'test-slug']);
+    $this->get('/umamusume/test-slug')
+        ->assertOk()
+        ->assertDontSee('are not stored')
+        ->assertDontSee('Skill lists are not stored');
+});
+```
+
+**Acceptance:**
+- [x] `grep -n 'are not stored' resources/views/catalog/show.blade.php` returns no match on the working tree (read the working tree, not `git show HEAD:`)
+- [x] The new copy names what is stored (`skills_innate`, `skills_unique`) and what is not recorded yet (`skills_awakening`, `skills_event`)
+- [x] The new copy carries a removal trigger (when the parser starts keeping those keys)
+- [x] Lore gate clean; `RenderedCopyHygieneTest` green
+- [x] Re-check that Tasks 2.2-2.4 copy still uses only the canonical absence forms
+
+##### Task 2.2 - Render the Skills section
+
+**Brief:**
+- New component: `resources/views/components/skill-row.blade.php`, invoked as `<x-skill-row>`
+- Consumes `CharacterCard::skills_innate` and `skills_unique` JSON lists (landed at `dd90330`; casts at `CharacterCard.php:66-67`)
+- Resolution: map the lists' ids to `Skill` rows via `skills.export_id`
+- Groups: `Her unique`, `Her innate`
+- Rows: name, `✦ Unique` pill (pattern from `skills/index.blade.php:128-133`), `N SP` or `N/A SP` with `title`
+- **No `turn` column.** A field that is `N/A` on every row until Phase B2 is noise on every row. Add it when the storage decision lands.
+- Facts disclosure: out of scope; it rides with the Phase B2 storage decision (`SKILLS-MECHANICS.md:3383-3386`)
+
+**Test (RED first)** - the skills table is empty under `RefreshDatabase`, so the test must create the `Skill` rows the resolution needs. `SkillFactory` exists; `export_id` is nullable with no default, so set it explicitly. Fixture names are obviously fake (the repo's rule against storing unsourced rows applies to fixtures as much as to seeders, and a plausible-sounding invented name is indistinguishable from a real one at a glance):
+```php
+it('lists her unique and innate skills on her detail page', function (): void {
+    $u = Umamusume::factory()->create(['slug' => 'test-slug']);
+    CharacterCard::factory()->create([
+        'umamusume_id' => $u->id,
+        'skills_unique' => [900001],
+        'skills_innate' => [900002, 900003],
+    ]);
+    Skill::factory()->create(['export_id' => 900001, 'name' => 'Test Unique Skill']);
+    Skill::factory()->create(['export_id' => 900002, 'name' => 'Test Innate Skill A']);
+    Skill::factory()->create(['export_id' => 900003, 'name' => 'Test Innate Skill B']);
+    $this->get('/umamusume/test-slug')
+        ->assertOk()
+        ->assertSee('Her unique skills')
+        ->assertSee('Her innate skills')
+        ->assertSee('Test Unique Skill')
+        ->assertSee('Test Innate Skill A');
+});
+```
+
+**Acceptance:**
+- [x] Component invoked from `catalog/show.blade.php`; section sits between "Costume forms" and "Goal races" per the binding order above
+- [x] Empty state, when both lists are empty: "No skill lists are recorded for this form."
+- [x] No `turn` column renders
+- [ ] Contrast measured in both themes (G-5), attached to the task record
+
+##### Task 2.3 - Add Goal races section (stub with absence copy)
+
+**Brief:**
+- No `trainee_goals` table exists; KI-34 is the reservation for it (`KNOWN-ISSUES.md:21-24`)
+- Render the heading and a body using the canonical absence form
+- Cite `RACE-AND-SLICE-RESEARCH.md` §"RACE-CALENDAR-GAPS.md" §7 for why no goal source is wired today (the pennant has no source). The four client Goal panels are recorded there as evidence of the missing shape, not as a template.
+
+**Acceptance:**
+- [x] Section renders a heading
+- [x] Body reads "Goal races are not recorded. The source publishes per-trainee goal races; this tool does not record them."
+- [x] Absence copy uses one of the two legal forms only, never "Unknown"
+
+##### Task 2.4 - Add "Her runs" section with primary action
+
+**Brief:**
+- Data access belongs in the controller, not the view. Add the query to the detail-page controller action, alongside the existing data for this view; do not query from Blade.
+- Query: `TrainingRun::where('umamusume_id', $umamusume->id)->with(['scenario', 'turnEntries'])->orderByDesc('created_at')->limit(10)`
+- Eager-load `scenario` (the row renders its label) and count `turnEntries` with `withCount('turnEntries')` rather than loading the rows, so the section is two queries total, not 1 + 10N
+- Row: run status pill, scenario label, turn count
+- Run scoping: this is a single-Trainer local tool with no auth surface, so there is no trainer scope to apply. Do not add one.
+- Primary action: label it **"New run"** and link via `route('runs.create')`, with the helper line "Opens run setup; the trainee is chosen there." Pre-selecting the trainee stays out of scope (`TrainingRunController::create()` at `:63-90` never reads a `umamusume_id` param, so a link that passed one would render and silently not pre-select). The helper line is what keeps the action honest rather than a mismatch; if the owner prefers to pull the pre-selection in, that is a scope change, not a clarification.
+
+**Acceptance:**
+- [x] Section present per `DESIGN.md` §4.2 item 6
+- [x] Query lives in the controller; the section renders in at most 2 queries (assert with a query log if convenient)
+- [x] Primary action renders via a named route, with the helper line
+- [x] `DESIGN.md` §2.3's "one primary action per screen" satisfied (no other button at that visual weight)
+
+##### Task 2.5 - Verify the eight-section page
+
+This is an unordered set. The rendered order is the one stated at the workstream head.
+
+**Acceptance:**
+- [x] All eight sections render: Aliases, Aptitudes, Costume forms, Goal races, Her runs, Identity, Provenance, Skills
+- [x] Rendered order matches the binding order above
+- [x] Each section's empty state is a named absence, not a blank
+- [x] Every absence string on the page is one of the two legal forms
+- [ ] `DESIGN.md` §4.2 checked against the rendered page
+- [ ] KI-35 closes with a note that Goal races remains a stub for the `trainee_goals` schema (KI-34 reservation)
+
+---
+
+#### Workstream 3 - Design-System Catch-Up (all in M1)
+
+**Owner:** Architect + Docs Writer
+**Lore Guardian:** every WS-3 change (amended design text is read by agents and by the Trainer via copy)
+**Blast radius:** `DESIGN-CORPUS.md`, register entries
+**Gates touched:** `DocSchemaDriftTest`, G-60
+**Depends on:** nothing (docs only). All three tasks run inside M1.
+
+Tasks 3.2 and 3.3 used to sit in a separate "M3 doc corrections" milestone. They are pure register and errata work with the same O-1 dependency as the M1 sweep and, in 3.3's case, the same file and the adjacent line to 3.1's, so they are in M1 with everything else. M3 is gone as a result.
+
+##### Task 3.1 - Amend D-30 for card skill lists and aptitudes
+
+**Brief:**
+- File: `docs/research-scratch/DESIGN-CORPUS.md`, section "CONSTRAINTS.md" §5, D-30 entry (`:1805`)
+- Add `skills_innate` and `skills_unique` to `CharacterCard`'s permitted render list, and the ten `aptitude_*` columns to `Umamusume`'s
+- Use the amendment text drafted in `PLANS-AND-BRIEFS.md` §"d-30-amendment-draft-2026-10-01.md" §2; the draft's own §1 cites `docs/design-research/CONSTRAINTS.md`, which no longer exists in the tree, so fix that citation when landing
+
+**Acceptance:**
+- [x] Both column sets named in D-30 with their stated uses ("grouping a card's own skills" / "the trainee detail page's aptitude section")
+- [x] Amendment dated 2026-10-02 with a lead that names the round
+- [x] G-60 passes: no retired literals in the amendment's block (or a `RETIRED LITERAL:` marker)
+- [x] `DocSchemaDriftTest` green
+
+##### Task 3.2 - Correct D-31 with a dated erratum
+
+**Brief:**
+- `DESIGN-CORPUS.md:1806` still describes the 0..1200 bound as a live defect though ADR-0015 landed (`8bda7db`)
+- This is the line immediately after Task 3.1's (`:1805`), same file, same session. Do it in the same commit as 3.1 so the two clauses never disagree on disk.
+- Append a dated erratum (D-289 applied): keep the historical clause verbatim, add the correction after it
+
+**Acceptance:**
+- [x] Erratum dates the supersession and names `8bda7db`
+- [x] No historical text edited in place
+- [x] Lands in the same commit as Task 3.1
+
+##### Task 3.3 - Close KI-48
+
+**Brief:**
+- No code or doc change: the bound erratum landed at `79d5f6f`; both carriers (`ARCHITECTURE-ESSENTIALS.md:36`, `ARCHITECTURE.md:158`) carry the dated correction citing ADR-0015 and `8bda7db`
+- Remaining work is the register closure. Same shape as the M1 sweep: pure register, O-1 gated.
+
+**Acceptance:**
+- [x] KI-48 closes in `KNOWN-ISSUES.md` naming `79d5f6f` (closure waits on O-1)
+- [x] `DocSchemaDriftTest` green
+
+---
+
+#### Workstream 4 - Skill Selector Combobox (G-SK-13)
+
+**Owner:** Frontend
+**Lore Guardian:** the new picker copy (band labels, the awakening disclosure, the keep-typing line)
+**Blast radius:** `trainee-combobox.ts` (generalize), new `skill-combobox.ts`, `runs/show.blade.php`
+**Gates touched:** C-1..C-4, C-8, C-9 (TypeScript), G-4, G-11 (keyboard), G-13
+**Depends on:** Task 3.1 (D-30 amendment, M1). Not on the M2 `skill-row` component: that Blade component and this TypeScript combobox share no code. The M2-before-M4 ordering still holds, but the reason is sequencing risk, not reuse: the four-band picker is the largest combobox surface in the plan, and landing it after the detail page has already proved the skill data shape in a simpler renderer means a shape failure shows up in a small surface first. No file or function is carried from `skill-row` into `skill-combobox.ts`.
+
+##### Task 4.1 - Generalize `trainee-combobox.ts`
+
+**Brief:**
+- Extract a factory: `createCombobox({ payloadAccessor, comparator, band, label, idPrefix })`
+- Trainee call site supplies its current closures; skill call site supplies four bands and a name-only comparator
+- Preserve every ARIA contract currently pinned by `TraineeSelectorTest.php` (aria-activedescendant/textContent pins ~`:664-680`, aria-label pin ~`:766-777`)
+
+**Test (RED first):**
+- `TraineeSelectorTest` stays exactly where it is. It is the regression net for the extraction, and moving it would mean the net is green against a file that no longer exists in the form it was written for.
+- The only new test is a source-shape pin, because there is no JS test runner and C-8 forbids adding one. It pins that the factory exists and takes an `idPrefix`, and that the id it builds is derived from that prefix rather than a hardcoded one:
+```php
+it('builds combobox ids from a caller-supplied prefix', function (): void {
+    $src = File::get(resource_path('js/trainee-combobox.ts'));
+    expect($src)
+        ->toContain('createCombobox')
+        ->toContain('idPrefix');
+});
+```
+- That pin is deliberately weak. It proves the parameter exists, not that two prefixes yield disjoint id sets; the browser pass in Task 4.2 is what proves behaviour. Say so in the task record rather than claiming more coverage than the pin has.
+
+**Acceptance:**
+- [ ] `TraineeSelectorTest` green and unmodified, and the suite still runs from its original path
+- [ ] `npm run typecheck` and `npm run build` clean
+- [ ] Slice 13 browser pass re-run per `SLICE-RECORDS.md` §"slice-13-2026-09-29.md" §5.1
+
+##### Task 4.2 - Build the skill selector and replace the native `<select>` in the repeater
+
+This task absorbs what were two tasks in v1.1. The old Task 4.3 was the same work as 4.2 (both replace the repeater's skill `<select>` with the combobox), split for no reason; they are one task now.
+
+**Brief:**
+- Four bands: `Her unique skills`, `Her innate skills`, `Already on this run`, `Everything else`; a skill appears in exactly one band (precedence per `SKILLS-MECHANICS.md` §"skills-section-phase-b2" §4.3)
+- Cardless trainee: two bands, no card bands, with the drafted disclosure (`SKILLS-MECHANICS.md:2888-2891`)
+- Awakening band absent; disclosure: "Awakening skills are not recorded yet, so this picker cannot group them." (drafted at `SKILLS-MECHANICS.md:2993`; adjusted to the canonical absence vocabulary, see WS-2)
+- Option label: `{band}: {title} · {N SP}` (SP cost from the `skills` table)
+- Cap at 10 visible rows, keep-typing line, keyboard per APG
+- The repeater's skill picker becomes the combobox; the status select and turn input stay
+- Hidden inputs carry `skills[N][skill_id]` for each row; the `syncSkills` write path (`TrainingRunController.php:708`) is unchanged
+
+**Test (RED first)** - the repo has no JS test runner and C-8 forbids adding one; the established RED for TypeScript is a source shape pin, as `TraineeSelectorTest`'s SHAPE PINS preamble documents:
+```php
+it('carries the four-band payload and the APG contract in skill-combobox.ts', function (): void {
+    $src = File::get(resource_path('js/skill-combobox.ts'));
+    expect($src)
+        ->toContain('Her unique')
+        ->toContain('Her innate')
+        ->toContain('Already on this run')
+        ->toContain('Everything else')
+        ->toContain('aria-activedescendant')
+        ->toContain('Awakening skills are not recorded yet');
+});
+```
+And a view-shape pin, so the `<select>` removal is checked rather than assumed:
+```php
+it('renders the skill combobox and no skill select in the run repeater', function (): void {
+    $html = $this->get(route('training-runs.show', $run))->assertOk()->getContent();
+    expect($html)->toContain('skill-combobox');
+    expect($html)->not->toContain('name="skills[0][skill_id]" data-role="native-select"');
+});
+```
+
+**Acceptance:**
+- [ ] `resources/js/skill-combobox.ts` written; `runs/show.blade.php` skills repeater replaced with the combobox
+- [ ] No `<option>` element for a skill remains; the payload carries the rows as JSON
+- [ ] `RunSkillRowLabelsTest` green (three labels per row)
+- [ ] Browser pass: keyboard navigation, Enter selects, Escape closes, `aria-activedescendant` tracks, and two instances on the page do not share an id namespace
+- [ ] `php artisan test --compact` full suite green
+- [ ] No new dependency (C-8 clean)
+- [ ] KI-33's G-SK-13 clause (`KNOWN-ISSUES.md:1585,:1618`) updated; G-SK-13 has no entry of its own, so the closure lands there
+
+---
+
+#### Workstream 5 - Support-Card UI Polish
+
+**Owner:** Frontend + Designer
+**Blast radius:** `deck-panel.blade.php`
+**Gates touched:** C-1..C-4, C-6
+**Depends on:** the generalized combobox from WS-4 (M3) only if O-2 resolves to Option A. Options B and C have no dependency on WS-4.
+
+##### Task 5.1 - Address KI-43 (deck panel markup weight)
+
+**Brief (choose one; this is owner decision O-2):**
+- **Option A (recommended):** search-first picker using the generalized combobox from WS-4. This is the register's own fix candidate 1 (KI-43).
+- **Option B:** filtered shortlist (five stat types + Pal)
+- **Option C:** accept and document (no change)
+
+**Test (if A or B):**
+- Page weight measurement before/after on the six-equipped run
+- Baseline is the number recorded in KI-43's table: deck block 296,537 B; `<option>` payload 207,504 B. The old `measure-deck-weight.php` reference is dropped: it lives in the gitignored `.scratch-uma/` dir and is not a durable artifact.
+
+**Units, stated once so the numbers are comparable.** All sizes in this task are **bytes** (B), and the budget is written in bytes too. 1 KB here means 1,000 B, not 1,024. Where KI-43 quotes a percentage, the denominator is the whole page response with six cards equipped (296,537 B for the deck block alone is not the denominator). Note that 207,504 B is about 70% of the 296,537 B deck block, so the 57.6% in KI-43 is a share of something else; before quoting any percentage in the task record, state the numerator and the denominator on the same line.
+
+**First question to answer, and it may settle the task on its own:** does the 207 KB `<option>` payload repeat the same 623-skill list across all six pickers? If it does, a single shared payload served once and referenced by all six is likely to meet the 80,000 B target without a new picker at all. Measure the repetition before choosing an option.
+
+**Acceptance:**
+- [ ] Choice recorded with reasoning in the task record
+- [ ] If the repeated-payload measurement shows a single shared payload meets the target, that is the change; record it as the fix, not as a rejected Option A
+- [ ] If A or B: deck block payload <= 100,000 B (target <= 80,000 B)
+- [ ] Any percentage quoted names its denominator
+- [ ] No page-level horizontal overflow at 1280x800 or 390x844
+- [ ] Contrast pairs re-measured (the picker's treatment may change)
+
+---
+
+#### Workstream 6 - Responsive Contract (KI-25)
+
+**Owner:** Frontend + Architect
+**Blast radius:** `DESIGN.md` §2.3, `runs/show.blade.php`, `race-calendar.blade.php`
+**Gates touched:** C-1..C-4, C-7
+**Depends on:** Task 6.1 (R82 ratification) for the *contract* work only. Task 6.2 needs no ratification, so it may run in M1 or M2 in parallel; it is the measurement, and the measurement is what tells the owner whether R82 is even the right floor.
+
+##### Task 6.1 - Obtain R82 ratification (owner gate, O-3)
+
+**Brief:** The 768px floor in `DESIGN.md` §2.3 (`:137`, `:146-152`) rests on an unratified proposal (R82, drafted at `PLANS-AND-BRIEFS.md:186+`). The owner must either ratify it or amend D-40 (`DESIGN-CORPUS.md:1834`). This is decision O-3 in Section 0.1.
+
+**Acceptance:**
+- [ ] D-40 carries the ratified addendum, or `DESIGN.md` §2.3 is corrected to a ratified floor
+
+##### Task 6.2 - Measure the turn log and race calendar at 390px
+
+**Brief:**
+- Data precondition. The calendar reads `race_catalog_slots` (`TrainingRun.php:337-348`). A seeded DB populates that table only via the `seed_file` path that landed at `8b17703`. On the scratch DB, confirm `race_catalog_slots` has rows before measuring.
+- If the seed path does not produce rows, measure the turn log only and defer the calendar measurement, recording the reason. Do not report a calendar number that came from an empty table.
+- Load `/training-runs/{run}` with a logged turn at 390x844. Read `scrollWidth` and `innerWidth` for the page and for each scroll region.
+- Press ArrowRight on the focused log region, measure the `scrollLeft` change, then repeat for the calendar region.
+
+**Acceptance:**
+- [ ] Seed verification result and every number pasted into the task record, with the viewport named
+- [ ] If `scrollWidth <= innerWidth` for both regions, KI-25's *measurement* obligation is met and the entry moves from RE-OPENED to measured
+- [ ] KI-25 does **not** close on the `scrollWidth` comparison alone. KI-25 also carries a D-40/768px reconciliation that Task 6.1 owns; the entry closes only when both are done
+- [ ] If `scrollWidth > innerWidth`, escalate to the owner with options: stacked cards, fewer columns, or scope the scroll to the table
+
+##### Task 6.3 - Apply the ratified change
+
+**Depends on:** 6.1 and 6.2
+
+**Acceptance:**
+- [ ] The change lands in one commit
+- [ ] KI-25 closes with both the measurement and the ratified floor
+- [ ] `DESIGN.md` §2.3 carries the ratified contract
+
+---
+
+### 3. Milestones & Sequencing
+
+Milestones are a reporting line, not a lock. Work is ordered by the dependency edges in the diagram below; an agent with a free lane takes the next unblocked task regardless of which milestone letter it carries.
+
+```
+O-1 (push order) ──> gates every register closure in M1, M2, M3
+
+M1  WS-1 (1.1, 1.2, 1.3)  WS-3 (3.1, 3.2, 3.3)        no code deps
+     |
+     +-- 6.2 (measurement only, no ratification)  ─┐   parallel-safe
+     |                                              │
+M2  WS-2 (2.1-2.5)  requires 3.1  <────────────────┘   |
+     |                                                  |
+M3  WS-4 (4.1, 4.2)  requires 3.1                     |
+     |                                                  |
+M4  WS-5 (5.1)  requires 4.1 IF Option A  <────────────┤
+     |                                                  |
+M5  WS-6 (6.1 ratification -> 6.3)  requires 6.2 ──────┘
+```
+
+| Milestone | Workstreams | Target | Exit criterion (work) | Exit criterion (register) |
+|---|---|---|---|---|
+| **M1 - Immediate fixes + docs** | WS-1 (all) + WS-3 (all) | 3-5 days | KI-29 fixed with the browser read attached; D-30 amended; D-31 erratum landed; the seeder helper guarded; KI-45 re-scoped; one doc-drift KI filed | KI-29, KI-32, KI-48, KI-49, KI-51, KI-53, KI-54 closed, each citing a sha that is on `origin/master` |
+| **M2 - Trainee detail page** | WS-2 (all) | 8-12 days | Eight sections render in the order stated in WS-2; every absence string legal | KI-35 closes with the `trainee_goals` reservation note |
+| **M3 - Skill selector** | WS-4 (all) | 10-14 days | Combobox on the run screen; no skill `<option>` remains; no picker emits more than 10 rows | KI-33's G-SK-13 clause satisfied |
+| **M4 - Support cards** | WS-5 (single task) | 5-8 days | KI-43 addressed per O-2 | KI-43 closed or re-scoped with the measurement |
+| **M5 - Responsive** | WS-6 (all) | 5-8 days (6.2 itself is 1 day and unblocked) | D-40 or `DESIGN.md` carries the ratified floor; the 390px measurement recorded | KI-25 closed with both the measurement and the ratification |
+
+The work column and the register column are separate on purpose. The work column is verifiable by a reviewer with the tree; the register column depends on O-1 and therefore on the owner. A milestone whose work is done but whose register is not is *work complete*, not *closed*, and the task record says which one it is.
+
+**Sequencing rationale:**
+- M1 first: smallest diffs, no code dependencies, clears the register backlog that currently makes every other milestone's exit criteria unverifiable.
+- D-30 (Task 3.1) lands in M1, before any UI reads the columns. It is a precondition for both WS-2 and WS-4, so it cannot sit inside either.
+- M2 before M3: sequencing risk, not code reuse. The four-band picker is the largest combobox surface here; the detail page proves the skill data shape in a simpler renderer first. Nothing is shared between `skill-row` and `skill-combobox.ts` (see WS-4's dependency note).
+- M3 before M4: the generalized combobox is the pattern for the deck panel if Option A is chosen.
+- 6.2 is pulled out of the M5 chain. It is a measurement against the current build, needs no ratified contract, and would otherwise sit behind an owner decision it can inform.
+- M5 last: the contract work is blocked on O-3; do not build against an unratified floor.
+- Every register closure in M1/M2/M3 waits on O-1.
+
+---
+
+### 4. Agent Assignments
+
+| Agent | Workstreams | Skills invoked |
+|---|---|---|
+| **Frontend engineer** | WS-1, WS-2, WS-4, WS-5, WS-6 | `laravel-best-practices`, `testing-best-practices`, `test-driven-development`, `gstack:careful` |
+| **Design-system owner** | WS-2 (design review), WS-5 (design review) | `code-review-and-quality`, `doubt-driven-development` |
+| **Architect** | WS-3 (D-30, D-31), WS-6 (ratification) | `source-driven-development`, `doubt-driven-development` |
+| **Docs Writer** | WS-3 (KI-48 closure), every register update | `antislop-copywriting`, `source-driven-development` |
+| **Lore Guardian** | Every WS-1, WS-2, WS-3 and WS-4 change: those are the four that add or alter user-visible copy or a scanned file | none - read and rule |
+| **QA** | Every PR's gate run | `code-review-and-quality` |
+
+The Lore Guardian row is not a formality on WS-1 or WS-4. WS-1's acceptance is a lore-count check, and WS-4 adds the band labels, the awakening disclosure and the keep-typing line. A change that ships without a Guardian pass has not met its own acceptance list.
+
+**Every dispatch must include:**
+1. The task's `file:line` targets (re-derived, not carried)
+2. The expected RED run (test written first)
+3. The gate commands to run before hand-off
+4. The R73 read-list (`SLICE-RECORDS.md:3613`)
+5. The branch freshness check idiom from `PROCESS-PLANS.md:77` (`git rev-list --left-right --count HEAD...origin/master`); there is no gate numbered C-11 in this repo
+
+---
+
+### 5. Gates & Verification
+
+Gate locations: C-1..C-9 live in root `CONSTRAINTS.md`; G-* and D-* gates live in the `DESIGN-CORPUS.md` gate table (~`:2558-2615`). `docs/GATE-REGISTRY.md`, which `agents.md` still cites as the gate runner reference, is absent from the tree; the register sweep (Task 1.3) files this.
+
+#### 5.1 The gate sequence, defined once
+
+Every task runs this sequence before hand-off. It is listed here so a task brief can say "the gate sequence" instead of re-listing it:
+
+```bash
+vendor/bin/pint --dirty --format agent      # style, fix in place
+vendor/bin/phpstan analyse --no-progress --memory-limit=1G   # level 6
+composer lore                               # tracked files
+composer lore-code                         # adds untracked files + Global client terms
+npm run typecheck                          # if a TS/CSS file changed
+php artisan test --compact                 # full suite
+```
+
+Notes that are easy to get wrong:
+- `phpstan` needs `--memory-limit=1G`; the `composer analyse` script omits it and can OOM on a 128M CLI default.
+- Run `pint` before the test run, not after; a formatting fix can change what a rendered-HTML assertion sees.
+- `npm run typecheck` is the front-end half of `composer test` and is run separately so a TS-only change does not need a full suite to prove itself.
+- `composer lore-code` is additive to `composer lore` (untracked files plus the Global client terminology). Running only `lore` under-reports.
+- A Vite manifest error means `npm run build`, not a code defect.
+
+#### 5.2 Per-workstream additional gates
+
+| Workstream | Additional gates |
+|---|---|
+| WS-1 | Browser measurement at two viewports; canary control read; lore counts relative to the task's own pre-run |
+| WS-2 | `DesignTokensTest`, `RenderedCopyHygieneTest`, D-30 amendment landed |
+| WS-3 | `DocSchemaDriftTest`, G-60 with retired-literal grep |
+| WS-4 | `npm run build`, `TraineeSelectorTest` green and unmodified, C-8 no new dependency |
+| WS-5 | Page weight measurement, contrast pairs |
+| WS-6 | Browser measurement at 390px, D-40/R82 ratification, seed verification |
+
+**Register discipline:**
+- A KI closes only when the fix is on `origin/master` and the closure names the sha
+- A KI that fails to reproduce closes with the failed reproduction recorded, not silently
+- A KI filed on a wrong cause (per KI-22) is corrected forward, not edited in place
+- An entry with two independent obligations (KI-25: measurement plus the D-40 reconciliation) closes only when both are met
+
+**Push and closure are two steps, not one.** A closure cannot be written before its fix is on `origin/master`, and the closure is itself a commit. So each milestone is: push the work, verify with `ls-remote`, write the closure commit, push again. There is no single push that both lands the fix and records the closure.
+
+---
+
+### 6. Risks & Mitigations
+
+The full risk table with likelihood, impact and owner is in Section 0.2. It is not repeated here; keeping one copy means an update lands in one place.
+
+---
+
+### 7. Out of Scope
+
+Deliberately not in this plan:
+
+- **Trainee profile fields** (voice actor, birthday, height, three sizes): the master-lineage implementation landed at `555b0cb`; the §3.1 lineage pick in `SESSION-CONSOLIDATION-2026-09-30.md` remains the owner's open decision and gates the alternate chain, not this plan's pages
+- **Support-card collection tracking**: cut by `ADR-0014:22`
+- **Skill facts on read rows (Phase B2)**: the design is drafted but the storage decision is outstanding (`SKILLS-MECHANICS.md:3383-3386`); it rides with the migration, not with this plan
+- **Trainee pre-selection on the create form**: the `umamusume_id` query param is dead in `TrainingRunController::create()`; honoring it is separate scope
+- **Legacy Select UI**: schema landed (`ADR-0010`); no screen yet; deferred
+- **Live-ops, gacha, event calendar**: cut by `PRD.md` §6
+- **Sizing fixes on other surfaces**: audit per the 2026-09-28 frontend review; queue after M1
+- **KI-42 (CI)**: owner backlog; not a UI/UX concern
+
+---
+
+### 8. Hand-Off Checklist
+
+Before opening M1:
+
+- [ ] Owner approves the plan
+- [ ] **O-1 resolved**: owner decides the push order (push local master first, or branch from local master accepting local-only citations). Register closures cannot precede this.
+- [ ] Branch created per O-1's outcome, with `git rev-list --left-right --count HEAD...origin/master` recorded
+- [ ] `.agents/` copied into the worktree (per Task 1 Step 3 of `docs/research-scratch/CATALOG-ROSTER-WORKSTREAM.md`)
+- [ ] `.env` and `.agents` present; baseline gate run recorded
+- [ ] `KNOWN-ISSUES.md` status lines quoted in the slice record
+- [ ] R73 read list for the first task assembled
+
+Before closing each milestone:
+
+- [ ] Every task's acceptance criteria checked
+- [ ] Every affected KI updated (closures only when the fix is on `origin/master`)
+- [ ] `PLAN.md` re-baselined
+- [ ] Slice record written under `docs/design-research/verification/`, with slice prose in `docs/research-scratch/SLICE-RECORDS.md`
+- [ ] Push 1: the milestone's work commits, `ls-remote` verified
+- [ ] Closure commit written citing shas confirmed on `origin/master`
+- [ ] Push 2: the closure and record commit. This second push is part of the milestone, not an optional extra; until it lands, the register does not record the fix
+
+---
+
+### Appendix A - Reference Map
+
+| Topic | Primary document | Section |
+|---|---|---|
+| Design system contract | `DESIGN.md` (root) | §2.3, §4.2 |
+| Control sizing rule | `docs/research-scratch/DESIGN-CORPUS.md` | "DESIGN.md" §6.14, `:904` |
+| Design rules (D-numbers) | `DESIGN-CORPUS.md` | "CONSTRAINTS.md" §5, §6, §10 |
+| Gate table (G-*, D-*) | `DESIGN-CORPUS.md` | ~`:2558-2615` |
+| Gate structure (C-*) | `CONSTRAINTS.md` (root) | C-1..C-9; note `docs/GATE-REGISTRY.md` is absent from the tree |
+| Register | `KNOWN-ISSUES.md` (root) | per KI number |
+| Frontend plan | `PLAN.md` | Slice exit criteria, open decisions |
+| Architecture | `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md` | §3 schema, §7 frontend |
+| Product truth | `PRD.md` | FR-A through FR-E |
+| Skills mechanics | `docs/research-scratch/SKILLS-MECHANICS.md` | all sections |
+| Support cards | `docs/research-scratch/SUPPORT-CARDS.md` | mechanics + module plan |
+| Combobox precedent | `resources/js/trainee-combobox.ts` | whole file |
+| Combobox test | `tests/Feature/TraineeSelectorTest.php` | whole file |
+| Slice records | `docs/research-scratch/SLICE-RECORDS.md` | sections named `slice-NN-YYYY-MM-DD.md` |
+| Source-of-truth | `docs/research-scratch/GOVERNANCE.md` | "SOURCE-OF-TRUTH.md" section |
+
+### Appendix B - Skill Registry Verification
+
+Before any dispatch:
+
+```bash
+node "${SKILL_REGISTRY_HOME:-$HOME/.qoder/skills/refresh-skill-registry}/scripts/scan-skills.cjs" --project "$(pwd)" --names
+node "${SKILL_REGISTRY_HOME:-$HOME/.qoder/skills/refresh-skill-registry}/scripts/scan-skills.cjs" --project "$(pwd)" --violations
+```
+
+The registry lives outside the repo, so the path is machine-specific. Set `SKILL_REGISTRY_HOME` to wherever the scanner actually is on your host rather than editing these two lines; a hardcoded `$HOME/.qoder` path is a path that only works on one machine. If the scanner is absent, record that in the dispatch record and fall back to reading `.agents/skills.json` by hand. Do not skip the step silently.
+
+Expected summary line: `SKILLS total=N errors=E warnings=W`. Attach to the dispatch record. Measured 2026-10-02 at `31592ac`: `SKILLS total=205 errors=4 warnings=62`. A dated measurement, not a baseline, and a different sha from the `e18a032` basis tree (see Section 1.3). What to do about the 4 errors: record them; they are workspace-wide, not this plan's to fix. If one of a task's own skills is in the error list, name that in the task record.
+
+### Appendix C - What to do when the plan and the tree disagree
+
+The plan is a synthesis. It can be wrong. When a task brief's claim contradicts the tree:
+
+1. **Re-derive before acting.** Open the file. Run the grep. Read the commit.
+2. **Cite the file:line or the sha you read it at.** Do not quote the brief.
+3. **Record the discrepancy in the task record.** A plan that is silent about its own drift cannot be corrected.
+4. **Do not edit the brief.** Amend forward with a dated erratum.
+
+This is D-289 applied to this plan, and the revision note in Appendix D is the first worked example: v1.0 verified its claims against local HEAD while prescribing `origin/master` as the branch base, and listed five tasks whose work had already shipped. Every current-state claim in v1.2 cites a file, a commit, or a KI number, re-derived against the tree on 2026-10-02.
+
+### Appendix D - Revision note (v1.0 -> v1.1 -> v1.2)
+
+Historical record. No task brief depends on it; nothing here is an instruction to an executing agent.
+
+#### D.1 v1.0 -> v1.1
+
+The v1.0 draft was cross-examined by three fresh-context reviewers against the tree. What changed. "v1.0 task" names a task number in the v1.0 draft, which does not match live numbering in v1.1 or v1.2.
+
+| v1.0 claim | Tree state at `e18a032` | v1.1 disposition | v1.1 task it changed |
+|---|---|---|---|
+| KI-32 lacks `color-scheme` | Declarations shipped at `ed71741`; register entry still OPEN | Reduced to measurement + register closure | v1.0 Task 1.2 |
+| KI-37 measurement owed | Measured 44/44/44/44 both viewports, canary 31; CLOSED 2026-10-01 | Deleted | v1.0 Task 1.3 (deleted) |
+| KI-48 flat bound still in arch docs | Corrected at `79d5f6f` with dated errata; register entry still OPEN | Reduced to register closure | v1.0 Task 3.2 |
+| ADR-0008/0012 lack the skill columns | Both carry dated `dd90330` errata (`0012:7`, `:73`; `0008:236`, `:439`) | Deleted | v1.0 Task 3.4 (deleted) |
+| DESIGN.md §4.2 still has "amber notice" / "Unknown" | Rewritten at `bcd8abe`; old text struck through | Deleted | v1.0 Task 3.3 (deleted) |
+| Support-card effect lines unbuilt | `SupportCardEffects` + test + deck-panel lines shipped | Deleted | v1.0 Task 5.2 (deleted) |
+| KI-49/51 bodies untracked | All nine `database/seeders/data/*.json` tracked (`8b17703`, `30b3a08`) | Moved to register sweep | v1.0 Task 1.3 |
+| KI-53/54 fixture deleted, 11 red | Fixture tracked at HEAD; 11-red no longer reproduces | Moved to register sweep | v1.0 Task 1.3 |
+| "26 consolidated documents" | The directory holds 16 consolidated files | Basis corrected | header |
+| Branch from `origin/master` | `origin/master` is 17 commits behind local master and carries no `docs/research-scratch/` | Owner gate O-1 added | hand-off |
+| "C-11 branch freshness check" | No C-11 exists in the repo | Replaced with the `PROCESS-PLANS.md:77` idiom | Section 4 |
+| Lore baselines 98/55 and 7 | Current: 181 hits / 55 exempt; lore-code 42 | Acceptance criteria made relative | all briefs |
+
+#### D.2 v1.1 -> v1.2
+
+A second review pass over v1.1 found eight defects that would have produced a wrong outcome, and a set of structural ones. All are fixed in v1.2.
+
+**Wrong-outcome defects:**
+
+1. Task 2.1's stale-copy check (`grep -c 'are not stored'` == 0, `assertDontSee('are not stored')`) collided with Task 2.3, whose mandated body contained the same phrase. Landing 2.3 would have broken 2.1's test. Fixed by standardizing on one canonical absence vocabulary ("not recorded") and by narrowing 2.1's assertion to the exact stale sentence.
+2. Task 4.1 asked for a test that "constructs the factory twice", which needs a JS test runner that the repo does not have and C-8 forbids adding; it also said to move `TraineeSelectorTest` into a new `ComboboxFactoryTest.php`, contradicting the acceptance criteria, the gate table and the risk table. Fixed: `TraineeSelectorTest` stays put, and the only new test is a source-shape pin, labelled as weaker than it looks.
+3. Section order was stated two ways (2.2 put Skills between Costume forms and Goal races; 2.5 listed it third). Fixed by one binding order at the WS-2 head, with 2.5 declared an unordered set.
+4. Tasks 4.2 and 4.3 were the same work. Merged into one. WS-4's claimed dependency on the M2 `skill-row` component was unexplained (a Blade component and a TypeScript module share nothing), so it is restated as a sequencing-risk rationale, not a code dependency.
+5. WS-6 depended on "M1's seed verification", which no M1 task performed (Task 6.2 does). Task 6.2 also closed KI-25 on `scrollWidth <= innerWidth` alone while KI-25 also carries a D-40/768px reconciliation. Fixed on both counts; 6.2 is now pulled out of the owner-gated chain.
+6. "One push" in the hand-off conflicted with the closure rule, since a closure commit follows the push that lands the fix. Fixed: two pushes per milestone, stated explicitly.
+7. The revision note said "Task 1.3 deleted" and "Task 3.3 deleted" while v1.1 had live tasks at those numbers. Fixed: every reference in the table is now labelled "v1.0 Task N", plus a column mapping to the live task.
+8. Task 1.3's scope contradicted WS-1's stated blast radius ("register entries only") by also allowing a test-helper fix, and left "file a KI, or fix it" undecided. Fixed: the helper is fixed in the sweep, and the blast radius says so.
+
+**Structural fixes:** owner summary and decision table promoted to Section 0; revision note moved to Appendix D; a legend for R73, R82, R85, D-30, D-31, D-40, D-289, G-SK-13, C-n, G-n, Slice n; the gate sequence defined once with exact commands in Section 5.1; a dependency graph; milestone exit criteria split into work vs register; M3 eliminated by folding WS-3 into M1; units in Task 5.1 stated in bytes with denominators required; the `turn N/A` column dropped from Task 2.2; Task 2.4's query placed in the controller with eager loading and a helper line; test fixtures renamed to obviously fake names; the Lore Guardian assigned to WS-1 and WS-4; em dashes removed from headings and prose; ASCII `->` kept as the single arrow form; the scanner path parameterized; the `31592ac` vs `e18a032` difference explained; the 4 scanner errors given a handling instruction; the lore-count movement explained; the risk table given Impact and an owner, and its two duplicate rows merged.
+
+**Not changed:** the evidence discipline (file:line or sha for every claim), the errata-forward convention, RED-first tests, checkbox acceptance criteria, the explicit out-of-scope list, and Appendix C.

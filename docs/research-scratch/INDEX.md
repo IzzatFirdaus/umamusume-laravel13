@@ -62,7 +62,7 @@ Round 4 also folded `WEB-FINDINGS.md` (390 lines) into `DESIGN-CORPUS.md` as its
 | Create-run flow, Legacy Select | `DESIGN-AND-MECHANICS-REQUESTS.md` |
 | Scratch-tree reorganization | `PROCESS-PLANS.md` |
 | C-5 down() enforcement gap | `PROCESS-PLANS.md` (C-5 section) |
-| The UI/UX plan (milestones, workstreams, gates) | `docs/PLAN-UI-UX-2026-10-02.md` |
+| The UI/UX plan (milestones, workstreams, gates) | `docs/PLAN-UI-UX-2026-10-02.md` (live, executable); frozen 2026-10-02 copy in `PROCESS-PLANS.md` |
 | Documentation-register sync plan (analysis A-1..A-12, owner gates O-1..O-3) | `docs/PLAN-DOC-SYNC-2026-10-02.md` |
 | Design system tokens, theme | `DESIGN-CORPUS.md` (DESIGN section) |
 | Design-research CONSTRAINTS (D-rules) | `DESIGN-CORPUS.md` (CONSTRAINTS section) |
