@@ -88,16 +88,30 @@ def dead_links():
 
     Files listed by `catalogues()` are skipped whole: their backticked paths are content, not
     citations. The exclusion is printed by `main()` so it cannot silently shrink the ratchet.
+
+    A tracked file that is absent from disk (an uncommitted deletion) is counted in neither kind of
+    dead link: it cannot be read, so it contributes no citations either way. It is collected and
+    reported as `MISSING_FILE` rather than raised on. Measured 2026-10-03: one peer session deleted
+    three tracked masters without staging, `io.open` raised `FileNotFoundError` here, and
+    `DocCitationParityTest`, which only shells out to this script, failed for a cause that was not
+    citation rot. A tool whose subject is missing files is not entitled to choke on one.
+
+    @return tuple[list[tuple[str, int, str, str]], list[str]] the dead links, and the unreadable files
     """
     bad = []
+    unreadable = []
     skip = set(catalogues())
     listing = set(git("ls-files").splitlines())
     for f in md_files():
         if f in skip:
             continue
         near = os.path.dirname(f)
-        for n, line in enumerate(io.open(os.path.join(REPO, f), encoding="utf-8",
-                                            errors="replace").read().split("\n"), 1):
+        try:
+            text = io.open(os.path.join(REPO, f), encoding="utf-8", errors="replace").read()
+        except OSError:
+            unreadable.append(f)
+            continue
+        for n, line in enumerate(text.split("\n"), 1):
             for ref in re.findall(r"`((?:[\w./&-]+/)?[\w.-]+\.md)`", line):
                 cand = ref.replace("\\", "/").lstrip("/")
                 tries = [cand]
@@ -109,7 +123,7 @@ def dead_links():
                 if not any(t in listing for t in tries):
                     target = next((t for t in tries if os.path.exists(os.path.join(REPO, t))), None)
                     bad.append((f, n, ref, "UNTRACKED" if target else "GONE"))
-    return bad
+    return bad, unreadable
 
 
 def main():
@@ -135,8 +149,12 @@ def main():
     for f in outside:
         print(f"  {lines_of(f):6}  {f}")
 
-    dead = dead_links()
+    dead, unreadable = dead_links()
     cats = catalogues(files)
+    print(f"\nMISSING_FILE (tracked, absent from disk: an uncommitted deletion, unscannable here): "
+          f"{len(unreadable)}")
+    for f in unreadable:
+        print(f"  MISSING_FILE {f}")
     print(f"\ncatalogue files excluded from the dead-link count ({CENSUS_FLAG}): {len(cats)}")
     for c in cats:
         print(f"  {c}")
