@@ -40,6 +40,16 @@ This index maps content types to their master consolidation files under `docs/re
 
 Round 4 also folded `WEB-FINDINGS.md` (390 lines) into `DESIGN-CORPUS.md` as its tenth source rather than leaving it tracked inside `docs/design-research/_scratch/`, which G-60 lists as ignored scratch.
 
+### Round 5 (2026-10-03) — O-3 promotion from root research-scratch/
+
+| Master | Content | Sources |
+|--------|---------|---------|
+| `scrape-game8-scenarios.md` | Game8 Global scenario extraction for URA Finale, Unity Cup, Trackblazer (477 lines). Playwright-rendered pages, per-scenario rules, stat caps, phase structures. Cited by `UMAMUSUME_REFERENCE.md` | 1 source from root `research-scratch/`, promoted per O-3 |
+| `scrape-training-heuristics.md` | JP training mechanics raw extraction from GameWith, Game8 JP, Kamigame (764 lines). Failure mechanics, energy curves, mood multipliers, per-scenario tables. Cited by `UMAMUSUME_REFERENCE.md` | 1 source from root `research-scratch/`, promoted per O-3 |
+| `global-race-sources.md` | Global/EN race calendar verification: grade labels, 17 new dirt races, July 2026 rework, all-races calendar with tiers, Goal vs Scheduled states (225 lines). Cited by `scenarios/09-global-race-calendar.md` | 1 source from root `research-scratch/`, promoted per O-3 |
+| `calendar-tables.md` | Generated race calendar tables for all three scenarios (Junior/Classic/Senior years, 400+ rows). Output of `gen_calendar.py`, synced by `resync_doc.py`. Cited by `scenarios/09-global-race-calendar.md` | 1 source from root `research-scratch/`, promoted per O-3 |
+| `DOCUMENTATION-INVENTORY-2026-09-30.md` | Full repo documentation census: 30 skills invoked, method limits, 2442 ignored files, 24 tracked strays, 300+ root scratch files (420 lines). Cited by `PROCESS-PLANS.md` | 1 source from root `research-scratch/`, promoted per O-3 |
+
 ## Routing Table
 
 | If you need... | Read |
@@ -79,6 +89,11 @@ Round 4 also folded `WEB-FINDINGS.md` (390 lines) into `DESIGN-CORPUS.md` as its
 | Audit verification (18 findings) | `AUDIT-AND-VERIFICATION.md` |
 | UX deliverables, the three triaged write-ups | `UX-DELIVERABLES.md` |
 | Legacy deprecated PDFs and what was ruled about them | `docs/deprecated/README.md`, reviewed in `docs/deprecated/REVIEW-2026-09-30.md` |
+| Game8 Global scenario extraction | `docs/research-scratch/scrape-game8-scenarios.md` |
+| JP training mechanics raw extraction | `docs/research-scratch/scrape-training-heuristics.md` |
+| Global/EN race calendar verification | `docs/research-scratch/global-race-sources.md` |
+| Generated race calendar tables | `docs/research-scratch/calendar-tables.md` |
+| Full repo documentation census | `docs/research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` |
 
 ### Deliberate exceptions, outside the masters
 

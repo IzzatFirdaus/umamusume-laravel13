@@ -119,7 +119,7 @@ tests/                Pest: Feature (catalog, runs, API, pipeline, matcher) + Un
 ## Skill automation subsystem (pre-existing, unrelated to the Uma domain)
 
 `app/Services/Skill{Registry,Matcher,Executor}.php` and `php artisan skill:manage`
-drive the declarative skills in `.agents/skills.json` (see `.agents/README.md`).
+drive the declarative skills in `.agents/skills.json` (machine-local skill registry; not tracked).
 They touch none of the catalog/run tables; treat them as a separate tooling
 layer with its own docs.
 

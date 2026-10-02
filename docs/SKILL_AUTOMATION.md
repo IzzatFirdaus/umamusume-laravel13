@@ -26,7 +26,7 @@ The agent will:
 If adding a new agent to this project:
 
 1. **Check if `.agentrules` exists** (it should auto-load)
-2. **For Copilot**: Add reference to `.copilot/instructions.md`
+2. **For Copilot**: Add reference to the Copilot instructions file (machine-local, not tracked)
 3. **For Windsurf**: Add reference to `.windsurf/rules.json`
 4. **For Claude**: Add custom instruction (see README)
 5. **Test**: Give a simple task, verify skills are invoked

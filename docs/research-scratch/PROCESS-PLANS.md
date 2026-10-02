@@ -33,7 +33,7 @@ is that plan's own Task 5 and Task 6, and the embed can follow once it lands.
 **Tech Stack:** Python 3.12 stdlib (`python`, not `python3`, on this box), `git -c core.quotepath=false`, `make lore`, Pest via `php artisan test --compact`.
 
 **Tool:** `research-scratch/scripts/reorg_scratch.py`, created 2026-10-01 and verified three ways: classifier self-test 7/7; `--scan` reporting 53 candidates, 44 movable, 9 held; and the rewrite path dry-run against a synthetic mapping for `research-scratch/data/json/character-cards.json`, which found 6 citing files, refused `KNOWN-ISSUES.md` at the guard, and classified the 8 hit lines in the first three files as LIVE 3 / RECORD 2 / UNKNOWN 3, editing nothing. No move has been performed.
-**Spec:** this file. The evidence it argues from is `research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` §10-§11 and `docs/GATE-REGISTRY.md` G-60.
+**Spec:** this file. The evidence it argues from is `docs/research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` §10-§11 and `docs/GATE-REGISTRY.md` G-60.
 
 #### Global Constraints
 
