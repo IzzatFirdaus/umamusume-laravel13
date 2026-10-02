@@ -7,6 +7,26 @@ returns nothing), sections 6/7/10/11 could not be read. Per the inventory's own
 methodology note, a direct filesystem + `git` survey was substituted as the source of
 truth for the candidate list, the cross-reference map, and the protected-file check.
 
+> **Corrected 2026-10-02.** The claim above that the inventory is "absent from disk" is wrong. It is on
+> disk at `research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` (644 lines), inside the repo-root
+> `research-scratch/` folder that `.gitignore:87` ignores. The verification recorded above
+> (`git log --all -- '*DOCUMENTATION-INVENTORY*'`) reads git history only and cannot see an ignored,
+> uncommitted file, so a history-only probe was reported as disk absence. §6 "Cross-reference map"
+> (`:353`) was therefore available to the consolidation and was not read. The substituted filesystem
+> survey stands as the record of what was actually merged; what changes is only that the sections said
+> to be unreadable are readable.
+>
+> What the recovered sections yield, read 2026-10-02: §6's cross-reference map is a **pre-consolidation**
+> record (its adjacency list `research-scratch/docinv_xref.json` shows all fourteen masters at 0 inbound,
+> because they did not exist on 2026-09-30), so it cannot cross-check `INDEX.md`'s absorption claims. What
+> it does carry is each absorbed source's reader pressure at map time — `CONSTRAINTS.md` 45 + 30 across its
+> two spellings, `DESIGN.md` 41 + 21, `docs/GATE-REGISTRY.md` 12, `docs/PRE-MORTEM.md` 11,
+> `docs/SOURCE-OF-TRUTH.md` 10 — which matches the census's post-consolidation dead-link densities and is
+> the baseline the citation repointing works from. §7's rot scan (391 line-citations: 155 resolvable, 19
+> stale, 33 broken) used a different method than the current census and its counts are not comparable to
+> the 512 dead links now recorded; §10's candidate list has since been executed as Rounds 1–4; §11's
+> do-not-touch list is consistent with the standing set `INDEX.md` now governs.
+
 ## Merge performed
 
 ### SCENARIO-PUBLISHER-REFERENCES.md (priority task 5)
