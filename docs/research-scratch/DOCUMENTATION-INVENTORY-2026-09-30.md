@@ -1,3 +1,4 @@
+<!-- census: content-not-citations -->
 # Documentation inventory, 2026-09-30
 
 Snapshot SHA: `c1e14a3`. Every count, line number and hash below was read from that tree.

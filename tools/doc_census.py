@@ -18,6 +18,14 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MASTERS_DIR = "docs/research-scratch"
 EXEMPT_PREFIXES = (".ai/", "docs/adr/")
 
+# A file whose header carries this marker is a catalogue: its backticked paths are the subject
+# it enumerates, not citations a reader follows. `DOCUMENTATION-INVENTORY-2026-09-30.md` lists every
+# markdown file in the tree, and 142 of those names point at files that no longer exist, which is
+# the inventory reporting correctly rather than rotting. The flag lives in the file, not in a list
+# here, so it travels with the content: promote the inventory again and the exemption comes with it.
+# Every excluded file is printed by main(), so opting out is never invisible.
+CENSUS_FLAG = "<!-- census: content-not-citations -->"
+
 
 def git(*args):
     return subprocess.run(["git", "-c", "core.quotepath=false", *args], cwd=REPO,
@@ -51,6 +59,25 @@ def inbound_per_master(masters):
     return out
 
 
+def heads(files, depth=5):
+    """Map each file to its opening block. The marker sits in the header, where this repo puts the
+    other machine-readable stamps (`PRODUCT.md` carries `impeccable:product-schema` on line 3)."""
+    out = {}
+    for f in files:
+        try:
+            out[f] = "\n".join(io.open(os.path.join(REPO, f), encoding="utf-8",
+                                       errors="replace").read().split("\n", depth)[:depth])
+        except OSError:
+            out[f] = ""
+    return out
+
+
+def catalogues(files=None):
+    """Tracked markdown that declares itself a catalogue, so its paths are excluded from the count."""
+    files = md_files() if files is None else files
+    return sorted(f for f, head in heads(files).items() if CENSUS_FLAG in head)
+
+
 def dead_links():
     """Backticked .md references that no longer resolve. A deletion without a repoint shows up here.
 
@@ -58,10 +85,16 @@ def dead_links():
     citing file, because this corpus cites root files, docs files and masters with the same
     shorthand. Bare master names such as `GOVERNANCE.md` resolve under the masters directory, so
     counting them as dead was a resolver gap rather than citation rot.
+
+    Files listed by `catalogues()` are skipped whole: their backticked paths are content, not
+    citations. The exclusion is printed by `main()` so it cannot silently shrink the ratchet.
     """
     bad = []
+    skip = set(catalogues())
     listing = set(git("ls-files").splitlines())
     for f in md_files():
+        if f in skip:
+            continue
         near = os.path.dirname(f)
         for n, line in enumerate(io.open(os.path.join(REPO, f), encoding="utf-8",
                                             errors="replace").read().split("\n"), 1):
@@ -103,6 +136,10 @@ def main():
         print(f"  {lines_of(f):6}  {f}")
 
     dead = dead_links()
+    cats = catalogues(files)
+    print(f"\ncatalogue files excluded from the dead-link count ({CENSUS_FLAG}): {len(cats)}")
+    for c in cats:
+        print(f"  {c}")
     gone = [d for d in dead if d[3] == "GONE"]
     untracked = [d for d in dead if d[3] == "UNTRACKED"]
     print(f"\ndead markdown links: {len(dead)} ({len(gone)} GONE, {len(untracked)} UNTRACKED)")
