@@ -67,7 +67,7 @@ This master file is compiled from 6 source files, embedded verbatim with heading
 **Non-goals (PRD §6 + Pre-Mortem §4 — do not build):**
 1. Auth/multi-user (replaces Breeze/Sanctum)
 2. SPA frontend (replaces Vue 3 + Pinia)
-3. Breeding/pairing engine (replaces sire×dam system — also a lore violation)
+3. Breeding/pairing engine (replaces sire×dam system — also a lore violation) <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 4. EAV attribute storage (replaces legacy `attributes` table)
 5. Excel export / `maatwebsite/excel`
 6. Event/banner calendar
@@ -87,16 +87,16 @@ This master file is compiled from 6 source files, embedded verbatim with heading
 
 #### 2.1 Banned Vocabulary (case-insensitive grep)
 ```
-horse, horses, sire, dam, mare, foal, 🏇
+horse, horses, sire, dam, mare, foal, 🏇 <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 ```
-Plus animal framing: `stallion`, `colt`, `filly`, `gelding`, `equine`, `pony`, `thoroughbred`, `stable` (as noun for character container), `breeding`, `pairing`, `bloodline`, `pedigree`, `lineage` (of characters), `hoof`, `mane`, `tail`, `withers`, `muzzle`, `jockey`, `rider`, `saddle`, `tack`, `reins`, `bit`, `paddock`, `herd`, `flock`, `pack`, "your horse", "your mount", "the animal", "the girl and her horse".
+Plus animal framing: `stallion`, `colt`, `filly`, `gelding`, `equine`, `pony`, `thoroughbred`, `stable` (as noun for character container), `breeding`, `pairing`, `bloodline`, `pedigree`, `lineage` (of characters), `hoof`, `mane`, `tail`, `withers`, `muzzle`, `jockey`, `rider`, `saddle`, `tack`, `reins`, `bit`, `paddock`, `herd`, `flock`, `pack`, "your horse", "your mount", "the animal", "the girl and her horse". <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 
 #### 2.2 Context-Allowed Senses (grep hits here are NOT violations)
-- `dam` inside `damaged`, `demand`, `command`
-- `sire` inside `desired`, `surprise`, `Red Desire` (Umamusume name)
-- `stable` as adjective: "stable growth", "keep the build stable"
-- `mare` inside `nightmare`
-- `tail` inside `detail`, `retail`, `curtail`
+- `dam` inside `damaged`, `demand`, `command` <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+- `sire` inside `desired`, `surprise`, `Red Desire` (Umamusume name) <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+- `stable` as adjective: "stable growth", "keep the build stable" <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+- `mare` inside `nightmare` <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+- `tail` inside `detail`, `retail`, `curtail` <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 - Japanese source strings & quoted official notices (source data)
 - `docs/PRE-MORTEM.md` legacy quotations (exempt once each under root C-4)
 
@@ -134,7 +134,7 @@ The banned list governs **player-facing copy and character framing only**. It do
 | Finished character | **Veteran Umamusume** | Hall of Fame, graduated |
 | Inheritance unit | **Spark** | Factor (JP 因子 wording) |
 | Inheritance system | **Inspiration** | Inheritance (JP 継承 word) |
-| Ancestors picked for run | **Legacies** | Parents, grandparents, bloodline |
+| Ancestors picked for run | **Legacies** | Parents, grandparents, bloodline | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 | Energy | Energy | Stamina for the gauge (collides with stat) |
 | Mood | Mood, with five state words | Motivation (JP guide gloss), **Condition** |
 | Scenario names | Ura Finale, Unity Cup, Brighter Together Our Grand Concert; **Trackblazer** or Twinkle Star Climax for the third | Make a new track!!, Climax bare |
@@ -525,7 +525,7 @@ Threshold applied (constraint-driven-development): every class must map to a PRD
 |---|---|---|---|
 | Breeze/Sanctum auth stack | uma-tracker, umamusume-tracker-app (dormant) | Cut | Local-only, single-Trainer tool. Auth is attack surface with zero utility. |
 | Vue 3 + Pinia SPA frontend | uma-companion | Cut | Blade + Tailwind v4 already in this skeleton. A SPA pipeline for one local user is maintenance for nobody. |
-| Breeding/lineage engine (pairing, eligibility, validation) | uma-companion | Cut, reduced | Maps to no user story in the other apps. The one useful fact (which two Umamusume provided inheritance) becomes two nullable FKs on `training_runs`. Its sire/dam vocabulary is also a lore violation. |
+| Breeding/lineage engine (pairing, eligibility, validation) | uma-companion | Cut, reduced | Maps to no user story in the other apps. The one useful fact (which two Umamusume provided inheritance) becomes two nullable FKs on `training_runs`. Its sire/dam vocabulary is also a lore violation. | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 | EAV `attributes` table | umamusume-tracker-app | Cut | Five stats are fixed. Five integer columns beat a name/value table on every axis. |
 | Excel export (`maatwebsite/excel`) | uma-tracker, umamusume-tracker-app | Cut | Heavy dependency for a local tool. CSV/JSON cover the need with zero dependencies. |
 | Event/banner calendar + goal progress | uma-companion | Defer (Phase 1 Non-Goal) | Useful, but entirely dependent on volatile scraped schedule data. Shipping it first would make the most visible feature the most fragile. |
@@ -571,7 +571,7 @@ Mitigation: WAL journal mode + `busy_timeout` on the sqlite connection; all mult
 2. JP-only characters. `release_status = JapanOnly`, Global fields nullable, UI labels JP-sourced data explicitly ("Not yet released on Global") so a Trainer never plans around unavailable content. Debut dates are nullable dates, never sentinel values.
 3. Unicode edge cases. Full-width vs half-width katakana, middle dot (・) in multiword names, prolonged sound mark (ー), combining marks. NFKD folds width variants; middle dot and punctuation are stripped for `match_key`, preserved in display names. SQLite lacks MySQL-style utf8mb4 collation, so matching always goes through the normalized key, never `=` on display strings.
 4. Timezone handling. JP schedules are announced in JST; the Trainer lives elsewhere. Store UTC; convert JP-source datetimes from `Asia/Tokyo` at fetch time with the source timezone recorded in provenance; display in `config('uma.display_timezone')`. Date-only values (debut dates) stay dates, never datetimes, so no shift can move a release day.
-5. Lore leaks from legacy data. Legacy repos contain a horse emoji (🏇) in UI and one schema uses an equine table name for characters (uma-companion). Banned-pattern grep (`horse`, `🏇`, `sire`, `dam`, `mare`, `foal`) runs in review; see CLAUDE.md.
+5. Lore leaks from legacy data. Legacy repos contain a horse emoji (🏇) in UI and one schema uses an equine table name for characters (uma-companion). Banned-pattern grep (`horse`, `🏇`, `sire`, `dam`, `mare`, `foal`) runs in review; see CLAUDE.md. <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 
 ### 4. Addendum (revision 0.2): `uma_musume_race_planner` [rev 0.2 — repo #4]
 
@@ -607,7 +607,7 @@ Fourth repository scanned read-only on 2026-09-27. Sections 1-3 above stand unch
 
 1. Stat bounds. Repo #4 encodes MAX_STAT_VALUE = 1200, MIN 0, and 70-78 turn careers. Adopted as validation bounds (0..1200 per stat, turn >= 1) rather than free integers; bounds live in one Form Request, not scattered.
 2. `Suggested` skills on a run. A planned skill has no `turn_acquired`; UI and export must distinguish "planned" from "acquired turn N" and "skipped".
-3. Lore violations in repo #4 to never copy: "racehorses" in two character-list views, 🏇 in its README feature list, "horse" in a skill description seeder and legacy docs, "horse girl" in its BRD. All fail the banned-pattern grep; replacements are "Umamusume"/"umamusume" per CLAUDE.md Lore Rules.
+3. Lore violations in repo #4 to never copy: "racehorses" in two character-list views, 🏇 in its README feature list, "horse" in a skill description seeder and legacy docs, "horse girl" in its BRD. All fail the banned-pattern grep; replacements are "Umamusume"/"umamusume" per CLAUDE.md Lore Rules. <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 4. String-slug primary keys on its `umamusume` table vs bigint FKs elsewhere. Unified schema keeps bigint PK + unique slug; if its seed data is ever imported, slugs map to `slug` column values, not PKs.
 
 ---

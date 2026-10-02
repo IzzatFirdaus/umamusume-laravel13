@@ -38,10 +38,10 @@ backup:
 # page rather than a new hit, so it is filtered here (R51). tools/lore.php applies the
 # same filter; LoreGateParityTest fails if either copy stops honouring it.
 lore:
-	git grep -inE "horse|sire|foal|🏇" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' | grep -v "<!-- lore-ignore-line" || true
-	git grep -inwE "dam|mare|stable" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' | grep -v "<!-- lore-ignore-line" || true
+	git grep -inE "horse|sire|foal|🏇" -- ':!vendor' ':!node_modules' | grep -v "<!-- lore-ignore-line" || true
+	git grep -inwE "dam|mare|stable" -- ':!vendor' ':!node_modules' | grep -v "<!-- lore-ignore-line" || true
 	# 16 additional patterns from docs/design-research/CONSTRAINTS.md §3.1 (banned vocabulary for characters)
-	git grep -inwE "stallion|colt|filly|gelding|equine|pony|thoroughbred|breeding|pairing|bloodline|pedigree|lineage|hoof|mane|tail|withers" -- ':!vendor' ':!node_modules' ':!docs/PRE-MORTEM.md' | grep -v "<!-- lore-ignore-line" || true
+	git grep -inwE "stallion|colt|filly|gelding|equine|pony|thoroughbred|breeding|pairing|bloodline|pedigree|lineage|hoof|mane|tail|withers" -- ':!vendor' ':!node_modules' | grep -v "<!-- lore-ignore-line" || true
 
 # Extended gate over shipped code, additive to `lore` rather than a replacement.
 #

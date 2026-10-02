@@ -50,7 +50,7 @@ $mode = ($argv[1] ?? '') === 'code' ? 'code' : 'docs';
 // keeping `-w` turns the pattern into a basic regex, where `|` is a literal bar and
 // the whole alternation matches nothing — a clean sweep that means nothing. If a
 // pattern changes, both copies change and LoreGateParityTest fails naming the diff.
-$excluded = [':!vendor', ':!node_modules', ':!docs/PRE-MORTEM.md'];
+$excluded = [':!vendor', ':!node_modules'];
 $appPaths = ['app/**', 'config/**', 'resources/**', 'routes/**', 'database/**', 'tests/**', 'lang/**'];
 // R62: committed client-export prose inside database/seeders/data/ is source data,
 // exempt under C-4 class 3 (verbatim game/client source data where the term is data,
