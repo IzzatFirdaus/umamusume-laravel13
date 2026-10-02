@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\ReleaseStatus;
 use App\Models\CharacterCard;
+use App\Models\Skill;
+use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Services\DataPipeline\NameNormalizer;
 use Closure;
@@ -174,10 +176,42 @@ class CatalogController extends Controller
 
         $activeCard = $this->activeCard($request, $umamusume->cards);
 
+        // WS-2 Task 2.4: the data access for the detail page lives here, not in Blade. `scenario`
+        // is a column on `training_runs`, not a relation — the row renders its label from
+        // `config/scenarios.php`, which is the only place a scenario name enters the layout path
+        // (D-240). `withCount` rather than `with('turnEntries')` keeps the section at two queries
+        // instead of 1 + 10N, since the row only prints the count.
+        $runs = TrainingRun::query()
+            ->where('umamusume_id', $umamusume->id)
+            ->withCount('turnEntries')
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
+        // WS-2 Task 2.2: the skill id arrays resolve to rows through `skills.export_id`. Resolved
+        // here for the same reason as the runs, and keyed so the view can render the lists in the
+        // source's own order rather than the query's.
+        //
+        // The null branch is real, not defensive: a trainee with no Global card has no form to read
+        // skill lists from, and the page's Costume forms section says exactly that. The arrays are
+        // themselves nullable (`skills_innate` is null until the parser keeps the key), which is why
+        // the inner `??` is there too.
+        $card = $activeCard ?? $umamusume->cards->first();
+        $uniqueIds = $card === null ? [] : ($card->skills_unique ?? []);
+        $innateIds = $card === null ? [] : ($card->skills_innate ?? []);
+        $skillIds = array_merge($uniqueIds, $innateIds);
+        $skillsByExportId = $skillIds === []
+            ? collect()
+            : Skill::query()->whereIn('export_id', $skillIds)->get(['id', 'export_id', 'name', 'sp_cost'])->keyBy('export_id');
+
         return view('catalog.show', [
             'umamusume' => $umamusume,
             'hiddenFormCount' => $showUnconfirmed ? 0 : $umamusume->cards()->where('unconfirmed', true)->count(),
             'activeCard' => $activeCard,
+            'runs' => $runs,
+            'uniqueSkills' => collect($uniqueIds)->map(fn ($id) => $skillsByExportId->get($id))->filter()->values(),
+            'innateSkills' => collect($innateIds)->map(fn ($id) => $skillsByExportId->get($id))->filter()->values(),
+            'scenarioLabels' => array_map(static fn (array $def): string => $def['label'], config('scenarios.scenarios')),
             // Passed rather than read off `$request` in the view: the tab strip has to carry the
             // opt-in into its GET form, and a view reaching for the request would be the only
             // place in this controller that did.

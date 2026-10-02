@@ -52,6 +52,8 @@
         @endif
     </p>
 
-    <h4 class="mt-4 text-xs font-bold uppercase tracking-widest text-ink-muted">Aptitude</h4>
-    <x-aptitude-grid :umamusume="$trainee" />
+    {{-- Aptitudes moved to the top-level Aptitudes section in `catalog/show.blade.php` (WS-2's
+         binding order puts them second, under Identity). Rendering the grid here drew the same ten
+         letters once per form on a trainee with several forms; they belong to the trainee, not to
+         a form, so they render once above. --}}
 </div>

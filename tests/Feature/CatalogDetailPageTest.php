@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 use App\Enums\CardRarity;
 use App\Enums\ReleaseStatus;
+use App\Enums\RunStatus;
 use App\Models\CharacterCard;
+use App\Models\Skill;
+use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\UmamusumeProfile;
 
@@ -222,13 +225,124 @@ it('names this form\'s own source and read date (D-33)', function (): void {
         ->assertSee('https://gametora.test/character-cards.json');
 });
 
-it('states the skills deferral in words instead of drawing four empty groups', function (): void {
+it('does not tell the trainer that skill lists are not stored', function (): void {
     $umamusume = detailTrainee(2);
+
+    // WS-2 Task 2.1. The page used to say the card document's skill id arrays "are not stored"
+    // and that ADR-0012 kept them off the card row. Both halves are now false: the arrays landed
+    // at dd90330 with casts on the model, so the page was describing a schema this tool no longer
+    // has. The assertion targets the retired sentence rather than the word "stored", so the new
+    // Skills body cannot accidentally satisfy it.
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertDontSee('are not stored')
+        ->assertDontSee('Skill lists are not stored');
+});
+
+it('names the skill lists it does store and the two it does not record yet', function (): void {
+    $umamusume = detailTrainee(1);
+
+    // The replacement copy has to be specific rather than merely not-stale: it names the two
+    // keys the tool now keeps and the two that stay unrecorded, so a reader can tell which
+    // absence is a schema decision and which is a missing import.
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertSee('skills_innate')
+        ->assertSee('skills_unique');
+});
+
+it('lists her unique and innate skills on her detail page', function (): void {
+    $umamusume = detailTrainee(1);
+    $umamusume->cards()->first()->update([
+        'skills_unique' => [900001],
+        'skills_innate' => [900002, 900003],
+    ]);
+
+    // Fixture names are obviously fake: a plausible-sounding invented skill name is
+    // indistinguishable from a real one at a glance, and this repo does not store unsourced rows.
+    Skill::factory()->create(['export_id' => 900001, 'name' => 'Test Unique Skill']);
+    Skill::factory()->create(['export_id' => 900002, 'name' => 'Test Innate Skill A']);
+    Skill::factory()->create(['export_id' => 900003, 'name' => 'Test Innate Skill B']);
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('Skill lists are not shown')
-        ->assertSee('ADR-0012');
+        ->assertSee('Her unique skills')
+        ->assertSee('Her innate skills')
+        ->assertSee('Test Unique Skill')
+        ->assertSee('Test Innate Skill A')
+        ->assertSee('Test Innate Skill B');
+});
+
+it('says her skill lists are not recorded rather than drawing empty groups', function (): void {
+    $umamusume = detailTrainee(1);
+
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertSee('No skill lists are recorded for this form.');
+});
+
+it('states the goal-race absence in the canonical form', function (): void {
+    $umamusume = detailTrainee(1);
+
+    // WS-2 Task 2.3: a heading plus the canonical absence body. No trainee_goals table exists;
+    // KI-34 is the reservation for it.
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertSee('Goal races')
+        ->assertSee('Goal races are not recorded.');
+});
+
+it('lists her runs and offers one primary action to start another', function (): void {
+    $umamusume = detailTrainee(1);
+    $run = TrainingRun::factory()->create([
+        'umamusume_id' => $umamusume->id,
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Active,
+    ]);
+
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertSee('Her runs')
+        ->assertSee('URA Finale')
+        ->assertSee('New run')
+        ->assertSee('Opens run setup; the trainee is chosen there.');
+});
+
+it('names the absence when she has no runs rather than drawing an empty list', function (): void {
+    $umamusume = detailTrainee(1);
+
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertSee('No runs recorded for her yet.');
+});
+
+it('never renders the word Unknown for a missing value', function (): void {
+    $umamusume = detailTrainee(1);
+
+    // The absence vocabulary is binding on every WS-2 task: a missing value is "not recorded",
+    // or N/A carrying a title. "Unknown" is neither, and the debut dates used to render it.
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertDontSee('Unknown');
+});
+
+it('renders the eight sections in the binding order', function (): void {
+    $umamusume = detailTrainee(1);
+
+    // WS-2 Task 2.5. The order is the workstream head's, not the alphabetical list the task
+    // checklist uses to sweep them.
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertSeeTextInOrder([
+            'Basic information',
+            'Aptitude',
+            'Costume forms',
+            'Skills',
+            'Goal races',
+            'Her runs',
+            'Aliases',
+            'Provenance',
+        ]);
 });
 
 it('keeps the single-form page free of any tab markup', function (): void {

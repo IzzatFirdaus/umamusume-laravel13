@@ -155,11 +155,22 @@
         </div>
         <div>
             <dt class="text-ink-muted">JP debut</dt>
-            <dd class="text-ink">{{ $umamusume->jp_debut_date?->toDateString() ?? 'Unknown' }}</dd>
+            {{-- Absence vocabulary (WS-2, binding): a missing value is N/A carrying a title, never
+                 the word "Unknown". The date is absent when the source has not published it, which
+                 is a different statement from "this trainee has no debut". --}}
+            @if ($umamusume->jp_debut_date)
+                <dd class="text-ink">{{ $umamusume->jp_debut_date->toDateString() }}</dd>
+            @else
+                <dd class="text-ink"><span title="The source publishes no JP debut date for this trainee.">N/A</span></dd>
+            @endif
         </div>
         <div>
             <dt class="text-ink-muted">Global debut</dt>
-            <dd class="text-ink">{{ $umamusume->global_debut_date?->toDateString() ?? 'Unknown' }}</dd>
+            @if ($umamusume->global_debut_date)
+                <dd class="text-ink">{{ $umamusume->global_debut_date->toDateString() }}</dd>
+            @else
+                <dd class="text-ink"><span title="The source publishes no Global debut date for this trainee.">N/A</span></dd>
+            @endif
         </div>
         <div>
             <dt class="text-ink-muted">Edited by Trainer</dt>
@@ -179,16 +190,21 @@
         </p>
     @endif
 
-    <h2 class="mt-8 text-lg font-semibold text-ink-strong">Aliases</h2>
-    @if ($umamusume->aliases->isEmpty())
-        <p class="mt-2 text-sm text-ink-muted">No aliases yet.</p>
-    @else
-        <ul class="mt-2 flex flex-wrap gap-2 text-sm">
-            @foreach ($umamusume->aliases as $alias)
-                <li class="rounded-md bg-sunken px-2 py-1 text-ink">{{ $alias->alias }} <span class="text-ink-muted">({{ $alias->language->label() }})</span></li>
-            @endforeach
-        </ul>
-    @endif
+    {{-- Aptitudes sit at the second position in the page's binding order (WS-2), directly under
+         Identity. They used to render as an `h4` inside each costume form's panel, which drew the
+         same ten-letter grid once per form on a trainee with several forms — the stacked-duplicate
+         complaint this page was restructured to answer. They are a property of the trainee, not of
+         a form, so they render once here. --}}
+    <section class="mt-8" aria-labelledby="aptitudes">
+        <h2 id="aptitudes" class="text-lg font-semibold text-ink-strong">Aptitude</h2>
+        @if ($umamusume->aptitude_turf === null)
+            <p class="mt-2 text-sm text-ink-muted">Aptitude not published for this trainee.</p>
+        @else
+            <div class="mt-2">
+                <x-aptitude-grid :umamusume="$umamusume" />
+            </div>
+        @endif
+    </section>
 
     {{-- Per-form content. The strip appears only above one form, because a single-choice control
          with nothing to choose between is chrome the Trainer has to read past, and the user's own
@@ -210,22 +226,19 @@
              as empty sections (D-220's one permitted exception, because the absence is itself
              the answer to "what does this form give me").
 
-             **Skills are the notable one, and the reason is a schema decision rather than a
-             missing import.** The card document carries `skills_unique`, `skills_innate`,
-             `skills_awakening` and `skills_event` as id arrays, and `ADR-0011` gives this tool
-             the `skills` table that would resolve those ids to names. But `character_cards` does
-             not store the arrays and `skills` stores no `char` column to join them through, so
-             every id is unresolvable from the database alone; rendering them would need either a
-             network call at view time (NFR-1) or columns ADR-0012 explicitly keeps off the card.
-             Both are a new decision, so the line says so instead of drawing four empty groups.
+             **Skills have moved out of this note.** The card document's `skills_unique` and
+             `skills_innate` id arrays *are* stored on `character_cards` (casts at
+             `CharacterCard.php`), and the Skills section below resolves them to names through
+             `skills.export_id`. This paragraph used to say the opposite, which was true before
+             that storage landed and has been stale since. What stays unrecorded is
+             `skills_awakening` and `skills_event`, and the Skills section says so in the same
+             place a reader looks for the lists.
 
              **Objectives and images are the two ADR-0012 decisions**, and both are recorded there
              with the reason. Objectives are per-character in a source with no scenario key; images
              are char-grain with no resolvable asset path. --}}
         <p class="mt-2 text-xs text-ink-muted">
-            Skill lists are not shown: the card document's skill id arrays are not stored, and
-            `ADR-0012` keeps them off the card row. Objectives and card images are not shown
-            either; that ADR records why.
+            Objectives and card images are not recorded for this form; `ADR-0012` records why.
         </p>
 
         @if ($umamusume->cards->count() > 1)
@@ -252,6 +265,99 @@
             {{ $hiddenFormCount }} {{ \Illuminate\Support\Str::plural('form', $hiddenFormCount) }} hidden as unconfirmed ·
             <a href="{{ route('catalog.show', ['slug' => $umamusume->slug, 'show_unconfirmed' => 1]) }}" class="text-ink-strong underline">Show unconfirmed forms</a>
         </p>
+    @endif
+
+    {{-- Skills, between Costume forms and Goal races per the binding order (WS-2 Task 2.2). The
+         lists are the form's own `skills_unique` / `skills_innate` arrays, resolved by the
+         controller through `skills.export_id` and rendered by `x-skill-row`. No `turn` column:
+         it is `N/A` on every row until the Phase B2 storage decision, and a column of absences is
+         noise. Nothing here ranks a skill — the ✦ pill classifies, it does not recommend. --}}
+    <section class="mt-8" aria-labelledby="skills">
+        <h2 id="skills" class="text-lg font-semibold text-ink-strong">Skills</h2>
+
+        @if ($uniqueSkills->isEmpty() && $innateSkills->isEmpty())
+            <p class="mt-2 text-sm text-ink-muted">No skill lists are recorded for this form.</p>
+        @else
+            @if ($uniqueSkills->isNotEmpty())
+                <h3 class="mt-4 text-xs font-bold uppercase tracking-widest text-ink-muted">Her unique skills</h3>
+                <ul class="mt-1">
+                    @foreach ($uniqueSkills as $skill)
+                        <x-skill-row :skill="$skill" />
+                    @endforeach
+                </ul>
+            @endif
+
+            @if ($innateSkills->isNotEmpty())
+                <h3 class="mt-4 text-xs font-bold uppercase tracking-widest text-ink-muted">Her innate skills</h3>
+                <ul class="mt-1">
+                    @foreach ($innateSkills as $skill)
+                        <x-skill-row :skill="$skill" />
+                    @endforeach
+                </ul>
+            @endif
+        @endif
+
+        <p class="mt-2 text-xs text-ink-muted">
+            From this form's stored <code>skills_innate</code> and <code>skills_unique</code> lists.
+            <code>skills_awakening</code> and <code>skills_event</code> are not recorded yet; they
+            appear here once the parser keeps those keys.
+        </p>
+    </section>
+
+    {{-- Goal races: a heading with the canonical absence body (WS-2 Task 2.3). No `trainee_goals`
+         table exists — KI-34 is the reservation for it — and the pennant has no source wired, so
+         the section states the absence rather than drawing four empty client panels. --}}
+    <section class="mt-8" aria-labelledby="goal-races">
+        <h2 id="goal-races" class="text-lg font-semibold text-ink-strong">Goal races</h2>
+        <p class="mt-2 text-sm text-ink-muted">
+            Goal races are not recorded. The source publishes per-trainee goal races; this tool
+            does not record them.
+        </p>
+    </section>
+
+    {{-- Her runs, with the page's one primary action (DESIGN.md §2.3). The query lives in the
+         controller, not here (WS-2 Task 2.4). The helper line is what keeps the action honest: the
+         link does not pre-select this trainee, because `TrainingRunController::create()` never
+         reads a `umamusume_id` param, so a link that appeared to pass one would silently not. --}}
+    <section class="mt-8" aria-labelledby="her-runs">
+        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+            <h2 id="her-runs" class="text-lg font-semibold text-ink-strong">Her runs</h2>
+            <a href="{{ route('runs.create') }}"
+               class="enamel rounded-full bg-chrome px-4 py-1.5 text-sm font-bold text-on-chrome">
+                New run
+            </a>
+        </div>
+        <p class="mt-1 text-xs text-ink-muted">Opens run setup; the trainee is chosen there.</p>
+
+        @if ($runs->isEmpty())
+            <p class="mt-2 text-sm text-ink-muted">No runs recorded for her yet.</p>
+        @else
+            <ul class="mt-2 divide-y divide-rule rounded-md border border-rule">
+                @foreach ($runs as $run)
+                    <li class="flex flex-wrap items-baseline gap-x-3 px-3 py-2 text-sm">
+                        <span class="font-semibold text-ink-strong">{{ $run->status->label() }}</span>
+                        <span class="text-ink">
+                            {{ $run->scenario ? ($scenarioLabels[$run->scenario] ?? $run->scenario) : 'No scenario set' }}
+                        </span>
+                        <span class="ml-auto font-mono text-xs tabular-nums text-ink-muted">
+                            {{ $run->turn_entries_count }} {{ \Illuminate\Support\Str::plural('turn', $run->turn_entries_count) }}
+                        </span>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </section>
+
+    {{-- Aliases sit seventh in the binding order, after Her runs. --}}
+    <h2 class="mt-8 text-lg font-semibold text-ink-strong">Aliases</h2>
+    @if ($umamusume->aliases->isEmpty())
+        <p class="mt-2 text-sm text-ink-muted">No aliases yet.</p>
+    @else
+        <ul class="mt-2 flex flex-wrap gap-2 text-sm">
+            @foreach ($umamusume->aliases as $alias)
+                <li class="rounded-md bg-sunken px-2 py-1 text-ink">{{ $alias->alias }} <span class="text-ink-muted">({{ $alias->language->label() }})</span></li>
+            @endforeach
+        </ul>
     @endif
 
     <h2 class="mt-8 text-lg font-semibold text-ink-strong">Provenance</h2>
