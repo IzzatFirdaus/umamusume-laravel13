@@ -99,9 +99,41 @@ it('puts the extraction file back where the other tier tests read it', function 
         ->and(file_exists(base_path(TIER_LABELS_RELATIVE_PATH.'.held-aside')))->toBeFalse();
 });
 
+it('tolerates the fixture already being absent when asked to move it aside', function (): void {
+    // KI-54's mechanism, pinned as its guard. `git restore` can recreate the tracked fixture while
+    // a `.held-aside` from a dead run is still in play, and then the state this helper exists to
+    // produce is already true: the tracked path is gone. In that state the helper used to call
+    // `rename()` on a missing source, which raises a warning the suite treats as a failure before
+    // any `finally` could restore anything, which is how one dead run took eleven tests with it.
+    // The state is reachable, so the helper has to answer it, not crash on it.
+    $file = base_path(TIER_LABELS_RELATIVE_PATH);
+    $aside = $file.'.probe-away';
+
+    rename($file, $aside);
+
+    try {
+        expect(withTierLabelsFileAbsent())->toBeTrue('the helper did not report the absent state it was asked for')
+            ->and(file_exists($aside))->toBeTrue('the probe file was consumed by the helper');
+    } finally {
+        rename($aside, $file);
+        clearstatcache(true, $file);
+    }
+
+    expect(file_exists($file))->toBeTrue('the fixture did not survive this test');
+});
+
 function withTierLabelsFileAbsent(): bool
 {
     $file = base_path(TIER_LABELS_RELATIVE_PATH);
+
+    // KI-54's guard. The state this helper exists to produce can already be true, because
+    // `git restore` recreates the tracked fixture while a dead run's `.held-aside` is still in
+    // play; `rename()` on a missing source raises a warning the suite treats as a failure, which
+    // is how one dead run took eleven tests with it. Reporting the state beats crashing on it.
+    if (! file_exists($file)) {
+        return true;
+    }
+
     rename($file, $file.'.held-aside');
     clearstatcache(true, $file);
 
