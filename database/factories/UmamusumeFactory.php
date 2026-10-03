@@ -17,6 +17,9 @@ class UmamusumeFactory extends Factory
     protected $model = Umamusume::class;
 
     /**
+     * `match_key` is derived by `Umamusume::newFactory()` from the name the row finally carries, so the
+     * key and the display name cannot disagree and cannot use an algorithm the import does not.
+     *
      * @return array<string, mixed>
      */
     public function definition(): array
@@ -27,7 +30,6 @@ class UmamusumeFactory extends Factory
             'slug' => Str::slug($name),
             'name' => $name,
             'name_ja' => null,
-            'match_key' => mb_strtolower(str_replace('-', '', Str::slug($name))),
             'release_status' => ReleaseStatus::GlobalReleased,
             'jp_debut_date' => null,
             'global_debut_date' => null,

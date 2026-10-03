@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ReleaseStatus;
+use App\Services\DataPipeline\NameNormalizer;
 use Database\Factories\UmamusumeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -51,6 +52,19 @@ class Umamusume extends Model
 {
     /** @use HasFactory<UmamusumeFactory> */
     use HasFactory;
+
+    /**
+     * Test rows get `match_key` from the import's own normalizer, applied after the attribute overrides
+     * have landed, so a fixture that states a name cannot carry another row's key. See `Skill::newFactory()`.
+     */
+    protected static function newFactory(): UmamusumeFactory
+    {
+        $normalizer = app(NameNormalizer::class);
+
+        return UmamusumeFactory::new()->afterMaking(static function (Umamusume $umamusume) use ($normalizer): void {
+            $umamusume->match_key ??= $normalizer->normalize($umamusume->name);
+        });
+    }
 
     /**
      * @return HasMany<UmamusumeAlias, $this>

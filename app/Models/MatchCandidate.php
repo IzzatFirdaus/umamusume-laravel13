@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\CandidateStatus;
 use App\Enums\MatchTier;
+use App\Services\DataPipeline\NameNormalizer;
 use Database\Factories\MatchCandidateFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,6 +36,22 @@ class MatchCandidate extends Model
 {
     /** @use HasFactory<MatchCandidateFactory> */
     use HasFactory;
+
+    /**
+     * `proposed_match_key` comes from the same normalizer `CrossReferenceMatcher::matchKey()` uses, after
+     * the overrides land, so a queued candidate in a test carries the key the pipeline would have filed.
+     * See `Skill::newFactory()`.
+     */
+    protected static function newFactory(): MatchCandidateFactory
+    {
+        $normalizer = app(NameNormalizer::class);
+
+        return MatchCandidateFactory::new()->afterMaking(
+            static function (MatchCandidate $candidate) use ($normalizer): void {
+                $candidate->proposed_match_key ??= $normalizer->normalize($candidate->proposed_name);
+            }
+        );
+    }
 
     /**
      * @return BelongsTo<Umamusume, $this>

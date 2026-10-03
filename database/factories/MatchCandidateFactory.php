@@ -17,6 +17,8 @@ class MatchCandidateFactory extends Factory
     protected $model = MatchCandidate::class;
 
     /**
+     * `proposed_match_key` is derived by `MatchCandidate::newFactory()` from the name this row carries.
+     *
      * @return array<string, mixed>
      */
     public function definition(): array
@@ -28,7 +30,6 @@ class MatchCandidateFactory extends Factory
             'external_ref' => null,
             'proposed_name' => $name,
             'proposed_name_ja' => null,
-            'proposed_match_key' => mb_strtolower(str_replace(' ', '', $name)),
             'suggested_umamusume_id' => null,
             'match_tier' => MatchTier::None,
             'status' => CandidateStatus::Pending,

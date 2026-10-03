@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ReleaseStatus;
+use App\Services\DataPipeline\NameNormalizer;
 use Database\Factories\SkillFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -69,6 +70,23 @@ class Skill extends Model
 {
     /** @use HasFactory<SkillFactory> */
     use HasFactory;
+
+    /**
+     * Test rows get their `match_key` from the same normalizer the import writes with
+     * (`StoreSkills.php:69`, `SkillSeeder.php:68`), applied after every attribute override has landed.
+     * Deriving it inside the factory's `definition()` cannot do this: `Factory::make($attributes)` turns
+     * the overrides into a state that runs *after* the definition, so a fixture that states a name and
+     * no key would keep the faker's key. A fixture that states its own key keeps it, which is how the
+     * alias and lookalike tiers are tested (`CatalogRosterTreeTest.php:23`).
+     */
+    protected static function newFactory(): SkillFactory
+    {
+        $normalizer = app(NameNormalizer::class);
+
+        return SkillFactory::new()->afterMaking(static function (Skill $skill) use ($normalizer): void {
+            $skill->match_key ??= $normalizer->normalize($skill->name);
+        });
+    }
 
     /**
      * The rows a Global Trainer can actually meet in their client.
