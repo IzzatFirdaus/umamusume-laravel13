@@ -107,7 +107,7 @@ it('holds nothing in the pinned region that would need its own scrollbar', funct
         ->and($xpath->query('.//*[contains(@class, " bg-grade-")]', $state)->length)->toBe(5);
 });
 
-it('pins the state region only from the desktop width, so a narrow screen stacks', function (): void {
+it('pins the resources region only from the desktop width, so a narrow screen stacks', function (): void {
     $html = frameHtml();
 
     // D-40: below 1024px the regions stack. Asserting the breakpoint here is the one
@@ -116,7 +116,13 @@ it('pins the state region only from the desktop width, so a narrow screen stacks
     // Counted rather than pattern-negated: a regex written to exclude `lg:sticky` also
     // matches the `g:sticky` inside it, which is how the first version of this assertion
     // failed on markup that was correct.
-    preg_match('/aria-label="Run state"[^>]*class="([^"]*)"/', $html, $matched);
+    //
+    // Re-pointed 2026-10-03 (O-2): the sticky class moved off `section[aria-label="Run
+    // state"]` and onto the Resources strip wrapper, because pinning the whole state block
+    // took two thirds of the viewport. The claim is unchanged - exactly one element carries
+    // a `sticky`-containing class at the `lg` breakpoint, and it is the Resources region -
+    // only the subject of the assertion moved.
+    preg_match('/aria-label="Resources"[^>]*class="([^"]*)"/', $html, $matched);
 
     $classes = explode(' ', $matched[1] ?? '');
 
