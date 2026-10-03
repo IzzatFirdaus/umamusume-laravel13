@@ -96,15 +96,29 @@ it('names only a declared source in the README', function (): void {
 });
 
 it('lists no route in the README Web surface table that the app does not have', function (): void {
-    $readme = (string) file_get_contents(base_path('README.md'));
+    // Normalised because this file is checked out with CRLF on a Windows host and the
+    // heading's casing is the prose's choice, not a contract.
+    $readme = str_replace("\r\n", "\n", (string) file_get_contents(base_path('README.md')));
 
-    expect(preg_match("/\n## Web surface\n(.*?)\n## /s", $readme, $section))
+    expect(preg_match("/\n## web surface\b(.*?)\n## /is", $readme, $section))
         ->toBe(1, 'the Web surface section must exist for this guard to read');
 
-    preg_match_all('/^\|\s*`?(\/[^|\s`]*)`?\s*\|/m', $section[1], $rows);
-    $listed = array_values(array_unique($rows[1]));
+    // Only the first backticked path of each row: the table abbreviates, and a cell like
+    // "`/training-runs` (+ `/create`, `/{run}`, PUT, DELETE)" names suffixes of the route above
+    // it, not routes of their own. A stale entry is still stale in the first position, which is
+    // where §7-1's `/design-preview` sat.
+    $listed = [];
 
-    expect($listed)->not->toBe([], 'the Web surface table must list at least one path');
+    foreach (explode("\n", $section[1]) as $line) {
+        if (preg_match('/^\|\s*`(\/[^`]*)`/', $line, $cell) === 1) {
+            $listed[] = $cell[1];
+        }
+    }
+
+    $listed = array_values(array_unique($listed));
+
+    expect($listed)->not->toBe([], 'the Web surface table must list at least one path')
+        ->and(count($listed))->toBeGreaterThanOrEqual(6, 'the table rows this guard reads have gone missing');
 
     $routes = array_map(
         fn ($route): string => '/'.ltrim($route->uri(), '/'),
