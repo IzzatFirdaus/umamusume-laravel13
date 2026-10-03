@@ -362,6 +362,10 @@ a measurement before being recorded, and three came back different from how they
   from "this tool cannot record this", and the `fans` cell does not say whether it wants the total or the
   change. Both are ambiguity, and the second is a modelling decision. **needs-design-decision.**
 
+  **Ruling revised 2026-10-03.** Owner confirmed (b)-equivalent. Fields store totals, display
+  computes the delta, labels read `Energy (after this turn)` / `Fans (after this turn)`. The (c)
+  delta-storage option is not in force.
+
 ### O-4 · major · Mood sits in its own block while the stats band wastes vertical space
 
 - **Confirmed as reported, with a structural cause.** The DOM does not group the way the screen reads:
@@ -467,6 +471,11 @@ a measurement before being recorded, and three came back different from how they
 - **Fix.** A goals panel: name, deadline period, state (cleared, active, failed), and the turn countdown
   the client prints. The race rows already carry `is_mandatory` and `is_special_race`, and the report
   records three cleared goals and one active, so the shape is known.
+
+  **Ruling revised 2026-10-03.** Owner confirmed (b). The goals panel renders directly in
+  `show.blade.php` from `is_mandatory` and `is_special_race` race rows. The grade-point-meter
+  component is not generalised. A future surface that needs the same list can extract a shared
+  component at that time.
 
 ---
 
