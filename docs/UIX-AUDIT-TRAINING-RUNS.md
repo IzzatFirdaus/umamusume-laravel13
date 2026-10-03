@@ -872,3 +872,106 @@ live, so no duplicate file was created.
 O-11 (skills panel design), O-8 (deck tiles and per-card state), O-12 (goals surface), O-3 (fans/energy
 total or delta), O-5 and R-7 (seed 406 unscoped race slots; Architect pass), R-2 and R-3 (schema), C-5
 (validation fields), the Infirmary and Races choices, and the Rest recovery tier. None of these changed.
+
+---
+
+## Part 8: quick wins applied (2026-10-03)
+
+Dispatch A's scope, stated in the dispatch itself as no schema and no PRD: the Rest recovery doc
+edit, the O-3 label disambiguation, the C-5 four-field surface on the create form, and the O-12
+goals panel. Each lands in its own commit.
+
+### Landed
+
+| Item | Commit | File | Test that closes it |
+|---|---|---|---|
+| A.1 Rest recovery tier | `24ba395` | `UMAMUSUME_REFERENCE.md` §1.1.5, `SCENARIO-PUBLISHER-REFERENCES.md` §2.1 note | doc-only, no test gate |
+| A.2 / O-3 fans and energy labels | `48544ca` | `resources/views/runs/show.blade.php` | the existing `ResourceStripOnRunDetailTest` and `ResourceStripTest` pins still pass on the longer labels |
+| A.3 / C-5 four create fields | `b411fd0` | `resources/views/runs/create.blade.php` | `RunCreateSurfaceTest` (new file, three tests) |
+| A.4 / O-12 goals surface | `6f7e738` | `resources/views/runs/show.blade.php` | `RunGoalsPanelTest` (new file, four tests) |
+
+### Premise 3, the domain fingerprint
+
+The dispatch opened expecting `04870f28...`, the value recorded at Part B end. Measured value at
+Dispatch A start was `87164db8f03e02d6523c144cfbe9606ac383e1aeb197144c7eca1e3e10ce4d70`. The
+mismatch is not a schema write from Dispatch A, because Dispatch A writes no rows.
+
+Resolution attempt: the audit doc records the expected value but does not record the method that
+produced it. The prior dispatch's own summary named a "per-table INSERT dump ordered by rowid",
+which hashes row data, but the current method (`sqlite_master.sql` + `PRAGMA table_info` per
+table) hashes schema metadata. Neither reproduces `04870f28...` against today's DB, nor do five
+other data-dump serialisations tried (pipe, csv, serialize, json, kv) against either the all-table
+set or the domain-only set. The expected value is unreproducible from what is on disk today.
+
+Owner ruling 2026-10-03 (this dispatch, pre-work): the premise conflated "fingerprint at dispatch
+start" with "fingerprint recorded at a prior dispatch end". The guard is the within-dispatch
+delta; the cross-session value is a stale reference. Re-baseline to the current schema-dump
+`87164db8...` and proceed. Dispatch A re-computes at the end of Stage 5 using the same method;
+delta must be zero.
+
+Amended template for the next dispatch: *domain fingerprint computed at the start of this
+dispatch; compare at the end; any delta is a finding*. Not: *domain fingerprint matches a value
+recorded at the end of a prior dispatch*.
+
+### Out-commits recorded
+
+Two of the four stage commits swept edits that were already on disk at dispatch start.
+
+- `24ba395` (Stage 1) carries, in `UMAMUSUME_REFERENCE.md`, the prior session's in-client hint
+  discount closure at §1.1.4, the Growth Rate owner identification at §1.3.5, the two §8.4 closed
+  gap lines, and the source-path renames that point §2.5 and §2.6 at `SCENARIO-PUBLISHER-REFERENCES.md`.
+  In the same commit, `SCENARIO-PUBLISHER-REFERENCES.md` grows by 1,262 lines of source expansion
+  the prior session made but never committed. All of it landed at one SHA because line-level staging
+  against a tree with no active peer was not authorised.
+- `b411fd0` (Stage 3) carries the prior session's C-2 caption edits in the same `create.blade.php`:
+  "Umamusume" → "Trainee *", "Status" → "Status *", `aria-required="true"` on the combobox input,
+  and the caption rationale that goes with them.
+
+Both sweeps are stated in the commit body. The alternative was to leave the prior session's work
+uncommitted across the rest of the dispatch, which the owner's "no peer on the board" ruling
+argues against. The next session that reads git log will see those edits under a Dispatch A label
+rather than under their own C-2 label; the bodies name the sweep so the audit trail is honest.
+
+### Stage 2 deviation, named
+
+The dispatch named Stage 2 as "label both as deltas". The turn-form fields on the run page take the
+client's post-turn reading, not a delta: the controller line
+`app/Http/Controllers/TrainingRunController.php:447` computes the per-turn change by subtracting
+the previous turn's stored value from the entered value. Switching the field to take a delta
+itself would need a controller edit, and the controller is outside this dispatch's fence. The
+labels read "Energy (after this turn)" and "Fans (after this turn)", which is what the fields
+actually take, and the Blade comment names the preview computation. The ambiguity O-3 found is
+resolved on the field. Reconciling the dispatch's wording to the field's shape is recorded here
+rather than papered over.
+
+### Stage 4, the grade-point-meter decision
+
+The dispatch's fence included `resources/views/components/grade-point-meter.blade.php` and named
+Stage 4 as generalising the component to an objective-list. The goals panel's data shape is
+different from the meter's (race state, year, turn countdown vs. points ladder, target, current
+sum), so the goals section was rendered directly on `show.blade.php` rather than shared through a
+generalised component. That is the smaller diff and it does not risk the Trackblazer meter's
+existing test pins. If a third panel lands that needs the same list pattern, the abstraction
+becomes worth its cost.
+
+### Suite state after Stage 5
+
+- **Start:** 1,123 passed, 2 skipped, 17,982 assertions, 82.29s, exit 0.
+- **End:** 1,130 passed, 2 skipped, 18,014 assertions, 100.05s, exit 0. The seven new tests are
+  Stage 3's three in `RunCreateSurfaceTest` and Stage 4's four in `RunGoalsPanelTest`. No test was
+  deleted, skipped, or weakened.
+- **Domain fingerprint.** `87164db8f03e02d6523c144cfbe9606ac383e1aeb197144c7eca1e3e10ce4d70` at both
+  Stage 5 start and end. Delta is zero, which is what the guard was set up to catch.
+- **One in-flight fix landed in Stage 5's commit.** Two `TraineeSelectorTest` xpath assertions at
+  lines 309 and 376 broadened `//option[@value="N"]` across the whole page. Stage 3's two new
+  inheritance-parent selects reuse the Global trainee list, so the broad pattern started matching
+  three rows per trainee and both assertions failed. Each was scoped to
+  `//select[@name="umamusume_id"]/option[@value="N"]`, the trainee select the test was actually
+  about, with a comment naming the C-5 selects as the reason the scoping matters. That tightens
+  the original claim rather than weakening it.
+
+### Still open
+
+O-11 (skills panel), O-8 (deck tiles and per-card state), O-5 and R-7 (the 406-row unscoped race
+catalog; Architect), R-2 and R-3 (schema), the Infirmary and Races choices. None of those landed
+here; they were in Dispatch A's held-or-future list, not its scope.

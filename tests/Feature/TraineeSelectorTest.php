@@ -189,6 +189,11 @@ it('names the combobox input explicitly, since no label reaches it', function ()
     // the name itself: the <label> belongs to the select (one label names one control), the
     // combobox is outside it, and the input would otherwise be unnamed.
     expect($xpath->query('//input[@data-combobox-input][@aria-label="Trainee or costume card name"]')->length)->toBe(1)
+        // C-2: required has to sit on the control the Trainer uses. The caption marks the two
+        // optional fields and nothing marks this one, so a screen reader learned the field was
+        // mandatory only from a failed submit. `aria-required`, not `required`: the value that
+        // posts is the hidden pair, so `required` here would gate on the label text instead.
+        ->and($xpath->query('//input[@data-combobox-input][@aria-required="true"]')->length)->toBe(1)
         // ...and the popup it opens is named too, since a listbox has no label of its own.
         ->and($xpath->query('//ul[@role="listbox"][@aria-label="Trainees and costume cards"]')->length)->toBe(1)
         // A5: the input is addressable, which is what lets the script move the caption's `for` onto
@@ -196,6 +201,27 @@ it('names the combobox input explicitly, since no label reaches it', function ()
         // below, because the markup the server sends still names the select; what the page has to
         // guarantee is that the target of that move exists.
         ->and($xpath->query('//input[@data-combobox-input][@id="trainee-combobox"]')->length)->toBe(1);
+});
+
+it('makes the visible caption a prefix of the accessible name it is paired with', function (): void {
+    /*
+     * C-3, WCAG 2.5.3. A speech-input user says the words on screen, so a field captioned
+     * "Umamusume" and named "Trainee or costume card name" could not be reached by voice: the
+     * name shared no text with the label. The caption is pinned to a literal because
+     * `str_starts_with($name, '')` is true, and a clause that passes on an empty caption is a
+     * clause that tests nothing.
+     */
+    selectorRoster();
+
+    $xpath = selectorXPath(createPageHtml());
+    $caption = trim((string) $xpath->query('//label[@for="umamusume-select"]/span')->item(0)?->textContent);
+    $name = $xpath->query('//input[@data-combobox-input]')->item(0)?->getAttribute('aria-label') ?? '';
+
+    expect($caption)->toBe('Trainee *')
+        // The `*` is this repository's required marker and `aria-required` on the input carries the
+        // same state to AT, so the words are all the accessible name has to hold: a speech-input user
+        // says "Trainee", never "Trainee asterisk".
+        ->and(str_starts_with($name, rtrim($caption, ' *')))->toBeTrue();
 });
 
 it('ships the whole roster to the page as data, and the select as trainees only', function (): void {
@@ -281,9 +307,13 @@ it('puts every Global trainee in the payload, and only confirmed cards in her ca
     // Global trainees. The [JP-Only] row stays out, because release status is a trainee-level
     // gate this fix does not touch.
     expect($xpath->query('//select[@name="umamusume_id"]/option')->length)->toBe(5)
-        ->and($xpath->query(sprintf('//option[@value="%d"]', $noCards->id))->length)->toBe(1)
-        ->and($xpath->query(sprintf('//option[@value="%d"]', $shadowed->id))->length)->toBe(1)
-        ->and($xpath->query(sprintf('//option[@value="%d"]', $jpOnly->id))->length)->toBe(0);
+        // Scoped to the trainee select: C-5 put two inheritance-parent selects on the same page,
+        // and each lists every Global trainee the same way, so the broad `//option[@value=...]`
+        // would now match three rows per trainee rather than one. The trainee gate this test
+        // actually pins is on the `umamusume_id` select alone.
+        ->and($xpath->query(sprintf('//select[@name="umamusume_id"]/option[@value="%d"]', $noCards->id))->length)->toBe(1)
+        ->and($xpath->query(sprintf('//select[@name="umamusume_id"]/option[@value="%d"]', $shadowed->id))->length)->toBe(1)
+        ->and($xpath->query(sprintf('//select[@name="umamusume_id"]/option[@value="%d"]', $jpOnly->id))->length)->toBe(0);
 });
 
 it('makes the payload trainee set the same set the no-script select offers', function (): void {
@@ -347,9 +377,12 @@ it('lists every Global trainee in the no-script select when the database holds n
 
     // Placeholder plus both Global trainees, and the release gate is still a gate.
     expect($xpath->query('//select[@name="umamusume_id"]/option')->length)->toBe(3)
-        ->and($xpath->query(sprintf('//option[@value="%d"]', $first->id))->length)->toBe(1)
-        ->and($xpath->query(sprintf('//option[@value="%d"]', $second->id))->length)->toBe(1)
-        ->and($xpath->query(sprintf('//option[@value="%d"]', $jpOnly->id))->length)->toBe(0)
+        // Scoped to the trainee select for the same reason as the assertion at line 309: the
+        // C-5 parent selects reuse the trainee list and would match a broad `//option[@value=...]`
+        // three times per trainee. The shape under test is the trainee select alone.
+        ->and($xpath->query(sprintf('//select[@name="umamusume_id"]/option[@value="%d"]', $first->id))->length)->toBe(1)
+        ->and($xpath->query(sprintf('//select[@name="umamusume_id"]/option[@value="%d"]', $second->id))->length)->toBe(1)
+        ->and($xpath->query(sprintf('//select[@name="umamusume_id"]/option[@value="%d"]', $jpOnly->id))->length)->toBe(0)
         // A1 corrects this clause from `rosterFrom($html))->toBe([])`, which was true of the
         // previous round and is the divergence itself: an empty payload hides the combobox, so the
         // two trainees on this page were reachable only through the select the script disables. The
@@ -761,6 +794,26 @@ it('names the empty and capped states in words a Trainer reads', function (): vo
 
     expect($source)->toContain('No trainee or card found.')
         ->and($source)->toContain('keep typing');
+});
+
+it('keeps the committed label replaceable and the presentation rows out of the tree', function (): void {
+    /*
+     * C-1 and C-4 from the run-flow audit. Both live in the JS runtime, so these are shape pins
+     * and the browser pass is the behaviour proof: commit a card, type a new query without
+     * clearing, and read the popup; then open the list and read its children.
+     */
+    $commit = comboboxSection('const commit =', 'const choose =');
+    $header = comboboxSection('const header = document.createElement', 'listbox.append(header)');
+    $divider = comboboxSection('const bandDivider =', 'const sortHits =');
+
+    expect($commit)->toContain('input.select();')
+        // After the label is written, or the next keystroke still appends: focus never leaves the
+        // field on the Enter path, so the focus handler's own `select()` does not fire.
+        ->and(strpos($commit, 'input.select();'))->toBeGreaterThan((int) strpos($commit, 'input.value = committed;'))
+        // `role="presentation"` drops the listitem but leaves the sentence as bare text inside the
+        // listbox, which the option below it already states in its own accessible name.
+        ->and($header)->toContain("setAttribute('aria-hidden', 'true')")
+        ->and($divider)->toContain("setAttribute('aria-hidden', 'true')");
 });
 
 it('gives every option the trainee it belongs to in its own accessible name', function (): void {
