@@ -135,9 +135,12 @@ final class PipelineRunner
              * returns before reaching it and correctly so — race rows are not in the
              * catalog list. Card rows are, so a fetch that landed cards without this
              * would leave the page serving the ids it cached before they existed.
+             *
+             * No TTL on this key, at either bump site: a counter that expires restarts the numbering an
+             * hour later, and the page keys embed the number (F-10 / N-4).
              */
             if ($stored['created'] + $stored['updated'] > 0) {
-                if (! Cache::add('catalog:version', 0, 3600)) {
+                if (! Cache::add('catalog:version', 0)) {
                     Cache::increment('catalog:version');
                 }
             }
@@ -264,7 +267,7 @@ final class PipelineRunner
         }
 
         if ($counts['created'] > 0 || $counts['updated'] > 0) {
-            if (! Cache::add('catalog:version', 0, 3600)) {
+            if (! Cache::add('catalog:version', 0)) {
                 Cache::increment('catalog:version');
             }
         }

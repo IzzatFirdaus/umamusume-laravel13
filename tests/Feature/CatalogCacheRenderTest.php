@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Umamusume;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 /*
  * KI-2: `GET /umamusume` returned 500 with "Attempt to read property "slug" on
@@ -29,8 +30,10 @@ it('renders the catalog through the database cache store, not only the array one
     expect(config('cache.default'))->toBe('database')
         ->and(test()->get('/umamusume')->getStatusCode())->toBe(200);
 
-    // The cold request populated the cache; this one deserialises it.
-    expect(Cache::has('catalog:version'))->toBeTrue()
+    // The cold request populated the cache; this one deserialises it. The page group key is the evidence,
+    // not `catalog:version`: that counter belongs to the promotion and a page read no longer writes it
+    // (F-10 / N-4), so asserting it here would pin the defect this file used to rely on.
+    expect(DB::table('cache')->where('key', 'like', '%catalog:list:v%')->count())->toBeGreaterThan(0)
         ->and(test()->get('/umamusume')->assertOk()->getContent())
         ->toContain('Umamusume');
 

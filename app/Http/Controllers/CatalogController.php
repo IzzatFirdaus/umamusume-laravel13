@@ -286,7 +286,10 @@ class CatalogController extends Controller
      */
     private function cached($query, ?string $status, ?string $searchKey, int $page, int $pageSize, bool $showUnconfirmed): array
     {
-        $version = (int) Cache::remember('catalog:version', 3600, fn () => 0);
+        // Read, never written, and with no TTL of its own (F-10 / N-4): the counter is the promotion's, and
+        // a `remember` here installed an expiring zero that a later increment inherited, so the page group
+        // could go back to key namespace 1 an hour after it left it. Absent means nothing has promoted yet.
+        $version = (int) Cache::get('catalog:version');
         $ttl = (int) config('uma.cache.ttl', 900);
         // Defensive key separation, not a live dependency: the flag changes which cards a
         // row shows, not which parent rows exist or how many there are, because
