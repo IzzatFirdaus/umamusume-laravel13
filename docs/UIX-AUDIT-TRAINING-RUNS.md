@@ -876,14 +876,6 @@ live, so no duplicate file was created.
   `RunSkillRowLabelsTest` and `GoalPanelsOnRunDetailTest` sit outside the dispatch's write fence but pin the
   exact shape this dispatch changed; the re-points are recorded here as a fence deviation.
 
-### Still open
-
-O-11 (skills panel design), O-8 (deck tiles and per-card state), O-12 (goals surface), O-3 (fans/energy
-total or delta), O-5 and R-7 (seed 406 unscoped race slots; Architect pass), R-2 and R-3 (schema), C-5
-(validation fields), the Infirmary and Races choices, and the Rest recovery tier. None of these changed.
-
----
-
 ## Part 8: quick wins applied (2026-10-03)
 
 Dispatch A's scope, stated in the dispatch itself as no schema and no PRD: the Rest recovery doc
@@ -984,3 +976,68 @@ becomes worth its cost.
 O-11 (skills panel), O-8 (deck tiles and per-card state), O-5 and R-7 (the 406-row unscoped race
 catalog; Architect), R-2 and R-3 (schema), the Infirmary and Races choices. None of those landed
 here; they were in Dispatch A's held-or-future list, not its scope.
+
+---
+
+## Part 9: deck tiles and per-card state, gated (2026-10-03)
+
+Dispatch C opened with Stage 0 (O-3 and O-12 ruling revisions) and Stage 1 (PRD-citation gate).
+Stage 1 stopped.
+
+### Stage 0 · landed
+
+| Item | Commit | File | Verification |
+|---|---|---|---|
+| O-3 revision note | `143d342` | `docs/UIX-AUDIT-TRAINING-RUNS.md` (O-3 body) | doc-only |
+| O-12 revision note | `143d342` | `docs/UIX-AUDIT-TRAINING-RUNS.md` (O-12 body) | doc-only |
+
+Both revisions record the ruling choice the audit named earlier as "needs-design-decision"
+without a settled answer. The dispatch's code path for the four per-card values still has to
+wait for the PRD amendment (next paragraph).
+
+### Stage 1 · stopped
+
+PRD §6.9 partial lift (line 172) cuts "no card levels, limit breaks or Unique Perk states,
+because that is uma-tracker's abandoned promise and no user story replaced it." US-12 (line 37)
+repeats the body: "no card level, limit break or Unique Perk state is stored anywhere
+(`ADR-0014`: identity, not collection)." `ADR-0014`'s §"Decision" table puts `UserSupportCard`
+on the **no** row with the reason "Collection tracking is still the feature §6.9 cut. The deck
+records card identity, not ownership state", and its §"Not designed here" list names
+"hint-level accumulation" alongside the other collection-style facts. Read together they
+cover the four values O-8 names (level, limit break, bond, hint level) without exception.
+
+No PRD section authorizes the change. No owner pre-approval is on the record in the ADRs I
+can read. The backlog item 3 ("Add per-card deck state: level, limit breaks, bond, hint level
+(O-8). Same gate.") is explicitly marked "Same gate" referring to item 2's "Needs a schema
+proposal with a PRD citation before code, which makes it an Architect item."
+
+The proposal at `docs/research-scratch/o8-per-card-state-proposal.md` records the four-column
+schema (card_level, limit_break, bond, hint_level, all nullable on `deck_slots`), names the
+two surface options (picker path or locked-tile path), enumerates the alternatives considered,
+and quotes the PRD and ADR-0014 passages that gate the change. The owner decides whether to
+amend §6.9 and US-12, and on approval re-issue Dispatch C from Stage 2.
+
+### Stages 2, 3, 4 · not run
+
+No migration file created. No `deck-panel.blade.php` change. No `StoreDeckRequest` change. No new
+`RunDeckTest` assertions.
+
+### Backlog status
+
+| Item | Before | After |
+|---|---|---|
+| Item 3 (per-card deck state schema) | open, gated | **open, gated, proposal lands** |
+| Item 12 (deck as six tiles with locked state and reset action) | open, needs design decision | **open** (Stage 3 was the implementation; gated on item 3) |
+
+Until the PRD amendment lands, neither item closes. The proposal stays at
+`docs/research-scratch/o8-per-card-state-proposal.md` for the owner's review.
+
+### Domain fingerprint
+
+Computed at Dispatch C start with the per-table data-dump of `training_runs, turn_entries,
+run_skills, deck_slots, support_cards, skills, race_catalog_slots` ordered by rowid, hashed
+SHA-256. Baseline value: `7a4c8f74a95621e63b490267bfe5447a1adf3cbea245933fb3a590be46930ef8`.
+The dispatch's "expected" value was `87164db8…` measured under the schema-dump method used at
+Dispatch A end; the two methods are not comparable, so per the amended rule this is the new
+baseline rather than a finding. End-of-Stage-1 fingerprint was not recomputed because the
+dispatch wrote no schema change during Stage 1: the baseline carries.
