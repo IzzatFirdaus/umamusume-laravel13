@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Models\MatchCandidate;
 use App\Models\Preference;
 use App\Models\Umamusume;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Pest\Browser\Browser;
 
@@ -80,21 +79,20 @@ it('renders the framework paginator from tokens too', function (): void {
         ->not->toMatch('/\bdark:/');
 });
 
-it('stores a preference as one keyed row and keeps SQLite the only store', function (): void {
-    DB::table('preferences')->insert([
-        'key' => 'failure_estimate',
-        'value' => 'on',
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
+it('keeps preferences in one keyed table with no per-user column', function (): void {
+    Preference::put('theme', 'light');
 
-    $row = DB::table('preferences')->where('key', 'failure_estimate')->sole();
+    $row = Preference::whereKey('theme')->sole();
 
-    expect($row->value)->toBe('on')
+    expect($row->value)->toBe('light')
         // A third key is a PRD change; a `user_id` would contradict §6 non-goal 1.
         ->and(Schema::hasTable('preferences'))->toBeTrue()
         ->and(Schema::hasColumn('preferences', 'user_id'))->toBeFalse()
         ->and(Schema::getColumnListing('preferences'))->toBe(['key', 'value', 'created_at', 'updated_at']);
+
+    // This case is about the table. `failure_estimate` used to be its subject, which left the key
+    // with a schema test and no behavior test at all while §7-5 said no control could set it;
+    // the behavioral half now lives in PreferenceControlsTest.
 });
 
 it('renders a stored theme into the document and drops the pre-paint script', function (): void {

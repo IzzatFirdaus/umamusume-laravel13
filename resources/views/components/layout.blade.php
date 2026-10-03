@@ -52,6 +52,13 @@
             <a href="{{ route('support-cards.index') }}" class="inline-flex min-h-11 items-center hover:underline">Support cards</a>
             <a href="{{ route('runs.index') }}" class="inline-flex min-h-11 items-center hover:underline">Training runs</a>
             <a href="{{ route('review.index') }}" class="inline-flex min-h-11 items-center hover:underline">Review</a>
+            {{-- §7-5 / PRD US-11: the `preferences` table and the server-side theme render both
+                 shipped, and nothing could write to them, so the dark theme was reachable only by
+                 inserting a row by hand (audit O-1: "the dark theme ships with no way to select
+                 it"). A link rather than a form in the shell: the nav renders on every screen, and
+                 a form here would precede each page's own form in document order, which is what
+                 `ReviewFormAccessibilityTest` and `TraineeSelectorTest` count. --}}
+            <a href="{{ route('preferences.edit') }}" class="ml-auto inline-flex min-h-11 items-center hover:underline">Preferences</a>
         </div>
     </nav>
 

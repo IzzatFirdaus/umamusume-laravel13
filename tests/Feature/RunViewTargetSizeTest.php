@@ -99,5 +99,9 @@ it('gives every L-F01 target the min-h-11 floor', function (): void {
     $assertFloor($helper, 'helper link');
     $assertFloor($summary, 'summary disclosure');
 
-    expect($nav->length)->toBe(5);
+    // The census of the nav, so the sweep above cannot pass on an empty node list. Six since
+    // §7-5: Catalog, Skills, Support cards, Training runs, Review, Preferences. Each one is
+    // asserted to carry the floor, so a seventh link that forgets it fails here rather than
+    // sliding past an unchanged count.
+    expect($nav->length)->toBe(6);
 });

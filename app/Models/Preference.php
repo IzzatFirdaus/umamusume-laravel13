@@ -30,6 +30,13 @@ class Preference extends Model
     /** @use HasFactory<PreferenceFactory> */
     use HasFactory;
 
+    /**
+     * The keys PRD US-11 authorizes (SCREEN_SPEC.md §7-5). One list for the store, the writer's
+     * validation and the screen that reads them back, so a third key is added in the one place
+     * the ruling lives rather than in three.
+     */
+    public const KEYS = ['theme', 'failure_estimate'];
+
     public $incrementing = false;
 
     protected $keyType = 'string';

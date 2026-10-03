@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SupportCardController;
@@ -44,3 +45,8 @@ Route::post('/training-runs/{run}/purchases', [TrainingRunController::class, 'st
 
 Route::get('/review', [ReviewController::class, 'index'])->name('review.index');
 Route::post('/review/{candidate}', [ReviewController::class, 'resolve'])->name('review.resolve');
+
+// The two UI preferences PRD US-11 authorizes (SCREEN_SPEC.md §7-5). One PUT for both keys,
+// because writing a preference is one action on the store rather than one action per key.
+Route::get('/preferences', [PreferenceController::class, 'edit'])->name('preferences.edit');
+Route::put('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
