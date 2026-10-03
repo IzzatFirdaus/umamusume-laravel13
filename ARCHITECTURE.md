@@ -290,7 +290,7 @@ Local-only changes the threat list; it does not remove it.
 |---|---|
 | Auth surface | None by design. No login, no sessions beyond the framework default, no exposed writes via API (read-only). The app must never be deployed publicly; README states `php artisan serve` on loopback. |
 | Untrusted fetched content | Parsed as data only. Parsers extract text fields; no HTML is ever rendered into Blade unescaped (auto-escaping stays on; no `{!! !!}` for source data). Prompt-injection-style text inside fetched pages cannot reach an LLM here (no LLM in the pipeline), but instruction-like strings are treated as plain text regardless. |
-| SSRF | Fetch targets come exclusively from `config('uma.sources')` allowlist; redirects limited (`Http::maxRedirects`); no user-supplied URLs. |
+| SSRF | Fetch targets come exclusively from `config('uma.sources')` allowlist; redirects are followed by the fetcher itself, at most two hops, and every hop's host is re-checked against the same allowlist before it is requested (F-9); no user-supplied URLs. |
 | Input validation | Form Requests at every web write boundary; third-party parsed records validated against array-shape checks before storage. |
 | Output encoding | Blade `{{ }}` everywhere; JSON via API Resources. |
 | Secrets | None exist. No API keys in Phase 1 sources; if a source later needs one, it goes in `.env`, never in config defaults or snapshots. |
