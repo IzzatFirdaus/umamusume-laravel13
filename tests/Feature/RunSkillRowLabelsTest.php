@@ -131,10 +131,18 @@ it('gives every control in the skills form its own label', function (): void {
 it('renders one editable row per skill on the run, plus a spare row to add another', function (): void {
     $run = labelledRun();
 
+    $dom = new DOMDocument;
+    @$dom->loadHTML($this->get(route('runs.show', $run))->content());
+    $xpath = new DOMXPath($dom);
+
     $rows = [];
 
-    foreach (skillsFormControls($this->get(route('runs.show', $run))->content()) as $control) {
-        if (preg_match('/^skills\[(\d+)\]\[skill_id\]$/', $control['name'], $m) === 1) {
+    // Re-pointed 2026-10-03 (B.6): a closed row posts its skill through a hidden input, so the
+    // row set is the union of the open select and the hidden inputs. The claim is unchanged: one
+    // row per seeded skill plus the spare, each posting its own `skills[N][skill_id]`.
+    foreach ($xpath->query('//form[@action and .//select[starts-with(@name, "skills[")]]//*[@name]') as $control) {
+        /** @var DOMElement $control */
+        if (preg_match('/^skills\[(\d+)\]\[skill_id\]$/', $control->getAttribute('name'), $m) === 1) {
             $rows[] = (int) $m[1];
         }
     }
@@ -328,10 +336,15 @@ it('sizes every control in the skills form to the 44 of DESIGN.md 6.14, and step
     expect($form)->not->toBeNull('the skills form is not on the page');
 
     // The count is asserted so the class loop below cannot pass over an empty set: a loop that checks
-    // nothing is the failure this repository has filed repeatedly. Three seeded skills plus the spare,
-    // three controls each, plus one submit button.
-    $rows = $xpath->query('.//select[starts-with(@name, "skills[")][contains(@name, "[skill_id]")]', $form)->length;
-    expect($rows)->toBe(4);
+    // nothing is the failure this repository has filed repeatedly. Re-pointed 2026-10-03 (B.6): the
+    // ten whole-catalogue selects collapsed to one open picker, so the visible controls are the open
+    // select, the status and turn control on each of the four rows, and the submit. The three closed
+    // rows' "Change row N" links carry the same 44px floor as `min-h-11`.
+    $openSelects = $xpath->query('.//select[contains(@name, "[skill_id]")]', $form)->length;
+    $switchLinks = $xpath->query('.//a[starts-with(normalize-space(.), "Change row ")]', $form)->length;
+
+    expect($openSelects)->toBe(1)
+        ->and($switchLinks)->toBe(3);
 
     $checked = 0;
 
@@ -349,7 +362,14 @@ it('sizes every control in the skills form to the 44 of DESIGN.md 6.14, and step
         $checked++;
     }
 
-    expect($checked)->toBe($rows * 3 + 1);
+    // One open select, four status selects, four turn inputs and the submit.
+    expect($checked)->toBe(10);
+
+    foreach ($xpath->query('.//a[starts-with(normalize-space(.), "Change row ")]', $form) as $link) {
+        /** @var DOMElement $link */
+        expect(str_contains($link->getAttribute('class'), 'min-h-11'))
+            ->toBeTrue('a Change row link is not sized to min-h-11');
+    }
 
     $turn = $xpath->query('.//input[@type="number"]', $form)->item(0);
     expect($turn)->not->toBeNull()

@@ -276,7 +276,7 @@ it('offers the run screen picker only client-named Global skills, and states the
         // inside the sentence, and a check that failed on indentation would be testing the
         // template's formatting, not its copy.
         ->and((string) preg_replace('/\s+/', ' ', $html))
-        ->toContain('Hint-level discounts follow the ladder recorded in docs/research-scratch/SKILLS-MECHANICS.md §2.4: 10 / 20 / 30 / 35 / 40 percent at Lv1 through Lv Max.');
+        ->toContain('Hint-level discounts follow the ladder recorded in docs/research-scratch/SKILLS-MECHANICS.md §2.4: 10, 20, 30, 35 and 40 percent at Lv1 through Lv Max.');
 
     // What the fixture's surviving translation is bought for: the run screen renders the client string for
     // every row Global has, and none of these eight renderings appear anywhere on it. Decoded first — a
