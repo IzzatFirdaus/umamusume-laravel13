@@ -59,7 +59,9 @@ return [
          * Owner approved this entry on 2026-09-27 with conservative politeness
          * defaults rather than a live robots.txt check, which was outside that
          * session's network scope. The dataset is a static JSON document, so one
-         * request per fetch plus the per-source lock and cache TTL bound the load.
+         * request per fetch plus the per-source lock, `delay_ms` and the retry ceiling bound the load.
+         * (`cache.ttl` is a read cache in front of the catalog pages and never touches this path; C-3
+         * struck it from the five notes here that credited it with bounding fetch load.)
          *
          * The hash in the URL is a cache-busting token published in
          * https://gametora.com/data/manifests/umamusume.json ; it rotates when the
@@ -125,7 +127,7 @@ return [
          *   - Same response class: a static JSON document. No HTML, no JS, no
          *     crawler directives to observe, no crawl budget consumed.
          *   - Same politeness class: one request per fetch, and the per-source
-         *     lock, delay_ms and cache TTL already bound the load.
+         *     lock, delay_ms and the retry ceiling already bound the load.
          *   - Same cache-busting hash convention, so a stale hash fails loudly
          *     instead of serving old data.
          *
@@ -151,7 +153,7 @@ return [
          * `gametora-characters` above, re-used the way `gametora-race-catalog` re-used it.
          * Same host, same publisher, one static JSON document, no HTML, no JS, no crawler
          * directive to observe, no crawl budget consumed, and the politeness bounds already
-         * set by `delay_ms`, the per-source lock and the cache TTL.
+         * set by `delay_ms`, the per-source lock and the retry ceiling.
          *
          * One difference is recorded instead of glossed: this source issues **two** requests
          * per fetch, because the document URL is resolved through `manifest` first. That is
@@ -195,7 +197,7 @@ return [
          * `gametora-characters` on 2026-09-27, re-used the way `gametora-skills` re-used it. Same
          * host, same publisher, one static JSON document, no HTML, no JS, no crawler directive to
          * observe, no crawl budget consumed, and the politeness bounds already set by `delay_ms`,
-         * the per-source lock and the cache TTL.
+         * the per-source lock and the retry ceiling.
          *
          * **Resolves through the manifest, so it issues two requests per fetch** — the same
          * response to KI-24 that `gametora-skills` records. KI-24 measured that a pinned
@@ -253,7 +255,7 @@ return [
          * `gametora-characters` on 2026-09-27, re-used the way `gametora-skills` and
          * `gametora-character-profiles` re-used it. Same host, same publisher, two static JSON
          * documents, no HTML, no JS, no crawler directive to observe, no crawl budget consumed, and the
-         * politeness bounds already set by `delay_ms`, the per-source lock and the cache TTL. The
+         * politeness bounds already set by `delay_ms`, the per-source lock and the retry ceiling. The
          * robots.txt and rate-limit question AGENTS.md escalation 5 raises for this host is still
          * formally unanswered, exactly as those entries record it.
          *
