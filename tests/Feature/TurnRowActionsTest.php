@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Models\TurnEvent;
 
 /*
  * SCREEN_SPEC.md §7-2: `runs.turns.update` and `runs.turns.destroy` are implemented and
@@ -175,4 +176,81 @@ it('keeps the row open after a refused submit so the typed edits survive', funct
     expect($html)->toContain('name="speed"')
         ->and($html)->toContain('value="140"')
         ->and($entry->refresh()->speed)->toBe(100);
+});
+
+/*
+ * The two writes above reach the turn row; these three cover what the row's delete does and does
+ * not take with it.
+ *
+ * `turn_events` is keyed on `(training_run_id, turn)` and has no `turn_entry_id` foreign key, so a
+ * failure event outlives the turn row that produced it, and the run page reads its chips by keying
+ * the events on `turn` (show.blade.php:321-323). Deleting a failed turn therefore left the Failed
+ * chip behind to be inherited by whichever turn later took that number, and §7-2 recorded the same
+ * shape for the log line the chip prints.
+ *
+ * The scoped delete is the narrow one on purpose. `storePurchase` writes `event_type = Scenario`
+ * rows on the very same `(run, turn)` key (TrainingRunController:593-598), so an unfiltered delete
+ * would let "remove this turn" also destroy a shop purchase logged at that number. That is a
+ * different claim about different data, and the tests below pin the failure half only.
+ */
+
+function failedTurn(TrainingRun $run, int $turn): TurnEntry
+{
+    test()->post("/training-runs/{$run->id}/turns", [
+        'turn' => $turn,
+        'speed' => 120, 'stamina' => 110, 'power' => 130, 'guts' => 100, 'wit' => 95,
+        'sp' => 20, 'energy' => 70, 'mood' => 'GREAT', 'fans' => 1200,
+        'choice' => 'training-Speed', 'outcome' => 'Failure', 'penalty_kind' => 'energy',
+        'stage' => 'confirm', 'previewed' => '1',
+    ])->assertRedirect(route('runs.show', $run));
+
+    return TurnEntry::query()->where('training_run_id', $run->id)->where('turn', $turn)->sole();
+}
+
+it('deletes the failure event together with the turn that recorded it', function (): void {
+    $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
+    $entry = failedTurn($run, 5);
+
+    expect(TurnEvent::query()->where('training_run_id', $run->id)->where('turn', 5)->count())->toBe(1);
+
+    $this->delete(route('runs.turns.destroy', [$run, $entry]))->assertRedirect(route('runs.show', $run));
+
+    expect(TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 5)->count())->toBe(0)
+        ->and(TurnEvent::query()->where('training_run_id', $run->id)->where('turn', 5)->count())->toBe(0);
+});
+
+it('leaves another turn\'s event alone when one turn is deleted', function (): void {
+    $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
+    $doomed = failedTurn($run, 5);
+    $kept = failedTurn($run, 6);
+
+    $this->delete(route('runs.turns.destroy', [$run, $doomed]))->assertRedirect(route('runs.show', $run));
+
+    // The delete is by `(run, turn)`, so the row beside it has to survive untouched. Without this
+    // the fix above could pass on a delete that cleared the whole run's events.
+    expect(TurnEvent::query()->where('training_run_id', $run->id)->where('turn', 6)->count())->toBe(1)
+        ->and($kept->refresh()->turn)->toBe(6);
+});
+
+it('does not hand a re-logged turn the failed chip of the turn that used the number before', function (): void {
+    $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
+    $doomed = failedTurn($run, 5);
+
+    $this->delete(route('runs.turns.destroy', [$run, $doomed]))->assertRedirect(route('runs.show', $run));
+
+    // The same number, logged again as a success this time. The new turn writes no event, so the
+    // only way this page can come out clean is the store path clearing what the old turn left.
+    $this->post("/training-runs/{$run->id}/turns", [
+        'turn' => 5,
+        'speed' => 120, 'stamina' => 110, 'power' => 130, 'guts' => 100, 'wit' => 95,
+        'sp' => 20, 'energy' => 70, 'mood' => 'GREAT', 'fans' => 1200,
+        'choice' => 'training-Speed', 'outcome' => 'Success',
+        'stage' => 'confirm', 'previewed' => '1',
+    ])->assertRedirect(route('runs.show', $run));
+
+    $html = $this->get(route('runs.show', $run))->assertOk()->content();
+
+    expect(TurnEvent::query()->where('training_run_id', $run->id)->where('turn', 5)->count())->toBe(0)
+        ->and($html)->not->toContain('Penalty kind:')
+        ->and($html)->not->toContain('>Failed<');
 });
