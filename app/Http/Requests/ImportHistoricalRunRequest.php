@@ -9,6 +9,7 @@ use App\Models\TrainingRun;
 use App\Services\ScenarioCaps;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 /**
  * Validates a historical run being imported from the CSV the app itself exports (ADR-0017).
@@ -130,12 +131,61 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
      */
     public function messages(): array
     {
-        return [
+        $messages = [
             'turns.required' => 'That file has no usable turn rows. The first line must be the header: '
                 .implode(', ', self::HEADERS).'.',
             'turns.*.turn.distinct' => 'Two rows claim the same turn number. Turn numbers are unique within a run.',
             'csv.required' => 'Paste the run\'s CSV or choose the file to import.',
         ];
+
+        /*
+         * KI-46. Laravel's default text puts the nested request key in the sentence, which is how a Trainer
+         * read `The turns.0.speed field must be between 0 and 1400.` `attributes()` cannot help: a wildcard
+         * key maps to one string, so renaming collapses every row onto the same word and the row identity
+         * goes with it. These carry a `:where` token that `withValidator()` replaces per row, and they are
+         * phrased to complete the sentence the form already prints in front of them.
+         */
+        foreach (self::STATS as $stat) {
+            $messages["turns.*.{$stat}.between"] = ':where must be between :min and :max.';
+            $messages["turns.*.{$stat}.integer"] = ':where has a '.$stat.' that is not a whole number.';
+            $messages["turns.*.{$stat}.required"] = ':where has no '.$stat.'.';
+        }
+
+        $messages['turns.*.turn.integer'] = ':where must be a turn number.';
+        $messages['turns.*.turn.required'] = ':where has no turn number.';
+
+        return $messages;
+    }
+
+    /**
+     * Replace each `:where` with the row it belongs to: the turn number the Trainer wrote, or the position
+     * in the file when that is the cell that is broken. KI-46.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        /** @var list<array<string, string|null>> $rows */
+        $rows = (array) $this->input('turns', []);
+
+        $validator->after(function (Validator $validator) use ($rows): void {
+            $errors = $validator->errors();
+
+            foreach ($errors->messages() as $key => $messages) {
+                if (preg_match('/^turns\.(\d+)\.(?:'.implode('|', self::STATS).'|turn)$/', $key, $m) !== 1) {
+                    continue;
+                }
+
+                $stated = $rows[(int) $m[1]]['turn'] ?? null;
+                $where = is_string($stated) && ctype_digit($stated)
+                    ? 'turn '.$stated
+                    : 'row '.((int) $m[1] + 1);
+
+                $errors->forget($key);
+
+                foreach ($messages as $message) {
+                    $errors->add($key, str_replace(':where', $where, $message));
+                }
+            }
+        });
     }
 
     /**
