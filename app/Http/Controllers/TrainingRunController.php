@@ -154,7 +154,7 @@ class TrainingRunController extends Controller
     }
 
     /**
-     * Seed a new run's `Suggested` skills from the card it was started on (KI-33).
+     * Seed a new run's `Starting` skills (the `Suggested` status) from the card it was started on (KI-33).
      *
      * A run that names no card has nothing to seed from, and a card whose lists are null was
      * published without them — `array` does not coerce a null column to `[]`, so both cases return
@@ -166,7 +166,7 @@ class TrainingRunController extends Controller
      * and a skill the source has not released on `[Global]` is dropped rather than offered.
      *
      * Creation only, never a backfill: a run already in progress holds Trainer-entered rows, and
-     * deriving `Suggested` into it overwrites memory with plan, which D-270 and Planner Rule 4
+     * deriving `Starting` into it overwrites memory with plan, which D-270 and Planner Rule 4
      * both forbid. `TrainingRunTest` pins that against a second creation from the same card.
      *
      * `setSkillStatus` upserts through `syncWithoutDetaching`, so seeding is idempotent and a skill

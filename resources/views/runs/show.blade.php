@@ -447,8 +447,13 @@
         $groups = ['Suggested', 'Acquired', 'Skipped'];
     @endphp
     @foreach ($groups as $group)
-        @php $inGroup = $run->skills->filter(fn ($skill) => $skill->pivot->status === $group); @endphp
-        <h3 class="mt-3 text-sm font-semibold text-ink-muted">{{ $group }}</h3>
+        @php
+            $inGroup = $run->skills->filter(fn ($skill) => $skill->pivot->status === $group);
+            // The status value stays `Suggested` in the database; the label reads `Starting`
+            // for the KI-33 seeded skills, and `Suggested` is reserved for hints (R-6, O-11).
+            $groupLabel = \App\Enums\SkillAcquisition::tryFrom($group)?->label() ?? $group;
+        @endphp
+        <h3 class="mt-3 text-sm font-semibold text-ink-muted">{{ $groupLabel }}</h3>
         @if ($inGroup->isEmpty())
             <p class="text-sm text-ink-muted">None.</p>
         @else

@@ -29,7 +29,7 @@ return [
     ],
 
     'skill_acquisition' => [
-        'Suggested' => 'Suggested',
+        'Suggested' => 'Starting',
         'Acquired' => 'Acquired',
         'Skipped' => 'Skipped',
     ],
