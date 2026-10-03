@@ -271,11 +271,12 @@ it('offers the run screen picker only client-named Global skills, and states the
         // The XPath is scoped to `skills[0][skill_id]`, so the three later rows cannot inflate this.
         ->and($options)->toHaveCount(10)
         ->and(implode(' | ', $options))->not->toMatch('/Gluttonous Ruler|Raise My Soul|Check/')
-        // The ruling from conflict row 16 reaches the screen as an absence the Trainer can see.
-        // Whitespace is folded because Blade's own line wrapping sits inside the sentence, and a
-        // check that failed on indentation would be testing the template's formatting, not its copy.
+        // R-6: the hint-level ladder is now recorded, so the screen names it instead of stating
+        // that no source settles it. Whitespace is folded because Blade's own line wrapping sits
+        // inside the sentence, and a check that failed on indentation would be testing the
+        // template's formatting, not its copy.
         ->and((string) preg_replace('/\s+/', ' ', $html))
-        ->toContain('hint levels are not shown: no source in this repository settles the per-level reduction');
+        ->toContain('Hint-level discounts follow the ladder recorded in docs/research-scratch/SKILLS-MECHANICS.md §2.4: 10 / 20 / 30 / 35 / 40 percent at Lv1 through Lv Max.');
 
     // What the fixture's surviving translation is bought for: the run screen renders the client string for
     // every row Global has, and none of these eight renderings appear anywhere on it. Decoded first — a
