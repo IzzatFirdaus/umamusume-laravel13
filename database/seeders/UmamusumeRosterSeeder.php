@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Actions\PromoteMatchedRecord;
-use App\Enums\CandidateStatus;
 use App\Enums\ReleaseStatus;
 use App\Models\MatchCandidate;
 use App\Services\DataPipeline\CrossReferenceMatcher;
@@ -76,15 +75,20 @@ class UmamusumeRosterSeeder extends Seeder
             $match = $matcher->match($record['name']);
 
             if (! $this->inScope($record)) {
-                MatchCandidate::create([
+                // The triple below is the unique index `2026_10_01_124051` enforces, so it is the identity
+                // this row is keyed by. Creating instead of upserting meant a second `db:seed` collided with
+                // its own first run, aborted here, and left the three seeders after this one unrun (KI-56).
+                // `status` is deliberately absent: a re-run must not reopen a candidate the Trainer already
+                // decided, and the column's own default files a new one as Pending.
+                MatchCandidate::updateOrCreate([
                     'source_key' => self::SOURCE_KEY,
                     'external_ref' => $record['external_ref'] ?? null,
+                    'proposed_match_key' => $matcher->matchKey($record['name']),
+                ], [
                     'proposed_name' => $record['name'],
                     'proposed_name_ja' => $record['name_ja'] ?? null,
-                    'proposed_match_key' => $matcher->matchKey($record['name']),
                     'suggested_umamusume_id' => $match['umamusume']?->id,
                     'match_tier' => $match['tier']->value,
-                    'status' => CandidateStatus::Pending->value,
                     'payload' => [...$record, 'url' => $config['url']],
                     'created_by_fetch_at' => now(),
                 ]);
