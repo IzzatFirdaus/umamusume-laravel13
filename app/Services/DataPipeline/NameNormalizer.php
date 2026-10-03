@@ -18,6 +18,15 @@ final class NameNormalizer
      * columns that have no stored normalized key. Two literal lists is how a two-word
      * card epithet and a two-word alias stopped matching their own search: the term was
      * spaceless, the column was not. Change this list; never add a second one.
+     *
+     * This list is the whole of the fold, and that is its ceiling (KI-40). NFKD does not
+     * decompose the Latin ligatures (`æ`, `œ`) or the stroked letters (`ø`, `ð`, `þ`, `đ`),
+     * and none of them is listed here, so they stay in the key: `Stræight` never matches
+     * `Straights`, and the Trainer sees "no such trainee" rather than a normalizer gap.
+     * Measured on the data today, the ae ligature only occurs in columns this tool does not
+     * store and the others occur zero times, so no Global name folds wrong yet.
+     * `tests/Unit/NameNormalizerTest.php` pins those pairs so a source that starts publishing
+     * one is a test failure. Lifting the ceiling means a transliteration step, not a longer list.
      */
     public const FOLDED_CHARACTERS = ['・', '･', '-', ' ', '　'];
 
