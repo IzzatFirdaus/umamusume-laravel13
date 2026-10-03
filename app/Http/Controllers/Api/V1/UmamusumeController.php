@@ -31,6 +31,7 @@ class UmamusumeController extends Controller
             ->when($statusValue !== null, fn ($q) => $q->where('release_status', $statusValue))
             ->when($searchKey !== null, fn ($q) => $q->where('match_key', 'like', "%{$searchKey}%"))
             ->orderBy('name')
+            ->orderBy('id')
             ->paginate($pageSize);
 
         return response()->json([

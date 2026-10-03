@@ -87,6 +87,7 @@ class TrainingRunController extends Controller
                 ->orderBy('global_release_date')
                 ->orderBy('card_id')])
             ->orderBy('name')
+            ->orderBy('id')
             ->get();
 
         $roster = $trainees
@@ -298,7 +299,7 @@ class TrainingRunController extends Controller
             // Without the second half this select would offer `Gluttonous Ruler` — a real English string
             // for a JP-only evolved skill — as if a Global Trainer could learn it. `sp_cost` comes along
             // because the option label states it (FR-D-1).
-            'skills' => Skill::query()->availableOnGlobal()->orderBy('name')->get(['id', 'name', 'sp_cost']),
+            'skills' => Skill::query()->availableOnGlobal()->orderBy('name')->orderBy('id')->get(['id', 'name', 'sp_cost']),
             // The deck picker offers the `[Global]` releases, which is the audience every other picker
             // here already serves (the 2026-09-27 Global-only ruling). The other ~300 records in the
             // catalogue are JP-only and a Global Trainer cannot own them. A card this run already uses
@@ -866,6 +867,7 @@ class TrainingRunController extends Controller
             'umamusumes' => Umamusume::query()
                 ->where('release_status', ReleaseStatus::GlobalReleased->value)
                 ->orderBy('name')
+                ->orderBy('id')
                 ->get(['id', 'name', 'name_ja']),
             'scenarios' => $this->scenarioLabels(),
         ];

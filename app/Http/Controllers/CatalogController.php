@@ -298,7 +298,9 @@ class CatalogController extends Controller
         $ids = Cache::remember(
             "{$base}:p{$page}:{$pageSize}",
             $ttl,
-            fn (): array => $query->orderBy('name')->forPage($page, $pageSize)->pluck('id')->all(),
+            // The `orderBy('id')` is what makes `forPage()` repeatable: a name tie left unresolved can move
+            // a trainee across a page boundary between two loads of the same data (KI-41).
+            fn (): array => $query->orderBy('name')->orderBy('id')->forPage($page, $pageSize)->pluck('id')->all(),
         );
 
         $total = Cache::remember("{$base}:count", $ttl, fn () => $query->count());
@@ -310,6 +312,7 @@ class CatalogController extends Controller
             ->with(['cards' => $this->cardScope($showUnconfirmed)])
             ->whereIn('id', $ids)
             ->orderBy('name')
+            ->orderBy('id')
             ->get();
 
         return [$items, $total];
