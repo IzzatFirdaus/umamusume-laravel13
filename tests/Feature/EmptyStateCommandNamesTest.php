@@ -82,7 +82,7 @@ it('names only a declared source in every command string the views print', funct
 });
 
 it('names only a declared source in the README', function (): void {
-    $readme = (string) file_get_contents(base_path('README.md'));
+    $readme = str_replace("\r\n", "\n", (string) file_get_contents(base_path('README.md')));
 
     expect(preg_match_all('/\b(gametora-[a-z0-9-]+)\b/', $readme, $hits))
         ->toBeGreaterThan(0, 'the README names at least one source, so this guard has something to read');
@@ -93,6 +93,38 @@ it('names only a declared source in the README', function (): void {
     )));
 
     expect($offenders)->toBe([], 'the README names a source config/uma.php does not declare');
+});
+
+it('backs any source count the README prints with the config that declares them', function (): void {
+    $readme = str_replace("\r\n", "\n", (string) file_get_contents(base_path('README.md')));
+
+    // §7-11's defect was a count in prose that config had outgrown. The fix that lasts is not
+    // deleting the number but refusing a wrong one: a file that only points at `config/uma.php`
+    // passes here, and a file that states a figure has to mean it.
+    //
+    // Words as well as digits, because the sentence in the README is "Seven sources are declared".
+    // A digit-only pattern would pass this guard without ever reading the number it claims to check.
+    $matched = preg_match(
+        '/\b(\d{1,3}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve) (?:[\w-]+ )*?sources? (?:are|is) declared/i',
+        $readme,
+        $stated,
+    );
+
+    if ($matched !== 1) {
+        expect(true)->toBeTrue();
+
+        return;
+    }
+
+    $words = ['one' => 1, 'two' => 2, 'three' => 3, 'four' => 4, 'five' => 5, 'six' => 6,
+        'seven' => 7, 'eight' => 8, 'nine' => 9, 'ten' => 10, 'eleven' => 11, 'twelve' => 12];
+    $statedCount = is_numeric($stated[1])
+        ? (int) $stated[1]
+        : $words[strtolower($stated[1])];
+    $declaredCount = count(declaredSources());
+
+    expect($statedCount)
+        ->toBe($declaredCount, "the README states {$stated[1]} declared sources; config/uma.php declares {$declaredCount}");
 });
 
 it('lists no route in the README Web surface table that the app does not have', function (): void {
