@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Services\DataPipeline\PipelineRunner;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -45,6 +46,7 @@ class SourceDocumentSeeder extends Seeder
     {
         $runner = app(PipelineRunner::class);
         $sources = config('uma.sources');
+        $failed = [];
 
         if (! is_array($sources)) {
             return;
@@ -87,6 +89,8 @@ class SourceDocumentSeeder extends Seeder
                 );
                 $this->command?->warn(sprintf('  %s: FAILED (%s) — skipped', $sourceKey, $e->getMessage()));
 
+                $failed[$sourceKey] = $e->getMessage();
+
                 continue;
             }
 
@@ -98,6 +102,26 @@ class SourceDocumentSeeder extends Seeder
                 $counts['skipped'],
                 $counts['review'],
             ));
+        }
+
+        /*
+         * F-2: the continue above keeps the other sources, and this keeps the truth. A seeder that swallows
+         * an exception exits 0, so `migrate --seed` reported success over a catalogue that is missing a
+         * source, while `uma:fetch` returns Command::FAILURE for the same event. The names and reasons come
+         * out here because the log line is not something the Trainer reads.
+         *
+         * Everything after this class in `DatabaseSeeder` is skipped when it throws. That is the point, and
+         * it is recoverable: `php artisan uma:reparse <source>` refills one source, and `migrate --seed` is
+         * re-runnable since KI-56.
+         */
+        if ($failed !== []) {
+            $report = [];
+
+            foreach ($failed as $sourceKey => $reason) {
+                $report[] = "{$sourceKey}: {$reason}";
+            }
+
+            throw new RuntimeException('Seeding left the catalogue incomplete. Sources that failed: '.implode('; ', $report));
         }
     }
 }
