@@ -321,6 +321,11 @@
         $failures = $run->turnEvents
             ->filter(fn ($event): bool => $event->event_type === \App\Enums\TurnEventType::Failure)
             ->keyBy('turn');
+
+        // Which row is open for correction, named by the link that was clicked. A query parameter
+        // rather than a toggle because this page ships no script (ADR-0007), and the primary key
+        // rather than the turn number because two runs may both have a turn 2.
+        $editing = (int) request('edit_turn');
     @endphp
     @if ($run->turnEntries->isEmpty())
         <p class="mt-2 text-sm text-ink-muted">No turns logged yet. Add the first one below.</p>
@@ -336,6 +341,7 @@
                         <th class="py-1 pr-3">Turn</th><th class="pr-3">Speed</th><th class="pr-3">Stamina</th>
                         <th class="pr-3">Power</th><th class="pr-3">Guts</th><th class="pr-3">Wit</th>
                         <th class="pr-3">SP</th><th class="pr-3">Condition</th><th class="pr-3">Mood</th>
+                        <th class="pr-3">Turn actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -364,7 +370,62 @@
                             <td class="pr-3">{{ $entry->sp ?? '' }}</td>
                             <td class="pr-3">{{ $entry->condition }}</td>
                             <td class="pr-3"><x-mood-pill :tier="$entry->mood" unrecorded="not recorded" /></td>
+                            <td class="pr-3 align-top">
+                                @if ($editing === $entry->id)
+                                    <a href="{{ request()->fullUrlWithQuery(['edit_turn' => null]) }}"
+                                       class="inline-flex min-h-11 items-center underline">Close turn {{ $entry->turn }}</a>
+                                @else
+                                    {{-- §7-2: the route existed, the control did not. The link is the
+                                         only write-free step, and the two destructive submissions below
+                                         it are reachable only on the row a Trainer just asked for. --}}
+                                    <a href="{{ request()->fullUrlWithQuery(['edit_turn' => $entry->id]) }}"
+                                       class="inline-flex min-h-11 items-center underline">Edit turn {{ $entry->turn }}</a>
+                                @endif
+                            </td>
                         </tr>
+                        @if ($editing === $entry->id)
+                            {{-- `StoreTurnEntryRequest` is the same boundary a create passes, so the
+                                 edit inherits the caps, the mood set and the per-run turn uniqueness
+                                 (which `->ignore($turn)` lets the row keep its own number). It is not
+                                 given `stage`, `choice` or `outcome`: the update path writes readings
+                                 only, and an outcome has no home in `turn_entries` to be corrected in.
+                                 Field names are shared with the hand-correction form below, so a
+                                 refused submit refills both; the uniqueness rule is what stops the
+                                 second one from writing a duplicate turn number. --}}
+                            <tr>
+                                <td colspan="10" class="px-1 py-2">
+                                    <form method="POST" action="{{ route('runs.turns.update', [$run, $entry]) }}"
+                                          class="grid grid-cols-2 gap-3 rounded-md border border-rule bg-raised p-4 text-sm md:grid-cols-4">
+                                        @csrf
+                                        @method('PUT')
+                                        <label class="flex flex-col gap-1"><span>Turn *</span><input type="number" name="turn" min="1" required value="{{ old('turn', $entry->turn) }}" class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"></label>
+                                        @foreach (['speed', 'stamina', 'power', 'guts', 'wit'] as $stat)
+                                            <label class="flex flex-col gap-1"><span>{{ ucfirst($stat) }} *</span><input type="number" name="{{ $stat }}" min="0" max="{{ $statCaps[ucfirst($stat)] }}" required value="{{ old($stat, $entry->{$stat}) }}" class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"></label>
+                                        @endforeach
+                                        <label class="flex flex-col gap-1"><span>SP</span><input type="number" name="sp" min="0" value="{{ old('sp', $entry->sp) }}" class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"></label>
+                                        <label class="flex flex-col gap-1"><span>Condition</span><input type="text" name="condition" maxlength="255" value="{{ old('condition', $entry->condition) }}" class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"></label>
+                                        <label class="flex flex-col gap-1"><span>Energy</span><input type="number" name="energy" min="0" max="100" value="{{ old('energy', $entry->energy) }}" class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"></label>
+                                        <label class="flex flex-col gap-1"><span>Fans</span><input type="number" name="fans" min="0" value="{{ old('fans', $entry->fans) }}" class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"></label>
+                                        <label class="flex flex-col gap-1"><span>Mood</span>
+                                            <select name="mood" class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                                                <option value="">not recorded</option>
+                                                @foreach (\App\Enums\MoodTier::cases() as $tier)
+                                                    <option value="{{ $tier->value }}" @selected((string) old('mood', $entry->mood?->value) === $tier->value)>{{ $tier->value }}</option>
+                                                @endforeach
+                                            </select>
+                                        </label>
+                                        <button type="submit" class="self-end enamel min-h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Save turn</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('runs.turns.destroy', [$run, $entry]) }}"
+                                          class="mt-2 flex max-w-3xl flex-wrap items-center gap-3 text-sm">
+                                        @csrf
+                                        @method('DELETE')
+                                        <span class="text-ink-muted">Removes turn {{ $entry->turn }} and its readings. The row above it stays.</span>
+                                        <button type="submit" class="min-h-11 rounded-full border-2 border-risk px-3 py-1.5 font-semibold text-risk">Delete turn {{ $entry->turn }}</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endif
                     @endforeach
                 </tbody>
             </table>
