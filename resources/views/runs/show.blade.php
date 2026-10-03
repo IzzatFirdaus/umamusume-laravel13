@@ -43,8 +43,8 @@
             </span>
         </h1>
         <div class="flex gap-3 text-sm">
-            <a href="{{ route('runs.export', ['run' => $run, 'format' => 'csv']) }}" class="hover:underline">Export CSV</a>
-            <a href="{{ route('runs.export', ['run' => $run, 'format' => 'json']) }}" class="hover:underline">Export JSON</a>
+            <a href="{{ route('runs.export', ['run' => $run, 'format' => 'csv']) }}" class="inline-flex min-h-11 items-center hover:underline">Export CSV</a>
+            <a href="{{ route('runs.export', ['run' => $run, 'format' => 'json']) }}" class="inline-flex min-h-11 items-center hover:underline">Export JSON</a>
         </div>
         {{-- Provenance stated rather than implied (ADR-0017): a run that arrived by file is not the
              Trainer's own typing, so the gaps in it belong to the sheet rather than to their memory.
@@ -407,7 +407,7 @@
          door for correcting a mistyped turn or pasting a column from a spreadsheet, and the
          summary says so rather than dressing it up as an alternative interface. --}}
     <details class="mt-6 max-w-3xl">
-        <summary class="cursor-pointer text-sm font-semibold text-ink-muted hover:text-ink">
+        <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-muted hover:text-ink">
             Correct a turn by hand
         </summary>
         <p class="mt-2 text-sm text-ink-muted">
@@ -469,7 +469,7 @@
         shown: no source in this repository settles the per-level reduction.
         {{-- G-SK-13: this select lists every Global row, which is the reason Screen D exists. Linking out
              is the honest statement that the list is too long to scan, and it costs no new mechanism. --}}
-            <a href="{{ route('skills.index') }}" class="underline">Search the skill catalog</a>
+            <a href="{{ route('skills.index') }}" class="inline-flex min-h-11 items-center underline">Search the skill catalog</a>
             to narrow that list before choosing here.
     </p>
 
@@ -580,10 +580,24 @@
         <button type="submit" class="enamel h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Save skill status</button>
     </form>
 
-    <form method="POST" action="{{ route('runs.destroy', $run) }}" class="mt-10" onsubmit="return confirm('Delete this run and all its turns?');">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="rounded-full border-2 border-risk px-3 py-1.5 text-sm font-semibold text-risk">Delete run</button>
-    </form>
     </section>
+
+    {{-- Confirmation is a disclosure, not a script: ADR-0007 records the no-script posture, and
+         native confirm() was the route's last inline handler. The summary is the prompt; the
+         form inside submits the DELETE only after the Trainer opens it. It sits outside the
+         turn-log section so the scrolling region keeps its one disclosure, the escape hatch
+         (RunViewFrameTest pins the count). --}}
+    <details class="mt-10">
+        <summary class="flex min-h-11 cursor-pointer items-center rounded-full border-2 border-risk px-3 text-sm font-semibold text-risk">
+            Delete run
+        </summary>
+        <p class="mt-2 text-sm text-ink-muted">
+            This removes the run and every turn logged for it. The action is permanent.
+        </p>
+        <form method="POST" action="{{ route('runs.destroy', $run) }}" class="mt-2">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="rounded-full border-2 border-risk px-3 py-1.5 text-sm font-semibold text-risk">Delete this run</button>
+        </form>
+    </details>
 </x-layout>
