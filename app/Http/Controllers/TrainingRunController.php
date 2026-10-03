@@ -356,14 +356,26 @@ class TrainingRunController extends Controller
     }
 
     /**
-     * The five disciplines plus the two free-turn actions.
+     * The five disciplines plus the two actions that train no stat.
      *
-     * Labels are the stat words the matrix already uses, not composed client copy: the
-     * corpus evidences `Rest` and its +30 (UMAMUSUME_REFERENCE.md §1.1.5) and Wit's zero
-     * Energy cost (§1.1.1), and nothing in this repository records an English string for
-     * the training buttons, so a `Speed Work` label would be an invented client string
-     * promoted into a Trainer-facing select (D-20). The mood row keeps the showcase's
-     * treatment for exactly that gap: neutral words, and the gap shown (D-54).
+     * Labels are the stat words the matrix already uses, not composed client copy: the corpus
+     * evidences Wit's zero Energy cost (UMAMUSUME_REFERENCE.md §1.1.1), and no client string for
+     * the five facility buttons has been read, so a `Speed Work` label would be an invented name
+     * promoted into a Trainer-facing select (D-20).
+     *
+     * `Rest` and `Recreation` are the two that are not inventions. Both are printed on the
+     * six-button action row in three July 2026 client captures under
+     * `docs/research-scratch/screenshot-notes/`, and `docs/scenarios/01-ura-finale.md:54` already
+     * spells the second one `Recreation`. The flag that used to sit on that row is off.
+     *
+     * Neither detail line carries a number. The published rest and outing values are probabilities,
+     * and §2.2 keeps those out of application code; the rest *tier* is worse, because this
+     * repository's own two sources disagree on it. §1.1.5 of `docs/UMAMUSUME_REFERENCE.md` has
+     * "+30 Energy per standard rest" against GameWith 2026-09-25, while §2.1 of
+     * `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` measures the modal rest at +50 with
+     * +30 as the under-slept failure tier, and a post-rework Global table agrees that 50 is the
+     * common case. A Trainer-facing number picked out of that would be a guess wearing the tool's
+     * voice, so the line says what all four sources agree on instead.
      *
      * @return list<array<string, mixed>>
      */
@@ -384,13 +396,12 @@ class TrainingRunController extends Controller
         $choices[] = [
             'key' => 'rest',
             'label' => 'Rest',
-            'detail' => 'Returns about +30 Energy, and a rest can backfire into a stayed-up-late penalty.',
+            'detail' => 'Refills Energy. A poor rest refills less and can leave a stayed-up-late penalty.',
         ];
         $choices[] = [
             'key' => 'mood',
-            'label' => 'Mood adjustment',
-            'detail' => 'Raises Mood. The client label is not verified.',
-            'unverified' => true,
+            'label' => 'Recreation',
+            'detail' => 'Lifts Mood, and the outing may return a little Energy as well.',
         ];
 
         return $choices;
