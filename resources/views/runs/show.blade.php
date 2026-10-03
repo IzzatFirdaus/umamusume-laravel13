@@ -277,6 +277,30 @@
         @error('scenario')<p class="w-full text-risk">{{ $message }}</p>@enderror
     </form>
 
+    {{-- §7-4: both forms above carried `status` as a hidden input whose only job was to satisfy
+         the shared request's `required` rule, so a run could be created in any of the three
+         states and never moved afterwards, and retiring a finished run meant editing the
+         database by hand. The server already refused anything outside RunStatus
+         (`StoreTrainingRunRequest:52`), so what was missing was the control rather than the rule.
+         The carry-throughs are the ones those forms already send: this request writes every field
+         it is handed, so a status form that omitted them would blank them. --}}
+    <form method="POST" action="{{ route('runs.update', $run) }}" class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-4 text-sm">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="umamusume_id" value="{{ $run->umamusume_id }}">
+        <input type="hidden" name="scenario" value="{{ $run->scenario }}">
+        <label class="flex flex-col gap-1">
+            <span class="font-medium text-ink">Status</span>
+            <select name="status" class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                @foreach (\App\Enums\RunStatus::cases() as $state)
+                    <option value="{{ $state->value }}" @selected($run->status === $state)>{{ $state->value }}</option>
+                @endforeach
+            </select>
+        </label>
+        <button type="submit" class="min-h-11 rounded-full border-2 border-rule px-4 py-2 font-bold text-ink-strong">Change status</button>
+        @error('status')<p class="w-full text-risk">{{ $message }}</p>@enderror
+    </form>
+
     @if ($run->composesGradeObjectives())
         {{-- Its own form, because its own verb: this one says which deadline the Trainer
              is working to, and a button reading "Change scenario" would promise something

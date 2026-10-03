@@ -66,6 +66,19 @@ function goalsRun(): TrainingRun
     return $run;
 }
 
+/**
+ * How many elements inside the Goals landmark print exactly this status word.
+ *
+ * Scoped rather than page-wide, because the count stopped being about the panel: the run page now
+ * carries a status select whose options are literally Active, Completed and Retired
+ * (`runs/show.blade.php`, §7-4), and a logged failure prints a "Failed" chip. A badge and an
+ * option that happen to say the same word are different things.
+ */
+function goalsStatusLabel(DOMXPath $xpath, string $label): int
+{
+    return $xpath->query('//*[@aria-label="Goals"]//*[normalize-space(text())="'.$label.'"]')->length;
+}
+
 it('renders the three cleared and one active goals from the run 7 shape', function (): void {
     $run = goalsRun();
 
@@ -77,9 +90,9 @@ it('renders the three cleared and one active goals from the run 7 shape', functi
     @$dom->loadHTML($html);
     $xpath = new DOMXPath($dom);
 
-    $cleared = $xpath->query('//*[normalize-space(text())="Cleared"]')->length;
-    $active = $xpath->query('//*[normalize-space(text())="Active"]')->length;
-    $failed = $xpath->query('//*[normalize-space(text())="Failed"]')->length;
+    $cleared = goalsStatusLabel($xpath, 'Cleared');
+    $active = goalsStatusLabel($xpath, 'Active');
+    $failed = goalsStatusLabel($xpath, 'Failed');
 
     expect($cleared)->toBe(3)
         ->and($active)->toBe(1)
@@ -158,9 +171,9 @@ it('names a skipped mandatory goal as Failed and an unentered one as Active', fu
     @$dom->loadHTML($html);
     $xpath = new DOMXPath($dom);
 
-    expect($xpath->query('//*[normalize-space(text())="Failed"]')->length)->toBe(1)
-        ->and($xpath->query('//*[normalize-space(text())="Active"]')->length)->toBe(1)
-        ->and($xpath->query('//*[normalize-space(text())="Cleared"]')->length)->toBe(0);
+    expect(goalsStatusLabel($xpath, 'Failed'))->toBe(1)
+        ->and(goalsStatusLabel($xpath, 'Active'))->toBe(1)
+        ->and(goalsStatusLabel($xpath, 'Cleared'))->toBe(0);
 });
 
 it('omits the Goals section when the run has no mandatory or special race entries', function (): void {
