@@ -41,17 +41,17 @@
         Skip to content
     </a>
     <nav class="border-b border-rule bg-panel">
-        <div class="mx-auto flex max-w-5xl gap-6 px-4 py-3 text-sm font-medium">
-            <a href="{{ route('catalog.index') }}" class="hover:underline">Catalog</a>
+        <div class="mx-auto flex max-w-5xl gap-3 px-4 py-3 text-sm font-medium lg:gap-6">
+            <a href="{{ route('catalog.index') }}" class="inline-flex min-h-11 items-center hover:underline">Catalog</a>
             {{-- Screen D sits beside the catalog because it is the same kind of thing: reference data the
                  engine wrote, read-only here. A route nobody can reach is a defect, and this is the one
                  entry point that does not depend on being inside a run. --}}
-            <a href="{{ route('skills.index') }}" class="hover:underline">Skills</a>
+            <a href="{{ route('skills.index') }}" class="inline-flex min-h-11 items-center hover:underline">Skills</a>
             {{-- The card catalog sits beside Skills for the same reason: reference data the engine wrote,
                  read-only here, reachable without being inside a run. --}}
-            <a href="{{ route('support-cards.index') }}" class="hover:underline">Support cards</a>
-            <a href="{{ route('runs.index') }}" class="hover:underline">Training runs</a>
-            <a href="{{ route('review.index') }}" class="hover:underline">Review</a>
+            <a href="{{ route('support-cards.index') }}" class="inline-flex min-h-11 items-center hover:underline">Support cards</a>
+            <a href="{{ route('runs.index') }}" class="inline-flex min-h-11 items-center hover:underline">Training runs</a>
+            <a href="{{ route('review.index') }}" class="inline-flex min-h-11 items-center hover:underline">Review</a>
         </div>
     </nav>
 
