@@ -516,7 +516,7 @@ class TrainingRunController extends Controller
     {
         $run->update($request->validated());
 
-        return redirect()->route('runs.show', $run);
+        return redirect()->route('runs.show', $run)->with('status', 'Run updated.');
     }
 
     /**
@@ -672,7 +672,8 @@ class TrainingRunController extends Controller
             }
         });
 
-        return redirect()->route('runs.show', $run);
+        return redirect()->route('runs.show', $run)
+            ->with('status', 'Turn '.$validated['turn'].' logged.');
     }
 
     /**
@@ -700,7 +701,7 @@ class TrainingRunController extends Controller
 
         $turn->update($request->validated());
 
-        return redirect()->route('runs.show', $run);
+        return redirect()->route('runs.show', $run)->with('status', 'Turn '.$turn->turn.' updated.');
     }
 
     public function destroyTurn(TrainingRun $run, TurnEntry $turn): RedirectResponse
@@ -709,7 +710,7 @@ class TrainingRunController extends Controller
 
         $turn->delete();
 
-        return redirect()->route('runs.show', $run);
+        return redirect()->route('runs.show', $run)->with('status', 'Turn '.$turn->turn.' removed.');
     }
 
     /**
@@ -729,7 +730,7 @@ class TrainingRunController extends Controller
             }
         }
 
-        return redirect()->route('runs.show', $run);
+        return redirect()->route('runs.show', $run)->with('status', 'Skill status saved.');
     }
 
     /**
@@ -756,7 +757,7 @@ class TrainingRunController extends Controller
             }
         });
 
-        return redirect()->route('runs.show', $run);
+        return redirect()->route('runs.show', $run)->with('status', 'Deck saved.');
     }
 
     /**

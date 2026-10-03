@@ -26,7 +26,16 @@
      * recycled 1200 that contradicted the rule the server applies.
      */
     $statCaps = \App\Services\ScenarioCaps::forRun($run);
-@endphp
+    @endphp
+
+    @if (session('status'))
+        {{-- One status region for every save that lands back on this page (R-5): the run-page
+             redirects all return here, so a single banner names what was saved. A live region
+             rather than an alert, because a successful save is not an emergency. --}}
+        <p class="mb-4 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-strong" role="status">
+            {{ session('status') }}
+        </p>
+    @endif
 
 <div class="flex items-baseline justify-between">
         <h1 class="text-2xl font-semibold text-ink-strong">
