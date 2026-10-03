@@ -4153,6 +4153,25 @@ SCREENSHOT-MANIFEST
 Triage of `docs/game-screenshots/` for scenario and screen-type coverage. Generated 2026-09-27.
 Method and per-screen visual detail live in `RAW-FINDINGS.md`; this file is the coverage index.
 
+### Preamble: what the 44 representatives are
+
+Added 2026-10-03 from the Phase B pass, on the owner's ruling. This qualifies every count below it.
+
+- The 44 full-desktop figures are **cluster representatives** drawn from `clusters.json`, not 44 distinct screens. A representative is one frame chosen to stand for a cluster; the cluster's other members are never individually accounted for here.
+- At least one cluster mixes screen types. The cluster whose `rep` is `2026-07-18 001811.png` holds 58 members, and frame `2026-07-17 233324` inside it is a Learn (skill acquisition) screen while the representative is a Training HUD. The rolling-window clustering chains frames that share HUD chrome, so one cluster can absorb several distinct screens and this index then reports one screen type where the capture session visited more than one.
+- **Future expansions of this manifest must select by frame, not by cluster representative.** Reading the 44 as 44 distinct surfaces overstates the dedupe, and any coverage claim built on that reading inherits the overstatement.
+- Derivation and the corrected funnel: `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md` item 13, with item 2 for the frame counts.
+
+### Standing note: the corpus spans two trains
+
+Added 2026-10-03 from the Phase B pass, widened the same day. Three noted frames come from the `2026-07-14` capture session.
+
+- `2026-07-14 025344` shows the trainee "Curren Chan".
+- `2026-07-14 194819` and `2026-07-14 202142` each carry a full stat band with denominators, and their notes name no trainee, so which run they belong to is not determinable from the notes.
+- Every noted frame from `2026-07-17` and `2026-07-18` shows "[Rosy Dreams] Rice Shower".
+
+**Any stat-curve, cap, or growth-rate read from this section is conditional on excluding the entire `2026-07-14` capture session, whose `025344` frame is Curren Chan and whose `194819` and `202142` frames are stat-bearing and unattributed.** The exclusion has not been performed; it is recorded as a hazard to be carried until a pass resolves which run each figure belongs to. An earlier revision of this note named only `025344`, which left two stat-bearing frames from the same session in scope.
+
 ### How this was produced
 
 Three passes, none of which reads all 1,160 frames:
@@ -4174,6 +4193,8 @@ Three passes, none of which reads all 1,160 frames:
 | Portrait snips (< 780 px) | 538 distinct |
 | Largest single cluster | 58 frames (`2026-07-18 001811.png`) |
 | Median frame luminance | 193 / 255 |
+
+**Verified against a second measurement, 2026-10-03.** The counts above for total frames (1,160), distinct after dedupe (751), full desktop (173 frames, 44 representatives) and largest single cluster (58 at `2026-07-18 001811.png`) were re-derived independently by the Phase B pass from `signatures.json` and `clusters.json`, and from a direct PNG IHDR measurement of the files on disk. All agree. The 173 figure was confirmed twice over, once from the signature table and once from the file headers, frame for frame. Source: `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md` item 2 and the re-derivation recorded there. This says the arithmetic is right; it does not change what the 44 are, which the preamble above qualifies.
 
 Filenames carry no semantic information (`Screenshot YYYY-MM-DD HHMMSS.png`, Windows Snipping Tool), so category assignment is content-derived. Full desktop frames are the highest-value stratum because they alone show panel relationships and chrome together.
 
@@ -4228,6 +4249,20 @@ The scenario-comparison gap identified above is therefore **unchanged**: one of 
 ### Not present in the corpus
 
 Scouts / gacha screens, support-card composition, settings, Trackblazer chrome, Our Grand Concert chrome, and any non-Unity-Cup training loop. Where the design needs these it borrows the grammar of the screens above rather than inventing new patterns, and `CONSTRAINTS.md` D-193 requires any such design to name its evidence rather than imply coverage.
+
+### Additions from the Phase B note set
+
+Added 2026-10-03 on the owner's ruling. Each line states the value, the note it was read from, and the frame that note describes. These are additions beside the coverage table above, not edits to it.
+
+1. **Mood effect magnitudes are a symmetric five-row table.** GREAT +20 percent training results and +4 percent attributes while running, GOOD +10 and +2, NORMAL no change, BAD -10 and -2, AWFUL -20 and -4. Source note `2026-07-18 001957`, the Mood Effect modal. This makes mood a lookup rather than an estimate. Hazard: this value is from a Rice Shower run; `2026-07-14 025344` is a Curren Chan run and is excluded from the read.
+2. **The practice-state strings, verbatim from the client.** "Mood -1", "Previously trained attribute -5", "Previously trained attribute -10", "Become Practice Poor", "Become Practice Perfect ○". Source note `2026-07-17 235902`, the Choices panel's branch tables. Hazard: this value is from a Rice Shower run; `2026-07-14 025344` is a Curren Chan run and is excluded from the read.
+3. **Hint level maps to discount percent.** Lv 1 is 10 percent, Lv 2 is 20, Lv 3 is 30, read from three rows in one frame. Source note `2026-07-17 234521`, the Learn surface. Hazard: this value is from a Rice Shower run; `2026-07-14 025344` is a Curren Chan run and is excluded from the read.
+4. **Failure risk is a per-discipline value, not a per-turn one.** Across one unresolved turn the badge reads 5 percent on Guts, 3 percent on Speed, 1 percent on Stamina and 2 percent on Power. Wit was not captured, so the series is four of five. Source note `2026-07-18 135801`, corroborated at the heavy and lean ends by `2026-07-18 135751` and `2026-07-18 135756`. Any model storing one failure percentage per turn is wrong. Hazard: this value is from a Rice Shower run; `2026-07-14 025344` is a Curren Chan run and is excluded from the read.
+5. **The support card rail is a per-discipline view.** Card counts on that same turn are 6, 3, 2 and 6 for the four captured disciplines. Source notes `2026-07-18 001823`, `2026-07-18 135751`, `2026-07-18 135756`, `2026-07-18 135801`. The coverage table above lists "support card rail" without saying it is filtered.
+6. **Facility banner tint is not a state channel.** The same two banners render blue in `2026-07-17 230755` where they render green in `2026-07-14 194819` and `2026-07-14 202142`. The coverage table's "Training HUD, blue theme" row reads this as evidence the HUD tints per trainee; these three frames show the tint differing between capture sessions with the same trainee, so the per-trainee reading is unsupported and a per-session accent is the alternative. Colour is load-bearing on the mood pill and decorative on the banner, and the two must not be modelled with one rule.
+7. **Growth Rate values are on record.** +0 percent Speed, +10 Stamina, +0 Power, +20 Guts, +0 Wit, identical across three captures of the same trainee. Source notes `2026-07-17 232345`, `2026-07-18 133731`, `2026-07-18 160438`. The coverage table names the Growth Rate row as a structural feature of the modal and carried no values. Hazard: this value is from a Rice Shower run; `2026-07-14 025344` is a Curren Chan run and is excluded from the read.
+8. **The Learn surface pairs with either right panel.** The left surface is unchanged behind "Log" (`2026-07-17 234453`, `2026-07-17 234521`) and behind "Scheduled Races" (`2026-07-17 233332`, `2026-07-17 233339`, `2026-07-17 233344`). The catalogue and the right panel are independent regions, not one fixed two-pane template. The coverage table's "Skill acquisition" row lists one representative and one treatment.
+9. **Observed stat denominators.** 1304 to 1358 across the four body stats and 1800 for Wit, from `2026-07-17 232345`, `2026-07-18 133731`, `2026-07-18 160438`, `2026-07-17 234444` and `2026-07-18 133312`. The minimum 1304 is in `232345` and the maximum 1358 in `133731` and `160438`. The values are run-specific; the standing note above applies. Any cap statement in this corpus should be checked against these before reuse. All five source frames are from the `2026-07-17` and `2026-07-18` sessions and so already satisfy that note's exclusion; the read is a Rice Shower read, and `2026-07-14 025344`, `194819` and `202142` contribute nothing to it.
 
 
 ---
