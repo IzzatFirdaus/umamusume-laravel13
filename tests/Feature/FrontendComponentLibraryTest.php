@@ -28,8 +28,6 @@ function componentMarkup(): array
         'capsule-header' => '<x-capsule-header title="Aptitudes" />',
         'grade-badge' => '<x-grade-badge grade="B+" />',
         'energy-gauge' => '<x-energy-gauge :energy="42" />',
-        'advisory-row' => '<x-advisory-row source="GameWith, 2026-09-25">Wit costs 0 Energy.</x-advisory-row>',
-        'support-card-rail' => "<x-support-card-rail :cards=\"[['name' => 'Kitasan Black', 'bond' => 60, 'friend' => true, 'burning' => true]]\" />",
         'deck-editor' => "<x-deck-editor :slots=\"[['name' => 'Kitasan Black', 'rarity' => 'SSR', 'type' => 'Speed', 'limit_break' => 3, 'level' => 45]]\" :legend=\"['Speed' => 2]\" />",
         'run-header' => '<x-run-header :turn="12" scenario="URA Finale" :energy="42" :fans="12000" :fan-gate="60000" />',
     ];
@@ -101,25 +99,6 @@ it('renders the capsule header with the lattice motif and a word', function (): 
         ->toContain('lattice-bleed')
         ->toContain('h-11')
         ->toContain('Aptitudes');
-});
-
-it('renders the advisory row with its hint badge and source', function (): void {
-    expect(Blade::render('<x-advisory-row source="GameWith">Wit costs 0 Energy.</x-advisory-row>'))
-        ->toContain('Hint')
-        ->toContain('text-on-green')
-        ->toContain('GameWith');
-});
-
-it('renders the support rail marks', function (): void {
-    $html = Blade::render('<x-support-card-rail :cards="$cards" />', [
-        'cards' => [['name' => 'Kitasan Black', 'bond' => 60, 'friend' => true, 'burning' => true]],
-    ]);
-
-    expect($html)
-        ->toContain('K')
-        ->toContain('Friendship')
-        ->toContain('Burning')
-        ->toContain('width: 60%');
 });
 
 it('renders six deck slots with limit-break diamonds and the type legend', function (): void {

@@ -44,6 +44,6 @@
             either way.
         </p>
 
-        <button type="submit" class="min-h-11 justify-self-start rounded-full border-2 border-rule px-4 font-bold text-ink-strong">Save preferences</button>
+        <x-app-button type="submit" variant="secondary" class="justify-self-start">Save preferences</x-app-button>
     </form>
 </x-layout>

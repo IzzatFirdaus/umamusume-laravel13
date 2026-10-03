@@ -297,7 +297,7 @@
                 @endforeach
             </select>
         </label>
-        <button type="submit" class="min-h-11 rounded-full border-2 border-rule px-4 py-2 font-bold text-ink-strong">Change status</button>
+        <x-app-button type="submit" variant="secondary" class="py-2">Change status</x-app-button>
         @error('status')<p class="w-full text-risk">{{ $message }}</p>@enderror
     </form>
 
@@ -438,7 +438,7 @@
                                                 @endforeach
                                             </select>
                                         </label>
-                                        <button type="submit" class="self-end enamel min-h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Save turn</button>
+                                        <x-app-button type="submit" variant="primary" class="self-end">Save turn</x-app-button>
                                     </form>
                                     <form method="POST" action="{{ route('runs.turns.destroy', [$run, $entry]) }}"
                                           class="mt-2 flex max-w-3xl flex-wrap items-center gap-3 text-sm">
