@@ -243,7 +243,7 @@ sequenceDiagram
     participant D as SQLite
     C->>C: Cache::lock("uma-fetch:{source}") atomic claim
     C->>F: fetch(source config)
-    F->>S: HTTPS GET (timeout, retry w/ backoff, delay between requests)
+    F->>S: HTTPS GET (timeout, up to 2 retries 500ms apart, delay between requests)
     S-->>F: body
     F->>F: write raw snapshot to storage/app/private/snapshots/{source}/{date}/{hash}.html
     F-->>P: body + snapshot path
@@ -273,7 +273,7 @@ Default: manual `php artisan uma:fetch` (PRD OQ-3). Concurrency is controlled by
 
 ## 6. Integration Pattern (scraping → normalization → storage → cache)
 
-- **Politeness:** per-source `delay_ms` and `timeout_s` in `config/uma.php`; retry with exponential backoff max 2; a descriptive User-Agent identifying the tool; sources list is an allowlist (SSRF posture: the engine only ever requests hosts from config, never from user input or fetched content).
+- **Politeness:** per-source `delay_ms` and `timeout_s` in `config/uma.php`; retry up to `uma.fetch.retry_times` (default 2) with a flat 500 ms pause between attempts, `throw: false` so an exhausted retry returns a failed response rather than an exception; a descriptive User-Agent identifying the tool; sources list is an allowlist, and every redirect hop is re-checked against it before it is requested (SSRF posture: the engine only ever requests hosts from config, never from user input or fetched content). This line said "exponential backoff" until E-1 measured it: `SourceFetcher::request()` passes a constant 500, and nothing in the client is told to grow it.
 - **Snapshots:** raw bodies streamed to `storage/app/private/snapshots/` (local disk), path recorded in `data_sources`. Snapshots are the replay corpus: `uma:reparse {source}` re-runs parser→match→promote from disk with zero network.
 - **Read cache:** catalog index/show wrapped in `Cache::remember` (database store, TTL from config, default 15 min). Invalidation is write-triggered: promotion bumps a `catalog:version` key used in cache keys (versioned-keys strategy, no per-row invalidation). The counter carries no TTL and a page read never writes it: an expiring counter restarts the numbering an hour later, and version 1 of hour two would reuse the page keys of version 1 of hour one (F-10). Trainer-data reads are never cached (cheap, must be fresh).
 - **Stale-while-revalidate:** a manual refresh runs the fetch synchronously and returns; UI shows last-fetched time from `data_sources`.

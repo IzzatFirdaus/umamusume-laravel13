@@ -49,7 +49,7 @@ Token-efficient digest of ARCHITECTURE.md for agent context injection. If this f
 - Concurrency: Cache::lock("uma-fetch:{source}") in UmaFetch; web refresh runs synchronously (stale-while-revalidate)
 - Timezone: JP datetimes parsed Asia/Tokyo → stored UTC, source_timezone recorded; date-only stays date
 - Commands: uma:fetch {source}, uma:reparse {source} (from snapshots, zero network), uma:backup (WAL checkpoint + file copy)
-- HTTP: allowlisted hosts from config('uma.sources') ONLY (SSRF), limited redirects, per-source delay_ms/timeout_s, retry backoff max 2, descriptive UA
+- HTTP: allowlisted hosts from config('uma.sources') ONLY (SSRF), redirects followed by the fetcher with the host allowlist re-checked per hop, per-source delay_ms/timeout_s, retry max 2 at a flat 500 ms, descriptive UA
 
 ## API contract (/api/v1, P2)
 - GET umamusume?status=&search=&page=&pageSize= ; GET umamusume/{slug} ; GET training-runs ; GET training-runs/{id}
