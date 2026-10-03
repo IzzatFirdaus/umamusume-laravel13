@@ -120,6 +120,64 @@
         @endif
     </section>
 
+    {{-- O-12: the client's header prints a goal line ("Place 1st in Arima Kinen, entry
+         criteria met, 5 turns") plus the cleared goals behind it. Nothing in this tool
+         showed that. The Grade Point meter and the Race calendar cover two scenario
+         shapes but neither reads as the goal line a Trainer actually watches: the meter
+         is a Trackblazer-only points ladder, the calendar is a year grid. This section
+         surfaces the run's mandatory and special race entries with a state word, in
+         turn order, on every scenario and on a run with no scenario at all. The shape
+         matches the report's data: cleared, active, or failed for one logged race; the
+         ones the catalogue has not offered yet stay out of the list rather than showing
+         as an empty state the client also does not show. --}}
+    @php
+        $goals = $run->raceEntries
+            ->filter(fn ($e): bool => $e->raceCatalogSlot !== null
+                && ($e->raceCatalogSlot->is_mandatory || $e->raceCatalogSlot->is_special_race))
+            ->sortBy(fn ($e): array => [
+                (int) ($e->raceCatalogSlot->year ?? 99),
+                (int) ($e->raceCatalogSlot->turn ?? 99),
+            ])
+            ->values();
+    @endphp
+    @if ($goals->isNotEmpty())
+        <section aria-label="Goals" class="mt-2">
+            <h2 class="text-lg font-semibold text-ink-strong">Goals</h2>
+            <ol class="mt-3 flex flex-col gap-1.5" aria-label="Race goals">
+                @foreach ($goals as $goal)
+                    @php
+                        $slot = $goal->raceCatalogSlot;
+                        $state = match ($goal->status) {
+                            \App\Enums\RaceEntryStatus::Completed => 'Cleared',
+                            \App\Enums\RaceEntryStatus::Entered => 'Active',
+                            \App\Enums\RaceEntryStatus::Skipped => 'Failed',
+                            default => null,
+                        };
+                        $yearLabel = $slot->year !== null
+                            ? (\App\Models\RaceCatalogSlot::YEARS[$slot->year] ?? (string) $slot->year)
+                            : null;
+                    @endphp
+                    @continue($state === null)
+                    <li class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 rounded-md border border-rule bg-panel px-3 py-2 text-sm">
+                        <span class="min-w-0 flex-1">
+                            <span class="font-semibold text-ink-strong">{{ $slot->title }}</span>
+                            @if ($yearLabel !== null || $slot->turn !== null)
+                                <span class="ml-1.5 text-xs text-ink-muted">
+                                    @if ($yearLabel !== null){{ $yearLabel }}@endif
+                                    @if ($yearLabel !== null && $slot->turn !== null) · @endif
+                                    @if ($slot->turn !== null)Turn {{ (int) $slot->turn }}@endif
+                                </span>
+                            @endif
+                        </span>
+                        <span class="shrink-0 text-xs font-bold {{ $state === 'Cleared' ? 'text-green-deep' : ($state === 'Failed' ? 'text-risk' : 'text-ink') }}">
+                            {{ $state }}
+                        </span>
+                    </li>
+                @endforeach
+            </ol>
+        </section>
+    @endif
+
     {{--
         The goal panel, and there is at most one. A scenario with mandatory race
         goals gets the calendar; a scenario with Grade Point deadlines gets the
