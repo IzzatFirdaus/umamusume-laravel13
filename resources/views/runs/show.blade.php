@@ -477,11 +477,11 @@
 
     {{-- Two absences, said out loud rather than left to be inferred. SP is the cost the source states;
          the class code the source carries is not rendered because six codes do not answer to the
-         client's three rarities (ADR-0011 §3), and no hint-level discount appears anywhere because
-         conflict row 16 bars encoding either candidate curve without an in-client check. --}}
+         client's three rarities (ADR-0011 §3). The hint-level ladder is now recorded, so the sentence
+         names it rather than denying it (R-6). --}}
     <p class="mt-2 max-w-3xl text-xs text-ink-muted">
-        SP is the cost the source states for that skill. Skill-point discounts from hint levels are not
-        shown: no source in this repository settles the per-level reduction.
+        SP is the cost the source states for that skill. Hint-level discounts follow the ladder recorded in
+        docs/research-scratch/SKILLS-MECHANICS.md §2.4: 10 / 20 / 30 / 35 / 40 percent at Lv1 through Lv Max.
         {{-- G-SK-13: this select lists every Global row, which is the reason Screen D exists. Linking out
              is the honest statement that the list is too long to scan, and it costs no new mechanism. --}}
             <a href="{{ route('skills.index') }}" class="inline-flex min-h-11 items-center underline">Search the skill catalog</a>
