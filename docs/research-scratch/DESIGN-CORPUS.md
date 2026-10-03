@@ -12,6 +12,12 @@
 8. `RAW-FINDINGS.md` (367 lines)
 9. `SCREENSHOT-MANIFEST.md` (80 lines)
 10. `WEB-FINDINGS.md` (390 lines, from `docs/design-research/_scratch/`, appended 2026-10-02)
+11. `phase-c-synthesis.md` (25,997 bytes, appended 2026-10-03, Round 9; from root `research-scratch/`,
+    which is gitignored. Its own banner says "superseded as a handoff, retained as a record", and
+    `corpus-edit-summary.md` cites it as the source of rulings applied to the SCREENSHOT-MANIFEST
+    section above)
+12. `scratch-priors.md` (20,884 bytes, appended 2026-10-03, Round 9; the standing priors for the
+    screenshot pipeline, established at `ef689a5`)
 
 ---
 
@@ -4680,3 +4686,456 @@ each of which is absorbed into exactly one master under a section heading of its
 Not applied retroactively: the corpus's own provenance lines name the source files they absorbed, and those
 are records of the merge, not pointers a reader follows. Only lines that direct a reader to a rule should carry
 the `DESIGN-CORPUS.md §"…"` form after this convention.
+
+---
+
+## phase-c-synthesis.md
+
+## Phase C synthesis
+
+**Status: superseded as a handoff, retained as a record.** This document was written as a handoff that applied nothing. Owner rulings were received on 2026-10-03 and the accepted items were then applied to `docs/research-scratch/DESIGN-CORPUS.md`; section 6 states exactly which of its section 5 items landed and which did not, and `docs/research-scratch/corpus-edit-summary.md` is the diff-level record. The sections below are left as written at synthesis time so the reasoning that produced each claim stays inspectable, with two corrections noted in place at section 5 items 1 and 9.
+
+The file it updated is `docs/research-scratch/DESIGN-CORPUS.md`, section `## SCREENSHOT-MANIFEST.md`.
+
+Spec used: the Phase C scope defined in Stage 2 of the closeout dispatch of 2026-10-03. No separate owner-held Phase C spec was available to this pass.
+
+Inputs read: the 49 notes at `docs/research-scratch/screenshot-notes/` (46 canonical plus 3 expansion), `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md`, and the `## SCREENSHOT-MANIFEST.md` section of `docs/research-scratch/DESIGN-CORPUS.md`. The frames were not re-read. Where a note is the only evidence for a statement, the note is cited; where a note is insufficient, that is said in place.
+
+The two JSON artefacts were relocated after this synthesis ran, by the `_scratch/` reorganization of 2026-10-03. The paths given here reflect the post-relocation locations and the SHAs were re-verified there. This synthesis names them only where a claim rests on them, at section 5 item 12, and that reference now carries the current paths: `docs/design-research/_scratch/analysis/color/clusters.json` (SHA `0ce49656c816c87befc2787c7007c00845806241cc6f350bab9e3bd04d7c4d1d`) and `docs/design-research/_scratch/analysis/scenarios/signatures.json` (SHA `0111030b32c012fb9e5f4e210ba7af9e589f8ae3efc1e49d384ef30b5a3135bb`). The `clusters.json` location is a misfiling by the reorg script, which matched on the word "clusters"; the file is a frame-clustering output, not a colour one. It was left in place rather than moved a second time.
+
+Note ids are the six-digit time suffix. Notes marked `(extras)` sit at `docs/research-scratch/screenshot-notes-extras/` and are outside both the canonical set and the expansion set; they are cited only where their absence from the set matters.
+
+### 1. Cross-screen invariants
+
+**V-1. Two-panel shell.** A working surface on the left, a context panel on the right, the nav rail outermost right. Holds on `194819`, `202142`, `221504`, `230755`, `230902`, `234444`, `234453`, `234521`, `235111`, `235229`, `235902`, `001811`, `001817`, `001823`, `002421`, `002432`, `002632`, `003303`, `133312`, `133322`, `134917`, `135745`, `135751`, `135756`, `135801`, `155757`, `160543`, `161122`, and on all three expansion notes. `001651` and `134106` hold the left surface plus a right rail but show no nav rail, so they are a partial case.
+Broken by the centred modals, which cover rather than abut: `025344`, `232527`, `234615` (Predictions), `232345`, `133731`, `160438` (Umamusume Details), `001957` (Mood Effect), and `133128`, whose field 7 records a single centred column with the calendar dimmed behind it. Broken once by a genuine split rather than a panel pair: `000919`, where the right half is a physical board and there is no nav rail.
+
+**V-2. The right panel is interchangeable and the left surface does not change.** The same left surface appears behind "Log" and behind "Scheduled Races": training behind both (`230755`, `230902`, `221504`, `003303` calendar; `001811`, `001817`, `001823`, `133312`, `133322`, `002632` Log), and Learn behind both (`234453`, `234521` Log; `233332`, `233339`, `233344` calendar). `233324` (extras) states the rule outright: "the right panel is interchangeable between Log and calendar without changing the left side." Consequence for layout: the catalogue and the right panel are independent regions, not one fixed two-pane template.
+
+**V-3. A green banner heads every panel and every modal.** `234444`, `233057`, `234912`, `235529`, `002941`, `161122`, `133128`, `001957`, `232345`, `221504`, `002632`, `003303`, `235111`, `160543`, `235229`. The nav rail's active item is filled green rather than outlined, so panel heading and rail selection use the same fill and are distinguished only by position.
+
+**V-4. State is encoded redundantly, never by colour alone.** Mood is word plus arrow plus colour (`194819`, `202142`, `221504`, `001811`, `133312`, `001957`). Placement is laurel art plus a number (`155757`, `234912`, `234918`, `004353`). Aptitude is a letter chip plus colour on the detail modal (`232345`, `133731`, `160438`) and a mark shape on the Predictions modal (`232527`, `234615`), two different vocabularies for one quantity on two surfaces.
+**The counter-example is the facility banner.** `230755` records that the same banners render blue there where `194819` and `202142` render them green, so banner tint tracks the frame's accent and is not a state channel. Colour is therefore load-bearing on the mood pill and decorative on the banner, and the two must not be modelled with one rule.
+
+**V-5. The stat band is always value, denominator and letter grade.** `194819`, `202142`, `221504`, `230755`, `230902`, `234444`, `133312`, `133322`, `134917`, `135745`, `135751`, `135756`, `135801`, `232345`, `133731`, `160438`, `235902`, `002421`, `002432`. Six columns, Speed, Stamina, Power, Guts, Wit and Skill Points, with Skill Points set apart in a teal box rather than carrying a denominator (`194819`, `133312`, `233332`).
+
+**V-6. Absence of a control is itself a state marker.** A held skill drops its stepper entirely (`233339`, `234453`, `233324` (extras)). An unentered team slot is a greyscale silhouette with no badge (`235529`, `002941`, `161122`). A past calendar cell greys out (`135745`). An unavailable action greys while keeping its label (`221504`, `002632`). A bond at ceiling shows "MAX" over the gauge rather than a full bar (`001817`, `134917`). In every case the removal, not a new mark, carries the state.
+
+**V-7. Signed deltas with a colour-highlighted direction word are the universal change notation.** `233057`, `234444`, `235902`, `002421`, `002432`, `134917`. The magnitude is a number and the direction is a word, and the word is what is coloured, so a monochrome render loses the sign.
+
+**V-8. Primary action is a wide saturated green button centred at the bottom; its companion is white and outlined.** Confirm over Reset (`234453`, `234521`, `233332`, `233339`, `233344`, `235111`), Next over nothing (`155757`, `234918`, `004353`, `235529`, `002941`, `161122`, `133128`), Save over Back and Album (`001651`, `134106`), Select Opponent over Back (`160543`, `235229`). Close is the modal's only control and sits at the bottom centre in the same slot (`025344`, `232527`, `234615`, `232345`, `133731`, `160438`, `001957`).
+
+**V-9. Yellow marks the item that is the player's current position, on three unrelated surfaces.** The player's own rows in a finishing-order list (`004353`, `235511`, `155757`), the next goal in the ladder (`133128`), and the current half-month cell in the calendar (`235229`, `160543`, `003303`, `135745`). It is one colour doing three jobs, disambiguated only by which surface it is on.
+
+**V-10. The turn header is a fixed stack.** Date strip over turn chip over a blue scenario countdown chip, with the goal banner to the right and the Energy gauge and mood pill beneath. `194819`, `202142`, `221504`, `230755`, `230902`, `234444`, `235902`, `002421`, `002432`, `002632`, `003303`, `133312`, `133322`, `134917`, `135745`, `135751`, `135756`, `135801`. The stack collapses to a "GOAL" pennant on a race day (`234444`), which is the only observed change to it.
+
+### 2. Per-category patterns
+
+#### 2.1 `training` (14 notes)
+
+Shared: the V-10 header stack, left-edge facility and activity banners, centre artwork, support card rail right of the art, the V-5 stat band across the lower third, a Failure badge, five circular discipline buttons along the bottom, and a right panel. Notes: `194819`, `202142`, `230755`, `230902`, `001811`, `001817`, `001823`, `133312`, `133322`, `134917`, `135745`, `135751`, `135756`, `135801`.
+
+Varies with the selected discipline, on the same unresolved turn: the activity name, the background art, the rail membership, which stat columns carry gain bubbles, and the failure percentage. `001811`, `001817`, `001823`, `133312`, `133322`, `135745`, `135751`, `135756`, `135801`.
+
+What the category establishes that no single frame could:
+- **Failure percentage and rail membership are per-discipline, not per-turn.** `135801` carries the four-value series across one turn: 5 percent on Guts with six cards, 3 percent on Speed with three, 1 percent on Stamina with two, 2 percent on Power with six. `135756` and `135751` corroborate the lean and the heavy ends. Wit was not captured, so the series is four of five.
+- **Facility level and selection are separate visual channels.** `135751` records a Lvl 4 button keeping its pink while unselected, and `135745` records the re-tint at Lvl 4 against Lvl 3.
+- **The accent tint drifts between capture sessions while the layout does not.** `230755` against `194819` and `202142`. This is the V-4 counter-example.
+- **The Skill Points balance is shared with the Learn surface.** `134917` reads 94 against `133322` at 139 across the same turn, so purchases spend the same counter the training HUD displays.
+
+#### 2.2 `skill-selection` (5 notes)
+
+Shared: the "Learn" chip, an art header carrying a Skill Points strip and a Full Stats button, full-width skill cards with icon left, name and description centre, badge and stepper right, then Confirm and Reset centred. `234453`, `234521`, `233332`, `233339`, `233344`.
+
+Varies: the right panel (Log in `234453` and `234521`, Scheduled Races in `233332`, `233339`, `233344`); which row carries the gold gradient selection treatment (`234521`, `233332`); whether an Obtained row is in view (`234453`, `233339`); whether a row carries a hint badge at all (`233344`, two of three rows without); the saturation of Confirm (`233344` against `233332` and `233339`).
+
+What the category establishes that no single frame could:
+- **Hint level maps to discount percent.** `234521` shows Lv 1 at 10 percent, Lv 2 at 20, Lv 3 at 30 in one frame.
+- **A badge marks a discount, not purchasability.** `233344` shows rows priced at 160 and 130 with no badge beside a badged row at 117.
+- **Price is not positional.** `233339` shows two different skills at the same 144 with the same badge.
+- **Held and purchasable rows share one scroll with no separator.** `233339` places an Obtained row directly beneath two offers.
+- **The Learn surface pairs with either right panel.** Before the expansion this rested on `233324` (extras), which is outside the set; `233332`, `233339` and `233344` now establish it inside the set.
+
+Not established by any note: what the "○" suffix on a skill name means (`233332`, `234453` and `235902` all show it and none resolves it), and what the gold chip on one skill marks (`133731` says its meaning is not stated in frame).
+
+#### 2.3 `race-entry` (10 notes)
+
+Shared: a race identity carried as a grade chip plus a venue string with surface, distance band, direction and turn; and a green Next occupying the V-8 slot on every result surface. `025344`, `232527`, `234615`, `234444`, `234912`, `234918`, `235511`, `000919`, `155757`, `004353`.
+
+Sub-surfaces within the category: the Predictions modal (`025344`, `232527`, `234615`), the Race Day turn surface (`234444`), the live board (`000919`), and the result screen with its Career Profile companion (`155757`, `234918`, `004353`, `235511`, `234912`).
+
+What the category establishes that no single frame could:
+- **The aptitude mark vocabulary is four shapes and one frame shows at most three.** `232527` shows double-circle and triangle; `234615` adds cross; the circle appears only on the letter-chip surfaces. The four-level reading requires both Predictions frames.
+- **The yellow row highlight marks own-team membership, not the win.** `235511` highlights the 1st and 3rd rows because both carry the "Blue Bloom" team line, and `004353` highlights a 2nd-place row. `155757` is the case where the two coincide, which is why one frame cannot settle it.
+- **A team race replaces the individual laurel with a WIN banner.** `235511` against `155757`.
+- **The result speech bubble changes register with placement.** `004353` against `155757`.
+- **Margin notation has at least three forms.** Whole lengths, a fraction of a length, and a body-part word: `234918` ("1 3/4 L", "1/2 L"), `155757` ("3 L", "Neck").
+
+#### 2.4 `career-progression` (9 notes)
+
+Shared: a scenario obligation or a team fixture presented as stacked cards, with the outcome expressed as signed deltas or as per-leg verdict words. `235902`, `002421`, `002432`, `160543`, `235229`, `235529`, `002941`, `161122`, `133128`.
+
+Sub-surfaces: event Choices (`235902`, `002421`, `002432`), team opponent select (`160543`, `235229`), team meeting result summary (`235529`, `002941`, `161122`), and the goal ladder (`133128`).
+
+What the category establishes that no single frame could:
+- **Branch structure is per option, not fixed.** `235902` shows a three-branch option beside two-branch options; `002421` shows two branches; `002432` shows that all three options there expose the same two branches at the same magnitudes, so the option text changes the odds and not the outcome set.
+- **The season badge tracks the calendar rather than the meeting.** `002941` reads "Wint" where `235529` and `161122` read "Spr".
+- **An opponent field is not always full.** `161122` carries two legs with an unoccupied slot; `235529` and `002941` carry one each.
+- **Goal status is a three-value enum with a separate progress ratio.** `133128`: cleared, next, later, plus "Goals Achieved 5/8".
+- **Team rank and performance tier are two independent ladders.** `221504` and `002632` pair a laurel letter with a chip word ("Up-and-Coming", "Platinum" against "Starting Out", "Silver"), and `235229` shows the laurel colour changing below D.
+
+### 3. Manifest reconciliation
+
+Target: the screen-type coverage table in `## SCREENSHOT-MANIFEST.md`.
+
+#### 3.1 Manifest screens the notes support
+
+| Manifest screen type | Manifest representative | Notes supporting it |
+|---|---|---|
+| Training HUD, full | `194819`, `202142` | `194819`, `202142`, plus twelve further training notes |
+| Training HUD, blue theme | `230755` | `230755`, `230902` |
+| Event choice panel | `124128`, `124926` | `235902`, `002421`, `002432` support the screen type, but neither named representative has a note |
+| Log / turn history | `234521` | `234521`, `234444`, `001811`, `001817`, `001823`, `133312`, `133322`, `002632`, `233057` |
+| Skill acquisition | `234521` | `234521`, `234453`, `233332`, `233339`, `233344` |
+| Umamusume Details modal | `232345` | `232345`, `133731`, `160438` |
+| Race calendar | `230755`, `235229` | `221504`, `003303`, `133128`, `135745`, `160543`, `235229`, `161122`, and every note whose right panel is the calendar |
+| Team Showdown | `235229` | `235229`, `160543`, `235111`, `235529`, `002941`, `161122` |
+| Race result / live | `000919`, `235511` | `000919`, `235511`, `155757`, `234918`, `004353`, `234912` |
+| Photo Album | `134106` | `134106`, `001651` |
+| NPC coaching bubble | `025519`, `038100`, `038751`, `058814`, `194319` | None. The bubble appears as a component inside `221504`, `234444`, `002632` and `133128`, but no note treats it as a screen |
+| Inheritance select | `121214`, `122453` | None. The Legacy Umamusume section appears inside `234912`, `155757`, `234918`, `004353` and `235511`, but the selection screen itself is unnoted |
+
+`134106` is worth naming: the manifest already lists it as the Photo Album representative, and revision 3 of the Phase B report folded it into `001651` and then un-folded it. The manifest and the un-folding agree.
+
+#### 3.2 Manifest screens with no note, named as gaps
+
+1. **NPC coaching bubble.** Five representatives named, zero notes. The largest gap by representative count.
+2. **Inheritance select.** Two representatives named, zero notes.
+3. **Event choice panel representatives.** `124128` and `124926` named, zero notes; the screen type is covered by three other frames, so this is a representative gap rather than a coverage gap.
+4. **Ura Finale frames.** The scenario table names `012428` and `014154` and says reading those two in full is the cheap way to widen that row. Neither has a note. This is the only route the manifest itself offers to the scenario coverage it says is missing.
+
+### 4. New screens
+
+Frames showing a screen the manifest's coverage table does not name:
+
+| Frame | Screen |
+|---|---|
+| `025344`, `232527`, `234615` | Predictions modal: portrait, race plate, a five-column aptitude mark row, and an advisor verdict bubble |
+| `234444` | The Race Day turn surface: GOAL pennant in place of the turn chip and the action set reduced to Skills and Race |
+| `234912` | Career Profile as a standalone card beside the result art, with Trainee, Legacy Umamusume and Support Cards sections |
+| `133128` | The goal ladder: stacked goal rows, a NEXT divider and a "Goals Achieved" footer ratio |
+| `235111` | Edit Team: five race-category columns of slots with an ACE slot, Auto-Fill and Confirm |
+| `235529`, `002941`, `161122` | RACE FINISHED: a five-leg team meeting summary with per-leg verdict words |
+| `001957` | Mood Effect reference modal: five tiers against two percentage columns |
+| `233057` | Spark-resolution event presentation: event art with a summary bubble beside a single running-prose Log card |
+
+### 5. Open items for the corpus
+
+Claims these notes establish that the manifest section does not carry, and claims it carries that these notes refine. Candidates only; the corpus file is outside this pass's fence.
+
+1. **Measured mood pill colours.** The corpus marks three of the five as derived and provisional and names the open item as "the three lower pills' measured hues" captured from the HUD. `001957` renders all five tiers: GREAT deep pink, GOOD burnt orange, NORMAL gold, BAD blue, AWFUL purple. `001811` independently records BAD as a blue pill with a down-left arrow and GREAT as pink. The two negative tiers are on the cool side of the wheel, so the premise that they sit near the positive pink does not hold, and the hue-distance argument that makes the arrow mandatory is measuring a gap the client does not have.
+   **Qualification added after the corpus update, and it narrows what this item can be used for.** The corpus does not treat this frame as a colour source at all. The comment block above its palette states that a probe on the Mood Effect panel is unusable because "it is a legend panel, and sampling its row bands averages the pill against the panel field", and it names the open item as the three lower pill colours captured **from the HUD**. `001957` is that legend panel. So this item supports a hue-family claim, that the two negative tiers are cool and are not near the positive pink, and it does not support a measured hex claim, which is the only thing that would let the three provisional tokens be replaced. The note carries no hexes. See `docs/research-scratch/corpus-edit-summary.md` edit D.
+2. **The mood effect magnitudes.** `001957`: +20/+10/0/-10/-20 percent on training results and +4/+2/0/-2/-4 percent on attributes while running, exactly symmetric.
+3. **The practice-state strings, verbatim.** `235902` carries "Mood -1", "Previously trained attribute -5", "Previously trained attribute -10", "Become Practice Poor" and "Become Practice Perfect ○".
+4. **Hint level to discount.** `234521`: Lv 1 is 10 percent, Lv 2 is 20, Lv 3 is 30, read from three rows in one frame.
+5. **Failure risk is a per-discipline value.** `135801` gives four values on one turn. Any model that stores one failure percentage per turn is wrong, and the manifest's training HUD row does not say which it is.
+6. **The support rail is a per-discipline view.** `001823`, `135751`, `135756`, `135801`: card counts of 6, 3, 2 and 6 on one turn. The manifest's training HUD row lists "support card rail" without saying it is filtered.
+7. **Facility banner tint is not a state channel.** `230755` against `194819` and `202142`. The manifest's "Training HUD, blue theme" row calls this "evidence the HUD tints per trainee". These notes show the tint differing between capture sessions with the same trainee, so the per-trainee reading is at least unsupported and the alternative is a per-session accent.
+8. **Growth Rate values.** `232345`, `133731` and `160438` each read Speed 0 percent, Stamina +10, Power 0, Guts +20, Wit 0 on the same trainee. The manifest names the Growth Rate row as a structural feature of the modal and carries no values.
+9. **Observed stat denominators.** 1304 to 1358 across the four body stats and 1800 for Wit. Corrected after the corpus update: this item first read "1318 to 1358", which understated the spread and was not what its own sources carry. The five cited notes hold 1304, 1307, 1308, 1316, 1318, 1319, 1321, 1322, 1325, 1330, 1334 and 1358, so the minimum is 1304 from `232345` and the maximum 1358 from `133731` and `160438`. Any cap statement in the corpus should be checked against these before it is reused, and the two-trains hazard in item 5.11 applies. **Not applied to the corpus**, because the range the item carried was wrong when the application was attempted; see `docs/research-scratch/corpus-edit-summary.md`.
+10. **The Learn surface pairs with both right panels.** The manifest's Skill acquisition row lists one representative and one treatment. `234453`, `234521`, `233332`, `233339` and `233344` show the left surface unchanged behind either panel, and show a selected-row treatment, an Obtained-row treatment, badged and unbadged prices, and two Confirm strengths.
+11. **The two-trains hazard, which must be flagged on any stat-curve statement.** `025344` shows the trainee "Curren Chan" on the Predictions modal. Every noted frame from the `2026-07-17` and `2026-07-18` sessions shows "[Rosy Dreams] Rice Shower". **Widened after the corpus update, because this item as first written did not say what the rest of `2026-07-14` is.** The note set holds three frames from that session: `025344`, which attributes to Curren Chan, and the two portrait additions `194819` and `202142`, which each carry a full stat band and attribute to nobody. So the hazard is not one foreign frame inside a Rice Shower corpus; it is a session whose trainee is known from one frame only and cannot be established for the other two from the notes. The exclusion has to be the whole `2026-07-14` session. A growth curve or cap read across the note set therefore mixes runs, and the first application of this item to the corpus named only `025344`, which understated it. This pass does not resolve the hazard and the corpus should not inherit an unresolved one silently.
+12. **Corroboration, not a gap.** The manifest's corpus-shape table states 1,160 frames, 751 distinct, 173 full desktop frames at 44 distinct, and a largest cluster of 58 frames at `2026-07-18 001811.png`. All five figures were re-derived independently in Phase B from `signatures.json` and `clusters.json` and match exactly. Those two files are now at `docs/design-research/_scratch/analysis/scenarios/signatures.json` and `docs/design-research/_scratch/analysis/color/clusters.json`, moved there after this measurement was taken; both hashes are unchanged. That row of the table can be marked verified against a second measurement.
+
+### 6. Status after corpus update
+
+Owner rulings 1(a), 2(a), 3(a) and 4(a) were received on 2026-10-03 and the accepted items were applied to `docs/research-scratch/DESIGN-CORPUS.md` the same day, in the `## SCREENSHOT-MANIFEST.md` section only. Applied: this section's items 2 through 8 and 10 as a new `### Additions from the Phase B note set` subsection, item 11 as a `### Standing note: the corpus spans two trains`, item 12 as a verification note beneath the `### Corpus shape` table, and the mixed-cluster finding as a `### Preamble: what the 44 representatives are`. Not applied: item 1, because the note it cites carries colour names and no hexes and the corpus already excludes that frame as a probe source, so the provisional tokens stand unchanged and the item is reduced to a hue-family claim, qualified above. No row of the existing coverage table was edited or renumbered.
+
+Two further edits followed the owner's review of that first application. **Item 9** was withheld the first time because it stated the denominator range as 1318 to 1358 when its own cited notes carry 1304 as the minimum; it is corrected above and was applied as entry 9 of the additions subsection once re-authorized. **Item 11** was applied too narrowly, naming only `025344`; the trainee classification pass showed two more `2026-07-14` frames that are stat-bearing and unattributed, and the standing note was widened to exclude the whole session. Both corrections are recorded at `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md` item 13.6 as synthesis quality notes, because in each case the synthesis summarized its own notes and then cited the summary.
+
+The diff-level record with old and new text for all five corpus edits is at `docs/research-scratch/corpus-edit-summary.md`, and the index entry is item 15 of `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md`. This document remains a record of what was read into it; the corpus edit is now a separate artefact and further changes to the corpus are a new pass rather than an edit here.
+
+Phase C closed on 2026-10-03. Corpus update applied per owner rulings of the same date. Trainee classification pass complete at `docs/research-scratch/trainee-classification.csv`. Phase C produces no further output; any subsequent corpus change is a new pass.
+
+
+---
+
+## scratch-priors.md
+
+## Scratch priors for the screenshot pipeline
+
+Established 2026-10-03 by the source-of-truth pass, at HEAD `ef689a5` (master, 3 ahead of
+`origin/master`, nothing pulled). Scope: make the seven measurement artefacts in
+`docs/design-research/_scratch/` citable before the extraction and synthesis agents run. This file
+is untracked and gitignored on purpose; it is an input, not a record. Every claim below cites a
+file and, where it matters, a line. Nothing in `_scratch/` or `tools/` was edited.
+
+### 1. What is already measured
+
+| Artefact | What it establishes | Currency | How to cite it |
+|---|---|---|---|
+| `tokens.json` | Light-theme token anchors, 16 colour ramps at steps 50 to 900, and 20 measured contrast pairs | Current for the light base per ADR-0006; incomplete, see section 2 | `docs/design-research/_scratch/tokens.json`, entry `ramps.action-green.700` |
+| `signatures.json` | Per-screenshot luminance, saturation and a 4 by 4 luminance cell grid for 1,160 frames | Current; one frame is missing from disk, see section 3 | `docs/design-research/_scratch/signatures.json`, entry with `"name": "Screenshot 2026-07-14 194819.png"` |
+| `clusters.json` | 751 perceptual clusters over the same corpus, each with a representative frame, a count and a member list | Current | `docs/design-research/_scratch/clusters.json`, record with `"rep": "Screenshot 2026-07-18 001811.png"` |
+| `accents.json` | 10 named accent groups: per frame, each accent's hue, share percentage, mean hex and peak hex | Current for the frames it covers | `docs/design-research/_scratch/accents.json`, key `"training-green"` |
+| `colorprobes.json` | 4 groups of named point probes with pixel coordinates and hex values on named frames | Current for its frames | `docs/design-research/_scratch/colorprobes.json`, key `"training-screen-green-theme"`, probe `"discipline-banner-fill(Dirt)"` |
+| `colorprobes2.json` | 3 groups of named hex pairs, log header and skill surfaces | Current for its frames | `docs/design-research/_scratch/colorprobes2.json`, key `"log-and-skill-learn"`, row `"log-header-lattice-dark"` |
+| `WEB-FINDINGS.md` | Computed-style typography, colour and font-face state of the official web properties | No longer a file; absorbed, see section 3 | `docs/research-scratch/DESIGN-CORPUS.md`, section `## WEB-FINDINGS.md` at line 4227 |
+
+Two facts about the set as a whole. First, every JSON here is generated: `tokens.py`,
+`accents.py`, `probe.py`, `probe2.py`, `cluster.py` and `triage.py` are the generators, and each
+one writes the JSON of the same name. A correction belongs in the generator, because a hand edit
+dies at the next regeneration. Second, the montage PNGs in the same directory (`cs_wide_1of2.png`,
+`sheet_1of19.png` through `sheet_19of19.png`, `scenario_chips.png`) are rendered views of
+`clusters.json` and `signatures.json`. Cite the JSON, never the PNG.
+
+Footnote added 2026-10-03 by the Phase A closure pass, resolving an arithmetic discrepancy in the
+Phase A report: that report said 10 of 751 clusters were categorized from the manifest, and its
+category table shows 8 clusters landing in a named bucket (training 3, skill-selection 1,
+race-entry 2, career-progression 1, character-detail 1). The 2-frame difference is the event
+choice panel representatives, `Screenshot 2026-07-14 124128.png` and `Screenshot 2026-07-14
+124926.png`, which are manifest-grounded but fall into `other` because no bucket exists for event
+panels. Both figures are correct and measure different things: 10 manifest-grounded, 8 in-bucket.
+
+### 2. What is stale, and what moved
+
+#### 2.1 The gate's first input leg is dead
+
+`tools/gate.py` builds its hex allowlist from two sources. Leg one reads a design document:
+`tools/gate.py:94` points at `docs/design-research/DESIGN.md`, extracts hexes from fenced CSS
+blocks and the 3.1, 3.6 and 3.7 tables (`tools/gate.py:97-107`). Leg two reads this file:
+`tools/gate.py:108-111` loads `tokens.json` and takes every `ramps` value.
+
+Leg one is dead. `docs/design-research/DESIGN.md` was folded into `docs/research-scratch/DESIGN-CORPUS.md`
+and deleted during the re-baseline; `INDEX.md:190` records the fold and names the line count
+verified. `tools/gate.py:95-96` handles a missing document by returning an empty set silently. The
+guard at `tools/gate.py:120-121` was written to catch exactly this and does not fire, because
+`tokens.json` alone yields 176 ramp values, well over the 40-value threshold.
+
+Consequence: the allowlist that `tools/gate.py:229-232` enforces on artifacts now contains only the
+`tokens.json` ramps plus three hardcoded values at `tools/gate.py:116-118`. Nothing about that set
+has been re-derived since `e0e043c`, which is the commit that last touched both the gate inputs
+and the research documents.
+
+#### 2.2 `tokens.json` versus `resources/css/app.css`
+
+All sixteen ramp anchors in `tokens.json` match the light declarations in `app.css` exactly. The
+anchor set (action green `#7FCC09`, confirm green `#4E7906`, skill cyan `#009FE1`, selected gold
+`#EFC96A`, grade indigo `#351F70`, alert crimson `#800014`, ink `#6A5641`, ink strong `#482720`,
+surface panel `#F8F8FB`, surface idle `#D2D2DB`, surface disabled `#D0D1D0`, mood great `#FB5590`,
+mood good `#ED8036`) is current, and so are the 165 ramp values behind them. The stale items are
+omissions and three movements, not wrong ramps.
+
+Values that moved after `tokens.json` was written. The old values are recoverable at
+`git show e0e043c:docs/design-research/DESIGN.md`:
+
+| Token | Old value, cited to the deleted `DESIGN.md` | Current value, cited to `app.css` |
+|---|---|---|
+| stat increase `up` | `#FF9A2C` at line 191 of the e0e043c document | `#B45309`, `app.css:168` |
+| stat decrease `down` | `#0088E0` at line 192 | `#0667B0`, `app.css:169` |
+| `ink-muted` | `#7A7067` at line 174 | `#6E6459`, `app.css:48` |
+
+None of the six hexes involved is present in `tokens.json`, and `#B45309`, `#0667B0` and `#6E6459`
+are not in the gate allowlist either. An artifact that uses the current `up` or `down` value as a
+raw hex fails G-4 today.
+
+Tokens declared in `app.css` that have no `tokens.json` counterpart at all: the three derived mood
+steps (`mood-normal #A0978E`, `mood-bad #D48556`, `mood-awful #D47E9E` at `app.css:146-148`), the
+on-colour pair (`on-green #1F1508`, `on-mood #1F1508`, `on-pick #482720`), `ring`, `sp-ink`,
+`goal #C81D25` and `goal-line #B45309`, `pick-line`, the grade badge ramp from `grade-g` through
+`grade-a`, `page #F2F1F8` and `sunken #E7E7EC`, and the entire dark block. `tokens.json` holds no
+dark-theme data of any kind. The dark block lives at `app.css:228-` and carries, among others,
+`page #0D0C0F`, `panel #121013`, `raised #24262A`, `idle #32343A`, `ink #ECEAF2`, `ink-muted
+#AAABB5`, `rule #2E2C33`, `pick #F5B73C`, `goal #F2555A` and `risk #FF7E8C`. A pipeline step that
+wants a dark anchor must cite `app.css` or `DESIGN-CORPUS.md`, never `tokens.json`.
+
+#### 2.3 The remedy
+
+Regenerate, do not hand-edit. `tokens.py` is the generator; point it at the current
+`resources/css/app.css` (both the `@theme static` block and the `html[data-theme='dark']` block)
+and let it re-derive anchors and ramps, then commit the regenerated `tokens.json`. Hand edits to
+`tokens.json` die at the next regeneration, and this file is `tools/gate.py`'s anchor input, so
+drift here is gate drift.
+
+### 3. What is missing
+
+1. `CLIENT-FINDINGS.md` never existed in this repository. `WEB-FINDINGS.md` names it as its
+   companion at `DESIGN-CORPUS.md:4231`, and `git log --all -- '*CLIENT-FINDINGS*'` returns
+   nothing. The client-side measured pass was either never run or its notes were never written.
+   The web study therefore stands on one leg: web properties are measured, the game client is not.
+2. `WEB-FINDINGS.md` is no longer a file. It was folded into `DESIGN-CORPUS.md` as its tenth
+   source and deleted; `INDEX.md:190` records 335 non-blank lines verified present. The dispatch's
+   path for it is wrong.
+3. `SCREENSHOT-MANIFEST.md` is no longer a file either. The dispatch's second path guess is wrong
+   in the same way; its content is absorbed into `DESIGN-CORPUS.md` and summarised at
+   `INDEX.md:22`.
+4. `signatures.json` holds 1,160 entries and `docs/game-screenshots/` holds 1,159 files. The
+   unresolvable entry is `Screenshot 2026-07-14 185506.png`. Either the frame was deleted after
+   the signature pass or it never landed; the signature is otherwise load-bearing and the gap
+   should be named to the extraction agent rather than discovered by it.
+5. `_scratch/web/` and `_scratch/legacy_crops/` are empty. `WEB-FINDINGS.md` says its screenshots
+   were copied into `./web/`, and that directory has nothing in it, so where the web captures live
+   now is unverified.
+
+### 4. Citation forms
+
+Use these forms verbatim in downstream notes. Each one resolves to a specific datum.
+
+- `per docs/design-research/_scratch/tokens.json, ramps.<name>.<step>` for a ramp value, for
+  example `ramps.action-green.700` resolves to `#68A713`.
+- `per docs/design-research/_scratch/tokens.json, anchors.<name>` for a measured anchor, for
+  example `anchors.mood-great` resolves to `#FB5590`.
+- `per docs/design-research/_scratch/tokens.json, contrast["<pair>"]` for a measured contrast
+  ratio, for example `contrast["white on confirm-green"]` resolves to `5.17`.
+- `per docs/design-research/_scratch/signatures.json, entry "Screenshot 2026-07-14 194819.png"`
+  for a frame signature. Add the field: `(lum 229, sat 14, cells[16])`.
+- `per docs/design-research/_scratch/clusters.json, record with "rep": "<filename>"` for a
+  cluster, and reach its members through that record's `members` array.
+- `per docs/design-research/_scratch/accents.json, key "<group>", accent hue <n>` for an accent,
+  for example key `training-green`, hue 345, peak `#A8273F`.
+- `per docs/design-research/_scratch/colorprobes.json, key "<group>", probe "<name>"` for a point
+  probe, for example key `training-screen-green-theme`, probe `discipline-banner-fill(Dirt)`, hex
+  `#52C518` at `[150, 207]`.
+- `per docs/design-research/_scratch/colorprobes2.json, key "<group>", row "<name>"` for a hex
+  pair, for example key `log-and-skill-learn`, row `log-header-lattice-dark`, hex `#6ABE01`.
+- `per docs/research-scratch/DESIGN-CORPUS.md, section "## WEB-FINDINGS.md", line <n>` for a web
+  measurement. The section starts at line 4227.
+- Dark theme values: cite `resources/css/app.css` by line inside the `html[data-theme='dark']`
+  block that starts at line 228. There is no JSON artefact for the dark theme.
+
+### 5. The `signatures.json` mapping rule
+
+It is a JSON list of 1,160 records, not a mapping. Record `i` runs 0 to 1,159 in the triage run's
+order; that order is not the directory listing order and must not be used as an index into
+`docs/game-screenshots/`. The binding field is `"name"`, which holds the exact filename of the
+frame the signature describes, so the frame a signature reaches is
+`docs/game-screenshots/<name>`. 1,159 of 1,160 names resolve to a file on disk; the one exception
+is named in section 3. A downstream note that wants the frame behind a measurement loads the list,
+filters by `"name"`, and cites the entry by that name.
+
+Each record measures one whole frame: `w` and `h` are pixel dimensions, `mean` is the mean RGB as
+a three-element list, `lum` is mean luminance 0 to 255, `sat` is mean saturation 0 to 255, and
+`cells` is sixteen luminance values for a 4 by 4 grid read left to right, top to bottom. Example,
+the first record: `Screenshot 2026-07-14 025344.png` is 1920 by 1080, mean RGB `[227, 231, 224]`,
+luminance 229, saturation 14. What it does not measure: colour identity, text content, UI region,
+scenario, or anything spatial beyond the 16 cells. For per-region colour the probes and accents
+files are the right citation; for which frames look alike, clusters.
+
+### 6. The missing-frame record (added 2026-10-03 by the Phase A closure pass)
+
+The frame named in section 3 item 4, `Screenshot 2026-07-14 185506.png`, is worse than an
+unreadable signature: it is a **cluster representative**. `clusters.json` holds exactly one record
+whose `rep` matches it, and that record is a singleton:
+
+- `rep`: `Screenshot 2026-07-14 185506.png`
+- `count`: 1; the `members` list contains the representative alone, so there are no sibling frames
+  to re-elect.
+- On disk today: 0 of 1 members. The group's only frame is absent from `docs/game-screenshots/`
+  and was never committed to git history (`git log --all -- 'docs/game-screenshots/Screenshot
+  2026-07-14 185506.png'` returns nothing).
+- Its signature survives in `signatures.json`: 613 by 456, luminance 229, saturation 37.
+
+This is therefore a group that **cannot be extracted at all**: no frame to read, no member to
+re-elect, and no source to recover the pixels from. The CSV row that Phase A wrote for it
+(`research-scratch/screenshots-inventory.csv`, `hash_group` = the rep name, 613 by 456, category
+`other`, `first_seen` untracked) names a path that does not resolve.
+
+Instruction to the extraction agent: **skip this group**. Record the skip in the extraction report
+by name, with the reason "representative missing from disk, singleton group, unrecoverable". Do
+not fabricate a note for it, and do not substitute another frame into the group: the cluster
+boundary came from the perceptual pass, and inventing a replacement member would break the
+one-frame-per-group invariant that `clusters.json` guarantees.
+
+**Unlocated second failure.** An earlier pass recorded two frames returning "no content" from the
+image read. Only the first, `Screenshot 2026-07-14 185506.png`, has been identified; the second is
+unnamed in every file available to this pipeline. Instruction to the extraction agent: treat any
+"no content" or error response from the image read as a skip with a recorded reason, not as a
+pipeline block. Name the frame, the tool, and the exact error in the extraction report, then
+continue with the next group. A single unreadable frame in a fifty-frame or 751-frame pass does not
+invalidate the pass; a pass that stops on the first unreadable frame and does not resume does.
+Added 2026-10-03 by the closure pass. Do not search for the second frame: the search would need to
+read every frame's tool output across previous sessions, which is outside the pipeline's fence, and
+the operating instruction converts the unknown into a handled case.
+
+The same paragraph carries one more clause, added 2026-10-03 by the Phase B restructuring pass:
+**if five or more consecutive frames return the same "no content" or error response, stop and
+report rather than continue.** Five consecutive identical failures is a wrong-tool, wrong-path, or
+wrong-permission signature, not a run of unreadable frames, and continuing past it produces a report
+full of skips for one cause. Five is a chosen threshold, not a derived one: no measurement in this
+file or in `_scratch/` yields it, and it is not tunable from corpus statistics. No other stop
+condition in the repository names a count of failed reads, so nothing here is superseded; the
+comparable `stop and report` clauses at `docs/research-scratch/CATALOG-ROSTER-WORKSTREAM.md:2076`
+and `docs/research-scratch/PLANS-AND-BRIEFS.md:90` are unconditional and carry no number. If a peer
+later writes a threshold for this pipeline, that one stands and this clause defers to it.
+
+### 7. The Phase B scope question (for the user, unresolved)
+
+Phase A produced **8** in-scope rows out of 751 (measured over the CSV's `category` column: training
+3, race-entry 2, skill-selection 1, character-detail 1, career-progression 1), because the manifest
+categorizes screen types with representative frames and filenames carry no semantic information (the
+manifest itself says so). An extraction agent that filters the CSV's `category` column would process
+8 frames and report complete, which would be a false completion. The Phase B prompt is not written
+until the user picks one of the two options below. Corrected 2026-10-03 by the restructuring pass:
+an earlier revision of this section said 7 in-scope rows, which contradicted both this section's own
+"743 `other` rows" and the section 1 footnote's 8 in-bucket. The filter returns 8.
+
+**Option 1: process all 751 cluster representatives.** The extraction agent categorizes each frame
+inside its own note, superseding the CSV's `category` column for the 743 `other` rows, and the
+inventory becomes accurate as a byproduct. Cost: roughly 750k to 1.5M vision tokens at 1k to 2k per
+frame, and hours rather than minutes of read time.
+
+**Option 2: the 46-frame stratum-plus-manifest pass.** The set is a union of two already-measured
+sets, recounted 2026-10-03 rather than estimated at "roughly 50" as an earlier draft did. The
+manifest counts 173 full-desktop files, 44 distinct after dedupe, and `signatures.json` confirms it:
+exactly **44** cluster representatives at 1920 by 1080, matching the manifest with no delta. The
+manifest's screen-type table grounds **8** representatives. The intersection is **6**, so the union
+is `44 + (8 - 6) = 46`. The two frames outside the stratum are the Training HUD representatives
+`Screenshot 2026-07-14 194819.png` (730 by 986) and `Screenshot 2026-07-14 202142.png` (721 by 993):
+both are portrait crops, which is precisely why the full-desktop stratum does not contain them. A
+previous revision of this section asserted the opposite, that they were "already inside the 44", and
+that clause was wrong in the direction that mattered; it is corrected here, not carried forward. The
+category spread of the 44 is not concentrated: training 1, skill-selection 1, character-detail 1,
+career-progression 1, race-entry 2, and 38 still uncategorized `other`.
+
+This section is two options wide because of a merge. An earlier draft offered the bare 44-frame
+stratum and the 46-frame union as separate choices; merging them is Resolution A, applied here, on
+the grounds that the gap between them is two frames and a two-frame gap is not a decision worth
+spending the reader's on. Resolution B, keeping the stratum and the union apart as a third and
+fourth framing, is the alternative and is not carried forward.
+
+Recommendation: **Option 2, 46 frames.** The lead reason is coverage. Option 2 is the only option
+that includes both Training HUD representatives, and `docs/research-scratch/DESIGN-CORPUS.md:4199`
+describes what those two frames hold: turn chip, date strip, goal row, Energy gauge, mood pill,
+discipline banner, six-column stat band, gain bubbles, Failure badge, five discipline buttons and the
+support card rail. That is the densest surface in the corpus, and a pass built from the stratum alone
+could not see it at all; the 46-frame set closes that hole for two frames of read cost. The cost
+argument is the second reason, not the first: 46 frames sits an order and a half to two orders under
+Option 1's 751, and Phase A's 8-in-751 in-scope count makes a full pass disproportionate to what the
+synthesis pass needs. Option 2's residual weakness is thinness rather than absence, skill-selection
+and character-detail each arrive with one representative, and section 8 is the rule that catches it.
+
+To restate the decision in one place: **Option 2 at 46 frames is recommended, Option 1 at all 751
+representatives is the alternative, and section 8's coverage gate sequences what happens after either
+option runs without choosing between them.** The user decides; this note does not resolve it.
+
+### 8. The Phase B to Phase C coverage gate (sequencing rule, added 2026-10-03)
+
+Phase B is graded by whether the categories the run page needs came back with enough notes to
+synthesize from, not by how many frames it read. Count notes per in-scope category in the extraction
+report, then take one of two branches:
+
+- **Expand:** any in-scope category with fewer than three notes. The pass ran and left a category
+  that cannot support a synthesis claim. Widen the sample inside the 743 `other` rows for that
+  category, re-run, and re-count.
+- **Proceed:** all in-scope categories at three or more notes. Phase C may start.
+
+The in-scope categories are the CSV's non-`other` values, measured 2026-10-03 to be five: training,
+race-entry, skill-selection, character-detail, career-progression. "Notes" means extraction notes
+rather than CSV rows, so the two counts are not interchangeable: the CSV is the inventory, this gate
+measures coverage.
+
+Before Phase B runs, four of the five categories hold fewer than three rows and only training clears
+the floor, so an expansion after a 46-frame pass is the expected outcome and not a failure signal. A
+pass returning three notes across all five categories is done; a pass returning 46 notes concentrated
+in training is not. The gate does not choose between section 7's options, and the three-note floor is
+the owner's threshold supplied with this dispatch, not a figure derived from the corpus.

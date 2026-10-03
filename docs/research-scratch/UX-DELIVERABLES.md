@@ -2736,6 +2736,8 @@ Per root `CONSTRAINTS.md` C-7 and PRD `ARCHITECTURE.md` §7, every data region i
 | Target size          | 44px minimum on anything clickable                                                             |
 | Color independence   | Every state carries a word. Grade badges show the letter. Deltas show sign and direction word. |
 | Keyboard             | Guided flow fully operable without pointer. Turn timeline is a list with roving focus.         |
+
+**Amended 2026-10-03: the WCAG 2.1 AA mandate this contract cites is superseded. WCAG 2.2 Level AA is the operative mandate, per the owner's ruling of 2026-10-03.**
 | Screen readers       | Stat band is a table or list with explicit labels. Gain bubbles are `aria-live="polite"`.      |
 | Decorative exclusion | Faceted page field and lattice bleed are decorative CSS, not exposed to assistive technology.  |
 

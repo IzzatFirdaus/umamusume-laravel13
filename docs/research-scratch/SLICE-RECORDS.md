@@ -4423,6 +4423,8 @@ are box reads from a rendered page.
    hold: D-10 mandates **WCAG 2.1 AA**, and 2.1 has no target-size criterion at all. Per R84 this is
    withdrawn on scope, not on arithmetic â€” it cites an obligation that does not exist here, in a sentence
    written as though it did.
+
+   **Amended 2026-10-03: WCAG 2.2 Level AA is the operative mandate. The 2.1 AA reasoning in this paragraph stands as superseded, per the owner's ruling of 2026-10-03.**
 4. **"The diff that slice is one view file."** True, and it is a `git diff --stat` fact, not a browser
    fact. It exonerates the slice's *diff*; it says nothing about whether the pre-existing overflow is
    reachable, which is the question KI-25 actually carries.

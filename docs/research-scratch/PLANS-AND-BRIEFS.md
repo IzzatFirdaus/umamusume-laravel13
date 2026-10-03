@@ -154,6 +154,8 @@ reconciliation is a ruling to be landed, not a negotiation to be had), R83 (the 
 work, and the approved kind mapping was wrong), R84 (WCAG 2.1 AA is the mandate; 24×24 is not an obligation
 here), R85 (no claim may rest on rendered attributes when it is about behaviour).
 
+**Amended 2026-10-03: WCAG 2.2 Level AA is the operative mandate. The R84 2.1 AA text above stands as the superseded ruling; see the owner's decision of 2026-10-03.**
+
 Every figure below is either a browser read, a computed value from a named token, or marked
 **[Unverified]** with the reason. Nothing is carried over from a previous slice's prose.
 
@@ -214,6 +216,8 @@ stop disagreeing by removing the newer one rather than by amending the older.
 #### 3. The Spark token cost (R83) [Full section omitted for brevity; see source file for colour mapping, D-10 compliance table, and token cost analysis]
 
 #### 4. WCAG scope (R84) [Full section omitted for brevity; see source file for WCAG 2.1 AA mandate, 24×24 scope clarification, and measured control sizes]
+
+**Amended 2026-10-03: this section's WCAG 2.1 AA mandate is superseded by the owner's ruling of 2026-10-03. WCAG 2.2 Level AA is now the operative mandate.**
 
 #### 5. The Legacy premise, narrowed [Full section omitted for brevity; see source file for read-only vs read/write panel analysis, three concrete obstacles]
 
