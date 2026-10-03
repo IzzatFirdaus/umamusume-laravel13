@@ -359,13 +359,18 @@
                        class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
             </label>
             <label class="flex flex-col gap-1">
-                <span class="font-medium text-ink">Energy</span>
+                {{-- O-3: the field takes the post-turn reading the client shows, not a delta.
+                     The controller's preview subtracts the previous turn's stored total from this
+                     value to print the per-turn change, so the number on screen after the preview
+                     is the change even though the value entered is the total. Naming the total on
+                     the label is what removes the ambiguity O-3 found. --}}
+                <span class="font-medium text-ink">Energy (after this turn)</span>
                 <input type="number" name="energy" min="0" max="100" value="{{ $guided['values']['energy'] ?? '' }}"
                        placeholder="{{ $guided['previous']?->energy ?? 'no logged turn' }}"
                        class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
             </label>
             <label class="flex flex-col gap-1">
-                <span class="font-medium text-ink">Fans</span>
+                <span class="font-medium text-ink">Fans (after this turn)</span>
                 <input type="number" name="fans" min="0" value="{{ $guided['values']['fans'] ?? '' }}"
                        placeholder="{{ $guided['previous']?->fans ?? 'no logged turn' }}"
                        class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
