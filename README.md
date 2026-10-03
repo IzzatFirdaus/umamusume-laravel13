@@ -81,6 +81,23 @@ Keep the app on loopback; it has no auth surface and must not be exposed (`ARCHI
 
 Windows note: do not use `make`. GNU make cannot run on this host (KI-4); the `Makefile` targets are documentation. Use the `composer` scripts and direct `php artisan` / `vendor/bin` commands below.
 
+### Serving for a browser pass
+
+`.env` sets `SESSION_DRIVER=database` and `CACHE_STORE=database` (`.env:28`, `.env:38`), so every page
+load writes session and cache rows into `database/database.sqlite`. That file is shared: a browser pass
+against the default server mutates state other sessions hold open and moves the domain fingerprint that
+exists to detect exactly that. Serve with both stores on files instead:
+
+```bash
+composer serve:browser                                # or, in a POSIX shell:
+SESSION_DRIVER=file CACHE_STORE=file php artisan serve
+```
+
+Use `file`, not `array`: the array driver does not carry the CSRF token between the GET that renders a
+form and the POST that submits it, so every form in the pass comes back a 419. `phpunit.xml` forces
+`array` for the test suite, which is the right choice there and the wrong one for a browser. The
+shared database stays untouched, so the before-and-after fingerprint comparison means something.
+
 ## Fetch Engine
 
 Seven sources are declared in `config/uma.php`: `gametora-characters`, `gametora-character-cards`, `gametora-race-catalog`, `gametora-skills`, `gametora-character-profiles`, `gametora-support-cards`, `gametora-support-effects`. Four of them resolve the document URL through the publisher's manifest first (two requests per fetch), keeping the pinned URL as an offline fallback; KI-24 measured that a stale pinned hash answers `200` with the superseded document, so manifest resolution is the freshness defense.
