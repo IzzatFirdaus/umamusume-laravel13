@@ -143,49 +143,55 @@
         heading gets the calendar rather than the turn-log wrapper (O-4).
     --}}
     @if ($run->hasScenario())
-        <section aria-label="Race calendar" class="mt-2">
-            @php
-                $panelScenario = $run->scenarioKey();
-                // The year is address state, not view state: a Trainer should be able
-                // to link "her Classic spring", and back should not drop the tab.
-                // Clamped because the query string is user input, in one place the race
-                // panel reads the same way.
-                $calendarYear = $run->careerYearForTab(request('year'));
-                // The turn being decided carries its own year, so the outline belongs to
-                // whichever tab holds it rather than to the year of the last logged turn.
-                $nextTurn = $run->nextTurnToPlay();
-            @endphp
-            <x-race-calendar
-                :scenario="$panelScenario"
-                :cells="$run->calendarCells($calendarYear)"
-                :year="$calendarYear"
-                :next-turn="$nextTurn !== null && $calendarYear === $nextTurn['year'] ? $nextTurn['turn'] : null"
-                class="mt-3" />
-            <x-grade-point-meter
-                :scenario="$panelScenario"
-                :objectives="$run->gradeObjectives()"
-                :current="$run->currentPeriodPosition()"
-                :earned="$run->gradeEarned()"
-                :unpriced-count="$run->gradeUnpricedCount()"
-                :periods="$run->gradePeriods()"
-                :unassigned-count="$run->gradeUnassignedCount()"
-                class="mt-3"
-            />
-            {{-- Self-gating on `panels.shop`, which only Trackblazer opens. It sits with the
-                 other scenario panels rather than with the turn log because it describes the
-                 run's resources, not one turn. --}}
-            <x-shop-panel :run="$run" class="mt-3" />
-            {{-- Every panel below self-gates on the composition matrix, so a scenario that
-                 does not open a mechanic renders nothing rather than an empty frame: these
-                 are Trackblazer and Unity Cup surfaces, and an URA run must not show either
-                 (D-221, D-241, gate G-34). --}}
-            <x-race-panel :run="$run" :slots="$raceSlots" :entry-mode="$entryMode" class="mt-3" />
-            <x-team-rank-gauge :run="$run" class="mt-3" />
-            <x-spirit-burst-roster :run="$run" class="mt-3" />
-            <x-team-race-panel :run="$run" class="mt-3" />
-            <x-epithet-checklist :run="$run" class="mt-3" />
-            <x-race-fatigue-chip :run="$run" class="mt-3" />
-        </section>
+        @php
+            $panelScenario = $run->scenarioKey();
+            // The year is address state, not view state: a Trainer should be able
+            // to link "her Classic spring", and back should not drop the tab.
+            // Clamped because the query string is user input, in one place the race
+            // panel reads the same way.
+            $calendarYear = $run->careerYearForTab(request('year'));
+            // The turn being decided carries its own year, so the outline belongs to
+            // whichever tab holds it rather than to the year of the last logged turn.
+            $nextTurn = $run->nextTurnToPlay();
+        @endphp
+        {{-- The calendar is its own section, and only when the scenario composes it. The
+             component self-gates to nothing otherwise, so a wrapper that always carried the
+             "Race calendar" label would claim the panel for a scenario that has none
+             (D-221, D-241, gate G-34). --}}
+        @if (config('scenarios.scenarios.'.$panelScenario.'.panels.race_calendar') === true)
+            <section aria-label="Race calendar" class="mt-2">
+                <x-race-calendar
+                    :scenario="$panelScenario"
+                    :cells="$run->calendarCells($calendarYear)"
+                    :year="$calendarYear"
+                    :next-turn="$nextTurn !== null && $calendarYear === $nextTurn['year'] ? $nextTurn['turn'] : null"
+                    class="mt-3" />
+            </section>
+        @endif
+        <x-grade-point-meter
+            :scenario="$panelScenario"
+            :objectives="$run->gradeObjectives()"
+            :current="$run->currentPeriodPosition()"
+            :earned="$run->gradeEarned()"
+            :unpriced-count="$run->gradeUnpricedCount()"
+            :periods="$run->gradePeriods()"
+            :unassigned-count="$run->gradeUnassignedCount()"
+            class="mt-3"
+        />
+        {{-- Self-gating on `panels.shop`, which only Trackblazer opens. It sits with the
+             other scenario panels rather than with the turn log because it describes the
+             run's resources, not one turn. --}}
+        <x-shop-panel :run="$run" class="mt-3" />
+        {{-- Every panel below self-gates on the composition matrix, so a scenario that
+             does not open a mechanic renders nothing rather than an empty frame: these
+             are Trackblazer and Unity Cup surfaces, and an URA run must not show either
+             (D-221, D-241, gate G-34). --}}
+        <x-race-panel :run="$run" :slots="$raceSlots" :entry-mode="$entryMode" class="mt-3" />
+        <x-team-rank-gauge :run="$run" class="mt-3" />
+        <x-spirit-burst-roster :run="$run" class="mt-3" />
+        <x-team-race-panel :run="$run" class="mt-3" />
+        <x-epithet-checklist :run="$run" class="mt-3" />
+        <x-race-fatigue-chip :run="$run" class="mt-3" />
     @endif
 
     {{-- The log: everything that grows with the run, scrolling under the pinned state. --}}
@@ -495,7 +501,7 @@
          names it rather than denying it (R-6). --}}
     <p class="mt-2 max-w-3xl text-xs text-ink-muted">
         SP is the cost the source states for that skill. Hint-level discounts follow the ladder recorded in
-        docs/research-scratch/SKILLS-MECHANICS.md §2.4: 10 / 20 / 30 / 35 / 40 percent at Lv1 through Lv Max.
+        docs/research-scratch/SKILLS-MECHANICS.md §2.4: 10, 20, 30, 35 and 40 percent at Lv1 through Lv Max.
         {{-- G-SK-13: this select lists every Global row, which is the reason Screen D exists. Linking out
              is the honest statement that the list is too long to scan, and it costs no new mechanism. --}}
             <a href="{{ route('skills.index') }}" class="inline-flex min-h-11 items-center underline">Search the skill catalog</a>
@@ -511,6 +517,30 @@
     @php
         $skillRows = $run->skills->sortBy('name')->values();
         $rowTotal = max(1, $skillRows->count() + 1);
+
+        /*
+         * One skill list, not ten. Each row used to carry the whole catalogue, measured here as
+         * 6,270 option nodes for the run page's ten `skill_id` selects. The deck fix landed the
+         * same shape one file over: one open picker, the rest closed, each closed row posting a
+         * hidden input under the same field name and offering a query-string link to open it. The
+         * open row is the one the query names, else the one a rejected submission put an error
+         * beside, else the first. The POST contract is unchanged: the same keys and values the
+         * server received before, one `skill_id`, one `status` and one `turn_acquired` per row.
+         */
+        $requestedRow = request()->has('skill_row') ? (int) request('skill_row') : null;
+        $erroredRow = null;
+
+        for ($row = 0; $row < $rowTotal; $row++) {
+            if ($errors->has("skills.{$row}.skill_id")) {
+                $erroredRow = $row;
+
+                break;
+            }
+        }
+
+        $openRow = ($requestedRow !== null && $requestedRow >= 0 && $requestedRow < $rowTotal)
+            ? $requestedRow
+            : ($erroredRow ?? 0);
     @endphp
 
     <form method="POST" action="{{ route('runs.skills.sync', $run) }}" class="mt-4 max-w-3xl space-y-3 rounded-md border border-rule bg-raised p-4 text-sm">
@@ -566,17 +596,30 @@
                  value, which is every row on a pre-populated run. --}}
             <div class="flex flex-wrap items-end gap-3">
                 <div class="flex flex-col gap-1">
-                    <label for="skill-{{ $row }}-id" class="text-ink-muted">Skill</label>
-                    <select id="skill-{{ $row }}-id" name="skills[{{ $row }}][skill_id]" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green">
-                        <option value="">Choose a skill</option>
-                        @foreach ($skills as $skill)
-                            {{-- The cost is in the label because the choice being made is a spending
-                                 choice: a Trainer planning a build picks partly on what the skill
-                                 costs, and the catalogue has been stating that figure since the
-                                 import (FR-D-1). --}}
-                            <option value="{{ $skill->id }}" @selected((string) $selectedSkillId === (string) $skill->id)>{{ $skill->name }}@if ($skill->sp_cost !== null) · {{ $skill->sp_cost }} SP @endif</option>
-                        @endforeach
-                    </select>
+                    @if ($row === $openRow)
+                        <label for="skill-{{ $row }}-id" class="text-ink-muted">Skill</label>
+                        <select id="skill-{{ $row }}-id" name="skills[{{ $row }}][skill_id]" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green">
+                            <option value="">Choose a skill</option>
+                            @foreach ($skills as $skill)
+                                {{-- The cost is in the label because the choice being made is a spending
+                                     choice: a Trainer planning a build picks partly on what the skill
+                                     costs, and the catalogue has been stating that figure since the
+                                     import (FR-D-1). --}}
+                                <option value="{{ $skill->id }}" @selected((string) $selectedSkillId === (string) $skill->id)>{{ $skill->name }}@if ($skill->sp_cost !== null) · {{ $skill->sp_cost }} SP @endif</option>
+                            @endforeach
+                        </select>
+                    @else
+                        {{-- A closed row still posts its own value and still reads back the skill the
+                             Trainer chose; the catalogue is one click away, and it is a link rather
+                             than a control so the screen has one option list at a time. --}}
+                        <span class="text-ink-muted">Skill</span>
+                        <p class="flex flex-wrap items-baseline gap-x-2 text-sm">
+                            <span class="text-ink">{{ $skills->firstWhere('id', (int) $selectedSkillId)?->name ?? 'Not chosen' }}</span>
+                            <a href="{{ request()->fullUrlWithQuery(['skill_row' => $row]) }}"
+                               class="inline-flex min-h-11 items-center underline">Change row {{ $row }}</a>
+                        </p>
+                        <input type="hidden" name="skills[{{ $row }}][skill_id]" value="{{ $selectedSkillId }}">
+                    @endif
                     @error($skillIdError)
                         <p class="text-risk">{{ $message }}</p>
                     @enderror
