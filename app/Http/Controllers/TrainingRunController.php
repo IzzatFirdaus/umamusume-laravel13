@@ -643,6 +643,16 @@ class TrainingRunController extends Controller
         DB::transaction(function () use ($run, $validated): void {
             $entry = $run->turnEntries()->create($this->turnAttributes($validated));
 
+            // An event is keyed on `(training_run_id, turn)` with no `turn_entry_id`, so a row at a
+            // number a deleted turn used inherits that turn's event, and the page's Failed chip is
+            // built from exactly that key. Cleared before any new event is written, and cleared
+            // whether or not this turn failed: a success at a reused number has to shed the orphan
+            // just as a failure has to replace it.
+            $run->turnEvents()
+                ->where('turn', $entry->turn)
+                ->where('event_type', TurnEventType::Failure)
+                ->delete();
+
             if (($validated['outcome'] ?? null) === 'Failure') {
                 $label = $this->choiceLabel((string) ($validated['choice'] ?? ''));
                 $kind = (string) $validated['penalty_kind'];
@@ -708,7 +718,19 @@ class TrainingRunController extends Controller
     {
         abort_unless($turn->training_run_id === $run->id, 404);
 
-        $turn->delete();
+        // The row and its failure event go together. The event is keyed on `(training_run_id, turn)`
+        // rather than on the row, so leaving it behind hands its Failed chip to whichever turn later
+        // takes the number (SCREEN_SPEC.md §7-2). Scoped to the failure type because a shop purchase
+        // is stored on this same key by `storePurchase` as a `Scenario` event, and deleting a turn
+        // is not a ruling on that record. One transaction, so a half delete cannot strand either row.
+        DB::transaction(function () use ($run, $turn): void {
+            $run->turnEvents()
+                ->where('turn', $turn->turn)
+                ->where('event_type', TurnEventType::Failure)
+                ->delete();
+
+            $turn->delete();
+        });
 
         return redirect()->route('runs.show', $run)->with('status', 'Turn '.$turn->turn.' removed.');
     }
