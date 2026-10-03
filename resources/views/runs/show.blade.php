@@ -391,7 +391,10 @@
         @endif
     </x-guided-step>
 
-    @error('previewed')<p class="mt-2 max-w-3xl text-sm text-risk">{{ $message }}</p>@enderror
+    {{-- One envelope for both kinds of error: the `previewed` request-stage marker renders as a
+         list item like any per-field error does, because one treatment is easier to read than two
+         (static review F-04). `$errors->all()` already carries the previewed message alongside the
+         field messages. --}}
     @if ($errors->any() && $errors->hasAny(['turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'energy', 'mood', 'fans', 'choice', 'outcome', 'penalty_kind', 'previewed']))
         <ul class="mt-2 max-w-3xl list-disc pl-6 text-sm text-risk">
             @foreach ($errors->all() as $error)
