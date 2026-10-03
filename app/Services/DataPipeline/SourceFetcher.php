@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\DataPipeline;
 
+use Illuminate\Http\Client\HttpClientException;
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -151,11 +152,25 @@ final class SourceFetcher
 
         try {
             $response = $this->request($sourceConfig)->get($url);
-        } catch (RequestException) {
+        } catch (HttpClientException $e) {
+            // Widened from `RequestException` on purpose: on this framework version a connection failure is
+            // a `ConnectionException`, which is a sibling, not a subtype, so the old catch let a DNS or
+            // timeout fault escape `fetch()` and crash the whole `uma:fetch` run instead of failing one
+            // source. `HttpClientException` is the parent of both, and null is the contract every caller
+            // already handles. The log line is the half that was missing (N-3): `->retry(..., throw: false)`
+            // means a spent timeout used to arrive here and leave without a word.
+            Log::warning("Fetch of '{$url}' failed: ".$e->getMessage());
+
             return null;
         }
 
-        return $response->failed() ? null : $response->body();
+        if ($response->failed()) {
+            Log::warning("Fetch of '{$url}' answered {$response->status()}.");
+
+            return null;
+        }
+
+        return $response->body();
     }
 
     /**
