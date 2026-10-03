@@ -60,50 +60,56 @@
         <p class="mt-2 text-sm text-ink-muted">{{ $run->notes }}</p>
     @endif
 
-    {{-- The pinned region holds exactly what D-170 names: the turn, the scenario, Energy
-         and Fans in the strip, and the band under it. Measured before this narrowing,
-         pinning the identity block with them made the pinned box 613px tall on a 900px
-         viewport, which left a Trainer 287px of log to read - the frame meant to keep the
-         totals in view had instead taken the screen from the thing they are read against.
-         The h1 carries the same scenario word the strip already prints, so nothing named
-         by the rule is what gave way. --}}
-    <section aria-label="Run state" class="bg-page lg:sticky lg:top-0 lg:z-10 lg:py-3">
-        {{-- Composed from the run's scenario (D-220). A run that names no scenario
-             resolves to the baseline strip rather than to no strip at all, and a value
-             the run has not recorded renders as unrecorded rather than as a default. --}}
-        <h2 class="text-lg font-semibold text-ink-strong">Resources</h2>
-        <x-resource-strip :scenario="$run->scenarioKey()" :declared="$run->hasScenario()" :run="$run->stripValues()" class="mt-3" />
+    {{-- The pinned region is the Resources strip alone (O-2). Pinning the whole state block
+         took two thirds of the viewport at 1024x720 and 1280x800, leaving the forms below the
+         remainder; Stats scrolls with the log, and Mood sits with the strip values because it
+         is 25px and belongs with them (O-4). The strip is the part D-170 names that benefits
+         from staying in view: turn, Energy, fans and the Unity Cup counters.
+
+         `lg:contents` at the breakpoint removes this wrapper's box so the sticky strip's
+         containing block is the page rather than the short state block, which is what lets it
+         stay pinned over the log. Below `lg` the wrapper is an ordinary block and nothing is
+         sticky. The section stays in the DOM, so the frame pins' containment still holds. --}}
+    <section aria-label="Run state" class="bg-page lg:contents">
+        <section aria-label="Resources" class="bg-page lg:sticky lg:top-0 lg:z-10 lg:py-2">
+            {{-- Composed from the run's scenario (D-220). A run that names no scenario
+                 resolves to the baseline strip rather than to no strip at all, and a value
+                 the run has not recorded renders as unrecorded rather than as a default. --}}
+            <h2 class="text-lg font-semibold text-ink-strong">Resources</h2>
+            <x-resource-strip :scenario="$run->scenarioKey()" :declared="$run->hasScenario()" :run="$run->stripValues()" class="mt-3" />
+
+            {{-- Mood is the trainee's state, not a turn's detail, and at 25px it belongs with
+                 the strip values rather than in a section of its own (O-4). It reads the latest
+                 logged turn for the same reason the band does. A turn that stored no tier says
+                 "not recorded" rather than defaulting to NORMAL, which would be a claim about a
+                 trainee nobody asked about (D-220). --}}
+            @if ($band !== null)
+                <div class="mt-2 flex flex-wrap items-baseline gap-2">
+                    <span class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Mood</span>
+                    <x-mood-pill :tier="$currentMood" unrecorded="not recorded" />
+                </div>
+            @endif
+        </section>
 
         {{-- The stat band is the trainee's current numbers, so it belongs beside the run's
              current resources and above anything that talks about a single turn. It reads the
              latest logged turn: the run's state is what the last turn ended at, not an average
              of the log. No logged turn means no band at all, because five zeroes would be a
-             claim about a trainee nobody entered (D-220). --}}
+             claim about a trainee nobody entered (D-220). It scrolls with the log rather than
+             pinning (O-2). --}}
         @if ($band !== null)
-            <h2 class="mt-6 text-lg font-semibold text-ink-strong">Stats</h2>
-            <x-stat-band
-                :scenario="$band['scenario']"
-                :caps="$band['caps']"
-                :values="$band['values']"
-                :skill-points="$band['skillPoints']"
-                class="mt-3"
-            />
-        @endif
-
-        {{-- Mood is the trainee's state, not a turn's detail, so it belongs in the region
-             that stays on screen. It reads the latest logged turn for the same reason the
-             band does. A turn that stored no tier says "not recorded" rather than defaulting
-             to NORMAL, which would be a claim about a trainee nobody asked about (D-220). --}}
-        @if ($band !== null)
-            <h2 class="mt-6 text-lg font-semibold text-ink-strong">Mood</h2>
-            <div class="mt-3">
-                <x-mood-pill :tier="$currentMood" unrecorded="not recorded" />
-            </div>
+            <section aria-label="Stats">
+                <h2 class="mt-6 text-lg font-semibold text-ink-strong">Stats</h2>
+                <x-stat-band
+                    :scenario="$band['scenario']"
+                    :caps="$band['caps']"
+                    :values="$band['values']"
+                    :skill-points="$band['skillPoints']"
+                    class="mt-3"
+                />
+            </section>
         @endif
     </section>
-
-    {{-- The log: everything that grows with the run, scrolling under the pinned state. --}}
-    <section aria-label="Turn log" class="mt-2">
 
     {{--
         The goal panel, and there is at most one. A scenario with mandatory race
@@ -123,50 +129,58 @@
         name specific races and specific deadlines, and borrowing the baseline's
         schedule would tell a Trainer their race calendar is Oka Sho when they have
         not picked a scenario at all (D-220, D-221).
+
+        It is its own section so a reader asking for the region of the calendar's own
+        heading gets the calendar rather than the turn-log wrapper (O-4).
     --}}
     @if ($run->hasScenario())
-        @php
-            $panelScenario = $run->scenarioKey();
-            // The year is address state, not view state: a Trainer should be able
-            // to link "her Classic spring", and back should not drop the tab.
-            // Clamped because the query string is user input, in one place the race
-            // panel reads the same way.
-            $calendarYear = $run->careerYearForTab(request('year'));
-            // The turn being decided carries its own year, so the outline belongs to
-            // whichever tab holds it rather than to the year of the last logged turn.
-            $nextTurn = $run->nextTurnToPlay();
-        @endphp
-        <x-race-calendar
-            :scenario="$panelScenario"
-            :cells="$run->calendarCells($calendarYear)"
-            :year="$calendarYear"
-            :next-turn="$nextTurn !== null && $calendarYear === $nextTurn['year'] ? $nextTurn['turn'] : null"
-            class="mt-3" />
-        <x-grade-point-meter
-            :scenario="$panelScenario"
-            :objectives="$run->gradeObjectives()"
-            :current="$run->currentPeriodPosition()"
-            :earned="$run->gradeEarned()"
-            :unpriced-count="$run->gradeUnpricedCount()"
-            :periods="$run->gradePeriods()"
-            :unassigned-count="$run->gradeUnassignedCount()"
-            class="mt-3"
-        />
-        {{-- Self-gating on `panels.shop`, which only Trackblazer opens. It sits with the
-             other scenario panels rather than with the turn log because it describes the
-             run's resources, not one turn. --}}
-        <x-shop-panel :run="$run" class="mt-3" />
-        {{-- Every panel below self-gates on the composition matrix, so a scenario that
-             does not open a mechanic renders nothing rather than an empty frame: these
-             are Trackblazer and Unity Cup surfaces, and an URA run must not show either
-             (D-221, D-241, gate G-34). --}}
-        <x-race-panel :run="$run" :slots="$raceSlots" :entry-mode="$entryMode" class="mt-3" />
-        <x-team-rank-gauge :run="$run" class="mt-3" />
-        <x-spirit-burst-roster :run="$run" class="mt-3" />
-        <x-team-race-panel :run="$run" class="mt-3" />
-        <x-epithet-checklist :run="$run" class="mt-3" />
-        <x-race-fatigue-chip :run="$run" class="mt-3" />
+        <section aria-label="Race calendar" class="mt-2">
+            @php
+                $panelScenario = $run->scenarioKey();
+                // The year is address state, not view state: a Trainer should be able
+                // to link "her Classic spring", and back should not drop the tab.
+                // Clamped because the query string is user input, in one place the race
+                // panel reads the same way.
+                $calendarYear = $run->careerYearForTab(request('year'));
+                // The turn being decided carries its own year, so the outline belongs to
+                // whichever tab holds it rather than to the year of the last logged turn.
+                $nextTurn = $run->nextTurnToPlay();
+            @endphp
+            <x-race-calendar
+                :scenario="$panelScenario"
+                :cells="$run->calendarCells($calendarYear)"
+                :year="$calendarYear"
+                :next-turn="$nextTurn !== null && $calendarYear === $nextTurn['year'] ? $nextTurn['turn'] : null"
+                class="mt-3" />
+            <x-grade-point-meter
+                :scenario="$panelScenario"
+                :objectives="$run->gradeObjectives()"
+                :current="$run->currentPeriodPosition()"
+                :earned="$run->gradeEarned()"
+                :unpriced-count="$run->gradeUnpricedCount()"
+                :periods="$run->gradePeriods()"
+                :unassigned-count="$run->gradeUnassignedCount()"
+                class="mt-3"
+            />
+            {{-- Self-gating on `panels.shop`, which only Trackblazer opens. It sits with the
+                 other scenario panels rather than with the turn log because it describes the
+                 run's resources, not one turn. --}}
+            <x-shop-panel :run="$run" class="mt-3" />
+            {{-- Every panel below self-gates on the composition matrix, so a scenario that
+                 does not open a mechanic renders nothing rather than an empty frame: these
+                 are Trackblazer and Unity Cup surfaces, and an URA run must not show either
+                 (D-221, D-241, gate G-34). --}}
+            <x-race-panel :run="$run" :slots="$raceSlots" :entry-mode="$entryMode" class="mt-3" />
+            <x-team-rank-gauge :run="$run" class="mt-3" />
+            <x-spirit-burst-roster :run="$run" class="mt-3" />
+            <x-team-race-panel :run="$run" class="mt-3" />
+            <x-epithet-checklist :run="$run" class="mt-3" />
+            <x-race-fatigue-chip :run="$run" class="mt-3" />
+        </section>
     @endif
+
+    {{-- The log: everything that grows with the run, scrolling under the pinned state. --}}
+    <section aria-label="Turn log" class="mt-2">
 
     <form method="POST" action="{{ route('runs.update', $run) }}" class="mt-4 flex max-w-3xl flex-wrap items-end gap-3 rounded-md border border-rule bg-raised p-4 text-sm">
         @csrf
@@ -427,6 +441,7 @@
         </form>
     </details>
 
+    <section aria-label="Skills">
     <h2 class="mt-10 text-lg font-semibold text-ink-strong">Skills</h2>
     @php
         $groups = ['Suggested', 'Acquired', 'Skipped'];
@@ -579,6 +594,7 @@
 
         <button type="submit" class="enamel h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Save skill status</button>
     </form>
+    </section>
 
     </section>
 
