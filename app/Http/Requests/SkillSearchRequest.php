@@ -32,6 +32,16 @@ class SkillSearchRequest extends FormRequest
      */
     public const UNSPECIFIED = 'Unspecified';
 
+    /**
+     * Where a refused facet lands (SCREEN_SPEC.md §7-9, ADR-0018). Support cards already named its
+     * route for this reason; leaving it unset sends the refusal to `previous()`, which is the
+     * referer when the browser supplies one and `/` when it does not, so the field error would
+     * arrive on the run list instead of beside the picker that caused it.
+     *
+     * @var string
+     */
+    protected $redirectRoute = 'skills.index';
+
     public function authorize(): bool
     {
         return true;

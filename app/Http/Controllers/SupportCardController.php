@@ -9,6 +9,7 @@ use App\Http\Requests\SupportCardSearchRequest;
 use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\Umamusume;
+use App\Services\PageSize;
 use App\Services\SupportCardEffects;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -32,12 +33,6 @@ use Illuminate\View\View;
  */
 class SupportCardController extends Controller
 {
-    /**
-     * The card list page size. A constant rather than a facet: nothing asks for a Trainer-chosen size
-     * here, and a size nobody can change is a size nobody has to reason about.
-     */
-    private const PER_PAGE = 25;
-
     public function index(SupportCardSearchRequest $request): View
     {
         $rarity = $request->validated('rarity');
@@ -45,8 +40,11 @@ class SupportCardController extends Controller
         $status = $request->validated('status');
         $sort = $request->validated('sort');
 
+        // §7-9 chose one page-size rule for all three surfaces over this screen's fixed constant,
+        // so `?pageSize=` honours and clamps here as it does on the catalog. The default is the
+        // number the constant carried, 25, so a filter nobody touched looks the same as before.
         $cards = $this->ordered($this->filtered($rarity, $type, $status), $sort)
-            ->paginate(self::PER_PAGE)
+            ->paginate(PageSize::clamp($request->query('pageSize')))
             ->withQueryString();
 
         return view('support-cards.index', [

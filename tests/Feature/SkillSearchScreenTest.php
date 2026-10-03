@@ -336,8 +336,12 @@ it('refuses a facet value the data has no such column for rather than ignoring i
     // Silently dropping an unknown `type` would answer a question nobody asked with the full catalog, which
     // is how a facet lies: the Trainer reads eight results as "these are the Speed skills". The form request
     // rejects it and the page comes back naming the field.
+    //
+    // Tightened to the canonical URL by ADR-0018: the bare `assertRedirect()` passed while the target was
+    // `previous()`, which resolves to the referer in a browser and to `/` in a test, so the refusal could
+    // land the Trainer on the run list with an error about a skill type.
     $this->get(route('skills.index', ['type' => 'Debuff']))
-        ->assertRedirect()
+        ->assertRedirect(route('skills.index'))
         ->assertSessionHasErrors('type');
 
     // The whole derivable set, so an option added to the form without a value behind it is visible here.

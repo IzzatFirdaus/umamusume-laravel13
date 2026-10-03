@@ -32,6 +32,13 @@
         <button type="submit" class="enamel h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">Filter</button>
     </form>
 
+    {{-- §7-9: a `status` the enum does not carry is refused rather than quietly answered with the
+         default, and the field is named beside the picker that caused it. Same treatment
+         skills/index.blade.php gives its type facet. --}}
+    @error('status')
+        <p class="mt-2 text-sm text-risk">Release status: {{ $message }}</p>
+    @enderror
+
     @if ($umamusumes->count() === 0)
         <p class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted">
             No Umamusume match. The catalog is filled by seed data or `php artisan uma:fetch`.

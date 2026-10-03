@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\ReleaseStatus;
+use App\Http\Requests\CatalogSearchRequest;
 use App\Models\CharacterCard;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Services\DataPipeline\NameNormalizer;
+use App\Services\PageSize;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -32,22 +35,24 @@ class CatalogController extends Controller
      * key, the aliases and the card titles — the last two folded to the term's shape at
      * comparison time, see `normalizedColumn()` (matching rule, CLAUDE.md). A Trainer
      * searching a card must land on the trainee who owns it, so the card clause selects
-     * the *parent* row. Unknown status values are ignored rather than erroring, and
-     * `status=all` is the way back to the unfiltered list. Renders catalog.index.
+     * the *parent* row. An unknown `status` is refused by CatalogSearchRequest and the
+     * Trainer lands back on the canonical catalog with the field named; `status=all` is
+     * the way back to the unfiltered list, and is an accepted token rather than an enum
+     * value. Renders catalog.index.
      *
      * The default status is Released (Global), not "everything": a catalog whose first
      * screen is half JP-only rows is not the Global English tool PRD §1 describes.
      */
-    public function index(Request $request, NameNormalizer $normalizer): View
+    public function index(CatalogSearchRequest $request, NameNormalizer $normalizer): View|RedirectResponse
     {
-        $status = $request->query('status');
+        $status = $request->validated('status');
         $search = $request->query('search');
         $page = max(1, (int) $request->query('page', '1'));
-        $pageSize = min(100, max(1, (int) $request->query('pageSize', '25')));
+        $pageSize = PageSize::clamp($request->query('pageSize'));
 
         /** @var ReleaseStatus|null $statusEnum */
-        $statusEnum = $status !== null ? ReleaseStatus::tryFrom((string) $status) : null;
-        $showAllStatus = $status === 'all';
+        $statusEnum = $status !== null && $status !== CatalogSearchRequest::ALL ? ReleaseStatus::tryFrom((string) $status) : null;
+        $showAllStatus = $status === CatalogSearchRequest::ALL;
         $showUnconfirmed = $request->boolean('show_unconfirmed');
         $searchKey = $search !== null && $search !== '' ? $normalizer->normalize((string) $search) : null;
 
