@@ -153,3 +153,18 @@ it('builds no request from a path that is not a plain relative one', function ()
 
     Http::assertNothingSent();
 });
+
+it('reports a mirrored file as existing', function (): void {
+    Storage::disk('local')->put(
+        'artwork/characters/portrait/trainee/256/100101.png',
+        'BYTES'
+    );
+
+    expect(app(ArtworkMirror::class)
+        ->exists('card_portrait', 100101))->toBeTrue();
+});
+
+it('reports an absent file as not existing', function (): void {
+    expect(app(ArtworkMirror::class)
+        ->exists('card_portrait', 100102))->toBeFalse();
+});

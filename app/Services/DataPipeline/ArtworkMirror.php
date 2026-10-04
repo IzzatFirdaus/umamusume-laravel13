@@ -6,6 +6,7 @@ namespace App\Services\DataPipeline;
 
 use App\Models\CharacterCard;
 use App\Models\SupportCard;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
@@ -46,6 +47,34 @@ final class ArtworkMirror
     }
 
     /**
+     * Whether this kind and id has a file in the mirror.
+     *
+     * A `false` is a normal answer, not an error: the mirror is partial by nature
+     * (`ADR-0021` Decision 5), which is why a caller probes before it points at a frame.
+     */
+    public function exists(string $kind, int $id): bool
+    {
+        return Storage::disk(self::DISK)->exists($this->storedPath($this->relativePath($kind, $id)));
+    }
+
+    /**
+     * Where the file sits on the disk, relative to `storage/app/private`.
+     */
+    public function storedPath(string $relativePath): string
+    {
+        return self::ROOT.'/'.$relativePath;
+    }
+
+    /**
+     * The filesystem the mirror reads and writes, so a caller can stream a stored file by path
+     * without restating the disk name.
+     */
+    public function disk(): Filesystem
+    {
+        return Storage::disk(self::DISK);
+    }
+
+    /**
      * The path under the asset host's own base, with the id substituted.
      *
      * `{id}` is cast to an int before it is interpolated, so a value that arrived as a string
@@ -76,14 +105,6 @@ final class ArtworkMirror
         };
 
         return array_map(static fn (mixed $id): int => (int) $id, $ids);
-    }
-
-    /**
-     * Where the file sits on the disk, relative to `storage/app/private`.
-     */
-    private function storedPath(string $relativePath): string
-    {
-        return self::ROOT.'/'.$relativePath;
     }
 
     /**
