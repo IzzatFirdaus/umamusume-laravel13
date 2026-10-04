@@ -5,6 +5,22 @@ This file is the design contract for the app's visual system. Owner rulings
 recorded here: **light-first theme** (revised same day, see §2.1), tactical-athletic
 identity, catalog-first design priority, and the lore-sensitive iconography boundary.
 
+**Audited against the tree 2026-10-04.** Every claim below now carries a status word,
+because this file had drifted past the implementation in both directions: it still
+described a migration that had already happened, and it described browser
+verification that this host cannot currently run.
+
+| Status | Meaning |
+|---|---|
+| **Existing** | Shipped in the tree, read from source on 2026-10-04. |
+| **Established Standard** | Binding decision, owned by an owner ruling, ADR, or `GOVERNANCE.md`. Not optional, not this file's to change. |
+| **Intended** | Shipped, but the build diverges from the contract written here. Named as a gap, not silently normalised. |
+| **Recommended** | A judgement from the audit. Ships nothing until an owner signs it off. |
+| **Unknown** | The claim cannot be checked from this tree. Not asserted either way. |
+
+Screen-level behaviour belongs to `SCREEN_SPEC.md`; this file owns the visual
+system and points at it rather than restating it.
+
 Design Read: personal analyst desk for one Trainer of Umamusume Pretty Derby,
 tactical-athletic language, dial ENERGY 1 / RHYTHM 1 / MOTION 1.
 (Reason: the only viewer is the owner mid-planning; decoration costs reading
@@ -62,16 +78,26 @@ the wrong thing. `chrome` is the clearest case — the ink-bearing green is `#4E
 with white letters in the default theme and `#7FCC09` with near-black letters in the
 dark one. The same hue cannot do both jobs.
 
-Implementation status, stated honestly: the four components built from the approved
-prototype (`stat-band`, `resource-strip`, `guided-step`, `race-calendar`), `design-preview`,
-and now `components/layout` render from the tokens below. The shell migrated on 2026-09-27
-because system-follow made dark reachable and `bg-zinc-50 text-zinc-900` was holding a
-near-white body while `--color-page` had already resolved to #0D0C0F — a dark theme with a
-light page. The **four content pages still do not**: `catalog/index`, `catalog/show`,
-`review/index`, `runs/create` keep the skeleton's `zinc-*` utilities, so their tables, forms
-and badges ignore `data-theme` and G-18 fails on them while passing everywhere a token is
-used. Migrating them is the remaining
-work, not a contract change.
+Implementation status, corrected 2026-10-04. **Existing:** the token migration this
+paragraph used to call pending is complete. `resources/views` contains no `zinc-*`
+utility and no `dark:` fork anywhere — the only `zinc` strings left are inside
+explanatory comments. Every page named here as unmigrated (`catalog/index`,
+`catalog/show`, `review/index`, `runs/create`) is token-only today, and
+`tests/Feature/DesignTokensTest.php` asserts that for the shell pages
+("renders each legacy shell page from tokens, with no theme fork and no skeleton
+palette class", 11 passing on 2026-10-04). `design-preview` is gone from the tree
+entirely and is struck from every inventory below; nothing renders it.
+
+**Unknown, and it undercuts several "measured" claims elsewhere in this file.** The
+browser contrast gate that is supposed to prove G-18 is `markTestIncomplete` behind a
+`class_exists(Browser::class)` guard, and this host has neither `pestphp/pest-plugin-browser`
+nor Playwright installed, so its two tests report *skipped*, not passed. Corpus figures
+in the comments below are transcribed from research-phase measurements whose evidence
+files are absent from the tree (`docs/design-research/verification/slice-6-2026-09-28.md`,
+cited by `app.css`, and `FRONTEND-SPEC-DIVERGENCE.md`, cited by the test, are both
+missing; that directory holds four PNGs and nothing else). Treat every ratio in this
+file as **documented, not re-verified here**. Closing that is a gate decision (R-class),
+not a copy fix.
 
 | Role | Token | Light (default) | Dark (override) | Why |
 |---|---|---|---|---|
@@ -102,21 +128,48 @@ literal hexes, so they follow the active theme instead of pinning one.
 |---|---|---|
 | `GlobalReleased` | `--color-green` capsule with `--color-on-chrome` ink (dark) or `--color-chrome` fill with white ink (light) | fill + text label always together; never color-only |
 | `GlobalAnnounced` | `--color-sp-ink` text + hairline outline | Proposed mapping, no fill — cyan as a fill reads as selected. Text uses `sp-ink`, not `sp`: the client cyan cannot carry a label on light surfaces |
-| `JapanOnly` | **unimplemented** — the catalog renders this status as `--color-ink-muted` label text today (`catalog/index.blade.php:43`), not as a badge | never color-only: the word says it (D-12). The treatment written here formerly said `--color-pick` **text** + hairline outline; gold text on a light surface is 1.59:1, so building it as specified would have shipped a text-contrast failure. Corrected during the KI-9 split rather than implemented. If a badge is ever wanted, it needs a fill + ink pair from the pair table above, not the pick hue as text |
+| `JapanOnly` | **unimplemented** — the catalog renders this status as `--color-ink-muted` label text today (`catalog/index.blade.php:71`, inside the `text-ink-muted` meta row), not as a badge | never color-only: the word says it (D-12). The treatment written here formerly said `--color-pick` **text** + hairline outline; gold text on a light surface is 1.59:1, so building it as specified would have shipped a text-contrast failure. Corrected during the KI-9 split rather than implemented. If a badge is ever wanted, it needs a fill + ink pair from the pair table above, not the pick hue as text |
 
 Never use Tailwind default `green-500` etc. as brand tokens; the client's
 action green is hue ~87°, and six degrees of drift breaks the resemblance
 (research doc §1 "palette drift", its §3.3 inverted delta rule).
+
+**Existing: the table documents 20 of the 60 declared roles.** `@theme static`
+carries **60** `--color-*` properties plus 2 font stacks, and
+`tests/Feature/DesignTokensTest.php` pins that 60 as a tripwire ("counts every colour
+token the static theme declares") — adding a role moves the number in the test and in
+this file together. The 40 roles with no row above are not undocumented decisions, they
+are token families whose contract lives in their own `app.css` comment block:
+
+| Family | Roles | Why it is not in the table above |
+|---|---|---|
+| Step scale | `sunken`, `idle`, `disabled` | surface steps, never text-bearing on their own |
+| Ink step | `ink-faint` | non-text only: borders, ticks, disabled glyphs. Measured as body text it fails, which is why `ink-muted` is the subordinate text tier |
+| Green family | `on-green`, `green-deep`, `green-tint`, `green-line` | the fill/ink pair and the tint/line pair that `chrome` and `green` are measured against |
+| Goal pair | `goal`, `goal-line` | two colours on one cell (red pennant, warm outline), so neither can borrow |
+| Mood | 5 tier fills + `on-mood` | chrome, deliberately *not* theme-overridden: the client's pill is one pink in both themes |
+| Stat bands | 6 `tint-*` + 6 `line-*` | per-stat whisper tints; stats carry no saturated identity hue |
+| Grade badges | 9 `grade-*` | 9 letters × 2 themes, white letters banned on the light fills |
+| Identity | `rank`, `lattice`, `anchor`, `scrim` | one-off roles; `scrim` is the only overlay treatment |
+
+**Intended:** the test's own comment says a new role is added "here and in DESIGN.md
+§3.1 together", but this file has no §3.1 — the token table is §2.1. The citation
+inside the test is stale, not the table's location.
 
 ### 2.2 Typography
 
 Owner ruling 2026-09-27: monospace numerals, clean legible sans UI text, no
 external fonts (offline constraint + C-8 dependency gate).
 
-- UI text: `--font-sans: ui-sans-serif, system-ui, sans-serif`. The current
-  `--font-sans: 'Instrument Sans', ...` token in `app.css` is a framework
-  default pointing at a font the app never bundles or loads; replacing its
-  value with the system stack is a pending one-line code change.
+- UI text: `--font-sans: ui-sans-serif, system-ui, sans-serif`.
+  **Existing (closed 2026-10-04):** the pending one-line change this bullet used to
+  carry has landed. `app.css` declares the system stack and its comment records the
+  close, naming the reason: the skeleton's `'Instrument Sans'` named a font the app
+  neither bundles nor loads, which also broke the offline requirement (NFR-1). Nothing
+  loads an external font anywhere in the tree.
+- `app.css`'s own header comment still says "Dark is the shipped default" twelve lines
+  above a block that correctly declares light. **Intended:** that comment is stale
+  against §2.1's light-first ruling and is a source-file fix, out of scope here.
 - Numerals, stats, dates, ids: `--font-mono: ui-monospace, 'Cascadia Mono',
   'Segoe UI Mono', Consolas, monospace` with
   `font-variant-numeric: tabular-nums` on every stat cell and timestamp.
@@ -130,10 +183,14 @@ external fonts (offline constraint + C-8 dependency gate).
 
 ### 2.3 Spacing and layout
 
-- Desktop-first: primary target 1280px+, layout max-width `max-w-6xl`
-  for tables (Proposed; current views use `max-w-5xl`). Mobile must not
-  break (R-03 floor: no overflow, tap targets via labeled controls) but is
-  not a design driver (PRD §2, PRODUCT Operating Context).
+- Desktop-first: primary target 1280px+. **Existing:** `max-w-6xl` appears nowhere in
+  the tree, so the proposal below it is superseded by what shipped. The measured widths
+  are `max-w-5xl` for the shell (nav and `main`, `components/layout.blade.php`), `max-w-3xl`
+  for the in-page forms and long copy blocks on the run screen, and `max-w-lg` for the
+  single-column create form. Mobile must not break (R-03 floor: no overflow, tap targets
+  via labeled controls) but is not a design driver (PRD §2, PRODUCT Operating Context).
+- **Recommended:** retire the `max-w-6xl` line rather than keep a proposed token that
+  no surface uses. Ratified widths, in one place: 5xl shell, 3xl form, lg narrow form.
 - **768px is the supported minimum (amended 2026-09-29, KI-25), and the floor above
   is narrower than it read.** "No overflow" was measured and is false below 768px for
   exactly two surfaces: the race calendar and the turn log are wide tables whose content
@@ -178,49 +235,97 @@ external fonts (offline constraint + C-8 dependency gate).
 ## 3. Component inventory (actual committed Blade)
 
 All views render through `resources/views/components/layout.blade.php`
-(`x-layout`: nav, flash, slot). States column: yes / gap = required by C-7
-but not yet implemented. **Updated 2026-09-27:** four content pages
-(`catalog/index`, `catalog/show`, `review/index`, `runs/create`) still hold
-skeleton `zinc-*` utilities; their loading/error states remain gaps.
-Token-migrated components (`stat-band`, `resource-strip`, `guided-step`,
-`race-calendar`, `design-preview`, `grade-point-meter`) render from
-`@theme static` and have no skeleton palette classes.
+(`x-layout`: nav, flash, slot). **Existing:** 24 components exist; 22 are reachable
+from a route, 2 have no call site at all, and `energy-gauge` is reachable only through
+one of those 2. All of them are token-only — the skeleton-palette migration is finished,
+so no row below is blocked on it. `design-preview` is removed from the tree and struck.
 
-| Component | Route | Purpose | Empty | Loading | Error |
+Two columns carry the audit's findings. **Reachable** is measured by call site, not by
+intent. **Loading** is uniformly `gap`: the app is server-rendered end to end, so C-7's
+loading state has no surface to live on, and the "fetch in flight" affordance §7 defers
+is the only thing that would ever create one. That is a deliberate absence, not an
+oversight, and it is cheaper than the indicator would be.
+
+| Component | Route | Purpose | Empty | Error | Reachable |
 |---|---|---|---|---|---|
-| Catalog filter form | `catalog.index` | status + normalized search | n/a | gap (server-rendered) | invalid status silently ignored, gap: should show |
-| Catalog list rows | `catalog.index` | name, name_ja, status badge, aliases count | yes | gap | gap |
-| Pagination | index, runs, review | page nav | n/a | n/a | n/a |
-| Catalog detail dl | `catalog.show` | identity + dates + manual flag | n/a | gap | 404 page |
-| Aliases chips / provenance list | `catalog.show` | aliases, last sources with URL + fetched timestamp in `display_timezone` | "No aliases yet" / "No fetched sources" | gap | gap |
-| JP-only notice | `catalog.show` | "Not yet released on Global" banner | conditional | n/a | n/a |
-| Run cards list | `runs.index` | run summary + status + date | yes | gap | gap |
-| Run create form | `runs.create` | umamusume select, scenario, status, notes | n/a | n/a | validation errors |
-| Turn table | `runs.show` | five stats + SP + condition, tabular numerals | "No turns logged yet" | gap | gap |
-| Turn add form | `runs.show` | 0..2000-target inputs (currently 1200, see §5) | n/a | n/a | $errors list |
-| Skill state groups | `runs.show` | Suggested / Acquired / Skipped lists | "None." per group | n/a | n/a |
-| Export links | `runs.show` | csv / json download | n/a | n/a | gap |
-| Candidate cards | `review.index` | proposed name, tier, source, suggestion | yes | gap | gap |
-| Resolve form | `review.index` | confirm / alias / reject per candidate | n/a | n/a | @error per card |
-| Stat band | `runs.show` | grade badges, values, cap markers | "No turns" | gap | gap |
-| Resource strip | `runs.show` | turn, energy, fans, scenario widgets | n/a | gap | gap |
-| Guided step | `runs.show` | discipline pick, preview, confirm | n/a | n/a | validation errors |
-| Race calendar | `runs.show` | scenario timeline, gates, goal pennants | n/a | gap | gap |
-| Grade point meter | `runs.show` | Trackblazer objectives, progress | n/a | gap | gap |
+| Catalog filter form | `catalog.index` | status + search + unconfirmed opt-in | n/a | n/a | yes |
+| Catalog roster rows | `catalog.index` | trainee header + her costume forms | dashed panel naming the remedy | 404 page | yes |
+| Catalog detail `dl` | `catalog.show` | identity, profile fields, dates | "unpublished" wording | 404 page | yes |
+| Costume form tabs | `catalog.show` | one panel per form, CSS/native-radio tabs | single form draws no strip | 404 page | yes |
+| Aptitude grid | `catalog.show` | 10 letters, letter **and** word (D-12) | "unpublished", never half a grid | 404 page | yes |
+| Aliases / provenance lists | `catalog.show` | aliases, source URL + fetched stamp in `display_timezone` | "No aliases yet" | 404 page | yes |
+| Run rows | `runs.index` | trainee, scenario, status, date (mono) | dashed panel, "No runs yet" | n/a | yes |
+| Run create form | `runs.create` | trainee combobox, scenario, status, legacy slots, notes | n/a | `@error` per field | yes |
+| Turn table | `runs.show` | five stats + SP + condition, tabular numerals | "No turns logged yet" | gap | yes |
+| Guided step | `runs.show` | discipline pick, preview, confirm | n/a | one error list for field + request errors | yes |
+| Stat band | `runs.show` | grade badges, values, cap markers | "No turns" | gap | yes |
+| Resource strip | `runs.show` | turn, energy, fans, scenario widgets | n/a | gap | yes |
+| Race calendar | `runs.show` | scenario timeline, gates, goal pennants | n/a | gap | yes |
+| Grade point meter | `runs.show` | Trackblazer objectives, progress | n/a | gap | yes |
+| Race panel / fatigue chip | `runs.show` | race entry + declared fatigue | n/a | `@error` | yes |
+| Shop panel | `runs.show` | purchase form + rotation countdown | n/a | `@error` | yes |
+| Deck panel | `runs.show` | equip one open picker, closed rows post hidden inputs | n/a | `@error` per row | yes |
+| Team panels | `runs.show` | team race, rank gauge, spirit burst roster, epithet checklist | varies | `@error` | yes |
+| Skill state groups | `runs.show` | Suggested / Acquired / Skipped lists | "None." per group | n/a | yes |
+| Skill rows form | `runs.show` | per-row skill id, status, turn acquired | n/a | `@error` per field | yes |
+| Hand-correction form | `runs.show` | `<details>` escape hatch, every field at once | n/a | `$errors` list | yes |
+| Delete run | `runs.show` | `<details>` disclosure wrapping the destructive POST | n/a | n/a | yes |
+| Export links | `runs.show` | csv / json download | n/a | gap | yes |
+| Skill filter form | `skills.index` | search, type, unique-only, all `h-11` | invitation shown only with no query | `@error('type')` | yes |
+| Skill rows | `skills.index` | name, name_ja, Unique mark, type, SP cost | two distinct no-data states | n/a | yes |
+| Candidate cards | `review.index` | proposed name, tier, source, suggestion | "Nothing pending" + command | stacked `role="alert"` list | yes |
+| Resolve form | `review.index` | confirm / alias / reject per candidate | n/a | same stacked list | yes |
+| Pagination | all index routes | two responsive blocks, token-only | n/a | n/a | yes |
+| 404 | error page | branded recovery, named routes out | n/a | n/a | yes |
+
+**Intended: three components are built and unreachable.** `deck-editor`,
+`energy-gauge`, `run-header`. Two of them matter beyond dead weight, because each
+duplicates a pattern the tree renders elsewhere:
+
+- `run-header` → `energy-gauge` is a ten-segment energy gauge. `resource-strip` and
+  `guided-step` ship the run's energy readout instead. Two energy representations, and the
+  unreachable one is the one whose hue treatment §2.2 rules *not* material: a stat colour on
+  a track gradient reads as a threshold the client never states.
+- `deck-editor` is the deck-slot read view. Mounting it means per-card level and limit-break
+  state, which PRD §6.9 and US-12 keep out, so it stays gated on that decision.
+
+**Adopted since this section was written.** `capsule-header` and `grade-badge` had call
+sites that re-implemented them: eight panels hand-copied the lattice-bleed capsule div and
+`stat-band` carried its own copy of the nine grade fills beside its own badge span. Both are
+mounted now, so the franchise motif §2.3 rules material reaches the surfaces it was ruled for
+and the grade letters §2.1 routes through `ink-strong` have one implementation instead of two.
+`FrontendComponentLibraryTest` fails if either visual is defined a second time.
+
+**Recommended:** for each of the three, either adopt the component at its call site or
+delete it. A component that exists only as an unimplemented decision is the cheapest
+thing in the tree to keep and the most expensive to leave, because a future author will
+read it as the pattern.
+
 
 ## 4. Surface specifications
 
 ### 4.1 Catalog index `/umamusume` (first surface, owner priority)
 
-The desk's front page and the most complex grid: filters, release-status
-badges, provenance density, normalized search. This surface decides the table
-pattern every other screen copies.
+**Existing, and it is not what this section used to describe.** The old contract ruled
+"table, not card grid" with columns for name, `name_ja`, release badge, aliases count and
+last-fetched date. The shipped page is a **two-level roster tree**: one card per trainee
+(`<li>` with a bordered `bg-raised` surface) whose header carries her name, her `name_ja`,
+her max rarity chip, her form count and her release status, and whose body is a
+`divide-y` list of her costume forms, each with title, rarity chip, debut marker,
+confirmation warning and Global release date.
 
-- Table, not card grid: one row per Umamusume; columns: name, name_ja
-  (muted), release badge, aliases count, last-fetched date (mono).
-- Filter row: search input (normalized, placeholder says "Name (normalized)"
-  so Trainers learn the match-key behavior), status select, submit.
-- Empty state names the remedy (seed or `uma:fetch`), already shipped.
+Why the tree and not the table is the right call, recorded because the old ruling got
+this backwards: search matches **forms and aliases**, not only trainee names, so a table
+keyed on the trainee row would hide the row a search actually matched. The tree keeps the
+match visible at the level it occurred.
+
+- Filter row: one `GET` form, one inline row, all controls `h-11` — search, release
+  status, an unconfirmed-cards opt-in checkbox, submit. It is a reload, not live typing,
+  and the view says so in its own comment rather than implying otherwise.
+- The trainee badge reads max rarity over the cards the filter let through, so hiding an
+  unconfirmed card moves the badge with it. Absence is worded ("no forms recorded"),
+  never a bare `0`, because `0` reads as a count.
+- Empty state names the remedy (seed or `uma:fetch`) in a dashed panel, already shipped.
 - Loading: static server render; the fetch-in-flight indicator belongs to the
   refresh affordance gap (§7), not to this page's initial paint.
 
@@ -353,9 +458,11 @@ disclosure wording. Filed as KI-35.
 
 - No external font loading, no CDNs, no analytics. All assets local;
   system font stacks only (§2.2).
-- Known violation: `resources/views/welcome.blade.php` (framework default)
-  links fonts.bunny.net. Either remove the link or replace the page; logged
-  as a one-line fix, not yet applied.
+- **Closed 2026-10-04.** This file carried a standing "known violation":
+  `resources/views/welcome.blade.php` (framework default) linking
+  `fonts.bunny.net`. That view does not exist in the tree, so the only CDN font
+  reference is gone and the offline requirement holds by absence of the page rather
+  than by a fix to it. Nothing else in `resources/` references an external origin.
 - The fetch engine is optional connectivity: with zero network the catalog,
   runs, review, and export all work from SQLite (PRODUCT principle, PRD
   NFR-2). Catalog data shows last-fetched timestamps so staleness is visible
@@ -375,8 +482,35 @@ That prescription predates the light-first flip: `#7FCC09` measures 9.51:1 on th
 but only **1.88:1 on the light panel and 1.99:1 on white**, against WCAG 1.4.11's 3:1 floor for
 non-text boundaries. No single green clears both themes — the deep `--color-chrome` passes the
 light surfaces at 4.88 but drops to 2.93 on the dark raised cell — so the ring splits per theme
-exactly as `chrome`/`on-chrome` do, and components stay theme-agnostic (D-101, D-258's rule that
-a contrast rule must name its second colour).
+exactly as `chrome`/`on-chrome` do, and components stay theme-agnostic (D-101, D-258's rule
+that a contrast rule must name its second colour).
+
+**Intended: the `transition-colors` half of this section ships nowhere.** The tree contains
+zero `transition-*`, `duration-*` and `animate-*` utilities, so hover and focus changes are
+instant on every surface. The contract's *intent* — "a desk does not move" — is honoured
+more completely than the contract's own text, because nothing eases at all.
+
+**What is shipped, from `app.css`'s base layer, is three treatments this section did not
+previously name:**
+
+| Treatment | Value | Why it is here |
+|---|---|---|
+| `:focus-visible` ring | `2px solid var(--color-ring)`, `2px` offset | one rule covers every focusable element, so a component cannot ship without a ring |
+| `::selection` | `--color-pick` fill with `--color-on-pick` ink | the amber selection, never white on amber (G-47) |
+| `caret-color` on input/textarea/select | `var(--color-chrome)` | the caret was a browser default belonging to no system, which is the cheapest tell of an assembled page |
+
+**Intended: two controls specify `focus-visible:outline-green` inline, bypassing
+`--color-ring`.** `resources/views/vendor/pagination/tailwind.blade.php` and the skill
+rows on `runs/show.blade.php` both do it. `green` is `#7FCC09`, which measures 1.88 on the
+light panel against WCAG 1.4.11's 3:1 for a non-text boundary — the exact failure
+`--color-ring` exists to prevent. The base-layer rule is correct and is being overridden by
+hand at four call sites.
+
+**Recommended:** delete the four inline `outline-green` declarations and let the base layer
+win. No `transition-colors` is a deliberate choice to keep; adding one needs an owner
+ruling, because it would be the first easing in the app. Also absent: any
+`prefers-reduced-motion` block. With zero motion that block is currently unnecessary, and
+it becomes mandatory the moment the ruling above goes the other way.
 
 ## 9. Where tokens live
 
@@ -392,6 +526,69 @@ a contrast rule must name its second colour).
 - `docs/research-scratch/DESIGN-CORPUS.md` section "CONSTRAINTS.md" (formerly
   `docs/design-research/CONSTRAINTS.md`): the research-phase design rules
   (D-numbers) this file cites (D-12, D-20, D-101).
-- Proposed values in this file (scale numbers, `max-w-6xl`, the mono stack) need
-  owner sign-off before they become tokens. The Announced-cyan proposal is now a
-  shipped pair — `--color-sp` for identity surfaces, `--color-sp-ink` for text.
+- Proposed values in this file (scale numbers, the mono stack) need owner sign-off before
+  they become tokens. The Announced-cyan proposal is now a shipped pair — `--color-sp` for
+  identity surfaces, `--color-sp-ink` for text. `max-w-6xl` is retired: it never shipped,
+  and §2.3 now records the three widths that did.
+
+## 10. What is enforced, and what is only claimed
+
+The gap between these two columns is the honest state of design verification in this
+repo, and it is the finding most worth carrying out of this audit.
+
+| Claim | Enforced by | State 2026-10-04 |
+|---|---|---|
+| No `zinc-*` utility, no `dark:` fork, on shell pages | `DesignTokensTest` (data provider over URLs) | **passing** |
+| Pagination renders from tokens | `DesignTokensTest` | **passing** |
+| Exactly 60 colour tokens in `@theme static` | `DesignTokensTest` | **passing** (11 passed, 42 assertions) |
+| Selection boundary uses `pick-line`, never `pick` | `DesignTokensTest` (whole view tree) | **passing** |
+| Theme preference is one keyed row, SQLite only | `DesignTokensTest` | **passing** |
+| First paint is the resolved theme; unknown stored value ignored | `DesignTokensTest` | **passing** |
+| All 60 tokens resolve non-empty in both themes (D-288) | `DesignTokensTest`, browser block | **skipped** — no Playwright, test is `markTestIncomplete` |
+| All 19 text/background pairs + 9 grade fills clear 4.5:1 in both themes (G-18) | `DesignTokensTest`, browser block | **skipped** — same cause |
+| Rendered copy: `N/A` for absence, never a dash, no `Unknown` | `RenderedCopyHygieneTest`, view tests | **passing** |
+| Flash banners use tokens | `FlashBannerTokensTest` | **passing** |
+| 768px minimum width is safe | nothing | **Unverified** — see §2.3's held proposal |
+| Every ratio quoted in this file | research-phase measurement, files absent | **documented, not reproducible here** |
+
+The two skipped rows are why this file's contrast numbers cannot be treated as verified on
+this host: they were transcribed from research captures whose evidence files are not in
+the tree. Installing `pestphp/pest-plugin-browser` plus a Playwright driver and replacing
+the two `markTestIncomplete` calls with real assertions is the single change that would move
+the whole §2.1 table from *documented* to *enforced*.
+
+## 11. Open questions for the owner
+
+Not defects; decisions this file cannot make for itself.
+
+1. **The three unreachable components** (§3): adopt or delete? Two of them block a motif
+   this file already rules material.
+2. **The stale `app.css` header comment** declaring dark the shipped default, twelve lines
+   above a light-default block (§2.2). Source-file fix, needs owner go-ahead.
+3. **`transition-colors`**: keep the tree motionless, or ratify a single transition token?
+   The contract currently prescribes something that ships nowhere (§8).
+4. **The four inline `outline-green` overrides** (§8): a correctness fix, not a decision.
+   Listed here only because it touches a vendored pagination view.
+5. **The 768px minimum** (§2.3): ratify with the measurement, or withdraw the number.
+6. **Loading states** (§3): with no client-side fetching, C-7's loading state has no
+   surface. Confirm that "no loading state, because nothing loads client-side" is the
+   accepted answer, or approve the fetch-in-flight affordance §7 defers.
+
+## Change log
+
+- **2026-10-04** — Mounted the two adopted orphans. `capsule-header` now renders the
+  capsule on all eight panels that were hand-copying the div, and `grade-badge` now owns the
+  grade fill in `stat-band`, which had carried a second copy of the nine-letter map and its own
+  badge span. §3 reachability recounted (24 components, 22 reachable, `deck-editor` and
+  `run-header` with no call site, `energy-gauge` only through `run-header`), the seven-unreachable
+  paragraph replaced with the three that remain and the reasons they are still parked, and open
+  question 1 narrowed to match. The ruling that these motifs are material is unchanged and now
+  reaches the surfaces it was ruled for.
+- **2026-10-04** — Audited this file against the tree. Corrected four stale claims
+  (token migration complete, font stack shipped, `welcome.blade.php` gone, catalog is a
+  roster tree not a table). Added the status legend, the 40 undocumented token roles,
+  reachability across all 28 components, the shipped base-layer treatments, the
+  enforcement table, and the owner questions. No owner ruling was changed or reversed.
+- 2026-09-29 — Catalog detail specification withdrawn and rewritten; 768px minimum
+  recorded as a held proposal rather than a contract.
+- 2026-09-27 — Light-first owner ruling; lattice/enamel/torn-chip motifs ruled material.
