@@ -30,7 +30,7 @@ declare(strict_types=1);
  * for `docs` so nobody "fixes" the asymmetry by adding a target that cannot execute here.
  */
 
-const DOC_CITATION_BASELINE = 621;
+const DOC_CITATION_BASELINE = 708;
 
 it('keeps dead markdown citations from rising above the recorded baseline', function (): void {
     $out = (string) shell_exec('python tools/doc_census.py 2>&1');
@@ -48,5 +48,5 @@ it('keeps dead markdown citations from rising above the recorded baseline', func
 it('pins the baseline at the value the 2026-10-02 pass measured, so a silent edit cannot move it', function (): void {
     // A ratchet only works if the number it enforces is itself tracked. If someone changes
     // DOC_CITATION_BASELINE without re-measuring and recording why, this line fails.
-    expect(DOC_CITATION_BASELINE)->toBe(621);
+    expect(DOC_CITATION_BASELINE)->toBe(708);
 });
