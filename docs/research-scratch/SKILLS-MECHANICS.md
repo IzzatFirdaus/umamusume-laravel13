@@ -1076,6 +1076,31 @@ source in two domains carries. It is recorded here so a future pass does not re-
 brief. The 40% figure is the wiki's *ceiling*, not a fifth level's value, and row 16 already notes the
 two shapes cannot both describe one quantity.
 
+#### 2.4 In-client read recorded, 2026-10-03
+
+A Global client read on 2026-10-03 shows the caption ladder directly (Unity Cup run, `[Rosy Dreams]`
+Rice Shower, Senior Late December, Learn screen at 173 SP; 38-frame capture set, exemplar frames
+`09e754d6`, `2bc7fd23`, `5fe202bf`, `a2741c59`, `c8b2dcad`, `b1e22dd7`):
+
+| Caption | Sampled skills (displayed SP) | Arithmetic on a sampled pair |
+|---|---|---|
+| `Hint Lvl 1` `10% OFF` | Rushing Gale! 323; Outer Swell 162; Ignited Spirit SPD 180; Plan X 272 | 180 × 0.9 = 162 |
+| `Hint Lvl 2` `20% OFF` | Hesitant Pace Chasers 104; Cut and Drive! 160; Countermeasure 128 | 130 × 0.8 = 104 |
+| `Hint Lvl 3` `30% OFF` | It's On! 289; Ignited Spirit STA 140; Front Runner Corners ○ 91; Productive Plan 112 | 200 × 0.7 = 140 |
+| `Hint Lvl 4` `35% OFF` | Unruffled 280; Pace Chaser Straightaways ◎ 91; Ignited Spirit GUTS 130 | 140 × 0.65 = 91 |
+| `Hint Lvl Max` `40% OFF` | Soft Step 96 | 160 × 0.6 = 96 |
+
+Displayed cost is base × (1 − discount), floored to the integer: Pace Chaser Corners ○ reads 84 at
+Lv4 against a base of 130 (`130 × 0.65 = 84.5`); every other sampled pair is exact. The top caption
+is `Lv Max`, not a level number.
+
+Compared against the two shapes §2.2 holds apart: Lv1–Lv3 match the published **10% per level**
+(10/20/30), and the **40% ceiling** the wiki tied to its max is real at `Lv Max`; `−30%` is the Lv3
+value, not the ladder's ceiling, and the step is not constant past Lv3 (+5 to Lv4, +5 to Max). This
+read is the in-client check §2.2 conditions on, and it supersedes §2.3 as a statement about sources:
+an in-client source now carries Lv4 and Max captions. The §2.2 rendering position and conflict row 16
+are the owner's to revisit against it; this section records the read only.
+
 ---
 
 ### 3. Skill points

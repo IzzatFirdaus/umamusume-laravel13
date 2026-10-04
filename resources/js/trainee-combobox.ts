@@ -132,6 +132,10 @@ const byTrainee = (a: TraineeRow, b: TraineeRow): number => a.trainee.localeComp
 const bandDivider = (): HTMLLIElement => {
     const rule = document.createElement('li');
     rule.setAttribute('role', 'presentation');
+    // A listbox's owned elements are its options. `role="presentation"` strips the listitem but
+    // leaves the sentence in the accessibility tree as bare text inside the listbox, which AT
+    // reports inconsistently and which the option below already states in its own name.
+    rule.setAttribute('aria-hidden', 'true');
     rule.setAttribute('data-band-divider', '');
     rule.className = 'border-t border-rule px-3 pt-3 pb-1 text-xs font-semibold text-ink-muted';
     rule.textContent = 'No confirmed costume card yet';
@@ -266,6 +270,10 @@ const render = (
             // hear a card title with no trainee in it. The header stays as sighted punctuation;
             // the trainee's name goes into each option below, where navigation always picks it up.
             header.setAttribute('role', 'presentation');
+            // Hidden, not just presentation: the name the header states is in every option under it,
+            // so the text inside the listbox would be a duplicate a screen reader speaks twice, and
+            // a bare text child of a listbox is not something the spec expects.
+            header.setAttribute('aria-hidden', 'true');
             header.setAttribute('data-group-header', '');
             header.className = 'px-3 pt-2 pb-1 text-xs font-semibold text-ink-muted';
             // textContent throughout: titles are source data and must never be parsed as
@@ -465,6 +473,14 @@ export const initTraineeCombobox = (): void => {
 
         label = committed;
         input.value = committed;
+        /*
+         * The focus handler's `select()` does not reach this path. Commit with Enter and the field
+         * never loses focus, so a Trainer who picks the wrong form and immediately retypes gets
+         * `Gold Ship · [RUN! RUIN! LAUNCHER!]rosy` instead of a filtered list, and the status line
+         * answers with "No trainee or card found", which describes a search problem rather than the
+         * appended text. Selecting the label here is what makes the next keystroke a replacement.
+         */
+        input.select();
         status.textContent = `Selected ${committed}`;
         chosen = true;
         setOpen(false);

@@ -26,9 +26,8 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
-    <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pl-16 pr-4 text-sm font-bold text-on-chrome">
-        <span>Spirit Burst</span>
-    </div>
+    {{-- x-capsule-header owns this anatomy for every panel (DESIGN.md §2.3). --}}
+    <x-capsule-header title="Spirit Burst" class="mb-3" />
 
     @if ($roster === [])
         <p class="text-sm text-ink-muted" role="status">

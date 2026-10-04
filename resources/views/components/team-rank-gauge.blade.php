@@ -20,9 +20,8 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
-    <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pl-16 pr-4 text-sm font-bold text-on-chrome">
-        <span>Team Rank</span>
-    </div>
+    {{-- x-capsule-header owns this anatomy for every panel (DESIGN.md §2.3). --}}
+    <x-capsule-header title="Team Rank" class="mb-3" />
 
     @if ($current === null)
         {{-- A gauge with no reading. Zero would say the team sits at the bottom of the

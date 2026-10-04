@@ -81,10 +81,11 @@
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
     {{-- Same capsule header as every other panel, so a section reads as a section
          across scenarios (DESIGN.md §2.3; the lattice bleed is the client's most
-         repeated element, measured across frames 234521, 230755 and 232345). --}}
-    <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pl-16 pr-4 text-sm font-bold text-on-chrome">
-        <span>Grade Point</span>
-    </div>
+         repeated element, measured across frames 234521, 230755, 232345). Drawn by
+         x-capsule-header, which is the one owner of that anatomy: five panels used
+         to hand-copy this div and drift from it (pl-16 against pl-20, text-sm
+         against text-base) while still claiming to be the same header. --}}
+    <x-capsule-header title="Grade Point" class="mb-3" />
 
     <div class="rounded-md border border-rule bg-raised p-3">
         @if ($objective === null)

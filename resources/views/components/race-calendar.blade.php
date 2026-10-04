@@ -103,12 +103,11 @@
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
     {{-- Capsule header with argyle lattice bleed: the client's most repeated element,
          measured across frames 234521, 230755 and 232345. It marks this as a section
-         header rather than as data. The fill is --color-chrome, not the client's bright
-         lime, because a capsule always carries a word and white on bright lime measures
-         1.99:1 (DESIGN.md §2.3 amendment, research §6.3, D-3). --}}
-    <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pl-16 pr-4 text-sm font-bold text-on-chrome">
-        <span>Race calendar</span>
-    </div>
+         header rather than as data. x-capsule-header is the one owner of that anatomy
+         (chrome fill rather than the client's bright lime, because a capsule always
+         carries a word and white on bright lime measures 1.99:1: DESIGN.md §2.3
+         amendment, research §6.3, D-3). Eight panels used to hand-copy this div. --}}
+    <x-capsule-header title="Race calendar" class="mb-3" />
 
     @if ($year !== null)
         {{-- The client's own three tabs, server-rendered as links. There is no

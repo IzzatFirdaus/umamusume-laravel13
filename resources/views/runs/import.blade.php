@@ -110,7 +110,7 @@
             </label>
 
             <label class="block">
-                <span class="font-medium text-ink">Status</span>
+                <span class="font-medium text-ink">Status *</span>
                 <select name="status" required class="mt-1 w-full rounded-md border border-rule bg-raised px-2 py-1 text-ink">
                     @foreach (\App\Enums\RunStatus::cases() as $status)
                         <option value="{{ $status->value }}" @selected(old('status', 'Completed') === $status->value)>{{ $status->label() }}</option>
@@ -137,7 +137,14 @@
                 <span class="font-mono text-xs text-ink-muted">
                     {{ implode(', ', \App\Http\Requests\ImportHistoricalRunRequest::HEADERS) }}
                 </span>
-                <textarea name="csv" rows="8" required class="rounded-md border border-rule bg-raised px-2 py-1 font-mono text-xs text-ink"
+                {{-- No `required` here on purpose. A native constraint is evaluated against this
+                     field alone, so a Trainer who chooses the file and leaves the box empty gets
+                     "Please fill out this field" and the form never submits: the upload path the field
+                     above exists for, closed. The server has the rule with the pair in view, because
+                     prepareForValidation copies the upload into `csv` before `csv` is validated, and
+                     its message says so in the words this form needs: "Paste the run's CSV or choose
+                     the file to import." --}}
+                <textarea name="csv" rows="8" class="rounded-md border border-rule bg-raised px-2 py-1 font-mono text-xs text-ink"
                     placeholder="{{ implode(',', \App\Http\Requests\ImportHistoricalRunRequest::HEADERS) }}">{{ old('csv') }}</textarea>
                 @error('csv')<p class="mt-1 text-risk">{{ $message }}</p>@enderror
                 @error('turns')<p class="mt-1 text-risk">{{ $message }}</p>@enderror

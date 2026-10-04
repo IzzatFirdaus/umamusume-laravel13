@@ -16,9 +16,8 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
-    <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pl-16 pr-4 text-sm font-bold text-on-chrome">
-        <span>Team Race</span>
-    </div>
+    {{-- x-capsule-header owns this anatomy for every panel (DESIGN.md §2.3). --}}
+    <x-capsule-header title="Team Race" class="mb-3" />
 
     {{-- 06:109, transcribed into config as `circles_guidance`: three circles is a safety
          margin, not a win condition, and the sentence matters because losing moves the

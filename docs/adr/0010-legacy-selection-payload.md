@@ -24,7 +24,7 @@ So the repository holds two statements that cannot both be followed: D-268 says 
 Two further facts were checked before this was written down, because both argue against the column:
 
 - **No user story asks for it.** `PRD.md` FR-A through FR-E and US-1 through US-11 contain no Legacy Select requirement. `AGENTS.md` tells the Architect that a new column must cite a PRD requirement, and the only citation available is FR-C-1's "optional two inheritance parents", which is the thing §6.3 caps rather than the thing being added. This ADR is the mechanism by which that gap is closed rather than worked around.
-- **The screen's visual grounding is generated, not captured.** `DESIGN.md:1544` records that the three frames behind §6.27 and §6.28 were generated for those sections and then read back. `CONSTRAINTS.md:126` adds that neither "Legacy Select" nor "Inspiration" has been read off a captured client frame. The payload fields therefore trace to D-268's enumeration and to `UMAMUSUME_REFERENCE.md` §1.5, not to a client export.
+- **The screen's visual grounding is generated, not captured.** `DESIGN.md:1544` records that the three frames behind §6.27 and §6.28 were generated for those sections and then read back. `docs/research-scratch/DESIGN-CORPUS.md` §"CONSTRAINTS.md" §4 "Official terminology (Global client strings)" adds that neither "Legacy Select" nor "Inspiration" has been read off a captured client frame. The payload fields therefore trace to D-268's enumeration and to `UMAMUSUME_REFERENCE.md` §1.5, not to a client export.
 
 ## Decision
 

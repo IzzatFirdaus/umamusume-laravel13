@@ -87,7 +87,7 @@ None of them requires a voice actor, a birthday, a height or a body measurement.
 approves the five; the PRD does not yet record that. The `A-7` text is drafted at the end of this
 document so the PRD edit is a paste rather than a rewrite, and **it is deliberately not applied here**:
 `PRD.md` is held dirty by a concurrent session in the main tree, and this branch has a recorded incident
-about two writers sharing one file (`PLAN.md:24-25`, and the register commit that carried a peer's KI
+about two writers sharing one file (the Status line at the top of `docs/research-scratch/PROCESS-PLANS.md` §"PLAN.md", and the register commit that carried a peer's KI
 lines). Scope changes are proposed to the human, never adopted silently — including when the human has
 already agreed to the scope in another document.
 

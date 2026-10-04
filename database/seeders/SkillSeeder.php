@@ -73,7 +73,8 @@ class SkillSeeder extends Seeder
         // re-seed and keep appearing in the run-detail select — the invented strings from the first
         // version, and `Traightaways`, which the source does not carry under either name field. On a
         // fresh install these are no-ops; on a development database they are the whole fix.
-        // `is_manual` gates the delete (CONSTRAINTS.md:26, PRD FR-B-4): a Trainer who corrected one of
+        // `is_manual` gates the delete (docs/research-scratch/GOVERNANCE.md, CONSTRAINTS
+        // section "Floor"; PRD FR-B-4): a Trainer who corrected one of
         // these rows by hand keeps it, and the name clauses are grouped so the guard applies to each of
         // them rather than only the last.
         Skill::query()

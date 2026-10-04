@@ -32,7 +32,8 @@ return new class extends Migration
             // cards on 2026-09-29 and 107 after that day's rotation, and the catalog
             // reads them in one whereIn; add the index when the roster is thousands, not before.
             $table->foreignId('umamusume_id')->constrained('umamusume')->cascadeOnDelete();
-            // Verbatim [Global] client string, brackets included. CONSTRAINTS.md:38
+            // Verbatim [Global] client string, brackets included. The rule is in
+            // docs/research-scratch/GOVERNANCE.md, CONSTRAINTS section, "Lore banned patterns":
             // keeps such names as source data and puts the lore guard on the display
             // path, so this column is never a place to normalize copy.
             $table->string('title');

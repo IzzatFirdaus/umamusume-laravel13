@@ -68,12 +68,6 @@
         'Wit' => 'M8 2 15 6l-7 4-7-4 7-4zm-5 7v3c0 1.7 10 1.7 10 0V9L8 11 3 9z',
     ];
 
-    $gradeClass = [
-        'G' => 'bg-grade-g', 'F' => 'bg-grade-f', 'E' => 'bg-grade-e', 'D' => 'bg-grade-d',
-        'C' => 'bg-grade-c', 'B' => 'bg-grade-b', 'A' => 'bg-grade-a', 'S' => 'bg-grade-s',
-        'SS' => 'bg-grade-ss',
-    ];
-
     /*
      * Grade is derived from the entered value, never stored. The banding is ours:
      * no source in this repository defines a client stat grade, so the boundaries
@@ -120,13 +114,6 @@
                 $softPct = min(100, $cap > 0 ? $base / $cap * 100 : 100);
                 $atCeiling = $cap <= $base;
                 $grade = $gradeOf($value);
-                // R13: the fill is keyed on the base letter with the modifier
-                // stripped, the badge prints the full letter. The banding emits
-                // seventeen labels including half-steps like `B+`, and the nine tint
-                // families are the nine letters — a `+` is a step within B's colour,
-                // not a tenth colour, and inventing one would be reading a client
-                // badge that no capture shows (KI-8).
-                $gradeFill = $gradeClass[rtrim($grade, '+-')];
             @endphp
             <div class="border-b border-r border-rule p-3 last:border-r-0">
                 <div class="-mx-3 -mt-3 mb-2 flex items-center gap-1.5 border-b px-3 py-1.5
@@ -139,11 +126,15 @@
                 </div>
 
                 <div class="flex items-end gap-2">
-                    <span class="inline-grid size-5 place-items-center rounded border border-rule
-                                 text-xs font-bold text-ink-strong {{ $gradeFill }}"
-                          title="Derived from the entered value, not read from the client">
-                        {{ $grade }}
-                    </span>
+                    {{-- R13 and KI-8, through the one component that owns the treatment: the
+                         fill is keyed on the base letter with the modifier stripped, and the
+                         badge prints the full letter. The banding emits seventeen labels
+                         including half-steps like `B+`, and the nine tint families are the nine
+                         letters, so a `+` is a step within B's colour rather than a tenth
+                         colour. This band used to carry its own copy of that nine-letter map
+                         and its own span, which is the second unreviewed implementation
+                         DESIGN.md §2.1 rules out; x-grade-badge is the only one now. --}}
+                    <x-grade-badge :grade="$grade" title="Derived from the entered value, not read from the client" />
                     <span class="font-mono text-2xl leading-none font-extrabold tabular-nums text-ink-strong">
                         {{ number_format($value) }}
                     </span>

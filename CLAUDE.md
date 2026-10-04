@@ -1,367 +1,286 @@
-# Claude Code
-
-Project instructions for Claude Code sessions in this repository.
-
-Read `CONSTRAINTS.md` before writing code. Do not weaken it to make a change pass.
-
-## Lore Rules (top priority, non-negotiable)
-
-The characters of *Umamusume Pretty Derby* are Umamusume: a humanoid race of girls. They are never animals.
-
-1. Never use "horse" or "horses" (or sire, dam, mare, foal, stable-as-noun, breeding-of-characters, 🏇) to refer to characters. Use "Umamusume" (capital U) at the start of a sentence or as the proper race name, "umamusume" (lowercase) mid-sentence. Singular and plural are identical: one umamusume, many umamusume.
-2. This applies everywhere: documentation, code comments, variable/class/table/column names, enum cases, seed and fixture data, commit messages, and UI strings.
-3. A violation is a hard failure. Before finalizing any artifact, run the banned-pattern grep and fix every hit (see Banned Patterns below).
-
-## Banned Patterns / Anti-Patterns
-
-Blocked on sight (QA / Lore Guardian grep these):
-
-- Lore: `horse`, `horses`, `sire`, `dam`, `mare`, `foal`, `🏇`, and animal framing of characters. Check context: "dam" in "damaged" and "stable" as an adjective are fine; the Guardian decides.
-- Naming: any equine term in an identifier, table, column, route, config key, or test name.
-- Over-engineering (Pre-Mortem §1): no auth/sessions surface, no SPA framework, no breeding/pairing engine, no EAV attribute tables, no Excel dependency, no Redis, no event calendar in Phase 1. Every new class cites a PRD FR-x/US-x or it does not ship.
-- Architecture: no business logic in controllers or models (use Actions/Services); no inline `$request->validate()` in controllers (use Form Requests); no `toArray()` hand-mapping in API responses (use API Resources); no raw `{!! !!}` on fetched/source data; no hard-coded fetch URLs (config allowlist only); no writing to `is_manual = true` rows from the engine.
-- Data: no fact stored without provenance; no matching on display strings (match on normalized `match_key`); no sentinel dates for "unreleased" (use nullable date + `release_status`).
-- Code comments (antislop-code): no comments that restate the code, no `// Step 1/2/3` narration, no banner separators, no decorative emoji, no vague TODOs. Comments explain WHY (constraint, workaround, non-obvious behavior) or are omitted. PHPDoc over inline; array-shape types in PHPDoc.
-- Copy (antislop-copywriting): no em dash (—) in prose, no AI buzzwords (seamless, powerful, revolutionary, cutting-edge, effortless, ultimate), no fabricated stats/testimonials/claims, no generic CTAs.
-- Suppressions/stubs (CONSTRAINTS.md floor): no new `@phpstan-ignore`, `@ts-ignore`, `eslint-disable`, `# noqa`, no `throw new \Exception('not implemented')`, no empty `catch {}`, no skipped/deleted tests without a reason in the commit message.
-
-## Planner Domain Rules [rev 0.2 — repo #4]
-
-The training-run planner (runs, turns, skills; PRD FR-C) inherits these rules from the `uma_musume_race_planner` consolidation:
-
-1. No speculative simulation. No race simulators, randomness, prediction engines, or "estimated outcome" math. Repo #4's manual race-prediction grades and race-day snapshots are cut (PRD §6.11); do not reintroduce them.
-2. Do not copy legacy complexity. No dual storage modes (SQLite is the only store), no localStorage-authored runs, no image uploads, no DB-level enum columns, no soft deletes, no Livewire.
-3. Explicit timezone handling. Store UTC; parse JP-source datetimes as `Asia/Tokyo` and record `source_timezone`; date-only values stay `date`, never datetimes; display via `config('uma.display_timezone')`. Never hardcode a locale timezone in `config/app.php` (repo #4 did; it shifted JP date logic).
-4. Deterministic calculations. Every derived number (deltas, totals, per-turn progression) is a pure function of Trainer-entered `turn_entries`. Same input, same output, no hidden state.
-5. Explainable outputs. Any computed value shown in the UI must be traceable to the turns that produced it; no unexplained "recommended" numbers.
-6. Stat bounds live in one place: `StoreTurnEntryRequest` (0..1200 per stat, turn >= 1). Do not scatter magic bounds through services or views.
-7. Umamusume terminology everywhere in the planner domain too: characters are Umamusume, never equine vocabulary. Banned terms are a hard failure (Lore Rules above apply to run notes placeholders, seed data, export headers, and UI labels).
-
-## Laravel 13 Coding Standards
-
-Full detail in `laravel-best-practices` and the Boost guidelines below. Non-negotiables:
-
-- PHP 8.5, `declare(strict_types=1);` at the top of every PHP file; explicit param and return types on every method.
-- Eloquent models: `#[Fillable]`/`#[Hidden]` attributes (not legacy properties); `casts()` as a method; enums cast by class name; `HasFactory` + a factory per model; `loadMissing`/`with` against N+1.
-- Thin controllers; logic in `app/Actions/` (one-off, `handle`/`__invoke`) or `app/Services/` (shared/external); dispatch events only from Actions/Services.
-- Form Requests in `app/Http/Requests/` for all input validation; API Resources in `app/Http/Resources/` for all JSON; API under `/api/v1`.
-- Named routes + `route()` helper; anonymous migration classes; `DB::transaction` for atomic multi-writes.
-- `config()` in app code, `env()` only in config files. Read config with `php artisan config:show`.
-- Create files with `php artisan make:* --no-interaction`.
-- SQLite only (WAL + busy_timeout); no MySQL/PG-specific DDL.
-- After any PHP edit: `vendor/bin/pint --dirty --format agent`. Keep PHPStan level 6 clean.
-- Verify installed versions before relying on a package API (`composer show <pkg>`); never assume a version.
-
-## Architectural Patterns
-
-Follow `ARCHITECTURE-ESSENTIALS.md` (the token-efficient digest) for the schema, fetch pipeline, API contract, caching, and conventions. `ARCHITECTURE.md` is the authoritative full text and wins on any disagreement. Fetch pipeline is stage-isolated (fetch → snapshot → parse → normalize → match → promote|review); matching tiers are Exact/Alias (auto-promote) vs Fuzzy/None (review queue); all fetched content is untrusted and snapshotted before parsing.
-
-## Testing Expectation
-
-Pest 4, feature-first (`test-driven-development`, `testing-best-practices`):
-
-- Write the failing test first for any behavior or logic change; then implement to green.
-- Create tests with `php artisan make:test --pest {name}` (no suite dir in the name).
-- All fetcher/pipeline tests use `Http::fake` and stored fixtures. No test touches the network.
-- Use factories for models; check factory states before hand-building data.
-- Cover the changed behavior and its important failure modes (unicode normalization, is_manual protection, match tiers, validation rejection). Do not add tests beyond them.
-- Run the narrowest set that covers the change (`php artisan test --compact --filter=...`); ask the human to run the full suite after.
-- Do not delete or skip tests without approval.
-
-## Workflow Notes
-
-- Load the matching skill before acting (`using-agent-skills`); the domain skills in `**/skills/**` are mandatory for their domains.
-- Documentation files only when explicitly requested; no verification scripts when tests cover it.
-- Do not change dependencies or create new base directories without approval.
-- Product name is **Trainer Desk** (owner decision 2026-09-27, PRD OQ-1 closed). Do not invent names for other undecided things (sources, palette proposals); mark them `Undecided — owner input needed`.
-- Visual work follows `DESIGN.md` (root): light base palette with dark opt-in via preference resolution (ADR-0006), tactical-athletic system, lore-sensitive iconography rules (no equestrian/animal motifs; stopwatch, chart, grid, track-line motifs only). Disclosure glyph is `N/A` + tooltip, never an em dash, in shipped copy.
-
-- Read `AGENTS.md` first: it carries the shared Laravel Boost guidelines this repository follows. Follow the conventions and rules it records.
-- The `impeccable` design skill covers UI design, redesign, critique, audit, and polish work in this project. It is installed at the project level (`.agents/skills/impeccable`, `.cursor/skills/impeccable`, `.grok/skills/impeccable`) and at the user level (`~/.claude/skills/impeccable`). Load and follow its instructions for any UI work.
-- `CLAUDE.md` and `.claude/` are gitignored by design: agent guideline and skill files are machine-local in this repository.
-
-===
-
-<laravel-boost-guidelines>
-=== .ai/custom/domain rules ===
-
-# Custom Domain Guidelines
-
-This file records the high-level domain terminology, application boundaries, and authorization patterns specific to this repository. It is loaded automatically by agents working on any part of the codebase.
-
-## Application Identity
-
-- **Project name:** Laravel 13 skeleton application.
-- **PHP version:** 8.3+ (targeting 8.4+ features where appropriate).
-- **Frontend stack:** Vite + Tailwind CSS v4 + vanilla JavaScript (no Livewire, no Inertia, no Flux UI installed).
-- **Testing stack:** Pest 4 with `pest-plugin-laravel`.
-
-## Core Domain Boundaries
-
-- `app/Models/` — Eloquent models. Currently contains the `User` model extending `Illuminate\Foundation\Auth\User`.
-- `app/Http/` — Controllers, form requests, middleware, and API resources.
-- `app/Actions/` — (intended) One-off business operations invoked by controllers or jobs.
-- `app/Services/` — (intended) Shared domain services wrapping external integrations or complex logic.
-- `app/Console/` — Artisan commands and scheduled tasks.
-- `app/Providers/` — Service providers, including the route service provider and any package providers.
-- `database/migrations/` — Schema definitions using anonymous migration classes (Laravel 13 default).
-
-## Authorization Patterns
-
-- Use **Laravel policies** at `app/Policies/` for object-level authorization.
-- Gate-based checks are acceptable for global, non-model rules.
-- Always resolve the `User` model via route model binding or explicit `Auth::user()`; never trust client-supplied identifiers without a policy check.
-
-## API Conventions
-
-- API endpoints return JSON via Eloquent **API Resources** at `app/Http/Resources/`.
-- Use **API versioning** for any public-facing endpoints (e.g., `api/v1/`).
-- Wrap collections with `ResourceCollection`; wrap single models with the resource class.
-
-## Events & Side Effects
-
-- Dispatch events from **Action classes** or **Service classes**, never from controllers or models directly.
-- Use `ShouldQueue` for jobs that interact with external services.
-- Listeners should be registered in the `EventServiceProvider` at `app/Providers/EventServiceProvider.php`.
-
-## Data Integrity
-
-- Mass assignment is governed by the `#[Fillable]` attribute on each model.
-- Soft deletes are not used by default; if added, ensure the `SoftDeletes` trait and corresponding migration column are added together.
-- Use database transactions (`DB::transaction`) when multiple writes must be atomic.
-
-=== .ai/framework/core rules ===
-
-<code-snippet name="strict-types" lang="php">
-<?php
-
-declare(strict_types=1);
-
-namespace App\Http\Controllers;
-
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-
-class UserController extends Controller
-{
-    public function index(): JsonResponse
-    {
-        return response()->json([
-            'data' => User::select(['id', 'name', 'email'])->get(),
-        ]);
-    }
-}
-</code-snippet>
-
-## PHP Baseline
-
-- Every PHP file **must** begin with `<?php` followed by `declare(strict_types=1);`.
-- Use **PHP 8.4+** features: readonly classes, `#[Override]`, intersection types where applicable, and constructor property promotion.
-- All method parameters and return types must be explicitly typed: `function store(Request $request): JsonResponse`.
-- Use **TitleCase** for enum cases: `FavoritePerson`, `BestLake`, `Monthly`.
-- Prefer **PHPDoc** blocks over inline comments. Only add inline comments for exceptionally complex logic.
-- Use array-shape type definitions in PHPDoc blocks, e.g. `@return array{ id: int, name: string }`.
-
-## Controllers & Actions
-
-- Controllers should be thin; delegate business logic to **Action classes** in `app/Actions/` or **Service classes** in `app/Services/`.
-- Action classes expose a `handle(...)` method (or `__invoke`) and are invoked from controllers or jobs.
-- Use **Form Request classes** in `app/Http/Requests/` for all input validation. Never inline `validate()` in controllers.
-- Return JSON responses via `response()->json()` for APIs; use `redirect()->back()` or named routes for web flows.
-
-## Models & Eloquent
-
-- Models live in `app/Models/`. Use the **attributes** (`#[Fillable]`, `#[Hidden]`) over legacy `$fillable`/`$hidden` properties.
-- Use the `HasFactory` trait and a factory at `database/factories/{Model}Factory.php`.
-- Define `casts()` as a method returning an array — this is the Laravel 13 standard.
-- Use **lazy eager loading** (`loadMissing`) to avoid N+1 queries in endpoints.
-- API responses must use **Eloquent API Resources** at `app/Http/Resources/` rather than manual `toArray()` mappings.
-
-## Routing
-
-- Use **named routes** and the `route()` helper for all URL generation.
-- Group routes by middleware: `api` prefix + `api` middleware for API routes; `web` middleware for browser routes.
-- Keep `routes/web.php` and `routes/api.php` thin — delegate to route model bindings and controller methods.
-
-## Configuration & Environment
-
-- Read configuration with `config('app.name')` or `php artisan config:show app.name`. Never hardcode env values.
-- Use `env()` only inside configuration files; in application code use `config()` so values are cached.
-
-## Frontend
-
-- Use **Vite** with `@tailwindcss/vite` and **Tailwind CSS v4**. Assets are referenced via `@vite(['resources/css/app.css', 'resources/js/app.js'])`.
-- Blade templates live in `resources/views/`. Use the `layout` Blade component for shared wrappers.
-- For Tailwind-specific guidance, activate the `tailwindcss-development` skill.
-
-=== foundation rules ===
-
-# Laravel Boost Guidelines
-
-The Laravel Boost guidelines are specifically curated by Laravel maintainers for this application. These guidelines should be followed closely to ensure the best experience when building Laravel applications.
-
-## Foundational Context
-
-This application is a Laravel application running on PHP 8.5. You are an expert with the Laravel ecosystem. Always use the APIs that match the installed major version of each package — do not assume a version.
-
-Before relying on a package's API, confirm its installed version:
-- PHP packages: run `composer show --direct` to list direct dependencies with versions, or `composer show <vendor/package>` for a single package.
-- JS packages: check `package.json` for the installed versions.
-
-## Skills Activation
-
-This project has domain-specific skills available in `**/skills/**`. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
-
-## Conventions
-
-- You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
-- Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
-- Check for existing components to reuse before writing a new one.
-
-## Verification Scripts
-
-- Do not create verification scripts or tinker when tests cover that functionality and prove they work. Unit and feature tests are more important.
-
-## Application Structure & Architecture
-
-- Stick to existing directory structure; don't create new base folders without approval.
-- Do not change the application's dependencies without approval.
-
-## Frontend Bundling
-
-- If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
-
-## Documentation Files
-
-- You must only create documentation files if explicitly requested by the user.
-
-## Replies
-
-- Be concise in your explanations - focus on what's important rather than explaining obvious details.
-
-=== boost rules ===
-
-# Laravel Boost
-
-## Tools
-
-- Laravel Boost is an MCP server with tools designed specifically for this application. Prefer Boost tools over manual alternatives like shell commands or file reads.
-- Use `database-query` to run read-only queries against the database instead of writing raw SQL in tinker.
-- Use `database-schema` to inspect table structure before writing migrations or models.
-- Use `get-absolute-url` to resolve the correct scheme, domain, and port for project URLs. Always use this before sharing a URL with the user.
-- Use `browser-logs` to read browser logs, errors, and exceptions. Only recent logs are useful, ignore old entries.
-
-## Searching Documentation (IMPORTANT)
-
-- Use `search-docs` before changes that depend on Laravel ecosystem APIs, behavior, configuration, or version-specific syntax. Skip it for copy-only edits and other changes where package documentation is irrelevant. Reuse sufficient results already in context instead of searching again.
-- Pass a `packages` array to scope results when you know which packages are relevant.
-- Use multiple broad, topic-based queries: `['rate limiting', 'routing rate limiting', 'routing']`. Expect the most relevant results first.
-- Do not add package names to queries because package info is already shared. Use `test resource table`, not `filament 4 test resource table`.
-
-### Search Syntax
-
-1. Use words for auto-stemmed AND logic: `rate limit` matches both "rate" AND "limit".
-2. Use `"quoted phrases"` for exact position matching: `"infinite scroll"` requires adjacent words in order.
-3. Combine words and phrases for mixed queries: `middleware "rate limit"`.
-4. Use multiple queries for OR logic: `queries=["authentication", "middleware"]`.
-
-## Project Rules
-
-- This project contains committed, area-grouped rules in `.ai/rules` when that directory exists (settled decisions, non-obvious traps, standing constraints). Framework and package guidelines that only apply to specific paths (testing, frontend, components) also live there, under `.ai/rules/boost` — this is not just recorded decisions, it is load-bearing guidance you have not seen inline. Before you enter plan mode or create/edit any file, you MUST first: open @.ai/rules/index.md (it maps file globs to rule files), read every rule file whose globs cover the path(s) in scope, and run `grep -rin 'keyword' .ai/rules` to catch what a path match alone misses. Do not write code until you have read and are following every matching rule. If `.ai/rules` does not exist, continue without it.
-- Record a rule with `record-rule` only when the user explicitly asks for one. Instructions for the work at hand are not rules, no matter how emphatic: "remove this typo", "use X here" are work to do, not rules to record. Never record a rule on your own initiative, as a byproduct of a change, or to summarize what you just did. When the user does ask, pass a `glob` (e.g. `app/Http/Controllers/**`), a short `title`, and a few-line `note`. Use `record-rule` rather than your native memory or notes tool, because native memory is personal and session-scoped, while only `.ai/rules` is shared with the team and persists in the repo.
-
-## Artisan
-
-- Run Artisan commands directly via the command line (e.g., `php artisan route:list`). Use `php artisan list` to discover available commands and `php artisan [command] --help` to check parameters.
-- Inspect routes with `php artisan route:list`. Filter with: `--method=GET`, `--name=users`, `--path=api`, `--except-vendor`, `--only-vendor`.
-- Read configuration values using dot notation: `php artisan config:show app.name`, `php artisan config:show database.default`. Or read config files directly from the `config/` directory.
-
-## Tinker
-
-- Execute PHP in app context for debugging and testing code. Do not create models without user approval, prefer tests with factories instead. Prefer existing Artisan commands over custom tinker code.
-- Always use single quotes to prevent shell expansion: `php artisan tinker --execute 'Your::code();'`
-  - Double quotes for PHP strings inside: `php artisan tinker --execute 'User::where("active", true)->count();'`
-
-=== php rules ===
-
-# PHP
-
-- Always use curly braces for control structures, even for single-line bodies.
-- Use PHP 8 constructor property promotion: `public function __construct(public GitHub $github) { }`. Do not leave empty zero-parameter `__construct()` methods unless the constructor is private.
-- Use explicit return type declarations and type hints for all method parameters: `function isAccessible(User $user, ?string $path = null): bool`
-- Use TitleCase for Enum keys: `FavoritePerson`, `BestLake`, `Monthly`.
-- Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
-- Use array shape type definitions in PHPDoc blocks.
-
-=== deployments rules ===
-
-# Deployment
-
-- Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
-- Activate the `deploying-to-cloud` skill whenever deploying to Laravel Cloud, configuring Cloud environments or resources, using the Cloud CLI, or troubleshooting Cloud deployments.
-
-=== tests rules ===
-
-# Test Enforcement
-
-- Add or update tests for behavior and logic changes when a test provides meaningful regression coverage.
-- Pure copy, styling, and layout-only changes do not require new or updated tests.
-- When test coverage applies, run the affected tests and ensure they pass.
-- Test the changed behavior and its important failure modes, but do not add tests beyond them.
-- Read the `testing-best-practices` skill before writing tests.
-
-=== laravel/core rules ===
-
-# Do Things the Laravel Way
-
-- Use `php artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available Artisan commands using `php artisan list` and check their parameters with `php artisan [command] --help`.
-- If you're creating a generic PHP class, use `php artisan make:class`.
-- Pass `--no-interaction` to all Artisan commands to ensure they work without user input. You should also pass the correct `--options` to ensure correct behavior.
-
-### Model Creation
-
-- When creating new models, create useful factories and seeders for them too. Ask the user if they need any other things, using `php artisan make:model --help` to check the available options.
-
-## APIs & Eloquent Resources
-
-- For APIs, default to using Eloquent API Resources and API versioning unless existing API routes do not, then you should follow existing application convention.
-
-## URL Generation
-
-- When generating links to other pages, prefer named routes and the `route()` function.
-
-## Testing
-
-- When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
-- Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
-- When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
-
-## Vite Error
-
-- If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
-
-=== pint/core rules ===
-
-# Laravel Pint Code Formatter
-
-- If you have modified any PHP files, you must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
-- Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
-
-=== pest/core rules ===
-
-# Pest
-
-- This project uses Pest. Create tests with `php artisan make:test --pest {name}`.
-- Do not include the test suite directory in `{name}`. Use `SomeFeatureTest`, not `Feature/SomeFeatureTest`.
-- Read the `testing-best-practices` skill for guidance on coverage, naming, structure, dependency isolation, and review.
-- Do not delete tests or test files without approval. They are part of the application.
-
-## Running Tests
-
-- Run the narrowest set of tests that covers the change. Pass a file path or `--filter=testName` to `php artisan test --compact`.
-- Rerun a test after each change to it.
-- Run `vendor/bin/pest` to call the test runner directly. It accepts the same file path and `--filter=testName` arguments.
-- After the feature tests pass, ask the user to run the complete suite with `php artisan test --compact`.
-
-</laravel-boost-guidelines>
+# Claude Code instructions (Trainer Desk)
+
+Read and follow `AGENTS.md` before doing repository work. It is the repository-wide
+operational contract: precedence, roles and escalation, the lore gate, the Floor, coding
+conventions, the pipeline rules, the validation matrix, the command reference, and the
+definition of done. This file does not repeat it. It records only what is specific to
+Claude Code in this repository.
+
+If this file and `AGENTS.md` disagree, `AGENTS.md` wins. If either contradicts
+`CONSTRAINTS.md` (the pointer to the binding bar in `docs/research-scratch/GOVERNANCE.md`,
+section "CONSTRAINTS.md (root quality bar, C-1 to C-9)"), the bar wins and the conflict
+gets reported, not silently resolved.
+
+One correction to the previous version of this file: `CLAUDE.md` is **tracked** in git and
+is yours to edit. `.claude/` **is** gitignored (`.gitignore:48`), so the hooks, skills, and
+agent files under it are local configuration, not repository truth.
+
+## 1. Instruction precedence, for Claude specifically
+
+1. The task you were given.
+2. `AGENTS.md`, then `CONSTRAINTS.md` -> `GOVERNANCE.md` §CONSTRAINTS.md for the bar.
+3. Accepted ADRs (`docs/adr/`); a `Proposed` ADR is not binding.
+4. `CLAUDE.md` (this file) for Claude-specific practice.
+5. `.ai/rules/index.md` -> the rule files whose globs cover the paths in scope.
+6. Laravel Boost's injected framework guidance.
+
+Boost's injected block asks for Laravel policies, `Auth::user()`, Laravel Cloud deployment,
+and an active `User` model. None of that exists here: there is no authorization layer by
+design (PRD NFR-1), and deployment is a non-goal (PRD §6.10). Do not add a policy, a gate,
+a `User` flow, or a deploy path because generic guidance suggests it.
+
+## 2. Required reading before a substantial change
+
+| Change | Read first |
+|---|---|
+| Anything | `AGENTS.md`, then the `.ai/rules` files covering the paths in scope |
+| UI, layout, copy, tokens | `DESIGN.md` (visual system) and `SCREEN_SPEC.md` §4 and §8 (screen behavior) |
+| Pipeline, parsers, sources, provenance | `ARCHITECTURE.md` §5 and §6, `config/uma.php`, the parser's sibling in `app/Services/DataPipeline/Parsers/` |
+| Schema | `ARCHITECTURE.md` §3, `ARCHITECTURE-ESSENTIALS.md` (the digest travels with the migration), the PRD requirement the column serves, and any ADR in the area |
+| Planner domain (runs, turns, skills, export) | `PRD.md` §4 FR-C, `ADR-0015` (stat ceilings), `app/Services/ScenarioCaps.php` |
+| Lore, terminology, displayed vocabulary | `AGENTS.md` §5, `lang/en/uma.php`, `tools/lore.php` |
+| Mechanics or roster facts | `docs/UMAMUSUME_REFERENCE.md` (eight sections; re-derive its table rather than quoting prose counts) |
+| Onboarding, setup, commands | `README.md` |
+
+`PRODUCT.md` is a generated summary for design and agent context. Where it and `PRD.md`
+disagree, `PRD.md` wins; do not edit `PRODUCT.md` by hand (the plugin rewrites it).
+
+## 3. Tooling already wired for you here
+
+**Laravel Boost MCP** (`php artisan boost:mcp`, configured in `.mcp.json`):
+
+- `application-info` once per session, so package versions in context are real rather than
+  remembered. `composer.json` requires PHP `^8.3` and Laravel `^13.0`.
+- `database-schema` before writing a migration or a model; `database-query` instead of
+  `tinker` for read-only SQL.
+- `search-docs` before relying on framework behavior that depends on the installed version.
+  Pass `packages` when you know which ones matter.
+- `browser-logs`, `last-error`, and `read-log-entries` after a UI change, before claiming a
+  page works.
+- `get-absolute-url` before handing a URL to the user.
+
+**Playwright MCP** (`.mcp.json`) and the `playwright-cli` skill in `.claude/skills/` are the
+browser path for real rendered checks. There is no other browser harness in the repo.
+
+**Hooks**: `.claude/settings.local.json` registers an impeccable design check after every
+`Edit`/`Write` and a deeper pass at `Stop`. Both no-op when the impeccable script is absent
+(it is currently not in `.claude/skills/`), and both are local, gitignored config. Do not
+edit that file as part of a feature change.
+
+**Skills** in `.claude/skills/`: `laravel-best-practices`, `pest-testing`,
+`testing-best-practices`, `running-tests`, `tailwindcss-development`, `creating-models`,
+`infer-conventions`, `playwright-cli`. `deploying-to-cloud` is installed and irrelevant:
+deployment is cut (PRD §6.10).
+
+The `impeccable` design skill is present at `.cursor/skills/impeccable`,
+`.grok/skills/impeccable`, `.github/skills/impeccable`, and user level
+`~/.agents/skills/impeccable`. The previous version of this file named `.agents/` and
+`~/.claude/`, neither of which holds it.
+
+**Skill automation** (`.agentrules`, `app/Services/Skill{Registry,Matcher,Executor}.php`,
+`php artisan skill:manage`) is a separate declarative layer documented in
+`docs/SKILL_AUTOMATION.md`. It reads `.agents/skills.json` (gitignored) and touches no
+catalog or run table. Do not wire it into domain code.
+
+## 4. Claude work pattern
+
+1. Read `AGENTS.md`, then the `.ai/rules` files whose globs cover the files in scope.
+2. Read the owning document for the class of change (§2). Do not work from a summary of a
+   document you have not opened.
+3. Inspect the real flow end to end before editing. For a bug, grep every caller of the
+   function you intend to touch and fix the shared function once.
+4. Plan the smallest coherent change. Name the files it will touch.
+5. Edit only those files, following sibling files for structure, naming, and idiom.
+6. Run the narrow validation that covers the change (§6).
+7. Run the broader gates when the change is cross-cutting (`AGENTS.md` §9).
+8. Read `git diff` before reporting. Unrelated hunks mean something went wrong.
+9. Update the document that owns the information you changed (§10).
+10. Report using the format in §11, including what was not run.
+
+Trivial copy or single-token work does not need steps 2 to 5 in full. It does still need the
+lore gate and a diff review.
+
+## 5. Search before creating
+
+Reuse is the default in this repository; a second implementation of something that already
+ships is a defect.
+
+- Blade components in `resources/views/components/` before writing markup.
+- `lang/en/uma.php` before writing a displayed string or an enum label.
+- `config/scenarios.php` before naming a scenario anywhere near the layout path.
+- `ScenarioCaps` before doing per-stat ceiling arithmetic.
+- The Form Request that already owns a validation boundary
+  (`app/Http/Requests/`); validation has one owner per boundary.
+- `app/Actions` and `app/Services` before adding a class.
+- `tests/Fixtures/` bodies and `Http::fake` before writing a pipeline test.
+- `docs/research-scratch/` masters before writing any new documentation file.
+
+A new table, column, or class cites a PRD requirement (`FR-x` / `US-x`). No citation, no
+merge (`AGENTS.md` §4, Architect role).
+
+## 6. Testing and validation
+
+Commands, gates, and which checks a change class needs are in `AGENTS.md` §9 and §10. The
+Claude-specific parts:
+
+- Narrow first: `php artisan test --compact --filter=Name` or
+  `vendor/bin/pest tests/Feature/XTest.php`. Then the full suite for anything that crosses
+  layers. There is no CI, so nothing catches a partial landing for you.
+- `vendor/bin/pint --dirty --format agent` and
+  `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` operate on the **whole working
+  tree**, not your diff. In a tree that carries other sessions' in-flight edits, `--dirty`
+  will reformat their files. Check `git status` first; if unrelated PHP is dirty, run Pint
+  on your own paths and say in the report what you scoped out and why.
+- Behavior changes ship with a test (`AGENTS.md` §15). Copy-only and layout-only changes do
+  not need a new one. Never delete or skip a test.
+- Host facts: `make` does not run here (KI-4); `composer analyse` omits the PHPStan memory
+  flag; `phpunit.xml` forces an in-memory SQLite database and beats `.env.testing`.
+- Never report a gate as passing unless you ran it and are quoting the output. "Not run" is a
+  legitimate line in the report.
+
+## 7. UI and browser workflow
+
+1. `DESIGN.md` for the visual system, `SCREEN_SPEC.md` §4 for the screen's states and §8 for
+   what owns which answer. Both are required before a visible change.
+2. Reuse committed components and design tokens only. No `dark:` utilities, no decorative
+   skeletons, no one-off spacing or color values.
+3. Desktop-first at 1280px+. Below 768px the race calendar and the turn log are wide tables
+   that deliberately scroll horizontally inside a focusable region rather than reflow; that
+   is the contract, and the 768px minimum is a proposal rather than a ratified one (KI-25).
+   Do not "fix" the scroll to be responsive without a decision.
+4. Build or serve before looking at a page: `npm run dev` for iteration, `npm run build`
+   when a Blade view references assets and the manifest is missing.
+5. Verify the rendered result when it is cheap: Boost `browser-logs` plus a Playwright
+   snapshot or screenshot at 1280 and 390 widths. Check the console before claiming the page
+   works.
+6. Accessibility behavior here is test-covered by name: keyboard paths, target sizes, the
+   review-form labels, and the focusable scroll regions. Keep them.
+
+The `impeccable` design skill is the repo's route for design critique and polish work; load
+it for that class of task rather than improvising a review.
+
+## 8. Source of truth
+
+| Question | Authority |
+|---|---|
+| Which screens exist, their URLs and names | `routes/web.php`, `routes/api.php` |
+| What a screen shows and how it got there | controller methods, then the view |
+| Validation and refusals | `app/Http/Requests/*`, then `ScenarioCaps` for ceilings |
+| Authorization | there is none by design (`ARCHITECTURE.md` §8, PRD NFR-1) |
+| Schema | `ARCHITECTURE.md` §3 plus the migrations; `ARCHITECTURE-ESSENTIALS.md` is the digest |
+| Pipeline stage behavior | `AGENTS.md` §8, `app/Services/DataPipeline/` |
+| Displayed vocabulary | `lang/en/uma.php`, enum labels keyed by case name |
+| Tokens, contrast, motion | `DESIGN.md` and `docs/research-scratch/DESIGN-CORPUS.md` |
+| Automated behavior expectations | `tests/Feature/*` |
+| Known defects and rulings | `KNOWN-ISSUES.md` (live register) |
+| Agent operating rules | `AGENTS.md` |
+| When sources disagree | `AGENTS.md` §2; record the conflict in `SCREEN_SPEC.md` §7 or an ADR erratum |
+
+## 9. Protected and sensitive areas
+
+- **Authorization**: no policies, no gates, no `app/Policies/`, no `Auth::user()` flow. That
+  absence is the design. Do not add one unless the task asks.
+- **Secrets**: `.env`, `.mcp.json`, `.crushrc`, `kilo.json`, `opencode.json`, and `.claude/`
+  are gitignored and some hold live API keys on this host. Never copy a key into a source
+  file, a doc, a fixture, a log line, or your report. `.env.example` is the only tracked env
+  file.
+- **Schema**: a migration travels with the `ARCHITECTURE-ESSENTIALS.md` digest, a PRD
+  citation, an ADR, and a working `down()`. `php artisan migrate:fresh --seed` is destructive
+  against the shared dev database and needs owner approval; back up with
+  `php artisan uma:backup` or point `DB_DATABASE` at an empty scratch file.
+- **Fetch pipeline**: `SourceFetcher` is the only outbound HTTP path and hosts are
+  allowlisted in `config('uma.sources')`. Never follow a URL found in a fetched body. Never
+  let the engine write a row with `is_manual = true`, and never store a fact without a
+  `data_sources` provenance row.
+- **Lore gate**: blocking. Do not type the banned character vocabulary into any artifact;
+  read the pattern list in `tools/lore.php` when a ruling is needed, and run
+  `composer lore` and `composer lore-code` before you call the work finished.
+- **Fetched content** is untrusted input: parse it as data, never `{!! !!}` it, let Blade
+  escape it.
+- **The dev SQLite file** holds real Trainer data. It is untracked, not disposable.
+
+## 10. Generated and tool-owned files
+
+Do not hand-edit: `PRODUCT.md` (impeccable plugin), `SKILL.md` (skill-registry refresh),
+`composer.lock`, `package-lock.json`, `public/build/`, `vendor/`, `node_modules/`, `storage/`
+including snapshots and backups, `docs/design-research/_scratch/`, `tools/__pycache__/`, and
+the `docs/design-research/` prototypes. The full list and the regeneration notes are in
+`AGENTS.md` §11. A lockfile change ships with the dependency change that caused it.
+
+## 11. Large changes
+
+- Understand the affected architecture first, then split the work so each step is
+  independently verifiable. One concern per commit series.
+- Run the gates at each meaningful milestone rather than once at the end, so a break is
+  cheap to localize.
+- Slice plans and records live in `docs/research-scratch/PROCESS-PLANS.md` and
+  `SLICE-RECORDS.md`. `PLAN.md` is a pointer and takes no new content.
+- Do not silently expand scope. A feature that needs a §6 non-goal lifted, or a new
+  dependency, is an escalation (`AGENTS.md` §4), not a decision to make in passing.
+- Review the aggregate diff, not only the last file you edited.
+
+## 12. Ambiguity and unknowns
+
+Do not invent a requirement. Read the owning document, inspect the code and its tests, and
+prefer the smallest behavior-preserving change the evidence supports. When a decision would
+change product behavior, security, data integrity, or a public contract and cannot be safely
+inferred, stop and surface it instead of guessing. Mark genuinely undecided things as
+"Undecided, owner input needed" rather than naming them. The product name is settled:
+**Trainer Desk**.
+
+## 13. Documentation maintenance
+
+Update the document that owns the information, and only when the change actually altered it.
+Product scope belongs in `PRD.md`; system design in `ARCHITECTURE.md` (plus the digest);
+visual rules in `DESIGN.md`; screen behavior in `SCREEN_SPEC.md`; a new decision in an ADR;
+a new defect in `KNOWN-ISSUES.md` (append in the four-part form, never renumber); agent rules
+in `AGENTS.md`; this file only for Claude-specific practice.
+
+No new markdown file in the repository root, and no new standalone file under
+`docs/research-scratch/`: content goes into the relevant master. Write documentation only
+when the task asks for it. A dated claim that turns out wrong is corrected by appending a
+dated erratum that preserves the original sentence, never by rewriting it silently. The ADR
+index in `docs/adr/README.md` is derived; regenerate it with the command in that file.
+
+## 14. Git and diff hygiene
+
+- Conventional-commit subjects as the history shows them: `type(scope): summary`, lowercase,
+  imperative (`feat(runs):`, `fix(components):`, `test(readme):`, `refactor(filters):`).
+- `git status` before you start and `git diff` before you report. This tree frequently holds
+  uncommitted work from other sessions: do not revert it, do not reformat it, do not commit
+  it. Scope your edits and your tools to your own files.
+- Never commit `vendor/`, `node_modules/`, `storage/` snapshots or backups, `.env`, or
+  `public/build/`.
+- Deleting or skipping a test needs owner approval and a stated reason in the commit.
+- There is no CI and no changelog file. The diff is the review.
+
+## 15. Completion reporting
+
+Report in this shape, and say plainly what you did not verify:
+
+```
+Implemented:
+- <file: what changed and why>
+
+Validated:
+- <command> -> <result or the output that proves it>
+- not run: <gate> (reason)
+
+Documentation:
+- <doc updated, or "none, behaviour unchanged">
+
+Known issues / failures:
+- <anything failing, skipped, or newly discovered>
+
+Intentionally deferred:
+- <what you did not touch and why>
+```
+
+Keep it short. The point is that a reader can tell what actually happened and what is still
+unproven.
+
+## 16. Change log
+
+| Date | Change | Reason |
+|---|---|---|
+| 2026-10-04 | Rewritten as Claude-specific guidance on top of `AGENTS.md`: added Boost MCP and Playwright guidance, the work pattern, search-before-create, the whole-tree caveat for Pint and PHPStan, the UI/browser workflow, the source-of-truth table, protected areas, and the completion-report shape. Removed the injected Laravel Boost block and the duplicated agent contract now held in `AGENTS.md`. Corrected three false claims: `CLAUDE.md` is tracked (not gitignored), impeccable is not installed under `.agents/` or `~/.claude/`, and the repository has no deployment path. | The file duplicated repository-wide rules, repeated generic framework guidance that contradicts the no-auth, no-deploy design, and asserted install paths and git status that the tree contradicts. |

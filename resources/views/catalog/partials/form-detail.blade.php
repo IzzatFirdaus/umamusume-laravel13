@@ -10,9 +10,10 @@
     the `> 1` threshold: one form gains no chrome, not different content.
 --}}
 <div class="rounded-md border border-rule bg-raised p-4">
-    {{-- The title is verbatim client copy, brackets included: CONSTRAINTS.md:38 keeps such a
-         string as source data and puts the lore guard on the display path, so nothing here
-         normalises, trims or re-cases it. --}}
+    {{-- The title is verbatim client copy, brackets included: the rule in
+         docs/research-scratch/GOVERNANCE.md (CONSTRAINTS section, "Lore banned patterns")
+         keeps such a string as source data and puts the lore guard on the display path,
+         so nothing here normalises, trims or re-cases it. --}}
     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h3 class="text-base font-semibold text-ink-strong">{{ $card->title }}</h3>
         <span class="flex flex-wrap items-baseline gap-3 text-xs text-ink-muted">

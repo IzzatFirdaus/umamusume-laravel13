@@ -11,6 +11,7 @@ use App\Models\Umamusume;
 use App\Services\DataPipeline\NameNormalizer;
 use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -168,14 +169,26 @@ class SkillController extends Controller
             return collect();
         }
 
-        return CharacterCard::query()
-            ->where('unconfirmed', false)
-            ->whereJsonContains($column, $skill->export_id)
-            ->with('umamusume:id,slug,name')
-            ->get()
-            ->sortBy(fn (CharacterCard $card): string => $card->umamusume->name)
-            ->unique('umamusume_id')
-            ->map(fn (CharacterCard $card): Umamusume => $card->umamusume)
-            ->values();
+        try {
+            return CharacterCard::query()
+                ->where('unconfirmed', false)
+                ->where(function (Builder $query) use ($column, $skill) {
+                    $query->whereJsonContains($column, $skill->export_id)
+                        ->whereRaw('json_valid('.$column.')');
+                })
+                ->with('umamusume:id,slug,name')
+                ->get()
+                ->sortBy(fn (CharacterCard $card): string => $card->umamusume->name)
+                ->unique('umamusume_id')
+                ->map(fn (CharacterCard $card): Umamusume => $card->umamusume)
+                ->values();
+        } catch (QueryException $e) {
+            // Column doesn't exist yet (migration not run) or JSON is malformed
+            if ($e->getCode() === 'HY000' && str_contains($e->getMessage(), 'no such column')) {
+                return collect();
+            }
+
+            throw $e;
+        }
     }
 }
