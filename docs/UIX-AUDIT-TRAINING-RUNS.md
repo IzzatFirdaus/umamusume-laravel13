@@ -1041,3 +1041,99 @@ The dispatch's "expected" value was `87164db8…` measured under the schema-dump
 Dispatch A end; the two methods are not comparable, so per the amended rule this is the new
 baseline rather than a finding. End-of-Stage-1 fingerprint was not recomputed because the
 dispatch wrote no schema change during Stage 1: the baseline carries.
+
+## Part 10: the two orphans that already had a ruling (2026-10-04)
+
+Not an audit item, and this audit names none of the eight component-library components. It is
+recorded here because the missing UI this work was asked about turned out to be surfaces that
+were already built and already ruled, and bypassed by inline copies of themselves. Which is what
+SCREEN_SPEC.md §7-13 item 13 was holding open: the reason it kept `capsule-header` and
+`grade-badge` was not that the treatment was undecided, but that the surfaces were still
+carrying their own.
+
+### Landed
+
+- `x-capsule-header` is mounted on the eight panels that hand-copied its div:
+  `epithet-checklist`, `grade-point-meter`, `race-calendar`, `race-panel`, `shop-panel`,
+  `spirit-burst-roster`, `team-race-panel`, `team-rank-gauge`. All eight had already drifted
+  from the component (`pl-16` against `pl-20`, `text-sm` against `text-base`) while each one
+  claimed to be the same header, which is the drift O-2's own note about repeated chrome is
+  about. Nothing about the ruling changed: DESIGN.md §2.3 already made the lattice bleed
+  material and chose the chrome fill.
+- `x-grade-badge` is mounted in `stat-band`, which carried its own nine-letter fill map and its
+  own badge span next to the letter it was banding. §2.1 already routed every grade letter
+  through `ink-strong`; the map is the one that KI-8's crash came from, so one owner is the fix.
+
+### Not landed, and why
+
+- `run-header` and `energy-gauge` are coupled and one cannot move without the other's tests
+  failing. Mounting the gauge is also O-10, which asks for the Energy control to become a
+  gauge: a design decision about a control this audit already flagged, not a wiring change.
+- `deck-editor` is still gated on backlog item 3 (per-card deck state), open since Part 9 and
+  waiting on the PRD amendment.
+
+### Gate added
+
+`FrontendComponentLibraryTest` asserts the lattice bleed and the grade fill map each appear in
+exactly one view, so a second copy fails the suite. Proven by re-inlining the shop panel header
+during the work and watching that case go red.
+
+## Part 11: baseline reconciliation (2026-10-04)
+
+Two dispatches reported the suite differently and both claimed no test was deleted, skipped, or
+weakened. The reconciled figure is **1,222 passed, 2 skipped, 18,275 assertions**, and the
+1,189 / 18,210 line is a transcription error.
+
+### What the record actually contains
+
+Neither figure is on disk. `docs/UIX-AUDIT-TRAINING-RUNS.md` never carried either, and a sweep of
+`.scratch-uma/`, `docs/`, and the tracked history finds no `Tests:` line for either run. The only
+suite figure recorded in a tracked file is `SLICE-RECORDS.md:1897`, which is a September slice
+(`2 skipped, 390 passed (1287 assertions)`). So the reconciliation had to be made from git and
+from a fresh run rather than by reading the two claims back.
+
+### The run that reproduces
+
+`php artisan test --compact` at `fc64bc2` with the working tree as it stands:
+
+```
+Tests:    2 skipped, 1222 passed (18275 assertions)
+Duration: 163.19s
+```
+
+Run twice, at 274.82s and 163.19s, with identical counts both times. A JUnit log of the same run
+records `tests="1224" assertions="18275" errors="0" failures="0" skipped="2"` across 125 test
+classes, which is 1,222 passed plus the 2 skipped.
+
+### Why the 1,189 figure is not a removed test
+
+- `git log --diff-filter=D --name-only -- tests/` returns nothing. No test file has ever been
+  deleted in this repository.
+- `git diff --stat 1f0f9ae..fc64bc2` covers the four commits that moved `HEAD` during and after
+  the orphan-mounting pass (`f1c18fc`, `9a09cc3`, `6238529`, `fc64bc2`, all between 11:32 and
+  11:42 on 2026-10-04). It touches two documentation files and nothing else: 127 insertions, 2
+  deletions, zero test files, zero source files.
+- `git diff --stat -- tests/` is `+92 / -11` across six files. Every deletion is a line edit
+  inside a case that still exists. `FrontendComponentLibraryTest.php` is `+56 / -0` and adds one
+  dataset-driven case worth exactly two test cases, which moves the count by 2, not by 33.
+
+### The arithmetic points at a counted subset
+
+The gap is 33 cases and 65 assertions, or 1.97 assertions per missing case. The suite averages
+14.9 assertions per case. A removed test file carries its own assertion density with it, so a
+removal cannot produce a slice at one eighth the suite's density. A partial or filtered run can.
+No single class in the log carries 33 cases at 65 assertions either: the nearest are
+`SupportCardTest` at 36 / 65 and `GametoraRaceCatalogParserTest` at 37 / 74.
+
+### Cross-worktree runs were checked and do not account for it
+
+Two sibling worktrees exist, so a run against the wrong checkout is a real mechanism worth
+ruling out rather than assuming. `C:/Users/exatf/AppData/Local/Temp/kilo/detail-page` at
+`e22d05e` holds 773 raw `it(` / `test(` cases and
+`.kilo/worktrees/cypress-cardamom` at `98953d0` holds 1,050. Neither is anywhere near 1,189, and
+neither is on `master`.
+
+### Corrected figure
+
+**1,222 passed, 2 skipped, 18,275 assertions** at `fc64bc2`. The 1,189 / 2 / 18,210 line should be
+struck from the record.
