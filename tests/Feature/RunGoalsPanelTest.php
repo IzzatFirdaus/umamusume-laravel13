@@ -86,7 +86,7 @@ it('renders the three cleared and one active goals from the run 7 shape', functi
         ->assertOk()
         ->getContent();
 
-    $dom = new DOMDocument();
+    $dom = new DOMDocument;
     @$dom->loadHTML($html);
     $xpath = new DOMXPath($dom);
 
@@ -167,7 +167,7 @@ it('names a skipped mandatory goal as Failed and an unentered one as Active', fu
         ->assertOk()
         ->getContent();
 
-    $dom = new DOMDocument();
+    $dom = new DOMDocument;
     @$dom->loadHTML($html);
     $xpath = new DOMXPath($dom);
 
