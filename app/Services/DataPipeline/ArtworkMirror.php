@@ -58,6 +58,20 @@ final class ArtworkMirror
     }
 
     /**
+     * The named-route url for a mirrored file, or null when there is none.
+     *
+     * Views point a frame at this rather than restating the route, so the loopback stream path
+     * (`ADR-0021`, `artwork.show`) has one owner. A null is the mirror's normal partial answer:
+     * the caller renders the text-only row instead of an image.
+     */
+    public function url(string $kind, int $id): ?string
+    {
+        return $this->exists($kind, $id)
+            ? route('artwork.show', ['kind' => $kind, 'id' => $id])
+            : null;
+    }
+
+    /**
      * Where the file sits on the disk, relative to `storage/app/private`.
      */
     public function storedPath(string $relativePath): string

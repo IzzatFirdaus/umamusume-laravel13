@@ -168,3 +168,18 @@ it('reports an absent file as not existing', function (): void {
     expect(app(ArtworkMirror::class)
         ->exists('card_portrait', 100102))->toBeFalse();
 });
+
+it('returns the named-route url when mirrored', function (): void {
+    Storage::disk('local')->put(
+        'artwork/characters/portrait/trainee/256/100101.png',
+        'BYTES'
+    );
+
+    expect(app(ArtworkMirror::class)
+        ->url('card_portrait', 100101))->toBe(route('artwork.show', ['kind' => 'card_portrait', 'id' => 100101]));
+});
+
+it('returns null when the file is not mirrored', function (): void {
+    expect(app(ArtworkMirror::class)
+        ->url('card_portrait', 100103))->toBeNull();
+});
