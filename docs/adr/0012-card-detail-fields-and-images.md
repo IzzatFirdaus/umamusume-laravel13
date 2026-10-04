@@ -201,6 +201,22 @@ accurate and unchanged: this ADR reopens nothing about the `0..2000` bound. The 
 storage decision, not of the reason the refusal gave, and a reader who deletes the §6.11 clause with
 the bullet deletes a constraint that still holds.
 
+**Erratum 4 - Decision 2's blocker is obsolete as of 2026-10-05, and the falsifier this ADR named did not fire.**
+Decision 2 declined card images because "A `card_id` key and a resolvable path are both required, and neither
+exists" (Consequences), and this document's own Verification section set the reopening test as "a media source
+gaining a `card_id` key". A probe on 2026-10-05 found that the media dump still has no such key - `character_media`
+is 173 rows keyed by `char_id`, and `meta/char_profile_art` is 170 rows keyed by `url_name`, neither carrying a
+base path - so **the named falsifier has not fired**. What fired instead is the other half of the conjunction, by a
+route this ADR did not consider: the vendor's asset host is addressable directly by the 6-digit `card_id`, and that
+id is already present in `gametora-characters` as the numeric prefix of `url_name` for all 268 rows. Verified
+responses: `characters/portrait/trainee/256/100101.png` and `/512/100802.png` return 200 `image/png`,
+`…/256/1001.png` returns 404 (the grain is the card, exactly as this ADR inferred), and `…/256/113601.png`
+resolves for a trainee unreleased on `[Global]`. Decision 2's conclusion, "Nothing", is therefore superseded for
+**sourced artwork display** by `ADR-0021`, which keeps the upload surface cut by `PRD.md` §6.13 and adds no column.
+What survives this ADR untouched: the data claim about `character_media` (char-grain, no path), the reasoning about
+always-broken URLs in a provenance set - which is precisely why `ADR-0021` Decision 3 derives the path instead of
+storing one - and Decision 3's objectives ruling, whose falsifier is unaffected.
+
 ## Consequences
 
 - **A second source on the card row.** `character_cards` will carry the trainee's stat arrays as
@@ -222,6 +238,11 @@ the bullet deletes a constraint that still holds.
   resolvable path are both required, and neither exists. Storing a URL that no fetch can satisfy would
   put a permanent, always-broken image in the provenance set, which is the same defect ADR-0008's
   Provenance section was written to prevent.
+  **Corrected by Erratum 4 (2026-10-05):** the reasoning is sound and remains the standard, but its factual
+  premise is no longer true. Both requirements are met - the key from `url_name`, the path from the vendor's
+  asset host, both verified - and `ADR-0021` acts on that while keeping the refusal this bullet was protecting
+  against: no stored URL that cannot be fetched, which is why the path is derived at render time rather than
+  written to a column.
 - **Objectives become simpler and weaker.** Per-character is what the source supports, and it means
   the detail page cannot show a trainee's objectives as they differ by scenario. That is a real loss of
   information, and it is a loss the source causes rather than a choice this ADR prefers.
@@ -234,8 +255,9 @@ This ADR adds no behaviour, so it ships no test. What proves it:
   this file and the `ADR-0008` amendment are inside the docs sweep.
 - The measurements in the Context are reproducible only against a gitignored body, so per erratum
   E-11 they are dated claims. The falsifiers are named: an export whose Global cards do not number
-  107 falsifies Erratum 1; a media source gaining a `card_id` key reopens Decision 2; an objectives
-  source gaining a scenario key reopens Decision 3.
+  107 falsifies Erratum 1; a media source gaining a `card_id` key reopens Decision 2 (Erratum 4 records that this
+  falsifier never fired and that Decision 2 was reopened anyway, by the asset path rather than by the dump); an
+  objectives source gaining a scenario key reopens Decision 3.
 - The drift guard is run deliberately against this file even though it cannot cover the status line,
   because the other three guarded docs are the ones that can regress:
   `php artisan test --compact tests/Feature/DocSchemaDriftTest.php`.

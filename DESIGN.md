@@ -408,6 +408,38 @@ disclosure wording. Filed as KI-35.
 `/api/v1/*` is read-only JSON; shapes and error envelope are fixed in
 `ARCHITECTURE.md` §4. No design decisions belong here.
 
+### 4.7 Sourced artwork slots (`ADR-0021`; mirror built, slots not)
+
+**Status: the mirror exists, no slot does.** `uma:fetch-art` and its `artwork/` directory are built
+(`ADR-0021`, 2026-10-05), and `grep -rn "<img" resources/views` still returns zero hits on this tree; the §3
+component inventory has no avatar, portrait or thumbnail element.
+Every trainee row, card row and support-card row renders text only: name, `name_ja`,
+rarity chip, counts. That text-only rendering is what this section calls the fallback, and
+it is not a decorative gap waiting to be filled — R-31 already rules that decoration costs
+reading speed and buys nothing, and §1's design read is an analyst desk.
+
+Which surfaces get a picture at all is **PRD OQ-6**, the owner's call, not this file's.
+What this file owns is the behaviour once a surface is chosen, and four rules bind it:
+
+- **Absence is a normal state, never an error state.** A file that was never mirrored, or
+  that no longer exists upstream, renders the fallback. No broken frame, no grey box, no
+  loader, no placeholder glyph. This is §4.2's absence discipline applied to an image
+  rather than to a value: the mirror is partial by nature, and a broken visual would claim
+  a defect the tool does not have.
+- **The slot's geometry is decided once, at build time, and recorded here.** Either the box
+  is reserved and a fallback paints inside it, or the element is omitted and the row
+  reflows. Both are defensible; a per-page mixture is not, and neither is a size class that
+  only exists in one view. Until then this section names no pixel value.
+- **`src` is a local path.** §7's rule (no CDNs, all assets local, the catalog works with
+  zero network) means hotlinking a third-party host in rendered HTML is out even though the
+  host is reachable: the page would then depend on someone else's uptime to render, and the
+  offline promise would be false on exactly the surfaces that have a picture.
+- **Alt text is inside the C-4 boundary** (§6 governs its vocabulary, so the alt is the client
+  display name and nothing else). No invented descriptor either, because the tool cannot see
+  inside the file it is describing. Where the same name is already printed beside the image,
+  the image is decorative in that position and takes `alt=""`, so a screen reader does not
+  read the name twice.
+
 ## 5. Data display rules with open implementation gaps
 
 - Validation bound: shipped code accepts stats 0..1200
@@ -573,9 +605,22 @@ Not defects; decisions this file cannot make for itself.
 6. **Loading states** (§3): with no client-side fetching, C-7's loading state has no
    surface. Confirm that "no loading state, because nothing loads client-side" is the
    accepted answer, or approve the fetch-in-flight affordance §7 defers.
+7. **Which surfaces get artwork, and whether the box is reserved** (§4.7): `ADR-0021`
+   authorizes sourced art and §4.7 fixes how an absent file behaves, but neither decides
+   where a picture appears or whether the layout reserves its box. Recorded as PRD OQ-6.
+   No pixel value is proposed here for the same reason §2.3's 768px number is question 5:
+   a number this file invents is a number no measurement supports.
 
 ## Change log
 
+- **2026-10-05** — §4.7 added (sourced artwork slot behaviour) and §11 item 7 added, both
+  following `ADR-0021`. No token, component, motif or ruling was changed, and no size class
+  was invented: the section states the four rules that bind a slot and names the two open
+  decisions it refuses to guess at, which are `PRD.md` OQ-6 and the reserved-box question.
+  The measured starting point is recorded rather than assumed — there is no image element
+  anywhere in `resources/views/`, so today's text-only row is the fallback. `ADR-0021`'s fetch
+  half landed the same day as `uma:fetch-art`, which changes no rule in §4.7: the mirror can now
+  be filled, and no slot exists to read it.
 - **2026-10-04** — 2.0 design target filed for reference at `docs/proposals/design-2.0.md`
   (with `docs/proposals/screen-spec-2.0.md`), the Inertia/Vue rewrite reference (`ADR-0020` §1).
   This file still owns the shipped Blade visual system. The target's trust-model, explainability,

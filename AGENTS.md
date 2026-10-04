@@ -82,7 +82,7 @@ for it.
 | `README.md` | onboarding, commands, route and doc tables | governance |
 | `docs/adr/README.md` | ADR index, derived; regenerate with the command in that file | hand-edited index rows |
 | `docs/UMAMUSUME_REFERENCE.md` | source-cited mechanics corpus, eight sections, dated live-ops snapshots | a write-up that cites this repo is not a second source |
-| `docs/scenarios/01`-`09` | per-scenario playing guides (`07` is a known-gap stub, `08` is `[JP-Only]` and must not be imported) | shipped copy |
+| `docs/scenarios/01`-`09` | per-scenario playing guides (`07` is the sourced guide for the fourth `[Global]` scenario, with its in-scenario client vocabulary still `❌ UNVERIFIED`; `08` is `[JP-Only]` and must not be imported) | shipped copy |
 | `PRODUCT.md`, `SKILL.md` | generated tooling artifacts | hand edits; the generator wins |
 | `docs/deprecated/` | retired legacy PDFs | not a source, not a spec; never copy their display text |
 
@@ -215,6 +215,13 @@ Pipeline stages are isolated: `fetch -> snapshot -> parse -> normalize -> match 
   `config('uma.match.fuzzy_threshold')`) and None land in `match_candidates` for `/review`.
 - **Promote**: upserts engine-owned columns, **skips any row with `is_manual = true`**,
   writes one `data_sources` provenance row per fact, inside `DB::transaction`.
+- **Artwork** (`ADR-0021`, accepted 2026-10-05; the fetch half **built**, the display half not): `uma:fetch-art`
+  reads ids from `character_cards.card_id` and `support_cards.support_id`, requests them from the asset host
+  declared in `config('uma.sources')`, and writes files under gitignored `storage/app/private/artwork/` with a
+  sibling `manifest.json`. Nothing enters the database and no `data_sources` row is written. `uma:fetch` steps
+  over any source entry that declares no parser, which is how the asset host stays allowlisted without being
+  parsed. Same allowlist rule as Fetch, not a second one; `DESIGN.md` §4.7 says how an absent file renders, and
+  `PRD.md` OQ-6 is still the open call on which screens get one. It is manual: nothing schedules it.
 
 Caching: catalog reads use `Cache::remember` with a `catalog:version` counter bumped on
 promotion. Trainer-data reads are never cached. `ScenarioCaps` is the single owner of
@@ -277,6 +284,7 @@ Every command below exists in `composer.json`, `package.json`, or artisan on thi
 | Lore gate | `composer lore`, `composer lore-code` |
 | Fresh DB with offline catalog data | `php artisan migrate:fresh --seed` (destructive, §11) |
 | Fetch / replay / import / backup | `php artisan uma:fetch`, `uma:reparse <source>`, `uma:import:support-cards`, `uma:backup` |
+| Mirror catalog artwork (manual only) | `php artisan uma:fetch-art` (`--kind`, `--dry-run`, `--refetch`) |
 | Routes / commands / config | `php artisan route:list`, `php artisan list`, `php artisan config:show uma.sources` |
 | Documentation census | `composer docs` (python) |
 
@@ -406,7 +414,10 @@ Do not invent a requirement. When the repository does not settle a question:
   `docs/research-scratch/` masters were deleted after verification; cite the master and
   its section anchor, not the deleted original.
 - Cut systems stay cut (PRD §6): no race-outcome prediction, no image uploads, no dual
-  storage, no simulation. A request that implies one is escalation 7.
+  storage, no simulation. A request that implies one is escalation 7. Read "image uploads"
+  precisely: it is a Trainer supplying a file, and `PRD.md` §6.13 still cuts it. Art the tool
+  fetches itself by id from an allowlisted host is a different object, authorized by
+  `ADR-0021` (2026-10-05), whose fetch half is built and whose display half is not.
 
 ## 18. Known traps
 
@@ -417,7 +428,9 @@ Do not invent a requirement. When the repository does not settle a question:
   claiming "unchanged" (KI-27); use `uma:reparse <source>`.
 - PHPUnit environment wins over `.env.testing`: `phpunit.xml` forces
   `DB_DATABASE=:memory:`. Keep the two in agreement.
+- `umamusume.com/news/NNN` is a client-rendered shell: its HTML carries no text, and a fetch that returns HTTP 200 with an empty body is not evidence of an empty notice. The bodies come from `POST https://umamusume.com/api/ajax/pr_info_index?format=json` with `{"announce_label":0,"limit":100,"offset":N}` (rows in `information_list`, full `message` included) and from `pr_info_detail` with `{"announce_id":NNN}`; `umamusume.jp` is the same shape. Four entries in the reference guide recorded a notice title and date with "URL not recorded" for exactly this reason, until the API was found on 2026-10-05 (see `docs/UMAMUSUME_REFERENCE.md` §4.6). It is a source candidate, not yet an allowlisted one: adding it to the fetch engine needs the §11 new-source package and a robots and rate-limit note, and it must not be polled.
 - A Blade page that references assets without a manifest needs `npm run build`.
+- The asset host answers a miss with **27,150 bytes of `text/html` at HTTP 404**, so "bytes came back" is never the test. `SourceFetcher::fetchAsset()` returns null on any non-2xx and `ArtworkMirrorTest` keeps it that way; a build that stored the body of a 404 would put an HTML document in place of a PNG and render it as a broken frame forever.
 - PHPStan needs `--memory-limit=1G`; `composer analyse` omits it.
 - The lore gate is blocking and easy to trip by accident, including inside this file: the
   banned word families are not written out in `AGENTS.md` on purpose. Read the pattern
@@ -446,3 +459,5 @@ fails if the logic breaks; a trivial one-liner needs no test.
 | Date | Change | Reason |
 |---|---|---|
 | 2026-10-04 | Rewritten as an operational contract: added §2 precedence and the Boost-conflict note, §3 documentation map with the pointer stubs, §9 change-class validation matrix, §11 change-safety, §16 ambiguity handling, §17 legacy handling. Pointer stubs resolved to their masters (`CONSTRAINTS.md` -> `GOVERNANCE.md`). Escaped the banned word families so this file no longer produces lore-gate hits needing a ruling. Role table and the seven escalation paths preserved verbatim in substance. | Agents were reading a stale file: it cited rules that had moved into `docs/research-scratch/` masters, repeated generic Boost guidance that contradicts the no-auth design, and quoted the banned vocabulary. |
+| 2026-10-05 | One cell of the §3 documentation map: `docs/scenarios/07` is no longer described as a known-gap stub. | The owner asked for the fourth `[Global]` scenario to be researched and its documents updated; the primary read landed, so the map's own description of the file went stale. The §6 non-negotiables, the gates and the precedence chain are unchanged. |
+| 2026-10-05 | §8 gains an **Artwork** bullet, §17's "no image uploads" line is disambiguated, and §18 gains a trap about the asset host's HTML 404 body. | `ADR-0021` was accepted the same day and `AGENTS.md` still read as though every image question ended at escalation 7. It does not: uploads stay cut, sourced artwork is authorized and unbuilt. An agent reading only this file would have refused work the owner had just authorized. |
