@@ -11,7 +11,7 @@ const appVersion = computed(() => page.props.app?.version ?? null);
 // a named absence rather than a dead link. `spa` marks the one Inertia route that
 // client-navigates; the rest full-reload to the existing Blade screens during the rewrite.
 const items = [
-    { label: 'Dashboard', to: '/dashboard', spa: true },
+    { label: 'Dashboard', to: '/', spa: true },
     { label: 'New Career', to: '/training-runs/create', spa: false },
     { label: 'Legacy Lab', to: null, spa: false },
     { label: 'Support Decks', to: '/support-cards', spa: false },

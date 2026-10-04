@@ -8,8 +8,8 @@ use Inertia\Testing\AssertableInertia as Assert;
 // catalogue facts; with RefreshDatabase and no seed they are zero but present, so the
 // test asserts the shape the Dashboard page consumes, not the numbers. The shared `app`
 // props (name/version/ruleset) come from HandleInertiaRequests and reach every page.
-it('renders the 2.0 dashboard as an Inertia page with catalogue counts', function (): void {
-    $this->get('/dashboard')
+it('renders the 2.0 dashboard at the home page as an Inertia page with catalogue counts', function (): void {
+    $this->get('/')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Dashboard')

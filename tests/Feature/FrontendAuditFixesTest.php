@@ -8,6 +8,7 @@ use App\Models\Preference;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\Umamusume;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * Pins the four behaviors the 2026-09-28 frontend audit reported, one test per
@@ -97,10 +98,16 @@ it('lands inside the product and honors the stored theme (F-1)', function (): vo
     Preference::put('theme', 'dark');
 
     // Re-pointed on merge rather than deleted. F-1 shipped against `welcome.blade.php`, and
-    // master later retired that view: R57 made `/` a redirect into the runs index. The durable
-    // half of the finding is not the view's name — it is that the front door opens inside the
-    // product shell and honors the stored theme, so it is asserted on the surface `/` reaches.
-    test()->get('/')->assertRedirect(route('runs.index'));
+    // master later retired that view: R57 made `/` a redirect into the runs index. As of
+    // 2026-10-04 the front door is the Trainer Desk 2.0 Inertia Dashboard (ADR-0020 §1). The
+    // durable half of the finding is unchanged: the front door opens inside the product shell
+    // and honors the stored theme.
+    $home = test()->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Dashboard'))
+        ->getContent();
+
+    expect($home)->toContain('data-theme="dark"');
 
     $html = test()->get(route('runs.index'))->assertOk()->getContent();
 

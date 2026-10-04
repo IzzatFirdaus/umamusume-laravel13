@@ -11,11 +11,9 @@ use App\Http\Controllers\SupportCardController;
 use App\Http\Controllers\TrainingRunController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/training-runs')->name('home');
-
-// Trainer Desk 2.0 SPA entry (ADR-0020 §1). The Inertia shell renders here; the Blade
+// Trainer Desk 2.0 home (ADR-0020 §1): the SPA Dashboard is the front door. The Blade
 // screens below still serve their own routes during the rewrite.
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->name('home');
 
 Route::get('/umamusume', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catalog.show');
