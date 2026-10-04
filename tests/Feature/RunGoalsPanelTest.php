@@ -13,7 +13,7 @@ use App\Models\TrainingRun;
  * Race calendar is a year grid, so neither is the line "Place 1st in Arima Kinen, entry
  * criteria met, 5 turns, three cleared behind it" that the audit names.
  *
- * `docs/UIX-AUDIT-TRAINING-RUNS.md` O-12 fixes this with a list of mandatory or special
+ * `docs/research-scratch/AUDIT-AND-VERIFICATION.md` (section UIX-AUDIT-TRAINING-RUNS.md) O-12 fixes this with a list of mandatory or special
  * race entries on the run, each with a state word. The report's data shape is three cleared
  * and one active for the run-7 fixture; the tests below reproduce that shape in factories.
  */

@@ -94,6 +94,15 @@ Three inbound citations were repointed: `docs/UMAMUSUME_REFERENCE.md:1007` and `
 `research-scratch/scripts/`, not `research-scratch/`) and its "replaces each table in this file" clause
 corrected to name `calendar-tables.md`, which is the file it actually edits.
 
+**Corrected 2026-10-04 (owner instruction, HEAD `228011e`).** The last row above and that closing clause
+are both superseded. calendar-tables.md is now dissolved: its 551 lines are embedded in
+`RACE-AND-SLICE-RESEARCH.md` as the section of that name and the tracked file is deleted. Reading the two
+scripts on disk also shows the Round 7 reason did not hold: `gen_calendar.py` and `resync_doc.py` read the
+gitignored root copy research-scratch/calendar-tables.md and `resync_doc.py` writes
+`docs/scenarios/09-global-race-calendar.md`, not the tracked table file, so the pipeline never depended on
+that file being standalone. The root input no longer exists, so `resync_doc.py` needs its source path
+repointed before it runs again; `gen_calendar.py` regenerates the rows.
+
 ### Round 9 (2026-10-03) — root `research-scratch/` emptied into the masters
 
 The user authorized consolidating every `.md` in the gitignored root `research-scratch/` into this
@@ -176,7 +185,11 @@ citation ratchet is unchanged by them.
 | Game8 Global scenario extraction | `SCENARIO-PUBLISHER-REFERENCES.md` (Game8 section) |
 | JP training mechanics raw extraction | `SCENARIO-PUBLISHER-REFERENCES.md` (training mechanics section) |
 | Global/EN race calendar verification | `RACE-AND-SLICE-RESEARCH.md` (global-race-sources section) |
-| Generated race calendar tables | `docs/research-scratch/calendar-tables.md`, the race master's generated companion |
+| Generated race calendar tables | `RACE-AND-SLICE-RESEARCH.md` (section calendar-tables.md; embedded 2026-10-04, the standalone file is deleted) |
+| Training-run UI/UX audit, browser-driven pass with the C-, R- and O- findings (2026-10-04) | `AUDIT-AND-VERIFICATION.md` (section UIX-AUDIT-TRAINING-RUNS.md) |
+| Audit decisions owed from that pass, proposals and measurements only | `AUDIT-AND-VERIFICATION.md` (section audit-decisions-2026-10.md) |
+| Unity Cup capture schema proposal (team rank, spirit bursts, team races, resource strip) | `PLANS-AND-BRIEFS.md` (section unity-cup-capture.md) |
+| Per-card deck state proposal for runs (O-8 2b(d)) | `PLANS-AND-BRIEFS.md` (section o8-per-card-state-proposal.md) |
 | Full repo documentation census | `AUDIT-AND-VERIFICATION.md` (documentation-inventory section, Part 1) |
 | Unfinished phases, unbacked rulings, register and gate state, pickup order | `AUDIT-AND-VERIFICATION.md` (documentation-inventory section, Part 2) |
 | Training run UI/UX review, static record and live browser pass (2026-10-03) | `AUDIT-AND-VERIFICATION.md` (training-run sections) |
