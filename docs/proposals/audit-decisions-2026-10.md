@@ -289,6 +289,8 @@ Recorded here because a later pass will otherwise re-find them.
   `KNOWN-ISSUES.md` is in the working tree as a 71-line pointer stub against a 2,655-line committed
   register, a peer's 2,722-line change in progress. Appending to it and committing would land that
   restructure under a docs-fix message, which `AGENTS.md` §11 and the shared-worktree rule both forbid.
+- **`runs/import.blade.php` and `form-detail.blade.php` are peer-dirty**, so any copy fix on those screens
+  needs the peer's change landed first.
 
 ## Register corrections from the 2026-10-04 pass
 
@@ -344,5 +346,44 @@ Still open on KI-55, and small: the inventory file names `docs/GATE-REGISTRY.md`
 live paths in thirteen other rows and tables too (counted at `f1c18fc` by grepping both paths and excluding
 the three corrected lines; the line numbers move on every edit, so re-run the grep rather than trusting a
 list here). Those are outside Item 1's stated scope and are recorded rather than edited.
-- **`runs/import.blade.php` and `form-detail.blade.php` are peer-dirty**, so any copy fix on those screens
-  needs the peer's change landed first.
+
+## Coordination: the peer-dirty file pattern
+
+Three files have blocked items across two dispatches and all three are still dirty at this HEAD:
+`KNOWN-ISSUES.md` (a 2,655 to 71 line restructure in flight, 2,722 lines of deletion in the working tree),
+`app/Http/Controllers/SkillController.php` (an uncommitted `json_valid` guard in `holders()`), and
+`resources/views/runs/import.blade.php` (two uncommitted copy hunks). What they cost, in order: the two
+register forward notes, KI-41's seventh `orderBy('name')` site, and KI-46's view half. This is the second
+dispatch to stop at the same three files.
+
+The pattern is wider than three files. `git status --porcelain -- resources/views/` at this HEAD returns 13
+entries, and 11 of them are `resources/views/components/*.blade.php`. A fourth blocked dispatch looks more
+likely than a coincidence. The file this dispatch suspected as the fourth,
+`resources/views/preferences/edit.blade.php`, is not among them.
+
+Three ways out, for the owner to choose. This pass takes none of them and lands none of the blocked items.
+
+**Option A, peer commits first.** The session holding those files lands its work before the next triage pass
+runs. Cheapest, no new machinery, nothing to maintain. It depends on coordination between two agent sessions
+that cannot signal each other from inside the worktree boundary, which is what the owner already observed on
+the last coordination request of this kind.
+
+**Option B, fork per session.** Each session works on a named branch (`session/triage-2026-10-04`,
+`session/audit-2026-10-04`) and merges on owner review. Ends the collision class outright, at the cost of one
+merge step per dispatch. Two measurements bear on it. `git worktree list` at this HEAD shows three working
+directories, the primary plus two `.kilo` sandboxes, and one of those is at detached HEAD, so isolated
+workspaces already exist on this host while carrying no reviewable branch name; a detached worktree's commits
+are reachable only by that SHA until someone branches them. And a prior pass on this repository measured that
+a second worktree arrives with no `vendor/`, that linking the primary's `vendor/` makes Composer's autoloader
+resolve through the link back to the primary's `tests/` so Pest's binding never applies, and that a real
+`composer install` is the only version that runs the suite. Option B pays that per branch.
+
+**Option C, file-ownership lockfile.** A tracked record declares which paths each active session holds, and a
+dispatch reads it at premise time and refuses to start on a locked file. Explicit and auditable, which is what
+this repository's provenance rules ask of any coordination mechanism, and it turns "we both rewrote
+`stat-band.blade.php`" into a precondition instead of a post-merge repair. Costs one more tracked thing to
+maintain, one more thing a session can forget to update, and AGENTS.md §3 forbids creating a new markdown file
+in the repository root without a ruling, so the lockfile would have to live under `docs/research-scratch/` or
+as a section of `INDEX.md` rather than at `.worktree-locks` in the root.
+
+If the same three files block a third dispatch, A has been shown not to work and B or C is warranted.
