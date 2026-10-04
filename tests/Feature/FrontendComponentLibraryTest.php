@@ -34,6 +34,36 @@ function componentMarkup(): array
 }
 
 /**
+ * Every Blade view's source, keyed by its path relative to the project root.
+ *
+ * RecursiveDirectoryIterator, not glob('**'): PHP's glob does not expand `**`, so a
+ * glob-based sweep reads one directory and passes without having looked at the rest.
+ *
+ * @return array<string, string>
+ */
+function bladeViewSources(): array
+{
+    $walk = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(base_path('resources/views'), FilesystemIterator::SKIP_DOTS)
+    );
+
+    $sources = [];
+
+    foreach ($walk as $file) {
+        // getExtension() answers "php" for foo.blade.php, so the suffix is matched on the
+        // filename. Filtering on the extension silently scans nothing.
+        if (str_ends_with($file->getFilename(), '.blade.php')) {
+            // Normalised to forward slashes so the expectation below is one literal on
+            // Windows and on a POSIX host alike.
+            $sources[str_replace(DIRECTORY_SEPARATOR, '/', str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname()))] =
+                (string) file_get_contents($file->getPathname());
+        }
+    }
+
+    return $sources;
+}
+
+/**
  * R71: a component that renders its controls inside an inert <template> looks present in the
  * source and is dead in the browser. Resolve the rendered document and assert none.
  */
@@ -115,3 +145,29 @@ it('renders six deck slots with limit-break diamonds and the type legend', funct
         ->toContain('Speed 2')
         ->toContain('Not equipped');
 });
+
+/**
+ * A shared visual is worth extracting exactly once. Both of these were defined twice and
+ * rendered from the second copy: `capsule-header` on eight panels, `grade-badge` in the
+ * stat band. A duplicate that renders identically today still drifts, and the drift is
+ * invisible until a contrast pass or a capture contradicts it.
+ */
+it('defines each shared visual in exactly one view', function (string $marker, string $owner): void {
+    $holders = [];
+
+    foreach (bladeViewSources() as $path => $source) {
+        if (str_contains($source, $marker)) {
+            $holders[] = $path;
+        }
+    }
+
+    expect($holders)->toBe(['resources/views/components/'.$owner]);
+})->with([
+    // The lattice bleed is the motif only a capsule header carries (DESIGN.md §2.3), and
+    // the eight panels that hand-copied the div had already moved away from the component's
+    // own padding and type size while each one claimed to be the same header.
+    'capsule header' => ['lattice-bleed', 'capsule-header.blade.php'],
+    // KI-8 crashed on the banding emitting seventeen labels against a nine-key map, which
+    // is what a second copy of that map invites: one owner, one place to add a tenth letter.
+    'grade fill map' => ['bg-grade-g', 'grade-badge.blade.php'],
+]);
