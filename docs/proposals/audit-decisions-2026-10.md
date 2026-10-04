@@ -55,6 +55,30 @@ another database did, and the idempotency it depends on is now tested (`RosterSe
 
 Owner: Data Engineer for the shape, Architect for the decision, per KI-27's own line.
 
+## N-3 addendum: the fetch-catch was narrower than the audit premise
+
+The audit's N-3 reads: `SourceFetcher.php` catches `RequestException` and returns null, and because
+`->retry(..., throw: false)` is in play, an exhausted retry arrives at that catch and leaves without a log
+line. Measured while fixing it, the premise held for half the failure modes and failed for the common one.
+On this framework version `ConnectionException` is **not** a subtype of `RequestException`: both extend
+`HttpClientException` (`vendor/laravel/framework/src/Illuminate/Http/Client/ConnectionException.php:5` and
+`.../RequestException.php:7`). A DNS fault, a refused connection or a timeout therefore never entered the
+`catch (RequestException)` block. It escaped `send()`, escaped `fetch()`, and ended the whole `uma:fetch`
+run with an unhandled exception, while the same body fed through `db:seed` was caught by
+`SourceDocumentSeeder`'s `catch (Throwable)` and turned into a warning plus a skipped source. One document
+failure, two different outcomes, and the silence N-3 named was only the smaller half of it.
+
+`9b8a9d5` widens the catch to `HttpClientException`, the parent of both, which is what `fetch()`'s own
+docblock had always promised (null when the request ultimately failed) and what lets one source fail
+without ending the run. Both failure branches now log the URL with the reason or the status.
+`tests/Feature/FetchFailureReportingTest.php` covers the three paths: a connection fault returns null and
+logs, a 404 returns null and logs, and a successful fetch logs nothing, which is what stops the first two
+from passing because every path talks.
+
+The audit entry for N-3 should be updated to record the mechanism rather than only the logging gap, because
+the entry as written describes a defect that would have been fixed by adding a log line, and the defect that
+crashed the run needed the catch class changed.
+
 ## 3. C-4: the `scenarios` table holds caps the app never consults
 
 `Scenario::cap_speed`, `cap_stamina`, `cap_power`, `cap_guts`, `cap_wit` and `hard_cap` are filled by
