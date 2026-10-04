@@ -76,29 +76,73 @@
 
     <form method="POST" action="{{ route('runs.deck.sync', $run) }}" class="max-w-3xl space-y-3 rounded-md border border-rule bg-raised p-4 text-sm">
         @csrf
+        @php
+            /*
+             * One option list, not six. Each slot used to carry the whole card catalogue, measured here as
+             * 1,512 `option` nodes for a deck with nothing else wrong with it, and 7,997 of them against
+             * 8,941 elements on the run page overall. Those nodes are not decoration a Trainer can see,
+             * they are the no-script path, so the fix keeps the path and stops paying for it six times.
+             *
+             * The open slot is the one the query names, else the one a rejected submission put an error
+             * beside, else the first. A closed slot still posts its own value, through a hidden input under
+             * the same field name, so StoreDeckRequest receives exactly the shape it received before: six
+             * keys, and blanks dropped by its own prepareForValidation rather than by a rule that had to
+             * be told about them. Switching which slot is open is a query-string link, built the way
+             * x-race-calendar builds its year tabs, so it answers a click with scripting off.
+             */
+            $requested = (int) request('deck_slot');
+            $errored = 0;
+
+            foreach (\App\Models\DeckSlot::POSITIONS as $position) {
+                if ($errors->has("deck.{$position}.support_card_id")) {
+                    $errored = $position;
+
+                    break;
+                }
+            }
+
+            $open = in_array($requested, \App\Models\DeckSlot::POSITIONS, true)
+                ? $requested
+                : ($errored > 0 ? $errored : \App\Models\DeckSlot::POSITIONS[0]);
+        @endphp
+
         @foreach (\App\Models\DeckSlot::POSITIONS as $position)
             @php
                 // Rehydrated from `old()` so a rejected submission does not wipe the six picks the
                 // Trainer just made (D-3's finding: the rail and the escape hatch disagreed about
                 // what to do with input the server had refused).
                 $selected = old("deck.{$position}.support_card_id", $slots->get($position)?->support_card_id);
+                $chosen = (string) $selected === '' ? null : $options->firstWhere('id', (int) $selected);
             @endphp
             <div class="flex flex-wrap items-end gap-3">
                 <div class="flex min-w-0 flex-1 flex-col gap-1">
-                    <label for="deck-slot-{{ $position }}" class="text-ink-muted">
-                        {{ $position === 6 ? 'Slot 6 · Friends' : 'Slot '.$position }}
-                    </label>
-                    {{-- One accessible name per control, paired by id rather than wrapped: a wrapping
-                         label over a group leaves the sibling controls unnamed (KI-36). --}}
-                    <select id="deck-slot-{{ $position }}" name="deck[{{ $position }}][support_card_id]"
-                        class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
-                        <option value="">Not equipped</option>
-                        @foreach ($options as $card)
-                            <option value="{{ $card->id }}" @selected((string) $selected === (string) $card->id)>
-                                {{ $card->displayName() }} · {{ $card->rarityWord() }} {{ $card->typeLabel() }}
-                            </option>
-                        @endforeach
-                    </select>
+                    @if ($position === $open)
+                        <label for="deck-slot-{{ $position }}" class="text-ink-muted">
+                            {{ $position === 6 ? 'Slot 6 · Friends' : 'Slot '.$position }}
+                        </label>
+                        {{-- One accessible name per control, paired by id rather than wrapped: a wrapping
+                             label over a group leaves the sibling controls unnamed (KI-36). --}}
+                        <select id="deck-slot-{{ $position }}" name="deck[{{ $position }}][support_card_id]"
+                            class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink">
+                            <option value="">Not equipped</option>
+                            @foreach ($options as $card)
+                                <option value="{{ $card->id }}" @selected((string) $selected === (string) $card->id)>
+                                    {{ $card->displayName() }} · {{ $card->rarityWord() }} {{ $card->typeLabel() }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @else
+                        {{-- The value posts and the name is readable, which is all a closed slot owes: the
+                             catalogue is one click away, and it is a link rather than a control so the
+                             screen has one option list in it at a time. --}}
+                        <p class="flex flex-wrap items-baseline gap-x-2 text-sm">
+                            <span class="text-ink-muted">{{ $position === 6 ? 'Slot 6 · Friends' : 'Slot '.$position }}:</span>
+                            <span class="text-ink">{{ $chosen?->displayName() ?? 'Not equipped' }}</span>
+                            <a href="{{ request()->fullUrlWithQuery(['deck_slot' => $position]) }}"
+                               class="inline-flex min-h-11 items-center underline">Change slot {{ $position }}</a>
+                        </p>
+                        <input type="hidden" name="deck[{{ $position }}][support_card_id]" value="{{ $selected }}">
+                    @endif
                 </div>
                 @error("deck.{$position}.support_card_id")
                     <p class="w-full text-risk">{{ $message }}</p>
