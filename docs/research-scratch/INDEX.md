@@ -94,6 +94,15 @@ Three inbound citations were repointed: `docs/UMAMUSUME_REFERENCE.md:1007` and `
 `research-scratch/scripts/`, not `research-scratch/`) and its "replaces each table in this file" clause
 corrected to name `calendar-tables.md`, which is the file it actually edits.
 
+> **Corrected forward 2026-10-04 (Round 11).** The `calendar-tables.md` row above was reversed by an
+> owner ruling: the tables are now the `## calendar-tables.md` section of `RACE-AND-SLICE-RESEARCH.md`,
+> and the two generators ship with the move as tracked `tools/gen_calendar.py` and
+> `tools/resync_doc.py`, so the stated reason for refusing it, a fix that could not be committed with the
+> move, no longer applies. The row's closing claim was also measured wrong: the seven blocks the re-sync
+> pushes, 512 lines between them, are each already byte-identical inside
+> `docs/scenarios/09-global-race-calendar.md`, and the eighth, a 12-line block, is the only content that
+> existed nowhere else. "Nothing in it was redundant" was true of 12 lines of it.
+
 ### Round 9 (2026-10-03) — root `research-scratch/` emptied into the masters
 
 The user authorized consolidating every `.md` in the gitignored root `research-scratch/` into this
@@ -133,6 +142,30 @@ records still name the old path in prose and are left verbatim per the correctio
 embedded `phase-c-synthesis.md` body inside this master, and `screenshot-notes/PHASE-B-REPORT.md`
 (items 15 and the Phase C output set). Those are provenance mentions the census tolerates, and the
 citation ratchet is unchanged by them.
+
+### Round 11 (2026-10-04, owner-authorized) — six named sources into the masters, on `trainer-desk-2.0`
+
+The owner named these six files and directed them into `docs/research-scratch/`. Five of the six are live
+documents carrying an open owner ruling or an unimplemented spec, so each destination is recorded as the
+authoritative copy where its open steps continue, the way the PLAN-UI-UX and PLAN-DOC-SYNC sections are.
+
+| Absorbed file | Lines | New home | Why there |
+|---|---|---|---|
+| `docs/UIX-AUDIT-TRAINING-RUNS.md` | 1,172 | `AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` | The audits master already holds the two 2026-10-03 training-run records for the same page and the Routing Table sent screen-level UX findings there. It supersedes neither: different finding registers, and one of the two never executed a browser pass. |
+| `docs/proposals/audit-decisions-2026-10.md` | 389 | `PLANS-AND-BRIEFS.md`, section `## audit-decisions-2026-10.md` | Options, a recommendation and a named owner per item, with no ruling recorded: an owner-gate package, and that master carries the O-2 and O-3 packages. Not the audits master, whose register copy is declared not edited forward. |
+| `docs/proposals/trainer-advisor.md` | 149 | `PROCESS-PLANS.md`, section `## trainer-advisor.md` | Implementation spec with open steps, the same class as the two live PLAN sections there. `ADR-0020` Links named it by path; that pointer was repointed. |
+| `docs/proposals/unity-cup-capture.md` | 153 | `RACE-AND-SLICE-RESEARCH.md`, section `## unity-cup-capture.md` | Its subject is `turn_entries` columns and `scenario_slots` team-race rows, which is that master's domain, and it answers `SCREEN_SPEC.md` §7-6 from there. |
+| `o8-per-card-state-proposal.md` | 130 | `SUPPORT-CARDS.md`, section `## o8-per-card-state-proposal.md` | Per-card `deck_slots` state is that master's own open question about where the four values belong. The file had been standalone inside `docs/research-scratch/`, which §File discipline forbids, so this fold clears a standing violation as well as absorbing a source. |
+| `calendar-tables.md` | 551 | `RACE-AND-SLICE-RESEARCH.md`, section `## calendar-tables.md` | Owner ruling reversing Round 7, on the condition that the generators ship with the move. Both are now tracked under `tools/`, with the hardcoded absolute repo path replaced by one derived from `__file__` so they resolve in a worktree. |
+
+Verification, per the discipline's line-by-line rule: every non-blank line of all six sources was found
+in its destination, allowing the one-level heading demotion, before the original was deleted (0 missing in
+each; `calendar-tables.md` has no headings and was compared unshifted). Sixteen pointer citations were
+repointed across `SCREEN_SPEC.md`, `ADR-0020`, `docs/proposals/screen-spec-2.0.md`, two feature tests and
+four masters. Dated records naming the old paths were left verbatim, including the Round 7 row above and
+the audit's own self-references inside its section. Two prose blocks were rewritten rather than repointed
+because they described an arrangement that no longer exists: the pipeline paragraph at
+`docs/scenarios/09-global-race-calendar.md:729`, and this directory's own routing rows.
 
 ## Routing Table
 
@@ -176,12 +209,17 @@ citation ratchet is unchanged by them.
 | Game8 Global scenario extraction | `SCENARIO-PUBLISHER-REFERENCES.md` (Game8 section) |
 | JP training mechanics raw extraction | `SCENARIO-PUBLISHER-REFERENCES.md` (training mechanics section) |
 | Global/EN race calendar verification | `RACE-AND-SLICE-RESEARCH.md` (global-race-sources section) |
-| Generated race calendar tables | `docs/research-scratch/calendar-tables.md`, the race master's generated companion |
+| Generated race calendar tables | `RACE-AND-SLICE-RESEARCH.md`, section `## calendar-tables.md` (folded from the standalone file in Round 11; `tools/resync_doc.py` reads that section) |
 | Full repo documentation census | `AUDIT-AND-VERIFICATION.md` (documentation-inventory section, Part 1) |
 | Unfinished phases, unbacked rulings, register and gate state, pickup order | `AUDIT-AND-VERIFICATION.md` (documentation-inventory section, Part 2) |
 | Training run UI/UX review, static record and live browser pass (2026-10-03) | `AUDIT-AND-VERIFICATION.md` (training-run sections) |
 | Reference guide build chain: drafts, the three assembled-body revisions, the 2026-09-27 self-audit and adversarial review | `REFERENCE-GUIDE-BUILD-CHAIN.md` |
 | Phase C rulings, screenshot-pipeline priors, and the edit-by-edit record | `DESIGN-CORPUS.md` (phase-c-synthesis, scratch-priors, corpus-edit-summary sections) |
+| The live run-surface audit, its Fail verdict, its completion backlog and forward plan | `AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` |
+| Decisions owed on the 2026-10 audit pass, with the owner named per item | `PLANS-AND-BRIEFS.md`, section `## audit-decisions-2026-10.md` |
+| Trainer Desk 2.0 subsystem 1: `BuildTarget` and the `TrainerAdvisor` ranking spec | `PROCESS-PLANS.md`, section `## trainer-advisor.md` |
+| Unity Cup capture: the proposed `turn_entries` columns and team-race `scenario_slots` rows | `RACE-AND-SLICE-RESEARCH.md`, section `## unity-cup-capture.md` |
+| Per-card deck state for runs, the four `deck_slots` columns awaiting a PRD amendment | `SUPPORT-CARDS.md`, section `## o8-per-card-state-proposal.md` |
 
 ### Deliberate exceptions, outside the masters
 

@@ -203,3 +203,34 @@ Until then `PROCESS-PLANS.md` stays as it is, and these three are cited by path 
 
 Recorded because the alternative — leaving the three uncited — is the state A-10 and A-11 describe: a document
 that exists, is relied on, and is invisible to the census's own gate.
+
+## Round 11 (2026-10-04) — six sources named by the owner, on branch `trainer-desk-2.0`
+
+The owner named six files and directed them into the masters: the training-run UI/UX audit, the audit
+decisions owed on that pass, the subsystem-1 advisor spec, the Unity Cup capture schema proposal, the
+per-card deck state proposal, and the generated calendar tables. Full routing and reasons are in `INDEX.md`
+§Round 11; this entry records only the two things a routing table cannot carry.
+
+**This pass overrides the condition stated twice above.** Both "Plans deliberately NOT consolidated"
+sections argue that a document with open acceptance boxes must stay out of a master because embedding it
+records a false completion. That condition held for one day and the owner reversed it, and
+`PROCESS-PLANS.md` now carries two plans with open steps as their authoritative copy. Round 11 follows the
+reversed rule and keeps its guard: five of the six sources were live, each destination states in its own
+Provenance that the section is the authoritative copy where open steps continue, and no status line was
+softened to make a fold look like a closure. Where a fold was refused, it is said: `docs/proposals/` keeps `docs/proposals/design-2.0.md` and
+`docs/proposals/screen-spec-2.0.md` in place, so the 2.0 spec set now spans two locations, and that
+split is recorded in `PROCESS-PLANS.md` rather than hidden by the commit message.
+
+**Round 7's standing ruling on the calendar tables was reversed by the owner, against the objection
+recorded here.** That ruling held the file standalone because its two generator scripts live in the
+gitignored root `research-scratch/`, so a move could not be committed with its fix. The owner chose to fold
+the tables and commit the generators. Both scripts are now tracked under `tools/` with the hardcoded
+absolute path to one machine's checkout replaced by one derived from `__file__`, which is what made the
+move committable in a worktree. `python tools/resync_doc.py` reports `unchanged` for all seven pushed
+labels against the folded section and leaves `docs/scenarios/09-global-race-calendar.md` byte-identical, so
+the pipeline was proven before the original was deleted, not after. The measurement also disproved Round 7's
+claim that nothing in the file was redundant: 512 of its 551 lines were already byte-identical in the
+scenario guide, and only a 12-line block existed nowhere else. `gen_calendar.py` cannot run in a worktree,
+because its four cached GameTora JSON bodies are gitignored scratch; it now exits with that stated rather
+than raising `FileNotFoundError`, and the fetch recipe stays at `docs/scenarios/09-global-race-calendar.md`
+§To reproduce.
