@@ -40,7 +40,7 @@ it('renders an img when the file is mirrored', function (): void {
 
 it('renders nothing when the file is not mirrored', function (): void {
     $rendered = Blade::render(
-        '<x-character-portrait :card-id="100101" size-class="size-12" name="Air Groove" :route-args="[\'slug\' => \'air-groove\']" />',
+        '<x-character-portrait :card-id="100101" size-class="size-12" name="Air Groove" />',
     );
 
     // Not an empty anchor and not an `<img>` with a dead src: the whole slot is absent, which is
