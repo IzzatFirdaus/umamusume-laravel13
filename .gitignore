@@ -72,6 +72,8 @@ Homestead.yaml
 /.opencode/
 /.playwright/
 /.playwright-mcp/
+/playwright-report/
+/test-results/
 /.qoder/
 /.roo/
 /.superpowers/
