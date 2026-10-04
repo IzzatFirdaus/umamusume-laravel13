@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PreferenceController;
@@ -53,3 +54,10 @@ Route::post('/review/{candidate}', [ReviewController::class, 'resolve'])->name('
 // because writing a preference is one action on the store rather than one action per key.
 Route::get('/preferences', [PreferenceController::class, 'edit'])->name('preferences.edit');
 Route::put('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
+
+// Streams a mirrored artwork file to an <img src> (ADR-0021 read half). A web route, not /api/v1:
+// it serves a browser asset, reads a Storage path, and opens no second outbound surface. `id` is
+// constrained to a number so a path-traversal value cannot reach the controller.
+Route::get('/artwork/{kind}/{id}', [ArtworkAssetController::class, 'show'])
+    ->whereNumber('id')
+    ->name('artwork.show');
