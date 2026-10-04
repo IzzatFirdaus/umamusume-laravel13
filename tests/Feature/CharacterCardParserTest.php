@@ -38,8 +38,9 @@ it('keeps the [Global] client title verbatim, brackets and all', function (): vo
     $titles = array_column(globalCardRecords(), 'title');
 
     // The Global string is not the JP string with brackets: the export's own `title`
-    // for card 100702 is "Run! Fun! Watergun!". CONSTRAINTS.md:38 bars editing a
-    // verbatim client name, so the guard belongs on the display path, never here.
+    // for card 100702 is "Run! Fun! Watergun!". The bar on editing a
+    // verbatim client name is in docs/research-scratch/GOVERNANCE.md, CONSTRAINTS section
+    // "Lore banned patterns", so the guard belongs on the display path, never here.
     expect($titles)->toContain('[RUN! RUIN! LAUNCHER!]')
         ->and($titles)->toContain('[Hopp\'n♪Happy Heart]')
         ->and($titles)->not->toContain('Run! Fun! Watergun!')
@@ -130,8 +131,9 @@ it('refuses a Global card with no client title rather than fall back to the Japa
         // card id. Only `title_en_gl` is absent, and `title` is present — the exact row
         // shape that makes `$card['title_en_gl'] ?? $card['title']` look harmless. It is
         // not harmless: `title` here is "Run! Fun! Watergun!", the Japanese-side string,
-        // and the card ships on [Global] as "[RUN! RUIN! LAUNCHER!]". CONSTRAINTS.md:38
-        // forbids editing a verbatim client name, so a row carrying the wrong one of the
+        // and the card ships on [Global] as "[RUN! RUIN! LAUNCHER!]". The bar on editing a
+        // verbatim client name (docs/research-scratch/GOVERNANCE.md, CONSTRAINTS section
+        // "Lore banned patterns") forbids it, so a row carrying the wrong one of the
         // two is a silent data error no later stage can detect.
         'title' => 'Run! Fun! Watergun!',
         'release_en' => '2026-07-02',
