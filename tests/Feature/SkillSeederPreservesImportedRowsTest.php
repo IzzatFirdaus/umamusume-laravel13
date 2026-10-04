@@ -9,7 +9,8 @@ use Database\Seeders\SkillSeeder;
  * F-3, two defects in one file.
  *
  * A. The retired-name cleanup at SkillSeeder.php:75-80 deletes by name with no is_manual
- * predicate. CONSTRAINTS.md:26 states the floor, no engine write to rows with is_manual = true,
+ * predicate. The floor, no engine write to rows with is_manual = true, is in
+ * docs/research-scratch/GOVERNANCE.md, CONSTRAINTS section "Floor",
  * and PRD FR-B-4 is the same rule. `Traightaways` and `Playtime's Over` are names this seeder
  * deletes on purpose, and both are also names a Trainer could plausibly have corrected by hand.
  *
