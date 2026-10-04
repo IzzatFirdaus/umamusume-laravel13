@@ -5,6 +5,7 @@ import { computed } from 'vue';
 const page = usePage();
 const active = computed(() => page.url);
 const appVersion = computed(() => page.props.app?.version ?? null);
+const flashStatus = computed(() => page.props.flash?.status ?? null);
 
 // The 2.0 navigation (docs/proposals/design-2.0.md §28). `to: null` = not built yet:
 // Legacy Lab and the Veteran library arrive in later ADR-0020 slices, so they render as
@@ -88,6 +89,12 @@ const mobileDisabledClass =
                 </span>
             </header>
             <main id="main" class="flex-1 px-6 py-6 pb-24 md:pb-6">
+                <p
+                    v-if="flashStatus"
+                    class="mb-4 rounded border border-green-line bg-green-tint px-3 py-2 text-sm text-ink"
+                >
+                    {{ flashStatus }}
+                </p>
                 <slot />
             </main>
         </div>

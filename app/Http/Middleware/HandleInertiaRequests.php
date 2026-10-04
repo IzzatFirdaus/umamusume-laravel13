@@ -44,6 +44,11 @@ class HandleInertiaRequests extends Middleware
                 // so this is a named absence, never an invented number.
                 'ruleset' => null,
             ],
+            // The one confirmation surface (the Blade shell's `session('status')`), shared so
+            // ported pages and the layout render it the same way.
+            'flash' => [
+                'status' => fn () => $request->session()->get('status'),
+            ],
         ];
     }
 

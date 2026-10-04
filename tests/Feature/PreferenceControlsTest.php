@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Preference;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * SCREEN_SPEC.md §7-5 / PRD US-11: the `preferences` table and the server-side theme render both
@@ -22,16 +23,17 @@ use App\Models\Preference;
  */
 
 it('offers both preferences with their default states on an unset database', function (): void {
-    $html = test()->get('/preferences')->assertOk()->getContent();
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Preferences/Edit')
+            ->where('theme', null)
+            ->where('failureEstimate', 'off'));
 
     // Absence is the default for both keys: no row means follow the OS, and the estimate is off
-    // by default (PRD US-11). A control that rendered "light" as if it were stored would claim a
+    // by default (PRD US-11). A page that rendered "light" as if it were stored would claim a
     // preference the Trainer never set.
-    expect($html)->toContain('name="theme"')
-        ->toContain('name="failure_estimate"')
-        ->toContain('value="" selected')
-        ->not->toMatch('/name="failure_estimate"[^>]*checked/')
-        ->and(Preference::count())->toBe(0);
+    expect(Preference::count())->toBe(0);
 });
 
 it('is reachable from the main layout', function (): void {
@@ -75,17 +77,20 @@ it('persists the failure estimate both ways', function (string $value): void {
     expect(Preference::get('failure_estimate'))->toBe($value);
 })->with(['on', 'off']);
 
-it('keeps the estimate checkbox unchecked when the stored value is off', function (): void {
+it('passes the stored failure estimate to the control', function (): void {
+    // The checkbox is now client-rendered (Vue), so the server-side contract is the prop the
+    // page reads; the rendered checked state is the component's, exercised in the browser.
     Preference::put('failure_estimate', 'off');
 
-    $html = test()->get('/preferences')->assertOk()->getContent();
-
-    expect($html)->not->toMatch('/name="failure_estimate"[^>]*checked/');
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('failureEstimate', 'off'));
 
     Preference::put('failure_estimate', 'on');
 
-    expect(test()->get('/preferences')->getContent())
-        ->toMatch('/name="failure_estimate"[^>]*checked/');
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('failureEstimate', 'on'));
 });
 
 it('refuses a theme value this tool does not store', function (): void {

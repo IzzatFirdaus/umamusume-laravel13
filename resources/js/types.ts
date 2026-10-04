@@ -7,6 +7,9 @@ declare module '@inertiajs/core' {
             version: string | null;
             ruleset: string | null;
         };
+        flash: {
+            status: string | null;
+        };
     }
 }
 
