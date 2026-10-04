@@ -339,7 +339,7 @@
                      (`slice-6-2026-09-28.md` §3). White on the same fill is 1.99:1, which is
                      the combination D-3 forbids. --}}
                 <span class="mr-1.5 rounded bg-green px-1.5 font-bold text-on-green">Hint</span>
-                Wit costs 0 Energy and you are at {{ (int) $energy }}. Rest returns about +30,
+                Wit costs 0 Energy and you are at {{ (int) $energy }}. Rest refills Energy,
                 and a rest can backfire, so it is a choice rather than a safe button.
                 <span class="block text-ink-muted">GameWith guidance, 2026-09-25.</span>
             </p>
