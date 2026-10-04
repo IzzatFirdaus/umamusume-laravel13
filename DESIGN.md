@@ -576,6 +576,12 @@ Not defects; decisions this file cannot make for itself.
 
 ## Change log
 
+- **2026-10-04** — 2.0 design target filed for reference at `docs/proposals/design-2.0.md`
+  (with `docs/proposals/screen-spec-2.0.md`), the Inertia/Vue rewrite reference (`ADR-0020` §1).
+  This file still owns the shipped Blade visual system. The target's trust-model, explainability,
+  no-false-precision and accessibility rules align with `ADR-0001` and are the intended carry-across;
+  its one conflict (a race win-chance example) is governance-held in the target's banner. No token,
+  component, or ruling in this file was changed.
 - **2026-10-04** — Mounted the two adopted orphans. `capsule-header` now renders the
   capsule on all eight panels that were hand-copying the div, and `grade-badge` now owns the
   grade fill in `stat-band`, which had carried a second copy of the nine-letter map and its own
