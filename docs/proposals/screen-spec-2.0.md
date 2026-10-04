@@ -12,7 +12,7 @@
 >
 > - **SCREEN-010 / SCREEN-014** — per-training stat-yield numbers ("+62 Speed / +25 Power") and numeric
 >   "Failure: 2%": no source publishes these. The approved advisor v1 excludes them
->   (`docs/proposals/trainer-advisor.md` §1, §5; `ADR-0001` §3).
+>   (`docs/research-scratch/PROCESS-PLANS.md`, section `## trainer-advisor.md` §1, §5; `ADR-0001` §3).
 > - **SCREEN-011 / SCREEN-017** — race win-probability ("Win probability: 84%") and risk percentages:
 >   race prediction, deferred on the `ADR-0016` data blocker; `ADR-0020` §4 reaffirms §6.11.
 > - **SCREEN-006** — "expected inheritance" and "up to three recommended combinations": inheritance

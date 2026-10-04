@@ -147,6 +147,6 @@ on the `ADR-0016` data blocker.
 - `docs/adr/0016-next-race-readiness-open-question.md` (the data blocker; candidate shapes 1 and 2)
 - `docs/UMAMUSUME_REFERENCE.md` §1.1 (Energy constants), §1.5 (Sparks/affinity)
 - `docs/research-scratch/GOVERNANCE.md` §"PRE-MORTEM.md" §4.1 (why the legacy prediction system was cut)
-- `docs/proposals/trainer-advisor.md` (subsystem 1 spec: BuildTarget + Trainer Advisor)
+- `docs/research-scratch/PROCESS-PLANS.md`, section `## trainer-advisor.md` (subsystem 1 spec: BuildTarget + Trainer Advisor)
 - `docs/proposals/screen-spec-2.0.md`, `docs/proposals/design-2.0.md` (2.0 design target, reference-only;
   deferred-computation sections carry a governance banner)

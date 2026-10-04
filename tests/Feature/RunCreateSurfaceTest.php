@@ -8,7 +8,7 @@ use App\Models\Umamusume;
 /*
  * C-5: four fields the request validates and the model persists, brought onto the
  * create form so a Trainer can record them while creating the run rather than
- * hand-editing the row afterwards. `docs/UIX-AUDIT-TRAINING-RUNS.md` C-5 names them:
+ * hand-editing the row afterwards. `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` C-5 names them:
  * `inheritance_parent_a_id`, `inheritance_parent_b_id`, `current_objective_index`,
  * `shop_resets_in`. The shape is nullable on the request and unchanged on the schema,
  * so a run created before this change reads exactly as one created after with the
