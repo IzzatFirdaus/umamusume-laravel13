@@ -62,6 +62,11 @@ Verification of these columns is in section 14.
 
 ### 4.1 Authored documentation (105 files)
 
+Corrected 2026-10-04: the two rows for `docs/GATE-REGISTRY.md` and `docs/PRE-MORTEM.md` below were listed
+as tracked and are not. Both paths were deleted on 2026-10-02 by `22e5135` (docs: finish the research
+consolidation into research-scratch) and their content is now sections of
+`docs/research-scratch/GOVERNANCE.md`. This is the contradiction KI-55 was filed against.
+
 | `Makefile` | 3377 / 69 | tracked | `5820e77` 2026-09-29 | config-doc | Names the repo's gate targets: `lore`, `lore-code`, `test`, `lint`, `stan`. | current | - | 0 | no |
 | `.ai/guidelines/custom/domain.md` | 2462 / 44 | tracked | `a72ee76` 2026-09-27 | config-doc | Tells agents the domain vocabulary, the directory boundaries and the authorization pattern to follow. | stale | - | 1 | no |
 | `.ai/guidelines/framework/core.md` | 3000 / 62 | tracked | `a72ee76` 2026-09-27 | config-doc | Laravel Boost's framework rules for this repo: strict types, thin controllers, named routes. | stale | - | 0 | no |
@@ -87,8 +92,8 @@ Verification of these columns is in section 14.
 | `README.md` | 7657 / 136 | tracked | `bbfa3de` 2026-09-29 | readme | The front door and the documentation map that says which file owns which question. | current | - | 0 | no |
 | `SKILL.md` | 19502 / 231 | tracked | `775b88a` 2026-09-27 | reference | A hand-counted table of the skills installed in this project. | stale | the `refresh-skill-registry` skill, which rebuilds this from disk (no in-repo file) | 1 | no |
 | `source.md` | 9988 / 172 | tracked | `775b88a` 2026-09-27 | notes | The system prompt that initialised this repo through Laravel Boost, kept as the record of that step. | current | - | 1 | no |
-| `docs/GATE-REGISTRY.md` | 12724 / 159 | tracked | `31f97a5` 2026-09-29 | constraint | Which gate enforces what, where the gate lives, and which gates are knowingly not automated. | current | - | 12 | yes |
-| `docs/PRE-MORTEM.md` | 12682 / 98 | tracked | `775b88a` 2026-09-27 | research | What could go wrong in the consolidation, written before the artefacts it then shaped. | current | - | 11 | no |
+| `docs/GATE-REGISTRY.md` | not a file (as written 2026-09-30: 12724 / 159) | **not tracked**; deleted `22e5135` 2026-10-02 | content at `docs/research-scratch/GOVERNANCE.md` | constraint | Which gate enforces what, where the gate lives, and which gates are knowingly not automated. The text is `docs/research-scratch/GOVERNANCE.md` under the heading `## GATE-REGISTRY.md` at line 357. | corrected 2026-10-04 | `AGENTS.md` was re-pointed at `bc42d93`; other rows in this file still name the path | 12 | n/a |
+| `docs/PRE-MORTEM.md` | not a file (as written 2026-09-30: 12682 / 98) | **not tracked**; deleted `22e5135` 2026-10-02 | content at `docs/research-scratch/GOVERNANCE.md` | research | What could go wrong in the consolidation, written before the artefacts it then shaped. The text is `docs/research-scratch/GOVERNANCE.md` under the heading `## PRE-MORTEM.md` at line 519. | corrected 2026-10-04 | `AGENTS.md` was re-pointed at `bc42d93`; other rows in this file still name the path | 11 | n/a |
 | `docs/SKILL_AUTOMATION.md` | 3077 / 91 | tracked | `cf8021d` 2026-09-27 | config-doc | How the repo's skill-discovery hook finds and loads skills. | unknown | - | 1 | no |
 | `docs/SOURCE-OF-TRUTH.md` | 19283 / 295 | tracked | `2033434` 2026-09-29 | reference | One page that restates the binding rules from seven other documents for agents that read only one. | stale | - | 10 | no |
 | `docs/UMAMUSUME_REFERENCE.md` | 448522 / 2179 | tracked | `24e491c` 2026-09-29 | reference | The mechanics corpus, eight sections, source-cited and dated. Everything the UI asserts about the game traces here. | current | - | 41 | yes |
