@@ -5,6 +5,7 @@ import { test, expect } from '@playwright/test';
 
 test('Preferences renders its heading, both controls and the shell nav', async ({ page }) => {
     await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
 
     await expect(page.getByRole('heading', { name: 'Preferences', level: 2 })).toBeVisible();
 
@@ -26,6 +27,7 @@ test('Preferences renders its heading, both controls and the shell nav', async (
 
 test('saving a preference confirms in place without a full reload', async ({ page }) => {
     await page.goto('/preferences');
+    await page.locator('#app > *').first().waitFor();
 
     await page.getByRole('checkbox', { name: 'Numeric failure estimate' }).check();
     await page.getByRole('button', { name: 'Save preferences' }).click();

@@ -9,10 +9,15 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
 
 export default defineConfig({
     testDir: './tests/browser',
-    fullyParallel: true,
+    // Serial: the dev server compiles modules on first request, so parallel workers
+    // contend on a cold cache and hydrate slowly. One worker keeps the runs honest.
+    fullyParallel: false,
+    workers: 1,
     forbidOnly: !!process.env.CI,
     retries: 0,
     reporter: 'list',
+    // Generous: first paint waits on the dev server's on-demand compile.
+    expect: { timeout: 15_000 },
     use: {
         baseURL,
         trace: 'off',
