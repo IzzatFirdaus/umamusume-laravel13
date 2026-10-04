@@ -1137,3 +1137,36 @@ neither is on `master`.
 
 **1,222 passed, 2 skipped, 18,275 assertions** at `fc64bc2`. The 1,189 / 2 / 18,210 line should be
 struck from the record.
+
+### Clean baseline (2026-10-04)
+
+Run after the peer-dirty files landed, at `36b71b4`.
+
+| Gate | Command | Result | Exit |
+|---|---|---|---|
+| Full suite | `composer test` | 2 skipped, 1222 passed, 18275 assertions, 256.25s | 0 |
+| Format | `vendor/bin/pint --test` | passed | 0 |
+| Static analysis | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` | No errors | 0 |
+| Lore (docs) | `composer lore` | 176 hits, 76 exempt lines | 0 |
+| Lore (code) | `composer lore-code` | 47 hits | 0 |
+
+The suite count matches the corrected figure above exactly, so the number is now stable across two
+runs and one landing. `composer test` runs `config:clear` and `npm run typecheck` ahead of the
+suite, so the typecheck passed inside that exit 0.
+
+Domain fingerprint, taken before the landings and again after the gates, identical both times:
+
+```
+domain-fingerprint 49ad58bbeaf4dc64494b126b7df049453b1e8d985cea86789843e1f824fb6af6
+training_runs 6, turn_entries 1, run_skills 34, deck_slots 6,
+support_cards 559, skills 1910, race_catalog_slots 410
+```
+
+### What this baseline does not cover
+
+Part 10 records the capsule-header and grade-badge mounting as landed, and Part 10 is now in
+git, but eight of the nine panels carrying that work are not. `stat-band.blade.php` and
+`epithet-checklist`, `grade-point-meter`, `race-calendar`, `shop-panel`, `spirit-burst-roster`,
+`team-race-panel`, and `team-rank-gauge` are all still dirty in the working tree. The suite
+passes against that dirty state, which is the whole point of a baseline, but the claim in Part 10
+is not yet backed by `HEAD`. Landing them is the next dispatch's call.
