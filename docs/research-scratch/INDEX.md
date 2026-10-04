@@ -190,6 +190,7 @@ citation ratchet is unchanged by them.
 | Audit decisions owed from that pass, proposals and measurements only | `AUDIT-AND-VERIFICATION.md` (section audit-decisions-2026-10.md) |
 | Unity Cup capture schema proposal (team rank, spirit bursts, team races, resource strip) | `PLANS-AND-BRIEFS.md` (section unity-cup-capture.md) |
 | Per-card deck state proposal for runs (O-8 2b(d)) | `PLANS-AND-BRIEFS.md` (section o8-per-card-state-proposal.md) |
+| BuildTarget + Trainer Advisor spec (Trainer Desk 2.0 subsystem 1; authority is branch-only) | `PLANS-AND-BRIEFS.md` (section trainer-advisor.md, read from trainer-desk-2.0 at `19c2e7d`) |
 | Full repo documentation census | `AUDIT-AND-VERIFICATION.md` (documentation-inventory section, Part 1) |
 | Unfinished phases, unbacked rulings, register and gate state, pickup order | `AUDIT-AND-VERIFICATION.md` (documentation-inventory section, Part 2) |
 | Training run UI/UX review, static record and live browser pass (2026-10-03) | `AUDIT-AND-VERIFICATION.md` (training-run sections) |
