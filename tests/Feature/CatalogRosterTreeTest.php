@@ -10,6 +10,7 @@ use App\Models\Umamusume;
 use App\Models\UmamusumeAlias;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * The catalog as a trainee and card tree (PRD FR-A-6, US-1).
@@ -45,15 +46,18 @@ it('nests each card under its trainee', function (): void {
         'rarity' => CardRarity::ThreeStar, 'global_release_date' => '2026-07-02',
     ]);
 
-    $html = test()->get('/umamusume')->assertOk()->getContent();
-
-    expect($html)->toContain('Gold Ship')
-        ->and($html)->toContain('ゴールドシップ')
-        ->and($html)->toContain('[Red Strife]')
-        ->and($html)->toContain('[RUN! RUIN! LAUNCHER!]')
-        // The trainee row carries her form count and the max rarity across her cards.
-        ->and($html)->toContain('2 forms')
-        ->and($html)->toContain('Three stars');
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Catalog/Index')
+            ->where('umamusumes.data.0.name', 'Gold Ship')
+            ->where('umamusumes.data.0.name_ja', 'ゴールドシップ')
+            // The trainee row carries her form count and the max rarity across her cards.
+            ->where('umamusumes.data.0.form_count', 2)
+            ->where('umamusumes.data.0.max_rarity.label', 'Three stars')
+            ->has('umamusumes.data.0.cards', 2)
+            ->where('umamusumes.data.0.cards.0.title', '[Red Strife]')
+            ->where('umamusumes.data.0.cards.1.title', '[RUN! RUIN! LAUNCHER!]'));
 });
 
 it('orders the debut first, then by Global release date ascending', function (): void {
@@ -97,13 +101,14 @@ it('never prints a bare zero when a trainee has no forms', function (): void {
         'name' => 'Cardless One', 'slug' => 'cardless-one', 'match_key' => 'cardlessone',
     ]);
 
-    $html = test()->get('/umamusume?search=cardless')->assertOk()->getContent();
-
-    // G-13 and the disclosure pattern: an absent count prints words, never 0. This is
-    // also the shape DesignTokensTest creates 30 of, so it has to render clean.
-    expect($html)->toContain('Cardless One')
-        ->and($html)->not->toMatch('/0 forms/')
-        ->and($html)->toContain('no forms recorded');
+    test()->get('/umamusume?search=cardless')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('umamusumes.data.0.name', 'Cardless One')
+            // Null, not a zero, so the page renders "no forms recorded" rather than "0 forms"
+            // (the words are asserted in tests/browser/catalog.spec.ts).
+            ->where('umamusumes.data.0.form_count', 0)
+            ->where('umamusumes.data.0.max_rarity', null));
 });
 
 it('hides a card only the Tier B source attests, unless asked', function (): void {
@@ -115,14 +120,17 @@ it('hides a card only the Tier B source attests, unless asked', function (): voi
         'umamusume_id' => $u->id, 'card_id' => 112002, 'title' => '[GameTora Only]',
     ]);
 
-    $default = test()->get('/umamusume')->assertOk()->getContent();
-    expect($default)->toContain('[Seen Twice]')
-        ->and($default)->not->toContain('[GameTora Only]');
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('umamusumes.data.0.cards.0.title', '[Seen Twice]')
+            ->has('umamusumes.data.0.cards', 1));
 
     test()->get('/umamusume?show_unconfirmed=1')
         ->assertOk()
-        ->assertSee('[GameTora Only]')
-        ->assertSee('Not confirmed by two sources');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('umamusumes.data.0.cards', 2)
+            ->where('umamusumes.data.0.cards.1.unconfirmed', true));
 });
 
 it('defaults the release status filter to released on Global', function (): void {
@@ -244,17 +252,17 @@ it('reads a trainee badge off the cards the filter let through', function (): vo
     // and `show_unconfirmed=1` moves both together. The glyph run is asserted alongside
     // the words because a rarity `<select>` or a card's `aria-label` could put the word
     // "Three stars" on the page for the wrong reason; `★★★` can only be the badge.
-    $default = test()->get('/umamusume?search=nice nature')->assertOk()->getContent();
-    expect($default)->toContain('[Two Star, Attested]')
-        ->and($default)->not->toContain('[Three Star, Alone]')
-        ->and($default)->toContain('Two stars')
-        ->and($default)->not->toContain('Three stars')
-        ->and($default)->not->toContain('★★★');
+    test()->get('/umamusume?search=nice nature')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('umamusumes.data.0.max_rarity.label', 'Two stars')
+            ->where('umamusumes.data.0.form_count', 1));
 
-    $shown = test()->get('/umamusume?search=nice nature&show_unconfirmed=1')->assertOk()->getContent();
-    expect($shown)->toContain('Three stars')
-        ->and($shown)->toContain('★★★')
-        ->and($shown)->toContain('2 forms');
+    test()->get('/umamusume?search=nice nature&show_unconfirmed=1')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('umamusumes.data.0.max_rarity.label', 'Three stars')
+            ->where('umamusumes.data.0.form_count', 2));
 });
 
 it('never serves a page cached for one term to another term sharing its key', function (): void {
@@ -287,22 +295,22 @@ it('keeps the active filters on every pagination link', function (): void {
     ]);
 
     // Two rows at one per page, so page 2 renders and its pager links with it.
-    $html = test()->get('/umamusume?status=all&search=teio&show_unconfirmed=1&pageSize=1&page=2')
-        ->assertOk()
-        ->getContent();
+    $response = test()->get('/umamusume?status=all&search=teio&show_unconfirmed=1&pageSize=1&page=2')
+        ->assertOk();
 
-    preg_match_all('/href="([^"]*page=\d+)"/', $html, $matches);
+    $links = $response->viewData('page')['props']['umamusumes']['links'];
+    $hrefs = array_values(array_filter(array_map(static fn (array $link): ?string => $link['url'], $links)));
 
     // A bare `/umamusume?page=1` silently reverts status, search and the unconfirmed
     // opt-in the moment a Trainer pages, so no pager link may drop one of the three.
     $dropped = array_values(array_filter(
-        $matches[1],
+        $hrefs,
         static fn (string $href): bool => ! str_contains($href, 'status=all')
             || ! str_contains($href, 'search=teio')
             || ! str_contains($href, 'show_unconfirmed=1'),
     ));
 
-    expect($matches[1])->not->toBeEmpty()
+    expect($hrefs)->not->toBeEmpty()
         ->and($dropped)->toBe([], 'a pagination link dropped an active filter');
 });
 

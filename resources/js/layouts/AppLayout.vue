@@ -15,10 +15,11 @@ const items = [
     { label: 'Dashboard', to: '/', spa: true },
     { label: 'New Career', to: '/training-runs/create', spa: false },
     { label: 'Legacy Lab', to: null, spa: false },
-    { label: 'Support Decks', to: '/support-cards', spa: false },
+    { label: 'Support Cards', to: '/support-cards', spa: false },
+    { label: 'Review', to: '/review', spa: true },
     { label: 'Veterans', to: null, spa: false },
-    { label: 'Database', to: '/umamusume', spa: false },
-    { label: 'Settings', to: '/preferences', spa: false },
+    { label: 'Database', to: '/umamusume', spa: true },
+    { label: 'Settings', to: '/preferences', spa: true },
 ];
 
 const linkClass =

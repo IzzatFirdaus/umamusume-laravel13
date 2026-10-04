@@ -25,8 +25,8 @@ function submit(): void {
 
 <template>
     <AppLayout>
-        <Head title="Preferences" />
-        <template #title>Preferences</template>
+        <Head title="Settings" />
+        <template #title>Settings</template>
 
         <h2 class="text-2xl font-semibold text-ink-strong">Preferences</h2>
         <p class="mt-1 text-sm text-ink-muted">

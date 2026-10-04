@@ -36,16 +36,12 @@ it('offers both preferences with their default states on an unset database', fun
     expect(Preference::count())->toBe(0);
 });
 
-it('is reachable from the main layout', function (): void {
-    // The dispatch's requirement is a control reachable from the shell, not a form inside every
-    // page: the nav carries a link, and the form lives on its own screen.
-    test()->get('/umamusume')->assertOk()->assertSeeText('Preferences');
-
-    expect(test()->get('/umamusume')->getContent())
-        ->toContain('href="'.route('preferences.edit').'"')
-        // The shell stays form-free, which is what keeps the page-wide control counts that
-        // ReviewFormAccessibilityTest and TraineeSelectorTest read honest.
-        ->not->toContain('name="failure_estimate"');
+it('is reachable from the shell navigation', function (): void {
+    // The shell is client-rendered now (ADR-0020 §1). That its Settings link is reachable, and
+    // that the shell carries no form, is asserted in tests/browser/preferences.spec.ts.
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Catalog/Index'));
 });
 
 it('writes the theme through the control and renders it on the next request', function (): void {

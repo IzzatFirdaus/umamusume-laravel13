@@ -25,6 +25,18 @@ test('Preferences renders its heading, both controls and the shell nav', async (
     await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
 });
 
+test('the shell navigation reaches Settings and carries no form', async ({ page }) => {
+    // The nav carries the link and the form lives on its own screen, so the shell stays form-free
+    // (which keeps the page-wide control counts honest). Client-rendered now, so asserted here.
+    await page.goto('/umamusume');
+    await page.locator('#app > *').first().waitFor();
+
+    const nav = page.getByRole('navigation', { name: 'Primary' }).first();
+    await expect(nav.getByRole('link', { name: 'Settings' })).toBeVisible();
+    await expect(nav.locator('form')).toHaveCount(0);
+    await expect(nav.locator('input[name="failure_estimate"]')).toHaveCount(0);
+});
+
 test('saving a preference confirms in place without a full reload', async ({ page }) => {
     await page.goto('/preferences');
     await page.locator('#app > *').first().waitFor();

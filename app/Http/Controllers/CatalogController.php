@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\CardRarity;
 use App\Enums\ReleaseStatus;
 use App\Http\Requests\CatalogSearchRequest;
 use App\Models\CharacterCard;
@@ -21,6 +22,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -43,7 +46,7 @@ class CatalogController extends Controller
      * The default status is Released (Global), not "everything": a catalog whose first
      * screen is half JP-only rows is not the Global English tool PRD §1 describes.
      */
-    public function index(CatalogSearchRequest $request, NameNormalizer $normalizer): View|RedirectResponse
+    public function index(CatalogSearchRequest $request, NameNormalizer $normalizer): Response|RedirectResponse
     {
         $status = $request->validated('status');
         $search = $request->query('search');
@@ -84,12 +87,41 @@ class CatalogController extends Controller
         // pager links carry a bare `?page=N` and paging silently reverts status, search
         // and the unconfirmed opt-in.
         $umamusumes = (new LengthAwarePaginator($items, $total, $pageSize, $page, ['path' => route('catalog.index')]))
-            ->withQueryString();
+            ->withQueryString()
+            ->through(static function (Umamusume $umamusume): array {
+                // The badge and the form count both read the collection the card scope loaded,
+                // so a hidden card moves the max rarity with it.
+                $maxRarity = $umamusume->cards->isEmpty()
+                    ? null
+                    : CardRarity::from((int) $umamusume->cards->max(static fn (CharacterCard $card): int => $card->rarity->value));
 
-        return view('catalog.index', [
+                return [
+                    'id' => $umamusume->id,
+                    'slug' => $umamusume->slug,
+                    'name' => $umamusume->name,
+                    'name_ja' => $umamusume->name_ja,
+                    'release_status_label' => $umamusume->release_status->label(),
+                    'max_rarity' => $maxRarity === null ? null : ['label' => $maxRarity->label(), 'stars' => $maxRarity->stars()],
+                    'form_count' => $umamusume->cards->count(),
+                    'cards' => $umamusume->cards->map(static fn (CharacterCard $card): array => [
+                        'id' => $card->id,
+                        'title' => $card->title,
+                        'rarity_label' => $card->rarity->label(),
+                        'rarity_stars' => $card->rarity->stars(),
+                        'is_debut_form' => $card->is_debut_form,
+                        'unconfirmed' => $card->unconfirmed,
+                        'global_release_date' => $card->global_release_date->toDateString(),
+                        'global_release_date_display' => $card->global_release_date->format('M j, Y'),
+                    ])->all(),
+                ];
+            });
+
+        return Inertia::render('Catalog/Index', [
             'umamusumes' => $umamusumes,
-            'statuses' => ReleaseStatus::cases(),
-            'currentStatus' => $statusEnum,
+            'statuses' => collect(ReleaseStatus::cases())
+                ->map(static fn (ReleaseStatus $status): array => ['value' => $status->value, 'label' => $status->label()])
+                ->all(),
+            'currentStatus' => $statusEnum?->value,
             'search' => $search,
             'showAllStatus' => $showAllStatus,
             'showUnconfirmed' => $showUnconfirmed,

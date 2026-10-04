@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\MatchCandidate;
 use App\Models\Preference;
+use App\Models\SupportCard;
 use App\Models\Umamusume;
 use Illuminate\Support\Facades\Schema;
 use Pest\Browser\Browser;
@@ -67,9 +68,11 @@ it('renders the framework paginator from tokens too', function (): void {
     expect(is_file($published))
         ->toBeTrue('The published pagination view is absent, so the framework default is rendering.');
 
-    Umamusume::factory()->count(30)->create();
+    // A page still on Blade that paginates. The catalog and review are Vue now (ADR-0020 §1),
+    // so their pagers render client-side and no longer exercise the framework's pagination view.
+    SupportCard::factory()->count(30)->create();
 
-    $html = test()->get('/umamusume')->assertOk()->getContent();
+    $html = test()->get('/support-cards')->assertOk()->getContent();
 
     // The shipped `pagination::tailwind` view carries `dark:` and gray/blue on every
     // element, so the published override is what makes the catalog and review pages

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Umamusume;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * KI-2: `GET /umamusume` returned 500 with "Attempt to read property "slug" on
@@ -33,9 +34,12 @@ it('renders the catalog through the database cache store, not only the array one
     // The cold request populated the cache; this one deserialises it. The page group key is the evidence,
     // not `catalog:version`: that counter belongs to the promotion and a page read no longer writes it
     // (F-10 / N-4), so asserting it here would pin the defect this file used to rely on.
-    expect(DB::table('cache')->where('key', 'like', '%catalog:list:v%')->count())->toBeGreaterThan(0)
-        ->and(test()->get('/umamusume')->assertOk()->getContent())
-        ->toContain('Umamusume');
+    expect(DB::table('cache')->where('key', 'like', '%catalog:list:v%')->count())->toBeGreaterThan(0);
+
+    // The read-back renders the cached rows through Inertia (ADR-0020 §1): the tree arrives in the props.
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('umamusumes.data', 3));
 
     Cache::flush();
 });
