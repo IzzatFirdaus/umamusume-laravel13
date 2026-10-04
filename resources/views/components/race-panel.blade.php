@@ -33,9 +33,8 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'rounded-md border border-rule bg-panel p-3']) }}>
-    <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pl-16 pr-4 text-sm font-bold text-on-chrome">
-        <span>Races</span>
-    </div>
+    {{-- x-capsule-header owns this anatomy for every panel (DESIGN.md §2.3). --}}
+    <x-capsule-header title="Races" class="mb-3" />
 
     {{-- The branch choice sits outside the record form: a form may not nest, and the choice
          is not part of what gets recorded. Each control submits its own value to the screen
@@ -109,13 +108,13 @@
         @else
             {{-- Manual path --}}
             <label class="flex flex-col gap-1">
-                <span class="font-medium text-ink">Race title</span>
+                <span class="font-medium text-ink">Race title *</span>
                 <input type="text" name="title" value="{{ old('title') }}" required maxlength="255"
                        class="min-w-48 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
                        placeholder="e.g. Practice Race">
             </label>
             <label class="flex flex-col gap-1">
-                <span class="font-medium text-ink">Month</span>
+                <span class="font-medium text-ink">Month *</span>
                 <select name="month" required class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
                     <option value="">select</option>
                     @foreach (range(1, 12) as $m)
@@ -124,7 +123,7 @@
                 </select>
             </label>
             <label class="flex flex-col gap-1">
-                <span class="font-medium text-ink">Half</span>
+                <span class="font-medium text-ink">Half *</span>
                 <select name="half" required class="rounded-md border border-rule bg-raised px-2 py-1 text-ink">
                     <option value="">select</option>
                     <option value="Early" {{ old('half') === 'Early' ? 'selected' : '' }}>Early</option>
@@ -132,10 +131,9 @@
                 </select>
             </label>
             <label class="flex flex-col gap-1">
-                <span class="font-medium text-ink">Tier</span>
+                <span class="font-medium text-ink">Tier (optional)</span>
                 <input type="text" name="tier" value="{{ old('tier') }}" maxlength="10"
-                       class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
-                       placeholder="optional">
+                       class="w-20 rounded-md border border-rule bg-raised px-2 py-1 text-ink">
                 <span class="text-xs text-ink-muted">No prefill for manual races</span>
             </label>
         @endif
