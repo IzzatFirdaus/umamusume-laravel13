@@ -255,8 +255,30 @@ it('keeps the six picks a Trainer made when the server rejects the deck', functi
         )
         ->assertOk()
         ->assertSee('That card is not in the catalogue')
-        // Blade's `@selected` echoes the bare attribute, not `selected="selected"`.
-        ->assertSee('value="'.$good->id.'" selected', false);
+        // The pick survives, read back two ways: the name the Trainer sees beside the slot, and the
+        // field and value the next submit carries. Slot 2 is the one that erred, so it is the slot open
+        // with the card list, and slot 1 posts through the closed-slot path.
+        ->assertSee('Keep Me')
+        ->assertSee('name="deck[1][support_card_id]" value="'.$good->id.'"', false);
+});
+
+it('carries one card list for the six slots rather than six', function (): void {
+    /*
+     * R-1's fix, counted. Six selects over the same catalogue measured 1,512 option nodes on a run page
+     * holding 8,941 elements, and those nodes are the no-script path rather than a visual thing, so the
+     * cut had to keep it: one slot open with the full list, five closed and posting hidden values, and a
+     * query-string link per closed slot so a Trainer with scripting off still reaches the catalogue for
+     * any of them.
+     */
+    $run = deckRun();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML(test()->get("/training-runs/{$run->id}")->assertOk()->getContent(), LIBXML_NOERROR);
+    $xpath = new DOMXPath($dom);
+
+    expect($xpath->query('//select[starts-with(@name, "deck[")]')->length)->toBe(1)
+        ->and($xpath->query('//input[starts-with(@name, "deck[")][@type="hidden"]')->length)->toBe(5)
+        ->and($xpath->query('//a[contains(text(), "Change slot")]')->length)->toBe(5);
 });
 
 it('shows the deck panel on a run that names no scenario', function (): void {
