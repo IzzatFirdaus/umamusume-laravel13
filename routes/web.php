@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SkillController;
@@ -11,6 +12,10 @@ use App\Http\Controllers\TrainingRunController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/training-runs')->name('home');
+
+// Trainer Desk 2.0 SPA entry (ADR-0020 §1). The Inertia shell renders here; the Blade
+// screens below still serve their own routes during the rewrite.
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::get('/umamusume', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catalog.show');

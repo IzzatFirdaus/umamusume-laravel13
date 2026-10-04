@@ -4,6 +4,7 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source '../**/*.vue';
 
 /*
  * Design tokens. Single source of truth for the app's palette, per DESIGN.md §2.1

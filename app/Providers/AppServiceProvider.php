@@ -36,10 +36,12 @@ class AppServiceProvider extends ServiceProvider
          * back to the system script rather than writing an attribute no stylesheet
          * would match.
          *
-         * Only the layout is composed. Composers run on every render, so the
-         * lookup stays to the one view whose output depends on it.
+         * Both root templates are composed: `components.layout` (the Blade shell) and
+         * `app` (the Inertia root, ADR-0020 §1), so each first paint is already the
+         * chosen theme. Composers run on every render, so the lookup stays to the two
+         * views whose output depends on it.
          */
-        View::composer('components.layout', function ($view): void {
+        View::composer(['components.layout', 'app'], function ($view): void {
             $theme = Preference::get('theme');
 
             $view->with('theme', in_array($theme, ['light', 'dark'], true) ? $theme : null);

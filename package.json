@@ -18,5 +18,10 @@
     },
     "allowScripts": {
         "esbuild@0.28.2": true
+    },
+    "dependencies": {
+        "@inertiajs/vue3": "^2.3.28",
+        "@vitejs/plugin-vue": "^6.0.9",
+        "vue": "^3.5.43"
     }
 }
