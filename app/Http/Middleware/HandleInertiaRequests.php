@@ -37,7 +37,34 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            //
+            'app' => [
+                'name' => config('app.name'),
+                'version' => $this->appVersion(),
+                // No source defines a Global ruleset version (docs/proposals/design-2.0.md §48),
+                // so this is a named absence, never an invented number.
+                'ruleset' => null,
+            ],
         ];
+    }
+
+    /**
+     * The application version, read from `VERSION.md` (its single source). A missing file or an
+     * unparseable line yields null, which the shell renders as an absence rather than a guess.
+     */
+    private function appVersion(): ?string
+    {
+        $path = base_path('VERSION.md');
+
+        if (! is_file($path)) {
+            return null;
+        }
+
+        $contents = (string) file_get_contents($path);
+
+        if (preg_match('/Current version:\s*`([^`]+)`/', $contents, $matches) !== 1) {
+            return null;
+        }
+
+        return $matches[1];
     }
 }

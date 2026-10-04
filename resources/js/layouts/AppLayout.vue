@@ -4,6 +4,7 @@ import { computed } from 'vue';
 
 const page = usePage();
 const active = computed(() => page.url);
+const appVersion = computed(() => page.props.app?.version ?? null);
 
 // The 2.0 navigation (docs/proposals/design-2.0.md §28). `to: null` = not built yet:
 // Legacy Lab and the Veteran library arrive in later ADR-0020 slices, so they render as
@@ -24,10 +25,21 @@ const linkClass =
 const activeClass = 'bg-raised text-ink-strong';
 const disabledClass =
     'flex min-h-11 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium text-ink-muted';
+const mobileClass =
+    'flex min-h-11 shrink-0 items-center whitespace-nowrap px-3 text-xs font-medium text-ink';
+const mobileDisabledClass =
+    'flex min-h-11 shrink-0 cursor-not-allowed items-center whitespace-nowrap px-3 text-xs font-medium text-ink-muted';
 </script>
 
 <template>
     <div class="flex min-h-screen bg-page text-ink">
+        <a
+            href="#main"
+            class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border-2 focus:border-rule focus:bg-raised focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-ink-strong"
+        >
+            Skip to content
+        </a>
+
         <aside class="hidden w-64 shrink-0 flex-col border-r border-rule bg-panel md:flex">
             <div class="border-b border-rule px-4 py-4">
                 <span class="text-sm font-bold tracking-wide text-ink-strong">TRAINER DESK</span>
@@ -59,15 +71,49 @@ const disabledClass =
 
         <div class="flex min-w-0 flex-1 flex-col">
             <header
-                class="flex items-center justify-between border-b border-rule bg-panel px-6 py-3"
+                class="flex items-center justify-between gap-4 border-b border-rule bg-panel px-6 py-3"
             >
                 <h1 class="text-base font-semibold text-ink-strong">
                     <slot name="title" />
                 </h1>
+                <span
+                    v-if="appVersion"
+                    class="font-mono text-xs tabular-nums text-ink-muted"
+                    title="Application version"
+                >
+                    v{{ appVersion }}
+                </span>
+                <span v-else class="text-xs text-ink-muted" title="Application version not recorded">
+                    N/A
+                </span>
             </header>
-            <main id="main" class="flex-1 px-6 py-6">
+            <main id="main" class="flex-1 px-6 py-6 pb-24 md:pb-6">
                 <slot />
             </main>
         </div>
+
+        <!-- Mobile navigation (docs/proposals/design-2.0.md §41). The sidebar is desktop-only;
+             below md the same destinations render as a scrollable bottom bar. -->
+        <nav
+            aria-label="Primary"
+            class="fixed inset-x-0 bottom-0 z-40 flex overflow-x-auto border-t border-rule bg-panel md:hidden"
+        >
+            <template v-for="item in items" :key="item.label">
+                <Link
+                    v-if="item.spa"
+                    :href="item.to as string"
+                    :class="[mobileClass, active === item.to ? activeClass : '']"
+                    :aria-current="active === item.to ? 'page' : undefined"
+                >
+                    {{ item.label }}
+                </Link>
+                <a v-else-if="item.to" :href="item.to" :class="mobileClass">
+                    {{ item.label }}
+                </a>
+                <span v-else :class="mobileDisabledClass" title="Coming with Trainer Desk 2.0">
+                    {{ item.label }}
+                </span>
+            </template>
+        </nav>
     </div>
 </template>
