@@ -289,5 +289,60 @@ Recorded here because a later pass will otherwise re-find them.
   `KNOWN-ISSUES.md` is in the working tree as a 71-line pointer stub against a 2,655-line committed
   register, a peer's 2,722-line change in progress. Appending to it and committing would land that
   restructure under a docs-fix message, which `AGENTS.md` §11 and the shared-worktree rule both forbid.
+
+## Register corrections from the 2026-10-04 pass
+
+Three findings' recorded status no longer matches what the tree does. None of them needs code; each needs
+the register line moved. They are listed here rather than edited into the register because root
+`KNOWN-ISSUES.md` is a peer's in-flight rewrite (see section 12) and
+`docs/research-scratch/AUDIT-AND-VERIFICATION.md` is closed to this pass by the dispatch that ordered it.
+
+**F-2, `cff9e92`: the fix carries a consequence the entry does not name.** `db:seed` now exits non-zero when
+a source fails to import, which is what F-2 asked for. The consequence: `DatabaseSeeder` calls seeders in a
+fixed order, and because the failure is raised at the end of `SourceDocumentSeeder::run()`, anything after it
+in that list does not execute on a partial seed. Today that is `ScenarioSlotSeeder`, so a failed source also
+leaves the URA finale goal races unpopulated.
+
+Accepted as the trade, and the reasoning is recorded because "seed exits with a code" does not say it: the
+skip is survivable only since KI-56 (`2aa0e5a`) made `db:seed` re-runnable. Before that, a re-run was the one
+action that could not repair a partial seed, because it aborted on its own first pass. The repair path for a
+failed source is `php artisan uma:reparse <source>` for a snapshot the engine already holds, or a plain re-run
+of `migrate --seed` once the input is fixed. A register entry that records F-2 as closed without naming the
+seeder skip will read, to the next person, as though one source failed quietly.
+
+**KI-50, `5a7e5e6`: one half of option (a) landed.** The DDL half is closed:
+`tests/Feature/SchemaCheckConstraintTest.php` reads `sqlite_master` and asserts both that each of the five
+tables carrying a constrained domain has a real `CHECK` clause and the value list that clause permits. It was
+mutation-checked by deleting the `support_effects` calc clause, which turned two of its seven cases red.
+
+The grep half of option (a), "a gate that greps `database/migrations/` for `->check(` and fails", is not
+built, and it cannot be built as written: `->check(` is present today in
+`2026_09_30_142618_create_support_cards_and_support_effects_tables.php` and in
+`2026_09_30_151945_correct_support_card_schema_and_constraints.php`, and the entry's own text says those two
+files "must not be modified" because `151945`'s `down()` deliberately reconstructs the constraint-free shape.
+A gate that fails at HEAD is either suppressed or wrong, and the Floor forbids the new suppression. So KI-50
+should read **partially resolved: DDL guard closed at `5a7e5e6`, spelling gate open, blocked by the two
+grandfathered migrations**, not open and not closed. If the owner wants the spelling gate, the decision it
+needs is whether those two migrations may carry an allowlist exception, which is a different ruling than the
+one the entry already records.
+
+**KI-55: the re-point this document recommended has already happened.** Section 5 above was written from the
+2026-10-02 register entry and recommends re-pointing `AGENTS.md`'s three citations at the GOVERNANCE.md
+sections. Checked at this HEAD: `git show HEAD:AGENTS.md` lines 5, 94 and 178 already name
+`docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md" and §"PRE-MORTEM.md", and the re-point landed as
+`bc42d93` ("O-2: repoint citations to GOVERNANCE.md sections"). Section 5's recommendation is therefore
+closed, and the owner decision it asked for is already given.
+
+What remained open was the other half of the contradiction, and it is the reason section 5's own citation was
+wrong: the rows marking the two paths as tracked are at lines 90 and 91 of
+`docs/research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` as that file was written, **not** at the
+`243-244` this document cited. Lines 243-244 are frontend probe records. That citation came from a subagent
+report this pass relayed without re-reading the target, which is the failure mode the relay rule exists to
+stop. Item 1 of this dispatch corrected rows 90 and 91 in place at `f1c18fc`.
+
+Still open on KI-55, and small: the inventory file names `docs/GATE-REGISTRY.md` or `docs/PRE-MORTEM.md` as
+live paths in thirteen other rows and tables too (counted at `f1c18fc` by grepping both paths and excluding
+the three corrected lines; the line numbers move on every edit, so re-run the grep rather than trusting a
+list here). Those are outside Item 1's stated scope and are recorded rather than edited.
 - **`runs/import.blade.php` and `form-detail.blade.php` are peer-dirty**, so any copy fix on those screens
   needs the peer's change landed first.
