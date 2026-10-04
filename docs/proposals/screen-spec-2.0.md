@@ -27,6 +27,132 @@
 
 ---
 
+## Product direction corrections (added 2026-10-05)
+
+A new product/UX strategy document (owner-supplied, 2026-10-05) corrects several assumptions in this brief.
+This section records those corrections without rewriting the brief itself. The brief stays verbatim; the
+corrections are additive notes so a reader can tell what stands and what must change before implementation.
+
+**Core UX model shift.** The application is reoriented from "career optimizer" to **"Trainer's planning desk."**
+It separates **Preparation mode** ("What am I going to build?") from **Active Career mode** ("Given what actually
+happened, what should I do next?"). The app never pretends its simulated state is authoritative game state.
+
+**Screen-level corrections:**
+
+| Screen | Original assumption | Corrected direction |
+|---|---|---|
+| SCREEN-002 (Scenario Selection) | Three scenarios with difficulty stars | **Four Global scenarios**; remove star ratings; show optimization focus (primary/secondary/training complexity); Grand Concert marked "PARTIALLY DOCUMENTED" |
+| SCREEN-005 (Build Target) | Generic stat targets | Add **Career Plan object**: purpose, scenario, trainee, race profile, stat/aptitude/style/skill targets, legacy/support requirements, risk tolerance. Render as "Your target" not "The correct target" |
+| SCREEN-006 (Legacy Lab) | Two-parent picker | Upgrade to **six-node ancestry planner** (Parent A/B + four grandparents). Show Spark probabilities (`~10% ★★★`), not guarantees. Distinguish Blue/Pink/Green/White/Scenario Sparks. Optimize entire ancestry configuration. **Factor yield clarified 2026-10-05**: exactly 1 Blue + 1 Pink per run, at most 1 Green (requires 3★ parent), White sparks unbounded — model as variable yield, not a slot cap |
+| SCREEN-007 (Support Deck) | Five owned + one borrowed | **Six slots**, ownership flag (OWNED/RENTED). **Seven support types**: Speed, Stamina, Power, Guts, Wit, Pal, Group. Scenario Link derived from scenario+character, not stored on card. Granular deck analysis (training power, early run, race, safety, events, skills) |
+| SCREEN-008 (Run Preflight) | Simple validation | Rename internally to **"Career Contract"**: scenario, trainee, six Legacy members, sparks analyzed, support deck, race profile, stat/skill/aptitude targets, risk profile. Warnings for low factor probability, missing aptitudes |
+| SCREEN-009 (Career Cockpit) | Dashboard | Make it a **state machine**: explicit `CareerState` (year, half, turn, energy, mood, stats, SP, fans, bonds, races, events, goals, scenario_state, inheritance_state, action_history). Every action: BEFORE → USER ENTERS → EXPECTED → ACTUAL → UPDATED STATE → RECALCULATED |
+| SCREEN-010 (Training Decision) | "+62 Speed / +25 Power" yields | Per-training yields are **unsourced** (§1.1.1 ⚠️ STALE). Render `N/A`. Keep decision card structure but remove specific yield numbers |
+| SCREEN-011 (Race Decision) | Win probability percentage | Race prediction **deferred** (`ADR-0016`). Use conservative readiness bands (Excellent/Good/Borderline/Poor), not fake precision ("Win probability: 84%"). Model race as complex object (surface, distance, band, style, grade, venue, layout, corners, straights, elevation, weather, ground, season, time, fans, skill interactions, scenario effects) |
+| SCREEN-012 (Event Decision) | Simple choice recording | Model event as: source (Support/Character/Scenario/Random), choices, known outcomes, current career state, expected effect, recommendation. If outcome incomplete: "⚠ Event outcome incomplete — choose manually" |
+| SCREEN-013 (Inheritance Event) | Expected inheritance display | Show **probability, not guarantees**. Factor outlook: `Speed ★★★ Potential payout: +21 Estimated roll: ~10%`. NOT "guaranteed" |
+| SCREEN-014–017 (Scenario Panels) | Static modules | Each panel genuinely different: URA (goals + Happy Meek), Unity Cup (**Team Cockpit** with team rank/spirit/bursts), Trackblazer (Grade Points + shop + rivals + Twinkle Star Climax), Grand Concert (basic tracker only, advanced advisor limited) |
+| SCREEN-018 (Career Timeline) | Turn log | Record **decisions, not just turns**: BEFORE state, ACTION, EXPECTED result, ACTUAL result, RESULT, DECISION accepted/rejected, ADVISOR CONFIDENCE. Creates career audit trail |
+| SCREEN-019 (Career Result) | Summary report | Upgrade to **Veteran Creation screen**: career result, aptitudes, skills, race history, sparks, legacy value (factor quality assessment), best use recommendation |
+| SCREEN-020 (Save Veteran) | Simple save | Add **Factor Analysis** workflow: veteran review → factor analysis → legacy value → tag → save. Recommendation: "Excellent Medium parent. Best used for: Medium, Pace Chaser, Speed-oriented builds" |
+| SCREEN-021 (Veteran Library) | List view | Three views: **Veterans** (all completed careers), **Factors** (searchable factor inventory), **Ancestry** (see where Veteran came from — six-node graph). Add "Find Parents for This Build" button |
+| SCREEN-022 (Veteran Comparison) | Side-by-side stats | Add factor comparison, ancestry visualization, compatibility calculation. Search by factor requirements, aptitude requirements, skill requirements, compatibility, scenario requirements |
+| New (not numbered) | — | Add **Race Planner sophistication**: course analysis (final corner, slope, backstretch, final straight, last-spurt conditions, position triggers). Don't hard-code distance ranges without resolving conflicts (1400m: Game8=Sprint vs export=Mile) |
+
+**New interaction patterns:**
+
+- **Undo last recorded action**: Safe because local planning tool, not game manipulation
+- **Screenshot-assisted entry** (future): Import screenshot → OCR → user confirmation → store as `USER_CONFIRMED_SCREENSHOT`
+- **Three complexity levels**: Beginner ("What should I do?" → "Train Speed"), Intermediate (+ why), Advanced (full modifier breakdown)
+- **Progressive disclosure**: Default shows summary; expand for training calculation, support contribution, scenario modifier, race requirements, source/confidence
+
+**Data integrity layer additions:**
+
+Every important game mechanic represented as `GameRule` with: key, scenario_id, server, version, value, source, source_type, confidence, verified_at, notes. Example:
+
+```text
+scenario.trackblazer.stat_cap.stamina
+value: 1900
+server: global
+source: gametora_scenario_export
+confidence: verified
+verified_at: 2026-09-27
+```
+
+**Terminology authority:** Global terminology is authoritative (Scouts, Transfer Requests, Veteran Umamusume, Pal, Wit, Inspiration, Legacies, Sparks). UI always uses Global labels; internal keys separate. JP-only mechanics explicitly excluded (four Global scenarios vs fourteen JP; JP-only features like Independent Training marked unverified for Global).
+
+**Confidence model:** Every recommendation carries confidence level: HIGH (supported by current client/data + current source), MEDIUM (current data + older guide), LOW (derived from incomplete information), UNVERIFIED (do not use for automatic recommendation). Example: "Train Speed — Confidence: HIGH" vs "Predicted exact stamina for 2200m — Confidence: LOW" (no verified metres-per-Stamina conversion).
+
+**Multi-objective optimizer architecture:** Hard constraints (mandatory race within N turns, fan requirements) come before optimization (career goals, scenario objectives, build targets, legacy value, risk model). LLM explains recommendation, does not invent it.
+
+**Versioning mandatory:** Every career run preserves ruleset snapshot. Old Veteran says "Ruleset: Global Trackblazer v2026-04" not silently recalculated with today's rules. Data status indicator on dashboard: "GLOBAL DATA ● Current Updated: 2026-09-27" or "⚠ Snapshot Last verified: 2026-09-27".
+
+**Strongest differentiator clarified:** Not "calculates training gains" (existing calculators do that). It is: **"Understands relationship between current Career Plan, six-person Legacy configuration, Support Deck, current Career State, and the Veteran being created."**
+
+---
+
+## Knowledge grounding (added 2026-10-05)
+
+The brief numbers its own screens `SCREEN-001` … `SCREEN-027`. The repository numbers screens
+`SCR-<AREA>-<nnn>` (`SCREEN_SPEC.md` §2). This section maps the two so a slice can cite one ID, and
+records what the corpus holds for each screen's data. It does not edit the brief.
+
+**Terminology.** "July 2026 rebalance" → the corpus's **2026-07-01 Global rework**
+(`docs/UMAMUSUME_REFERENCE.md` L1016; `SCENARIO-PUBLISHER-REFERENCES.md` L544). "Support Decks" in the
+brief's nav (§3) is the repository's **Support Cards** (`SCREEN_SPEC.md` §3 nav order).
+
+**Screen mapping.** This document's screens are `SCREEN-001` … `SCREEN-024`. `design-2.0.md` carries a
+**different** inventory (`SCR-001` … `SCR-027`) that adds a Skills Planner and a Grand Concert panel and
+omits Inheritance Event, Career Timeline and Veteran Comparison. The two lists disagree; neither is
+authoritative over the other, and the development plan builds their union. "Port" = the screen exists today
+and this rewrite re-renders it in Vue; "New" = no current screen.
+
+| Brief ID | Screen | Repo ID | Route / source | State |
+|---|---|---|---|---|
+| SCREEN-001 | Dashboard | — (SPA `Dashboard.vue`) | `GET /` (`home`) | Partly built; Active-Career/Recent-Veterans are named absences |
+| SCREEN-002 | Scenario Selection | New | `config/scenarios.php` | New; binds the four-scenario matrix |
+| SCREEN-003 | Trainee Selection | `SCR-CAT-001` | `GET /umamusume` | Port |
+| SCREEN-004 | Trainee Profile | `SCR-CAT-002` | `GET /umamusume/{slug}` | Port |
+| SCREEN-005 | Build Target | New (`FR-F`) | `training_runs.build_target` | New; spec `PROCESS-PLANS.md` `## trainer-advisor.md` §2 |
+| SCREEN-006 | Legacy Lab | New (`FR-G`, record-only) | Veteran library | New; optimization parts **held** (`ADR-0020` §3) |
+| SCREEN-007 | Support Deck Builder | New | `runs.deck.sync`; `x-deck-editor` | New screen over an existing write path |
+| SCREEN-008 | Run Preflight | New | composes 005–007 | New |
+| SCREEN-009 | Career Cockpit | New (descends `SCR-RUN-003`) | `GET /training-runs/{run}` | New; the flagship screen |
+| SCREEN-010 | Training Decision | New (`FR-F`) | advisor spec | New; per-training yields **held** |
+| SCREEN-011 | Race Decision | New | `RaceCatalogSlot` | New; win-probability **held** (`ADR-0016`) |
+| SCREEN-012 | Event Decision | New | `TurnEvent` + `TurnEvents\*Payload` | New over existing event recording |
+| SCREEN-013 | Inheritance Event | New | — | New; **record-only** (`ADR-0020` §3) |
+| SCREEN-014 | Scenario Panel: URA Finale | New | `ura_finale` | New |
+| SCREEN-015 | Scenario Panel: Unity Cup | New | `unity_cup`; `x-spirit-burst-roster`, `x-team-rank-gauge`, `x-team-race-panel` | New over existing components |
+| SCREEN-016 | Scenario Panel: Trackblazer | New | `trackblazer`; `x-shop-panel`, `x-grade-point-meter`, `x-epithet-checklist` | New; shop recommendation **held** (rotation not modelled) |
+| SCREEN-017 | Scenario Race Planner | New | `RaceCatalogSlot` | New; win-probability **held** (`ADR-0016`) |
+| SCREEN-018 | Career Timeline | New | `TurnEntry` / `TurnEvent` | New |
+| SCREEN-019 | Career Result | New | `TrainingRun` | New |
+| SCREEN-020 | Save Veteran | New (`FR-G`) | — | New |
+| SCREEN-021 | Veteran Library | New (`FR-G`) | — | New |
+| SCREEN-022 | Veteran Comparison | New (`FR-G`) | — | New |
+| SCREEN-023 | Database | `SCR-CAT-001/002`, `SCR-SKL-001/002`, `SCR-SUP-001/002` | `GET /umamusume`, `/skills`, `/support-cards` | Port; races and scenarios are new |
+| SCREEN-024 | Settings | `SCR-SYS-002` | `GET /preferences` | Ported to Vue 2026-10-04 |
+
+**From `design-2.0.md` but not here:** a Skills Planner (`SCR-013`) and a Grand Concert panel (`SCR-017`).
+Both are in the development plan's union. Grand Concert's panel is a baseline strip only (below).
+
+**Not in either brief but already shipping:** the Review queue (`SCR-REV-001`, `GET /review`, ported to Vue)
+and the run import screens (`SCR-RUN-004`/`005`). They stay.
+
+**Corpus authority per screen's data.** Scenario panels read `config/scenarios.php`, whose per-number
+provenance is stated in its own header (`GameTora scenarios.json`, verified 2026-09-27). Sparks/Affinity
+data (006, 013, 021) is `UMAMUSUME_REFERENCE.md` §1.5. Support-card effects (007, 022) are §1.4. The
+Trackblazer shop catalogue and epithet routes are transcribed from `SCENARIO-PUBLISHER-REFERENCES.md`.
+
+**Unknowns the plan must render as absence, never invent:** Grand Concert mechanics (07 stub, §2.2.4
+❌ UNVERIFIED); race distance/surface on goal races and any win probability (`ADR-0016`); per-training
+stat yields and failure % (§1.1.1 ⚠️ STALE, excluded by the advisor spec); the official scenario title
+"Twinkle Star Climax" (§7 conflict row 31 ❌ UNVERIFIED as the official name; "Trackblazer" is the export
+label); the factor-slot count (§1.5 L641 ❌ UNVERIFIED); and the `app.ruleset` string, currently `null`.
+
+---
+
 # Uma Trainer Desk — Screen Specification
 
 **Project:** Uma Trainer Desk

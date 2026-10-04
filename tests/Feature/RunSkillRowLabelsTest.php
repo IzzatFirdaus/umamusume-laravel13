@@ -376,7 +376,7 @@ it('sizes every control in the skills form to the 44 of DESIGN.md 6.14, and step
         ->and($turn->getAttribute('step'))->toBe('1');
 
     // §10's focus ring, the same treatment Screen D's controls already carry
-    // (`resources/views/skills/index.blade.php`:31, `:40`). The button is excluded on purpose: Screen D's
+    // (`resources/js/pages/Skills/Index.vue`). The button is excluded on purpose: Screen D's
     // button does not carry the ring either, and this change copies that surface rather than inventing.
     foreach ($xpath->query('.//select|.//input[@type="number"]', $form) as $control) {
         expect($control->getAttribute('class'))->toContain('focus-visible:outline-2');
@@ -389,7 +389,7 @@ it('names the two catalogue commands when no skill is offerable, and still rende
     // `name_is_client` (its own docblock says the omission is deliberate), so the scope at
     // `Skill::scopeAvailableOnGlobal()` matches none of them and no tracked writer in this tree produces a
     // row this picker can offer. The empty picker is therefore the ordinary first state, not an edge case,
-    // and Screen D already names both commands for it (`resources/views/skills/index.blade.php`:89-92).
+    // and Screen D already names both commands for it (`resources/js/pages/Skills/Index.vue`).
     $run = TrainingRun::factory()->create();
 
     $html = $this->get(route('runs.show', $run))->content();

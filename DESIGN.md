@@ -346,6 +346,10 @@ likewise unimplementable: the token set has no caution chrome and `pick` measure
 surface, so the notice is copy over `ink-faint` (3.26:1 light / 4.21:1 dark) as the view's own comment at
 `:33-38` records.
 
+**Ported 2026-10-05.** `SCR-CAT-002` now renders through `resources/js/pages/Catalog/Show.vue`; the
+`catalog/show.blade.php` view and its `form-detail` partial are deleted. The withdrawal above stands as
+written for the 0.1.0 view it describes, and the eight-section workspace below is the ported page's shape.
+
 **The trainee page is a workspace for that trainee.** Eight sections, in this order:
 
 1. **Identity** — name, Japanese name, release status, JP debut, Global debut, Trainer-edited flag.
@@ -508,9 +512,14 @@ hand at four call sites.
 
 **Recommended:** delete the four inline `outline-green` declarations and let the base layer
 win. No `transition-colors` is a deliberate choice to keep; adding one needs an owner
-ruling, because it would be the first easing in the app. Also absent: any
-`prefers-reduced-motion` block. With zero motion that block is currently unnecessary, and
-it becomes mandatory the moment the ruling above goes the other way.
+ruling, because it would be the first easing in the app.
+
+**Corrected 2026-10-05.** The sentence that stood here read: "Also absent: any
+`prefers-reduced-motion` block. With zero motion that block is currently unnecessary, and it
+becomes mandatory the moment the ruling above goes the other way." The block now ships in
+`app.css`'s base layer (§12), so the absence it recorded no longer holds. It is the escape
+hatch for the operating-system setting and the guard for the first easing a later slice adds;
+the MOTION dial stays 1 and no `transition-*` utility was added.
 
 ## 9. Where tokens live
 
@@ -574,9 +583,38 @@ Not defects; decisions this file cannot make for itself.
    surface. Confirm that "no loading state, because nothing loads client-side" is the
    accepted answer, or approve the fetch-in-flight affordance §7 defers.
 
+## 12. Accessibility conformance
+
+**Target: WCAG 2.2 level AA on every shipped screen**, the ported Inertia pages and the live
+Blade screens alike, verified by an axe pass plus a keyboard-only pass, 200% zoom, 320px
+reflow, and a reduced-motion check. The criterion-by-criterion disposition lives in
+`docs/proposals/frontend-development-plan.md` §12; this section records only what the visual
+system owns.
+
+- **Focus.** One base-layer `:focus-visible` rule (2px `--color-ring`, 2px offset) covers every
+  focusable element, so a component cannot ship without a ring. The four inline `outline-green`
+  overrides named in §8 remain the one violation; deleting them is the fix.
+- **Focus not obscured (2.4.11).** Below the `md` breakpoint the shell pins a nav bar to the
+  viewport bottom; `scroll-padding-bottom: 4rem` on `html` keeps a focused control or a fragment
+  jump from landing underneath it.
+- **Reduced motion.** A `prefers-reduced-motion: reduce` block in `app.css` collapses any
+  animation and transition to a single frame and disables smooth scrolling. With the MOTION dial
+  at 1 there is nothing to collapse today; the block is the escape hatch and the guard for later
+  work.
+- **Target size.** The house bar is 44px (`min-h-11`/`h-11`), stricter than WCAG 2.2 AA's 24px
+  minimum (2.5.8). Every control meets the 24px floor; 44px is the design intent.
+- **Colour is never the only signal.** Every state carries a word or a glyph beside its hue
+  (§5, §6).
+
 ## Change log
 
-- **2026-10-04** — 2.0 design target filed for reference at `docs/proposals/design-2.0.md`
+- **2026-10-05** — Declared the WCAG 2.2 AA conformance target (§12) and shipped its three
+  visual-system pieces: a `prefers-reduced-motion` block and `scroll-padding-bottom` for the
+  pinned mobile nav in `app.css`, and a `role="banner"` landmark on the shell header. Corrected
+  the §8 sentence that recorded the reduced-motion block as absent. The 0.1.0 Blade and Vue
+  screens were remediated to the same bar (Japanese names carry `lang="ja"`, the guided-rail
+  heading skip is closed, the error-page actions meet the 44px bar, and the ported pages gained
+  loading and processing states).
   (with `docs/proposals/screen-spec-2.0.md`), the Inertia/Vue rewrite reference (`ADR-0020` §1).
   This file still owns the shipped Blade visual system. The target's trust-model, explainability,
   no-false-precision and accessibility rules align with `ADR-0001` and are the intended carry-across;

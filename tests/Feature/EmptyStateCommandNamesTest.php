@@ -30,7 +30,11 @@ function declaredSources(): array
 }
 
 /**
- * Every `view: source` pair printed by a Blade template, for the sweep to check.
+ * Every `view: source` pair printed by a Blade template or a Vue page, for the sweep to check.
+ *
+ * Both roots are walked: a screen that has ported to Vue (ADR-0020 §1) prints its empty-state
+ * command from `resources/js`, and a Blade-only sweep would silently stop counting it the day
+ * the view was deleted.
  *
  * @return list<string>
  */
@@ -38,21 +42,25 @@ function commandStringsInViews(): array
 {
     $found = [];
 
-    $walk = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(base_path('resources/views'), FilesystemIterator::SKIP_DOTS),
-    );
+    foreach ([base_path('resources/views'), base_path('resources/js')] as $root) {
+        $walk = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
+        );
 
-    foreach ($walk as $file) {
-        if (! str_ends_with($file->getFilename(), '.blade.php')) {
-            continue;
-        }
+        foreach ($walk as $file) {
+            $filename = $file->getFilename();
 
-        $name = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
-        $source = (string) file_get_contents($file->getPathname());
+            if (! str_ends_with($filename, '.blade.php') && ! str_ends_with($filename, '.vue')) {
+                continue;
+            }
 
-        if (preg_match_all('/uma:fetch\s+([a-z0-9]+(?:-[a-z0-9]+)*)/', $source, $hits) > 0) {
-            foreach ($hits[1] as $token) {
-                $found[] = $name.': '.$token;
+            $name = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
+            $source = (string) file_get_contents($file->getPathname());
+
+            if (preg_match_all('/uma:fetch\s+([a-z0-9]+(?:-[a-z0-9]+)*)/', $source, $hits) > 0) {
+                foreach ($hits[1] as $token) {
+                    $found[] = $name.': '.$token;
+                }
             }
         }
     }

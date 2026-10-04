@@ -174,7 +174,7 @@
 
     @if ($preview !== [])
         <div class="mt-3 rounded-md border border-rule bg-raised p-3">
-            <h4 class="mb-2 text-xs font-bold uppercase tracking-widest text-ink-muted">Preview</h4>
+            <h3 class="mb-2 text-xs font-bold uppercase tracking-widest text-ink-muted">Preview</h3>
             <div class="flex flex-wrap gap-4">
                 @foreach ($preview as $delta)
                     {{-- increase is orange, decrease is blue. Green is reserved for actions. --}}
@@ -200,7 +200,7 @@
     --}}
     @if ($current === 'shop' && ($def['panels']['shop'] ?? false) === true)
         <div class="mt-3 rounded-md border border-rule bg-raised p-3">
-            <h4 class="text-xs font-bold uppercase tracking-widest text-ink-muted">Shop</h4>
+            <h3 class="text-xs font-bold uppercase tracking-widest text-ink-muted">Shop</h3>
 
             {{-- D-232: the rotation is the shop's primary number. Unspent coins die
                  with the run, so "how long until this lineup changes" is the decision
@@ -258,9 +258,9 @@
 
     @if ($current === 'team_race' && ($def['panels']['team_race'] ?? false) === true)
         <div class="mt-3 rounded-md border border-rule bg-raised p-3">
-            <h4 class="text-xs font-bold uppercase tracking-widest text-ink-muted">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-ink-muted">
                 Opponent · one of {{ (int) $def['team_race']['opponent_count'] }}
-            </h4>
+            </h3>
 
             <ul class="mt-2 flex flex-col gap-1.5">
                 @foreach ($def['team_race']['opponents'] as $opponent)

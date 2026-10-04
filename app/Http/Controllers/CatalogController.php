@@ -8,9 +8,12 @@ use App\Enums\CardRarity;
 use App\Enums\ReleaseStatus;
 use App\Http\Requests\CatalogSearchRequest;
 use App\Models\CharacterCard;
+use App\Models\DataSource;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
+use App\Models\UmamusumeAlias;
+use App\Models\UmamusumeProfile;
 use App\Services\DataPipeline\NameNormalizer;
 use App\Services\PageSize;
 use Closure;
@@ -19,9 +22,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\View\View;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -168,7 +171,7 @@ class CatalogController extends Controller
 
     /**
      * Detail page for one Umamusume by slug: her aliases, her profile block, her last 10
-     * provenance rows, and her costume forms. Renders catalog.show.
+     * provenance rows, and her costume forms. Renders the Catalog/Show Inertia page.
      *
      * The two provenances are two answers. `dataSources` is this trainee's own fetch history
      * (FR-A-4); each card carries its own `source_url` / `fetched_at` from Amendment A1, so a
@@ -196,7 +199,7 @@ class CatalogController extends Controller
      *
      * @throws NotFoundHttpException when the slug is unknown
      */
-    public function show(Request $request, string $slug): View
+    public function show(Request $request, string $slug): Response
     {
         $showUnconfirmed = $request->boolean('show_unconfirmed');
 
@@ -213,7 +216,7 @@ class CatalogController extends Controller
 
         $activeCard = $this->activeCard($request, $umamusume->cards);
 
-        // WS-2 Task 2.4: the data access for the detail page lives here, not in Blade. `scenario`
+        // WS-2 Task 2.4: the data access for the detail page lives here, not in the page. `scenario`
         // is a column on `training_runs`, not a relation — the row renders its label from
         // `config/scenarios.php`, which is the only place a scenario name enters the layout path
         // (D-240). `withCount` rather than `with('turnEntries')` keeps the section at two queries
@@ -228,13 +231,13 @@ class CatalogController extends Controller
         // WS-2 Task 2.2, widened to the four lists the card document publishes. The arrays decide
         // which band a skill sits in and nothing else, which is the use D-30's 2026-10-02 amendment
         // admits, and the skill detail page reads the same four columns in reverse, so the two
-        // surfaces cannot drift about what a band means. Resolved here rather than in the view for
+        // surfaces cannot drift about what a band means. Resolved here rather than in the page for
         // the same reason as the runs, and keyed so each group renders in the source's own order.
         //
         // The null branch is real, not defensive: a trainee with no Global card has no form to read
         // skill lists from, and the page's Costume forms section says exactly that. The arrays are
         // themselves nullable, which is why the inner `??` is there too. `is_unique` is selected
-        // because `x-skill-row` draws the Unique pill from it, and the column was never fetched
+        // because `SkillRow.vue` draws the Unique pill from it, and the column was never fetched
         // here, so the pill could not render on a trainee page for any card.
         $card = $activeCard ?? $umamusume->cards->first();
 
@@ -250,27 +253,193 @@ class CatalogController extends Controller
             ? collect()
             : Skill::query()->whereIn('export_id', $skillIds)->get(['id', 'export_id', 'name', 'sp_cost', 'is_unique', 'release_status', 'name_is_client'])->keyBy('export_id');
 
-        foreach ($skillLists as $index => $list) {
-            $list['skills'] = collect($list['ids'])
-                ->map(static fn ($id) => $skillsByExportId->get($id))
-                ->filter()
-                ->values();
+        $scenarioLabels = array_map(static fn (array $def): string => $def['label'], config('scenarios.scenarios'));
 
-            $skillLists[$index] = $list;
-        }
-
-        return view('catalog.show', [
-            'umamusume' => $umamusume,
+        return Inertia::render('Catalog/Show', [
+            'trainee' => [
+                'id' => $umamusume->id,
+                'slug' => $umamusume->slug,
+                'name' => $umamusume->name,
+                'name_ja' => $umamusume->name_ja,
+                'release_status_label' => $umamusume->release_status->label(),
+                'is_japan_only' => $umamusume->release_status === ReleaseStatus::JapanOnly,
+                // Resolved through the model so the page owes the Trainer a name whether or not the
+                // profile fetch has run: it prefers the profile row and falls back to the trainee's
+                // own column (D-220).
+                'japanese_name' => $umamusume->japaneseName(),
+                'jp_debut_date' => $umamusume->jp_debut_date?->toDateString(),
+                'global_debut_date' => $umamusume->global_debut_date?->toDateString(),
+                'release_date' => $this->releaseDate($umamusume),
+                'is_manual' => $umamusume->is_manual,
+                'aptitudes' => $this->aptitudes($umamusume),
+                'profile' => $this->profileShape($umamusume->profile),
+                'aliases' => $umamusume->aliases->map(static fn (UmamusumeAlias $alias): array => [
+                    'alias' => $alias->alias,
+                    'language_label' => $alias->language->label(),
+                ])->values()->all(),
+            ],
+            'cards' => $umamusume->cards->map(static fn (CharacterCard $card): array => [
+                'id' => $card->id,
+                'title' => $card->title,
+                'rarity_label' => $card->rarity->label(),
+                'rarity_stars' => $card->rarity->stars(),
+                'is_debut_form' => $card->is_debut_form,
+                'unconfirmed' => $card->unconfirmed,
+                'global_release_date' => $card->global_release_date->toDateString(),
+                'global_release_date_display' => $card->global_release_date->format('M j, Y'),
+                'snapshot_path' => $card->snapshot_path,
+                'source_url' => $card->source_url,
+                'fetched_at_display' => $card->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+            ])->values()->all(),
+            'activeCardId' => $activeCard?->id,
             'hiddenFormCount' => $showUnconfirmed ? 0 : $umamusume->cards()->where('unconfirmed', true)->count(),
-            'activeCard' => $activeCard,
-            'runs' => $runs,
-            'skillLists' => $skillLists,
-            'scenarioLabels' => array_map(static fn (array $def): string => $def['label'], config('scenarios.scenarios')),
-            // Passed rather than read off `$request` in the view: the tab strip has to carry the
-            // opt-in into its GET form, and a view reaching for the request would be the only
-            // place in this controller that did.
+            'runs' => $runs->map(static fn (TrainingRun $run): array => [
+                'id' => $run->id,
+                'status_label' => $run->status->label(),
+                'scenario_label' => $run->scenario ? ($scenarioLabels[$run->scenario] ?? $run->scenario) : 'No scenario set',
+                'turn_count' => $run->turn_entries_count,
+            ])->values()->all(),
+            'skillLists' => collect($skillLists)->map(static fn (array $list): array => [
+                'label' => $list['label'],
+                'absent' => $list['absent'],
+                'has_ids' => $list['ids'] !== [],
+                'skills' => collect($list['ids'])
+                    ->map(static fn ($id) => $skillsByExportId->get($id))
+                    ->filter()
+                    // The detail route serves only rows `Skill::availableOnGlobal()` accepts, so a
+                    // JapanOnly or third-party-named skill prints its name with no link that would
+                    // 404 on it (ADR-0011 §2).
+                    ->map(static fn (Skill $skill): array => [
+                        'id' => $skill->id,
+                        'name' => $skill->name,
+                        'sp_cost' => $skill->sp_cost,
+                        'is_unique' => $skill->is_unique,
+                        'url' => $skill->release_status === ReleaseStatus::GlobalReleased && $skill->name_is_client
+                            ? route('skills.show', $skill)
+                            : null,
+                    ])
+                    ->values()
+                    ->all(),
+            ])->values()->all(),
+            'provenance' => $umamusume->dataSources->map(static fn (DataSource $source): array => [
+                'url' => $source->url,
+                'source_key' => $source->source_key,
+                'fetched_at_display' => $source->fetched_at->timezone(config('uma.display_timezone'))->format('Y-m-d H:i T'),
+            ])->values()->all(),
+            // Passed rather than read off `$request` in the page: the form links have to carry the
+            // opt-in into their address, and a page reaching for the request would be the only place
+            // in this controller that did.
             'showUnconfirmed' => $showUnconfirmed,
         ]);
+    }
+
+    /**
+     * The release date the profile block prints, as the one stored answer (ADR-0008).
+     *
+     * Global wins when both are known, because that is the date a Global Trainer can act on; the
+     * JP date is the fallback for a trainee Global has not shipped. A trainee with neither date
+     * gets null rather than a dangling "(JP only)" suffix, and the page then prints nothing for
+     * the field instead of an empty label.
+     *
+     * @return array{iso: string, display: string, is_global: bool}|null
+     */
+    private function releaseDate(Umamusume $umamusume): ?array
+    {
+        $date = $umamusume->global_debut_date ?? $umamusume->jp_debut_date;
+
+        if ($date === null) {
+            return null;
+        }
+
+        return [
+            'iso' => $date->toDateString(),
+            'display' => $date->format('M j, Y'),
+            'is_global' => $umamusume->global_debut_date !== null,
+        ];
+    }
+
+    /**
+     * The ten aptitude letters, or null when the source published none.
+     *
+     * `aptitude_turf` is the sentinel: the parser writes all ten or none, so one null means the
+     * whole set is absent and the page states that in words rather than drawing an empty grid
+     * (D-220, `AptitudeGrid.vue`).
+     *
+     * @return array<string, string>|null
+     */
+    private function aptitudes(Umamusume $umamusume): ?array
+    {
+        if ($umamusume->aptitude_turf === null) {
+            return null;
+        }
+
+        return [
+            'turf' => $umamusume->aptitude_turf,
+            'dirt' => $umamusume->aptitude_dirt,
+            'sprint' => $umamusume->aptitude_sprint,
+            'mile' => $umamusume->aptitude_mile,
+            'medium' => $umamusume->aptitude_medium,
+            'long' => $umamusume->aptitude_long,
+            'front_runner' => $umamusume->aptitude_front_runner,
+            'pace_chaser' => $umamusume->aptitude_pace_chaser,
+            'late_surger' => $umamusume->aptitude_late_surger,
+            'end_closer' => $umamusume->aptitude_end_closer,
+        ];
+    }
+
+    /**
+     * The profile block as an explicit array, or null when no profile fetch has run.
+     *
+     * Null is a third state, not an empty block: the common state before the first
+     * `uma:fetch gametora-character-profiles`, which the page names in words. Every field inside
+     * stays on one source, so a gap in this document is never filled by another (D-220).
+     *
+     * @return array{va_ja: string|null, va_en: string|null, birthday: array{iso: string|null, display: string}|null, height: int|null, three_sizes: array{b: int|null, h: int|null, w: int|null}|null}|null
+     */
+    private function profileShape(?UmamusumeProfile $profile): ?array
+    {
+        if ($profile === null) {
+            return null;
+        }
+
+        return [
+            'va_ja' => $profile->va_ja,
+            'va_en' => $profile->va_en,
+            'birthday' => $this->birthday($profile),
+            'height' => $profile->height,
+            'three_sizes' => $profile->hasThreeSizes()
+                ? ['b' => $profile->three_sizes_b, 'h' => $profile->three_sizes_h, 'w' => $profile->three_sizes_w]
+                : null,
+        ];
+    }
+
+    /**
+     * The birthday, split so a missing year reads as a missing year and never as a January 1st.
+     *
+     * `birth_year` is the only part this document omits. When month and day are present but the
+     * year is not, the date is stated and the gap is named rather than filled; the `iso` is null
+     * there so the page prints a `<span>` with the explanation instead of a `<time>` that would
+     * assert a year the source never published (D-220).
+     *
+     * @return array{iso: string|null, display: string}|null
+     */
+    private function birthday(UmamusumeProfile $profile): ?array
+    {
+        if ($profile->hasFullBirthday()) {
+            return [
+                'iso' => sprintf('%04d-%02d-%02d', $profile->birth_year, $profile->birth_month, $profile->birth_day),
+                'display' => Carbon::create($profile->birth_year, $profile->birth_month, $profile->birth_day)->format('M j, Y'),
+            ];
+        }
+
+        if ($profile->birth_month !== null && $profile->birth_day !== null) {
+            return [
+                'iso' => null,
+                'display' => Carbon::create(2000, $profile->birth_month, $profile->birth_day)->format('M j').' · year not published',
+            ];
+        }
+
+        return null;
     }
 
     /**

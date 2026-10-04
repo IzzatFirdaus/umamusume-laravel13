@@ -697,7 +697,7 @@
         {{-- KI-37, measured in a browser: `px-2 py-1` with no height put the two selects at 31, the turn
              input at 30 and the submit at 32 against `docs/design-research/DESIGN.md` §6.14's 44. The four
              now carry `h-11`, this repository's idiom for the value (the scenario panels' capsule headers),
-             and the three field controls take Screen D's focus ring (`skills/index.blade.php`:31). The turn
+             and the three field controls take Screen D's focus ring (`resources/js/pages/Skills/Index.vue`). The turn
              input also gains `step="1"`: §6.14's last bullet asks number inputs to carry steppers, and the
              browser review confirmed the attribute was absent (`step` was `null`). --}}
 
@@ -705,7 +705,7 @@
             {{-- KI-51's UI consequence: on a fresh clone no tracked writer produces an offerable skill
                  (the tracked seeder sets neither `release_status` nor `name_is_client`), so this is the
                  ordinary first state rather than an error. The two commands are Screen D's own
-                 (`skills/index.blade.php`:89-92), named here rather than re-worded. --}}
+                 (`resources/js/pages/Skills/Index.vue`), named here rather than re-worded. --}}
             <p class="text-xs text-ink-muted">
                 No skills are available to choose yet. Run `php artisan uma:fetch gametora-skills` to fill
                 the catalogue, or `php artisan uma:reparse gametora-skills` if a fetch says the document is

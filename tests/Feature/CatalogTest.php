@@ -46,8 +46,10 @@ it('shows a detail page with Japanese name and provenance', function (): void {
 
     test()->get('/umamusume/special-week')
         ->assertOk()
-        ->assertSee('スペシャルウィーク')
-        ->assertSee('https://example.test/special-week');
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Catalog/Show')
+            ->where('trainee.japanese_name', 'スペシャルウィーク')
+            ->where('provenance.0.url', 'https://example.test/special-week'));
 });
 
 it('labels japan-only entries as not yet released on global', function (): void {
@@ -57,9 +59,11 @@ it('labels japan-only entries as not yet released on global', function (): void 
         'release_status' => ReleaseStatus::JapanOnly,
     ]);
 
+    // The notice copy is client-rendered (tests/browser/catalog-detail.spec.ts); the server
+    // contract is the flag it binds.
     test()->get('/umamusume/unseen-one')
         ->assertOk()
-        ->assertSee('Not yet released on Global');
+        ->assertInertia(fn (Assert $page) => $page->where('trainee.is_japan_only', true));
 });
 
 it('sends an empty list when nothing matches the search', function (): void {

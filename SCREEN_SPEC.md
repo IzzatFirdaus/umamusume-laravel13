@@ -149,7 +149,7 @@ Trainer.
 No auth. The trainee option list is restricted to `release_status = GlobalReleased`; costume cards to `unconfirmed = false` and ordered by debut-first (`cardScope` equivalence with the catalog, stated in the controller). A cardless trainee is still selectable and commits with `character_card_id` empty.
 
 #### Entry Points
-`runs.index` "New run" pill; `catalog.show` "Her runs → New run" (does **not** preselect the trainee — the page's own helper copy says so, `catalog/show.blade.php:344`); back button from import.
+`runs.index` "New run" pill; `catalog.show` "Her runs → New run" (does **not** preselect the trainee — the page's own helper copy says so, `Catalog/Show.vue`); back button from import.
 
 #### Route / Location
 `GET /training-runs/create`, name `runs.create`; submits to `POST /training-runs` (`runs.store`).
@@ -512,7 +512,7 @@ Status labels via enum→`lang/en/uma.php`. Card titles are **verbatim source da
 `Umamusume`, `CharacterCard` (with `cardScope()` order: debut first, Global date, source card id); `NameNormalizer`; `Cache::remember` behind `catalog:version` (bumped on promotion; Trainer data never cached).
 
 #### Implementation References
-View: `resources/views/catalog/index.blade.php`; Controller: `CatalogController::index` (+`cardScope`, `normalizedColumn`, `cached`); Tests: `CatalogTest`, `CatalogRosterTreeTest`, `CatalogCacheRenderTest`.
+Page: `resources/js/pages/Catalog/Index.vue`; Controller: `CatalogController::index` (+`cardScope`, `normalizedColumn`, `cached`); Tests: `CatalogTest`, `CatalogRosterTreeTest`, `CatalogCacheRenderTest`, `tests/browser/catalog.spec.ts`.
 
 #### Current Status
 Implemented.
@@ -540,13 +540,13 @@ Catalog rows; skill-holder links (SCR-SKL-002); support-card "Belongs to" (SCR-S
 `GET /umamusume/{slug}` name `catalog.show`. Query: `?form={local card id}`, `?show_unconfirmed=1`.
 
 #### Layout / Structure (binding order per WS-2)
-Header (name, "Back to catalog") → **Basic information** (Japanese name, voice actor JP + EN line, Release date Global-or-JP-only, birthday, height, three sizes) → status dl (Release status, JP debut, Global debut, "Edited by Trainer" `is_manual` statement) → JapanOnly notice when applicable → **Aptitude** grid (ten letters, once, not per form) → **Costume forms** (tabs when >1 form via `x-form-tabs`; inline panel when exactly one; each panel `catalog/partials/form-detail`: verbatim title, rarity/debut/unconfirmed marks, its own `source_url`/`snapshot_path`/`fetched_at` line) → hidden-forms count + "Show unconfirmed forms" link → **Skills** (four groups: unique/innate/awakening/event, resolved through `Skill.export_id`, `x-skill-row` links only for rows Screen D serves) → **Goal races** (named absence — KI-34 reservation, no table exists) → **Her runs** (last 10 with status, scenario label, turn count) + "New run" (helper states it does not preselect) → **Aliases** → **Provenance** (trainee-level `data_sources` last 10, with the sentence separating it from the per-form/per-card inline provenances).
+Header (name, "Back to catalog") → **Basic information** (Japanese name, voice actor JP + EN line, Release date Global-or-JP-only, birthday, height, three sizes) → status dl (Release status, JP debut, Global debut, "Edited by Trainer" `is_manual` statement) → JapanOnly notice when applicable → **Aptitude** grid (ten letters, once, not per form) → **Costume forms** (a link strip when >1 form via `FormTabs.vue`; inline panel when exactly one; each panel `FormDetail.vue`: verbatim title, rarity/debut/unconfirmed marks, its own `source_url`/`snapshot_path`/`fetched_at` line) → hidden-forms count + "Show unconfirmed forms" link → **Skills** (four groups: unique/innate/awakening/event, resolved through `Skill.export_id`, `SkillRow.vue` links only for rows Screen D serves) → **Goal races** (named absence — KI-34 reservation, no table exists) → **Her runs** (last 10 with status, scenario label, turn count) + "New run" (helper states it does not preselect) → **Aliases** → **Provenance** (trainee-level `data_sources` last 10, with the sentence separating it from the per-form/per-card inline provenances).
 
 #### Data Displayed
 Profile nullability is *measured and normal*: `va_en` absent on 10 of 135, `three_sizes` on 10, `birth_year` on 17 of 163 rows — every absence renders as a named sentence ("Not published by the source", "No English dub listed", "· year not published"), never a blank, zero, or guessed date. Base stats and stat bonuses are deliberately absent (ADR-0012 Decision 1: columns authorized, not built). `skills_evo` is stored but **not listed**: most of its ids name skills `[Global]` has not shipped and the detail route refuses them, so listing would emit 829 dead links.
 
 #### Inputs
-None (display only). Form tabs commit via GET form (one submit control) so the choice is addressable — WAI-ARIA manual-activation shape, arrow keys move, Enter/button commits.
+None (display only). Form tabs are plain `<Link>`s carrying `?form={local card id}` (and `?show_unconfirmed=1` while the lever is on), so the choice is addressable and survives a reload; the active tab carries `aria-current="page"`.
 
 #### User Actions
 Switch costume form (tab + commit), show unconfirmed, open a skill (only when Global-released and client-named), start a run (no preselect), read provenance links.
@@ -561,7 +561,7 @@ Unknown slug → 404. Out-of-scope `?form=` → silent fallback to first visible
 Provenance link text comes from `config('uma.sources')` / stored columns, never from a fetched body; snapshot path is named, not linked (disk path). `is_manual` disclosed so the Trainer knows the engine will not overwrite her.
 
 #### Accessibility
-`aria-labelledby` sections; dl/dt/dd semantics; tab radios are native inputs (`sr-only` input, `peer-focus-visible` ring on the label, one Tab stop per group); Japanese script rendered as data with no re-casing.
+`aria-labelledby` sections; dl/dt/dd semantics; the costume-form strip is a `<nav aria-label="Costume forms">` of links, the active one carrying `aria-current="page"` (native keyboard targets, `min-h-11`); Japanese script rendered as data with no re-casing.
 
 #### Responsive Behavior
 Profile grid `grid-cols-2 md:grid-cols-3`; status dl `md:grid-cols-4`.
@@ -573,10 +573,10 @@ Profile grid `grid-cols-2 md:grid-cols-3`; status dl `md:grid-cols-4`.
 Back to SCR-CAT-001; forward to SCR-SKL-002, SCR-RUN-002 (generic create, no preselect — recorded on the button itself so the affordance does not lie).
 
 #### Dependencies
-`Umamusume`, `UmamusumeProfile`, `CharacterCard`, `Skill`, `TrainingRun`, `DataSource`; `x-form-tabs`, `x-aptitude-grid`, `x-skill-row`, `x-rarity-chip`.
+`Umamusume`, `UmamusumeProfile`, `CharacterCard`, `Skill`, `TrainingRun`, `DataSource`; `Catalog/Show.vue` with `FormTabs.vue`, `FormDetail.vue`, `AptitudeGrid.vue`, `SkillRow.vue`, `RarityChip.vue`.
 
 #### Implementation References
-View: `resources/views/catalog/show.blade.php` (+ `partials/form-detail.blade.php`, `components/form-tabs.blade.php`); Controller: `CatalogController::show`; Tests: `CatalogDetailPageTest` (asserts all six profile rows), `CatalogSkillListsTest`, `GametoraCharacterProfileParserTest`.
+Page: `resources/js/pages/Catalog/Show.vue` (+ `components/catalog/{FormTabs,FormDetail}.vue`, `components/{AptitudeGrid,SkillRow,RarityChip}.vue`); Controller: `CatalogController::show`; Tests: `CatalogDetailPageTest` (asserts the props), `CatalogSkillListsTest`, `tests/browser/catalog-detail.spec.ts`, `GametoraCharacterProfileParserTest`.
 
 #### Current Status
 Implemented.
@@ -635,7 +635,7 @@ Latin-script "Japanese" names (`#LookatCurren` etc.) dedupe against the English 
 `Skill`; `NameNormalizer`; `GametoraSkillsParser::CATEGORIES`; `StoreSkills` (write path, referenced by copy).
 
 #### Implementation References
-View: `resources/views/skills/index.blade.php`; Controller: `SkillController::index` (+`query`, `describeAsk`, `availableCount`); Request: `SkillSearchRequest`; ADR: `docs/adr/0011-skills-reference-import.md`; Test: `SkillsFetchTest` (family).
+Page: `resources/js/pages/Skills/Index.vue`; Controller: `SkillController::index` (+`query`, `describeAsk`, `availableCount`); Request: `SkillSearchRequest`; ADR: `docs/adr/0011-skills-reference-import.md`; Tests: `SkillSearchScreenTest` (asserts the props), `tests/browser/skills.spec.ts`, `SkillsFetchTest` (family).
 
 #### Current Status
 Implemented.
@@ -657,7 +657,7 @@ Trainer.
 No auth. Route param is the **local** `skills.id`; lookup starts from `availableOnGlobal()`, so an id the scope rejects is the same 404 as an unknown one. The export id never reaches the screen.
 
 #### Entry Points
-Screen-D rows; run-page/skill cross links from SCR-CAT-002 `x-skill-row`; support-card lists.
+Screen-D rows; run-page/skill cross links from SCR-CAT-002 `SkillRow.vue`; support-card lists.
 
 #### Route / Location
 `GET /skills/{skill}` name `skills.show`.
@@ -681,7 +681,7 @@ As SCR-SKL-001 (same view idiom; holder links use slug routes; monospace data bl
 `Skill`, `CharacterCard` (JSON `whereJsonContains` over the four lists, `json_valid` guarded, missing-column tolerated with `QueryException` narrowing).
 
 #### Implementation References
-View: `resources/views/skills/show.blade.php`; Controller: `SkillController::show` (+`holders`); Test: `CatalogSkillListsTest` (mirror read), `GametoraSkillsParserTest`.
+Page: `resources/js/pages/Skills/Show.vue`; Controller: `SkillController::show` (+`holderRows`, `holders`); Tests: `SkillDetailTest` (asserts the props), `CatalogSkillListsTest` (mirror read), `tests/browser/skills.spec.ts`, `GametoraSkillsParserTest`.
 
 #### Current Status
 Implemented.
@@ -971,7 +971,7 @@ Shop panel → purchase form (turn, item from the scenario catalogue, cost as re
 | SCR-RUN-* | run status | Active / Completed / Retired | select on the run page's own PUT form (§7-4, resolved 2026-10-04); create and import still set it at entry |
 | SCR-REV-001 | candidate | Pending → Confirmed/Aliased/Rejected | verdict action |
 | Skills/refs | availability | stored-at-write, applied-at-read (`availableOnGlobal`) | engine columns, no UI toggle |
-| Catalog | disclosure | confirmed / +unconfirmed (`?show_unconfirmed`) | GET opt-in; tab commit must carry it through (`form-tabs` keeps the lever on every tab GET) |
+| Catalog | disclosure | confirmed / +unconfirmed (`?show_unconfirmed`) | GET opt-in; the tab links carry it through (`FormTabs.vue` keeps the lever on every tab GET) |
 
 ## 7. Screen-System Gaps & Inconsistencies
 

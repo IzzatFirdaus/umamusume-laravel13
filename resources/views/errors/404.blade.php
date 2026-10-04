@@ -13,15 +13,15 @@
         </p>
         <div class="mt-4 flex flex-wrap gap-3 text-sm">
             <a href="{{ route('runs.index') }}"
-               class="enamel rounded-full bg-chrome px-4 py-1.5 font-bold text-on-chrome">
+               class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-bold text-on-chrome">
                 Training runs
             </a>
             <a href="{{ route('catalog.index') }}"
-               class="rounded-full border-2 border-rule px-4 py-1.5 font-semibold text-ink-strong hover:underline">
+               class="inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 font-semibold text-ink-strong hover:underline">
                 Catalog
             </a>
             <a href="{{ route('review.index') }}"
-               class="rounded-full border-2 border-rule px-4 py-1.5 font-semibold text-ink-strong hover:underline">
+               class="inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 font-semibold text-ink-strong hover:underline">
                 Review
             </a>
         </div>

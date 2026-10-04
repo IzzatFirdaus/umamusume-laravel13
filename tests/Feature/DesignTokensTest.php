@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\MatchCandidate;
 use App\Models\Preference;
-use App\Models\SupportCard;
+use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use Illuminate\Support\Facades\Schema;
 use Pest\Browser\Browser;
@@ -68,11 +68,12 @@ it('renders the framework paginator from tokens too', function (): void {
     expect(is_file($published))
         ->toBeTrue('The published pagination view is absent, so the framework default is rendering.');
 
-    // A page still on Blade that paginates. The catalog and review are Vue now (ADR-0020 §1),
-    // so their pagers render client-side and no longer exercise the framework's pagination view.
-    SupportCard::factory()->count(30)->create();
+    // A page still on Blade that paginates. The catalog, review, skills and support-card screens are
+    // Vue now (ADR-0020 §1), so their pagers render client-side and no longer exercise the framework's
+    // pagination view. The run list is the remaining server-rendered surface that does.
+    TrainingRun::factory()->count(30)->create();
 
-    $html = test()->get('/support-cards')->assertOk()->getContent();
+    $html = test()->get('/training-runs')->assertOk()->getContent();
 
     // The shipped `pagination::tailwind` view carries `dark:` and gray/blue on every
     // element, so the published override is what makes the catalog and review pages

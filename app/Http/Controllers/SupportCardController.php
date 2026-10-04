@@ -12,8 +12,8 @@ use App\Models\Umamusume;
 use App\Services\PageSize;
 use App\Services\SupportCardEffects;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * The support-card catalog, `/support-cards` and `/support-cards/{card}` (PRD FR-B; ADR-0014).
@@ -33,21 +33,36 @@ use Illuminate\View\View;
  */
 class SupportCardController extends Controller
 {
-    public function index(SupportCardSearchRequest $request): View
+    public function index(SupportCardSearchRequest $request): Response
     {
         $rarity = $request->validated('rarity');
         $type = $request->validated('type');
         $status = $request->validated('status');
         $sort = $request->validated('sort');
 
+        // Read once for the page, not once per row: twenty-five cards ask the same 35 dictionary rows
+        // the same question, which is the N+1 the deck panel avoids the same way.
+        $dictionary = SupportCardEffects::dictionary();
+
         // §7-9 chose one page-size rule for all three surfaces over this screen's fixed constant,
         // so `?pageSize=` honours and clamps here as it does on the catalog. The default is the
         // number the constant carried, 25, so a filter nobody touched looks the same as before.
         $cards = $this->ordered($this->filtered($rarity, $type, $status), $sort)
             ->paginate(PageSize::clamp($request->query('pageSize')))
-            ->withQueryString();
+            ->withQueryString()
+            ->through(static fn (SupportCard $card): array => [
+                'id' => $card->id,
+                'name' => $card->displayName(),
+                'url' => route('support-cards.show', $card),
+                'rarity_label' => $card->rarity->label(),
+                'rarity_stars' => $card->rarity->stars(),
+                'rarity_word' => $card->rarityWord(),
+                'type_label' => $card->typeLabel(),
+                'release_status' => $card->release_status,
+                'effects' => SupportCardEffects::atCap($card, $dictionary),
+            ]);
 
-        return view('support-cards.index', [
+        return Inertia::render('SupportCards/Index', [
             'cards' => $cards,
             'rarity' => $rarity,
             'type' => $type,
@@ -59,9 +74,6 @@ class SupportCardController extends Controller
             'sorts' => $this->sortLabels(),
             'totalCount' => SupportCard::query()->count(),
             'askedFor' => $this->describeAsk($rarity, $type, $status),
-            // Read once for the page, not once per row: twenty-five cards ask the same 35 dictionary rows
-            // the same question, which is the N+1 the deck panel avoids the same way.
-            'effectNames' => SupportCardEffects::dictionary(),
         ]);
     }
 
@@ -73,16 +85,39 @@ class SupportCardController extends Controller
      * own `support_id` is not a route key: nothing in the UI prints it, and a URL that changed meaning
      * when the publisher renumbered would be a URL that breaks.
      */
-    public function show(SupportCard $card): View
+    public function show(SupportCard $card): Response
     {
         $dictionary = SupportCardEffects::dictionary();
+        $trainee = $this->trainee($card);
 
-        return view('support-cards.show', [
-            'card' => $card,
+        return Inertia::render('SupportCards/Show', [
+            'card' => [
+                'id' => $card->id,
+                'name' => $card->displayName(),
+                'name_ja' => $card->name_ja,
+                'title_ja' => $card->title_ja,
+                'rarity_label' => $card->rarity->label(),
+                'rarity_stars' => $card->rarity->stars(),
+                'rarity_word' => $card->rarityWord(),
+                'type_label' => $card->typeLabel(),
+                'release_status' => $card->release_status,
+                // A calendar date stays a calendar date: converting it through the display timezone
+                // would move a card released on the 24th to the 24th at 09:00 and, on the wrong side
+                // of midnight, to a day the source never stated.
+                'release_jp_display' => $card->release_jp?->format('M j, Y'),
+                'release_global_display' => $card->release_global?->format('M j, Y'),
+                'char_name' => $card->char_name,
+                'source_url' => $card->source_url,
+                'fetched_at_display' => $card->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+                'is_manual' => $card->is_manual,
+            ],
             'effects' => SupportCardEffects::atCap($card, $dictionary),
             'hinted' => $this->skillList($card->hint_skills),
             'events' => $this->skillList($card->event_skills),
-            'trainee' => $this->trainee($card),
+            'trainee' => $trainee === null ? null : [
+                'name' => $trainee->name,
+                'url' => route('catalog.show', $trainee->slug),
+            ],
         ]);
     }
 
@@ -206,12 +241,12 @@ class SupportCardController extends Controller
      * The source's own order is kept, because a card's hint list is the order the game prints it in.
      *
      * @param  array<int, int>|null  $ids  null is "no list stored", which is not an empty list
-     * @return array{stored: bool, linked: Collection<int, Skill>, unlinked: int}
+     * @return array{stored: bool, skills: list<array{name: string, sp_cost: int|null, is_unique: bool, url: string}>, unlinked: int}
      */
     private function skillList(?array $ids): array
     {
         if ($ids === null) {
-            return ['stored' => false, 'linked' => collect(), 'unlinked' => 0];
+            return ['stored' => false, 'skills' => [], 'unlinked' => 0];
         }
 
         $resolved = $ids === []
@@ -222,14 +257,27 @@ class SupportCardController extends Controller
                 ->get(['id', 'export_id', 'name', 'is_unique', 'sp_cost'])
                 ->keyBy('export_id');
 
-        return [
-            'stored' => true,
-            'linked' => collect($ids)
-                ->map(static fn (int $id): ?Skill => $resolved->get($id))
-                ->filter()
-                ->values(),
-            'unlinked' => count(array_filter($ids, static fn (int $id): bool => ! $resolved->has($id))),
-        ];
+        $skills = [];
+        $unlinked = 0;
+
+        foreach ($ids as $id) {
+            $skill = $resolved->get($id);
+
+            if ($skill === null) {
+                $unlinked++;
+
+                continue;
+            }
+
+            $skills[] = [
+                'name' => $skill->name,
+                'sp_cost' => $skill->sp_cost,
+                'is_unique' => $skill->is_unique,
+                'url' => route('skills.show', $skill),
+            ];
+        }
+
+        return ['stored' => true, 'skills' => $skills, 'unlinked' => $unlinked];
     }
 
     /**

@@ -20,6 +20,113 @@
 
 ---
 
+## Product direction corrections (added 2026-10-05)
+
+A new product/UX strategy document (owner-supplied, 2026-10-05) corrects several assumptions in this brief.
+This section records those corrections without rewriting the brief itself. The brief stays verbatim; the
+corrections are additive notes so a reader can tell what stands and what must change before implementation.
+
+**Scope.** The corrected direction treats the app as a **"Trainer's planning desk"** rather than a "career
+optimizer." It separates **Preparation mode** (answering "What am I going to build?") from **Active Career
+mode** (answering "Given what actually happened, what should I do next?"). The application never pretends its
+simulated state is the game's authoritative state.
+
+**Key corrections:**
+
+| Brief section | Original assumption | Corrected direction |
+|---|---|---|
+| §1–2 | Three scenarios (URA, Unity Cup, Trackblazer) | **Four Global scenarios**: URA Finale, Unity Cup, Trackblazer, Brighter Together: Our Grand Concert (mechanics ❌ UNVERIFIED, baseline strip only) |
+| §15 | Generic "scenario difficulty" rating | Remove star ratings; instead show **what each scenario optimizes** (primary/secondary/training complexity) |
+| §19–20 | Sparks shown as star counts | Add **probability model**: ★ star ratings are roll probabilities, not guarantees. Display `Potential payout` + `Estimated roll ~X%`. **Factor yield clarified 2026-10-05**: exactly 1 Blue + 1 Pink per run, at most 1 Green (requires 3★ parent), White sparks unbounded — model as variable yield, not a slot cap |
+| §21 | Affinity as a named value | Make affinity a **first-class planning concept**: six-node ancestry graph with visual compatibility calculation |
+| §22 | Two-parent selection | Upgrade to **six-node Legacy configuration** (Parent A/B + four grandparents); optimize entire ancestry, not just parents |
+| §23 | Five support types + borrowed slot | **Seven support types**: Speed, Stamina, Power, Guts, Wit, **Pal**, **Group**. Scenario Link is **derived** from scenario+character relationship, not stored on card |
+| §26–31 | Scenario panels as static modules | Each panel must reflect scenario-specific currencies/objectives; Grand Concert initially limited to basic tracking until mechanics verified |
+| §36 | Simple Veteran save | **Veteran Creation screen** with factor analysis, legacy value assessment, tagging, and "Optimize Next Career" loop |
+| §44 | LLM-style recommendation | **Deterministic rules engine first** (hard constraints → optimization), explanatory second. Never invent recommendations via AI |
+| §45 | Three-state model (observed/derived/predicted) | **Four-state model**: Observed / Calculated / Predicted / RNG. Visually distinct rendering |
+| §48 | Versioning UI | Make versioning **mandatory**: every career run preserves its ruleset snapshot (`Global 2026-07-01 rebalance`) |
+| Appendix | Five-component hierarchy | Expand to include **Legacy Lab (six-node)**, **Support Deck (seven types)**, **Career State Machine** |
+
+**New domain objects introduced:**
+
+- **Career Plan**: purpose, scenario, trainee, race profile, stat targets, aptitude targets, running style, skill targets, legacy requirements, support requirements, risk tolerance
+- **Career State Machine**: explicit state (`current_year`, `current_half`, `current_turn`, `energy`, `mood`, `stats`, `skill_points`, `fans`, `support_bonds`, `races`, `events`, `goals`, `scenario_state`, `inheritance_state`, `action_history`)
+- **GameRule**: key, scenario_id, server, version, value, source, source_type, confidence, verified_at, notes
+- **Event Model**: source (Support/Character/Scenario/Random), choices, known outcomes, current career state, expected effect, recommendation
+
+**Removed concepts:**
+
+- "Trainer Abilities" system (does not exist on client)
+- "Friendship radius" term (not an established game term)
+- Generic five-type support model (must be seven types)
+- Borrowed-card structural assumption (deck is six slots, ownership is OWNED/RENTED flag)
+
+**Implementation priority shift:**
+
+The corrected direction changes development order:
+
+1. **Phase 0** — Data foundation (terminology, versions, cards, races, skills, sparks, veterans, sources, confidence)
+2. **Phase 1** — Career Planner (scenario, trainee, plan, race profile, targets)
+3. **Phase 2** — Legacy Lab (veteran library, six-node ancestry, sparks, affinity, probabilities, search)
+4. **Phase 3** — Support Deck (six slots, seven types, limit break, effects, friendship, hints, scenario link)
+5. **Phase 4** — Active Career State (turn, energy, mood, stats, SP, fans, goals, history, bonds, events)
+6. **Phase 5** — Deterministic Advisor (hard constraints, scenario rules, training comparison, race requirements, deficits, risk)
+7. **Phase 6** — Scenario Modules (URA → Unity Cup → Trackblazer → Grand Concert)
+
+**Race simulator explicitly deferred:** Do not build full race simulator in MVP. Use conservative readiness bands (Excellent/Good/Borderline/Poor) rather than fake precision ("Win probability: 84%").
+
+**Screenshot-assisted entry noted as future feature:** Import screenshot → OCR detection → user confirmation → store as `USER_CONFIRMED_SCREENSHOT`.
+
+**Undo strongly recommended:** Because this is local planning (not game manipulation), undo last recorded action is safe and valuable.
+
+**Data provenance layer:** Every important mechanic needs provenance/version/confidence. Raw game knowledge → normalized data → rule engine → player-facing model. UI always uses Global labels.
+
+**Research confidence indicator:** Subtle dashboard badge showing data status (● Current / ⚠ Snapshot / ? Unverified). Tells user "this isn't connected to Cygames."
+
+---
+
+## Knowledge grounding (added 2026-10-05)
+
+The brief below cites external sources (GameTora, uma.guide). This section reconciles each load-bearing
+fact against the repository's own corpus, so a reader can tell what is sourced from what. It does not
+edit the brief; the brief stays verbatim as the design target.
+
+**Terminology.** The brief says "July 2026 rebalance". The corpus's canonical term is the
+**2026-07-01 Global rework** (`docs/UMAMUSUME_REFERENCE.md` L1016/L1028/L1137;
+`docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` L544 "July 1, 2026 Update — What Changed").
+Where the two docs in this directory say "July 2026", read "2026-07-01".
+
+**Provenance of the brief's mechanics claims.**
+
+| Brief section | Claim | Repository authority | Verdict |
+|---|---|---|---|
+| §19–20 Sparks | Blue=Stats, Pink=Aptitude, Green=Unique, White=Skills/races/scenario | `UMAMUSUME_REFERENCE.md` §1.5 L604–611 | Corroborated; **factor-slot count clarified 2026-10-05**: exactly 1 Blue + 1 Pink per run, at most 1 Green (requires 3★ parent), White sparks roll independently per category with no stated limit — model as variable yield, not a slot cap |
+| §21 Affinity | Affinity is a named compatibility value | `UMAMUSUME_REFERENCE.md` §1.5 L645 | Corroborated |
+| §22 Parent tree | Two parents + four grandparents | `UMAMUSUME_REFERENCE.md` §1.5 L637 | Corroborated |
+| §23 Support cards | Many interacting bonuses and event effects | `UMAMUSUME_REFERENCE.md` §1.4 L423–585; `docs/research-scratch/SUPPORT-CARDS.md` | Corroborated |
+| §26–31 Scenario languages | URA/Happy Meek, Unity team+Spirit, Trackblazer Grade Points+shop, Grand Concert | `config/scenarios.php`; `docs/scenarios/01`–`03`, `07`; `SCENARIO-PUBLISHER-REFERENCES.md` L68/L102/L702 | Corroborated, **except** Grand Concert (below) |
+| §15/§25 Training cards | "+62 Speed / +25 Power", "Failure 2%" | — | **Not sourced.** `UMAMUSUME_REFERENCE.md` §1.1.1 L108–114 is marked ⚠️ STALE (GameWith 2023-02-25); no published per-training yield. Excluded by the advisor spec (`PROCESS-PLANS.md` `## trainer-advisor.md` §1, §5). |
+| §26/§49 Win probability | "Estimated win chance: 82%" | — | **Not sourced.** Race prediction deferred on the `ADR-0016` data blocker (`ADR-0020` §4). Use conservative readiness bands (Excellent/Good/Borderline/Poor) rather than fake precision. |
+| §44 Expert mode | inheritance probability, race probability | — | **Deferred/banned.** Inheritance computation banned (`ADR-0020` §3); race probability per above. |
+| §48 Versioning UI | "Ruleset: 2026.07" | `HandleInertiaRequests` shares `app.ruleset` | **Real but currently `null`** — no ruleset string is sourced. Render `N/A`, never invent a version. Grand Concert caps corroborated 2026-10-05 (two independent sources): 1600/1300/1300/1500/1300 for Speed/Stamina/Power/Guts/Wit. |
+| §19/§20 Sparks (star counts) | ★ star ratings | `UMAMUSUME_REFERENCE.md` §1.5 L621–627 (star-roll odds) | Corroborated as a mechanic; factor-slot count is ❌ UNVERIFIED (L641). |
+
+**Grand Concert.** The brief's §31 and its appendix treat Grand Concert as a fourth first-class scenario.
+The repo agrees it is the fourth Global scenario, live 2026-07-22 and permanently selectable
+(`config/scenarios.php` `our_grand_concert`, `live_on_global => '2026-07-22'`), **but its mechanics are
+not held**: `docs/scenarios/07-grand-concert.md` is a known-gap stub and `UMAMUSUME_REFERENCE.md`
+§2.2.4 L910–929 marks the mechanics ❌ UNVERIFIED with extraction suspended. `config/scenarios.php` encodes
+this as `'documented' => false` and renders the baseline strip with every panel off (D-241, gate G-41).
+The SPA must bind Grand Concert to that entry, not to the brief's fuller panel.
+
+**Committed inventory, not a target.** The brief's §47 component hierarchy and the appendix file tree are
+aspirational names. The components that exist today are the 24 committed Blade components listed in
+`DESIGN.md` §3 (L235–279), all token-only. The rewrite ports those, then adds new ones; it does not
+rename the library to match the brief.
+
+---
+
 # Uma Trainer Desk — Design System
 
 **Product:** Uma Trainer Desk

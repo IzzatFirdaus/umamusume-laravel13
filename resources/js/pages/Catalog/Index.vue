@@ -45,6 +45,7 @@ const props = defineProps<{
 const search = ref(props.search ?? '');
 const status = ref(props.showAllStatus ? 'all' : (props.currentStatus ?? ''));
 const showUnconfirmed = ref(props.showUnconfirmed);
+const loading = ref(false);
 
 function applyFilters(): void {
     router.get(
@@ -54,7 +55,16 @@ function applyFilters(): void {
             status: status.value || undefined,
             show_unconfirmed: showUnconfirmed.value ? 1 : undefined,
         },
-        { preserveState: true, preserveScroll: true },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            onStart: () => {
+                loading.value = true;
+            },
+            onFinish: () => {
+                loading.value = false;
+            },
+        },
     );
 }
 
@@ -95,6 +105,8 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
             </button>
         </form>
 
+        <p v-if="loading" role="status" class="mt-4 text-sm text-ink-muted">Loading results…</p>
+
         <p
             v-if="umamusumes.data.length === 0"
             class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
@@ -108,7 +120,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                     <h3 class="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-3">
                         <a :href="`/umamusume/${trainee.slug}`" class="font-semibold text-ink-strong hover:underline">
                             {{ trainee.name }}
-                            <span v-if="trainee.name_ja" class="ml-2 text-sm font-normal text-ink-muted">
+                            <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
                                 {{ trainee.name_ja }}
                             </span>
                         </a>

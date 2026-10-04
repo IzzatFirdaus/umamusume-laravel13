@@ -59,7 +59,7 @@ defineProps<{
                             {{ candidate.created_at }}
                         </span>
                     </div>
-                    <p v-if="candidate.proposed_name_ja" class="text-ink-muted">
+                    <p v-if="candidate.proposed_name_ja" lang="ja" class="text-ink-muted">
                         {{ candidate.proposed_name_ja }}
                     </p>
                     <p v-if="candidate.suggestion" class="text-ink-muted">

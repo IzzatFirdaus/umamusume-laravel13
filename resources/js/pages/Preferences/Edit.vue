@@ -36,6 +36,7 @@ function submit(): void {
 
         <form
             class="mt-6 grid max-w-3xl grid-cols-1 gap-4 rounded-md border border-rule bg-raised p-4 text-sm sm:grid-cols-2"
+            :aria-busy="form.processing"
             @submit.prevent="submit"
         >
             <label class="flex flex-col gap-1">
@@ -80,9 +81,10 @@ function submit(): void {
 
             <button
                 type="submit"
-                class="inline-flex min-h-11 items-center justify-self-start rounded-md border border-rule bg-raised px-4 text-sm font-bold text-ink-strong hover:bg-panel"
+                :disabled="form.processing"
+                class="inline-flex min-h-11 items-center justify-self-start rounded-md border border-rule bg-raised px-4 text-sm font-bold text-ink-strong hover:bg-panel disabled:opacity-60"
             >
-                Save preferences
+                {{ form.processing ? 'Saving…' : 'Save preferences' }}
             </button>
         </form>
     </AppLayout>

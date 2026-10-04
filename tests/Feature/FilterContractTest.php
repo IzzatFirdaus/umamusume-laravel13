@@ -73,11 +73,15 @@ it('honours a page size on the surface that used to ignore it', function (): voi
 
     $this->get('/support-cards?pageSize=3')
         ->assertOk()
-        ->assertViewHas('cards', fn ($cards): bool => $cards->count() === 3 && $cards->perPage() === 3);
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 3)
+            ->where('cards.per_page', 3));
 
     // The default stays where the deleted constant had it, so a filter nobody touched does not
     // change shape underneath SupportCardPageTest's own pagination case.
-    expect($this->get('/support-cards')->assertOk()->viewData('cards')->perPage())->toBe(25);
+    $this->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('cards.per_page', 25));
 });
 
 it('keeps the catalog and skills page sizes on the same rule they already used', function (): void {
@@ -90,5 +94,5 @@ it('keeps the catalog and skills page sizes on the same rule they already used',
 
     $this->get('/skills?pageSize=2')
         ->assertOk()
-        ->assertViewHas('skills', fn ($rows): bool => $rows->perPage() === 2);
+        ->assertInertia(fn (Assert $page) => $page->where('skills.per_page', 2));
 });

@@ -62,8 +62,8 @@ it('renders one detail page through the same store, twice', function (): void {
     config()->set('cache.default', 'database');
     Cache::flush();
 
-    // The detail page caches the model itself, so the second visit is the one
-    // that reads an object back out of a persistent store.
+    // The detail page is not cached (KI-2), so both visits are plain renders under a
+    // persistent store: the name now travels in the Inertia payload, not a cached model graph.
     test()->get('/umamusume/'.$umamusume->slug)->assertOk();
 
     $html = test()->get('/umamusume/'.$umamusume->slug)->assertOk()->getContent();

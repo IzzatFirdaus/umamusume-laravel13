@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * Screen D, the skill search surface (PRD FR-D-2; DESIGN.md §8.4; CONSTRAINTS.md D-62 to D-65).
@@ -40,9 +41,9 @@ class SkillController extends Controller
     public function __construct(private readonly NameNormalizer $normalizer) {}
 
     /**
-     * @return View|RedirectResponse a bad facet value redirects back with the field named; see the request.
+     * @return Response|RedirectResponse a bad facet value redirects back with the field named; see the request.
      */
-    public function index(SkillSearchRequest $request): View|RedirectResponse
+    public function index(SkillSearchRequest $request): Response|RedirectResponse
     {
         $perPage = min(100, max(1, (int) ($request->query('pageSize') ?? 25)));
 
@@ -52,9 +53,17 @@ class SkillController extends Controller
         $skills = $this->query($search, $type, $request->boolean('unique'))
             ->orderBy('name')
             ->paginate($perPage)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(static fn (Skill $skill): array => [
+                'id' => $skill->id,
+                'name' => $skill->name,
+                'name_ja' => $skill->name_ja,
+                'is_unique' => $skill->is_unique,
+                'type' => $skill->type,
+                'sp_cost' => $skill->sp_cost,
+            ]);
 
-        return view('skills.index', [
+        return Inertia::render('Skills/Index', [
             'skills' => $skills,
             'search' => $search,
             'searchKey' => $search === null ? null : $this->normalizer->normalize($search),
@@ -76,16 +85,27 @@ class SkillController extends Controller
      * same refusal. The parameter is the local `skills.id`, the key a row on this tree
      * can name, not the source's export id, which no screen prints.
      */
-    public function show(string $skill): View
+    public function show(string $skill): Response
     {
         $model = Skill::query()->availableOnGlobal()->findOrFail((int) $skill);
 
-        return view('skills.show', [
-            'skill' => $model,
-            'uniqueHolders' => $this->holders($model, 'skills_unique'),
-            'innateHolders' => $this->holders($model, 'skills_innate'),
-            'awakeningHolders' => $this->holders($model, 'skills_awakening'),
-            'eventHolders' => $this->holders($model, 'skills_event'),
+        return Inertia::render('Skills/Show', [
+            'skill' => [
+                'id' => $model->id,
+                'name' => $model->name,
+                'name_ja' => $model->name_ja,
+                'type' => $model->type,
+                'sp_cost' => $model->sp_cost,
+                'is_unique' => $model->is_unique,
+                'condition_groups' => $model->condition_groups,
+                'source_url' => $model->source_url,
+                // A stored instant renders through the display timezone (US-7); the view names the date only.
+                'fetched_at_display' => $model->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+            ],
+            'uniqueHolders' => $this->holderRows($model, 'skills_unique'),
+            'innateHolders' => $this->holderRows($model, 'skills_innate'),
+            'awakeningHolders' => $this->holderRows($model, 'skills_awakening'),
+            'eventHolders' => $this->holderRows($model, 'skills_event'),
         ]);
     }
 
@@ -149,6 +169,26 @@ class SkillController extends Controller
     private function availableCount(): int
     {
         return Skill::query()->availableOnGlobal()->count();
+    }
+
+    /**
+     * The holder collection as the page props shape: name, slug, and the trainee page URL.
+     *
+     * The URL is built here rather than in the page for the reason the catalog index maps its
+     * rows: a route name stays server-side, so a page never assembles a link out of a string.
+     *
+     * @return list<array{name: string, slug: string, url: string}>
+     */
+    private function holderRows(Skill $skill, string $column): array
+    {
+        return $this->holders($skill, $column)
+            ->map(static fn (Umamusume $holder): array => [
+                'name' => $holder->name,
+                'slug' => $holder->slug,
+                'url' => route('catalog.show', $holder->slug),
+            ])
+            ->values()
+            ->all();
     }
 
     /**

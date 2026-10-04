@@ -15,7 +15,8 @@ const items = [
     { label: 'Dashboard', to: '/', spa: true },
     { label: 'New Career', to: '/training-runs/create', spa: false },
     { label: 'Legacy Lab', to: null, spa: false },
-    { label: 'Support Cards', to: '/support-cards', spa: false },
+    { label: 'Support Cards', to: '/support-cards', spa: true },
+    { label: 'Skills', to: '/skills', spa: true },
     { label: 'Review', to: '/review', spa: true },
     { label: 'Veterans', to: null, spa: false },
     { label: 'Database', to: '/umamusume', spa: true },
@@ -73,6 +74,7 @@ const mobileDisabledClass =
 
         <div class="flex min-w-0 flex-1 flex-col">
             <header
+                role="banner"
                 class="flex items-center justify-between gap-4 border-b border-rule bg-panel px-6 py-3"
             >
                 <h1 class="text-base font-semibold text-ink-strong">
