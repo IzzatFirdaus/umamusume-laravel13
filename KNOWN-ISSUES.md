@@ -235,3 +235,11 @@ file, so the next migration can sit Pending in exactly this way again. Landing (
 dispatch since 2026-10-02, so it is the owner's to apply. Closure of this entry is additionally held on
 **O-1**: register discipline closes an entry only when the fix is on `origin/master`, and `master` is
 unpushed. Everything above is local.
+
+**Correction, 2026-10-06, the same day.** The owner lifted the `AGENTS.md` fence and asked for
+corrections, so the §9 half of (c) **landed at `e505f72`**: `migrate:status` on the dev database joins the
+Schema row of the §9 change-class table, the hand-off sequence carries a paragraph stating that
+`phpunit.xml:64` forces `DB_DATABASE=:memory:` and therefore that a green suite proves nothing about
+`database/database.sqlite`, and §18 gains the matching trap. The paragraph above stands as the record of
+what was fenced when this entry was filed; what is now false in it is "no gate runs `migrate:status`".
+Still open: the plan's `Landed` leg, and this entry's closure, which waits on **O-1**.
