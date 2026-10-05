@@ -126,3 +126,78 @@ test('separates a list the source states as empty from a list nothing stored', a
     await page.locator('#app > *').first().waitFor();
     await expect(page.getByText('The source lists no hinted skills for this card.')).toBeVisible();
 });
+
+// The `ADR-0021` thumbnail slots on the two support-card screens (`design-2.0` §45a "Support-card
+// index, card row" and "Support-card detail, header"). The mirror ships empty and nothing in this
+// suite runs `uma:fetch-art`, so each case derives its state from the rendered DOM and asserts only
+// when that state is present, following the catalog index spec's `:36` rarity-chip precedent. The
+// props, including the `support_id`-versus-local-`id` discipline, are proven server-side by
+// `SupportCardsArtworkSlotTest`.
+test('renders a mirrored row thumbnail as a named link to the same card', async ({ page }) => {
+    await page.goto('/support-cards');
+    await page.locator('#app > *').first().waitFor();
+
+    const framed = page.locator('#support-card-results > li:has(img)').first();
+    if (await framed.locator('img').isVisible().catch(() => false)) {
+        const frame = framed.locator('img');
+        // Decorative: the row prints the card's name beside the frame, so the name is read once.
+        await expect(frame).toHaveAttribute('alt', '');
+        await expect(frame).toHaveAttribute('src', /\/artwork\/support_thumb\/\d+$/);
+
+        // §45a records `size-12` for this row, so the box is the reserved square.
+        const box = await frame.boundingBox();
+        expect(box?.width ?? 0, 'the row thumbnail has no rendered width').toBeGreaterThan(0);
+        expect(box?.height ?? 0, 'the row thumbnail has no rendered height').toBeGreaterThan(0);
+
+        // This is the one slot of the five that is genuinely clickable, so it is also the one where
+        // an accessible name is mandatory rather than optional. `alt=""` leaves the anchor unnamed,
+        // and an unnamed link fails WCAG 2.2 AA 4.1.2; `aria-label` has to carry the row's printed
+        // name verbatim, which is also what makes WCAG 2.5.3 label-in-name hold (§42).
+        const link = framed.locator('a:has(img)');
+        await expect(link).toHaveCount(1);
+        const label = await link.getAttribute('aria-label');
+        const rowName = (await framed.locator('a').first().innerText()).trim();
+        expect(label, 'the thumbnail link carries no accessible name').toBeTruthy();
+        expect(label).toContain(rowName);
+
+        // The destination is the row's own link target, the local primary key, while the frame is
+        // keyed on the publisher's `support_id`. Same destination, and the row keeps its name link.
+        const href = await link.getAttribute('href');
+        const nameHref = await framed.locator('a').first().getAttribute('href');
+        expect(href).toBe(nameHref);
+    }
+});
+
+test('leaves support-card rows text-only when the mirror holds no file', async ({ page }) => {
+    await page.goto('/support-cards');
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.locator('#support-card-results img')).toHaveCount(0);
+    await expect(page.locator('#support-card-results img[src=""]')).toHaveCount(0);
+
+    // No stray anchor either: absence must not leave a clickable frame-shaped hole in the row.
+    await expect(page.locator('#support-card-results a:has(img)')).toHaveCount(0);
+
+    // The rows still read as before.
+    await expect(page.locator('#support-card-results > li').first().locator('a').first()).toBeVisible();
+});
+
+test('renders the support-card header thumbnail as a bare frame with no link', async ({ page }) => {
+    await page.goto('/support-cards/1');
+    await page.locator('#app > *').first().waitFor();
+
+    const frame = page.locator('img[src*="/artwork/support_thumb/"]').first();
+    if (await frame.isVisible().catch(() => false)) {
+        await expect(frame).toHaveAttribute('alt', '');
+        const box = await frame.boundingBox();
+        expect(box?.width ?? 0, 'the header thumbnail has no rendered width').toBeGreaterThan(0);
+        expect(box?.height ?? 0, 'the header thumbnail has no rendered height').toBeGreaterThan(0);
+    }
+
+    // §45a gives this slot *no action*, so the header frame must not be a link. The Blade component
+    // always emitted one, which on a detail page meant a link to the page already open, with its
+    // `aria-label` blanked by the same flag that blanked the alt: a nameless focus target, failing
+    // WCAG 2.2 AA 4.1.2. Asserted unconditionally because it must hold whether or not art is present.
+    await expect(page.locator('a:has(img[src*="/artwork/support_thumb/"])')).toHaveCount(0);
+    await expect(page.locator('a[aria-label=""]')).toHaveCount(0);
+});

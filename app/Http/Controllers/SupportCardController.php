@@ -9,6 +9,7 @@ use App\Http\Requests\SupportCardSearchRequest;
 use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\Umamusume;
+use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\PageSize;
 use App\Services\SupportCardEffects;
 use Illuminate\Database\Eloquent\Builder;
@@ -54,6 +55,14 @@ class SupportCardController extends Controller
                 'id' => $card->id,
                 'name' => $card->displayName(),
                 'url' => route('support-cards.show', $card),
+                // The row's thumbnail slot (`ADR-0021` read half, `design-2.0` §45a "Support-card
+                // index, card row"). `support_id` is the publisher's number and the only key the
+                // mirror's storage path answers to; the `url` above is built from the local primary
+                // key, because `show()` binds on that. The two must not be interchanged: a swapped
+                // `support-id` finds no file and the slot silently disappears, which reads as "the
+                // pictures never arrived" rather than as a bug. A null is the mirror's normal
+                // partial answer and the page renders no frame for it (`DESIGN.md` §4.7).
+                'artworkURL' => app(ArtworkMirror::class)->url('support_thumb', (int) $card->support_id),
                 'rarity_label' => $card->rarity->label(),
                 'rarity_stars' => $card->rarity->stars(),
                 'rarity_word' => $card->rarityWord(),
@@ -94,6 +103,11 @@ class SupportCardController extends Controller
             'card' => [
                 'id' => $card->id,
                 'name' => $card->displayName(),
+                // The header thumbnail (`design-2.0` §45a "Support-card detail, header"), keyed on
+                // `support_id` for the same reason the index row's is: it is the publisher's number
+                // and the only key the mirror's storage path answers to, while the route binds on the
+                // local `id`.
+                'artworkURL' => app(ArtworkMirror::class)->url('support_thumb', (int) $card->support_id),
                 'name_ja' => $card->name_ja,
                 'title_ja' => $card->title_ja,
                 'rarity_label' => $card->rarity->label(),

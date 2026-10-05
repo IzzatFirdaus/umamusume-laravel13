@@ -2,6 +2,7 @@
 import AppLayout from '../../layouts/AppLayout.vue';
 import RarityChip from '../../components/RarityChip.vue';
 import SkillRow from '../../components/SkillRow.vue';
+import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -27,6 +28,8 @@ interface SkillList {
 interface Card {
     id: number;
     name: string;
+    /** The header thumbnail's loopback URL, keyed on the publisher's `support_id`. Null when unmirrored. */
+    artworkURL: string | null;
     name_ja: string | null;
     title_ja: string | null;
     rarity_label: string;
@@ -73,7 +76,29 @@ const skillSections = computed(() => [
             <Link href="/support-cards" class="text-sm text-ink-muted hover:underline">Back to support cards</Link>
         </div>
 
-        <p v-if="hasJapanese" lang="ja" class="mt-1 text-sm text-ink-muted">{{ japaneseName }}</p>
+        <!-- The header thumbnail (`ADR-0021` read half, `design-2.0` §45a "Support-card detail,
+             header"), at the recorded `size-16`, leading the block that names this card.
+
+             No `href`, because §45a gives this slot the click action *no action* and the component
+             then renders no anchor at all. The Blade component this replaces always emitted one, so
+             on a detail page it produced a link to the page already open — and its `decorative` flag
+             had blanked that link's `aria-label`, making it a focusable control with no accessible
+             name, which fails WCAG 2.2 AA 4.1.2. Splitting the alt decision from the link decision
+             is what lets this screen take the no-action case honestly.
+
+             Decorative `alt=""`: the shell banner's `<h1>` is this card's name, so the name is read
+             once, from the text. Renders nothing when the mirror holds no file, leaving the block
+             text-only with no placeholder (`DESIGN.md` §4.7).
+
+             The wrapper is guarded on `card.artworkURL || hasJapanese` so a card with neither a
+             mirrored file nor a Japanese name renders no empty row: the frame and the Japanese line
+             both live inside it, and a `mt-4` flex box holding nothing would otherwise leave a band
+             of dead space above the field grid. Its `mt-4` is the spacing this block now needs to
+             carry a 64px frame, which the old text-only `mt-1` line did not. -->
+        <div v-if="card.artworkURL || hasJapanese" class="mt-4 flex items-center gap-3">
+            <ArtworkSlot :url="card.artworkURL" alt="" size="size-16" />
+            <p v-if="hasJapanese" lang="ja" class="text-sm text-ink-muted">{{ japaneseName }}</p>
+        </div>
 
         <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 rounded-md border border-rule bg-raised p-4 text-sm md:grid-cols-3">
             <div>

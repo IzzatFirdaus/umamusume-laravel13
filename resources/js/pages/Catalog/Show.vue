@@ -4,6 +4,7 @@ import AptitudeGrid from '../../components/AptitudeGrid.vue';
 import SkillRow from '../../components/SkillRow.vue';
 import FormDetail from '../../components/catalog/FormDetail.vue';
 import FormTabs from '../../components/catalog/FormTabs.vue';
+import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 interface Alias {
@@ -76,6 +77,8 @@ interface Trainee {
     aptitudes: Record<string, string> | null;
     profile: Profile | null;
     aliases: Alias[];
+    /** The Identity slot's loopback URL, or null when the mirror holds no file for the active form. */
+    artworkURL: string | null;
 }
 
 const props = defineProps<{
@@ -104,7 +107,27 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
         </div>
 
         <section class="mt-4" aria-labelledby="basic-information">
-            <h2 id="basic-information" class="text-lg font-semibold text-ink-strong">Basic information</h2>
+            <!-- The Identity slot (`ADR-0021` read half, `design-2.0` §45a "Catalog detail,
+                 Identity"): the active form's portrait at the recorded `size-16`, as a leading cell
+                 beside this section's heading rather than inside the shell banner, which is a thin
+                 `py-3` chrome bar carrying the page name at `text-base` and is not where a 64px
+                 frame belongs.
+
+                 No `href`: §45a gives this slot the click action *no action*, and the component then
+                 renders a bare frame with no anchor at all. That is the case the Blade component
+                 could not express — it always emitted a link, which on a detail page meant a link to
+                 the page already open, with an `aria-label` its own `decorative` flag had just
+                 blanked. An unnamed focusable link fails WCAG 2.2 AA 4.1.2, so the honest reading of
+                 §45a here is no anchor.
+
+                 Decorative `alt=""`: the shell banner's `<h1>` is this trainee's name, so a screen
+                 reader reads it once from the text (`design-2.0` §42). The frame renders only when
+                 the mirror holds a file; otherwise the section keeps its heading and its text with no
+                 box and no placeholder (`DESIGN.md` §4.7). -->
+            <div class="flex items-center gap-3">
+                <ArtworkSlot :url="trainee.artworkURL" alt="" size="size-16" />
+                <h2 id="basic-information" class="text-lg font-semibold text-ink-strong">Basic information</h2>
+            </div>
 
             <template v-if="!trainee.profile">
                 <dl

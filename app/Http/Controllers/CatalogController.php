@@ -285,6 +285,15 @@ class CatalogController extends Controller
                 'is_manual' => $umamusume->is_manual,
                 'aptitudes' => $this->aptitudes($umamusume),
                 'profile' => $this->profileShape($umamusume->profile),
+                // The Identity slot (`ADR-0021` read half, `design-2.0` §45a "Catalog detail,
+                // Identity"). Keyed on the same `$card` the four skill lists above read, so the
+                // portrait and the skills it sits above can never disagree about which form is
+                // being shown. `card_id` is the publisher's number and the only key the mirror's
+                // storage path answers to; a null is the mirror's normal partial answer and the
+                // page renders no frame for it (`DESIGN.md` §4.7).
+                'artworkURL' => $card === null
+                    ? null
+                    : app(ArtworkMirror::class)->url('card_portrait', (int) $card->card_id),
                 'aliases' => $umamusume->aliases->map(static fn (UmamusumeAlias $alias): array => [
                     'alias' => $alias->alias,
                     'language_label' => $alias->language->label(),

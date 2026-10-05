@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
 import RarityChip from '../../components/RarityChip.vue';
+import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -14,6 +15,8 @@ interface Card {
     id: number;
     name: string;
     url: string;
+    /** The row thumbnail's loopback URL, keyed on the publisher's `support_id`. Null when unmirrored. */
+    artworkURL: string | null;
     rarity_label: string;
     rarity_stars: string;
     rarity_word: string;
@@ -177,6 +180,33 @@ function applyFilters(): void {
                     :key="card.id"
                     class="flex flex-wrap items-baseline gap-x-2 gap-y-1 px-4 py-3 text-sm"
                 >
+                    <!-- The row thumbnail (`ADR-0021` read half, `design-2.0` §45a "Support-card index, card
+                     row"): a `size-12` leading cell before the card's name link.
+
+                     Clickable, because §45a gives this slot the click action *navigates to
+                     support-card detail*. The destination is the row's own `url` — the local primary
+                     key, not the `support_id` the frame is keyed on — so the frame and the name beside
+                     it lead to the same place, which is what makes WCAG 2.5.3 satisfiable at all: the
+                     link's accessible name has to contain the visible label, so `linkLabel` is the
+                     same `card.name` this row prints. `alt` is empty because that name is already
+                     printed beside the frame, so a screen reader hears it once, from the link label,
+                     rather than twice.
+
+                     This is the one slot of the five that is genuinely a second control pointing at
+                     the row's destination. §45a sanctions it and the name-bearing label is what keeps
+                     it findable rather than anonymous; a frame with `alt=""` and no label would be an
+                     unnamed link and fail 4.1.2.
+
+                     Renders nothing when the mirror holds no file, so the row keeps its text and
+                     gains no empty box (`DESIGN.md` §4.7). -->
+                    <ArtworkSlot
+                        :url="card.artworkURL"
+                        alt=""
+                        size="size-12"
+                        :href="card.url"
+                        :link-label="card.name"
+                    />
+
                     <a :href="card.url" class="font-semibold text-ink-strong hover:underline">{{ card.name }}</a>
 
                     <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
