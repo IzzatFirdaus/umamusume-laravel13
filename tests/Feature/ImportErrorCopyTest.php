@@ -13,10 +13,10 @@ use Illuminate\Support\MessageBag;
  * key to one string, so renaming it collapses every row onto the same word and the row identity goes with
  * it, and the finding's own prescription is a message that states the row.
  *
- * Asserted on the MessageBag the request returns. The form prints its own prefix in front of these strings
- * (`runs/import.blade.php:153`, "A speed value is outside what this scenario allows:"), and that file is
- * carrying a peer's uncommitted change, so the composite sentence is not verified here: it needs a browser
- * pass on the landed view.
+ * Asserted on the MessageBag the request returns. The form prints its own prefix in front of these strings,
+ * and the composite sentence is measured in `tests/browser/run-import.spec.ts` against the landed view:
+ * that pass closes the gap this header used to name, when the prefix lived in a Blade file carrying a
+ * peer's uncommitted change and `Runs/Import.vue` did not exist yet.
  */
 function csvWith(array $rows): string
 {

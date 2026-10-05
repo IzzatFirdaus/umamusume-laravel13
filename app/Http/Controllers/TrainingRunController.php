@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\ImportHistoricalRun;
 use App\Enums\MoodTier;
 use App\Enums\ReleaseStatus;
+use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\TurnEventType;
 use App\Http\Requests\ImportHistoricalRunRequest;
@@ -28,10 +29,13 @@ use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\Umamusume;
 use App\Services\ScenarioCaps;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -53,32 +57,39 @@ class TrainingRunController extends Controller
         'energy', 'fans', 'mood', 'choice', 'outcome', 'penalty_kind',
     ];
 
-    public function index(): View
+    public function index(): InertiaResponse
     {
-        return view('runs.index', [
-            'runs' => TrainingRun::with('umamusume')->latest()->paginate(25),
+        return Inertia::render('Runs/Index', [
+            'runs' => TrainingRun::with('umamusume')->latest()->paginate(25)
+                ->through(static fn (TrainingRun $run): array => [
+                    'id' => $run->id,
+                    'name' => $run->umamusume->name,
+                    // The scenario key is a storage value; the label is config's, so the payload
+                    // never carries the slug (hasScenario() is the model's one ruling: a blank
+                    // scenario is no scenario, not a name to print).
+                    'scenario_label' => $run->hasScenario()
+                        ? (config('scenarios.scenarios.'.$run->scenario.'.label') ?? $run->scenario)
+                        : null,
+                    'status_label' => $run->status->label(),
+                    'created_date' => $run->created_at->toDateString(),
+                    'url' => route('runs.show', $run),
+                ]),
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): InertiaResponse
     {
         /*
-         * One query, two lists, one truth. The catalog page and this selector read the same
-         * rows, so a card that exists in the dropdown cannot be absent from the catalog. Cards
-         * come with the trainees rather than in a second pass: at 68 and ~107 rows, an eager
-         * load is one query and a lazy one is sixty-nine.
+         * One query, one list, one truth. The combobox is the page's only picker now (ADR-0020 §1),
+         * so the roster is also what the inheritance-parent selects read: a second trainee collection
+         * would be a second list to drift from the first. Cards come with the trainees rather than in
+         * a second pass: at 68 and ~107 rows, an eager load is one query and a lazy one is sixty-nine.
          *
-         * The two lists hold the same trainees, and that equality is load-bearing. The combobox
-         * disables the select and commits only trainees the payload carries, so a trainee the
-         * payload drops is unreachable *and* unpostable for as long as she is dropped: an
-         * unconfirmed form is not a pre-fetch transient, it is how the row sits until a fetch
-         * confirms it. A cardless row therefore ships with `cards: []`, and the module paints her
-         * one selectable row that says no costume card is confirmed yet, committing her with an
-         * empty `character_card_id` - which is nullable, and which the request accepts.
-         *
-         * The card gate stayed where it belongs, inside the card list (FR-A-6, FR-B-4): an
-         * unconfirmed form is out of the payload the same way the catalog hides it, because it is
-         * her form that is not confirmed yet, not her place on the roster.
+         * The card gate stays inside the card list (FR-A-6, FR-B-4): an unconfirmed form is out of the
+         * payload the same way the catalog hides it, because it is her form that is not confirmed yet,
+         * not her place on the roster. A cardless trainee therefore ships with `cards: []` and the
+         * component paints her one selectable row that commits an empty `character_card_id` - which
+         * is nullable, and which the request accepts.
          */
         $trainees = Umamusume::query()
             ->where('release_status', ReleaseStatus::GlobalReleased->value)
@@ -111,31 +122,16 @@ class TrainingRunController extends Controller
                 ])->all(),
             ])->all();
 
-        return view('runs.create', [
-            'umamusumes' => $trainees,
-            'rosterJson' => $roster,
-            'selectedLabel' => $this->selectedCardLabel(),
+        return Inertia::render('Runs/Create', [
+            'roster' => $roster,
             'scenarios' => $this->scenarioLabels(),
+            'statuses' => $this->statusLabels(),
+            'maxObjectiveIndex' => RaceEntry::MAX_OBJECTIVE_INDEX,
+            // A failed write comes back through a redirect, which reloads the page and takes the
+            // component's own state with it, so the flashed input is what keeps a Trainer from
+            // choosing their trainee twice.
+            'old' => (array) $request->old(),
         ]);
-    }
-
-    /**
-     * The selection a failed submit has to hand back. Read from `old()` so the visible
-     * label names the same card the hidden fields still carry, not one the Trainer has to
-     * pick again. Joined with a middle dot: R-02, D-79 and RenderedCopyHygieneTest keep an
-     * em or en dash out of copy that reaches a Trainer.
-     */
-    private function selectedCardLabel(): ?string
-    {
-        $cardId = old('character_card_id');
-
-        if (! is_numeric($cardId)) {
-            return null;
-        }
-
-        $card = CharacterCard::with('umamusume')->find((int) $cardId);
-
-        return $card === null ? null : $card->umamusume->name.' · '.$card->title;
     }
 
     public function store(StoreTrainingRunRequest $request): RedirectResponse
@@ -790,9 +786,25 @@ class TrainingRunController extends Controller
      * sheet records the trainee rather than which of her forms was equipped; collecting it would offer a
      * field the source cannot fill and invite a guess that then reads as the Trainer's own record.
      */
-    public function importForm(): View
+    public function importForm(Request $request): InertiaResponse
     {
-        return view('runs.import', $this->importChoices());
+        return Inertia::render('Runs/Import', $this->importProps($request));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function importProps(Request $request): array
+    {
+        return [
+            ...$this->importChoices(),
+            'statuses' => $this->statusLabels(),
+            // The column list is the export's own, so the hint a Trainer reads before pasting is the
+            // same array the request parses against rather than a second copy that can drift.
+            'headers' => ImportHistoricalRunRequest::HEADERS,
+            'preview' => null,
+            'old' => (array) $request->old(),
+        ];
     }
 
     /**
@@ -803,17 +815,18 @@ class TrainingRunController extends Controller
      * fails on the second POST rather than reaching the action. The rows are handed over as raw strings
      * straight from the parse, which is also what makes a rejected cell point at the row that held it.
      */
-    public function importPreview(ImportHistoricalRunRequest $request): View
+    public function importPreview(ImportHistoricalRunRequest $request): InertiaResponse
     {
         $validated = $request->validated();
 
-        return view('runs.import', array_merge($this->importChoices(), [
+        return Inertia::render('Runs/Import', [
+            ...$this->importProps($request),
             'preview' => [
                 'csv' => (string) $validated['csv'],
                 'turns' => $validated['turns'],
                 'run' => $request->only(['umamusume_id', 'scenario', 'status', 'notes']),
             ],
-        ]));
+        ]);
     }
 
     /**
@@ -853,22 +866,41 @@ class TrainingRunController extends Controller
     }
 
     /**
+     * Status value => the word the enum labels it with, for the two forms that offer the choice.
+     * Built from `RunStatus::cases()` so a fourth case appears without a controller edit.
+     *
+     * @return array<string, string>
+     */
+    private function statusLabels(): array
+    {
+        return collect(RunStatus::cases())
+            ->mapWithKeys(fn (RunStatus $status): array => [$status->value => $status->label()])
+            ->all();
+    }
+
+    /**
      * The two lists the import page renders, shared by its form and its preview step.
      *
      * Narrower than `create()`'s trainee query on purpose: the import collects no costume card, so it
      * selects no cards and carries no `unconfirmed` gate. A global roster would list a trainee the run
      * cannot be created for.
      *
-     * @return array{umamusumes: Collection<int, Umamusume>, scenarios: array<string, string>}
+     * @return array{trainees: list<array{id: int, name: string, name_ja: string|null}>, scenarios: array<string, string>}
      */
     private function importChoices(): array
     {
         return [
-            'umamusumes' => Umamusume::query()
+            'trainees' => Umamusume::query()
                 ->where('release_status', ReleaseStatus::GlobalReleased->value)
                 ->orderBy('name')
                 ->orderBy('id')
-                ->get(['id', 'name', 'name_ja']),
+                ->get(['id', 'name', 'name_ja'])
+                ->map(static fn (Umamusume $u): array => [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'name_ja' => $u->name_ja,
+                ])
+                ->all(),
             'scenarios' => $this->scenarioLabels(),
         ];
     }

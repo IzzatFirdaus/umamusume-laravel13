@@ -63,14 +63,18 @@ Copied verbatim from the governing docs; every task implicitly includes this sec
 
 ## 1. What is already built (do not rebuild)
 
+Inventory measured against the working tree on 2026-10-05, not remembered: 12 page components, 7 shared
+components, 8 browser specs, 26 Blade files still in `resources/views/`.
+
 | Layer | Files | State |
 |---|---|---|
 | Inertia root + resolver | `resources/views/app.blade.php`, `resources/js/spa.ts` | Done |
-| Shared props | `app/Http/Middleware/HandleInertiaRequests.php` (`app`, `flash`), `resources/js/types.ts` | Done |
+| Shared props | `app/Http/Middleware/HandleInertiaRequests.php` (`app`, `flash`, `errors`), `resources/js/types.ts` | Done |
 | Shell | `resources/js/layouts/AppLayout.vue` (sidebar + mobile bottom nav + skip link) | Done |
-| Ported pages | `pages/Dashboard.vue`, `pages/Catalog/Index.vue`, `pages/Review/Index.vue`, `pages/Preferences/Edit.vue` | Done |
-| Ported components | `components/RarityChip.vue`, `components/review/CandidateForm.vue` | Done |
-| Browser tests | `tests/browser/{catalog,preferences,review}.spec.ts`, `playwright.config.ts` | Done |
+| Ported pages | `pages/Dashboard.vue`, `pages/Catalog/{Index,Show}.vue`, `pages/Review/Index.vue`, `pages/Preferences/Edit.vue`, `pages/Skills/{Index,Show}.vue`, `pages/SupportCards/{Index,Show}.vue`, `pages/Runs/{Index,Create,Import}.vue` | Done (12) |
+| Ported components | `components/RarityChip.vue`, `components/SkillRow.vue`, `components/AptitudeGrid.vue`, `components/TraineeCombobox.vue`, `components/catalog/{FormDetail,FormTabs}.vue`, `components/review/CandidateForm.vue` | Done (7) |
+| Browser tests | `tests/browser/{catalog,catalog-detail,preferences,review,skills,support-cards,runs,run-import}.spec.ts`, `playwright.config.ts` | Done (8 specs, 43 tests) |
+| Still on Blade | `resources/views/runs/show.blade.php` (A4b), `resources/views/errors/{404,419,500}.blade.php`, and the 21 components under `resources/views/components/` that `runs/show` and the error pages still consume | A4b pending |
 
 The established page pattern is `resources/js/pages/Catalog/Index.vue`: local `Paginator<T>` interface,
 filters via `router.get(url, params, { preserveState, preserveScroll })`, forms via `useForm` +
@@ -187,6 +191,19 @@ Concert panel and omits Inheritance Event, Career Timeline and Veteran Compariso
 | **E** | E5 | Scenario Race Planner (race facts only; **no** win probability) | SCREEN-017 | D8 |
 | **E** | E6 | Grand Concert panel — baseline strip only *(design-2.0 only)* | SCR-017 | E1 |
 
+**Phase A status, 2026-10-05.** A1, A2, A3, A4a and A4c have landed green; **A4b has not started**, and B1
+is therefore blocked (it waits on all of A). No Phase B–E slice has begun.
+
+| Slice | State | Evidence, and what is still open |
+|---|---|---|
+| A1 | Landed | One clause of its browser case is unreachable, not unfinished: the `JapanOnly` notice. See §5.2. |
+| A2 | Landed | Filter button was found at 32px and raised to `h-11` during the port. See §5.3. |
+| A3 | Landed | `resources/js/pages/SupportCards/{Index,Show}.vue`; `rarity-chip`/`skill-row` Blade retired. |
+| A4a | Landed | No-script fallback select retired by owner ruling 2026-10-05; 11 source-text shape pins became Playwright behaviour proofs. See §5.5. |
+| A4b | **Not started** | Atomic: 824-line view, 15 components, 13 forms, ~14 test files pinning this markup. Sized in §5.5. |
+| A4c | Landed | Preview kept as a server-rendered Inertia page, not a JSON endpoint (it never was one). See §5.5. |
+| B1 | Blocked | Waits on A4b. |
+
 Race prediction (the win-probability field on `SCREEN-011` and `SCREEN-017`), inheritance optimization
 (`SCREEN-006`), and per-training stat yields (`SCREEN-010`) are **not built**: they are held on `ADR-0016`
 and `ADR-0020` §3–4 and have no task anywhere in this plan. The screens that would show them still ship,
@@ -260,10 +277,18 @@ Inertia::render('Catalog/Show', [
 **Produces:** `Catalog/Show.vue` and the four ported components; A3 reuses `SkillRow.vue`.
 
 - [x] Apply the port recipe (5.1) steps 1–9.
-- [ ] Assert in `catalog-detail.spec.ts`: the trainee's Japanese name renders; the provenance URL renders;
-      the costume-form tabs keyboard-navigate and the active tab carries `aria-current`; a japan-only entry
-      prints "Not yet released on Global" and no `>JapanOnly<` machine token (carries `EnumLabelTest`'s
-      detail-page case into the browser).
+- [x] Assert in `catalog-detail.spec.ts`: the trainee's Japanese name renders; the provenance URL renders;
+      the costume-form tabs keyboard-navigate and the active tab carries `aria-current`. **Deviation, and it
+      is a real shortfall:** the fourth clause of this row — a japan-only entry printing "Not yet released
+      on Global" — is **not** browser-asserted and cannot be on this repo's tooling.
+      `UmamusumeRosterSeeder::inScope()` files `JapanOnly` rows as pending candidates rather than promoting
+      them (PRD FR-A-1; measured 68 promoted of 135), so no `umamusume` row any database can build reaches
+      that branch. Intercepting the response was tried and rejected: Blade points at the Vite dev server on
+      `localhost:5173`, and Chromium's private-network check refuses those asset requests for a
+      `route.fulfill()`-synthesised document, so the page never hydrates (and clearing `public/build/hot`
+      to force same-origin assets would break a peer's running `composer dev` in this shared worktree).
+      Covered where it can be: the prop that drives the branch is pinned in `CatalogDetailPageTest`, and
+      `catalog-detail.spec.ts` proves the `JapanOnly` machine token never reaches a real page.
 - [x] Verify the `?form=` deep link selects the named form and an out-of-scope id falls back (props
       assertion in `CatalogDetailPageTest`).
 
@@ -297,9 +322,17 @@ props test asserts `cards.perPage()` rather than a manual `pageSize` prop.
 **Delete after green:** `resources/views/support-cards/index.blade.php`, `show.blade.php`, and
 `resources/views/components/skill-row.blade.php` (its last consumer).
 
-- [ ] Apply the port recipe steps 1–9.
-- [ ] Browser: assert the card grid renders a rarity chip with an accessible name, and the detail page's
-      effect list renders stated anchor values with no invented interpolation.
+- [x] Apply the port recipe steps 1–9.
+- [x] Browser: assert the card grid renders a rarity chip with an accessible name, and the detail page's
+      effect list renders stated anchor values with no invented interpolation. **Deviation:** the no-results
+      copy is "Nothing matches {ask}." (D-65, same precedent as A2), so `tests/browser/support-cards.spec.ts`
+      asserts that string rather than a "No support cards match" one. The chip's accessible name is the
+      enum's `label()` ("One Star"), asserted via `getByRole('img', { name: 'One Star' })`; the at-cap effect
+      prints its stated anchor ("Friendship Bonus 15%") beside the "highest stated anchor" basis note. The
+      spec also records two Playwright gotchas it worked around: a wrapping `<label>`'s computed name
+      swallows its `<option>` text (so the four selects are addressed by `select[name="…"]`), and the seeded
+      snapshot URL carries a content hash (so the provenance link is matched on host + document, not a
+      literal filename).
 
 ### 5.5 Slice A4 — Training runs (`SCR-RUN-001`–`005`)
 
@@ -307,7 +340,20 @@ The largest port: five screens, one controller, the guided turn rail, and the ru
 into three shippable sub-slices.
 
 - **A4a — list + create** (`Runs/Index.vue`, `Runs/Create.vue`). Migrate `RunsIndexTest`,
-  `RunCreateSurfaceTest`. Browser: `runs.spec.ts`.
+  `RunCreateSurfaceTest`. Browser: `runs.spec.ts`. **Landed 2026-10-05.** Owner ruling recorded on the
+  way: the create page's no-script fallback `<select>`, its `#trainee-roster` JSON island and the
+  script's handover between the two pickers were retired, because a client-rendered page has no
+  no-script path to serve. Eleven shape pins in `TraineeSelectorTest` that read `trainee-combobox.ts`
+  source text (they existed because no JS runner did, and C-8 still forbids adding a JS unit-test
+  dependency) became Playwright behaviour proofs in `runs.spec.ts`, which proves the filter, the cap,
+  the keyboard path and the stale-pair rule rather than describing them. `trainee-combobox.ts` and the
+  published `vendor/pagination/tailwind.blade.php` deleted with them; that view renders nowhere once
+  the run list stopped calling `->links()`, so `DesignTokensTest`'s paginator gate became a class sweep
+  over both source trees, which then caught two offenders the rendered-page check could never see.
+  Two known gaps, stated not implied away: the populated run row and the pagination control are not
+  browser-asserted (the seeded database holds zero runs and creating them from a browser test would
+  mutate the development database the suite shares), and the cardless band is unreachable there (all
+  67 seeded Global trainees have a confirmed card). Both are covered on the props side.
 - **A4b — detail + guided turns** (`Runs/Show.vue`; port `x-run-header`, `x-stat-band`, `x-energy-gauge`,
   `x-mood-pill`, `x-resource-strip`, `x-deck-panel`, `x-race-calendar`, `x-race-panel`, `x-guided-step`,
   `x-capsule-header`, `x-app-button`, `x-grade-badge`). Migrate `RunViewFrameTest`, `RunViewNoScriptTest`,
@@ -316,10 +362,67 @@ into three shippable sub-slices.
   `GuidedTurn*`, `GuidedStep*`, `GuidedFirstTurnTest`, `StatBandTest`, `MoodPillTest`, `RaceCalendarTest`,
   `ScenarioPanelUiTest`. Browser: `run-detail.spec.ts` asserting the guided rail's keyboard path and the
   44px control sweep.
+  **Correction to this row, from the 2026-10-05 read of the view: it is not a 15-component port.** Each of
+  the 15 components named above has exactly one consumer, `runs/show.blade.php`, and nothing else in
+  `resources/views/`. Building a Vue twin for each buys no reuse and is what makes this row read as larger
+  than it has to be; the smaller correct port is one `Runs/Show.vue` with the panel bodies inlined, and the
+  Blade files deleted with their consumer. Two may still earn a twin (`app-button`, `capsule-header`) if a
+  later slice renders the same control. `x-guided-step` also cannot be lifted out as a sibling component:
+  it owns the `<form>` that wraps the view's slot, so the turn fields inside it would detach. Its Vue shape
+  is a component that renders a `<form>` around a default slot, which Vue supports directly.
+  **Still open, and sized:** 824-line view, ~2,450 lines of components, 13 forms (five separate
+  `runs.update` PUTs, each carrying a different set of hidden pass-through fields — collapsing them
+  wrongly blanks a column), and ~14 test files pinning this exact markup.
+  **Props contract, worked out from `showData()` so the port is mechanical.** `showData()` currently hands
+  the view live models; every one of these becomes an explicit array, and the mapping is the first
+  commit of the slice:
+
+  ```php
+  Inertia::render('Runs/Show', [
+      'run'     => ['id','umamusume_id','umamusume_name','status' => $run->status->value,
+                    'status_label','scenario','scenario_label','has_scenario','notes','notes_present',
+                    'imported_display','import_source','export_csv_url','export_json_url',
+                    'next_turn_number','turn_count'],
+      'turns'   => [['id','turn','speed','stamina','power','guts','wit','sp','condition',
+                     'energy','fans','mood_value','mood_word','failure_penalty_kind','failure_source']],
+      'caps'    => ScenarioCaps::forRun($run),          // the same call the validator makes (KI-47)
+      'band'    => null|['scenario','caps','values','skill_points'],
+      'strip'   => $run->stripValues() + widgets from config,
+      'resources'  => ['scenario_key','declared'],
+      'goals'   => [['title','state','year_label','turn']],
+      'skills'  => [['id','name','sp_cost']],           // the picker's catalogue
+      'runSkills' => [['id','name','sp_cost','is_unique','status','turn_acquired']],
+      'skillRows' => ['total' => int, 'open' => int, 'acquisitions' => [...]],
+      'deck'    => ['cards' => [...], 'slots' => [...], 'open_slot' => int|null],
+      'rail'    => showData()'s `guided` block, with `previous` flattened to the placeholder values
+                   and `confirm_url` replacing `confirm-route`,
+      'racePanel' => ['slots','entry_mode','calendar_year','cells','next_turn','year_tabs'],
+      'grade'   => ['objectives','current','earned','periods','unpriced_count','unassigned_count'],
+      'shop'    => ['catalogue','purchases','resets_in','spend','rotation_turns','max_copies'],
+      'unityCup'=> ['team_rank','facility_level','ladder','bursts','team_race','epithets','fatigue'],
+      'errors'  => shared, 'staged' => $staged, 'preview' => $preview, 'previewed' => $previewed,
+  ]);
+  ```
+
+  Two behaviours the port must not lose, both found by reading the view rather than the summary:
+  (1) the failure chip is an **event**, not a column — `turn_events` keyed by turn, because
+  `turn_entries` holds the absolute readings the client showed (ADR-0003); (2) the rail rehydrates
+  server-side through `showData()`'s `old()`-and-`stage` branch while the escape hatch and the turn-edit
+  row rehydrate per field, so a Vue port that moves to `useForm().state` must drop the server branch
+  deliberately rather than end up filling both.
 - **A4c — import** (`Runs/Import.vue`; the form and the preview/confirm step). Migrate the import cases;
-  the preview endpoint stays JSON (`runs.import.preview`).
+  the preview endpoint stays JSON (`runs.import.preview`). **Landed 2026-10-05.** Deviation from the brief:
+  `runs.import.preview` was never JSON. It returned the same Blade view as the form, with a `preview` key
+  set, and the plan described that as a JSON endpoint. The port keeps the shape rather than inventing a
+  fetch layer: `importPreview` now returns `Inertia::render('Runs/Import', …)` with a `preview` prop, and
+  the component branches on it. Two POSTs, no session state, and the commit still re-runs the same Form
+  Request, which is what makes the preview not a trust boundary. Also closed here: `ImportErrorCopyTest`
+  deferred the composite per-stat error sentence to "a browser pass on the landed view", and
+  `tests/browser/run-import.spec.ts` now measures it against `Runs/Import.vue`. `runs/import.blade.php`
+  deleted; `x-layout` survives on `runs/show` and the two error pages.
 
 - [ ] Each sub-slice applies the port recipe steps 1–9 and lands green before the next starts.
+      **A4a and A4c have; A4b has not, so this row stays open.**
 - [ ] The run-scoped writes (`runs.turns.store/update/destroy`, `runs.deck.sync`, `runs.skills.sync`,
       `runs.races.store`, `runs.purchases.store`) keep their Form Requests; the Vue forms only post and
       handle `useForm` errors. Assert one write per sub-slice still round-trips through its request.
@@ -615,4 +718,5 @@ reduced-motion check; each screen's browser spec asserts the criteria it names.
 |---|---|---|
 | 2026-10-05 | Filed. Derived from `design-2.0.md` + `screen-spec-2.0.md`; bound to real routes, controllers, models, `config/scenarios.php` and gates. | Owner asked for a comprehensive frontend development plan from the two 2.0 design docs, grounded in the repository's knowledge corpus. |
 | 2026-10-05 | Added §12 (WCAG 2.2 AA conformance), §13 (Laws of UX rubric), §14 (Phase A0 remediation of the 0.1.0 screens); strengthened the Global Constraints accessibility bullet and the §10 definition of done. | Owner required the 2.0 UI and the in-tandem 0.1.0 UI to meet WCAG 2.2 AA and the UX laws, not just carry the old Blade behavior forward. |
+| 2026-10-05 | §1 inventory rewritten from the tree (12 pages, 7 components, 8 specs, 26 Blade files). Phase A status block added under §4. A1, A3, A4a and A4c recorded as landed with their deviations; A4b re-sized in §5.5. | The inventory had stopped tracking the ports after the first four pages, so the plan read as if A1–A4c were unbuilt. §5.5's A4b row also over-stated the work by assuming a Vue twin per Blade component; the read shows one consumer each. |
 

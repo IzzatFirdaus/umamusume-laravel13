@@ -27,8 +27,9 @@
     The shell is the ground plane for both themes, so it renders from tokens, not from the
     skeleton's zinc utilities: with system-follow active, `bg-zinc-50 text-zinc-900` kept the
     page near-white while `--color-page` had already resolved to #0D0C0F, i.e. a dark theme with
-    a light body. Page-level tables and forms still use zinc utilities (root DESIGN.md §2.1
-    implementation status); this is the shared fix, not the whole migration.
+    a light body. That migration is finished now: every class in either source tree, Blade or Vue,
+    is a token one, and the DesignTokensTest sweep is the gate that keeps it true as the remaining
+    screens move over.
 --}}
 <body class="min-h-screen bg-page text-ink">
     {{-- D-55 and G-11: the flow must be completable without a pointer, and the first Tab

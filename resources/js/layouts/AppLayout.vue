@@ -13,7 +13,7 @@ const flashStatus = computed(() => page.props.flash?.status ?? null);
 // client-navigates; the rest full-reload to the existing Blade screens during the rewrite.
 const items = [
     { label: 'Dashboard', to: '/', spa: true },
-    { label: 'New Career', to: '/training-runs/create', spa: false },
+    { label: 'New Career', to: '/training-runs/create', spa: true },
     { label: 'Legacy Lab', to: null, spa: false },
     { label: 'Support Cards', to: '/support-cards', spa: true },
     { label: 'Skills', to: '/skills', spa: true },

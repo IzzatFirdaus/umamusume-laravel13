@@ -118,7 +118,7 @@ Nav links carry `min-h-11` (44px) targets. Empty state is plain prose (screen-re
 Title/action row uses `flex-wrap`; row content `flex-wrap` so the date wraps under the name at narrow widths. No breakpoint-specific restructure.
 
 #### Localization / Content
-Hardcoded English in Blade. Status label from `RunStatus::label()` (`lang/en/uma.php`). Dates are date-only (no timezone conversion). Scenario labels come only from `config/scenarios.php` (D-240: a scenario name must not be hardcoded in a view).
+Hardcoded English in the component. Status label from `RunStatus::label()` (`lang/en/uma.php`), server-formatted onto the row. Dates are date-only (no timezone conversion). Scenario labels come only from `config/scenarios.php` (D-240: a scenario name must not be hardcoded in a view), and the row carries the label rather than the storage key.
 
 #### Navigation & Workflow Relationships
 `runs.create`, `runs.import`, `runs.show` forward; it is the success destination of run deletion.
@@ -127,7 +127,7 @@ Hardcoded English in Blade. Status label from `RunStatus::label()` (`lang/en/uma
 `TrainingRun`, `Umamusume` models; `config/scenarios.php` for labels.
 
 #### Implementation References
-View: `resources/views/runs/index.blade.php`; Controller: `TrainingRunController::index`; Route: `routes/web.php:25`.
+Page: `resources/js/pages/Runs/Index.vue`; Controller: `TrainingRunController::index`; Route: `routes/web.php:29`; Tests: `RunsIndexTest.php` (props), `tests/browser/runs.spec.ts` (empty state and the action controls).
 
 #### Current Status
 Implemented.
@@ -155,16 +155,23 @@ No auth. The trainee option list is restricted to `release_status = GlobalReleas
 `GET /training-runs/create`, name `runs.create`; submits to `POST /training-runs` (`runs.store`).
 
 #### Layout / Structure
-Page title → single form card: Trainee field (one label, two paths), Scenario select, Status select, inheritance A/B selects, Grade Point period number, Shop resets number, Notes textarea, submit.
+Page title → single form card: Trainee combobox, Scenario select, Status select, inheritance A/B selects, Grade Point period number, Shop resets number, Notes textarea, submit.
 
 #### Data Displayed
-The trainee roster (English names; combobox payload also carries Japanese names and per-trainee card titles/release dates/debut flags as a JSON island, `#trainee-roster`).
+The trainee roster as an Inertia prop (English names, plus per-trainee Japanese names and card titles / release dates / debut flags). It is also the source the inheritance-parent selects read, so the page holds one trainee list rather than two that can drift.
+
+> **Retired 2026-10-05 (owner ruling, `ADR-0020` §1).** This field used to ship two pickers: a native
+> `select` for a browser with scripting off, and a combobox a module switched on by disabling the
+> first and enabling a hidden `umamusume_id` / `character_card_id` pair. A client-rendered page has no
+> no-script path — with scripting off there is no page at all — so the fallback, the JSON script island
+> that fed the module, and the handover between the two went with the Blade view. The combobox is the
+> control.
 
 #### Inputs
 | Field | Type | Req | Default | Validation (source: `StoreTrainingRunRequest`) |
 |---|---|---|---|---|
-| `umamusume_id` | native `select` + JS combobox hidden pair | required | — | integer, exists `umamusume.id` |
-| `character_card_id` | combobox hidden | optional | — | integer, exists `character_cards.id` **scoped to the submitted trainee** (join in the rule) |
+| `umamusume_id` | combobox (`role=combobox` input over a `role=listbox` popup) | required | — | integer, exists `umamusume.id` |
+| `character_card_id` | combobox commit (a cardless trainee writes nothing) | optional | — | integer, exists `character_cards.id` **scoped to the submitted trainee** (join in the rule) |
 | `scenario` | select | optional | "Not set (baseline strip)" | in `config('scenarios.php')` keys; `''` normalizes to null |
 | `status` | select | required | `Active` | enum `RunStatus` |
 | `inheritance_parent_a_id` / `_b_id` | select | optional | none | exists `umamusume.id` |
@@ -178,20 +185,20 @@ Required marker convention: `*` on fields with no answer of their own, `(optiona
 | Action | Trigger | Result | Feedback |
 |---|---|---|---|
 | Create run | submit | run row + card's Global-released innate/unique skills seeded as `Suggested` ("Starting" label), in one transaction (KI-33) | redirect `runs.show`, flash "Run created." |
-| (Combobox pick) | typing in JS-enhanced field | filters trainee/card list; commits the hidden pair | live `aria-live="polite"` status line |
-| (No-script path) | native select remains in markup | submit works with scripting off | — |
+| (Combobox pick) | typing, arrows, Enter or a click on a row | filters the trainee/card list and commits the pair the form posts | live `aria-live="polite"` status line |
+| (Enter with no cursor) | Enter while nothing is highlighted | the form submits; it is not a silent re-pick of row zero | native submission |
 
 #### Screen States
-Initial; validation-error re-render with `old()` rehydration (trainee sticky on both paths; card id is lost on the no-script path — recorded as an honest ceiling in the view comment, not an oversight); the combobox is hidden (`hidden` class) until its module claims it, so pre-script state equals the no-script form.
+Initial (popup closed, live region silent: a count stated before anyone opened the list reports a list nobody asked for); validation-error re-render with the flashed input rehydrating every field, the combobox re-painting its label from the `umamusume_id` / `character_card_id` pair rather than from a stored string; in-flight (`aria-busy`) while the write is posted.
 
 #### Validation & Error Handling
-Server-authoritative (`StoreTrainingRunRequest`), errors rendered per field (`@error` → `text-risk` paragraph). Duplicate/mismatch cases: card not owned by trainee → field error. Empty scenario → null, not error. No client-side blocking beyond native `required` on select/status (kept no-looser-than-server, audit I-1/I-2 rule).
+Server-authoritative (`StoreTrainingRunRequest`), errors rendered per field from the Inertia `errors` prop. A committed label the Trainer edits away clears the posted pair, so the next submit fails `required` rather than writing a run that disagrees with its own input (the server cannot see that disagreement: trainee and card agree with each other). Duplicate/mismatch cases: card not owned by trainee → field error. Empty scenario → null, not error. No client-side blocking beyond native `required` on the status select (kept no-looser-than-server, audit I-1/I-2 rule).
 
 #### Security & Privacy
-`@csrf`. All user-entered content is Trainer's own; Blade escaping on.
+CSRF through the framework XSRF cookie header Inertia sends with every write. All user-entered content is Trainer's own; card titles are source data and reach the page through Vue interpolation, which escapes them.
 
 #### Accessibility
-Combobox implements `role=combobox`/`aria-expanded`/`aria-controls`/`aria-activedescendant`, a `role=listbox` with its own accessible name, `aria-required` on the text input (the submitting control is the hidden pair), explicit `for`/`id` label on the select (a label may name exactly one labelable control), caption text reused in the accessible name for speech input (WCAG 2.5.3, stated in view comments). Tests: `tests/Feature/TraineeSelectorTest.php` (~28 assertions), `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` C-1…C-4 closed same-day 2026-10-03.
+Combobox implements `role=combobox` with `aria-expanded`, `aria-controls`, `aria-autocomplete="list"` and `aria-activedescendant`, over a `role=listbox` that carries its own accessible name, with `aria-required` on the input (the value that posts is the committed pair, not the text typed). The caption's `for` points at the input and the caption text is a prefix of the accessible name, so a speech-input user can say the words on screen (WCAG 2.5.3). Per-trainee headers and the band seam are `role=presentation` and `aria-hidden`, which puts each trainee's name in her options' own accessible names rather than in a group that owns nothing. Every control meets the 44px floor (`h-11` / `min-h-11`, KI-37). Tests: `tests/Feature/TraineeSelectorTest.php` (the payload and the POST round trip) and `tests/browser/runs.spec.ts` (the ARIA surface, the keyboard path, the cap, the commit, the stale-pair rule and the rehydration), `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` C-1…C-4 closed same-day 2026-10-03.
 
 #### Responsive Behavior
 Form capped `max-w-lg`. No dedicated breakpoint behavior.
@@ -203,10 +210,10 @@ Hardcoded English. `·` middle dot as separator (em/en dash banned in shipped co
 Success → SCR-RUN-003. Sibling entry SCR-RUN-004 (import) shares its Form Request contract via inheritance (`ImportHistoricalRunRequest extends StoreTrainingRunRequest`).
 
 #### Dependencies
-Models `Umamusume`, `CharacterCard`, `TrainingRun`, `Skill` (pre-populate through `Skill::availableOnGlobal()`); `config/scenarios.php`; module `resources/js/trainee-combobox.ts`.
+Models `Umamusume`, `CharacterCard`, `TrainingRun`, `Skill` (pre-populate through `Skill::availableOnGlobal()`); `config/scenarios.php`; component `resources/js/components/TraineeCombobox.vue`.
 
 #### Implementation References
-View: `resources/views/runs/create.blade.php`; Controller: `TrainingRunController::create/store`; Request: `app/Http/Requests/StoreTrainingRunRequest.php`; Tests: `TraineeSelectorTest.php`, `TrainingRunTest.php` (create + pre-populate cases).
+Page: `resources/js/pages/Runs/Create.vue` (+ `components/TraineeCombobox.vue`); Controller: `TrainingRunController::create/store`; Request: `app/Http/Requests/StoreTrainingRunRequest.php`; Tests: `TraineeSelectorTest.php`, `RunCreateSurfaceTest.php`, `TrainingRunTest.php` (create + pre-populate cases), `tests/browser/runs.spec.ts`.
 
 #### Current Status
 Implemented.
@@ -384,13 +391,13 @@ Labels on every control; the preview table (on SCR-RUN-005) is the scrollable re
 Copy names the limitation plainly: import carries **turns only**; skills/deck/races stay empty and are added per-turn on the run page.
 
 #### Navigation & Workflow Relationships
-Forward: SCR-RUN-005. Failure loop: preview re-render of the same view with `@error`.
+Forward: SCR-RUN-005. Failure loop: the same page re-rendered with the Inertia `errors` prop.
 
 #### Dependencies
 `Umamusume`; `config/scenarios.php`; `TrainingRunController::importForm/importChoices`.
 
 #### Implementation References
-View: `resources/views/runs/import.blade.php` (form branch); Request: `ImportHistoricalRunRequest`; Controller: `TrainingRunController::importForm`; ADR: `docs/adr/0017-historical-run-import.md`; Tests: `HistoricalRunImportTest`.
+Page: `resources/js/pages/Runs/Import.vue` (form branch); Controller: `TrainingRunController::importForm`; Request: `ImportHistoricalRunRequest`; ADR: `docs/adr/0017-historical-run-import.md`; Tests: `HistoricalRunImportTest`, `tests/browser/run-import.spec.ts` (the KI-46 composite sentence, which the MessageBag test could not reach).
 
 #### Current Status
 Implemented.
@@ -448,7 +455,7 @@ Success → SCR-RUN-003 with import provenance line visible there.
 `ImportHistoricalRun` action; `TrainingRun` fillable `imported_at`/`import_source`.
 
 #### Implementation References
-View: `resources/views/runs/import.blade.php` (preview branch); Controller: `TrainingRunController::importPreview/importStore`; Action: `app/Actions/ImportHistoricalRun.php`; Test: `HistoricalRunImportTest` (two-POST semantics pinned).
+Page: `resources/js/pages/Runs/Import.vue` (preview branch, gated on the `preview` prop); Controller: `TrainingRunController::importPreview/importStore`; Action: `app/Actions/ImportHistoricalRun.php`; Tests: `HistoricalRunImportTest` (two-POST semantics pinned), `tests/browser/run-import.spec.ts`.
 
 #### Current Status
 Implemented. (Documented as a separate ID because it is a distinct workflow state with its own commit action; it shares the physical view file.)
@@ -730,7 +737,7 @@ Same filter-surface idiom as Screen D (`h-11`, focus ring, wrap rows); client ra
 `SupportCard`, `SupportCardEffects::dictionary()` (read once per page, N+1 avoided by design), `CardRarity`.
 
 #### Implementation References
-View: `resources/views/support-cards/index.blade.php`; Controller: `SupportCardController::index`; Request: `SupportCardSearchRequest`; ADR: `docs/adr/0014-support-card-entities.md`; Tests: `ApiV1SupportCardTest` (data shape), `GametoraSupportCardParserTest`.
+View: `resources/js/pages/SupportCards/Index.vue` (+ `components/RarityChip.vue`); Controller: `SupportCardController::index`; Request: `SupportCardSearchRequest`; ADR: `docs/adr/0014-support-card-entities.md`; Tests: `SupportCardPageTest` (asserts the props), `tests/browser/support-cards.spec.ts`, `ApiV1SupportCardTest` (data shape), `GametoraSupportCardParserTest`.
 
 #### Current Status
 Implemented.
@@ -758,7 +765,7 @@ Catalog rows; deck rows.
 `GET /support-cards/{card}` name `support-cards.show` (implicit binding).
 
 #### Layout / Structure
-Header (display name, optional `name_ja`/`title_ja` line, Back) → dl (Rarity chip+word, Type word, Availability, Released in Japan, Released on [Global] — date-only never timezone-shifted, Belongs to → catalog link or the named two-way miss: 9000-block staff and untracked trainees; measured 322/559 resolve) → **Effects** (at-cap chips + basis note) → **Hinted skills** and **Event skills** (each: not-stored vs empty-stated distinction; linked rows via `x-skill-row`; unlinked counted in words) → **Provenance** (source, read date, and the `is_manual` "Corrected by hand, so the fetch engine leaves it alone" line — FR-B-4's stop sign placed where a Trainer can see it).
+Header (display name, optional `name_ja`/`title_ja` line, Back) → dl (Rarity chip+word, Type word, Availability, Released in Japan, Released on [Global] — date-only never timezone-shifted, Belongs to → catalog link or the named two-way miss: 9000-block staff and untracked trainees; measured 322/559 resolve) → **Effects** (at-cap chips + basis note) → **Hinted skills** and **Event skills** (each: not-stored vs empty-stated distinction; linked rows via `SkillRow.vue`; unlinked counted in words) → **Provenance** (source, read date, and the `is_manual` "Corrected by hand, so the fetch engine leaves it alone" line — FR-B-4's stop sign placed where a Trainer can see it).
 
 #### Data Displayed / States
 Unknown dictionary rows marked by id, never labelled. No tier label (held).
@@ -773,7 +780,7 @@ Same idiom as SCR-SUP-001; no inputs.
 `SupportCard`, `SupportCardEffects::atCap`, `Skill` via `availableOnGlobal`, `Umamusume` via `external_ref` string join (deliberately not a foreign key — ADR-0014 correction 1).
 
 #### Implementation References
-View: `resources/views/support-cards/show.blade.php`; Controller: `SupportCardController::show` (+`skillList`, `trainee`); Test: `RunDeckTest` (deck read-side), parser test above.
+View: `resources/js/pages/SupportCards/Show.vue` (+ `components/SkillRow.vue`, `components/RarityChip.vue`); Controller: `SupportCardController::show` (+`skillList`, `trainee`); Tests: `SupportCardPageTest` (asserts the props), `tests/browser/support-cards.spec.ts`, `RunDeckTest` (deck read-side), parser test above.
 
 #### Current Status
 Implemented.
