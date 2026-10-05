@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Schema;
 use Pest\Browser\Browser;
 
 /*
- * G-18 / G-19 for the legacy application shell.
+ * G-18 / G-19 for the application's two source trees.
  *
- * G-19 is a grep gate, and this is that grep run against the rendered HTML rather
+ * G-19 is a grep gate, and this is that grep run against rendered HTML rather
  * than the source, so a value smuggled in through a Blade expression is caught
  * too. Two things must not appear: a `dark:` utility, because the theme forks by
  * flipping custom properties and nothing else (D-101), and any skeleton palette
  * class, which is what left the dark theme with a white page and zinc borders
- * before `components/layout.blade.php` was migrated to tokens.
+ * while the shell still rendered on the skeleton palette (B1 retired that shell).
  *
  * The measured half of G-18 — every text/background pair clearing 4.5:1 in both
  * themes — is a browser check against resolved custom properties, and the corpus
@@ -94,10 +94,11 @@ function styleSources(): array
 /**
  * The comments out of a source file, leaving the code.
  *
- * A comment that names a withdrawn utility is documentation doing its job: layout.blade.php records
- * the `bg-zinc-50` pair it replaced precisely so nobody puts it back, and runs/import.blade.php says
- * "no `dark:` fork" in order to forbid one. Matching those would make the gate fail the prose that
- * keeps the rule alive, so the class scan reads only what can reach an element.
+ * Comments are where a rule is documented by naming the form it rejects, which is
+ * precisely the shape this gate is meant to forbid in markup. DESIGN.md and the
+ * test prose that guards it both name the withdrawn pairs so nobody reintroduces
+ * them; matching those would make the gate fail the prose that keeps the rule
+ * alive, so the class scan reads only what can reach an element.
  *
  * ponytail: line comments are found by `//` not preceded by `:`, which covers a URL in a string but
  * would also cut a trailing double slash inside one. Upgrade path is a real tokenizer, worth it only

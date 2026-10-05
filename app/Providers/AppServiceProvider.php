@@ -36,12 +36,14 @@ class AppServiceProvider extends ServiceProvider
          * back to the system script rather than writing an attribute no stylesheet
          * would match.
          *
-         * Both root templates are composed: `components.layout` (the Blade shell) and
-         * `app` (the Inertia root, ADR-0020 §1), so each first paint is already the
-         * chosen theme. Composers run on every render, so the lookup stays to the two
-         * views whose output depends on it.
+         * All four root documents are composed: `app` (the Inertia root, ADR-0020 §1) and the
+         * two error views that render themselves as documents, `errors.404` and `errors.419`,
+         * because the Blade shell they used to share was retired with the Inertia port.
+         * `errors.500` stays out on purpose: it is the page a Trainer sees when part of the app
+         * is already failing, and it draws itself without the database. Composers run on every
+         * render, so the lookup stays to the four views whose output depends on it.
          */
-        View::composer(['components.layout', 'app'], function ($view): void {
+        View::composer(['app', 'errors.404', 'errors.419'], function ($view): void {
             $theme = Preference::get('theme');
 
             $view->with('theme', in_array($theme, ['light', 'dark'], true) ? $theme : null);

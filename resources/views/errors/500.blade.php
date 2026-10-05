@@ -1,10 +1,10 @@
-{{-- A standalone document, deliberately not `x-layout`: this page is what a Trainer sees when part
-     of the app is already failing, and the layout's theme composer reads the stored preference from
-     the `preferences` table (D-104). A dead database would turn the error page into a second error.
+{{-- A standalone document, deliberately not a shared shell: this page is what a Trainer sees when part
+     of the app is already failing, and the theme composer reads the stored preference from the
+     `preferences` table (D-104). A dead database would turn the error page into a second error.
      The theme order this app documents is stored value, then operating system, then light; with the
      store unreachable the first term is unavailable, so the inline fallback is what keeps the first
-     paint themed (G-20). It stays in the head for the reason the layout gives: a bundled script runs
-     after first paint and would flash the wrong theme. --}}
+     paint themed (G-20). It stays in the head for the reason every root document keeps it there: a
+     bundled script runs after first paint and would flash the wrong theme. --}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +18,9 @@
             }
         })();
     </script>
-    @vite(['resources/css/app.css', 'resources/js/app.ts'])
+    {{-- The stylesheet only: the shell's JavaScript entry went away with the Inertia port, and a page
+         that draws itself without the database should not be the last thing pinned to it. --}}
+    @vite(['resources/css/app.css'])
 </head>
 <body class="min-h-screen bg-page text-ink">
     <main id="main" class="mx-auto max-w-5xl px-4 py-8">
