@@ -69,3 +69,29 @@ the shipped theme; or regenerate `tokens.json` with `tokens.py` against the curr
 the anchor is refreshed. Not fixed here; this entry files the finding. First recorded in
 `docs/research-scratch/DESIGN-CORPUS.md` section "scratch-priors.md" §2.1 (2026-10-03, priors pass;
 the priors file moved there on 2026-10-03 when root `research-scratch/` was emptied).
+
+### KI-59 The catalog detail Identity slot emits a portrait URL the artwork mirror does not hold, so the frame renders broken instead of absent - FILED 2026-10-05 (Task B1 closure pass, from the Playwright run), OPEN
+
+`resources/js/pages/Catalog/Show.vue:128` passes `:url="trainee.artworkURL"` to `ArtworkSlot`
+unconditionally, and `resources/js/components/ArtworkSlot.vue:80-85` renders an `<img>` whenever
+`url` is truthy, with no check that the mirrored file exists. The prop comes from the row, not from
+the disk, so on a host where the manual `uma:fetch-art` (`ADR-0021`) has not run the page still
+prints a `size-16` portrait frame pointing at a path that is not there. `DESIGN.md` §4.7 calls that
+exact case out: an absent file renders no frame and no placeholder. The mirror is gitignored
+(`storage/app/private/.gitignore:1`), so the rendered outcome is host state rather than repository
+state, which is what makes this a defect and not a fixture difference.
+
+Reproducer: `npx playwright test tests/browser/catalog-detail.spec.ts`. On this host
+`storage/app/private/artwork/card_portrait` does not exist, and
+`tests/browser/catalog-detail.spec.ts:146` fails `toHaveCount(0)` with `Received: 1`, resolving to
+one element on 33 consecutive polls. The sibling case at `:113` passes because it guards on the
+rendered state before asserting (`if (await frame.isVisible())`), and it confirms the URL is
+emitted in the documented shape, `/artwork/card_portrait/\d+$`.
+
+`tests/browser/catalog-detail.spec.ts:140-152` is correct as written and should not be weakened: it
+encodes §4.7's absence state. The defect is that the absence state is unreachable whenever the prop
+is populated. Whether the prop should be gated on file existence, or the slot should treat an
+unsatisfiable URL as absent, is a design call for the Architect; `AGENTS.md` §8 still describes the
+`ADR-0021` display half as unbuilt, which no longer matches
+`resources/js/components/ArtworkSlot.vue`, so that line is stale in the same way. Not fixed here;
+this entry files the finding.
