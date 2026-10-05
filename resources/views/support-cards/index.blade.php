@@ -10,11 +10,16 @@
     whose whole purpose is to state availability per row. Pre-filtering to Global would put a second,
     silent copy of that decision on the read side.
 
-    What is NOT rendered, and why: no card art and no icon (the source publishes neither). No tier label,
+    What is NOT rendered, and why: no icon (the source publishes none). No tier label,
     which ADR-0014 holds pending a current Global source. No effect value at any level but cap, because
     the panel names its basis rather than printing bracketing anchors (D-256). And no em dash as the
     disclosure glyph (R-02, D-79, KI-7). D-30 currently carries no SupportCard entry at all, so the
     widening ask travels in `docs/research-scratch/PLANS-AND-BRIEFS.md`.
+
+    Card art is the one exception this list used to make: a row now carries the `ADR-0021` thumbnail
+    when the local mirror holds the card's file, and stays the text-only row when it does not. The
+    source publishes no art of its own, which is why the art arrives through the mirror rather than
+    through this import.
 --}}
 <x-layout title="Support cards">
     <h1 class="text-2xl font-semibold text-ink-strong">Support cards</h1>
@@ -124,6 +129,27 @@
             @foreach ($cards as $card)
                 @php $effects = \App\Services\SupportCardEffects::atCap($card, $effectNames); @endphp
                 <li class="flex flex-wrap items-baseline gap-x-2 gap-y-1 px-4 py-3 text-sm">
+                    {{-- The `ADR-0021` thumbnail, the leading cell `design-2.0` §45a fixes for this row.
+                         Two identifiers meet here and they are not interchangeable: `support-id` is the
+                         publisher's number and the only one the mirror's storage path is keyed on, while
+                         `route-args` carries the local `id` because `SupportCardController` binds
+                         `support-cards.show` on the primary key and declares no `getRouteKeyName()`. Swapping
+                         them links to a page that does not exist and points the frame at a file the mirror
+                         never wrote, and neither mistake shows up in the component's own test, which
+                         supplies both arguments by hand.
+
+                         The slot is clickable here (`§45a`: "navigates to support-card detail") and is not
+                         `decorative`: §42's label-in-name clause wants the anchor labelled with the name this
+                         row already prints, which is also what makes the second link to the same destination
+                         findable rather than anonymous. When the mirror holds nothing the component renders
+                         no element at all, so the row is the text-only list it has always been. --}}
+                    <x-support-thumb
+                        :support-id="$card->support_id"
+                        size-class="size-12"
+                        :name="$card->displayName()"
+                        :route-args="['card' => $card->id]"
+                    />
+
                     <a href="{{ route('support-cards.show', $card) }}" class="font-semibold text-ink-strong hover:underline">{{ $card->displayName() }}</a>
 
                     <x-rarity-chip :rarity="$card->rarity" />

@@ -15,6 +15,26 @@
 --}}
 <x-layout :title="$card->displayName()">
     <div class="flex items-baseline justify-between">
+        {{-- The `ADR-0021` thumbnail in the title block, at the `size-16` geometry `design-2.0` §45a
+             fixes for this screen. `support-id` is the publisher's number and the only key the mirror's
+             storage path is addressed by; `route-args` carries the local `id`, which is what
+             `SupportCardController::show()` binds on. The wrapper link is the component's, not this
+             screen's: §45a gives the detail slot the click action "no action", and pointing it at the
+             page it is already on changes no page and moves no scroll.
+
+             Not `decorative`, and the reason is worth recording. The title beside the slot prints the
+             same name, so §42 would normally blank the `alt`; but `decorative` blanks the anchor's
+             `aria-label` with it, and a focusable anchor with no accessible name fails WCAG 2.2 AA
+             4.1.2 on a screen whose binding constraint is WCAG 2.2 AA. The component's default keeps the
+             name reachable and leaves the `alt` carrying the client's display name, which is the smaller
+             of the two deviations. Making the flag blank only the `alt`, or making the slot
+             non-navigational here, is a change to the component and travels with Task 10. --}}
+        <x-support-thumb
+            :support-id="$card->support_id"
+            size-class="size-16"
+            :name="$card->displayName()"
+            :route-args="['card' => $card->id]"
+        />
         <h1 class="text-2xl font-semibold text-ink-strong">{{ $card->displayName() }}</h1>
         <a href="{{ route('support-cards.index') }}" class="text-sm text-ink-muted hover:underline">Back to support cards</a>
     </div>
