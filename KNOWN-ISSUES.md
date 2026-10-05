@@ -7,8 +7,9 @@ commit that closed it.** KI-38 through KI-56 sit in the same master, further dow
 KI-57 onward.
 
 **Status (2026-10-06, at `ab53861`):** this file carries KI-57, KI-58, KI-59 and KI-60, and all four are
-OPEN. The count is stated as composition rather than a total, because the totals that used to live here
-went stale the moment the history moved.
+OPEN. KI-60's dev-database half was remediated on 2026-10-06 and stays open for its prevention half; the
+entry records which is which. The count is stated as composition rather than a total, because the
+totals that used to live here went stale the moment the history moved.
 
 ## This file is still the append target
 
@@ -175,3 +176,51 @@ Trainer's own data, and it is the owner's call, not an agent's.
 skills and character-card sources so the new columns hold data; (c) give the plan's status column an
 applied-to-dev leg, or add `migrate:status` to the hand-off sequence in `AGENTS.md` §9, so a Pending
 migration in front of a committed read path fails a gate instead of a page.
+
+**Remediation applied 2026-10-06, by owner ruling after this entry was filed. (a) and (b) are done; (c)
+is not, and closure is held on `O-1`.**
+
+- `php artisan uma:backup` first, and the backup was opened and counted *before* any write:
+  `storage/app/backups/uma-backup-20261005-195923.sqlite` holds 30 tables, 6 runs, 1,910 skills and 41
+  `migrations` rows. The name is UTC; the local date is 2026-10-06.
+- `php artisan migrate` applied all four (10.55 / 8.16 / 3.31 / 2.84 ms). `migrate:status` now reports
+  **0 Pending**.
+- `uma:reparse gametora-skills` → 1,910 updated, 0 created, 0 skipped, 0 to review.
+  `uma:reparse gametora-character-cards` → 106 updated, 0 created, 1 skipped, 0 to review. Both replayed
+  from the `2026-09-29` snapshots, zero network, as `AGENTS.md` §11 requires.
+- Post-state, measured on the dev file rather than asserted: `condition_groups` non-null on **1,910 of
+  1,910** skills, and `skills_awakening` / `skills_event` / `skills_evo` on **106 of 106** cards.
+  `veterans` holds 0 rows and `build_target` is NULL on all 6 runs, which are correct empties rather
+  than gaps: nothing has been recorded to the library and no target has been entered.
+- **No row count moved anywhere.** Against the same-day backup: `umamusume` 67, `training_runs` 6,
+  `turn_entries` 1, `character_cards` 106, `skills` 1,910, `race_catalog_slots` 410, `support_cards` 559,
+  all identical.
+- `GET /` and `GET /legacy` return **200** on the live server on 8000. The dashboard document carries the
+  `activeCareer`, `recentVeterans`, `quickActions` and `dataStatus` props and the string
+  `no such table` is absent from it.
+
+**Two things this pass suspected and then cleared, recorded because both look like defects.**
+
+1. `data_sources` stayed at 67 rows while 2,016 rows were rewritten, which reads as a breach of the
+   Floor's "no fact stored without provenance". It is not: at these grains provenance travels **on the
+   row**, and `source_url`, `snapshot_path` and `fetched_at` are non-null on all 1,910 skills and all
+   106 cards. Rows holding content with no provenance number **0**.
+2. The row's `fetched_at` then moved to the moment of the reparse while `data_sources.fetched_at` stayed
+   at the real fetch date, so two clocks disagree. The copy separates them correctly: the skill, card
+   and form panels print `read <fetched_at>` and the `data_sources` list prints `fetched <...>`
+   (`resources/js/pages/Skills/Show.vue:184`, `resources/js/components/catalog/FormDetail.vue:41`,
+   `resources/js/pages/Catalog/Show.vue:389`). Nothing claims a fetch that did not happen.
+
+**One number this pass could not explain, and did not paper over.** The cards reparse reported
+`1 skipped (manual or unresolved)` while `character_cards` holds **zero** rows with `is_manual = 1` and
+**zero** rows with a NULL `umamusume_id`, and its row count did not change. The counter's meaning lives
+in `PipelineRunner`, which this pass did not read, so the skip is recorded as unattributed rather than
+assigned to a cause. A future pass should read that counter before treating the message as evidence.
+
+**What stays open.** Half (c): `docs/proposals/frontend-development-plan.md` still records a slice as
+`Landed` with no leg for `applied to the dev database`, and no gate runs `migrate:status` against the dev
+file, so the next migration can sit Pending in exactly this way again. Landing (c) means editing
+`AGENTS.md` §9 and the plan's status table, both of which have been fenced against agent edits in every
+dispatch since 2026-10-02, so it is the owner's to apply. Closure of this entry is additionally held on
+**O-1**: register discipline closes an entry only when the fix is on `origin/master`, and `master` is
+unpushed. Everything above is local.
