@@ -3,18 +3,35 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const page = usePage();
-const active = computed(() => page.url);
 const appVersion = computed(() => page.props.app?.version ?? null);
 const flashStatus = computed(() => page.props.flash?.status ?? null);
 
+// "Am I on this destination?" answered as a prefix, not as equality, because a section's own
+// sub-screens carry it in the URL: `/legacy/12` and `/legacy/compare` are both the Legacy Lab.
+// `page.url` also carries the query string on a filtered list, so the comparison strips it —
+// otherwise `aria-current="page"` silently falls off the moment a filter is applied. Exact
+// equality had this working only on the bare index URLs, which is why it is stated here rather
+// than left to look correct on the screen it was written for.
+function isCurrent(to: string): boolean {
+    const [path] = page.url.split('?');
+
+    return path === to || path.startsWith(`${to}/`);
+}
+
 // The 2.0 navigation (docs/proposals/design-2.0.md §28). `to: null` = not built yet:
-// Legacy Lab and the Veteran library arrive in later ADR-0020 slices, so they render as
-// a named absence rather than a dead link. `spa` marks the one Inertia route that
-// client-navigates; the rest full-reload to the existing Blade screens during the rewrite.
+// the Veteran library arrives in the D16 slice, so it renders as a named absence rather
+// than a dead link. `spa` marks the Inertia routes that client-navigate; the rest
+// full-reload to the existing Blade screens during the rewrite.
+//
+// Legacy Lab became a link when slice D5 landed, which took the list from eight live
+// destinations plus one absence to eight plus one — the count is unchanged, so
+// Miller's Law (plan §13) holds without dropping anything. The Veteran library below
+// is the remaining named absence and the one a future slice has to replace rather than
+// add beside.
 const items = [
     { label: 'Dashboard', to: '/', spa: true },
     { label: 'New Career', to: '/training-runs/create', spa: true },
-    { label: 'Legacy Lab', to: null, spa: false },
+    { label: 'Legacy Lab', to: '/legacy', spa: true },
     { label: 'Support Cards', to: '/support-cards', spa: true },
     { label: 'Skills', to: '/skills', spa: true },
     { label: 'Review', to: '/review', spa: true },
@@ -53,8 +70,8 @@ const mobileDisabledClass =
                         <Link
                             v-if="item.spa"
                             :href="item.to as string"
-                            :class="[linkClass, active === item.to ? activeClass : '']"
-                            :aria-current="active === item.to ? 'page' : undefined"
+                            :class="[linkClass, isCurrent(item.to as string) ? activeClass : '']"
+                            :aria-current="isCurrent(item.to as string) ? 'page' : undefined"
                         >
                             {{ item.label }}
                         </Link>
@@ -112,8 +129,8 @@ const mobileDisabledClass =
                 <Link
                     v-if="item.spa"
                     :href="item.to as string"
-                    :class="[mobileClass, active === item.to ? activeClass : '']"
-                    :aria-current="active === item.to ? 'page' : undefined"
+                    :class="[mobileClass, isCurrent(item.to as string) ? activeClass : '']"
+                    :aria-current="isCurrent(item.to as string) ? 'page' : undefined"
                 >
                     {{ item.label }}
                 </Link>

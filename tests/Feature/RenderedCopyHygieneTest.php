@@ -98,14 +98,37 @@ function renderedDashLines(): array
 
 it('scans every view and component, not just the top directory', function (): void {
     $sources = shippedCopySources();
-    $blade = array_filter(array_keys($sources), static fn (string $path): bool => str_ends_with($path, '.blade.php'));
-    $vue = array_filter(array_keys($sources), static fn (string $path): bool => str_ends_with($path, '.vue'));
+    // `$paths`, not `$vue`/`$blade`: the filtered values are the paths themselves, and taking
+    // `array_keys()` of that list afterwards would yield list indices (0, 1, 2 …) rather than
+    // paths. `array_values()` keeps them as paths with contiguous keys.
+    $paths = array_values(array_keys($sources));
+    $blade = array_filter($paths, static fn (string $path): bool => str_ends_with($path, '.blade.php'));
+    $vue = array_filter($paths, static fn (string $path): bool => str_ends_with($path, '.vue'));
 
     // The guards below are worthless if the sweep walks nothing, so it has a floor on each tree
     // rather than one total: the Vue tree is where the copy lives now, and a total would be
     // satisfied by either tree alone.
+    //
+    // The Vue floor was an exact count of 40 until 2026-10-05, and it was the wrong shape. Every
+    // Phase D slice adds components and pages, so the number is a constant that each slice has to
+    // bump and none of them can own: two slices landing at once (D5's Legacy Lab and D6's Support
+    // deck builder) each failed the other's count, and the "fix" would have been to bake in whichever
+    // session happened to commit last. The floor keeps what the assertion is actually for — proving
+    // the recursive walk reaches the whole Vue tree rather than one directory, which a Blade-only
+    // sweep would satisfy vacuously now that almost every surface is a component — and stops it being
+    // a collision oracle. 40 is the count the exact assertion was written against, so anything that
+    // silently stops scanning that many files still fails.
+    // Normalise the host's path separator before matching, so the assertion holds on Windows (`\`)
+    // and on the `/` hosts this suite also runs on. `getPathname()` is what builds the key, so the
+    // separator is the host's rather than the repository's.
+    $vuePaths = array_map(static fn (string $path): string => str_replace('\\', '/', $path), $vue);
+
     expect($blade)->not->toBeEmpty()
-        ->and($vue)->toHaveCount(40);
+        ->and(count($vue))->toBeGreaterThanOrEqual(40)
+        // A named surface from each tree, so a walk that found files by accident while skipping
+        // nested directories would still fail.
+        ->and(array_filter($vuePaths, static fn (string $path): bool => str_ends_with($path, 'pages/Legacy/Builder.vue')))->not->toBeEmpty()
+        ->and(array_filter($vuePaths, static fn (string $path): bool => str_ends_with($path, 'components/legacy/AncestryNode.vue')))->not->toBeEmpty();
 });
 
 it('loads no remote stylesheet or font on first paint', function (): void {

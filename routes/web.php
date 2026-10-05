@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LegacyController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SkillController;
@@ -44,12 +45,36 @@ Route::put('/training-runs/{run}/turns/{turn}', [TrainingRunController::class, '
 Route::delete('/training-runs/{run}/turns/{turn}', [TrainingRunController::class, 'destroyTurn'])->name('runs.turns.destroy');
 Route::post('/training-runs/{run}/skills', [TrainingRunController::class, 'syncSkills'])->name('runs.skills.sync');
 Route::post('/training-runs/{run}/deck', [TrainingRunController::class, 'syncDeck'])->name('runs.deck.sync');
+// The deck builder (SCREEN-007). Read-only; it posts to `runs.deck.sync` above, so the write and its
+// Form Request are the ones the run screen already uses. Registered after the POST because Laravel
+// matches on method first, and either order would bind the same `{run}`.
+Route::get('/training-runs/{run}/deck', [TrainingRunController::class, 'deck'])->name('runs.deck');
 Route::post('/training-runs/{run}/races', [TrainingRunController::class, 'storeRace'])->name('runs.races.store');
 Route::post('/training-runs/{run}/purchases', [TrainingRunController::class, 'storePurchase'])->name('runs.purchases.store');
 Route::put('/training-runs/{run}/build-target', [TrainingRunController::class, 'updateBuildTarget'])->name('runs.build-target.update');
 
 Route::get('/review', [ReviewController::class, 'index'])->name('review.index');
 Route::post('/review/{candidate}', [ReviewController::class, 'resolve'])->name('review.resolve');
+
+/*
+ * The Legacy Lab (SCREEN-006; PRD FR-G, ADR-0020 §3, under ADR-0010). Record-only: these routes read
+ * the Veteran library, record what the Trainer entered, and align stored rows. Nothing here computes
+ * an inheritance, an Affinity payout, a star-roll chance, or a recommended combination, and the
+ * controller's docblock is where that boundary is stated in full.
+ *
+ * `/legacy/compare` is declared first and `{run}` is constrained to a number, which is the same pair of
+ * decisions `routes/web.php` already makes for `runs.import` and `runs.{run}`: the literal segment
+ * would otherwise bind to the model and 404. The constraint is belt-and-braces for the ordering, and
+ * it is also what stops `/legacy/compare` from reading as a run id at all.
+ */
+Route::get('/legacy', [LegacyController::class, 'index'])->name('legacy.index');
+Route::get('/legacy/compare', [LegacyController::class, 'compare'])->name('legacy.compare');
+Route::get('/legacy/{run}', [LegacyController::class, 'builder'])
+    ->whereNumber('run')
+    ->name('legacy.builder');
+Route::put('/legacy/{run}', [LegacyController::class, 'update'])
+    ->whereNumber('run')
+    ->name('legacy.update');
 
 // The two UI preferences PRD US-11 authorizes (SCREEN_SPEC.md §7-5). One PUT for both keys,
 // because writing a preference is one action on the store rather than one action per key.

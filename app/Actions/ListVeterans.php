@@ -6,8 +6,8 @@ namespace App\Actions;
 
 use App\Models\Veteran;
 use App\Services\PageSize;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * The Veteran library query (PRD FR-G-2, ADR-0020 §3): read-only, and it searches only what the Trainer
@@ -27,6 +27,14 @@ use Illuminate\Database\Eloquent\Builder;
 final class ListVeterans
 {
     /**
+     * The paginator is typed as the concrete `LengthAwarePaginator` rather than the
+     * `Illuminate\Contracts\Pagination\LengthAwarePaginator` interface, because the screen that
+     * renders this list calls `through()` to map each row to an explicit array. The interface does
+     * not declare it, so the wider type would force that screen either to re-query or to map by hand
+     * and lose the "never pass an Eloquent model to a page" rule the rest of the rewrite holds. The
+     * concrete class is what `paginate()` returns anyway, so this narrows the promise to the truth
+     * rather than widening it.
+     *
      * @param  array{trainee?: int|null, scenario?: string|null, tags?: list<string>}  $filters
      * @return LengthAwarePaginator<int, Veteran>
      */

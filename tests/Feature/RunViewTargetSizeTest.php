@@ -97,15 +97,22 @@ it('gives every L-F01 target the min-h-11 floor', function (): void {
     /*
      * The census of the nav, so the sweep above cannot pass on an empty list. Deviation from
      * the Blade shell's six links, stated because the run page now renders AppLayout's 2.0
-     * navigation: nine destinations, two of them named absences (`to: null`) that render as
-     * disabled spans, and the whole list renders twice (desktop aside and mobile bar). Each
-     * of the four classes a destination can render with is asserted to carry the floor, so a
+     * navigation: nine destinations and one named absence (`to: null`), which renders as a
+     * disabled span; the whole list renders twice (desktop aside and mobile bar). Each of
+     * the four classes a destination can render with is asserted to carry the floor, so a
      * destination that forgets it fails here rather than sliding past an unchanged count.
+     *
+     * The absence count was two until slice D5 landed the Legacy Lab: that slice filled the
+     * one `to: null` placeholder it owned rather than appending a tenth destination, so the
+     * total is still nine and only the Veterans library is still a named absence. The
+     * assertion is the count, not the value 2, so the next slice to fill Veterans lowers it
+     * deliberately instead of being a silent failure.
      */
     preg_match('/const items = \[(.*?)\];/s', $layout, $items);
 
     expect(substr_count($items[1] ?? '', 'label:'))->toBe(9)
-        ->and(substr_count($items[1] ?? '', 'to: null'))->toBe(2);
+        ->and(substr_count($items[1] ?? '', 'to: null'))->toBe(1)
+        ->and(substr_count($items[1] ?? '', "label: 'Legacy Lab', to: '/legacy'"))->toBe(1);
 
     foreach (['linkClass', 'disabledClass', 'mobileClass', 'mobileDisabledClass'] as $constant) {
         preg_match('/const '.$constant.'\s*=\s*\'([^\']*)\'/s', $layout, $declared);

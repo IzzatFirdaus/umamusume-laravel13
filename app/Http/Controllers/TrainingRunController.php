@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\ImportHistoricalRun;
+use App\Enums\CardRarity;
 use App\Enums\MoodTier;
 use App\Enums\RaceEntryStatus;
 use App\Enums\ReleaseStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\TurnEventType;
+use App\Http\Requests\DeckPickerSearchRequest;
 use App\Http\Requests\ImportHistoricalRunRequest;
 use App\Http\Requests\StoreBuildTargetRequest;
 use App\Http\Requests\StoreDeckRequest;
@@ -32,6 +34,9 @@ use App\Models\TurnEntry;
 use App\Models\TurnEvent;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\Umamusume;
+use App\Services\DataPipeline\ArtworkMirror;
+use App\Services\DeckAnalysis;
+use App\Services\PageSize;
 use App\Services\ScenarioCaps;
 use App\Services\SupportCardEffects;
 use Illuminate\Http\RedirectResponse;
@@ -917,6 +922,299 @@ class TrainingRunController extends Controller
         }
 
         return DeckSlot::POSITIONS[0];
+    }
+
+    /**
+     * The deck builder (SCREEN-007), over the same `runs.deck.sync` write the run screen uses.
+     *
+     * **The six selections live in the query string, not in component state.** Every picker action is
+     * a `router.get` onto this same route, so a filter change or a page change would otherwise wipe
+     * the five slots the Trainer had not submitted yet. Carrying them in the URL is the same move
+     * `deckPayload()`'s `open_url` already makes for one slot at a time, lifted to all six, and it is
+     * what lets the picker be a genuinely paginated query instead of five hundred option nodes.
+     *
+     * The read-back order is `old()` first, then the query string, then the stored row: a rejected
+     * submission returns the six picks the Trainer just made (`D-3`), an unsubmitted pick survives
+     * navigation, and a page reached from a link shows what the run holds.
+     */
+    public function deck(DeckPickerSearchRequest $request, TrainingRun $run): InertiaResponse
+    {
+        $run->loadMissing(['umamusume', 'deckSlots.supportCard']);
+        $dictionary = SupportCardEffects::dictionary();
+
+        return Inertia::render('Support/Builder', [
+            'run' => [
+                'id' => $run->id,
+                'name' => $run->umamusume?->name,
+                'status_label' => $run->status->label(),
+                'scenario' => $run->scenario,
+                'has_scenario' => $run->hasScenario(),
+                // The label is config's, never the stored slug, and null when the Trainer has not
+                // chosen one, which is also when the Scenario Link derivation has nothing to run on.
+                'scenario_label' => $run->hasScenario() ? config('scenarios.scenarios.'.$run->scenarioKey().'.label') : null,
+                'run_url' => route('runs.show', $run),
+            ],
+            'slots' => $this->builderSlots($request, $run, $dictionary),
+            'picker' => $this->builderPicker($request, $run, $dictionary),
+            'types' => $this->builderTypes(),
+            'rarities' => $this->rarityWords(),
+            'availabilities' => SupportCard::AVAILABILITIES,
+            'analysis' => DeckAnalysis::build($this->builderAnalysisInput($request, $run, $dictionary)),
+            'action' => route('runs.deck.sync', $run),
+        ]);
+    }
+
+    /**
+     * The six slot rows, each with the card it holds and the flag the run record cannot yet store.
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return list<array<string, mixed>>
+     */
+    private function builderSlots(Request $request, TrainingRun $run, array $dictionary): array
+    {
+        $stored = $run->deckSlots->keyBy('slot_position');
+        $rows = [];
+
+        foreach (DeckSlot::POSITIONS as $position) {
+            $selected = $this->builderSelection($request, $run, $position);
+            $card = $selected === null ? null : SupportCard::query()->find($selected);
+
+            $rows[] = [
+                'position' => $position,
+                'label' => $position === DeckSlot::MAX_POSITION ? 'Slot 6 · Friends' : 'Slot '.$position,
+                // The role belongs to the position, not to the card parked in it (ADR-0014 correction 1).
+                'is_friend' => $position === DeckSlot::MAX_POSITION,
+                'selected' => (string) $selected,
+                'card' => $card === null ? null : $this->builderCard($card, $run, $dictionary),
+                // The only value the run can be read as. `RENTED` is a per-slot fact the table has no
+                // column for, and inventing one needs owner approval, so the control ships with the
+                // value and the screen says the run record does not keep it (see the hand-off).
+                'ownership' => 'OWNED',
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * What a slot holds right now: the rejected submit's pick, else the pick in the URL, else the
+     * stored row, else nothing.
+     */
+    private function builderSelection(Request $request, TrainingRun $run, int $position): ?int
+    {
+        // `old()` hands back whatever the POST carried, and a hand-made request or a test can carry an
+        // int where a form sends text, so the check is on the cast value rather than on the type.
+        $old = $request->old("deck.{$position}.support_card_id");
+
+        if ($old !== null && (string) $old !== '') {
+            return (int) $old;
+        }
+
+        $picked = $request->query('deck');
+
+        if (is_array($picked) && (string) ($picked[$position] ?? '') !== '') {
+            return (int) $picked[$position];
+        }
+
+        $id = $run->deckSlots->firstWhere('slot_position', $position)?->support_card_id;
+
+        return $id === null ? null : (int) $id;
+    }
+
+    /**
+     * The card picker. The offered set is the Global releases plus any card this run already uses, the
+     * same rule `deckPayload()` applies, and the query is the same shape `SupportCardController` uses:
+     * facet columns first, a deterministic order, then a clamped page size.
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return array<string, mixed>
+     */
+    private function builderPicker(DeckPickerSearchRequest $request, TrainingRun $run, array $dictionary): array
+    {
+        $equipped = $run->deckSlots->pluck('support_card_id')->all();
+        $rarity = $request->validated('rarity');
+        $type = $request->validated('type');
+        $status = $request->validated('status');
+        $search = $request->validated('query');
+
+        $query = SupportCard::query()
+            ->where(function ($q) use ($equipped): void {
+                $q->whereNotNull('release_global');
+
+                if ($equipped !== []) {
+                    $q->orWhereIn('id', $equipped);
+                }
+            })
+            ->when($rarity !== null, fn ($q) => $q->where('rarity', (int) $rarity))
+            ->when($type !== null, fn ($q) => $q->where('type', $type))
+            ->when($status !== null, fn ($q) => $q->where('release_status', $status))
+            ->when($search !== null, fn ($q) => $q->where(
+                fn ($inner) => $inner->where('char_name', 'like', '%'.$search.'%')->orWhere('title_en', 'like', '%'.$search.'%')
+            ))
+            // The tiebreaker is load-bearing for the same reason it is on the catalog: an order without
+            // one lets pagination hand back a different half of the catalogue on each pass.
+            ->orderBy('type')
+            ->orderBy('char_name')
+            ->orderBy('title_en');
+
+        $offered = SupportCard::query()
+            ->whereNotNull('release_global')
+            ->when($equipped !== [], fn ($q) => $q->orWhereIn('id', $equipped))
+            ->count();
+
+        return [
+            'page' => $query->paginate(PageSize::clamp($request->query('pageSize')))
+                ->withQueryString()
+                ->through(fn (SupportCard $card): array => $this->builderCard($card, $run, $dictionary)),
+            'offered' => $offered,
+            'type' => $type,
+            'rarity' => $rarity,
+            'status' => $status,
+            'query' => $search,
+            // Which slot a card row's Equip button writes to. A replacement is one keystroke away from
+            // the row, and the focus comes back to the slot afterwards. An out-of-range slot is a
+            // pasted URL, not a Trainer's mistake, so it falls back to the first rather than refusing
+            // the page over a picker target (the judgement `PageSize` already states for a page size).
+            'fillingSlot' => in_array((int) $request->validated('slot'), DeckSlot::POSITIONS, true)
+                ? (int) $request->validated('slot')
+                : DeckSlot::POSITIONS[0],
+            'askedFor' => $this->builderAsk($rarity, $type, $status, $search),
+        ];
+    }
+
+    /**
+     * What the Trainer narrowed the picker by, for the no-results state to name the ask rather than
+     * repeating a query back at them.
+     */
+    private function builderAsk(?string $rarity, ?string $type, ?string $status, ?string $search): string
+    {
+        $parts = array_filter([
+            $rarity === null ? null : 'rarity '.CardRarity::from((int) $rarity)->word(),
+            $type === null ? null : 'type '.SupportCard::typeWord($type),
+            $status === null ? null : 'availability '.$status,
+            $search === null ? null : 'a name containing "'.$search.'"',
+        ]);
+
+        return $parts === [] ? 'those conditions' : implode(' + ', $parts);
+    }
+
+    /**
+     * One card, in the shape both the slot rows and the picker rows read.
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return array<string, mixed>
+     */
+    private function builderCard(SupportCard $card, TrainingRun $run, array $dictionary): array
+    {
+        $scenarioLink = $this->scenarioLinkState($card, $run);
+
+        return [
+            'id' => $card->id,
+            'name' => $card->displayName(),
+            'name_ja' => $card->name_ja,
+            'title_ja' => $card->title_ja,
+            'url' => route('support-cards.show', $card),
+            // Keyed on the publisher's `support_id`, the only key the mirror's path answers to
+            // (ADR-0021 read half, `design-2.0` §45a "Support-card index, card row").
+            'artworkURL' => app(ArtworkMirror::class)->url('support_thumb', (int) $card->support_id),
+            'rarity_word' => $card->rarityWord(),
+            'type' => $card->type,
+            'type_label' => $card->typeLabel(),
+            'scenario_link' => $scenarioLink['state'],
+            'scenario_link_note' => $scenarioLink['note'],
+            'effects' => SupportCardEffects::atCap($card, $dictionary),
+        ];
+    }
+
+    /**
+     * The Scenario Link badge, derived on read and never stored (ADR-0014 correction 3; §1.4.7).
+     *
+     * Three states rather than one, because `isScenarioLink()` answers `false` for two different
+     * things: a character that is genuinely not on the list, and a card with nothing to compare
+     * against. Printing the badge for the second would be a claim the repository cannot make, so it
+     * becomes `N/A` with the reason as its title, which is the rule every underived value on this
+     * screen follows.
+     *
+     * @return array{state: string, note: string|null}
+     */
+    private function scenarioLinkState(SupportCard $card, TrainingRun $run): array
+    {
+        if (! $run->hasScenario()) {
+            return ['state' => 'unknown', 'note' => 'This run names no scenario, so there is no linked list to check this card against.'];
+        }
+
+        $linked = config('scenarios.scenarios.'.$run->scenarioKey().'.scenario_links');
+
+        if (! is_array($linked)) {
+            return ['state' => 'unknown', 'note' => 'The scenario config states no linked list, so the badge cannot be derived.'];
+        }
+
+        if ($card->char_name === null) {
+            return ['state' => 'unknown', 'note' => 'The source stores no character name for this card, so there is nothing to match against the linked list.'];
+        }
+
+        return $card->isScenarioLink($run->scenarioKey())
+            ? ['state' => 'linked', 'note' => null]
+            : ['state' => 'not_linked', 'note' => null];
+    }
+
+    /**
+     * The six cards the analysis reads, in slot order, with their at-cap effects.
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return list<array{card_name: string, effects: list<array<string, mixed>>}>
+     */
+    private function builderAnalysisInput(Request $request, TrainingRun $run, array $dictionary): array
+    {
+        $ids = [];
+
+        foreach (DeckSlot::POSITIONS as $position) {
+            $id = $this->builderSelection($request, $run, $position);
+
+            if ($id !== null) {
+                $ids[] = $id;
+            }
+        }
+
+        $cards = [];
+
+        foreach (SupportCard::query()->whereIn('id', $ids)->get() as $card) {
+            $cards[] = [
+                'card_name' => $card->displayName(),
+                'effects' => SupportCardEffects::atCap($card, $dictionary),
+            ];
+        }
+
+        return $cards;
+    }
+
+    /**
+     * The seven support types as the picker and the slot rows read them.
+     *
+     * @return list<array{key: string, label: string}>
+     */
+    private function builderTypes(): array
+    {
+        return array_map(
+            static fn (string $type): array => ['key' => $type, 'label' => SupportCard::typeWord($type)],
+            SupportCard::TYPES
+        );
+    }
+
+    /**
+     * The rarity words the picker offers, keyed by the value the query string carries.
+     *
+     * @return array<string, string>
+     */
+    private function rarityWords(): array
+    {
+        $words = [];
+
+        foreach (CardRarity::cases() as $case) {
+            $words[(string) $case->value] = $case->word();
+        }
+
+        return $words;
     }
 
     /**

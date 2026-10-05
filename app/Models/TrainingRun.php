@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -63,6 +64,10 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Skill> $skills
  * @property-read Umamusume $umamusume
  * @property-read CharacterCard|null $characterCard
+ * @property-read Veteran|null $veteran the library row built from this run, or null when none was
+ *                                       saved (`LegacyCompareRequest::runsInOrder()` reads it so a
+ *                                       run with a Legacy selection stays comparable before it is
+ *                                       filed)
  */
 #[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source'])]
 class TrainingRun extends Model
@@ -247,6 +252,21 @@ class TrainingRun extends Model
     public function raceEntries(): HasMany
     {
         return $this->hasMany(RaceEntry::class);
+    }
+
+    /**
+     * The Veteran-library row built from this run, or null when the Trainer never saved one.
+     *
+     * A `HasOne` rather than the reverse of `Veteran::trainingRun()` because the read side is what
+     * the Legacy Lab's compare surface needs: a run can hold a Legacy selection and never have been
+     * filed in the library, and that run still has to be comparable. The foreign key is unique
+     * (`ARCHITECTURE-ESSENTIALS.md`), so this can never return more than one row.
+     *
+     * @return HasOne<Veteran, $this>
+     */
+    public function veteran(): HasOne
+    {
+        return $this->hasOne(Veteran::class);
     }
 
     /**
