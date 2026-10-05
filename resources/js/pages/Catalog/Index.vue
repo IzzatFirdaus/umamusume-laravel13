@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
 import RarityChip from '../../components/RarityChip.vue';
+import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -120,17 +121,14 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
             <ul class="mt-6 space-y-4">
                 <li v-for="trainee in umamusumes.data" :key="trainee.id" class="rounded-md border border-rule bg-raised">
                     <h3 class="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-3">
-                        <!-- The trainee portrait, the Inertia half of the `ADR-0021` slot. The row
-                             header already prints her name beside the frame, so the image is
-                             decorative and takes `alt=""` (DESIGN.md §4.7); a screen reader reads the
-                             name once, from the text. It renders only when the mirror holds a file,
-                             so an unmirrored trainee keeps the text-only row and no grey box. -->
-                        <img
-                            v-if="trainee.artworkURL"
-                            :src="trainee.artworkURL"
-                            alt=""
-                            class="size-12 rounded-md object-cover"
-                        >
+                        <!-- The trainee portrait, the Inertia half of the `ADR-0021` slot, through the
+                             one component that owns the contract. The row header already prints her
+                             name beside the frame, so the image is decorative and takes `alt=""`
+                             (DESIGN.md §4.7); a screen reader reads the name once, from the text. No
+                             `href`: §45a makes the row's own name link the destination, so a second
+                             link to the same page would be a duplicate control. Renders nothing when
+                             the mirror holds no file, keeping the row text-only and box-free. -->
+                        <ArtworkSlot :url="trainee.artworkURL" alt="" size="size-12" />
                         <a :href="`/umamusume/${trainee.slug}`" class="font-semibold text-ink-strong hover:underline">
                             {{ trainee.name }}
                             <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
@@ -153,15 +151,11 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                             :key="card.id"
                             class="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-2"
                         >
-                            <!-- The form's own portrait, keyed on its card id. Decorative like the
-                                 header frame: this row prints the form title beside it, and the file
-                                 is a trainee portrait, so the name lives in the header, not here. -->
-                            <img
-                                v-if="card.artworkURL"
-                                :src="card.artworkURL"
-                                alt=""
-                                class="size-10 rounded-md object-cover"
-                            >
+                            <!-- The form's own portrait, keyed on its card id, at the `size-10` geometry
+                                 §45a records for a costume-form row. Decorative like the header frame:
+                                 this row prints the form title beside it, and the file is a trainee
+                                 portrait, so the name lives in the header, not here. -->
+                            <ArtworkSlot :url="card.artworkURL" alt="" size="size-10" />
                             <h4 class="text-sm font-medium text-ink">{{ card.title }}</h4>
                             <span class="flex items-baseline gap-3 text-xs text-ink-muted">
                                 <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
