@@ -112,6 +112,17 @@ at all and render no frame. The mechanism was misread because the `card_portrait
 nested `characters/portrait/trainee/<bucket>/` tree, and a shallow directory listing without recursion
 reported zero files where 665 exist. The `DESIGN.md` §4.7 rule holds and the app is not at fault.
 
+**Host-state note, 2026-10-06.** The sentence above asserts "this host" holds 665 mirrored files. Measured
+on this worktree on 2026-10-06, `storage/app/private/artwork/` **did not exist**, and
+`php artisan uma:fetch-art --dry-run` reported `card_portrait: 106 ids, already on disk 0` and
+`support_thumb: 559 ids, already on disk 0`. So the populated-mirror premise of this entry does not
+describe this tree, and every slot on every screen was rendering the null branch. Two readings fit the
+evidence: the 665 belonged to a peer worktree that has since been pruned (each tree carries its own
+gitignored `storage/`), or the count conflated the two kinds, since 106 + 559 = 665 exactly while only
+the 106 live under `characters/portrait/`. Which one it was is not established here, and this note does
+not withdraw the entry's mechanism: with a populated mirror the `:140` case still cannot pass. The
+mirror was filled on 2026-10-06 by `uma:fetch-art`, so the entry is now reproducible in this tree again.
+
 ### KI-60 Four committed migrations have never been applied to `database/database.sqlite`, so the landing page and `/legacy` return 500 while the whole suite passes green - FILED 2026-10-06 (from the owner's `GET /` error report), OPEN
 
 **Symptom, observed.** `GET http://127.0.0.1:8000/` raises
