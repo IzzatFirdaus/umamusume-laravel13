@@ -6,10 +6,14 @@ import { test, expect } from '@playwright/test';
 // scratch database (playwright.config.ts), so the fixtures are seeded rows: `special-week` has
 // three costume forms, a profile and a provenance row; `silence-suzuka` has exactly one form.
 //
-// Not covered here: the positive "Not yet released on Global" notice. `UmamusumeRosterSeeder`
-// skips `JapanOnly` rows on purpose (`inScope()`), so the seeded database holds none and a
-// browser test cannot exercise that branch. The server flag it binds is pinned in
-// `CatalogDetailPageTest`; the machine-token half is checked below on a released trainee.
+// Not covered here, and it is not coverable by this suite: the positive "Not yet released on Global"
+// notice. `UmamusumeRosterSeeder::inScope()` files `JapanOnly` rows as pending candidates rather than
+// promoting them (PRD FR-A-1: this is a Global-client tool; measured 68 promoted of 135), so no
+// `umamusume` row in any database this app builds can reach that branch, and rewriting the served page
+// object in flight does not work either: Blade points at the Vite dev server on `localhost:5173`, and
+// Chromium's private-network check refuses those asset requests for a `route.fulfill()`-synthesized
+// document, so the page never hydrates. What is proven: the prop that drives the branch
+// (`CatalogDetailPageTest`), and that the machine token stays off a real page (the last test below).
 
 const EIGHT_SECTIONS = [
     'Basic information',

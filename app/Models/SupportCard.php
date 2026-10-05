@@ -105,7 +105,7 @@ class SupportCard extends Model
 
     /**
      * The client's rarity word, which is not the enum's label. `CardRarity::label()` reads "Three
-     * stars" (the order signal `x-rarity-chip` puts in its aria-label); the word the Global client
+     * stars" (the order signal `RarityChip.vue` puts in its aria-label); the word the Global client
      * prints is R / SR / SSR (UMAMUSUME_REFERENCE.md §1.4.2), and showing "Three stars" where the game
      * shows "SSR" would be the tool inventing vocabulary. The mapping lives on the enum because a
      * filter facet has to name a rarity that is not a row yet.

@@ -356,12 +356,41 @@ into three shippable sub-slices.
   67 seeded Global trainees have a confirmed card). Both are covered on the props side.
 - **A4b — detail + guided turns** (`Runs/Show.vue`; port `x-run-header`, `x-stat-band`, `x-energy-gauge`,
   `x-mood-pill`, `x-resource-strip`, `x-deck-panel`, `x-race-calendar`, `x-race-panel`, `x-guided-step`,
-  `x-capsule-header`, `x-app-button`, `x-grade-badge`). Migrate `RunViewFrameTest`, `RunViewNoScriptTest`,
+  `x-capsule-header`, `x-app-button`, `x-grade-badge`).
+  **Half-built as of 2026-10-05, nothing wired.** The 15 Vue component twins exist as untracked files
+  under `resources/js/components/` (`AppButton`, `CapsuleHeader`, `MoodPill`, `GradeBadge`,
+  `EnergyGauge`, `StatBand`, `ResourceStrip`, `GradePointMeter`, `RaceCalendar`, `DeckPanel`, `RacePanel`,
+  `ShopPanel`, `TeamRankGauge`, `SpiritBurstRoster`, `TeamRacePanel`, `EpithetChecklist`,
+  `RaceFatigueChip`, `GuidedStep`). They are not in any page's import graph, so `npm run build` does not
+  compile them and they are **not yet proven by the build**; each was compiled individually with
+  `@vue/compiler-sfc` and they do pass `DesignTokensTest`'s token sweep, which walks `resources/js`.
+  `runs/show.blade.php`, the Blade components and every run test file are untouched, so HEAD is green.
+  Still to do, in order: flatten `showData()` into the props the components ask for (it has exactly one
+  caller, `show()`, so it becomes the page payload directly); write `Runs/Show.vue` (header/exports,
+  Resources+Mood, Stats, Goals, scenario panel cluster, the three `runs.update` forms with their
+  hidden carry-throughs, deck, turn table with its editable row, the rail via `GuidedStep`'s default
+  slot, error envelope, escape hatch, skills, delete disclosure); migrate the ~14 test files; add
+  `run-detail.spec.ts`; delete the Blade page and its now-unused components.
+  Five things the port must not lose, each already paid for once:
+  (1) `GuidedStep` must render a real `<form>` around its default slot, because the rail's radios live in
+  the component and its number fields live in the page; the Blade wrapped `{{ $slot }}` in the same form
+  for exactly this reason. (2) `showData()`'s server-side `old()`-and-`stage` rehydration of the rail now
+  conflicts with client-side `useForm` state — pick one, deliberately, or the rail double-fills.
+  (3) `KeyboardPathTest` reads the run page's **server HTML** for the skip link and for the "Keys 1 to 7"
+  advertisement, and pins `resources/js/guided-flow.ts` plus `import './guided-flow'` in `app.ts`;
+  `GuidedStep.vue` owns digits and Escape now, so that module loses its last consumer and those three
+  assertions move to the component and the browser, they do not disappear. (4) `RunViewTargetSizeTest`
+  hard-censuses the Blade shell's six nav links and sweeps `min-h-11` off server HTML; the Vue shell has a
+  different, nine-item navigation, so the census and the sweep both change. (5) `DeckPanel.vue` posts the
+  deck from form state and dropped the closed slots' hidden inputs, which were the no-script path — a
+  behaviour change under the 2026-10-05 ruling, not a like-for-like port, so it needs a stated note.
+
+  Migrate `RunViewFrameTest`, `RunViewNoScriptTest`,
   `RunViewTargetSizeTest`, `RunViewErrorEnvelopeTest`, `RunDeckTest`, `RunSkillPickerTest`,
   `RunStatusControlTest`, `RunSaveConfirmationTest`, `RunGoalsPanelTest`, `GoalPanelsOnRunDetailTest`,
   `GuidedTurn*`, `GuidedStep*`, `GuidedFirstTurnTest`, `StatBandTest`, `MoodPillTest`, `RaceCalendarTest`,
-  `ScenarioPanelUiTest`. Browser: `run-detail.spec.ts` asserting the guided rail's keyboard path and the
-  44px control sweep.
+  `ScenarioPanelUiTest`, `KeyboardPathTest`. Browser: `run-detail.spec.ts` asserting the guided rail's
+  keyboard path and the 44px control sweep.
   **Correction to this row, from the 2026-10-05 read of the view: it is not a 15-component port.** Each of
   the 15 components named above has exactly one consumer, `runs/show.blade.php`, and nothing else in
   `resources/views/`. Building a Vue twin for each buys no reuse and is what makes this row read as larger

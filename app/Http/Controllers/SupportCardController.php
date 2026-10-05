@@ -108,7 +108,7 @@ class SupportCardController extends Controller
                 'release_global_display' => $card->release_global?->format('M j, Y'),
                 'char_name' => $card->char_name,
                 'source_url' => $card->source_url,
-                'fetched_at_display' => $card->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+                'fetched_at_display' => $card->fetched_at->timezone(config('uma.display_timezone'))->format('M j, Y'),
                 'is_manual' => $card->is_manual,
             ],
             'effects' => SupportCardEffects::atCap($card, $dictionary),
