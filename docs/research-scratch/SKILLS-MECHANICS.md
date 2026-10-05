@@ -1069,6 +1069,16 @@ Working position for this repo, following the stricter record: **a hint level ma
 level; a discount percentage may not be computed or rendered** until an in-client read settles it. The
 `NN% OFF` caption shape is already pinned in `SOURCE-OF-TRUTH.md:93` for the day it becomes honest.
 
+**This subsection's two cross-file claims are stale as of 2026-10-05, and its condition is met.** It quotes
+`REFERENCE` §1.1.4 as printing "Exact per-level discount percentages: ❌ UNVERIFIED: No current source found": that
+sentence is no longer in §1.1.4, which now carries the measured ladder. It also says §8.4 "keeps the same gap open":
+§8.4 records the gap **closed on 2026-10-03** and points back at §2.4 of this file. The in-client check §2.2 makes
+a precondition for any rendered percentage has since been run (§2.4, and the 68-frame capture note
+`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md`), and conflict row 16 in §7 of the reference guide now records that.
+What §2.2 and §2.3 say about *sources* is left standing as the dated position it was: at the time, no source carried
+Lv4 or Max, and the brief's table was correctly rejected as a unit. What is no longer true is the present-tense
+claim that the client has never been read.
+
 #### 2.3 The brief's table is rejected as a unit
 
 `Lv0–Lv5 = 0/10/20/30/35/40%` restates a curve row 16 declined to settle and appends Lv4/Lv5 values no
@@ -1156,6 +1166,19 @@ extracted, so the name is all this repo has.
 `SOURCE-OF-TRUTH.md` §4.1 the latter must not be imported into app data, config, or UI copy. Neither may
 be used to fill a skill surface.
 
+**Status of the first file changed 2026-10-05, and the second half of that sentence is why it matters here.**
+`07` was refilled from a primary read and is no longer a stub (`docs/UMAMUSUME_REFERENCE.md` §2.8). For a skill
+surface the consequence is narrow and it is not permission to print prose: the nine skills the scenario's finale
+offers are **already resolvable by id in the committed `[Global]` export**, so a surface may point at them the way
+`EpithetRewardNamesTest` demands an epithet reward does. Full Speed! `202281` and Full Tilt `202282`,
+Concentration `200431` and Focus `200432`, Trackblazer `200711` and Rosy Outlook `200712`, Come What May `201701`
+and All I've Got `201702`, Lane Legerdemain `200501`, plus the scenario skill I Wanna Win with You `210071`. Two
+hazards, both recorded in §7 of the reference guide: "Trackblazer" there is a **skill name** and must never join on
+the scenario key of the same English word, and the export's spelling of the scenario skill is
+`I Wanna Win with You`, lowercase `with`, which is the string a display path must use. What stays barred is the
+scenario's own interior vocabulary, the resource noun and the bonus-layer names, because those have no client
+string at all. `08` is unchanged and still must not be imported.
+
 ---
 
 ### 5. What the brief got wrong
@@ -1184,6 +1207,12 @@ Recorded because a re-import of a retired claim is the failure this repo has bee
 - **"Skill Set" bulk planning** — `[JP]`-only, excluded by `MECHANICS-TRANSLATION-TRIAGE.md` §3.
 - **The 1200-Power evolution gate** — triage §7.2 `:182` shows it is Grand Live's *Fully Charged* gate
   misfiled as an evolution condition, alongside a 340 SP figure that belongs to Swinging Maestro.
+  **Ownership corrected 2026-10-05: *Fully Charged* is not Grand Live's.** The Game8 page that names it
+  ([607687](https://game8.co/games/Umamusume-Pretty-Derby/archives/607687), dated 2026-07-02, read end to end)
+  calls it a Power-based mechanic introduced in the `[Global]` 2026-07-01 update, gated on "at least a calculated
+  1200 Power or more" and firing as increased acceleration at the start of the late race. The misfiling this
+  bullet records still stands, and the reason is stronger now: it was never an evolution condition and it is not
+  a scenario rule either, so no scenario's skill gates may cite it. See `docs/UMAMUSUME_REFERENCE.md` §2.8.
 - **Mood pre-race percentages** — the incoming docs' +10/+5 are contradicted by the client's own Mood
   Effect panel (+4/+2/0/−2/−4), triage §7.2 `:172`.
 

@@ -207,6 +207,7 @@ because they described an arrangement that no longer exists: the pipeline paragr
 | UX deliverables, the three triaged write-ups | `UX-DELIVERABLES.md` |
 | Legacy deprecated PDFs and what was ruled about them | `docs/deprecated/README.md`, reviewed in `docs/deprecated/REVIEW-2026-09-30.md` |
 | Game8 Global scenario extraction | `SCENARIO-PUBLISHER-REFERENCES.md` (Game8 section) |
+| Our Grand Concert mechanics: the 2026-10-05 primary read (both Game8 pages end to end, GameTora's mechanics sections, `[Global]` notice 899) | `SCENARIO-PUBLISHER-REFERENCES.md`, section "Our Grand Concert: the 2026-10-05 primary read"; the changelog is `docs/UMAMUSUME_REFERENCE.md` §2.8 and the guide is `docs/scenarios/07-grand-concert.md` |
 | JP training mechanics raw extraction | `SCENARIO-PUBLISHER-REFERENCES.md` (training mechanics section) |
 | Global/EN race calendar verification | `RACE-AND-SLICE-RESEARCH.md` (global-race-sources section) |
 | Generated race calendar tables | `RACE-AND-SLICE-RESEARCH.md`, section `## calendar-tables.md` (folded from the standalone file in Round 11; `tools/resync_doc.py` reads that section) |
@@ -220,6 +221,10 @@ because they described an arrangement that no longer exists: the pipeline paragr
 | Trainer Desk 2.0 subsystem 1: `BuildTarget` and the `TrainerAdvisor` ranking spec | `PROCESS-PLANS.md`, section `## trainer-advisor.md` |
 | Unity Cup capture: the proposed `turn_entries` columns and team-race `scenario_slots` rows | `RACE-AND-SLICE-RESEARCH.md`, section `## unity-cup-capture.md` |
 | Per-card deck state for runs, the four `deck_slots` columns awaiting a PRD amendment | `SUPPORT-CARDS.md`, section `## o8-per-card-state-proposal.md` |
+| The 2026-10-05 `[Global]` live-ops refresh, the news API that reads the archive, and the four archive negatives (no Grand Masters, no Masters Challenge, no Training Pass, no "Pickup" on Global) | `docs/UMAMUSUME_REFERENCE.md` §4.6 |
+| The 68-frame `[Global]` client capture note behind the hint ladder, the cap readings and the run-surface evidence (a tracked file outside the masters, unregistered until 2026-10-05) | `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` |
+| Every open marker in the corpus, the four propagation defects found and fixed on 2026-10-05, and the gaps sorted by the instrument that would close them | `AUDIT-AND-VERIFICATION.md`, section `## Open-question register and propagation audit, 2026-10-05` |
+| Trainee and support-card artwork: which paths resolve to a file, which bulk routes were searched and failed, and how the local mirror works | `docs/adr/0021-sourced-character-artwork.md` (the measured URL table, the bulk negatives, the decision rows). Its fetch half is built as `uma:fetch-art`; no live pass has run and no screen renders a file. Which screens show a picture is open: `PRD.md` OQ-6; slot behaviour: `DESIGN.md` §4.7; screen-system state: `SCREEN_SPEC.md` §7-16 |
 
 ### Deliberate exceptions, outside the masters
 

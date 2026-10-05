@@ -16,6 +16,13 @@ Both are browser extractions held at arm's length, exactly like the three scenar
 numbers, the publisher and its last-updated date in the section header, and contradictions recorded
 below rather than blended away. Neither file contains an em dash, so nothing was normalised.
 
+6. `Our Grand Concert: the 2026-10-05 primary read`, added 2026-10-05 on the owner's instruction to research
+the fourth `[Global]` scenario. Raw HTML from Game8 (607337 and 607687), GameTora and the rendered `[Global]`
+news page 899, read to the end of the body and extracted with the page dates on file. This is the section
+`docs/scenarios/07-grand-concert.md` and `docs/UMAMUSUME_REFERENCE.md` §2.2.4 both say they were missing, and it
+is the source the 2026-09-27 owner suspension asked for. The repo-authored guide `07` is still not part of this
+master's set: the guide now cites this section, which is the other direction.
+
 ## Disagreements
 
 The three merged sources contain one live contradiction that the app carries as KI-15. It is documented here rather than resolved, because resolving it is a schema/owner decision (CONSTRAINTS escalation path 4/7), not a merge call:
@@ -24,6 +31,8 @@ The three merged sources contain one live contradiction that the app carries as 
 - **Stat-cap currency across sources.** The GameTora Trackblazer file (dated on the scenario launch day) predicts Global keeps flat 1200 caps; the later GameTora Unity Cup file confirms the post-2026-07-01 raised caps. This is a date conflict, not a merge conflict, and is governed by `docs/adr/0002` and `docs/adr/0003`; both statements are kept verbatim so the expiry is visible. See DESIGN-CORPUS D-228.
 - **Server scope is mixed across the five sources.** The three scenario guides are `[Global]`. The Game8 scenario extraction is `[Global]`. The training-mechanics extraction is `[JP]`, taken from GameWith, Game8 JP and Kamigame, and its per-scenario tables are keyed to JP scenario names and JP print. Nothing in this master reconciles a JP number to a Global one, and no JP figure here may be quoted as a Global expectation. The split is recorded so a later reader does not read the training section as Global-validated; `docs/UMAMUSUME_REFERENCE.md` is where a JP-sourced mechanic earns its Global counterpart.
 - **Publisher coverage is uneven across the three scenarios.** The uma.guide and GameTora guides cover Trackblazer and Unity Cup only. URA Finale enters this master solely through the Game8 extraction, so for URA Finale there is no second publisher to cross-check against, and for Trackblazer and Unity Cup the Game8 extraction is now the third voice rather than the only one.
+- **Our Grand Concert: the two publishers disagree on nouns and agree on numbers.** Game8 prints the resource as "Performance Points" in five types (Dance, Passion, Vocals, Visuals, Composure); GameTora prints "performance tokens" (Dance, Passion, Vocal, Visual, Mental) and its own icon asset keys use `da`, `pa`, `vo`, `vi`, `me`. Game8 names both song bonus tiers "Mastery Bonus"; GameTora splits them into Practice Bonus (習得ボーナス) and Live Bonus (ライブボーナス), which are JP client strings. Neither site's head noun is the client's: notice 905 prints the resource as bare **Performance** in five types, **Dance, Passion, Vocals, Visuals, and Composure**. Game8's type list is therefore the client's and its "Points" is padding, while GameTora's "tokens" is padding and its fifth type "Mental" renders the JP word Global prints as **Composure**. Row 48 closed on official copy on 2026-10-05, which makes the two sites' disagreement evidence about the sites rather than about the game. What the two agree on is every cost figure, every effect pair, the five-stat cap line, the 23-song total, the four-and-one live structure and the five linked characters. Recorded per type in §7 rows 48 to 52. Rows 48 and 52 closed on `[Global]` notice 905 the same day, because an official page prints the client's own words for the resource, its five types and the title; rows 49, 50 and 51 stay open as guide divergences a capture would settle.
+- **Our Grand Concert: song titles circulate in two languages.** Game8's Global guide prints English titles ("Believe in Miracles!"), GameTora prints romaji JP titles (Kiseki wo Shinjite!). That row-for-row correspondence was derived by matching effect text and cost figures row by row, and it lines up on all 23 rows. Whether the `[Global]` client localises the titles or prints the JP ones is unverified, and it is the question a single Lesson-menu capture closes.
 
 ---
 
@@ -2101,3 +2110,381 @@ They publish effect names in Japanese plus percentage values only.
 
 Excluded from the ledger deliberately: no prediction model, no race-simulation rule, and no real-world ancestor
 information appeared on any page in a form I could tie to a training mechanic, so none is recorded.
+
+---
+
+## Our Grand Concert: the 2026-10-05 primary read (Game8 ×2, GameTora, `[Global]` notice 899)
+
+**Server:** `[Global]`, with the `[JP]` client strings quoted where GameTora prints them.
+**Read:** 2026-10-05. **Method:** raw HTTP fetch with a browser user-agent, HTML kept under the gitignored
+`research-scratch/gc-2026-10-05/` (`to-text.cjs` does the tag strip), then read to the end of the body. Nothing
+below came from a search snippet.
+
+| Source | Grade | Page date | HTTP | Bytes | File |
+|---|---|---|---|---|---|
+| [Game8 Grand Live (Grand Concert) Scenario Guide 607337](https://game8.co/games/Umamusume-Pretty-Derby/archives/607337) | A | last updated 2026-07-26 | 200 | 510,262 | `g8-607337.html` |
+| [Game8 Fully Charged Explained 607687](https://game8.co/games/Umamusume-Pretty-Derby/archives/607687) | A | last updated 2026-07-02 04:58 | 200 | 395,943 | `g8-607687.html` |
+| [GameTora Our Grand Concert (Grand Live) Scenario](https://gametora.com/umamusume/our-grand-concert) | B | last updated 2026-07-22 | 200 | 173,502 | `gt-gc.html` |
+| [Umamusume Global Official News 905](https://umamusume.com/news/905), the scenario add notice | S | posted 2026-07-22 22:00 UTC | 200 through the news API | 2,328 chars of body | read live, and the source of every client string below |
+| [Umamusume Global Official News 899](https://umamusume.com/news/899), "New Career Scenario Celebration Pretty Derby and Support Card Scouts out now!" | S | posted 2026-07-22 22:00 (UTC) | rendered in the browser | 5,511 chars of body text | read live, page not cached |
+| [Game8 List of All Songs 537610](https://game8.co/games/Umamusume-Pretty-Derby/archives/537610) | A | not re-read this pass | 200 | fetched, title confirmed, body not extracted | `g8-songslist.html` |
+| [Kamigame JP guide to earning パフォーマンス](https://kamigame.jp/umamusume/page/225259740320523907.html) | A `[JP]` | 2025-06-07 from the search index, **not the page's own stamp**; treat as ⚠️ STALE | 200 | 150,022 | `jp-perf.html`. Used for one thing only: the `[JP]` resource noun is パフォーマンス, the head noun of its title. Its advice body was not extracted |
+
+This closes the re-opening bar `docs/UMAMUSUME_REFERENCE.md` §2.2.4 set for itself: one of the two Game8 pages
+read end to end. Both were. The 2026-09-27 owner suspension that required it is discharged by that read plus
+the owner's 2026-10-05 instruction to research this scenario and update the documents.
+
+### Game8 607337, verbatim extraction
+
+Scenario framing, in the page's own words:
+
+> ・Grand Live returns the standard trainee career with a blend of more Idol-performance themes. The gameplay
+> loop is similar to Unity Cup (Aoharu Hai) where, instead of improving Training through your Unity Cup team,
+> Songs and Techniques are learned for stronger training gains.
+> ・ Friendship Training Effectiveness is strongly encouraged in this scenario, compared to the previous
+> Race-stacking strategy of Trackblazer (MANT) where training turns are mostly kept to a minimum or limited to
+> Summer Camp periods.
+
+Career length and cross-scenario advice, as printed: "Each career run is expected to last an average of around
+30 minutes", shorter than Trackblazer's near hour; PvP-built Umamusume (Champions Meeting and Team Trials) are
+"better trained in Grand Live compared to past scenarios"; "Strong parents are still best made in Trackblazer
+(MANT) for race affinity bonuses and spark farming"; fan farming stays optimal in Trackblazer or URA Finale.
+
+Returns the standard career:
+
+> Unlike in Trackblazer (MANT) , Grand Live (Grand Concert) returns the standard trainee career features of
+> race goals and career events. This includes the familiar New Year events, the hot spring lottery, and hidden
+> events for each Umamusume. Because of this, expect easier access to skill-locked hidden events. This means you
+> will be able to get the Runaway style for Umamusume like Silence Suzuka , and skills like Straightaway Spurt
+> will be easier to obtain for Mayano Top Gun .
+
+The resource, as the page lists it under "Focus on Promo Concerts and Training": `Performance Points`, in five
+types printed as **Dance (Da)**, **Passion (Pa)**, **Vocals (Vo)**, **Visuals (Vi)**, **Composure (Co)**.
+
+> Grand Live (Grand Concert) revolves around Promo Concerts , which are held every 6 months starting in Late
+> December of Junior Year, culminating in a Grand Concert in Senior Year. To succeed in these events, your
+> trainee must gain and spend Performance Points to learn Songs and Techniques .
+> Performance Points are gained by training with your Support Umamusume . Friendship Training is a priority as
+> it grants more Performance Points.
+> Techniques have a Mastery Bonus that grants instant stat boosts , skill hints , skill points , or energy
+> recovery . Completing a set number of Techniques unlocks Songs, which provide two types of bonuses:
+> Mastery Bonus — Grants flat stat boosts , skill points , or improves training gains upon learning.
+> Mastery Bonus — Takes effect after concerts, providing bonuses like Friendship Training Effectiveness ,
+> Specialty Priority , and Support Chain Event Frequency .
+
+The page prints both song bonus tiers under the same heading, "Mastery Bonus"; GameTora names the second one
+Live Bonus and the first one Practice Bonus (see its extraction below). The duplicate heading is the page's own
+and is kept as found.
+
+Caps, as printed (1200 → raised): Speed 1600, Stamina 1300, Power 1300, Guts 1500, Wit 1300. "Training stats
+beyond 1200 are observed to have halved effectiveness."
+
+Song unlock patterns: "In Year 1, songs require 1, 2, 3, and 4 techniques respectively. In Years 2 and 3, songs
+require 2 techniques for the first 3 songs, and 4 techniques for the 4th song." Year 1 printed as (1-2-3-4-4),
+Years 2 and 3 as (2-2-2-4-5). "Techniques grant an immediate bonus and can be learned at any point during your
+career without ending your turn." "After learning your fourth song each half-year, it's highly recommended to
+stop learning techniques and save your Performance Points. Pushing for a fifth song will drain your Performance
+Points quickly, and the scaling of song unlocks resets after every concert."
+
+Hype and the lives:
+
+> Ensure each Promo Concert ends in a Great Success by maxing out the Hype Level before the performance. Each
+> Promo Concert grants a stat increase , and achieving a Great Success boosts these gained stats even further.
+> You can increase your Hype Level by learning songs throughout the scenario.
+> If you've managed to grab 18 songs you get Girls' Legend U, the Hype Level will display Special Hype! instead.
+
+Objective thresholds: 16 songs by Early November of Senior Year triggers the scenario-character skill-choice
+event; 18 songs before Early December of Senior Year gives the rare scenario skill, and fewer than 18 gives its
+common version; "Girls' Legend U does not count if it's your 18th song"; "Make Debut!", auto-unlocked after 4
+turns from the start, does count. Also printed: "Fan Count is not a strict unlock condition" and "Not all
+concerts need to be a huge success", with the caveat "Unlock conditions are based on JP experience."
+
+Scenario event table, as printed. Game8 names the event **Closer Together**, Senior Year, Early November,
+condition "Learn 16 Songs before Early November of Senior Year", five choices:
+
+| Lyric line offered | Rare hint | Common hint if the character is neither trainee nor support |
+|---|---|---|
+| "A song with some call-and-response"... | Full Speed! hint lvl +1 | Full Tilt +1 |
+| "Gratitude towards the fans, without whom I would not be running"... | Concentration hint lvl +1 | Focus +1 |
+| "I'm home"... | Trackblazer hint lvl +1 | Rosy Outlook +1 |
+| "The power to achieve a breakthrough"... | Come What May hint lvl +1 | All I've Got +1 |
+| "Song brings us closer together"... | Lane Legerdemain hint lvl +1 | not printed |
+
+Each rare name above was checked against the committed Global skill export (`skills.609afe88.json`) rather than
+taken on faith: Full Speed! 202281, Full Tilt 202282, Concentration 200431, Focus 200432, Trackblazer 200711,
+Rosy Outlook 200712, Come What May 201701, All I've Got 201702, Lane Legerdemain 200501. The export prints the
+scenario skill as **I Wanna Win with You** (210071, rarity 2), lowercase `with`; Game8 prints "I Wanna Win With
+You". "Trackblazer" in that table is a *skill name* (切り開く者), not the scenario, and the two now collide in one
+document.
+
+Scenario Spark: "Grand Concert has its own scenario-based Spark called **Our Grand Concert** . This spark boosts
+Speed and Guts if it activates during inspiration." This matches the committed export row exactly
+(`static_scenarios.json`, order 4, factor id 3000401, `effect_1` speed, `effect_2` guts, `name_en` "Our Grand
+Concert", `name_ja` グランドライブシナリオ, `did_not_exist` pre_gl). GameTora's prose calls the same spark
+"Grand Live Scenario", which is its rendering of the JP name.
+
+Deck shape, as published: "Sets of 3 Speed, 2 Wit, and 1 Pal, or 2 Speed, 2 Wit, 1 Pal, and 1 open slot"; 1
+Stamina type for Medium and Long. Light Hello `[From the Ground Up]` Pal SSR is called the must-have (chance for
+free Performance Points, "You can get 20 Points for the type where you have the fewest points banked", Energy
+Cost Reduction inside Friendship Training, 10% Training Effectiveness at 2 limit breaks, Initial Speed from 3
+breaks, and the skill See Ya Later!, "the gold version of Playtime's Over!"). Both skill names resolve in the
+export: See Ya Later! 201662, Playtime's Over! 201661. Priority songs: "Run for Our Dream!" and "Grow Up and
+Shine!" for their Skill Point bonuses, both available in Year 2.
+
+Song list, as Game8 prints the English titles (23 rows, with the effect pair and the cost figures exactly as
+they appear on the page; the token type each cost belongs to is not printed as text):
+
+| Year block | Song | Effect pair | Cost figures as printed |
+|---|---|---|---|
+| Junior | Believe in Miracles! | Training Wit Gain +1 / Specialty Priority +5 | 21, 21 |
+| Junior | Full Speed Ahead! Umadol Power☆ | Speed +22 / Friendship Training Effectiveness +5% | 32, 12 |
+| Junior | Getaway! Fallin' Love | Training Guts Gain +1 / Support Chain Event Frequency Lvl +1 | 21, 21 |
+| Junior | Go This Way | Training Power Gain +1 / Support Chain Event Frequency Lvl +1 | 21, 21 |
+| Junior | Here Comes Our Time | Power +22 / Friendship Training Effectiveness +5% | 32, 12 |
+| Junior | Ring Ring Diary | Training Stamina Gain +1 / Support Chain Event Frequency Lvl +1 | 21, 21 |
+| Junior | Run n' Run! | Skill Points +22 / Friendship Training Effectiveness +5% | 14, 16, 14 |
+| Junior | Zero Is Where the Center Stands! | Training Speed Gain +1 / Support Chain Event Frequency Lvl +1 | 21, 21 |
+| Junior | Make Debut! | All Performance Points +10 / Specialty Priority +5 | after 4 turns from start |
+| Classic 1st half | Hey, Guess What! | Training Guts Gain +2 / Specialty Priority +5 | 42, 21 |
+| Classic 1st half | Our Blue Bird Days | Training Speed Gain +2 / Specialty Priority +5 | 21, 42 |
+| Classic 1st half | Run for Our Dream! | Training Skill Point Bonus +2 / Specialty Priority +5 | 21, 21 |
+| Classic 2nd half | Grow Up and Shine! | Training Skill Point Bonus +3 / Support Chain Event Frequency Lvl +1 | 21, 21, 21 |
+| Classic 2nd half | Hoppity Sunny Days ♪ | Training Stamina Gain +2 / Specialty Priority +5 | 42, 21 |
+| Classic 2nd half | Seven Colors Scenery | Training Power Gain +2 / Specialty Priority +5 | 21, 42 |
+| Classic 2nd half | Sunbeam Cheer | Training Wit Gain +2 / Support Chain Event Frequency Lvl +1 | 42, 21 |
+| Senior | Dream Sky | Wit +22 / Friendship Training Effectiveness +5% | 22, 22 |
+| Senior | Fanfare for the Future! | Guts +26 / Friendship Training Effectiveness +10% | 26, 42 |
+| Senior | Precious Treasure Box | Speed +26 / Friendship Training Effectiveness +10% | 42, 26 |
+| Senior | Present March ♪ | Power +22 / Friendship Training Effectiveness +5% | 22, 22 |
+| Senior | Sky-Blue Spring | Guts +22 / Friendship Training Effectiveness +5% | 12, 32 |
+| Senior | The World's at Our Whim | Stamina +22 / Friendship Training Effectiveness +5% | 32, 12 |
+| Senior | Girls' Legend U | All stats +10 / Friendship Training Effectiveness +10% | Grand Concert song, not a lesson |
+
+Release section: "Released on July 22, 2026, 10PM (UTC)"; "This is a permanent scenario and will remain
+accessible even after additional scenarios are released"; released alongside the Light Hello Pal SSR, the Agnes
+Tachyon Speed SSR and the Smart Falcon Alternative Outfit; "Grand Live is expected to be the main training
+scenario for four (4) months until the release of the Grandmasters scenario in the future." `[JP]` dates on the
+same page: Grand Live 2022-08-24, Trackblazer (MANT) 2022-02-24, Grandmasters 2023-02-24.
+
+### GameTora our-grand-concert, verbatim extraction
+
+GameTora's own header: "By robflop & Gertas, Last updated on 2026-07-22." Its section list is Basic Information,
+Scenario Link and Character-specific Events, Story, Grand Live Mechanics, Inheritance, Training, Example Turns,
+Lessons, Lesson Patterns, Promotional Lives and Grand Live, Song Lessons (split by availability), Skills, Base
+Training Values, Unique Skill Level-ups, Training Facility Levels, Scenario Factor, Stat Caps.
+
+> Brighter Together: Our Grand Concert (also called Grand Live outside of Global) is the fourth training
+> scenario to be added to the Uma Musume game. It was released on July 22, 2026 on Global and August 24th, 2022
+> on JP.
+
+> This scenario marks the return of the Scenario Link mechanic, featuring Silence Suzuka, Agnes Tachyon, Smart
+> Falcon, Mihono Bourbon, and Light Hello, a new original NPC introduced in the story of Grand Live.
+> Character-specific secret events (e.g. Runaway events) are also back.
+
+Story: the scenario is about reviving the titular Grand Live, "a big fan appreciation festival that was once
+regularly held in the past", and Light Hello (ライトハロー) is "an event producer" voiced by Kana Ueda.
+
+Mechanics:
+
+> Before being able to revive the Grand Live and turn it into a great success (大成功), you must successfully
+> carry out a set of four Promotional Lives, held every six months starting from late December of the first
+> year. To achieve this, you will have to raise the "Hype Level" (ライブ期待度) gauge of each live by using the
+> new Lesson mechanic.
+
+Inheritance raises the caps, which no other `[Global]` scenario entry in this master claims:
+
+> In Grand Live, it will also raise your stat caps (both at the start of the run and during inheritance
+> events). The stat uncaps received at the start of the run are based on the blue factors of the parents. A
+> one-star blue factor will uncap its corresponding stat by 4, a two-star factor by 9, and a three-star factor
+> by 16. In total, you can get a maximum of 48 stat points uncapped with one 9\* parent.
+> Unlike previously, unique skill (green) factors triggering during inheritance events will now also give stat
+> uncaps (but no flat stats) besides the skill hint. Which uncaps they give will depend on the stat growth
+> bonuses of the character the unique skill is from. For example, Vodka's Cutting × DRIVE! factor will give
+> Speed and Power uncaps, as she has a 10% Speed and 20% Power bonus.
+> The value of the uncaps received during inheritance events from blue and green factors seems to be randomized
+> within a range of values, similar to flat stat gains. The exact ranges are yet unknown.
+
+The resource, named as tokens:
+
+> In Grand Live, apart from the basic stats (Speed, Stamina, Power, Guts, Wisdom), you will also gather a new
+> set of performance tokens called **Dance, Passion, Vocal, Visual, and Mental**. These tokens are initially
+> capped at 200 each and can be obtained in training alongside stats.
+> While there is no set correspondence of which training facility will give which performance token, each has a
+> primary and secondary token that they are more likely to provide you with.
+
+> Based on testing done so far, an estimate is that a facility will give you tokens of its primary type around
+> 60% of the time, tokens of its secondary type around 30% of the time, and tokens of any other type as the
+> remaining 10% of the time. This distribution is random for each turn.
+
+GameTora's facility-to-token table has no text cells: each row carries two icon images from
+`/images/umamusume/icons/perf_tokens/`, and the mapping below is read off those icon file names, which is the
+only place this correspondence exists in this extraction. **Method stated because it is an inference from asset keys,
+not from prose:** Speed → Dance primary, Visual secondary; Stamina → Passion primary, Vocal secondary; Power →
+Vocal primary, Mental secondary; Guts → Visual primary, Dance secondary; Wit → Mental primary, Passion
+secondary. A client capture is what would confirm it.
+
+Lessons:
+
+> Lessons are a new mechanic unique to Grand Live, with which you can spend your performance tokens to learn
+> Live Techniques or practice new songs to play in Promotion Lives. Song lessons (楽曲) will have their cover on
+> the left, whereas Live Technique lessons (ライブテクニック) will display various icons related to stats and the
+> like. The list of available lessons will stay static until you decide to complete one of the three. Once this
+> happens, the list will refresh, allowing you to do multiple lessons in a single training turn.
+> The button to access the lesson menu is located between the outing and race buttons of the home menu. It will
+> be locked until the fifth turn of the training run, which is when the 「グランドライブ再建計画、開始！」
+> training event happens, signaling the start of the Grand Live mechanics.
+> Practicing songs in lessons will raise the Hype Level gauge... Three songs are required to fill the Hype
+> Level gauge fully. Automatically gained songs also count for this.
+> When you lack performance tokens for a lesson, the green "confirm" button (習得) will change to a "reserve"
+> button (予約). Once you have reserved a lesson, the game will display 「あとX」 above the token indicator on the
+> training menu to indicate a lack of X performance tokens of that type.
+> In addition to gaining Live Techniques or practicing songs, lessons also have additional Practice Bonuses
+> (習得ボーナス, two yellow up arrows) that will be awarded alongside the learned technique or practiced song...
+> These can range from stats (such as giving you 10 Speed) to skill hints or skill points.
+> Aside from that, song lessons also grant Live Bonuses (ライブボーナス, purple microphone below practice bonus),
+> whose effects include, for example, increasing the likelihood of triggering support card chain events
+> (サポート連続イベント率アップ). These will, however, not immediately go into effect like Practice Bonuses, but
+> rather be "queued" up for activation after the next live happens... Live Bonuses will stay in effect for the
+> entirety of the training run and have levels that can be raised by doing lessons with the same bonus.
+> You can also do lessons before character objectives alongside learning skills.
+
+> The Grand Live scenario features a total of three Live Bonuses: Friendship Bonus (友情ボーナス), Speciality
+> Rate Up (得意率アップ), Support Event Chance Up (サポート連続イベント率アップ).
+
+Lesson patterns, as GameTora's table prints them (initial then looping): before the 1st Promo Live 1-2-3 then
+4-4-2-2; before the 2nd, 3rd and 4th 2-2-2 then 4-5-2-2; before the Grand Live 2-2-2 then 4-3-2-2. "The pattern
+progress will reset completely after a Live... it's possible to reach the selection of a song lesson before
+doing a Promotional Live and have it carry over to the next segment. A song carried over this way and learned
+after the Live will count as one point for the following initial pattern, saving you one lesson."
+
+Promotional Lives and the Grand Live:
+
+> Depending on the outcome of a Promotional Live, you may gain more collaborators for the Grand Live. Making a
+> Promotional Live a "Great Success" (大成功) by sufficiently raising the Hype Level beforehand will raise your
+> stat caps.
+> Lives will additionally award you 5 Skill Points for every technique lesson and 25 Skill Points for every song
+> lesson you have taken since the previous Live. They will also raise the cap of performance tokens by 50 when
+> successful (no matter if you achieve great or normal success). A fully filled Hype Level gauge will always
+> guarantee a Great Success.
+> You may choose to do lessons before stepping onto the stage of a Promotional Live or the Grand Live like you
+> would learn skills before races.
+> Learning at least 18 songs (excluding "GIRLS' LEGEND U") before late December of the Senior year will make a
+> special version of "GIRLS' LEGEND U" play in the Grand Live. It will also be available in the Live Theater
+> afterward. With 17 or fewer songs, you will unlock a normal version of "GIRLS' LEGEND U" instead.
+
+Songs and totals: "You won't get any new lesson songs after the 3rd Promotional Live, so including the
+automatically gained specials (Make Debut! and GIRLS' LEGEND U), there's a total of 23 songs." Its all-songs
+cost row prints five figures, 252 / 201 / 150 / 275 / 196, one per token type, and the page does not print the
+column labels as text, so which figure belongs to which type is **not** extracted here. GameTora's per-song rows
+carry the JP titles in romaji (Kiseki wo Shinjite!, Tachiichi zero-ban! Juni wa Ichiban!, Nigekiri! Fallin'
+Love, Seishun ga Matteru, RUN×RUN!, Zensoku! Zenshin! Umadol Power☆, Yume wo Kakeru!, A・NO・NE, Bokura no
+Bluebird Days, Komorebi no Yell, Pyoitto ♪ Hallelujah!, Nanairo no Keshiki, Yumezora, PRESENT MARCH♪, Daisuki no
+Takarabako, Sekai wa Bokura no Iinari Sa, Harusora BLUE, Fanfare for Future!, Grow Up, Shine!) and the same
+effect-plus-cost pairs Game8 prints in English.
+
+Skills: "Learning 18–21 songs (excluding GIRLS' LEGEND U) before late December of the Senior year awards a Lv 1
+hint for the skill. Learning all 22 songs upgrades this reward to Lv 3 hint. With 17 or fewer songs, you receive
+a Lv 1 hint for the skill instead." Which skill each band awards sits in an image table, so the gold-and-common
+split is taken from Game8's prose, not from this page. The same section states the Early November event
+「あなたと私を繋げるライブ」 fires at 16 or more songs, offers five lyric lines, four tied one-to-one to a
+scenario link character and the fifth "an unrelated standard choice".
+
+Base training values at facility level 1, no supports, no character growth: Speed +8 Speed, +4 Power, +4 Skill
+Points, 10 tokens, −19 energy; Stamina +8 Stamina, +6 Guts, +4 SP, 10, −20; Power +4 Stamina, +9 Power, +4 SP,
+10, −20; Guts +2 Speed, +2 Power, +7 Guts, +4 SP, 10, −20; Wit +2 Speed, +6 Wit, +5 SP, one further figure
+printed as +5 whose column is not recoverable from the text layer (the three-column header is Stat gains / Token
+gain / Energy and only two values follow, so this row is recorded as **partially extracted**).
+
+Unique skill level-ups: "The mechanic for leveling up unique skills in Grand Live is equal to that of the URA
+Finals scenario. That means getting 60.000 fans by Valentine's Day (Early February), 70.000 fans by Early April,
+and 120.000 fans by Christmas (Late December) of the Senior year (the third year). These values are 40.000,
+60.000, and 80.000, respectively, for characters with high dirt aptitude but low turf aptitude (such as Haru
+Urara or Smart Falcon). The April level-up also requires you to have a green bond gauge (3 bars) with chairman
+Akikawa."
+
+Facility levels: "Just as in the URA Finals scenario, the level of the training facilities in Grand Live will
+rise depending on how often you train at it. All facilities start at level 1 and level up every four times you
+use them... until level 5."
+
+Stat caps: Speed 1600, Stamina 1300, Power 1300, Guts 1500, Wit 1300 (the page prints the fifth stat under its
+own gloss for 賢さ; the client word is Wit and conflict row 4 in `docs/UMAMUSUME_REFERENCE.md` §7 is the standing
+ruling on that alternation).
+
+### `[Global]` official notice 899, tier S
+
+Posted 2026-07-22 22:00 (UTC), titled "New Career Scenario Celebration Pretty Derby and Support Card Scouts out
+now!". Body, in its own words:
+
+> As of 10:00 p.m., Jul 22, 2026 (UTC), a New Career Scenario Celebration Pretty Derby Scout and New Career
+> Scenario Celebration Support Card Scout have begun! ... The Trainee Umamusume and Support Cards debuting in
+> these Scouts are featured as Scenario Link characters in the Career Scenario "Brighter Together! Our Grand
+> Concert." ... New Career Scenario Celebration Scout Availability Period: 10:00 p.m., Jul 22 - 9:59 p.m., Aug
+> 10, 2026 (UTC).
+> Trainee Umamusume ■ Debut Trainee Umamusume (Spotlight): ★★★ [Twilight Triumph] Smart Falcon.
+> Support Cards ■ Debut Support Cards (Spotlight): • SSR [From the Ground Up] Light Hello • SSR [Q≠0] Agnes
+> Tachyon • R [Event Producer] Light Hello.
+
+The notice also uses "Pal type" for the support-card type ("including some of the Pal type"), which is a tier-S
+confirmation of the `[Global]` label the terminology map already carries and of `lang/en/uma.php` `card_pal`.
+The scenario name inside the notice is printed with an exclamation mark, "Brighter Together! Our Grand Concert",
+while the data export's `name_en` and every repository document print it without one. Recorded as conflict row 52
+in §7. **Resolved the same day by a second official page:** notice 905 routes the player to "Brighter Together!
+Our Grand Concert under Career in Help", and a Help path is a client string rather than sentence punctuation, so the
+exclamation mark belongs to the title and the export field is the outlier.
+
+### `[Global]` official notice 905, tier S: the scenario in Cygames' own English
+
+Fetched 2026-10-05 from the official news API (`POST https://umamusume.com/api/ajax/pr_info_detail?format=json`, body
+`{"announce_id":905}`; the `message` field carries the whole body, verified against the rendered page). Posted
+2026-07-22 22:00 UTC. Verbatim, with the notice's own sub-headings:
+
+> As of 10:00 p.m., Jul 22, 2026 (UTC), the new Career scenario "Brighter Together! Our Grand Concert" has been added
+> to the game! In this new scenario, you can train your trainees using a different system than all previous Career
+> scenarios. ... Check out the newest Career scenario, featuring new characters and new systems!
+>
+> **Grand Concert.** In this new Career scenario, your goal is to revive the Grand Concert. Four Promo Concerts and one
+> Grand Concert are held, making for a total of five concerts. Work towards making things a great success by making
+> each concert a spectacle! Concerts are held biannually starting from the second half of December during your
+> trainee's junior year. Prepare for concerts during the period leading up to them and make them unforgettable!
+>
+> **Performance and Lessons.** In this new Career scenario, you acquire Performance through activities like training
+> and Career events. There are five types of Performance: Dance, Passion, Vocals, Visuals, and Composure. By spending
+> Performance in lessons, you can acquire new songs and concert techniques. Songs and concert techniques don't just
+> make concerts more exciting; they also have various effects, such as increasing your parameters, recovering energy,
+> and boosting training effects.
+>
+> **Live Performance Expectations.** By holding lessons and acquiring new songs as you work towards your next concert,
+> your Live Performance Expectations will increase. When it reaches its max, your next concert will be a Great
+> Success. Make sure to acquire plenty of songs and make your concert a Great Success!
+>
+> Important Information 1. For more information on the new Career scenario, please refer to Brighter Together! Our
+> Grand Concert under Career in Help.
+
+**What that settles on `[S]` copy:** the resource noun is bare **Performance**, with no Point or Token after it; its
+five types are **Dance, Passion, Vocals, Visuals, Composure**, which is Game8's list exactly and corrects GameTora's
+fifth; the events are **Promo Concert** and **Grand Concert**, four plus one; the cadence is biannual from the second
+half of December of Junior Year; the purchases are **lessons** yielding **songs** and **concert techniques**; the
+effects "increase your parameters, recover energy, and boost training effects"; the gauge is **Live Performance
+Expectations** and its ceiling yields a **Great Success**; and the title carries the exclamation mark, inside a Help
+path.
+
+**What it does not.** It names neither bonus layer, so row 51 stands open between the two guides. It prints no Song
+titles, so row 49 stands open. It carries **no number at all**, so the 200 cap and the +50 per concert, the lesson
+patterns, the 5 and 25 skill-point payouts, the three-songs-to-full gauge, both song thresholds and every cost figure
+still rest on tier-A and tier-B pages, and the turn-five gate, the reserve button and the inheritance cap-raise are
+guide-only claims. The manifest's 0 captured frames is unchanged, and it is still what rows 49 and 51 are waiting on:
+this is official prose, not a screen.
+
+### What this read did not settle
+
+- **No client frame exists**, and it still earns its place: `docs/research-scratch/DESIGN-CORPUS.md` records 0 captured frames for this
+  scenario, so no Global client string above is measured. The resource noun (Point versus Token), the fifth
+  type's word (Composure versus Mental), the event name (Closer Together versus 「あなたと私を繋げるライブ」) and
+  the song titles' language are third-party renderings.
+- **Nothing that GameTora renders as an image was extracted as a number.** The facility-to-token table, the
+  per-column song cost totals, and the gold-versus-common skill column in the Skills table are the three cases,
+  each stated above with the method used or the reason it failed.
+- **No per-level magnitude tables exist on either page.** No Lesson cost-per-level curve, no Hype-point value per
+  song, no Live Bonus percentage ladder.
+- The 2026-09-27 「Fully Charged」 reading is **refuted by the page it came from**; see §7 conflict 4 and
+  `docs/UMAMUSUME_REFERENCE.md` §2.8.

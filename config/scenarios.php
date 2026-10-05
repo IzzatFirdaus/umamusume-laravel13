@@ -19,9 +19,9 @@ declare(strict_types=1);
 |   caps        GameTora `scenarios.json`, field `stats`, a per-stat bonus
 |               over a 1200 base. Verified 2026-09-27 against three Global
 |               prose sources. `hard_caps` is a separate engine ceiling.
-|   panels      docs/scenarios/01..06, reconciled in
-|               docs/design-research/SCENARIO-DIFFERENCES.md
-|   matrix      docs/design-research/CONSTRAINTS.md §10n
+|   panels      docs/scenarios/01, 02, 03 and 07, reconciled in
+|               docs/research-scratch/DESIGN-CORPUS.md (the SCENARIO-DIFFERENCES source)
+|   matrix      docs/research-scratch/DESIGN-CORPUS.md, CONSTRAINTS section, §10n
 |
 | Do not collapse cap_bonus into a flat cap. The bar renders base plus bonus
 | as separate labelled terms (DESIGN.md §6.22), and one JP scenario carries a
@@ -302,6 +302,8 @@ return [
 
         'our_grand_concert' => [
             'label' => 'Our Grand Concert',
+            // Cygames' notice 899 opens "As of 10:00 p.m., Jul 22, 2026 (UTC)", the same instant the
+            // export's start_en decodes to, so this is a dated hour and not only a dated day.
             'live_on_global' => '2026-07-22',
             'cap_bonus' => ['Speed' => 400, 'Stamina' => 100, 'Power' => 100, 'Guts' => 300, 'Wit' => 100],
             'widgets' => ['turn', 'energy', 'fans'],
@@ -317,11 +319,36 @@ return [
             'scenario_links' => [
                 'Smart Falcon', 'Agnes Tachyon', 'Silence Suzuka', 'Mihono Bourbon', 'Light Hello',
             ],
-            'facility_level_source' => null,
-            'documented' => false,
-            'notes' => 'Live on Global and caps Speed highest of any scenario here, but no mechanics guide is '
-                .'held for it. Baseline strip plus published caps only: every panel is off, because an '
-                .'undescribed scenario must render as absence rather than as a guess (D-241, gate G-41).',
+            /*
+            | Sourced 2026-10-05: GameTora's own sentence is "the level of the training facilities in Grand
+            | Live will rise depending on how often you train at it. All facilities start at level 1 and level
+            | up every four times you use them ... until level 5." Same rule as URA, tier B, one page.
+            */
+            'facility_level_source' => 'repetition',
+            /*
+            | `documented` is a provenance marker, not a rendering switch: nothing in app/, resources/ or
+            | tests/ reads it. It asserted that no mechanics guide was held here, and after the 2026-10-05
+            | primary read that sentence was false, so it moved. D-241 and gate G-41 are unaffected by the
+            | value itself: what they govern is the panels and widgets below, which stay off.
+            */
+            'documented' => true,
+            /*
+            | Mechanics are extracted and live in docs/scenarios/07-grand-concert.md, with the raw read in
+            | docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section
+            | "Our Grand Concert: the 2026-10-05 primary read" and the changelog in docs/UMAMUSUME_REFERENCE.md
+            | §2.8. Shape: a five-type resource earned in training and spent in the Lesson menu on Live
+            | Techniques and Songs; a Hype gauge that decides four Promotional Lives held every six months from
+            | late December of Junior Year and then the finale; 23 songs; song-count thresholds at 16 and 18
+            | decide the finale's hints. Panels still render off, and no resource chip, live marker or goal
+            | calendar is invented from a guide, because none has a component and no English name for any of it
+            | is a measured client string (§7 rows 48 to 52 of the reference guide). Whether this scenario gains
+            | surfaces is the owner's call, and D-241's named acceptance case is now a described scenario: that
+            | wording is the gate registry's to amend, not a slice's.
+            */
+            'notes' => 'Live on `[Global]` since 2026-07-22 and caps Speed highest of any scenario here. '
+                .'Mechanics sourced 2026-10-05 by a primary read; every panel stays off because the client '
+                .'strings behind them are still third-party renderings, so the strip renders baseline plus the '
+                .'published caps (D-241, gate G-41).',
         ],
 
     ],

@@ -5382,3 +5382,99 @@ git, but eight of the nine panels carrying that work are not. `stat-band.blade.p
 `team-race-panel`, and `team-rank-gauge` are all still dirty in the working tree. The suite
 passes against that dirty state, which is the whole point of a baseline, but the claim in Part 10
 is not yet backed by `HEAD`. Landing them is the next dispatch's call.
+
+
+## Open-question register and propagation audit, 2026-10-05
+
+**Scope of this record.** The owner asked for every still-unverified item in `docs/UMAMUSUME_REFERENCE.md` and for
+any other Umamusume knowledge in the corpus that needs updating. It is an audit of markers, not a slice: one file
+changed no code, and the two defects it found in the corpus's own bookkeeping were fixed in place.
+
+### 1. Marker census, measured rather than recalled
+
+| File | `❌` lines | `unverified` matches | `⚠️ STALE` |
+|---|---|---|---|
+| `docs/UMAMUSUME_REFERENCE.md` | 69 | 68 | 52 |
+| `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` | 20 | 21 | 1 |
+| `docs/research-scratch/SKILLS-MECHANICS.md` | 11 | 19 | 0 |
+| `docs/research-scratch/DESIGN-CORPUS.md` | 7 | 26 | 2 |
+| `docs/scenarios/09-global-race-calendar.md` | 7 | 3 | 0 |
+| `docs/scenarios/07-grand-concert.md` | 4 | 2 | 0 |
+| `docs/scenarios/08-grand-masters-jp-only.md` | 5 | 0 | 1 |
+| `docs/research-scratch/SUPPORT-CARDS.md` | 0 | 10 | 0 |
+| `docs/research-scratch/AUDIT-AND-VERIFICATION.md` | 1 | 15 | 0 |
+| `docs/research-scratch/CATALOG-ROSTER-WORKSTREAM.md` | 0 | 5 | 0 |
+| `GOVERNANCE.md`, `RACE-AND-SLICE-RESEARCH.md`, `CHARACTERS-SOURCE.md`, guides `01`/`03`, `SCREEN_SPEC.md`, `ARCHITECTURE.md`, `PRD.md`, `KNOWN-ISSUES.md` | 0-1 | 0-2 | 0 |
+
+Counts come from `grep -c` over each file on 2026-10-05 and they are line counts, not question counts: §8.4's own
+counting correction states that ~67 occurrences decompose into roughly 30 distinct questions, because a marker
+repeats across a status cell, a prose sentence and the 8.2 audit row that quotes it. **The instrument for the number is
+`grep -c '❌ UNVERIFIED' docs/UMAMUSUME_REFERENCE.md`, not this table.**
+
+### 2. The four propagation defects, all fixed by this audit
+
+The failure mode is one the file has named before: *a marker outlives the read that closed it, and then a status cell
+and an audit row disagree inside one file.* These are the cross-file instances.
+
+| # | Defect | Where it sat | Fix |
+|---|---|---|---|
+| P-1 | The per-level hint discount was ruled unsettled on the strength of two pointers into `docs/UMAMUSUME_REFERENCE.md` that no longer say what the paragraph claims: §1.1.4 does not print the `❌` sentence the paragraph quotes, and §8.4 records the gap **closed**, not open. | `docs/research-scratch/SKILLS-MECHANICS.md` §2.2 | Dated note added. The subsection's position on *sources* stands as the record it is; its present-tense claims about the other file do not. |
+| P-2 | §8.4 cites "1.1.4" as the place the closed ladder lives, and §1.1.4 did not contain it: the measured captions lived only in `SKILLS-MECHANICS.md` §2.4 and in the 68-frame capture note. A reader following the citation found a different statement. | `docs/UMAMUSUME_REFERENCE.md` §8.4 and §1.1.4 | The ladder is now printed in §1.1.4, so the pointer resolves, and conflict row 16 records that its own "in-client check" condition was met on 2026-10-03. |
+| P-3 | Tier labels: `DESIGN-CORPUS.md` §6.20 says codes 200, 300 and 700 `❌ UNVERIFIED` **in present tense**, while §1.2.6 closed 200 and 300 on two publishers on 2026-09-29 and D-153's own exception note says so. | `docs/research-scratch/DESIGN-CORPUS.md` §6.20 | Forward correction. 200 and 300 closed, 400 and 700 single-domain, and the rendering rule (tier as stored on the race row) unchanged, which is what the original sentence was protecting. |
+| P-4 | The `[Global]` notice that introduced Independent Training was cited four times as "title and date captured, URL not recorded", because `umamusume.com/news/NNN` renders client-side and the earlier pass could not get a URL out of it. | `docs/UMAMUSUME_REFERENCE.md` 1.1.7, 1.6.0, 1.6.8, §6 | URL recovered (notice **100087**) through the news API, with the body read in full, and the timing claim corrected: the mode arrived **08:00 UTC** on 2026-07-22, not at the 22:00 update boundary it shared with Grand Concert. Recorded as an `AGENTS.md` §18 trap. |
+
+### 3. Closed by the same day's research, listed so the markers are not re-derived
+
+- **TP** (the standing "what does TP govern"): it is the Career entry cost, 30 per run at a 100 cap, 1 per 10 minutes
+  (`[Global]` Game8 538079, 2025-08-04 ⚠️ STALE, cross-checked against the client string "Restores 30 TP"). RP joined
+  it: Team Trials entry, 1 per race, cap 5, 1 per 2 hours, with 1.6.5's Racing Carnival 1-per-attempt reading kept
+  beside it because the currency is shared.
+- **Story event record 1057**: named "Banquet of Shadows" from the vendor field the earlier pass said was absent, with
+  the new hazard that its `story-event-NN` slug is not a cross-server key.
+- **「SSRセレクトステップアップガチャ」**: official title confirmed, window 2026-08-24 12:00 to 2026-09-30 11:59 JST,
+  purchase cap two cycles paid-Carat only, notice id 3415 resolved.
+- **Trackblazer Alarm Clock retry**: three per run with an inventory requirement, and the wording is *that race*, which
+  makes the "start of that semester" recollection the weaker reading. Which turn it resumes on is still unstated.
+- **Our Grand Concert vocabulary**: rows 48 and 52 closed on notice 905 (Performance; Dance, Passion, Vocals, Visuals,
+  Composure; Promo Concert, Grand Concert, lessons, songs, concert techniques, Live Performance Expectations, Great
+  Success; the title's exclamation mark inside a Help path). Rows 49, 50 and 51 stay open.
+- **The `[Global]` live-ops state**, refreshed from all 154 notices in the archive (§4.6), including four archive
+  negatives: no Grand Masters, no Masters Challenge, no Training Pass and no "Pickup" string in any Global notice.
+- **Conflict row 4 / 2.4 and conflict 4's 「Fully Charged」 half**, closed, and refuted as scenario chrome.
+- **Repo #4's trainee image question**, probed rather than recalled. The legacy app's `images` column holds
+  hand-fed booru downloads for a handful of characters, its `source` field reads `"fanart"`, and its app code
+  makes no outbound request at all; it is the feature `PRD.md` §6.13 cut, and the cut was sound. What does work
+  is a `card_id`-keyed third-party asset host, verified path by path, reachable from ids already committed in
+  `database/seeders/data/` (268 card ids in the seed body, 106 of them kept as `character_cards` rows on a seeded
+  tree, 559 support ids, 125 distinct skill icons across 1,910 rows that have no column to sit in).
+  Bulk alternatives were each searched and each ruled out for a stated reason. Decided as `ADR-0021`, whose
+  fetch half landed the same day (`uma:fetch-art`, `ArtworkMirror`, `SourceFetcher::fetchAsset()`, eight cases in
+  `ArtworkMirrorTest` against `Http::fake`), while **no live pass has been run and no screen renders a file**.
+  One thing the build found: skill icons are not reachable, because `skills` stores no `iconid` column and the
+  125 distinct ids exist only in the committed dataset. The open half, which screens get a picture and whether
+  the box is reserved, sits in `PRD.md` OQ-6 and `SCREEN_SPEC.md` §7-16 rather than being answered here.
+
+### 4. What is still open, sorted by the instrument that would close it
+
+**Needs a client capture (nothing else can reach these).** The Unique Perk badge question and its per-level value table
+(conflict row 47, 1.4.7); the hint-stage colouring, whose premise row 15 now calls doubtful (1.4.4); Grand Concert's
+two bonus layers and its 23 Song titles (rows 49 and 51); the reserve and confirm button labels; the gauge label as
+displayed. One frame each, and two of these also fix the manifest's 0-frame row for the scenario.
+
+**Needs an official notice that does not exist yet.** Whether Masters Challenge and Training Pass reach `[Global]`;
+per-season Training Pass quantities and the season close time, which are published in-app; the `[JP]` 10th Masters
+Challenge opening, with no announcement as of 2026-10-05; Grand Concert's successor on `[Global]`, unannounced across
+the whole archive; Holiday Celebration Part 2, promised without a date.
+
+**Needs a source that has been searched and does not publish it.** Grade code 700's numeric-to-label mapping (the label
+is one publisher, the number is nobody's); the time-of-day values 2 and 3 (the label set is three, the codes are
+unmapped); `SlopePer`'s unit and 10000 scale; `frontType` 3; the skill effect magnitudes stored as raw integers
+(600000 / 400000); the bond-radius term "friendship radius", unattested in every source read; the energy-versus-failure
+probability table; per-level SP totals for the card ladder; the inheritance uncap ranges.
+
+**Needs an owner ruling, not a source.** Whether the `[Global]` label moves to the exclamation-marked title the notice
+prints (row 52 says the export field is what everything currently joins on); whether Grand Concert gains any surface at
+all (2.8's last paragraph, `SCREEN_SPEC.md` §7); whether D-241 and gate G-41 keep naming "the undescribed fourth
+scenario" now that it is described; and whether `02-unity-cup.md:244`'s claim that Global still pays +2 SP on the four
+energy disciplines survived the 2026-07-01 rework, which is the one dated game claim this audit found, flagged, and
+could not settle from any source read.
