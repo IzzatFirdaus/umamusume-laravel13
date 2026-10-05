@@ -99,14 +99,17 @@ class CatalogController extends Controller
                     ? null
                     : CardRarity::from((int) $umamusume->cards->max(static fn (CharacterCard $card): int => $card->rarity->value));
 
-                // The header frame is the form the badge already names: the first card at the max
-                // rarity in the scoped order, so a trainee's portrait matches her top form rather
-                // than her debut. `url()` resolves to null when the mirror holds no file, and Vue
-                // then renders no frame (DESIGN.md §4.7). A `card_portrait` is a trainee portrait
-                // keyed on `card_id`, the same kind the Blade slot and the detail page point at.
-                $headerCard = $maxRarity === null
-                    ? null
-                    : $umamusume->cards->first(static fn (CharacterCard $card): bool => $card->rarity === $maxRarity);
+                // The header frame is identity, and identity is the debut form: the export derives
+                // `is_debut_form` by rule, and a trainee who later gained an SSR costume is still
+                // the trainee she was at debut. The badge on the same row keeps naming the top
+                // rarity, so the two read two different cards deliberately and neither is wrong
+                // (`DESIGN.md` §4.7). The `?? first()` branch is not defensive padding: rows with no
+                // debut flag still get a frame rather than nothing, which is the fallback the detail
+                // page already uses, so the two screens cannot disagree by accident. `url()` resolves
+                // to null when the mirror holds no file and Vue renders no frame. A `card_portrait`
+                // is a trainee portrait keyed on `card_id`, the same kind the detail page points at.
+                $headerCard = $umamusume->cards->first(static fn (CharacterCard $card): bool => $card->is_debut_form)
+                    ?? $umamusume->cards->first();
 
                 return [
                     'id' => $umamusume->id,

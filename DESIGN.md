@@ -443,6 +443,15 @@ run create screen: that screen's trainee picker is a native `<select>` whose `<o
 is text, plus a client-rendered combobox listbox, so neither surface hosts a frame today. Skill rows
 remain deferred because `skills` has no `icon` column (`ADR-0021` Verification).
 
+**Which card supplies a trainee's portrait differs by screen, and that split is deliberate.** The
+index row is identity, so it frames the debut form: the export derives `is_debut_form` by rule, and a
+trainee who later gained an SSR costume is still the trainee she was at debut. The detail page is the
+form in view, so it frames `activeCard`, which follows the costume tab and the `?form=` deep link. A
+multi-form trainee therefore shows two different portraits across the two screens by design, and the
+rarity badge on the index row keeps naming the top form on the same line as its debut portrait. Both
+read `?? cards->first()` as their fallback, so a trainee whose rows carry no debut flag cannot make
+the two screens disagree by accident. `tests/Feature/CatalogIndexPortraitTest.php` pins the split.
+
 Every row that has no slot still renders text only: name, `name_ja`, rarity chip, counts. That
 text-only rendering is what this section calls the fallback, and it is not a decorative gap waiting to
 be filled — R-31 already rules that decoration costs reading speed and buys nothing, and §1's design
