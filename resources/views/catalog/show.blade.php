@@ -9,6 +9,24 @@
         {{-- The Japanese name is not repeated here. It has its own full-width row in the profile
              block below, which is where the character page puts it, and printing it twice on one
              screen is a copy decision rather than a data one. --}}
+        {{-- The Identity portrait, the read half of `ADR-0021`. The slot is the active form's card
+             id, the same one the page falls back to for its skill lists (`$activeCard ?? first`).
+             `decorative` is what this host passes, because the `<h1>` beside the slot already
+             prints the trainee's name: `DESIGN.md` §4.7 then blanks the alt and the anchor label so
+             a screen reader reads the name once, from the text. The `route-args` point back at this
+             page, so the wrapper is a self-navigation rather than a jump. When the mirror holds no
+             file the component renders no element at all and the row reflows to text unchanged, so
+             the guard here is only about `$card` being null on a trainee with no costume card. --}}
+        @php $identityCard = $activeCard ?? $umamusume->cards->first(); @endphp
+        @if ($identityCard !== null)
+            <x-character-portrait
+                :card-id="$identityCard->card_id"
+                size-class="size-16"
+                :name="$umamusume->name"
+                decorative
+                :route-args="['slug' => $umamusume->slug]"
+            />
+        @endif
         <h1 class="text-2xl font-semibold text-ink-strong">{{ $umamusume->name }}</h1>
         <a href="{{ route('catalog.index') }}" class="text-sm text-ink-muted hover:underline">Back to catalog</a>
     </div>
