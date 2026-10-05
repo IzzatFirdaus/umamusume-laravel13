@@ -3,7 +3,12 @@
 **Pointer for the historical register, and still the live one. Its full text moved on 2026-10-03 to
 `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section "KNOWN-ISSUES.md (defect register)":
 2,655 lines covering KI-01 to KI-37, each entry naming the command or file that proves it and the
-commit that closed it.**
+commit that closed it.** KI-38 through KI-56 sit in the same master, further down; this file carries
+KI-57 onward.
+
+**Status (2026-10-06, at `ab53861`):** this file carries KI-57, KI-58, KI-59 and KI-60, and all four are
+OPEN. The count is stated as composition rather than a total, because the totals that used to live here
+went stale the moment the history moved.
 
 ## This file is still the append target
 
@@ -105,3 +110,68 @@ withdrawn: `url()` does check the disk, so a host that has not run `uma:fetch-ar
 at all and render no frame. The mechanism was misread because the `card_portrait` kind resolves to the
 nested `characters/portrait/trainee/<bucket>/` tree, and a shallow directory listing without recursion
 reported zero files where 665 exist. The `DESIGN.md` §4.7 rule holds and the app is not at fault.
+
+### KI-60 Four committed migrations have never been applied to `database/database.sqlite`, so the landing page and `/legacy` return 500 while the whole suite passes green - FILED 2026-10-06 (from the owner's `GET /` error report), OPEN
+
+**Symptom, observed.** `GET http://127.0.0.1:8000/` raises
+`Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1 no such table: veterans
+(Connection: sqlite, Database: database/database.sqlite, SQL: select count(*) as "aggregate" from
+"veterans")`. The aggregate comes from `ListVeterans::handle()` at `app/Actions/ListVeterans.php:63`,
+the `paginate()` call, reached from the route `home`.
+
+**Cause, measured.** `php artisan migrate:status` on the dev file reports four **Pending** migrations,
+all of them committed: `2026_10_02_193559_add_condition_groups_to_skills_table` and
+`2026_10_02_193601_add_awakening_event_evo_to_character_cards_table` (both from `e1de4ce`), plus
+`2026_10_05_120000_create_veterans_table` and
+`2026_10_05_180000_add_build_target_to_training_runs_table` (both from `dbf390f`). The dev database
+carries 41 rows in `migrations`; the tree ships 45. `php artisan db:table veterans` answers
+`Table [veterans] doesn't exist.`
+
+**Scope, wider than the report names.** This is not a defect in the dashboard. The dashboard path that
+raised it is a peer's **uncommitted** in-progress slice (`DashboardController.php`, `Dashboard.vue`,
+`types.ts`, `DashboardTest.php`, `config/scenarios.php`), and nothing here touched it. But committed
+`master` already reads the same table at `app/Http/Controllers/LegacyController.php:106`
+(`Veteran::query()->count()` on `/legacy`), and `build_target` and `condition_groups` are read by
+committed code too. Every route touching those four tables is broken on this host's dev database
+regardless of the working tree.
+
+**Why no gate caught it.** `phpunit.xml:64` forces `DB_DATABASE=:memory:`, so every test rebuilds its
+schema from the migration files and cannot observe the dev file's drift. The suite is green at five
+digits and the application returns 500 on its own landing page; those two facts are not in tension,
+they are the same fact seen from a database the check does not read. `composer docs`, Pint, PHPStan and
+`npm run typecheck` are likewise schema-blind. There is no check that runs `migrate:status` against the
+dev file.
+
+**Proof of the mechanism, run without writing to the dev file.** The dev database was copied with
+`VACUUM INTO` (never `cp`: it is in WAL mode, and the main file alone held ~0.2% of the content when
+last measured), `php artisan migrate` was run against the copy, and the result checked there: all four
+applied cleanly, `veterans` exists with its unique index on `training_run_id`, all six new columns
+exist, and all 29 pre-existing tables kept identical row counts (only `migrations` moved, 41 to 45).
+The migrated copy was then served on a spare port and `GET /` and `GET /legacy` both returned 200.
+`database/database.sqlite` was not modified by this pass.
+
+**Two consequences the fix has to cover, not just the 500.**
+
+1. `migrate` alone leaves the two 2026-10-02 columns **empty**: on this host `skills` holds 1,910 rows
+   and `character_cards` 106, and `condition_groups`, `skills_awakening`, `skills_event` and
+   `skills_evo` are NULL on all of them, because those columns are filled by the parsers, not by the
+   migration. Reading them after a bare `migrate` renders the very mechanics absence `KI-33` and
+   `KI-59` describe. The population step is `php artisan uma:reparse <source>` (`AGENTS.md` §11, and
+   `KI-27` for why a short-circuited `uma:fetch` will not do it).
+2. The plan tracks slices by whether their code landed, and
+   `docs/proposals/frontend-development-plan.md` §5 records C3 as `Landed` while the table it names had
+   never been created on the only database anyone browses. "Landed" there means merged and tested; it
+   carries no leg for "applied to the dev database", which is the leg that broke.
+
+**How it stayed unfixed for four days, stated plainly because the reason is the finding.** Every
+dispatch since 2026-10-02 fenced shared-database writes and required `DB_DATABASE=<scratch path>` for
+each migrate, and `AGENTS.md` §11 routes schema verification to a scratch database. That instruction is
+correct for *verification* and was read as forbidding *application*, so the migrations landed with no
+permitted path onto the dev file and nobody filed the gap. This entry does not resolve that: applying
+the four migrations to `database/database.sqlite` is an additive, per-migration-reversible write to the
+Trainer's own data, and it is the owner's call, not an agent's.
+
+**Fix, in order.** (a) `php artisan migrate` against the dev file; (b) `php artisan uma:reparse` for the
+skills and character-card sources so the new columns hold data; (c) give the plan's status column an
+applied-to-dev leg, or add `migrate:status` to the hand-off sequence in `AGENTS.md` §9, so a Pending
+migration in front of a committed read path fails a gate instead of a page.
