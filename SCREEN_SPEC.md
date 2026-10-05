@@ -1014,7 +1014,45 @@ Shop panel → purchase form (turn, item from the scenario catalogue, cost as re
 15. **Import cannot carry skills/deck/races.** Stated on-screen; no story requests the wider format. *Unresolved Requirement, acceptable.*
    **Unchanged 2026-10-04, as instructed.** `ADR-0018`'s sibling concern, the turn edit path, does not touch the import: `runs.import.*` keeps its own request and its own column list, and `HistoricalRunImportTest` passes unchanged.
 16. **No screen places artwork.** `ADR-0021` (2026-10-05) authorizes a local mirror of id-addressable third-party game art, and `DESIGN.md` §4.7 fixes how a slot behaves; no screen in this spec lists an image slot, and `grep -rn "<img" resources/views` returns zero on this tree, so nothing in the product renders a picture. *Unresolved Requirement, acceptable; the open decision is PRD OQ-6.* **Superseded in part 2026-10-05**; the sentence above is preserved as written and is false for four screens, as recorded below.
-   **Partially resolved 2026-10-05: four screens now place a slot, two candidates do not.** `uma:fetch-art` is the mechanism and it was already recorded; this entry records the read half, `artwork.show` plus `ArtworkMirror::url()` and two components. **Placed, matching `design-2.0` §45a:** SCR-CAT-001's trainee card header (`size-12`) and its costume-form rows (`size-10`), SCR-CAT-002 section 1 Identity (`size-16`, decorative), SCR-SUP-001's card rows (`size-12`) and SCR-SUP-002's header (`size-16`). A miss renders the text-only row those screens shipped before, so **no state table above changes** and the four-state collapse recorded below still holds. **Not placed, and each for a stated reason rather than by omission.** The pre-run Legacy Select widget cannot host a frame: SCR-RUN-CREATE's trainee picker is a native `<select>` whose `<option>` content model is text, plus a client-rendered combobox listbox, so there is no row to put an image in; wiring the combobox instead is a TypeScript slice with its own browser-spec cost, and it is deferred rather than refused. Skill rows remain unreachable for the original reason: `skills` stores no `iconid` column, so the 125 distinct ids live only in the committed dataset and mirroring them would need a migration of its own (`ADR-0021`'s Verification records the finding). Two open items ride with the placement: the catalog index resolves a trainee's header portrait from her top-rarity form while the detail page resolves it from the active or first form, so one multi-form trainee can show two different portraits across the two screens; and the components' single `decorative` flag cannot express "decorative image, still-named link", which `DESIGN.md` §4.7's fifth bullet now records as a known gap. Neither changes a state table. **PRD OQ-6 stays open**: the placement question has an answered subset, not an answer, and the run-create and skill-row remainder is what is left.
+   **Resolved on the ported surfaces 2026-10-05; two candidates still do not carry a slot.**
+`uma:fetch-art` is the mechanism and it was already recorded; this entry records the read half,
+`artwork.show` plus `ArtworkMirror::url()` and `ArtworkSlot.vue`. **Placed, matching
+`design-2.0` §45a:** SCR-CAT-001's trainee card header (`size-12`) and its costume-form rows
+(`size-10`), SCR-CAT-002 section 1 Identity (`size-16`, decorative, no anchor), SCR-SUP-001's card
+rows (`size-12`, clickable to the card's own page) and SCR-SUP-002's header (`size-16`, no anchor).
+A miss renders the text-only row those screens shipped before, so **no state table above changes**
+and the four-state collapse recorded below still holds.
+
+**The slots are Vue, and the Blade components this entry previously named are gone.** `x-character-
+portrait` and `x-support-thumb` were built for the three Blade screens the artwork work first
+targeted and deleted the same day, because the A1 to A3 ports retired `catalog/show.blade.php` and
+both support-card Blade views and those components had no other call site
+(`frontend-development-plan.md` §5.1 step 8 deletes a shared component at zero call sites).
+`ArtworkSlot.vue` replaced them across all four screens. **`grep -rn "<img" resources/views`
+returning zero is therefore correct again**, not the gap this item's first sentence describes: the
+`<img>` elements now come from `.vue` files. That sentence is preserved above as written and is
+false for four screens in a second way as well.
+
+**Not placed, and each for a stated reason rather than by omission.** The pre-run Legacy Select widget
+cannot host a frame: SCR-RUN-CREATE's trainee picker is a native `<select>` whose `<option>` content
+model is text, plus a client-rendered combobox listbox, so there is no row to put an image in; wiring
+the combobox instead is a TypeScript slice with its own browser-spec cost, and it is deferred rather
+than refused. Skill rows remain unreachable for the original reason: `skills` stores no `iconid`
+column, so the 125 distinct ids live only in the committed dataset and mirroring them would need a
+migration of its own (`ADR-0021`'s Verification records the finding).
+
+**One open item rides with the placement, and one gap is closed.** Open: the catalog index resolves a
+trainee's header portrait from her top-rarity form while the detail page resolves it from the active
+or first form, so one multi-form trainee can show two different portraits across the two screens; that
+is a placement decision for the owner, not something either screen should assume. Closed: the Blade
+components' single `decorative` flag, which blanked the image `alt` and the anchor `aria-label`
+together and so could not express a decorative image inside a named link, nor a no-action slot with no
+anchor at all. `ArtworkSlot.vue` takes `alt` and `href`/`linkLabel` as separate props, which is what
+lets the three no-action slots carry `alt=""` without leaving a nameless focus target that failed
+WCAG 2.2 AA 4.1.2. `DESIGN.md` §4.7's fifth bullet now records the resolution rather than the gap.
+Neither the open item nor the closure changes a state table. **PRD OQ-6 stays open**: the placement
+question has an answered subset, not an answer, and the run-create and skill-row remainder is what is
+left.
    **Unchanged 2026-10-05, and the build did not change it.** `uma:fetch-art` is the mechanism, not the placement: it fills `storage/app/private/artwork/` and writes `artwork/manifest.json`, and no screen reads either yet. If the owner answers OQ-6 yes, the candidate slots are SCR-CAT-001's trainee card header and its costume-form rows, SCR-CAT-002 section 1 (Identity), SCR-SUP-001's card rows and SCR-SUP-002's header, plus the pre-run Legacy Select widget. A skill row's icon is **not** reachable the same way: `skills` stores no `iconid` column, so the 125 distinct ids live only in the committed dataset and mirroring them would need a migration of its own (`ADR-0021`'s Verification records the finding). Four states a slot can be in, and three of them render identically: mirrored-and-present, never mirrored, gone upstream, and unreadable on disk, with everything after the first falling back to the text-only row that ships today, because the mirror is partial by nature and a broken frame would advertise a defect the tool does not have (`ADR-0021` Decision 5). No state table above changes until a slot exists, and no per-screen empty state is added on the strength of a mirror nobody has filled.
 
 ## 8. Source of Truth

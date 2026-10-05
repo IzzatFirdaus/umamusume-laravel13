@@ -236,8 +236,13 @@ external fonts (offline constraint + C-8 dependency gate).
 
 All views render through `resources/views/components/layout.blade.php`
 (`x-layout`: nav, flash, slot), which is the shell and is not one of the count below.
-**Existing:** 26 components exist; 24 are reachable
-from a route, 2 have no call site at all, and `energy-gauge` is reachable only through
+**Existing:** 11 Blade components exist, and 26 Vue single-file components sit under
+`resources/js/components/`. The Blade count is small because the port has been retiring it:
+`character-portrait` and `support-thumb` were added on 2026-10-05 for the artwork slots and
+deleted the same day, because the three Blade screens that were their only call sites were
+retired by the A1 to A3 ports and the slots moved to `ArtworkSlot.vue` with them.
+
+Of the 11, 2 have no call site at all, and `energy-gauge` is reachable only through
 one of those 2. All of them are token-only — the skeleton-palette migration is finished,
 so no row below is blocked on it. `design-preview` is removed from the tree and struck.
 
@@ -252,8 +257,8 @@ oversight, and it is cheaper than the indicator would be.
 | Catalog filter form | `catalog.index` | status + search + unconfirmed opt-in | n/a | n/a | yes |
 | Catalog roster rows | `catalog.index` | trainee header + her costume forms | dashed panel naming the remedy | 404 page | yes |
 | Catalog detail `dl` | `catalog.show` | identity, profile fields, dates | "unpublished" wording | 404 page | yes |
-| Trainee artwork slot | `catalog.index`, `catalog.show` | `x-character-portrait`: a mirrored portrait ahead of the row's name, streamed from `artwork.show`, geometry per §4.7 | renders nothing; the row stays text-only | the stream route 404s if the file goes missing between page and request | yes |
-| Support-card artwork slot | `support-cards.index`, `support-cards.show` | `x-support-thumb`: a mirrored thumbnail ahead of the card's name, same stream and rules | renders nothing; the row stays text-only | the stream route 404s | yes |
+| Trainee artwork slot | `catalog.index`, `catalog.show` | `ArtworkSlot`: a mirrored portrait streamed from `artwork.show`, geometry per §4.7 | renders nothing; the row stays text-only | the stream route 404s if the file goes missing between page and request | yes |
+| Support-card artwork slot | `support-cards.index`, `support-cards.show` | `ArtworkSlot`: a mirrored thumbnail, same stream and rules | renders nothing; the row stays text-only | the stream route 404s | yes |
 | Costume form tabs | `catalog.show` | one panel per form, CSS/native-radio tabs | single form draws no strip | 404 page | yes |
 | Aptitude grid | `catalog.show` | 10 letters, letter **and** word (D-12) | "unpublished", never half a grid | 404 page | yes |
 | Aliases / provenance lists | `catalog.show` | aliases, source URL + fetched stamp in `display_timezone` | "No aliases yet" | 404 page | yes |
@@ -417,12 +422,20 @@ disclosure wording. Filed as KI-35.
 
 ### 4.7 Sourced artwork slots (`ADR-0021`; mirror and slots built)
 
-**Status: the mirror exists and so do slots, on the server-rendered screens.** `uma:fetch-art` and its
+**Status: the mirror exists and so do slots, on the ported screens.** `uma:fetch-art` and its
 `artwork/` directory are built (`ADR-0021`, 2026-10-05). The read half landed the same day:
 `ArtworkAssetController` streams a mirrored file over the loopback route `artwork.show`,
-`ArtworkMirror::url()` hands views that route and returns `null` for a miss, and two components
-(`x-character-portrait`, `x-support-thumb`) plus the catalog index's own inline `<img>` are the slots.
-`grep -rn "<img" resources/views` is no longer zero.
+`ArtworkMirror::url()` hands the pages that route and returns `null` for a miss, and
+`resources/js/components/ArtworkSlot.vue` is the single owner of the slot contract.
+
+**The slots live in Vue, not Blade, and that is the port's doing rather than a preference.**
+`x-character-portrait` and `x-support-thumb` were built for the three Blade screens the artwork
+work originally targeted, then deleted the same day: the A1 to A3 ports retired
+`catalog/show.blade.php` and both support-card Blade views, and those components had no other call
+site (`frontend-development-plan.md` §5.1 step 8: delete at zero call sites). `ArtworkSlot.vue`
+replaced them and is now used by all four slot-bearing screens. `grep -rn "<img" resources/views`
+is zero again, and that is now the correct answer rather than a gap: the screens render `<img>` from
+`.vue` files.
 
 **Which screens carry a slot is still PRD OQ-6's remainder, and the shipped answer is partial.** The
 slots are on the catalog index and detail, the support-card index and detail. They are **not** on the
@@ -436,35 +449,38 @@ be filled — R-31 already rules that decoration costs reading speed and buys no
 read is an analyst desk.
 
 Which surfaces get a picture at all is **PRD OQ-6**, the owner's call, not this file's.
-What this file owns is the behaviour once a surface is chosen, and four rules bind it:
+What this file owns is the behaviour once a surface is chosen, and five rules bind it:
 
 - **Absence is a normal state, never an error state.** A file that was never mirrored, or
   that no longer exists upstream, renders the fallback. No broken frame, no grey box, no
   loader, no placeholder glyph. This is §4.2's absence discipline applied to an image
   rather than to a value: the mirror is partial by nature, and a broken visual would claim
-  a defect the tool does not have. The components implement this by generating nothing at
-  all when the mirror misses, so the link wrapper disappears with the image rather than
-  stranding an empty anchor.
+  a   defect the tool does not have. `ArtworkSlot.vue` implements this by rendering nothing
+  when the mirror misses: the guard wraps both of its branches rather than the `<img>`
+  inside one, so an absent file leaves no frame and no anchor either.
 - **The slot's geometry is decided once, at build time, and recorded here.** Either the box
   is reserved and a fallback paints inside it, or the element is omitted and the row
   reflows. Both are defensible; a per-page mixture is not, and neither is a size class that
-  only exists in one view. **This section now names the values, because the slots exist and
-  leaving it silent would leave the rule unenforced.** The reserved-pixel pair is `64 64`,
-  which is the square's intrinsic ratio rather than a painted size; the painted box comes
-  from the size class. Recorded geometry, and where each is used:
+  only exists in one view. **This section names the values, because the slots exist and
+  leaving it silent would leave the rule unenforced.** No `width`/`height` attributes are
+  emitted: the size class sets both edges, so the square is reserved before the file
+  arrives and there is no layout shift for intrinsic dimensions to paper over. Recorded
+  geometry, and where each is used:
 
-  | Box | Surface | Source |
-  |---|---|---|
-  | `size-16` | trainee portrait on catalog detail; support thumb on support-card detail | `design-2.0` §45a |
-  | `size-12` | trainee portrait on catalog index; support thumb on support-card index; and the default of both components | `design-2.0` §45a |
-  | `size-10` | trainee portrait on the catalog index's costume-form row | `design-2.0` §45a |
+  | Box | Surface | Click action | Source |
+  |---|---|---|---|
+  | `size-16` | trainee portrait on catalog detail; support thumb on support-card detail | no action | `design-2.0` §45a |
+  | `size-12` | trainee portrait on catalog index; support thumb on support-card index | navigates to detail | `design-2.0` §45a |
+  | `size-10` | trainee portrait on the catalog index's costume-form row | no action | `design-2.0` §45a |
 
-  `size-10` is the one class that appears in a single view, which the rule above forbids. It is
-  recorded here as a deliberate exception rather than left as an accident: the costume-form row is a
-  denser row nested under a trainee header that already carries a `size-12` frame, so a second
-  `size-12` beside it would dominate its own row header. Removing the class and reconciling that row
-  with the header is a layout decision, not a geometry one, and it belongs to whoever next touches
-  the catalog index.
+  The three values are pinned as a TypeScript union on `ArtworkSlot.vue`'s `size` prop
+  rather than passed as free strings, so Tailwind's scanner — which reads raw source text —
+  is guaranteed to see all three even though the binding is dynamic. `size-10` is the one
+  class that appears in a single screen, which the rule above forbids. It is recorded here
+  as a deliberate exception rather than left as an accident: the costume-form row is a
+  denser row nested under a trainee header that already carries a `size-12` frame, so a
+  second `size-12` beside it would dominate its own row header. Reconciling that row with
+  the header is a layout decision, not a geometry one.
 - **`src` is a local path.** §7's rule (no CDNs, all assets local, the catalog works with
   zero network) means hotlinking a third-party host in rendered HTML is out even though the
   host is reachable: the page would then depend on someone else's uptime to render, and the
@@ -479,16 +495,15 @@ What this file owns is the behaviour once a surface is chosen, and four rules bi
   read the name twice.
 - **A decorative image and an unnamed link are different defects, and the two must be chosen
   separately.** WCAG 2.2 AA 4.1.2 needs every focusable control to have an accessible name, and
-  §42's label-in-name clause needs a clickable slot's `aria-label` to carry the printed name
-  verbatim. So "the name prints beside the image" (which argues for `alt=""`) does **not**
-  imply "the anchor needs no name". The two components currently take one `decorative` flag
-  that blanks `alt` and `aria-label` together, which cannot express decorative-image-named-link;
-  two call sites have therefore taken opposite workarounds (catalog detail passes `decorative`
-  and accepts an unnamed self-link, support-card detail takes the default and keeps the name).
-  **Known gap, owner-visible:** one flag should split into an alt decision and a link decision,
-  and the run-create and future no-action slots need a way to omit the anchor altogether rather
-  than be pointed at the page they are already on. Until that lands, a new slot must pick its
-  side of this deliberately rather than copy whichever neighbouring view it resembles.
+  §42's label-in-name clause needs a clickable slot's accessible name to contain the printed label
+  verbatim. So "the name prints beside the image" (which argues for `alt=""`) does **not** imply
+  "the link needs no name", and §45a's *no action* click action does **not** imply "render a link to
+  the page you are already on". `ArtworkSlot.vue` therefore takes the two decisions as separate props:
+  `alt` for the image, and `href` plus `linkLabel` for the link, with an absent `href` rendering a
+  bare frame and no anchor at all. That is what lets the three no-action slots (catalog detail,
+  support-card detail, and the catalog index rows whose own name link is already the destination)
+  carry a decorative `alt=""` without leaving a nameless focus target behind, and it is why the
+  unnamed self-link the deleted Blade components produced does not exist to fail 4.1.2.
 
 ## 5. Data display rules with open implementation gaps
 
@@ -691,6 +706,22 @@ system owns.
 
 ## Change log
 
+- **2026-10-05** — §4.7 and §3 corrected after the artwork slots moved from Blade to Vue. The two
+  rows the read-half entry below added named `x-character-portrait` and `x-support-thumb`; both
+  components were deleted the same day because the A1 to A3 ports retired their only call sites, and
+  `ArtworkSlot.vue` replaced them across all four slot-bearing screens. Changed: the §3 count (11
+  Blade components and 26 Vue SFCs, with the two-day lifespan of the Blade slot components recorded
+  rather than hidden), §4.7's status paragraph (the slots are in `.vue` files, so
+  `grep -rn "<img" resources/views` being zero is again the correct answer and not a gap), the
+  geometry rule (`ArtworkSlot` emits no `width`/`height`, the size class reserves the square, and the
+  three values are pinned as a TypeScript union so Tailwind's scanner sees them), and the fifth
+  bullet — which had recorded the `decorative`-flag limitation as a known owner-visible gap and now
+  records its resolution: `alt` and `href`/`linkLabel` are separate props, so the three no-action
+  slots carry a decorative `alt=""` with no anchor at all rather than a nameless self-link that
+  failed WCAG 2.2 AA 4.1.2. Unchanged: all four original rules, the absence discipline, the C-4 alt
+  boundary, the `64 64`-free geometry decision in favour of CSS reservation, the run-create carve-out,
+  the skill-row deferral, and OQ-6 remaining the owner's call. **Superseded in part:** the entry below
+  claims `size-*` defaults and a reserved-pixel pair that the deleted Blade components carried.
 - **2026-10-05** — Declared the WCAG 2.2 AA conformance target (§12) and shipped its three
   visual-system pieces: a `prefers-reduced-motion` block and `scroll-padding-bottom` for the
   pinned mobile nav in `app.css`, and a `role="banner"` landmark on the shell header. Corrected
