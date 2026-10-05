@@ -6,6 +6,8 @@ use App\Enums\RaceEntryStatus;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
+use Illuminate\Support\Collection;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * R61/R68: a `free_race` cell takes open-cell geometry and the Trainer-entered marker, and never
@@ -23,9 +25,33 @@ use App\Models\TrainingRun;
  * reason it was running, which is the same failure KI-21 was filed against.
  *
  * This file goes through the read path. A Trainer-entered race is created as a row, the run is
- * fetched over HTTP, and the marker is required to sit inside a calendar cell that carries the
- * open treatment, names its state to assistive tech, and has no Goal pennant anywhere on the page.
+ * fetched, and the page payload is required to carry the manual slot inside a calendar cell in the
+ * open (or past) state, with no `goal` state anywhere the pennant could draw from; the geometry
+ * classes and the spoken state words are the components'.
  */
+
+/**
+ * The slot the calendar payload holds for one half-month, straight out of the props.
+ *
+ * @return array<string, mixed>|null
+ */
+function calendarSlotIn(Collection $cells, int $monthIndex, string $half): ?array
+{
+    return $cells[$monthIndex]['halves'][$half]['slots'][0] ?? null;
+}
+
+/**
+ * Every slot the twelve month-cells hold, Early and Late.
+ *
+ * @return Collection<int, array<string, mixed>>
+ */
+function allCalendarSlots(Collection $cells): Collection
+{
+    return $cells->flatMap(static fn (array $month): array => [
+        ...$month['halves']['Early']['slots'],
+        ...$month['halves']['Late']['slots'],
+    ]);
+}
 
 it('renders a persisted free_race row as an open manual cell on the run screen', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
@@ -42,46 +68,35 @@ it('renders a persisted free_race row as an open manual cell on the run screen',
         'sort_order' => 1,
     ]);
 
-    $html = $this->get(route('runs.show', $run))->content();
+    // Scoped to the calendar payload's own cells: the race panel prints the same words on its
+    // entry rows, so a page-wide check would pass without the calendar carrying anything at all.
+    $this->get(route('runs.show', $run))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.show', true)
+        // Open geometry and the manual marker: the state the read path is required to report (R61).
+        ->where('calendar.cells', function (Collection $cells): bool {
+            $cell = calendarSlotIn($cells, 8, 'Late');
 
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
-
-    // Scoped to a calendar cell, which is the element carrying role="img": the race panel prints
-    // the same words on its own entry rows, and a page-wide count would pass without the calendar
-    // rendering anything at all.
-    $markers = $xpath->query('//*[text()="Trainer-entered"][ancestor::*[@role="img"]]');
-
-    expect($markers->length)->toBe(1);
-
-    $cell = $xpath->query('ancestor::*[@role="img"]', $markers->item(0))->item(0);
-    $cellClass = $cell->getAttribute('class');
-
-    // Open geometry: the dashed edge. Not the goal outline, and not the past treatment.
-    expect($cellClass)->toContain('border-dashed')
-        ->and($cellClass)->toContain('border-green-line')
-        ->and($cellClass)->not->toContain('border-goal-line')
-        ->and($cellClass)->not->toContain('bg-transparent');
-
-    // D-12: the treatment is not the only signal. The cell says its state out loud.
-    expect($cell->getAttribute('aria-label'))->toContain('Entry open')
-        ->and($cell->getAttribute('aria-label'))->toContain('Autumn Practice Stakes');
-
-    // R61: never a Goal pennant. D-181 draws it as a corner triangle with border-l-goal, and it
-    // is emitted only for state `goal`, so the whole page holding zero of them is the assertion.
-    expect($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " border-l-goal ")]')->length)
-        ->toBe(0);
+            return $cell !== null
+                && $cell['state'] === 'open'
+                && $cell['label'] === 'Autumn Practice Stakes'
+                && $cell['manual'] === true;
+        })
+        // D-181: the pennant is drawn only from state `goal`, so the whole payload holding zero
+        // of them is the assertion.
+        ->where('calendar.cells', fn (Collection $cells) => allCalendarSlots($cells)->doesntContain(
+            fn (array $slot): bool => $slot['state'] === 'goal'
+        )));
 });
 
 /*
- * The marker survives the finish. `calendarCell()` returns `['state' => 'past', ..., 'manual' =>
- * true]` for a free race with a recorded entry (`app/Models/TrainingRun.php:437`), because
- * `free_race` is a tool concept rather than a client one: the game never offers a race that is not
- * in the calendar, so "this row came from the Trainer" is provenance about where the record came
- * from, and Slice 13 measured that it reads better looking back over a finished career. Slice 12
- * reported the marker as lost; the read path's owner made that call in the same window this slice
- * ran, and the test below is what pins it.
+ * The marker survives the finish. `TrainingRun::calendarCell()` returns `['state' => 'past', ...,
+ * 'manual' => true]` for a free race with a recorded entry, because `free_race` is a tool concept
+ * rather than a client one: the game never offers a race that is not in the calendar, so "this row
+ * came from the Trainer" is provenance about where the record came from, and Slice 13 measured that
+ * it reads better looking back over a finished career. Slice 12 reported the marker as lost; the
+ * read path's owner made that call in the same window this slice ran, and the test below is what
+ * pins it.
  */
 it('keeps the Trainer-entered marker on a free_race cell after its finish is recorded', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
@@ -104,24 +119,19 @@ it('keeps the Trainer-entered marker on a free_race cell after its finish is rec
         'placement' => 1,
     ]);
 
-    $html = $this->get(route('runs.show', $run))->content();
+    $this->get(route('runs.show', $run))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        // Past cell: the run happened here, and the provenance is still named. The cell's own
+        // state word is `Scheduled` (the component's), never `goal`, so still no pennant.
+        ->where('calendar.cells', function (Collection $cells): bool {
+            $cell = calendarSlotIn($cells, 8, 'Late');
 
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
-
-    $markers = $xpath->query('//*[text()="Trainer-entered"][ancestor::*[@role="img"]]');
-
-    expect($markers->length)->toBe(1);
-
-    $cell = $xpath->query('ancestor::*[@role="img"]', $markers->item(0))->item(0);
-
-    // Past geometry: the run happened here. Provenance still named, and still no
-    // pennant. The word is the client's `Scheduled`, which is what the pink pill on the
-    // cell says and therefore what the accessible name says too.
-    expect($cell->getAttribute('class'))->toContain('bg-transparent')
-        ->and($cell->getAttribute('aria-label'))->toContain('Scheduled')
-        ->and($cell->getAttribute('aria-label'))->toContain('Autumn Practice Stakes')
-        ->and($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " border-l-goal ")]')->length)
-        ->toBe(0);
+            return $cell !== null
+                && $cell['state'] === 'past'
+                && $cell['label'] === 'Autumn Practice Stakes'
+                && $cell['manual'] === true;
+        })
+        ->where('calendar.cells', fn (Collection $cells) => allCalendarSlots($cells)->doesntContain(
+            fn (array $slotItem): bool => $slotItem['state'] === 'goal'
+        )));
 });

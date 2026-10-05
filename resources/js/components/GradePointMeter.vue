@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CapsuleHeader from './CapsuleHeader.vue';
 import { computed } from 'vue';
 
 // No scenario name is passed (G-33): the controller's `gradeObjectives()` already returns
@@ -62,12 +63,9 @@ const barLabel = computed(() => {
 
 <template>
     <div v-if="objectives.length > 0" class="rounded-md border border-rule bg-panel p-3">
-        <!-- ponytail: capsule-header anatomy inlined from Blade's x-capsule-header (the one
-             owner there); extract a CapsuleHeader.vue when the second Vue panel lands.
-             h-11 is the 44px target rule (DESIGN.md §2.3, D-3). -->
-        <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pr-5 pl-20">
-            <span class="text-base font-bold text-on-chrome">Grade Point</span>
-        </div>
+        <!-- The capsule header's anatomy was inlined here while CapsuleHeader.vue did not exist;
+             it is the one owner of the lattice bleed and the 44px height now (DESIGN.md §2.3, D-3). -->
+        <CapsuleHeader title="Grade Point" class="mb-3" />
 
         <div class="rounded-md border border-rule bg-raised p-3">
             <template v-if="objective === null">

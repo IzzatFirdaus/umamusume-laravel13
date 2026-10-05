@@ -14,6 +14,9 @@ use Inertia\Testing\AssertableInertia as Assert;
  * Pins the four behaviors the 2026-09-28 frontend audit reported, one test per
  * finding. Each of these fails on master at 7d4b8cf and passes on the fix
  * commit; they are not general UI snapshots.
+ *
+ * The run page is an Inertia page now, so the F-3 assertions read the props the
+ * page resolves; the words a Trainer actually sees are the browser spec's.
  */
 
 function auditRun(?string $scenario = 'ura_finale'): TrainingRun
@@ -42,28 +45,31 @@ function auditRun(?string $scenario = 'ura_finale'): TrainingRun
     return $run;
 }
 
-/*
- * The scenario picker is a control, not a claim: it must keep listing every
- * scenario, including the one the run does not use. So "URA Finale" is allowed
- * inside an <option> and nowhere else, and the assertions strip those first.
- */
-function auditCopyOf(string $html): string
-{
-    return preg_replace('#<option\b[^>]*>.*?</option>#s', '', $html);
-}
-
 it('stops naming a scenario the run never chose, on the strip and the rail (F-3)', function (): void {
-    $html = auditCopyOf(test()->get('/training-runs/'.auditRun(null)->id)->assertOk()->getContent());
-
-    expect($html)->not->toContain('URA Finale')
-        ->and($html)->toContain('no scenario set');
+    test()->get('/training-runs/'.auditRun(null)->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // The scenario picker is a control, not a claim: it must keep listing every scenario,
+            // including the one the run does not use.
+            ->where('scenarios.ura_finale', 'URA Finale')
+            // The run itself names none. The strip and the rail compose from URA Finale's key
+            // anyway, so `declared` is the flag that keeps them from printing its label (D-220).
+            ->where('run.has_scenario', false)
+            ->where('run.scenario_label', null)
+            ->where('strip.declared', false)
+            ->where('rail.declared', false));
 });
 
 it('still names the scenario the Trainer did choose (F-3, no over-correction)', function (): void {
-    $html = auditCopyOf(test()->get('/training-runs/'.auditRun('ura_finale')->id)->assertOk()->getContent());
-
-    expect($html)->toContain('URA Finale')
-        ->and($html)->not->toContain('no scenario set');
+    test()->get('/training-runs/'.auditRun('ura_finale')->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('run.has_scenario', true)
+            ->where('run.scenario_label', 'URA Finale')
+            ->where('strip.declared', true)
+            ->where('rail.declared', true));
 });
 
 it('exports the energy, mood and fans it logs and displays (F-9)', function (): void {
@@ -141,8 +147,9 @@ it('reaches a preview by redirect, so refreshing it is not a 405 (F-7)', functio
     // A preview never wrote a row.
     expect($run->turnEntries()->count())->toBe(1);
 
-    // And the screen it redirects to is still the preview, recomputed on the GET.
-    $html = test()->withSession([
+    // And the screen it redirects to is still the preview, recomputed on the GET from the flashed
+    // input: the bubbles survive the redirect, so PRG did not cost the preview anything.
+    test()->withSession([
         '_old_input' => [
             'stage' => 'preview',
             'turn' => 2,
@@ -159,9 +166,11 @@ it('reaches a preview by redirect, so refreshing it is not a 405 (F-7)', functio
             'outcome' => 'Success',
             'previewed' => '1',
         ],
-    ])->get("/training-runs/{$run->id}")->assertOk()->getContent();
-
-    // The bubbles survive the redirect: they are computed on the GET from the
-    // flashed input, so PRG did not cost the preview anything. 520 - 480 = +40.
-    expect($html)->toContain('+40 Speed');
+    ])->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // 520 - 480 = +40.
+            ->where('rail.preview.0.direction', 'up')
+            ->where('rail.preview.0.text', '+40 Speed'));
 });

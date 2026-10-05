@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import CapsuleHeader from './CapsuleHeader.vue';
+
 // Self-gating panel: `enabled` is the controller's resolved composesPanel('team_rank_ladder'),
 // never a scenario slug (G-33). The ladder arrives pre-flattened from config so the view holds
 // no config lookup (D-240), and `current.level` is run->facilityLevel(rank) computed server-side.
@@ -11,10 +13,7 @@ defineProps<{
 
 <template>
     <div v-if="enabled" class="rounded-md border border-rule bg-panel p-3">
-        <!-- inline until CapsuleHeader.vue lands -->
-        <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pr-5 pl-20">
-            <span class="text-base font-bold text-on-chrome">Team Rank</span>
-        </div>
+        <CapsuleHeader title="Team Rank" class="mb-3" />
 
         <p v-if="current === null" class="text-sm text-ink">
             <span class="font-bold text-ink">Rank not recorded</span>: the league letter is

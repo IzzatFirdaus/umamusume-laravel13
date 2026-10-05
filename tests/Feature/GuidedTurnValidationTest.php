@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * D-3: what a failed submit hands back to the rail.
@@ -14,12 +15,14 @@ use App\Models\TurnEntry;
  * again - and because the reason for the failure is on the outcome step, the Trainer also
  * lost the step they were standing on.
  *
- * The raw escape hatch beside the rail rehydrates from `old()` per field, so two forms
- * posting to the same endpoint disagreed about what to do with input the server had just
- * rejected, and the form that asks for more fields lost more. The rehydration now lives in
- * `showData()`, the one place the GET, the staged preview and the redirect-back all read,
- * so there is a single assembly rather than a per-view `old()` call that a later edit
- * would miss.
+ * Two forms posting to the same endpoint disagreed about what to do with input the server
+ * had just rejected: the raw escape hatch rehydrated from `old()` per field and the rail
+ * rehydrated not at all, so the form that asks for more fields lost more. The rehydration
+ * now lives in `showData()`, the one place the GET, the staged preview and the redirect-back
+ * all read, so there is a single assembly rather than a per-view `old()` call that a later
+ * edit would miss. The screen is Inertia now (ADR-0020), so the assertions read the `rail`
+ * prop that assembly produces; the `checked`/`selected` attributes it paints are in
+ * tests/browser/run-detail.spec.ts.
  *
  * D-3 was fixed rather than characterized: discarding a Trainer's input contradicts D-56,
  * which sends an error "back to the step that caused it", so no test here pins the loss.
@@ -57,12 +60,13 @@ it('hands the typed numbers back after a rejected submit', function (): void {
         ->post("/training-runs/{$run->id}/turns", $payload)
         ->assertSessionHasErrors('speed');
 
-    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
-
-    expect($html)
-        ->toContain('value="1500"')
-        ->toContain('value="525"')
-        ->toContain('value="12400"');
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('rail.values.speed', 1500)
+            ->where('rail.values.stamina', 525)
+            ->where('rail.values.fans', 12400));
 });
 
 it('returns the rail to the step the failure came from', function (): void {
@@ -74,7 +78,8 @@ it('returns the rail to the step the failure came from', function (): void {
 
     // A failure missing its penalty kind is a stage-two failure, and the rail has to come
     // back on the outcome step - not on the choice cards, which is where a stage-one
-    // rehydration would put it.
+    // rehydration would put it. `current` is the stage the rail renders, and the flashed
+    // flag is what restores the confirm control.
     test()->withHeader('referer', url("/training-runs/{$run->id}"))
         ->post("/training-runs/{$run->id}/turns", validationPayload([
             'outcome' => 'Failure',
@@ -82,10 +87,12 @@ it('returns the rail to the step the failure came from', function (): void {
         ]))
         ->assertSessionHasErrors('penalty_kind');
 
-    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
-
-    expect($html)->toContain('Step 2 of')
-        ->toContain('name="previewed"');
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.current', 'outcome')
+            ->where('rail.previewed', true)
+            ->where('rail.values.outcome', 'Failure'));
 });
 
 it('keeps the chosen discipline and the mood across the redirect', function (): void {
@@ -95,15 +102,14 @@ it('keeps the chosen discipline and the mood across the redirect', function (): 
         ->post("/training-runs/{$run->id}/turns", validationPayload(['energy' => 999]))
         ->assertSessionHasErrors('energy');
 
-    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
-
-    // `checked` on the radio and `selected` on the mood, both read back out of the staged
-    // values. A choice that silently reverts is the same loss as a number that reverts.
-    // The mood pattern starts at the <option>, not at the <select>: `[^>]*` cannot cross
-    // the tag boundary between them, so anchoring on the select's name never matches.
-    expect($html)
-        ->toMatch('/name="choice"[^>]*value="training-Speed"[^>]*checked/')
-        ->toMatch('/<option value="GOOD"[^>]*selected/');
+    // The choice radio and the mood option both read back out of the staged values, here
+    // as `selected` and `mood`; a choice that silently reverts is the same loss as a
+    // number that reverts.
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.selected', 'training-Speed')
+            ->where('rail.mood', 'GOOD'));
 });
 
 it('writes nothing while handing the input back', function (): void {
@@ -119,9 +125,9 @@ it('writes nothing while handing the input back', function (): void {
 it('does not repopulate the rail from a rejected raw-form submit', function (): void {
     $run = validationRun();
 
-    // The hatch posts eight fields and no `stage`. Its own inputs already rehydrate from
-    // `old()` per field, so the rail must stay empty: two forms filling each other in
-    // would be a second way to be wrong, and the rail would show numbers nobody staged.
+    // The hatch posts eight fields and no `stage`. The rail rehydrates only from a staged
+    // submission, so it must stay empty: two forms filling each other in would be a second
+    // way to be wrong, and the rail would show numbers nobody staged.
     test()->withHeader('referer', url("/training-runs/{$run->id}"))
         ->post("/training-runs/{$run->id}/turns", [
             'turn' => 1, 'speed' => 1500, 'stamina' => 90, 'power' => 110,
@@ -129,21 +135,23 @@ it('does not repopulate the rail from a rejected raw-form submit', function (): 
         ])
         ->assertSessionHasErrors('speed');
 
-    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
-
-    expect($html)
-        ->not->toContain('name="previewed"')
-        ->not->toMatch('/name="choice"[^>]*checked/');
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.values', [])
+            ->where('rail.selected', null)
+            ->where('rail.previewed', false));
 });
 
 it('leaves a plain visit to a run with no staged values at all', function (): void {
     $run = validationRun();
 
-    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
-
     // No old input, no staged values: the inputs render empty and the stat band stays
     // unmounted, because a run that has logged nothing has nothing to show.
-    expect($html)
-        ->not->toContain('name="previewed"')
-        ->not->toContain('value="1500"');
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.values', [])
+            ->where('rail.previewed', false)
+            ->where('band', null));
 });

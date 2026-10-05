@@ -2,50 +2,37 @@
 
 declare(strict_types=1);
 
-use App\Models\TrainingRun;
-use App\Models\TurnEntry;
-
 /*
- * The keyboard path (D-55, gate G-11).
+ * The keyboard path (D-55, gate G-11), after the run screen's Inertia port (ADR-0020 §1).
  *
- * What a PHP suite can prove here is structure and wiring: that a skip link exists and
- * points at something real, that the rail advertises its shortcuts rather than assuming
- * them, and that the module that implements them is actually in the entry the browser
- * loads. That the keys do what they claim is a runtime fact, verified with real key
- * presses in the browser pass and recorded in
- * `docs/design-research/verification/slice-5-2026-09-28.md`.
+ * What a PHP suite can prove here is structure and wiring. The structure is client-side:
+ * the skip link is in `resources/js/layouts/AppLayout.vue`, and the rail's advertisement and
+ * key handling are in `resources/js/components/GuidedStep.vue`, which owns its own
+ * document-level listener (the Blade-era `guided-flow.ts` module is gone, B1). That the keys
+ * do what they claim is a runtime fact, verified with real key presses in
+ * tests/browser/run-detail.spec.ts.
  */
-function keyboardHtml(): string
+
+function keyboardSource(string $path): string
 {
-    $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
-
-    TurnEntry::create([
-        'training_run_id' => $run->id, 'turn' => 1, 'speed' => 300, 'stamina' => 280,
-        'power' => 240, 'guts' => 210, 'wit' => 150, 'sp' => 120, 'energy' => 74,
-        'mood' => 'GOOD', 'fans' => 4000,
-    ]);
-
-    return test()->get('/training-runs/'.$run->id)->assertOk()->getContent();
+    return (string) file_get_contents(base_path($path));
 }
 
 it('offers a skip link whose target exists', function (): void {
-    $html = keyboardHtml();
-    $doc = new DOMDocument;
-    @$doc->loadHTML($html, LIBXML_NOERROR);
-    $xpath = new DOMXPath($doc);
-
-    $link = $xpath->query('//a[@href="#main"]')->item(0);
-    $target = $xpath->query('//main[@id="main"]')->item(0);
+    $layout = keyboardSource('resources/js/layouts/AppLayout.vue');
 
     // A skip link that points at nothing is worse than none: it is a trap for the exact
-    // person it exists for. Both halves are asserted, not just the anchor.
-    expect($link)->not->toBeNull()
-        ->and($link->textContent)->toContain('Skip to content')
-        ->and($target)->not->toBeNull();
+    // person it exists for. Both halves are asserted, not just the anchor, and the text is
+    // tied to the anchor rather than to the file.
+    expect($layout)->toMatch('/<a\s+[^>]*href="#main"[^>]*>\s*Skip to content\s*<\/a>/')
+        ->and($layout)->toContain('<main id="main"');
 });
 
 it('hides the skip link until it has focus', function (): void {
-    $classes = (string) preg_replace('/.*<a href="#main"([^>]*)>.*/s', '$1', keyboardHtml());
+    $layout = keyboardSource('resources/js/layouts/AppLayout.vue');
+
+    preg_match('/<a\s+[^>]*href="#main"[^>]*class="([^"]*)"/s', $layout, $anchor);
+    $classes = explode(' ', $anchor[1] ?? '');
 
     // Revealed only in its own focus state, so it costs no layout to the mouse user and
     // appears exactly when a keyboard Trainer needs it.
@@ -54,42 +41,51 @@ it('hides the skip link until it has focus', function (): void {
 });
 
 it('advertises the rail shortcuts instead of assuming them', function (): void {
-    $html = keyboardHtml();
+    $step = keyboardSource('resources/js/components/GuidedStep.vue');
 
     // D-55 binds 1-5 to the five disciplines; the rail also offers Rest and a Mood
     // adjustment, and the advertised range is counted from the choices themselves.
-    expect($html)->toContain('Keys 1 to 7 choose an activity')
-        ->and($html)->toContain('Enter previews the turn')
-        ->and($html)->toContain('Escape returns to the choices');
+    expect($step)->toContain('Keys 1 to {{ choices.length }} choose an activity')
+        ->and($step)->toMatch('/arrow keys move between them, Enter\s+previews the turn, Escape returns to the choices\./s');
 });
 
-it('loads the keyboard module from the entry the browser actually runs', function (): void {
-    $entry = (string) file_get_contents(base_path('resources/js/app.ts'));
+it('loads the keyboard component from the entry the browser actually runs', function (): void {
+    // The component existing on disk proves nothing about it executing: the entry the run page
+    // loads must resolve the page, and the page must mount GuidedStep. Without that the
+    // behaviour is untestable from here and invisible in the browser pass, which would report
+    // the keys as broken.
+    //
+    // The third clause is the registration, not the definition. The first draft of this assertion
+    // pinned `function onKeydown` and passed against a component that declared the handler and
+    // never attached it, which is the exact defect it exists to catch.
+    $step = keyboardSource('resources/js/components/GuidedStep.vue');
 
-    // The module existing on disk proves nothing about it executing. This is the wiring
-    // check: without the import the behaviour is untestable from here and invisible in the
-    // browser pass, which would report the keys as broken.
-    expect($entry)->toContain("import './guided-flow';");
+    expect(keyboardSource('resources/js/spa.ts'))->toContain("'./pages/**/*.vue'")
+        ->and(keyboardSource('resources/js/pages/Runs/Show.vue'))->toContain("import GuidedStep from '../../components/GuidedStep.vue'")
+        ->and($step)->toContain("document.addEventListener('keydown', onKeydown)")
+        // A listener registered on the document and never removed leaks one handler per visit, so
+        // the rail that returns here after a turn accumulates handlers that all press the same key.
+        ->and($step)->toContain("document.removeEventListener('keydown', onKeydown)");
 });
 
 it('leaves the arrow-key roving to the radio group rather than reimplementing it', function (): void {
-    $script = (string) file_get_contents(base_path('resources/js/guided-flow.ts'));
+    $script = keyboardSource('resources/js/components/GuidedStep.vue');
 
     // The browser already roves focus and selection through a radio group with the arrow
     // keys. A script that re-does it fights the platform and breaks inside text fields, so
     // the absence of tabindex juggling here is the decision, not an omission.
     expect($script)->not->toContain('tabIndex')
         ->and($script)->not->toContain('ArrowDown')
-        ->and($script)->toContain('isEditing');
+        ->and($script)->toContain('input[type="radio"]');
 });
 
 it('guards the number shortcut by input type rather than by tag name', function (): void {
-    $script = (string) file_get_contents(base_path('resources/js/guided-flow.ts'));
+    $script = keyboardSource('resources/js/components/GuidedStep.vue');
 
     // The guard exists so a digit typed into Speed is not a command. Keyed on the tag it
     // also matched the radios, and because focus is on a radio right after an arrow key
     // moves the selection, the shortcut died exactly where it is used. The browser pass
     // found this; the type list is what keeps it fixed.
-    expect($script)->toContain('nonTextInputTypes')
+    expect($script)->toContain('NON_TEXT_TYPES.includes(target.type)')
         ->and($script)->toMatch('/radio/');
 });

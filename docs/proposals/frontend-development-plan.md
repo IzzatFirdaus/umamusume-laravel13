@@ -63,18 +63,18 @@ Copied verbatim from the governing docs; every task implicitly includes this sec
 
 ## 1. What is already built (do not rebuild)
 
-Inventory measured against the working tree on 2026-10-05, not remembered: 12 page components, 7 shared
-components, 8 browser specs, 26 Blade files still in `resources/views/`.
+Inventory measured against the working tree on 2026-10-05, not remembered: 13 page components, 25 shared
+components, 9 browser specs, 15 Blade files still in `resources/views/`.
 
 | Layer | Files | State |
 |---|---|---|
 | Inertia root + resolver | `resources/views/app.blade.php`, `resources/js/spa.ts` | Done |
 | Shared props | `app/Http/Middleware/HandleInertiaRequests.php` (`app`, `flash`, `errors`), `resources/js/types.ts` | Done |
 | Shell | `resources/js/layouts/AppLayout.vue` (sidebar + mobile bottom nav + skip link) | Done |
-| Ported pages | `pages/Dashboard.vue`, `pages/Catalog/{Index,Show}.vue`, `pages/Review/Index.vue`, `pages/Preferences/Edit.vue`, `pages/Skills/{Index,Show}.vue`, `pages/SupportCards/{Index,Show}.vue`, `pages/Runs/{Index,Create,Import}.vue` | Done (12) |
-| Ported components | `components/RarityChip.vue`, `components/SkillRow.vue`, `components/AptitudeGrid.vue`, `components/TraineeCombobox.vue`, `components/catalog/{FormDetail,FormTabs}.vue`, `components/review/CandidateForm.vue` | Done (7) |
-| Browser tests | `tests/browser/{catalog,catalog-detail,preferences,review,skills,support-cards,runs,run-import}.spec.ts`, `playwright.config.ts` | Done (8 specs, 43 tests) |
-| Still on Blade | `resources/views/runs/show.blade.php` (A4b), `resources/views/errors/{404,419,500}.blade.php`, and the 21 components under `resources/views/components/` that `runs/show` and the error pages still consume | A4b pending |
+| Ported pages | `pages/Dashboard.vue`, `pages/Catalog/{Index,Show}.vue`, `pages/Review/Index.vue`, `pages/Preferences/Edit.vue`, `pages/Skills/{Index,Show}.vue`, `pages/SupportCards/{Index,Show}.vue`, `pages/Runs/{Index,Create,Show,Import}.vue` | Done (13) |
+| Ported components | `components/RarityChip.vue`, `components/SkillRow.vue`, `components/AptitudeGrid.vue`, `components/TraineeCombobox.vue`, `components/ArtworkSlot.vue`, `components/{AppButton,CapsuleHeader,MoodPill,GradeBadge,EnergyGauge,StatBand,ResourceStrip,GradePointMeter,RaceCalendar,DeckPanel,RacePanel,ShopPanel,TeamRankGauge,SpiritBurstRoster,TeamRacePanel,EpithetChecklist,RaceFatigueChip,GuidedStep}.vue`, `components/catalog/{FormDetail,FormTabs}.vue`, `components/review/CandidateForm.vue` | Done (25) |
+| Browser tests | `tests/browser/{catalog,catalog-detail,preferences,review,skills,support-cards,runs,run-detail,run-import}.spec.ts`, `playwright.config.ts` | Done (9 specs) |
+| Still on Blade | `resources/views/errors/{404,419,500}.blade.php`, `resources/views/components/{layout,capsule-header,energy-gauge}.blade.php`, and the zero-consumer run components (`app-button`, `deck-editor`, `grade-badge`, `grade-point-meter`, `guided-step`, `race-calendar`, `resource-strip`, `run-header`) | B1 pending |
 
 The established page pattern is `resources/js/pages/Catalog/Index.vue`: local `Paginator<T>` interface,
 filters via `router.get(url, params, { preserveState, preserveScroll })`, forms via `useForm` +
@@ -191,8 +191,8 @@ Concert panel and omits Inheritance Event, Career Timeline and Veteran Compariso
 | **E** | E5 | Scenario Race Planner (race facts only; **no** win probability) | SCREEN-017 | D8 |
 | **E** | E6 | Grand Concert panel — baseline strip only *(design-2.0 only)* | SCR-017 | E1 |
 
-**Phase A status, 2026-10-05.** A1, A2, A3, A4a and A4c have landed green; **A4b has not started**, and B1
-is therefore blocked (it waits on all of A). No Phase B–E slice has begun.
+**Phase A status, 2026-10-05.** A1, A2, A3, A4a, A4b and A4c have landed green, so **B1 is unblocked**. No
+Phase B–E slice has begun.
 
 | Slice | State | Evidence, and what is still open |
 |---|---|---|
@@ -200,9 +200,9 @@ is therefore blocked (it waits on all of A). No Phase B–E slice has begun.
 | A2 | Landed | Filter button was found at 32px and raised to `h-11` during the port. See §5.3. |
 | A3 | Landed | `resources/js/pages/SupportCards/{Index,Show}.vue`; `rarity-chip`/`skill-row` Blade retired. |
 | A4a | Landed | No-script fallback select retired by owner ruling 2026-10-05; 11 source-text shape pins became Playwright behaviour proofs. See §5.5. |
-| A4b | **Not started** | Atomic: 824-line view, 15 components, 13 forms, ~14 test files pinning this markup. Sized in §5.5. |
+| A4b | Landed | `resources/js/pages/Runs/Show.vue` plus 19 ported panel components; `runs/show.blade.php` and its ten now-consumerless components deleted. Deviations and the two behaviour changes under the 2026-10-05 ruling are in §5.5. |
 | A4c | Landed | Preview kept as a server-rendered Inertia page, not a JSON endpoint (it never was one). See §5.5. |
-| B1 | Blocked | Waits on A4b. |
+| B1 | Ready | Waits on nothing now. Its own work: the nine zero-consumer Blade components the A4b port left behind, `guided-flow.ts`, and `app.ts`. |
 
 Race prediction (the win-probability field on `SCREEN-011` and `SCREEN-017`), inheritance optimization
 (`SCREEN-006`), and per-training stat yields (`SCREEN-010`) are **not built**: they are held on `ADR-0016`
@@ -354,91 +354,88 @@ into three shippable sub-slices.
   browser-asserted (the seeded database holds zero runs and creating them from a browser test would
   mutate the development database the suite shares), and the cardless band is unreachable there (all
   67 seeded Global trainees have a confirmed card). Both are covered on the props side.
-- **A4b — detail + guided turns** (`Runs/Show.vue`; port `x-run-header`, `x-stat-band`, `x-energy-gauge`,
-  `x-mood-pill`, `x-resource-strip`, `x-deck-panel`, `x-race-calendar`, `x-race-panel`, `x-guided-step`,
-  `x-capsule-header`, `x-app-button`, `x-grade-badge`).
-  **Half-built as of 2026-10-05, nothing wired.** The 15 Vue component twins exist as untracked files
-  under `resources/js/components/` (`AppButton`, `CapsuleHeader`, `MoodPill`, `GradeBadge`,
-  `EnergyGauge`, `StatBand`, `ResourceStrip`, `GradePointMeter`, `RaceCalendar`, `DeckPanel`, `RacePanel`,
-  `ShopPanel`, `TeamRankGauge`, `SpiritBurstRoster`, `TeamRacePanel`, `EpithetChecklist`,
-  `RaceFatigueChip`, `GuidedStep`). They are not in any page's import graph, so `npm run build` does not
-  compile them and they are **not yet proven by the build**; each was compiled individually with
-  `@vue/compiler-sfc` and they do pass `DesignTokensTest`'s token sweep, which walks `resources/js`.
-  `runs/show.blade.php`, the Blade components and every run test file are untouched, so HEAD is green.
-  Still to do, in order: flatten `showData()` into the props the components ask for (it has exactly one
-  caller, `show()`, so it becomes the page payload directly); write `Runs/Show.vue` (header/exports,
-  Resources+Mood, Stats, Goals, scenario panel cluster, the three `runs.update` forms with their
-  hidden carry-throughs, deck, turn table with its editable row, the rail via `GuidedStep`'s default
-  slot, error envelope, escape hatch, skills, delete disclosure); migrate the ~14 test files; add
-  `run-detail.spec.ts`; delete the Blade page and its now-unused components.
-  Five things the port must not lose, each already paid for once:
-  (1) `GuidedStep` must render a real `<form>` around its default slot, because the rail's radios live in
-  the component and its number fields live in the page; the Blade wrapped `{{ $slot }}` in the same form
-  for exactly this reason. (2) `showData()`'s server-side `old()`-and-`stage` rehydration of the rail now
-  conflicts with client-side `useForm` state — pick one, deliberately, or the rail double-fills.
-  (3) `KeyboardPathTest` reads the run page's **server HTML** for the skip link and for the "Keys 1 to 7"
-  advertisement, and pins `resources/js/guided-flow.ts` plus `import './guided-flow'` in `app.ts`;
-  `GuidedStep.vue` owns digits and Escape now, so that module loses its last consumer and those three
-  assertions move to the component and the browser, they do not disappear. (4) `RunViewTargetSizeTest`
-  hard-censuses the Blade shell's six nav links and sweeps `min-h-11` off server HTML; the Vue shell has a
-  different, nine-item navigation, so the census and the sweep both change. (5) `DeckPanel.vue` posts the
-  deck from form state and dropped the closed slots' hidden inputs, which were the no-script path — a
-  behaviour change under the 2026-10-05 ruling, not a like-for-like port, so it needs a stated note.
-
-  Migrate `RunViewFrameTest`, `RunViewNoScriptTest`,
-  `RunViewTargetSizeTest`, `RunViewErrorEnvelopeTest`, `RunDeckTest`, `RunSkillPickerTest`,
-  `RunStatusControlTest`, `RunSaveConfirmationTest`, `RunGoalsPanelTest`, `GoalPanelsOnRunDetailTest`,
-  `GuidedTurn*`, `GuidedStep*`, `GuidedFirstTurnTest`, `StatBandTest`, `MoodPillTest`, `RaceCalendarTest`,
-  `ScenarioPanelUiTest`, `KeyboardPathTest`. Browser: `run-detail.spec.ts` asserting the guided rail's
-  keyboard path and the 44px control sweep.
-  **Correction to this row, from the 2026-10-05 read of the view: it is not a 15-component port.** Each of
-  the 15 components named above has exactly one consumer, `runs/show.blade.php`, and nothing else in
-  `resources/views/`. Building a Vue twin for each buys no reuse and is what makes this row read as larger
-  than it has to be; the smaller correct port is one `Runs/Show.vue` with the panel bodies inlined, and the
-  Blade files deleted with their consumer. Two may still earn a twin (`app-button`, `capsule-header`) if a
-  later slice renders the same control. `x-guided-step` also cannot be lifted out as a sibling component:
-  it owns the `<form>` that wraps the view's slot, so the turn fields inside it would detach. Its Vue shape
-  is a component that renders a `<form>` around a default slot, which Vue supports directly.
-  **Still open, and sized:** 824-line view, ~2,450 lines of components, 13 forms (five separate
-  `runs.update` PUTs, each carrying a different set of hidden pass-through fields — collapsing them
-  wrongly blanks a column), and ~14 test files pinning this exact markup.
-  **Props contract, worked out from `showData()` so the port is mechanical.** `showData()` currently hands
-  the view live models; every one of these becomes an explicit array, and the mapping is the first
-  commit of the slice:
+- **A4b — detail + guided turns** (`Runs/Show.vue`; the port of `x-run-header`, `x-stat-band`,
+  `x-energy-gauge`, `x-mood-pill`, `x-resource-strip`, `x-deck-panel`, `x-race-calendar`, `x-race-panel`,
+  `x-guided-step`, `x-capsule-header`, `x-app-button`, `x-grade-badge`, and the four Trackblazer/Unity Cup
+  panels). **Landed 2026-10-05.** `TrainingRunController::show()` is now
+  `Inertia::render('Runs/Show', $this->showData($run))`, and `showData()` *is* the page payload: every value
+  it handed the view as a live model is now an explicit array, built by one private mapper per region
+  (`runHeader`, `turnRows`, `goalRows`, `skillGroupsFor`, `deckPayload`, `railPayload`, …). The 19 Vue
+  panel components are in `resources/js/pages/Runs/Show.vue`'s import graph, so `npm run build` compiles
+  them; `runs/show.blade.php` and the ten Blade components whose only consumer it was are deleted.
+  **Deviation from the shape this row sketched: the 15 named components each had exactly one consumer**,
+  `runs/show.blade.php`, so the twins bought no reuse — but they were already written and each one owns a
+  real piece of the page (the rail's `<form>`, the deck's own write, the calendar's cell grid), so the port
+  wires them rather than inlining them. `GuidedStep` could not have been inlined: it owns the `<form>` that
+  wraps the page's number fields, so its Vue shape is a component rendering a `<form>` around a default
+  slot, which Vue supports directly.
+  **Props actually shipped** (the sketch below was right about the regions and wrong about some key names):
+  `run`, `turns`, `goals`, `skillGroups`, `skillCatalog`, `acquisitionOptions`, `moodOptions`, `scenarios`,
+  `statuses`, `caps`, `statOrder`, `baseCap`, `hardCap`, `gradeBanding`, `maxObjectiveIndex`, `band`
+  (null, not zeroed, for a run with no turns), `strip`, `currentMood`, `gradeMeter`, `teamRank`,
+  `spiritBursts`, `teamRace`, `epithets`, `fatigue`, `calendar`, `deck`, `racePanel`, `shop`, `rail`, plus
+  the shared `errors`/`flash`. The sketch's `resources`, `skills`/`runSkills`/`skillRows`, `unityCup` and
+  `grade` keys do not exist: the resource strip's declaration rides on `strip`, the skill picker's
+  catalogue is `skillCatalog` and the run's own skills are `skillGroups`, and the four Unity Cup panels are
+  four top-level keys rather than one grouped under a scenario name (G-33: no scenario name in a prop).
+  The contract the sketch worked out:
 
   ```php
   Inertia::render('Runs/Show', [
       'run'     => ['id','umamusume_id','umamusume_name','status' => $run->status->value,
-                    'status_label','scenario','scenario_label','has_scenario','notes','notes_present',
+                    'status_label','scenario','scenario_label','has_scenario','notes',
                     'imported_display','import_source','export_csv_url','export_json_url',
-                    'next_turn_number','turn_count'],
-      'turns'   => [['id','turn','speed','stamina','power','guts','wit','sp','condition',
-                     'energy','fans','mood_value','mood_word','failure_penalty_kind','failure_source']],
+                    'update_url','destroy_url','turn_count'],
+      'turns'   => [['id','turn','speed','stamina','power','guts','wit','sp','condition','energy',
+                     'fans','mood','update_url','destroy_url',
+                     'failure' => ['penalty_kind','source_name']|null]],
       'caps'    => ScenarioCaps::forRun($run),          // the same call the validator makes (KI-47)
-      'band'    => null|['scenario','caps','values','skill_points'],
+      'band'    => null|['values','capBonus','skillPoints'],
       'strip'   => $run->stripValues() + widgets from config,
-      'resources'  => ['scenario_key','declared'],
       'goals'   => [['title','state','year_label','turn']],
-      'skills'  => [['id','name','sp_cost']],           // the picker's catalogue
-      'runSkills' => [['id','name','sp_cost','is_unique','status','turn_acquired']],
-      'skillRows' => ['total' => int, 'open' => int, 'acquisitions' => [...]],
-      'deck'    => ['cards' => [...], 'slots' => [...], 'open_slot' => int|null],
+      'deck'    => ['equipped','slots','options','openSlot','action'],
       'rail'    => showData()'s `guided` block, with `previous` flattened to the placeholder values
-                   and `confirm_url` replacing `confirm-route`,
-      'racePanel' => ['slots','entry_mode','calendar_year','cells','next_turn','year_tabs'],
-      'grade'   => ['objectives','current','earned','periods','unpriced_count','unassigned_count'],
-      'shop'    => ['catalogue','purchases','resets_in','spend','rotation_turns','max_copies'],
-      'unityCup'=> ['team_rank','facility_level','ladder','bursts','team_race','epithets','fatigue'],
-      'errors'  => shared, 'staged' => $staged, 'preview' => $preview, 'previewed' => $previewed,
+                   and `action` replacing `confirm-route`,
+      'racePanel' => ['showUrl','racesUrl','entryMode','year','calendarSlots','manualSlots','entries','old'],
+      'gradeMeter' => ['objectives','current','earned','unpricedCount','periods','unassignedCount'],
+      'shop'    => ['panelsShop','purchaseUrl','catalogue','purchases','spendTotal','maxCopies', …],
   ]);
   ```
 
-  Two behaviours the port must not lose, both found by reading the view rather than the summary:
-  (1) the failure chip is an **event**, not a column — `turn_events` keyed by turn, because
-  `turn_entries` holds the absolute readings the client showed (ADR-0003); (2) the rail rehydrates
-  server-side through `showData()`'s `old()`-and-`stage` branch while the escape hatch and the turn-edit
-  row rehydrate per field, so a Vue port that moves to `useForm().state` must drop the server branch
-  deliberately rather than end up filling both.
+  Two behaviours the port kept, both found by reading the view rather than the summary: (1) the failure
+  chip is an **event**, not a column — `turn_events` keyed by turn, folded onto `turns[].failure` in
+  `turnRows()`, because `turn_entries` holds the absolute readings the client showed (ADR-0003);
+  (2) the rail rehydrates **only** through the payload's `rail.values` block, which the controller builds
+  from the `old()`-and-`stage` branch, while the escape hatch and the turn-edit row keep their own per-field
+  `useForm` defaults. The server branch was kept deliberately and the client rail was left stateless, so
+  the two paths to one endpoint cannot fill each other in.
+  **The five things the port must not lose, and where each went.** (1) `GuidedStep` renders a real
+  `<form>` around its default slot. (2) The double-fill was avoided as above. (3) `KeyboardPathTest`'s
+  three `guided-flow.ts` assertions moved, not disappeared: `GuidedStep.vue` owns the digits and Escape
+  (a document-level listener, mounted and removed with the component), `import './guided-flow'` is out of
+  `app.ts`, and the skip link plus the "Keys 1 to N" advertisement are asserted in
+  `tests/browser/run-detail.spec.ts`. `guided-flow.ts` itself is now dead and is B1's to delete.
+  (4) `RunViewTargetSizeTest`'s census moved to `AppLayout.vue`'s nine destinations, two of them named
+  absences, and the sweep reads `Runs/Show.vue`. (5) `DeckPanel.vue` posting from form state and dropping
+  the closed slots' hidden inputs is the stated 2026-10-05 behaviour change, not a port defect.
+  **What this row's test migration cost.** ~14 files moved from rendered-text assertions to props
+  assertions, which moved ~30 rendered-copy claims into `tests/browser/run-detail.spec.ts` (the section
+  order, the 44px sweep, the rail's keyboard path, the scenario prose, the shop write and its price
+  refusal, and the band's `B+` badge). `StatBandTest` lost two cases outright: the Blade band's guards
+  ("refuses a band with no ceilings", "refuses an unknown scenario") were server throws, and the Vue band
+  is not given a scenario key at all (G-33), so the surviving claim is the stronger one — the caps the
+  page ships are `ScenarioCaps::forRun()`, the same call the turn validator makes.
+  One infrastructure fix travelled with it: `php artisan test` exhausted the host's 128 MB CLI default
+  part-way through the suite and reported no totals, so `phpunit.xml` now sets `memory_limit` the way
+  PHPStan is already told to on the command line.
+
+  Migrated: `RunViewFrameTest`, `RunViewNoScriptTest`, `RunViewTargetSizeTest`, `RunViewErrorEnvelopeTest`,
+  `RunDeckTest`, `RunSkillPickerTest`, `RunStatusControlTest`, `RunSaveConfirmationTest`,
+  `RunGoalsPanelTest`, `GoalPanelsOnRunDetailTest`, `GuidedTurn*`, `GuidedStep*`, `GuidedFirstTurnTest`,
+  `StatBandTest`, `MoodPillTest`, `RaceCalendarTest`, `ScenarioPanelUiTest`, `KeyboardPathTest`,
+  `TurnLogScrollRegionTest`, `ShopPurchasePayloadTest`, `SkillsFetchTest`, `RunUpdateTest`,
+  `TrainingRunTest`, `GradePointMeterTest`, and the run halves of `SkillSearchScreenTest`. Browser:
+  `run-detail.spec.ts` (7 tests).
 - **A4c — import** (`Runs/Import.vue`; the form and the preview/confirm step). Migrate the import cases;
   the preview endpoint stays JSON (`runs.import.preview`). **Landed 2026-10-05.** Deviation from the brief:
   `runs.import.preview` was never JSON. It returned the same Blade view as the form, with a `preview` key
@@ -450,28 +447,34 @@ into three shippable sub-slices.
   `tests/browser/run-import.spec.ts` now measures it against `Runs/Import.vue`. `runs/import.blade.php`
   deleted; `x-layout` survives on `runs/show` and the two error pages.
 
-- [ ] Each sub-slice applies the port recipe steps 1–9 and lands green before the next starts.
-      **A4a and A4c have; A4b has not, so this row stays open.**
-- [ ] The run-scoped writes (`runs.turns.store/update/destroy`, `runs.deck.sync`, `runs.skills.sync`,
+- [x] Each sub-slice applies the port recipe steps 1–9 and lands green before the next starts.
+- [x] The run-scoped writes (`runs.turns.store/update/destroy`, `runs.deck.sync`, `runs.skills.sync`,
       `runs.races.store`, `runs.purchases.store`) keep their Form Requests; the Vue forms only post and
       handle `useForm` errors. Assert one write per sub-slice still round-trips through its request.
-- [ ] Do not delete `x-guided-step` / `x-stat-band` / etc. until their consumer count reaches zero (grep in
-      step 8); the scenario panels in Phase E may still want them as reference.
+- [x] Do not delete `x-guided-step` / `x-stat-band` / etc. until their consumer count reaches zero (grep in
+      step 8); the scenario panels in Phase E may still want them as reference. Ten are deleted; the nine
+      that remain have zero consumers and are B1's, so Phase E keeps its Blade reference for now.
 
 ---
 
 ## 6. Phase B — retire the Blade shell
 
-**B1 — one slice, after A1–A4 are green.**
+**B1 — one slice, after A1–A4 are green. Unblocked since A4b landed on 2026-10-05.**
 
-The shell (`resources/views/components/layout.blade.php`, 11 consumers today) loses its last consumer when
-A4 lands. Delete it, delete `resources/views/components/` entries whose `<x-name` count is now zero, and
-remove the Blade-era TS entries (`resources/js/guided-flow.ts`, `resources/js/trainee-combobox.ts`, and
-`resources/js/app.ts` if nothing under `resources/views` still loads it — `app.blade.php` loads `spa.ts`).
+The shell (`resources/views/components/layout.blade.php`, 11 consumers when this was written) has two left:
+`errors/{404,419,500}.blade.php`. Delete it, delete `resources/views/components/` entries whose `<x-name`
+count is now zero, and remove the Blade-era TS entries (`resources/js/guided-flow.ts`, whose last consumer
+`Runs/Show.vue` replaced, and `resources/js/app.ts`, which `app.blade.php` no longer loads — it loads
+`spa.ts`). `trainee-combobox.ts` already went with A4a.
 
+**The zero-consumer set measured after A4b, which is this slice's real work:** `app-button`, `deck-editor`,
+`grade-badge`, `grade-point-meter`, `guided-step`, `race-calendar`, `resource-strip`, `run-header`. Each has
+a Vue twin in the run page's import graph. Two of them are still named by a test that renders them through
+`Blade::render` and must be repointed or deleted with a stated reason, not deleted silently:
+`GradePointMeterTest` (18 cases against `x-grade-point-meter`) and `ErrorPageViewsTest`'s shell assertions.
 **Keep:** `resources/views/app.blade.php` (the Inertia root), `resources/views/errors/{404,419,500}.blade.php`
 (rendered by Laravel's error handler and required to work with no Inertia page and no database —
-`SCREEN_SPEC.md` `SCR-SYS-001/003/004`), and `resources/views/vendor/pagination/tailwind.blade.php`.
+`SCREEN_SPEC.md` `SCR-SYS-001/003/004`).
 
 **Tests to repoint:** `DesignTokensTest` and `ErrorPageViewsTest` currently grep rendered Blade HTML. The
 error pages stay Blade, so `ErrorPageViewsTest` is unchanged. `DesignTokensTest` moves its four pages from
@@ -748,4 +751,5 @@ reduced-motion check; each screen's browser spec asserts the criteria it names.
 | 2026-10-05 | Filed. Derived from `design-2.0.md` + `screen-spec-2.0.md`; bound to real routes, controllers, models, `config/scenarios.php` and gates. | Owner asked for a comprehensive frontend development plan from the two 2.0 design docs, grounded in the repository's knowledge corpus. |
 | 2026-10-05 | Added §12 (WCAG 2.2 AA conformance), §13 (Laws of UX rubric), §14 (Phase A0 remediation of the 0.1.0 screens); strengthened the Global Constraints accessibility bullet and the §10 definition of done. | Owner required the 2.0 UI and the in-tandem 0.1.0 UI to meet WCAG 2.2 AA and the UX laws, not just carry the old Blade behavior forward. |
 | 2026-10-05 | §1 inventory rewritten from the tree (12 pages, 7 components, 8 specs, 26 Blade files). Phase A status block added under §4. A1, A3, A4a and A4c recorded as landed with their deviations; A4b re-sized in §5.5. | The inventory had stopped tracking the ports after the first four pages, so the plan read as if A1–A4c were unbuilt. §5.5's A4b row also over-stated the work by assuming a Vue twin per Blade component; the read shows one consumer each. |
+| 2026-10-05 | A4b recorded as landed in §4 and §5.5, B1 unblocked in §6 with its measured zero-consumer set, §1 re-measured (13 pages, 25 components, 9 specs, 15 Blade files), and the three Phase-A checklist rows closed. | The slice landed with a 19-component port, ~24 migrated test files and two behaviour changes that needed writing down where the next slice will read them, not only in a commit message. |
 

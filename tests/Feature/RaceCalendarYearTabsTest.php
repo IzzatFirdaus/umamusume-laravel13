@@ -6,13 +6,21 @@ use App\Models\RaceCatalogSlot;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Services\DataPipeline\Parsers\GametoraRaceCatalogParser;
-use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Collection;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * The grid gained a year dimension when it moved onto race_catalog_slots: the
  * catalogue holds three years of slots and the client shows one at a time behind
  * three tabs. These cover the derivation, the per-year scoping, and the highlight
  * the component has defined since 70248b3 but never had a way to reach.
+ *
+ * After the Inertia port (ADR-0020 §1) the year is server state, not a prop a test
+ * hands to a component: `careerYearForTab()` resolves the query parameter, the
+ * controller builds the tabs because they are navigations, and `nextTurn` is null
+ * unless the turn being decided is in the year on screen. The cases below therefore read
+ * the resolved payload for each year and let the component's own source answer the
+ * treatment questions; `RaceCalendarTest` owns the cell map itself.
  */
 
 function runWithTurn(?int $turn, string $scenario = 'ura_finale'): TrainingRun
@@ -27,22 +35,30 @@ function runWithTurn(?int $turn, string $scenario = 'ura_finale'): TrainingRun
 }
 
 /**
- * Twelve empty months with one goal race, so a priority question can be asked of
- * the component without a Goals source behind the model.
- *
- * @return list<array{halves: array<string, array<string, mixed>>}>
+ * The calendar component's own source, which owns the tab markup and the outline.
  */
-function calendarCellsWithGoal(int $monthIndex, string $half, string $label): array
+function calendarTabsSource(): string
 {
-    $cells = [];
+    return (string) file_get_contents(base_path('resources/js/components/RaceCalendar.vue'));
+}
 
-    for ($m = 0; $m < 12; $m++) {
-        $cells[$m] = ['halves' => ['Early' => ['slots' => []], 'Late' => ['slots' => []]]];
+/**
+ * Which state outranks which, read out of the map the cell loop ranks candidates with.
+ *
+ * @return array<string, int>
+ */
+function calendarTabsPriority(): array
+{
+    preg_match('/const priority: Record<string, number> = \{(.*?)\n\};/s', calendarTabsSource(), $block);
+    preg_match_all('/^\s{4}(\w+):\s*(\d+),/m', $block[1] ?? '', $rows, PREG_SET_ORDER);
+
+    $priority = [];
+
+    foreach ($rows as $row) {
+        $priority[$row[1]] = (int) $row[2];
     }
 
-    $cells[$monthIndex]['halves'][$half] = ['slots' => [['state' => 'goal', 'label' => $label]]];
-
-    return $cells;
+    return $priority;
 }
 
 it('derives the career year from a monotonic turn counter', function (int $turn, int $year): void {
@@ -123,120 +139,159 @@ it('defaults the grid to the year the run is actually in', function (): void {
 });
 
 it('renders three year tabs and marks the viewed one selected', function (): void {
-    $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="2" />',
-        ['cells' => runWithTurn(1)->calendarCells(2)]
-    );
+    // One catalogued race, so the panel is the grid rather than its "nothing entered" message. The
+    // tabs are built server-side because they are navigations, and the selection is the address:
+    // a Trainer can hand over "her Classic spring" as a URL.
+    RaceCatalogSlot::factory()->create(['year' => 2, 'month' => 4, 'half' => 'Early', 'turn' => 31, 'title' => 'Classic Race']);
+    $run = runWithTurn(30);
 
-    expect($html)->toContain('role="tablist"')
-        ->and(substr_count($html, 'role="tab"'))->toBe(3)
-        ->and($html)->toContain('aria-selected="true"')
-        ->and($html)->toContain('Classic Year')
-        // The finale block is not a year you can train through.
-        ->and($html)->not->toContain('Finale Year');
+    $this->get('/training-runs/'.$run->id.'?year=2')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.year', 2)
+        ->where('calendar.yearWord', 'Classic')
+        ->where('calendar.yearTabs', fn (Collection $tabs): bool => $tabs->pluck('label')->all() === [
+            'Junior Year', 'Classic Year', 'Senior Year',
+        ]));
+
+    // The tablist is a tablist and each tab is a tab, which is what makes the selected one announced.
+    // The finale block is deliberately absent from the tab list: it is not a year you can train through.
+    expect(calendarTabsSource())
+        ->toContain('role="tablist"')
+        ->toContain('role="tab"')
+        ->toContain(":aria-selected=\"tab.year === year ? 'true' : 'false'\"")
+        ->not->toContain('Finale');
 });
 
 it('carries the year in the tab links so the view is addressable', function (): void {
-    $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" />',
-        ['cells' => runWithTurn(1)->calendarCells(1)]
-    );
+    RaceCatalogSlot::factory()->create(['year' => 1, 'month' => 4, 'half' => 'Early', 'turn' => 7, 'title' => 'Junior Race']);
+    $run = runWithTurn(1);
 
-    expect($html)->toMatch('/href="[^"]*year=2/')->and($html)->toMatch('/href="[^"]*year=3/');
+    $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.yearTabs', fn (Collection $tabs): bool => $tabs->every(
+            fn (array $tab): bool => str_contains((string) $tab['url'], 'year='.$tab['year'])
+        ))
+        // Each tab carries its own year in the address, and the run's identifier survives beside it,
+        // so a tab link is a page rather than a fragment.
+        ->where('calendar.yearTabs', fn (Collection $tabs): bool => $tabs->contains(
+            fn (array $tab): bool => $tab['year'] === 2 && str_contains((string) $tab['url'], '/training-runs/'.$run->id)
+        )));
+
+    expect(calendarTabsSource())->toContain(':href="tab.url"');
 });
 
 it('names the year in the region label so a screen reader is not told twelve months of nothing', function (): void {
-    $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="3" />',
-        ['cells' => runWithTurn(1)->calendarCells(3)]
-    );
+    RaceCatalogSlot::factory()->create(['year' => 3, 'month' => 4, 'half' => 'Early', 'turn' => 55, 'title' => 'Senior Race']);
+    $run = runWithTurn(50);
 
-    expect($html)->toContain('Senior year, 24 turn slots');
+    $this->get('/training-runs/'.$run->id.'?year=3')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.yearWord', 'Senior'));
+
+    // The region name leads with the panel, then the year word, then the slot count, so a screen
+    // reader is told which career year it is looking at rather than "Race calendar".
+    expect(calendarTabsSource())
+        ->toContain('`Race calendar, ${props.yearWord !== null ?')
+        ->toContain('year, ` : \'\'}${slotCount.value} turn slots`');
 });
 
 it('highlights the turn to play, which the component ranked but never received', function (): void {
-    // 70248b3 put `current` at priority 5 in its own map; nothing fed it, so the
-    // state was defined and unreachable. The prop is the feed, and it now carries the
-    // turn being decided rather than the one just logged.
+    // 70248b3 put `current` at priority 5 in its own map; nothing fed it, so the state was defined and
+    // unreachable. `calendar.nextTurn` is the feed now, and it carries the turn being decided rather
+    // than the one just logged.
+    RaceCatalogSlot::factory()->create(['year' => 1, 'month' => 6, 'half' => 'Late', 'turn' => 12, 'title' => 'Junior Make Debut']);
     $run = runWithTurn(11);
 
-    $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" :next-turn="$turn" />',
-        ['cells' => $run->calendarCells(1), 'turn' => $run->nextTurnToPlay()['turn']]
-    );
+    // Turn 11 is logged and turn 12 is the one being asked about: Late June, where the debut sits.
+    $this->get('/training-runs/'.$run->id.'?year=1')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.nextTurn', 12));
 
-    // Turn 11 is logged and turn 12 is the one being asked about: Late June, where the
-    // debut sits. The spoken words name the new semantics instead of the old ones.
-    expect($html)->toContain('aria-label="Late Jun: Next, Next; next turn to play"')
-        ->and(substr_count($html, 'border-pick-line'))->toBe(1);
+    // The spoken words name the new semantics instead of the old ones, and the outline is one cell's
+    // border rather than a class anywhere in the document.
+    expect(calendarTabsSource())
+        ->toContain('; next turn to play')
+        ->toContain('const isNext = props.nextTurn !== null && props.nextTurn === slotIndex + 1')
+        ->toContain("...(isNext ? ['current'] : [])");
 });
 
 it('shows the outline on the year that holds the turn to play, not the year last logged', function (): void {
-    // Junior Late December is turn 24, so the turn to play is Classic Early January.
-    // The derivation carries its own year precisely so the tab that does not hold the
-    // turn stays plain instead of lighting up Early January of the wrong year.
+    // Junior Late December is turn 24, so the turn to play is Classic Early January. The derivation
+    // carries its own year precisely so the tab that does not hold the turn stays plain instead of
+    // lighting up Early January of the wrong year.
+    RaceCatalogSlot::factory()->create(['year' => 2, 'month' => 1, 'half' => 'Early', 'turn' => 25, 'title' => 'Classic Opener']);
     $run = runWithTurn(24);
     $next = $run->nextTurnToPlay();
 
-    $classic = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="$year" :next-turn="$turn" />',
-        ['cells' => $run->calendarCells(RaceCatalogSlot::YEAR_CLASSIC), 'year' => $next['year'], 'turn' => $next['turn']]
-    );
-    $junior = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" :next-turn="null" />',
-        ['cells' => $run->calendarCells(RaceCatalogSlot::YEAR_JUNIOR)]
-    );
+    expect($next)->toBe(['year' => 2, 'turn' => 1]);
 
-    expect($next)->toBe(['year' => 2, 'turn' => 1])
-        ->and($classic)->toContain('Early Jan: Next, Next; next turn to play')
-        ->and($junior)->not->toContain('border-pick-line');
+    // The year on screen decides, not the year last logged: the same run lights up on the tab holding
+    // the turn and stays plain on the tab that does not.
+    $this->get('/training-runs/'.$run->id.'?year=2')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.year', 2)
+        ->where('calendar.nextTurn', 1));
+
+    $this->get('/training-runs/'.$run->id.'?year=1')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.year', 1)
+        ->whereNull('calendar.nextTurn'));
 });
 
 it('highlights nothing when the career has no turn left to play', function (): void {
-    // The edge the semantics change has to answer: a finished career shows no
-    // outline at all, rather than falling back to the last turn the Trainer played.
+    // The edge the semantics change has to answer: a finished career shows no outline at all, rather
+    // than falling back to the last turn the Trainer played.
+    RaceCatalogSlot::factory()->create(['year' => 3, 'month' => 4, 'half' => 'Early', 'turn' => 55, 'title' => 'Senior Race']);
     $run = runWithTurn(72);
 
-    $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="3" :next-turn="$turn" />',
-        ['cells' => $run->calendarCells(RaceCatalogSlot::YEAR_SENIOR), 'turn' => $run->nextTurnToPlay()['turn'] ?? null]
-    );
+    expect($run->nextTurnToPlay())->toBeNull();
 
-    expect($run->nextTurnToPlay())->toBeNull()
-        ->and($html)->not->toContain('border-pick-line')
-        ->and($html)->not->toContain('next turn to play');
+    $this->get('/training-runs/'.$run->id.'?year=3')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->whereNull('calendar.nextTurn'));
+
+    // The component's own guard, because a null `nextTurn` must produce no outline rather than an
+    // outline on slot zero.
+    expect(calendarTabsSource())->toContain('const isNext = props.nextTurn !== null && props.nextTurn === slotIndex + 1');
 });
 
 it('ranks a goal above the next-turn outline', function (): void {
-    // Priority is a component concern, so it is tested at the component. Going
-    // through the model would need a Goal source that does not exist yet.
-    $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="2" :next-turn="20" />',
-        ['cells' => calendarCellsWithGoal(9, 'Late', 'Tokyo Yushun (Japanese Derby)')]
-    );
+    // Priority is a component concern, so it is read from the map the cell loop ranks candidates with
+    // rather than driven through the model. There is no trainee_goals source yet, so no run can
+    // produce a goal cell; the map is what a goals source will reach, and it has to be right now.
+    $priority = calendarTabsPriority();
 
-    expect($html)->toContain('border-goal-line')
-        ->and(substr_count($html, 'border-pick-line'))->toBe(0);
+    expect($priority)->toHaveKeys(['goal', 'current', 'fan_locked', 'maiden_locked', 'open', 'past'])
+        ->and($priority['goal'])->toBeGreaterThan($priority['current'])
+        ->and($priority['current'])->toBeGreaterThan($priority['fan_locked'])
+        ->and($priority['past'])->toBeLessThan($priority['open']);
+
+    // The loop only replaces the state on a strict improvement, so a tie cannot silently demote the
+    // earlier candidate, and the current turn enters the same loop as a candidate rather than
+    // overwriting the result afterwards.
+    expect(calendarTabsSource())
+        ->toContain('if ((priority[candidate] ?? 0) > (priority[state] ?? 0))')
+        ->toContain('const candidates = [...slots.map((slotItem) => slotItem.state), ...(isNext ? [\'current\'] : [])]');
 });
 
 it('keeps the career year when the entry mode is switched, which the mode form used to drop', function (): void {
     // The year tabs are links built through `request()->fullUrlWithQuery`, so they carry `entry_mode`
-    // for free. The mode buttons are the mirror image and were not the mirror fix: the submitted fields
+    // for free. The mode buttons were the mirror image and were not the mirror fix: the submitted fields
     // of a GET form replace the action's query string whole, so pressing "Race not on the calendar"
     // from the Classic tab sent `entry_mode` and nothing else, and the panel answered with the year the
-    // run has actually reached rather than the tab the Trainer was sitting in. A GET form keeps state it
-    // is not itself about by carrying it as a field, which is what the tabs cannot need and this can.
+    // run has actually reached rather than the tab the Trainer was sitting in. The port keeps carrying
+    // the year on the switch, and `careerYearForTab` resolves it server-side.
     $run = runWithTurn(1);
 
-    // Through the screen rather than a bare component render: the panel reads `$errors`, which only
-    // exists on a request, and the year arrives the way a Trainer's does, as a query parameter.
-    $html = $this->get(route('runs.show', $run).'?year=2')->content();
-
-    // Two mode buttons, so two carriers. The value is the resolved tab year rather than the raw
-    // query parameter, because `careerYearForTab` is the one place that decides which year is in view.
-    expect(substr_count($html, 'name="year" value="2"'))
-        ->toBe(2)
-        // The branch the panel actually drew is the Classic one, which is the same fact seen from the
-        // heading the calendar path prints above its select.
-        ->and($html)->toContain('Classic year');
+    // Through the screen rather than a bare component render: the year arrives the way a Trainer's
+    // does, as a query parameter, and the panel reads `$errors` — which only exists on a request.
+    $this->get(route('runs.show', $run).'?year=2')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        // Both mode switches carry the resolved tab year rather than the run's actual one, and the
+        // panel answered with the Classic branch: the same fact seen from the heading it prints.
+        ->where('calendar.year', 2)
+        ->where('calendar.yearWord', 'Classic')
+        ->where('racePanel.year', 2)
+        ->where('racePanel.yearLabel', 'Classic')
+        ->where('racePanel.entryMode', 'calendar'));
 });

@@ -386,7 +386,13 @@ it('is reachable from the run screen it exists to relieve', function (): void {
     $run = TrainingRun::factory()->create();
 
     // G-SK-13: the run screen's picker lists every Global row in one select, and Screen D is the designed
-    // answer. A route nobody can reach is a defect, so the picker points at it. The shell's own nav link
-    // (`AppLayout.vue`) is asserted against the rendered DOM in `tests/browser/skills.spec.ts`.
-    expect($this->get(route('runs.show', $run))->content())->toContain(route('skills.index'));
+    // answer. A route nobody can reach is a defect, so the picker points at it. The link is read from the
+    // component that renders it (the page is client-rendered, ADR-0020 §1) and resolved against the
+    // route table, so a renamed route fails here rather than shipping a dead `/skills`. The rendered
+    // link is asserted in the browser pass; the shell's own nav link lives in `AppLayout.vue` and is
+    // asserted against the rendered DOM in `tests/browser/skills.spec.ts`.
+    $source = (string) file_get_contents(base_path('resources/js/pages/Runs/Show.vue'));
+    $skillsPath = parse_url(route('skills.index'), PHP_URL_PATH);
+
+    expect($source)->toContain('href="'.$skillsPath.'"');
 });

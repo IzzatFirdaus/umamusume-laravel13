@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CapsuleHeader from './CapsuleHeader.vue';
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -65,10 +66,8 @@ const rotationOptions = computed(() => Array.from({ length: props.rotationTurns 
 
 <template>
     <div v-if="panelsShop" class="rounded-md border border-rule bg-panel p-3">
-        <!-- The capsule anatomy is DESIGN.md §2.3's, carried from x-capsule-header. -->
-        <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pr-5 pl-20">
-            <span class="text-base font-bold text-on-chrome">Shop</span>
-        </div>
+        <!-- The capsule anatomy is DESIGN.md §2.3's, owned by CapsuleHeader.vue. -->
+        <CapsuleHeader title="Shop" class="mb-3" />
 
         <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-sm">
             <p class="text-ink">

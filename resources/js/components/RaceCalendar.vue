@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CapsuleHeader from './CapsuleHeader.vue';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -158,12 +159,9 @@ const cellsRendered = computed<RenderedCell[]>(() => {
 
 <template>
     <div class="rounded-md border border-rule bg-panel p-3">
-        <!-- The capsule header's anatomy inlined (x-capsule-header is still Blade; its Vue
-             extraction belongs with the next Blade file that has no Vue twin). Chrome fill,
-             never the client's bright lime: white on lime measures 1.99:1 (DESIGN.md §2.3, D-3). -->
-        <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pr-5 pl-20">
-            <span class="text-base font-bold text-on-chrome">Race calendar</span>
-        </div>
+        <!-- The capsule header is one owner now, chrome fill and never the client's bright lime:
+             white on lime measures 1.99:1 (DESIGN.md §2.3, D-3). -->
+        <CapsuleHeader title="Race calendar" class="mb-3" />
 
         <div v-if="year !== null" class="mb-3 flex gap-1" role="tablist" aria-label="Career year">
             <Link

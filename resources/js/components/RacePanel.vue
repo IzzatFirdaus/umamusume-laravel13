@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CapsuleHeader from './CapsuleHeader.vue';
 import { computed } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 
@@ -126,10 +127,8 @@ const circleOptions = computed(() => Array.from({ length: props.maxCircles + 1 }
 
 <template>
     <div v-if="visible" class="rounded-md border border-rule bg-panel p-3">
-        <!-- The capsule anatomy is DESIGN.md §2.3's, carried from x-capsule-header. -->
-        <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pr-5 pl-20">
-            <span class="text-base font-bold text-on-chrome">Races</span>
-        </div>
+        <!-- The capsule anatomy is DESIGN.md §2.3's, owned by CapsuleHeader.vue. -->
+        <CapsuleHeader title="Races" class="mb-3" />
 
         <div class="mb-3 flex flex-wrap gap-2" aria-label="Race entry mode">
             <button

@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
+use Illuminate\Support\Collection;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * SCREEN_SPEC.md §7-2: `runs.turns.update` and `runs.turns.destroy` are implemented and
@@ -13,12 +15,11 @@ use App\Models\TurnEvent;
  * by hand; the ones here drive the page, because the defect is the missing control rather
  * than a missing route.
  *
- * The disclosure is a link plus a query parameter, the same shape the deck picker
- * (`components/deck-panel.blade.php:93-106`) and the skill rows already use: this page carries
- * no script (ADR-0007, `RunViewNoScriptTest`), so "expand row 2" has to be a navigation. That
- * also makes the destructive step two-stepped by construction, which is the confirmation the
- * dispatch asks for, and keeps the second DELETE form off the page until a Trainer is looking
- * at the row they mean to remove.
+ * The disclosure was a link plus a query parameter the page read; it is the page component's
+ * own open row now, and the `edit_turn` query string is still accepted by the GET. Either way
+ * the destructive step is two-stepped by construction: the row's delete control only exists
+ * once a Trainer is looking at the row they mean to remove, and the destroy route answers
+ * DELETE only, so no navigation can fire it.
  */
 
 function turnFor(TrainingRun $run, int $turn, array $overrides = []): TurnEntry
@@ -56,45 +57,44 @@ function turnRowPayload(array $overrides = []): array
     ], $overrides);
 }
 
-it('offers an Edit control on every turn row', function (): void {
+it('offers an edit path on every turn row', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
     turnFor($run, 1);
     turnFor($run, 2, ['speed' => 222]);
 
-    $response = $this->get(route('runs.show', $run));
-
-    // Rendered copy, not markup shape: the control has to say what it does, and a test that
-    // matched only the anchor would pass on a link that goes nowhere useful.
-    $response->assertOk()
-        ->assertSeeText('Edit turn 1')
-        ->assertSeeText('Edit turn 2')
-        ->assertSee("edit_turn={$run->turnEntries()->orderBy('id')->value('id')}", false);
+    // The row control (`Edit turn N` opening the row's own form) is the component's; what the
+    // server owes is that every turn carries its own routes, so the control a row opens posts
+    // back to that row rather than to whichever row happens to be first.
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->has('turns', 2)
+            ->where('turns.0.turn', 1)
+            ->where('turns.1.turn', 2)
+            ->where('turns', fn (Collection $turns): bool => $turns->every(
+                fn (array $turn): bool => $turn['update_url'] === route('runs.turns.update', [$run, $turn['id']])
+                    && $turn['destroy_url'] === route('runs.turns.destroy', [$run, $turn['id']])
+            )));
 });
 
 it('expands one row into a form that posts the correction back to that row', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
     $entry = turnFor($run, 2);
 
-    $html = $this->get(route('runs.show', ['run' => $run, 'edit_turn' => $entry->id]))
+    // The row editor is the component's; the payload gives it the row it edits: the stored
+    // readings, so a Trainer edits a number rather than retyping the turn, that row's own
+    // routes, and nothing of the rail the two share the screen with.
+    test()->get(route('runs.show', ['run' => $run, 'edit_turn' => $entry->id]))
         ->assertOk()
-        ->assertSeeText('Save turn')
-        ->assertSeeText('Delete turn 2')
-        ->content();
-
-    // Scoped to this one form: the page carries `stage` and `previewed` for the guided rail, and
-    // a page-wide absence check would be asserting about the rail rather than the row editor.
-    $start = strpos($html, 'action="'.route('runs.turns.update', [$run, $entry]).'"');
-    $form = substr($html, (int) $start, (int) strpos(substr($html, (int) $start), '</form>') + 7);
-
-    expect($form)
-        ->toContain('name="_method" value="PUT"')
-        ->toContain('name="_token"')
-        // The row's own values come pre-filled, so a Trainer edits a number rather than
-        // retyping the turn, and a refused submit keeps what they typed.
-        ->toContain('value="100"')
-        ->toContain('name="speed"')
-        ->not->toContain('name="stage"')
-        ->not->toContain('name="previewed"');
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('turns.0.id', $entry->id)
+            ->where('turns.0.update_url', route('runs.turns.update', [$run, $entry]))
+            ->where('turns.0.destroy_url', route('runs.turns.destroy', [$run, $entry]))
+            ->where('turns.0.speed', 100)
+            ->missing('turns.0.stage')
+            ->missing('turns.0.previewed'));
 });
 
 it('saves a corrected turn through the row form', function (): void {
@@ -136,14 +136,16 @@ it('keeps the row delete off the page until the row is open', function (): void 
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
     $entry = turnFor($run, 2);
 
-    $plain = $this->get(route('runs.show', $run))->content();
-    $open = $this->get(route('runs.show', ['run' => $run, 'edit_turn' => $entry->id]))->content();
+    // Two-stepping the destructive turn action. Opening a row is a navigation, and a navigation
+    // cannot fire the delete: the destroy route answers DELETE only, so the GET a Trainer follows
+    // to reach their row comes back 405 rather than removing anything. The row's DELETE form only
+    // exists on the opened row, which is the browser spec's count.
+    test()->get(route('runs.show', ['run' => $run, 'edit_turn' => $entry->id]))->assertOk();
 
-    // The run itself has one delete form, and `RunViewNoScriptTest` pins that count page-wide.
-    // Two-stepping the destructive turn action is what keeps that pin honest rather than pinned
-    // around by accident: the turn form only exists once a Trainer has asked for that row.
-    expect(substr_count($plain, 'name="_method" value="DELETE"'))
-        ->toBeLessThan(substr_count($open, 'name="_method" value="DELETE"'));
+    test()->get(route('runs.turns.destroy', [$run, $entry]))
+        ->assertStatus(405);
+
+    expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(1);
 });
 
 it('will not edit or delete another run\'s turn from this run\'s page', function (): void {
@@ -169,13 +171,17 @@ it('keeps the row open after a refused submit so the typed edits survive', funct
     $this->put(route('runs.turns.update', [$run, $entry]), turnRowPayload(['wit' => 99999]))
         ->assertSessionHasErrors('wit');
 
-    $html = $this->get(route('runs.show', ['run' => $run, 'edit_turn' => $entry->id]))->content();
+    // The row the page re-reads after the refusal is still the row the Trainer was editing, with
+    // the stored readings intact. Keeping it open, and keeping the typed numbers in it, is the
+    // component's own state across the error visit, carried by the browser spec.
+    test()->get(route('runs.show', ['run' => $run, 'edit_turn' => $entry->id]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('turns.0.id', $entry->id)
+            ->where('turns.0.speed', 100));
 
-    // The row is still open and still holds what was typed: a refused submit that collapsed the
-    // row back to the stored readings would throw the Trainer's correction away.
-    expect($html)->toContain('name="speed"')
-        ->and($html)->toContain('value="140"')
-        ->and($entry->refresh()->speed)->toBe(100);
+    expect($entry->refresh()->speed)->toBe(100);
 });
 
 /*
@@ -183,10 +189,10 @@ it('keeps the row open after a refused submit so the typed edits survive', funct
  * not take with it.
  *
  * `turn_events` is keyed on `(training_run_id, turn)` and has no `turn_entry_id` foreign key, so a
- * failure event outlives the turn row that produced it, and the run page reads its chips by keying
- * the events on `turn` (show.blade.php:321-323). Deleting a failed turn therefore left the Failed
- * chip behind to be inherited by whichever turn later took that number, and §7-2 recorded the same
- * shape for the log line the chip prints.
+ * failure event outlives the turn row that produced it, and the run page reads its chips from the
+ * `failure` key the controller folds onto each turn row (ADR-0003). Deleting a failed turn
+ * therefore left the Failed chip behind to be inherited by whichever turn later took that number,
+ * and §7-2 recorded the same shape for the log line the chip prints.
  *
  * The scoped delete is the narrow one on purpose. `storePurchase` writes `event_type = Scenario`
  * rows on the very same `(run, turn)` key (TrainingRunController:593-598), so an unfiltered delete
@@ -248,9 +254,13 @@ it('does not hand a re-logged turn the failed chip of the turn that used the num
         'stage' => 'confirm', 'previewed' => '1',
     ])->assertRedirect(route('runs.show', $run));
 
-    $html = $this->get(route('runs.show', $run))->assertOk()->content();
+    // The chip and its `Penalty kind:` line are drawn from the row's own `failure` key (ADR-0003),
+    // so a null here is the clean row.
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('turns.0.failure', null));
 
-    expect(TurnEvent::query()->where('training_run_id', $run->id)->where('turn', 5)->count())->toBe(0)
-        ->and($html)->not->toContain('Penalty kind:')
-        ->and($html)->not->toContain('>Failed<');
+    expect(TurnEvent::query()->where('training_run_id', $run->id)->where('turn', 5)->count())->toBe(0);
 });

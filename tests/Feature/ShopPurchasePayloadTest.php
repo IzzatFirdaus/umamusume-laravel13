@@ -6,6 +6,7 @@ use App\Enums\TurnEventType;
 use App\Models\TrainingRun;
 use App\Models\TurnEvent;
 use App\Models\TurnEvents\ShopPurchasePayload;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * Slice 8 T1b: a Trackblazer shop purchase rides `turn_events`, not a new table
@@ -90,9 +91,14 @@ it('sums entered coins and never a coin balance it cannot see', function (): voi
 
     // The balance is coins earned minus coins spent, and earning is not stored per turn,
     // so the panel says the balance is not recorded rather than subtracting toward zero.
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    expect(strip_tags($html))->toMatch('/Shop Coins: not yet recorded/i');
+    // The page carries both halves of that: the entered spend as a resolved figure, and no
+    // balance at all, so a coin count the server never saw cannot be printed (D-232).
+    // The sentence itself is asserted in `tests/browser/run-detail.spec.ts`.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('shop.spendTotal', '65')
+            ->where('strip.values.shop_coins', null));
 });
 
 it('refuses a sixth copy of the same item', function (): void {
@@ -140,39 +146,56 @@ it('marks the cost input when the catalogue price disagrees', function (): void 
     // Its own test because a second failed request in the same session ages the first
     // one's flashed bag out before the page renders, which would prove nothing about the
     // form. The referer is what a browser sends, and `back()` needs it to return here.
-    $html = $this->withHeader('referer', url('/training-runs/'.$run->id))
+    // Inertia carries the bag as the shared `errors` prop, which is what `ShopPanel.vue`
+    // binds to the cost field's `aria-invalid`; both halves are asserted, because a bag that
+    // arrives with nothing bound to it renders an unmarked input and no message.
+    test()->withHeader('referer', url('/training-runs/'.$run->id))
         ->followingRedirects()
         ->post('/training-runs/'.$run->id.'/purchases', [
             'turn' => 1, 'item' => 'Vita 40', 'cost' => 40, 'effect' => 'Energy +40',
         ])
         ->assertOk()
-        ->getContent();
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('errors.cost', fn ($message): bool => is_string($message)
+                && str_contains($message, 'charges 55 coins for Vita 40')));
 
-    expect($html)->toMatch('/name="cost"[^>]*aria-invalid="true"/')
-        ->and($html)->toMatch('/charges 55 coins for Vita 40/');
+    $panel = (string) file_get_contents(base_path('resources/js/components/ShopPanel.vue'));
+
+    expect($panel)->toContain(":aria-invalid=\"purchaseForm.errors.cost ? 'true' : 'false'\"")
+        ->and($panel)->toContain('id="purchase-cost-error"');
 });
 
 it('warns about the overwrite and the cap beside the purchase control', function (): void {
     $run = shopRun();
 
-    $html = strip_tags($this->get('/training-runs/'.$run->id)->assertOk()->getContent());
-
-    // The panel's own line breaks fall inside these sentences, so the patterns match
-    // whitespace runs rather than single spaces.
-    expect($html)->toMatch('/A\s+higher-rank\s+buy\s+overwrites\s+the\s+lower\s+one/i')
-        ->and($html)->toMatch('/up\s+to\s+5\s+copies\s+of\s+an\s+item\s+can\s+be\s+held/i');
+    // The cap the panel states is the scenario's own limit, read once here rather than
+    // transcribed into the assertion, so a config change cannot leave a stale 5 behind.
+    // The two sentences themselves are rendered-copy evidence in
+    // `tests/browser/run-detail.spec.ts`.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('shop.maxCopies', (int) config('scenarios.scenarios.trackblazer.shop.max_copies_per_item'))
+            ->where('shop.panelsShop', true));
 });
 
 it('renders a purchase recorded through the writer in the panel', function (): void {
     $run = shopRun();
 
-    $this->post('/training-runs/'.$run->id.'/purchases', [
+    test()->post('/training-runs/'.$run->id.'/purchases', [
         'turn' => 4, 'item' => 'Royal Kale Juice', 'cost' => 70, 'effect' => 'Energy +100, Mood −1',
     ])->assertSessionHasNoErrors();
 
-    $html = strip_tags($this->get('/training-runs/'.$run->id)->assertOk()->getContent());
-
-    expect($html)->toContain('Royal Kale Juice')
-        ->and($html)->toMatch('/70\s*coins/')
-        ->and($html)->toMatch('/Spent:\s*70\s*coins/i');
+    // The panel prints the item, its effect, its cost and the running total, all four of
+    // them number-formatted by the controller; the rendered row is browser evidence in
+    // `tests/browser/run-detail.spec.ts`.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('shop.purchases', [[
+                'item' => 'Royal Kale Juice',
+                'effect' => 'Energy +100, Mood −1',
+                'cost' => '70',
+            ]])
+            ->where('shop.spendTotal', '70'));
 });

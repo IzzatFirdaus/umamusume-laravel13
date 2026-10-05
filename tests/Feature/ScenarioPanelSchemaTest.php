@@ -6,6 +6,7 @@ use App\Enums\RaceEntryStatus;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * Slice 8 T1: the two columns the Unity Cup and Trackblazer panels need, both entered
@@ -120,14 +121,19 @@ it('renders the shop countdown as entered and never as a computed number', funct
     $run = panelRun('trackblazer');
     $run->update(['shop_resets_in' => 4]);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    expect(strip_tags($html))->toMatch('/resets in 4/i');
+    // The countdown reaches the shop panel as `shop.resetsInLabel`, composed on the server from
+    // the entered figure. The exact words ShopPanel prints around it are the component's; that the
+    // entered 4 becomes "resets in 4 turns" and not a computed number is the prop's claim.
+    $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('shop.resetsInLabel', 'resets in 4 turns'));
 
     $unset = panelRun('trackblazer');
-    $blank = $this->get('/training-runs/'.$unset->id)->assertOk()->getContent();
 
-    // Null is a disclosure, not a zero: `0 turns` would claim the shop rotates next turn.
-    expect(strip_tags($blank))->toMatch('/countdown not recorded/i')
-        ->and(strip_tags($blank))->not->toMatch('/resets in 0/i');
+    // Null is a disclosure, not a zero: with no countdown entered the label is absent, so nothing
+    // on the page can read "resets in 0 turns". The "countdown not recorded" copy the panel shows
+    // for that null is the browser's.
+    $this->get('/training-runs/'.$unset->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->whereNull('shop.resetsInLabel'));
 });

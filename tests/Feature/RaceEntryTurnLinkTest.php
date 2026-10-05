@@ -7,7 +7,9 @@ use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * KI-17: D-230 says Trackblazer's Race Fatigue is safe to surface because the consecutive-race
@@ -112,16 +114,19 @@ it('offers exactly this run\'s logged turns in the race panel dropdown', functio
     $stranger = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
     $theirs = TurnEntry::factory()->create(['training_run_id' => $stranger->id, 'turn' => 2]);
 
-    $options = renderedTurnOptions($this->get(route('runs.show', $run))->content());
-
-    // Ordered by turn number, not by id. The exact set is what pins it: a turn from another run
-    // would have to appear here to matter, and there is no room in three options for a fourth.
-    expect($options)->toEqual([
-        '' => 'not named',
-        $first->id => 'Turn 5',
-        $later->id => 'Turn 9',
-    ])
-        ->and(array_key_exists($theirs->id, $options))->toBeFalse();
+    // The picker's option list is built from `racePanel.turns`. Ordered by turn number, not by id
+    // (the `turnEntries` relation carries `orderBy('turn')`), and exactly this run's rows: a turn
+    // from another run would have to appear here to matter, and there is no room in two entries for
+    // a third. The blank "not named" option and the `Turn N` label are the component's rendering.
+    $this->get(route('runs.show', $run))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('racePanel.turns', [
+            ['id' => $first->id, 'turn' => 5],
+            ['id' => $later->id, 'turn' => 9],
+        ])
+        ->where('racePanel.turns', fn (Collection $turns): bool => ! $turns->contains(
+            fn (array $row): bool => $row['id'] === $theirs->id
+        )));
 });
 
 it('links a free race to its turn too, since both branches share the one form', function (): void {
@@ -176,42 +181,23 @@ it('brings the turn choice back when the form comes back with entered values', f
 
     // `withOld()` is not a helper this Laravel version exposes, and phpunit.xml pins SESSION_DRIVER
     // to `array`, so a failed write followed by a redirect would drop the flashed input. It is
-    // therefore seeded directly, which is the state the form renders from.
-    $html = $this->withSession([
+    // therefore seeded directly, which is the state the component rehydrates from.
+    $this->withSession([
         '_old_input' => [
             'entry_mode' => 'calendar',
             'scenario_slot_id' => (string) $slot->id,
             'turn_entry_id' => (string) $turn->id,
             'status' => RaceEntryStatus::Completed->value,
         ],
-    ])->get(route('runs.show', $run))->content();
-
-    expect(renderedTurnOptions($html))->toEqual([
-        '' => 'not named',
-        $turn->id => 'Turn 21',
-        $other->id => 'Turn 22',
-    ])
-        ->and($html)->toMatch('/<option value="'.$turn->id.'"\s+selected>/')
-        ->and($html)->not->toMatch('/<option value="'.$other->id.'"\s+selected>/');
+    ])->get(route('runs.show', $run))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        // Both logged turns stay offered to the picker.
+        ->where('racePanel.turns', [
+            ['id' => $turn->id, 'turn' => 21],
+            ['id' => $other->id, 'turn' => 22],
+        ])
+        // The choice the Trainer made comes back as the flashed input, which is what the component
+        // re-selects. A single rehydrated value cannot be the other turn too, so the `selected`
+        // attribute landing on this row and not on turn 22 is carried by the same assertion.
+        ->where('racePanel.old.turn_entry_id', (string) $turn->id));
 });
-
-/**
- * The turn dropdown as a Trainer reads it: option value keyed to option text. Numeric values arrive
- * as int keys because PHP coerces them, which is why the key type is `array-key` and not `string`.
- *
- * @return array<array-key, string>
- */
-function renderedTurnOptions(string $html): array
-{
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
-
-    $options = [];
-
-    foreach ($xpath->query('//select[@name="turn_entry_id"]/option') as $option) {
-        $options[$option->getAttribute('value')] = trim($option->textContent);
-    }
-
-    return $options;
-}

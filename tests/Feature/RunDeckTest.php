@@ -6,13 +6,15 @@ use App\Models\DeckSlot;
 use App\Models\SupportCard;
 use App\Models\SupportEffect;
 use App\Models\TrainingRun;
+use Illuminate\Support\Collection;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * Slice 2: the deck panel on the run screen and the picker that fills it.
  *
  * A POST test cannot see a `disabled` attribute, a mislabelled control, or an option list that dropped
- * the card already equipped, so the render assertions here read the returned HTML rather than only the
- * rows.
+ * the card already equipped, so the render assertions here read the props the page resolves; the
+ * rendered DOM half of each claim is carried by the browser spec.
  *
  * The write side is delete-then-insert, which is the shape the unique index on
  * (training_run_id, slot_position) forces: a card that moves from slot two to slot three has to leave
@@ -146,11 +148,16 @@ it('renders the deck panel with one picker per slot on the run screen', function
 
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Support deck')
-        ->assertSee('name="deck[1][support_card_id]"', false)
-        ->assertSee('name="deck[6][support_card_id]"', false)
-        ->assertSee('Slot 6 · Friends', false)
-        ->assertSee('Not equipped');
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // The picker's `deck[N][support_card_id]` fields are built from these six rows, one per
+            // position, with the first open and the rest reading `Not equipped` from an empty pick.
+            ->has('deck.slots', 6)
+            ->where('deck.slots', fn (Collection $slots): bool => $slots->pluck('position')->all() === [1, 2, 3, 4, 5, 6]
+                && $slots->every(fn (array $slot): bool => $slot['selected'] === '' && $slot['selected_name'] === null))
+            ->where('deck.slots.0.label', 'Slot 1')
+            ->where('deck.slots.5.label', 'Slot 6 · Friends')
+            ->where('deck.openSlot', 1));
 });
 
 it('names the absence rather than showing an empty frame when nothing is recorded', function (): void {
@@ -159,7 +166,10 @@ it('names the absence rather than showing an empty frame when nothing is recorde
 
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('No support cards recorded for this run', false);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // `DeckPanel` keys its empty-state copy off this one count; the copy itself is rendered.
+            ->has('deck.equipped', 0));
 });
 
 it('lists an equipped card with its slot, its type, its rarity word and a link to its own page', function (): void {
@@ -173,13 +183,15 @@ it('lists an equipped card with its slot, its type, its rarity word and a link t
 
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Quiet Star [Osenai Dancer]')
-        ->assertSee('Slot 4')
-        ->assertSee('SSR Wit')
-        // The panel is the entry point a Trainer actually reaches a card from: they logged the deck, now
-        // they want the effect figures behind it. Asserted as the raw href, since the visible text above
-        // is already pinned and a `<span>` would render identically to a Trainer and to a name check.
-        ->assertSee(route('support-cards.show', $card), false);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('deck.equipped.0.card_name', 'Quiet Star [Osenai Dancer]')
+            ->where('deck.equipped.0.slot_word', 'Slot 4')
+            ->where('deck.equipped.0.rarity_type', 'SSR Wit')
+            // The panel is the entry point a Trainer actually reaches a card from: they logged the deck, now
+            // they want the effect figures behind it. Asserted as the URL the row's anchor binds to, since
+            // the visible text above is already pinned and a `<span>` would render identically to a name check.
+            ->where('deck.equipped.0.card_url', route('support-cards.show', $card)));
 });
 
 it('labels slot six Friends even when a stat card sits there', function (): void {
@@ -191,8 +203,10 @@ it('labels slot six Friends even when a stat card sits there', function (): void
 
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Friends')
-        ->assertSee('Tokai Teio');
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('deck.equipped.0.slot_word', 'Friends')
+            ->where('deck.equipped.0.card_name', 'Tokai Teio [Tracen Academy]'));
 });
 
 it('badges a linked character on the scenario, derived on read', function (): void {
@@ -209,9 +223,14 @@ it('badges a linked character on the scenario, derived on read', function (): vo
     DeckSlot::factory()->atPosition(2)->create(['training_run_id' => $run->id, 'support_card_id' => $other->id]);
 
     // URA Finale's only linked character is Aoi Kiryuin, so exactly one row carries the badge.
-    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
+    $deck = test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Runs/Show')->has('deck.equipped', 2))
+        ->inertiaProps('deck');
 
-    expect(substr_count($html, 'Scenario Link'))->toBe(1);
+    expect(collect($deck['equipped'])->where('scenario_link', true))
+        ->toHaveCount(1)
+        ->and(collect($deck['equipped'])->firstWhere('scenario_link', true)['card_name'])->toBe('Aoi Kiryuin [Tracen Academy]');
 });
 
 it('offers only Global releases in the picker', function (): void {
@@ -219,10 +238,13 @@ it('offers only Global releases in the picker', function (): void {
     SupportCard::factory()->create(['char_name' => 'Global Card', 'release_global' => '2025-06-26']);
     SupportCard::factory()->jpOnly()->create(['char_name' => 'Japan Only Card']);
 
-    test()->get("/training-runs/{$run->id}")
+    $labels = collect(test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Global Card')
-        ->assertDontSee('Japan Only Card');
+        ->assertInertia(fn (Assert $page) => $page->component('Runs/Show')->has('deck.options', 1))
+        ->inertiaProps('deck')['options'])->pluck('label');
+
+    expect($labels)->toHaveCount(1)
+        ->and(str_starts_with($labels[0], 'Global Card'))->toBeTrue();
 });
 
 it('still offers a JP-only card the run already uses', function (): void {
@@ -232,15 +254,18 @@ it('still offers a JP-only card the run already uses', function (): void {
     $jpOnly = SupportCard::factory()->jpOnly()->create(['char_name' => 'Forever Young', 'title_en' => '[New Order]']);
     DeckSlot::factory()->atPosition(1)->create(['training_run_id' => $run->id, 'support_card_id' => $jpOnly->id]);
 
-    test()->get("/training-runs/{$run->id}")
+    $labels = collect(test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Forever Young [New Order]');
+        ->assertInertia(fn (Assert $page) => $page->component('Runs/Show'))
+        ->inertiaProps('deck')['options'])->pluck('label');
+
+    expect($labels->contains(fn (string $label): bool => str_starts_with($label, 'Forever Young [New Order]')))->toBeTrue();
 });
 
 it('keeps the six picks a Trainer made when the server rejects the deck', function (): void {
     // D-3's finding applied to this form: a failed submit must not return the picker to its defaults.
     // Taken as one round trip with `followingRedirects()`, because that is what the browser does and it
-    // is the only way the flashed `old()` input reaches the rendered select.
+    // is the only way the flashed `old()` input reaches the resolved picker.
     $run = deckRun();
     $good = SupportCard::factory()->create(['char_name' => 'Keep Me', 'release_global' => '2025-06-26']);
 
@@ -254,12 +279,16 @@ it('keeps the six picks a Trainer made when the server rejects the deck', functi
             ['HTTP_REFERER' => url("/training-runs/{$run->id}")]
         )
         ->assertOk()
-        ->assertSee('That card is not in the catalogue')
-        // The pick survives, read back two ways: the name the Trainer sees beside the slot, and the
-        // field and value the next submit carries. Slot 2 is the one that erred, so it is the slot open
-        // with the card list, and slot 1 posts through the closed-slot path.
-        ->assertSee('Keep Me')
-        ->assertSee('name="deck[1][support_card_id]" value="'.$good->id.'"', false);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // The refusal lands on the slot that erred, and that is the slot the picker reopens.
+            // The envelope is keyed by the field name verbatim, which is the key the picker reads back.
+            ->where('errors', fn (Collection $errors): bool => str_contains($errors['deck.2.support_card_id'] ?? '', 'That card is not in the catalogue'))
+            // The pick survives, read back two ways: the name beside the slot, and the value the
+            // next submit carries. Slot 1 posts through its closed-slot path.
+            ->where('deck.slots.0.selected', (string) $good->id)
+            ->where('deck.slots.0.selected_name', 'Keep Me [Tracen Academy]')
+            ->where('deck.openSlot', 2));
 });
 
 it('carries one card list for the six slots rather than six', function (): void {
@@ -271,14 +300,19 @@ it('carries one card list for the six slots rather than six', function (): void 
      * any of them.
      */
     $run = deckRun();
+    SupportCard::factory()->count(4)->create(['release_global' => '2025-06-26']);
 
-    $dom = new DOMDocument;
-    @$dom->loadHTML(test()->get("/training-runs/{$run->id}")->assertOk()->getContent(), LIBXML_NOERROR);
-    $xpath = new DOMXPath($dom);
-
-    expect($xpath->query('//select[starts-with(@name, "deck[")]')->length)->toBe(1)
-        ->and($xpath->query('//input[starts-with(@name, "deck[")][@type="hidden"]')->length)->toBe(5)
-        ->and($xpath->query('//a[contains(text(), "Change slot")]')->length)->toBe(5);
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // One option list on the payload, once, whichever slot is open...
+            ->has('deck.options', 4)
+            // ...and every slot names itself in the navigation that opens it, so the five closed
+            // rows keep their own route into the catalogue.
+            ->where('deck.slots', fn (Collection $slots): bool => $slots->every(
+                fn (array $slot): bool => str_contains($slot['open_url'], 'deck_slot='.$slot['position'])
+            )));
 });
 
 it('shows the deck panel on a run that names no scenario', function (): void {
@@ -288,14 +322,16 @@ it('shows the deck panel on a run that names no scenario', function (): void {
 
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Support deck')
-        ->assertSee('deck[1][support_card_id]', false);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('run.has_scenario', false)
+            ->has('deck.slots', 6));
 });
 
 it('lists an equipped card effect at its highest stated anchor and names that basis', function (): void {
     // The vector is the export's own shape: id then eleven anchors at levels 1, 5, 10 ... 50, and the
     // highest stated here is level 45, not level 50. The figure must not read as a level this run holds,
-    // so the panel carries the basis sentence beside it (D-256).
+    // so the figure rides with its basis sentence beside it (D-256).
     $run = deckRun();
     SupportEffect::factory()->create(['effect_id' => 1, 'name_en' => 'Friendship Bonus', 'symbol' => 'percent']);
     $card = SupportCard::factory()->create([
@@ -307,13 +343,15 @@ it('lists an equipped card effect at its highest stated anchor and names that ba
 
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Friendship Bonus 25%', false)
-        ->assertSee('highest stated anchor', false);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('deck.equipped.0.effects.0.name', 'Friendship Bonus')
+            ->where('deck.equipped.0.effects.0.display', '25%'));
 });
 
 it('marks an anchor with no dictionary row instead of inventing a label', function (): void {
-    // D-20: a gap is shown as a gap. The id is the source's own number, so printing it states a fact
-    // rather than guessing a word for an effect the dictionary does not name.
+    // D-20: a gap is shown as a gap. A null `name` is what makes the row print the source's own id
+    // rather than guess a word for an effect the dictionary does not name.
     $run = deckRun();
     $card = SupportCard::factory()->create([
         'char_name' => 'Quiet Star',
@@ -324,7 +362,12 @@ it('marks an anchor with no dictionary row instead of inventing a label', functi
 
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('[Unverified] effect 77', false);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('deck.equipped.0.effects.0.effect_id', 77)
+            ->where('deck.equipped.0.effects.0.name', null)
+            // No symbol either, so the figure prints bare rather than wearing an invented unit.
+            ->where('deck.equipped.0.effects.0.display', '5'));
 });
 
 it('renders no effect line for a card whose vector states nothing at any level', function (): void {
@@ -341,6 +384,8 @@ it('renders no effect line for a card whose vector states nothing at any level',
 
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Quiet Star')
-        ->assertDontSee('Mood Effect', false);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('deck.equipped.0.card_name', 'Quiet Star [Tracen Academy]')
+            ->has('deck.equipped.0.effects', 0));
 });

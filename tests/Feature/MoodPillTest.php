@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\MoodTier;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use Illuminate\Support\Collection;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * Mood is recorded, validated and stored, and until this slice it was never shown: the
@@ -21,6 +23,10 @@ use App\Models\TurnEntry;
  * The pair measurements these tokens have to survive live in
  * `docs/design-research/verification/slice-6-2026-09-28.md`, taken from the rendered
  * element per D-288, not from the hexes in this file.
+ *
+ * On the Inertia port the recorded tier travels as `turns[].mood` and `currentMood`, and the five
+ * tier words with their arrows as `moodOptions` (MoodTier::arrow()); the pill's own fills, its
+ * glyphs, and which element prints them are the component's.
  */
 function moodRun(): TrainingRun
 {
@@ -64,72 +70,60 @@ it('renders a recorded mood tier in the timeline as a pill wearing its own token
     $run = moodRun();
     moodTurn($run, 1, MoodTier::Great->value);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    expect($html)->toContain('bg-mood-great')
-        ->and($html)->toContain('text-on-mood');
+    // The tier reaches the timeline as the row's own `mood`; that it draws `bg-mood-great` and
+    // `text-on-mood` is the pill's, carried in the browser spec.
+    $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->has('turns', 1)
+        ->where('turns.0.mood', MoodTier::Great->value));
 });
 
 it('renders the directional arrow beside the tier word, never colour alone', function (): void {
     $run = moodRun();
     moodTurn($run, 1, MoodTier::Awful->value);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
     // D-259: the glyph is the only ordinal signal in the component. A pill that prints
-    // `AWFUL` in a rose fill without the down arrow has thrown away the ordering.
-    expect(pillText($html, 'awful'))->toBe('AWFUL↓');
+    // `AWFUL` without the down arrow has thrown away the ordering.
+    $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('turns.0.mood', 'AWFUL')
+        ->where('moodOptions', fn (Collection $options) => $options->contains(
+            fn (array $option): bool => $option['value'] === 'AWFUL' && $option['arrow'] === '↓'
+        )));
 });
 
 it('gives every tier the arrow the client\'s panel gives it', function (): void {
     $arrows = [
-        'great' => 'GREAT↑',
-        'good' => 'GOOD↑',
-        'normal' => 'NORMAL→',
-        'bad' => 'BAD↓',
-        'awful' => 'AWFUL↓',
+        'GREAT' => '↑',
+        'GOOD' => '↑',
+        'NORMAL' => '→',
+        'BAD' => '↓',
+        'AWFUL' => '↓',
     ];
 
-    foreach ($arrows as $token => $expected) {
+    foreach ($arrows as $tier => $arrow) {
         $run = moodRun();
-        moodTurn($run, 1, strtoupper($token));
+        moodTurn($run, 1, $tier);
 
-        $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-        expect(pillText($html, $token))->toBe($expected);
+        $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('turns.0.mood', $tier)
+            ->where('moodOptions', fn (Collection $options) => $options->contains(
+                fn (array $option): bool => $option['value'] === $tier && $option['arrow'] === $arrow
+            )));
     }
 });
-
-/**
- * The pill's own visible text, read out of the rendered document rather than matched
- * across markup: the arrow lives in a nested span so a regex over the HTML would be
- * asserting a shape instead of what a Trainer reads.
- *
- * @return string the text of the first `bg-mood-{$token}` element in the timeline
- */
-function pillText(string $html, string $token): string
-{
-    $doc = new DOMDocument;
-    @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);
-    $xpath = new DOMXPath($doc);
-
-    $pill = $xpath->query('//*[@class][contains(concat(" ", normalize-space(@class), " "), " bg-mood-'.$token.' ")]')->item(0);
-
-    expect($pill)->not->toBeNull();
-
-    return (string) $pill->textContent;
-}
 
 it('says the mood was not recorded instead of picking a tier', function (): void {
     $run = moodRun();
     moodTurn($run, 1, null);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    // No `bg-mood-*` fill may appear for a turn that stored nothing: a default tier would
-    // be a claim about the trainee, and D-220 says absent beats empty.
-    expect($html)->not->toMatch('/bg-mood-(great|good|normal|bad|awful)/')
-        ->and(strip_tags($html))->toContain('not recorded');
+    // No tier may be read for a turn that stored nothing, and the state region may not fall back
+    // either: a default would be a claim about the trainee, and D-220 says absent beats empty.
+    $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->whereNull('turns.0.mood')
+        ->whereNull('currentMood'));
 });
 
 it('shows the run\'s current mood in the pinned state region, from the latest logged turn', function (): void {
@@ -137,24 +131,19 @@ it('shows the run\'s current mood in the pinned state region, from the latest lo
     moodTurn($run, 1, MoodTier::Great->value);
     moodTurn($run, 2, MoodTier::Bad->value);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-    $doc = new DOMDocument;
-    @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);
-    $xpath = new DOMXPath($doc);
-
-    $state = $xpath->query('//section[@aria-label="Run state"]')->item(0);
-    expect($state)->not->toBeNull();
-
-    $pills = $xpath->query('.//span[contains(@class, "bg-mood-")]', $state);
     // The run's mood is where the last turn ended, not an average and not turn 1 (D-220).
-    expect($pills->length)->toBe(1)
-        ->and($pills->item(0)->getAttribute('class'))->toContain('bg-mood-bad');
+    $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('currentMood', MoodTier::Bad->value));
 });
 
 it('keeps the tier a select, because a pill is a readout and not an input', function (): void {
     $run = moodRun();
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    expect($html)->toContain('<select name="mood"');
+    // The five client words travel as the option list a select renders; MoodPill is the readout.
+    $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('moodOptions', fn (Collection $options) => $options->pluck('value')->all() === [
+            'GREAT', 'GOOD', 'NORMAL', 'BAD', 'AWFUL',
+        ]));
 });

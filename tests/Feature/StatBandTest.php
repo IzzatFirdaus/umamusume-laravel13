@@ -3,149 +3,184 @@
 declare(strict_types=1);
 
 use App\Models\TrainingRun;
+use App\Models\TurnEntry;
 use App\Services\ScenarioCaps;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\View\ViewException;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
- * The stat band's grade badge (KI-8, ruling R13).
+ * The stat band's grade badge (KI-8, ruling R13), after the Inertia port (ADR-0020 §1).
  *
  * The band was the only component with no test file, which is how it shipped a
  * crash: `config/scenarios.php`'s `grade_banding.labels` carries seventeen entries
  * including half-steps like `B+`, while the badge's class map has keys for the nine
  * base letters only. Any stat landing on a half-step threw
  * "Undefined array key "B+"" and took `/design-preview` — the only route that
- * renders this band — down with it.
+ * rendered this band — down with it.
  *
  * R13 settles it: the fill is keyed on the base letter with the modifier stripped,
  * and the badge shows the full letter. A `B+` is a B's colour, and the difference
  * the `+` carries is the text's job, not the tint's.
+ *
+ * Both owners are Vue components now, so this file reads the two things a PHP
+ * assertion can still establish about them — that the badge's map covers every letter
+ * the banding can produce, and that the page ships the numbers the badge maps — and
+ * the rendered badge itself is browser evidence in `tests/browser/run-detail.spec.ts`.
+ * What is gone is the component's own two guards: they existed because the Blade
+ * component re-derived its numbers and could be handed a scenario key that did not
+ * exist. The Vue band cannot be handed either, because it is not given a key at all
+ * (G-33) and its columns come from the caps map the server resolved.
  */
 
 /**
- * The badge letters the band actually printed, in order.
- *
- * Matched on the badge span rather than as a substring: "B" appears inside "B+" and
- * inside class names, so a plain contains() would pass a band that printed the wrong
- * letter or none at all.
- *
- * @return list<string>
+ * The run's own two payload halves: the caps the turn validator also uses, and the band the
+ * five badges render. One logged turn, because five zeroes would be a claim about a trainee
+ * nobody entered (D-220).
  */
-function badgeLabels(string $html): array
+function bandRun(?string $scenario = 'ura_finale'): TrainingRun
 {
-    preg_match_all(
-        '/class="[^"]*bg-grade-[a-z]+[^"]*"[^>]*>\s*([A-Z]+[+]?)\s*</',
-        $html,
-        $matches,
-    );
+    $run = TrainingRun::factory()->create(['scenario' => $scenario]);
 
-    return $matches[1];
+    TurnEntry::create([
+        'training_run_id' => $run->id, 'turn' => 1, 'speed' => 350, 'stamina' => 280,
+        'power' => 240, 'guts' => 210, 'wit' => 150, 'sp' => 120, 'energy' => 74,
+        'mood' => 'GOOD', 'fans' => 4000,
+    ]);
+
+    return $run;
 }
 
-function renderBand(array $values, ?string $scenario = 'ura_finale'): string
+/**
+ * The badge's fill map, read from the component that owns it: the keys are the base letters
+ * the lookup resolves to, so a label the map cannot answer is the KI-8 crash.
+ *
+ * @return array<string, string>
+ */
+function gradeBadgeFills(): array
 {
-    // Caps arrive the way the controller sends them now: from ScenarioCaps, not derived inside
-    // the component. Passing the scenario alone used to be enough because the band re-derived,
-    // and that re-derivation is what KI-47 was.
-    $caps = $scenario === null
-        ? ScenarioCaps::forRun(new TrainingRun(['scenario' => null]))
-        : ScenarioCaps::caps($scenario);
+    $source = (string) file_get_contents(base_path('resources/js/components/GradeBadge.vue'));
 
-    return Blade::render(
-        '<x-stat-band :scenario="$scenario" :caps="$caps" :values="$values" />',
-        [
-            'scenario' => $scenario,
-            'caps' => $caps,
-            'values' => $values,
-        ],
-    );
+    preg_match_all('/^\s{4}([A-Z]+):\s*\'(bg-grade-[a-z]+)\',/m', $source, $matches, PREG_SET_ORDER);
+
+    $fills = [];
+
+    foreach ($matches as $match) {
+        $fills[$match[1]] = $match[2];
+    }
+
+    return $fills;
 }
 
 it('renders a badge for every label the banding can produce', function (): void {
-    // A dataset was tried first and cannot work here: Pest collects datasets before
-    // the app is booted, so config() is empty at that point. The loop collects every
-    // failure instead, so a break names the labels rather than stopping at the first.
-    $band = config('scenarios.grade_banding');
-    $stats = config('scenarios.stat_order');
+    $run = bandRun();
+
+    // The page hands the band the whole banding, so the badge's map is the only thing standing
+    // between a seventeen-label config and an undefined key. The loop collects every failure
+    // instead of stopping at the first, so a break names the letters rather than the label.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('gradeBanding', (array) config('scenarios.grade_banding'))
+            ->where('gradeBanding.labels', config('scenarios.grade_banding.labels'))
+            ->where('baseCap', (int) config('scenarios.base_cap'))
+            ->where('hardCap', (int) config('scenarios.hard_cap')));
+
+    $fills = gradeBadgeFills();
     $broken = [];
 
-    foreach ($band['labels'] as $index => $label) {
-        $value = $index * $band['step'];
+    foreach (config('scenarios.grade_banding.labels') as $label) {
+        $base = preg_replace('/[-+]+$/', '', (string) $label);
 
-        try {
-            $html = renderBand(array_fill_keys($stats, $value));
-        } catch (Throwable $e) {
-            $broken[$label] = $e->getMessage();
-
-            continue;
-        }
-
-        if (! in_array($label, badgeLabels($html), true)) {
-            $broken[$label] = 'badge printed '.implode('/', badgeLabels($html) ?: ['nothing']);
+        if (! isset($fills[$base])) {
+            $broken[$label] = 'no fill keyed on '.var_export($base, true);
         }
     }
 
     // KI-8: nine base letters worked and the eight half-steps threw.
-    expect($broken)->toBe([]);
+    expect($broken)->toBe([])
+        // An empty map would satisfy the loop above, so the census is asserted too.
+        ->and($fills)->toHaveCount(9);
 });
 
-it('does not throw for a half-step grade', function (): void {
-    // The exact value that produced KI-8: index 11 of the label list is `B+`.
-    $band = config('scenarios.grade_banding');
-    $value = 11 * $band['step'];
+it('strips the modifier before the lookup, so a half-step can never miss the map', function (): void {
+    $source = (string) file_get_contents(base_path('resources/js/components/GradeBadge.vue'));
 
-    expect(fn (): string => renderBand(['Speed' => $value]))->not->toThrow(ViewException::class);
+    // Two halves, because either alone is a weaker guard: the strip is what makes `B+` resolve
+    // to `B`, and the fallback is what a label nobody predicted still renders instead of throwing.
+    expect($source)->toContain("replace(/[-+]+$/, '')")
+        ->toContain("?? 'bg-grade-g'")
+        // The badge prints the full letter the band resolved, modifier included.
+        ->toContain('{{ grade }}');
 });
 
 it('tints a half-step with its base letter fill and prints the full letter', function (): void {
-    $html = renderBand(['Speed' => 550, 'Stamina' => 550, 'Power' => 550, 'Guts' => 550, 'Wit' => 550]);
-
-    // `B+` is a B's colour and a B+ 's text. Asserting both halves matters: a fix
-    // that rendered "B" to keep the map honest would pass a fill-only assertion.
-    expect(badgeLabels($html))->toBe(['B+', 'B+', 'B+', 'B+', 'B+'])
-        ->and($html)->toContain('bg-grade-b')
-        ->not->toContain('bg-grade-b+');
+    // `B+` is a B's colour and a B+ 's text. Asserting both halves matters: a fix that rendered
+    // "B" to keep the map honest would pass a fill-only assertion.
+    expect(gradeBadgeFills())
+        ->toHaveKey('B')
+        ->and(gradeBadgeFills()['B'])->toBe('bg-grade-b')
+        // R13: no fill is keyed on a half-step at all, so the `+` can never become a colour.
+        ->and(array_keys(gradeBadgeFills()))->not->toContain('B+');
 });
 
 it('says the grade is derived and not read from the client', function (): void {
-    $html = renderBand(['Speed' => 550]);
+    $run = bandRun();
 
-    // D-256 with G-46: the banding is this tool's own reading of pixels, not a
-    // client string, and a badge that looks like game data has to say otherwise.
-    expect($html)->toContain('Derived from the entered value, not read from the client');
+    // D-256 with G-46: the banding is this tool's own reading of pixels, not a client string,
+    // and a badge that looks like game data has to say otherwise. The word rides on the badge as
+    // its accessible name, and the page is what decides the band exists at all.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('band.values.Speed', 350)
+            // The bonus row is the scenario's own breakdown, the same one the ceilings are built
+            // from, so the arithmetic line under the band cannot disagree with the bar.
+            ->where('band.capBonus', (array) config('scenarios.scenarios.ura_finale.cap_bonus')));
+
+    expect((string) file_get_contents(base_path('resources/js/components/StatBand.vue')))
+        ->toContain('Derived from the entered value, not read from the client');
 });
 
 it('renders the base cap when told there is no scenario, and says so in the footer', function (): void {
-    $html = renderBand(['Speed' => 600, 'Stamina' => 600, 'Power' => 600, 'Guts' => 600, 'Wit' => 600], null);
+    $run = bandRun(null);
 
-    // The component used to reach for `config('scenarios')` by itself and was handed a resolved
+    // The band used to reach for `config('scenarios')` by itself and was handed a resolved
     // key, so this is the state it could never express: a band with no bonus row at all. Both
     // halves matter — the ceiling the bar ends at, and the arithmetic line that explains it.
-    expect($html)->toContain('/ 1,200')
-        ->and($html)->toContain('no scenario set: every ceiling here is the base cap and no bonus applies.');
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('run.scenario', null)
+            ->where('run.has_scenario', false)
+            ->where('band.capBonus', null)
+            ->where('baseCap', 1200));
+
+    expect((string) file_get_contents(base_path('resources/js/components/StatBand.vue')))
+        ->toContain('no scenario set: every ceiling here is the base cap and no bonus applies.');
 });
 
-it('refuses to draw a band it was given no ceilings for', function (): void {
-    // A caller that forgets `caps` must not get a rendered page. The band once derived its own
-    // numbers, which is how a wrong one survived every passing test beside it; a silent fallback
-    // here would reintroduce the same failure with a friendlier error rate.
-    expect(fn () => Blade::render(
-        '<x-stat-band :scenario="$scenario" :values="$values" />',
-        ['scenario' => 'ura_finale', 'values' => ['Speed' => 600]],
-    ))->toThrow(ViewException::class, 'x-stat-band requires a ceiling for every rated stat');
+it('takes every ceiling from the one owner, so the band cannot be handed a number it invented', function (): void {
+    // KI-47, and the answer to the guard the Blade component used to raise: the band renders the
+    // caps map and nothing else, and the page builds that map with the same call the turn
+    // validator makes. A band rated against a bonus the form would reject is therefore not
+    // reachable, which is a stronger claim than the exception it replaces.
+    $run = bandRun();
+
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('caps', ScenarioCaps::forRun($run->fresh())));
+
+    expect(ScenarioCaps::forRun($run->fresh()))
+        ->toHaveKeys(['Speed', 'Stamina', 'Power', 'Guts', 'Wit'])
+        ->and((string) file_get_contents(base_path('resources/js/components/StatBand.vue')))
+        ->not->toContain('scenario:');
 });
 
 it('still refuses a scenario that was named and does not exist', function (): void {
-    // Caps are supplied for a scenario that does exist so the service cannot be what throws:
-    // the message has to come from this component's own guard, and asserting the suffix proves
-    // which file raised it. Rendering the helper instead would have passed by testing
-    // ScenarioCaps, which is a different unit with a similar error.
-    expect(fn () => Blade::render(
-        '<x-stat-band :scenario="$scenario" :caps="$caps" :values="$values" />',
-        [
-            'scenario' => 'grand_masters',
-            'caps' => ScenarioCaps::caps('ura_finale'),
-            'values' => ['Speed' => 600],
-        ],
-    ))->toThrow(ViewException::class, 'Unknown scenario [grand_masters] for x-stat-band');
+    // The component no longer names a scenario, so the refusal that survives is the service's:
+    // an unknown key has no cap row, and the page can never be handed one. Asserting the
+    // message keeps the failure pointing at the file that raises it rather than at the band,
+    // which is a different unit with a similar-sounding guard.
+    expect(fn (): array => ScenarioCaps::caps('grand_masters'))
+        ->toThrow(InvalidArgumentException::class, 'Unknown scenario [grand_masters] has no cap row.');
 });

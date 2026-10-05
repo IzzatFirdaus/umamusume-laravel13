@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\RunStatus;
 use App\Models\TrainingRun;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * SCREEN_SPEC.md §7-4: a run could enter as Active, Completed or Retired and never leave that
@@ -25,16 +26,15 @@ function statusRun(RunStatus $status = RunStatus::Active): TrainingRun
 it('offers the three statuses and marks the run\'s current one', function (): void {
     $run = statusRun(RunStatus::Completed);
 
-    $html = $this->get(route('runs.show', $run))->assertOk()->content();
-
-    foreach (['Active', 'Completed', 'Retired'] as $label) {
-        expect($html)->toContain('>'.$label.'<');
-    }
-
-    // The current value is the selected one, so pressing Save without touching the
-    // select is a no-op rather than a silent reset to Active.
-    expect(preg_match('/value="Completed"[^>]*selected/', $html))->toBe(1)
-        ->and(preg_match('/value="Active"[^>]*selected/', $html))->toBe(0);
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // The options the status select renders, value => label, built from `RunStatus::cases()`.
+            ->where('statuses', ['Active' => 'Active', 'Completed' => 'Completed', 'Retired' => 'Retired'])
+            // The current value is what the select binds to, so pressing Save without touching the
+            // select is a no-op rather than a silent reset to Active.
+            ->where('run.status', 'Completed'));
 });
 
 it('moves a run through each status transition the select offers', function (RunStatus $from, RunStatus $to): void {
@@ -86,33 +86,14 @@ it('changes the status without blanking the fields the select is not editing', f
 it('submits the status form with the run\'s own carried fields', function (): void {
     $run = statusRun();
 
-    $html = $this->get(route('runs.show', $run))->content();
-
-    // Read by which form holds the select: the race panel ships its own `<select name="status">`
-    // (components/race-panel.blade.php:144) and it comes earlier in the document, so a search for
-    // the first one on the page finds the wrong control.
-    preg_match_all(
-        '#<form[^>]*action="'.preg_quote(route('runs.update', $run), '#').'"[^>]*>(.*?)</form>#s',
-        $html,
-        $forms,
-    );
-
-    $statusForm = null;
-
-    foreach ($forms[1] as $body) {
-        if (str_contains($body, '<select name="status"')) {
-            $statusForm = $body;
-        }
-    }
-
-    expect($statusForm)->not->toBeNull('the run page has no status select inside a run update form');
-
-    // The shared request needs the fields this form is not editing, which is why the two
-    // existing update forms carry them hidden. A status form that dropped them would blank
-    // the run, so the carry-through is part of the control, not incidental markup.
-    expect($statusForm)
-        ->toContain('name="_method" value="PUT"')
-        ->toContain('name="umamusume_id"')
-        ->toContain('name="scenario"')
-        ->not->toContain('name="current_objective_index"');
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // The shared request needs the fields this form is not editing, which is why the two
+            // existing update forms carry them. A status form that dropped them would blank the run,
+            // so the payload ships the run's own values and the action the form posts to.
+            ->where('run.update_url', route('runs.update', $run))
+            ->where('run.umamusume_id', $run->umamusume_id)
+            ->where('run.scenario', 'ura_finale'));
 });

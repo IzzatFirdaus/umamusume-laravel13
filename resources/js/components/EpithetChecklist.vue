@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import CapsuleHeader from './CapsuleHeader.vue';
+
 // `enabled` is the resolved composesPanel('epithet_routes') (G-33). `seenRaceTitles` is
 // run->completedRaceTitles() and `rows` is run->epithetProgress(); state, missing races and
 // the aggregate `note` are all derived server-side against the config route table.
@@ -27,10 +29,7 @@ const treatments: Record<EpithetState, string> = {
 
 <template>
     <div v-if="enabled" class="rounded-md border border-rule bg-panel p-3">
-        <!-- inline until CapsuleHeader.vue lands -->
-        <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pr-5 pl-20">
-            <span class="text-base font-bold text-on-chrome">Epithet routes</span>
-        </div>
+        <CapsuleHeader title="Epithet routes" class="mb-3" />
 
         <p class="text-xs text-ink-muted">
             Derived

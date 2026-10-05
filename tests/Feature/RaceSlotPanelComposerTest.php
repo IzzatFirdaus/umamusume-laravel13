@@ -8,7 +8,6 @@ use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
-use Illuminate\Support\Facades\Blade;
 
 /*
  * S2: the run-detail goal panels read from `scenario_slots` and this run's own
@@ -17,6 +16,13 @@ use Illuminate\Support\Facades\Blade;
  * The shaping lives on the model beside `stripValues()` because it is the same
  * kind of thing: run state composed for a component. Keeping it in the view
  * would put a query and a config walk inside a template.
+ *
+ * Since the Inertia port (ADR-0020 §1) this file asserts the shaped state on the
+ * model and the client treatment on the component's own source: `stateClass`,
+ * `stateWord`, and the pennant and marker spans are the whole treatment, and the
+ * page is what feeds the component now. The cases that used to hand a hand-built
+ * cell array to a Blade tag are the ones the component's source answers instead;
+ * each says why the model cannot produce that cell.
  */
 
 function runWithFans(int $fans): TrainingRun
@@ -25,6 +31,24 @@ function runWithFans(int $fans): TrainingRun
     TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 1, 'fans' => $fans]);
 
     return $run->fresh();
+}
+
+/**
+ * The calendar component's source, which owns the cell treatment.
+ */
+function composerSource(): string
+{
+    return (string) file_get_contents(base_path('resources/js/components/RaceCalendar.vue'));
+}
+
+/**
+ * One entry out of the `stateClass` map, so a treatment is read rather than retyped.
+ */
+function composerStateClass(string $state): string
+{
+    preg_match('/'.preg_quote($state, '/').": '([^']*)',/", composerSource(), $match);
+
+    return $match[1] ?? '';
 }
 
 it('renders a mandatory career race as an open cell, not as a Goal pennant', function (): void {
@@ -61,13 +85,13 @@ it('keeps the debut pennant-free while it is mandatory but unGoal-ed', function 
     $run = runWithFans(20000);
     RaceCatalogSlot::factory()->debut()->create();
 
-    $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" />',
-        ['cells' => $run->fresh()->calendarCells(1)]
-    );
+    // The model decides the cell state, and a mandatory career race is an open cell.
+    expect($run->fresh()->calendarCells(1)[5]['halves']['Late']['slots'][0])
+        ->toMatchArray(['state' => 'open', 'label' => 'Junior Make Debut']);
 
-    expect($html)->toContain('Junior Make Debut')
-        ->and($html)->not->toContain('border-goal-line');
+    // The pennant is then gated on that state alone, so no cell the model can emit today can draw one.
+    expect(composerSource())->toContain('v-if="cell.state === \'goal\'"')
+        ->toContain("goal: 'border-2 border-goal-line");
 });
 
 it('locks a fan-gated race until this run has the fans it asks for', function (): void {
@@ -215,16 +239,16 @@ it('keeps the goal treatment ready on the component while the model withholds it
     // character's objective — but the treatment must not be deleted on the way
     // past that, or the fix becomes a rewrite. A cell carrying the goal state
     // still draws the pennant, which is exactly what a goals source will emit.
-    $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="2" />',
-        ['cells' => [3 => ['halves' => [
-            'Late' => ['slots' => [['state' => 'goal', 'label' => 'Japanese Oaks']]],
-            'Early' => ['slots' => []],
-        ]]] + array_fill(0, 12, ['halves' => ['Early' => ['slots' => []], 'Late' => ['slots' => []]]])]
-    );
-
-    expect($html)->toContain('border-goal-line')
-        ->and($html)->toContain('Japanese Oaks');
+    //
+    // The cell is read from the component rather than handed to it: no run can
+    // produce a goal cell today, so the assertion is on the treatment the
+    // component still holds and on the one gate that decides it.
+    expect(composerStateClass('goal'))->toContain('border-goal-line')
+        ->and(composerStateClass('goal'))->not->toContain('border-dashed')
+        ->and(composerSource())
+        ->toContain('goal: \'Mandatory goal\',')
+        ->toContain('v-if="cell.state === \'goal\'"')
+        ->toContain('border-l-goal');
 });
 
 it('keeps the Trainer-entered marker on a free race after it has been run', function (): void {
@@ -254,14 +278,12 @@ it('keeps the Trainer-entered marker on a free race after it has been run', func
 
     expect($cell)->toMatchArray(['state' => 'past', 'label' => 'Autumn Practice Stakes', 'manual' => true]);
 
-    $html = Blade::render(
-        '<x-race-calendar scenario="ura_finale" :cells="$cells" :year="1" />',
-        ['cells' => $run->fresh()->calendarCells(1)]
-    );
-
-    expect($html)->toContain('Trainer-entered')
-        // Past, not goal: the marker survives, the pennant still does not appear.
-        ->and($html)->not->toContain('border-goal-line');
+    // The marker is drawn from the cell's own `manual` flag and from nothing else, so a past free race
+    // keeps it while a past catalogue race does not — see the case below.
+    expect(composerSource())
+        ->toContain('manual: slots.some((slotItem) => slotItem.manual === true)')
+        ->toContain('v-if="cell.manual"')
+        ->toContain('Trainer-entered');
 });
 
 it('does not give a calendar race the Trainer-entered marker once run', function (): void {

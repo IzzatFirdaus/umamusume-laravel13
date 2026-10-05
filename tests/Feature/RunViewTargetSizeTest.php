@@ -6,102 +6,110 @@ use App\Enums\ReleaseStatus;
 use App\Enums\SkillAcquisition;
 use App\Models\Skill;
 use App\Models\TrainingRun;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
- * L-F01 regression gate (WCAG 2.2 SC 2.5.8). The five nav links, the two export links,
- * the helper link and the summary disclosure must all carry `min-h-11` (44px, the
- * project's floor idiom from KI-37), and the skill-row controls must still carry
- * the `h-11` KI-37 closed with. Asserted on the rendered DOM, not the source.
+ * L-F01 regression gate (WCAG 2.2 SC 2.5.8). The navigation, the two export links, the helper
+ * link and the summary disclosure must all carry `min-h-11` (44px, the project's floor idiom
+ * from KI-37), and the skill-row controls must still carry the `h-11` KI-37 closed with.
+ *
+ * The page is component-rendered now (ADR-0020 §1), so the classes are read from the component
+ * sources that render them: the nav is in `resources/js/layouts/AppLayout.vue`, the run page's
+ * own targets in `resources/js/pages/Runs/Show.vue`. The rendered heights are measured in the
+ * browser pass (tests/browser/run-detail.spec.ts).
  */
 
-function runViewTargetsHtml(): string
+function runViewSource(string $path): string
 {
+    return (string) file_get_contents(base_path($path));
+}
+
+/**
+ * The class attribute of the first element whose opening tag matches the pattern, or an empty
+ * string when nothing matches: the empty string fails every floor assertion below, so a
+ * component that drops a control fails here rather than passing vacuously.
+ */
+function sourceClassOf(string $source, string $pattern): string
+{
+    if (preg_match($pattern, $source, $tag) !== 1) {
+        return '';
+    }
+
+    preg_match('/class="([^"]*)"/', $tag[0], $class);
+
+    return $class[1] ?? '';
+}
+
+it('keeps the skill-row controls at the KI-37 height', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
 
     // One recorded skill so the collapsed picker has a closed row beside the open one,
     // which is what makes the "Change row N" link half of the L-F01 claim non-vacuous.
-    $run->setSkillStatus(
-        Skill::factory()->create([
-            'release_status' => ReleaseStatus::GlobalReleased->value,
-            'name_is_client' => true,
-        ]),
-        SkillAcquisition::Acquired,
-    );
+    $skill = Skill::factory()->create([
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+    ]);
+    $run->setSkillStatus($skill, SkillAcquisition::Acquired);
 
-    return test()->get('/training-runs/'.$run->id)->assertOk()->getContent();
-}
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('skillGroups.1.key', 'Acquired')
+            ->where('skillGroups.1.skills.0.id', $skill->id));
 
-it('keeps the skill-row controls at the KI-37 height', function (): void {
-    $html = runViewTargetsHtml();
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html, LIBXML_NOERROR);
-    $xpath = new DOMXPath($dom);
-
-    $classesOf = function (DOMNodeList $nodes): array {
-        $out = [];
-
-        foreach ($nodes as $node) {
-            $out[] = $node->attributes->getNamedItem('class')?->nodeValue ?? '';
-        }
-
-        return $out;
-    };
+    $source = runViewSource('resources/js/pages/Runs/Show.vue');
 
     /*
-     * Re-pointed 2026-10-03 (B.6). The ten `skill_id` selects collapsed to one open picker,
-     * so the visible picker control is now the open select plus the "Change row N" links that
-     * open a closed row. The old selectors matched whole-catalogue selects that no longer exist
-     * on every row. The claim is unchanged: every control a Trainer reaches in the skill rows
-     * meets the KI-37 44px floor. The hidden per-row `skill_id` inputs are deliberately excluded,
-     * because they are not controls and must not carry a height.
+     * Re-pointed 2026-10-03 (B.6), and again with the Inertia port: the ten `skill_id` selects
+     * collapsed to one open picker, so the visible picker control is now the open select plus
+     * the "Change row N" links that open a closed row. The claim is unchanged: every control a
+     * Trainer reaches in the skill rows meets the KI-37 44px floor. The hidden per-row
+     * `skill_id` inputs are deliberately excluded, because they are not controls and must not
+     * carry a height.
      */
-    $openSelect = $xpath->query('//select[contains(@name, "[skill_id]")]');
-    $switchLinks = $xpath->query('//a[starts-with(normalize-space(.), "Change row ")]');
-    $statusSelects = $xpath->query('//select[contains(@name, "[status]")]');
-    $turnInputs = $xpath->query('//input[contains(@name, "[turn_acquired]")]');
-    $saveButton = $xpath->query('//button[contains(., "Save skill status")]');
-
-    expect($openSelect->length)->toBe(1)
-        ->and($switchLinks->length)->toBeGreaterThan(0)
-        ->and($classesOf($openSelect))->each->toContain('h-11')
-        ->and($classesOf($switchLinks))->each->toContain('min-h-11')
-        ->and($classesOf($statusSelects))->each->toContain('h-11')
-        ->and($classesOf($turnInputs))->each->toContain('h-11')
-        ->and($classesOf($saveButton))->each->toContain('h-11');
+    expect(sourceClassOf($source, '/<select[^>]*v-model="row\.skill_id"[^>]*>/'))->toContain('h-11')
+        ->and(sourceClassOf($source, '/<button[^>]*>\s*Change row/s'))->toContain('min-h-11')
+        ->and(sourceClassOf($source, '/<select[^>]*v-model="row\.status"[^>]*>/'))->toContain('h-11')
+        ->and(sourceClassOf($source, '/<input[^>]*v-model="row\.turn_acquired"[^>]*>/'))->toContain('h-11')
+        ->and(sourceClassOf($source, '/<button[^>]*>\s*Save skill status/s'))->toContain('h-11');
 });
 
 it('gives every L-F01 target the min-h-11 floor', function (): void {
-    $html = runViewTargetsHtml();
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html, LIBXML_NOERROR);
-    $xpath = new DOMXPath($dom);
+    $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
 
-    $nav = $xpath->query('//nav//a');
-    $exportCsv = $xpath->query('//a[contains(@href, "/export/csv")]');
-    $exportJson = $xpath->query('//a[contains(@href, "/export/json")]');
-    $helper = $xpath->query('//a[contains(., "Search the skill catalog")]');
-    $summary = $xpath->query('//summary[contains(., "Correct a turn by hand")]');
+    // The two export links are payload-driven; the floor itself is a class on the component
+    // that renders them.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('run.export_csv_url', route('runs.export', ['run' => $run, 'format' => 'csv']))
+            ->where('run.export_json_url', route('runs.export', ['run' => $run, 'format' => 'json'])));
 
-    $assertFloor = function (?DOMNodeList $nodes, string $label): void {
-        expect($nodes, $label)->not->toBeNull();
-        expect($nodes->length, $label.' found')->toBeGreaterThan(0);
+    $source = runViewSource('resources/js/pages/Runs/Show.vue');
 
-        foreach ($nodes as $node) {
-            $class = $node->attributes->getNamedItem('class')?->nodeValue ?? '';
+    expect(sourceClassOf($source, '/<a[^>]*:href="run\.export_csv_url"[^>]*>/'))->toContain('min-h-11')
+        ->and(sourceClassOf($source, '/<a[^>]*:href="run\.export_json_url"[^>]*>/'))->toContain('min-h-11')
+        ->and(sourceClassOf($source, '/<a[^>]*href="\/skills"[^>]*>/'))->toContain('min-h-11')
+        ->and(sourceClassOf($source, '/<summary[^>]*>\s*Correct a turn by hand/s'))->toContain('min-h-11');
 
-            expect($class, $label)->toContain('min-h-11');
-        }
-    };
+    $layout = runViewSource('resources/js/layouts/AppLayout.vue');
 
-    $assertFloor($nav, 'nav links');
-    $assertFloor($exportCsv, 'export csv');
-    $assertFloor($exportJson, 'export json');
-    $assertFloor($helper, 'helper link');
-    $assertFloor($summary, 'summary disclosure');
+    /*
+     * The census of the nav, so the sweep above cannot pass on an empty list. Deviation from
+     * the Blade shell's six links, stated because the run page now renders AppLayout's 2.0
+     * navigation: nine destinations, two of them named absences (`to: null`) that render as
+     * disabled spans, and the whole list renders twice (desktop aside and mobile bar). Each
+     * of the four classes a destination can render with is asserted to carry the floor, so a
+     * destination that forgets it fails here rather than sliding past an unchanged count.
+     */
+    preg_match('/const items = \[(.*?)\];/s', $layout, $items);
 
-    // The census of the nav, so the sweep above cannot pass on an empty node list. Six since
-    // §7-5: Catalog, Skills, Support cards, Training runs, Review, Preferences. Each one is
-    // asserted to carry the floor, so a seventh link that forgets it fails here rather than
-    // sliding past an unchanged count.
-    expect($nav->length)->toBe(6);
+    expect(substr_count($items[1] ?? '', 'label:'))->toBe(9)
+        ->and(substr_count($items[1] ?? '', 'to: null'))->toBe(2);
+
+    foreach (['linkClass', 'disabledClass', 'mobileClass', 'mobileDisabledClass'] as $constant) {
+        preg_match('/const '.$constant.'\s*=\s*\'([^\']*)\'/s', $layout, $declared);
+
+        expect($declared[1] ?? '', $constant)->toContain('min-h-11');
+    }
 });

@@ -18,6 +18,16 @@
         </include>
     </source>
     <php>
+        <!--
+            The suite is one process, and the host's CLI default is 128M. Around 1,200 feature
+            tests that each boot the application, migrate and render accumulate past it, so
+            `composer test` died with "Allowed memory size of 134217728 bytes exhausted" part-way
+            through the run and reported no totals - a gate that cannot produce evidence is not
+            evidence. PHPUnit applies this before the first test, which is the only point at which
+            the limit can still be raised. Same reasoning as the memory limit AGENTS.md §18 requires
+            on PHPStan. Raise it rather than deleting a test or splitting the suite.
+        -->
+        <ini name="memory_limit" value="1G"/>
         <env name="APP_ENV" value="testing" force="true"/>
         <!--
             Every <env> entry below is mirrored as a <server> entry, and the mirror is not

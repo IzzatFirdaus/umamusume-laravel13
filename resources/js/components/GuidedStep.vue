@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 interface Choice {
@@ -155,6 +155,16 @@ function onKeydown(event: KeyboardEvent): void {
         event.preventDefault();
     }
 }
+
+/*
+ * Scoped to the document, not to the form, because that is what the retired `guided-flow.ts` did and
+ * the card's own copy advertises the keys to the whole page: a Trainer who presses "3" straight after
+ * load has body focus, so a binding on the form would swallow the advertised shortcut exactly when it
+ * is most likely to be used. The `group.value === null` guard above is what keeps the listener inert
+ * on a step that has no choices.
+ */
+onMounted(() => document.addEventListener('keydown', onKeydown));
+onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 </script>
 
 <template>

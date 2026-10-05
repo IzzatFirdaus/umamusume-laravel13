@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * G-18 / G-19 for the one confirmation surface the application shell has.
@@ -22,7 +23,12 @@ use App\Models\Umamusume;
  * approved text-pair table. `--color-green` is additionally documented in app.css as
  * "action and affordability only, never 'good'", and a status message is a "good".
  * The pair used is the one §6.16's band table already approves for the Safe band,
- * `ink` on `green-tint`, and it is shipped at guided-step.blade.php:55.
+ * `ink` on `green-tint`, and it is shipped at resources/js/layouts/AppLayout.vue:97.
+ *
+ * The pages are Inertia pages now: the server-side claim is that the flash reaches
+ * every one of them in the shared prop the shell renders the banner from, and the
+ * rendered box (its tokens, its absence of palette-numbered greens) is the browser
+ * spec's.
  */
 
 /**
@@ -43,26 +49,21 @@ function approvedStatusChipPairs(): array
     ];
 }
 
-it('renders the flash banner from tokens, with no skeleton palette class', function (): void {
+it('sends the created-run flash the shell renders the banner from', function (): void {
     $umamusume = Umamusume::factory()->create();
 
-    $html = test()->followingRedirects()
+    test()->followingRedirects()
         ->post('/training-runs', [
             'umamusume_id' => $umamusume->id,
             'status' => 'Active',
         ])
         ->assertOk()
-        ->assertSee('Run created.')
-        ->getContent();
-
-    expect($html)
-        ->toContain('bg-green-tint')
-        ->toContain('border-green-line')
-        ->toContain('text-ink')
-        ->not->toMatch('/\bgreen-(?:50|100|200|300|400|500|600|700|800|900)\b/');
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('flash.status', 'Run created.'));
 });
 
-it('carries no palette-numbered green class on any shell page that can flash', function (string $target): void {
+it('carries the shared flash prop on every shell page that can flash', function (string $target): void {
     $run = TrainingRun::factory()->create();
 
     // A provider closure runs before the test body, so the run does not exist yet and
@@ -73,12 +74,9 @@ it('carries no palette-numbered green class on any shell page that can flash', f
         default => $target,
     };
 
-    $html = test()->withSession(['status' => 'Run deleted.'])->get($url)->assertOk()->getContent();
-
-    expect($html)
-        ->toContain('Run deleted.')
-        ->not->toMatch('/\bgreen-\d/')
-        ->not->toMatch('/\bdark:/');
+    test()->withSession(['status' => 'Run deleted.'])->get($url)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('flash.status', 'Run deleted.'));
 })->with([
     'catalog index' => '/umamusume',
     'runs index' => '/training-runs',
@@ -88,7 +86,9 @@ it('carries no palette-numbered green class on any shell page that can flash', f
 ]);
 
 it('agrees with the approved pair list, so the sweep reads one source', function (string $fill, string $border, string $ink): void {
-    $layout = file_get_contents(base_path('resources/views/components/layout.blade.php'));
+    // `AppLayout` is the only shell now (B1 retired the Blade layout that drew the
+    // same pair on the two error pages it wrapped).
+    $layout = file_get_contents(base_path('resources/js/layouts/AppLayout.vue'));
 
     expect($layout)
         ->toContain($fill)

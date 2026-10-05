@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import CapsuleHeader from './CapsuleHeader.vue';
+
 // `enabled` is the resolved composesPanel('team_race') (G-33). The Blade's `$slots ??`
 // fallback was dead twice over (undefined variable, and the value never rendered), so the
 // controller supplies `entries` directly from raceEntries filtered on the team_race slot.
@@ -19,10 +21,7 @@ defineProps<{
 
 <template>
     <div v-if="enabled" class="rounded-md border border-rule bg-panel p-3">
-        <!-- inline until CapsuleHeader.vue lands -->
-        <div class="lattice-bleed mb-3 flex h-11 items-center rounded-full bg-chrome pr-5 pl-20">
-            <span class="text-base font-bold text-on-chrome">Team Race</span>
-        </div>
+        <CapsuleHeader title="Team Race" class="mb-3" />
 
         <p class="text-sm text-ink">
             <span class="font-bold text-ink-strong">Aim for at least {{ guidance }} circles</span>

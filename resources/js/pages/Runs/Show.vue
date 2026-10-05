@@ -110,7 +110,6 @@ const props = defineProps<{
 }>();
 
 const page = usePage();
-const flash = computed(() => (page.props.flash as { status?: string | null } | undefined)?.status ?? null);
 const errors = computed(() => (page.props.errors as Record<string, string | undefined> | undefined) ?? {});
 
 const statWords = ['speed', 'stamina', 'power', 'guts', 'wit'];
@@ -157,23 +156,60 @@ function saveTurn(turn: Turn): void {
     editForm.put(turn.update_url, { preserveScroll: true });
 }
 
+// The Blade opened a row from `?edit_turn`, and `back()` after a refused PUT returns to that same URL.
+// Without the read the row a Trainer was fixing closes on them at the reload.
+const reopenedTurn = props.turns.find(
+    (turn) => turn.id === Number(new URLSearchParams(window.location.search).get('edit_turn') ?? 0),
+);
+
+if (reopenedTurn !== undefined) {
+    openTurn(reopenedTurn);
+}
+
 // The catalogue is one list, not ten: each row used to carry every skill, measured at 6,270 option
 // nodes. One row is open — the one the query names, else the one an error landed on, else the first —
 // and the closed rows post a hidden value behind a link that opens them.
-const openSkillRow = ref<number>(
-    Number(new URLSearchParams(window.location.search).get('skill_row') ?? 0) || 0,
-);
+const skillRows = props.skillGroups
+    // The group's key is the row's stored pivot status. Flattening without it made every row post
+    // `Acquired`, so saving the form rewrote a Suggested or Skipped skill's status in silence.
+    .flatMap((group) => group.skills.map((skill) => ({ ...skill, status: group.key })))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
 const skillsForm = useForm({
-    skills: (props.skillGroups.flatMap((group) => group.skills).length + 1) > 0
-        ? props.skillGroups.flatMap((group) => group.skills)
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((skill) => ({
-                skill_id: String(skill.id),
-                status: 'Acquired',
-                turn_acquired: skill.turn_acquired === null ? '' : String(skill.turn_acquired),
-            }))
-            .concat([{ skill_id: '', status: 'Acquired', turn_acquired: '' }])
-        : [{ skill_id: '', status: 'Acquired', turn_acquired: '' }],
+    skills: skillRows
+        .map((skill) => ({
+            skill_id: String(skill.id),
+            status: skill.status,
+            turn_acquired: skill.turn_acquired === null ? '' : String(skill.turn_acquired),
+        }))
+        // The spare row takes the first option, which is what a browser submits for a select with
+        // nothing marked selected. Naming a case here would also break when the enum gains one.
+        .concat([{ skill_id: '', status: props.acquisitionOptions[0]?.value ?? '', turn_acquired: '' }]),
+});
+
+const pickedSkillRow = ref<number | null>(null);
+const requestedSkillRow = Number(new URLSearchParams(window.location.search).get('skill_row') ?? -1);
+
+const erroredSkillRow = computed(() => {
+    for (let row = 0; row < skillsForm.skills.length; row++) {
+        if (errors.value[`skills.${row}.skill_id`] !== undefined) {
+            return row;
+        }
+    }
+
+    return null;
+});
+
+const openSkillRow = computed(() => {
+    if (pickedSkillRow.value !== null) {
+        return pickedSkillRow.value;
+    }
+
+    if (requestedSkillRow >= 0 && requestedSkillRow < skillsForm.skills.length) {
+        return requestedSkillRow;
+    }
+
+    return erroredSkillRow.value ?? 0;
 });
 
 const hatchForm = useForm({
@@ -207,22 +243,15 @@ const railStep = computed(() => props.rail as unknown as {
         <Head :title="`Run: ${run.umamusume_name}`" />
         <template #title>{{ run.umamusume_name }}</template>
 
-        <p
-            v-if="flash"
-            role="status"
-            class="mb-4 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-strong"
-        >
-            {{ flash }}
-        </p>
-
+        <!-- The page has one h1 and AppLayout owns it: it renders the `#title` slot inside its own
+             heading, which is the shell every ported page follows. A second h1 here repeated the
+             trainee's name and split the document outline in two. -->
         <div class="flex flex-wrap items-baseline justify-between gap-3">
-            <h1 class="text-2xl font-semibold text-ink-strong">
-                {{ run.umamusume_name }}
-                <span class="ml-2 text-sm font-normal text-ink-muted">
-                    {{ run.status_label }} ·
-                    {{ run.scenario_label ?? 'No scenario set' }}
-                </span>
-            </h1>
+            <p class="text-sm text-ink-muted">
+                {{ run.status_label }}
+                <span aria-hidden="true">·</span>
+                {{ run.scenario_label ?? 'No scenario set' }}
+            </p>
             <div class="flex gap-3 text-sm">
                 <a :href="run.export_csv_url" class="inline-flex min-h-11 items-center hover:underline">Export CSV</a>
                 <a :href="run.export_json_url" class="inline-flex min-h-11 items-center hover:underline">Export JSON</a>
@@ -687,7 +716,7 @@ const railStep = computed(() => props.rail as unknown as {
                                 <span class="text-ink-muted">Skill</span>
                                 <p class="flex flex-wrap items-baseline gap-x-2 text-sm">
                                     <span class="text-ink">{{ skillName(rowIndex) }}</span>
-                                    <button type="button" class="inline-flex min-h-11 items-center underline" @click="openSkillRow = rowIndex">
+                                    <button type="button" class="inline-flex min-h-11 items-center underline" @click="pickedSkillRow = rowIndex">
                                         Change row {{ rowIndex }}
                                     </button>
                                 </p>

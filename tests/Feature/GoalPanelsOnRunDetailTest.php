@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\TrainingRun;
+use Illuminate\Support\Collection;
+use Illuminate\Testing\TestResponse;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * The two mutually exclusive goal panels, mounted on a real run.
@@ -17,112 +20,122 @@ use App\Models\TrainingRun;
  * no Grade Points, so both panels land on a run that has neither. The tests
  * pin that the panels then say what is missing instead of printing a zero,
  * because "0 fans" and "0 / 300" are claims about a trainee that nobody entered.
+ *
+ * The gating is server state on the Inertia page — `calendar.show` and a
+ * non-empty `gradeMeter.objectives` are the mount flags — so it is asserted
+ * from the payload rather than searched for as a heading in rendered HTML.
  */
 
-function goalPanelHtml(?string $scenario): string
+function goalPanelPage(?string $scenario): TestResponse
 {
     return test()
         ->get('/training-runs/'.TrainingRun::factory()->create(['scenario' => $scenario])->id)
-        ->assertOk()
-        ->getContent();
+        ->assertOk();
 }
 
 it('mounts the race calendar and not the meter where race goals exist', function (?string $scenario): void {
-    $html = goalPanelHtml($scenario);
-
-    expect($html)
-        ->toContain('Race calendar')
-        ->toContain('No races entered for this run yet')
-        ->not->toContain('Grade Point</span>');
+    goalPanelPage($scenario)->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.show', true)
+        // Nothing is catalogued for these runs, so the grid itself is absent and the
+        // panel names that instead of drawing 24 cells that all read "No race" (D-220).
+        ->has('calendar.cells', 0)
+        ->has('gradeMeter.objectives', 0));
 })->with(['ura_finale', 'unity_cup']);
 
 it('mounts neither panel for a run with no scenario chosen', function (): void {
-    // This case used to sit in the provider above, on the premise stated in this
-    // file's header: "This build stores no race entries and no Grade Points, so
-    // both panels land on a run that has neither." Slice 2's S2 ended that premise —
-    // the panels now read `scenario_slots` and the race log. With real slots loaded,
-    // keeping `null` there rendered the baseline's actual schedule (Oka Sho, Tenno
-    // Sho, Asahi Hai) under a header reading "No scenario set", which is a invented
-    // race calendar for a run that has chosen nothing. `scenarioKey()`'s baseline
-    // fallback is a ruling about the generic resource strip, not about named races.
-    $html = goalPanelHtml(null);
-
-    expect($html)
-        ->toContain('No scenario set')
-        ->not->toContain('Race calendar')
-        ->not->toContain('Grade Point</span>');
+    // `null` left the provider above when Slice 2 gave the panels real data: with slots loaded, the
+    // `scenarioKey()` baseline fallback rendered the baseline's actual schedule (Oka Sho, Tenno Sho,
+    // Asahi Hai) under a header reading "No scenario set", which is a race calendar invented for a run
+    // that has chosen nothing. The fallback is a ruling about the resource strip, not about named races.
+    goalPanelPage(null)->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('run.has_scenario', false)
+        ->whereNull('run.scenario_label')
+        ->where('calendar.show', false)
+        ->has('gradeMeter.objectives', 0));
 });
 
 it('renders the same absence for a blank scenario as for a null one', function (): void {
-    // Found by the Slice 2 browser pass, not by the suite. `hasScenario()` read `!== null`, so the empty
-    // string counted as a declared scenario, `stat-band` looked its caps up under
-    // `scenarios.scenarios.` and got nothing, and the run page returned Laravel's exception screen at
-    // 950 KB instead of the run. The web form normalises '' to null so this could not arrive through the
-    // UI, which is exactly why no test covered it: the historical-run import will insert
-    // Trainer-supplied rows, and a blank column must render the baseline rather than fatal.
-    $html = goalPanelHtml('');
-
-    expect($html)
-        ->toContain('No scenario set')
-        ->not->toContain('Race calendar')
-        ->not->toContain('Grade Point</span>')
-        ->not->toContain('Whoops')
-        ->not->toContain('cap_bonus');
+    // Found by the Slice 2 browser pass, not by the suite: `hasScenario()` read `!== null`, so `''`
+    // counted as declared and every self-gating panel looked its numbers up under `scenarios.scenarios.`
+    // and got nothing — the run page answered with Laravel's exception screen instead of the run. The
+    // web form normalises `''` to null, but the historical-run import will insert Trainer-supplied rows,
+    // and a blank column must render the baseline rather than fatal.
+    goalPanelPage('')->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('run.scenario', '')
+        ->where('run.has_scenario', false)
+        ->where('calendar.show', false)
+        ->has('gradeMeter.objectives', 0));
 });
 
 it('mounts the meter and not the calendar where point deadlines exist', function (): void {
-    $html = goalPanelHtml('trackblazer');
-
-    expect($html)
-        ->toContain('Grade Point</span>')
-        ->not->toContain('Race calendar');
+    goalPanelPage('trackblazer')->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        // The four standard-track objectives, debut included (ADR-0003): any fewer is a ladder to nowhere.
+        ->has('gradeMeter.objectives', 4)
+        ->where('calendar.show', false));
 });
 
 it('shows neither panel for a scenario with neither', function (): void {
     // Our Grand Concert is live, has the highest Speed cap of any scenario here,
     // and has no guide. The safe and honest rendering is the baseline strip alone.
-    $html = goalPanelHtml('our_grand_concert');
-
-    expect($html)
-        ->toContain('Resources')
-        ->not->toContain('Race calendar')
-        ->not->toContain('Grade Point</span>');
+    goalPanelPage('our_grand_concert')->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->has('strip.widgets')
+        ->where('strip.declared', true)
+        ->where('calendar.show', false)
+        ->has('gradeMeter.objectives', 0));
 });
 
-it('never shows both panels at once, in any scenario', function (?string $scenario): void {
-    $html = goalPanelHtml($scenario);
-
-    expect(str_contains($html, 'Race calendar') && str_contains($html, 'Grade Point</span>'))
-        ->toBeFalse();
-})->with(['ura_finale', 'unity_cup', 'trackblazer', 'our_grand_concert', null]);
+it('never shows both panels at once, in any scenario', function (?string $scenario, bool $calendarShown, int $objectiveCount): void {
+    // Both mount flags pinned per scenario; no row has the calendar and the meter on together.
+    goalPanelPage($scenario)->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.show', $calendarShown)
+        ->has('gradeMeter.objectives', $objectiveCount));
+})->with([
+    ['ura_finale', true, 0],
+    ['unity_cup', true, 0],
+    ['trackblazer', false, 4],
+    ['our_grand_concert', false, 0],
+    [null, false, 0],
+]);
 
 it('claims no figure for a run that has entered no race', function (): void {
-    $html = goalPanelHtml('ura_finale');
-
     // The structure is real and the run's entries are not, so the panel names the
     // cause and the action instead of drawing 24 cells that all read "No race".
-    expect($html)
-        ->toContain('No races entered for this run yet')
-        ->toContain('24 turn slots');
+    goalPanelPage('ura_finale')->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.show', true)
+        ->has('calendar.cells', 0));
 });
 
 it('claims no figure for a run that has entered no Grade Point', function (): void {
-    $html = goalPanelHtml('trackblazer');
-
     // A zero here would read as "she is on zero points", which is a claim about a
     // trainee rather than about the log. The deadlines still print, because those
     // are the scenario's and they are the reason the panel is worth opening.
-    expect($html)
-        ->toContain('End of Junior Year')
-        ->toContain('End of Senior Year')
-        ->toContain('not yet recorded')
-        ->not->toMatch('/\b\d+ \/ \d+/');
+    goalPanelPage('trackblazer')->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('gradeMeter.objectives', fn (Collection $objectives) => $objectives->pluck('name')->all() === [
+            'Debut race',
+            'End of Junior Year',
+            'End of Classic Year',
+            'End of Senior Year',
+        ])
+        // Null with nothing unpriced is the "not yet recorded" branch, never "0 / 300" (KI-10, D-220).
+        ->whereNull('gradeMeter.earned')
+        ->where('gradeMeter.unpricedCount', 0));
 });
 
 it('moves the panels when the run is switched to another scenario', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
 
-    expect(test()->get("/training-runs/{$run->id}")->getContent())->toContain('Race calendar');
+    test()->get("/training-runs/{$run->id}")->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.show', true)
+        ->has('gradeMeter.objectives', 0));
 
     test()->put("/training-runs/{$run->id}", [
         'umamusume_id' => $run->umamusume_id,
@@ -130,9 +143,8 @@ it('moves the panels when the run is switched to another scenario', function ():
         'scenario' => 'trackblazer',
     ])->assertRedirect();
 
-    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
-
-    expect($html)
-        ->toContain('Grade Point</span>')
-        ->not->toContain('Race calendar');
+    test()->get("/training-runs/{$run->id}")->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('calendar.show', false)
+        ->has('gradeMeter.objectives', 4));
 });

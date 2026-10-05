@@ -12,6 +12,7 @@ use App\Services\DataPipeline\PipelineRunner;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Testing\AssertableInertia as Assert;
 
 function skillsFixtureBody(): string
 {
@@ -250,46 +251,49 @@ it('offers the run screen picker only client-named Global skills, and states the
     app(PipelineRunner::class)->run('gametora-skills', skillsSourceConfig(), skillsFixtureBody(), null);
     $run = TrainingRun::factory()->create();
 
-    $html = $this->get(route('runs.show', $run))->content();
+    // The picker's rows are the page's `skillCatalog` prop: one row per skill the run screen may
+    // offer, with the cost the option label states (FR-D-1). The label text itself is composed by
+    // the component and is browser evidence in `tests/browser/run-detail.spec.ts`.
+    $catalog = test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // Nine of the twelve imported rows may be offered. `Check` and `Gluttonous Ruler` are
+            // excluded because the source marks them unreleased on `en`; the third excluded row carries
+            // a client-shaped English name and is still not on Global, which is the case a filter on
+            // `name_en` alone would have leaked. The tenth option the rendered picker showed was the
+            // blank "Choose a skill" row, which the component adds and the payload does not carry.
+            ->has('skillCatalog', 9))
+        ->viewData('page')['props']['skillCatalog'];
 
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
+    $names = array_column($catalog, 'name');
 
-    $options = [];
-    foreach ($xpath->query('//select[@name="skills[0][skill_id]"]/option') as $option) {
-        $options[] = trim((string) $option->textContent);
-    }
+    expect($names)->toContain('Gourmand')
+        ->and($names)->toContain('Certain Victory')
+        ->and(implode(' | ', $names))->not->toMatch('/Gluttonous Ruler|Raise My Soul|Check/')
+        // The cost rides on the row rather than in the label, so the 180 the client charges for
+        // Gourmand is asserted where the component reads it from.
+        ->and(array_column($catalog, 'sp_cost', 'name'))->toMatchArray(['Gourmand' => 180]);
 
-    // Nine of the twelve imported rows may be offered. `Check` and `Gluttonous Ruler` are excluded because
-    // the source marks them unreleased on `en`; the third excluded row carries a client-shaped English
-    // name and is still not on Global, which is the case a filter on `name_en` alone would have leaked.
-    expect($options)->toContain('Gourmand · 180 SP')
-        ->and($options)->toContain('Certain Victory')
-        // Ten, not nine: the nine Global rows plus the blank "Choose a skill" option the repeater's
-        // spare row needs in order to submit nothing (KI-33's repeater, landed with KI-36's labels).
-        // The XPath is scoped to `skills[0][skill_id]`, so the three later rows cannot inflate this.
-        ->and($options)->toHaveCount(10)
-        ->and(implode(' | ', $options))->not->toMatch('/Gluttonous Ruler|Raise My Soul|Check/')
-        // R-6: the hint-level ladder is now recorded, so the screen names it instead of stating
-        // that no source settles it. Whitespace is folded because Blade's own line wrapping sits
-        // inside the sentence, and a check that failed on indentation would be testing the
-        // template's formatting, not its copy.
-        ->and((string) preg_replace('/\s+/', ' ', $html))
-        ->toContain('Hint-level discounts follow the ladder recorded in docs/research-scratch/SKILLS-MECHANICS.md §2.4: 10, 20, 30, 35 and 40 percent at Lv1 through Lv Max.');
+    /*
+     * R-6: the hint-level ladder is now recorded, so the screen names it instead of stating
+     * that no source settles it. The sentence is static copy in the component, and the page
+     * resolves it in the browser pass; here the claim is kept as the link that proves the
+     * sentence points at the document that carries it.
+     */
+    expect((string) file_get_contents(base_path('resources/js/pages/Runs/Show.vue')))
+        ->toContain('Hint-level discounts follow the ladder recorded in')
+        ->toContain('SKILLS-MECHANICS.md');
 
-    // What the fixture's surviving translation is bought for: the run screen renders the client string for
-    // every row Global has, and none of these eight renderings appear anywhere on it. Decoded first — a
-    // not-contains against escaped HTML could pass because an apostrophe or a `×` was entity-encoded,
-    // which is the same failure KI-21 was filed against in the other direction.
-    $visible = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    // What the fixture's surviving translation is bought for: the run screen offers the client string for
+    // every row Global has, and none of these eight renderings appear among them. Asserting the absences
+    // over the offered names rather than over escaped HTML cannot pass on an extraction that saw nothing,
+    // because the same list is what the presence assertions above read.
+    $offered = Skill::availableOnGlobal()->pluck('name');
 
     expect(skillsFixtureGlobalRenderings())->toHaveCount(8)
-        // Same transformation, one string required present. Without it the eight absences would pass on an
-        // extraction that saw nothing, and one of the eight is `'`-escaped in the source markup, so this is
-        // also the control that proves the decode step is doing what it is claimed to do.
-        ->and($visible)->toContain('Master of the Sands')
-        ->and($visible)->not->toContain(...skillsFixtureGlobalRenderings());
+        ->and($offered)->toContain('Master of the Sands')
+        ->and($offered)->not->toContain(...skillsFixtureGlobalRenderings());
 });
 
 it('marks a unique skill and states its cost in the recorded groups', function (): void {
@@ -299,10 +303,18 @@ it('marks a unique skill and states its cost in the recorded groups', function (
     $run->setSkillStatus(Skill::where('name', 'Certain Victory')->firstOrFail(), SkillAcquisition::Acquired, 12);
     $run->setSkillStatus(Skill::where('name', 'Gourmand')->firstOrFail(), SkillAcquisition::Suggested);
 
-    $html = $this->get(route('runs.show', $run))->content();
-
-    // The sparkle is the mark and "Unique" is the word: D-12 forbids a state that lives in a glyph alone.
-    expect($html)->toContain('✦ Unique')
-        ->and($html)->toContain('· 180 SP')
-        ->and($html)->toContain('· turn 12');
+    // The sparkle is the mark and "Unique" is the word: D-12 forbids a state that lives in a glyph
+    // alone. The component prints both from these three values, so the payload is where the claim
+    // lives; `tests/browser/run-detail.spec.ts` reads the rendered glyph and the two costs.
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('skillGroups.1.key', 'Acquired')
+            ->where('skillGroups.1.skills.0.name', 'Certain Victory')
+            ->where('skillGroups.1.skills.0.is_unique', true)
+            ->where('skillGroups.1.skills.0.turn_acquired', 12)
+            // Gourmand is the row that states a cost, and 180 is the price the client charges.
+            ->where('skillGroups.0.skills.0.name', 'Gourmand')
+            ->where('skillGroups.0.skills.0.sp_cost', 180));
 });
