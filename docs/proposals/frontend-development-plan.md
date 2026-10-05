@@ -191,8 +191,9 @@ Concert panel and omits Inheritance Event, Career Timeline and Veteran Compariso
 | **E** | E5 | Scenario Race Planner (race facts only; **no** win probability) | SCREEN-017 | D8 |
 | **E** | E6 | Grand Concert panel — baseline strip only *(design-2.0 only)* | SCR-017 | E1 |
 
-**Phase A status, 2026-10-05.** A1, A2, A3, A4a, A4b and A4c have landed green, so **B1 is unblocked**. No
-Phase B–E slice has begun.
+**Phase A–C status, 2026-10-05.** A1, A2, A3, A4a, A4b and A4c have landed green, B1 landed on their
+back, and Phase C's three slices landed frontend-agnostic per `ADR-0020` §3. No Phase D or E slice has
+begun.
 
 | Slice | State | Evidence, and what is still open |
 |---|---|---|
@@ -202,7 +203,10 @@ Phase B–E slice has begun.
 | A4a | Landed | No-script fallback select retired by owner ruling 2026-10-05; 11 source-text shape pins became Playwright behaviour proofs. See §5.5. |
 | A4b | Landed | `resources/js/pages/Runs/Show.vue` plus 19 ported panel components; `runs/show.blade.php` and its ten now-consumerless components deleted. Deviations and the two behaviour changes under the 2026-10-05 ruling are in §5.5. |
 | A4c | Landed | Preview kept as a server-rendered Inertia page, not a JSON endpoint (it never was one). See §5.5. |
-| B1 | Ready | Waits on nothing now. Its own work: the nine zero-consumer Blade components the A4b port left behind, `guided-flow.ts`, and `app.ts`. |
+| B1 | Landed | `resources/views/components/` is now empty: the shell plus `app-button`, `capsule-header`, `deck-editor`, `energy-gauge`, `grade-badge`, `grade-point-meter`, `guided-step`, `race-calendar`, `resource-strip` and `run-header` are gone, with `resources/js/app.ts` and `guided-flow.ts` and the Vite input that named the first. The three error documents render themselves and `AppServiceProvider` composes them in place of the shell, `errors.500` staying out because it draws itself with no database. §6's measured set named eight components and missed `capsule-header`, `energy-gauge` and the shell itself. |
+| C1 | Landed | `build_target` json column, `App\Models\Advisor\BuildTargetPayload`, `StoreBuildTargetRequest` validating the five targets against `ScenarioCaps::forRun`. |
+| C2 | Landed | `app/Services/Advisor/TrainerAdvisor.php` plus `config/advisor.php`; the held fields, score and numeric confidence and per-training yield, stayed out. |
+| C3 | Landed | `veterans` table, `Veteran`, and `RecordVeteran`/`ListVeterans`/`ShowVeteran`, record-only. The plan's "rating" filter is not built: no source records a rating, and inventing one is the computation this slice forbids. |
 
 Race prediction (the win-probability field on `SCREEN-011` and `SCREEN-017`), inheritance optimization
 (`SCREEN-006`), and per-training stat yields (`SCREEN-010`) are **not built**: they are held on `ADR-0016`
@@ -481,6 +485,12 @@ error pages stay Blade, so `ErrorPageViewsTest` is unchanged. `DesignTokensTest`
 Blade URLs to the ported Inertia URLs and asserts the same two things (no `dark:` utility, no skeleton
 palette class) against the served HTML.
 
+**Landed 2026-10-05, with a set three larger than measured above.** `capsule-header` and `energy-gauge`
+were zero-consumer too once A4b had landed, and the shell is itself in the deletion. `DesignTokensTest`
+had already moved off the Blade URLs with the A1–A3 retirements, so only its prose changed here;
+`ErrorPageViewsTest` stayed Blade-scoped and gained the guard that a view must not reach for the shell
+again.
+
 ---
 
 ## 7. Phase C — domain-first, frontend-agnostic
@@ -752,4 +762,5 @@ reduced-motion check; each screen's browser spec asserts the criteria it names.
 | 2026-10-05 | Added §12 (WCAG 2.2 AA conformance), §13 (Laws of UX rubric), §14 (Phase A0 remediation of the 0.1.0 screens); strengthened the Global Constraints accessibility bullet and the §10 definition of done. | Owner required the 2.0 UI and the in-tandem 0.1.0 UI to meet WCAG 2.2 AA and the UX laws, not just carry the old Blade behavior forward. |
 | 2026-10-05 | §1 inventory rewritten from the tree (12 pages, 7 components, 8 specs, 26 Blade files). Phase A status block added under §4. A1, A3, A4a and A4c recorded as landed with their deviations; A4b re-sized in §5.5. | The inventory had stopped tracking the ports after the first four pages, so the plan read as if A1–A4c were unbuilt. §5.5's A4b row also over-stated the work by assuming a Vue twin per Blade component; the read shows one consumer each. |
 | 2026-10-05 | A4b recorded as landed in §4 and §5.5, B1 unblocked in §6 with its measured zero-consumer set, §1 re-measured (13 pages, 25 components, 9 specs, 15 Blade files), and the three Phase-A checklist rows closed. | The slice landed with a 19-component port, ~24 migrated test files and two behaviour changes that needed writing down where the next slice will read them, not only in a commit message. |
+| 2026-10-05 | §4's status block renamed to Phase A–C: B1 recorded as Landed with the eleven Blade files it deleted and the three its measured set had missed, and C1, C2 and C3 recorded as Landed with the shapes that shipped. §6 gains the matching landed note. | The block still said B1 was Ready and that no Phase B–E slice had begun, neither of which held once B1 and the Phase C slices committed. §4 is where the next slice reads to decide what to start, so it could not stay a step behind. |
 
