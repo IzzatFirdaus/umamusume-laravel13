@@ -795,16 +795,16 @@ Wire the slot in the existing header block of both, alongside the title/rarity:
 
 | Task | Description | Status | Commit | Evidence |
 |---|---|---|---|---|
-| 1 | `ArtworkMirror::exists(string $kind, int $id): bool` + `storedPath()` / `disk()` lifts | `[ ]` | — | — |
-| 2 | Streaming route `/artwork/{kind}/{id}` via `ArtworkAssetController::show`, allowlist on `kind` | `[ ]` | — | — |
-| 3 | `ArtworkMirror::url(string $kind, int $id): ?string` | `[ ]` | — | — |
-| 4 | `<x-character-portrait>` Blade component (`alt=""` when `decorative`) | `[ ]` | — | — |
-| 5 | `<x-support-thumb>` Blade component | `[ ]` | — | — |
-| 6 | Catalog detail Identity (`catalog/show.blade.php`) — `decorative`, `size-16` | `[ ]` | — | — |
-| 7 | Catalog index Inertia page (`Catalog/Index.vue` + `CatalogController::index`) — `artworkURL` per row + form | `[ ]` | — | — |
-| 8 | Support-card index + detail (Blade) — `<x-support-thumb>` `size-12` / `size-16` | `[ ]` | — | — |
-| 9 | Run Create / Legacy Select — `size-10` | `[ ]` | — | — |
-| 10 | Cross-doc change-log rows + gate run-down | `[ ]` | — | — |
+| 1 | `ArtworkMirror::exists(string $kind, int $id): bool` + `storedPath()` / `disk()` lifts | `[x]` | `a0899a3` | 10 cases green; pint, phpstan clean |
+| 2 | Streaming route `/artwork/{kind}/{id}` via `ArtworkAssetController::show`, allowlist on `kind` | `[x]` | `ce376f7` | 3 cases green (200 / 404 absent / 404 unknown kind); phpstan clean |
+| 3 | `ArtworkMirror::url(string $kind, int $id): ?string` | `[x]` | `fde4439` | 12 cases green; the brief's route stub dropped after the real route resolved |
+| 4 | `<x-character-portrait>` Blade component (`alt=""` when `decorative`) | `[x]` | `bebdd74`, `898aa9e` | 3 cases green; guard ordering proved by a hoist-RED experiment |
+| 5 | `<x-support-thumb>` Blade component | `[x]` | `ac60f61` | 2 cases green; mirror fidelity held |
+| 6 | Catalog detail Identity (`catalog/show.blade.php`) — `decorative`, `size-16` | `[x]` | `53e5d12` | 2 cases green; the `$activeCard ?? first` duplication in the view is recorded, not fixed |
+| 7 | Catalog index Inertia page (`Catalog/Index.vue` + `CatalogController::index`) — `artworkURL` per row + form | `[x]` | `b5547d6`, `625c86e` | 2 Pest + 2 Playwright green; browser cases derived from the DOM after a fix round |
+| 8 | Support-card index + detail (Blade) — `<x-support-thumb>` `size-12` / `size-16` | `[x]` | `7d7e5d6` | 5 cases green; the id-swap guard proved by a swap experiment; full suite 1240 passed |
+| 9 | Run Create / Legacy Select — `size-10` | `[x]` **not implemented** | — | **Blocked, no slice committed.** No placeable surface: the view's picker is a native `<select>` (an `<img>` cannot render inside `<option>`) plus a client-rendered combobox listbox, and on `trainer-desk-2.0` both the view and `trainee-combobox.ts` are deleted by the port. Recorded as unplaceable in `PRD.md` OQ-6, `SCREEN_SPEC.md` §7-16 and `design-2.0` §45a. |
+| 10 | Cross-doc change-log rows + gate run-down | `[x]` | see below | `DESIGN.md` §3 count, §4.7 status and geometry, `SCREEN_SPEC.md` §7-16 superseded-in-part, `PRD.md` OQ-6 narrowed, `design-2.0` §45a shipped-state note; full gate block in the Slice Log |
 
 **Slice report format.** For each landing slice, append a dated block under
 `## Slice Log` below in this shape (`Phase gate reporting format`):

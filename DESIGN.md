@@ -235,7 +235,8 @@ external fonts (offline constraint + C-8 dependency gate).
 ## 3. Component inventory (actual committed Blade)
 
 All views render through `resources/views/components/layout.blade.php`
-(`x-layout`: nav, flash, slot). **Existing:** 24 components exist; 22 are reachable
+(`x-layout`: nav, flash, slot), which is the shell and is not one of the count below.
+**Existing:** 26 components exist; 24 are reachable
 from a route, 2 have no call site at all, and `energy-gauge` is reachable only through
 one of those 2. All of them are token-only — the skeleton-palette migration is finished,
 so no row below is blocked on it. `design-preview` is removed from the tree and struck.
@@ -251,6 +252,8 @@ oversight, and it is cheaper than the indicator would be.
 | Catalog filter form | `catalog.index` | status + search + unconfirmed opt-in | n/a | n/a | yes |
 | Catalog roster rows | `catalog.index` | trainee header + her costume forms | dashed panel naming the remedy | 404 page | yes |
 | Catalog detail `dl` | `catalog.show` | identity, profile fields, dates | "unpublished" wording | 404 page | yes |
+| Trainee artwork slot | `catalog.index`, `catalog.show` | `x-character-portrait`: a mirrored portrait ahead of the row's name, streamed from `artwork.show`, geometry per §4.7 | renders nothing; the row stays text-only | the stream route 404s if the file goes missing between page and request | yes |
+| Support-card artwork slot | `support-cards.index`, `support-cards.show` | `x-support-thumb`: a mirrored thumbnail ahead of the card's name, same stream and rules | renders nothing; the row stays text-only | the stream route 404s | yes |
 | Costume form tabs | `catalog.show` | one panel per form, CSS/native-radio tabs | single form draws no strip | 404 page | yes |
 | Aptitude grid | `catalog.show` | 10 letters, letter **and** word (D-12) | "unpublished", never half a grid | 404 page | yes |
 | Aliases / provenance lists | `catalog.show` | aliases, source URL + fetched stamp in `display_timezone` | "No aliases yet" | 404 page | yes |
@@ -408,15 +411,25 @@ disclosure wording. Filed as KI-35.
 `/api/v1/*` is read-only JSON; shapes and error envelope are fixed in
 `ARCHITECTURE.md` §4. No design decisions belong here.
 
-### 4.7 Sourced artwork slots (`ADR-0021`; mirror built, slots not)
+### 4.7 Sourced artwork slots (`ADR-0021`; mirror and slots built)
 
-**Status: the mirror exists, no slot does.** `uma:fetch-art` and its `artwork/` directory are built
-(`ADR-0021`, 2026-10-05), and `grep -rn "<img" resources/views` still returns zero hits on this tree; the §3
-component inventory has no avatar, portrait or thumbnail element.
-Every trainee row, card row and support-card row renders text only: name, `name_ja`,
-rarity chip, counts. That text-only rendering is what this section calls the fallback, and
-it is not a decorative gap waiting to be filled — R-31 already rules that decoration costs
-reading speed and buys nothing, and §1's design read is an analyst desk.
+**Status: the mirror exists and so do slots, on the server-rendered screens.** `uma:fetch-art` and its
+`artwork/` directory are built (`ADR-0021`, 2026-10-05). The read half landed the same day:
+`ArtworkAssetController` streams a mirrored file over the loopback route `artwork.show`,
+`ArtworkMirror::url()` hands views that route and returns `null` for a miss, and two components
+(`x-character-portrait`, `x-support-thumb`) plus the catalog index's own inline `<img>` are the slots.
+`grep -rn "<img" resources/views` is no longer zero.
+
+**Which screens carry a slot is still PRD OQ-6's remainder, and the shipped answer is partial.** The
+slots are on the catalog index and detail, the support-card index and detail. They are **not** on the
+run create screen: that screen's trainee picker is a native `<select>` whose `<option>` content model
+is text, plus a client-rendered combobox listbox, so neither surface hosts a frame today. Skill rows
+remain deferred because `skills` has no `icon` column (`ADR-0021` Verification).
+
+Every row that has no slot still renders text only: name, `name_ja`, rarity chip, counts. That
+text-only rendering is what this section calls the fallback, and it is not a decorative gap waiting to
+be filled — R-31 already rules that decoration costs reading speed and buys nothing, and §1's design
+read is an analyst desk.
 
 Which surfaces get a picture at all is **PRD OQ-6**, the owner's call, not this file's.
 What this file owns is the behaviour once a surface is chosen, and four rules bind it:
@@ -425,20 +438,53 @@ What this file owns is the behaviour once a surface is chosen, and four rules bi
   that no longer exists upstream, renders the fallback. No broken frame, no grey box, no
   loader, no placeholder glyph. This is §4.2's absence discipline applied to an image
   rather than to a value: the mirror is partial by nature, and a broken visual would claim
-  a defect the tool does not have.
+  a defect the tool does not have. The components implement this by generating nothing at
+  all when the mirror misses, so the link wrapper disappears with the image rather than
+  stranding an empty anchor.
 - **The slot's geometry is decided once, at build time, and recorded here.** Either the box
   is reserved and a fallback paints inside it, or the element is omitted and the row
   reflows. Both are defensible; a per-page mixture is not, and neither is a size class that
-  only exists in one view. Until then this section names no pixel value.
+  only exists in one view. **This section now names the values, because the slots exist and
+  leaving it silent would leave the rule unenforced.** The reserved-pixel pair is `64 64`,
+  which is the square's intrinsic ratio rather than a painted size; the painted box comes
+  from the size class. Recorded geometry, and where each is used:
+
+  | Box | Surface | Source |
+  |---|---|---|
+  | `size-16` | trainee portrait on catalog detail; support thumb on support-card detail | `design-2.0` §45a |
+  | `size-12` | trainee portrait on catalog index; support thumb on support-card index; and the default of both components | `design-2.0` §45a |
+  | `size-10` | trainee portrait on the catalog index's costume-form row | `design-2.0` §45a |
+
+  `size-10` is the one class that appears in a single view, which the rule above forbids. It is
+  recorded here as a deliberate exception rather than left as an accident: the costume-form row is a
+  denser row nested under a trainee header that already carries a `size-12` frame, so a second
+  `size-12` beside it would dominate its own row header. Removing the class and reconciling that row
+  with the header is a layout decision, not a geometry one, and it belongs to whoever next touches
+  the catalog index.
 - **`src` is a local path.** §7's rule (no CDNs, all assets local, the catalog works with
   zero network) means hotlinking a third-party host in rendered HTML is out even though the
   host is reachable: the page would then depend on someone else's uptime to render, and the
-  offline promise would be false on exactly the surfaces that have a picture.
+  offline promise would be false on exactly the surfaces that have a picture. The route is
+  id-addressed rather than path-addressed: `artwork.show` validates `kind` against the
+  asset host's two declared paths and casts `id` to an integer, so a request naming a
+  traversal cannot reach storage.
 - **Alt text is inside the C-4 boundary** (§6 governs its vocabulary, so the alt is the client
   display name and nothing else). No invented descriptor either, because the tool cannot see
   inside the file it is describing. Where the same name is already printed beside the image,
   the image is decorative in that position and takes `alt=""`, so a screen reader does not
   read the name twice.
+- **A decorative image and an unnamed link are different defects, and the two must be chosen
+  separately.** WCAG 2.2 AA 4.1.2 needs every focusable control to have an accessible name, and
+  §42's label-in-name clause needs a clickable slot's `aria-label` to carry the printed name
+  verbatim. So "the name prints beside the image" (which argues for `alt=""`) does **not**
+  imply "the anchor needs no name". The two components currently take one `decorative` flag
+  that blanks `alt` and `aria-label` together, which cannot express decorative-image-named-link;
+  two call sites have therefore taken opposite workarounds (catalog detail passes `decorative`
+  and accepts an unnamed self-link, support-card detail takes the default and keeps the name).
+  **Known gap, owner-visible:** one flag should split into an alt decision and a link decision,
+  and the run-create and future no-action slots need a way to omit the anchor altogether rather
+  than be pointed at the page they are already on. Until that lands, a new slot must pick its
+  side of this deliberately rather than copy whichever neighbouring view it resembles.
 
 ## 5. Data display rules with open implementation gaps
 
@@ -621,6 +667,19 @@ Not defects; decisions this file cannot make for itself.
   anywhere in `resources/views/`, so today's text-only row is the fallback. `ADR-0021`'s fetch
   half landed the same day as `uma:fetch-art`, which changes no rule in §4.7: the mirror can now
   be filled, and no slot exists to read it.
+- **2026-10-05** — §4.7 rewritten for the read half. The `ADR-0021` fetch half (`uma:fetch-art`) was
+  already recorded; this row records the display half landing on the catalog and support-card screens.
+  Changed: the heading status (`mirror built, slots not` → `mirror and slots built`), the status
+  paragraph (the "no image element anywhere in `resources/views/`" claim above is now false and is
+  superseded by this row, not edited), the run-create carve-out and the skill-row deferral, the
+  geometry rule (this section now records `64 64` as the reserved pair and the three painted boxes,
+  with `size-10` named as the one single-view class and the reason it stays), the `src` rule (now that
+  a route exists, it records that the route is id-addressed and cannot be walked), and a new fifth
+  bullet separating a decorative image from an unnamed link. §3 count corrected to 26 components and
+  24 reachable, and two artwork-slot rows added to the surface table. Unchanged: all four original
+  rules, the absence discipline, the C-4 alt boundary, and OQ-6 remaining the owner's call. The
+  known gap named in the new bullet is real and unfixed; two call sites currently hold it apart by
+  opposite workarounds rather than by one decision.
 - **2026-10-04** — 2.0 design target filed for reference at `docs/proposals/design-2.0.md`
   (with `docs/proposals/screen-spec-2.0.md`), the Inertia/Vue rewrite reference (`ADR-0020` §1).
   This file still owns the shipped Blade visual system. The target's trust-model, explainability,
