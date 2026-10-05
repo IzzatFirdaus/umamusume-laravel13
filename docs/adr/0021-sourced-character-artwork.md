@@ -148,3 +148,25 @@ This ADR adds no behaviour, so it ships no test. What proves it, and what would 
   first real run is the owner's call at 665 requests and roughly 51 MB on the seeded tree (`uma:fetch-art
   --dry-run` counted them on 2026-10-05), and the `ADR-0012` Erratum 4 falsifier (a
   portrait id that 404s although `gametora-characters` has the row) is what that run would surface.
+
+**Erratum 1 - the live pass has been run as of 2026-10-05, and the falsifier named above did not fire.** The
+sentence preserved above recorded the state at the time of writing: the fetch half was built and had never
+touched the network. The owner authorised the full default walk the same day. `uma:fetch-art` reported
+`card_portrait: 106 ids, wrote 106, unresolved 0` and `support_thumb: 559 ids, wrote 559, unresolved 0`, so
+**665 files, 45 MB**, in `storage/app/private/artwork/` with a sibling `manifest.json` carrying url, sha256 and
+fetched-at per file. Nothing entered the database and no `data_sources` row was written, which is what Decision
+3 chose. The cost prediction above was right on the request count and about 6 MB high on bytes.
+
+What the run settles: the asset host answers every id the catalog holds, so **the `ADR-0012` Erratum 4 falsifier
+did not fire** - no portrait id 404s against a row `gametora-characters` has. It also exercises the read path
+end to end against real bytes rather than an `Http::fake` body: `GET /artwork/card_portrait/100101` returns
+`200`, `image/png`, 21,937 bytes, inside the 22-30 KB band this ADR's Verification measured, and the non-2xx
+guard that `ArtworkMirrorTest` holds against the host's 27,150-byte HTML 404 has now been observed in the wild
+as well as in the fixture.
+
+What it does not settle: one seeded tree on one day. The mirror stays partial by nature for any row added after
+this pass, and a file withdrawn upstream still renders the fallback. `uma:fetch-art` remains manual and nothing
+schedules it - which matters more than it did before, because `mirror()` writes the manifest once, after a whole
+kind completes, so a run interrupted mid-kind leaves bytes on disk with no manifest rows and the next run's
+`skipExisting` never adds them.
+
