@@ -11,6 +11,7 @@ use App\Models\CharacterCard;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
+use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\DataPipeline\NameNormalizer;
 use App\Services\PageSize;
 use Closure;
@@ -46,7 +47,7 @@ class CatalogController extends Controller
      * The default status is Released (Global), not "everything": a catalog whose first
      * screen is half JP-only rows is not the Global English tool PRD §1 describes.
      */
-    public function index(CatalogSearchRequest $request, NameNormalizer $normalizer): Response|RedirectResponse
+    public function index(CatalogSearchRequest $request, NameNormalizer $normalizer, ArtworkMirror $mirror): Response|RedirectResponse
     {
         $status = $request->validated('status');
         $search = $request->query('search');
@@ -88,12 +89,21 @@ class CatalogController extends Controller
         // and the unconfirmed opt-in.
         $umamusumes = (new LengthAwarePaginator($items, $total, $pageSize, $page, ['path' => route('catalog.index')]))
             ->withQueryString()
-            ->through(static function (Umamusume $umamusume): array {
+            ->through(static function (Umamusume $umamusume) use ($mirror): array {
                 // The badge and the form count both read the collection the card scope loaded,
                 // so a hidden card moves the max rarity with it.
                 $maxRarity = $umamusume->cards->isEmpty()
                     ? null
                     : CardRarity::from((int) $umamusume->cards->max(static fn (CharacterCard $card): int => $card->rarity->value));
+
+                // The header frame is the form the badge already names: the first card at the max
+                // rarity in the scoped order, so a trainee's portrait matches her top form rather
+                // than her debut. `url()` resolves to null when the mirror holds no file, and Vue
+                // then renders no frame (DESIGN.md §4.7). A `card_portrait` is a trainee portrait
+                // keyed on `card_id`, the same kind the Blade slot and the detail page point at.
+                $headerCard = $maxRarity === null
+                    ? null
+                    : $umamusume->cards->first(static fn (CharacterCard $card): bool => $card->rarity === $maxRarity);
 
                 return [
                     'id' => $umamusume->id,
@@ -102,6 +112,7 @@ class CatalogController extends Controller
                     'name_ja' => $umamusume->name_ja,
                     'release_status_label' => $umamusume->release_status->label(),
                     'max_rarity' => $maxRarity === null ? null : ['label' => $maxRarity->label(), 'stars' => $maxRarity->stars()],
+                    'artworkURL' => $headerCard === null ? null : $mirror->url('card_portrait', (int) $headerCard->card_id),
                     'form_count' => $umamusume->cards->count(),
                     'cards' => $umamusume->cards->map(static fn (CharacterCard $card): array => [
                         'id' => $card->id,
@@ -112,6 +123,7 @@ class CatalogController extends Controller
                         'unconfirmed' => $card->unconfirmed,
                         'global_release_date' => $card->global_release_date->toDateString(),
                         'global_release_date_display' => $card->global_release_date->format('M j, Y'),
+                        'artworkURL' => $mirror->url('card_portrait', (int) $card->card_id),
                     ])->all(),
                 ];
             });

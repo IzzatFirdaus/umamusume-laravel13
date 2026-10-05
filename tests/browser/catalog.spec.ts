@@ -37,3 +37,40 @@ test('renders a rarity chip as a named glyph run', async ({ page }) => {
         await expect(chip).toBeVisible();
     }
 });
+
+// The `ADR-0021` portrait slot on the Inertia catalog index. The mirror is partial, so the same
+// page carries both the mirrored and the absent state, and each is asserted here: DESIGN.md §4.7
+// says a miss renders no element and no placeholder, while a held file renders a decorative frame
+// (alt="") because the header already prints the name beside it.
+test('omits the trainee portrait when the mirror holds no file', async ({ page }) => {
+    await page.goto('/umamusume');
+    await page.locator('#app > *').first().waitFor();
+
+    const rows = page.locator('ul.space-y-4 > li');
+    expect(await rows.count(), 'the seeded catalog rendered no trainee rows').toBeGreaterThan(1);
+
+    // The first row (ordered by name) is the trainee whose card the mirror does not hold: no
+    // frame, no grey box, and the name link still heads the row.
+    const header = rows.first().locator('h3');
+    await expect(header.locator('img')).toHaveCount(0);
+    await expect(header.getByRole('link')).toBeVisible();
+});
+
+test('renders a mirrored portrait as a decorative loopback frame', async ({ page }) => {
+    await page.goto('/umamusume');
+    await page.locator('#app > *').first().waitFor();
+
+    // A trainee the mirror does hold shows her portrait ahead of the name. Decorative (alt="")
+    // because the row prints the name beside it, and streamed from the loopback `artwork.show`
+    // route rather than the asset host (§7: offline first, no CDN).
+    const frame = page.locator('ul.space-y-4 > li h3 img').first();
+    await expect(frame).toBeVisible();
+    await expect(frame).toHaveAttribute('alt', '');
+    await expect(frame).toHaveAttribute('src', /\/artwork\/card_portrait\/\d+$/);
+
+    // The form row carries the same slot: its own card portrait, decorative, same route.
+    const formFrame = page.locator('ul.space-y-4 ul.divide-y > li img').first();
+    await expect(formFrame).toBeVisible();
+    await expect(formFrame).toHaveAttribute('alt', '');
+});
+
