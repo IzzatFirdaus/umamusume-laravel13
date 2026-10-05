@@ -20,8 +20,10 @@ trackers plus the `uma_musume_race_planner` career-run planner (rev 0.2, repo #4
   must not be exposed (`PRD.md` §6.10). No hosting, cloud, or deployment path exists.
 - **SQLite only** (`database/database.sqlite`, WAL + `busy_timeout`). The framework
   `users` table and `User` model are unused defaults.
-- **Web surface is server-rendered Blade** with Tailwind CSS v4, Vite, and TypeScript.
-  JSON is a read-only `/api/v1` surface (P2, three controllers).
+- **Web surface is Inertia + Vue 3** (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, TypeScript,
+  Tailwind CSS v4, Vite), with 51 single-file components under `resources/js/`. Blade survives only
+  as the `resources/views/app.blade.php` shell and `resources/views/errors/`; there are no Blade view
+  components. JSON is a read-only `/api/v1` surface (P2, three controllers).
 - **Data arrives through a stage-isolated fetch engine** that cross-references JP and
   Global catalog sources, snapshots each body, and promotes engine-owned facts with
   provenance.
@@ -162,9 +164,9 @@ app/Models/                  catalog, trainer-data, and support-card entities, T
 config/uma.php               fetch allowlist, politeness, thresholds, cache TTL, display timezone
 config/scenarios.php         the ONLY place scenario names enter the layout path
 database/                    migrations, a factory per model, seeders, seeders/data (committed bodies)
-resources/views/             Blade: catalog, skills, support-cards, runs, review, preferences,
-                             errors, components/
-resources/js/                TypeScript: app, bootstrap, guided-flow, trainee-combobox
+resources/views/             4 Blade files only: app.blade.php (the Inertia shell) + errors/
+resources/js/                TypeScript + Vue 3: spa.ts, bootstrap.ts, types.ts, pages/ (18),
+                             components/ (31, incl. catalog, legacy, review, support), layouts/ (2)
 lang/en/uma.php              displayed vocabulary and the Global terms map
 routes/                      web.php (browser), api.php (JSON)
 tests/                       Feature/ (the bulk), Unit/ (no database), Fixtures/ (stored bodies)
@@ -190,13 +192,16 @@ touch. The short form, all of it enforced by Pint (`laravel` preset) and PHPStan
   `php artisan make:* --no-interaction`.
 - Enums live in `app/Enums/`; browser routes in `routes/web.php`; JSON under
   `app/Http/Controllers/Api/V1/` declared in `routes/api.php`.
-- No soft deletes, no DB-level enum columns, no Livewire/Inertia/SPA, no Redis, no Excel.
+- No soft deletes, no DB-level enum columns, no Livewire, no Redis, no Excel. **"No Inertia/SPA" is
+  withdrawn**: the Trainer Desk 2.0 line made Inertia + Vue 3 the shipped web surface (§1). The other
+  three stay banned and are still absent from `composer.lock`.
 - Formatting: `.editorconfig` (4 spaces, LF, single quotes, trailing commas, final
   newline), PHPDoc over inline comments, array shapes in PHPDoc, curly braces always.
 - `config/scenarios.php` is the only source of scenario names in the layout path; the
-  scenario-driven components (`x-resource-strip`, `x-stat-band`, `x-race-calendar`,
-  `x-guided-step`, `x-grade-point-meter`) declare `scenario` with **no default**. A scenario
-  name hardcoded in a view is a defect.
+  scenario-driven components (`ResourceStrip.vue`, `StatBand.vue`, `RaceCalendar.vue`,
+  `GuidedStep.vue`, `GradePointMeter.vue`) take the **resolved label** from the server as a required
+  prop with **no default** (`scenarioLabel: string`, `ResourceStrip.vue:14`) rather than a key they
+  look up themselves. A scenario name hardcoded in a page or component is a defect.
 - Design tokens only (`bg-page`, `text-ink`, `border-rule`, ...). Zero `dark:` utilities,
   zero skeleton palette classes.
 
@@ -215,13 +220,21 @@ Pipeline stages are isolated: `fetch -> snapshot -> parse -> normalize -> match 
   `config('uma.match.fuzzy_threshold')`) and None land in `match_candidates` for `/review`.
 - **Promote**: upserts engine-owned columns, **skips any row with `is_manual = true`**,
   writes one `data_sources` provenance row per fact, inside `DB::transaction`.
-- **Artwork** (`ADR-0021`, accepted 2026-10-05; the fetch half **built**, the display half not): `uma:fetch-art`
+- **Artwork** (`ADR-0021`, accepted 2026-10-05; **both halves built** — the display half was recorded
+  here as unbuilt until 2026-10-06, and it is not): `uma:fetch-art`
   reads ids from `character_cards.card_id` and `support_cards.support_id`, requests them from the asset host
   declared in `config('uma.sources')`, and writes files under gitignored `storage/app/private/artwork/` with a
   sibling `manifest.json`. Nothing enters the database and no `data_sources` row is written. `uma:fetch` steps
   over any source entry that declares no parser, which is how the asset host stays allowlisted without being
   parsed. Same allowlist rule as Fetch, not a second one; `DESIGN.md` §4.7 says how an absent file renders, and
-  `PRD.md` OQ-6 is still the open call on which screens get one. It is manual: nothing schedules it.
+  `PRD.md` OQ-6 has placed the slots: `resources/js/components/ArtworkSlot.vue` renders `card_portrait` on the
+  catalog index and the trainee detail and `support_thumb` on the support-card index and detail, with the deck
+  picker carrying a thumb as a sixth surface that `DESIGN.md`'s component table does not list yet. Files reach
+  the browser through the loopback `artwork.show` route and never from the asset host (§7). It is manual:
+  nothing schedules it, **and an unrun mirror renders nothing at all**, so a fresh worktree shows no frames
+  until someone runs it; on this tree that pass resolved 665 ids with zero unresolved. Still open under OQ-6:
+  the pre-run pick screen cannot host a frame while its trainee picker is a native `<select>`, and skill icons
+  have no stored column.
 
 Caching: catalog reads use `Cache::remember` with a `catalog:version` counter bumped on
 promotion. Trainer-data reads are never cached. `ScenarioCaps` is the single owner of
@@ -255,14 +268,20 @@ What to run, by class of change:
 | Logic in a model, action, or service | the narrow test file, then `php artisan test --compact` |
 | Route, controller, Form Request, or view behavior | the feature tests for that screen; `SCREEN_SPEC.md` state coverage must hold |
 | Fetch pipeline or a parser | the parser tests plus the fetch/pipeline tests, `Http::fake` only |
-| Schema | migration plus the digest that travels with it (§11), then a fresh migrate and seed on a scratch DB |
-| TypeScript or Blade assets | `npm run typecheck`, and `npm run build` if a view references assets |
+| Schema | migration plus the digest that travels with it (§11), then a fresh migrate and seed on a scratch DB, **and `php artisan migrate:status` clean on the dev database before hand-off** |
+| TypeScript, Vue, or Blade assets | `npm run typecheck`, and `npm run build` if a page references assets |
 | Anything crossing layers | the full suite, then the hand-off sequence below |
 
 Hand-off sequence (the bar's own order): targeted tests green -> `php artisan test --compact`
 -> `vendor/bin/pint --dirty --format agent` -> `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`
 -> `npm run typecheck` -> `composer lore` and `composer lore-code` with a ruling per hit ->
 `composer audit` and `npm audit --omit=dev` when dependencies changed.
+
+**The suite cannot see the dev database.** `phpunit.xml` forces `DB_DATABASE=:memory:`, so every test
+builds its own schema from the migration files and a green run proves nothing about
+`database/database.sqlite`. Four committed migrations sat Pending there for four days while 1,326 tests
+passed (`KNOWN-ISSUES.md` KI-60); the landing page and `/legacy` were returning 500 the whole time. Run
+`migrate:status` as part of the hand-off whenever a change reads a table a migration creates.
 
 Evidence rule: a claim is the command output. "Tests pass" means the run output is in the
 hand-off; a gate that was not run is reported as not run.
@@ -344,7 +363,9 @@ No `SECURITY.md` exists; the model is `ARCHITECTURE.md` §8.
 
 `DESIGN.md` owns the visual system; `SCREEN_SPEC.md` owns screen behavior.
 
-- Reuse the committed Blade components in `resources/views/components/`. A one-off style
+- Reuse the committed components in `resources/js/components/` (and its `catalog`, `legacy`,
+  `review`, `support` subfolders). `resources/views/components/` no longer holds anything; a change
+  that adds a Blade view there is going backwards. A one-off style
   needs a token that already exists, or a reason recorded in the change.
 - Design tokens only; no `dark:` utilities; no decorative skeletons.
 - Every data view renders its empty, loading/refresh, and error states (ADR-0007: a custom
@@ -377,7 +398,7 @@ A change is done when all of these hold, or when the exception is reported expli
 - [ ] The narrow tests pass, and the broader suite plus the hand-off sequence in §9 were
       run for a cross-cutting change, with the output attached.
 - [ ] `vendor/bin/pint --dirty --format agent` was run; PHPStan level 6 is clean; `npm run
-      typecheck` is clean if TypeScript or Blade changed.
+      typecheck` is clean if TypeScript, Vue or Blade changed.
 - [ ] The lore gate ran, and every hit carries a context ruling.
 - [ ] No unrelated file changed; the diff was read before reporting.
 - [ ] Documentation moved with the behavior: digest and ADR for schema, `SCREEN_SPEC.md`
@@ -417,7 +438,7 @@ Do not invent a requirement. When the repository does not settle a question:
   storage, no simulation. A request that implies one is escalation 7. Read "image uploads"
   precisely: it is a Trainer supplying a file, and `PRD.md` §6.13 still cuts it. Art the tool
   fetches itself by id from an allowlisted host is a different object, authorized by
-  `ADR-0021` (2026-10-05), whose fetch half is built and whose display half is not.
+  `ADR-0021` (2026-10-05), whose fetch half and display half are both built (§8).
 
 ## 18. Known traps
 
@@ -429,8 +450,12 @@ Do not invent a requirement. When the repository does not settle a question:
 - PHPUnit environment wins over `.env.testing`: `phpunit.xml` forces
   `DB_DATABASE=:memory:`. Keep the two in agreement.
 - `umamusume.com/news/NNN` is a client-rendered shell: its HTML carries no text, and a fetch that returns HTTP 200 with an empty body is not evidence of an empty notice. The bodies come from `POST https://umamusume.com/api/ajax/pr_info_index?format=json` with `{"announce_label":0,"limit":100,"offset":N}` (rows in `information_list`, full `message` included) and from `pr_info_detail` with `{"announce_id":NNN}`; `umamusume.jp` is the same shape. Four entries in the reference guide recorded a notice title and date with "URL not recorded" for exactly this reason, until the API was found on 2026-10-05 (see `docs/UMAMUSUME_REFERENCE.md` §4.6). It is a source candidate, not yet an allowlisted one: adding it to the fetch engine needs the §11 new-source package and a robots and rate-limit note, and it must not be polled.
-- A Blade page that references assets without a manifest needs `npm run build`.
+- A page that references built assets without a manifest needs `npm run build`.
 - The asset host answers a miss with **27,150 bytes of `text/html` at HTTP 404**, so "bytes came back" is never the test. `SourceFetcher::fetchAsset()` returns null on any non-2xx and `ArtworkMirrorTest` keeps it that way; a build that stored the body of a 404 would put an HTML document in place of a PNG and render it as a broken frame forever.
+- An empty artwork mirror is **invisible, not obviously broken**: `ArtworkSlot.vue` renders nothing for a
+  null url (`DESIGN.md` §4.7), so a tree where nobody has run `uma:fetch-art` shows no frames and no error.
+  Check `migrate:status`-style disk state first (`uma:fetch-art --dry-run` reports the id count and how many
+  are already on disk without touching the network) before reading missing images as a frontend defect.
 - PHPStan needs `--memory-limit=1G`; `composer analyse` omits it.
 - The lore gate is blocking and easy to trip by accident, including inside this file: the
   banned word families are not written out in `AGENTS.md` on purpose. Read the pattern
@@ -461,3 +486,6 @@ fails if the logic breaks; a trivial one-liner needs no test.
 | 2026-10-04 | Rewritten as an operational contract: added §2 precedence and the Boost-conflict note, §3 documentation map with the pointer stubs, §9 change-class validation matrix, §11 change-safety, §16 ambiguity handling, §17 legacy handling. Pointer stubs resolved to their masters (`CONSTRAINTS.md` -> `GOVERNANCE.md`). Escaped the banned word families so this file no longer produces lore-gate hits needing a ruling. Role table and the seven escalation paths preserved verbatim in substance. | Agents were reading a stale file: it cited rules that had moved into `docs/research-scratch/` masters, repeated generic Boost guidance that contradicts the no-auth design, and quoted the banned vocabulary. |
 | 2026-10-05 | One cell of the §3 documentation map: `docs/scenarios/07` is no longer described as a known-gap stub. | The owner asked for the fourth `[Global]` scenario to be researched and its documents updated; the primary read landed, so the map's own description of the file went stale. The §6 non-negotiables, the gates and the precedence chain are unchanged. |
 | 2026-10-05 | §8 gains an **Artwork** bullet, §17's "no image uploads" line is disambiguated, and §18 gains a trap about the asset host's HTML 404 body. | `ADR-0021` was accepted the same day and `AGENTS.md` still read as though every image question ended at escalation 7. It does not: uploads stay cut, sourced artwork is authorized and unbuilt. An agent reading only this file would have refused work the owner had just authorized. |
+| 2026-10-06 | §8's Artwork bullet and §17 corrected: **the display half is built**, and the bullet now names the six surfaces, the loopback-only `src` rule, and the two OQ-6 remainders. §18 gains the empty-mirror trap. | The row above and §17 both asserted the display half was unbuilt. It is: `ArtworkSlot.vue` plus `CatalogController.php:121,132,299`, `SupportCardController.php:65,110` and `TrainingRunController.php:1119`, and 128 frames were verified rendering in Chromium with zero console errors after the first `uma:fetch-art` pass. An agent reading only this file would have refused to debug an image question as if nothing displayed it. |
+| 2026-10-06 | §1, §6, §7 and §13 corrected for the frontend stack: the web surface is **Inertia + Vue 3**, `resources/views/` holds 4 Blade files and no components, `resources/js/` holds 51 SFCs, and the scenario components take a required `scenarioLabel` rather than declaring `scenario`. §7's "no Inertia/SPA" ban is withdrawn in place, §9 and §15 widen the asset and typecheck rows to Vue, and §18's Blade-manifest line is de-Bladed. | `8e58b65` folded the Trainer Desk 2.0 line into `master` and `0ea8d43` retired the Blade shell, so the file described a surface that no longer exists. Measured on this tree, not remembered. Per §2 the code wins and the rule is stale; the rule was left standing where it is still true (Livewire, Redis and Excel are absent from `composer.lock`) rather than deleted wholesale. |
+| 2026-10-06 | §9: `migrate:status` on the dev database joins the Schema row and the hand-off, with a paragraph stating that the suite cannot see that file. | KI-60. Four committed migrations sat Pending on `database/database.sqlite` for four days while 1,326 tests passed, because `phpunit.xml:64` forces `DB_DATABASE=:memory:` and every test builds its own schema. A green suite was reported as evidence of a working application and it was not. This tightens the bar, which §5 permits an agent to apply; relaxing it remains escalation 4. |
