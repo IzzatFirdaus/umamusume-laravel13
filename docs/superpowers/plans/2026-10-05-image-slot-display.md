@@ -5,6 +5,22 @@
 > Steps use checkbox (`- [ ]`) syntax for tracking. **The Progress section at the
 > bottom mirrors each task's state and is updated as the slice lands.**
 
+> **SUPERSEDED IN PART, 2026-10-05.** Tasks 4, 5, 6 and 8 as written below build the slots as
+> **Blade** components (`<x-character-portrait>`, `<x-support-thumb>`). They shipped on
+> `feat/image-slot-display` and were deleted by `b645048` on `trainer-desk-2.0`, which replaced
+> both with one Vue SFC, `resources/js/components/ArtworkSlot.vue`, adopted at `fff920f` when the
+> A1 to A3 ports retired the Blade screens those components were built for. **Do not execute Tasks
+> 4, 5, 6 and 8.** Read them as the record of what landed and why the port retired it. Tasks 1 to 3
+> (the mirror probe, the streaming route, the url helper) and Task 7 (the catalog index wire-up)
+> stand as written; Task 9 is recorded as unplaceable and Task 10 landed.
+>
+> The single `decorative` flag these tasks specify was a **WCAG 2.2 AA 4.1.2 defect**, not a style
+> preference: it blanked `alt` and `aria-label` together, so a decorative image inside a named link
+> was unrepresentable and each of the three no-action slots rendered an anchor with a blanked
+> accessible name. `ArtworkSlot.vue` takes `alt` and `href`/`linkLabel` separately, which makes the
+> defect unrepresentable. `DESIGN.md` §4.7's fifth bullet records the gap and its resolution. The
+> full dated erratum is at the foot of this file.
+
 **Goal:** Render id-addressed artwork (trainee portraits, support-card thumbnails)
 on the screens that already display the rows that own them, with WCAG 2.2 AA
 conformance and the UX laws named in `docs/proposals/frontend-development-plan.md`
@@ -852,4 +868,44 @@ neither renumbered nor rewritten.)
   enumerating the banned families inline (`AGENTS.md §18` keeps that list
   in `tools/lore.php` only); any future hit lands with an inline ruling
   per the §5 lore-gate rule.
+
+---
+
+## Erratum, 2026-10-05 (preserves every sentence above)
+
+Filed per `AGENTS.md §11`: a dated claim that later proves wrong is corrected by appending, not by
+rewriting. The four claims above that stopped being true:
+
+1. **"per-screen wire-ups into the existing catalog / support-card / run-create Blade templates."**
+   Three of those four wire-ups (`Task 6` catalog detail, `Task 8` support-card index and detail)
+   targeted Blade templates that the A1 to A3 ports retired. The slots now live on the Vue pages:
+   `Catalog/Show.vue`, `SupportCards/Index.vue`, `SupportCards/Show.vue` (`fff920f`).
+2. **"Create: `resources/views/components/character-portrait.blade.php`"** (`Task 4`) and the
+   `support-thumb.blade.php` twin (`Task 5`). Both files landed as written, then `b645048` deleted
+   them with zero call sites remaining, which is `docs/proposals/frontend-development-plan.md` §5.1
+   step 8 behaving as designed. One SFC, `ArtworkSlot.vue`, is now the single owner of the slot
+   contract.
+3. **"the slot component declares the `decorative` flag"** (Self-Review Notes, Type consistency).
+   One flag blanking `alt` and `aria-label` together could not express a decorative image inside a
+   named link, and could not express a no-action slot without an anchor. The three no-action slots
+   therefore each rendered a focusable anchor with an empty accessible name, failing WCAG 2.2 AA
+   4.1.2 Name, Role, Value on the slice whose binding constraint was WCAG 2.2 AA. `ArtworkSlot.vue`
+   splits `alt` from `href`/`linkLabel`; with no `href` a slot renders no anchor at all, so the
+   defect cannot be expressed.
+4. **"Task 9 ... Run Create / Legacy Select."** Never built, and not buildable as specified: that
+   picker is a native `<select>`, and an `<img>` cannot render inside an `<option>`. Recorded as
+   unplaceable in `PRD.md` OQ-6, `SCREEN_SPEC.md` §7-16 and `design-2.0` §45a.
+
+**Process note, so the record is complete.** Finding 3 was raised by review while `Task 4` was in
+flight and named the axe rule it would fail. It was deferred as a minor on the grounds that the
+slice's file list excluded the component's contract, then carried unchanged into Tasks 5, 6 and 8.
+A finding that names the plan's own binding constraint is not scope-fenceable: it gets fixed, or it
+gets a written ruling against it. Deferring it into a minor list is how a conformance failure
+shipped.
+
+**What still stands.** `ArtworkMirror::exists`, `url`, `storedPath` and `disk` (`Tasks 1`, `3`), the
+`/artwork/{kind}/{id}` loopback route with its `kind` allowlist and `whereNumber` guard (`Task 2`),
+the catalog index wire-up (`Task 7`), the absent-file-renders-nothing rule, the local-`src`-only
+rule, and the `skills.iconid` deferral. All five remain as specified.
+
 
