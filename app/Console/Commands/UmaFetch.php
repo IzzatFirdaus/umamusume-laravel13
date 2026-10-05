@@ -41,6 +41,24 @@ class UmaFetch extends Command
                 return self::FAILURE;
             }
 
+            /*
+             * An asset entry has no parser and no document, so there is nothing here to run. It is
+             * declared in this array only so the SSRF allowlist covers the host it serves
+             * (ADR-0021 Decision 4), and `uma:fetch-art` is its reader. "Has a parser" is the same
+             * discriminator SourceDocumentSeeder:56 already uses, so one rule decides both.
+             */
+            if (! isset($sources[$key]['parser'])) {
+                if ($requested !== null) {
+                    $this->error("'{$key}' declares no parser; an asset host is read by uma:fetch-art, not uma:fetch.");
+
+                    return self::FAILURE;
+                }
+
+                $this->line("'{$key}' is an asset host with no document to parse; skipped.");
+
+                continue;
+            }
+
             $this->fetchOne($key, $sources[$key], $fetcher, $pipeline);
         }
 

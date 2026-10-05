@@ -1,0 +1,236 @@
+import { test, expect } from '@playwright/test';
+
+// Rendered-DOM evidence for the deck builder (SCREEN-007, `SCR-CAR-007`). The server-side
+// `SupportDeckBuilderTest` asserts the resolved props; these assert what only a browser can reach: the
+// keyboard replacement path and where focus lands afterwards, the 44px sweep across the six slots and
+// the picker's controls, and the analysis lines carrying their numbers beside their labels.
+//
+// Fixture strategy follows `run-detail.spec.ts`: the seeded scratch database holds no training runs, so
+// this spec creates one through the create form, works on it, and deletes it in `afterEach` even when an
+// assertion throws. The card catalogue is seeded (559 rows), so the picker has real cards to equip.
+
+const TRAINEE = 'Agnes Digital';
+const createdRunUrls: string[] = [];
+
+test.afterEach(async ({ page }) => {
+    for (const url of createdRunUrls.splice(0)) {
+        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+        if (response === null || !response.ok()) {
+            continue;
+        }
+        await page.getByText('Delete run').click();
+        await page.getByRole('button', { name: 'Delete this run' }).click();
+        await page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' });
+    }
+});
+
+async function builderUrl(page: import('@playwright/test').Page, scenario: string): Promise<string> {
+    await page.goto('/training-runs/create');
+    await page.locator('#app > *').first().waitFor();
+    await page.locator('#trainee-combobox').fill(TRAINEE);
+    await page.keyboard.press('Enter');
+    await page.selectOption('select[name="scenario"]', { value: scenario });
+    await page.getByRole('button', { name: 'Create run' }).click();
+    await page.waitForURL(/\/training-runs\/\d+$/);
+
+    const runUrl = page.url();
+    createdRunUrls.push(runUrl);
+
+    const url = `${runUrl}/deck`;
+    await page.goto(url);
+    await page.locator('#app > *').first().waitFor();
+    return url;
+}
+
+test('renders six slots, each with a labelled ownership toggle, and the seventh-type pickers', async ({ page }) => {
+    await builderUrl(page, 'ura_finale');
+
+    // The six positions, in order, with the friend slot named as the position rather than as the card
+    // parked in it (ADR-0014 correction 1).
+    const slots = page.locator('ul > li[id^="deck-slot-"]');
+    await expect(slots).toHaveCount(6);
+    await expect(page.locator('#deck-slot-6')).toContainText('Slot 6 · Friends');
+    await expect(page.locator('#deck-slot-6')).toContainText('Friend slot');
+
+    // A slot with no card states the gap and offers the way to fill it, rather than showing a blank.
+    await expect(page.locator('#deck-slot-1')).toContainText('Not equipped');
+    await expect(page.getByRole('button', { name: 'Replace the card in Slot 1' })).toBeVisible();
+
+    // Ownership is a two-button group per slot, each button carrying its word. The state is never a
+    // filled box or a colour, which is what `design-2.0` §17 forbids.
+    const owned = page.getByRole('button', { name: 'Owned', exact: true });
+    const rented = page.getByRole('button', { name: 'Rented', exact: true });
+    await expect(owned).toHaveCount(6);
+    await expect(rented).toHaveCount(6);
+    await expect(owned.first()).toHaveAttribute('aria-pressed', 'true');
+
+    // The seven types are offered as words. `Wit` and `Pal` are the Global client's words for the
+    // export's `intelligence` and `friend` keys.
+    const typeOptions = await page.locator('select[name="type"] option').allTextContents();
+    expect(typeOptions).toEqual(['All', 'Speed', 'Stamina', 'Power', 'Guts', 'Wit', 'Pal', 'Group']);
+});
+
+test('sizes every control on the screen to the 44px contract', async ({ page }) => {
+    await builderUrl(page, 'ura_finale');
+
+    // The four pickers, the Filter submit, the primary action, the two ownership buttons and Replace.
+    // The selects are addressed by name rather than by label: a wrapping label's computed name swallows
+    // its option text, so `getByLabel('Type')` also matches the "Type" option inside another select.
+    for (const name of ['type', 'rarity', 'status', 'query']) {
+        const box = await page.locator(`select[name="${name}"], input[name="${name}"]`).boundingBox();
+        expect(box?.height ?? 0, `the ${name} picker is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
+    }
+
+    for (const [selector, what] of [
+        ['button:has-text("Filter")', 'Filter'],
+        ['button:has-text("Confirm deck")', 'Confirm deck'],
+        ['button:has-text("Owned")', 'an Owned toggle'],
+        ['button:has-text("Replace")', 'a Replace button'],
+    ] as const) {
+        const box = await page.locator(selector).first().boundingBox();
+        expect(box?.height ?? 0, `${what} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
+    }
+});
+
+test('replaces a slot with the keyboard alone and returns focus to the slot it changed', async ({ page }) => {
+    await builderUrl(page, 'ura_finale');
+
+    // The path a keyboard user has: focus the Replace button, press it, then reach the picker's Equip
+    // button. No drag, and no per-slot select holding five hundred options.
+    const replace = page.getByRole('button', { name: 'Replace the card in Slot 2' });
+    await replace.focus();
+    await page.keyboard.press('Enter');
+
+    // The picker now writes to slot two, and the button says so in words rather than by position alone.
+    await expect(page.getByRole('button', { name: /^Equip to Slot 2/ })).toBeVisible();
+
+    // Equip the first card the picker offers, by keyboard.
+    const equip = page.getByRole('button', { name: /^Equip to Slot 2/ }).first();
+    await equip.focus();
+    await page.keyboard.press('Enter');
+
+    // Focus comes back to the slot that changed, so a Trainer replacing several cards in a row never
+    // has to re-navigate from the top of the document.
+    await expect(page.locator('#deck-slot-2')).toBeFocused();
+
+    // The slot now holds a card, and it is the one the picker wrote there.
+    const name = (await page.locator('#deck-slot-2 a').first().innerText()).trim();
+    await expect(page.locator('#deck-slot-2')).toContainText(name);
+    await expect(page.locator('#deck-slot-2')).not.toContainText('Not equipped');
+
+    // The other five picks are untouched by the equip, which is what carrying the six in the query
+    // string is for.
+    await expect(page.locator('#deck-slot-1')).toContainText('Not equipped');
+    await expect(page.locator('#deck-slot-3')).toContainText('Not equipped');
+});
+
+test('shows the analysis figures with their labels and no bar', async ({ page }) => {
+    await builderUrl(page, 'ura_finale');
+
+    // The empty state says what is missing, why it matters and what to do, rather than showing six
+    // categories of zeros.
+    await expect(page.getByText('Nothing to analyse yet.')).toBeVisible();
+
+    // Put one card in so the analysis has something to read.
+    await page.getByRole('button', { name: 'Replace the card in Slot 1' }).click();
+    await page.getByRole('button', { name: /^Equip to Slot 1/ }).first().click();
+    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
+
+    const analysis = page.locator('#deck-analysis-heading').locator('..');
+    await expect(analysis).toBeVisible();
+
+    // All six categories, each named.
+    for (const label of ['Training power', 'Early run', 'Race bonus', 'Safety', 'Events', 'Skills']) {
+        await expect(page.getByRole('heading', { name: label, exact: true })).toBeVisible();
+    }
+
+    // At least one category now carries a number, and the number is printed beside its own label with
+    // the provenance word. The seeded catalogue's first card carries a Friendship Bonus, so the
+    // training-power category is the one that fills.
+    await expect(page.getByText('summed across the 1 card carrying it').first()).toBeVisible();
+    await expect(page.getByText('Calculated', { exact: true }).first()).toBeVisible();
+
+    // A category the deck carries nothing in says so in a sentence naming the group, which is what lets
+    // a Trainer tell "no card has this" from "I have not looked yet".
+    await expect(page.getByText('No card in the deck carries an effect here.').first()).toBeVisible();
+
+    // No bar anywhere. The brief sketches a five-row bar chart and what ships is the number beside its
+    // label, so a progress element would be a score wearing a chart costume.
+    await expect(analysis.locator('[role="progressbar"]')).toHaveCount(0);
+    await expect(analysis.locator('meter')).toHaveCount(0);
+
+    // The recommended replacement is a named absence, not a card this tool picked.
+    await expect(page.getByRole('heading', { name: 'Recommended replacement' })).toBeVisible();
+    await expect(page.getByText('Not built.')).toBeVisible();
+});
+
+test('keeps the ownership choice on the page and says the run record does not store it', async ({ page }) => {
+    await builderUrl(page, 'ura_finale');
+
+    // The toggle responds at once, with no round trip, because there is nowhere to persist the answer.
+    const rented = page.locator('#deck-slot-3').getByRole('button', { name: 'Rented', exact: true });
+    await rented.click();
+    await expect(rented).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#deck-slot-3').getByRole('button', { name: 'Owned', exact: true })).toHaveAttribute(
+        'aria-pressed',
+        'false',
+    );
+
+    // The screen says the flag is not stored rather than letting the control imply a record it does not
+    // write. The ownership claim is a per-slot one either way: no slot's value is derived from its
+    // position.
+    await expect(page.getByText('The run record stores no field for the owned or rented flag yet')).toBeVisible();
+});
+
+test('prints the seven types on the picker rows as a word and a glyph, never colour alone', async ({ page }) => {
+    await builderUrl(page, 'ura_finale');
+
+    const firstRow = page.locator('#deck-picker-results > li').first();
+    await expect(firstRow).toBeVisible();
+
+    // The glyph is decorative and the word beside it carries the meaning, so a screen reader hears the
+    // type once and a Trainer who cannot separate the seven fills can still read it.
+    const marks = firstRow.locator('svg[aria-hidden="true"]');
+    await expect(marks.first()).toBeVisible();
+    await expect(firstRow).toContainText(/Speed|Stamina|Power|Guts|Wit|Pal|Group/);
+});
+
+test('leaves the picker rows text-only when the mirror holds no file', async ({ page }) => {
+    await builderUrl(page, 'ura_finale');
+
+    // `ADR-0021` is unfilled in this suite, so the absence is the state that renders. No frame, no grey
+    // box, no placeholder glyph, and no anchor stranded around an absent image.
+    await expect(page.locator('#deck-picker-results img')).toHaveCount(0);
+    await expect(page.locator('#deck-picker-results img[src=""]')).toHaveCount(0);
+    await expect(page.locator('#deck-picker-results a:has(img)')).toHaveCount(0);
+    await expect(page.locator('#deck-picker-results > li').first().locator('a').first()).toBeVisible();
+});
+
+test('narrowing the picker leaves the six picks exactly where they were', async ({ page }) => {
+    await builderUrl(page, 'ura_finale');
+
+    await page.getByRole('button', { name: 'Replace the card in Slot 1' }).click();
+    await page.getByRole('button', { name: /^Equip to Slot 1/ }).first().click();
+    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
+
+    // A filter click is a `router.get` onto the same route. If the six picks rode in component state
+    // rather than the query string, this would empty slot one with no way back.
+    await page.locator('select[name="type"]').selectOption('guts');
+    await page.getByRole('button', { name: 'Filter' }).click();
+    await page.waitForURL(/type=guts/);
+
+    await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
+    await expect(page.locator('select[name="type"]')).toHaveValue('guts');
+});
+
+test('names the ask when a filter reaches no card rather than showing an empty frame', async ({ page }) => {
+    await builderUrl(page, 'ura_finale');
+
+    // No R-rarity group card exists in the catalogue, so this is a valid combination with no rows.
+    await page.locator('select[name="rarity"]').selectOption('1');
+    await page.locator('select[name="type"]').selectOption('group');
+    await page.getByRole('button', { name: 'Filter' }).click();
+    await page.waitForURL(/rarity=1/);
+
+    await expect(page.getByText(/Nothing matches rarity R \+ type Group/)).toBeVisible();
+});

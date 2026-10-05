@@ -6,6 +6,11 @@ the three candidate shapes are not. `PRD.md` §6.11 is **not amended by this doc
 as written: no race simulation, no prediction engine, no race-day snapshots. Nothing in this file lifts it,
 and no slice may cite this ADR as permission to build the surface it describes.
 
+> **Dated note 2026-10-04:** the owner revisited race prediction while ruling on the Trainer Desk 2.0
+> program (`ADR-0020`) and **kept this hold**. The blocker is the data gap measured below, which an owner
+> scope ruling does not close; §6.11 stays unchanged for race outcomes. `ADR-0020` Decision §4 records the
+> reaffirmation.
+
 Date: 2026-10-01
 Deciders: product owner (held the slice), implementing agent (measurement and record)
 Relates to: `ADR-0001` (lifted §6.11 *in part*, for Energy guidance only — that partial lift is unchanged

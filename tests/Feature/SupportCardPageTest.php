@@ -8,13 +8,15 @@ use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\SupportEffect;
 use App\Models\Umamusume;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * The two support-card read surfaces, `/support-cards` and `/support-cards/{id}`.
  *
- * Assertions are on rendered text rather than on markup, for the reason the skill-detail slice recorded:
- * Blade escapes what the source stored, so a title carrying brackets or an apostrophe does not survive a
- * raw-string comparison. Where a link has to be proved, the test navigates it instead of reading the href.
+ * These assert the props the Inertia page receives, not the markup it renders: the page is a Vue
+ * component now (ADR-0020 §1), so the server contract is the payload. The copy a Trainer reads, the
+ * selected state a picker paints and the labels the form carries are asserted against the rendered
+ * DOM in `tests/browser/support-cards.spec.ts`.
  *
  * The rows come from factories, never from the seeder, so a test names the card it asserts on.
  */
@@ -50,13 +52,17 @@ it('lists every card with the label a Trainer reads and a link to its own page',
     $special = cardWithEffects(['char_name' => 'Special Week', 'title_en' => '[Tracen Academy]']);
     $tazuna = SupportCard::factory()->friend()->create(['title_en' => '[Pal]']);
 
-    $response = test()->get('/support-cards')->assertOk();
-
-    $response->assertSee('Special Week [Tracen Academy]')
-        ->assertSee('Tazuna Hayakawa [Pal]')
-        ->assertSee('2 of 2 support cards')
-        ->assertSee(route('support-cards.show', $special), false)
-        ->assertSee(route('support-cards.show', $tazuna), false);
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('SupportCards/Index')
+            ->has('cards.data', 2)
+            ->where('cards.data.0.name', 'Special Week [Tracen Academy]')
+            ->where('cards.data.0.url', route('support-cards.show', $special))
+            ->where('cards.data.1.name', 'Tazuna Hayakawa [Pal]')
+            ->where('cards.data.1.url', route('support-cards.show', $tazuna))
+            ->where('cards.total', 2)
+            ->where('totalCount', 2));
 });
 
 it('shows the rarity word, the type word and the availability the source states', function (): void {
@@ -65,10 +71,14 @@ it('shows the rarity word, the type word and the availability the source states'
 
     test()->get('/support-cards')
         ->assertOk()
-        ->assertSee('SSR')
-        ->assertSee('Wit')
-        ->assertSee('JP-only')
-        ->assertSee('Global');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'Gold Ship [Tracen Academy]')
+            ->where('cards.data.0.rarity_word', 'R')
+            ->where('cards.data.0.release_status', 'JP-only')
+            ->where('cards.data.1.name', 'Silence Suzuka [Tracen Academy]')
+            ->where('cards.data.1.rarity_word', 'SSR')
+            ->where('cards.data.1.type_label', 'Wit')
+            ->where('cards.data.1.release_status', 'Global'));
 });
 
 it('summarizes each card\'s effects at cap on the row', function (): void {
@@ -77,13 +87,23 @@ it('summarizes each card\'s effects at cap on the row', function (): void {
 
     // The factory vector's last stated anchor is 15 at card level 35, and the dictionary row's `percent`
     // symbol is what makes it a percentage rather than a bare number.
-    test()->get('/support-cards')->assertOk()->assertSee('Friendship Bonus 15%');
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.effects.0.name', 'Friendship Bonus')
+            ->where('cards.data.0.effects.0.display', '15%'));
 });
 
 it('names an effect the dictionary has no row for instead of inventing a label', function (): void {
     cardWithEffects(['char_name' => 'Special Week', 'effects' => [[77, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]]]);
 
-    test()->get('/support-cards')->assertOk()->assertSee('[Unverified] effect 77');
+    // `name` is null so the page can mark the gap rather than print a word the source does not state.
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.effects.0.effect_id', 77)
+            ->where('cards.data.0.effects.0.name', null)
+            ->where('cards.data.0.effects.0.display', '5'));
 });
 
 it('paginates at twenty-five cards and carries the filter through the link', function (): void {
@@ -93,14 +113,18 @@ it('paginates at twenty-five cards and carries the filter through the link', fun
 
     test()->get('/support-cards')
         ->assertOk()
-        ->assertSee('Trainee 01')
-        ->assertSee('26 of 26 support cards')
-        ->assertDontSee('Trainee 26');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 25)
+            ->where('cards.data.0.name', 'Trainee 01 [Tracen Academy]')
+            ->where('cards.data.24.name', 'Trainee 25 [Tracen Academy]')
+            ->where('cards.total', 26)
+            ->where('totalCount', 26));
 
     test()->get('/support-cards?page=2&rarity=1')
         ->assertOk()
-        ->assertSee('Trainee 26')
-        ->assertDontSee('Trainee 01');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Trainee 26 [Tracen Academy]'));
 });
 
 it('narrows by rarity, by type and by availability', function (): void {
@@ -108,62 +132,82 @@ it('narrows by rarity, by type and by availability', function (): void {
     SupportCard::factory()->sr()->stamina()->create(['char_name' => 'Only SR Stamina']);
     SupportCard::factory()->jpOnly()->create(['char_name' => 'Only JP Card']);
 
-    test()->get('/support-cards?rarity=3')->assertOk()
-        ->assertSee('Only SSR Speed')->assertDontSee('Only SR Stamina');
+    test()->get('/support-cards?rarity=3')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Only SSR Speed [Tracen Academy]'));
 
-    test()->get('/support-cards?type=stamina')->assertOk()
-        ->assertSee('Only SR Stamina')->assertDontSee('Only SSR Speed');
+    test()->get('/support-cards?type=stamina')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Only SR Stamina [Tracen Academy]'));
 
-    test()->get('/support-cards?status=JP-only')->assertOk()
-        ->assertSee('Only JP Card')->assertDontSee('Only SSR Speed');
+    test()->get('/support-cards?status=JP-only')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Only JP Card [Tracen Academy]'));
 });
 
-it('keeps the facets a Trainer chose selected in the pickers', function (): void {
+it('hands the pickers the facets a Trainer chose', function (): void {
     SupportCard::factory()->create(['char_name' => 'Special Week']);
 
-    // The rarity picker is the one that can silently fail: PHP keys its map on ints while the query
-    // string carries text, so a comparison without a cast leaves every picker reading "All" on a page
-    // that is plainly filtered.
-    $html = test()->get('/support-cards?rarity=3&type=guts&status=Global&sort=released')
+    // The rarity facet is the one that can silently fail: PHP keys its map on ints while the query
+    // string carries text, so the page casts the chosen value back to text to select the picker. The
+    // props are what the picker binds to; the `selected` attribute it paints is asserted in the
+    // browser spec.
+    test()->get('/support-cards?rarity=3&type=guts&status=Global&sort=released')
         ->assertOk()
-        ->getContent();
-
-    expect($html)
-        ->toContain('value="3" selected')
-        ->toContain('value="guts" selected')
-        ->toContain('value="Global" selected')
-        ->toContain('value="released" selected');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rarity', '3')
+            ->where('type', 'guts')
+            ->where('status', 'Global')
+            ->where('sort', 'released'));
 });
 
 it('refuses a facet value the columns cannot hold rather than answering with the whole catalog', function (): void {
     SupportCard::factory()->create(['char_name' => 'Special Week']);
 
+    // Silently dropping an unknown `type` would answer a question nobody asked with the full catalog,
+    // which is how a facet lies. The form request rejects it and lands on the canonical route.
     test()->get('/support-cards?type=turbo')
         ->assertStatus(302)
-        ->assertRedirect(route('support-cards.index'));
-
-    test()->followingRedirects()->get('/support-cards?type=turbo')->assertSee('Type:');
+        ->assertRedirect(route('support-cards.index'))
+        ->assertSessionHasErrors('type');
 });
 
 it('orders by rarity and by release date when asked, and by name when not', function (): void {
     SupportCard::factory()->create(['char_name' => 'Beryl', 'rarity' => CardRarity::OneStar, 'release_global' => '2025-01-01']);
     SupportCard::factory()->create(['char_name' => 'Amber', 'rarity' => CardRarity::ThreeStar, 'release_global' => '2026-01-01']);
 
-    $byName = test()->get('/support-cards')->assertOk()->getContent();
-    expect(strpos($byName, 'Amber'))->toBeLessThan(strpos($byName, 'Beryl'));
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'Amber [Tracen Academy]')
+            ->where('cards.data.1.name', 'Beryl [Tracen Academy]'));
 
-    $byRarity = test()->get('/support-cards?sort=rarity')->assertOk()->getContent();
-    expect(strpos($byRarity, 'Beryl'))->toBeLessThan(strpos($byRarity, 'Amber'));
+    test()->get('/support-cards?sort=rarity')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'Beryl [Tracen Academy]')
+            ->where('cards.data.1.name', 'Amber [Tracen Academy]'));
 
-    $byRelease = test()->get('/support-cards?sort=released')->assertOk()->getContent();
-    expect(strpos($byRelease, 'Amber'))->toBeLessThan(strpos($byRelease, 'Beryl'));
+    test()->get('/support-cards?sort=released')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'Amber [Tracen Academy]')
+            ->where('cards.data.1.name', 'Beryl [Tracen Academy]'));
 });
 
 it('names the fetch that fills an empty catalog', function (): void {
+    // The page renders the fetch-and-reparse copy; here the contract is the state that selects it.
     test()->get('/support-cards')
         ->assertOk()
-        ->assertSee('The support-card catalog holds no rows yet')
-        ->assertSee('uma:fetch gametora-support-cards');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 0)
+            ->where('totalCount', 0));
 });
 
 it('names the ask when a filter matches nothing', function (): void {
@@ -171,9 +215,10 @@ it('names the ask when a filter matches nothing', function (): void {
 
     test()->get('/support-cards?rarity=3')
         ->assertOk()
-        ->assertSee('Nothing matches')
-        ->assertSee('rarity SSR')
-        ->assertDontSee('Special Week');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 0)
+            ->where('totalCount', 1)
+            ->where('askedFor', 'rarity SSR'));
 });
 
 it('renders one card\'s own page with the fields the source states', function (): void {
@@ -190,14 +235,18 @@ it('renders one card\'s own page with the fields the source states', function ()
 
     test()->get("/support-cards/{$card->id}")
         ->assertOk()
-        ->assertSee('Special Week [Tracen Academy]')
-        ->assertSee('スペシャルウィーク')
-        ->assertSee('[トレセン学園]')
-        ->assertSee('SSR')
-        ->assertSee('Guts')
-        ->assertSee('Feb 24, 2021')
-        ->assertSee('Jun 26, 2025')
-        ->assertSee('Global');
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('SupportCards/Show')
+            ->where('card.name', 'Special Week [Tracen Academy]')
+            ->where('card.name_ja', 'スペシャルウィーク')
+            ->where('card.title_ja', '[トレセン学園]')
+            ->where('card.rarity_word', 'SSR')
+            ->where('card.type_label', 'Guts')
+            // A calendar date stays a calendar date, so it is formatted server-side and never routed
+            // through the display timezone.
+            ->where('card.release_jp_display', 'Feb 24, 2021')
+            ->where('card.release_global_display', 'Jun 26, 2025')
+            ->where('card.release_status', 'Global'));
 });
 
 it('resolves the anchor vector at cap and names the basis', function (): void {
@@ -208,10 +257,9 @@ it('resolves the anchor vector at cap and names the basis', function (): void {
 
     test()->get("/support-cards/{$card->id}")
         ->assertOk()
-        ->assertSee('Effects')
-        ->assertSee('Friendship Bonus')
-        ->assertSee('15%')
-        ->assertSee('highest stated anchor');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('effects.0.name', 'Friendship Bonus')
+            ->where('effects.0.display', '15%'));
 });
 
 it('links each hinted skill to its own page', function (): void {
@@ -222,10 +270,14 @@ it('links each hinted skill to its own page', function (): void {
 
     test()->get("/support-cards/{$card->id}")
         ->assertOk()
-        ->assertSee('Hinted skills')
-        ->assertSee('Corner Adept');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('hinted.stored', true)
+            ->has('hinted.skills', 1)
+            ->where('hinted.skills.0.name', 'Corner Adept')
+            ->where('hinted.skills.0.url', route('skills.show', $skill))
+            ->where('hinted.unlinked', 0));
 
-    test()->get(route('skills.show', $skill))->assertOk()->assertSee('Corner Adept');
+    test()->get(route('skills.show', $skill))->assertOk();
 });
 
 it('links each event skill to its own page', function (): void {
@@ -236,8 +288,9 @@ it('links each event skill to its own page', function (): void {
 
     test()->get("/support-cards/{$card->id}")
         ->assertOk()
-        ->assertSee('Event skills')
-        ->assertSee('Straight Burst');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('events.skills.0.name', 'Straight Burst')
+            ->where('events.skills.0.url', route('skills.show', $skill)));
 
     test()->get(route('skills.show', $skill))->assertOk();
 });
@@ -260,9 +313,10 @@ it('counts a hint id it cannot link rather than dropping it silently', function 
 
     test()->get("/support-cards/{$card->id}")
         ->assertOk()
-        ->assertSee('Corner Adept')
-        ->assertSee('2 hinted skill ids')
-        ->assertDontSee('Japan Only Skill');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('hinted.skills', 1)
+            ->where('hinted.skills.0.name', 'Corner Adept')
+            ->where('hinted.unlinked', 2));
 });
 
 it('separates a list the source states as empty from a list nothing stored', function (): void {
@@ -272,8 +326,11 @@ it('separates a list the source states as empty from a list nothing stored', fun
 
     test()->get("/support-cards/{$card->id}")
         ->assertOk()
-        ->assertSee('The source lists no hinted skills for this card')
-        ->assertSee('No event skill list is stored for this card');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('hinted.stored', true)
+            ->has('hinted.skills', 0)
+            ->where('events.stored', false)
+            ->has('events.skills', 0));
 });
 
 it('links the card to the trainee page its character id resolves to', function (): void {
@@ -286,8 +343,9 @@ it('links the card to the trainee page its character id resolves to', function (
 
     test()->get("/support-cards/{$card->id}")
         ->assertOk()
-        ->assertSee('Belongs to')
-        ->assertSee('Special Week');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('trainee.name', 'Special Week')
+            ->where('trainee.url', route('catalog.show', $trainee->slug)));
 
     test()->get(route('catalog.show', $trainee->slug))->assertOk();
 });
@@ -302,8 +360,9 @@ it('names the absence when the character id resolves to no trainee', function ()
 
     test()->get("/support-cards/{$card->id}")
         ->assertOk()
-        ->assertSee('Tazuna Hayakawa')
-        ->assertSee('has no trainee page in this catalog');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('card.char_name', 'Tazuna Hayakawa')
+            ->where('trainee', null));
 });
 
 it('prints the row\'s own provenance and whether the Trainer corrected it', function (): void {
@@ -317,9 +376,9 @@ it('prints the row\'s own provenance and whether the Trainer corrected it', func
 
     test()->get("/support-cards/{$card->id}")
         ->assertOk()
-        ->assertSee('Provenance')
-        ->assertSee('gametora.com/data/umamusume/support-cards.json')
-        ->assertSee('Corrected by hand');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('card.source_url', 'https://gametora.com/data/umamusume/support-cards.json')
+            ->where('card.is_manual', true));
 });
 
 it('renders no tier label, which ADR-0014 holds pending a current Global source', function (): void {
@@ -327,8 +386,13 @@ it('renders no tier label, which ADR-0014 holds pending a current Global source'
 
     $card = SupportCard::query()->firstOrFail();
 
-    test()->get('/support-cards')->assertOk()->assertDontSee('Tier');
-    test()->get("/support-cards/{$card->id}")->assertOk()->assertDontSee('Tier');
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->missing('cards.data.0.tier'));
+
+    test()->get("/support-cards/{$card->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->missing('card.tier'));
 });
 
 it('refuses a card id that does not exist', function (): void {

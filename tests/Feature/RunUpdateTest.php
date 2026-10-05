@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\RunStatus;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * The scenario switch: PUT /training-runs/{run}, which had a route, a form and a request
@@ -148,24 +149,16 @@ it('renders the scenario error on the form that refused it', function (): void {
         ->assertRedirect();
 
     // One GET, not two: the first request after the failed PUT is the one that receives
-    // the flashed bag, so a second GET would read an empty one.
-    $response = test()->get("/training-runs/{$run->id}")->assertOk();
-    $html = $response->getContent();
-
-    // The message is read out of the bag the template was given rather than transcribed,
-    // so this asserts the thing that matters - the reason reaches the page - and stays
-    // true if the wording is reworded.
-    $messages = $response->viewData('errors')->getBag('default')->get('scenario');
-
-    expect($messages)->not->toBeEmpty();
-
-    foreach ((array) $messages as $message) {
-        expect($html)->toContain($message);
-    }
-
-    expect($html)
-        // The stored scenario survives the refusal, so the select still shows it.
-        ->toMatch('/<option value="ura_finale"[^>]*selected/');
+    // the flashed bag, so a second GET would read an empty one. Inertia carries the bag as
+    // the shared `errors` prop, which is what the scenario form reads per field.
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            $page->component('Runs/Show')
+                ->where('errors.scenario', fn ($message): bool => is_string($message) && $message !== '')
+                // The stored scenario survives the refusal, so the select still shows it.
+                ->where('run.scenario', 'ura_finale');
+        });
 });
 
 it('leaves a run that was never given a scenario reporting none, not the baseline key', function (): void {

@@ -69,3 +69,39 @@ the shipped theme; or regenerate `tokens.json` with `tokens.py` against the curr
 the anchor is refreshed. Not fixed here; this entry files the finding. First recorded in
 `docs/research-scratch/DESIGN-CORPUS.md` section "scratch-priors.md" §2.1 (2026-10-03, priors pass;
 the priors file moved there on 2026-10-03 when root `research-scratch/` was emptied).
+
+### KI-59 The catalog detail browser case asserts a portrait absence a populated mirror cannot produce, and its sibling guard makes the pair mutually exclusive - FILED 2026-10-05 (Task B1 closure pass, from the Playwright run), CORRECTED 2026-10-05, OPEN
+
+`tests/browser/catalog-detail.spec.ts:140-152` asserts unconditionally that the catalog detail Identity
+section holds no `<img>`, while its sibling at `:113` asserts the frame is present but only once it is
+already visible. Exactly one of the two can pass on a given host: `:140` needs the mirror to hold no
+file, `:113` needs it to hold one. The spec's own contract at `:107-112` says each case "asserts only
+when that state is present, the same `:36` rarity-chip precedent the catalog index uses", and `:113`
+follows it while `:140` does not.
+
+On this host the mirror holds 665 portraits under
+`storage/app/private/artwork/characters/portrait/`, which is why `:146` fails `toHaveCount(0)` with
+`Received: 1`, resolving to one element across 33 polls. The app is behaving as documented:
+`ArtworkMirror::url()` (`app/Services/DataPipeline/ArtworkMirror.php:67-72`) probes the disk and
+returns the `artwork.show` route only when the file is present, and `CatalogIndexPortraitTest` pins the
+other branch server-side, asserting `artworkURL` is `null` when the portrait is not mirrored
+(`tests/Feature/CatalogIndexPortraitTest.php:44-54`). The absence state is therefore real and
+covered, but unreachable from a browser: with every cataloged `card_id` mirrored, no page on a
+populated host can show it. That is a coverage gap and a fixture-dependence, not a rendering defect.
+
+Fix options, in priority order: give `:140` a fixture whose portrait the mirror provably lacks, because
+an unmirrored card is exactly the case `DESIGN.md` §4.7 exists to describe; or guard it like `:113` so
+both cases assert only when reachable and the suite stops depending on whether this host has run
+`uma:fetch-art`. Not fixed here; this entry files the finding. Separately, `AGENTS.md` §8 still
+describes the `ADR-0021` display half as unbuilt, which no longer matches
+`resources/js/components/ArtworkSlot.vue`; that is a documentation defect of the same pass, not part of
+this entry's mechanism.
+
+**Correction, 2026-10-05, the same day as filing.** The original text named the app and claimed
+"`Catalog/Show.vue:128` passes `:url="trainee.artworkURL"` to `ArtworkSlot` unconditionally, and
+`ArtworkSlot.vue:80-85` renders an `<img>` whenever `url` is truthy, with no check that the mirrored
+file exists", concluding "the prop comes from the row, not from the disk". That was wrong and is
+withdrawn: `url()` does check the disk, so a host that has not run `uma:fetch-art` would emit no URL
+at all and render no frame. The mechanism was misread because the `card_portrait` kind resolves to the
+nested `characters/portrait/trainee/<bucket>/` tree, and a shallow directory listing without recursion
+reported zero files where 665 exist. The `DESIGN.md` §4.7 rule holds and the app is not at fault.

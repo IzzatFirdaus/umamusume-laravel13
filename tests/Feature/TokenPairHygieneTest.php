@@ -11,6 +11,9 @@ declare(strict_types=1);
  * This test pins the naming, not the ratio. The ratios are measured from the rendered element
  * in `docs/design-research/verification/slice-6-2026-09-28.md` §3, per D-288: a hex in a
  * stylesheet proves nothing about what a browser paints.
+ *
+ * The sweep covers both source trees. The components it guards are Vue now (ADR-0020 §1, B1),
+ * so a Blade-only walk would go quiet the moment the last component moved.
  */
 it('declares an ink for the bright lime fill instead of borrowing the gold one', function (): void {
     $css = (string) file_get_contents(base_path('resources/css/app.css'));
@@ -18,44 +21,77 @@ it('declares an ink for the bright lime fill instead of borrowing the gold one',
     expect($css)->toContain('--color-on-green');
 });
 
-it('leaves no component wearing the gold ink on the green fill', function (): void {
-    $views = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(base_path('resources/views')),
-    );
+/**
+ * Every source that can put a class on an element a Trainer sees, keyed by its path.
+ *
+ * RecursiveDirectoryIterator, not glob('**'): PHP's glob does not expand `**`, so a
+ * glob-based sweep reads one directory and passes without having looked at the rest.
+ *
+ * @return array<string, string>
+ */
+function markupSources(): array
+{
+    $sources = [];
 
+    foreach (['resources/views', 'resources/js'] as $root) {
+        $walk = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(base_path($root), FilesystemIterator::SKIP_DOTS),
+        );
+
+        foreach ($walk as $file) {
+            // getExtension() answers "php" for foo.blade.php, so the suffix is matched on the
+            // whole filename. Filtering on the extension silently scans nothing.
+            if (preg_match('/(\.blade\.php|\.vue|\.ts)$/', $file->getFilename()) === 1) {
+                $sources[str_replace(
+                    [DIRECTORY_SEPARATOR, base_path().DIRECTORY_SEPARATOR],
+                    ['/', ''],
+                    $file->getPathname(),
+                )] = (string) file_get_contents($file->getPathname());
+            }
+        }
+    }
+
+    return $sources;
+}
+
+/**
+ * Comments stripped from a source, so prose naming the rejected pair does not trip the gate.
+ *
+ * @param  array<string, string>  $sources
+ * @return array<string, string>
+ */
+function withoutMarkupComments(array $sources): array
+{
+    $patterns = [
+        '/\{\{--.*?--\}\}/s',   // Blade
+        '/<!--.*?-->/s',        // Vue template
+        '/\/\*.*?\*\//s',       // PHP and TypeScript block comments
+        '/(?<!:)\/\/[^\n]*/',   // line comments, leaving a `:` prefix alone (URLs in strings)
+    ];
+
+    return array_map(
+        static function (string $source) use ($patterns): string {
+            foreach ($patterns as $pattern) {
+                $source = (string) preg_replace($pattern, '', $source);
+            }
+
+            return $source;
+        },
+        $sources,
+    );
+}
+
+it('leaves no component wearing the gold ink on the green fill', function (): void {
     $offenders = [];
 
-    foreach ($views as $file) {
-        if (! $file->isFile() || $file->getExtension() !== 'php') {
-            continue;
-        }
-
-        $source = (string) file_get_contents($file->getPathname());
-
-        // Prose is allowed to name the rejected pair to say it was rejected, which is exactly
-        // what layout.blade.php does. Lines inside a `{{-- --}}` block and `//` lines are
-        // comment prose; everything else is markup and is scanned with its real line number.
-        $inComment = false;
-
+    foreach (withoutMarkupComments(markupSources()) as $path => $source) {
         foreach (explode("\n", $source) as $number => $line) {
-            if ($inComment) {
-                $inComment = ! str_contains($line, '--}}');
-
-                continue;
-            }
-
-            if (preg_match('/\{\{--(?![\s\S]*?--\}\})/', $line)) {
-                $inComment = true;
-
-                continue;
-            }
-
-            if (preg_match('/^\s*(\/\/|\*)/', $line)) {
-                continue;
-            }
-
-            if (preg_match('/\bbg-green\b/', $line) && preg_match('/\btext-on-pick\b/', $line)) {
-                $offenders[] = $file->getRelativePathname().':'.($number + 1);
+            // `\b` does not hold at the hyphen, so `bg-green-tint` and `bg-green-line` match
+            // `\bbg-green\b`. The negative lookahead keeps the gate on the bare fill, which is
+            // the pair this rule was written for.
+            if (preg_match('/\bbg-green(?![-\w])/', $line) === 1
+                && preg_match('/\btext-on-pick\b/', $line) === 1) {
+                $offenders[] = $path.':'.($number + 1);
             }
         }
     }
@@ -64,10 +100,11 @@ it('leaves no component wearing the gold ink on the green fill', function (): vo
 });
 
 it('keeps the gold ink on the gold fill, where it belongs', function (): void {
-    $hint = (string) file_get_contents(base_path('resources/views/components/guided-step.blade.php'));
+    // The port moved this pair from `x-guided-step` to `GuidedStep.vue`. The Caution band
+    // still uses `bg-pick text-on-pick`; if that pair had been renamed away rather than the
+    // borrow removed, this test is how it would show up.
+    $step = (string) file_get_contents(base_path('resources/js/components/GuidedStep.vue'));
 
-    // The Caution band still uses `bg-pick text-on-pick`. If that pair had been renamed away
-    // rather than the borrow removed, this test is how it would show up.
-    expect($hint)->toContain('bg-pick text-on-pick')
-        ->and($hint)->toContain('bg-green px-1.5 font-bold text-on-green');
+    expect($step)->toContain('bg-pick text-on-pick')
+        ->and($step)->toContain('bg-green px-1.5 font-bold text-on-green');
 });

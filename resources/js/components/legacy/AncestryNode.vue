@@ -1,0 +1,130 @@
+<script setup lang="ts">
+/*
+ * One node of the six-node ancestry graph (`REFERENCE` §1.5.4: two parents, each bringing two
+ * ancestors of her own).
+ *
+ * **The graph is a labelled list, not a picture.** `design-2.0`'s version of this screen draws a tree,
+ * and a tree drawn as an SVG is unreadable to a screen reader and unreachable by keyboard. So the
+ * structure here is real markup — a nested list where the nesting *is* the ancestry — and the connector
+ * lines are `border` decoration on that structure. The Law of Uniform Connectedness (plan §13) is
+ * satisfied by the list nesting a sighted Trainer can see, and not by an image they cannot.
+ *
+ * **Assignment is a button, never a drag** (WCAG 2.2 SC 2.5.7, plan §12.1). The control is a real
+ * `<select>` under a real `<label>`, so it is in the tab order, arrow-keyable and screen-reader
+ * labelled with no custom key handling at all, and it is `min-h-11` for the 44px floor. A drag handle
+ * would have needed a full keyboard equivalent written from scratch to reach the same place.
+ *
+ * **Nothing here is computed.** A node prints the name the Trainer entered, the Sparks a run recorded,
+ * and `N/A` with a `title` for anything the tool does not hold. The probability slot is passed in and is
+ * always null from the controller, which is the honest answer: this tree holds no star-roll table.
+ */
+import SparkChip from './SparkChip.vue';
+
+interface SparkRow {
+    kind: string;
+    kind_label: string;
+    target: string | null;
+    stars: number | null;
+}
+
+withDefaults(defineProps<{
+    label: string;
+    name: string | null;
+    rank: number | null;
+    isGuest: boolean;
+    sparks: SparkRow[];
+    probability: { value: null; title: string };
+    /** The `name` attribute of the node's pick control, unique per node in the form. */
+    controlName?: string;
+    /** Options for the pick control. Empty on the compare surface, which never assigns. */
+    options?: { id: number; name: string }[];
+    /** Field errors for this node's control, keyed by the control's own name. */
+    error?: string;
+    assignable?: boolean;
+}>(), {
+    controlName: undefined,
+    options: () => [],
+    error: undefined,
+    assignable: false,
+});
+</script>
+
+<template>
+    <!-- The node. `<li>` because every node in this graph is one item of the parent's list, and the
+         browser's own list semantics are then the graph's semantics. -->
+    <li class="rounded-md border border-rule bg-raised p-3">
+        <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ label }}</p>
+
+        <p class="mt-1 text-sm font-semibold text-ink-strong">
+            <!-- The absent name is a named absence, never a dash and never a default (AGENTS.md §5).
+                 `title` says which of the two absences it is: not chosen, or not read. -->
+            <span v-if="name">{{ name }}</span>
+            <span v-else class="text-ink-muted" title="No Umamusume entered for this node yet.">
+                N/A, not chosen
+            </span>
+        </p>
+
+        <p class="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs text-ink-muted">
+            <span>
+                Rank
+                <!-- `title` distinguishes "you did not record her rank" from "she has no rank",
+                     which are different statements and read the same as a bare N/A. -->
+                <span class="text-ink" :title="rank === null ? 'You have not recorded this Legacy’s own rank.' : undefined">
+                    {{ rank ?? 'N/A' }}
+                </span>
+            </span>
+            <span v-if="isGuest">Rented from a friend</span>
+        </p>
+
+        <!-- The Spark list. A node with none says so rather than rendering an empty row (D-220). -->
+        <ul v-if="sparks.length > 0" class="mt-2 flex flex-wrap gap-1.5">
+            <li v-for="(spark, index) in sparks" :key="`${spark.kind}-${spark.target ?? 'none'}-${index}`">
+                <SparkChip
+                    :kind-label="spark.kind_label"
+                    :target="spark.target"
+                    :stars="spark.stars"
+                />
+            </li>
+        </ul>
+        <p v-else class="mt-2 text-xs text-ink-muted" title="No Sparks recorded for this node.">
+            No Sparks recorded.
+        </p>
+
+        <!--
+            The chance a Spark rolls. Always `N/A` from the controller, and the `title` says why, so
+            the cell is a disclosure rather than a blank. The brief asks for `~10% ★★★`; the odds it
+            would come from exist in the corpus only as a wiki pair flagged stale (§1.5.3), and the
+            plan's rule for a silent corpus is that the screen renders absence, never a number.
+        -->
+        <p class="mt-2 text-xs text-ink-muted">
+            Spark chance
+            <span class="text-ink" :title="probability.title">{{ probability.value ?? 'N/A' }}</span>
+        </p>
+
+        <!-- The assignment control. Present only where the screen assigns; the compare surface renders
+             the same node with no picker, so the two cannot disagree about what a node is. -->
+        <div v-if="assignable" class="mt-3">
+            <label class="block text-xs font-medium text-ink" :for="controlName">
+                Assign to {{ label }}
+            </label>
+            <select
+                :id="controlName"
+                :name="controlName"
+                class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
+                :class="error ? 'border-risk' : ''"
+                :aria-describedby="error ? `${controlName}-error` : undefined"
+                :aria-invalid="error ? 'true' : undefined"
+            >
+                <option value="">Not chosen</option>
+                <option v-for="option in options ?? []" :key="option.id" :value="option.id">
+                    {{ option.name }}
+                </option>
+            </select>
+            <!-- The error is tied to its control with `aria-describedby` (WCAG 3.3.1) rather than
+                 rendered near it and left for the Trainer to connect by eye. -->
+            <p v-if="error" :id="`${controlName}-error`" class="mt-1 text-xs text-risk">
+                {{ error }}
+            </p>
+        </div>
+    </li>
+</template>

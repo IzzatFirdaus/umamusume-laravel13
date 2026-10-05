@@ -9,11 +9,16 @@ use Illuminate\Support\Facades\DB;
  * failure both landed on a framework page that is off-theme (G-20 says the first paint is the
  * chosen theme; that promise only held on screens this app renders itself).
  *
- * The 500 case has a constraint the 404 does not: it is the page a Trainer sees when something in
- * the app is already broken, so it may not query the database or read the session to draw itself.
- * `components/layout` cannot be used there, because its composer reads the stored theme from
- * `preferences` (D-104). That is what the query counter below is for: it is the difference between
- * a page that looks independent and one that is.
+ * The 500 case has a constraint the 404 and 419 do not: it is the page a Trainer sees when
+ * something in the app is already broken, so it may not query the database or read the session to
+ * draw itself. The theme composer reads the stored preference from `preferences` (D-104), which
+ * is reachable for a 404 or a 419 and is not reachable for the page that says the connection
+ * itself failed. That is what the query counter below is for: it is the difference between a page
+ * that looks independent and one that is.
+ *
+ * B1 retired the shared Blade shell, so the three views draw their own document. `errors.404` and
+ * `errors.419` still take `$theme` from the composer and still query; only the 500 is DB-free. The
+ * canary at the end of this file proves that counter is counting something.
  *
  * A 419 is not reachable through the HTTP stack in tests: the framework's CSRF middleware
  * short-circuits when `runningUnitTests()`, so a tokenless POST is accepted rather than rejected.
@@ -21,7 +26,7 @@ use Illuminate\Support\Facades\DB;
  * once the status exists.
  */
 
-it('keeps a missing address inside the product shell', function (): void {
+it('keeps a missing address on-theme with a way back to work', function (): void {
     $html = test()->get('/no-such-page')
         ->assertNotFound()
         ->getContent();
@@ -58,13 +63,13 @@ it('renders the 500 page without querying the database', function (): void {
     expect($queries)->toBe([], 'the 500 view asked the database something while the app was failing')
         ->and($html)->toContain('Something broke on this machine');
 
-    // The view is the reason the assertion above can pass: it is a standalone document rather than
-    // `x-layout`, whose theme composer reads `preferences`.
+    // The view is the reason the assertion above can pass: it is a standalone document that is not
+    // on the composer's list, so nothing resolves its theme from the database for it.
     expect(file_get_contents(base_path('resources/views/errors/500.blade.php')))
         ->not->toContain('<x-layout');
 });
 
-it('proves the 500 assertion is about something, by failing it for the layout', function (): void {
+it('proves the 500 assertion is about something, by failing it for a page the composer serves', function (): void {
     DB::flushQueryLog();
     DB::enableQueryLog();
 
@@ -73,9 +78,22 @@ it('proves the 500 assertion is about something, by failing it for the layout', 
     $queries = DB::getQueryLog();
     DB::disableQueryLog();
 
-    // Canary for the test above: the shared shell does query, so a zero-query result on the 500 is
-    // a property of that view rather than a counter that never counts anything.
+    // Canary for the test above: the 419 takes its theme from AppServiceProvider's composer, which
+    // reads `preferences`, so a zero-query result on the 500 is a property of that view rather
+    // than a counter that never counts anything.
     expect($queries)->not->toBe([]);
+});
+
+it('drew the shell out of the error paths entirely, so no error view can reach the app shell', function (): void {
+    // B1: the shell went away with the Inertia port. A future view that re-adds `<x-layout` would
+    // also re-add a nav and a flash-banner region to a page that exists outside the product.
+    expect(file_exists(base_path('resources/views/components/layout.blade.php')))->toBeFalse();
+
+    foreach (['404', '419', '500'] as $status) {
+        $source = (string) file_get_contents(base_path("resources/views/errors/{$status}.blade.php"));
+
+        expect($source, "errors/{$status}")->not->toContain('<x-layout');
+    }
 });
 
 it('keeps both new error pages free of a default value standing in for a fact', function (): void {

@@ -33,14 +33,14 @@ class SupportCardEffects
     private const ANCHOR_LEVELS = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
     /**
-     * @return array<int, array{name: string, symbol: string|null}>
+     * @return array<int, array{name: string, symbol: string|null, calc: string|null}>
      */
     public static function dictionary(): array
     {
         return SupportEffect::query()
-            ->get(['effect_id', 'name_en', 'symbol'])
+            ->get(['effect_id', 'name_en', 'symbol', 'calc'])
             ->mapWithKeys(fn (SupportEffect $effect): array => [
-                $effect->effect_id => ['name' => $effect->name_en, 'symbol' => $effect->symbol],
+                $effect->effect_id => ['name' => $effect->name_en, 'symbol' => $effect->symbol, 'calc' => $effect->calc],
             ])
             ->all();
     }
@@ -53,8 +53,8 @@ class SupportCardEffects
      * width would otherwise be read with the wrong levels. A dictionary row that is absent leaves
      * `name` null so the surface can mark the gap instead of inventing a label (D-20).
      *
-     * @param  array<int, array{name: string, symbol: string|null}>  $dictionary
-     * @return list<array{effect_id: int, name: string|null, display: string}>
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>
      */
     public static function atCap(SupportCard $card, array $dictionary): array
     {
@@ -77,20 +77,31 @@ class SupportCardEffects
                 continue;
             }
 
+            $value = (int) $value;
             $effectId = $row[0];
             $entry = $dictionary[$effectId] ?? null;
 
             $rows[] = [
                 'effect_id' => $effectId,
                 'name' => $entry['name'] ?? null,
-                'display' => self::format((int) $value, $entry['symbol'] ?? null),
+                'display' => self::formatValue($value, $entry['symbol'] ?? null),
+                // The anchor's own number, unit and combining mode, beside the word a Trainer reads.
+                // `DeckAnalysis` sums the numbers and reads `calc` to know which of them must not be
+                // summed at all: a `mult` summed would be a figure the client does not state.
+                'value' => $value,
+                'symbol' => $entry['symbol'] ?? null,
+                'calc' => $entry['calc'] ?? null,
             ];
         }
 
         return $rows;
     }
 
-    private static function format(int $value, ?string $symbol): string
+    /**
+     * The anchor's own unit word, applied once here so a figure and a total of figures cannot read
+     * two different units for the same effect.
+     */
+    public static function formatValue(int $value, ?string $symbol): string
     {
         return match ($symbol) {
             'percent' => $value.'%',

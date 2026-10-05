@@ -7,6 +7,7 @@ use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\Umamusume;
 use App\Services\PageSize;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * SCREEN_SPEC.md §7-9: three filter surfaces, two contracts. The catalog answered an unknown
@@ -41,7 +42,8 @@ it('refuses an unknown catalog status and lands on the canonical catalog', funct
 
     $this->followingRedirects()->get('/umamusume?status=Bogus')
         ->assertOk()
-        ->assertSee('Release status:');
+        // The field-naming copy is client-rendered now; the server contract is the error on the page.
+        ->assertInertia(fn (Assert $page) => $page->has('errors.status'));
 });
 
 it('still accepts every status the picker offers, including the unfiltered token', function (string $status): void {
@@ -71,11 +73,15 @@ it('honours a page size on the surface that used to ignore it', function (): voi
 
     $this->get('/support-cards?pageSize=3')
         ->assertOk()
-        ->assertViewHas('cards', fn ($cards): bool => $cards->count() === 3 && $cards->perPage() === 3);
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 3)
+            ->where('cards.per_page', 3));
 
     // The default stays where the deleted constant had it, so a filter nobody touched does not
     // change shape underneath SupportCardPageTest's own pagination case.
-    expect($this->get('/support-cards')->assertOk()->viewData('cards')->perPage())->toBe(25);
+    $this->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('cards.per_page', 25));
 });
 
 it('keeps the catalog and skills page sizes on the same rule they already used', function (): void {
@@ -84,9 +90,9 @@ it('keeps the catalog and skills page sizes on the same rule they already used',
 
     $this->get('/umamusume?pageSize=2')
         ->assertOk()
-        ->assertViewHas('umamusumes', fn ($rows): bool => $rows->perPage() === 2);
+        ->assertInertia(fn (Assert $page) => $page->where('umamusumes.per_page', 2));
 
     $this->get('/skills?pageSize=2')
         ->assertOk()
-        ->assertViewHas('skills', fn ($rows): bool => $rows->perPage() === 2);
+        ->assertInertia(fn (Assert $page) => $page->where('skills.per_page', 2));
 });

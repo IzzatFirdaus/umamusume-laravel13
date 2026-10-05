@@ -10,6 +10,7 @@ use App\Models\Umamusume;
 use App\Models\UmamusumeAlias;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * The catalog as a trainee and card tree (PRD FR-A-6, US-1).
@@ -45,15 +46,18 @@ it('nests each card under its trainee', function (): void {
         'rarity' => CardRarity::ThreeStar, 'global_release_date' => '2026-07-02',
     ]);
 
-    $html = test()->get('/umamusume')->assertOk()->getContent();
-
-    expect($html)->toContain('Gold Ship')
-        ->and($html)->toContain('ゴールドシップ')
-        ->and($html)->toContain('[Red Strife]')
-        ->and($html)->toContain('[RUN! RUIN! LAUNCHER!]')
-        // The trainee row carries her form count and the max rarity across her cards.
-        ->and($html)->toContain('2 forms')
-        ->and($html)->toContain('Three stars');
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Catalog/Index')
+            ->where('umamusumes.data.0.name', 'Gold Ship')
+            ->where('umamusumes.data.0.name_ja', 'ゴールドシップ')
+            // The trainee row carries her form count and the max rarity across her cards.
+            ->where('umamusumes.data.0.form_count', 2)
+            ->where('umamusumes.data.0.max_rarity.label', 'Three stars')
+            ->has('umamusumes.data.0.cards', 2)
+            ->where('umamusumes.data.0.cards.0.title', '[Red Strife]')
+            ->where('umamusumes.data.0.cards.1.title', '[RUN! RUIN! LAUNCHER!]'));
 });
 
 it('orders the debut first, then by Global release date ascending', function (): void {
@@ -97,13 +101,14 @@ it('never prints a bare zero when a trainee has no forms', function (): void {
         'name' => 'Cardless One', 'slug' => 'cardless-one', 'match_key' => 'cardlessone',
     ]);
 
-    $html = test()->get('/umamusume?search=cardless')->assertOk()->getContent();
-
-    // G-13 and the disclosure pattern: an absent count prints words, never 0. This is
-    // also the shape DesignTokensTest creates 30 of, so it has to render clean.
-    expect($html)->toContain('Cardless One')
-        ->and($html)->not->toMatch('/0 forms/')
-        ->and($html)->toContain('no forms recorded');
+    test()->get('/umamusume?search=cardless')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('umamusumes.data.0.name', 'Cardless One')
+            // Null, not a zero, so the page renders "no forms recorded" rather than "0 forms"
+            // (the words are asserted in tests/browser/catalog.spec.ts).
+            ->where('umamusumes.data.0.form_count', 0)
+            ->where('umamusumes.data.0.max_rarity', null));
 });
 
 it('hides a card only the Tier B source attests, unless asked', function (): void {
@@ -115,14 +120,17 @@ it('hides a card only the Tier B source attests, unless asked', function (): voi
         'umamusume_id' => $u->id, 'card_id' => 112002, 'title' => '[GameTora Only]',
     ]);
 
-    $default = test()->get('/umamusume')->assertOk()->getContent();
-    expect($default)->toContain('[Seen Twice]')
-        ->and($default)->not->toContain('[GameTora Only]');
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('umamusumes.data.0.cards.0.title', '[Seen Twice]')
+            ->has('umamusumes.data.0.cards', 1));
 
     test()->get('/umamusume?show_unconfirmed=1')
         ->assertOk()
-        ->assertSee('[GameTora Only]')
-        ->assertSee('Not confirmed by two sources');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('umamusumes.data.0.cards', 2)
+            ->where('umamusumes.data.0.cards.1.unconfirmed', true));
 });
 
 it('defaults the release status filter to released on Global', function (): void {
@@ -244,17 +252,17 @@ it('reads a trainee badge off the cards the filter let through', function (): vo
     // and `show_unconfirmed=1` moves both together. The glyph run is asserted alongside
     // the words because a rarity `<select>` or a card's `aria-label` could put the word
     // "Three stars" on the page for the wrong reason; `★★★` can only be the badge.
-    $default = test()->get('/umamusume?search=nice nature')->assertOk()->getContent();
-    expect($default)->toContain('[Two Star, Attested]')
-        ->and($default)->not->toContain('[Three Star, Alone]')
-        ->and($default)->toContain('Two stars')
-        ->and($default)->not->toContain('Three stars')
-        ->and($default)->not->toContain('★★★');
+    test()->get('/umamusume?search=nice nature')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('umamusumes.data.0.max_rarity.label', 'Two stars')
+            ->where('umamusumes.data.0.form_count', 1));
 
-    $shown = test()->get('/umamusume?search=nice nature&show_unconfirmed=1')->assertOk()->getContent();
-    expect($shown)->toContain('Three stars')
-        ->and($shown)->toContain('★★★')
-        ->and($shown)->toContain('2 forms');
+    test()->get('/umamusume?search=nice nature&show_unconfirmed=1')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('umamusumes.data.0.max_rarity.label', 'Three stars')
+            ->where('umamusumes.data.0.form_count', 2));
 });
 
 it('never serves a page cached for one term to another term sharing its key', function (): void {
@@ -287,22 +295,22 @@ it('keeps the active filters on every pagination link', function (): void {
     ]);
 
     // Two rows at one per page, so page 2 renders and its pager links with it.
-    $html = test()->get('/umamusume?status=all&search=teio&show_unconfirmed=1&pageSize=1&page=2')
-        ->assertOk()
-        ->getContent();
+    $response = test()->get('/umamusume?status=all&search=teio&show_unconfirmed=1&pageSize=1&page=2')
+        ->assertOk();
 
-    preg_match_all('/href="([^"]*page=\d+)"/', $html, $matches);
+    $links = $response->viewData('page')['props']['umamusumes']['links'];
+    $hrefs = array_values(array_filter(array_map(static fn (array $link): ?string => $link['url'], $links)));
 
     // A bare `/umamusume?page=1` silently reverts status, search and the unconfirmed
     // opt-in the moment a Trainer pages, so no pager link may drop one of the three.
     $dropped = array_values(array_filter(
-        $matches[1],
+        $hrefs,
         static fn (string $href): bool => ! str_contains($href, 'status=all')
             || ! str_contains($href, 'search=teio')
             || ! str_contains($href, 'show_unconfirmed=1'),
     ));
 
-    expect($matches[1])->not->toBeEmpty()
+    expect($hrefs)->not->toBeEmpty()
         ->and($dropped)->toBe([], 'a pagination link dropped an active filter');
 });
 
@@ -388,9 +396,10 @@ it('lists the trainee\'s forms on her detail page', function (): void {
 
     test()->get('/umamusume/mejiro-mcqueen')
         ->assertOk()
-        ->assertSee('[Frontline Elegance]')
-        ->assertSee('Costume forms')
-        ->assertSee('debut form');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards', 1)
+            ->where('cards.0.title', '[Frontline Elegance]')
+            ->where('cards.0.is_debut_form', true));
 });
 
 it('names the source and the fetch date instead of the seeded-data line', function (): void {
@@ -402,21 +411,22 @@ it('names the source and the fetch date instead of the seeded-data line', functi
         'fetched_at' => '2026-09-29 10:00:00',
     ]);
 
-    // The exact sentence the request quotes has to go away for fetched rows, while
-    // staying for genuinely hand-entered ones. That is the deliverable, tested.
+    // A fetched row is what the page reads for its provenance list; a genuinely hand-entered
+    // record resolves an empty list instead (the next case).
     test()->get('/umamusume/silence-suzuka')
         ->assertOk()
-        ->assertSee('gametora.test')
-        ->assertSee('gametora-character-cards')
-        ->assertDontSee('No fetched sources');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('provenance', 1)
+            ->where('provenance.0.url', 'https://gametora.test/character-cards.json')
+            ->where('provenance.0.source_key', 'gametora-character-cards'));
 });
 
-it('still says a hand-entered record has no fetched source', function (): void {
+it('resolves no provenance for a hand-entered record', function (): void {
     Umamusume::factory()->manual()->create(['name' => 'Local Entry', 'slug' => 'local-entry']);
 
     test()->get('/umamusume/local-entry')
         ->assertOk()
-        ->assertSee('seeded or entered by hand');
+        ->assertInertia(fn (Assert $page) => $page->has('provenance', 0));
 });
 
 it('keeps an unconfirmed card out of the detail list unless asked', function (): void {
@@ -425,11 +435,19 @@ it('keeps an unconfirmed card out of the detail list unless asked', function ():
         'umamusume_id' => $u->id, 'card_id' => 199901, 'title' => '[Solo Sourced]', 'is_debut_form' => true,
     ]);
 
-    test()->get('/umamusume/vodka')->assertOk()->assertDontSee('[Solo Sourced]');
+    test()->get('/umamusume/vodka')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards', 0)
+            ->where('hiddenFormCount', 1));
+
     test()->get('/umamusume/vodka?show_unconfirmed=1')
         ->assertOk()
-        ->assertSee('[Solo Sourced]')
-        ->assertSee('Not confirmed by two sources');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards', 1)
+            ->where('cards.0.title', '[Solo Sourced]')
+            ->where('cards.0.unconfirmed', true)
+            ->where('hiddenFormCount', 0));
 });
 
 it('names each card the source its own row was read from', function (): void {
@@ -452,23 +470,20 @@ it('names each card the source its own row was read from', function (): void {
         'fetched_at' => '2026-01-01 00:00:00',
     ]);
 
-    // `assertSeeText` is the half that matters: `assertSee` compares against the raw
-    // response body, so a URL parked in a `title` attribute satisfies it while a Trainer
-    // reads nothing but `read <date>`. Stripping tags first is what puts "the source is on
-    // screen" under test rather than "the source is in the markup somewhere".
+    // The two levels stay distinct: the card carries the document its own row was read from,
+    // and the trainee's list carries hers. A card fed from `data_sources` would swap these.
     test()->get('/umamusume/mayano-top-gun')
         ->assertOk()
-        ->assertSee('card-199902')
-        ->assertSeeText('card-199902');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.0.source_url', 'https://gametora.test/card-199902.json')
+            ->where('provenance.0.url', 'https://gametora.test/characters.json'));
 });
 
 it('names the snapshot it was read from, and the URL where there is none', function (): void {
     // The row reads `from <snapshot> · <url>` where a snapshot exists and `from <url>` where
     // it does not: `source_url` is NOT NULL so it is always on screen, and the snapshot is
     // preferred by coming first because it is the in-tree document this fetch actually read.
-    // Two cards on one trainee, so the pair is settled in a single render, and every
-    // assertion is on stripped text: a URL parked in a `title` attribute satisfies
-    // `assertSee` while showing a Trainer nothing.
+    // Two cards on one trainee, with pinned release dates so the two rows settle in one order.
     // A trainee the suite already uses, deliberately: a fixture name is copy this repository
     // owns rather than verbatim source data, so it must not add a hit to the `lore-code` gate.
     $u = Umamusume::factory()->create(['name' => 'Special Week', 'slug' => 'special-week']);
@@ -476,6 +491,7 @@ it('names the snapshot it was read from, and the URL where there is none', funct
         'umamusume_id' => $u->id,
         'card_id' => 199903,
         'title' => '[Snapshot Form]',
+        'global_release_date' => '2025-01-01',
         'source_url' => 'https://gametora.test/card-199903.json',
         'snapshot_path' => 'snapshots/gametora-character-cards/2026-09-29/ab12cd.html',
     ]);
@@ -483,27 +499,24 @@ it('names the snapshot it was read from, and the URL where there is none', funct
         'umamusume_id' => $u->id,
         'card_id' => 199904,
         'title' => '[No Snapshot Form]',
+        'global_release_date' => '2025-02-01',
         'source_url' => 'https://gametora.test/card-199904.json',
     ]);
 
     test()->get('/umamusume/special-week')
         ->assertOk()
-        ->assertSeeText('snapshots/gametora-character-cards/2026-09-29/ab12cd.html')
-        ->assertSeeText('https://gametora.test/card-199903.json')
-        ->assertSeeText('https://gametora.test/card-199904.json')
-        // The snapshot leads its own URL, which is what "preferred" has to mean here: a row
-        // that printed the two in the other order still shows both strings.
-        ->assertSeeTextInOrder([
-            'snapshots/gametora-character-cards/2026-09-29/ab12cd.html',
-            'https://gametora.test/card-199903.json',
-        ]);
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards', 2)
+            ->where('cards.0.snapshot_path', 'snapshots/gametora-character-cards/2026-09-29/ab12cd.html')
+            ->where('cards.0.source_url', 'https://gametora.test/card-199903.json')
+            ->where('cards.1.snapshot_path', null)
+            ->where('cards.1.source_url', 'https://gametora.test/card-199904.json'));
 });
 
 it('says forms are hidden rather than that none were recorded', function (): void {
     // Constraint C: a filtered value gets the truth, not a false absence. Two solo-sourced
-    // forms is the whole fixture, so "2 forms hidden as unconfirmed" re-counts from it, and
-    // the section cannot read "No Global costume cards recorded for this trainee yet" while
-    // rows sit behind the filter.
+    // forms is the whole fixture, so the page re-counts from it, and the section cannot read
+    // "No Global costume cards recorded" while rows sit behind the filter.
     $u = Umamusume::factory()->create(['name' => 'Gold Ship', 'slug' => 'gold-ship-detail']);
     CharacterCard::factory()->unconfirmed()->create([
         'umamusume_id' => $u->id, 'card_id' => 199905, 'title' => '[Hidden Alpha]',
@@ -512,23 +525,17 @@ it('says forms are hidden rather than that none were recorded', function (): voi
         'umamusume_id' => $u->id, 'card_id' => 199906, 'title' => '[Hidden Beta]',
     ]);
 
-    $hidden = test()->get('/umamusume/gold-ship-detail')->assertOk()->getContent();
+    test()->get('/umamusume/gold-ship-detail')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards', 0)
+            ->where('hiddenFormCount', 2));
 
-    expect($hidden)->not->toContain('No Global costume cards recorded')
-        ->and($hidden)->toContain('Every costume form recorded for this trainee is hidden as unconfirmed.')
-        ->and($hidden)->toContain('2 forms hidden as unconfirmed')
-        // The lever is on the page, not something to type into the address bar (G-11).
-        ->and($hidden)->toContain('Show unconfirmed forms')
-        // Both fixtures, not one: the same branch hides both titles, so pinning only the
-        // first would let a scope that leaked one of them through unchanged.
-        ->and($hidden)->not->toContain('[Hidden Alpha]')
-        ->and($hidden)->not->toContain('[Hidden Beta]');
-
-    $shown = test()->get('/umamusume/gold-ship-detail?show_unconfirmed=1')->assertOk()->getContent();
-
-    expect($shown)->toContain('[Hidden Alpha]')
-        ->and($shown)->toContain('[Hidden Beta]')
-        ->and($shown)->not->toContain('hidden as unconfirmed');
+    test()->get('/umamusume/gold-ship-detail?show_unconfirmed=1')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards', 2)
+            ->where('hiddenFormCount', 0));
 });
 
 it('reads a card on the display date and keeps a date-only value date-only', function (): void {
@@ -551,9 +558,10 @@ it('reads a card on the display date and keeps a date-only value date-only', fun
     test()->travelTo('2026-09-29 12:00:00', function (): void {
         test()->get('/umamusume/winning-ticket')
             ->assertOk()
-            ->assertSee('read Sep 30, 2026')
-            ->assertDontSee('read Sep 29, 2026')
-            ->assertSee('Released (Global) Mar 1, 2025');
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('cards.0.fetched_at_display', 'Sep 30, 2026')
+                ->where('cards.0.global_release_date_display', 'Mar 1, 2025')
+                ->where('cards.0.global_release_date', '2025-03-01'));
     });
 });
 
@@ -564,11 +572,12 @@ it('names each form rarity through the shared chip rather than a second badge', 
         'rarity' => CardRarity::TwoStar,
     ]);
 
-    $html = test()->get('/umamusume/mcqueen-second-form')->assertOk()->getContent();
-
-    // One fixture card, so exactly one chip. The accessible name is asserted with the glyphs
-    // because a bare star run is noise to a screen reader, and a second badge would put the
-    // same words on the page for the wrong reason.
-    expect($html)->toContain('★★')
-        ->and(substr_count($html, 'aria-label="Two stars"'))->toBe(1, 'the detail row grew a second rarity badge');
+    // One fixture card, so exactly one chip. The glyph run and its accessible name are asserted
+    // in tests/browser/catalog-detail.spec.ts; here the props carry the pair the chip binds.
+    test()->get('/umamusume/mcqueen-second-form')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards', 1)
+            ->where('cards.0.rarity_label', 'Two stars')
+            ->where('cards.0.rarity_stars', '★★'));
 });

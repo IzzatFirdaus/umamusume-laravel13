@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LegacyController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SkillController;
@@ -10,7 +13,9 @@ use App\Http\Controllers\SupportCardController;
 use App\Http\Controllers\TrainingRunController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/training-runs')->name('home');
+// Trainer Desk 2.0 home (ADR-0020 §1): the SPA Dashboard is the front door. The Blade
+// screens below still serve their own routes during the rewrite.
+Route::get('/', [DashboardController::class, 'index'])->name('home');
 
 Route::get('/umamusume', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catalog.show');
@@ -40,13 +45,45 @@ Route::put('/training-runs/{run}/turns/{turn}', [TrainingRunController::class, '
 Route::delete('/training-runs/{run}/turns/{turn}', [TrainingRunController::class, 'destroyTurn'])->name('runs.turns.destroy');
 Route::post('/training-runs/{run}/skills', [TrainingRunController::class, 'syncSkills'])->name('runs.skills.sync');
 Route::post('/training-runs/{run}/deck', [TrainingRunController::class, 'syncDeck'])->name('runs.deck.sync');
+// The deck builder (SCREEN-007). Read-only; it posts to `runs.deck.sync` above, so the write and its
+// Form Request are the ones the run screen already uses. Registered after the POST because Laravel
+// matches on method first, and either order would bind the same `{run}`.
+Route::get('/training-runs/{run}/deck', [TrainingRunController::class, 'deck'])->name('runs.deck');
 Route::post('/training-runs/{run}/races', [TrainingRunController::class, 'storeRace'])->name('runs.races.store');
 Route::post('/training-runs/{run}/purchases', [TrainingRunController::class, 'storePurchase'])->name('runs.purchases.store');
+Route::put('/training-runs/{run}/build-target', [TrainingRunController::class, 'updateBuildTarget'])->name('runs.build-target.update');
 
 Route::get('/review', [ReviewController::class, 'index'])->name('review.index');
 Route::post('/review/{candidate}', [ReviewController::class, 'resolve'])->name('review.resolve');
+
+/*
+ * The Legacy Lab (SCREEN-006; PRD FR-G, ADR-0020 §3, under ADR-0010). Record-only: these routes read
+ * the Veteran library, record what the Trainer entered, and align stored rows. Nothing here computes
+ * an inheritance, an Affinity payout, a star-roll chance, or a recommended combination, and the
+ * controller's docblock is where that boundary is stated in full.
+ *
+ * `/legacy/compare` is declared first and `{run}` is constrained to a number, which is the same pair of
+ * decisions `routes/web.php` already makes for `runs.import` and `runs.{run}`: the literal segment
+ * would otherwise bind to the model and 404. The constraint is belt-and-braces for the ordering, and
+ * it is also what stops `/legacy/compare` from reading as a run id at all.
+ */
+Route::get('/legacy', [LegacyController::class, 'index'])->name('legacy.index');
+Route::get('/legacy/compare', [LegacyController::class, 'compare'])->name('legacy.compare');
+Route::get('/legacy/{run}', [LegacyController::class, 'builder'])
+    ->whereNumber('run')
+    ->name('legacy.builder');
+Route::put('/legacy/{run}', [LegacyController::class, 'update'])
+    ->whereNumber('run')
+    ->name('legacy.update');
 
 // The two UI preferences PRD US-11 authorizes (SCREEN_SPEC.md §7-5). One PUT for both keys,
 // because writing a preference is one action on the store rather than one action per key.
 Route::get('/preferences', [PreferenceController::class, 'edit'])->name('preferences.edit');
 Route::put('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
+
+// Streams a mirrored artwork file to an <img src> (ADR-0021 read half). A web route, not /api/v1:
+// it serves a browser asset, reads a Storage path, and opens no second outbound surface. `id` is
+// constrained to a number so a path-traversal value cannot reach the controller.
+Route::get('/artwork/{kind}/{id}', [ArtworkAssetController::class, 'show'])
+    ->whereNumber('id')
+    ->name('artwork.show');

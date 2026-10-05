@@ -5,9 +5,11 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "test:browser": "playwright test"
     },
     "devDependencies": {
+        "@playwright/test": "^1.63.0",
         "@tailwindcss/vite": "^4.0.0",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",
@@ -18,5 +20,10 @@
     },
     "allowScripts": {
         "esbuild@0.28.2": true
+    },
+    "dependencies": {
+        "@inertiajs/vue3": "^2.3.28",
+        "@vitejs/plugin-vue": "^6.0.9",
+        "vue": "^3.5.43"
     }
 }

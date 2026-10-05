@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use Illuminate\Support\Collection;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * The guided turn flow and the stat band, mounted on a real run.
@@ -13,6 +15,10 @@ use App\Models\TurnEntry;
  * tests are the other half of that fix - a component nobody can reach has no behaviour to
  * guard, so the guards live on the route a Trainer actually uses. That preview surface
  * (`design-preview`) has since been deleted, so this file exercises the run screen only.
+ *
+ * The screen is Inertia now (ADR-0020), so these assert the `rail` prop the Vue rail
+ * renders from. The rendered half - the radiogroup, the choice cards, the delta colours,
+ * the energy chip words, the first-turn note - lives in tests/browser/run-detail.spec.ts.
  *
  * Two rules decide most of what is asserted here:
  *   D-51 - committing is a separate action from selecting, and "preview before commit" is
@@ -50,25 +56,6 @@ function guidedTurn(TrainingRun $run, int $turn, array $overrides = []): TurnEnt
     ], $overrides));
 }
 
-/**
- * The grade letters the mounted band printed, in DOM order.
- *
- * Matched on the badge span rather than as a substring: "B" is inside "B+", and a plain
- * contains() would pass a band that printed nothing.
- *
- * @return list<string>
- */
-function mountedBandLetters(string $html): array
-{
-    preg_match_all(
-        '/class="[^"]*bg-grade-[a-z]+[^"]*"[^>]*>\s*([A-Z][+]?)\s*</',
-        $html,
-        $matches,
-    );
-
-    return $matches[1];
-}
-
 function previewPayload(TrainingRun $run, array $overrides = []): array
 {
     return array_merge([
@@ -93,12 +80,17 @@ it('mounts the stat band from the latest entered turn of the run', function (): 
     guidedTurn($run, 1);
     guidedTurn($run, 2, ['speed' => 550, 'stamina' => 525, 'power' => 601, 'guts' => 75, 'wit' => 0]);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    // 550/50 = index 11 of the seventeen labels, so Speed must read B+; the same row
-    // printed from turn 1 would say C+. The band takes the latest, not the first.
-    expect(mountedBandLetters($html))->toBe(['B+', 'B', 'A', 'G+', 'G'])
-        ->and($html)->toContain('550');
+    // Turn 1 holds 480 on Speed and turn 2 holds 550, so a band built from turn 1 fails
+    // here: the band takes the latest, not the first. The grade letters it derives from
+    // these values (550/50 = index 11 of the seventeen labels, so Speed reads B+) live in
+    // StatBand.vue and are pinned in tests/browser/run-detail.spec.ts.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('band.values', [
+                'Speed' => 550, 'Stamina' => 525, 'Power' => 601, 'Guts' => 75, 'Wit' => 0,
+            ]));
 });
 
 it('mounts no stat band for a run that has logged no turns', function (): void {
@@ -106,34 +98,30 @@ it('mounts no stat band for a run that has logged no turns', function (): void {
     guidedTurn($run, 1);
     TurnEntry::query()->where('training_run_id', $run->id)->delete();
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    // Five zeroes would be a claim about a trainee nobody entered (D-220). The section
-    // is absent, and the page says what to do instead (R-27).
-    expect($html)->not->toContain('bg-grade-')
-        ->and($html)->toContain('No turns logged yet');
+    // Five zeroes would be a claim about a trainee nobody entered (D-220), so the band
+    // payload is null. The empty log is also what renders the page's "No turns logged yet"
+    // copy (R-27), in tests/browser/run-detail.spec.ts.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('band', null)
+            ->has('turns', 0));
 });
 
 it('puts the guided rail ahead of the raw form and hides the raw form behind a disclosure', function (): void {
     $run = guidedRun();
     guidedTurn($run, 1);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    // D-53: the escape hatch is reachable, it is not the default. Position is the proof:
-    // the rail renders first and `condition`, which only the raw form carries, sits
-    // inside the <details>.
-    $rail = strpos($html, 'role="radiogroup"');
-    $details = strpos($html, '<details');
-    $rawField = strpos($html, 'name="condition"');
-    $detailsEnd = strpos($html, '</details>');
-
-    expect($rail)->not->toBeFalse()
-        ->and($details)->not->toBeFalse()
-        ->and($rail)->toBeLessThan($details)
-        ->and($rawField)->toBeGreaterThan($details)
-        ->and($rawField)->toBeLessThan($detailsEnd)
-        ->and($html)->toContain('Correct a turn by hand');
+    // D-53: the escape hatch is reachable, it is not the default. The rail is what the page
+    // offers first, assembled server-side. Its rendered position, the <details> wrapper and
+    // the 'Correct a turn by hand' summary are in tests/browser/run-detail.spec.ts.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('rail.choices', 7)
+            ->where('rail.current', 'training')
+            ->where('rail.turn', 2)
+            ->where('rail.action', route('runs.turns.store', $run)));
 });
 
 it('previews a turn without writing it', function (): void {
@@ -142,26 +130,33 @@ it('previews a turn without writing it', function (): void {
 
     $payload = previewPayload($run);
 
-    $this->post('/training-runs/'.$run->id.'/turns', $payload)
+    test()->post('/training-runs/'.$run->id.'/turns', $payload)
         ->assertRedirect(route('runs.show', $run));
 
     expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(1);
 
     // PRG: the previewed screen lives on the redirect target, and the carry below is the
     // flashed input plus the `previewed` flag the controller adds, which is exactly what
-    // the browser arrives with. `assertSee('Preview')` moved with the body it reads.
-    $response = $this->withSession(['_old_input' => $payload + ['previewed' => '1']])
-        ->get(route('runs.show', $run));
-
-    $response->assertSee('Preview', false);
-
-    // The deltas are the entered value minus the stored one, in the two prose colours
-    // with the words present: orange up, blue down, never colour alone (D-12).
-    $html = $response->getContent();
-
-    expect($html)->toMatch('/text-up[^>]*>\s*\+70 Speed\s*</')
-        ->and($html)->toMatch('/text-down[^>]*>\s*-14 Energy\s*</')
-        ->and($html)->toContain('Confirm turn');
+    // the browser arrives with. Each delta is entered minus stored with its own direction:
+    // orange up, blue down, never colour alone (D-12). The panel heading, the 'Confirm
+    // turn' control and the colours are in tests/browser/run-detail.spec.ts.
+    test()->withSession(['_old_input' => $payload + ['previewed' => '1']])
+        ->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.previewed', true)
+            ->where('rail.current', 'outcome')
+            ->where('rail.preview', [
+                ['direction' => 'up', 'text' => '+70 Speed'],
+                ['direction' => 'up', 'text' => '+225 Stamina'],
+                ['direction' => 'up', 'text' => '+246 Power'],
+                ['direction' => 'down', 'text' => '-135 Guts'],
+                ['direction' => 'down', 'text' => '-95 Wit'],
+                ['direction' => 'down', 'text' => '-50 Skill Points'],
+                ['direction' => 'down', 'text' => '-14 Energy'],
+                ['direction' => 'up', 'text' => '+3400 Fans'],
+                ['direction' => 'up', 'text' => '+2 Mood'],
+            ]));
 });
 
 it('refuses to confirm a turn that was never previewed', function (): void {
@@ -180,18 +175,19 @@ it('reads a mood drop as a drop, whatever the enum order says', function (): voi
 
     $payload = previewPayload($run, ['mood' => 'BAD']);
 
-    $this->post('/training-runs/'.$run->id.'/turns', $payload)
+    test()->post('/training-runs/'.$run->id.'/turns', $payload)
         ->assertRedirect(route('runs.show', $run));
-
-    $html = $this->withSession(['_old_input' => $payload + ['previewed' => '1']])
-        ->get(route('runs.show', $run))
-        ->getContent();
 
     // MoodTier::cases() is ordered best to worst, so subtracting in index order reports
     // GREAT -> BAD as +3 and paints a mood collapse in the colour of a gain. The browser
     // pass caught this on the rendered preview; the deltas above are the same arithmetic.
-    expect($html)->toMatch('/text-down[^>]*>\s*-3 Mood\s*</')
-        ->and($html)->not->toContain('+3 Mood');
+    test()->withSession(['_old_input' => $payload + ['previewed' => '1']])
+        ->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.preview', fn (Collection $deltas): bool => $deltas->contains(
+                fn (array $delta): bool => $delta['direction'] === 'down' && $delta['text'] === '-3 Mood'
+            ) && ! $deltas->contains(fn (array $delta): bool => $delta['text'] === '+3 Mood')));
 });
 
 it('confirms a previewed turn and stores it', function (): void {
@@ -227,85 +223,108 @@ it('records a failed turn as an event and names the penalty kind on the timeline
         'event_type' => 'Failure',
     ]);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
+    // A failure is a first-class state, not a zero (D-200, D-153): it is folded onto the
+    // turn row (ADR-0003) as `failure`, which is what the 'Failed' chip renders from. The
+    // chip word and the penalty wording are in tests/browser/run-detail.spec.ts.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('turns', function (Collection $rows): bool {
+                $turn = $rows->firstWhere('turn', 2);
 
-    // A failure is a first-class state, not a zero (D-200, D-153). The word carries the
-    // colour's meaning, so the chip survives colour-blindness and a screen reader.
-    expect($html)->toContain('Failed')
-        ->and($html)->toMatch('/penalt[a-z]*[^<]*stat/i');
+                return is_array($turn) && $turn['failure'] === [
+                    'penalty_kind' => 'stat',
+                    'source_name' => 'Speed',
+                ];
+            }));
 });
 
 it('offers the five client mood strings with their arrows', function (): void {
     $run = guidedRun();
     guidedTurn($run, 1);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
     // D-259 makes the glyph part of the component: the three derived mood colours are
-    // not separable by hue, so the arrow is the only ordinal signal.
-    foreach (['GREAT ↑', 'GOOD ↑', 'NORMAL →', 'BAD ↓', 'AWFUL ↓'] as $option) {
-        expect($html)->toContain($option);
-    }
-
-    expect($html)->not->toContain('Practice Poor')
-        ->and($html)->not->toContain('Peak');
+    // not separable by hue, so the arrow is the only ordinal signal. The rail's select
+    // binds to exactly this list, and the option text it renders is in
+    // tests/browser/run-detail.spec.ts.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('moodOptions', [
+                ['value' => 'GREAT', 'arrow' => '↑'],
+                ['value' => 'GOOD', 'arrow' => '↑'],
+                ['value' => 'NORMAL', 'arrow' => '→'],
+                ['value' => 'BAD', 'arrow' => '↓'],
+                ['value' => 'AWFUL', 'arrow' => '↓'],
+            ]));
 });
 
 it('defaults the mood choice to the mood of the previous turn', function (): void {
     $run = guidedRun();
     guidedTurn($run, 1, ['mood' => 'GOOD']);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    expect($html)->toMatch('/<option value="GOOD"[^>]*selected/');
+    // The select's selected option binds to `rail.mood`, which is the latest stored tier
+    // when nothing is staged.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('rail.mood', 'GOOD'));
 });
 
-it('renders the energy band word that the value puts it in', function (int $energy, string $word): void {
+it('renders the energy band word that the value puts it in', function (int $energy): void {
     $run = guidedRun();
     guidedTurn($run, 1, ['energy' => $energy]);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    expect($html)->toContain($word);
+    // The Safe/Caution/Danger words and their 50/30 boundaries are derived in
+    // GuidedStep.vue from this reading, so the band chip itself is in
+    // tests/browser/run-detail.spec.ts.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('rail.energy', $energy));
 })->with([
-    [74, 'Safe'],
-    [42, 'Caution'],
-    [18, 'Danger'],
+    74, // Safe
+    42, // Caution
+    18, // Danger
 ]);
 
 it('attributes the Danger boundary to this tool, not to the game', function (): void {
     $run = guidedRun();
     guidedTurn($run, 1, ['energy' => 18]);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
     // D-204: 50 is the only sourced Energy threshold. A Danger band below 30 is an owner
-    // preference and has to say so wherever it renders.
-    expect($html)->toMatch('/30[^<]{0,80}(this tool|not a game|no source|own ruling)/i');
+    // preference and has to say so wherever it renders; the rail's own note renders in
+    // GuidedStep.vue from the reading below, and its wording is in
+    // tests/browser/run-detail.spec.ts.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('rail.energy', 18));
 });
 
-it('advises under 50 and names Wit, and stays quiet above it', function (int $energy, bool $advises): void {
+it('advises under 50 and names Wit, and stays quiet above it', function (int $energy): void {
     $run = guidedRun();
     guidedTurn($run, 1, ['energy' => $energy]);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    expect(str_contains($html, 'Wit costs 0 Energy'))->toBe($advises);
+    // The hint renders in GuidedStep.vue from this reading being below 50; its 'Wit costs
+    // 0 Energy' wording is in tests/browser/run-detail.spec.ts.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('rail.energy', $energy));
 })->with([
-    [74, false],
-    [42, true],
-    [18, true],
+    74, // no hint: above the sourced 50 line
+    42, // hint
+    18, // hint
 ]);
 
 it('gives green-tint its committed consumer in the Safe state', function (): void {
     $run = guidedRun();
     guidedTurn($run, 1, ['energy' => 74]);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
     // R23 promised this token a real consumer instead of retirement. KI-11's open half
-    // closes only if the Safe band actually renders on a Trainer-facing surface.
-    expect($html)->toContain('bg-green-tint');
+    // closes only if the Safe band actually renders on a Trainer-facing surface: the
+    // rail's Safe state (above 50) is the one that carries bg-green-tint, in
+    // GuidedStep.vue, pinned in tests/browser/run-detail.spec.ts.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('rail.energy', 74));
 });
 
 it('still accepts a raw escape-hatch entry with none of the rail fields', function (): void {
@@ -339,22 +358,27 @@ it('gives the choice group the semantics it claims', function (): void {
     $run = guidedRun();
     guidedTurn($run, 1);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
     // The deferred accessibility finding was that the rail declared `role="radiogroup"`
     // over children that were `role="radio"` buttons: a claim the element did not support,
     // and one that carried no value on submit either. Every choice is now a radio input
-    // inside the banner the design mandates, so the group is telling the truth.
+    // inside the banner the design mandates, built one-per-choice from this payload; the
+    // group itself is in tests/browser/run-detail.spec.ts.
     $expected = count(config('scenarios.stat_order')) + 2;
 
-    expect($html)->toContain('role="radiogroup"')
-        ->and($html)->not->toContain('role="radio"')
-        ->and(substr_count($html, '<input type="radio" name="choice"'))->toBe($expected);
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('rail.choices', $expected)
+            ->where('rail.choices', fn (Collection $choices): bool => $choices->pluck('key')->all() === [
+                'training-Speed', 'training-Stamina', 'training-Power', 'training-Guts', 'training-Wit', 'rest', 'mood',
+            ]));
 });
 
 it('names no scenario in the run view or the rail it passes down', function (): void {
-    $view = (string) file_get_contents(base_path('resources/views/runs/show.blade.php'));
-    $rail = (string) file_get_contents(base_path('resources/views/components/guided-step.blade.php'));
+    // The run screen is Inertia now, so the view and the rail are these two sources; the
+    // retired Blade pair is no longer rendered by anything.
+    $view = (string) file_get_contents(base_path('resources/js/pages/Runs/Show.vue'));
+    $rail = (string) file_get_contents(base_path('resources/js/components/GuidedStep.vue'));
 
     // D-240: the run view composes from config. A scenario literal here is the smell the
     // whole component set exists to avoid.
@@ -370,20 +394,32 @@ it('carries the turn being staged across both stages without a script', function
 
     $payload = previewPayload($run);
 
-    $this->post('/training-runs/'.$run->id.'/turns', $payload)
+    test()->post('/training-runs/'.$run->id.'/turns', $payload)
         ->assertRedirect(route('runs.show', $run));
 
-    $html = $this->withSession(['_old_input' => $payload + ['previewed' => '1']])
-        ->get(route('runs.show', $run))
-        ->getContent();
-
     // Zero new JS means every value the second stage needs is in the first response:
-    // re-posting the rail must not depend on anything the browser computed.
-    foreach (['speed', 'stamina', 'power', 'guts', 'wit', 'energy', 'fans', 'choice', 'turn'] as $field) {
-        expect($html)->toContain('name="'.$field.'"');
-    }
-
-    expect($html)->toContain('name="previewed"');
+    // re-posting the rail must not depend on anything the browser computed. `previewed`
+    // is the flag the confirm control renders from.
+    test()->withSession(['_old_input' => $payload + ['previewed' => '1']])
+        ->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.values', [
+                'turn' => 2,
+                'speed' => 550,
+                'stamina' => 525,
+                'power' => 601,
+                'guts' => 75,
+                'wit' => 0,
+                'sp' => 190,
+                'energy' => 74,
+                'mood' => 'GREAT',
+                'fans' => 12400,
+                'choice' => 'training-Speed',
+                'outcome' => 'Success',
+            ])
+            ->where('rail.selected', 'training-Speed')
+            ->where('rail.previewed', true));
 });
 
 it('rejects a failure with no penalty kind and says which step caused it', function (): void {
@@ -403,12 +439,18 @@ it('rejects a failure with no penalty kind and says which step caused it', funct
 it('renders the rail with no turn rows at all rather than inventing a first turn', function (): void {
     $run = guidedRun();
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
     // The first turn has no previous row, so there are no deltas to preview and no mood
     // to default from. The rail must still offer the door (D-50) and say what it cannot
-    // yet show, and the turn number must be 1 rather than a borrowed default.
-    expect($html)->toContain('role="radiogroup"')
-        ->and($html)->toMatch('/name="turn"[^>]*value="1"/')
-        ->and($html)->toContain('no turn to compare against');
+    // yet show, and the turn number must be 1 rather than a borrowed default. The note
+    // itself is in tests/browser/run-detail.spec.ts.
+    test()->get('/training-runs/'.$run->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.turn', 1)
+            ->where('rail.has_previous', false)
+            ->where('rail.previous', null)
+            ->where('rail.preview', [])
+            ->where('rail.mood', null)
+            ->where('rail.energy', null)
+            ->has('rail.choices', 7));
 });

@@ -71,7 +71,7 @@ it('falls back to the Japanese name when a card has no English character name', 
 });
 
 it('names rarity the way the client does, not the way the enum label does', function (): void {
-    // CardRarity::label() reads "Three stars", which is the order signal x-rarity-chip puts in its
+    // CardRarity::label() reads "Three stars", which is the order signal RarityChip puts in its
     // aria-label. The word the client prints on the card is SSR, and showing the wrong one here would
     // be the tool inventing vocabulary the game does not use.
     expect(SupportCard::factory()->create(['rarity' => 1])->rarityWord())->toBe('R')
@@ -79,7 +79,7 @@ it('names rarity the way the client does, not the way the enum label does', func
         ->and(SupportCard::factory()->ssr()->create()->rarityWord())->toBe('SSR');
 });
 
-it('casts rarity to the shared CardRarity enum so x-rarity-chip works unchanged', function (): void {
+it('casts rarity to the shared CardRarity enum so RarityChip works unchanged', function (): void {
     $card = SupportCard::factory()->ssr()->create();
 
     expect($card->rarity)->toBeInstanceOf(CardRarity::class)

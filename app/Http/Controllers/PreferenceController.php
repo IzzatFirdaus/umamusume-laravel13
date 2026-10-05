@@ -6,8 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdatePreferenceRequest;
 use App\Models\Preference;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * The only writer for the `preferences` table (PRD US-11, SCREEN_SPEC.md §7-5).
@@ -19,13 +20,13 @@ use Illuminate\Http\RedirectResponse;
  */
 class PreferenceController extends Controller
 {
-    public function edit(): View
+    public function edit(): Response
     {
         // The same rule the layout composer applies: a stored value outside the two resolved
         // themes is not a theme, so it must not come back preselected as if it were.
         $theme = Preference::get('theme');
 
-        return view('preferences.edit', [
+        return Inertia::render('Preferences/Edit', [
             'theme' => in_array($theme, ['light', 'dark'], true) ? $theme : null,
             'failureEstimate' => Preference::get('failure_estimate') ?? 'off',
         ]);

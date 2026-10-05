@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Preference;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * SCREEN_SPEC.md §7-5 / PRD US-11: the `preferences` table and the server-side theme render both
@@ -22,28 +23,25 @@ use App\Models\Preference;
  */
 
 it('offers both preferences with their default states on an unset database', function (): void {
-    $html = test()->get('/preferences')->assertOk()->getContent();
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Preferences/Edit')
+            ->where('theme', null)
+            ->where('failureEstimate', 'off'));
 
     // Absence is the default for both keys: no row means follow the OS, and the estimate is off
-    // by default (PRD US-11). A control that rendered "light" as if it were stored would claim a
+    // by default (PRD US-11). A page that rendered "light" as if it were stored would claim a
     // preference the Trainer never set.
-    expect($html)->toContain('name="theme"')
-        ->toContain('name="failure_estimate"')
-        ->toContain('value="" selected')
-        ->not->toMatch('/name="failure_estimate"[^>]*checked/')
-        ->and(Preference::count())->toBe(0);
+    expect(Preference::count())->toBe(0);
 });
 
-it('is reachable from the main layout', function (): void {
-    // The dispatch's requirement is a control reachable from the shell, not a form inside every
-    // page: the nav carries a link, and the form lives on its own screen.
-    test()->get('/umamusume')->assertOk()->assertSeeText('Preferences');
-
-    expect(test()->get('/umamusume')->getContent())
-        ->toContain('href="'.route('preferences.edit').'"')
-        // The shell stays form-free, which is what keeps the page-wide control counts that
-        // ReviewFormAccessibilityTest and TraineeSelectorTest read honest.
-        ->not->toContain('name="failure_estimate"');
+it('is reachable from the shell navigation', function (): void {
+    // The shell is client-rendered now (ADR-0020 §1). That its Settings link is reachable, and
+    // that the shell carries no form, is asserted in tests/browser/preferences.spec.ts.
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Catalog/Index'));
 });
 
 it('writes the theme through the control and renders it on the next request', function (): void {
@@ -75,17 +73,20 @@ it('persists the failure estimate both ways', function (string $value): void {
     expect(Preference::get('failure_estimate'))->toBe($value);
 })->with(['on', 'off']);
 
-it('keeps the estimate checkbox unchecked when the stored value is off', function (): void {
+it('passes the stored failure estimate to the control', function (): void {
+    // The checkbox is now client-rendered (Vue), so the server-side contract is the prop the
+    // page reads; the rendered checked state is the component's, exercised in the browser.
     Preference::put('failure_estimate', 'off');
 
-    $html = test()->get('/preferences')->assertOk()->getContent();
-
-    expect($html)->not->toMatch('/name="failure_estimate"[^>]*checked/');
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('failureEstimate', 'off'));
 
     Preference::put('failure_estimate', 'on');
 
-    expect(test()->get('/preferences')->getContent())
-        ->toMatch('/name="failure_estimate"[^>]*checked/');
+    test()->get('/preferences')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('failureEstimate', 'on'));
 });
 
 it('refuses a theme value this tool does not store', function (): void {

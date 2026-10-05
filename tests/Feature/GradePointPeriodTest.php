@@ -6,6 +6,8 @@ use App\Enums\RaceEntryStatus;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
+use Illuminate\Support\Collection;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * KI-10's schema half: Grade Points are judged per period, so a finish has to know
@@ -138,18 +140,28 @@ it('reports nothing while the Trainer has named no live period', function (): vo
     // period it is null, not 0 and not the sum of some period: D-220.
     expect($run->gradeEarned())->toBeNull();
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-    expect(strip_tags($html))->toContain('no period reported')
-        ->and($html)->not->toContain('Working toward');
+    // An unreported period renders as "no period reported", never "Working toward"; the copy is the
+    // meter's, and the props' null `current` is what selects it.
+    $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        ->where('gradeMeter.objectives', fn (Collection $objectives) => $objectives->isNotEmpty())
+        ->whereNull('gradeMeter.current')
+        ->whereNull('gradeMeter.earned'));
 });
 
 it('shows the reported period as the one being worked toward', function (): void {
     $run = periodRun();
     $run->update(['current_objective_index' => 3]);
 
-    $html = $this->get('/training-runs/'.$run->id)->assertOk()->getContent();
-
-    expect(strip_tags($html))->toContain('End of Classic Year');
+    $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Runs/Show')
+        // The column is 1-based; the payload's `current` is a 0-based position into `objectives`,
+        // which is the one place the two numberings meet.
+        ->where('gradeMeter.current', 2)
+        ->where('gradeMeter.objectives', fn (Collection $objectives) => $objectives->contains(
+            fn (array $objective): bool => $objective['index'] === 3
+                && $objective['name'] === 'End of Classic Year'
+        )));
 });
 
 it('rejects an objective index outside the four periods', function (): void {

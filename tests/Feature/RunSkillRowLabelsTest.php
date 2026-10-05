@@ -6,6 +6,8 @@ use App\Enums\ReleaseStatus;
 use App\Enums\SkillAcquisition;
 use App\Models\Skill;
 use App\Models\TrainingRun;
+use Illuminate\Support\Collection;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * KI-36 and the repeater half of KI-33, both on the run screen's skills form.
@@ -21,59 +23,10 @@ use App\Models\TrainingRun;
  * required part of itself, not a follow-on, and both defects live in the same seventeen lines, which
  * is why they land together.
  *
- * Every assertion here reads the rendered document through a parser, not through `assertSee` on a
- * class name: a label's `for` and a control's `id` are the fact, and a substring test on the HTML
- * would pass on a `for` that points at nothing.
+ * The port moved the form into `Runs/Show.vue`. The label/`for`/`id` pairing and the control sizing
+ * are measured against the live page now; what the server is asserted for here is the payload every
+ * row is built from: one row per stored skill, the status it sits under, and the turn it was given.
  */
-
-/**
- * @return array<int, array<string, string>> one entry per form control in the skills form
- */
-function skillsFormControls(string $html): array
-{
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
-
-    $form = $xpath->query('//form[@action and .//select[starts-with(@name, "skills[")]]')->item(0);
-    expect($form)->not->toBeNull('the skills form is not on the page');
-
-    $controls = [];
-
-    foreach ($xpath->query('.//select|.//input', $form) as $control) {
-        /** @var DOMElement $control */
-        if ($control->getAttribute('type') === 'hidden') {
-            continue; // the CSRF field is not a Trainer-facing control
-        }
-
-        $controls[] = [
-            'tag' => $control->nodeName,
-            'name' => $control->getAttribute('name'),
-            'id' => $control->getAttribute('id'),
-        ];
-    }
-
-    return $controls;
-}
-
-/**
- * @return array<string, string> control id => the text of the label pointing at it
- */
-function skillsFormLabels(string $html): array
-{
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
-
-    $labels = [];
-
-    foreach ($xpath->query('//label[@for]') as $label) {
-        /** @var DOMElement $label */
-        $labels[$label->getAttribute('for')] = trim(preg_replace('/\s+/', ' ', $label->textContent) ?? '');
-    }
-
-    return $labels;
-}
 
 function labelledRun(): TrainingRun
 {
@@ -96,87 +49,71 @@ function labelledRun(): TrainingRun
     return $run->refresh();
 }
 
-it('gives every control in the skills form its own label', function (): void {
+it('sends the three per-row values the skills form labels name', function (): void {
     $run = labelledRun();
 
-    $html = $this->get(route('runs.show', $run))->content();
-    $controls = skillsFormControls($html);
-    $labels = skillsFormLabels($html);
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // KI-36: the label/`for`/`id` pairing is the component's markup, checked on the live page.
+            // The server owes every row a pickable skill, a status and a turn for those three controls
+            // to name, so none of them is rendered unlabelled against nothing.
+            ->has('skillCatalog', 3)
+            ->where('acquisitionOptions', fn (Collection $options): bool => $options->pluck('value')->sort()->values()->all() === ['Acquired', 'Skipped', 'Suggested'])
+            ->where('skillGroups', function (Collection $groups): bool {
+                $rows = $groups->flatMap(fn (array $group): array => $group['skills']);
 
-    // Three controls per row: the picker, the acquisition status, the turn. Each has to carry an
-    // `id` and each `id` has to be the target of exactly one `<label for>` with real text.
-    expect($controls)->not->toBe([]);
-
-    foreach ($controls as $control) {
-        // `toHaveKey`'s second argument is the expected **value**, not a failure message, so the
-        // membership test goes through array_key_exists and the message rides on `toBe` instead.
-        expect($control['id'])->not->toBe('', "control {$control['name']} has no id, so no label can name it")
-            ->and(array_key_exists($control['id'], $labels))->toBeTrue("no label points at {$control['id']}")
-            ->and($labels[$control['id']])->not->toBe('');
-    }
-
-    // The status select and the turn input are the two KI-36 names. A label that reads "Skill" for
-    // all three would satisfy `for`/`id` and still leave the defect in place.
-    $names = array_values(array_unique(array_map(
-        static fn (array $c): string => $labels[$c['id']],
-        $controls,
-    )));
-
-    expect($names)->toHaveCount(3)
-        ->and(implode(' | ', $names))->toMatch('/skill/i')
-        ->and(implode(' | ', $names))->toMatch('/status/i')
-        ->and(implode(' | ', $names))->toMatch('/turn/i');
+                return $rows->count() === 3
+                    && $rows->every(fn (array $row): bool => array_key_exists('turn_acquired', $row));
+            }));
 });
 
-it('renders one editable row per skill on the run, plus a spare row to add another', function (): void {
+it('sends one editable row per skill on the run, each posting its own field', function (): void {
     $run = labelledRun();
 
-    $dom = new DOMDocument;
-    @$dom->loadHTML($this->get(route('runs.show', $run))->content());
-    $xpath = new DOMXPath($dom);
+    // Re-pointed 2026-10-03 (B.6): a closed row still posts its skill under its own field name, so the
+    // row set is the union of the open picker and the closed rows. The claim is unchanged: one row per
+    // seeded skill, no duplicates. The spare row is the component's own, so the browser spec counts it.
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('skillGroups', function (Collection $groups): bool {
+                $rows = $groups->flatMap(fn (array $group): array => $group['skills']);
 
-    $rows = [];
-
-    // Re-pointed 2026-10-03 (B.6): a closed row posts its skill through a hidden input, so the
-    // row set is the union of the open select and the hidden inputs. The claim is unchanged: one
-    // row per seeded skill plus the spare, each posting its own `skills[N][skill_id]`.
-    foreach ($xpath->query('//form[@action and .//select[starts-with(@name, "skills[")]]//*[@name]') as $control) {
-        /** @var DOMElement $control */
-        if (preg_match('/^skills\[(\d+)\]\[skill_id\]$/', $control->getAttribute('name'), $m) === 1) {
-            $rows[] = (int) $m[1];
-        }
-    }
-
-    // Three seeded skills and one empty row. The spare is what makes the pre-populated list editable
-    // rather than merely visible.
-    expect($rows)->toBe([0, 1, 2, 3]);
+                return $rows->count() === 3 && $rows->pluck('id')->unique()->count() === 3;
+            }));
 });
 
-it('preselects each existing skill with the status and turn the Trainer gave it', function (): void {
+it('carries each existing skill under the status and turn the Trainer gave it', function (): void {
     $run = labelledRun();
     $first = Skill::orderBy('export_id')->first();
     $run->setSkillStatus($first, SkillAcquisition::Acquired, 9);
 
-    $html = $this->get(route('runs.show', $run))->content();
+    // The status is the group a row sits in and the turn rides on the row itself, which is what the
+    // status select and the turn input are built from.
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('skillGroups', function (Collection $groups) use ($first): bool {
+                $acquired = $groups->firstWhere('key', SkillAcquisition::Acquired->value);
+                $suggested = $groups->firstWhere('key', SkillAcquisition::Suggested->value);
 
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
-
-    $selectedSkill = $xpath->evaluate('string(//select[@name="skills[0][skill_id]"]/option[@selected]/@value)');
-    $selectedStatus = trim($xpath->evaluate('string(//select[@name="skills[0][status]"]/option[@selected])'));
-    $turnValue = $xpath->evaluate('string(//input[@name="skills[0][turn_acquired]"]/@value)');
-
-    expect((int) $selectedSkill)->toBe($first->id)
-        ->and($selectedStatus)->toBe(SkillAcquisition::Acquired->value)
-        ->and((int) $turnValue)->toBe(9);
+                return $acquired['skills'][0]['id'] === $first->id
+                    && $acquired['skills'][0]['turn_acquired'] === 9
+                    && count($suggested['skills']) === 2;
+            }));
 });
 
-it('keeps the typed edits when a submit is refused', function (): void {
+it('names the refused row in the error envelope and half-writes nothing', function (): void {
     // The last thing a Trainer does before hitting save is re-read a row they just fixed. When the
     // server refuses the submit for some other row, the re-rendered form used to hand back the
     // *stored* values instead, so the fix they just made vanished and the row they were re-reading
-    // said the opposite. The deck form has rehydrated from `old()` since D-3; this form never did.
+    // said the opposite. The deck form rehydrates from `old()` since D-3; this form's rows are the
+    // component's own state, which is what keeps the typed edits, and the server's half is that the
+    // refusal names the refused row and nothing half-writes.
     $run = labelledRun();
     $skills = Skill::orderBy('export_id')->get();
 
@@ -193,10 +130,7 @@ it('keeps the typed edits when a submit is refused', function (): void {
     // re-index is a no-op and the error key and the old-input key are the same key.
     //
     // One round trip with `followingRedirects()`, because that is what the browser does and it is
-    // the only way the flashed `old()` input and the error bag reach the rendered form. Issuing a
-    // separate `get()` after the post leaves the form rendering the stored values, which reads as
-    // the defect this test is about while actually being a harness artefact; `RunDeckTest` records
-    // the same trap for the deck form.
+    // the only way the flashed input and the error bag reach the page the redirect lands on.
     $response = $this->followingRedirects()
         ->post(
             route('runs.skills.sync', $run),
@@ -210,37 +144,13 @@ it('keeps the typed edits when a submit is refused', function (): void {
             ['HTTP_REFERER' => route('runs.show', $run)],
         );
 
-    $response->assertOk();
-
-    $html = $response->content();
-
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
-
-    $selectedSkill = $xpath->evaluate('string(//select[@name="skills[0][skill_id]"]/option[@selected]/@value)');
-    $selectedStatus = trim($xpath->evaluate('string(//select[@name="skills[0][status]"]/option[@selected])'));
-    $turnValue = $xpath->evaluate('string(//input[@name="skills[0][turn_acquired]"]/@value)');
-
-    expect((int) $selectedSkill)->toBe($skills[2]->id)
-        ->and($selectedStatus)->toBe(SkillAcquisition::Acquired->value)
-        ->and((int) $turnValue)->toBe(17);
-
-    // The refused row keeps the number the Trainer typed rather than being quietly corrected to
-    // something valid, because the reason it was refused is about to be printed under it.
-    expect($xpath->evaluate('string(//input[@name="skills[1][turn_acquired]"]/@value)'))->toBe('0');
-
-    // And the refusal has to be visible on the row that caused it, or the Trainer is left staring
-    // at a form that looks like it saved. `text-risk` is what the deck form uses for this, so the
-    // class is part of the fact being asserted, and the message has to land inside *this* form
-    // rather than somewhere else on the page.
-    $errorText = array_map(
-        static fn (DOMNode $node): string => trim(preg_replace('/\s+/', ' ', $node->textContent) ?? ''),
-        iterator_to_array($xpath->query('//form[.//select[starts-with(@name, "skills[")]]//p[contains(@class, "text-risk")]')),
-    );
-
-    expect($errorText)->toHaveCount(1)
-        ->and($errorText[0])->toContain('at least 1');
+    $response->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // The refusal has to be visible on the row that caused it, or the Trainer is left staring
+            // at a form that looks like it saved. The envelope is keyed by the field name verbatim,
+            // which is the key the form reads back.
+            ->where('errors', fn (Collection $errors): bool => str_contains($errors['skills.1.turn_acquired'] ?? '', 'at least 1')));
 
     // The refusal must not have half-written either: the row the edit was aimed at still holds what
     // the pre-populate gave it, because validation runs before the controller body.
@@ -318,89 +228,41 @@ it('adds a skill through the spare row without disturbing the rows above it', fu
         ->and($run->skills->firstWhere('id', $skills[2]->id)->pivot->turn_acquired)->toBe(11);
 });
 
-it('sizes every control in the skills form to the 44 of DESIGN.md 6.14, and steps the turn input', function (): void {
-    // KI-37. The screen shipped `px-2 py-1` with no height, so a real browser measured the selects at 31,
-    // the turn input at 30 and the submit button at 32 against `docs/design-research/DESIGN.md` §6.14's
-    // height of 44. `h-11` is this repository's idiom for that value (the scenario panels' capsule headers
-    // carry it), so this test pins the class rather than a pixel: a DOM parser cannot measure, and the
-    // earlier entry's own numbers are what rotted, so re-asserting a number here would repeat its failure.
-    // What it can pin is that every control was moved and that the missing `step` was added, which is what
-    // §6.14's last bullet asks for and what the browser review confirmed was absent (`step` was `null`).
+it('sends the non-empty control surface the 44px sweep measures', function (): void {
+    // KI-37. The 44px sizing itself is a browser claim now: the component carries `h-11` on every
+    // control and `min-h-11` on each "Change row" link, and only a rendered box can confirm what a
+    // class does. What the server owes is that every control the sweep measures has its data: the
+    // one picker's catalogue, the statuses its rows offer, and the rows themselves.
     $run = labelledRun();
 
-    $dom = new DOMDocument;
-    @$dom->loadHTML($this->get(route('runs.show', $run))->content());
-    $xpath = new DOMXPath($dom);
-
-    $form = $xpath->query('//form[@action and .//select[starts-with(@name, "skills[")]]')->item(0);
-    expect($form)->not->toBeNull('the skills form is not on the page');
-
-    // The count is asserted so the class loop below cannot pass over an empty set: a loop that checks
-    // nothing is the failure this repository has filed repeatedly. Re-pointed 2026-10-03 (B.6): the
-    // ten whole-catalogue selects collapsed to one open picker, so the visible controls are the open
-    // select, the status and turn control on each of the four rows, and the submit. The three closed
-    // rows' "Change row N" links carry the same 44px floor as `min-h-11`.
-    $openSelects = $xpath->query('.//select[contains(@name, "[skill_id]")]', $form)->length;
-    $switchLinks = $xpath->query('.//a[starts-with(normalize-space(.), "Change row ")]', $form)->length;
-
-    expect($openSelects)->toBe(1)
-        ->and($switchLinks)->toBe(3);
-
-    $checked = 0;
-
-    foreach ($xpath->query('.//select|.//input|.//button[@type="submit"]', $form) as $control) {
-        /** @var DOMElement $control */
-        if ($control->getAttribute('type') === 'hidden') {
-            continue; // the CSRF field is not a Trainer-facing control
-        }
-
-        // `toContain`'s second argument is a second needle, not a failure message (the same trap the
-        // `toHaveKey` note at the top of this file records), so the check goes through `str_contains` and
-        // the message rides on `toBeTrue`.
-        expect(str_contains($control->getAttribute('class'), 'h-11'))
-            ->toBeTrue("{$control->nodeName} {$control->getAttribute('name')} is not sized to h-11");
-        $checked++;
-    }
-
-    // One open select, four status selects, four turn inputs and the submit.
-    expect($checked)->toBe(10);
-
-    foreach ($xpath->query('.//a[starts-with(normalize-space(.), "Change row ")]', $form) as $link) {
-        /** @var DOMElement $link */
-        expect(str_contains($link->getAttribute('class'), 'min-h-11'))
-            ->toBeTrue('a Change row link is not sized to min-h-11');
-    }
-
-    $turn = $xpath->query('.//input[@type="number"]', $form)->item(0);
-    expect($turn)->not->toBeNull()
-        ->and($turn->getAttribute('step'))->toBe('1');
-
-    // §10's focus ring, the same treatment Screen D's controls already carry
-    // (`resources/views/skills/index.blade.php`:31, `:40`). The button is excluded on purpose: Screen D's
-    // button does not carry the ring either, and this change copies that surface rather than inventing.
-    foreach ($xpath->query('.//select|.//input[@type="number"]', $form) as $control) {
-        expect($control->getAttribute('class'))->toContain('focus-visible:outline-2');
-    }
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->has('skillCatalog', 3)
+            ->has('acquisitionOptions', 3)
+            ->where('skillGroups', fn (Collection $groups): bool => $groups->sum(
+                fn (array $group): int => count($group['skills'])
+            ) === 3));
 });
 
-it('names the two catalogue commands when no skill is offerable, and still renders a submittable form', function (): void {
+it('sends an empty catalogue when no skill is offerable, and the rows that keep the form submittable', function (): void {
     // KI-51's UI consequence, and the state this section had no copy for at all. On a fresh clone
     // `DatabaseSeeder` reaches `SkillSeeder`, which writes nine rows and sets neither `release_status` nor
     // `name_is_client` (its own docblock says the omission is deliberate), so the scope at
     // `Skill::scopeAvailableOnGlobal()` matches none of them and no tracked writer in this tree produces a
     // row this picker can offer. The empty picker is therefore the ordinary first state, not an edge case,
-    // and Screen D already names both commands for it (`resources/views/skills/index.blade.php`:89-92).
+    // and the component names both catalogue commands for it; the copy is measured on the live page.
     $run = TrainingRun::factory()->create();
 
-    $html = $this->get(route('runs.show', $run))->content();
-
-    expect($html)->toContain('uma:fetch gametora-skills')
-        ->and($html)->toContain('uma:reparse gametora-skills');
-
-    // And the state must not be a dead control: the placeholder option is present and the spare row is
-    // the one the repeater always ships, so the form still renders and still submits.
-    $controls = skillsFormControls($html);
-
-    expect($controls)->not->toBe([])
-        ->and(collect($controls)->pluck('name'))->toContain('skills[0][skill_id]');
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // The state must not be a dead control: the groups report their absences rather than
+            // offering nothing silently, and the form still renders a submittable row set.
+            ->has('skillCatalog', 0)
+            ->where('skillGroups', fn (Collection $groups): bool => $groups->every(
+                fn (array $group): bool => $group['skills'] === [] && $group['absent'] === 'None.'
+            )));
 });

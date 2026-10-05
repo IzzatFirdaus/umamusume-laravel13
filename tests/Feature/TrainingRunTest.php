@@ -9,6 +9,7 @@ use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\Umamusume;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * Run CRUD, turn recording, turn editing, export and delete.
@@ -95,11 +96,19 @@ it('records suggested acquired and skipped skills on a run', function (): void {
 
     expect($run->skills->count())->toBe(3);
 
+    // The port moved the three names out of rendered text and into the payload: the page groups
+    // the run's skills by acquisition status, so each name sits under the group it was written to.
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Certain Victory')
-        ->assertSee('1st Place Kiss☆')
-        ->assertSee('Feel the Burn!');
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('skillGroups.0.key', 'Suggested')
+            ->where('skillGroups.0.skills.0.name', 'Certain Victory')
+            ->where('skillGroups.1.key', 'Acquired')
+            ->where('skillGroups.1.skills.0.name', '1st Place Kiss☆')
+            ->where('skillGroups.1.skills.0.turn_acquired', 3)
+            ->where('skillGroups.2.key', 'Skipped')
+            ->where('skillGroups.2.skills.0.name', 'Feel the Burn!'));
 });
 
 it('refuses to pin a skill the Global catalogue does not offer', function (array $attributes): void {

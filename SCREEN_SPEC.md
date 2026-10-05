@@ -118,7 +118,7 @@ Nav links carry `min-h-11` (44px) targets. Empty state is plain prose (screen-re
 Title/action row uses `flex-wrap`; row content `flex-wrap` so the date wraps under the name at narrow widths. No breakpoint-specific restructure.
 
 #### Localization / Content
-Hardcoded English in Blade. Status label from `RunStatus::label()` (`lang/en/uma.php`). Dates are date-only (no timezone conversion). Scenario labels come only from `config/scenarios.php` (D-240: a scenario name must not be hardcoded in a view).
+Hardcoded English in the component. Status label from `RunStatus::label()` (`lang/en/uma.php`), server-formatted onto the row. Dates are date-only (no timezone conversion). Scenario labels come only from `config/scenarios.php` (D-240: a scenario name must not be hardcoded in a view), and the row carries the label rather than the storage key.
 
 #### Navigation & Workflow Relationships
 `runs.create`, `runs.import`, `runs.show` forward; it is the success destination of run deletion.
@@ -127,7 +127,7 @@ Hardcoded English in Blade. Status label from `RunStatus::label()` (`lang/en/uma
 `TrainingRun`, `Umamusume` models; `config/scenarios.php` for labels.
 
 #### Implementation References
-View: `resources/views/runs/index.blade.php`; Controller: `TrainingRunController::index`; Route: `routes/web.php:25`.
+Page: `resources/js/pages/Runs/Index.vue`; Controller: `TrainingRunController::index`; Route: `routes/web.php:29`; Tests: `RunsIndexTest.php` (props), `tests/browser/runs.spec.ts` (empty state and the action controls).
 
 #### Current Status
 Implemented.
@@ -149,22 +149,29 @@ Trainer.
 No auth. The trainee option list is restricted to `release_status = GlobalReleased`; costume cards to `unconfirmed = false` and ordered by debut-first (`cardScope` equivalence with the catalog, stated in the controller). A cardless trainee is still selectable and commits with `character_card_id` empty.
 
 #### Entry Points
-`runs.index` "New run" pill; `catalog.show` "Her runs → New run" (does **not** preselect the trainee — the page's own helper copy says so, `catalog/show.blade.php:344`); back button from import.
+`runs.index` "New run" pill; `catalog.show` "Her runs → New run" (does **not** preselect the trainee — the page's own helper copy says so, `Catalog/Show.vue`); back button from import.
 
 #### Route / Location
 `GET /training-runs/create`, name `runs.create`; submits to `POST /training-runs` (`runs.store`).
 
 #### Layout / Structure
-Page title → single form card: Trainee field (one label, two paths), Scenario select, Status select, inheritance A/B selects, Grade Point period number, Shop resets number, Notes textarea, submit.
+Page title → single form card: Trainee combobox, Scenario select, Status select, inheritance A/B selects, Grade Point period number, Shop resets number, Notes textarea, submit.
 
 #### Data Displayed
-The trainee roster (English names; combobox payload also carries Japanese names and per-trainee card titles/release dates/debut flags as a JSON island, `#trainee-roster`).
+The trainee roster as an Inertia prop (English names, plus per-trainee Japanese names and card titles / release dates / debut flags). It is also the source the inheritance-parent selects read, so the page holds one trainee list rather than two that can drift.
+
+> **Retired 2026-10-05 (owner ruling, `ADR-0020` §1).** This field used to ship two pickers: a native
+> `select` for a browser with scripting off, and a combobox a module switched on by disabling the
+> first and enabling a hidden `umamusume_id` / `character_card_id` pair. A client-rendered page has no
+> no-script path — with scripting off there is no page at all — so the fallback, the JSON script island
+> that fed the module, and the handover between the two went with the Blade view. The combobox is the
+> control.
 
 #### Inputs
 | Field | Type | Req | Default | Validation (source: `StoreTrainingRunRequest`) |
 |---|---|---|---|---|
-| `umamusume_id` | native `select` + JS combobox hidden pair | required | — | integer, exists `umamusume.id` |
-| `character_card_id` | combobox hidden | optional | — | integer, exists `character_cards.id` **scoped to the submitted trainee** (join in the rule) |
+| `umamusume_id` | combobox (`role=combobox` input over a `role=listbox` popup) | required | — | integer, exists `umamusume.id` |
+| `character_card_id` | combobox commit (a cardless trainee writes nothing) | optional | — | integer, exists `character_cards.id` **scoped to the submitted trainee** (join in the rule) |
 | `scenario` | select | optional | "Not set (baseline strip)" | in `config('scenarios.php')` keys; `''` normalizes to null |
 | `status` | select | required | `Active` | enum `RunStatus` |
 | `inheritance_parent_a_id` / `_b_id` | select | optional | none | exists `umamusume.id` |
@@ -178,20 +185,20 @@ Required marker convention: `*` on fields with no answer of their own, `(optiona
 | Action | Trigger | Result | Feedback |
 |---|---|---|---|
 | Create run | submit | run row + card's Global-released innate/unique skills seeded as `Suggested` ("Starting" label), in one transaction (KI-33) | redirect `runs.show`, flash "Run created." |
-| (Combobox pick) | typing in JS-enhanced field | filters trainee/card list; commits the hidden pair | live `aria-live="polite"` status line |
-| (No-script path) | native select remains in markup | submit works with scripting off | — |
+| (Combobox pick) | typing, arrows, Enter or a click on a row | filters the trainee/card list and commits the pair the form posts | live `aria-live="polite"` status line |
+| (Enter with no cursor) | Enter while nothing is highlighted | the form submits; it is not a silent re-pick of row zero | native submission |
 
 #### Screen States
-Initial; validation-error re-render with `old()` rehydration (trainee sticky on both paths; card id is lost on the no-script path — recorded as an honest ceiling in the view comment, not an oversight); the combobox is hidden (`hidden` class) until its module claims it, so pre-script state equals the no-script form.
+Initial (popup closed, live region silent: a count stated before anyone opened the list reports a list nobody asked for); validation-error re-render with the flashed input rehydrating every field, the combobox re-painting its label from the `umamusume_id` / `character_card_id` pair rather than from a stored string; in-flight (`aria-busy`) while the write is posted.
 
 #### Validation & Error Handling
-Server-authoritative (`StoreTrainingRunRequest`), errors rendered per field (`@error` → `text-risk` paragraph). Duplicate/mismatch cases: card not owned by trainee → field error. Empty scenario → null, not error. No client-side blocking beyond native `required` on select/status (kept no-looser-than-server, audit I-1/I-2 rule).
+Server-authoritative (`StoreTrainingRunRequest`), errors rendered per field from the Inertia `errors` prop. A committed label the Trainer edits away clears the posted pair, so the next submit fails `required` rather than writing a run that disagrees with its own input (the server cannot see that disagreement: trainee and card agree with each other). Duplicate/mismatch cases: card not owned by trainee → field error. Empty scenario → null, not error. No client-side blocking beyond native `required` on the status select (kept no-looser-than-server, audit I-1/I-2 rule).
 
 #### Security & Privacy
-`@csrf`. All user-entered content is Trainer's own; Blade escaping on.
+CSRF through the framework XSRF cookie header Inertia sends with every write. All user-entered content is Trainer's own; card titles are source data and reach the page through Vue interpolation, which escapes them.
 
 #### Accessibility
-Combobox implements `role=combobox`/`aria-expanded`/`aria-controls`/`aria-activedescendant`, a `role=listbox` with its own accessible name, `aria-required` on the text input (the submitting control is the hidden pair), explicit `for`/`id` label on the select (a label may name exactly one labelable control), caption text reused in the accessible name for speech input (WCAG 2.5.3, stated in view comments). Tests: `tests/Feature/TraineeSelectorTest.php` (~28 assertions), `docs/research-scratch/AUDIT-AND-VERIFICATION.md` C-1…C-4 closed same-day 2026-10-03.
+Combobox implements `role=combobox` with `aria-expanded`, `aria-controls`, `aria-autocomplete="list"` and `aria-activedescendant`, over a `role=listbox` that carries its own accessible name, with `aria-required` on the input (the value that posts is the committed pair, not the text typed). The caption's `for` points at the input and the caption text is a prefix of the accessible name, so a speech-input user can say the words on screen (WCAG 2.5.3). Per-trainee headers and the band seam are `role=presentation` and `aria-hidden`, which puts each trainee's name in her options' own accessible names rather than in a group that owns nothing. Every control meets the 44px floor (`h-11` / `min-h-11`, KI-37). Tests: `tests/Feature/TraineeSelectorTest.php` (the payload and the POST round trip) and `tests/browser/runs.spec.ts` (the ARIA surface, the keyboard path, the cap, the commit, the stale-pair rule and the rehydration), `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` C-1…C-4 closed same-day 2026-10-03.
 
 #### Responsive Behavior
 Form capped `max-w-lg`. No dedicated breakpoint behavior.
@@ -203,10 +210,10 @@ Hardcoded English. `·` middle dot as separator (em/en dash banned in shipped co
 Success → SCR-RUN-003. Sibling entry SCR-RUN-004 (import) shares its Form Request contract via inheritance (`ImportHistoricalRunRequest extends StoreTrainingRunRequest`).
 
 #### Dependencies
-Models `Umamusume`, `CharacterCard`, `TrainingRun`, `Skill` (pre-populate through `Skill::availableOnGlobal()`); `config/scenarios.php`; module `resources/js/trainee-combobox.ts`.
+Models `Umamusume`, `CharacterCard`, `TrainingRun`, `Skill` (pre-populate through `Skill::availableOnGlobal()`); `config/scenarios.php`; component `resources/js/components/TraineeCombobox.vue`.
 
 #### Implementation References
-View: `resources/views/runs/create.blade.php`; Controller: `TrainingRunController::create/store`; Request: `app/Http/Requests/StoreTrainingRunRequest.php`; Tests: `TraineeSelectorTest.php`, `TrainingRunTest.php` (create + pre-populate cases).
+Page: `resources/js/pages/Runs/Create.vue` (+ `components/TraineeCombobox.vue`); Controller: `TrainingRunController::create/store`; Request: `app/Http/Requests/StoreTrainingRunRequest.php`; Tests: `TraineeSelectorTest.php`, `RunCreateSurfaceTest.php`, `TrainingRunTest.php` (create + pre-populate cases), `tests/browser/runs.spec.ts`.
 
 #### Current Status
 Implemented.
@@ -298,7 +305,7 @@ All writes CSRF-protected. Deck/skill catalogues include only `[Global]` rows on
 Skip link; pinned strip below 25% viewport (measured 176px, O-2 closed); each panel its own `section` with `aria-label` (Run state, Resources, Stats, Skills, Race calendar, Turn log — O-4 closed); turn table inside a focusable scroll region (`role=region tabindex=0 aria-label="Turn log"`, KI-25 convention shared with the import table); status region `role=status`, error lists and race/shop refusals `role=alert`; failure chips carry the word "Failed" (D-12); Unique mark ✦ plus word; `h-11`/44px controls and Screen-D focus ring on the skill form (KI-37); per-row `<label for>` on skill controls (KI-36); `step="1"` steppers (DESIGN.md §6.14); previous-turn placeholders, never pre-filled values (an input arriving with a number asserts a fact, D-220). Tests: `KeyboardPathTest`, `RunViewFrameTest`, `RunViewTargetSizeTest`, `RunViewNoScriptTest`, `RunSaveConfirmationTest`, `GuidedTurn*` family.
 
 #### Responsive Behavior
-`lg:` sticky only at ≥1024px; below `lg` everything stacks one column. Turn-entry grid `grid-cols-2 md:grid-cols-4`. Nine-column turn table scrolls horizontally rather than reflowing. Race panel options measured against 390px viewport (`min-w-0` allowances). Shell `max-w-5xl`. A systematic responsive pass is recorded as **not** done (`docs/research-scratch/AUDIT-AND-VERIFICATION.md` "What this audit could not verify").
+`lg:` sticky only at ≥1024px; below `lg` everything stacks one column. Turn-entry grid `grid-cols-2 md:grid-cols-4`. Nine-column turn table scrolls horizontally rather than reflowing. Race panel options measured against 390px viewport (`min-w-0` allowances). Shell `max-w-5xl`. A systematic responsive pass is recorded as **not** done (`docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` "What this audit could not verify").
 
 #### Localization / Content
 Group label `Suggested` renders as **Starting** (O-11/R-6 copy ruling in `lang/en/uma.php`; DB value unchanged). Rest/Recreation activity names are client-captured strings (I-3); no invented facility labels (D-20). Energy/Fans labels state "after this turn" (O-3 disambiguation direction; whether total-vs-delta is *the* model stays open — §7). Dates via `M j, Y`; datetimes through `config('uma.display_timezone')`; date-only stays date-only. No em dash in copy (`N/A` + title is the disclosure glyph).
@@ -313,7 +320,7 @@ Hub of WF-001/002/005/006/007. Links out to `skills.index` ("Search the skill ca
 View: `resources/views/runs/show.blade.php` (681 lines); components `guided-step`, `stat-band`, `resource-strip`, `mood-pill`, `race-calendar`, `race-panel`, `deck-panel`, `shop-panel`, `grade-point-meter`, `team-rank-gauge`, `spirit-burst-roster`, `team-race-panel`, `epithet-checklist`, `race-fatigue-chip`; Controller: `TrainingRunController` (show/storeTurn/syncSkills/syncDeck/storeRace/storePurchase/export/destroy + `showData`); Requests: `StoreTurnEntryRequest`, `StoreRunSkillRequest`, `StoreDeckRequest`, `StoreRaceEntryRequest`, `StoreShopPurchaseRequest`; JS: `resources/js/guided-flow.ts`; Tests: `GuidedFirstTurnTest`, `GuidedTurnStagesTest`, `GuidedTurnOnRunViewTest`, `GuidedTurnValidationTest`, `RunDeckTest`, `RunSkillPickerTest`, `RunSkillRowLabelsTest`, `RunSaveConfirmationTest`, `RunWriteAtomicityTest`, `GoalPanelsOnRunDetailTest`, `GradePointMeterTest`, `FreeRaceWriterTest`, `HistoricalRunImportTest`.
 
 #### Current Status
-Implemented. `docs/research-scratch/AUDIT-AND-VERIFICATION.md` carries a live **Fail verdict (2026-10-03)** for this page after the owner pass; Part 7 subsequently closed the blockers (O-2, O-4, R-5, R-6, R-8, item 14 both halves). Open at filing time: O-11 skills-panel design, O-8 deck tiles + per-card state, O-12 goals surface, O-3 total-vs-delta wording, O-5/R-7 unseeded race slots, R-2/R-3 schema asks, `Infirmary`/`Races` turn choices, contested Rest figure.
+Implemented. `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` carries a live **Fail verdict (2026-10-03)** for this page after the owner pass; Part 7 subsequently closed the blockers (O-2, O-4, R-5, R-6, R-8, item 14 both halves). Open at filing time: O-11 skills-panel design, O-8 deck tiles + per-card state, O-12 goals surface, O-3 total-vs-delta wording, O-5/R-7 unseeded race slots, R-2/R-3 schema asks, `Infirmary`/`Races` turn choices, contested Rest figure.
 
 #### Open Questions / Gaps
 - `runs.turns.update` / `runs.turns.destroy` exist (controller + tests) but **no UI control posts to them** — turn rows have no Edit/Delete action (§7-2).
@@ -384,13 +391,13 @@ Labels on every control; the preview table (on SCR-RUN-005) is the scrollable re
 Copy names the limitation plainly: import carries **turns only**; skills/deck/races stay empty and are added per-turn on the run page.
 
 #### Navigation & Workflow Relationships
-Forward: SCR-RUN-005. Failure loop: preview re-render of the same view with `@error`.
+Forward: SCR-RUN-005. Failure loop: the same page re-rendered with the Inertia `errors` prop.
 
 #### Dependencies
 `Umamusume`; `config/scenarios.php`; `TrainingRunController::importForm/importChoices`.
 
 #### Implementation References
-View: `resources/views/runs/import.blade.php` (form branch); Request: `ImportHistoricalRunRequest`; Controller: `TrainingRunController::importForm`; ADR: `docs/adr/0017-historical-run-import.md`; Tests: `HistoricalRunImportTest`.
+Page: `resources/js/pages/Runs/Import.vue` (form branch); Controller: `TrainingRunController::importForm`; Request: `ImportHistoricalRunRequest`; ADR: `docs/adr/0017-historical-run-import.md`; Tests: `HistoricalRunImportTest`, `tests/browser/run-import.spec.ts` (the KI-46 composite sentence, which the MessageBag test could not reach).
 
 #### Current Status
 Implemented.
@@ -448,7 +455,7 @@ Success → SCR-RUN-003 with import provenance line visible there.
 `ImportHistoricalRun` action; `TrainingRun` fillable `imported_at`/`import_source`.
 
 #### Implementation References
-View: `resources/views/runs/import.blade.php` (preview branch); Controller: `TrainingRunController::importPreview/importStore`; Action: `app/Actions/ImportHistoricalRun.php`; Test: `HistoricalRunImportTest` (two-POST semantics pinned).
+Page: `resources/js/pages/Runs/Import.vue` (preview branch, gated on the `preview` prop); Controller: `TrainingRunController::importPreview/importStore`; Action: `app/Actions/ImportHistoricalRun.php`; Tests: `HistoricalRunImportTest` (two-POST semantics pinned), `tests/browser/run-import.spec.ts`.
 
 #### Current Status
 Implemented. (Documented as a separate ID because it is a distinct workflow state with its own commit action; it shares the physical view file.)
@@ -512,7 +519,7 @@ Status labels via enum→`lang/en/uma.php`. Card titles are **verbatim source da
 `Umamusume`, `CharacterCard` (with `cardScope()` order: debut first, Global date, source card id); `NameNormalizer`; `Cache::remember` behind `catalog:version` (bumped on promotion; Trainer data never cached).
 
 #### Implementation References
-View: `resources/views/catalog/index.blade.php`; Controller: `CatalogController::index` (+`cardScope`, `normalizedColumn`, `cached`); Tests: `CatalogTest`, `CatalogRosterTreeTest`, `CatalogCacheRenderTest`.
+Page: `resources/js/pages/Catalog/Index.vue`; Controller: `CatalogController::index` (+`cardScope`, `normalizedColumn`, `cached`); Tests: `CatalogTest`, `CatalogRosterTreeTest`, `CatalogCacheRenderTest`, `tests/browser/catalog.spec.ts`.
 
 #### Current Status
 Implemented.
@@ -540,13 +547,13 @@ Catalog rows; skill-holder links (SCR-SKL-002); support-card "Belongs to" (SCR-S
 `GET /umamusume/{slug}` name `catalog.show`. Query: `?form={local card id}`, `?show_unconfirmed=1`.
 
 #### Layout / Structure (binding order per WS-2)
-Header (name, "Back to catalog") → **Basic information** (Japanese name, voice actor JP + EN line, Release date Global-or-JP-only, birthday, height, three sizes) → status dl (Release status, JP debut, Global debut, "Edited by Trainer" `is_manual` statement) → JapanOnly notice when applicable → **Aptitude** grid (ten letters, once, not per form) → **Costume forms** (tabs when >1 form via `x-form-tabs`; inline panel when exactly one; each panel `catalog/partials/form-detail`: verbatim title, rarity/debut/unconfirmed marks, its own `source_url`/`snapshot_path`/`fetched_at` line) → hidden-forms count + "Show unconfirmed forms" link → **Skills** (four groups: unique/innate/awakening/event, resolved through `Skill.export_id`, `x-skill-row` links only for rows Screen D serves) → **Goal races** (named absence — KI-34 reservation, no table exists) → **Her runs** (last 10 with status, scenario label, turn count) + "New run" (helper states it does not preselect) → **Aliases** → **Provenance** (trainee-level `data_sources` last 10, with the sentence separating it from the per-form/per-card inline provenances).
+Header (name, "Back to catalog") → **Basic information** (Japanese name, voice actor JP + EN line, Release date Global-or-JP-only, birthday, height, three sizes) → status dl (Release status, JP debut, Global debut, "Edited by Trainer" `is_manual` statement) → JapanOnly notice when applicable → **Aptitude** grid (ten letters, once, not per form) → **Costume forms** (a link strip when >1 form via `FormTabs.vue`; inline panel when exactly one; each panel `FormDetail.vue`: verbatim title, rarity/debut/unconfirmed marks, its own `source_url`/`snapshot_path`/`fetched_at` line) → hidden-forms count + "Show unconfirmed forms" link → **Skills** (four groups: unique/innate/awakening/event, resolved through `Skill.export_id`, `SkillRow.vue` links only for rows Screen D serves) → **Goal races** (named absence — KI-34 reservation, no table exists) → **Her runs** (last 10 with status, scenario label, turn count) + "New run" (helper states it does not preselect) → **Aliases** → **Provenance** (trainee-level `data_sources` last 10, with the sentence separating it from the per-form/per-card inline provenances).
 
 #### Data Displayed
 Profile nullability is *measured and normal*: `va_en` absent on 10 of 135, `three_sizes` on 10, `birth_year` on 17 of 163 rows — every absence renders as a named sentence ("Not published by the source", "No English dub listed", "· year not published"), never a blank, zero, or guessed date. Base stats and stat bonuses are deliberately absent (ADR-0012 Decision 1: columns authorized, not built). `skills_evo` is stored but **not listed**: most of its ids name skills `[Global]` has not shipped and the detail route refuses them, so listing would emit 829 dead links.
 
 #### Inputs
-None (display only). Form tabs commit via GET form (one submit control) so the choice is addressable — WAI-ARIA manual-activation shape, arrow keys move, Enter/button commits.
+None (display only). Form tabs are plain `<Link>`s carrying `?form={local card id}` (and `?show_unconfirmed=1` while the lever is on), so the choice is addressable and survives a reload; the active tab carries `aria-current="page"`.
 
 #### User Actions
 Switch costume form (tab + commit), show unconfirmed, open a skill (only when Global-released and client-named), start a run (no preselect), read provenance links.
@@ -561,7 +568,7 @@ Unknown slug → 404. Out-of-scope `?form=` → silent fallback to first visible
 Provenance link text comes from `config('uma.sources')` / stored columns, never from a fetched body; snapshot path is named, not linked (disk path). `is_manual` disclosed so the Trainer knows the engine will not overwrite her.
 
 #### Accessibility
-`aria-labelledby` sections; dl/dt/dd semantics; tab radios are native inputs (`sr-only` input, `peer-focus-visible` ring on the label, one Tab stop per group); Japanese script rendered as data with no re-casing.
+`aria-labelledby` sections; dl/dt/dd semantics; the costume-form strip is a `<nav aria-label="Costume forms">` of links, the active one carrying `aria-current="page"` (native keyboard targets, `min-h-11`); Japanese script rendered as data with no re-casing.
 
 #### Responsive Behavior
 Profile grid `grid-cols-2 md:grid-cols-3`; status dl `md:grid-cols-4`.
@@ -573,10 +580,10 @@ Profile grid `grid-cols-2 md:grid-cols-3`; status dl `md:grid-cols-4`.
 Back to SCR-CAT-001; forward to SCR-SKL-002, SCR-RUN-002 (generic create, no preselect — recorded on the button itself so the affordance does not lie).
 
 #### Dependencies
-`Umamusume`, `UmamusumeProfile`, `CharacterCard`, `Skill`, `TrainingRun`, `DataSource`; `x-form-tabs`, `x-aptitude-grid`, `x-skill-row`, `x-rarity-chip`.
+`Umamusume`, `UmamusumeProfile`, `CharacterCard`, `Skill`, `TrainingRun`, `DataSource`; `Catalog/Show.vue` with `FormTabs.vue`, `FormDetail.vue`, `AptitudeGrid.vue`, `SkillRow.vue`, `RarityChip.vue`.
 
 #### Implementation References
-View: `resources/views/catalog/show.blade.php` (+ `partials/form-detail.blade.php`, `components/form-tabs.blade.php`); Controller: `CatalogController::show`; Tests: `CatalogDetailPageTest` (asserts all six profile rows), `CatalogSkillListsTest`, `GametoraCharacterProfileParserTest`.
+Page: `resources/js/pages/Catalog/Show.vue` (+ `components/catalog/{FormTabs,FormDetail}.vue`, `components/{AptitudeGrid,SkillRow,RarityChip}.vue`); Controller: `CatalogController::show`; Tests: `CatalogDetailPageTest` (asserts the props), `CatalogSkillListsTest`, `tests/browser/catalog-detail.spec.ts`, `GametoraCharacterProfileParserTest`.
 
 #### Current Status
 Implemented.
@@ -635,7 +642,7 @@ Latin-script "Japanese" names (`#LookatCurren` etc.) dedupe against the English 
 `Skill`; `NameNormalizer`; `GametoraSkillsParser::CATEGORIES`; `StoreSkills` (write path, referenced by copy).
 
 #### Implementation References
-View: `resources/views/skills/index.blade.php`; Controller: `SkillController::index` (+`query`, `describeAsk`, `availableCount`); Request: `SkillSearchRequest`; ADR: `docs/adr/0011-skills-reference-import.md`; Test: `SkillsFetchTest` (family).
+Page: `resources/js/pages/Skills/Index.vue`; Controller: `SkillController::index` (+`query`, `describeAsk`, `availableCount`); Request: `SkillSearchRequest`; ADR: `docs/adr/0011-skills-reference-import.md`; Tests: `SkillSearchScreenTest` (asserts the props), `tests/browser/skills.spec.ts`, `SkillsFetchTest` (family).
 
 #### Current Status
 Implemented.
@@ -657,7 +664,7 @@ Trainer.
 No auth. Route param is the **local** `skills.id`; lookup starts from `availableOnGlobal()`, so an id the scope rejects is the same 404 as an unknown one. The export id never reaches the screen.
 
 #### Entry Points
-Screen-D rows; run-page/skill cross links from SCR-CAT-002 `x-skill-row`; support-card lists.
+Screen-D rows; run-page/skill cross links from SCR-CAT-002 `SkillRow.vue`; support-card lists.
 
 #### Route / Location
 `GET /skills/{skill}` name `skills.show`.
@@ -681,7 +688,7 @@ As SCR-SKL-001 (same view idiom; holder links use slug routes; monospace data bl
 `Skill`, `CharacterCard` (JSON `whereJsonContains` over the four lists, `json_valid` guarded, missing-column tolerated with `QueryException` narrowing).
 
 #### Implementation References
-View: `resources/views/skills/show.blade.php`; Controller: `SkillController::show` (+`holders`); Test: `CatalogSkillListsTest` (mirror read), `GametoraSkillsParserTest`.
+Page: `resources/js/pages/Skills/Show.vue`; Controller: `SkillController::show` (+`holderRows`, `holders`); Tests: `SkillDetailTest` (asserts the props), `CatalogSkillListsTest` (mirror read), `tests/browser/skills.spec.ts`, `GametoraSkillsParserTest`.
 
 #### Current Status
 Implemented.
@@ -730,7 +737,7 @@ Same filter-surface idiom as Screen D (`h-11`, focus ring, wrap rows); client ra
 `SupportCard`, `SupportCardEffects::dictionary()` (read once per page, N+1 avoided by design), `CardRarity`.
 
 #### Implementation References
-View: `resources/views/support-cards/index.blade.php`; Controller: `SupportCardController::index`; Request: `SupportCardSearchRequest`; ADR: `docs/adr/0014-support-card-entities.md`; Tests: `ApiV1SupportCardTest` (data shape), `GametoraSupportCardParserTest`.
+View: `resources/js/pages/SupportCards/Index.vue` (+ `components/RarityChip.vue`); Controller: `SupportCardController::index`; Request: `SupportCardSearchRequest`; ADR: `docs/adr/0014-support-card-entities.md`; Tests: `SupportCardPageTest` (asserts the props), `tests/browser/support-cards.spec.ts`, `ApiV1SupportCardTest` (data shape), `GametoraSupportCardParserTest`.
 
 #### Current Status
 Implemented.
@@ -758,7 +765,7 @@ Catalog rows; deck rows.
 `GET /support-cards/{card}` name `support-cards.show` (implicit binding).
 
 #### Layout / Structure
-Header (display name, optional `name_ja`/`title_ja` line, Back) → dl (Rarity chip+word, Type word, Availability, Released in Japan, Released on [Global] — date-only never timezone-shifted, Belongs to → catalog link or the named two-way miss: 9000-block staff and untracked trainees; measured 322/559 resolve) → **Effects** (at-cap chips + basis note) → **Hinted skills** and **Event skills** (each: not-stored vs empty-stated distinction; linked rows via `x-skill-row`; unlinked counted in words) → **Provenance** (source, read date, and the `is_manual` "Corrected by hand, so the fetch engine leaves it alone" line — FR-B-4's stop sign placed where a Trainer can see it).
+Header (display name, optional `name_ja`/`title_ja` line, Back) → dl (Rarity chip+word, Type word, Availability, Released in Japan, Released on [Global] — date-only never timezone-shifted, Belongs to → catalog link or the named two-way miss: 9000-block staff and untracked trainees; measured 322/559 resolve) → **Effects** (at-cap chips + basis note) → **Hinted skills** and **Event skills** (each: not-stored vs empty-stated distinction; linked rows via `SkillRow.vue`; unlinked counted in words) → **Provenance** (source, read date, and the `is_manual` "Corrected by hand, so the fetch engine leaves it alone" line — FR-B-4's stop sign placed where a Trainer can see it).
 
 #### Data Displayed / States
 Unknown dictionary rows marked by id, never labelled. No tier label (held).
@@ -773,7 +780,7 @@ Same idiom as SCR-SUP-001; no inputs.
 `SupportCard`, `SupportCardEffects::atCap`, `Skill` via `availableOnGlobal`, `Umamusume` via `external_ref` string join (deliberately not a foreign key — ADR-0014 correction 1).
 
 #### Implementation References
-View: `resources/views/support-cards/show.blade.php`; Controller: `SupportCardController::show` (+`skillList`, `trainee`); Test: `RunDeckTest` (deck read-side), parser test above.
+View: `resources/js/pages/SupportCards/Show.vue` (+ `components/SkillRow.vue`, `components/RarityChip.vue`); Controller: `SupportCardController::show` (+`skillList`, `trainee`); Tests: `SupportCardPageTest` (asserts the props), `tests/browser/support-cards.spec.ts`, `RunDeckTest` (deck read-side), parser test above.
 
 #### Current Status
 Implemented.
@@ -971,7 +978,7 @@ Shop panel → purchase form (turn, item from the scenario catalogue, cost as re
 | SCR-RUN-* | run status | Active / Completed / Retired | select on the run page's own PUT form (§7-4, resolved 2026-10-04); create and import still set it at entry |
 | SCR-REV-001 | candidate | Pending → Confirmed/Aliased/Rejected | verdict action |
 | Skills/refs | availability | stored-at-write, applied-at-read (`availableOnGlobal`) | engine columns, no UI toggle |
-| Catalog | disclosure | confirmed / +unconfirmed (`?show_unconfirmed`) | GET opt-in; tab commit must carry it through (`form-tabs` keeps the lever on every tab GET) |
+| Catalog | disclosure | confirmed / +unconfirmed (`?show_unconfirmed`) | GET opt-in; the tab links carry it through (`FormTabs.vue` keeps the lever on every tab GET) |
 
 ## 7. Screen-System Gaps & Inconsistencies
 
@@ -985,7 +992,7 @@ Shop panel → purchase form (turn, item from the scenario catalogue, cost as re
 5. **Preferences ship without a control (US-11).** `preferences` table + server-side theme render exist; no theme toggle or failure-estimate toggle anywhere in `resources/views/` (audit O-1 confirms "the dark theme ships with no way to select it"). `failure_estimate` key exists only in a schema test. *Referenced but Missing; Partially Implemented story.*
    **Resolved 2026-10-04, with one half still blocked.** `GET /preferences` + `PUT /preferences` (SCR-SYS-002) write the two authorized keys, validated by `UpdatePreferenceRequest`, which refuses an unknown *key* as well as an unknown value because `validated()` would otherwise drop it silently. Follow-the-OS is stored as the absence of a row, which is what the theme composer already resolves. The control lives on its own screen behind a sixth nav link, not in the nav: a form in `components/layout` precedes every page's own form in document order and broke six page-wide control-count tests. `failure_estimate` persists and reads back and **changes no calculation**: ADR-0001 §3 records that no source publishes a failure curve and requires any number to print its formula beside it, so there is nothing honest to render. The screen says so rather than offering a silent switch. That display half stays blocked on a sourced model, not on this app.
 6. **Scenario panels without capture (Unity Cup).** Team-rank gauge, spirit-burst roster, team-race panel render explanations; the only capture is `circles`/`placement` on the race form; the resource strip prints `N/A` with no entry path (audit R-2, O-6/O-7). *Implementation Gap blocked on a schema proposal with PRD citation (owner backlog item 2).*
-   **Blocked item discharged, still Deferred 2026-10-04.** The schema proposal the gap was waiting on now exists: `docs/research-scratch/PLANS-AND-BRIEFS.md`. It separates the four figures into three per-turn readings needing columns on `turn_entries` (team rank, league position, burst counts, on the `energy`/`fans` precedent) and the team-race rounds needing **rows** in `scenario_slots` rather than any schema at all, since `circles` and `placement` already exist and `circles` is already gated to `kind = team_race`. It cites US-10 for the slot kind, ADR-0003 R3 for provenance, PRD §6.11 and §6.3 for what stays unbuilt, and reads the value vocabulary out of `config/scenarios.php:119-146` instead of inventing it. It writes no migration and closes nothing: the six open questions there, led by "is there a PRD story for this at all", are the owner's, and ADR-0010's precedent says a column that outlives its screen should be removed rather than kept.
+   **Blocked item discharged, still Deferred 2026-10-04.** The schema proposal the gap was waiting on now exists: `docs/research-scratch/RACE-AND-SLICE-RESEARCH.md`, section `## unity-cup-capture.md`. It separates the four figures into three per-turn readings needing columns on `turn_entries` (team rank, league position, burst counts, on the `energy`/`fans` precedent) and the team-race rounds needing **rows** in `scenario_slots` rather than any schema at all, since `circles` and `placement` already exist and `circles` is already gated to `kind = team_race`. It cites US-10 for the slot kind, ADR-0003 R3 for provenance, PRD §6.11 and §6.3 for what stays unbuilt, and reads the value vocabulary out of `config/scenarios.php:119-146` instead of inventing it. It writes no migration and closes nothing: the six open questions there, led by "is there a PRD story for this at all", are the owner's, and ADR-0010's precedent says a column that outlives its screen should be removed rather than kept.
 7. **Race calendar data unscoped.** `race_catalog_slots` seeded 410 rows with `scenario_key` on 4; calendar/picker cannot honestly scope years/scenarios (audit O-5 corrected, R-7; `TrainingRunController::raceSlotsFor` comment says empty-by-design until fetch lands, KI-11). *Implementation Gap, data-first.*
    **Deferred with reason 2026-10-04. No code change, as the gap is data.** Scope is blocked on scenario-tagged catalogue rows, not on a screen: the table holds 410 races and four carry a `scenario_key`, so `forScenario()` honestly returns nothing for the other 406 and the picker is right to look thin. Two corrections to this line while I am in it. First, the citation is stale: `KI-11` is **closed** in the committed register (`git show HEAD:KNOWN-ISSUES.md`, the Slice 13 status line: "18 resolved/closed (KI-1–9, KI-11–14...)"), while `TrainingRunController.php:208` still says "Empty by design until the fetch engine lands (KI-11)". The comment's premise is also superseded, since the fetch did land and filled 410 rows. Which text is corrected, and whether the comment moves to the open fetch work or to a new KI, is the owner's call and no code in this dispatch touches it. Second, a measured blocker on top of the scoping: `migrate --seed` on a fresh in-memory database reports `gametora-race-catalog: FAILED (table race_catalog_slots has no column named export_slot_id) — skipped` and **exits 0** (audit F-2), because `GametoraRaceCatalogParser.php:163` emits `export_slot_id`, no migration defines it, and `SourceDocumentSeeder.php:82-90` swallows the failure. Until that column is settled, no source refresh can add the scenario scoping this gap is waiting for.
 8. **Error-state coverage asymmetry.** Custom 404 view only; no 500/419 views; framework default pages are off-theme (G-20 first-paint rule holds only for shipped screens). *Documentation/UX Gap, minor.*
@@ -996,16 +1003,58 @@ Shop panel → purchase form (turn, item from the scenario catalogue, cost as re
    **Unchanged 2026-10-04, as instructed.** The documented upgrade path stays: it needs a schema change, which this dispatch bars, and the ceiling is disclosed in the code rather than hidden.
 11. **Stale copy risk in commands naming.** Four screens print artisan command strings verbatim in empty states (`uma:fetch gametora-skills`, `gametora-support-cards`, `gametora-character-cards`, `gametora-character-profiles`), and README still says "Three [sources] are declared today" while `config/uma.php` declares the full set. The UI copy matches config; the README does not. *Documentation Gap.*
    **Resolved 2026-10-04.** Verified first: all four command strings the views print name a key that exists in `config/uma.sources`, and all four sources are declared. The README's count claim is gone rather than corrected to a new number, because correcting it re-creates the same line for the next source to break; the sibling session's README restructure, still uncommitted in this worktree, went further and lists all seven. The durable part is `EmptyStateCommandNamesTest`, which sweeps every Blade view for `uma:fetch <source>` and checks each token against the declared set, checks the README's source names the same way, and checks the Web surface table's paths against the registered routes. It has floors on all three sweeps, so it cannot pass by finding nothing.
-12. **Run page carries an open adversarial review.** `docs/research-scratch/AUDIT-AND-VERIFICATION.md` verdict "Fail on the run page" (2026-10-03) with a still-open list (O-3 total-vs-delta semantics, O-8 deck tiles/reset, O-11 skills panel design, O-12 goals, Infirmary/Races choices, contested Rest figure). The screen is implemented; the review is not closed. This spec records both, per Step 3, rather than declaring either done. *Mixed; tracked in the audit's own backlog.*
+12. **Run page carries an open adversarial review.** `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` verdict "Fail on the run page" (2026-10-03) with a still-open list (O-3 total-vs-delta semantics, O-8 deck tiles/reset, O-11 skills panel design, O-12 goals, Infirmary/Races choices, contested Rest figure). The screen is implemented; the review is not closed. This spec records both, per Step 3, rather than declaring either done. *Mixed; tracked in the audit's own backlog.*
    **Unchanged 2026-10-04, and not closed by this work.** Three of the four code items touched the run page (turn rows, status select, nav count), and none of them is an audit item; the verdict and its open list stand as the audit wrote them. Per the dispatch's hard rule no verdict in that file was edited and no open item was marked closed.
 13. **Orphaned library components.** `run-header`, `deck-editor`, `energy-gauge` (used only inside `run-header`), `app-button`, `advisory-row`, `capsule-header`, `support-card-rail`, `grade-badge` are referenced only by `FrontendComponentLibraryTest` (and compiled view cache) since `/design-preview` was deleted. They are exercised but mounted on no screen. *Consistency Gap (dead surface kept alive by tests); removal or re-mounting is a decision, not this document's.*
    **Status: partly Resolved 2026-10-04 (app-button mounted, two components deleted); five Deferred with reason, listed below.** Checked against the tree after items B to D, and none of the eight had gained a mount site: every `<x-…>` tag on every page is enumerated in the commit report, and the new turn editor, status form and preferences screen are inline markup. `app-button` is now mounted on three submit controls, and its `secondary` variant renders the exact class list two of them hand-carried. `advisory-row` and `support-card-rail` are deleted with their dataset entries and their two dedicated cases: zero call sites, and neither is named by DESIGN.md's three motif/energy/grade bullets.
-   Kept and still owed to the owner: `run-header` and `energy-gauge` (coupled, one cannot go without the other's tests breaking; `energy-gauge` is also the only consumer of the `bg-lattice` utility, and the token-pruning gate that would notice self-skips with no browser package installed), `capsule-header` and `grade-badge` (both artifacts of open design rulings, in a file a sibling session is editing now), and `deck-editor` (the nearest existing thing to O-8's six card tiles, and O-8 is mid-flight at `b21f356`). Worth correcting in this line: `docs/research-scratch/AUDIT-AND-VERIFICATION.md` names **none** of the eight components, so a caution about O-8 depending on them is a near-neighbour risk, not a documented dependency.
+   Kept and still owed to the owner: `run-header` and `energy-gauge` (coupled, one cannot go without the other's tests breaking; `energy-gauge` is also the only consumer of the `bg-lattice` utility, and the token-pruning gate that would notice self-skips with no browser package installed), `capsule-header` and `grade-badge` (both artifacts of open design rulings, in a file a sibling session is editing now), and `deck-editor` (the nearest existing thing to O-8's six card tiles, and O-8 is mid-flight at `b21f356`). Worth correcting in this line: `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` names **none** of the eight components, so a caution about O-8 depending on them is a near-neighbour risk, not a documented dependency.
    **Further resolved 2026-10-04, and the two open design rulings it was waiting on are now closed in code.** The reason this item held `capsule-header` and `grade-badge` was that both were waiting on a ruling about how they render, not about whether they render: DESIGN.md §2.1 and §2.3 had already decided the treatment (grade fill keyed on the base letter with the modifier stripped, nine tint families; capsule chrome fill with the lattice bleed). The surfaces were simply still carrying their own copies. `capsule-header` is now mounted on all eight panels that hand-copied its div, and `grade-badge` now owns the grade fill in `stat-band`, which had its own nine-letter map and its own badge span. Nothing about either ruling changed; what changed is that the ruled implementation is the only one left. `FrontendComponentLibraryTest` asserts both visuals are defined in exactly one view, so a second copy fails the suite. Remaining on this item: `run-header`, `energy-gauge` (coupled, and the unreachable one is the one whose hue treatment §2.2 rules not material) and `deck-editor` (still gated on the per-card state decision PRD §6.9 and US-12 exclude). Reachability across the 24 remaining components: 22 from a route, those two with no call site at all.
 14. **Terminology drift caught and ruled.** `Wisdom/Motivation` (JP-wiki English) vs `Wit/Mood` (client words) is gated by `tools/lore.php` and the lang file's terms map; UI shows only client words. Recorded so a future reader does not "fix" the lang map's JP-side entries. *Consistency, resolved.*
    **Unchanged 2026-10-04; mechanism re-verified and it holds as written.** The ruling stands and was followed: the new turn-row editor, status select and preferences screen print Wit, Mood and the five client mood strings, and no JP-wiki gloss entered any of them. Re-checking what enforces it found both halves of this sentence true. `tools/lore.php:64` carries `wisdom|motivation` (with `strength|endurance|luck|agility|charisma`, and `gacha|jewel|factor`) in the pattern scanned over the app paths, and `lang/en/uma.php:70-90` is the terms map that states the Global label, `'card_wit' => 'Wit'`, with `:78-79` recording that 賢さ keys as `intelligence` in the export while the player-facing word is Wit. That is the JP-side entry the dispatch forbids editing, and it was not touched. `AGENTS.md`'s "Practical notes" line describes the same list from the other side ("the Global client terminology (`Wisdom` for Wit, `Motivation` for Mood...)"), which reads as though the wiki glosses are the client words; §7-14 and this dispatch both say the opposite, and the rendered copy plus the lang file agree with §7-14. The wording in `AGENTS.md` and in this item's first sentence is what needs the owner's ruling; neither file was edited here, and nothing in `tools/lore.php` or the lang map was touched.
 15. **Import cannot carry skills/deck/races.** Stated on-screen; no story requests the wider format. *Unresolved Requirement, acceptable.*
    **Unchanged 2026-10-04, as instructed.** `ADR-0018`'s sibling concern, the turn edit path, does not touch the import: `runs.import.*` keeps its own request and its own column list, and `HistoricalRunImportTest` passes unchanged.
+16. **No screen places artwork.** `ADR-0021` (2026-10-05) authorizes a local mirror of id-addressable third-party game art, and `DESIGN.md` §4.7 fixes how a slot behaves; no screen in this spec lists an image slot, and `grep -rn "<img" resources/views` returns zero on this tree, so nothing in the product renders a picture. *Unresolved Requirement, acceptable; the open decision is PRD OQ-6.* **Superseded in part 2026-10-05**; the sentence above is preserved as written and is false for four screens, as recorded below.
+   **Resolved on the ported surfaces 2026-10-05; two candidates still do not carry a slot.**
+`uma:fetch-art` is the mechanism and it was already recorded; this entry records the read half,
+`artwork.show` plus `ArtworkMirror::url()` and `ArtworkSlot.vue`. **Placed, matching
+`design-2.0` §45a:** SCR-CAT-001's trainee card header (`size-12`) and its costume-form rows
+(`size-10`), SCR-CAT-002 section 1 Identity (`size-16`, decorative, no anchor), SCR-SUP-001's card
+rows (`size-12`, clickable to the card's own page) and SCR-SUP-002's header (`size-16`, no anchor).
+A miss renders the text-only row those screens shipped before, so **no state table above changes**
+and the four-state collapse recorded below still holds.
+
+**The slots are Vue, and the Blade components this entry previously named are gone.** `x-character-
+portrait` and `x-support-thumb` were built for the three Blade screens the artwork work first
+targeted and deleted the same day, because the A1 to A3 ports retired `catalog/show.blade.php` and
+both support-card Blade views and those components had no other call site
+(`frontend-development-plan.md` §5.1 step 8 deletes a shared component at zero call sites).
+`ArtworkSlot.vue` replaced them across all four screens. **`grep -rn "<img" resources/views`
+returning zero is therefore correct again**, not the gap this item's first sentence describes: the
+`<img>` elements now come from `.vue` files. That sentence is preserved above as written and is
+false for four screens in a second way as well.
+
+**Not placed, and each for a stated reason rather than by omission.** The pre-run Legacy Select widget
+cannot host a frame: SCR-RUN-CREATE's trainee picker is a native `<select>` whose `<option>` content
+model is text, plus a client-rendered combobox listbox, so there is no row to put an image in; wiring
+the combobox instead is a TypeScript slice with its own browser-spec cost, and it is deferred rather
+than refused. Skill rows remain unreachable for the original reason: `skills` stores no `iconid`
+column, so the 125 distinct ids live only in the committed dataset and mirroring them would need a
+migration of its own (`ADR-0021`'s Verification records the finding).
+
+**One open item rides with the placement, and one gap is closed.** Open: the catalog index resolves a
+trainee's header portrait from her top-rarity form while the detail page resolves it from the active
+or first form, so one multi-form trainee can show two different portraits across the two screens; that
+is a placement decision for the owner, not something either screen should assume. Closed: the Blade
+components' single `decorative` flag, which blanked the image `alt` and the anchor `aria-label`
+together and so could not express a decorative image inside a named link, nor a no-action slot with no
+anchor at all. `ArtworkSlot.vue` takes `alt` and `href`/`linkLabel` as separate props, which is what
+lets the three no-action slots carry `alt=""` without leaving a nameless focus target that failed
+WCAG 2.2 AA 4.1.2. `DESIGN.md` §4.7's fifth bullet now records the resolution rather than the gap.
+Neither the open item nor the closure changes a state table. **PRD OQ-6 stays open**: the placement
+question has an answered subset, not an answer, and the run-create and skill-row remainder is what is
+left.
+   **Unchanged 2026-10-05, and the build did not change it.** `uma:fetch-art` is the mechanism, not the placement: it fills `storage/app/private/artwork/` and writes `artwork/manifest.json`, and no screen reads either yet. If the owner answers OQ-6 yes, the candidate slots are SCR-CAT-001's trainee card header and its costume-form rows, SCR-CAT-002 section 1 (Identity), SCR-SUP-001's card rows and SCR-SUP-002's header, plus the pre-run Legacy Select widget. A skill row's icon is **not** reachable the same way: `skills` stores no `iconid` column, so the 125 distinct ids live only in the committed dataset and mirroring them would need a migration of its own (`ADR-0021`'s Verification records the finding). Four states a slot can be in, and three of them render identically: mirrored-and-present, never mirrored, gone upstream, and unreadable on disk, with everything after the first falling back to the text-only row that ships today, because the mirror is partial by nature and a broken frame would advertise a defect the tool does not have (`ADR-0021` Decision 5). No state table above changes until a slot exists, and no per-screen empty state is added on the strength of a mirror nobody has filled.
+   **Corrected 2026-10-05: the build did change it, and the mirror is now filled. Gap §7-16 status: resolved in part.** Four of the five candidate slots named above are live, on the ported Vue screens rather than the Blade views this entry assumed: SCR-CAT-001's trainee card header and its costume-form rows, SCR-CAT-002 section 1 (Identity), SCR-SUP-001's card rows and SCR-SUP-002's header. `resources/js/components/ArtworkSlot.vue` is the one owner of the slot contract. The first live `uma:fetch-art` pass resolved all 665 ids into 45 MB with zero unresolved, so the four states above are no longer hypothetical: mirrored-and-present renders a frame, and the other three collapse to one render. That render is now specified rather than assumed — `ArtworkSlot` paints nothing, and a row reserves a transparent cell so its label holds one x whether or not the file exists (`DESIGN.md` §4.7). Still open under OQ-6: the pre-run Legacy Select widget, which cannot host a frame because its picker is a native `<select>` whose `<option>` content model is text, and skill icons, which still need the `skills.iconid` migration this entry already named. The per-screen state tables above still do not change, because an absent frame is not a new state of the screen — it is the same text row, held in place.
 
 ## 8. Source of Truth
 
@@ -1019,9 +1068,10 @@ Shop panel → purchase form (turn, item from the scenario catalogue, cost as re
 | Displayed label vocabulary | `lang/en/uma.php` (enum labels keyed by case name) + client-captured strings per audit I-3/Part 5 | `EnumLabelTest`; lore gate `composer lore`/`tools/lore.php` |
 | Visual system, tokens, contrast, motion | `DESIGN.md` (+ corpus `docs/research-scratch/DESIGN-CORPUS.md`) | `DesignTokensTest`, `FlashBannerTokensTest`, gate G-18/G-19/G-20 |
 | State coverage duty (empty/loading/error) | `ARCHITECTURE.md` §7 + ADR-0007 (server-rendered scope) | Per-screen empty states as documented above |
+| Artwork: whether a file may be shown, and how absence behaves | `ADR-0021` (Decisions 3, 5, 6) + `DESIGN.md` §4.7 | `PRD.md` OQ-6 for placement on a screen, open; `PRD.md` §6.13 for uploads, still cut; §7-16 above |
 | Automated behavioral expectations | `tests/Feature/*` Pest suite (HTTP via `Http::fake` fixtures; no network) | Test names cited per screen |
 | Known defects and rulings | `KNOWN-ISSUES.md` (live register; history in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`) | Inline KI references above |
-| Screen-level UX findings & decisions owed | `docs/research-scratch/AUDIT-AND-VERIFICATION.md` | Part 7 landed/closed ledger |
+| Screen-level UX findings & decisions owed | `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` | Part 7 landed/closed ledger |
 | When sources disagree | `CONSTRAINTS.md` > GATE-REGISTRY > ADRs > DESIGN > slice plans (`AGENTS.md` precedence; `ARCHITECTURE.md` over its digest; `PRD.md` is product truth) — conflicts are recorded here (§7), not silently resolved |
 
 ## 9. Change Log
@@ -1029,4 +1079,7 @@ Shop panel → purchase form (turn, item from the scenario catalogue, cost as re
 | Date | Change | Reason |
 |---|---|---|
 | 2026-10-03 | Initial screen specification | Repository baseline |
-| 2026-10-04 | Section 7 carries a status line for every gap (1 to 15). Resolved: 1, 2, 4, 5 (display half still open), 8, 11, 13 (partly). Deferred with reason: 3, 6, 7, 10, 15. Decision recorded: 9 (`ADR-0018`). Unchanged and not closed: 12, 14. New screen SCR-SYS-002 (Preferences); nav shell now six links; `runs.turns.update`/`runs.turns.destroy` no longer UI-less; SCR-SYS-001's "only one custom error view" state corrected. | Screen-system gaps dispatch, items A to G. No verdict in `docs/research-scratch/AUDIT-AND-VERIFICATION.md` was edited and no open audit item was closed. |
+| 2026-10-04 | Section 7 carries a status line for every gap (1 to 15). Resolved: 1, 2, 4, 5 (display half still open), 8, 11, 13 (partly). Deferred with reason: 3, 6, 7, 10, 15. Decision recorded: 9 (`ADR-0018`). Unchanged and not closed: 12, 14. New screen SCR-SYS-002 (Preferences); nav shell now six links; `runs.turns.update`/`runs.turns.destroy` no longer UI-less; SCR-SYS-001's "only one custom error view" state corrected. | Screen-system gaps dispatch, items A to G. No verdict in `docs/UIX-AUDIT-TRAINING-RUNS.md` was edited and no open audit item was closed. |
+| 2026-10-04 | Trainer Desk 2.0 design target filed for reference: `docs/proposals/screen-spec-2.0.md` (screen set) and `docs/proposals/design-2.0.md` (visual system). These are the Inertia/Vue rewrite target (`ADR-0020` §1), **reference-only** — this document still describes the shipped Blade app. The target's deferred-computation sections (race win-probability, per-training stat-yield and numeric failure, inheritance computation, shop recommendation) carry a governance banner naming the holding ADR and are not authorization. | Owner-supplied design brief, filed as the 2.0 target. No shipped screen changed. |
+| 2026-10-05 | Gap §7-16 added, and one §8 authority row for artwork. No screen section, state table or workflow changed. | `ADR-0021` authorized sourced artwork on 2026-10-05 while the placement question stays open (PRD OQ-6). The screen system records an authorization it has not yet implemented rather than letting the ADR be the only place a future build looks. |
+| 2026-10-05 | §7-16 marked **superseded in part**, with a dated correction appended under it rather than the original sentence rewritten. No screen section, state table, workflow or §8 authority row changed. The correction names the four placed screens with their recorded geometry, states the pre-run Legacy Select as unplaceable with its reason, keeps the skill-row deferral, and carries forward two open items (the index/detail portrait-source drift, and the components' single `decorative` flag). | The read half of `ADR-0021` landed, so §7-16's own claim that `grep -rn "<img" resources/views` returns zero no longer holds. `AGENTS.md` §16 says a stale written rule is reported rather than edited to match the code; the sentence is preserved verbatim and marked false-for-four-screens, with the correction dated beside it, which is the same shape §7-4 and §7-14 already use for their own closures. PRD OQ-6 stays **open**: a subset of placements is answered, not the question. |

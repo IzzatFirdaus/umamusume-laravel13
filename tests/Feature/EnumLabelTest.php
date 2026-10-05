@@ -9,6 +9,7 @@ use App\Enums\ReleaseStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Models\Umamusume;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * Views printed the enum backing value, so a Trainer read the machine token
@@ -65,10 +66,20 @@ it('keeps the backing value in the option value and in the status filter', funct
     Umamusume::factory()->japanOnly()->create(['name' => 'Japan Only One', 'slug' => 'japan-only-one']);
     Umamusume::factory()->create(['name' => 'Released One', 'slug' => 'released-one']);
 
-    test()->get('/umamusume')->assertSee('value="JapanOnly"', false);
+    // The picker's option value is client-rendered now (ADR-0020 §1), so the backing value is
+    // asserted on the prop the picker binds, and the filter still selects on that value.
+    test()->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where(
+            'statuses',
+            fn ($statuses): bool => collect($statuses)->contains(
+                fn (array $status): bool => $status['value'] === 'JapanOnly' && $status['label'] === 'Japan only',
+            ),
+        ));
 
     test()->get('/umamusume?status=JapanOnly')
         ->assertOk()
-        ->assertSee('Japan Only One')
-        ->assertDontSee('Released One');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('umamusumes.data', 1)
+            ->where('umamusumes.data.0.name', 'Japan Only One'));
 });

@@ -16,8 +16,8 @@ use App\Models\TurnEntry;
  *
  * That invariant is what the D-1 fix put at risk, because the fix moved a boolean that
  * decides both the visible stage and whether the confirm control is rendered. A test that
- * only ever looks at markup would not notice that fix also made stage 1 writable; one
- * that counts rows does.
+ * only ever reads the rail's stage would not notice that fix also made stage 1 writable;
+ * one that counts rows does.
  *
  * Every count here is asserted on TurnEntry directly rather than on the response body.
  */

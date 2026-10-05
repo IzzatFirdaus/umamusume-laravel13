@@ -4,6 +4,7 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source '../**/*.vue';
 
 /*
  * Design tokens. Single source of truth for the app's palette, per DESIGN.md §2.1
@@ -355,5 +356,32 @@ html[data-theme='dark'] {
     textarea,
     select {
         caret-color: var(--color-chrome);
+    }
+
+    /*
+     * WCAG 2.2 AA 2.4.11 Focus Not Obscured. Below md the shell pins a nav bar to
+     * the viewport bottom; without scroll padding a keyboard-focused control or a
+     * #fragment jump lands underneath it. 4rem clears the 44px bar.
+     */
+    @media (max-width: 767px) {
+        html {
+            scroll-padding-bottom: 4rem;
+        }
+    }
+
+    /*
+     * WCAG 2.2 AA reduced-motion path (design-2.0 §43). The MOTION dial is 1, so
+     * there is little to quiet today; this is the escape hatch for the OS setting
+     * and the guard for any transition a later slice adds.
+     */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
     }
 }

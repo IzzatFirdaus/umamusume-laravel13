@@ -28,9 +28,12 @@ sides believing they pointed at the same fact. When an ADR claims one owner for 
 list should name the call *and* the argument, or it has described an intention rather than a guarantee.
 
 Five ADRs carry a correction of their own claim: `ADR-0001` (§5 superseded by `ADR-0003`), `ADR-0008`
-(status), `ADR-0012` (numbered errata), `ADR-0013` (withdrawn, original status preserved in a footnote), and
-`ADR-0015`. `ADR-0014` matches the same grep and does **not** belong: it supersedes `ADR-0005`, which is a
-different act. Re-derive with `grep -niE "erratum|superseded (by|on)" docs/adr/00*.md` and read which claim
+(status), `ADR-0012` (numbered errata, four as of 2026-10-05), `ADR-0013` (withdrawn, original status
+preserved in a footnote), and `ADR-0015`. `ADR-0014` matches the same grep and does **not** belong: it
+supersedes `ADR-0005`, which is a different act. Neither do `ADR-0019` (it records a correction it *asks*
+for, in §14 of `AGENTS.md`, and is still Proposed) nor `ADR-0021` (it corrects `ADR-0012` Decision 2 and says
+so in `ADR-0012` Erratum 4, which is amending another decision, not one's own claim). Re-derive with
+`grep -niE "erratum|superseded (by|on)" docs/adr/00*.md` and read which claim
 each hit is about; a count typed straight from a grep is the failure this section exists to prevent.
 
 ## The index
@@ -64,12 +67,16 @@ for f in docs/adr/00*.md; do printf '%s\t%s\t%s\n' \
 | 0017 | A historical run imports as the CSV this app exports, through a web form | Accepted (Slice 4, built 2026-10-01) |
 | 0018 | One facet contract for the three filter surfaces, and one page-size rule | Accepted (owner dispatch 2026-10-04) |
 | 0019 | A semver label, a tag, and a release branch for a local-only tool | **Proposed** — version and non-`master` target set by owner; pre-release mechanism and the §14 correction owed |
+| 0020 | Trainer Desk 2.0 — SPA frontend, target-based Trainer Advisor, record-only Veteran library (race prediction stays deferred) | Accepted (owner ruling 2026-10-04); amends §6.2, extends `ADR-0001`, builds on `ADR-0010`, reaffirms `ADR-0016` |
+| 0021 | Sourced character and support-card artwork, mirrored locally and derived from ids | **Accepted (owner ruling 2026-10-05)**; supersedes `ADR-0012` Decision 2 for sourced artwork, preserves `PRD.md` §6.13; fetch half built 2026-10-05, display half open (`PRD.md` OQ-6) |
 
 The table is stale the moment a status line changes and no test guards it, so the command above is the
 authoritative form and this prose is a snapshot. This table was stale when `ADR-0019` was written: it ended
-at 0017 while `ADR-0018` was on disk, and the count below said seventeen. Nineteen files: four not accepted
+at 0017 while `ADR-0018` was on disk, and the count below said seventeen. Twenty-one files: four not accepted
 in full (0005 declined, 0013 withdrawn, 0016 an open question, 0019 proposed), two accepted in part (0001,
-0011), one superseded within its own subject by a later ADR (0002's bound, by 0015).
+0011), one superseded within its own subject by a later ADR (0002's bound, by 0015), and one whose subject is
+only half landed (0021: its fetch mechanism built the day it was accepted, its display slots still open on
+`PRD.md` OQ-6, and no live pass run against the asset host).
 
 This file holds no decisions. An ADR is written when a question is answered, not to hold a fork open — which
 is why `ADR-0016` carries no verdict and the row above says so rather than smoothing it.

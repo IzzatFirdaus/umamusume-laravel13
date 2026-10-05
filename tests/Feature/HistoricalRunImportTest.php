@@ -8,6 +8,7 @@ use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\Umamusume;
 use Illuminate\Http\UploadedFile;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * ADR-0017: a run the app exported must be a run the app can read back.
@@ -232,12 +233,30 @@ it('writes nothing on the preview step', function (): void {
     $runsBefore = TrainingRun::count();
     $turnsBefore = TurnEntry::count();
 
+    $csv = importCsv([importTurn(), importTurn(['turn' => 2])]);
+
     test()->post(route('runs.import.preview'), importPayload($source, [
-        'csv' => importCsv([importTurn(), importTurn(['turn' => 2])]),
+        'csv' => $csv,
+        'notes' => 'from a paper sheet',
     ]))
         ->assertOk()
-        ->assertSee('Confirm the import')
-        ->assertSee('2 turns');
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Import')
+            ->has('preview.turns', 2)
+            // Rows arrive as the raw strings the parse produced, which is also what lets a rejected
+            // cell point at the row that held it.
+            ->where('preview.turns.1.turn', '2')
+            // The text is carried, not a token standing in for it, because the commit runs this same
+            // Form Request again: the preview is not a trust boundary.
+            ->where('preview.csv', $csv)
+            // The run half travels as the four fields the commit re-validates, so a note typed before
+            // the preview is not quietly dropped at the confirm step.
+            ->where('preview.run', [
+                'umamusume_id' => $source->umamusume_id,
+                'scenario' => $source->scenario,
+                'status' => $source->status->value,
+                'notes' => 'from a paper sheet',
+            ]));
 
     expect(TrainingRun::count())->toBe($runsBefore);
     expect(TurnEntry::count())->toBe($turnsBefore);

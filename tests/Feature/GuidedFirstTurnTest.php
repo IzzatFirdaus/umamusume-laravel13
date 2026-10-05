@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\Umamusume;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * D-1: the first turn of a run, through the guided rail.
@@ -12,18 +13,20 @@ use App\Models\Umamusume;
  * The deadlock, in three layers that all read the same thing:
  *
  *   StoreTurnEntryRequest:78   a confirm stage requires `previewed`
- *     ^ guided-step renders `previewed` only when `@if ($preview !== [])`
+ *     ^ the rail rendered its confirm control only when the delta list was non-empty
  *       ^ previewDeltas() returns [] when there is no previous row
  *         ^ a run's first turn has no previous row
  *
  * So the first turn of every run could not be committed through the rail. It was not a
- * data-loss bug: the raw escape hatch at runs/show.blade.php:304 still records a turn, and
- * that is exactly why it survived - GuidedTurnOnRunViewTest's confirm test runs against a
- * run that already has turn 1, so no existing test ever previewed turn 1.
+ * data-loss bug: the raw escape hatch beside the rail still records a turn, and that is
+ * exactly why it survived - GuidedTurnOnRunViewTest's confirm test runs against a run that
+ * already has turn 1, so no existing test ever previewed turn 1.
  *
  * The fix is in the controller, not the view: an empty delta list meant both "this is the
  * plain GET" and "this is a preview of a first turn", and the rail read the first. Those
- * are now two named states, and the confirm gate follows the state rather than the list.
+ * are now two named states (`rail.previewed` beside `rail.preview`), and the confirm gate
+ * follows the state rather than the list. The screen is Inertia now (ADR-0020), so these
+ * assert that state; the rendered copy is in tests/browser/run-detail.spec.ts.
  *
  * D-1 was fixed rather than characterized: the old behaviour contradicted D-53, which
  * requires the escape hatch to be reachable rather than default, and nothing here pins it.
@@ -63,16 +66,19 @@ it('offers the confirm stage on a preview of the very first turn', function (): 
     // PRG: the previewed screen is the redirect target, not the POST body. The controller
     // flashes the submitted input plus the `previewed` flag it was told to set, so the
     // carry below is what the browser actually arrives with.
-    $html = test()
+    test()
         ->withSession(['_old_input' => $payload + ['previewed' => '1']])
         ->get(route('runs.show', $run))
-        ->getContent();
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            // A first turn previews to an empty delta list by arithmetic, so the only thing
+            // that can carry "you have previewed this" is the flag itself.
+            ->where('rail.preview', [])
+            ->where('rail.previewed', true)
+            ->where('rail.current', 'outcome'));
 
-    // A first turn previews to an empty delta list by arithmetic, so the only thing that
-    // can carry "you have previewed this" is the flag itself.
-    expect($html)->toContain('name="previewed"')
-        ->and($html)->toContain('Step 2 of')
-        ->and(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(0);
+    expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(0);
 });
 
 it('says why the first turn has no deltas, rather than showing an empty preview', function (): void {
@@ -82,15 +88,17 @@ it('says why the first turn has no deltas, rather than showing an empty preview'
     test()->post("/training-runs/{$run->id}/turns", $payload)
         ->assertRedirect(route('runs.show', $run));
 
-    $html = test()
+    // D-220: an absent figure is a labelled absence. Five zeroed deltas, or a blank panel
+    // with no explanation, would both be structure claiming to be data. The empty list and
+    // `has_previous` false are what render the first-turn note, in
+    // tests/browser/run-detail.spec.ts.
+    test()
         ->withSession(['_old_input' => $payload + ['previewed' => '1']])
         ->get(route('runs.show', $run))
-        ->getContent();
-
-    // D-220: an absent figure is a labelled absence. Five zeroed deltas, or a blank panel
-    // with no explanation, would both be structure claiming to be data.
-    expect($html)->toContain('This is the run\'s first turn')
-        ->and($html)->not->toContain('+0 Speed');
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.preview', [])
+            ->where('rail.has_previous', false));
 });
 
 it('commits the first turn through the rail without touching the raw form', function (): void {
@@ -128,14 +136,20 @@ it('leaves a second turn previewing its deltas as before', function (): void {
     test()->post("/training-runs/{$run->id}/turns", $payload)
         ->assertRedirect(route('runs.show', $run));
 
-    $html = test()
+    // `has_previous` true is what keeps the first-turn note off this preview; the note's
+    // own copy and the delta colours are in tests/browser/run-detail.spec.ts.
+    test()
         ->withSession(['_old_input' => $payload + ['previewed' => '1']])
         ->get(route('runs.show', $run))
-        ->getContent();
-
-    expect($html)->toContain('+50 Speed')
-        ->toContain('-14 Energy')
-        ->not->toContain('This is the run\'s first turn');
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.preview', [
+                ['direction' => 'up', 'text' => '+50 Speed'],
+                ['direction' => 'up', 'text' => '+20 Skill Points'],
+                ['direction' => 'down', 'text' => '-14 Energy'],
+                ['direction' => 'up', 'text' => '+1200 Fans'],
+            ])
+            ->where('rail.has_previous', true));
 });
 
 it('still refuses a confirm that was never previewed, on a first turn too', function (): void {
@@ -155,19 +169,20 @@ it('still refuses a confirm that was never previewed, on a first turn too', func
 it('does not offer the confirm stage on a plain visit to a fresh run', function (): void {
     $run = firstTurnRun();
 
-    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
-
-    expect($html)->not->toContain('name="previewed"');
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('rail.previewed', false));
 });
 
 it('still renders no turn rows for a run that has logged none', function (): void {
     $umamusume = Umamusume::factory()->create();
     $run = TrainingRun::factory()->create(['umamusume_id' => $umamusume->id]);
 
-    $html = test()->get("/training-runs/{$run->id}")->assertOk()->getContent();
-
     // The D-1 regression bar, unchanged and unmodifiable: a fresh run invents no turn
     // row and mounts no stat band, whatever the rail is offering to record.
-    expect($html)->not->toContain('bg-grade-')
-        ->and(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(0);
+    test()->get("/training-runs/{$run->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('band', null));
+
+    expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(0);
 });

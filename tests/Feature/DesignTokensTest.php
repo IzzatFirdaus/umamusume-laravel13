@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Schema;
 use Pest\Browser\Browser;
 
 /*
- * G-18 / G-19 for the legacy application shell.
+ * G-18 / G-19 for the application's two source trees.
  *
- * G-19 is a grep gate, and this is that grep run against the rendered HTML rather
+ * G-19 is a grep gate, and this is that grep run against rendered HTML rather
  * than the source, so a value smuggled in through a Blade expression is caught
  * too. Two things must not appear: a `dark:` utility, because the theme forks by
  * flipping custom properties and nothing else (D-101), and any skeleton palette
  * class, which is what left the dark theme with a white page and zinc borders
- * before `components/layout.blade.php` was migrated to tokens.
+ * while the shell still rendered on the skeleton palette (B1 retired that shell).
  *
  * The measured half of G-18 — every text/background pair clearing 4.5:1 in both
  * themes — is a browser check against resolved custom properties, and the corpus
@@ -28,8 +28,10 @@ use Pest\Browser\Browser;
  */
 
 /**
- * Every page the design audit found still on the skeleton palette, with the
- * content each one needs in order to render its non-empty branch.
+ * Pages the design audit found on the skeleton palette. Every one of them is an Inertia page now, so
+ * what the response still carries from the server is the shell and the resolved props, and both are
+ * read here: the shell for its own classes, the props for a class smuggled in through an expression.
+ * The markup the components render is swept from source by the gate below, where it can be seen whole.
  *
  * @return array<string, string>
  */
@@ -57,26 +59,101 @@ it('renders each legacy shell page from tokens, with no theme fork and no skelet
         ->not->toMatch('/\b(?:bg|text|border)-white\b/');
 })->with(shellPageUrls());
 
-it('renders the framework paginator from tokens too', function (): void {
-    // The published override is the whole subject. Asserting it is present, rather
-    // than skipping the test when it is not, is the point: a missing override means
-    // the framework default is rendering raw `dark:` and gray/blue classes, and that
-    // is a defect to fail on, not a condition to tolerate.
-    $published = base_path('resources/views/vendor/pagination/tailwind.blade.php');
+/**
+ * Every source that can put a class on an element a Trainer sees: the Blade that is left, and the
+ * Vue components and pages that replaced most of it (ADR-0020 §1).
+ *
+ * RecursiveDirectoryIterator, not glob('**'): PHP's glob does not expand `**`, so a glob-based sweep
+ * reads one directory and passes without having looked at the rest. A gate that reads only one of the
+ * two trees goes quiet as the port advances, which is how a sweep ends up proving nothing.
+ *
+ * @return array<string, string>
+ */
+function styleSources(): array
+{
+    $sources = [];
 
-    expect(is_file($published))
-        ->toBeTrue('The published pagination view is absent, so the framework default is rendering.');
+    foreach (['resources/views', 'resources/js'] as $root) {
+        $walk = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(base_path($root), FilesystemIterator::SKIP_DOTS),
+        );
 
-    Umamusume::factory()->count(30)->create();
+        foreach ($walk as $file) {
+            // getExtension() answers "php" for foo.blade.php, so the suffix is matched on the
+            // whole filename.
+            if (preg_match('/(\.blade\.php|\.vue|\.ts)$/', $file->getFilename()) === 1) {
+                $sources[str_replace([DIRECTORY_SEPARATOR, base_path().DIRECTORY_SEPARATOR], ['/', ''], $file->getPathname())] =
+                    (string) file_get_contents($file->getPathname());
+            }
+        }
+    }
 
-    $html = test()->get('/umamusume')->assertOk()->getContent();
+    return $sources;
+}
 
-    // The shipped `pagination::tailwind` view carries `dark:` and gray/blue on every
-    // element, so the published override is what makes the catalog and review pages
-    // pass the same gate as the rest of the shell.
-    expect($html)
-        ->toContain('aria-label="Pagination Navigation"')
-        ->not->toMatch('/\bdark:/');
+/**
+ * The comments out of a source file, leaving the code.
+ *
+ * Comments are where a rule is documented by naming the form it rejects, which is
+ * precisely the shape this gate is meant to forbid in markup. DESIGN.md and the
+ * test prose that guards it both name the withdrawn pairs so nobody reintroduces
+ * them; matching those would make the gate fail the prose that keeps the rule
+ * alive, so the class scan reads only what can reach an element.
+ *
+ * ponytail: line comments are found by `//` not preceded by `:`, which covers a URL in a string but
+ * would also cut a trailing double slash inside one. Upgrade path is a real tokenizer, worth it only
+ * if a class ever hides behind that shape.
+ *
+ * @param  array<string, string>  $sources
+ * @return array<string, string>
+ */
+function withoutComments(array $sources): array
+{
+    $patterns = ['/\{\{--.*?--\}\}/s', '/<!--.*?-->/s', '/\/\*.*?\*\//s', '/(?<!:)\/\/[^\n]*/'];
+
+    return array_map(
+        static function (string $source) use ($patterns): string {
+            foreach ($patterns as $pattern) {
+                $source = (string) preg_replace($pattern, '', $source);
+            }
+
+            return $source;
+        },
+        $sources,
+    );
+}
+
+it('keeps every class the Trainer will see on tokens, in either source tree', function (): void {
+    /*
+     * G-19 run against both trees. The page that used to anchor this claim called `->links()` and
+     * rendered the framework's published pagination view; every page that paginates is a Vue component
+     * now, so the pager's classes live in `resources/js` and that published override renders nowhere.
+     * Sweeping the sources rather than one rendered page is what keeps the gate biting as the port
+     * advances instead of narrowing it to whatever Blade happens to be left.
+     */
+    $offenders = [];
+
+    foreach (withoutComments(styleSources()) as $path => $source) {
+        $hits = [];
+
+        if (preg_match('/\bdark:/', $source) === 1) {
+            $hits[] = 'a dark: utility (theme forks by flipping custom properties only, D-101)';
+        }
+
+        if (preg_match('/\b(?:zinc|gray|neutral|stone|slate|amber|red|blue|emerald)-[0-9]/', $source) === 1) {
+            $hits[] = 'a skeleton palette class';
+        }
+
+        if (preg_match('/\b(?:bg|text|border)-white\b/', $source) === 1) {
+            $hits[] = 'a hardcoded white';
+        }
+
+        if ($hits !== []) {
+            $offenders[] = $path.': '.implode(', ', $hits);
+        }
+    }
+
+    expect($offenders)->toBe([]);
 });
 
 it('keeps preferences in one keyed table with no per-user column', function (): void {
@@ -142,25 +219,15 @@ it('draws every selection boundary with the line token, never the fill token', f
     // dark ink, useless as a 2px outline someone must see to know which row is live.
     // So boundaries take `--color-pick-line` and the fill keeps `--color-pick`.
     //
-    // Asserted across the view tree because the failure mode is one component
+    // Asserted across both source trees because the failure mode is one component
     // drifting back to the prettier token, not all of them being wrong at once.
-    $walk = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(base_path('resources/views'), FilesystemIterator::SKIP_DOTS),
-    );
-
     $offenders = [];
 
-    foreach ($walk as $file) {
-        if (! str_ends_with($file->getFilename(), '.blade.php')) {
-            continue;
-        }
-
-        $source = (string) file_get_contents($file->getPathname());
-
+    foreach (withoutComments(styleSources()) as $path => $source) {
         // `border-pick-line` is allowed; `border-pick` followed by anything but a
         // hyphen is the fill token used as a boundary.
         if (preg_match('/border-pick(?![-\w])/', $source) === 1) {
-            $offenders[] = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
+            $offenders[] = $path;
         }
     }
 

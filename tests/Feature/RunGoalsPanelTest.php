@@ -6,6 +6,8 @@ use App\Enums\RaceEntryStatus;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\TrainingRun;
+use Illuminate\Support\Collection;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * O-12: the run page has no goals surface, and the client's header is the first thing a
@@ -13,9 +15,15 @@ use App\Models\TrainingRun;
  * Race calendar is a year grid, so neither is the line "Place 1st in Arima Kinen, entry
  * criteria met, 5 turns, three cleared behind it" that the audit names.
  *
- * `docs/research-scratch/AUDIT-AND-VERIFICATION.md` (section UIX-AUDIT-TRAINING-RUNS.md) O-12 fixes this with a list of mandatory or special
+ * `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` O-12 fixes this with a list of mandatory or special
  * race entries on the run, each with a state word. The report's data shape is three cleared
  * and one active for the run-7 fixture; the tests below reproduce that shape in factories.
+ *
+ * The goal line reaches the page as the `goals` prop: one row per mandatory or special entry,
+ * each `{title, state, year_label, turn}`, where `state` is the word the screen prints (Cleared,
+ * Active, Failed). The Goals landmark is `v-if="goals.length > 0"`, so its presence is the
+ * prop being non-empty and its absence the prop being empty; the `aria-label` itself is the
+ * component's and lives in the browser spec.
  */
 
 function goalsRun(): TrainingRun
@@ -66,41 +74,20 @@ function goalsRun(): TrainingRun
     return $run;
 }
 
-/**
- * How many elements inside the Goals landmark print exactly this status word.
- *
- * Scoped rather than page-wide, because the count stopped being about the panel: the run page now
- * carries a status select whose options are literally Active, Completed and Retired
- * (`runs/show.blade.php`, §7-4), and a logged failure prints a "Failed" chip. A badge and an
- * option that happen to say the same word are different things.
- */
-function goalsStatusLabel(DOMXPath $xpath, string $label): int
-{
-    return $xpath->query('//*[@aria-label="Goals"]//*[normalize-space(text())="'.$label.'"]')->length;
-}
-
 it('renders the three cleared and one active goals from the run 7 shape', function (): void {
     $run = goalsRun();
 
-    $html = test()->get("/training-runs/{$run->id}")
+    // Each state word is counted within the goals list, so the count is about the panel: an
+    // Active option in a status select or a Failed turn chip is a different thing and stays out
+    // of `goals[].state`. Four rows is what makes the Goals landmark mount at all.
+    test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->getContent();
-
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
-
-    $cleared = goalsStatusLabel($xpath, 'Cleared');
-    $active = goalsStatusLabel($xpath, 'Active');
-    $failed = goalsStatusLabel($xpath, 'Failed');
-
-    expect($cleared)->toBe(3)
-        ->and($active)->toBe(1)
-        ->and($failed)->toBe(0);
-
-    // The Goals section exists as an `aria-label="Goals"` landmark.
-    $sections = $xpath->query('//*[@aria-label="Goals"]')->length;
-    expect($sections)->toBe(1);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->has('goals', 4)
+            ->where('goals', fn (Collection $goals): bool => $goals->where('state', 'Cleared')->count() === 3
+                && $goals->where('state', 'Active')->count() === 1
+                && $goals->where('state', 'Failed')->count() === 0));
 });
 
 it('lists every mandatory and special race entry but not an optional one', function (): void {
@@ -132,9 +119,11 @@ it('lists every mandatory and special race entry but not an optional one', funct
 
     test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->assertSee('Oka Sho')
-        ->assertSee('Arima Kinen')
-        ->assertDontSee('Some Handicap');
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('goals', fn (Collection $goals): bool => $goals->pluck('title')->contains('Oka Sho')
+                && $goals->pluck('title')->contains('Arima Kinen')
+                && ! $goals->pluck('title')->contains('Some Handicap')));
 });
 
 it('names a skipped mandatory goal as Failed and an unentered one as Active', function (): void {
@@ -163,29 +152,27 @@ it('names a skipped mandatory goal as Failed and an unentered one as Active', fu
         'status' => RaceEntryStatus::Entered,
     ]);
 
-    $html = test()->get("/training-runs/{$run->id}")
+    test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->getContent();
-
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
-
-    expect(goalsStatusLabel($xpath, 'Failed'))->toBe(1)
-        ->and(goalsStatusLabel($xpath, 'Active'))->toBe(1)
-        ->and(goalsStatusLabel($xpath, 'Cleared'))->toBe(0);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->has('goals', 2)
+            ->where('goals', fn (Collection $goals): bool => $goals->where('state', 'Failed')->count() === 1
+                && $goals->where('state', 'Active')->count() === 1
+                && $goals->where('state', 'Cleared')->count() === 0));
 });
 
 it('omits the Goals section when the run has no mandatory or special race entries', function (): void {
-    // A fresh run has no logged race entries. The Goals section is absent, not
-    // "No goals yet", because a Trainer watching a run they have just started
-    // does not need a panel asserting what is already true. The section appears
-    // when the first mandatory or special entry is logged.
+    // A fresh run has no logged race entries. The Goals section is absent, not "No goals yet",
+    // because a Trainer watching a run they have just started does not need a panel asserting
+    // what is already true. On the Inertia page the section is `v-if="goals.length > 0"`, so an
+    // empty `goals` prop is exactly that absence; the section reappears when the first mandatory
+    // or special entry is logged.
     $run = TrainingRun::factory()->create(['scenario' => null]);
 
-    $html = test()->get("/training-runs/{$run->id}")
+    test()->get("/training-runs/{$run->id}")
         ->assertOk()
-        ->getContent();
-
-    expect(str_contains($html, 'aria-label="Goals"'))->toBeFalse();
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->has('goals', 0));
 });

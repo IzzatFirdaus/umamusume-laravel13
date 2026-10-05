@@ -10,14 +10,17 @@ use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\UmamusumeProfile;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
- * The detail page: the profile block above, the per-form content below, and a tab strip that
- * appears only above one form.
+ * The detail page's server contract: the profile block above, the per-form content below, and the
+ * form the page opens on.
  *
- * The threshold is the user's own complaint — a page of stacked duplicates of the same
- * character — so both sides of it are pinned: two forms get a strip, one form gets the same
- * content with no chrome.
+ * The page is the Catalog/Show Inertia component (ADR-0020 §1), so this file asserts the resolved
+ * props and the behaviours the request named — `?form=` selection, its fallback, and the
+ * unconfirmed opt-in. The rendered words (the six profile labels, the eight-section binding order,
+ * the tab strip and the "no chrome on one form" threshold, the Unique pill, and every absence
+ * sentence) are asserted against the live DOM in tests/browser/catalog-detail.spec.ts.
  */
 
 /**
@@ -46,67 +49,60 @@ function detailTrainee(int $forms): Umamusume
     return $umamusume->fresh();
 }
 
-it('draws a tab strip when a trainee has more than one form', function (): void {
+it('carries every form with its title when a trainee has more than one', function (): void {
     $umamusume = detailTrainee(2);
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('name="form"', false)
-        ->assertSee('Open this form')
-        ->assertSee('form-panel-'.$umamusume->cards->first()->id, false);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Catalog/Show')
+            ->has('cards', 2)
+            ->where('cards.0.title', '[Global] Form 1')
+            ->where('cards.1.title', '[Global] Form 2')
+            // The page opens on the first form in cardScope() order.
+            ->where('activeCardId', $umamusume->cards->first()->id));
 });
 
-it('draws no tab strip for a trainee with a single form', function (): void {
+it('carries the single form with no choice to make', function (): void {
     // The threshold. One form is not a choice, and a one-option control is chrome the Trainer
-    // has to read past to reach the same content.
+    // has to read past to reach the same content. The content is still there: no chrome, not
+    // less page (the strip's absence is asserted in tests/browser/catalog-detail.spec.ts).
     $umamusume = detailTrainee(1);
 
-    $response = $this->get(route('catalog.show', $umamusume->slug));
-
-    $response->assertOk()
-        ->assertDontSee('name="form"', false)
-        ->assertDontSee('Open this form')
-        // The content is still there: no chrome, not less page.
-        ->assertSee('[Global] Form 1');
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards', 1)
+            ->where('cards.0.title', '[Global] Form 1')
+            ->where('activeCardId', $umamusume->cards->first()->id));
 });
 
-it('renders one panel per form, each carrying its own title', function (): void {
+it('orders the forms debut first, then by Global release date', function (): void {
     $umamusume = detailTrainee(3);
 
-    $response = $this->get(route('catalog.show', $umamusume->slug));
-
-    $response->assertOk();
-
-    foreach (['[Global] Form 1', '[Global] Form 2', '[Global] Form 3'] as $title) {
-        $response->assertSee($title);
-    }
-
-    // Three radios, three panels: the strip is not a control over one reused body.
-    expect(substr_count($response->getContent(), 'type="radio" name="form"'))->toBe(3)
-        ->and(substr_count($response->getContent(), 'peer/t'))->toBeGreaterThan(3);
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards', 3)
+            ->where('cards.0.title', '[Global] Form 1')
+            ->where('cards.0.is_debut_form', true)
+            ->where('cards.1.title', '[Global] Form 2')
+            ->where('cards.2.title', '[Global] Form 3'));
 });
 
 it('opens the first form by default and honours ?form=', function (): void {
     $umamusume = detailTrainee(3);
     $cards = $umamusume->cards;
 
-    // Matched as a tag rather than as a substring: Blade puts each attribute on its own line, so
-    // asserting "id=.. value=.. checked" as one string would be testing the template's whitespace.
-    // Not preg_quoted, because the only interpolated value is an integer id and preg_quote would
-    // escape this pattern's own `\s+` quantifiers into literals.
-    $checkedRadio = fn (int $id): string => '<input type="radio" name="form" id="form-tab-'.$id.'" value="'.$id.'"\s+class="[^"]*"\s+aria-label="[^"]*"\s+checked>';
-
-    // Default: the first card in the controller's scope order is the checked radio.
-    $default = $this->get(route('catalog.show', $umamusume->slug))->assertOk()->getContent();
-
-    expect($default)->toMatch('/'.$checkedRadio($cards->first()->id).'/');
+    // Default: the first card in the controller's scope order is the active form.
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('activeCardId', $cards->first()->id));
 
     // Addressable: a link into the second form survives a reload.
-    $addressed = $this->get(route('catalog.show', ['slug' => $umamusume->slug, 'form' => $cards[1]->id]))
-        ->assertOk()->getContent();
-
-    expect($addressed)->toMatch('/'.$checkedRadio($cards[1]->id).'/')
-        ->and($addressed)->not->toMatch('/'.$checkedRadio($cards->first()->id).'/');
+    $this->get(route('catalog.show', ['slug' => $umamusume->slug, 'form' => $cards[1]->id]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('activeCardId', $cards[1]->id));
 });
 
 it('falls back to the first form for a ?form= that names no card on this page', function (): void {
@@ -115,53 +111,52 @@ it('falls back to the first form for a ?form= that names no card on this page', 
 
     $this->get(route('catalog.show', ['slug' => $umamusume->slug, 'form' => 999999]))
         ->assertOk()
-        ->assertSee('[Global] Form 1')
-        ->assertSee('[Global] Form 2');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('activeCardId', $umamusume->cards->first()->id));
 });
 
-it('carries the unconfirmed opt-in into the strip so a tab change does not close it', function (): void {
+it('carries the unconfirmed opt-in so a form link does not close it', function (): void {
     $umamusume = detailTrainee(2);
 
     $this->get(route('catalog.show', ['slug' => $umamusume->slug, 'show_unconfirmed' => 1]))
         ->assertOk()
-        ->assertSee('name="show_unconfirmed" value="1"', false);
+        ->assertInertia(fn (Assert $page) => $page->where('showUnconfirmed', true));
 });
 
-it('renders the six profile fields for a complete profile', function (): void {
+it('resolves the six profile fields for a complete profile', function (): void {
     $umamusume = detailTrainee(2);
     UmamusumeProfile::factory()->create(['umamusume_id' => $umamusume->id]);
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('Japanese name')
-        ->assertSee('スペシャルウィーク')
-        ->assertSee('Voice actor')
-        ->assertSee('和氣あず未')
-        ->assertSee('EN: Azumi Waki')
-        ->assertSee('Release date')
-        ->assertSee('Birthday')
-        ->assertSee('May 2, 1995')
-        ->assertSee('Height')
-        ->assertSee('158 cm')
-        ->assertSee('Three sizes')
-        ->assertSee('81 · 81 · 56 cm');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('trainee.japanese_name', 'スペシャルウィーク')
+            ->where('trainee.profile.va_ja', '和氣あず未')
+            ->where('trainee.profile.va_en', 'Azumi Waki')
+            ->where('trainee.profile.birthday.display', 'May 2, 1995')
+            ->where('trainee.profile.height', 158)
+            ->where('trainee.profile.three_sizes.b', 81)
+            ->where('trainee.profile.three_sizes.h', 81)
+            ->where('trainee.profile.three_sizes.w', 56));
 });
 
-it('says a value is unpublished rather than drawing an empty slot', function (): void {
+it('leaves an unpublished value null rather than a placeholder', function (): void {
     // D-220. Measured: va_en and three_sizes are each absent on 10 of the 135 roster rows, so
-    // this is the normal path for a Trainer, not an edge case.
+    // this is the normal path for a Trainer, not an edge case. The words that say so are in
+    // tests/browser/catalog-detail.spec.ts.
     $umamusume = detailTrainee(1);
     UmamusumeProfile::factory()->partial()->create(['umamusume_id' => $umamusume->id]);
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('No English dub listed')
-        ->assertSee('Not published by the source');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('trainee.profile.va_en', null)
+            ->where('trainee.profile.three_sizes', null));
 });
 
 it('names the missing birth year instead of inventing one', function (): void {
     // `birth_year` is the only birthday part the source omits (17 of 163 rows). A January 1st
-    // would be a date the source never stated.
+    // would be a date the source never stated, so the year gap is a null `iso` carrying words.
     $umamusume = detailTrainee(1);
     UmamusumeProfile::factory()->withoutBirthYear()->create([
         'umamusume_id' => $umamusume->id,
@@ -171,21 +166,20 @@ it('names the missing birth year instead of inventing one', function (): void {
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('Mar 20')
-        ->assertSee('year not published')
-        ->assertDontSee('Mar 20, 2000');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('trainee.profile.birthday.iso', null)
+            ->where('trainee.profile.birthday.display', 'Mar 20 · year not published'));
 });
 
-it('names the fetch when no profile has been written', function (): void {
+it('resolves no profile block when no profile has been written', function (): void {
     $umamusume = detailTrainee(1);
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('No profile recorded for this trainee yet')
-        ->assertSee('gametora-character-profiles');
+        ->assertInertia(fn (Assert $page) => $page->where('trainee.profile', null));
 });
 
-it('renders the ten aptitude letters on both rows of the grid', function (): void {
+it('resolves the ten aptitude letters', function (): void {
     $umamusume = detailTrainee(1);
     $umamusume->update([
         'aptitude_turf' => 'A',
@@ -202,19 +196,26 @@ it('renders the ten aptitude letters on both rows of the grid', function (): voi
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('Aptitude')
-        ->assertSee('Turf')
-        ->assertSee('End closer')
-        // All ten letters, each read from the trainee rather than the card.
-        ->assertSeeTextInOrder(['Turf', 'A', 'End closer', 'C']);
+        ->assertInertia(fn (Assert $page) => $page
+            // All ten letters, each read from the trainee rather than the card.
+            ->where('trainee.aptitudes.turf', 'A')
+            ->where('trainee.aptitudes.dirt', 'B')
+            ->where('trainee.aptitudes.sprint', 'C')
+            ->where('trainee.aptitudes.mile', 'D')
+            ->where('trainee.aptitudes.medium', 'E')
+            ->where('trainee.aptitudes.long', 'F')
+            ->where('trainee.aptitudes.front_runner', 'G')
+            ->where('trainee.aptitudes.pace_chaser', 'A')
+            ->where('trainee.aptitudes.late_surger', 'B')
+            ->where('trainee.aptitudes.end_closer', 'C'));
 });
 
-it('says aptitude is unpublished rather than drawing a half grid', function (): void {
+it('resolves no aptitude grid rather than a half grid', function (): void {
     $umamusume = detailTrainee(1);
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('Aptitude not published for this trainee.');
+        ->assertInertia(fn (Assert $page) => $page->where('trainee.aptitudes', null));
 });
 
 it('names this form\'s own source and read date (D-33)', function (): void {
@@ -222,36 +223,12 @@ it('names this form\'s own source and read date (D-33)', function (): void {
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('https://gametora.test/character-cards.json');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.0.source_url', 'https://gametora.test/character-cards.json')
+            ->where('cards.0.fetched_at_display', now()->timezone(config('uma.display_timezone'))->format('M j, Y')));
 });
 
-it('does not tell the trainer that skill lists are not stored', function (): void {
-    $umamusume = detailTrainee(2);
-
-    // WS-2 Task 2.1. The page used to say the card document's skill id arrays "are not stored"
-    // and that ADR-0012 kept them off the card row. Both halves are now false: the arrays landed
-    // at dd90330 with casts on the model, so the page was describing a schema this tool no longer
-    // has. The assertion targets the retired sentence rather than the word "stored", so the new
-    // Skills body cannot accidentally satisfy it.
-    $this->get(route('catalog.show', $umamusume->slug))
-        ->assertOk()
-        ->assertDontSee('are not stored')
-        ->assertDontSee('Skill lists are not stored');
-});
-
-it('names the card skill lists its Skills section reads from', function (): void {
-    $umamusume = detailTrainee(1);
-
-    // The replacement copy has to be specific rather than merely not-stale: it names the two
-    // keys the tool now keeps and the two that stay unrecorded, so a reader can tell which
-    // absence is a schema decision and which is a missing import.
-    $this->get(route('catalog.show', $umamusume->slug))
-        ->assertOk()
-        ->assertSee('skills_innate')
-        ->assertSee('skills_unique');
-});
-
-it('lists her unique and innate skills on her detail page', function (): void {
+it('resolves her unique and innate skills', function (): void {
     $umamusume = detailTrainee(1);
     $umamusume->cards()->first()->update([
         'skills_unique' => [900001],
@@ -266,35 +243,29 @@ it('lists her unique and innate skills on her detail page', function (): void {
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('Her unique skills')
-        ->assertSee('Her innate skills')
-        ->assertSee('Test Unique Skill')
-        ->assertSee('Test Innate Skill A')
-        ->assertSee('Test Innate Skill B');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('skillLists.0.label', 'Her unique skills')
+            ->where('skillLists.0.skills.0.name', 'Test Unique Skill')
+            ->where('skillLists.1.label', 'Her innate skills')
+            ->where('skillLists.1.skills.0.name', 'Test Innate Skill A')
+            ->where('skillLists.1.skills.1.name', 'Test Innate Skill B'));
 });
 
-it('says her skill lists are not recorded rather than drawing empty groups', function (): void {
+it('resolves every skill list as empty when the form carries none', function (): void {
     $umamusume = detailTrainee(1);
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('No skill lists are recorded for this form.');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('skillLists.0.has_ids', false)
+            ->where('skillLists.1.has_ids', false)
+            ->where('skillLists.2.has_ids', false)
+            ->where('skillLists.3.has_ids', false));
 });
 
-it('states the goal-race absence in the canonical form', function (): void {
+it('lists her runs with status, scenario and turn count', function (): void {
     $umamusume = detailTrainee(1);
-
-    // WS-2 Task 2.3: a heading plus the canonical absence body. No trainee_goals table exists;
-    // KI-34 is the reservation for it.
-    $this->get(route('catalog.show', $umamusume->slug))
-        ->assertOk()
-        ->assertSee('Goal races')
-        ->assertSee('Goal races are not recorded.');
-});
-
-it('lists her runs and offers one primary action to start another', function (): void {
-    $umamusume = detailTrainee(1);
-    $run = TrainingRun::factory()->create([
+    TrainingRun::factory()->create([
         'umamusume_id' => $umamusume->id,
         'scenario' => 'ura_finale',
         'status' => RunStatus::Active,
@@ -302,59 +273,47 @@ it('lists her runs and offers one primary action to start another', function ():
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('Her runs')
-        ->assertSee('URA Finale')
-        ->assertSee('New run')
-        ->assertSee('Opens run setup; the trainee is chosen there.');
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('runs', 1)
+            ->where('runs.0.status_label', RunStatus::Active->label())
+            ->where('runs.0.scenario_label', 'URA Finale')
+            ->where('runs.0.turn_count', 0));
 });
 
-it('names the absence when she has no runs rather than drawing an empty list', function (): void {
+it('resolves no runs when she has none', function (): void {
     $umamusume = detailTrainee(1);
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('No runs recorded for her yet.');
+        ->assertInertia(fn (Assert $page) => $page->has('runs', 0));
 });
 
-it('never renders the word Unknown for a missing value', function (): void {
+it('flags a Japan-only trainee for the not-yet-on-Global notice', function (): void {
     $umamusume = detailTrainee(1);
+    $umamusume->update(['release_status' => ReleaseStatus::JapanOnly]);
 
-    // The absence vocabulary is binding on every WS-2 task: a missing value is "not recorded",
-    // or N/A carrying a title. "Unknown" is neither, and the debut dates used to render it.
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertDontSee('Unknown');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('trainee.is_japan_only', true)
+            ->where('trainee.release_status_label', 'Japan only'));
 });
 
-it('renders the eight sections in the binding order', function (): void {
+it('resolves the release date the profile block prints, Global first', function (): void {
     $umamusume = detailTrainee(1);
+    $umamusume->update([
+        'jp_debut_date' => '2021-03-01',
+        'global_debut_date' => '2025-06-26',
+    ]);
 
-    // WS-2 Task 2.5. The order is the workstream head's, not the alphabetical list the task
-    // checklist uses to sweep them.
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSeeTextInOrder([
-            'Basic information',
-            'Aptitude',
-            'Costume forms',
-            'Skills',
-            'Goal races',
-            'Her runs',
-            'Aliases',
-            'Provenance',
-        ]);
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('trainee.release_date.display', 'Jun 26, 2025')
+            ->where('trainee.release_date.is_global', true));
 });
 
-it('keeps the single-form page free of any tab markup', function (): void {
-    $umamusume = detailTrainee(1);
-
-    $content = $this->get(route('catalog.show', $umamusume->slug))->getContent();
-
-    expect($content)->not->toContain('type="radio"')
-        ->and($content)->not->toContain('<form method="GET"');
-});
-
-it('still prints the Japanese name before the profile fetch has run', function (): void {
+it('still resolves the Japanese name before the profile fetch has run', function (): void {
     $umamusume = Umamusume::factory()->create([
         'name' => 'Special Week',
         'name_ja' => 'スペシャルウィーク',
@@ -366,9 +325,9 @@ it('still prints the Japanese name before the profile fetch has run', function (
 
     $this->get(route('catalog.show', $umamusume->slug))
         ->assertOk()
-        ->assertSee('Japanese name')
-        ->assertSee('スペシャルウィーク')
-        ->assertSee('No profile recorded for this trainee yet');
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('trainee.japanese_name', 'スペシャルウィーク')
+            ->where('trainee.profile', null));
 });
 
 it('prefers the profile document and falls back to the trainee column for the Japanese name', function (): void {
@@ -379,6 +338,10 @@ it('prefers the profile document and falls back to the trainee column for the Ja
     ]);
 
     expect($umamusume->fresh()->japaneseName())->toBe('スペシャルウィーク・改');
+
+    $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('trainee.japanese_name', 'スペシャルウィーク・改'));
 
     $profile->update(['name_ja' => null]);
 

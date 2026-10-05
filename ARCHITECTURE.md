@@ -150,6 +150,20 @@ training_runs
     see App\Models\Legacy\LegacySelectionPayload for the shape and what it deliberately omits),
   notes text nullable, timestamps
 
+veterans
+  id, training_run_id FK->training_runs unique cascade,
+  tags json nullable (the Trainer's own facets, a flat list of strings),
+  notes text nullable, timestamps
+  -- PRD FR-G, ADR-0020 §3, under ADR-0010's recording allowance; migrated as
+  -- 2026_10_05_120000_create_veterans_table. A Veteran is a completed run kept in the library:
+  -- the run's recorded facts (trainee, final stats, skills, sparks, race record) are read back
+  -- through training_run_id, and only the Trainer's tags and notes are stored here. Record-only
+  -- (FR-G-4): nothing derives a Spark firing, an affinity payout or an offspring. The FK is
+  -- unique (one run is one Veteran, so a re-save rewrites its tags and notes) and cascades (with
+  -- the run gone there is nothing to read back). No is_manual write and no data_sources row:
+  -- a Veteran is Trainer data, not a fetched fact. Actions RecordVeteran / ListVeterans /
+  -- ShowVeteran are the record/list/show path; no routes or screens yet (slice D16 builds those).
+
 turn_entries
   id, training_run_id FK->training_runs cascade, turn unsigned int,
   speed, stamina, power, guts, wit unsigned smallint,
@@ -277,6 +291,7 @@ Default: manual `php artisan uma:fetch` (PRD OQ-3). Concurrency is controlled by
 - **Snapshots:** raw bodies streamed to `storage/app/private/snapshots/` (local disk), path recorded in `data_sources`. Snapshots are the replay corpus: `uma:reparse {source}` re-runs parser→match→promote from disk with zero network.
 - **Read cache:** catalog index/show wrapped in `Cache::remember` (database store, TTL from config, default 15 min). Invalidation is write-triggered: promotion bumps a `catalog:version` key used in cache keys (versioned-keys strategy, no per-row invalidation). The counter carries no TTL and a page read never writes it: an expiring counter restarts the numbering an hour later, and version 1 of hour two would reuse the page keys of version 1 of hour one (F-10). Trainer-data reads are never cached (cheap, must be fresh).
 - **Stale-while-revalidate:** a manual refresh runs the fetch synchronously and returns; UI shows last-fetched time from `data_sources`.
+- **Artwork mirror:** **built 2026-10-05 by `ADR-0021`, and run against the live host the same day.** `uma:fetch-art` (`app/Console/Commands/UmaFetchArt.php`) reads ids from `character_cards.card_id` and `support_cards.support_id`, asks `App\Services\DataPipeline\ArtworkMirror` for the path each id implies, and stores the bytes under `storage/app/private/artwork/` (gitignored) with a sibling `artwork/manifest.json` carrying url, sha256 and fetched-at. The first pass resolved all 665 ids into 45 MB with zero unresolved, so the falsifier `ADR-0012` Erratum 4 named did not fire (`ADR-0021` Erratum 1). It goes out through `SourceFetcher::fetchAsset()`, which reuses the same allowlist, per-request delay, retry ceiling and per-hop redirect re-check as `fetch()` and returns null on any non-2xx — the check that matters, because a miss on this host is 27,150 bytes of HTML at 404. Binaries are **not** snapshotted: the stored file is the body, so a snapshot would put the same bytes on disk twice with no reader. Nothing enters the database, so a rendered path is derived from the id and there is no second store for a fact the id already determines (`PRD.md` §6.12), and `data_sources` stays what it was: provenance for engine-owned facts, not for files. `uma:fetch` steps over any source entry declaring no parser, which is how the asset host can sit in the same allowlist without being parsed. A missing file is normal state: `resources/js/components/ArtworkSlot.vue` paints nothing, and a row reserves a transparent cell so its label holds one x either way (`DESIGN.md` §4.7). Four ported screens ask for a file now, the catalog index and detail and the support-card index and detail; what `PRD.md` OQ-6 still holds open is the pre-run picker, whose native `<select>` cannot host a frame, and skill icons, which need a column this tree does not have. Not to be confused with the cut upload surface (`PRD.md` §6.13): the tool fetches third-party art by id, a Trainer never supplies a file.
 
 ## 7. Frontend
 
@@ -291,6 +306,7 @@ Local-only changes the threat list; it does not remove it.
 | Auth surface | None by design. No login, no sessions beyond the framework default, no exposed writes via API (read-only). The app must never be deployed publicly; README states `php artisan serve` on loopback. |
 | Untrusted fetched content | Parsed as data only. Parsers extract text fields; no HTML is ever rendered into Blade unescaped (auto-escaping stays on; no `{!! !!}` for source data). Prompt-injection-style text inside fetched pages cannot reach an LLM here (no LLM in the pipeline), but instruction-like strings are treated as plain text regardless. |
 | SSRF | Fetch targets come exclusively from `config('uma.sources')` allowlist; redirects are followed by the fetcher itself, at most two hops, and every hop's host is re-checked against the same allowlist before it is requested (F-9); no user-supplied URLs. |
+| Binary asset files (authorized by `ADR-0021`, unbuilt) | An artwork host is declared in the same `config('uma.sources')` allowlist as an **asset** entry with no parser, so the single rule above stays true of every outbound request the tool makes. Request paths are a config constant plus an integer id read from a catalog row — never from a request, a form, or a fetched body — so there is no path to inject. Files land in gitignored `storage/app/private/artwork/` and are never served by a route the app exposes, which is also what keeps the copy a private one (`PRD.md` §6.10). The host answers a miss with 27,150 bytes of `text/html` at HTTP 404, so availability is judged on the status code, never on "bytes came back". |
 | Input validation | Form Requests at every web write boundary; third-party parsed records validated against array-shape checks before storage. |
 | Output encoding | Blade `{{ }}` everywhere; JSON via API Resources. |
 | Secrets | None exist. No API keys in Phase 1 sources; if a source later needs one, it goes in `.env`, never in config defaults or snapshots. |

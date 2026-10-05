@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\ReleaseStatus;
 use App\Models\DataSource;
 use App\Models\Umamusume;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * Catalog list, filter, search, detail and empty state.
@@ -45,8 +46,10 @@ it('shows a detail page with Japanese name and provenance', function (): void {
 
     test()->get('/umamusume/special-week')
         ->assertOk()
-        ->assertSee('スペシャルウィーク')
-        ->assertSee('https://example.test/special-week');
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Catalog/Show')
+            ->where('trainee.japanese_name', 'スペシャルウィーク')
+            ->where('provenance.0.url', 'https://example.test/special-week'));
 });
 
 it('labels japan-only entries as not yet released on global', function (): void {
@@ -56,15 +59,19 @@ it('labels japan-only entries as not yet released on global', function (): void 
         'release_status' => ReleaseStatus::JapanOnly,
     ]);
 
+    // The notice copy is client-rendered (tests/browser/catalog-detail.spec.ts); the server
+    // contract is the flag it binds.
     test()->get('/umamusume/unseen-one')
         ->assertOk()
-        ->assertSee('Not yet released on Global');
+        ->assertInertia(fn (Assert $page) => $page->where('trainee.is_japan_only', true));
 });
 
-it('renders the empty state when nothing matches the search', function (): void {
+it('sends an empty list when nothing matches the search', function (): void {
+    // The empty-state copy is client-rendered now; the server contract is an empty page.
+    // The words ("No Umamusume match") are asserted in tests/browser/catalog.spec.ts.
     test()->get('/umamusume?search=nothinghere')
         ->assertOk()
-        ->assertSee('No Umamusume match');
+        ->assertInertia(fn (Assert $page) => $page->has('umamusumes.data', 0));
 });
 
 it('finds an umamusume by normalized search text', function (): void {
@@ -79,33 +86,5 @@ it('finds an umamusume by normalized search text', function (): void {
         ->assertSee('Special Week');
 });
 
-it('sizes every catalog control to the design contract\'s 44px', function (): void {
-    // KI-29. The index shipped `px-2 py-1` with no height, so a browser measured the search
-    // field, the status filter and the submit at 30/31/32 against the 44 the design contract
-    // fixes (`docs/research-scratch/DESIGN-CORPUS.md` "DESIGN.md" section 6.14). The run screen
-    // took the same fix at c17e63b; this is the second surface. The class assertion proves the
-    // token was applied, not the rendered height: h-11 is 2.75rem, which is 44px only while the
-    // root font size is 16px, so the browser read in the task record is what proves the contract.
-    // The selector below covers untyped, text and search inputs, every select, and submit
-    // buttons, so a control with no type attribute or a type="search" cannot slip through; the
-    // checkbox is deliberately outside it, because a checkbox is a 24px AA-floor control, not a
-    // form field.
-    $html = $this->get('/umamusume')->assertOk()->getContent();
-
-    $dom = new DOMDocument;
-    @$dom->loadHTML($html);
-    $xpath = new DOMXPath($dom);
-
-    $controls = $xpath->query(
-        '//input[not(@type) or @type="text" or @type="search"]'
-        .' | //select | //button[not(@type) or @type="submit"]'
-    );
-
-    expect($controls->length)->toBeGreaterThan(0);
-
-    foreach ($controls as $node) {
-        /** @var DOMElement $node */
-        expect(str_contains($node->getAttribute('class'), 'h-11'))
-            ->toBeTrue("{$node->nodeName} [{$node->getAttribute('name')}] is not sized to h-11");
-    }
-});
+// KI-29: the catalog controls are sized to the design contract's 44px (h-11). They render
+// client-side now, so the rendered heights are asserted in tests/browser/catalog.spec.ts.

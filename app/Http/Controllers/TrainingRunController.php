@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\ImportHistoricalRun;
+use App\Enums\CardRarity;
 use App\Enums\MoodTier;
+use App\Enums\RaceEntryStatus;
 use App\Enums\ReleaseStatus;
+use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\TurnEventType;
+use App\Http\Requests\DeckPickerSearchRequest;
 use App\Http\Requests\ImportHistoricalRunRequest;
+use App\Http\Requests\StoreBuildTargetRequest;
 use App\Http\Requests\StoreDeckRequest;
 use App\Http\Requests\StoreRaceEntryRequest;
 use App\Http\Requests\StoreRunSkillRequest;
@@ -18,20 +23,31 @@ use App\Http\Requests\StoreTrainingRunRequest;
 use App\Http\Requests\StoreTurnEntryRequest;
 use App\Http\Resources\TrainingRunResource;
 use App\Models\CharacterCard;
+use App\Models\DeckSlot;
+use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Models\TurnEvent;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\Umamusume;
+use App\Services\DataPipeline\ArtworkMirror;
+use App\Services\DeckAnalysis;
+use App\Services\PageSize;
 use App\Services\ScenarioCaps;
+use App\Services\SupportCardEffects;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
+use Illuminate\Support\ViewErrorBag;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -53,32 +69,39 @@ class TrainingRunController extends Controller
         'energy', 'fans', 'mood', 'choice', 'outcome', 'penalty_kind',
     ];
 
-    public function index(): View
+    public function index(): InertiaResponse
     {
-        return view('runs.index', [
-            'runs' => TrainingRun::with('umamusume')->latest()->paginate(25),
+        return Inertia::render('Runs/Index', [
+            'runs' => TrainingRun::with('umamusume')->latest()->paginate(25)
+                ->through(static fn (TrainingRun $run): array => [
+                    'id' => $run->id,
+                    'name' => $run->umamusume->name,
+                    // The scenario key is a storage value; the label is config's, so the payload
+                    // never carries the slug (hasScenario() is the model's one ruling: a blank
+                    // scenario is no scenario, not a name to print).
+                    'scenario_label' => $run->hasScenario()
+                        ? (config('scenarios.scenarios.'.$run->scenario.'.label') ?? $run->scenario)
+                        : null,
+                    'status_label' => $run->status->label(),
+                    'created_date' => $run->created_at->toDateString(),
+                    'url' => route('runs.show', $run),
+                ]),
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): InertiaResponse
     {
         /*
-         * One query, two lists, one truth. The catalog page and this selector read the same
-         * rows, so a card that exists in the dropdown cannot be absent from the catalog. Cards
-         * come with the trainees rather than in a second pass: at 68 and ~107 rows, an eager
-         * load is one query and a lazy one is sixty-nine.
+         * One query, one list, one truth. The combobox is the page's only picker now (ADR-0020 §1),
+         * so the roster is also what the inheritance-parent selects read: a second trainee collection
+         * would be a second list to drift from the first. Cards come with the trainees rather than in
+         * a second pass: at 68 and ~107 rows, an eager load is one query and a lazy one is sixty-nine.
          *
-         * The two lists hold the same trainees, and that equality is load-bearing. The combobox
-         * disables the select and commits only trainees the payload carries, so a trainee the
-         * payload drops is unreachable *and* unpostable for as long as she is dropped: an
-         * unconfirmed form is not a pre-fetch transient, it is how the row sits until a fetch
-         * confirms it. A cardless row therefore ships with `cards: []`, and the module paints her
-         * one selectable row that says no costume card is confirmed yet, committing her with an
-         * empty `character_card_id` - which is nullable, and which the request accepts.
-         *
-         * The card gate stayed where it belongs, inside the card list (FR-A-6, FR-B-4): an
-         * unconfirmed form is out of the payload the same way the catalog hides it, because it is
-         * her form that is not confirmed yet, not her place on the roster.
+         * The card gate stays inside the card list (FR-A-6, FR-B-4): an unconfirmed form is out of the
+         * payload the same way the catalog hides it, because it is her form that is not confirmed yet,
+         * not her place on the roster. A cardless trainee therefore ships with `cards: []` and the
+         * component paints her one selectable row that commits an empty `character_card_id` - which
+         * is nullable, and which the request accepts.
          */
         $trainees = Umamusume::query()
             ->where('release_status', ReleaseStatus::GlobalReleased->value)
@@ -111,31 +134,16 @@ class TrainingRunController extends Controller
                 ])->all(),
             ])->all();
 
-        return view('runs.create', [
-            'umamusumes' => $trainees,
-            'rosterJson' => $roster,
-            'selectedLabel' => $this->selectedCardLabel(),
+        return Inertia::render('Runs/Create', [
+            'roster' => $roster,
             'scenarios' => $this->scenarioLabels(),
+            'statuses' => $this->statusLabels(),
+            'maxObjectiveIndex' => RaceEntry::MAX_OBJECTIVE_INDEX,
+            // A failed write comes back through a redirect, which reloads the page and takes the
+            // component's own state with it, so the flashed input is what keeps a Trainer from
+            // choosing their trainee twice.
+            'old' => (array) $request->old(),
         ]);
-    }
-
-    /**
-     * The selection a failed submit has to hand back. Read from `old()` so the visible
-     * label names the same card the hidden fields still carry, not one the Trainer has to
-     * pick again. Joined with a middle dot: R-02, D-79 and RenderedCopyHygieneTest keep an
-     * em or en dash out of copy that reaches a Trainer.
-     */
-    private function selectedCardLabel(): ?string
-    {
-        $cardId = old('character_card_id');
-
-        if (! is_numeric($cardId)) {
-            return null;
-        }
-
-        $card = CharacterCard::with('umamusume')->find((int) $cardId);
-
-        return $card === null ? null : $card->umamusume->name.' · '.$card->title;
     }
 
     public function store(StoreTrainingRunRequest $request): RedirectResponse
@@ -197,11 +205,11 @@ class TrainingRunController extends Controller
         }
     }
 
-    public function show(TrainingRun $run): View
+    public function show(TrainingRun $run): InertiaResponse
     {
         $run->load(['umamusume', 'turnEntries', 'skills', 'turnEvents', 'deckSlots.supportCard', 'raceEntries.scenarioSlot', 'raceEntries.raceCatalogSlot', 'raceEntries.turnEntry']);
 
-        return view('runs.show', $this->showData($run));
+        return Inertia::render('Runs/Show', $this->showData($run));
     }
 
     /**
@@ -225,36 +233,27 @@ class TrainingRunController extends Controller
     }
 
     /**
-     * Everything `runs.show` renders, in one place, so the GET and the staged preview
-     * cannot drift into two different versions of the same screen.
+     * Everything `Runs/Show` renders, as plain arrays and scalars: the page payload. No model,
+     * collection, enum or payload object rides in it (the Vue components are the contract).
      *
-     * `band` is null rather than an empty array when the run has logged no turns: five
-     * zeroed stats would be a claim about a trainee nobody entered (D-220). `guided`
-     * always exists, because the door to logging the first turn has to be there before
-     * the first turn is.
+     * `band` is null rather than a zeroed band when the run has logged no turns: five zeroes
+     * would be a claim about a trainee nobody entered (D-220).
      *
-     * `$previewed` is a parameter rather than something read back off `$preview`, and that
-     * is the whole of the first-turn fix. An empty delta list meant two different things:
-     * "this response is the plain GET" and "this response is a preview of a first turn,
-     * which has nothing to subtract". The rail advanced its stage and revealed its confirm
-     * button on the first, so a run's first turn could never be committed through the
-     * guided rail at all - the Trainer had to drop to the raw escape hatch to start the
-     * run, and the escape hatch is by definition the path D-53 says must stay reachable
-     * rather than default. The two cases are now named.
+     * `$previewed` is a parameter rather than something read back off `$preview`, and that is
+     * the first-turn fix (D-1). An empty delta list meant two things at once: "this response is
+     * the plain GET" and "this is a preview of a first turn, which has nothing to subtract".
+     * The rail advanced its stage on the first, so a run's first turn could never be committed
+     * through the rail, and D-53 keeps the raw escape hatch reachable rather than default. The
+     * two cases are now named.
      *
-     * D-3. A failed validation redirects back to this page, and the rail used to come
-     * back empty: `show()` passed the default `$staged = []`, so every number the
-     * Trainer had typed was replaced by its placeholder and the whole turn had to be
-     * entered a second time. The raw escape hatch beside it rehydrates from `old()`
-     * per field, so the two paths to the same endpoint disagreed about what to do with
-     * input the server had just rejected - and the rail, which asks for more fields than
-     * the hatch, lost the most.
-     *
-     * The rehydration happens here rather than in the view so the GET, the staged
-     * preview and the redirect-back share one assembly. It is gated on the rail's own
-     * `stage` marker so a failed *raw form* submit does not also repopulate the rail
-     * from the eight fields it posted - the hatch already rehydrates itself, and two
-     * forms filling each other in would be a second way to be wrong.
+     * D-3. A failed validation redirects back to this page, so the rail rehydrates from the
+     * flashed input: without it every number the Trainer typed was replaced by its placeholder
+     * and the whole turn had to be entered a second time. The raw escape hatch behind the rail
+     * rehydrates per field already, so the two paths to one endpoint would otherwise disagree
+     * about input the server had just refused. Gated on the rail's own `stage` marker so a
+     * failed *raw form* submit does not also repopulate the rail from the eight fields it
+     * posted: the hatch already rehydrates itself, and two forms filling each other in is a
+     * second way to be wrong.
      *
      * @param  array<string, mixed>  $staged
      * @param  list<array{direction: string, text: string}>  $preview
@@ -286,73 +285,1126 @@ class TrainingRunController extends Controller
 
         $latest = $run->turnEntries->sortByDesc('turn')->first();
 
-        // R67: which half of the race form is open is server state, read the same way the
-        // disclosure control supplies it. `old()` wins inside showData's caller below, so a
-        // failed write comes back to the branch the Trainer was filling in.
-        $entryMode = request()->query('entry_mode');
+        // R67: which half of the race form is open is server state. The flash wins: a failed write
+        // comes back to the branch the Trainer was filling in, then the query, then 'calendar'.
+        $requestedMode = request()->query('entry_mode');
+        $entryMode = in_array($requestedMode, ['calendar', 'manual'], true) ? (string) $requestedMode : 'calendar';
+        $entryMode = request()->old('entry_mode', $entryMode) === 'manual' ? 'manual' : 'calendar';
+
+        // The year is address state, clamped here (careerYearForTab refuses anything outside the
+        // three career years), so the tabs and the grid cannot disagree about which year it is.
+        $calendarYear = $run->careerYearForTab(request('year'));
 
         return [
-            'run' => $run,
-            'entryMode' => in_array($entryMode, ['calendar', 'manual'], true) ? $entryMode : 'calendar',
-            // Availability is recorded at write time and applied at read time (ADR-0011 §2), so the
-            // picker offers only skills the source says are on `[Global]` **and** named by the client.
-            // Without the second half this select would offer `Gluttonous Ruler` — a real English string
-            // for a JP-only evolved skill — as if a Global Trainer could learn it. `sp_cost` comes along
-            // because the option label states it (FR-D-1).
-            'skills' => Skill::query()->availableOnGlobal()->orderBy('name')->orderBy('id')->get(['id', 'name', 'sp_cost']),
-            // The deck picker offers the `[Global]` releases, which is the audience every other picker
-            // here already serves (the 2026-09-27 Global-only ruling). The other ~300 records in the
-            // catalogue are JP-only and a Global Trainer cannot own them. A card this run already uses
-            // is added back by the panel itself, so logging an older deck never shows a slot the
-            // Trainer cannot re-select their own card in.
-            'deckCards' => SupportCard::query()->whereNotNull('release_global')->orderBy('char_name')->get(),
+            'run' => $this->runHeader($run),
+            'turns' => $this->turnRows($run),
+            'goals' => $this->goalRows($run),
+            'skillGroups' => $this->skillGroupsFor($run),
+            'skillCatalog' => $this->skillCatalog(),
+            'acquisitionOptions' => $this->acquisitionOptions(),
+            'moodOptions' => $this->moodOptions(),
             'scenarios' => $this->scenarioLabels(),
-            'raceSlots' => $this->raceSlotsFor($run),
-            'band' => $latest === null ? null : [
-                /*
-                 * The run's own scenario or null, and the ceilings, handed over together.
-                 *
-                 * This used to pass `$run->scenarioKey()`, which resolves null to the baseline
-                 * scenario, and the band then derived its ceilings from that key — so a run that
-                 * named no scenario was rated against URA Finale's +200 on screen while its own
-                 * turn form enforced 1200. `ScenarioCaps::forRun()` refuses that bonus for exactly
-                 * that reason, and the display path was the one reader that never went through it.
-                 *
-                 * The scenario is still passed, because it is the truth of the label and the footer
-                 * breaks a bonus down from it; what it may no longer do is supply a ceiling. Ceilings
-                 * arrive from `forRun()`, the same call the validator makes, so the page cannot show
-                 * a number the form would reject. Recorded as KI-47, and deferred here by name in
-                 * `docs/design-research/verification/slice-1-stat-ceilings-2026-09-30.md` §3.
-                 */
-                'scenario' => $run->hasScenario() ? $run->scenario : null,
-                'caps' => ScenarioCaps::forRun($run),
-                'values' => [
-                    'Speed' => $latest->speed,
-                    'Stamina' => $latest->stamina,
-                    'Power' => $latest->power,
-                    'Guts' => $latest->guts,
-                    'Wit' => $latest->wit,
+            'statuses' => $this->statusLabels(),
+            // KI-47/ADR-0015: the ceilings come from the one owner, the same call the turn
+            // validator makes, so the band cannot rate a trainee against a bonus the form rejects.
+            'caps' => ScenarioCaps::forRun($run),
+            'statOrder' => (array) config('scenarios.stat_order'),
+            'baseCap' => (int) config('scenarios.base_cap'),
+            'hardCap' => (int) config('scenarios.hard_cap'),
+            'gradeBanding' => (array) config('scenarios.grade_banding'),
+            'maxObjectiveIndex' => RaceEntry::MAX_OBJECTIVE_INDEX,
+            // Five zeroes would be a claim about a trainee nobody entered (D-220).
+            'band' => $latest === null ? null : $this->bandFor($run, $latest),
+            'strip' => $this->stripFor($run),
+            // Where the latest logged turn's mood ended, or null when no turn exists: no turns,
+            // no claim about a trainee (D-220).
+            'currentMood' => $latest?->mood?->value,
+            'gradeMeter' => $this->gradeMeterPayload($run),
+            'teamRank' => $this->teamRankPayload($run),
+            'spiritBursts' => $this->spiritBurstPayload($run),
+            'teamRace' => $this->teamRacePayload($run),
+            'epithets' => $this->epithetPayload($run),
+            'fatigue' => $this->fatiguePayload($run),
+            'calendar' => $this->calendarPayload($run, $calendarYear),
+            'deck' => $this->deckPayload($run),
+            'racePanel' => $this->racePanelPayload($run, $entryMode, $calendarYear),
+            'shop' => $this->shopPayload($run),
+            'rail' => $this->railPayload($run, $staged, $preview, $previewed, $latest),
+        ];
+    }
+
+    /**
+     * The run's own facts, flattened for the page header and its four forms. `scenario_label` is
+     * null when the run names no scenario: the page then says "No scenario set" rather than
+     * borrowing the baseline's name, which is a composition device and not a fact (D-220).
+     *
+     * @return array{id: int, umamusume_id: int, umamusume_name: string, status: string, status_label: string, scenario: string|null, scenario_label: string|null, has_scenario: bool, notes: string|null, imported_display: string|null, import_source: string|null, turn_count: int, export_csv_url: string, export_json_url: string, update_url: string, destroy_url: string}
+     */
+    private function runHeader(TrainingRun $run): array
+    {
+        return [
+            'id' => $run->id,
+            'umamusume_id' => $run->umamusume_id,
+            'umamusume_name' => $run->umamusume->name,
+            'status' => $run->status->value,
+            'status_label' => $run->status->label(),
+            'scenario' => $run->scenario,
+            'scenario_label' => $run->hasScenario()
+                ? ($this->scenarioLabels()[$run->scenarioKey()] ?? $run->scenarioKey())
+                : null,
+            'has_scenario' => $run->hasScenario(),
+            'notes' => $run->notes,
+            // Provenance stated rather than implied (ADR-0017): a run that arrived by file is not
+            // the Trainer's own typing. A typed run says nothing.
+            'imported_display' => Carbon::make($run->imported_at)?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+            'import_source' => $run->import_source,
+            // The hatch form opens on the number after the last logged turn.
+            'turn_count' => $run->turnEntries->count(),
+            'export_csv_url' => route('runs.export', ['run' => $run, 'format' => 'csv']),
+            'export_json_url' => route('runs.export', ['run' => $run, 'format' => 'json']),
+            'update_url' => route('runs.update', $run),
+            'destroy_url' => route('runs.destroy', $run),
+        ];
+    }
+
+    /**
+     * The turn log, each row with its own form routes. A recorded failure is an event, not a
+     * column, so it is folded onto its turn here (ADR-0003): the page's Failed chip is built
+     * from exactly this key.
+     *
+     * @return list<array{id: int, turn: int, speed: int, stamina: int, power: int, guts: int, wit: int, sp: int|null, condition: string|null, energy: int|null, fans: int|null, mood: string|null, update_url: string, destroy_url: string, failure: array{penalty_kind: string, source_name: string}|null}>
+     */
+    private function turnRows(TrainingRun $run): array
+    {
+        $failures = $run->turnEvents
+            ->filter(fn (TurnEvent $event): bool => $event->event_type === TurnEventType::Failure)
+            ->keyBy('turn');
+
+        return $run->turnEntries
+            ->map(function (TurnEntry $entry) use ($run, $failures): array {
+                $failure = $failures->get($entry->turn);
+
+                return [
+                    'id' => $entry->id,
+                    'turn' => $entry->turn,
+                    'speed' => $entry->speed,
+                    'stamina' => $entry->stamina,
+                    'power' => $entry->power,
+                    'guts' => $entry->guts,
+                    'wit' => $entry->wit,
+                    'sp' => $entry->sp,
+                    'condition' => $entry->condition,
+                    'energy' => $entry->energy,
+                    'fans' => $entry->fans,
+                    'mood' => $entry->mood?->value,
+                    'update_url' => route('runs.turns.update', [$run, $entry]),
+                    'destroy_url' => route('runs.turns.destroy', [$run, $entry]),
+                    'failure' => $failure === null ? null : [
+                        'penalty_kind' => (string) ($failure->deltas['penalty_kind'] ?? 'not recorded'),
+                        'source_name' => $failure->source_name,
+                    ],
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * The client's goal line (O-12): mandatory and special entries in turn order, with the state
+     * word the screen renders. A status with no word stays out rather than showing as an empty
+     * state the client also does not show.
+     *
+     * @return list<array{title: string, state: string, year_label: string, turn: int|null}>
+     */
+    private function goalRows(TrainingRun $run): array
+    {
+        $entries = $run->raceEntries
+            ->filter(fn (RaceEntry $entry): bool => $entry->raceCatalogSlot !== null
+                && ($entry->raceCatalogSlot->is_mandatory || $entry->raceCatalogSlot->is_special_race))
+            ->sortBy(fn (RaceEntry $entry): array => [
+                (int) ($entry->raceCatalogSlot->year ?? 99),
+                (int) ($entry->raceCatalogSlot->turn ?? 99),
+            ])
+            ->values();
+
+        $rows = [];
+
+        foreach ($entries as $entry) {
+            $slot = $entry->raceCatalogSlot;
+
+            if ($slot === null || (! $slot->is_mandatory && ! $slot->is_special_race)) {
+                continue;
+            }
+
+            $state = match ($entry->status) {
+                RaceEntryStatus::Completed => 'Cleared',
+                RaceEntryStatus::Entered => 'Active',
+                RaceEntryStatus::Skipped => 'Failed',
+                default => null,
+            };
+
+            if ($state === null) {
+                continue;
+            }
+
+            $rows[] = [
+                'title' => $slot->title,
+                'state' => $state,
+                // The career catalogue's own year word; `year` is not nullable on the row.
+                'year_label' => RaceCatalogSlot::YEARS[$slot->year] ?? (string) $slot->year,
+                'turn' => $slot->turn,
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * The three acquisition groups, from `SkillAcquisition::cases()` so a fourth state appears
+     * without a controller edit. The database value stays the enum's; the heading is its label
+     * (`Suggested` reads `Starting` for the seeded skills, KI-33).
+     *
+     * @return list<array{key: string, label: string, absent: string, skills: list<array{id: int, name: string, sp_cost: int|null, is_unique: bool, turn_acquired: int|null}>}>
+     */
+    private function skillGroupsFor(TrainingRun $run): array
+    {
+        $groups = [];
+
+        foreach (SkillAcquisition::cases() as $acquisition) {
+            $groups[] = [
+                'key' => $acquisition->value,
+                'label' => $acquisition->label(),
+                'absent' => 'None.',
+                'skills' => $run->skills
+                    ->filter(fn (Skill $skill): bool => $skill->pivot->status === $acquisition->value)
+                    ->map(static fn (Skill $skill): array => [
+                        'id' => $skill->id,
+                        'name' => $skill->name,
+                        'sp_cost' => $skill->sp_cost,
+                        'is_unique' => $skill->is_unique,
+                        'turn_acquired' => $skill->pivot->turn_acquired,
+                    ])
+                    ->values()
+                    ->all(),
+            ];
+        }
+
+        return $groups;
+    }
+
+    /**
+     * The skill picker's options: only rows the source says are on `[Global]` **and** named by
+     * the client (ADR-0011 §2), the same scope the skill search serves. `sp_cost` rides along
+     * because the option label states it (FR-D-1).
+     *
+     * @return list<array{id: int, name: string, sp_cost: int|null}>
+     */
+    private function skillCatalog(): array
+    {
+        return Skill::query()
+            ->availableOnGlobal()
+            ->orderBy('name')
+            ->orderBy('id')
+            ->get(['id', 'name', 'sp_cost'])
+            ->map(static fn (Skill $skill): array => [
+                'id' => $skill->id,
+                'name' => $skill->name,
+                'sp_cost' => $skill->sp_cost,
+            ])
+            ->all();
+    }
+
+    /**
+     * @return list<array{value: string, label: string}>
+     */
+    private function acquisitionOptions(): array
+    {
+        return array_map(
+            static fn (SkillAcquisition $status): array => ['value' => $status->value, 'label' => $status->label()],
+            SkillAcquisition::cases(),
+        );
+    }
+
+    /**
+     * The five client tier words with the directional arrow D-259 makes mandatory: three of the
+     * derived fills sit at equal luminance, so the arrow is the only ordinal signal.
+     *
+     * @return list<array{value: string, arrow: string}>
+     */
+    private function moodOptions(): array
+    {
+        return array_map(
+            static fn (MoodTier $tier): array => ['value' => $tier->value, 'arrow' => $tier->arrow()],
+            MoodTier::cases(),
+        );
+    }
+
+    /**
+     * The stat band's inputs. `capBonus` is the scenario's own breakdown, or null when the run
+     * names no scenario: it is a display breakdown only, and the ceilings themselves are the
+     * page's `caps` from `ScenarioCaps::forRun()` (KI-47, ADR-0015).
+     *
+     * @return array{scenario: string|null, capBonus: array<string, int>|null, values: array<string, int>, skillPoints: int|null}
+     */
+    private function bandFor(TrainingRun $run, TurnEntry $latest): array
+    {
+        $capBonus = null;
+
+        if ($run->hasScenario()) {
+            $capBonus = array_map(
+                static fn (mixed $bonus): int => (int) $bonus,
+                (array) config('scenarios.scenarios.'.$run->scenarioKey().'.cap_bonus'),
+            );
+        }
+
+        return [
+            // The run's own scenario or null: the label and the footer breakdown read it, and it
+            // may not supply a ceiling (KI-47).
+            'scenario' => $run->hasScenario() ? $run->scenario : null,
+            'capBonus' => $capBonus,
+            'values' => [
+                'Speed' => $latest->speed,
+                'Stamina' => $latest->stamina,
+                'Power' => $latest->power,
+                'Guts' => $latest->guts,
+                'Wit' => $latest->wit,
+            ],
+            'skillPoints' => $latest->sp,
+        ];
+    }
+
+    /**
+     * The Resources strip: the widget list, label and panel flag from the matrix (D-240), the
+     * run's own numbers from `stripValues()`, and one null per scenario resource that has no
+     * column yet, so the strip prints its own "N/A" rather than a default (D-220).
+     *
+     * @return array{widgets: list<string>, scenarioLabel: string, hasGradeObjectives: bool, declared: bool, values: array<string, int|string|null>}
+     */
+    private function stripFor(TrainingRun $run): array
+    {
+        $scenarioKey = $run->scenarioKey();
+
+        return [
+            'widgets' => array_values((array) config('scenarios.scenarios.'.$scenarioKey.'.widgets')),
+            'scenarioLabel' => (string) config('scenarios.scenarios.'.$scenarioKey.'.label'),
+            'hasGradeObjectives' => config('scenarios.scenarios.'.$scenarioKey.'.panels.grade_objectives') === true,
+            // The baseline key is what the strip composes from; whether the run declared a
+            // scenario is a separate fact and the only one that lets the caption name it (D-220).
+            'declared' => $run->hasScenario(),
+            'values' => [
+                ...$run->stripValues(),
+                'team_rank' => null,
+                'bursts' => null,
+                'grade_points' => null,
+                'shop_coins' => null,
+            ],
+        ];
+    }
+
+    /**
+     * The race calendar's own inputs. `yearTabs` is built here because the tabs are navigations:
+     * `fullUrlWithQuery` keeps the other query parameters, so back does not drop the tab. The
+     * Finale year has no tab (it sits outside the 24-turn grid).
+     *
+     * @return array{show: bool, cells: list<array<string, mixed>>, year: int, yearTabs: list<array{year: int, label: string, url: string}>, yearWord: string|null, nextTurn: int|null}
+     */
+    private function calendarPayload(TrainingRun $run, int $calendarYear): array
+    {
+        // Self-gating on the matrix, not on a scenario name: an empty grid would still claim the
+        // scenario has a calendar (D-221, D-241, gate G-34).
+        $show = $run->composesPanel('race_calendar');
+
+        $yearTabs = [];
+
+        foreach (RaceCatalogSlot::YEARS as $value => $label) {
+            if ($value === RaceCatalogSlot::YEAR_FINALE) {
+                continue;
+            }
+
+            $yearTabs[] = [
+                'year' => $value,
+                'label' => $label.' Year',
+                'url' => request()->fullUrlWithQuery(['year' => $value]),
+            ];
+        }
+
+        // The turn being decided carries its own year, so the outline belongs to whichever tab
+        // holds it rather than to the year of the last logged turn.
+        $nextTurn = $run->hasScenario() ? $run->nextTurnToPlay() : null;
+
+        return [
+            'show' => $show,
+            'cells' => $show ? $run->calendarCells($calendarYear) : [],
+            'year' => $calendarYear,
+            'yearTabs' => $yearTabs,
+            'yearWord' => RaceCatalogSlot::YEARS[$calendarYear] ?? null,
+            'nextTurn' => $nextTurn !== null && $calendarYear === $nextTurn['year'] ? $nextTurn['turn'] : null,
+        ];
+    }
+
+    /**
+     * The Grade Point meter. An empty `objectives` list is its off state, so no scenario name is
+     * passed (D-221, D-241, gate G-34). `earned` stays null when no honest figure exists (KI-10)
+     * and is never 0, which would claim the trainee stands on nothing.
+     *
+     * @return array{objectives: list<array{index: int, name: string, required: int}>, current: int|null, earned: int|null, unpricedCount: int, periods: list<array{index: int, earned: int|null, unpriced: int}>, unassignedCount: int, rotationTurns: int|null}
+     */
+    private function gradeMeterPayload(TrainingRun $run): array
+    {
+        $rotation = config('scenarios.scenarios.'.$run->scenarioKey().'.shop.rotation_turns');
+
+        return [
+            'objectives' => $run->gradeObjectives(),
+            'current' => $run->currentPeriodPosition(),
+            'earned' => $run->gradeEarned(),
+            'unpricedCount' => $run->gradeUnpricedCount(),
+            // Each deadline carries its own sum only; an absent period is null, not 0 (D-232, D-220).
+            'periods' => array_map(
+                static fn (array $row): array => [
+                    'index' => $row['index'],
+                    'earned' => $row['earned'],
+                    'unpriced' => $row['unpriced'],
                 ],
-                'skillPoints' => $latest->sp,
+                $run->gradePeriods(),
+            ),
+            'unassignedCount' => $run->gradeUnassignedCount(),
+            // The rotation is config's or null; the meter only prints it when it exists (D-232, D-240).
+            'rotationTurns' => $rotation === null ? null : (int) $rotation,
+        ];
+    }
+
+    /**
+     * The Team Rank gauge. The ladder arrives pre-flattened from config so the view holds no
+     * config lookup (D-240), and `level` is derived through the config mapping, never stored: a
+     * rank above the top rung has no level and the panel must not hand it one.
+     *
+     * @return array{enabled: bool, current: array{rank: string, level: int|null}|null, ladder: list<array{rank: string, level: int}>}
+     */
+    private function teamRankPayload(TrainingRun $run): array
+    {
+        $enabled = $run->composesPanel('team_rank_ladder');
+
+        $ladder = [];
+
+        foreach ((array) config('scenarios.scenarios.'.$run->scenarioKey().'.team_rank_ladder') as $rung) {
+            foreach ((array) ($rung['ranks'] ?? []) as $letter) {
+                $ladder[] = ['rank' => (string) $letter, 'level' => (int) $rung['level']];
+            }
+        }
+
+        $reported = $enabled ? $run->latestTeamRank() : null;
+
+        return [
+            'enabled' => $enabled,
+            'current' => $reported === null ? null : [
+                'rank' => $reported->rank,
+                'level' => $run->facilityLevel($reported->rank),
             ],
-            // The run's mood is where the latest logged turn ended, handed over as the enum so
-            // the view renders a tier or says it is unrecorded and never has to map a string
-            // back to a case. Null when no turn exists: no turns, no claim about a trainee.
-            'currentMood' => $latest?->mood,
-            'guided' => [
-                'scenario' => $run->scenarioKey(),
-                // Stage one asks what the turn did; stage two records how it ended.
-                'current' => $previewed ? 'outcome' : 'training',
-                'previewed' => $previewed,
-                'choices' => $this->turnChoices(),
-                'values' => $staged,
-                'preview' => $preview,
-                'energy' => $staged['energy'] ?? $latest?->energy,
-                'mood' => $staged['mood'] ?? $latest?->mood?->value,
-                'turn' => (int) ($staged['turn'] ?? $run->nextTurnNumber()),
-                'has_previous' => $latest !== null,
-                'previous' => $latest,
+            'ladder' => $ladder,
+        ];
+    }
+
+    /**
+     * The Spirit Burst roster. `enabled` is the scenario's widget membership, never a slug
+     * (D-221, gate G-34): `state` is the enum's opaque backing value and `stateLabel` is its
+     * label, because no Global capture names these states (D-20).
+     *
+     * @return array{enabled: bool, roster: list<array{teammate: string, state: string, stateLabel: string}>}
+     */
+    private function spiritBurstPayload(TrainingRun $run): array
+    {
+        $enabled = in_array('spirit_bursts', (array) config('scenarios.scenarios.'.$run->scenarioKey().'.widgets', []), true);
+
+        $roster = [];
+
+        if ($enabled) {
+            foreach ($run->spiritBurstRoster() as $row) {
+                $roster[] = [
+                    'teammate' => $row['teammate'],
+                    'state' => $row['state']->value,
+                    'stateLabel' => $row['state']->label(),
+                ];
+            }
+        }
+
+        return ['enabled' => $enabled, 'roster' => $roster];
+    }
+
+    /**
+     * The Team Race panel. Title and tier nulls travel as nulls: the component renders its own
+     * "not recorded" copy for each (G-33).
+     *
+     * @return array{enabled: bool, guidance: int, entries: list<array{title: string|null, tier: string|null, circles: int|null, placement: int|null}>}
+     */
+    private function teamRacePayload(TrainingRun $run): array
+    {
+        $enabled = $run->composesPanel('team_race');
+
+        $entries = [];
+
+        if ($enabled) {
+            foreach ($run->raceEntries as $entry) {
+                $slot = $entry->scenarioSlot;
+
+                if ($slot === null || $slot->kind !== 'team_race') {
+                    continue;
+                }
+
+                $entries[] = [
+                    'title' => $slot->title,
+                    'tier' => $slot->tier,
+                    'circles' => $entry->circles,
+                    'placement' => $entry->placement,
+                ];
+            }
+        }
+
+        return [
+            'enabled' => $enabled,
+            // The source's own margin, transcribed into config: three circles is a safety margin,
+            // not a win condition.
+            'guidance' => (int) config('scenarios.scenarios.'.$run->scenarioKey().'.team_race.circles_guidance', 0),
+            'entries' => $entries,
+        ];
+    }
+
+    /**
+     * The epithet checklist. `rows` is `epithetProgress()` verbatim: its three states are derived
+     * against the config route table there, and `unverifiable` must not be folded into `open` by
+     * a reshape (D-220, D-256).
+     *
+     * @return array{enabled: bool, seenRaceTitles: list<string>, rows: list<array{route: string, epithet: string, reward: string, state: string, missing: list<string>, note: string|null}>}
+     */
+    private function epithetPayload(TrainingRun $run): array
+    {
+        return [
+            'enabled' => $run->composesPanel('epithet_routes'),
+            'seenRaceTitles' => $run->completedRaceTitles(),
+            'rows' => $run->epithetProgress(),
+        ];
+    }
+
+    /**
+     * The Race Fatigue chip. It gates on the epithet flag, the same flag as the checklist and
+     * never a race panel (the screen's own rule, kept, G-33). The word is the payload's band
+     * derivation, and `hide_after` is mapped out of its storage name: an unmapped key still
+     * renders as itself (KI-18).
+     *
+     * @return array{enabled: bool, consecutiveRaces: int|null, riskWord: string|null, hideAfterLabel: string|null}
+     */
+    private function fatiguePayload(TrainingRun $run): array
+    {
+        $enabled = $run->composesPanel('epithet_routes');
+        $fatigue = $enabled ? $run->latestFatigue() : null;
+
+        /** @var array<string, string> $labels */
+        $labels = ['late_december' => 'late December'];
+        $hideAfter = config('scenarios.scenarios.'.$run->scenarioKey().'.race_fatigue.hide_after');
+
+        return [
+            'enabled' => $enabled,
+            'consecutiveRaces' => $fatigue?->consecutiveRaces,
+            'riskWord' => $fatigue?->riskWord(),
+            'hideAfterLabel' => $hideAfter === null ? null : ($labels[(string) $hideAfter] ?? (string) $hideAfter),
+        ];
+    }
+
+    /**
+     * The deck panel. `options` is the Global releases plus any card this run already uses, so a
+     * Trainer logging an older deck is never shown a slot they cannot re-select their own card
+     * in; the effect facts sit on the equipped list, not in the picker.
+     *
+     * @return array{equipped: list<array{position: int, card_url: string, card_name: string, slot_word: string, rarity_type: string, scenario_link: bool, effects: list<array{effect_id: int, name: string|null, display: string}>}>, slots: list<array{position: int, label: string, selected: string, selected_name: string|null, open_url: string}>, options: list<array{id: int, label: string}>, openSlot: int, action: string}
+     */
+    private function deckPayload(TrainingRun $run): array
+    {
+        $slots = $run->deckSlots->keyBy('slot_position');
+        $scenarioKey = $run->scenarioKey();
+        // The dictionary is read once for the panel, not once per slot: six equipped cards ask
+        // the same 35 rows the same question.
+        $effectNames = SupportCardEffects::dictionary();
+
+        $offered = SupportCard::query()
+            ->whereNotNull('release_global')
+            ->orderBy('char_name')
+            ->get();
+
+        foreach ($run->deckSlots as $slot) {
+            $card = $slot->supportCard;
+
+            if (! $offered->contains('id', $card->id)) {
+                $offered->push($card);
+            }
+        }
+
+        /** @var Collection<int, SupportCard> $offered */
+        $offered = $offered->unique('id')->sortBy(['type', 'char_name', 'title_en'])->values();
+
+        $equipped = [];
+
+        foreach (DeckSlot::POSITIONS as $position) {
+            $slot = $slots->get($position);
+
+            if ($slot === null) {
+                continue;
+            }
+
+            $card = $slot->supportCard;
+
+            $equipped[] = [
+                'position' => $position,
+                'card_url' => route('support-cards.show', $card),
+                'card_name' => $card->displayName(),
+                // Position is the slot's own identity, and six is the friend slot whatever card
+                // sits in it (ADR-0014 correction 1).
+                'slot_word' => $position === DeckSlot::MAX_POSITION ? 'Friends' : 'Slot '.$position,
+                'rarity_type' => $card->rarityWord().' '.$card->typeLabel(),
+                // Derived, never stored (ADR-0014 correction 3).
+                'scenario_link' => $card->isScenarioLink($scenarioKey),
+                'effects' => SupportCardEffects::atCap($card, $effectNames),
+            ];
+        }
+
+        $openSlot = $this->openDeckSlot();
+        $formSlots = [];
+
+        foreach (DeckSlot::POSITIONS as $position) {
+            // Rehydrated from `old()` so a rejected submission does not wipe the six picks the
+            // Trainer just made (D-3).
+            $selected = request()->old("deck.{$position}.support_card_id", (string) $slots->get($position)?->support_card_id);
+            $chosen = (string) $selected === '' ? null : $offered->firstWhere('id', (int) $selected);
+
+            $formSlots[] = [
+                'position' => $position,
+                'label' => $position === DeckSlot::MAX_POSITION ? 'Slot 6 · Friends' : 'Slot '.$position,
+                'selected' => (string) $selected,
+                'selected_name' => $chosen?->displayName(),
+                // Built server-side so the other query parameters survive the slot switch.
+                'open_url' => request()->fullUrlWithQuery(['deck_slot' => $position]),
+            ];
+        }
+
+        return [
+            'equipped' => $equipped,
+            'slots' => $formSlots,
+            'options' => $offered
+                ->map(static fn (SupportCard $card): array => [
+                    'id' => $card->id,
+                    'label' => $card->displayName().' · '.$card->rarityWord().' '.$card->typeLabel(),
+                ])
+                ->all(),
+            'openSlot' => $openSlot,
+            'action' => route('runs.deck.sync', $run),
+        ];
+    }
+
+    /**
+     * The deck slot the picker opens: the requested one, else the one a rejected save landed an
+     * error on, else the first. Resolved server-side because a client ref cannot reopen a slot
+     * after the redirect back from a rejected submit, which is exactly when it has to reopen.
+     */
+    private function openDeckSlot(): int
+    {
+        $requested = (int) request()->query('deck_slot');
+
+        if (in_array($requested, DeckSlot::POSITIONS, true)) {
+            return $requested;
+        }
+
+        $errors = request()->session()->get('errors');
+
+        if ($errors instanceof ViewErrorBag) {
+            foreach (DeckSlot::POSITIONS as $position) {
+                if ($errors->has("deck.{$position}.support_card_id")) {
+                    return $position;
+                }
+            }
+        }
+
+        return DeckSlot::POSITIONS[0];
+    }
+
+    /**
+     * The deck builder (SCREEN-007), over the same `runs.deck.sync` write the run screen uses.
+     *
+     * **The six selections live in the query string, not in component state.** Every picker action is
+     * a `router.get` onto this same route, so a filter change or a page change would otherwise wipe
+     * the five slots the Trainer had not submitted yet. Carrying them in the URL is the same move
+     * `deckPayload()`'s `open_url` already makes for one slot at a time, lifted to all six, and it is
+     * what lets the picker be a genuinely paginated query instead of five hundred option nodes.
+     *
+     * The read-back order is `old()` first, then the query string, then the stored row: a rejected
+     * submission returns the six picks the Trainer just made (`D-3`), an unsubmitted pick survives
+     * navigation, and a page reached from a link shows what the run holds.
+     */
+    public function deck(DeckPickerSearchRequest $request, TrainingRun $run): InertiaResponse
+    {
+        $run->loadMissing(['umamusume', 'deckSlots.supportCard']);
+        $dictionary = SupportCardEffects::dictionary();
+
+        return Inertia::render('Support/Builder', [
+            'run' => [
+                'id' => $run->id,
+                'name' => $run->umamusume?->name,
+                'status_label' => $run->status->label(),
+                'scenario' => $run->scenario,
+                'has_scenario' => $run->hasScenario(),
+                // The label is config's, never the stored slug, and null when the Trainer has not
+                // chosen one, which is also when the Scenario Link derivation has nothing to run on.
+                'scenario_label' => $run->hasScenario() ? config('scenarios.scenarios.'.$run->scenarioKey().'.label') : null,
+                'run_url' => route('runs.show', $run),
             ],
+            'slots' => $this->builderSlots($request, $run, $dictionary),
+            'picker' => $this->builderPicker($request, $run, $dictionary),
+            'types' => $this->builderTypes(),
+            'rarities' => $this->rarityWords(),
+            'availabilities' => SupportCard::AVAILABILITIES,
+            'analysis' => DeckAnalysis::build($this->builderAnalysisInput($request, $run, $dictionary)),
+            'action' => route('runs.deck.sync', $run),
+        ]);
+    }
+
+    /**
+     * The six slot rows, each with the card it holds and the flag the run record cannot yet store.
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return list<array<string, mixed>>
+     */
+    private function builderSlots(Request $request, TrainingRun $run, array $dictionary): array
+    {
+        $stored = $run->deckSlots->keyBy('slot_position');
+        $rows = [];
+
+        foreach (DeckSlot::POSITIONS as $position) {
+            $selected = $this->builderSelection($request, $run, $position);
+            $card = $selected === null ? null : SupportCard::query()->find($selected);
+
+            $rows[] = [
+                'position' => $position,
+                'label' => $position === DeckSlot::MAX_POSITION ? 'Slot 6 · Friends' : 'Slot '.$position,
+                // The role belongs to the position, not to the card parked in it (ADR-0014 correction 1).
+                'is_friend' => $position === DeckSlot::MAX_POSITION,
+                'selected' => (string) $selected,
+                'card' => $card === null ? null : $this->builderCard($card, $run, $dictionary),
+                // The only value the run can be read as. `RENTED` is a per-slot fact the table has no
+                // column for, and inventing one needs owner approval, so the control ships with the
+                // value and the screen says the run record does not keep it (see the hand-off).
+                'ownership' => 'OWNED',
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * What a slot holds right now: the rejected submit's pick, else the pick in the URL, else the
+     * stored row, else nothing.
+     */
+    private function builderSelection(Request $request, TrainingRun $run, int $position): ?int
+    {
+        // `old()` hands back whatever the POST carried, and a hand-made request or a test can carry an
+        // int where a form sends text, so the check is on the cast value rather than on the type.
+        $old = $request->old("deck.{$position}.support_card_id");
+
+        if ($old !== null && (string) $old !== '') {
+            return (int) $old;
+        }
+
+        $picked = $request->query('deck');
+
+        if (is_array($picked) && (string) ($picked[$position] ?? '') !== '') {
+            return (int) $picked[$position];
+        }
+
+        $id = $run->deckSlots->firstWhere('slot_position', $position)?->support_card_id;
+
+        return $id === null ? null : (int) $id;
+    }
+
+    /**
+     * The card picker. The offered set is the Global releases plus any card this run already uses, the
+     * same rule `deckPayload()` applies, and the query is the same shape `SupportCardController` uses:
+     * facet columns first, a deterministic order, then a clamped page size.
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return array<string, mixed>
+     */
+    private function builderPicker(DeckPickerSearchRequest $request, TrainingRun $run, array $dictionary): array
+    {
+        $equipped = $run->deckSlots->pluck('support_card_id')->all();
+        $rarity = $request->validated('rarity');
+        $type = $request->validated('type');
+        $status = $request->validated('status');
+        $search = $request->validated('query');
+
+        $query = SupportCard::query()
+            ->where(function ($q) use ($equipped): void {
+                $q->whereNotNull('release_global');
+
+                if ($equipped !== []) {
+                    $q->orWhereIn('id', $equipped);
+                }
+            })
+            ->when($rarity !== null, fn ($q) => $q->where('rarity', (int) $rarity))
+            ->when($type !== null, fn ($q) => $q->where('type', $type))
+            ->when($status !== null, fn ($q) => $q->where('release_status', $status))
+            ->when($search !== null, fn ($q) => $q->where(
+                fn ($inner) => $inner->where('char_name', 'like', '%'.$search.'%')->orWhere('title_en', 'like', '%'.$search.'%')
+            ))
+            // The tiebreaker is load-bearing for the same reason it is on the catalog: an order without
+            // one lets pagination hand back a different half of the catalogue on each pass.
+            ->orderBy('type')
+            ->orderBy('char_name')
+            ->orderBy('title_en');
+
+        $offered = SupportCard::query()
+            ->whereNotNull('release_global')
+            ->when($equipped !== [], fn ($q) => $q->orWhereIn('id', $equipped))
+            ->count();
+
+        return [
+            'page' => $query->paginate(PageSize::clamp($request->query('pageSize')))
+                ->withQueryString()
+                ->through(fn (SupportCard $card): array => $this->builderCard($card, $run, $dictionary)),
+            'offered' => $offered,
+            'type' => $type,
+            'rarity' => $rarity,
+            'status' => $status,
+            'query' => $search,
+            // Which slot a card row's Equip button writes to. A replacement is one keystroke away from
+            // the row, and the focus comes back to the slot afterwards. An out-of-range slot is a
+            // pasted URL, not a Trainer's mistake, so it falls back to the first rather than refusing
+            // the page over a picker target (the judgement `PageSize` already states for a page size).
+            'fillingSlot' => in_array((int) $request->validated('slot'), DeckSlot::POSITIONS, true)
+                ? (int) $request->validated('slot')
+                : DeckSlot::POSITIONS[0],
+            'askedFor' => $this->builderAsk($rarity, $type, $status, $search),
+        ];
+    }
+
+    /**
+     * What the Trainer narrowed the picker by, for the no-results state to name the ask rather than
+     * repeating a query back at them.
+     */
+    private function builderAsk(?string $rarity, ?string $type, ?string $status, ?string $search): string
+    {
+        $parts = array_filter([
+            $rarity === null ? null : 'rarity '.CardRarity::from((int) $rarity)->word(),
+            $type === null ? null : 'type '.SupportCard::typeWord($type),
+            $status === null ? null : 'availability '.$status,
+            $search === null ? null : 'a name containing "'.$search.'"',
+        ]);
+
+        return $parts === [] ? 'those conditions' : implode(' + ', $parts);
+    }
+
+    /**
+     * One card, in the shape both the slot rows and the picker rows read.
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return array<string, mixed>
+     */
+    private function builderCard(SupportCard $card, TrainingRun $run, array $dictionary): array
+    {
+        $scenarioLink = $this->scenarioLinkState($card, $run);
+
+        return [
+            'id' => $card->id,
+            'name' => $card->displayName(),
+            'name_ja' => $card->name_ja,
+            'title_ja' => $card->title_ja,
+            'url' => route('support-cards.show', $card),
+            // Keyed on the publisher's `support_id`, the only key the mirror's path answers to
+            // (ADR-0021 read half, `design-2.0` §45a "Support-card index, card row").
+            'artworkURL' => app(ArtworkMirror::class)->url('support_thumb', (int) $card->support_id),
+            'rarity_word' => $card->rarityWord(),
+            'type' => $card->type,
+            'type_label' => $card->typeLabel(),
+            'scenario_link' => $scenarioLink['state'],
+            'scenario_link_note' => $scenarioLink['note'],
+            'effects' => SupportCardEffects::atCap($card, $dictionary),
+        ];
+    }
+
+    /**
+     * The Scenario Link badge, derived on read and never stored (ADR-0014 correction 3; §1.4.7).
+     *
+     * Three states rather than one, because `isScenarioLink()` answers `false` for two different
+     * things: a character that is genuinely not on the list, and a card with nothing to compare
+     * against. Printing the badge for the second would be a claim the repository cannot make, so it
+     * becomes `N/A` with the reason as its title, which is the rule every underived value on this
+     * screen follows.
+     *
+     * @return array{state: string, note: string|null}
+     */
+    private function scenarioLinkState(SupportCard $card, TrainingRun $run): array
+    {
+        if (! $run->hasScenario()) {
+            return ['state' => 'unknown', 'note' => 'This run names no scenario, so there is no linked list to check this card against.'];
+        }
+
+        $linked = config('scenarios.scenarios.'.$run->scenarioKey().'.scenario_links');
+
+        if (! is_array($linked)) {
+            return ['state' => 'unknown', 'note' => 'The scenario config states no linked list, so the badge cannot be derived.'];
+        }
+
+        if ($card->char_name === null) {
+            return ['state' => 'unknown', 'note' => 'The source stores no character name for this card, so there is nothing to match against the linked list.'];
+        }
+
+        return $card->isScenarioLink($run->scenarioKey())
+            ? ['state' => 'linked', 'note' => null]
+            : ['state' => 'not_linked', 'note' => null];
+    }
+
+    /**
+     * The six cards the analysis reads, in slot order, with their at-cap effects.
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return list<array{card_name: string, effects: list<array<string, mixed>>}>
+     */
+    private function builderAnalysisInput(Request $request, TrainingRun $run, array $dictionary): array
+    {
+        $ids = [];
+
+        foreach (DeckSlot::POSITIONS as $position) {
+            $id = $this->builderSelection($request, $run, $position);
+
+            if ($id !== null) {
+                $ids[] = $id;
+            }
+        }
+
+        $cards = [];
+
+        foreach (SupportCard::query()->whereIn('id', $ids)->get() as $card) {
+            $cards[] = [
+                'card_name' => $card->displayName(),
+                'effects' => SupportCardEffects::atCap($card, $dictionary),
+            ];
+        }
+
+        return $cards;
+    }
+
+    /**
+     * The seven support types as the picker and the slot rows read them.
+     *
+     * @return list<array{key: string, label: string}>
+     */
+    private function builderTypes(): array
+    {
+        return array_map(
+            static fn (string $type): array => ['key' => $type, 'label' => SupportCard::typeWord($type)],
+            SupportCard::TYPES
+        );
+    }
+
+    /**
+     * The rarity words the picker offers, keyed by the value the query string carries.
+     *
+     * @return array<string, string>
+     */
+    private function rarityWords(): array
+    {
+        $words = [];
+
+        foreach (CardRarity::cases() as $case) {
+            $words[(string) $case->value] = $case->word();
+        }
+
+        return $words;
+    }
+
+    /**
+     * The race panel. Every display string in `entries` composes here, including the fallbacks
+     * the screen reads ('no grade', 'turn not named', 'circles not read', 'no period'): the
+     * component only renders them.
+     *
+     * @return array{showUrl: string, racesUrl: string, composesRaceCalendar: bool, composesTeamRace: bool, composesGradeObjectives: bool, entryMode: string, year: int, yearLabel: string, calendarSlots: list<array{id: int, label: string, tier: string}>, manualSlots: list<array{id: int, title: string}>, turns: list<array{id: int, turn: int}>, raceStatuses: list<string>, maxCircles: int, objectives: list<array{index: int, name: string}>, entries: list<array{id: int, title: string, status: string, trainer_entered: bool, tier: string, placement: string, turn: string, circles: string, period: string}>, old: array<string, mixed>}
+     */
+    private function racePanelPayload(TrainingRun $run, string $entryMode, int $calendarYear): array
+    {
+        $composesTeamRace = $run->composesPanel('team_race');
+        $composesGradeObjectives = $run->composesGradeObjectives();
+
+        // The calendar list is the career catalogue for the year this screen shows: a list built
+        // from `scenario_slots` would offer a Senior G1 to a Trainer sitting in Junior.
+        $calendarSlots = $run->calendarRaceSlots($calendarYear)
+            ->map(static fn (RaceCatalogSlot $slot): array => [
+                'id' => $slot->id,
+                // The picker names the half-month and grade, so a race cannot be chosen on its
+                // name alone; 'no grade' is the Blade's own fallback, kept as one string.
+                'label' => $slot->title.' · '.$slot->slot_label.' · '.($slot->tier ?? 'no grade'),
+                'tier' => $slot->tier ?? '',
+            ])
+            ->all();
+
+        $manualSlots = $this->raceSlotsFor($run)
+            ->where('kind', 'free_race')
+            ->map(static fn (ScenarioSlot $slot): array => ['id' => $slot->id, 'title' => $slot->title])
+            ->values()
+            ->all();
+
+        $entries = $run->raceEntries
+            ->sortBy(fn (RaceEntry $entry): int => $entry->scenarioSlot->sort_order ?? $entry->raceCatalogSlot->sort_order ?? PHP_INT_MAX)
+            ->values()
+            ->map(function (RaceEntry $entry): array {
+                $turn = $entry->turnEntry;
+
+                return [
+                    'id' => $entry->id,
+                    'title' => $entry->raceCatalogSlot->title ?? $entry->scenarioSlot->title ?? 'a race with no calendar row',
+                    'status' => $entry->status->value,
+                    'trainer_entered' => $entry->scenarioSlot?->isFreeRace() === true,
+                    'tier' => $entry->tierKey() ?? 'no grade',
+                    // R69: the ordinal, teens included.
+                    'placement' => $entry->placementOrdinal(),
+                    // KI-17: the Trainer names the turn; nothing guesses it from a race date.
+                    'turn' => $turn === null ? 'turn not named' : 'turn '.$turn->turn,
+                    'circles' => $entry->circles === null ? 'circles not read' : $entry->circles.' circles',
+                    'period' => $entry->objective_index === null ? 'no period' : 'period '.$entry->objective_index,
+                ];
+            })
+            ->all();
+
+        return [
+            'showUrl' => route('runs.show', $run),
+            'racesUrl' => route('runs.races.store', $run),
+            'composesRaceCalendar' => $run->composesPanel('race_calendar'),
+            'composesTeamRace' => $composesTeamRace,
+            'composesGradeObjectives' => $composesGradeObjectives,
+            'entryMode' => $entryMode,
+            'year' => $calendarYear,
+            'yearLabel' => RaceCatalogSlot::YEARS[$calendarYear] ?? (string) $calendarYear,
+            // Both lists of slots the calendar branch can name, and the turns it can tie a race to.
+            'calendarSlots' => $calendarSlots,
+            'manualSlots' => $manualSlots,
+            'turns' => $run->turnEntries
+                ->map(static fn (TurnEntry $turn): array => ['id' => $turn->id, 'turn' => $turn->turn])
+                ->values()
+                ->all(),
+            'raceStatuses' => array_map(static fn (RaceEntryStatus $status): string => $status->value, RaceEntryStatus::cases()),
+            'maxCircles' => RaceEntry::MAX_CIRCLES,
+            'objectives' => array_map(static fn (array $row): array => [
+                'index' => $row['index'],
+                'name' => $row['name'],
+            ], $run->gradeObjectives()),
+            'entries' => $entries,
+            // The form opens on the flashed input after a rejected write.
+            'old' => (array) request()->old(),
+        ];
+    }
+
+    /**
+     * The shop panel. The catalogue and purchases are read only when the scenario composes a
+     * shop: `purchasePayload()` validates a stored row against the run's own catalogue and
+     * throws for a scenario with no shop, so the gate is load-bearing (D-226, ADR-0003).
+     *
+     * @return array{panelsShop: bool, purchaseUrl: string, updateUrl: string, rotationTurns: int, maxCopies: int, resetsInLabel: string|null, catalogue: list<array{name: string, label: string}>, purchases: list<array{item: string, effect: string, cost: string}>, spendTotal: string, turnDefault: int, umamusumeId: int, statusValue: string, scenario: string, currentObjectiveIndex: int|null, shopResetsIn: int|null}
+     */
+    private function shopPayload(TrainingRun $run): array
+    {
+        $shop = $run->composesShop();
+        $scenarioKey = $run->scenarioKey();
+
+        $catalogue = [];
+        $purchases = [];
+
+        if ($shop) {
+            // The form's option list is the catalogue the payload validates against, so the
+            // choice offered and the choice accepted cannot drift apart.
+            foreach (ShopPurchasePayload::catalogueFor($run) as $name => $row) {
+                $catalogue[] = [
+                    'name' => $name,
+                    'label' => $name.' · '.number_format($row['cost']).' coins',
+                ];
+            }
+
+            foreach ($run->turnEvents as $event) {
+                $purchase = $event->purchasePayload();
+
+                if ($purchase === null) {
+                    continue;
+                }
+
+                $purchases[] = [
+                    'item' => $purchase->item,
+                    'effect' => $purchase->effect,
+                    'cost' => number_format($purchase->cost),
+                ];
+            }
+        }
+
+        $resets = $run->shop_resets_in;
+        $rotation = config('scenarios.scenarios.'.$scenarioKey.'.shop.rotation_turns');
+
+        return [
+            'panelsShop' => $shop,
+            'purchaseUrl' => route('runs.purchases.store', $run),
+            'updateUrl' => route('runs.update', $run),
+            // Config is the only owner of the rotation bounds (D-240); the panel only prints them.
+            'rotationTurns' => $rotation === null ? 0 : (int) $rotation,
+            'maxCopies' => (int) config('scenarios.scenarios.'.$scenarioKey.'.shop.max_copies_per_item', 0),
+            // Entered, never computed: 0 would say the lineup changes next turn (D-232, D-220).
+            'resetsInLabel' => $resets === null ? null : 'resets in '.$resets.' '.($resets === 1 ? 'turn' : 'turns'),
+            'catalogue' => $catalogue,
+            'purchases' => $purchases,
+            // A sum of entered costs, never a balance: the earning side is not stored (D-232).
+            'spendTotal' => number_format($run->shopSpendTotal()),
+            'turnDefault' => (int) $run->turnEntries->max('turn') ?: 1,
+            // The rotation form is the shared `runs.update` write, so every field it is not
+            // editing is carried through or the request blanks it.
+            'umamusumeId' => $run->umamusume_id,
+            'statusValue' => $run->status->value,
+            'scenario' => $run->scenario ?? '',
+            'currentObjectiveIndex' => $run->current_objective_index,
+            'shopResetsIn' => $resets,
+        ];
+    }
+
+    /**
+     * The guided rail. `$previewed` is the response's own marker, never a read of `$preview`: a
+     * first turn previews to an empty list and still has to offer its confirm step (D-1, D-51).
+     * `previous` is the row the typed numbers are compared against, as placeholders only: an
+     * input arriving pre-filled would assert the stat did not change (D-220).
+     *
+     * @param  array<string, mixed>  $staged
+     * @param  list<array{direction: string, text: string}>  $preview
+     * @return array{def: array<string, mixed>, declared: bool, current: string, previewed: bool, choices: list<array<string, mixed>>, selected: string|null, values: array<string, mixed>, preview: list<array{direction: string, text: string}>, energy: int|null, mood: string|null, turn: int, has_previous: bool, previous: array<string, int|null>|null, action: string}
+     */
+    private function railPayload(TrainingRun $run, array $staged, array $preview, bool $previewed, ?TurnEntry $latest): array
+    {
+        return [
+            // The scenario's resolved config, so the rail orders its steps from data and branches
+            // on flags rather than on a slug (D-240, G-33).
+            'def' => (array) config('scenarios.scenarios.'.$run->scenarioKey()),
+            // The baseline key orders the steps either way; this decides only whether the rail may
+            // name the scenario out loud (D-220).
+            'declared' => $run->hasScenario(),
+            // Stage one asks what the turn did; stage two records how it ended.
+            'current' => $previewed ? 'outcome' : 'training',
+            'previewed' => $previewed,
+            'choices' => $this->turnChoices(),
+            'selected' => isset($staged['choice']) ? (string) $staged['choice'] : null,
+            'values' => $staged,
+            'preview' => $preview,
+            'energy' => isset($staged['energy']) ? (int) $staged['energy'] : $latest?->energy,
+            'mood' => isset($staged['mood']) ? (string) $staged['mood'] : $latest?->mood?->value,
+            'turn' => (int) ($staged['turn'] ?? $run->nextTurnNumber()),
+            'has_previous' => $latest !== null,
+            'previous' => $latest === null ? null : [
+                'speed' => $latest->speed,
+                'stamina' => $latest->stamina,
+                'power' => $latest->power,
+                'guts' => $latest->guts,
+                'wit' => $latest->wit,
+                'sp' => $latest->sp,
+                'energy' => $latest->energy,
+                'fans' => $latest->fans,
+            ],
+            'action' => route('runs.turns.store', $run),
         ];
     }
 
@@ -518,6 +1570,20 @@ class TrainingRunController extends Controller
         $run->update($request->validated());
 
         return redirect()->route('runs.show', $run)->with('status', 'Run updated.');
+    }
+
+    /**
+     * Stores the build target the Trainer entered for this run (FR-F-1, `ADR-0020` §2).
+     *
+     * The target is replaced whole rather than merged: it is entered and read as one object, and a
+     * merge would leave a field the Trainer cleared sitting in the column while nothing on screen
+     * still claimed it. Validation is the request's; this method writes what it was handed.
+     */
+    public function updateBuildTarget(StoreBuildTargetRequest $request, TrainingRun $run): RedirectResponse
+    {
+        $run->update(['build_target' => $request->payload()]);
+
+        return redirect()->route('runs.show', $run)->with('status', 'Build target saved.');
     }
 
     /**
@@ -790,9 +1856,25 @@ class TrainingRunController extends Controller
      * sheet records the trainee rather than which of her forms was equipped; collecting it would offer a
      * field the source cannot fill and invite a guess that then reads as the Trainer's own record.
      */
-    public function importForm(): View
+    public function importForm(Request $request): InertiaResponse
     {
-        return view('runs.import', $this->importChoices());
+        return Inertia::render('Runs/Import', $this->importProps($request));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function importProps(Request $request): array
+    {
+        return [
+            ...$this->importChoices(),
+            'statuses' => $this->statusLabels(),
+            // The column list is the export's own, so the hint a Trainer reads before pasting is the
+            // same array the request parses against rather than a second copy that can drift.
+            'headers' => ImportHistoricalRunRequest::HEADERS,
+            'preview' => null,
+            'old' => (array) $request->old(),
+        ];
     }
 
     /**
@@ -803,17 +1885,18 @@ class TrainingRunController extends Controller
      * fails on the second POST rather than reaching the action. The rows are handed over as raw strings
      * straight from the parse, which is also what makes a rejected cell point at the row that held it.
      */
-    public function importPreview(ImportHistoricalRunRequest $request): View
+    public function importPreview(ImportHistoricalRunRequest $request): InertiaResponse
     {
         $validated = $request->validated();
 
-        return view('runs.import', array_merge($this->importChoices(), [
+        return Inertia::render('Runs/Import', [
+            ...$this->importProps($request),
             'preview' => [
                 'csv' => (string) $validated['csv'],
                 'turns' => $validated['turns'],
                 'run' => $request->only(['umamusume_id', 'scenario', 'status', 'notes']),
             ],
-        ]));
+        ]);
     }
 
     /**
@@ -853,22 +1936,41 @@ class TrainingRunController extends Controller
     }
 
     /**
+     * Status value => the word the enum labels it with, for the two forms that offer the choice.
+     * Built from `RunStatus::cases()` so a fourth case appears without a controller edit.
+     *
+     * @return array<string, string>
+     */
+    private function statusLabels(): array
+    {
+        return collect(RunStatus::cases())
+            ->mapWithKeys(fn (RunStatus $status): array => [$status->value => $status->label()])
+            ->all();
+    }
+
+    /**
      * The two lists the import page renders, shared by its form and its preview step.
      *
      * Narrower than `create()`'s trainee query on purpose: the import collects no costume card, so it
      * selects no cards and carries no `unconfirmed` gate. A global roster would list a trainee the run
      * cannot be created for.
      *
-     * @return array{umamusumes: Collection<int, Umamusume>, scenarios: array<string, string>}
+     * @return array{trainees: list<array{id: int, name: string, name_ja: string|null}>, scenarios: array<string, string>}
      */
     private function importChoices(): array
     {
         return [
-            'umamusumes' => Umamusume::query()
+            'trainees' => Umamusume::query()
                 ->where('release_status', ReleaseStatus::GlobalReleased->value)
                 ->orderBy('name')
                 ->orderBy('id')
-                ->get(['id', 'name', 'name_ja']),
+                ->get(['id', 'name', 'name_ja'])
+                ->map(static fn (Umamusume $u): array => [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'name_ja' => $u->name_ja,
+                ])
+                ->all(),
             'scenarios' => $this->scenarioLabels(),
         ];
     }
