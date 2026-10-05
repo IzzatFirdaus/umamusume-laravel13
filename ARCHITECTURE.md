@@ -150,6 +150,20 @@ training_runs
     see App\Models\Legacy\LegacySelectionPayload for the shape and what it deliberately omits),
   notes text nullable, timestamps
 
+veterans
+  id, training_run_id FK->training_runs unique cascade,
+  tags json nullable (the Trainer's own facets, a flat list of strings),
+  notes text nullable, timestamps
+  -- PRD FR-G, ADR-0020 §3, under ADR-0010's recording allowance; migrated as
+  -- 2026_10_05_120000_create_veterans_table. A Veteran is a completed run kept in the library:
+  -- the run's recorded facts (trainee, final stats, skills, sparks, race record) are read back
+  -- through training_run_id, and only the Trainer's tags and notes are stored here. Record-only
+  -- (FR-G-4): nothing derives a Spark firing, an affinity payout or an offspring. The FK is
+  -- unique (one run is one Veteran, so a re-save rewrites its tags and notes) and cascades (with
+  -- the run gone there is nothing to read back). No is_manual write and no data_sources row:
+  -- a Veteran is Trainer data, not a fetched fact. Actions RecordVeteran / ListVeterans /
+  -- ShowVeteran are the record/list/show path; no routes or screens yet (slice D16 builds those).
+
 turn_entries
   id, training_run_id FK->training_runs cascade, turn unsigned int,
   speed, stamina, power, guts, wit unsigned smallint,

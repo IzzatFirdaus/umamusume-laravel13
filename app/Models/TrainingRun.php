@@ -8,6 +8,7 @@ use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\SpiritBurstState;
+use App\Models\Advisor\BuildTargetPayload;
 use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\TurnEvents\RaceFatiguePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
@@ -51,6 +52,11 @@ use Illuminate\Support\Carbon;
  * @property int|null $shop_resets_in turns until the shop rotation, as the Trainer
  *                                    reports it; null renders the N/A disclosure and is
  *                                    never computed from the turn number (D-232)
+ * @property array<array-key, mixed>|null $build_target the build target as the Trainer entered
+ *                                                      it (FR-F-1, ADR-0020 §2); null when they
+ *                                                      entered none, which the advisor reads as
+ *                                                      no target rather than as an empty one.
+ *                                                      `buildTarget()` is the typed view of this bag
  * @property-read Collection<int, TurnEntry> $turnEntries
  * @property-read Collection<int, TurnEvent> $turnEvents
  * @property-read Collection<int, RaceEntry> $raceEntries
@@ -58,7 +64,7 @@ use Illuminate\Support\Carbon;
  * @property-read Umamusume $umamusume
  * @property-read CharacterCard|null $characterCard
  */
-#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'notes', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source'])]
 class TrainingRun extends Model
 {
     /** @use HasFactory<TrainingRunFactory> */
@@ -196,6 +202,27 @@ class TrainingRun extends Model
         }
 
         return LegacySelectionPayload::fromArray($this->legacy_selection);
+    }
+
+    /**
+     * The build target as the Trainer entered it, or null when they entered none.
+     *
+     * Null is the whole point of the distinction: the advisor's contract has a case for "no target
+     * set" that names the absence and falls back to Energy-only guidance, and returning an empty
+     * payload here would make that case unreachable and let the advisor rank against zeroes the
+     * Trainer never typed (`ADR-0020` §2, `SCREEN-005`).
+     *
+     * As with the Legacy payload, a malformed stored value throws rather than reading as nothing:
+     * the shape is validated on the way in by `BuildTargetPayload`, so a row that fails here means
+     * a write got past it, which is the fact worth an exception.
+     */
+    public function buildTarget(): ?BuildTargetPayload
+    {
+        if ($this->build_target === null) {
+            return null;
+        }
+
+        return BuildTargetPayload::fromArray($this->build_target);
     }
 
     /**
@@ -885,6 +912,7 @@ class TrainingRun extends Model
             'current_objective_index' => 'integer',
             'shop_resets_in' => 'integer',
             'legacy_selection' => 'array',
+            'build_target' => 'array',
             'imported_at' => 'datetime',
         ];
     }

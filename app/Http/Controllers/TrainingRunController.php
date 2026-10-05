@@ -12,6 +12,7 @@ use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\TurnEventType;
 use App\Http\Requests\ImportHistoricalRunRequest;
+use App\Http\Requests\StoreBuildTargetRequest;
 use App\Http\Requests\StoreDeckRequest;
 use App\Http\Requests\StoreRaceEntryRequest;
 use App\Http\Requests\StoreRunSkillRequest;
@@ -1271,6 +1272,20 @@ class TrainingRunController extends Controller
         $run->update($request->validated());
 
         return redirect()->route('runs.show', $run)->with('status', 'Run updated.');
+    }
+
+    /**
+     * Stores the build target the Trainer entered for this run (FR-F-1, `ADR-0020` §2).
+     *
+     * The target is replaced whole rather than merged: it is entered and read as one object, and a
+     * merge would leave a field the Trainer cleared sitting in the column while nothing on screen
+     * still claimed it. Validation is the request's; this method writes what it was handed.
+     */
+    public function updateBuildTarget(StoreBuildTargetRequest $request, TrainingRun $run): RedirectResponse
+    {
+        $run->update(['build_target' => $request->payload()]);
+
+        return redirect()->route('runs.show', $run)->with('status', 'Build target saved.');
     }
 
     /**

@@ -46,6 +46,7 @@ Route::post('/training-runs/{run}/skills', [TrainingRunController::class, 'syncS
 Route::post('/training-runs/{run}/deck', [TrainingRunController::class, 'syncDeck'])->name('runs.deck.sync');
 Route::post('/training-runs/{run}/races', [TrainingRunController::class, 'storeRace'])->name('runs.races.store');
 Route::post('/training-runs/{run}/purchases', [TrainingRunController::class, 'storePurchase'])->name('runs.purchases.store');
+Route::put('/training-runs/{run}/build-target', [TrainingRunController::class, 'updateBuildTarget'])->name('runs.build-target.update');
 
 Route::get('/review', [ReviewController::class, 'index'])->name('review.index');
 Route::post('/review/{candidate}', [ReviewController::class, 'resolve'])->name('review.resolve');
