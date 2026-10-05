@@ -197,14 +197,16 @@ function applyFilters(): void {
                      it findable rather than anonymous; a frame with `alt=""` and no label would be an
                      unnamed link and fail 4.1.2.
 
-                     Renders nothing when the mirror holds no file, so the row keeps its text and
-                     gains no empty box (`DESIGN.md` §4.7). -->
+                     Renders a transparent reserved cell when the mirror holds no file, so the name
+                     link stays at one x rather than sliding 56px left. Nothing is painted, so
+                     `DESIGN.md` §4.7's absence rule still holds: no frame, no grey box, no glyph. -->
                     <ArtworkSlot
                         :url="card.artworkURL"
                         alt=""
                         size="size-12"
                         :href="card.url"
                         :link-label="card.name"
+                        reserve
                     />
 
                     <a :href="card.url" class="font-semibold text-ink-strong hover:underline">{{ card.name }}</a>

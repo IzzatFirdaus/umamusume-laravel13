@@ -20,9 +20,13 @@
  *
  * The rules this owns, all from `DESIGN.md` §4.7:
  *
- *   - **Absence is a normal state, never an error state.** A null `url` renders nothing at all:
- *     no frame, no grey box, no loader, no placeholder glyph, and no anchor stranded around an
- *     absent image. This is why the guard wraps both branches rather than the `<img>` inside one.
+ *   - **Absence is a normal state, never an error state.** A null `url` renders no frame, no grey
+ *     box, no loader, no placeholder glyph, and no anchor stranded around an absent image. This is
+ *     why the guard wraps both branches rather than the `<img>` inside one. `reserve` adds a third
+ *     branch for row surfaces: an empty, transparent cell of the same size, which paints nothing
+ *     and so does not soften this rule, but keeps the row's text at one x whether or not the mirror
+ *     happens to hold the file. Without it, `DESIGN.md` §4.7's absence rule moved a label 56 to 137
+ *     px depending on disk state, which reads as a layout fault rather than as absence.
  *   - **`src` is local.** The url is the loopback `artwork.show` route, resolved server-side by
  *     `ArtworkMirror::url()`, never the asset host: §7 forbids a CDN and promises the catalog
  *     works with zero network, so a third-party host in rendered HTML would make the page depend
@@ -54,6 +58,13 @@ defineProps<{
      * already names the link it sits inside. The printed row name verbatim (`§42`, WCAG 2.5.3).
      */
     linkLabel?: string | null;
+    /**
+     * Hold the cell when the mirror holds no file, so the row's text does not move. Transparent:
+     * no fill, no border, no glyph, so §4.7's "no grey box, no placeholder" still holds and the
+     * column does not shift. Row surfaces set this; a detail header reserves nothing, because an
+     * invisible box above a heading is just a gap.
+     */
+    reserve?: boolean;
 }>();
 </script>
 
@@ -72,4 +83,6 @@ defineProps<{
         :alt="alt"
         :class="`${size} rounded-md object-cover`"
     >
+    <span v-else-if="reserve" :class="[size, 'block']" aria-hidden="true"></span>
 </template>
+

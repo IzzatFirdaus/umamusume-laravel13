@@ -120,21 +120,29 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
         <template v-else>
             <ul class="mt-6 space-y-4">
                 <li v-for="trainee in umamusumes.data" :key="trainee.id" class="rounded-md border border-rule bg-raised">
-                    <h3 class="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-3">
-                        <!-- The trainee portrait, the Inertia half of the `ADR-0021` slot, through the
-                             one component that owns the contract. The row header already prints her
-                             name beside the frame, so the image is decorative and takes `alt=""`
-                             (DESIGN.md §4.7); a screen reader reads the name once, from the text. No
-                             `href`: §45a makes the row's own name link the destination, so a second
-                             link to the same page would be a duplicate control. Renders nothing when
-                             the mirror holds no file, keeping the row text-only and box-free. -->
-                        <ArtworkSlot :url="trainee.artworkURL" alt="" size="size-12" />
-                        <a :href="`/umamusume/${trainee.slug}`" class="font-semibold text-ink-strong hover:underline">
-                            {{ trainee.name }}
-                            <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
-                                {{ trainee.name_ja }}
-                            </span>
-                        </a>
+                    <h3 class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-3">
+                        <!-- Frame and name are one group, not two siblings of a `justify-between` row.
+                             With three children that class distributed the leftover space and floated
+                             the name to the row's centre: 89px from its own portrait, and at a
+                             different x in every row (measured 411 to 447), which broke the Law of
+                             Proximity and left no scanning column on a list meant to be scanned.
+                             `reserve` holds the cell so the name starts at one x whether or not the
+                             mirror happens to hold the file.
+
+                             The header already prints her name beside the frame, so the image is
+                             decorative and takes `alt=""` (DESIGN.md §4.7); a screen reader reads the
+                             name once, from the text. No `href`: §45a makes the row's own name link
+                             the destination, so a second link to the same page would be a duplicate
+                             control. -->
+                        <span class="flex items-center gap-3">
+                            <ArtworkSlot :url="trainee.artworkURL" alt="" size="size-12" reserve />
+                            <a :href="`/umamusume/${trainee.slug}`" class="font-semibold text-ink-strong hover:underline">
+                                {{ trainee.name }}
+                                <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
+                                    {{ trainee.name_ja }}
+                                </span>
+                            </a>
+                        </span>
                         <span class="flex items-baseline gap-3 text-xs text-ink-muted">
                             <template v-if="trainee.max_rarity">
                                 <RarityChip :label="trainee.max_rarity.label" :stars="trainee.max_rarity.stars" />
@@ -149,14 +157,19 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                         <li
                             v-for="card in trainee.cards"
                             :key="card.id"
-                            class="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-2"
+                            class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-2"
                         >
                             <!-- The form's own portrait, keyed on its card id, at the `size-10` geometry
-                                 §45a records for a costume-form row. Decorative like the header frame:
-                                 this row prints the form title beside it, and the file is a trainee
-                                 portrait, so the name lives in the header, not here. -->
-                            <ArtworkSlot :url="card.artworkURL" alt="" size="size-10" />
-                            <h4 class="text-sm font-medium text-ink">{{ card.title }}</h4>
+                                 §45a records for a costume-form row. Grouped with the title for the same
+                                 reason the header is: three siblings in a `justify-between` row centre
+                                 the middle one. A `div` rather than a `span`, because this group holds an
+                                 `h4`, and flow content is not allowed inside a `span`. Decorative like
+                                 the header frame: this row prints the form title beside it, and the file
+                                 is a trainee portrait, so the name lives in the header, not here. -->
+                            <div class="flex items-center gap-3">
+                                <ArtworkSlot :url="card.artworkURL" alt="" size="size-10" reserve />
+                                <h4 class="text-sm font-medium text-ink">{{ card.title }}</h4>
+                            </div>
                             <span class="flex items-baseline gap-3 text-xs text-ink-muted">
                                 <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
                                 <span v-if="card.is_debut_form">debut form</span>

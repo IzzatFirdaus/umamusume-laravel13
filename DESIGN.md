@@ -476,6 +476,20 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   arrives and there is no layout shift for intrinsic dimensions to paper over. Recorded
   geometry, and where each is used:
 
+  **A row reserves its cell; a detail header does not.** The choice above is per surface, and
+  this is the record of it. `ArtworkSlot.vue`'s `reserve` prop renders an empty, transparent
+  cell of the same size when the mirror holds no file, so a row's label keeps one x whether or
+  not the bytes exist; nothing is painted, so the absence rule still forbids a grey box, a
+  loader and a glyph, and the cell is `aria-hidden`. The two index screens set it. The two
+  detail headers do not, because an invisible box above a heading is only a gap.
+
+  The reason is measured, not stylistic. With the slot as a bare sibling of the label inside a
+  `justify-between` row, three flex children centred the label: 89px from its own portrait, at
+  a different x in every row (411 to 447 across eight), and the label jumped 137px between a
+  mirrored and an unmirrored trainee. Grouping frame and label into one child and reserving the
+  cell puts every label at one x and the frame 12px from its name. The support-card row needed
+  the reserve alone; its label was already 8px from the frame.
+
   | Box | Surface | Click action | Source |
   |---|---|---|---|
   | `size-16` | trainee portrait on catalog detail; support thumb on support-card detail | no action | `design-2.0` §45a |
