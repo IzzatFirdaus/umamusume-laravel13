@@ -50,6 +50,7 @@ Token-efficient digest of ARCHITECTURE.md for agent context injection. If this f
 - Timezone: JP datetimes parsed Asia/Tokyo → stored UTC, source_timezone recorded; date-only stays date
 - Commands: uma:fetch {source}, uma:reparse {source} (from snapshots, zero network), uma:backup (WAL checkpoint + file copy)
 - HTTP: allowlisted hosts from config('uma.sources') ONLY (SSRF), redirects followed by the fetcher with the host allowlist re-checked per hop, per-source delay_ms/timeout_s, retry max 2 at a flat 500 ms, descriptive UA
+- Artwork: `ADR-0021` (2026-10-05), fetch half **built** 2026-10-05, display half not — `uma:fetch-art` + `ArtworkMirror` + `SourceFetcher::fetchAsset()`, asset host declared in config('uma.sources'), files in gitignored `storage/app/private/artwork/` with a sibling `manifest.json`, path derived from the id, **nothing in the database**, no snapshot of a binary. Absent file renders the text-only row (`DESIGN.md` §4.7; there is no avatar component). No live pass has been run. `uma:fetch` steps over parser-less entries. Distinct from the cut upload surface below
 
 ## API contract (/api/v1, P2)
 - GET umamusume?status=&search=&page=&pageSize= ; GET umamusume/{slug} ; GET training-runs ; GET training-runs/{id}
@@ -85,7 +86,7 @@ Token-efficient digest of ARCHITECTURE.md for agent context injection. If this f
 
 ## Phase-1 non-goals (do not build without new PRD scope)
 - Auth/multi-user; SPA; breeding engine (inheritance = 2 nullable parent FKs only); EAV; Excel; event calendar; legacy DB import; MySQL/PG; support-card **collection**; deploy paths
-- [rev 0.2 — repo #4] race simulation/predictions/snapshots; dual storage modes or browser-side authoritative data; trainee image uploads; DB-level enum columns
+- [rev 0.2 — repo #4] race simulation/predictions/snapshots; dual storage modes or browser-side authoritative data; trainee image uploads; DB-level enum columns. **Uploads stay cut**; `ADR-0021` authorizes a different object (art the tool fetches itself by id), see "Artwork" under Fetch engine above and PRD OQ-6
 - Support cards split in two, 2026-09-30. `ADR-0014` supersedes `ADR-0005` (DECLINED, owner ruling R37) and authorizes `support_cards`, `support_effects` and `deck_slots` — reference data plus the six cards a run was equipped with, per `PRD.md` **FR-A-8**, **FR-A-9**, **FR-C-6**, **US-12**. `ADR-0005`'s re-verification already exercised the cross-reference these deferral text named, on all 559 records. What stays cut is the collection: no `user_support_cards`, no level, limit break or Unique Perk state. Card **tier** labels are held for want of a current Global source, not for want of authorization; `ADR-0014` records that R75 governs race tiers and does not reach this.
 - `ADR-0008`'s `character_cards` is the **costume-card** table and still authorizes nothing in the support-card direction: `training_runs.character_card_id` names a costume, `deck_slots.support_card_id` names a training companion, and the two keys are not interchangeable (`character_cards.umamusume_id` is a local FK; `support_cards.char_id` is the source's own id as a plain column)
 

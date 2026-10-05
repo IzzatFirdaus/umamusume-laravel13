@@ -13,6 +13,7 @@ interface Card {
     unconfirmed: boolean;
     global_release_date: string | null;
     global_release_date_display: string | null;
+    artworkURL: string | null;
 }
 
 interface Trainee {
@@ -22,6 +23,7 @@ interface Trainee {
     name_ja: string | null;
     release_status_label: string;
     max_rarity: { label: string; stars: string } | null;
+    artworkURL: string | null;
     form_count: number;
     cards: Card[];
 }
@@ -118,6 +120,17 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
             <ul class="mt-6 space-y-4">
                 <li v-for="trainee in umamusumes.data" :key="trainee.id" class="rounded-md border border-rule bg-raised">
                     <h3 class="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-3">
+                        <!-- The trainee portrait, the Inertia half of the `ADR-0021` slot. The row
+                             header already prints her name beside the frame, so the image is
+                             decorative and takes `alt=""` (DESIGN.md §4.7); a screen reader reads the
+                             name once, from the text. It renders only when the mirror holds a file,
+                             so an unmirrored trainee keeps the text-only row and no grey box. -->
+                        <img
+                            v-if="trainee.artworkURL"
+                            :src="trainee.artworkURL"
+                            alt=""
+                            class="size-12 rounded-md object-cover"
+                        >
                         <a :href="`/umamusume/${trainee.slug}`" class="font-semibold text-ink-strong hover:underline">
                             {{ trainee.name }}
                             <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
@@ -140,6 +153,15 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                             :key="card.id"
                             class="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-2"
                         >
+                            <!-- The form's own portrait, keyed on its card id. Decorative like the
+                                 header frame: this row prints the form title beside it, and the file
+                                 is a trainee portrait, so the name lives in the header, not here. -->
+                            <img
+                                v-if="card.artworkURL"
+                                :src="card.artworkURL"
+                                alt=""
+                                class="size-10 rounded-md object-cover"
+                            >
                             <h4 class="text-sm font-medium text-ink">{{ card.title }}</h4>
                             <span class="flex items-baseline gap-3 text-xs text-ink-muted">
                                 <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />

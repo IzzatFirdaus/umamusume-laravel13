@@ -89,6 +89,52 @@ final class SourceFetcher
     }
 
     /**
+     * One polite GET of a file under a declared asset host, returning raw bytes and taking no snapshot.
+     *
+     * `ADR-0021`'s route: the body *is* the stored file, so snapshotting it would put the same bytes on
+     * disk twice for no reader. Everything that makes `fetch()` safe is reused unchanged, because this is
+     * the app's only other outbound request — the same `send()`, so the same per-request delay, retry
+     * ceiling, User-Agent, and re-check of every redirect hop against `allowedHosts()`. A non-2xx answers
+     * null rather than a body, which is the check that matters against a host that serves 27,150 bytes of
+     * HTML at 404.
+     *
+     * @return array{body: string, url: string}|null null when the source is not declared, the path is not
+     *                                               a plain relative one, or the request failed
+     */
+    public function fetchAsset(string $sourceKey, string $relativePath): ?array
+    {
+        /** @var array<string, mixed>|null $source */
+        $source = config("uma.sources.{$sourceKey}");
+
+        if (! is_array($source)) {
+            return null;
+        }
+
+        $base = $source['url'] ?? null;
+
+        if (! is_string($base) || $base === '' || $relativePath === '') {
+            return null;
+        }
+
+        // Built by the caller from this config value plus an integer out of a catalog column, so the guard
+        // is for the next caller rather than this one: no scheme, no host, no parent step, and never a URL
+        // read out of a fetched body (AGENTS.md §12).
+        if (preg_match('#^[a-z][a-z0-9+.-]*://#i', $relativePath) === 1 || str_contains($relativePath, '..')) {
+            Log::warning("Refused asset path '{$relativePath}' for source '{$sourceKey}'.");
+
+            return null;
+        }
+
+        return $this->send(
+            rtrim($base, '/').'/'.ltrim($relativePath, '/'),
+            [
+                'delay_ms' => (int) ($source['delay_ms'] ?? 1000),
+                'timeout_s' => (int) ($source['timeout_s'] ?? 15),
+            ],
+        );
+    }
+
+    /**
      * Where the document actually lives.
      *
      * @param  array{url?: string, manifest?: array{url: string, base: string, key: string}, delay_ms?: int, timeout_s?: int}  $sourceConfig

@@ -1460,9 +1460,17 @@ Requirements:
 * sufficient contrast
 * numerical values paired with visual indicators
 
+**Image slots** are governed by `design-2.0` §42 (alt text, reserved-box contrast, label-in-name) and §45a (per-screen placement, geometry, click action). WCAG 2.2 AA conformance for slot-bearing screens is verified by the axe pass in `docs/proposals/frontend-development-plan.md` §12, *per screen*; the law-by-law review of "recognition rather than recall" and "minimal design" sits in that plan's §13.
+
 ---
 
-# 35. Error States
+# 35. Sourced image slots
+
+Per-screen placement is `design-2.0` §45a; the Blade parity rule is `DESIGN.md` §4.7. A cell that ships no `<img>` today stays a text-only row. The four absence states (`never mirrored`, `gone upstream`, `unreadable on disk`, `not yet mirrored`) render identically — there is no broken frame, no grey box, no placeholder glyph (R-31). Skill icons are deferred until `skills.iconid` exists as a column (a migration of its own; `ADR-0021` Verification records the finding). Reduced motion is inherited from `design-2.0` §43 and from `frontend-development-plan.md` §12.2: a slot's reveal is no animation, so a fixed focal-length layout is what a screen reader and a sighted Trainer both experience.
+
+---
+
+# 36. Error States
 
 The UI must clearly handle:
 

@@ -1250,6 +1250,14 @@ Minimum requirements:
 * text alternatives for icons
 * no color-only state indicators
 
+**Image slots** follow the same contract, with three additional clauses:
+
+* **Alt text** (WCAG 1.1.1 Non-text Content). The client display name from `lang/en/uma.php` and nothing else, never a fabricated descriptor. Where the same name is already printed beside the slot, the image takes `alt=""` so a screen reader does not read the name twice; the slot is decorative in that position.
+* **Reserved-box contrast** (WCAG 1.4.11 Non-text Contrast). An absent slot's placeholder outline carries a 3:1 border against its parent surface, so the empty-state geometry is visible even without the file.
+* **Label in name** (WCAG 2.5.3). A clickable slot's `aria-label` matches the printed trainee or support name verbatim, so a screen reader finds the control by the same word the row already prints.
+
+The trust-row for images is bounded: a mirrored file is **Confirmed**; the four absence states (`never mirrored`, `gone upstream`, `unreadable on disk`, `not yet mirrored`) collapse to a single **Unknown** visual — the same text-only row the page already renders — and **Estimated** never applies (no upscaled thumbnail, no fake preview). The UX laws the proposal's §1 calls for apply in three named ways here: **Nielsen heuristic 6** — recognition rather than recall — is the slot's only justification; **Nielsen heuristic 8 + R-31** — minimal design — cut a slot the row's label already carries; **Don Norman's signifier** — the slot indexes the row's identity rather than claiming more information than the row does. **Fitts's Law** keeps the slot as a passive cell next to the existing row link: the click target stays the row's `h-11` link, not the image. Geometry follows §45a below.
+
 ---
 
 # 43. Animation
@@ -1327,6 +1335,24 @@ Avoid:
 * decorative pie charts
 * excessive radar charts
 * charts where a number would be clearer
+
+## 45a. Sourced image slots
+
+`ADR-0021` (`docs/adr/0021-sourced-character-artwork.md`, 2026-10-05) authorizes a local artwork mirror fetched by id from an allowlisted asset host. The placement decision is the owner's per `PRD.md` OQ-6; when the answer is "yes":
+
+| Screen | Slot kind | Click action | Geometry |
+|---|---|---|---|
+| Catalog index, trainee card header | portrait (`card_portrait` 256) | navigates to trainee detail | fixed `size-12` leading cell |
+| Catalog index, costume-form row | portrait (`card_portrait` 256) | navigates to trainee detail | fixed `size-10` in the row header |
+| Catalog detail, Identity | portrait (`card_portrait` 256, 512 if mirrored) | no action | fixed `size-16` aligned to the name block |
+| Support-card index, card row | thumbnail (`full/small`) | navigates to support-card detail | fixed `size-12` leading cell |
+| Support-card detail, header | thumbnail (`full/small`) | no action | fixed `size-16` |
+| Run Create / Legacy Select row | portrait + thumbnail | row's form select | fixed `size-10` |
+| Skill rows | **deferred** — `skills.iconid` has no column (`ADR-0021` Verification) | n/a | n/a |
+
+A click on any clickable slot terminates at the same destination as the row's existing link, satisfying WCAG 2.5.3 because `aria-label` is the row's printed name verbatim. Absence renders the text-only row that the screen ships today — no broken frame, no grey box, no placeholder glyph (R-31). At narrow viewports the slot cell is **omitted**, not reflowed (`WCAG 1.4.10 Reflow` holds without a second layout path). Reduced motion is inherited from §43; a slot either paints or it does not.
+
+**Shipped-state note, 2026-10-05 (does not change the table above).** The table is the placement decision and it stands. What the Blade implementation found is narrower and belongs to the surfaces that exist rather than to the spec: the catalog index and the support-card pair placed their slots as written, and the **Run Create row cannot host one as built** — that screen's trainee picker is a native `<select>` whose `<option>` content model is text, plus a client-rendered combobox listbox, so there is no row to put a frame in, and `<img>` inside `<option>` is not rendered by the platform. Wiring the combobox listbox is a live option and is deferred, not refused. Two further gaps this document's rules imply but do not resolve: the catalog index resolves a trainee's portrait from her top-rarity form while the detail page resolves it from the active or first form, so a multi-form trainee can show two portraits across the two screens; and the two Blade components take a single `decorative` flag that blanks the image `alt` and the anchor `aria-label` together, which cannot express the combination this section's own alt clause (decorative image where the name prints beside it) and label-in-name clause (a named, clickable slot) both require at once. `DESIGN.md` §4.7 records the geometry values this section names, and records the second gap as known.
 
 ---
 

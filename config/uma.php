@@ -313,6 +313,43 @@ return [
             'timezone' => 'Asia/Tokyo',
             'seed_file' => 'support_effects.ca447e53.json',
         ],
+
+        /*
+         * An ASSET host, not a document source: no `parser`, no `seed_file`, no manifest. That
+         * missing `parser` is the whole discriminator, the same one SourceDocumentSeeder:56
+         * already uses, so `uma:fetch` steps over this entry and `uma:fetch-art` is the only
+         * reader of it (`ADR-0021`, accepted 2026-10-05, which authorizes the layer).
+         *
+         * It lives in `uma.sources` rather than in a key of its own because ARCHITECTURE §8's
+         * rule is that every host this tool requests is one this array names, and
+         * SourceFetcher::allowedHosts() derives that set from these entries. An asset host
+         * declared anywhere else would either break the rule or break the redirect check.
+         *
+         * `url` is a directory prefix, not a document. A requested path is this base plus one
+         * of the `paths` shapes with `{id}` replaced by an integer read from a catalog column
+         * (`character_cards.card_id`, `support_cards.support_id`) and never by a request value.
+         * Each shape was resolved by hand on 2026-10-05 and is recorded, with the sizes it
+         * answers at, in `ADR-0021`'s Context table.
+         *
+         * Politeness, stated because there is no policy to read: `media.gametora.com` serves no
+         * robots.txt at all (it answers 404), and `gametora.com/robots.txt` disallows only
+         * /404, /500, /patron-zone, /cdn-cgi/, /loc/ and one event landing page, which covers
+         * none of these paths. With no publisher rule to obey the bound is this tool's own: one
+         * request per file with `delay_ms` in front of each, `uma.fetch.retry_times` at a flat
+         * 500 ms, files already on disk skipped unless `--refetch`, and never a scheduled or
+         * repeated run. A miss answers 404 with 27,150 bytes of HTML, so `SourceFetcher`'s
+         * status check is what decides whether bytes are usable; nothing here treats a
+         * non-empty body as success.
+         */
+        'gametora-artwork' => [
+            'url' => 'https://media.gametora.com/umamusume/',
+            'delay_ms' => 1000,
+            'timeout_s' => 20,
+            'paths' => [
+                'card_portrait' => 'characters/portrait/trainee/256/{id}.png',
+                'support_thumb' => 'supports/full/small/{id}.png',
+            ],
+        ],
     ],
 
 ];

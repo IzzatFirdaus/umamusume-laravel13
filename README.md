@@ -100,13 +100,16 @@ shared database stays untouched, so the before-and-after fingerprint comparison 
 
 ## Fetch Engine
 
-Seven sources are declared in `config/uma.php`: `gametora-characters`, `gametora-character-cards`, `gametora-race-catalog`, `gametora-skills`, `gametora-character-profiles`, `gametora-support-cards`, `gametora-support-effects`. Four of them resolve the document URL through the publisher's manifest first (two requests per fetch), keeping the pinned URL as an offline fallback; KI-24 measured that a stale pinned hash answers `200` with the superseded document, so manifest resolution is the freshness defense.
+Eight sources are declared in `config/uma.php`: `gametora-characters`, `gametora-character-cards`, `gametora-race-catalog`, `gametora-skills`, `gametora-character-profiles`, `gametora-support-cards`, `gametora-support-effects`, `gametora-artwork`. Seven have a parser and a document to parse. The eighth is an **asset host** (`ADR-0021`): it declares directory shapes rather than a document, has no parser and no seed file, `uma:fetch` steps over it, and `uma:fetch-art` is its only reader. It lives in this array so the SSRF allowlist covers the host every request goes to, rather than leaving a second place a URL could hide.
+
+Four of the seven resolve the document URL through the publisher's manifest first (two requests per fetch), keeping the pinned URL as an offline fallback; KI-24 measured that a stale pinned hash answers `200` with the superseded document, so manifest resolution is the freshness defense.
 
 Pipeline stages are isolated: `fetch -> snapshot -> parse -> normalize -> match -> promote | review`. `SourceFetcher` is the only outbound HTTP path and only ever visits hosts in the config allowlist (SSRF floor). Unchanged snapshot hashes short-circuit a run; promotion upserts engine-owned columns inside a transaction and skips `is_manual` rows.
 
 ```bash
 php artisan uma:fetch [source]            # omit source to fetch all declared sources
 php artisan uma:reparse <source>          # replay parse->match->promote from stored snapshots, zero network
+php artisan uma:fetch-art [--kind=…]      # mirror id-addressable artwork into storage/app/private/artwork (ADR-0021); manual only
 php artisan uma:import:support-cards      # import the two support datasets from committed bodies, zero network
 php artisan uma:backup [path]             # WAL checkpoint + consistent single-file copy (NFR-5)
 ```
@@ -169,6 +172,7 @@ Tests use Pest 4, feature-first, with a global `TestCase` + `RefreshDatabase` bi
 | Build assets | `npm run build` |
 | Fresh DB + offline catalog data | `php artisan migrate:fresh --seed` |
 | Fetch / replay / backup | `php artisan uma:fetch`, `uma:reparse <source>`, `uma:backup` |
+| Mirror catalog artwork | `php artisan uma:fetch-art` (options `--kind`, `--dry-run`, `--refetch`); manual only, `ADR-0021` |
 | Route list | `php artisan route:list` |
 | Backup before experimenting | `php artisan uma:backup` (writes to `storage/app/backups/`) |
 
@@ -235,7 +239,7 @@ tools/                    lore.php (lore gate), gate.py (design-artifact gate), 
 | `AGENTS.md` | Agent roles, escalation paths, practical build notes |
 | `CLAUDE.md` | Coding rules for assistants |
 | `KNOWN-ISSUES.md` | Pointer; defect register KI-01..KI-58 under `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. New entries append to the root file. |
-| `docs/adr/README.md` | ADR index (`ADR-0001` to `ADR-0017`) with the errata convention |
+| `docs/adr/README.md` | ADR index (`ADR-0001` to `ADR-0021`) with the errata convention |
 | `docs/UMAMUSUME_REFERENCE.md` | Source-cited mechanics reference; live-ops claims are dated snapshots |
 | `docs/scenarios/` | Per-scenario playing guides |
 | `.ai/rules/index.md` | Path-scoped repo rules (style, Eloquent, testing) |
@@ -286,7 +290,7 @@ Evidence-backed current state, distinct from the PRD non-goals in §6:
 
 - Next-race readiness is not a shipped judgement: fatigue data is recorded (`x-race-fatigue-chip`) but the threshold is an open question (`ADR-0016`).
 - Support cards are reference data and per-run deck only; card collection state (ownership, levels, limit breaks) is cut (`ADR-0014`). Card tier labels are held for want of a Global source.
-- Card images are deferred (`ADR-0012`); no trainee image uploads (PRD §6.13).
+- Sourced artwork is authorized and **not built** (`ADR-0021`, 2026-10-05): the tool may fetch id-addressable game art from an allowlisted host into a gitignored local mirror; nothing renders a picture yet and no command exists. `ADR-0012` Decision 2's earlier "no card images" is superseded for that object only, by `ADR-0021`. There are still no trainee image uploads (PRD §6.13), and which screens get a slot is open (PRD OQ-6).
 - The GameTora robots.txt / rate-limit verification is formally outstanding (PRD OQ-2); sources are bounded by config politeness settings instead.
 - Fetch scheduling is manual; the scheduler default is open (PRD OQ-3).
 - Aptitude letters and per-scenario caps are engine-owned facts (`ADR-0004`); growth rates and base stats are not implemented (PRD OQ-4 scope).
