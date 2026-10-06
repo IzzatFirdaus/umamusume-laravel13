@@ -32,10 +32,10 @@ code" reaches the rules one hop later than before and reaches all of them.
 > contradictions against the tree today, and both sections are ones an agent reads first: the ADR
 > index and the file map.
 >
-> ##### Drift measured on 2026-09-30 at snapshot `c1e14a3`, by the documentation inventory:
+> #### Drift measured on 2026-09-30 at snapshot `c1e14a3`, by the documentation inventory
 >
 > | Section | What it says | What the tree says |
-> |---|---|---|
+> | --- | --- | --- |
 > | 10. ADR Index | lists 0001 to 0006 | 13 ADRs are tracked: 0001 to 0013. Seven are missing, including ADR-0007, which narrows C-7, and ADR-0012, which superseded ADR-0013 |
 > | 10. ADR-0005 row | "Proposed, not built" | **DECLINED for Phase 1**, owner ruling R37, 2026-09-28, in `docs/adr/0005-support-card-entities.md`'s own Status line |
 > | 10. ADR-0002 row | "Validation bound widened to 0..2000" | Accepted as a decision and **not implemented**: `app/Http/Requests/StoreTurnEntryRequest.php:49-50` still validates `between:0,1200` |
@@ -64,14 +64,15 @@ code" reaches the rules one hop later than before and reaches all of them.
 
 ### 1. Product Identity & Scope
 
-| Field | Value |
-|-------|-------|
-| **Product name** | Trainer Desk (owner decision 2026-09-27, closes OQ-1) |
-| **Target audience** | Trainers of the Global English version of *Umamusume Pretty Derby* |
-| **Architecture** | Local-only Laravel 13 tool, SQLite (WAL + busy_timeout), no auth, no SPA, no multi-user |
-| **Phase 1 exit** | US-1..US-3 work end-to-end; migrations/factories/seeders clean; zero lore hits; PHPStan L6 clean; Pint clean |
+| Field                 | Value                                                                                                          |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Product name**      | Trainer Desk (owner decision 2026-09-27, closes OQ-1)                                                          |
+| **Target audience**   | Trainers of the Global English version of *Umamusume Pretty Derby*                                             |
+| **Architecture**      | Local-only Laravel 13 tool, SQLite (WAL + busy_timeout), no auth, no SPA, no multi-user                        |
+| **Phase 1 exit**      | US-1..US-3 work end-to-end; migrations/factories/seeders clean; zero lore hits; PHPStan L6 clean; Pint clean   |
 
 **Non-goals (PRD §6 + Pre-Mortem §4 — do not build):**
+
 1. Auth/multi-user (replaces Breeze/Sanctum)
 2. SPA frontend (replaces Vue 3 + Pinia)
 3. Breeding/pairing engine (replaces sire×dam system — also a lore violation) <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
@@ -93,12 +94,15 @@ code" reaches the rules one hop later than before and reaches all of them.
 **Characters are Umamusume: a humanoid race of girls. They are never animals.**
 
 #### 2.1 Banned Vocabulary (case-insensitive grep)
-```
+
+```text
 horse, horses, sire, dam, mare, foal, 🏇 <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
-```
+```text
+
 Plus animal framing: `stallion`, `colt`, `filly`, `gelding`, `equine`, `pony`, `thoroughbred`, `stable` (as noun for character container), `breeding`, `pairing`, `bloodline`, `pedigree`, `lineage` (of characters), `hoof`, `mane`, `tail`, `withers`, `muzzle`, `jockey`, `rider`, `saddle`, `tack`, `reins`, `bit`, `paddock`, `herd`, `flock`, `pack`, "your horse", "your mount", "the animal", "the girl and her horse". <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 
 #### 2.2 Context-Allowed Senses (grep hits here are NOT violations)
+
 - `dam` inside `damaged`, `demand`, `command` <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 - `sire` inside `desired`, `surprise`, `Red Desire` (Umamusume name) <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
 - `stable` as adjective: "stable growth", "keep the build stable" <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
@@ -108,6 +112,7 @@ Plus animal framing: `stallion`, `colt`, `filly`, `gelding`, `equine`, `pony`, `
 - `docs/PRE-MORTEM.md` legacy quotations (exempt once each under root C-4)
 
 #### 2.3 Required Forms
+
 - Race name: **Umamusume** (capital U at sentence start or as proper race name; lowercase `umamusume` mid-sentence)
 - Singular = plural: "one umamusume, three umamusume" — never "umamusumes"
 - Training context: **Trainee Umamusume**
@@ -116,7 +121,9 @@ Plus animal framing: `stallion`, `colt`, `filly`, `gelding`, `equine`, `pony`, `
 - Sentence case in all UI copy; no decorative emoji in labels/headings/buttons
 
 #### 2.4 Exemptions (Identifier & Mechanics — CLAUDE.md §25–26, CONSTRAINTS.md C-4)
+
 The banned list governs **player-facing copy and character framing only**. It does NOT apply to:
+
 - Dataset/export keys: `intelligence` (for Wit), `friend` (for Pal), `scenarios.json` field names
 - Localisation-mapping strings quoted as client evidence: "Intelligence Limit Up", "Runner's Tricks ◎"
 - Distinct mechanics sharing a word: "Bad Conditions", the "condition correction" in the failure formula, a "condition" item effect — these are mechanics, not Mood synonyms
@@ -126,33 +133,34 @@ The banned list governs **player-facing copy and character framing only**. It do
 
 ### 3. Official Global Terminology (UI Labels) — CONSTRAINTS.md §4, UMAMUSUME_REFERENCE.md §6
 
-| Concept | Required Label | Banned Alternatives |
-|---------|---------------|---------------------|
-| Five stats | Speed, Stamina, Power, Guts, **Wit** | Intelligence (export key, not client label) |
-| Skill currency | **Skill Points**, abbreviated **SP** | Skill Pt, Skill Pts (as UI label) |
-| Running styles | Front Runner, Pace Chaser, Late Surger, End Closer | Runner, Leader, Betweener, Tracker, Chaser |
-| Style abbreviations | Front, Pace, Late, End (aptitude table only) | Full names inside dense aptitude grid |
-| Distances | Sprint, Mile, Medium, Long | Short, Middle, Staying |
-| Surfaces | Turf, Dirt | Grass, Sand |
-| Support card types | Speed, Stamina, Power, Guts, Wit, **Pal** [uncaptured], Group | Friend (for 友人) |
-| Gacha | **Scouts** | Gacha, Pickup, Banner |
-| Pull currency | Carats | Jewels, Gems |
-| Character being trained | **Trainee Umamusume** | Trainee Uma Musume |
-| Finished character | **Veteran Umamusume** | Hall of Fame, graduated |
-| Inheritance unit | **Spark** | Factor (JP 因子 wording) |
-| Inheritance system | **Inspiration** | Inheritance (JP 継承 word) |
-| Ancestors picked for run | **Legacies** | Parents, grandparents, bloodline | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
-| Energy | Energy | Stamina for the gauge (collides with stat) |
-| Mood | Mood, with five state words | Motivation (JP guide gloss), **Condition** |
-| Scenario names | Ura Finale, Unity Cup, Brighter Together Our Grand Concert; **Trackblazer** or Twinkle Star Climax for the third | Make a new track!!, Climax bare |
-| Rest action | Rest | Break, Vacation |
-| Bond gauge | Bond | Friendship gauge, trust |
-| Friendship training | Friendship Training, Friendship Bonus | Rainbow training |
-| Hint discount | Hint Lvl N, NN% OFF | Hint level N discount |
-| Skill acquisition states | **Suggested**, **Acquired**, **Skipped** (SkillAcquisition enum) | Planned/Used/Ignored, Proposed |
-| Run states | **Active**, **Completed**, **Retired** (RunStatus enum) | Ongoing/Finished/Archived |
+| Concept                  | Required Label                                                                                                   | Banned Alternatives                         |                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------- |
+| Five stats               | Speed, Stamina, Power, Guts, **Wit**                                                                             | Intelligence (export key, not client label) |                                                           |
+| Skill currency           | **Skill Points**, abbreviated **SP**                                                                             | Skill Pt, Skill Pts (as UI label)           |                                                           |
+| Running styles           | Front Runner, Pace Chaser, Late Surger, End Closer                                                               | Runner, Leader, Betweener, Tracker, Chaser  |                                                           |
+| Style abbreviations      | Front, Pace, Late, End (aptitude table only)                                                                     | Full names inside dense aptitude grid       |                                                           |
+| Distances                | Sprint, Mile, Medium, Long                                                                                       | Short, Middle, Staying                      |                                                           |
+| Surfaces                 | Turf, Dirt                                                                                                       | Grass, Sand                                 |                                                           |
+| Support card types       | Speed, Stamina, Power, Guts, Wit, **Pal** [uncaptured], Group                                                    | Friend (for 友人)                           |                                                           |
+| Gacha                    | **Scouts**                                                                                                       | Gacha, Pickup, Banner                       |                                                           |
+| Pull currency            | Carats                                                                                                           | Jewels, Gems                                |                                                           |
+| Character being trained  | **Trainee Umamusume**                                                                                            | Trainee Uma Musume                          |                                                           |
+| Finished character       | **Veteran Umamusume**                                                                                            | Hall of Fame, graduated                     |                                                           |
+| Inheritance unit         | **Spark**                                                                                                        | Factor (JP 因子 wording)                    |                                                           |
+| Inheritance system       | **Inspiration**                                                                                                  | Inheritance (JP 継承 word)                  |                                                           |
+| Ancestors picked for run | **Legacies**                                                                                                     | Parents, grandparents, bloodline            | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 --> |
+| Energy                   | Energy                                                                                                           | Stamina for the gauge (collides with stat)  |                                                           |
+| Mood                     | Mood, with five state words                                                                                      | Motivation (JP guide gloss), **Condition**  |                                                           |
+| Scenario names           | Ura Finale, Unity Cup, Brighter Together Our Grand Concert; **Trackblazer** or Twinkle Star Climax for the third | Make a new track!!, Climax bare             |                                                           |
+| Rest action              | Rest                                                                                                             | Break, Vacation                             |                                                           |
+| Bond gauge               | Bond                                                                                                             | Friendship gauge, trust                     |                                                           |
+| Friendship training      | Friendship Training, Friendship Bonus                                                                            | Rainbow training                            |                                                           |
+| Hint discount            | Hint Lvl N, NN% OFF                                                                                              | Hint level N discount                       |                                                           |
+| Skill acquisition states | **Suggested**, **Acquired**, **Skipped** (SkillAcquisition enum)                                                 | Planned/Used/Ignored, Proposed              |                                                           |
+| Run states               | **Active**, **Completed**, **Retired** (RunStatus enum)                                                          | Ongoing/Finished/Archived                   |                                                           |
 
 #### 3.1 Friend / Pal / Friends Distinction — **CLARIFICATION APPLIED**
+
 - **`Pal`** — the sixth support card type (友人), used in UI labels and code. The Global client's own label for this type has **not been captured** (`[uncaptured]` in CONSTRAINTS.md); `Pal` is Game8 English's word. Do not ship it as though the client said it.
 - **`Friend`** — the export key for the Pal type in GameTora data (`support-cards.json` `type` field). This is a dataset identifier, not UI copy.
 - **`Friends`** — the raw client string for the support card slot label in the deck UI (e.g., "Friends" slot). **Preserve raw client strings faithfully in captures.** Do not overwrite faithful captures with wiki labels.
@@ -160,6 +168,7 @@ The banned list governs **player-facing copy and character framing only**. It do
 - **Never** use "Friend" as a UI label for the 友人 support card type.
 
 #### 3.2 Condition / Skill Pt — **CLARIFICATION APPLIED**
+
 - The bans on **"Condition"** (for Mood) and **"Skill Pt"** (for Skill Points) apply **strictly to prose and UI labels**.
 - They do **not** apply to:
   - Committed schema columns: `turn_entries.condition` (free-text notes), `training_runs.condition` if it exists
@@ -172,14 +181,15 @@ The banned list governs **player-facing copy and character framing only**. It do
 
 The four `[Global]` scenarios, in order, with their stat caps (base 1200 + bonus) and hard caps:
 
-| # | Scenario (Global) | Speed | Stamina | Power | Guts | Wit | Hard Cap | Status |
-|---|-------------------|-------|---------|-------|------|-----|----------|--------|
-| 1 | URA Finale | 1400 | 1400 | 1400 | 1400 | 1400 | 2000 | Active |
-| 2 | Unity Cup | 1300 | 1300 | 1300 | 1300 | 1800 | 2000 | Active |
-| 3 | **Trackblazer** (Twinkle Star Climax) | 1200 | **1900** | 1200 | 1200 | 1500 | 2000 | Active |
-| 4 | Our Grand Concert | **1600** | 1300 | 1300 | 1500 | 1300 | 2000 | Known-Gap Stub |
+| #     | Scenario (Global)                       | Speed      | Stamina     | Power     | Guts     | Wit     | Hard Cap     | Status           |
+| ----- | --------------------------------------- | ---------- | ----------- | --------- | -------- | ------- | ------------ | ---------------- |
+| 1     | URA Finale                              | 1400       | 1400        | 1400      | 1400     | 1400    | 2000         | Active           |
+| 2     | Unity Cup                               | 1300       | 1300        | 1300      | 1300     | 1800    | 2000         | Active           |
+| 3     | **Trackblazer** (Twinkle Star Climax)   | 1200       | **1900**    | 1200      | 1200     | 1500    | 2000         | Active           |
+| 4     | Our Grand Concert                       | **1600**   | 1300        | 1300      | 1500     | 1300    | 2000         | Known-Gap Stub   |
 
 #### 4.1 Supersedence Rules (applied to all scenario files)
+
 - **Active** files are the current authoritative reference for mechanics numbers.
 - **Superseded** files preserve pre-release or pre-rework snapshots; their mechanics numbers are stale — read the superseding file instead.
 - **Known-Gap Stub** files are boundary markers recording sourced facts only; no mechanics are inferred. Per CONSTRAINTS.md D-165, no scenario-specific chrome may be invented from assumption.
@@ -187,6 +197,7 @@ The four `[Global]` scenarios, in order, with their stat caps (base 1200 + bonus
 - **`08-grand-masters-jp-only.md`** is `[JP-Only]` reference material. Per AGENTS.md and owner ruling: **must not be imported into app data, config, or UI copy until a Global release date exists.**
 
 #### 4.2 Speed Ceiling Conflict — **CORRECTION APPLIED**
+
 - **2000** is the hard cap (`hard_cap`) for all four `[Global]` scenarios (URA, Unity Cup, Trackblazer, Our Grand Concert).
 - **2100** does not appear in any current Global scenario. It was a misreading; the highest Speed ceiling on Global is **1600** (Our Grand Concert). The `hard_cap` of 2000 is 400 above that.
 - Two `[JP]`-only future scenarios (Beyond Dreams / らっしゃい！トレセン軒！) carry `hard_caps = 2500` (and 9999/99999 sixth element, meaning unverified). Nothing in the current Global set approaches 2500.
@@ -197,13 +208,13 @@ The four `[Global]` scenarios, in order, with their stat caps (base 1200 + bonus
 
 Per `UMAMUSUME_REFERENCE.md` source registry (Section 8, preamble):
 
-| Tier | Meaning | Examples |
-|------|---------|----------|
-| **[S]** | Official Cygames | Umamusume JP/Global official portals, news, character index |
-| **[A]** | Major community wiki with editorial process | Kamigame JP, GameWith JP, Game8 EN/JP, Umamusume Wiki (MediaWiki) |
-| **[B]** | Database or tool site | GameTora data export |
-| **[C]** | Community post requiring corroboration | r/UmaMusume banner megathreads |
-| **[D]** | Rumor / unverified | Datamine-only claims |
+| Tier      | Meaning                                       | Examples                                                            |
+| --------- | --------------------------------------------- | ------------------------------------------------------------------- |
+| **[S]**   | Official Cygames                              | Umamusume JP/Global official portals, news, character index         |
+| **[A]**   | Major community wiki with editorial process   | Kamigame JP, GameWith JP, Game8 EN/JP, Umamusume Wiki (MediaWiki)   |
+| **[B]**   | Database or tool site                         | GameTora data export                                                |
+| **[C]**   | Community post requiring corroboration        | r/UmaMusume banner megathreads                                      |
+| **[D]**   | Rumor / unverified                            | Datamine-only claims                                                |
 
 - Every fact in `UMAMUSUME_REFERENCE.md` carries a tier citation.
 - `[Global]` official site is Tier S; `[Global]` community guides (Game8 EN) are Tier A.
@@ -214,6 +225,7 @@ Per `UMAMUSUME_REFERENCE.md` source registry (Section 8, preamble):
 ### 6. Skill Registry — **SKILL.md POINTER CORRECTED**
 
 The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
+
 - `SKILL.md` is a human-readable summary; the machine-readable registry is `skills.json`.
 - Agents MUST read `skills.json` via the `using-agent-skills` skill (§1.2, §1.4.4 of that skill) to discover and invoke skills.
 - Local project skills at `.agents/skills/` take precedence over global installs when both exist.
@@ -223,15 +235,18 @@ The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
 ### 7. Data-Fetching Engine (JP ↔ Global Cross-Reference)
 
 #### 7.1 Pipeline Stages (ARCHITECTURE.md §5, FR-B)
+
 `fetch` → `snapshot` (raw body to disk, hashed) → `parse` (per-source, isolated) → `normalize` (NFKD match_key) → `match` (Exact/Alias/Fuzzy/None) → `promote` | `review`
 
 #### 7.2 Match Tiers
+
 - **Exact** (`match_key` equality) → auto-promote
 - **Alias** (alias hit) → auto-promote
 - **Fuzzy** (Levenshtein ≥ threshold, default 85%) → `match_candidates` review queue
 - **None** → `match_candidates` review queue
 
 #### 7.3 Invariants
+
 - `is_manual` rows are **immutable to the engine** (FR-B-4, PRD US-8)
 - Every engine-owned fact carries provenance: `data_sources` row with `url`, `fetched_at`, `snapshot_path`, `confidence`, `source_timezone` (FR-A-4)
 - A fact without provenance is **deleted, not stored** (Data Engineer rules)
@@ -244,17 +259,20 @@ The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
 ### 8. Training-Run Domain (Planner — FR-C, US-3, US-4)
 
 #### 8.1 Schema (ARCHITECTURE.md §3)
+
 - `training_runs`: `umamusume_id`, `scenario?`, `status` (Active|Completed|Retired), `inheritance_parent_a_id?`, `inheritance_parent_b_id?`, `notes?`
 - `turn_entries`: `training_run_id`, `turn` (unique per run), `speed/stamina/power/guts/wit` (0..2000), `sp?`, `condition?` (free-text notes)
 - `run_skills` pivot: `status` (Suggested|Acquired|Skipped), `turn_acquired?` — **Suggested = planned pre-run**
 
 #### 8.2 Deterministic Math (Planner Rules 4, 5)
+
 - All run math is deterministic over Trainer-entered `turn_entries` — no randomness, no simulation, no speculative prediction
 - Every computed number must be explainable from the entered turns
 - Stat bounds: **0..2000** per stat (per scenario's `hard_cap`), turn ≥ 1 (StoreTurnEntryRequest, ADR-0002 Option B accepted)
 - The 1,200 halved-gains line and the scenario ceiling are **two visible, differently-drawn markers** (ADR-0002 amendment, DESIGN.md §6.5)
 
 #### 8.3 Timezone Correctness (Planner Rule 3, US-7)
+
 - Store UTC; parse JP-source datetimes as `Asia/Tokyo`; record `source_timezone`
 - Date-only stays `date`; display via `config('uma.display_timezone')`
 - Any date-arithmetic change requires a test with `freezeTime()`
@@ -263,19 +281,20 @@ The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
 
 ### 9. Quality Bar (CONSTRAINTS.md) — Verification Sequence
 
-| # | Dimension | Threshold | Command |
-|---|-----------|-----------|---------|
-| C-1 | Tests | All Pest tests pass; every behavior change ships a test | `php artisan test --compact` |
-| C-2 | Static analysis | PHPStan level 6 (Larastan), zero errors | `vendor/bin/phpstan analyse --no-progress` |
-| C-3 | Formatting | Pint clean | `vendor/bin/pint --dirty --format agent` then `vendor/bin/pint --test --format agent` |
-| C-4 | Lore | Zero unexplained hits of banned patterns | `make lore` |
-| C-5 | Migrations | Fresh migrate + seed succeeds; every migration has working `down()` | `php artisan migrate:fresh --seed` |
-| C-6 | Performance | Catalog index < 200 ms at ~1k Umamusume / ~2k skills | Manual benchmark per PRD §8 |
-| C-7 | UI states | Every data view renders empty, loading/refresh, error | Review checklist |
-| C-8 | Dependencies | No new package without approval; `composer audit` / `npm audit` no critical/high | `composer audit`; `npm audit --omit=dev` |
-| C-9 | TypeScript | Zero errors from `tsc --noEmit` (`strict: true`, `noEmit: true`) | `npm run typecheck` |
+| #     | Dimension         | Threshold                                                                          | Command                                                                                 |
+| ----- | ----------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| C-1   | Tests             | All Pest tests pass; every behavior change ships a test                            | `php artisan test --compact`                                                            |
+| C-2   | Static analysis   | PHPStan level 6 (Larastan), zero errors                                            | `vendor/bin/phpstan analyse --no-progress`                                              |
+| C-3   | Formatting        | Pint clean                                                                         | `vendor/bin/pint --dirty --format agent` then `vendor/bin/pint --test --format agent`   |
+| C-4   | Lore              | Zero unexplained hits of banned patterns                                           | `make lore`                                                                             |
+| C-5   | Migrations        | Fresh migrate + seed succeeds; every migration has working `down()`                | `php artisan migrate:fresh --seed`                                                      |
+| C-6   | Performance       | Catalog index < 200 ms at ~1k Umamusume / ~2k skills                               | Manual benchmark per PRD §8                                                             |
+| C-7   | UI states         | Every data view renders empty, loading/refresh, error                              | Review checklist                                                                        |
+| C-8   | Dependencies      | No new package without approval; `composer audit` / `npm audit` no critical/high   | `composer audit`; `npm audit --omit=dev`                                                |
+| C-9   | TypeScript        | Zero errors from `tsc --noEmit` (`strict: true`, `noEmit: true`)                   | `npm run typecheck`                                                                     |
 
 #### 9.1 Floor (Never, in Any Change)
+
 - No new suppressions: `@phpstan-ignore`, `@phpstan-` escapes, `eslint-disable`, `@ts-ignore`, `# noqa`
 - No stub bodies: `throw new \Exception('not implemented')`, empty `catch {}`, TODO placeholders
 - No deleted or skipped tests without human approval and reason in commit message
@@ -285,6 +304,7 @@ The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
 - No business logic in controllers; no inline `$request->validate()` (CLAUDE.md)
 
 #### 9.2 Verification Sequence Before Hand-off
+
 1. `php artisan migrate:fresh --seed`
 2. `php artisan test --compact` (narrow first, full at hand-off)
 3. `vendor/bin/pint --dirty --format agent`
@@ -296,45 +316,45 @@ The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
 
 ### 10. ADR Index (Binding Decisions)
 
-| ADR | Title | Status | Summary |
-|-----|-------|--------|---------|
-| 0001 | Lift no-prediction non-goal for energy guidance | Accepted | Energy guidance permitted; race outcomes still prohibited |
-| 0002 | Scenario-aware stat caps exceed validation bound | **Accepted (Option B)** | Validation bound widened to **0..2000** sourced from `scenarios.hard_cap`; 1200 halved-gains line + scenario ceiling remain two visible UI markers |
-| 0003 | Consolidated Phase 1 schema expansion | **Accepted** | Adds Energy, Fans, Mood, TurnEvent, ScenarioSlots, RaceEntry; US-10 promoted to P1; stat bound reads from scenario's `hard_cap` |
-| 0004 | Aptitude & scenario cap reference data | **Accepted** | Stores 10 aptitude letters on `umamusume`; creates `scenarios` table with 5 caps + `hard_cap` + provenance; closes OQ-4 for these domains; `GametoraScenarioParser` implements `ScenarioSourceParser` |
-| 0005 | Support card entities | Proposed, not built | Schema shapes specified; not part of design until owner settles scope (PRD §6.9) |
-| 0006 | Design authority & theme default | Accepted | Dark-first tactical-athletic system; theme preference in SQLite not localStorage |
+| ADR     | Title                                              | Status                    | Summary                                                                                                                                                                                                 |
+| ------- | -------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0001    | Lift no-prediction non-goal for energy guidance    | Accepted                  | Energy guidance permitted; race outcomes still prohibited                                                                                                                                               |
+| 0002    | Scenario-aware stat caps exceed validation bound   | **Accepted (Option B)**   | Validation bound widened to **0..2000** sourced from `scenarios.hard_cap`; 1200 halved-gains line + scenario ceiling remain two visible UI markers                                                      |
+| 0003    | Consolidated Phase 1 schema expansion              | **Accepted**              | Adds Energy, Fans, Mood, TurnEvent, ScenarioSlots, RaceEntry; US-10 promoted to P1; stat bound reads from scenario's `hard_cap`                                                                         |
+| 0004    | Aptitude & scenario cap reference data             | **Accepted**              | Stores 10 aptitude letters on `umamusume`; creates `scenarios` table with 5 caps + `hard_cap` + provenance; closes OQ-4 for these domains; `GametoraScenarioParser` implements `ScenarioSourceParser`   |
+| 0005    | Support card entities                              | Proposed, not built       | Schema shapes specified; not part of design until owner settles scope (PRD §6.9)                                                                                                                        |
+| 0006    | Design authority & theme default                   | Accepted                  | Dark-first tactical-athletic system; theme preference in SQLite not localStorage                                                                                                                        |
 
 ---
 
 ### 11. Open Questions (PRD §7)
 
-| ID | Question | Status |
-|----|----------|--------|
-| OQ-1 | Product name | **CLOSED 2026-09-27**: Trainer Desk |
-| OQ-2 | Concrete fetch sources for Phase 1 | Open — each addition = legal/robots.txt review + parser class |
-| OQ-3 | `uma:fetch` on scheduler vs manual | Default: manual, until rate-limit behavior observed |
-| OQ-4 | Aptitude & scenario caps scope | **CLOSED 2026-09-27**: Enters as engine-owned facts with provenance (ADR-0004) |
+| ID     | Question                             | Status                                                                           |
+| ------ | ------------------------------------ | -------------------------------------------------------------------------------- |
+| OQ-1   | Product name                         | **CLOSED 2026-09-27**: Trainer Desk                                              |
+| OQ-2   | Concrete fetch sources for Phase 1   | Open — each addition = legal/robots.txt review + parser class                    |
+| OQ-3   | `uma:fetch` on scheduler vs manual   | Default: manual, until rate-limit behavior observed                              |
+| OQ-4   | Aptitude & scenario caps scope       | **CLOSED 2026-09-27**: Enters as engine-owned facts with provenance (ADR-0004)   |
 
 ---
 
 ### 12. Key File Locations
 
-| Domain | Files |
-|--------|-------|
-| Product requirements | `PRD.md` |
-| System design | `ARCHITECTURE.md` (authoritative), `ARCHITECTURE-ESSENTIALS.md` (digest) |
-| Mechanics reference | `docs/UMAMUSUME_REFERENCE.md` (8 sections, 46 conflict rows) |
-| Scenario guides | `docs/scenarios/01`–`08` (07=stub, 08=JP-Only) |
-| Design system | `docs/design-research/DESIGN.md` (root), `docs/design-research/CONSTRAINTS.md` (UI contract) |
-| Quality bar | `CONSTRAINTS.md` (root), `docs/design-research/CONSTRAINTS.md` (additive) |
-| Agent roles | `AGENTS.md` |
-| Lore rules | `CLAUDE.md` (top section), `CONSTRAINTS.md` C-4 |
-| Skill registry | `.agents/skills/skills.json` (machine), `SKILL.md` (human summary) |
-| ADRs | `docs/adr/0001`–`0006` |
-| Fetch pipeline | `app/Services/DataPipeline/` (Contracts, Parsers, PipelineRunner, SourceFetcher, CrossReferenceMatcher, NameNormalizer) |
-| Models | `app/Models/{Umamusume,UmamusumeAlias,Skill,TrainingRun,TurnEntry,Scenario,DataSource,MatchCandidate,RunSkill,ScenarioRace,RaceEntry,TurnEvent,Preference}` |
-| Migrations | `database/migrations/2026_09_26_162814`–`2026_09_27_121500` |
+| Domain                 | Files                                                                                                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product requirements   | `PRD.md`                                                                                                                                                      |
+| System design          | `ARCHITECTURE.md` (authoritative), `ARCHITECTURE-ESSENTIALS.md` (digest)                                                                                      |
+| Mechanics reference    | `docs/UMAMUSUME_REFERENCE.md` (8 sections, 46 conflict rows)                                                                                                  |
+| Scenario guides        | `docs/scenarios/01`–`08` (07=stub, 08=JP-Only)                                                                                                                |
+| Design system          | `docs/design-research/DESIGN.md` (root), `docs/design-research/CONSTRAINTS.md` (UI contract)                                                                  |
+| Quality bar            | `CONSTRAINTS.md` (root), `docs/design-research/CONSTRAINTS.md` (additive)                                                                                     |
+| Agent roles            | `AGENTS.md`                                                                                                                                                   |
+| Lore rules             | `CLAUDE.md` (top section), `CONSTRAINTS.md` C-4                                                                                                               |
+| Skill registry         | `.agents/skills/skills.json` (machine), `SKILL.md` (human summary)                                                                                            |
+| ADRs                   | `docs/adr/0001`–`0006`                                                                                                                                        |
+| Fetch pipeline         | `app/Services/DataPipeline/` (Contracts, Parsers, PipelineRunner, SourceFetcher, CrossReferenceMatcher, NameNormalizer)                                       |
+| Models                 | `app/Models/{Umamusume,UmamusumeAlias,Skill,TrainingRun,TurnEntry,Scenario,DataSource,MatchCandidate,RunSkill,ScenarioRace,RaceEntry,TurnEvent,Preference}`   |
+| Migrations             | `database/migrations/2026_09_26_162814`–`2026_09_27_121500`                                                                                                   |
 
 ---
 
@@ -375,21 +395,21 @@ does not restate them; it records where they run and how they bind the shipped a
 ```text
 ID | Name | Type (Automated/Review/Manual) | Scope | Command | Pass | Fail |
 Evidence | Exceptions | Owner | Status
-```
+```text
 
 ### Global gates
 
-| ID | Name | Type | Command | Pass criteria | Fail = | Evidence | Exceptions | Owner | Status |
-|---|---|---|---|---|---|---|---|---|---|
-| C-1 | Tests | Automated | `vendor/bin/pest --compact` | zero failures | any failure | command output in hand-off | reasoned skips only (`markTestSkipped` with text) | QA | active |
-| C-2 | Static analysis | Automated | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` | `[OK] No errors` at level 6 | any error | command output | none; `@phpstan-ignore` is a Floor violation | Laravel Dev | active |
-| C-3 | Style | Automated | `vendor/bin/pint --test --format agent` | `"result":"passed"` | any drift | command output | none | Laravel Dev | active |
-| C-4 | Lore | Automated + Review | `make lore` and `make lore-code` (git grep passes) + context ruling | zero *unexplained* hits | violation without an allowed classification (below) | hit list + one-line ruling per hit | four allowed hit classes (below) | Lore Guardian | active; blind spots below |
-| C-5 | Migrations | Manual/Approval | `php artisan migrate` + `db:seed` on a fresh scratch DB (`DB_DATABASE=` pointed at an empty file); `migrate:fresh --seed` against the shared dev file is destructive and needs explicit approval | clean up+down, seed idempotent | any error | command output | destructive variant by approval only | Laravel Dev | active |
-| C-6 | Floor (no suppressions/stubs/deleted tests) | Review + grep | `git grep -nE "@phpstan-ignore|eslint-disable|@ts-ignore|not implemented|catch \{\}|TODO" app resources tests config` + diff review for deleted/skipped tests | zero hits or an approved, commit-noted reason | unexplained hit | grep output + commit note | none (floor) | QA | active |
-| C-7 | UI states | Review (per ADR-0007) | enumerate per data view: empty, error, data required; custom loading required only for user-initiated async actions | every view's state table complete; no decorative skeletons | missing required state, or async action with no feedback | state enumeration in the view's flow/spec doc | initial server-render navigation may rely on browser loading (ADR-0007) | Frontend | active |
-| C-8 | Dependencies | Review + automated | `composer show --direct` / `package.json` diff vs approved list; `composer audit`; `npm audit --omit=dev` | no new package without human approval; no reachable critical/high | unapproved addition | diff + audit output | approval recorded in PR/commit | Architect | active |
-| G-60 | Retired literals | Automated + scope rules | run via `tools/gate.py` family / reviewer grep of the retired-value registry | retired values absent from active paths | any hit in an active path | grep output | ignored paths below; `RETIRED LITERAL` blocks below | Pre-Dev | **partial: registry live, scanner pending (see Gaps)** |
+| ID   | Name                                        | Type                    | Command                                                                                                                                                                                          | Pass criteria                                                     | Fail =                                                   | Evidence                                      | Exceptions                                                              | Owner                                                                     | Status                                                 |                 |                           |              |    |        |
+| ---- | ------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------ | --------------- | ------------------------- | ------------ | -- | ------ |
+| C-1  | Tests                                       | Automated               | `vendor/bin/pest --compact`                                                                                                                                                                      | zero failures                                                     | any failure                                              | command output in hand-off                    | reasoned skips only (`markTestSkipped` with text)                       | QA                                                                        | active                                                 |                 |                           |              |    |        |
+| C-2  | Static analysis                             | Automated               | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`                                                                                                                                     | `[OK] No errors` at level 6                                       | any error                                                | command output                                | none; `@phpstan-ignore` is a Floor violation                            | Laravel Dev                                                               | active                                                 |                 |                           |              |    |        |
+| C-3  | Style                                       | Automated               | `vendor/bin/pint --test --format agent`                                                                                                                                                          | `"result":"passed"`                                               | any drift                                                | command output                                | none                                                                    | Laravel Dev                                                               | active                                                 |                 |                           |              |    |        |
+| C-4  | Lore                                        | Automated + Review      | `make lore` and `make lore-code` (git grep passes) + context ruling                                                                                                                              | zero *unexplained* hits                                           | violation without an allowed classification (below)      | hit list + one-line ruling per hit            | four allowed hit classes (below)                                        | Lore Guardian                                                             | active; blind spots below                              |                 |                           |              |    |        |
+| C-5  | Migrations                                  | Manual/Approval         | `php artisan migrate` + `db:seed` on a fresh scratch DB (`DB_DATABASE=` pointed at an empty file); `migrate:fresh --seed` against the shared dev file is destructive and needs explicit approval | clean up+down, seed idempotent                                    | any error                                                | command output                                | destructive variant by approval only                                    | Laravel Dev                                                               | active                                                 |                 |                           |              |    |        |
+| C-6  | Floor (no suppressions/stubs/deleted tests) | Review + grep           | `git grep -nE "@phpstan-ignore                                                                                                                                                                   | eslint-disable                                                    | @ts-ignore                                               | not implemented                               | catch \{\}                                                              | TODO" app resources tests config` + diff review for deleted/skipped tests | zero hits or an approved, commit-noted reason          | unexplained hit | grep output + commit note | none (floor) | QA | active |
+| C-7  | UI states                                   | Review (per ADR-0007)   | enumerate per data view: empty, error, data required; custom loading required only for user-initiated async actions                                                                              | every view's state table complete; no decorative skeletons        | missing required state, or async action with no feedback | state enumeration in the view's flow/spec doc | initial server-render navigation may rely on browser loading (ADR-0007) | Frontend                                                                  | active                                                 |                 |                           |              |    |        |
+| C-8  | Dependencies                                | Review + automated      | `composer show --direct` / `package.json` diff vs approved list; `composer audit`; `npm audit --omit=dev`                                                                                        | no new package without human approval; no reachable critical/high | unapproved addition                                      | diff + audit output                           | approval recorded in PR/commit                                          | Architect                                                                 | active                                                 |                 |                           |              |    |        |
+| G-60 | Retired literals                            | Automated + scope rules | run via `tools/gate.py` family / reviewer grep of the retired-value registry                                                                                                                     | retired values absent from active paths                           | any hit in an active path                                | grep output                                   | ignored paths below; `RETIRED LITERAL` blocks below                     | Pre-Dev                                                                   | **partial: registry live, scanner pending (see Gaps)** |                 |                           |              |    |        |
 
 ### G-60: retired-literal scoping (codified per owner ruling + D-286)
 
@@ -415,7 +435,7 @@ Evidence | Exceptions | Owner | Status
 - A stat, metric, or field that is zero because it is untracked or not applicable
   renders as `N/A` with a tooltip where useful, e.g. `title="Not tracked in this
   scenario"`, optionally plus a static disclosure line ("breakthrough not tracked
-  + deck untracked", per `stat-band.blade.php:153`).
+  - deck untracked", per `stat-band.blade.php:153`).
 - Never render `0` for a value the schema cannot observe (Planner Rule 5).
 - Never use an em dash as the disclosure glyph in shipped copy (R-02; no
   C-4/R-02 carve-out granted). Open breach: `KNOWN-ISSUES.md` KI-7 (Frontend,
@@ -487,14 +507,14 @@ answering it.
 
 ### Known gate gaps (recorded, not hidden)
 
-| Gap | Consequence | Fix owner |
-|---|---|---|
-| `make lore` uses `git grep` on tracked files: blind to untracked copy | fresh, unstaged copy is unswept by the repo-wide pass; `lore-code` reads untracked but only inside app paths, so an unsaved `docs/` edit is unseen by both | Pre-Dev (registry tells reviewers to sweep dirty files; KI-4 closed 2026-09-28 for the runner, not for this scope split) |
-| `make lore` vocabulary: 23 words over three greps (`ee97869`), while client-string terminology stays gate.py's scope | two vocabularies exist; both `make lore` and `composer lore` read one list, and `LoreGateParityTest` fails if the Makefile and `tools/lore.php` drift | Pre-Dev: point both at `docs/design-research/CONSTRAINTS.md` §3.1 |
-| The shipped-Blade dash check lives in the Pest suite, not in `tools/gate.py` | `composer test` fails on an en or em dash in any `.blade.php` under `resources/views` (`RenderedCopyHygieneTest`, which strips the three comment forms prose hides in); running `gate.py` alone still checks D-79 only in prototype HTML, so a scan-by-gate.py pass is not proof the Blade sweep ran | Pre-Dev: fold the view sweep into `gate.py` or cite the test wherever the scanner is the only gate |
-| G-60 scanner does not yet read a retired-value registry file | G-60 currently reviewer-enforced | Pre-Dev at next ADR amendment cycle |
-| C-7 loading-state enforcement is interpretive | per ADR-0007 clause 2; review checks the state enumeration | Frontend |
-| Stale mirrors: `.kilo/worktrees/giddy-chronometer/docs/design-research/_scratch/gate.py` exists | edits there are inert; never treat as the live gate | whoever prunes the worktree cache |
+| Gap                                                                                                                    | Consequence                                                                                                                                                                                                                                                                                            | Fix owner                                                                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `make lore` uses `git grep` on tracked files: blind to untracked copy                                                  | fresh, unstaged copy is unswept by the repo-wide pass; `lore-code` reads untracked but only inside app paths, so an unsaved `docs/` edit is unseen by both                                                                                                                                             | Pre-Dev (registry tells reviewers to sweep dirty files; KI-4 closed 2026-09-28 for the runner, not for this scope split)   |
+| `make lore` vocabulary: 23 words over three greps (`ee97869`), while client-string terminology stays gate.py's scope   | two vocabularies exist; both `make lore` and `composer lore` read one list, and `LoreGateParityTest` fails if the Makefile and `tools/lore.php` drift                                                                                                                                                  | Pre-Dev: point both at `docs/design-research/CONSTRAINTS.md` §3.1                                                          |
+| The shipped-Blade dash check lives in the Pest suite, not in `tools/gate.py`                                           | `composer test` fails on an en or em dash in any `.blade.php` under `resources/views` (`RenderedCopyHygieneTest`, which strips the three comment forms prose hides in); running `gate.py` alone still checks D-79 only in prototype HTML, so a scan-by-gate.py pass is not proof the Blade sweep ran   | Pre-Dev: fold the view sweep into `gate.py` or cite the test wherever the scanner is the only gate                         |
+| G-60 scanner does not yet read a retired-value registry file                                                           | G-60 currently reviewer-enforced                                                                                                                                                                                                                                                                       | Pre-Dev at next ADR amendment cycle                                                                                        |
+| C-7 loading-state enforcement is interpretive                                                                          | per ADR-0007 clause 2; review checks the state enumeration                                                                                                                                                                                                                                             | Frontend                                                                                                                   |
+| Stale mirrors: `.kilo/worktrees/giddy-chronometer/docs/design-research/_scratch/gate.py` exists                        | edits there are inert; never treat as the live gate                                                                                                                                                                                                                                                    | whoever prunes the worktree cache                                                                                          |
 
 ### Tooling placement
 
@@ -506,7 +526,7 @@ Forbidden stale copies: docs/design-research/_scratch/gate.py (moved away),
 Data still in provenance: docs/design-research/_scratch/tokens.json (read by
 tools/gate.py as a measured-anchor input; it is data, not tooling)
 Makefile gate targets: lore, lore-code (git grep); tests/lint/stan as before
-```
+```text
 
 ### Changelog
 
@@ -528,17 +548,17 @@ Sources examined: `D:/Projects/uma-companion`, `D:/Projects/uma-tracker`, `D:/Pr
 
 Threshold applied (constraint-driven-development): every class must map to a PRD user story, or it does not ship.
 
-| Legacy component | Source repo | Verdict | Reason |
-|---|---|---|---|
-| Breeze/Sanctum auth stack | uma-tracker, umamusume-tracker-app (dormant) | Cut | Local-only, single-Trainer tool. Auth is attack surface with zero utility. |
-| Vue 3 + Pinia SPA frontend | uma-companion | Cut | Blade + Tailwind v4 already in this skeleton. A SPA pipeline for one local user is maintenance for nobody. |
-| Breeding/lineage engine (pairing, eligibility, validation) | uma-companion | Cut, reduced | Maps to no user story in the other apps. The one useful fact (which two Umamusume provided inheritance) becomes two nullable FKs on `training_runs`. Its sire/dam vocabulary is also a lore violation. | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
-| EAV `attributes` table | umamusume-tracker-app | Cut | Five stats are fixed. Five integer columns beat a name/value table on every axis. |
-| Excel export (`maatwebsite/excel`) | uma-tracker, umamusume-tracker-app | Cut | Heavy dependency for a local tool. CSV/JSON cover the need with zero dependencies. |
-| Event/banner calendar + goal progress | uma-companion | Defer (Phase 1 Non-Goal) | Useful, but entirely dependent on volatile scraped schedule data. Shipping it first would make the most visible feature the most fragile. |
-| Redis/queue server, multiple cache stores | implied by scale patterns | Cut | SQLite database cache + the queue worker from `composer run dev` is the ceiling this tool needs. |
-| Idempotency keys, cursor pagination, OpenAPI generation | api-and-interface-design defaults | Trim | Single local consumer. Versioned `/api/v1`, one error shape, offset pagination. Nothing beyond. |
-| Dual schemas (legacy EAV vs normalized target) | umamusume-tracker-app | Cut | One normalized schema from day one. No legacy DB migration promised. |
+| Legacy component                                           | Source repo                                  | Verdict                  | Reason                                                                                                                                                                                                 |                                                           |
+| ---------------------------------------------------------- | -------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| Breeze/Sanctum auth stack                                  | uma-tracker, umamusume-tracker-app (dormant) | Cut                      | Local-only, single-Trainer tool. Auth is attack surface with zero utility.                                                                                                                             |                                                           |
+| Vue 3 + Pinia SPA frontend                                 | uma-companion                                | Cut                      | Blade + Tailwind v4 already in this skeleton. A SPA pipeline for one local user is maintenance for nobody.                                                                                             |                                                           |
+| Breeding/lineage engine (pairing, eligibility, validation) | uma-companion                                | Cut, reduced             | Maps to no user story in the other apps. The one useful fact (which two Umamusume provided inheritance) becomes two nullable FKs on `training_runs`. Its sire/dam vocabulary is also a lore violation. | <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 --> |
+| EAV `attributes` table                                     | umamusume-tracker-app                        | Cut                      | Five stats are fixed. Five integer columns beat a name/value table on every axis.                                                                                                                      |                                                           |
+| Excel export (`maatwebsite/excel`)                         | uma-tracker, umamusume-tracker-app           | Cut                      | Heavy dependency for a local tool. CSV/JSON cover the need with zero dependencies.                                                                                                                     |                                                           |
+| Event/banner calendar + goal progress                      | uma-companion                                | Defer (Phase 1 Non-Goal) | Useful, but entirely dependent on volatile scraped schedule data. Shipping it first would make the most visible feature the most fragile.                                                              |                                                           |
+| Redis/queue server, multiple cache stores                  | implied by scale patterns                    | Cut                      | SQLite database cache + the queue worker from `composer run dev` is the ceiling this tool needs.                                                                                                       |                                                           |
+| Idempotency keys, cursor pagination, OpenAPI generation    | api-and-interface-design defaults            | Trim                     | Single local consumer. Versioned `/api/v1`, one error shape, offset pagination. Nothing beyond.                                                                                                        |                                                           |
+| Dual schemas (legacy EAV vs normalized target)             | umamusume-tracker-app                        | Cut                      | One normalized schema from day one. No legacy DB migration promised.                                                                                                                                   |                                                           |
 
 What survives, and why: catalog browsing (all three apps had it), training-run logging with per-turn stats (all three independently built it), skill acquisition tracking (two of three), the JP to Global cross-reference engine (stated core logic, absent everywhere), CSV/JSON export (cheap, Trainers already use it).
 
@@ -586,21 +606,21 @@ Fourth repository scanned read-only on 2026-09-27. Sections 1-3 above stand unch
 
 #### 4.1 Over-engineering found in repo #4 (verdicts)
 
-| Component | Verdict | Reason |
-|---|---|---|
-| Dual storage modes (browser localStorage "local runs" vs account/DB runs) + conversion service | Cut | A local-only tool has exactly one store: SQLite. Dual-store parity is pure liability, and browser-only data is one cleared cache away from loss. |
-| Sanctum auth + login/register routes + hardcoded "Public User" id=1 | Cut | Same verdict as §1 row 1. The id=1 FK assumption is a migration trap, not a feature. |
-| Livewire 3 component tree (~20 components) | Cut | Not installed here; Blade + vanilla JS is the stack (ARCHITECTURE §7). Carrying Livewire would add a dependency for zero new capability. |
-| Race-day snapshots (immutable `career_snapshots` + SnapshotService) | Cut | Speculative archival of data SQLite already persists. CSV/JSON export (US-6) covers the real need: getting data out. |
-| Manual race predictions table (`race_predictions`, venue/ground/aptitude grades) | Cut (Phase 1) | No race/calendar entity exists in the unified schema; predictions hang off free text. Revisit only if US-10 (P2) is ever scheduled. |
-| Trainee image upload + ImageProcessingService | Cut | No user story; adds an upload attack surface to a tool that otherwise accepts only form fields and fetched text. |
-| Excel/Markdown export paths | Cut | §1 row 5 stands. CSV/JSON only. Note: repo #4's README cites Laravel Excel but the dependency is absent from its composer.json; the claim was already dead. |
-| DB-level enum columns (career_stage, class, status on `plans`) | Cut | Repo #4's own migration risk: enum DDL complicates SQLite/MySQL portability. Unified schema uses string columns + PHP backed enums (ARCHITECTURE §3). |
-| Soft deletes on plans | Cut | Domain rule: no soft deletes; Trainer-data deletion is explicit and cascades. |
-| JSON-typed columns on `umamusume` (growth_rates, aptitudes, base_stats) | Defer (INVESTIGATE) | Useful planning data, but engine-owned facts must arrive through the fetch pipeline with provenance, not hardcoded seeders. Phase 2 candidate once sources (OQ-2) are chosen. No column added now. |
-| Turn tracker + per-turn stat logging (StatProgressService) | Keep, merged | Independently validates the `turn_entries` design. One concrete gain adopted: deterministic stat bounds (0..1200) become validation rules in `StoreTurnEntryRequest`. |
-| Skill 3-state status (Acquired / Skipped / Suggested) | Keep, refactored | `SkillAcquisition` enum gains `Suggested` (planned-but-not-yet-taken), matching how planners actually work: plan vs actual comparison (US-4). |
-| CSV/JSON legacy importers (MigrateLegacyCsv/Json, FormatDetector) | INVESTIGATE | Real, working reference code for the `uma-run-tracker` JSON shape. Not carried in (Non-Goal 7 stands for Phase 1); located and cited if the Trainer later asks for import. |
+| Component                                                                                        | Verdict               | Reason                                                                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------ | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dual storage modes (browser localStorage "local runs" vs account/DB runs) + conversion service   | Cut                   | A local-only tool has exactly one store: SQLite. Dual-store parity is pure liability, and browser-only data is one cleared cache away from loss.                                                     |
+| Sanctum auth + login/register routes + hardcoded "Public User" id=1                              | Cut                   | Same verdict as §1 row 1. The id=1 FK assumption is a migration trap, not a feature.                                                                                                                 |
+| Livewire 3 component tree (~20 components)                                                       | Cut                   | Not installed here; Blade + vanilla JS is the stack (ARCHITECTURE §7). Carrying Livewire would add a dependency for zero new capability.                                                             |
+| Race-day snapshots (immutable `career_snapshots` + SnapshotService)                              | Cut                   | Speculative archival of data SQLite already persists. CSV/JSON export (US-6) covers the real need: getting data out.                                                                                 |
+| Manual race predictions table (`race_predictions`, venue/ground/aptitude grades)                 | Cut (Phase 1)         | No race/calendar entity exists in the unified schema; predictions hang off free text. Revisit only if US-10 (P2) is ever scheduled.                                                                  |
+| Trainee image upload + ImageProcessingService                                                    | Cut                   | No user story; adds an upload attack surface to a tool that otherwise accepts only form fields and fetched text.                                                                                     |
+| Excel/Markdown export paths                                                                      | Cut                   | §1 row 5 stands. CSV/JSON only. Note: repo #4's README cites Laravel Excel but the dependency is absent from its composer.json; the claim was already dead.                                          |
+| DB-level enum columns (career_stage, class, status on `plans`)                                   | Cut                   | Repo #4's own migration risk: enum DDL complicates SQLite/MySQL portability. Unified schema uses string columns + PHP backed enums (ARCHITECTURE §3).                                                |
+| Soft deletes on plans                                                                            | Cut                   | Domain rule: no soft deletes; Trainer-data deletion is explicit and cascades.                                                                                                                        |
+| JSON-typed columns on `umamusume` (growth_rates, aptitudes, base_stats)                          | Defer (INVESTIGATE)   | Useful planning data, but engine-owned facts must arrive through the fetch pipeline with provenance, not hardcoded seeders. Phase 2 candidate once sources (OQ-2) are chosen. No column added now.   |
+| Turn tracker + per-turn stat logging (StatProgressService)                                       | Keep, merged          | Independently validates the `turn_entries` design. One concrete gain adopted: deterministic stat bounds (0..1200) become validation rules in `StoreTurnEntryRequest`.                                |
+| Skill 3-state status (Acquired / Skipped / Suggested)                                            | Keep, refactored      | `SkillAcquisition` enum gains `Suggested` (planned-but-not-yet-taken), matching how planners actually work: plan vs actual comparison (US-4).                                                        |
+| CSV/JSON legacy importers (MigrateLegacyCsv/Json, FormatDetector)                                | INVESTIGATE           | Real, working reference code for the `uma-run-tracker` JSON shape. Not carried in (Non-Goal 7 stands for Phase 1); located and cited if the Trainer later asks for import.                           |
 
 #### 4.2 New failure points
 
@@ -632,16 +652,16 @@ is untouched by this branch's commit (proof in §7).
 
 ### 1. Environment header
 
-| Item | Value |
-|---|---|
-| Branch | `docs/frontend-review` (based on `master` @ `7d4b8cf`) |
-| Boot commands | `New-Item -ItemType Directory .scratch-uma` → `$env:DB_DATABASE="D:\Projects\umamusume-laravel13\.scratch-uma\frontend-review.sqlite"` → `php artisan migrate --seed` → `php .scratch-uma\frontend-review-fixture.php` (via tinker `require`) → `.scratch-uma\serve-8144.cmd` (sets `DB_DATABASE`, then `php artisan serve --host=127.0.0.1 --port=8144`) |
-| Scratch DB | `.scratch-uma/frontend-review.sqlite` (gitignored via `.gitignore:88 /.scratch-uma/`; the shared `database/database.sqlite` was never written — verified read-only) |
-| Theme control | `Preference::put('theme', 'light'/'dark')` on the scratch DB; the layout renders `data-theme` server-side from `AppServiceProvider`'s view composer |
-| Server PID | 20036 (`php-cgi.exe` child of the 8144 wrapper; `netstat`-verified bound to 127.0.0.1:8144 and serving the scratch DB) |
-| Timestamp | 2026-09-28, captures 21:22–22:58 local (all taken after the scratch DB, the final view-code state, and the server-DB confirmation were in place) |
-| Viewport | 1280×800, full-page captures, Playwright MCP |
-| Capture format | `docs/frontend-review/2026-09-28/{page-slug}-{state}-{theme}.png`, each with `.console.txt` and `.network.txt` sidecars |
+| Item             | Value                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Branch           | `docs/frontend-review` (based on `master` @ `7d4b8cf`)                                                                                                                                                                                                                                                                                                      |
+| Boot commands    | `New-Item -ItemType Directory .scratch-uma` → `$env:DB_DATABASE="D:\Projects\umamusume-laravel13\.scratch-uma\frontend-review.sqlite"` → `php artisan migrate --seed` → `php .scratch-uma\frontend-review-fixture.php` (via tinker `require`) → `.scratch-uma\serve-8144.cmd` (sets `DB_DATABASE`, then `php artisan serve --host=127.0.0.1 --port=8144`)   |
+| Scratch DB       | `.scratch-uma/frontend-review.sqlite` (gitignored via `.gitignore:88 /.scratch-uma/`; the shared `database/database.sqlite` was never written — verified read-only)                                                                                                                                                                                         |
+| Theme control    | `Preference::put('theme', 'light'/'dark')` on the scratch DB; the layout renders `data-theme` server-side from `AppServiceProvider`'s view composer                                                                                                                                                                                                         |
+| Server PID       | 20036 (`php-cgi.exe` child of the 8144 wrapper; `netstat`-verified bound to 127.0.0.1:8144 and serving the scratch DB)                                                                                                                                                                                                                                      |
+| Timestamp        | 2026-09-28, captures 21:22–22:58 local (all taken after the scratch DB, the final view-code state, and the server-DB confirmation were in place)                                                                                                                                                                                                            |
+| Viewport         | 1280×800, full-page captures, Playwright MCP                                                                                                                                                                                                                                                                                                                |
+| Capture format   | `docs/frontend-review/2026-09-28/{page-slug}-{state}-{theme}.png`, each with `.console.txt` and `.network.txt` sidecars                                                                                                                                                                                                                                     |
 
 **Caveat recorded honestly:** a stale `php -S` listener from a prior session briefly
 occupied port 8144 early in setup and served the old slice-5 scratch DB. The
@@ -670,40 +690,40 @@ Built by `.scratch-uma/frontend-review-fixture.php`, seeded on top of
 42 page-captures + 7 body captures (4 API, 2 exports, 1 health page). Every
 visited route, its HTTP status, and its screenshot(s):
 
-| Route | Status | Captures (light / dark) |
-|---|---|---|
-| `/` landing | 200 | `landing-default-light` (splash is theme-static; dark adds nothing — see F-1) |
-| `/training-runs` populated | 200 | `runs-index-populated-light`, `runs-index-populated-dark` |
-| `/training-runs` empty (0 runs, via scratch backup/restore) | 200 | `runs-index-empty-light` |
-| `/training-runs/create` | 200 | `run-create-form-light`, `run-create-form-dark` |
-| `/training-runs/create` validation error (server-side) | 200 (redirect back with errors) | `run-create-form-validation-error-light` |
-| `/training-runs/1` URA Finale | 200 | `run-detail-ura-finale-light`, `run-detail-ura-finale-dark` |
-| `/training-runs/2` Unity Cup | 200 | `run-detail-unity-cup-light`, `run-detail-unity-cup-dark` |
-| `/training-runs/3` Trackblazer, no period reported | 200 | `run-detail-trackblazer-light`, `run-detail-trackblazer-dark` |
-| `/training-runs/4` no scenario | 200 | `run-detail-no-scenario-light`, `run-detail-no-scenario-dark` |
-| `/training-runs/5` KI-10 unpriceable ("not yet totalled") | 200 | `run-detail-unpriceable-light`, `run-detail-unpriceable-dark` |
-| `/training-runs/6` empty first-turn | 200 | `run-detail-empty-first-turn-light`, `run-detail-empty-first-turn-dark` |
-| `/training-runs/1/turns` POST preview (refresh/partial state) | 200 (POST render) | `run-detail-guided-preview-light`, `run-detail-guided-preview-dark` |
-| `/training-runs/99` 404 | 404 | `error-404-run-light` |
-| `/training-runs/{1..5}/export/csv` | 200 | `export-csv-run1.txt` (body capture, per spec for non-HTML) |
-| `/training-runs/1/export/json` | 200 | `export-json-run1.txt` |
-| `/training-runs/1/export/xlsx` | 404 (by design, PRD FR-C-5) | body embedded in F-9 |
-| `/umamusume` populated (2 records, paginated) | 200 | `catalog-index-populated-light`, `catalog-index-populated-dark` |
-| `/umamusume?search=special` filtered | 200 | `catalog-index-search-light`, `catalog-index-search-dark` |
-| `/umamusume?search=zzzznone` empty result | 200 | `catalog-index-empty-light`, `catalog-index-empty-dark` |
-| `/umamusume?status=GlobalAnnounced` | 200 | `catalog-index-filter-announced-light`, `catalog-index-filter-announced-dark` |
-| `/umamusume?status=GlobalReleased` | 200 | `catalog-index-filter-global-light` |
-| `/umamusume?page=2` out-of-range page | 200 | `catalog-index-page2-out-of-range-light`, `catalog-index-page2-out-of-range-dark` |
-| `/umamusume/special-week` detail | 200 | `catalog-detail-populated-light`, `catalog-detail-populated-dark` |
-| `/umamusume/nope-404` 404 | 404 | `error-404-catalog-light` |
-| `/review` populated | 200 | `review-queue-populated-light`, `review-queue-populated-dark` |
-| `/review` empty (via scratch backup/restore) | 200 | `review-queue-empty-light`, `review-queue-empty-dark` |
-| `/design-preview` deprecated review surface | 200 | `design-preview-all-light`, `design-preview-all-dark` (forced via its own localStorage, see F-2) |
-| `/up` framework health page (not in `routes/web.php`) | 200 | `up-health-page.txt` (body evidence for F-19: off-origin CDN loads at page time) |
-| `/api/v1/umamusume` | 200 | `api-umamusume-index.txt` |
-| `/api/v1/umamusume/special-week` | 200 | `api-umamusume-detail.txt` |
-| `/api/v1/training-runs` | 200 | `api-training-runs-index.txt` |
-| `/api/v1/training-runs/1` | 200 | `api-training-runs-detail.txt` |
+| Route                                                           | Status                            | Captures (light / dark)                                                                            |
+| --------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `/` landing                                                     | 200                               | `landing-default-light` (splash is theme-static; dark adds nothing — see F-1)                      |
+| `/training-runs` populated                                      | 200                               | `runs-index-populated-light`, `runs-index-populated-dark`                                          |
+| `/training-runs` empty (0 runs, via scratch backup/restore)     | 200                               | `runs-index-empty-light`                                                                           |
+| `/training-runs/create`                                         | 200                               | `run-create-form-light`, `run-create-form-dark`                                                    |
+| `/training-runs/create` validation error (server-side)          | 200 (redirect back with errors)   | `run-create-form-validation-error-light`                                                           |
+| `/training-runs/1` URA Finale                                   | 200                               | `run-detail-ura-finale-light`, `run-detail-ura-finale-dark`                                        |
+| `/training-runs/2` Unity Cup                                    | 200                               | `run-detail-unity-cup-light`, `run-detail-unity-cup-dark`                                          |
+| `/training-runs/3` Trackblazer, no period reported              | 200                               | `run-detail-trackblazer-light`, `run-detail-trackblazer-dark`                                      |
+| `/training-runs/4` no scenario                                  | 200                               | `run-detail-no-scenario-light`, `run-detail-no-scenario-dark`                                      |
+| `/training-runs/5` KI-10 unpriceable ("not yet totalled")       | 200                               | `run-detail-unpriceable-light`, `run-detail-unpriceable-dark`                                      |
+| `/training-runs/6` empty first-turn                             | 200                               | `run-detail-empty-first-turn-light`, `run-detail-empty-first-turn-dark`                            |
+| `/training-runs/1/turns` POST preview (refresh/partial state)   | 200 (POST render)                 | `run-detail-guided-preview-light`, `run-detail-guided-preview-dark`                                |
+| `/training-runs/99` 404                                         | 404                               | `error-404-run-light`                                                                              |
+| `/training-runs/{1..5}/export/csv`                              | 200                               | `export-csv-run1.txt` (body capture, per spec for non-HTML)                                        |
+| `/training-runs/1/export/json`                                  | 200                               | `export-json-run1.txt`                                                                             |
+| `/training-runs/1/export/xlsx`                                  | 404 (by design, PRD FR-C-5)       | body embedded in F-9                                                                               |
+| `/umamusume` populated (2 records, paginated)                   | 200                               | `catalog-index-populated-light`, `catalog-index-populated-dark`                                    |
+| `/umamusume?search=special` filtered                            | 200                               | `catalog-index-search-light`, `catalog-index-search-dark`                                          |
+| `/umamusume?search=zzzznone` empty result                       | 200                               | `catalog-index-empty-light`, `catalog-index-empty-dark`                                            |
+| `/umamusume?status=GlobalAnnounced`                             | 200                               | `catalog-index-filter-announced-light`, `catalog-index-filter-announced-dark`                      |
+| `/umamusume?status=GlobalReleased`                              | 200                               | `catalog-index-filter-global-light`                                                                |
+| `/umamusume?page=2` out-of-range page                           | 200                               | `catalog-index-page2-out-of-range-light`, `catalog-index-page2-out-of-range-dark`                  |
+| `/umamusume/special-week` detail                                | 200                               | `catalog-detail-populated-light`, `catalog-detail-populated-dark`                                  |
+| `/umamusume/nope-404` 404                                       | 404                               | `error-404-catalog-light`                                                                          |
+| `/review` populated                                             | 200                               | `review-queue-populated-light`, `review-queue-populated-dark`                                      |
+| `/review` empty (via scratch backup/restore)                    | 200                               | `review-queue-empty-light`, `review-queue-empty-dark`                                              |
+| `/design-preview` deprecated review surface                     | 200                               | `design-preview-all-light`, `design-preview-all-dark` (forced via its own localStorage, see F-2)   |
+| `/up` framework health page (not in `routes/web.php`)           | 200                               | `up-health-page.txt` (body evidence for F-19: off-origin CDN loads at page time)                   |
+| `/api/v1/umamusume`                                             | 200                               | `api-umamusume-index.txt`                                                                          |
+| `/api/v1/umamusume/special-week`                                | 200                               | `api-umamusume-detail.txt`                                                                         |
+| `/api/v1/training-runs`                                         | 200                               | `api-training-runs-index.txt`                                                                      |
+| `/api/v1/training-runs/1`                                       | 200                               | `api-training-runs-detail.txt`                                                                     |
 
 **Captures: 42 screenshots, 42 console sidecars, 42 network sidecars, 6 response-body `.txt` files (4 API + CSV + JSON).**
 
@@ -987,29 +1007,29 @@ Programmatic WCAG AA probe (text vs. computed stacked background, 4.5:1 /
   band word) measured 6.4:1+ in both themes, matching slice-5 §3's recorded
   numbers. **No N1-class gate failures found in this build.**
 
-### Count: 19 numbered observations (F-1…F-19) — 7 need-fix (N: F-1, F-2, F-3, F-7, F-9, F-10, F-19), 11 minor/observation (O), and 1 N1-class gate result recorded as a pass (F-17: zero contrast failures, so no D-288 gate finding was raised).
+### Count: 19 numbered observations (F-1…F-19) — 7 need-fix (N: F-1, F-2, F-3, F-7, F-9, F-10, F-19), 11 minor/observation (O), and 1 N1-class gate result recorded as a pass (F-17: zero contrast failures, so no D-288 gate finding was raised)
 
 ---
 
 ### 5. Cross-reference: known issues vs. visibility in this build
 
-| KI | Subject | Visible here? |
-|---|---|---|
-| KI-1 | `x-layout` Vite entry missing — RESOLVED | Not visible. Every page loads `/build/assets/app-*.{css,js}` 200. |
-| KI-2 | Catalog cache kills models — RESOLVED | Not visible. Catalog index/detail/search all 200, no 500s. |
-| KI-3 | welcome breaks offline — RESOLVED (font links), residual open | **Partially visible.** Zero off-origin *requests* (fixed); but the splash itself persists (F-1, F-15-adjacent) — the "residual, not fixed" note is confirmed live. |
-| KI-4 | `make lore` blind to untracked — RESOLVED | n/a to rendered UI. |
-| KI-5 | fabricated skill name — FIXED | Not visible. Banned-pattern grep clean (§4 Copy/Lore). |
-| KI-6 | shipped font — CLOSED as decision | Not visible. System stack renders per DESIGN.md §2.2. |
-| KI-7 | em dashes in Blade copy — RESOLVED | Not visible. No em dash renders in any capture. |
-| KI-8 | design-preview 500s on grade badge — RESOLVED | Not visible. `/design-preview` returns 200 in both themes (grade letters render). |
-| KI-9 | selection gold 1.59:1 light — RESOLVED | Not visible. Contrast probe found no sub-3:1 selection pairs (F-17). |
-| KI-10 | Grade Points unpriceable — schema half CLOSED, ratio half OPEN | **Visible as designed.** Run 5 renders the honest "not yet totalled" withholding (the OPEN half is exactly what F-4/F-16 observe at the copy boundary). Fixture reproduces it. |
-| KI-11 | seeder stub + green-tint debt — BOTH CLOSED | Not visible. Slots seeded via fixture; green-tint band word measures (F-17). |
-| KI-12 | meter says "nothing entered" — RESOLVED (R18) | **Visible as fixed.** Run 5 renders the three-state copy; run 3 renders the "no period reported" state. The plural/pronoun bug (F-18) is new, filed in §4. |
-| KI-13 | models exist on no ref — RESOLVED | Not visible. Everything resolves on this branch. |
-| KI-14 | rail declared fake radios — RESOLVED | Not visible. `role=radio` semantics present with focus rings (F-13 positive). |
-| KI-15 | GP track selection unsourced — OPEN (×2 duplicate sections) | **Visible as designed.** Run 3/5 meters show the `standard` track (60/300/300) with the record's own caveat rendered beside it. Also: `KNOWN-ISSUES.md` carries KI-15 **twice** (lines 645 and 678, byte-near-identical) — a doc-integrity observation for the file's owner, not a UI defect. |
+| KI      | Subject                                                          | Visible here?                                                                                                                                                                                                                                                                                   |
+| ------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| KI-1    | `x-layout` Vite entry missing — RESOLVED                         | Not visible. Every page loads `/build/assets/app-*.{css,js}` 200.                                                                                                                                                                                                                               |
+| KI-2    | Catalog cache kills models — RESOLVED                            | Not visible. Catalog index/detail/search all 200, no 500s.                                                                                                                                                                                                                                      |
+| KI-3    | welcome breaks offline — RESOLVED (font links), residual open    | **Partially visible.** Zero off-origin *requests* (fixed); but the splash itself persists (F-1, F-15-adjacent) — the "residual, not fixed" note is confirmed live.                                                                                                                              |
+| KI-4    | `make lore` blind to untracked — RESOLVED                        | n/a to rendered UI.                                                                                                                                                                                                                                                                             |
+| KI-5    | fabricated skill name — FIXED                                    | Not visible. Banned-pattern grep clean (§4 Copy/Lore).                                                                                                                                                                                                                                          |
+| KI-6    | shipped font — CLOSED as decision                                | Not visible. System stack renders per DESIGN.md §2.2.                                                                                                                                                                                                                                           |
+| KI-7    | em dashes in Blade copy — RESOLVED                               | Not visible. No em dash renders in any capture.                                                                                                                                                                                                                                                 |
+| KI-8    | design-preview 500s on grade badge — RESOLVED                    | Not visible. `/design-preview` returns 200 in both themes (grade letters render).                                                                                                                                                                                                               |
+| KI-9    | selection gold 1.59:1 light — RESOLVED                           | Not visible. Contrast probe found no sub-3:1 selection pairs (F-17).                                                                                                                                                                                                                            |
+| KI-10   | Grade Points unpriceable — schema half CLOSED, ratio half OPEN   | **Visible as designed.** Run 5 renders the honest "not yet totalled" withholding (the OPEN half is exactly what F-4/F-16 observe at the copy boundary). Fixture reproduces it.                                                                                                                  |
+| KI-11   | seeder stub + green-tint debt — BOTH CLOSED                      | Not visible. Slots seeded via fixture; green-tint band word measures (F-17).                                                                                                                                                                                                                    |
+| KI-12   | meter says "nothing entered" — RESOLVED (R18)                    | **Visible as fixed.** Run 5 renders the three-state copy; run 3 renders the "no period reported" state. The plural/pronoun bug (F-18) is new, filed in §4.                                                                                                                                      |
+| KI-13   | models exist on no ref — RESOLVED                                | Not visible. Everything resolves on this branch.                                                                                                                                                                                                                                                |
+| KI-14   | rail declared fake radios — RESOLVED                             | Not visible. `role=radio` semantics present with focus rings (F-13 positive).                                                                                                                                                                                                                   |
+| KI-15   | GP track selection unsourced — OPEN (×2 duplicate sections)      | **Visible as designed.** Run 3/5 meters show the `standard` track (60/300/300) with the record's own caveat rendered beside it. Also: `KNOWN-ISSUES.md` carries KI-15 **twice** (lines 645 and 678, byte-near-identical) — a doc-integrity observation for the file's owner, not a UI defect.   |
 
 **No previously-resolved KI regressed in this build.** KI-10 and KI-15 remain
 open and both are *correctly* visible (they are deliberate withholdings).
@@ -1018,20 +1038,20 @@ open and both are *correctly* visible (they are deliberate withholdings).
 
 ### 6. Unreachable routes
 
-| Route | Reason |
-|---|---|
-| `runs.update` PUT `/training-runs/{run}` | Write-only verb — GET is 405 by design; exercised through the scenario-change form (no visible defect). |
-| `runs.destroy` DELETE | Write-only; its UI trigger (the "Delete run" button) was deliberately **not** activated (destructive; documentation-only audit). |
-| `runs.turns.update` / `runs.turns.destroy` | Write-only verbs on turn rows; no screenable GET surface. |
-| `runs.skills.sync` POST | Write-only. |
-| `review.resolve` POST | Write-only; deliberately not activated (mutates the candidate row; PRG confirmed from code + the success path is covered by the empty-queue capture). |
-| `runs.export` `xlsx` | 404 is the implementation (PRD FR-C-5 cut Excel): not an error, a designed absence. |
+| Route                                        | Reason                                                                                                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runs.update` PUT `/training-runs/{run}`     | Write-only verb — GET is 405 by design; exercised through the scenario-change form (no visible defect).                                                 |
+| `runs.destroy` DELETE                        | Write-only; its UI trigger (the "Delete run" button) was deliberately **not** activated (destructive; documentation-only audit).                        |
+| `runs.turns.update` / `runs.turns.destroy`   | Write-only verbs on turn rows; no screenable GET surface.                                                                                               |
+| `runs.skills.sync` POST                      | Write-only.                                                                                                                                             |
+| `review.resolve` POST                        | Write-only; deliberately not activated (mutates the candidate row; PRG confirmed from code + the success path is covered by the empty-queue capture).   |
+| `runs.export` `xlsx`                         | 404 is the implementation (PRD FR-C-5 cut Excel): not an error, a designed absence.                                                                     |
 
 ---
 
 ### 7. Tree integrity (audit changed no source)
 
-- `git check-ignore -v .scratch-uma/` → `.gitignore:88:/.scratch-uma/	.scratch-uma/`
+- `git check-ignore -v .scratch-uma/` → `.gitignore:88:/.scratch-uma/ .scratch-uma/`
 - The audit commit (`docs(frontend-review): screenshot audit…`) contains **only**
   `docs/frontend-review/**`: `git show --name-only HEAD` lists zero files under
   `app/`, `resources/`, `config/`, `tests/`, `routes/`, or `database/`.
@@ -1168,27 +1188,27 @@ line would have been editing a comment.
 
 ---
 
-| ID | Sev | Status | Commit | Verification |
-|---|---|---|---|---|
-| F-1 | N | **fixed** | `7034c19` | `/` returns 200 with `data-theme="dark"` under a dark preference; response contains zero six-digit hex (was 26 in-file / 42 incl. shorthand), no `cloud.laravel.com`, no `fonts.bunny.net`. Test: *lands inside the product and honors the stored theme*. |
-| F-2 | N | **fixed by deletion** | `93cb39b` + `f042d17` | `/design-preview` now 404. Route + view removed; orphaned `View` import removed. Closes F-14 and F-15 with it. |
-| F-3 | N | **fixed** | `bc7ceb6` | Run 4 strip caption reads "no scenario set"; rail label chip gone. Captured light + dark. Test asserts both directions so the fix cannot over-correct. |
-| F-4 | O | deferred | — | Vocabulary split (strip "N/A" vs panel "not yet totalled") is real but lives in copy the audit graded O; touching it means choosing one vocabulary, which is a design-record call, not a one-liner in a file I was already in. |
-| F-5 | O | deferred | — | Validation message "The umamusume id field is required." needs an attribute label in `StoreTrainingRunRequest`, which is outside the frontend fence for this slice. |
-| F-6 | O | **decision requested** | — | No column, no input path, permanently N/A. Needs schema work or widget removal. See `DECISIONS-NEEDED.md`. |
-| F-7 | N | **fixed; frozen tests updated in two phases** | `83db98c` code, `ad17d99` + `792b5cb` tests | POST `stage=preview` now `302` + `Location: /training-runs/1`; target answers GET 200, so the 405 is unreachable. All 8 frozen tests green; suite back to base parity at 6. See §Frozen below. |
-| F-8 | O | deferred | — | Out-of-range page reuses the zero-result sentence. Audit marked O; a distinct state needs new copy + a branch in `catalog/index.blade.php`, i.e. a new file opened to chase an observation, which the fence forbids here. |
-| F-9 | N | **fixed** | `3c8c830` | CSV header now `…,condition,energy,mood,fans`; row 1 = `1,480,300,355,210,95,240,,88,NORMAL,9000`. JSON turn keys carry the same three. Original 8 positions unchanged. Bodies in `resolutions/`. |
-| F-10 | N | **fixed** | `9419665` | `resources/views/errors/404.blade.php` renders through `x-layout`: nav, skip link, tokens, three routes back. Both 404 routes captured. |
-| F-11 | O | not done | — | `errors/500.blade.php` optional; skipped because a 500 page cannot be exercised on this fixture without injecting a fault, and inventing one to screenshot it would be a fake verification. |
-| F-12 | O | deferred | — | Three controls in one `<label>` on the skills editor (`runs/show.blade.php`). Real a11y gap; fixing it means restructuring that block, which is the "do not refactor while fixing" line. |
-| F-13 | — | no action | — | Audit recorded this as a pass. |
-| F-14 | O | **fixed with F-2** | `93cb39b` | The double-announced "Next, Next" existed only in the deleted route's literal sample data. |
-| F-15 | O | **fixed with F-2** | `93cb39b` | design-preview was the last surface outside the token/layout system; it is gone. |
-| F-16 | O | deferred | — | Run page length is a layout/design question, not a fix. |
-| F-17 | — | no action | — | Audit recorded zero contrast failures. |
-| F-18 | O | deferred | — | Plural/pronoun bug in `grade-point-meter.blade.php:104-106`. One-line copy fix, but the file is not one I otherwise touched, so the fence says leave it for the follow-up slice. |
-| F-19 | N | **decision requested** | — | `/up` still loads `fonts.bunny.net` + `cdn.jsdelivr.net` (re-confirmed on this branch). Vendor-registered route. See `DECISIONS-NEEDED.md`. |
+| ID     | Sev   | Status                                          | Commit                                        | Verification                                                                                                                                                                                                                                                |
+| ------ | ----- | ----------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F-1    | N     | **fixed**                                       | `7034c19`                                     | `/` returns 200 with `data-theme="dark"` under a dark preference; response contains zero six-digit hex (was 26 in-file / 42 incl. shorthand), no `cloud.laravel.com`, no `fonts.bunny.net`. Test: *lands inside the product and honors the stored theme*.   |
+| F-2    | N     | **fixed by deletion**                           | `93cb39b` + `f042d17`                         | `/design-preview` now 404. Route + view removed; orphaned `View` import removed. Closes F-14 and F-15 with it.                                                                                                                                              |
+| F-3    | N     | **fixed**                                       | `bc7ceb6`                                     | Run 4 strip caption reads "no scenario set"; rail label chip gone. Captured light + dark. Test asserts both directions so the fix cannot over-correct.                                                                                                      |
+| F-4    | O     | deferred                                        | —                                             | Vocabulary split (strip "N/A" vs panel "not yet totalled") is real but lives in copy the audit graded O; touching it means choosing one vocabulary, which is a design-record call, not a one-liner in a file I was already in.                              |
+| F-5    | O     | deferred                                        | —                                             | Validation message "The umamusume id field is required." needs an attribute label in `StoreTrainingRunRequest`, which is outside the frontend fence for this slice.                                                                                         |
+| F-6    | O     | **decision requested**                          | —                                             | No column, no input path, permanently N/A. Needs schema work or widget removal. See `DECISIONS-NEEDED.md`.                                                                                                                                                  |
+| F-7    | N     | **fixed; frozen tests updated in two phases**   | `83db98c` code, `ad17d99` + `792b5cb` tests   | POST `stage=preview` now `302` + `Location: /training-runs/1`; target answers GET 200, so the 405 is unreachable. All 8 frozen tests green; suite back to base parity at 6. See §Frozen below.                                                              |
+| F-8    | O     | deferred                                        | —                                             | Out-of-range page reuses the zero-result sentence. Audit marked O; a distinct state needs new copy + a branch in `catalog/index.blade.php`, i.e. a new file opened to chase an observation, which the fence forbids here.                                   |
+| F-9    | N     | **fixed**                                       | `3c8c830`                                     | CSV header now `…,condition,energy,mood,fans`; row 1 = `1,480,300,355,210,95,240,,88,NORMAL,9000`. JSON turn keys carry the same three. Original 8 positions unchanged. Bodies in `resolutions/`.                                                           |
+| F-10   | N     | **fixed**                                       | `9419665`                                     | `resources/views/errors/404.blade.php` renders through `x-layout`: nav, skip link, tokens, three routes back. Both 404 routes captured.                                                                                                                     |
+| F-11   | O     | not done                                        | —                                             | `errors/500.blade.php` optional; skipped because a 500 page cannot be exercised on this fixture without injecting a fault, and inventing one to screenshot it would be a fake verification.                                                                 |
+| F-12   | O     | deferred                                        | —                                             | Three controls in one `<label>` on the skills editor (`runs/show.blade.php`). Real a11y gap; fixing it means restructuring that block, which is the "do not refactor while fixing" line.                                                                    |
+| F-13   | —     | no action                                       | —                                             | Audit recorded this as a pass.                                                                                                                                                                                                                              |
+| F-14   | O     | **fixed with F-2**                              | `93cb39b`                                     | The double-announced "Next, Next" existed only in the deleted route's literal sample data.                                                                                                                                                                  |
+| F-15   | O     | **fixed with F-2**                              | `93cb39b`                                     | design-preview was the last surface outside the token/layout system; it is gone.                                                                                                                                                                            |
+| F-16   | O     | deferred                                        | —                                             | Run page length is a layout/design question, not a fix.                                                                                                                                                                                                     |
+| F-17   | —     | no action                                       | —                                             | Audit recorded zero contrast failures.                                                                                                                                                                                                                      |
+| F-18   | O     | deferred                                        | —                                             | Plural/pronoun bug in `grade-point-meter.blade.php:104-106`. One-line copy fix, but the file is not one I otherwise touched, so the fence says leave it for the follow-up slice.                                                                            |
+| F-19   | N     | **decision requested**                          | —                                             | `/up` still loads `fonts.bunny.net` + `cdn.jsdelivr.net` (re-confirmed on this branch). Vendor-registered route. See `DECISIONS-NEEDED.md`.                                                                                                                 |
 
 **Counts: 6 fixed (F-1, F-2, F-3, F-9, F-10, plus F-14/F-15 absorbed by F-2), 8 deferred
 (F-4, F-5, F-8, F-11, F-12, F-16, F-18), 2 decision-requested (F-6, F-19), 2 no-action
@@ -1321,7 +1341,7 @@ $this->post('/training-runs/'.$run->id.'/turns', $payload)
 $html = $this->withSession(['_old_input' => $payload + ['previewed' => '1']])
     ->get(route('runs.show', $run))
     ->getContent();
-```
+```text
 
 Two things that snippet encodes, both easy to get wrong. `followRedirect()` does not exist on
 `TestResponse` in Laravel 13.32, so the redirect target is reached by an explicit second request.
@@ -1341,17 +1361,17 @@ The quality bar for this repository, written as a contract. Agents: read this be
 
 ### Dimensions and thresholds
 
-| # | Dimension | Threshold | Command |
-|---|---|---|---|
-| C-1 | Tests | All Pest tests pass; every behavior change ships a test | `php artisan test --compact` |
-| C-2 | Static analysis | PHPStan level 6 (Larastan), zero errors | `vendor/bin/phpstan analyse --no-progress` |
-| C-3 | Formatting | Pint clean | `vendor/bin/pint --dirty --format agent` then `vendor/bin/pint --test --format agent` |
-| C-4 | Lore | Zero unexplained hits of banned patterns (below) in tracked text | `composer lore` (and `composer lore-code`) — not `make lore`, which cannot run on this host (KI-4) |
-| C-5 | Migrations | Fresh migrate + seed succeeds; every migration has a working `down()` | `php artisan migrate:fresh --seed` |
-| C-6 | Performance (local budget) | Catalog index under 200 ms at ~1,000 Umamusume / ~2,000 skills (NFR-3) | manual benchmark per PRD §8; re-check when schema or query shape changes |
-| C-7 | UI states | Every data view renders empty, loading/refresh, and error states (§7, antislop R-27) | review checklist |
-| C-8 | Dependencies | No new package without human approval; `composer audit` and `npm audit` with no reachable critical/high | `composer audit`; `npm audit --omit=dev` |
-| C-9 | Frontend types | `resources/js/**/*.ts` compiles clean under `tsconfig.json`'s `strict` mode, which declares `noEmit` | `npm run typecheck` (also runs inside `composer test`) |
+| #     | Dimension                    | Threshold                                                                                                 | Command                                                                                              |
+| ----- | ---------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| C-1   | Tests                        | All Pest tests pass; every behavior change ships a test                                                   | `php artisan test --compact`                                                                         |
+| C-2   | Static analysis              | PHPStan level 6 (Larastan), zero errors                                                                   | `vendor/bin/phpstan analyse --no-progress`                                                           |
+| C-3   | Formatting                   | Pint clean                                                                                                | `vendor/bin/pint --dirty --format agent` then `vendor/bin/pint --test --format agent`                |
+| C-4   | Lore                         | Zero unexplained hits of banned patterns (below) in tracked text                                          | `composer lore` (and `composer lore-code`) — not `make lore`, which cannot run on this host (KI-4)   |
+| C-5   | Migrations                   | Fresh migrate + seed succeeds; every migration has a working `down()`                                     | `php artisan migrate:fresh --seed`                                                                   |
+| C-6   | Performance (local budget)   | Catalog index under 200 ms at ~1,000 Umamusume / ~2,000 skills (NFR-3)                                    | manual benchmark per PRD §8; re-check when schema or query shape changes                             |
+| C-7   | UI states                    | Every data view renders empty, loading/refresh, and error states (§7, antislop R-27)                      | review checklist                                                                                     |
+| C-8   | Dependencies                 | No new package without human approval; `composer audit` and `npm audit` with no reachable critical/high   | `composer audit`; `npm audit --omit=dev`                                                             |
+| C-9   | Frontend types               | `resources/js/**/*.ts` compiles clean under `tsconfig.json`'s `strict` mode, which declares `noEmit`      | `npm run typecheck` (also runs inside `composer test`)                                               |
 
 > C-7 loading-state scope is interpreted by ADR-0007 (`docs/adr/0007-c7-loading-state-scope-for-server-rendered-views.md`): initial server-rendered navigation may rely on browser-native loading; user-initiated async operations require explicit loading states. Empty/error/data states remain mandatory. Gate tooling and G-number registration live in `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md".
 

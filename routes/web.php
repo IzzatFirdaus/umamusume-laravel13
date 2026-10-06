@@ -7,9 +7,12 @@ use App\Http\Controllers\Career\BuildTargetController;
 use App\Http\Controllers\Career\CockpitController;
 use App\Http\Controllers\Career\DeckSelectController;
 use App\Http\Controllers\Career\LegacySelectController;
+use App\Http\Controllers\Career\PreflightController;
+use App\Http\Controllers\Career\RaceDecisionController;
 use App\Http\Controllers\Career\ScenarioSelectController;
 use App\Http\Controllers\Career\TraineeProfileController;
 use App\Http\Controllers\Career\TraineeSelectController;
+use App\Http\Controllers\Career\TrainingDecisionController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LegacyController;
@@ -18,6 +21,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SupportCardController;
 use App\Http\Controllers\TrainingRunController;
+use App\Http\Controllers\VeteranController;
 use Illuminate\Support\Facades\Route;
 
 // Trainer Desk 2.0 home (ADR-0020 §1): the SPA Dashboard is the front door. The Blade
@@ -70,6 +74,14 @@ Route::get('/career/setup/legacy', [LegacySelectController::class, 'show'])->nam
 Route::put('/career/setup/legacy', [LegacySelectController::class, 'store'])->name('career.legacy.store');
 Route::get('/career/setup/deck', [DeckSelectController::class, 'show'])->name('career.deck');
 Route::put('/career/setup/deck', [DeckSelectController::class, 'store'])->name('career.deck.store');
+/*
+ * Preflight, and the wizard's one write: the GET composes the draft into one contract and the PUT runs
+ * `Start Career`. It is its own route rather than a post to `runs.store` because that endpoint validates
+ * the run row alone — the deck, the ancestry and the target would be silently dropped — and because this
+ * write re-runs each step's Form Request before it creates anything (`StartCareerRequest`).
+ */
+Route::get('/career/setup/preflight', [PreflightController::class, 'show'])->name('career.preflight');
+Route::put('/career/setup/preflight', [PreflightController::class, 'store'])->name('career.preflight.store');
 
 Route::get('/umamusume', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catalog.show');
@@ -98,6 +110,12 @@ Route::get('/training-runs/{run}', [TrainingRunController::class, 'show'])->name
  * cannot collide, because the cockpit's path carries an extra segment.
  */
 Route::get('/training-runs/{run}/cockpit', [CockpitController::class, 'show'])->name('runs.cockpit');
+/*
+ * The Training Decision detail (SCREEN-010, `SCR-CAR-012`, plan §8 D9). Read-only: its one write is the
+ * guided turn, which posts to `runs.turns.store` below with that route's own Form Request, so no second
+ * turn-write route exists (the same rule the cockpit's correction follows).
+ */
+Route::get('/training-runs/{run}/training', [TrainingDecisionController::class, 'show'])->name('runs.training');
 Route::put('/training-runs/{run}', [TrainingRunController::class, 'update'])->name('runs.update');
 Route::delete('/training-runs/{run}', [TrainingRunController::class, 'destroy'])->name('runs.destroy');
 Route::get('/training-runs/{run}/export/{format}', [TrainingRunController::class, 'export'])->name('runs.export');
@@ -136,6 +154,19 @@ Route::get('/legacy/{run}', [LegacyController::class, 'builder'])
 Route::put('/legacy/{run}', [LegacyController::class, 'update'])
     ->whereNumber('run')
     ->name('legacy.update');
+
+/*
+ * The Veteran library (SCREEN-021, PRD FR-G-2, plan §8 D16's read half). Two reads and no writes: the row
+ * is `ListVeterans` and the detail is `ShowVeteran`, both landed at C3, and `VeteranRow` is the shape the
+ * Legacy Lab's own browse list prints, so the two surfaces cannot describe one Veteran differently.
+ *
+ * There is no write route here on purpose. `RecordVeteran` is landed and has no caller, because the screen
+ * that files a career (`SCREEN-020`, Save Veteran) is the other half of D16 and the plan gates it behind
+ * D15, Career Result. A library with no rows is therefore the true state of a fresh install, not a broken
+ * read, and both pages say so rather than leaving an unexplained empty list.
+ */
+Route::get('/veterans', [VeteranController::class, 'index'])->name('veterans.index');
+Route::get('/veterans/{veteran}', [VeteranController::class, 'show'])->name('veterans.show');
 
 // The two UI preferences PRD US-11 authorizes (SCREEN_SPEC.md §7-5). One PUT for both keys,
 // because writing a preference is one action on the store rather than one action per key.

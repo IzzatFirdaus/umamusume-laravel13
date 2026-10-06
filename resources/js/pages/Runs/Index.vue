@@ -37,7 +37,7 @@ defineProps<{
                 Import a historical run
             </a>
             <a
-                href="/training-runs/create"
+                href="/career/setup/scenario"
                 class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome"
             >
                 New run

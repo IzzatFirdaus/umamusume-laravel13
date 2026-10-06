@@ -36,9 +36,10 @@ final class ListVeterans
      * rather than widening it.
      *
      * @param  array{trainee?: int|null, scenario?: string|null, tags?: list<string>}  $filters
+     * @param  'newest'|'oldest'  $order  the library's own recording order; see the note in the body
      * @return LengthAwarePaginator<int, Veteran>
      */
-    public function handle(array $filters = [], mixed $pageSize = null): LengthAwarePaginator
+    public function handle(array $filters = [], mixed $pageSize = null, string $order = 'newest'): LengthAwarePaginator
     {
         $trainee = $filters['trainee'] ?? null;
         $scenario = $filters['scenario'] ?? null;
@@ -60,6 +61,12 @@ final class ListVeterans
             $query->whereJsonContains('tags', $tag);
         }
 
-        return $query->latest('id')->paginate(PageSize::clamp($pageSize));
+        // The toggle orders by the row's own id, which is the order the library recorded them in. It is
+        // not a completion date: no column holds the date a career actually finished, so labelling
+        // `created_at` that would print a fact the store does not have. The default is today's behaviour,
+        // so the two surfaces that call this without an order argument see the list they already show.
+        return $order === 'oldest'
+            ? $query->oldest('id')->paginate(PageSize::clamp($pageSize))
+            : $query->latest('id')->paginate(PageSize::clamp($pageSize));
     }
 }

@@ -48,10 +48,6 @@ class ScenarioSelectController extends Controller
             'scenarios' => $this->cards(),
             'selected' => $draft['scenario'],
             'ruleset' => $this->ruleset(),
-            // The wizard's own absence note for the step that will consume this choice. Step 2 is the
-            // Trainee Selection slice (D3); until it lands the nav renders it as a named absence and
-            // this page says so, which is the `AppLayout` `to: null` rule applied to a step.
-            'nextStepReady' => false,
         ]);
     }
 

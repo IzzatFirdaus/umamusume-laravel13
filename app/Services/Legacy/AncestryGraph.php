@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Legacy;
 
 use App\Models\Legacy\LegacySelectionPayload;
+use App\Models\Veteran;
 
 /**
  * The six-node ancestry graph, shaped from what a payload and two names already hold.
@@ -69,6 +70,30 @@ final class AncestryGraph
                 self::parentNode($payload?->legacies[1] ?? null, 'parent_b', 'Parent B', 'Grandparent B1', 'Grandparent B2', $parentBName),
             ],
         ];
+    }
+
+    /**
+     * The two parent names behind a pair of library picks, in slot order.
+     *
+     * A Veteran is a run whose trainee is the Umamusume the client shows in the parent slot, so the name is
+     * read through the run rather than stored a second time (`ADR-0010` Decision keeps the two foreign keys
+     * as the identity and the json as the read-back). The wizard step and Preflight both hold their
+     * identity as `veterans` ids, so both resolve names here instead of each writing the join.
+     *
+     * @param  array{0: int|null, 1: int|null}  $veteranIds
+     * @return array{0: string|null, 1: string|null}
+     */
+    public static function parentNames(array $veteranIds): array
+    {
+        /** @var array{0: string|null, 1: string|null} $names */
+        $names = array_map(
+            static fn (?int $id): ?string => $id === null
+                ? null
+                : Veteran::query()->with('trainingRun.umamusume')->find($id)?->trainingRun?->umamusume?->name,
+            $veteranIds,
+        );
+
+        return $names;
     }
 
     /**

@@ -40,7 +40,6 @@ const props = defineProps<{
     scenarios: ScenarioCard[];
     selected: string | null;
     ruleset: { value: string | null; title: string };
-    nextStepReady: boolean;
 }>();
 
 const choosing = ref<string | null>(null);
@@ -230,16 +229,5 @@ const optimizesText = (card: ScenarioCard): string | null => {
                 </p>
             </li>
         </ul>
-
-        <!-- Step 2 is the Trainee Selection slice (D3). Until it lands there is nowhere to continue
-             to, and the screen says so instead of offering a dead link or a second submit button. -->
-        <p
-            v-if="!props.nextStepReady"
-            class="mt-6 max-w-2xl text-sm text-ink-muted"
-            title="The Trainee Selection step is its own slice (D3)."
-        >
-            Your choice is stored in this setup draft. Trainee selection is the next step and is not
-            built yet, so there is nothing to continue to from here.
-        </p>
     </SetupLayout>
 </template>

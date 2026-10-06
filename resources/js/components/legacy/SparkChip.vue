@@ -29,7 +29,9 @@ const props = withDefaults(
     { target: null, stars: null },
 );
 
-const starsLabel = computed(() => (props.stars === null ? 'stars not recorded' : `${props.stars} star`));
+const starsLabel = computed(() =>
+    props.stars === null ? 'stars not recorded' : `${props.stars} star${props.stars === 1 ? '' : 's'}`,
+);
 
 const accessibleName = computed(() => {
     const target = props.target === null || props.target === '' ? null : props.target;
@@ -46,7 +48,6 @@ const accessibleName = computed(() => {
          the column slower to scan for no gain. A sighted Trainer still gets the shape. -->
     <span
         class="inline-flex items-center gap-1.5 rounded-full border border-rule bg-sunken px-2 py-0.5 text-xs text-ink"
-        :title="accessibleName"
     >
         <span aria-hidden="true" class="font-mono text-[0.65rem] font-bold text-ink-strong">
             {{ kindLabel.slice(0, 1) }}

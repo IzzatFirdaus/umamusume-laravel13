@@ -47,15 +47,15 @@ Replacement, proposed for R4: **every derived number is a pure function of enter
 
 The constant set, with the citation each one carries. These are the only values the engine may use:
 
-| Constant | Value | Source in `UMAMUSUME_REFERENCE.md` | Confidence |
-|---|---|---|---|
-| Session Energy cost | 17-28, scaling with training level | §1.1.6, GameWith | ⚠ STALE, measured 2023-02-25 |
-| Rest recovery | +30 | §1.1.5, GameWith 2026-09-25 | current |
-| Wit session cost | 0, recovers a small amount | §1.1.1, Game8 2026-09-10 | current |
-| Advisory threshold | 50 Energy | §1.1.5: success rate 「大きく変わってくる」 | current, **qualitative only** |
-| Mood multipliers | +20 / +10 / 0 / −10 / −20 % | §1.1.6, `[Global]` client Mood Effect panel; Kamigame + GameWith agree | current, **client-confirmed 2026-09-27** |
-| Injury stat hit | −5 to −10 | §1.1.5, GameWith | ⚠ STALE, 2023-02-25 |
-| Maximum Energy raise from events | +12 | §1.1.6, GameWith 2026-09-25 | current |
+| Constant                         | Value                              | Source in `UMAMUSUME_REFERENCE.md`                                     | Confidence                               |  |
+| -------------------------------- | ---------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------- |  |
+| Session Energy cost              | 17-28, scaling with training level | §1.1.6, GameWith                                                       | ⚠ STALE, measured 2023-02-25             |  |
+| Rest recovery                    | +30                                | §1.1.5, GameWith 2026-09-25                                            | current                                  |  |
+| Wit session cost                 | 0, recovers a small amount         | §1.1.1, Game8 2026-09-10                                               | current                                  |  |
+| Advisory threshold               | 50 Energy                          | §1.1.5: success rate 「大きく変わってくる」                            | current, **qualitative only**            |  |
+| Mood multipliers                 | +20 / +10 / 0 / −10 / −20 %        | §1.1.6, `[Global]` client Mood Effect panel; Kamigame + GameWith agree | current, **client-confirmed 2026-09-27** |  |
+| Injury stat hit                  | −5 to −10                          | §1.1.5, GameWith                                                       | ⚠ STALE, 2023-02-25                      |  |
+| Maximum Energy raise from events | +12                                | §1.1.6, GameWith 2026-09-25                                            | current                                  |  |
 
 ### 3. A failure percentage cannot be sourced, so it ships as a band and the number is opt-in
 
@@ -76,10 +76,10 @@ A suggested sequence is allowed, but the UI must be able to answer "why this" fr
 
 `turn_entries` currently holds turn, five stats, `sp`, and `condition`. Energy guidance needs:
 
-| Column | Type | Notes |
-|---|---|---|
-| `energy` | unsigned smallint, nullable | 0-100. Nullable because historical runs were logged without it and must not be backfilled with guesses |
-| `mood` | string, nullable, enum-backed | `MoodTier`: Peak / Good / Normal / Poor / Worst |
+| Column   | Type                          | Notes                                                                                                  |  |
+| -------- | ----------------------------- | ------------------------------------------------------------------------------------------------------ |  |
+| `energy` | unsigned smallint, nullable   | 0-100. Nullable because historical runs were logged without it and must not be backfilled with guesses |  |
+| `mood`   | string, nullable, enum-backed | `MoodTier`: Peak / Good / Normal / Poor / Worst                                                        |  |
 
 Two notes on this table:
 

@@ -33,17 +33,21 @@ use Pest\TestCases\TestCase;
 
 class UserIndexTest extends TestCase
 {
-    use RefreshDatabase;
 
-    public function test_users_can_be_listed(): void
-    {
-        User::factory()->count(3)->create();
+```text
+use RefreshDatabase;
 
-        $response = $this->get(route('users.index'));
+public function test_users_can_be_listed(): void
+{
+    User::factory()->count(3)->create();
 
-        $response->assertOk();
-        $response->assertJsonPath('data.0.id', User::first()->id);
-    }
+    $response = $this->get(route('users.index'));
+
+    $response->assertOk();
+    $response->assertJsonPath('data.0.id', User::first()->id);
+}
+```
+
 }
 </code-snippet>
 

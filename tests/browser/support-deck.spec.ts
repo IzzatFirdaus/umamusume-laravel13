@@ -25,19 +25,33 @@ test.afterEach(async ({ page }) => {
 });
 
 async function builderUrl(page: import('@playwright/test').Page, scenario: string): Promise<string> {
-    await page.goto('/training-runs/create');
+    // The picker's 25 thumbnails cost 1.3-2.4s each on this host (`/artwork/support_thumb/10001`
+    // measured at 2.40s for 67 KB), and `artisan serve` is a single process on Windows
+    // (`PHP_CLI_SERVER_WORKERS` is ignored: six concurrent requests staircased 14s, 19s, 24s, 29s, 35s,
+    // 41s). One page view of this screen therefore queues ~50s of PHP work that every later navigation
+    // in the file waits behind, which is what turned a 17-test file into a 20-minute one.
+    //
+    // No assertion in this file reads a decoded image. `ArtworkSlot` puts the `<img>` in the DOM as soon
+    // as the mirror holds a file, so the requests are refused at the browser and the markup these tests
+    // measure is the same markup. Same `page.route` lever `dashboard.spec.ts` uses for its error state.
+    await page.route('**/artwork/**', (route) => route.abort());
+
+    // `domcontentloaded` on every navigation, for the reason `legacy.spec.ts`'s header gives: `load`
+    // waits on the module graph and one loopback request per artwork frame, which is host speed rather
+    // than a property of this screen.
+    await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.locator('#trainee-combobox').fill(TRAINEE);
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: scenario });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/);
+    await page.waitForURL(/\/training-runs\/\d+$/, { waitUntil: 'domcontentloaded' });
 
     const runUrl = page.url();
     createdRunUrls.push(runUrl);
 
     const url = `${runUrl}/deck`;
-    await page.goto(url);
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     return url;
 }
@@ -102,7 +116,10 @@ test('replaces a slot with the keyboard alone and returns focus to the slot it c
     await page.keyboard.press('Enter');
 
     // The picker now writes to slot two, and the button says so in words rather than by position alone.
-    await expect(page.getByRole('button', { name: /^Equip to Slot 2/ })).toBeVisible();
+    // The picker renders one equip button per card row, so the name is a prefix match against many
+    // elements; `.first()` is what `runs.spec.ts` and this file's own line below already do. Without
+    // it this is a strict-mode violation, not a missing control.
+    await expect(page.getByRole('button', { name: /^Equip to Slot 2/ }).first()).toBeVisible();
 
     // Equip the first card the picker offers, by keyboard.
     const equip = page.getByRole('button', { name: /^Equip to Slot 2/ }).first();
@@ -195,15 +212,30 @@ test('prints the seven types on the picker rows as a word and a glyph, never col
     await expect(firstRow).toContainText(/Speed|Stamina|Power|Guts|Wit|Pal|Group/);
 });
 
-test('leaves the picker rows text-only when the mirror holds no file', async ({ page }) => {
+test('never paints a placeholder frame or a stranded anchor in the picker', async ({ page }) => {
     await builderUrl(page, 'ura_finale');
 
-    // `ADR-0021` is unfilled in this suite, so the absence is the state that renders. No frame, no grey
-    // box, no placeholder glyph, and no anchor stranded around an absent image.
-    await expect(page.locator('#deck-picker-results img')).toHaveCount(0);
+    // The invariants `DESIGN.md` §4.7 and `ADR-0021` §7 actually promise, stated so they hold in
+    // either mirror state: a slot paints a real file or it paints nothing, and an absent file never
+    // becomes `src=""`, a grey box, or an anchor wrapped around nothing.
+    //
+    // This test used to assert `img` count zero, which encoded one environment — a mirror nobody had
+    // filled. `uma:fetch-art` has since run on this tree (666 files under
+    // `storage/app/private/artwork`), so that assertion was describing the disk, not the contract.
+    // A test that can only pass on an unfilled mirror is the trap AGENTS.md §18 names.
+    // A row has to exist before an absence can be measured. On an unhydrated page every `toHaveCount(0)`
+    // below passes for the wrong reason, which is the trap `AGENTS.md` §18's empty-mirror note describes
+    // from the other side: the old assertion could only pass on an unfilled mirror, and a zero-count on
+    // no rows at all can only pass on nothing.
+    const rows = page.locator('#deck-picker-results > li');
+    await expect(rows.first()).toBeVisible();
+
     await expect(page.locator('#deck-picker-results img[src=""]')).toHaveCount(0);
-    await expect(page.locator('#deck-picker-results a:has(img)')).toHaveCount(0);
-    await expect(page.locator('#deck-picker-results > li').first().locator('a').first()).toBeVisible();
+    await expect(page.locator('#deck-picker-results img:not([src])')).toHaveCount(0);
+    await expect(page.locator('#deck-picker-results a:has(img[src=""])')).toHaveCount(0);
+
+    // Every row still offers its text link, framed or not, and the row name is the link's own text.
+    await expect(rows.first().locator('a').first()).toBeVisible();
 });
 
 test('narrowing the picker leaves the six picks exactly where they were', async ({ page }) => {
@@ -217,7 +249,7 @@ test('narrowing the picker leaves the six picks exactly where they were', async 
     // rather than the query string, this would empty slot one with no way back.
     await page.locator('select[name="type"]').selectOption('guts');
     await page.getByRole('button', { name: 'Filter' }).click();
-    await page.waitForURL(/type=guts/);
+    await page.waitForURL(/type=guts/, { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
     await expect(page.locator('select[name="type"]')).toHaveValue('guts');
@@ -230,7 +262,7 @@ test('names the ask when a filter reaches no card rather than showing an empty f
     await page.locator('select[name="rarity"]').selectOption('1');
     await page.locator('select[name="type"]').selectOption('group');
     await page.getByRole('button', { name: 'Filter' }).click();
-    await page.waitForURL(/rarity=1/);
+    await page.waitForURL(/rarity=1/, { waitUntil: 'domcontentloaded' });
 
     await expect(page.getByText(/Nothing matches rarity R \+ type Group/)).toBeVisible();
 });

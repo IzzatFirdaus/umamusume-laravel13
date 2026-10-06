@@ -11,12 +11,12 @@ A turn entry's stat ceiling is **that scenario's own per-stat cap**: `base_cap` 
 previously computed inline. The two call sites cannot disagree because only one of them does the
 sum.
 
-| Scenario | Speed | Stamina | Power | Guts | Wit |
-|---|---|---|---|---|---|
-| URA Finale | 1400 | 1400 | 1400 | 1400 | 1400 |
-| Unity Cup | 1300 | 1300 | 1300 | 1300 | 1800 |
-| Trackblazer | 1200 | 1900 | 1200 | 1200 | 1500 |
-| Our Grand Concert | 1600 | 1300 | 1300 | 1500 | 1300 |
+| Scenario            | Speed   | Stamina   | Power   | Guts   | Wit    |
+| ------------------- | ------- | --------- | ------- | ------ | ------ |
+| URA Finale          | 1400    | 1400      | 1400    | 1400   | 1400   |
+| Unity Cup           | 1300    | 1300      | 1300    | 1300   | 1800   |
+| Trackblazer         | 1200    | 1900      | 1200    | 1200   | 1500   |
+| Our Grand Concert   | 1600    | 1300      | 1300    | 1500   | 1300   |
 
 Derived from `config/scenarios.php` (`base_cap` 1200, `hard_cap` 2000, per-scenario `cap_bonus`),
 whose header dates that table to 2026-09-27 against three Global sources. The table above is the

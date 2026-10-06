@@ -50,6 +50,7 @@ Since you can race as often as you like without a fixed schedule dictating turn 
 ## What We Don't Know Yet
 
 Because Trackblazer hasn't launched on Global, the following are **not yet confirmed for the Global version** and aren't covered by currently available guides:
+
 - Specific Support Card deck archetype recommendations (analogous to Unity Cup's Speed/Wit, Double Pal, etc. builds) tailored to Trackblazer's shop/rival mechanics.
 - A fixed or semi-fixed calendar of any scripted (non-race-goal) events, if any exist.
 - Whether Trackblazer will receive a Global-exclusive early balance patch the way Unity Cup did just 5 days after its Global launch — worth watching for at release, since it changed the JP-vs-Global experience meaningfully for Unity Cup.

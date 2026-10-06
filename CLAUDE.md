@@ -31,16 +31,16 @@ a `User` flow, or a deploy path because generic guidance suggests it.
 
 ## 2. Required reading before a substantial change
 
-| Change | Read first |
-|---|---|
-| Anything | `AGENTS.md`, then the `.ai/rules` files covering the paths in scope |
-| UI, layout, copy, tokens | `DESIGN.md` (visual system) and `SCREEN_SPEC.md` §4 and §8 (screen behavior) |
-| Pipeline, parsers, sources, provenance | `ARCHITECTURE.md` §5 and §6, `config/uma.php`, the parser's sibling in `app/Services/DataPipeline/Parsers/` |
-| Schema | `ARCHITECTURE.md` §3, `ARCHITECTURE-ESSENTIALS.md` (the digest travels with the migration), the PRD requirement the column serves, and any ADR in the area |
-| Planner domain (runs, turns, skills, export) | `PRD.md` §4 FR-C, `ADR-0015` (stat ceilings), `app/Services/ScenarioCaps.php` |
-| Lore, terminology, displayed vocabulary | `AGENTS.md` §5, `lang/en/uma.php`, `tools/lore.php` |
-| Mechanics or roster facts | `docs/UMAMUSUME_REFERENCE.md` (eight sections; re-derive its table rather than quoting prose counts) |
-| Onboarding, setup, commands | `README.md` |
+| Change                                         | Read first                                                                                                                                                   |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Anything                                       | `AGENTS.md`, then the `.ai/rules` files covering the paths in scope                                                                                          |
+| UI, layout, copy, tokens                       | `DESIGN.md` (visual system) and `SCREEN_SPEC.md` §4 and §8 (screen behavior)                                                                                 |
+| Pipeline, parsers, sources, provenance         | `ARCHITECTURE.md` §5 and §6, `config/uma.php`, the parser's sibling in `app/Services/DataPipeline/Parsers/`                                                  |
+| Schema                                         | `ARCHITECTURE.md` §3, `ARCHITECTURE-ESSENTIALS.md` (the digest travels with the migration), the PRD requirement the column serves, and any ADR in the area   |
+| Planner domain (runs, turns, skills, export)   | `PRD.md` §4 FR-C, `ADR-0015` (stat ceilings), `app/Services/ScenarioCaps.php`                                                                                |
+| Lore, terminology, displayed vocabulary        | `AGENTS.md` §5, `lang/en/uma.php`, `tools/lore.php`                                                                                                          |
+| Mechanics or roster facts                      | `docs/UMAMUSUME_REFERENCE.md` (eight sections; re-derive its table rather than quoting prose counts)                                                         |
+| Onboarding, setup, commands                    | `README.md`                                                                                                                                                  |
 
 `PRODUCT.md` is a generated summary for design and agent context. Where it and `PRD.md`
 disagree, `PRD.md` wins; do not edit `PRODUCT.md` by hand (the plugin rewrites it).
@@ -161,20 +161,20 @@ it for that class of task rather than improvising a review.
 
 ## 8. Source of truth
 
-| Question | Authority |
-|---|---|
-| Which screens exist, their URLs and names | `routes/web.php`, `routes/api.php` |
-| What a screen shows and how it got there | controller methods, then the view |
-| Validation and refusals | `app/Http/Requests/*`, then `ScenarioCaps` for ceilings |
-| Authorization | there is none by design (`ARCHITECTURE.md` §8, PRD NFR-1) |
-| Schema | `ARCHITECTURE.md` §3 plus the migrations; `ARCHITECTURE-ESSENTIALS.md` is the digest |
-| Pipeline stage behavior | `AGENTS.md` §8, `app/Services/DataPipeline/` |
-| Displayed vocabulary | `lang/en/uma.php`, enum labels keyed by case name |
-| Tokens, contrast, motion | `DESIGN.md` and `docs/research-scratch/DESIGN-CORPUS.md` |
-| Automated behavior expectations | `tests/Feature/*` |
-| Known defects and rulings | `KNOWN-ISSUES.md` (live register) |
-| Agent operating rules | `AGENTS.md` |
-| When sources disagree | `AGENTS.md` §2; record the conflict in `SCREEN_SPEC.md` §7 or an ADR erratum |
+| Question                                    | Authority                                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Which screens exist, their URLs and names   | `routes/web.php`, `routes/api.php`                                                     |
+| What a screen shows and how it got there    | controller methods, then the view                                                      |
+| Validation and refusals                     | `app/Http/Requests/*`, then `ScenarioCaps` for ceilings                                |
+| Authorization                               | there is none by design (`ARCHITECTURE.md` §8, PRD NFR-1)                              |
+| Schema                                      | `ARCHITECTURE.md` §3 plus the migrations; `ARCHITECTURE-ESSENTIALS.md` is the digest   |
+| Pipeline stage behavior                     | `AGENTS.md` §8, `app/Services/DataPipeline/`                                           |
+| Displayed vocabulary                        | `lang/en/uma.php`, enum labels keyed by case name                                      |
+| Tokens, contrast, motion                    | `DESIGN.md` and `docs/research-scratch/DESIGN-CORPUS.md`                               |
+| Automated behavior expectations             | `tests/Feature/*`                                                                      |
+| Known defects and rulings                   | `KNOWN-ISSUES.md` (live register)                                                      |
+| Agent operating rules                       | `AGENTS.md`                                                                            |
+| When sources disagree                       | `AGENTS.md` §2; record the conflict in `SCREEN_SPEC.md` §7 or an ADR erratum           |
 
 ## 9. Protected and sensitive areas
 
@@ -258,7 +258,7 @@ index in `docs/adr/README.md` is derived; regenerate it with the command in that
 
 Report in this shape, and say plainly what you did not verify:
 
-```
+```text
 Implemented:
 - <file: what changed and why>
 
@@ -274,13 +274,13 @@ Known issues / failures:
 
 Intentionally deferred:
 - <what you did not touch and why>
-```
+```text
 
 Keep it short. The point is that a reader can tell what actually happened and what is still
 unproven.
 
 ## 16. Change log
 
-| Date | Change | Reason |
-|---|---|---|
-| 2026-10-04 | Rewritten as Claude-specific guidance on top of `AGENTS.md`: added Boost MCP and Playwright guidance, the work pattern, search-before-create, the whole-tree caveat for Pint and PHPStan, the UI/browser workflow, the source-of-truth table, protected areas, and the completion-report shape. Removed the injected Laravel Boost block and the duplicated agent contract now held in `AGENTS.md`. Corrected three false claims: `CLAUDE.md` is tracked (not gitignored), impeccable is not installed under `.agents/` or `~/.claude/`, and the repository has no deployment path. | The file duplicated repository-wide rules, repeated generic framework guidance that contradicts the no-auth, no-deploy design, and asserted install paths and git status that the tree contradicts. |
+| Date         | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Reason                                                                                                                                                                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-04   | Rewritten as Claude-specific guidance on top of `AGENTS.md`: added Boost MCP and Playwright guidance, the work pattern, search-before-create, the whole-tree caveat for Pint and PHPStan, the UI/browser workflow, the source-of-truth table, protected areas, and the completion-report shape. Removed the injected Laravel Boost block and the duplicated agent contract now held in `AGENTS.md`. Corrected three false claims: `CLAUDE.md` is tracked (not gitignored), impeccable is not installed under `.agents/` or `~/.claude/`, and the repository has no deployment path.   | The file duplicated repository-wide rules, repeated generic framework guidance that contradicts the no-auth, no-deploy design, and asserted install paths and git status that the tree contradicts.   |

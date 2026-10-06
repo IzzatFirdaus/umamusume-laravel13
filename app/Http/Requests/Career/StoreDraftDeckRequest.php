@@ -6,6 +6,7 @@ namespace App\Http\Requests\Career;
 
 use App\Http\Requests\StoreDeckRequest;
 use App\Models\DeckSlot;
+use Illuminate\Validation\Rule;
 
 /**
  * The deck of the setup wizard's step 5 (`SCR-CAR-009`, PRD FR-A-4, `ADR-0020` §1, under `ADR-0014`).
@@ -31,6 +32,30 @@ class StoreDraftDeckRequest extends StoreDeckRequest
      * @var string
      */
     protected $redirectRoute = 'career.deck';
+
+    /**
+     * The wizard's one demand over the run-scoped write: a slot that carries a card has to say how it
+     * is held.
+     *
+     * `StoreDeckRequest` lets the flag be absent because `deck_slots` has no column for it and the run
+     * screen states that out loud. The draft is the opposite case: the flag is the only reason the key
+     * exists, so a row reaching Preflight without one would print `N/A` for something the Trainer did
+     * choose. An absent flag is therefore refused here rather than defaulted, because "owned" would be
+     * an invented answer and `ADR-0020` §2 does not allow one.
+     *
+     * Blank slots never meet this rule: the parent's `prepareForValidation()` drops them before the
+     * rules run, so every row that is evaluated here carries a card. The vocabulary stays
+     * `DeckSlot::OWNERSHIP`'s, not a second copy of the two words.
+     *
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            ...parent::rules(),
+            'deck.*.ownership' => ['required', 'string', Rule::in(DeckSlot::OWNERSHIP)],
+        ];
+    }
 
     /**
      * The deck as the draft stores it: all six positions, in order, blanks included.

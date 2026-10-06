@@ -25,10 +25,10 @@ The catalog could not answer two questions a Trainer asks before planning a run.
 Store both as **reference data reached through the fetch pipeline**, not as hand-written seeders and
 not as simulation inputs.
 
-| Object | Where | Columns |
-|---|---|---|
-| Aptitudes | `umamusume`, ten nullable `char(1)` columns in the export's element order | `aptitude_turf`, `aptitude_dirt`, four distance, four running style |
-| Scenario caps | new `scenarios` table | slug, names, order, both server start dates, five caps, `hard_cap`, `caps_reworked_at`, `source_url`, `fetched_at`, `is_manual` |
+| Object          | Where                                                                       | Columns                                                                                                                           |
+| --------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Aptitudes       | `umamusume`, ten nullable `char(1)` columns in the export's element order   | `aptitude_turf`, `aptitude_dirt`, four distance, four running style                                                               |
+| Scenario caps   | new `scenarios` table                                                       | slug, names, order, both server start dates, five caps, `hard_cap`, `caps_reworked_at`, `source_url`, `fetched_at`, `is_manual`   |
 
 Aptitudes ride the existing `SourceParser` record shape through `PipelineRunner` and
 `PromoteMatchedRecord`, so every value keeps a `DataSource` provenance row like the rest of the catalog

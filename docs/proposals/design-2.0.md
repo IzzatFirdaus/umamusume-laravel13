@@ -33,20 +33,20 @@ simulated state is the game's authoritative state.
 
 **Key corrections:**
 
-| Brief section | Original assumption | Corrected direction |
-|---|---|---|
-| §1–2 | Three scenarios (URA, Unity Cup, Trackblazer) | **Four Global scenarios**: URA Finale, Unity Cup, Trackblazer, Brighter Together: Our Grand Concert (mechanics ❌ UNVERIFIED, baseline strip only) |
-| §15 | Generic "scenario difficulty" rating | Remove star ratings; instead show **what each scenario optimizes** (primary/secondary/training complexity) |
-| §19–20 | Sparks shown as star counts | Add **probability model**: ★ star ratings are roll probabilities, not guarantees. Display `Potential payout` + `Estimated roll ~X%`. **Factor yield clarified 2026-10-05**: exactly 1 Blue + 1 Pink per run, at most 1 Green (requires 3★ parent), White sparks unbounded — model as variable yield, not a slot cap |
-| §21 | Affinity as a named value | Make affinity a **first-class planning concept**: six-node ancestry graph with visual compatibility calculation |
-| §22 | Two-parent selection | Upgrade to **six-node Legacy configuration** (Parent A/B + four grandparents); optimize entire ancestry, not just parents |
-| §23 | Five support types + borrowed slot | **Seven support types**: Speed, Stamina, Power, Guts, Wit, **Pal**, **Group**. Scenario Link is **derived** from scenario+character relationship, not stored on card |
-| §26–31 | Scenario panels as static modules | Each panel must reflect scenario-specific currencies/objectives; Grand Concert initially limited to basic tracking until mechanics verified |
-| §36 | Simple Veteran save | **Veteran Creation screen** with factor analysis, legacy value assessment, tagging, and "Optimize Next Career" loop |
-| §44 | LLM-style recommendation | **Deterministic rules engine first** (hard constraints → optimization), explanatory second. Never invent recommendations via AI |
-| §45 | Three-state model (observed/derived/predicted) | **Four-state model**: Observed / Calculated / Predicted / RNG. Visually distinct rendering |
-| §48 | Versioning UI | Make versioning **mandatory**: every career run preserves its ruleset snapshot (`Global 2026-07-01 rebalance`) |
-| Appendix | Five-component hierarchy | Expand to include **Legacy Lab (six-node)**, **Support Deck (seven types)**, **Career State Machine** |
+| Brief section   | Original assumption                              | Corrected direction                                                                                                                                                                                                                                                                                                   |
+| --------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| §1–2            | Three scenarios (URA, Unity Cup, Trackblazer)    | **Four Global scenarios**: URA Finale, Unity Cup, Trackblazer, Brighter Together: Our Grand Concert (mechanics ❌ UNVERIFIED, baseline strip only)                                                                                                                                                                    |
+| §15             | Generic "scenario difficulty" rating             | Remove star ratings; instead show **what each scenario optimizes** (primary/secondary/training complexity)                                                                                                                                                                                                            |
+| §19–20          | Sparks shown as star counts                      | Add **probability model**: ★ star ratings are roll probabilities, not guarantees. Display `Potential payout` + `Estimated roll ~X%`. **Factor yield clarified 2026-10-05**: exactly 1 Blue + 1 Pink per run, at most 1 Green (requires 3★ parent), White sparks unbounded — model as variable yield, not a slot cap   |
+| §21             | Affinity as a named value                        | Make affinity a **first-class planning concept**: six-node ancestry graph with visual compatibility calculation                                                                                                                                                                                                       |
+| §22             | Two-parent selection                             | Upgrade to **six-node Legacy configuration** (Parent A/B + four grandparents); optimize entire ancestry, not just parents                                                                                                                                                                                             |
+| §23             | Five support types + borrowed slot               | **Seven support types**: Speed, Stamina, Power, Guts, Wit, **Pal**, **Group**. Scenario Link is **derived** from scenario+character relationship, not stored on card                                                                                                                                                  |
+| §26–31          | Scenario panels as static modules                | Each panel must reflect scenario-specific currencies/objectives; Grand Concert initially limited to basic tracking until mechanics verified                                                                                                                                                                           |
+| §36             | Simple Veteran save                              | **Veteran Creation screen** with factor analysis, legacy value assessment, tagging, and "Optimize Next Career" loop                                                                                                                                                                                                   |
+| §44             | LLM-style recommendation                         | **Deterministic rules engine first** (hard constraints → optimization), explanatory second. Never invent recommendations via AI                                                                                                                                                                                       |
+| §45             | Three-state model (observed/derived/predicted)   | **Four-state model**: Observed / Calculated / Predicted / RNG. Visually distinct rendering                                                                                                                                                                                                                            |
+| §48             | Versioning UI                                    | Make versioning **mandatory**: every career run preserves its ruleset snapshot (`Global 2026-07-01 rebalance`)                                                                                                                                                                                                        |
+| Appendix        | Five-component hierarchy                         | Expand to include **Legacy Lab (six-node)**, **Support Deck (seven types)**, **Career State Machine**                                                                                                                                                                                                                 |
 
 **New domain objects introduced:**
 
@@ -99,18 +99,18 @@ Where the two docs in this directory say "July 2026", read "2026-07-01".
 
 **Provenance of the brief's mechanics claims.**
 
-| Brief section | Claim | Repository authority | Verdict |
-|---|---|---|---|
-| §19–20 Sparks | Blue=Stats, Pink=Aptitude, Green=Unique, White=Skills/races/scenario | `UMAMUSUME_REFERENCE.md` §1.5 L604–611 | Corroborated; **factor-slot count clarified 2026-10-05**: exactly 1 Blue + 1 Pink per run, at most 1 Green (requires 3★ parent), White sparks roll independently per category with no stated limit — model as variable yield, not a slot cap |
-| §21 Affinity | Affinity is a named compatibility value | `UMAMUSUME_REFERENCE.md` §1.5 L645 | Corroborated |
-| §22 Parent tree | Two parents + four grandparents | `UMAMUSUME_REFERENCE.md` §1.5 L637 | Corroborated |
-| §23 Support cards | Many interacting bonuses and event effects | `UMAMUSUME_REFERENCE.md` §1.4 L423–585; `docs/research-scratch/SUPPORT-CARDS.md` | Corroborated |
-| §26–31 Scenario languages | URA/Happy Meek, Unity team+Spirit, Trackblazer Grade Points+shop, Grand Concert | `config/scenarios.php`; `docs/scenarios/01`–`03`, `07`; `SCENARIO-PUBLISHER-REFERENCES.md` L68/L102/L702 | Corroborated, **except** Grand Concert (below) |
-| §15/§25 Training cards | "+62 Speed / +25 Power", "Failure 2%" | — | **Not sourced.** `UMAMUSUME_REFERENCE.md` §1.1.1 L108–114 is marked ⚠️ STALE (GameWith 2023-02-25); no published per-training yield. Excluded by the advisor spec (`PROCESS-PLANS.md` `## trainer-advisor.md` §1, §5). |
-| §26/§49 Win probability | "Estimated win chance: 82%" | — | **Not sourced.** Race prediction deferred on the `ADR-0016` data blocker (`ADR-0020` §4). Use conservative readiness bands (Excellent/Good/Borderline/Poor) rather than fake precision. |
-| §44 Expert mode | inheritance probability, race probability | — | **Deferred/banned.** Inheritance computation banned (`ADR-0020` §3); race probability per above. |
-| §48 Versioning UI | "Ruleset: 2026.07" | `HandleInertiaRequests` shares `app.ruleset` | **Real but currently `null`** — no ruleset string is sourced. Render `N/A`, never invent a version. Grand Concert caps corroborated 2026-10-05 (two independent sources): 1600/1300/1300/1500/1300 for Speed/Stamina/Power/Guts/Wit. |
-| §19/§20 Sparks (star counts) | ★ star ratings | `UMAMUSUME_REFERENCE.md` §1.5 L621–627 (star-roll odds) | Corroborated as a mechanic; factor-slot count is ❌ UNVERIFIED (L641). |
+| Brief section                  | Claim                                                                             | Repository authority                                                                                       | Verdict                                                                                                                                                                                                                                        |
+| ------------------------------ | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| §19–20 Sparks                  | Blue=Stats, Pink=Aptitude, Green=Unique, White=Skills/races/scenario              | `UMAMUSUME_REFERENCE.md` §1.5 L604–611                                                                     | Corroborated; **factor-slot count clarified 2026-10-05**: exactly 1 Blue + 1 Pink per run, at most 1 Green (requires 3★ parent), White sparks roll independently per category with no stated limit — model as variable yield, not a slot cap   |
+| §21 Affinity                   | Affinity is a named compatibility value                                           | `UMAMUSUME_REFERENCE.md` §1.5 L645                                                                         | Corroborated                                                                                                                                                                                                                                   |
+| §22 Parent tree                | Two parents + four grandparents                                                   | `UMAMUSUME_REFERENCE.md` §1.5 L637                                                                         | Corroborated                                                                                                                                                                                                                                   |
+| §23 Support cards              | Many interacting bonuses and event effects                                        | `UMAMUSUME_REFERENCE.md` §1.4 L423–585; `docs/research-scratch/SUPPORT-CARDS.md`                           | Corroborated                                                                                                                                                                                                                                   |
+| §26–31 Scenario languages      | URA/Happy Meek, Unity team+Spirit, Trackblazer Grade Points+shop, Grand Concert   | `config/scenarios.php`; `docs/scenarios/01`–`03`, `07`; `SCENARIO-PUBLISHER-REFERENCES.md` L68/L102/L702   | Corroborated, **except** Grand Concert (below)                                                                                                                                                                                                 |
+| §15/§25 Training cards         | "+62 Speed / +25 Power", "Failure 2%"                                             | —                                                                                                          | **Not sourced.** `UMAMUSUME_REFERENCE.md` §1.1.1 L108–114 is marked ⚠️ STALE (GameWith 2023-02-25); no published per-training yield. Excluded by the advisor spec (`PROCESS-PLANS.md` `## trainer-advisor.md` §1, §5).                         |
+| §26/§49 Win probability        | "Estimated win chance: 82%"                                                       | —                                                                                                          | **Not sourced.** Race prediction deferred on the `ADR-0016` data blocker (`ADR-0020` §4). Use conservative readiness bands (Excellent/Good/Borderline/Poor) rather than fake precision.                                                        |
+| §44 Expert mode                | inheritance probability, race probability                                         | —                                                                                                          | **Deferred/banned.** Inheritance computation banned (`ADR-0020` §3); race probability per above.                                                                                                                                               |
+| §48 Versioning UI              | "Ruleset: 2026.07"                                                                | `HandleInertiaRequests` shares `app.ruleset`                                                               | **Real but currently `null`** — no ruleset string is sourced. Render `N/A`, never invent a version. Grand Concert caps corroborated 2026-10-05 (two independent sources): 1600/1300/1300/1500/1300 for Speed/Stamina/Power/Guts/Wit.           |
+| §19/§20 Sparks (star counts)   | ★ star ratings                                                                    | `UMAMUSUME_REFERENCE.md` §1.5 L621–627 (star-roll odds)                                                    | Corroborated as a mechanic; factor-slot count is ❌ UNVERIFIED (L641).                                                                                                                                                                         |
 
 **Grand Concert.** The brief's §31 and its appendix treat Grand Concert as a fourth first-class scenario.
 The repo agrees it is the fourth Global scenario, live 2026-07-22 and permanently selectable
@@ -180,7 +180,7 @@ BEST OPTION
 WHY?
       ↓
 PLAYER DECIDES
-```
+```text
 
 The application never removes player agency.
 
@@ -190,23 +190,23 @@ The application never removes player agency.
 
 Keywords:
 
-* clean
-* optimistic
-* tactical
-* organized
-* friendly
-* precise
-* game-adjacent
-* modern
+- clean
+- optimistic
+- tactical
+- organized
+- friendly
+- precise
+- game-adjacent
+- modern
 
 Avoid:
 
-* overly corporate dashboards
-* dark hacker aesthetics
-* excessive neon
-* excessive anime decoration
-* dense spreadsheet layouts
-* unnecessary gamification
+- overly corporate dashboards
+- dark hacker aesthetics
+- excessive neon
+- excessive anime decoration
+- dense spreadsheet layouts
+- unnecessary gamification
 
 ---
 
@@ -220,17 +220,17 @@ Things requiring immediate attention.
 
 Examples:
 
-* mandatory race
-* imminent failure
-* critical energy state
-* scenario deadline
-* recommended action
+- mandatory race
+- imminent failure
+- critical energy state
+- scenario deadline
+- recommended action
 
 Visual treatment:
 
-* strong emphasis
-* clear icon
-* prominent placement
+- strong emphasis
+- clear icon
+- prominent placement
 
 ---
 
@@ -238,15 +238,15 @@ Visual treatment:
 
 Examples:
 
-* target deficit
-* support bond
-* inheritance opportunity
-* scenario resource
+- target deficit
+- support bond
+- inheritance opportunity
+- scenario resource
 
 Visual treatment:
 
-* card
-* medium emphasis
+- card
+- medium emphasis
 
 ---
 
@@ -254,14 +254,14 @@ Visual treatment:
 
 Examples:
 
-* race history
-* database values
-* secondary projections
+- race history
+- database values
+- secondary projections
 
 Visual treatment:
 
-* muted text
-* secondary cards
+- muted text
+- secondary cards
 
 ---
 
@@ -269,14 +269,14 @@ Visual treatment:
 
 Examples:
 
-* data source
-* ruleset version
-* timestamps
+- data source
+- ruleset version
+- timestamps
 
 Visual treatment:
 
-* smallest text
-* low contrast but still accessible
+- smallest text
+- low contrast but still accessible
 
 ---
 
@@ -294,7 +294,7 @@ Information  → Blue
 Special      → Purple
 Exceptional  → Gold
 Neutral      → Gray
-```
+```text
 
 Do not use color as the sole indicator.
 
@@ -304,7 +304,7 @@ Example:
 ✓ Safe
 ⚠ Risk
 ✕ Failure
-```
+```text
 
 rather than relying only on colored text.
 
@@ -338,7 +338,7 @@ Deep navy
 
 Muted
 Slate gray
-```
+```text
 
 Exact values should be implemented as design tokens rather than hardcoded
 throughout the application.
@@ -359,7 +359,7 @@ Example:
 --color-danger
 --color-info
 --color-special
-```
+```text
 
 ---
 
@@ -373,34 +373,34 @@ Typography must prioritize numerical readability.
 
 Used for:
 
-* page titles
-* career result
-* major scenario titles
+- page titles
+- career result
+- major scenario titles
 
 ### Heading
 
 Used for:
 
-* section titles
-* card headings
+- section titles
+- card headings
 
 ### Body
 
 Used for:
 
-* descriptions
-* recommendations
-* explanations
+- descriptions
+- recommendations
+- explanations
 
 ### Numeric
 
 Used for:
 
-* stats
-* percentages
-* currencies
-* turn counters
-* projections
+- stats
+- percentages
+- currencies
+- turn counters
+- projections
 
 Numerical information should use tabular numerals where available.
 
@@ -410,7 +410,7 @@ Example:
 Speed       1,204
 Stamina       782
 Power       1,091
-```
+```text
 
 Numbers should visually align.
 
@@ -424,7 +424,7 @@ Recommended base unit:
 
 ```text
 4px
-```
+```text
 
 Scale:
 
@@ -439,7 +439,7 @@ Scale:
 40
 48
 64
-```
+```text
 
 Primary layout spacing should use 16px / 24px / 32px increments.
 
@@ -455,7 +455,7 @@ Cards              10px
 Large panels       14px
 Dialogs            16px
 Pills              999px
-```
+```text
 
 Avoid excessively rounded UI.
 
@@ -469,16 +469,16 @@ Use shadows sparingly.
 
 Default cards should primarily rely on:
 
-* background contrast
-* borders
-* spacing
+- background contrast
+- borders
+- spacing
 
 Use shadows for:
 
-* dialogs
-* floating panels
-* important recommendations
-* menus
+- dialogs
+- floating panels
+- important recommendations
+- menus
 
 ---
 
@@ -494,13 +494,13 @@ Desktop:
 │               │                                           │
 │               │                                           │
 └───────────────┴───────────────────────────────────────────┘
-```
+```text
 
 Sidebar width:
 
 ```text
 240–280px
-```
+```text
 
 Main content should have a readable maximum width.
 
@@ -519,17 +519,17 @@ Speed Training
 +62 Speed
 +25 Power
 3 Supports
-```
+```text
 
 Bad:
 
 A card containing:
 
-* training
-* shop
-* race
-* inheritance
-* support deck
+- training
+- shop
+- race
+- inheritance
+- support deck
 
 Do not overload cards.
 
@@ -577,7 +577,7 @@ Example:
 
 ```text
 [ Start Career ]
-```
+```text
 
 ## Secondary
 
@@ -585,7 +585,7 @@ Used for alternatives.
 
 ```text
 [ Edit Deck ]
-```
+```text
 
 ## Tertiary
 
@@ -593,15 +593,15 @@ Used for low-priority actions.
 
 ```text
 View Details
-```
+```text
 
 ## Destructive
 
 Used for:
 
-* deleting veteran
-* deleting career
-* resetting data
+- deleting veteran
+- deleting career
+- resetting data
 
 Must require confirmation.
 
@@ -615,12 +615,12 @@ Stats should always be represented in two ways:
 Speed
 1,024 / 1,200
 ██████████████░░
-```
+```text
 
 This provides:
 
-* exact numerical information
-* visual progress
+- exact numerical information
+- visual progress
 
 Never use only progress bars.
 
@@ -636,7 +636,7 @@ Stamina
 Power
 Guts
 Wit
-```
+```text
 
 The colors should remain muted.
 
@@ -653,7 +653,7 @@ Turf       A
 Medium     A
 Long       B
 Pace       A
-```
+```text
 
 Badge hierarchy:
 
@@ -662,7 +662,7 @@ S / A    Strong
 B / C    Neutral
 D / E    Weak
 F / G    Very weak
-```
+```text
 
 Do not communicate aptitude solely through color.
 
@@ -677,14 +677,14 @@ Blue      → Stats
 Pink      → Aptitude
 Green     → Unique
 White     → Skills / races / factors
-```
+```text
 
 Display star count prominently.
 
 ```text
 Speed
 ★★★
-```
+```text
 
 Use a consistent star component.
 
@@ -714,7 +714,7 @@ This is a signature component.
 │                                               │
 │ Alternative: Train Wit                        │
 └───────────────────────────────────────────────┘
-```
+```text
 
 The recommendation must always expose its reasoning.
 
@@ -728,13 +728,13 @@ Use:
 HIGH
 MEDIUM
 LOW
-```
+```text
 
 Do not display false precision such as:
 
 ```text
 Confidence: 97.31%
-```
+```text
 
 unless the underlying model actually supports that precision.
 
@@ -748,13 +748,13 @@ Three primary states:
 LOW RISK
 MEDIUM RISK
 HIGH RISK
-```
+```text
 
 Optional fourth:
 
 ```text
 CRITICAL
-```
+```text
 
 Always pair with text.
 
@@ -778,31 +778,31 @@ Visual structure:
 ● Senior
 │
 ● Finale
-```
+```text
 
 Current position:
 
 ```text
 ◉
-```
+```text
 
 Completed:
 
 ```text
 ●
-```
+```text
 
 Upcoming:
 
 ```text
 ○
-```
+```text
 
 Missed/failed:
 
 ```text
 ×
-```
+```text
 
 ---
 
@@ -819,7 +819,7 @@ Current Decision
 
 Trainer Advisor
    30%
-```
+```text
 
 The middle column always receives the greatest visual emphasis.
 
@@ -851,13 +851,13 @@ Available actions should be visually comparable.
 │ +35        │
 │ SAFE       │
 └────────────┘
-```
+```text
 
 The recommended card gets an additional indicator:
 
 ```text
 ★ RECOMMENDED
-```
+```text
 
 ---
 
@@ -875,7 +875,7 @@ Unity-specific
 Trackblazer-specific
 +
 Future scenario-specific
-```
+```text
 
 Instead:
 
@@ -883,7 +883,7 @@ Instead:
 Career Cockpit
       +
 Scenario Panel
-```
+```text
 
 This allows each scenario to introduce its own mechanics without
 destroying the core layout.
@@ -896,9 +896,9 @@ URA should be the least visually complex scenario.
 
 Focus:
 
-* career goals
-* Happy Meek
-* finale progression
+- career goals
+- Happy Meek
+- finale progression
 
 Avoid adding unnecessary permanent panels.
 
@@ -908,17 +908,17 @@ Avoid adding unnecessary permanent panels.
 
 Unity Cup emphasizes:
 
-* teams
-* Spirit
-* team rank
-* training synergy
+- teams
+- Spirit
+- team rank
+- training synergy
 
 Use:
 
-* team cards
-* member rows
-* Spirit meters
-* burst indicators
+- team cards
+- member rows
+- Spirit meters
+- burst indicators
 
 The Team Panel should become a first-class UI element.
 
@@ -928,11 +928,11 @@ The Team Panel should become a first-class UI element.
 
 Trackblazer emphasizes:
 
-* Grade Points
-* Shop Coins
-* races
-* shop decisions
-* Rival races
+- Grade Points
+- Shop Coins
+- races
+- shop decisions
+- Rival races
 
 Use:
 
@@ -942,7 +942,7 @@ Shop Coins
 Race Calendar
 Shop Inventory
 Rival Alerts
-```
+```text
 
 The Shop should be quickly accessible from the Career Cockpit.
 
@@ -965,7 +965,7 @@ Complete your first career to create a Veteran
 that can be used for future inheritance planning.
 
 [Start Career]
-```
+```text
 
 ---
 
@@ -981,7 +981,7 @@ For example:
 │ █████████                │
 │ ███████████████          │
 └──────────────────────────┘
-```
+```text
 
 Because the application is local-first, loading should normally be minimal.
 
@@ -991,10 +991,10 @@ Because the application is local-first, loading should normally be minimal.
 
 Use modals only for:
 
-* confirmation
-* focused comparison
-* detailed inspection
-* destructive actions
+- confirmation
+- focused comparison
+- detailed inspection
+- destructive actions
 
 Do not put primary workflows inside deep modal stacks.
 
@@ -1004,11 +1004,11 @@ Do not put primary workflows inside deep modal stacks.
 
 Drawers are appropriate for:
 
-* detailed database information
-* race details
-* support card details
-* trainee details
-* timeline entries
+- detailed database information
+- race details
+- support card details
+- trainee details
+- timeline entries
 
 This allows the user to inspect information without losing the current context.
 
@@ -1023,7 +1023,7 @@ Examples:
 ```text
 Race Bonus
 ?
-```
+```text
 
 Hover:
 
@@ -1039,27 +1039,27 @@ Default:
 
 ```text
 Moderate density
-```
+```text
 
 Expert mode:
 
 ```text
 High density
-```
+```text
 
 The application should eventually support a density preference.
 
 Casual mode:
 
-* larger cards
-* fewer numbers
-* more explanations
+- larger cards
+- fewer numbers
+- more explanations
 
 Expert mode:
 
-* compact cards
-* more projections
-* more detailed modifiers
+- compact cards
+- more projections
+- more detailed modifiers
 
 ---
 
@@ -1073,7 +1073,7 @@ Default:
 Speed +62
 3 Supports
 2% Failure
-```
+```text
 
 Expand:
 
@@ -1092,7 +1092,7 @@ Scenario modifier
 
 Total
 +62
-```
+```text
 
 This keeps the interface readable.
 
@@ -1126,17 +1126,17 @@ Example:
 ✓ Training recorded
 
 [Undo]
-```
+```text
 
 Undo should restore:
 
-* stats
-* energy
-* mood
-* SP
-* support state
-* scenario state
-* timeline
+- stats
+- energy
+- mood
+- SP
+- support state
+- scenario state
+- timeline
 
 ---
 
@@ -1157,7 +1157,7 @@ Mood
 [Great]
 
 [Save Correction]
-```
+```text
 
 This is essential because the application is an assistant rather than a direct
 game integration.
@@ -1178,7 +1178,7 @@ Examples:
 ★ New inheritance candidate found
 
 ⚠ Shop refresh in 1 turn
-```
+```text
 
 Notifications should never interrupt the user's current decision unnecessarily.
 
@@ -1197,7 +1197,7 @@ Two columns:
 ```text
 Main Decision
 Advisor
-```
+```text
 
 Timeline becomes a horizontal strip.
 
@@ -1215,7 +1215,7 @@ Actions
 Scenario
 ↓
 Timeline
-```
+```text
 
 The recommendation remains above secondary information.
 
@@ -1231,7 +1231,7 @@ Career
 Legacy
 Deck
 More
-```
+```text
 
 Do not attempt to shrink the desktop sidebar onto mobile.
 
@@ -1241,20 +1241,20 @@ Do not attempt to shrink the desktop sidebar onto mobile.
 
 Minimum requirements:
 
-* WCAG-conscious contrast
-* keyboard navigation
-* visible focus states
-* semantic buttons
-* ARIA labels where required
-* reduced-motion support
-* text alternatives for icons
-* no color-only state indicators
+- WCAG-conscious contrast
+- keyboard navigation
+- visible focus states
+- semantic buttons
+- ARIA labels where required
+- reduced-motion support
+- text alternatives for icons
+- no color-only state indicators
 
 **Image slots** follow the same contract, with three additional clauses:
 
-* **Alt text** (WCAG 1.1.1 Non-text Content). The client display name from `lang/en/uma.php` and nothing else, never a fabricated descriptor. Where the same name is already printed beside the slot, the image takes `alt=""` so a screen reader does not read the name twice; the slot is decorative in that position.
-* **Reserved-box contrast** (WCAG 1.4.11 Non-text Contrast). An absent slot's placeholder outline carries a 3:1 border against its parent surface, so the empty-state geometry is visible even without the file.
-* **Label in name** (WCAG 2.5.3). A clickable slot's `aria-label` matches the printed trainee or support name verbatim, so a screen reader finds the control by the same word the row already prints.
+- **Alt text** (WCAG 1.1.1 Non-text Content). The client display name from `lang/en/uma.php` and nothing else, never a fabricated descriptor. Where the same name is already printed beside the slot, the image takes `alt=""` so a screen reader does not read the name twice; the slot is decorative in that position.
+- **Reserved-box contrast** (WCAG 1.4.11 Non-text Contrast). An absent slot's placeholder outline carries a 3:1 border against its parent surface, so the empty-state geometry is visible even without the file.
+- **Label in name** (WCAG 2.5.3). A clickable slot's `aria-label` matches the printed trainee or support name verbatim, so a screen reader finds the control by the same word the row already prints.
 
 The trust-row for images is bounded: a mirrored file is **Confirmed**; the four absence states (`never mirrored`, `gone upstream`, `unreadable on disk`, `not yet mirrored`) collapse to a single **Unknown** visual — the same text-only row the page already renders — and **Estimated** never applies (no upscaled thumbnail, no fake preview). The UX laws the proposal's §1 calls for apply in three named ways here: **Nielsen heuristic 6** — recognition rather than recall — is the slot's only justification; **Nielsen heuristic 8 + R-31** — minimal design — cut a slot the row's label already carries; **Don Norman's signifier** — the slot indexes the row's identity rather than claiming more information than the row does. **Fitts's Law** keeps the slot as a passive cell next to the existing row link: the click target stays the row's `h-11` link, not the image. Geometry follows §45a below.
 
@@ -1266,28 +1266,28 @@ Animation should communicate state changes.
 
 Good:
 
-* progress bar transition
-* card selection
-* recommendation appearing
-* timeline progression
+- progress bar transition
+- card selection
+- recommendation appearing
+- timeline progression
 
 Avoid:
 
-* excessive bouncing
-* constant decorative animations
-* long transitions
+- excessive bouncing
+- constant decorative animations
+- long transitions
 
 Default transition duration:
 
 ```text
 150–200ms
-```
+```text
 
 Important state changes may use:
 
 ```text
 250–300ms
-```
+```text
 
 ---
 
@@ -1312,7 +1312,7 @@ Skill Points    Spark
 Shop            Store
 Warning         Triangle
 Recommendation Star
-```
+```text
 
 Do not use emoji as the primary icon system in production.
 
@@ -1324,31 +1324,31 @@ Charts should be used only when they improve understanding.
 
 Good:
 
-* stat progression
-* target progress
-* career timeline
-* race performance
-* veteran comparison
+- stat progression
+- target progress
+- career timeline
+- race performance
+- veteran comparison
 
 Avoid:
 
-* decorative pie charts
-* excessive radar charts
-* charts where a number would be clearer
+- decorative pie charts
+- excessive radar charts
+- charts where a number would be clearer
 
 ## 45a. Sourced image slots
 
 `ADR-0021` (`docs/adr/0021-sourced-character-artwork.md`, 2026-10-05) authorizes a local artwork mirror fetched by id from an allowlisted asset host. The placement decision is the owner's per `PRD.md` OQ-6; when the answer is "yes":
 
-| Screen | Slot kind | Click action | Geometry |
-|---|---|---|---|
-| Catalog index, trainee card header | portrait (`card_portrait` 256) | navigates to trainee detail | fixed `size-12` leading cell |
-| Catalog index, costume-form row | portrait (`card_portrait` 256) | navigates to trainee detail | fixed `size-10` in the row header |
-| Catalog detail, Identity | portrait (`card_portrait` 256, 512 if mirrored) | no action | fixed `size-16` aligned to the name block |
-| Support-card index, card row | thumbnail (`full/small`) | navigates to support-card detail | fixed `size-12` leading cell |
-| Support-card detail, header | thumbnail (`full/small`) | no action | fixed `size-16` |
-| Run Create / Legacy Select row | portrait + thumbnail | row's form select | fixed `size-10` |
-| Skill rows | **deferred** — `skills.iconid` has no column (`ADR-0021` Verification) | n/a | n/a |
+| Screen                               | Slot kind                                                                | Click action                       | Geometry                                    |
+| ------------------------------------ | ------------------------------------------------------------------------ | ---------------------------------- | ------------------------------------------- |
+| Catalog index, trainee card header   | portrait (`card_portrait` 256)                                           | navigates to trainee detail        | fixed `size-12` leading cell                |
+| Catalog index, costume-form row      | portrait (`card_portrait` 256)                                           | navigates to trainee detail        | fixed `size-10` in the row header           |
+| Catalog detail, Identity             | portrait (`card_portrait` 256, 512 if mirrored)                          | no action                          | fixed `size-16` aligned to the name block   |
+| Support-card index, card row         | thumbnail (`full/small`)                                                 | navigates to support-card detail   | fixed `size-12` leading cell                |
+| Support-card detail, header          | thumbnail (`full/small`)                                                 | no action                          | fixed `size-16`                             |
+| Run Create / Legacy Select row       | portrait + thumbnail                                                     | row's form select                  | fixed `size-10`                             |
+| Skill rows                           | **deferred** — `skills.iconid` has no column (`ADR-0021` Verification)   | n/a                                | n/a                                         |
 
 A click on any clickable slot terminates at the same destination as the row's existing link, satisfying WCAG 2.5.3 because `aria-label` is the row's printed name verbatim. Absence renders the text-only row that the screen ships today — no broken frame, no grey box, no placeholder glyph (R-31). At narrow viewports the slot cell is **omitted**, not reflowed (`WCAG 1.4.10 Reflow` holds without a second layout path). Reduced motion is inherited from §43; a slot either paints or it does not.
 
@@ -1369,7 +1369,7 @@ Medium             ★★★           ★★★
 Skill A             ★★           ★★★
 G1 wins             9             12
 Affinity            High          Medium
-```
+```text
 
 Never force the user to compare two separate cards mentally.
 
@@ -1381,13 +1381,13 @@ Future feature.
 
 Expert mode exposes:
 
-* modifier breakdown
-* support calculations
-* probability estimates
-* training formulas
-* scenario modifiers
-* inheritance probability
-* race assumptions
+- modifier breakdown
+- support calculations
+- probability estimates
+- training formulas
+- scenario modifiers
+- inheritance probability
+- race assumptions
 
 The default interface remains simpler.
 
@@ -1408,7 +1408,7 @@ Unity Cup
 
 Data updated:
 2026-08-14
-```
+```text
 
 If the database and career state use different versions:
 
@@ -1419,7 +1419,7 @@ This career was created using an older
 scenario ruleset.
 
 [Review Changes]
-```
+```text
 
 ---
 
@@ -1434,7 +1434,7 @@ Confirmed
 Calculated
 Estimated
 Unknown
-```
+```text
 
 Never represent an estimate as a fact.
 
@@ -1442,13 +1442,13 @@ Example:
 
 ```text
 Estimated win chance: 82%
-```
+```text
 
 not:
 
 ```text
 Win chance: 82%
-```
+```text
 
 ---
 
@@ -1487,7 +1487,7 @@ The application should feel like:
              │
              ▼
        UPDATED STATE
-```
+```text
 
 The player remains the Trainer.
 
@@ -1568,7 +1568,7 @@ resources/js/
         ├── UraPanel.vue
         ├── UnityCupPanel.vue
         └── TrackblazerPanel.vue
-```
+```text
 
 The two flagship experiences are the **Career Cockpit** ("what should I do on this turn?") and the
 **Legacy Lab** ("how do I start this run?"). Note the Legacy Lab's recommendation/optimization parts are

@@ -33,13 +33,13 @@ carries profile fields. The three other profile-shaped datasets do not (§5).
 
 **The rows are two populations, and the discriminator is the `race` key.**
 
-| `race` value | Rows |
-|---|---|
-| `uma` | 105 |
-| `false` | 17 |
-| `""` (present, empty) | 35 |
-| `human` | 4 |
-| `unknown` | 2 |
+| `race` value            | Rows   |
+| ----------------------- | ------ |
+| `uma`                   | 105    |
+| `false`                 | 17     |
+| `""` (present, empty)   | 35     |
+| `human`                 | 4      |
+| `unknown`               | 2      |
 
 The 58 rows where `race` is not `uma` are the **real-world race animals the characters are named
 after** — their own registry rows, with their own career records, in the same document. Sample of
@@ -60,14 +60,14 @@ in the filter expression (C-4 class 3) and must never be promoted into copy or a
 The brief's field names (`name_jp`, `voice_actor`, `voice_actor_en`, `birthday`, `sizes`) **do not
 exist in this document.** The actual keys:
 
-| Profile field | Source key | Type | Notes |
-|---|---|---|---|
-| Japanese name | `jp_name` | string | 105/105 within the `uma` subset |
-| Voice actor (JP) | `va_ja` | string | 105/105 |
-| Voice actor (EN) | `va_en` | string | 102/105 |
-| Birthday | `birth_year` + `birth_month` + `birth_day` | int ×3 | 98/105; three columns, not one date string |
-| Height | `height` | int, cm | 105/105 |
-| Three sizes | `three_sizes` | object `{b, h, w}` | 98/105; **all three subkeys always present together** — never partial |
+| Profile field      | Source key                                   | Type                 | Notes                                                                   |
+| ------------------ | -------------------------------------------- | -------------------- | ----------------------------------------------------------------------- |
+| Japanese name      | `jp_name`                                    | string               | 105/105 within the `uma` subset                                         |
+| Voice actor (JP)   | `va_ja`                                      | string               | 105/105                                                                 |
+| Voice actor (EN)   | `va_en`                                      | string               | 102/105                                                                 |
+| Birthday           | `birth_year` + `birth_month` + `birth_day`   | int ×3               | 98/105; three columns, not one date string                              |
+| Height             | `height`                                     | int, cm              | 105/105                                                                 |
+| Three sizes        | `three_sizes`                                | object `{b, h, w}`   | 98/105; **all three subkeys always present together** — never partial   |
 
 Two more keys exist and are **not** profile fields: `va_link` (137/163) and `va_ko` / `va_zh_tw`
 (localisation). `jp_name_real` appears on 3 rows and is a separate thing from `jp_name`.
@@ -80,25 +80,25 @@ shape to guard against.
 
 The five numbers reproduce exactly as **non-blank counts out of 163 total rows**:
 
-| Key | Non-blank / 163 |
-|---|---|
-| `birth_year` | 146 |
-| `three_sizes` | 127 |
-| `va_en` | 137 |
-| `height` | 163 |
-| `va_ja` | 163 |
+| Key             | Non-blank / 163   |
+| --------------- | ----------------- |
+| `birth_year`    | 146               |
+| `three_sizes`   | 127               |
+| `va_en`         | 137               |
+| `height`        | 163               |
+| `va_ja`         | 163               |
 
 Read as "sparse profile data", this is wrong. The gaps are the 58 non-`uma` rows, not missing
 Umamusume data. Restricted to the 105 `uma` rows the coverage is near-complete:
 
-| Key | Non-blank / 105 |
-|---|---|
-| `jp_name` | 105 |
-| `va_ja` | 105 |
-| `height` | 105 |
-| `va_en` | 102 |
-| `birth_year` | 98 |
-| `three_sizes` | 98 |
+| Key             | Non-blank / 105   |
+| --------------- | ----------------- |
+| `jp_name`       | 105               |
+| `va_ja`         | 105               |
+| `height`        | 105               |
+| `va_en`         | 102               |
+| `birth_year`    | 98                |
+| `three_sizes`   | 98                |
 
 **The 3 `birth_year` and 3 `va_en` gaps inside the `uma` subset are the only real coverage gaps in
 this slice.** Every other absence is a row that was never a Umamusume. The schema should carry
@@ -109,15 +109,15 @@ expectation is 105/105, not 146/163.
 
 Confirmed on the live document, all 163 rows unless noted:
 
-| Key | Present | What it is |
-|---|---|---|
-| `rl` | 163 | Nested object: `record` (`10-4-2-1`), `wins`, `races`, `earnings`, `country`, `active` (a year range), and `death` on 90 rows. A full career and death record for a real animal. |
-| `sex` | 163 | Integer `1` (119) or `2` (44). Within `uma`: 83 / 22. |
-| `race` | 128 | The population discriminator (§1). Not a lore problem in itself; a correctness gate. |
-| `tid` | 163 | String. |
-| `url_name` | 163 | String, e.g. `special-week`. The brief's "maybe needed for URL construction later" — not needed, `char_id` is the key. |
-| `active` | 155 | Boolean. |
-| `active_en` | 94 | Boolean. |
+| Key           | Present   | What it is                                                                                                                                                                         |
+| ------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rl`          | 163       | Nested object: `record` (`10-4-2-1`), `wins`, `races`, `earnings`, `country`, `active` (a year range), and `death` on 90 rows. A full career and death record for a real animal.   |
+| `sex`         | 163       | Integer `1` (119) or `2` (44). Within `uma`: 83 / 22.                                                                                                                              |
+| `race`        | 128       | The population discriminator (§1). Not a lore problem in itself; a correctness gate.                                                                                               |
+| `tid`         | 163       | String.                                                                                                                                                                            |
+| `url_name`    | 163       | String, e.g. `special-week`. The brief's "maybe needed for URL construction later" — not needed, `char_id` is the key.                                                             |
+| `active`      | 155       | Boolean.                                                                                                                                                                           |
+| `active_en`   | 94        | Boolean.                                                                                                                                                                           |
 
 `rl` is the hard one, and the brief understated it: it is not on one row, it is on **every** row,
 and it is a nested object, so a naive `$row` projection carries the entire career record plus a
@@ -134,11 +134,11 @@ not.
 
 All three were fetched and read.
 
-| Manifest key | Rows | Shape | Carries the five fields? |
-|---|---|---|---|
-| `characters_extended` | 934 | `{char_id, name_en, name_ja}` | no — **and see §6, the brief is wrong about this one** |
-| `char_profiles` | 173 | `{char_id, en, ja, ko, zh_tw}`, `en` is prose | no |
-| `character_profiles` | 173 | same shape | no |
+| Manifest key            | Rows   | Shape                                           | Carries the five fields?                                 |
+| ----------------------- | ------ | ----------------------------------------------- | -------------------------------------------------------- |
+| `characters_extended`   | 934    | `{char_id, name_en, name_ja}`                   | no — **and see §6, the brief is wrong about this one**   |
+| `char_profiles`         | 173    | `{char_id, en, ja, ko, zh_tw}`, `en` is prose   | no                                                       |
+| `character_profiles`    | 173    | same shape                                      | no                                                       |
 
 `char_profiles` and `character_profiles` are **the same dataset at two `secrets` shapes**, not two
 datasets: identical `char_id` sets (verified element-wise equal), identical `en` subkeys
@@ -171,14 +171,14 @@ section stays empty; the correct source for real alternate names is the `ja`/`ko
 
 Hashes read from `https://gametora.com/data/manifests/umamusume.json` on 2026-09-30:
 
-| Key | Hash | Path that answered |
-|---|---|---|
-| `characters` | `c6676539` | `data/umamusume/characters.c6676539.json` |
-| `characters_extended` | `6342c36b` | `data/umamusume/characters_extended.6342c36b.json` |
-| `char_profiles` | `025e03a7` | `data/umamusume/char_profiles.025e03a7.json` |
-| `character_profiles` | `49aa6e38` | `data/umamusume/character_profiles.49aa6e38.json` |
-| `meta/char_profile_art` | `fc64c1d0` | `data/umamusume/meta/char_profile_art.fc64c1d0.json` — **subdirectory, the flat path 404s** |
-| `static/character_rl_details` | `5e916b34` | `data/umamusume/static/character_rl_details.5e916b34.json` |
+| Key                             | Hash         | Path that answered                                                                            |
+| ------------------------------- | ------------ | --------------------------------------------------------------------------------------------- |
+| `characters`                    | `c6676539`   | `data/umamusume/characters.c6676539.json`                                                     |
+| `characters_extended`           | `6342c36b`   | `data/umamusume/characters_extended.6342c36b.json`                                            |
+| `char_profiles`                 | `025e03a7`   | `data/umamusume/char_profiles.025e03a7.json`                                                  |
+| `character_profiles`            | `49aa6e38`   | `data/umamusume/character_profiles.49aa6e38.json`                                             |
+| `meta/char_profile_art`         | `fc64c1d0`   | `data/umamusume/meta/char_profile_art.fc64c1d0.json` — **subdirectory, the flat path 404s**   |
+| `static/character_rl_details`   | `5e916b34`   | `data/umamusume/static/character_rl_details.5e916b34.json`                                    |
 
 The last two are not in the brief. `character_rl_details` is 148 rows of
 `{char_id, jbis_slug, nk_slug, offspring, pedigree, race_history, siblings}` with a three-deep
@@ -284,29 +284,29 @@ untrusted, and an allowlisted source list is the rule.
 
 `https://gametora.com/data/manifests/umamusume.json` → HTTP 200, 11,114 bytes, 280 keys.
 
-| key | hash | note |
-|---|---|---|
-| `characters` | `c6676539` | the body behind this probe; saved on disk as `characters.json` |
-| `character-cards` | `e9e9ee6d` | **still the hash `config/uma.php` pins**, so the card verdicts still describe the live body |
-| `characters_extended` | `6342c36b` | not opened |
-| `character_profiles` | `49aa6e38` | `char_id` + `en`/`ja`/`ko`/`zh_tw`; profile *text*, not the six basic-information fields |
-| `char_profiles` | `025e03a7` | not opened |
-| `character_media` | `36ab44f6` | the source ADR-0012 Decision 2 defers |
-| `meta/char_profile_art` | `fc64c1d0` | checked, see §C below |
-| `static/character_rl_details` | `5e916b34` | not opened; see the `rl` finding, which is the reason not to |
+| key                             | hash         | note                                                                                          |
+| ------------------------------- | ------------ | --------------------------------------------------------------------------------------------- |
+| `characters`                    | `c6676539`   | the body behind this probe; saved on disk as `characters.json`                                |
+| `character-cards`               | `e9e9ee6d`   | **still the hash `config/uma.php` pins**, so the card verdicts still describe the live body   |
+| `characters_extended`           | `6342c36b`   | not opened                                                                                    |
+| `character_profiles`            | `49aa6e38`   | `char_id` + `en`/`ja`/`ko`/`zh_tw`; profile *text*, not the six basic-information fields      |
+| `char_profiles`                 | `025e03a7`   | not opened                                                                                    |
+| `character_media`               | `36ab44f6`   | the source ADR-0012 Decision 2 defers                                                         |
+| `meta/char_profile_art`         | `fc64c1d0`   | checked, see §C below                                                                         |
+| `static/character_rl_details`   | `5e916b34`   | not opened; see the `rl` finding, which is the reason not to                                  |
 
 #### `characters.json` (manifest hash `c6676539`) — HTTP 200, 102,945 bytes, 163 rows
 
 Keyed by `char_id`, one row per character, **not** per costume card. The document is **two populations**;
 the discriminator is the `race` key. Re-derived on `master` from the saved body:
 
-| `race` value | rows | kept by the profile parser? |
-|---|---|---|
-| `"uma"` | **105** | yes — the trainees |
-| `false` | 17 | no — real-world namesakes |
-| (key absent) | 35 | no |
-| `"human"` | 4 | no |
-| `"unknown"` | 2 | no |
+| `race` value   | rows      | kept by the profile parser?   |
+| -------------- | --------- | ----------------------------- |
+| `"uma"`        | **105**   | yes — the trainees            |
+| `false`        | 17        | no — real-world namesakes     |
+| (key absent)   | 35        | no                            |
+| `"human"`      | 4         | no                            |
+| `"unknown"`    | 2         | no                            |
 
 So `array_key_exists('race', $row)` counts **128** and `$row['race'] === 'uma'` counts **105**; neither
 number is the complement of the other, which is why reading them as one made them look contradictory. The
@@ -326,17 +326,17 @@ distinction — but "the source never sends nulls" is true only of the keys this
 
 ##### Coverage, re-scoped to the 105 trainee rows the parser keeps
 
-| key | present (of 105) | absent (of 105) | document-wide (163) | sample |
-|---|---|---|---|---|
-| `char_id`, `url_name`, `en_name`, `jp_name`, `tid`, `height`, `birth_day`, `birth_month`, `va_ja`, `race`, `sex`, `rl` | 105 | 0 | 163 / 0 | `1001`, `special-week`, `スペシャルウィーク`, `158`, `和氣あず未` |
-| `va_ko`, `va_zh_tw` | 105 | 0 | 160 / 149 | `와키 아즈미` (a third script of the same name) |
-| **`va_en`** (romanised voice actor) | **102** | **3** | 137 / 26 | `Azumi Waki` |
-| **`birth_year`** | **98** | **7** | 146 / 17 | `1995` |
-| **`three_sizes`** | **98** | **7** | 127 / 36 | `{"b":81,"h":81,"w":56}` |
-| `playable` | — | — | 135 / 28 | refused |
-| `playable_en` | — | — | **68** / 95 | refused; the same 68 the catalog lists as `GlobalReleased`, cross-checked from the other side |
-| `jp_name_real` (pseudonym) | — | — | 3 / 160 | refused |
-| `race` | — | — | 128 / 35 | the scope key, read but never stored |
+| key                                                                                                                      | present (of 105)   | absent (of 105)   | document-wide (163)   | sample                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------------- | --------------------- | ----------------------------------------------------------------------------------------------- |
+| `char_id`, `url_name`, `en_name`, `jp_name`, `tid`, `height`, `birth_day`, `birth_month`, `va_ja`, `race`, `sex`, `rl`   | 105                | 0                 | 163 / 0               | `1001`, `special-week`, `スペシャルウィーク`, `158`, `和氣あず未`                               |
+| `va_ko`, `va_zh_tw`                                                                                                      | 105                | 0                 | 160 / 149             | `와키 아즈미` (a third script of the same name)                                                 |
+| **`va_en`** (romanised voice actor)                                                                                      | **102**            | **3**             | 137 / 26              | `Azumi Waki`                                                                                    |
+| **`birth_year`**                                                                                                         | **98**             | **7**             | 146 / 17              | `1995`                                                                                          |
+| **`three_sizes`**                                                                                                        | **98**             | **7**             | 127 / 36              | `{"b":81,"h":81,"w":56}`                                                                        |
+| `playable`                                                                                                               | —                  | —                 | 135 / 28              | refused                                                                                         |
+| `playable_en`                                                                                                            | —                  | —                 | **68** / 95           | refused; the same 68 the catalog lists as `GlobalReleased`, cross-checked from the other side   |
+| `jp_name_real` (pseudonym)                                                                                               | —                  | —                 | 3 / 160               | refused                                                                                         |
+| `race`                                                                                                                   | —                  | —                 | 128 / 35              | the scope key, read but never stored                                                            |
 
 The branch carried the right-hand column as the operative numbers; they reproduce exactly against the
 saved body — but they are **document-wide**, and the profile block reads only the 105 trainee rows. On
@@ -365,16 +365,16 @@ note what is wrong is the word "nulls" and two of the names:
 A reading on `master` once took `va_en` to be the English dub cast and `va_ja` "the romanised Japanese
 cast". The values say otherwise. Eight rows, re-read straight off the saved body (2026-09-30, all `uma`):
 
-| character | `va_ja` | `va_en` | `va_ko` | ja == en |
-|---|---|---|---|---|
-| Special Week | 和氣あず未 | Azumi Waki | 와키 아즈미 | no |
-| Silence Suzuka | 高野麻里佳 | Marika Kouno | 코노 마리카 | no |
-| Tokai Teio | Machico | Machico | Machico | **yes** |
-| Maruzensky | Lynn | Lynn | Lynn | **yes** |
-| Fuji Kiseki | 松井恵理子 | Eriko Matsui | 마츠이 에리코 | no |
-| Oguri Cap | 高柳知葉 | Tomoyo Takayanagi | 타카야나기 토모요 | no |
-| Gold Ship | 上田瞳 | Hitomi Ueda | 우에다 히토미 | no |
-| Vodka | 大橋彩香 | Ayaka Oohashi | 오오하시 아야카 | no |
+| character        | `va_ja`    | `va_en`             | `va_ko`           | ja == en   |
+| ---------------- | ---------- | ------------------- | ----------------- | ---------- |
+| Special Week     | 和氣あず未 | Azumi Waki          | 와키 아즈미       | no         |
+| Silence Suzuka   | 高野麻里佳 | Marika Kouno        | 코노 마리카       | no         |
+| Tokai Teio       | Machico    | Machico             | Machico           | **yes**    |
+| Maruzensky       | Lynn       | Lynn                | Lynn              | **yes**    |
+| Fuji Kiseki      | 松井恵理子 | Eriko Matsui        | 마츠이 에리코     | no         |
+| Oguri Cap        | 高柳知葉   | Tomoyo Takayanagi   | 타카야나기 토모요 | no         |
+| Gold Ship        | 上田瞳     | Hitomi Ueda         | 우에다 히토미     | no         |
+| Vodka            | 大橋彩香   | Ayaka Oohashi       | 오오하시 아야카   | no         |
 
 One person per row in three scripts: 和氣あず未 is Waki Azumi is Azumi Waki. And where the stage name is
 already romanised — Machico, Lynn — **all three fields hold the identical string**, which a separate
@@ -389,7 +389,7 @@ Re-runnable against the saved body:
 ```bash
 node -e 'const a=require("./research-scratch/data/json/characters.json");
 for(const r of a){if(r.race==="uma"&&r.va_ja&&r.va_en)console.log(`${r.en_name} | ${r.va_ja} | ${r.va_en} | ${r.va_ko} | ${r.va_ja===r.va_en}`);}'
-```
+```text
 
 (An equivalent one-liner in `php -r` works against the same file. The old command here pointed at
 `characters.c6676539.json`; the saved file is `characters.json`.)
@@ -418,13 +418,13 @@ the tests that prove it, not the view.** It is enforced and tested at both ends:
 keyed by **character slug**, not by card. `images` is a flat boolean map, and across all 170 rows it uses
 exactly five keys:
 
-| key | rows |
-|---|---|
-| `uniform` | 151 |
-| `racing` | 144 |
-| `starting-future` | 129 |
-| `concept` | 123 |
-| `work` | 19 |
+| key                 | rows   |
+| ------------------- | ------ |
+| `uniform`           | 151    |
+| `racing`            | 144    |
+| `starting-future`   | 129    |
+| `concept`           | 123    |
+| `work`              | 19     |
 
 No paths, no file names, no `card_id`, nothing per-form. It says which portrait kinds a character page has;
 it does not say where the bytes are. **No per-form asset source was discovered, so §C's stop condition is
@@ -435,14 +435,14 @@ four assumed.
 
 The fields the user asked for, and where each comes from (coverage re-scoped to the 105 trainee rows):
 
-| field | source | coverage (of 105 trainee rows) |
-|---|---|---|
-| Japanese name | `umamusume.name_ja` (stored) | already there; `characters.jp_name` agrees 105/105 |
-| Voice actor | `characters.va_ja` + `va_en` | 105 / 102 (3 absent) |
-| Release date | `umamusume.global_debut_date` (stored) | not in this dataset |
-| Birthday | `characters.birth_day` + `birth_month` (+ `birth_year`) | 105 / 105 / 98 (7 absent) |
-| Height | `characters.height` | 105 |
-| Three sizes | `characters.three_sizes.{b,h,w}` | 98 of 105 (7 absent) |
+| field           | source                                                    | coverage (of 105 trainee rows)                       |
+| --------------- | --------------------------------------------------------- | ---------------------------------------------------- |
+| Japanese name   | `umamusume.name_ja` (stored)                              | already there; `characters.jp_name` agrees 105/105   |
+| Voice actor     | `characters.va_ja` + `va_en`                              | 105 / 102 (3 absent)                                 |
+| Release date    | `umamusume.global_debut_date` (stored)                    | not in this dataset                                  |
+| Birthday        | `characters.birth_day` + `birth_month` (+ `birth_year`)   | 105 / 105 / 98 (7 absent)                            |
+| Height          | `characters.height`                                       | 105                                                  |
+| Three sizes     | `characters.three_sizes.{b,h,w}`                          | 98 of 105 (7 absent)                                 |
 
 The sibling-table recommendation holds, and for the reason the brief gave: ADR-0003 Amendment R3 wants
 `source_url`, `snapshot_path`, `fetched_at`, `source_timezone` and `is_manual` inline on a reference row,
@@ -462,13 +462,13 @@ measurement), not a live fetch — see §6.
 
 #### 1. Preconditions
 
-| # | Check | Result |
-|---|---|---|
-| 1 | `git fetch`; divergence at start | `behind=0`, `ahead=21`. No fast-forward (origin/master had not moved past local). |
-| 2 | `git rev-parse HEAD` at start | `85b37a40e3bdc93e059bf9ec00c4d3a6ac53d95a` |
-| 3 | `php artisan test --compact` | green: 826 passed, 2 skipped, 0 failed (baseline, with the peer's tree changes present) |
-| 4 | `git status --short` clean | **FAILED on first check** — 5 tracked files carried an uncommitted peer changeset, including a PRD A-7 re-asserting the `va_en` defect Step 1 fixes. |
-| 5 | branch exists | `feat/umamusume-detail-page` = `8ffab63`, checked out in worktree `D:/Projects/umamusume-laravel13-catalog-roster`. |
+| #     | Check                              | Result                                                                                                                                                 |
+| ----- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1     | `git fetch`; divergence at start   | `behind=0`, `ahead=21`. No fast-forward (origin/master had not moved past local).                                                                      |
+| 2     | `git rev-parse HEAD` at start      | `85b37a40e3bdc93e059bf9ec00c4d3a6ac53d95a`                                                                                                             |
+| 3     | `php artisan test --compact`       | green: 826 passed, 2 skipped, 0 failed (baseline, with the peer's tree changes present)                                                                |
+| 4     | `git status --short` clean         | **FAILED on first check** — 5 tracked files carried an uncommitted peer changeset, including a PRD A-7 re-asserting the `va_en` defect Step 1 fixes.   |
+| 5     | branch exists                      | `feat/umamusume-detail-page` = `8ffab63`, checked out in worktree `D:/Projects/umamusume-laravel13-catalog-roster`.                                    |
 
 Precondition 4 was surfaced to the human owner before any edit. Disposition chosen: **commit the peer's
 work as its own preservation commit, then run the sequence.** The 5-file changeset (KNOWN-ISSUES, PLAN,
@@ -478,16 +478,16 @@ before committing it.
 
 #### 2. Commits landed (oldest → newest)
 
-| SHA | Step | What |
-|---|---|---|
-| `71fabfc` | (pre) | preserve the pre-existing 5-file peer changeset |
-| `5774a8b` | 1 | `va_en` docblock correction + characterization pin |
-| `88d2830` | 2 (net-new) | `race === 'uma'` filter + test moves |
-| `3bac088` | 5 | PRD A-7 `va_en` reading + uma-scope |
-| `d6670d8` | 3 | port store-side allowlist guard + all-null coercion (parser-side already covered) |
-| `4ba2962` | 2 (artifact) | port the probe record + correct the migration `va_en` comment |
-| `5a50900` | 4 | withdraw ADR-0013, land on master |
-| `a4da6d1` | 7 | two PLAN.md exit criteria (checkpoint, collision) |
+| SHA         | Step           | What                                                                                |
+| ----------- | -------------- | ----------------------------------------------------------------------------------- |
+| `71fabfc`   | (pre)          | preserve the pre-existing 5-file peer changeset                                     |
+| `5774a8b`   | 1              | `va_en` docblock correction + characterization pin                                  |
+| `88d2830`   | 2 (net-new)    | `race === 'uma'` filter + test moves                                                |
+| `3bac088`   | 5              | PRD A-7 `va_en` reading + uma-scope                                                 |
+| `d6670d8`   | 3              | port store-side allowlist guard + all-null coercion (parser-side already covered)   |
+| `4ba2962`   | 2 (artifact)   | port the probe record + correct the migration `va_en` comment                       |
+| `5a50900`   | 4              | withdraw ADR-0013, land on master                                                   |
+| `a4da6d1`   | 7              | two PLAN.md exit criteria (checkpoint, collision)                                   |
 
 #### 3. The `va_en` defect
 
@@ -505,7 +505,7 @@ so master holds one consistent reading across code, PRD and schema).
 
 **The one genuine executable RED this run was the race filter,** not the `va_en` pin:
 
-```
+```text
 $ php artisan test --compact tests/Feature/GametoraCharacterProfileParserTest.php   # BEFORE the filter
 Tests: 1 failed, 11 passed
   keeps only rows whose race is exactly "uma"...
@@ -514,7 +514,7 @@ Tests: 1 failed, 11 passed
 
 $ ... # AFTER `race !== 'uma' -> return null`
 Tests: 12 passed (43 assertions)
-```
+```text
 
 The **`va_en` pin** and the **two ported guards** (store-side refused-key drop, all-null coercion) are
 **characterization tests: green by construction against master's already-correct parser/store, red on a
@@ -615,11 +615,11 @@ refused data. Making it *correct* rather than *green* was the work.
 
 #### 12. Final gate evidence (tree `a4da6d1`)
 
-```
+```text
 Tests:    2 skipped, 830 passed (2890 assertions)      # full suite
 [OK]    No errors                                       # phpstan level 6
 pint --test: passed                                     # C-3
 lore-code: 8 hit(s)   lore-docs: 116 hit(s), 57 exempt  # == baselines, no new banned-term hit
 tsc --noEmit: exit 0                                    # C-9 (no .ts touched this run)
 ahead=29 behind=0 vs origin/master                      # 8 commits landed, all local
-```
+```text

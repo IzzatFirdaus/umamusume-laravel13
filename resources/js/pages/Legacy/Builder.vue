@@ -57,6 +57,7 @@ const props = defineProps<{
     trainee: { id: number; name: string; name_ja: string | null };
     hasSelection: boolean;
     graph: Graph;
+    affinity: string | null;
     roster: { id: number; name: string }[];
     knownNames: string[];
     sparkKinds: Record<string, string>;
@@ -64,14 +65,35 @@ const props = defineProps<{
     notice: string;
 }>();
 
+/**
+ * The library row a stored parent was picked from, by her name.
+ *
+ * The payload keeps a name and not a library id (`ADR-0010`: `legacy_id` is a lookup key, not a stored
+ * fact), so the pick control is re-seeded through the roster. `LegacyController::roster()` is ordered
+ * `latest('id')`, so the first match is the newest Veteran for that trainee, and any Veteran of that
+ * trainee resolves back to the same `umamusume_id` on the write. A parent whose library row was
+ * deleted therefore stays unpreselected, which is the honest answer rather than a guessed id.
+ */
+const rosterIdFor = (name: string | null): string => {
+    if (name === null) {
+        return '';
+    }
+
+    return String(props.roster.find((row) => row.name === name)?.id ?? '');
+};
+
 const form = useForm({
-    affinity: '' as string,
+    affinity: props.affinity ?? '',
     legacies: props.graph.parents.map((parent) => ({
-        legacy_id: '' as string,
-        rank: '' as string | number,
-        is_guest: false,
-        ancestors: ['', ''] as [string, string],
-        sparks: [] as { kind: string; target: string; stars: string | number }[],
+        legacy_id: rosterIdFor(parent.name),
+        rank: parent.rank ?? ('' as string),
+        is_guest: parent.is_guest,
+        ancestors: parent.ancestors.map((ancestor) => ancestor.name ?? '') as [string, string],
+        sparks: parent.sparks.map((spark) => ({
+            kind: spark.kind,
+            target: spark.target ?? '',
+            stars: spark.stars ?? ('' as string | number),
+        })),
     })),
 });
 

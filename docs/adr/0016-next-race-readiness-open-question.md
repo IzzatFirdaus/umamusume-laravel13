@@ -32,15 +32,15 @@ picked one would be a decision wearing a record.
 Taken against `storage/app/backups/uma-backup-20260930-155251.sqlite`, which is a peer session's seed of the
 shared development database and the most-populated state available on this machine.
 
-| What the model needs | Where it lives | Populated? |
-|---|---|---|
-| Race distance, distance band, surface | `race_catalog_slots` (`distance`, `distance_band`, `surface`, `grade_code`) | **0 rows** |
-| The race a run is preparing for | `race_entries.scenario_slot_id` → `scenario_slots` | 0 rows / 296 rows |
-| Tier of that race | `scenario_slots.tier` | **141 of 296 NULL**; non-null only G1 34, G2 42, G3 76, OP 3 |
-| Fan gate | `scenario_slots.fans_needed` | **296 of 296** non-null |
-| Maiden gate | `scenario_slots.is_maiden_gated` | non-null on 296, but **0 rows true** — computable, never fires |
-| Grade-point targets | `config('scenarios.php')` `grade_objectives`, `grade_point_by_grade` | present, Trackblazer only |
-| Trainee aptitudes (all ten letters) | `umamusume.aptitude_*` | **67 of 67** complete |
+| What the model needs                    | Where it lives                                                                | Populated?                                                       |
+| --------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Race distance, distance band, surface   | `race_catalog_slots` (`distance`, `distance_band`, `surface`, `grade_code`)   | **0 rows**                                                       |
+| The race a run is preparing for         | `race_entries.scenario_slot_id` → `scenario_slots`                            | 0 rows / 296 rows                                                |
+| Tier of that race                       | `scenario_slots.tier`                                                         | **141 of 296 NULL**; non-null only G1 34, G2 42, G3 76, OP 3     |
+| Fan gate                                | `scenario_slots.fans_needed`                                                  | **296 of 296** non-null                                          |
+| Maiden gate                             | `scenario_slots.is_maiden_gated`                                              | non-null on 296, but **0 rows true** — computable, never fires   |
+| Grade-point targets                     | `config('scenarios.php')` `grade_objectives`, `grade_point_by_grade`          | present, Trackblazer only                                        |
+| Trainee aptitudes (all ten letters)     | `umamusume.aptitude_*`                                                        | **67 of 67** complete                                            |
 
 `race_catalog_slots` is the **only** table in the schema carrying a race's distance or surface, and
 `scenario_slots` — the table a run actually joins to — has no distance or surface column at all. So there

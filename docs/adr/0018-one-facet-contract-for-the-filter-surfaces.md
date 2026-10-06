@@ -9,11 +9,11 @@ filters on) and `ADR-0014` (the support-card catalog's availability column).
 Three server-rendered filter surfaces parse the same idiom, a query string of facet values and a page
 size, in two different ways:
 
-| Surface | Unknown facet value | `pageSize` |
-|---|---|---|
-| `/umamusume` catalog | ignored, answered with the `GlobalReleased` default | clamped 1..100, default 25 |
-| `/skills` search | refused, redirected | clamped 1..100, default 25 |
-| `/support-cards` | refused, redirected | ignored, fixed constant 25 |
+| Surface                | Unknown facet value                                   | `pageSize`                   |
+| ---------------------- | ----------------------------------------------------- | ---------------------------- |
+| `/umamusume` catalog   | ignored, answered with the `GlobalReleased` default   | clamped 1..100, default 25   |
+| `/skills` search       | refused, redirected                                   | clamped 1..100, default 25   |
+| `/support-cards`       | refused, redirected                                   | ignored, fixed constant 25   |
 
 The clamp was written five times: `CatalogController`, `SkillController`, and the three `/api/v1`
 list controllers, each as `min(100, max(1, (int) $request->query('pageSize', '25')))`.

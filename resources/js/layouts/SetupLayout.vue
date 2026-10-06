@@ -3,24 +3,27 @@
  * The career setup wizard's shell (SCREEN-002 to SCREEN-008; `ADR-0020` §1, plan §2 convention 3:
  * `SetupLayout` is added "only when its first screen lands", which is this slice).
  *
- * It is `AppLayout`'s landmark structure and nothing more: one skip link, one `banner`, one labelled
- * `nav` for the steps, one `main`, and the same 44px targets. It deliberately does not re-declare the
- * product navigation, because a wizard that keeps the whole sidebar gives the Trainer nine ways to
- * leave a six-step flow and no way to tell which step they are on.
+ * It is `AppLayout` plus the step bar, which is the same decision `CareerLayout.vue` makes for the
+ * career screens: the product navigation stays reachable, because a six-step flow that hides the way out
+ * is a flow a Trainer can get stuck inside. The original docblock argued the opposite, on the grounds
+ * that a wizard with the full sidebar "gives the Trainer nine ways to leave a six-step flow and no way to
+ * tell which step they are on". Both halves of that have since been answered: `SetupDraft` writes every
+ * step to the session as it is saved, so leaving mid-flow loses nothing, and the step count and
+ * `aria-current="step"` are what tell a Trainer which step they are on, not the absence of a sidebar.
+ *
+ * The step bar stays the wizard's own sub-navigation, so "which step am I on and what is next" is
+ * answered one level above the page rather than competing with the product destinations.
  *
  * A step whose slice has not landed is a named absence (`to: null`), the same rule `AppLayout`
- * `items[]` uses for Veterans. Steps 1 to 5 are live: the ancestry step (D5-wizard) and the deck step
- * (D6-wizard) carry their values in the session draft rather than on a run, which is what lets them exist
- * before Preflight creates one, unlike the run-scoped Legacy Lab and deck builder. Only Preflight (D7) is
- * still an absence.
+ * `items[]` uses. All six steps are live: the ancestry step (D5-wizard) and the deck step (D6-wizard)
+ * carry their values in the session draft rather than on a run, and Preflight (D7) composes that draft
+ * and creates the run. The `to: null` branch stays because the next wizard slice that lands a step ahead
+ * of its own screen needs it, and because a named absence is the honest answer rather than a dead link.
  */
-import { Link, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import AppLayout from './AppLayout.vue';
+import { Link } from '@inertiajs/vue3';
 
 const props = defineProps<{ step: number }>();
-
-const page = usePage();
-const flashStatus = computed(() => page.props.flash?.status ?? null);
 
 const steps = [
     { label: 'Scenario', to: '/career/setup/scenario' },
@@ -28,46 +31,37 @@ const steps = [
     { label: 'Your target', to: '/career/setup/target' },
     { label: 'Legacy', to: '/career/setup/legacy' },
     { label: 'Support Cards', to: '/career/setup/deck' },
-    { label: 'Preflight', to: null },
+    { label: 'Preflight', to: '/career/setup/preflight' },
 ];
 
 const stepLink =
     'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 const stepCurrent = 'bg-raised text-ink-strong font-bold';
-const stepAbsent = 'flex min-h-11 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium text-ink-muted';
+const stepAbsent =
+    'flex min-h-11 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium text-ink-muted';
+const leaveLink =
+    'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 </script>
 
 <template>
-    <div class="flex min-h-screen flex-col bg-page text-ink">
-        <a
-            href="#main"
-            class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border-2 focus:border-rule focus:bg-raised focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-ink-strong"
-        >
-            Skip to content
-        </a>
-
-        <header
-            role="banner"
-            class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-rule bg-panel px-4 py-3 sm:px-6"
-        >
-            <h1 class="text-base font-semibold text-ink-strong">
-                <slot name="title" />
-            </h1>
-            <div class="flex items-center gap-3">
-                <span class="text-xs text-ink-muted" aria-hidden="true">
-                    Step {{ props.step }} of {{ steps.length }}
-                </span>
-                <Link href="/" class="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised">
-                    Leave setup
-                </Link>
-            </div>
-        </header>
+    <AppLayout>
+        <template #title><slot name="title" /></template>
 
         <!-- The step list is a labelled nav, and the current step carries `aria-current="step"`, so
-             the position is announced rather than carried by the accent alone (WCAG 1.4.1). -->
-        <nav aria-label="Setup steps" class="border-b border-rule bg-panel px-2 py-2">
+             the position is announced rather than carried by the accent alone (WCAG 1.4.1). The visible
+             count and the `sr-only` line are the same fact in two media: the number is a position, and
+             a screen reader should hear it before the list rather than after the sixth item. -->
+        <nav aria-label="Setup steps" class="mb-4 border-b border-rule pb-2">
+            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <p class="text-xs text-ink-muted">
+                    Step {{ props.step }} of {{ steps.length }}
+                </p>
+                <Link href="/" :class="leaveLink">Leave setup</Link>
+            </div>
+
             <p class="sr-only">Step {{ props.step }} of {{ steps.length }}</p>
-            <ol class="flex flex-wrap gap-1 text-sm">
+
+            <ol class="mt-1 flex flex-wrap gap-1 text-sm">
                 <li v-for="(item, index) in steps" :key="item.label">
                     <Link
                         v-if="item.to"
@@ -85,14 +79,6 @@ const stepAbsent = 'flex min-h-11 cursor-not-allowed items-center rounded-md px-
             </ol>
         </nav>
 
-        <main id="main" class="flex-1 px-4 py-6 sm:px-6">
-            <p
-                v-if="flashStatus"
-                class="mb-4 rounded border border-green-line bg-green-tint px-3 py-2 text-sm text-ink"
-            >
-                {{ flashStatus }}
-            </p>
-            <slot />
-        </main>
-    </div>
+        <slot />
+    </AppLayout>
 </template>

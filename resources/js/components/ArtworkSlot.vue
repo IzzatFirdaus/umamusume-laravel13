@@ -36,6 +36,12 @@
  *     no layout shift for intrinsic dimensions to paper over.
  *   - **Alt is the client display name and nothing else.** C-4 bounds its vocabulary, and the tool
  *     cannot see inside the file it would be describing, so there is no invented descriptor.
+ *   - **`loading="lazy"` and `decoding="async"`, both branches.** A list screen asks for one frame per
+ *     row, and `php artisan serve` is one process: the off-screen rows were queuing ahead of the text a
+ *     Trainer came to read. Lazy defers them to the viewport and async keeps each arrival off the main
+ *     thread. This is fetch timing only, so it does not touch the geometry rule above or §4.7's absence
+ *     discipline, and an above-the-fold slot (a detail header) is fetched immediately anyway, because
+ *     that is what the browser does with a lazy image already in view.
  *
  * The `size` union is typed rather than `string` on purpose. Tailwind's scanner reads raw source
  * text, so pinning the three values `DESIGN.md` §4.7 records here guarantees the classes are
@@ -75,12 +81,14 @@ defineProps<{
         :aria-label="alt === '' ? (linkLabel ?? undefined) : undefined"
         :class="[size, 'block']"
     >
-        <img :src="url" :alt="alt" :class="`${size} rounded-md object-cover`">
+        <img :src="url" :alt="alt" loading="lazy" decoding="async" :class="`${size} rounded-md object-cover`">
     </a>
     <img
         v-else-if="url"
         :src="url"
         :alt="alt"
+        loading="lazy"
+        decoding="async"
         :class="`${size} rounded-md object-cover`"
     >
     <span v-else-if="reserve" :class="[size, 'block']" aria-hidden="true"></span>

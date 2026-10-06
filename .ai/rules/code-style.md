@@ -18,9 +18,11 @@ These rules record the formatting and style conventions this project commits to.
 
 <code-snippet name="trailing-comma" lang="php">
 $attributes = [
-    'name' => $name,
-    'email' => $email,
-    'password' => $password,
+```text
+'name' => $name,
+'email' => $email,
+'password' => $password,
+```
 ];
 </code-snippet>
 

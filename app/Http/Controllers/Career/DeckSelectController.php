@@ -15,7 +15,7 @@ use App\Services\SupportCardEffects;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\View\ViewErrorBag;
+use Illuminate\Support\ViewErrorBag;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -90,7 +90,7 @@ class DeckSelectController extends Controller
             'picker' => $this->picker($request, $selected),
             'scenarioLabel' => SetupDraft::scenarioLabel(),
             'scenarioPending' => SetupDraft::read()['scenario'] === null,
-            'analysis' => DeckAnalysis::build($this->analysisInput($cards, $dictionary)),
+            'analysis' => DeckAnalysis::build($this->analysisInput($cards)),
             // The one write this step makes, stated as a URL the page never has to resolve.
             'action' => route('career.deck.store'),
         ]);
@@ -210,21 +210,19 @@ class DeckSelectController extends Controller
     }
 
     /**
-     * The six cards the analysis reads, in the draft's order, with their at-cap effects.
+     * The six cards the analysis reads, in the draft's order, with their at-cap effects. The mapping is
+     * `DeckAnalysis::inputFor()`'s, so this step and Preflight cannot disagree about what a deck's effects
+     * are.
      *
      * @param  Collection<int, SupportCard>  $cards
-     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
      * @return list<array{card_name: string, effects: list<array<string, mixed>>}>
      */
-    private function analysisInput($cards, array $dictionary): array
+    private function analysisInput($cards): array
     {
-        return $cards
-            ->map(static fn (SupportCard $card): array => [
-                'card_name' => $card->displayName(),
-                'effects' => SupportCardEffects::atCap($card, $dictionary),
-            ])
-            ->values()
-            ->all();
+        /** @var list<array{card_name: string, effects: list<array<string, mixed>>}> $input */
+        $input = DeckAnalysis::inputFor($cards);
+
+        return $input;
     }
 
     /**
@@ -246,11 +244,12 @@ class DeckSelectController extends Controller
 
     /**
      * The label a slot carries: `Slot 3`, or `Slot 6 · Friends` for the position the client reserves for a
-     * borrowed card (`ADR-0014` correction 1), worded the same way the run builder words it.
+     * borrowed card (`ADR-0014` correction 1). The words themselves are `DeckSlot::positionLabel()`'s, which
+     * Preflight's summary reads too.
      */
     private function slotLabel(int $position): string
     {
-        return $position === DeckSlot::MAX_POSITION ? 'Slot 6 · Friends' : 'Slot '.$position;
+        return DeckSlot::positionLabel($position);
     }
 
     /**

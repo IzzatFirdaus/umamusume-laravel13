@@ -23,18 +23,18 @@ GameTora skills document and measured it before writing a column against it.
 
 **Measured on `skills.609afe88.json` (1,910 records, pulled 2026-09-29):**
 
-| Field | Present on | What it is |
-|---|---|---|
-| `id` | 1,910 | The export's own skill id. Not the app's `id`. |
-| `enname` | 1,910 | A literal rendering of the Japanese name — **not the client string** |
-| `name_en` | 985 (all 623 Global rows) | **The `[Global]` client string.** 535 of 623 differ from `enname` |
-| `unreleased` | 1,287 | Array of server codes. Every populated value contains `en`; absence is the Global statement |
-| `rarity` | 1,910 | Six values: 1 (598), 2 (346), 3 (22), 4 (22), 5 (250), 6 (672) |
-| `cost` | 906 | SP cost. Present on rarity 1 and 2 only; absent on 3–6 |
-| `type` | 1,910 | An array of **gate keys** (`nac`, `med`, `l_1`, `ldr`, `dir`, `mil`, `cor`, `run`, `f_s`, …) |
-| `char` | 1,490 | The trainee cards whose unique skill this is |
-| `gene_version` | 290 (rarity 3/4/5 only) | A nested record: `inherited: true`, `parent_skills: [host id]`, own `id`, own `cost` |
-| `evo` / `pre_evo` | 256 (rarity 2) / 672 (rarity 6) | The evolution pair, both directions |
+| Field               | Present on                        | What it is                                                                                     |
+| ------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `id`                | 1,910                             | The export's own skill id. Not the app's `id`.                                                 |
+| `enname`            | 1,910                             | A literal rendering of the Japanese name — **not the client string**                           |
+| `name_en`           | 985 (all 623 Global rows)         | **The `[Global]` client string.** 535 of 623 differ from `enname`                              |
+| `unreleased`        | 1,287                             | Array of server codes. Every populated value contains `en`; absence is the Global statement    |
+| `rarity`            | 1,910                             | Six values: 1 (598), 2 (346), 3 (22), 4 (22), 5 (250), 6 (672)                                 |
+| `cost`              | 906                               | SP cost. Present on rarity 1 and 2 only; absent on 3–6                                         |
+| `type`              | 1,910                             | An array of **gate keys** (`nac`, `med`, `l_1`, `ldr`, `dir`, `mil`, `cor`, `run`, `f_s`, …)   |
+| `char`              | 1,490                             | The trainee cards whose unique skill this is                                                   |
+| `gene_version`      | 290 (rarity 3/4/5 only)           | A nested record: `inherited: true`, `parent_skills: [host id]`, own `id`, own `cost`           |
+| `evo` / `pre_evo`   | 256 (rarity 2) / 672 (rarity 6)   | The evolution pair, both directions                                                            |
 
 Three findings changed the shape of this decision:
 
@@ -79,14 +79,14 @@ the export's number auditable and `tier` carries a label only where a source pin
 **4. `skills.type` is filled by derivation and marked as derived.** Owner chose derivation over NULL. The
 codes and their meanings, read off the export's own English descriptions:
 
-| effect code | rows | what the copy says |
-|---|---|---|
-| 27 | 1,238 | velocity ("increase velocity") |
-| 31 | 431 | position-hold / determination effects |
-| 22 | 380 | acceleration ("surge ahead … increase acceleration") |
-| 9 / 28 | 334 / 40 | endurance recovery |
-| 1 / 2 / 3 | 124 / 78 / 59 | performance on track side, venue, ground condition |
-| 21 | 60 | **negative values** (`v=-2000`) on self: `Corner Adept ×`, `Defeatist` |
+| effect code   | rows            | what the copy says                                                       |
+| ------------- | --------------- | ------------------------------------------------------------------------ |
+| 27            | 1,238           | velocity ("increase velocity")                                           |
+| 31            | 431             | position-hold / determination effects                                    |
+| 22            | 380             | acceleration ("surge ahead … increase acceleration")                     |
+| 9 / 28        | 334 / 40        | endurance recovery                                                       |
+| 1 / 2 / 3     | 124 / 78 / 59   | performance on track side, venue, ground condition                       |
+| 21            | 60              | **negative values** (`v=-2000`) on self: `Corner Adept ×`, `Defeatist`   |
 
 So Speed-type (27, 22) and Recovery-type (9, 28) are evidenced, a large "condition performance" family
 (1/2/3) maps to Passive, and **Debuff is not evidenced at all** — nothing in this file is an effect on

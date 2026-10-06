@@ -18,16 +18,16 @@ Phase 1 of `PRD.md`, substantially implemented and in active development (no rel
 
 ## Technology Stack
 
-| Area | Technology |
-|---|---|
-| Runtime | PHP >= 8.3 (`composer.json`; developed on 8.5.8) with `pdo_sqlite` and `intl` |
-| Framework | Laravel 13 (`laravel/framework` 13.32.0) |
-| Database | SQLite only, WAL mode + `busy_timeout` (`database/database.sqlite`, gitignored) |
-| Cache / Queue | framework `database` stores (no Redis) |
-| Frontend | Blade + Tailwind CSS v4 (CSS-first `@theme` in `resources/css/app.css`, no `tailwind.config.js`), Vite 7, TypeScript sources under `resources/js/` |
-| Testing | Pest 4 (feature-first), `Http::fake`, in-memory SQLite for tests |
-| Static analysis | Larastan level 6 (`phpstan.neon`), Pint (laravel preset, `pint.json`) |
-| Type check | `tsc --noEmit` (`npm run typecheck`) |
+| Area              | Technology                                                                                                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runtime           | PHP >= 8.3 (`composer.json`; developed on 8.5.8) with `pdo_sqlite` and `intl`                                                                        |
+| Framework         | Laravel 13 (`laravel/framework` 13.32.0)                                                                                                             |
+| Database          | SQLite only, WAL mode + `busy_timeout` (`database/database.sqlite`, gitignored)                                                                      |
+| Cache / Queue     | framework `database` stores (no Redis)                                                                                                               |
+| Frontend          | Blade + Tailwind CSS v4 (CSS-first `@theme` in `resources/css/app.css`, no `tailwind.config.js`), Vite 7, TypeScript sources under `resources/js/`   |
+| Testing           | Pest 4 (feature-first), `Http::fake`, in-memory SQLite for tests; Playwright for browser/E2E and accessibility                                       |
+| Static analysis   | Larastan level 6 (`phpstan.neon`), Pint (laravel preset, `pint.json`)                                                                                |
+| Type check        | `tsc --noEmit` (`npm run typecheck`)                                                                                                                 |
 
 Deliberately absent (PRD §6): auth packages, SPA frameworks, Excel export, Redis, MySQL/PostgreSQL, deploy tooling. `compose.yaml` is stock Laravel Sail (MySQL/Redis) and is **not** the supported database path for this app.
 
@@ -59,7 +59,7 @@ composer setup
 
 # 4. Populate the catalog offline from the committed source bodies.
 php artisan migrate:fresh --seed
-```
+```text
 
 Seeding reads `database/seeders/data/` (the committed copies of each source document) and fills the reference tables with no network: the roster, cards, 1,910 skills (623 `[Global]`, as of the `609afe88` snapshot), 559 support cards, scenario slots. Trainer-facing surfaces only show rows passing `Skill::availableOnGlobal()` (release status `GlobalReleased` **and** `name_is_client`), per `ADR-0011`.
 
@@ -75,7 +75,7 @@ Seeding reads `database/seeders/data/` (the committed copies of each source docu
 
 ```bash
 composer dev          # artisan serve + queue listener + pail logs + Vite HMR, concurrently
-```
+```text
 
 Keep the app on loopback; it has no auth surface and must not be exposed (`ARCHITECTURE.md` §8).
 
@@ -91,7 +91,7 @@ exists to detect exactly that. Serve with both stores on files instead:
 ```bash
 composer serve:browser                                # or, in a POSIX shell:
 SESSION_DRIVER=file CACHE_STORE=file php artisan serve
-```
+```text
 
 Use `file`, not `array`: the array driver does not carry the CSRF token between the GET that renders a
 form and the POST that submits it, so every form in the pass comes back a 419. `phpunit.xml` forces
@@ -112,7 +112,7 @@ php artisan uma:reparse <source>          # replay parse->match->promote from st
 php artisan uma:fetch-art [--kind=…]      # mirror id-addressable artwork into storage/app/private/artwork (ADR-0021); manual only
 php artisan uma:import:support-cards      # import the two support datasets from committed bodies, zero network
 php artisan uma:backup [path]             # WAL checkpoint + consistent single-file copy (NFR-5)
-```
+```text
 
 Adding a source requires owner approval plus a robots/rate-limit review and one parser class (`AGENTS.md`, Data Engineer). The robots/live-availability check on the GameTora host remains formally outstanding (PRD OQ-2).
 
@@ -120,21 +120,21 @@ Adding a source requires owner approval plus a robots/rate-limit review and one 
 
 Verified against `php artisan route:list`:
 
-| Route | Purpose |
-|---|---|
-| `/` | redirects to `/training-runs` |
-| `/umamusume`, `/umamusume/{slug}` | catalog index (release-status filter, normalized search) and detail with aliases, cards, and provenance |
-| `/skills`, `/skills/{skill}` | skill search (Screen D) and detail; Global-filtered, paginated |
-| `/support-cards`, `/support-cards/{card}` | support-card catalog (reference data only, no collection state) |
-| `/training-runs` (+ `/create`, `/{run}`, PUT, DELETE) | Trainer run CRUD |
-| `/training-runs/{run}/turns[/{turn}]` | per-turn stat logging; stats validate against the run's scenario ceiling (`base_cap` + `cap_bonus`, clamped to `hard_cap`, via `App\Services\ScenarioCaps`; `ADR-0015`). A run with no scenario keeps the 1200 base cap. |
-| `/training-runs/{run}/skills` | skill states Suggested / Acquired / Skipped |
-| `/training-runs/{run}/deck` | the six support cards the run was equipped with |
-| `/training-runs/{run}/races`, `.../purchases` | race entries and shop purchases per turn |
-| `/training-runs/import` (+ preview, store) | historical-run import from this app's own CSV export (`ADR-0017`) |
-| `/training-runs/{run}/export/csv\|json` | run download, no data lock-in (US-6) |
-| `/review`, `POST /review/{candidate}` | match review queue |
-| `/up` | framework health route |
+| Route                                                 | Purpose                                                                                                                                                                                                                  |                                      |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| `/`                                                   | redirects to `/training-runs`                                                                                                                                                                                            |                                      |
+| `/umamusume`, `/umamusume/{slug}`                     | catalog index (release-status filter, normalized search) and detail with aliases, cards, and provenance                                                                                                                  |                                      |
+| `/skills`, `/skills/{skill}`                          | skill search (Screen D) and detail; Global-filtered, paginated                                                                                                                                                           |                                      |
+| `/support-cards`, `/support-cards/{card}`             | support-card catalog (reference data only, no collection state)                                                                                                                                                          |                                      |
+| `/training-runs` (+ `/create`, `/{run}`, PUT, DELETE) | Trainer run CRUD                                                                                                                                                                                                         |                                      |
+| `/training-runs/{run}/turns[/{turn}]`                 | per-turn stat logging; stats validate against the run's scenario ceiling (`base_cap` + `cap_bonus`, clamped to `hard_cap`, via `App\Services\ScenarioCaps`; `ADR-0015`). A run with no scenario keeps the 1200 base cap. |                                      |
+| `/training-runs/{run}/skills`                         | skill states Suggested / Acquired / Skipped                                                                                                                                                                              |                                      |
+| `/training-runs/{run}/deck`                           | the six support cards the run was equipped with                                                                                                                                                                          |                                      |
+| `/training-runs/{run}/races`, `.../purchases`         | race entries and shop purchases per turn                                                                                                                                                                                 |                                      |
+| `/training-runs/import` (+ preview, store)            | historical-run import from this app's own CSV export (`ADR-0017`)                                                                                                                                                        |                                      |
+| `/training-runs/{run}/export/csv\                     | json`                                                                                                                                                                                                                    | run download, no data lock-in (US-6) |
+| `/review`, `POST /review/{candidate}`                 | match review queue                                                                                                                                                                                                       |                                      |
+| `/up`                                                 | framework health route                                                                                                                                                                                                   |                                      |
 
 The former `/design-preview` route has been deleted; component review now happens on the real screens and their tests.
 
@@ -145,36 +145,38 @@ GET /api/v1/umamusume?status=GlobalReleased&search=special%20week&page=1&pageSiz
 GET /api/v1/umamusume/{slug}
 GET /api/v1/training-runs[/{id}]
 GET /api/v1/support-cards[/{supportCard}]
-```
+```text
 
 List shape: `{ "data": [...], "pagination": { "page", "pageSize", "totalItems", "totalPages" } }`. Every non-2xx: `{ "error": { "code", "message" } }`, rendered centrally in `bootstrap/app.php`. Contract: `ARCHITECTURE.md` §4.
 
 ## Testing & Quality Gates
 
-| Gate | Command |
-|---|---|
-| Full pipeline (config:clear, TS typecheck, suite) | `composer test` |
-| Tests | `php artisan test --compact` (narrowest first: `--filter=Name`, or a file path via `vendor/bin/pest`) |
-| Style check / fix | `composer lint` / `vendor/bin/pint --dirty --format agent` |
-| Static analysis | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` (level 6; `composer analyse` omits the flag and can OOM a 128M CLI default) |
-| TS type check | `npm run typecheck` |
-| Lore grep | `composer lore` and `composer lore-code` (extended, includes untracked files and Global client terminology); each hit needs a context ruling |
-| Dependency audit | `composer audit` and `npm audit --omit=dev` (the `Makefile` `audit` target wraps both; make itself is unavailable, KI-4) |
+| Gate                                                | Command                                                                                                                                        |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Full pipeline (config:clear, TS typecheck, suite)   | `composer test`                                                                                                                                |
+| Tests                                               | `php artisan test --compact` (narrowest first: `--filter=Name`, or a file path via `vendor/bin/pest`)                                          |
+| Style check / fix                                   | `composer lint` / `vendor/bin/pint --dirty --format agent`                                                                                     |
+| Static analysis                                     | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` (level 6; `composer analyse` omits the flag and can OOM a 128M CLI default)       |
+| TS type check                                       | `npm run typecheck`                                                                                                                            |
+| Accessibility                                       | `npm run test:a11y` (Playwright + `@axe-core/playwright`, WCAG 2.1 AA ruleset)                                                                 |
+| Lore grep                                           | `composer lore` and `composer lore-code` (extended, includes untracked files and Global client terminology); each hit needs a context ruling   |
+| Dependency audit                                    | `composer audit` and `npm audit --omit=dev` (the `Makefile` `audit` target wraps both; make itself is unavailable, KI-4)                       |
 
 Tests use Pest 4, feature-first, with a global `TestCase` + `RefreshDatabase` binding in `tests/Pest.php`. All fetcher/pipeline tests use `Http::fake` against stored bodies in `tests/Fixtures`; no test touches the network. The test database is in-memory SQLite (`phpunit.xml` forces it). The full quality bar, including the no-suppression floor, is `CONSTRAINTS.md`.
 
 ## Common Commands
 
-| Task | Command |
-|---|---|
-| First-time setup | `composer setup` (then fix `.env` DB to sqlite, see Installation) |
-| Dev environment | `composer dev` |
-| Build assets | `npm run build` |
-| Fresh DB + offline catalog data | `php artisan migrate:fresh --seed` |
-| Fetch / replay / backup | `php artisan uma:fetch`, `uma:reparse <source>`, `uma:backup` |
-| Mirror catalog artwork | `php artisan uma:fetch-art` (options `--kind`, `--dry-run`, `--refetch`); manual only, `ADR-0021` |
-| Route list | `php artisan route:list` |
-| Backup before experimenting | `php artisan uma:backup` (writes to `storage/app/backups/`) |
+| Task                              | Command                                                                                             |
+| --------------------------------- | --------------------------------------------------------------------------------------------------- |
+| First-time setup                  | `composer setup` (then fix `.env` DB to sqlite, see Installation)                                   |
+| Dev environment                   | `composer dev`                                                                                      |
+| Build assets                      | `npm run build`                                                                                     |
+| Accessibility tests               | `npm run test:a11y`                                                                                 |
+| Fresh DB + offline catalog data   | `php artisan migrate:fresh --seed`                                                                  |
+| Fetch / replay / backup           | `php artisan uma:fetch`, `uma:reparse <source>`, `uma:backup`                                       |
+| Mirror catalog artwork            | `php artisan uma:fetch-art` (options `--kind`, `--dry-run`, `--refetch`); manual only, `ADR-0021`   |
+| Route list                        | `php artisan route:list`                                                                            |
+| Backup before experimenting       | `php artisan uma:backup` (writes to `storage/app/backups/`)                                         |
 
 ## Database & Data Setup
 
@@ -197,7 +199,7 @@ Screen-level behavior is specified in `SCREEN_SPEC.md`.
 
 ## Project Structure
 
-```
+```text
 app/Actions/              PromoteMatchedRecord, ResolveMatchCandidate, ImportHistoricalRun,
                           Store* ingest actions (skills, cards, profiles, support, race slots)
 app/Console/Commands/     UmaFetch, UmaReparse, UmaBackup, UmaImportSupportCards (+ ManageSkills, see below)
@@ -222,28 +224,28 @@ routes/                   web.php, api.php (named routes throughout)
 tests/                    Pest: Feature (100+ files) + Unit; tests/Fixtures stored bodies
 docs/                     adr/, scenarios/, UMAMUSUME_REFERENCE.md, research-scratch/ (governance masters)
 tools/                    lore.php (lore gate), gate.py (design-artifact gate), doc_census.py, roster-crosscheck.php
-```
+```text
 
 ## Documentation Map
 
-| Document | Purpose |
-|---|---|
-| `PRD.md` | Product truth: users, stories, functional/non-functional requirements, non-goals, open questions |
-| `PRODUCT.md` | Product summary for design and agent context |
-| `ARCHITECTURE.md` | Full system design: schema, fetch engine, API contract, security model |
-| `ARCHITECTURE-ESSENTIALS.md` | Token-efficient digest of the above (ARCHITECTURE.md wins on conflict) |
-| `DESIGN.md` | Visual system contract: theme, tokens, components |
-| `SCREEN_SPEC.md` | Screen and workflow specifications |
-| `CONSTRAINTS.md` | Pointer; the binding quality bar (C-1 to C-9) lives in `docs/research-scratch/GOVERNANCE.md` |
-| `docs/research-scratch/GOVERNANCE.md` | Gate registry, pre-mortem risk record, consolidated design/governance masters |
-| `AGENTS.md` | Agent roles, escalation paths, practical build notes |
-| `CLAUDE.md` | Coding rules for assistants |
-| `KNOWN-ISSUES.md` | Pointer; defect register KI-01..KI-58 under `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. New entries append to the root file. |
-| `docs/adr/README.md` | ADR index (`ADR-0001` to `ADR-0021`) with the errata convention |
-| `docs/UMAMUSUME_REFERENCE.md` | Source-cited mechanics reference; live-ops claims are dated snapshots |
-| `docs/scenarios/` | Per-scenario playing guides |
-| `.ai/rules/index.md` | Path-scoped repo rules (style, Eloquent, testing) |
-| `PLAN.md` | Pointer; the frontend slice plan lives in `docs/research-scratch/PROCESS-PLANS.md` |
+| Document                                | Purpose                                                                                                                               |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `PRD.md`                                | Product truth: users, stories, functional/non-functional requirements, non-goals, open questions                                      |
+| `PRODUCT.md`                            | Product summary for design and agent context                                                                                          |
+| `ARCHITECTURE.md`                       | Full system design: schema, fetch engine, API contract, security model                                                                |
+| `ARCHITECTURE-ESSENTIALS.md`            | Token-efficient digest of the above (ARCHITECTURE.md wins on conflict)                                                                |
+| `DESIGN.md`                             | Visual system contract: theme, tokens, components                                                                                     |
+| `SCREEN_SPEC.md`                        | Screen and workflow specifications                                                                                                    |
+| `CONSTRAINTS.md`                        | Pointer; the binding quality bar (C-1 to C-9) lives in `docs/research-scratch/GOVERNANCE.md`                                          |
+| `docs/research-scratch/GOVERNANCE.md`   | Gate registry, pre-mortem risk record, consolidated design/governance masters                                                         |
+| `AGENTS.md`                             | Agent roles, escalation paths, practical build notes                                                                                  |
+| `CLAUDE.md`                             | Coding rules for assistants                                                                                                           |
+| `KNOWN-ISSUES.md`                       | Pointer; defect register KI-01..KI-58 under `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. New entries append to the root file.   |
+| `docs/adr/README.md`                    | ADR index (`ADR-0001` to `ADR-0021`) with the errata convention                                                                       |
+| `docs/UMAMUSUME_REFERENCE.md`           | Source-cited mechanics reference; live-ops claims are dated snapshots                                                                 |
+| `docs/scenarios/`                       | Per-scenario playing guides                                                                                                           |
+| `.ai/rules/index.md`                    | Path-scoped repo rules (style, Eloquent, testing)                                                                                     |
+| `PLAN.md`                               | Pointer; the frontend slice plan lives in `docs/research-scratch/PROCESS-PLANS.md`                                                    |
 
 When documents disagree: `CONSTRAINTS.md` bar > gate registry > ADRs > `DESIGN.md` > slice plans; `ARCHITECTURE.md` over its digest; `PRD.md` is product truth.
 

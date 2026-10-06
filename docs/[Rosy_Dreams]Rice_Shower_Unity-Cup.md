@@ -23,13 +23,13 @@ puts Top Star at 240,000, so **30,755 fans** is the open numeric target (`7a68ae
 
 ### 1.2 Live stat line and the caps above it
 
-| Stat | Value | Rank | Cap shown | Growth | Over the 1300 floor |
-|---|---|---|---|---|---|
-| Speed | 607 | B | 1325 | +0% | +25 |
-| Stamina | 577 | C+ | 1322 | +10% | +22 |
-| Power | 549 | C+ | 1368 | +0% | +68 |
-| Guts | 736 | B+ | 1308 | +20% | +8 |
-| Wit | 397 | D+ | 1800 | +0% | N/A (different floor) |
+| Stat    | Value | Rank | Cap shown | Growth | Over the 1300 floor   |  |
+| ------- | ----- | ---- | --------- | ------ | --------------------- |  |
+| Speed   | 607   | B    | 1325      | +0%    | +25                   |  |
+| Stamina | 577   | C+   | 1322      | +10%   | +22                   |  |
+| Power   | 549   | C+   | 1368      | +0%    | +68                   |  |
+| Guts    | 736   | B+   | 1308      | +20%   | +8                    |  |
+| Wit     | 397   | D+   | 1800      | +0%    | N/A (different floor) |  |
 
 Skill Points: **173 unspent** (`09e754d6`). The 1300 / 1300 / 1300 / 1300 / 1800 floor is the scenario
 base: the 2026-07 rework added +100 to Speed, Stamina, Power and Guts and +600 to Wit ([game8.co
@@ -74,14 +74,14 @@ which carries each card's effects at their maximum anchors. The client popup sho
 has reached at its current level and limit breaks, so the two columns below are different things: the
 catalog is what the card can be, the client column is what this run has.
 
-| Card | Type | Client level | Unique Perk | Scenario link |
-|---|---|---|---|---|
-| Tokai Teio [Dream Big!] | Speed | 35/35 | Dream Big! L30: Friendship Bonus and Initial Speed | no |
-| Nishino Flower [Even the Littlest Bud] | Speed | 30/30 | Even the Littlest Bud L30: Mood Effect and Initial Friendship Gauge | no |
-| Biko Pegasus [Double Carrot Punch!] | Speed | 30/30 | Double Carrot Punch! L30: Training Effectiveness and Specialty Priority | no |
-| Super Creek [Piece of Mind] | Stamina | 50/50 | Piece of Mind L30: Friendship Bonus and Specialty Priority | no |
-| Matikanetannhauser [Just Keep Going] | Guts | 30/30 | Just Keep Going L40: Friendship Bonus and Initial Guts | no |
-| Haru Urara [Urara's Day Off!] | Guts | 35/35 | Urara's Day Off! L40: Friendship Bonus and Race Bonus | **yes** |
+| Card                                   | Type    | Client level | Unique Perk                                                             | Scenario link |  |
+| -------------------------------------- | ------- | ------------ | ----------------------------------------------------------------------- | ------------- |  |
+| Tokai Teio [Dream Big!]                | Speed   | 35/35        | Dream Big! L30: Friendship Bonus and Initial Speed                      | no            |  |
+| Nishino Flower [Even the Littlest Bud] | Speed   | 30/30        | Even the Littlest Bud L30: Mood Effect and Initial Friendship Gauge     | no            |  |
+| Biko Pegasus [Double Carrot Punch!]    | Speed   | 30/30        | Double Carrot Punch! L30: Training Effectiveness and Specialty Priority | no            |  |
+| Super Creek [Piece of Mind]            | Stamina | 50/50        | Piece of Mind L30: Friendship Bonus and Specialty Priority              | no            |  |
+| Matikanetannhauser [Just Keep Going]   | Guts    | 30/30        | Just Keep Going L40: Friendship Bonus and Initial Guts                  | no            |  |
+| Haru Urara [Urara's Day Off!]          | Guts    | 35/35        | Urara's Day Off! L40: Friendship Bonus and Race Bonus                   | **yes**       |  |
 
 Three Speed, one Stamina, two Guts, no Wit, no Pal. The sixth slot is a **friend card**: the Career
 Profile rail tags Super Creek's entry with a "Friends" pill where the other five carry their discipline
@@ -94,27 +94,27 @@ Haru Urara is the deck's only Unity Cup link, so every Special Training and Burs
 carries the +1 (`02-unity-cup.md:78`). Super Creek at 50/50 is the only maxed card, and every client row
 visible for her equals her catalog maximum, which is the check that the two columns mean what they say.
 
-| Card | Effect set, values at max (catalog) | Client rows visible |
-|---|---|---|
-| Tokai Teio | Friendship Bonus 20, Mood Effect 60, Power Bonus 1, Initial Friendship Gauge 25, Race Bonus 10, Fan Bonus 15, Hint Levels 2, Hint Frequency 40, Specialty Priority 35 | FB 16, Mood 45, Power Bonus 1, Hint Freq 33, Specialty Priority 25, Hint Levels (row cut), Race 45 locked, Fan 45 locked |
-| Nishino Flower | FB 20, Mood 30, Speed Bonus 1, Training Effectiveness 10, Initial Speed 30, Initial Friendship Gauge 35, Race 5, Fan 15, Hint Levels 3, Hint Frequency 50 | FB 15, Mood 20, Training Eff 5, Hint Levels Lv2, Hint Freq 40, Speed Bonus 35 locked, Initial Speed 45 locked |
-| Biko Pegasus | FB 25, Speed Bonus 1, Training Eff 15, Initial Speed 35, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35 | FB 20, Training Eff 10, Initial Speed 25, Fan 15, Specialty Priority 20, Speed Bonus 35 locked, Initial Friendship Gauge 45 locked |
-| Super Creek | FB 25, Stamina Bonus 1, Training Eff 15, Initial Stamina 35, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35 | FB 25, Stamina Bonus 1, Training Eff 15, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35 |
-| Matikanetannhauser | FB 25, Mood 30, Guts Bonus 1, Training Eff 5, Initial Guts 35, Race 5, Fan 10, Specialty Priority 65 | FB 20, Training Eff 5, Initial Guts 25, Fan 5, Specialty Priority 50, Guts Bonus 35 locked, Mood 45 locked |
-| Haru Urara | FB 20, Mood 30, Training Eff 15, Initial Guts 35, Race 5, Fan 10, Specialty Priority 50, Skill Point Bonus 1 | FB 16, Training Eff 11, Initial Guts 27, Fan 6, Specialty Priority 40, Skill Point Bonus 1, Mood 45 locked |
+| Card               | Effect set, values at max (catalog)                                                                                                                                   | Client rows visible                                                                                                                |  |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |  |
+| Tokai Teio         | Friendship Bonus 20, Mood Effect 60, Power Bonus 1, Initial Friendship Gauge 25, Race Bonus 10, Fan Bonus 15, Hint Levels 2, Hint Frequency 40, Specialty Priority 35 | FB 16, Mood 45, Power Bonus 1, Hint Freq 33, Specialty Priority 25, Hint Levels (row cut), Race 45 locked, Fan 45 locked           |  |
+| Nishino Flower     | FB 20, Mood 30, Speed Bonus 1, Training Effectiveness 10, Initial Speed 30, Initial Friendship Gauge 35, Race 5, Fan 15, Hint Levels 3, Hint Frequency 50             | FB 15, Mood 20, Training Eff 5, Hint Levels Lv2, Hint Freq 40, Speed Bonus 35 locked, Initial Speed 45 locked                      |  |
+| Biko Pegasus       | FB 25, Speed Bonus 1, Training Eff 15, Initial Speed 35, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35                                          | FB 20, Training Eff 10, Initial Speed 25, Fan 15, Specialty Priority 20, Speed Bonus 35 locked, Initial Friendship Gauge 45 locked |  |
+| Super Creek        | FB 25, Stamina Bonus 1, Training Eff 15, Initial Stamina 35, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35                                      | FB 25, Stamina Bonus 1, Training Eff 15, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35                       |  |
+| Matikanetannhauser | FB 25, Mood 30, Guts Bonus 1, Training Eff 5, Initial Guts 35, Race 5, Fan 10, Specialty Priority 65                                                                  | FB 20, Training Eff 5, Initial Guts 25, Fan 5, Specialty Priority 50, Guts Bonus 35 locked, Mood 45 locked                         |  |
+| Haru Urara         | FB 20, Mood 30, Training Eff 15, Initial Guts 35, Race 5, Fan 10, Specialty Priority 50, Skill Point Bonus 1                                                          | FB 16, Training Eff 11, Initial Guts 27, Fan 6, Specialty Priority 40, Skill Point Bonus 1, Mood 45 locked                         |  |
 
 **Correction to the first pass:** the number beside a padlock in the client popup is the card level at
 which that effect unlocks, not a value. "Race Bonus 🔒 Lvl 45" means the effect arrives at level 45,
 which these cards cannot reach until their limit breaks raise the cap. It is not a 45% anything.
 
-| Card | Hint pool (catalog) | Story-event skills (catalog) |
-|---|---|---|
-| Tokai Teio | Prudent Positioning, Nimble Navigator, Go with the Flow, Thunderbolt Step, Soft Step, Shrewd Step | Rushing Gale!, Pace Chaser Straightaways ○ |
-| Nishino Flower | Hanshin Racecourse ○, Standard Distance ○, Firm Conditions ○, Updrafters, Pace Chaser Corners ○ | Beeline Burst, Straightaway Adept, Countermeasure |
-| Biko Pegasus | Outer Post Proficiency ○, Wait-and-See, Gap Closer, Productive Plan, Updrafters, Meticulous Measures, Stop Right There! | Sprint Straightaways ○, Plan X |
-| Super Creek | Firm Conditions ○, Corner Recovery ○, Ramp Up, Homestretch Haste, Hesitant Pace Chasers | Swinging Maestro, Deep Breaths |
-| Matikanetannhauser | Lay Low, Pace Strategy, Steadfast, Deep Breaths, Fighter | Unruffled, Calm in a Crowd, Subdued Front Runners |
-| Haru Urara | none stored | Long Shot ○, Unruffled |
+| Card               | Hint pool (catalog)                                                                                                     | Story-event skills (catalog)                      |  |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |  |
+| Tokai Teio         | Prudent Positioning, Nimble Navigator, Go with the Flow, Thunderbolt Step, Soft Step, Shrewd Step                       | Rushing Gale!, Pace Chaser Straightaways ○        |  |
+| Nishino Flower     | Hanshin Racecourse ○, Standard Distance ○, Firm Conditions ○, Updrafters, Pace Chaser Corners ○                         | Beeline Burst, Straightaway Adept, Countermeasure |  |
+| Biko Pegasus       | Outer Post Proficiency ○, Wait-and-See, Gap Closer, Productive Plan, Updrafters, Meticulous Measures, Stop Right There! | Sprint Straightaways ○, Plan X                    |  |
+| Super Creek        | Firm Conditions ○, Corner Recovery ○, Ramp Up, Homestretch Haste, Hesitant Pace Chasers                                 | Swinging Maestro, Deep Breaths                    |  |
+| Matikanetannhauser | Lay Low, Pace Strategy, Steadfast, Deep Breaths, Fighter                                                                | Unruffled, Calm in a Crowd, Subdued Front Runners |  |
+| Haru Urara         | none stored                                                                                                             | Long Shot ○, Unruffled                            |  |
 
 This closes the per-card Skills question from the catalog rather than from the frames, and it cross-
 validates the Learn screen: Soft Step at `Lv Max`, Shrewd Step and Nimble Navigator Obtained (Teio);
@@ -133,7 +133,7 @@ member, since the deck's characters join the team. Those six blocks are in §1.9
 The ancestry tree is now read directly, from the Legacy Umamusume panel (`2161e855`) and one Sparks
 panel per ancestor (`fd78e996`, `31fd26c4`, `f7a6952f`, `e771563c`, `24f5b5d0`, `eea37f2a`):
 
-```
+```text
 Rice Shower
 ├── Legacy 1  Vodka [Wild Top Gear]  rank B+
 │     ├── Daiwa Scarlet [Peak Blue]            rank B+
@@ -141,16 +141,16 @@ Rice Shower
 └── Legacy 2  Maruzensky [Formula R]  rank UG, flagged Guest
       ├── Daiwa Scarlet [Peak Blue]   rank UG
       └── Taiki Shuttle [Wild Frontier]  rank UG
-```
+```text
 
-| Ancestor | Blue | Pink | Green unique | White sparks |
-|---|---|---|---|---|
-| Vodka | Power ★☆☆ | Late Surger ★★☆ | Cut and Drive! ★★☆ | Oka Sho ★☆☆, Victoria Mile ★☆☆, Shuka Sho ★★☆, Japan C. ★★☆, Extra Tank ★★☆, Soft Step ★★★ |
-| Daiwa Scarlet, Legacy 1 side | Guts ★☆☆ | Mile ★☆☆ | Resplendent Red Ace ★☆☆ | Osaka Hai ★★☆, Tenno Sho (Autumn) ★☆☆, Competitive Spirit ○ ★★★, Pace Chaser Straightaways ○ ★★☆ |
-| Seiun Sky | **Stamina ★★★** | Turf ★★☆ | Angling and Scheming ★★☆ | Kikuka Sho ★☆☆, Corner Recovery ○ ★★☆, URA Finale ★☆☆ |
-| Maruzensky | Speed ★★☆ | Turf ★★☆ | Red Shift/LP1211-M ★☆☆ | Takarazuka Kinen ★★☆, Asahi Hai F.S. ★★☆, Corner Adept ○ ★★☆, Ramp Up ★★☆, Mile Straightaways ○ ★☆☆, **Ignited Spirit: Guts +** ★☆☆ |
-| Daiwa Scarlet, Legacy 2 side | Speed ★★☆ | Front Runner ★★☆ | Resplendent Red Ace ★☆☆ | Osaka Hai ★★☆, Tenno Sho (Spring) ★★☆, NHK Mile C. ★★☆, Japan C. ★★☆, Corner Adept ○ ★★☆, Unyielding Spirit ★★☆, Front Runner Savvy ○ ★☆☆ |
-| Taiki Shuttle | **Power ★★★** | Pace Chaser ★★☆ | Shooting for Victory! ★★☆ | NHK Mile C. ★★☆, Sprinters S. ★☆☆, JBC L. Classic ★★☆, Tokyo Daishoten ★★☆, Corner Adept ○ ★★☆, Corner Acceleration ○ ★★☆, Shifting Gears ★☆☆, Productive Plan ★★☆, Pace Chaser Straightaways ○ ★★★, Disorient ★★☆, Sympathy ★★☆, Head-On ★★☆, Glittering Star ★★☆ |
+| Ancestor                     | Blue            | Pink             | Green unique              | White sparks                                                                                                                                                                                                                                                       |  |
+| ---------------------------- | --------------- | ---------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |  |
+| Vodka                        | Power ★☆☆       | Late Surger ★★☆  | Cut and Drive! ★★☆        | Oka Sho ★☆☆, Victoria Mile ★☆☆, Shuka Sho ★★☆, Japan C. ★★☆, Extra Tank ★★☆, Soft Step ★★★                                                                                                                                                                         |  |
+| Daiwa Scarlet, Legacy 1 side | Guts ★☆☆        | Mile ★☆☆         | Resplendent Red Ace ★☆☆   | Osaka Hai ★★☆, Tenno Sho (Autumn) ★☆☆, Competitive Spirit ○ ★★★, Pace Chaser Straightaways ○ ★★☆                                                                                                                                                                   |  |
+| Seiun Sky                    | **Stamina ★★★** | Turf ★★☆         | Angling and Scheming ★★☆  | Kikuka Sho ★☆☆, Corner Recovery ○ ★★☆, URA Finale ★☆☆                                                                                                                                                                                                              |  |
+| Maruzensky                   | Speed ★★☆       | Turf ★★☆         | Red Shift/LP1211-M ★☆☆    | Takarazuka Kinen ★★☆, Asahi Hai F.S. ★★☆, Corner Adept ○ ★★☆, Ramp Up ★★☆, Mile Straightaways ○ ★☆☆, **Ignited Spirit: Guts +** ★☆☆                                                                                                                                |  |
+| Daiwa Scarlet, Legacy 2 side | Speed ★★☆       | Front Runner ★★☆ | Resplendent Red Ace ★☆☆   | Osaka Hai ★★☆, Tenno Sho (Spring) ★★☆, NHK Mile C. ★★☆, Japan C. ★★☆, Corner Adept ○ ★★☆, Unyielding Spirit ★★☆, Front Runner Savvy ○ ★☆☆                                                                                                                          |  |
+| Taiki Shuttle                | **Power ★★★**   | Pace Chaser ★★☆  | Shooting for Victory! ★★☆ | NHK Mile C. ★★☆, Sprinters S. ★☆☆, JBC L. Classic ★★☆, Tokyo Daishoten ★★☆, Corner Adept ○ ★★☆, Corner Acceleration ○ ★★☆, Shifting Gears ★☆☆, Productive Plan ★★☆, Pace Chaser Straightaways ○ ★★★, Disorient ★★☆, Sympathy ★★☆, Head-On ★★☆, Glittering Star ★★☆ |  |
 
 **These panels replace the star reads in the first version of this section, and three of them were
 wrong.** Reading stars off the scrolling Sparks grid gave Shooting for Victory! ★★★ (it is ★★☆),
@@ -181,10 +181,10 @@ and the **Arima Kinen** goal slot at Late Dec.
 **Race day, Senior Early Oct** (`85e4c75a`, `f49bd7b1`, `714f495d`). The turn offers two races and the
 client marks the first one Recommended:
 
-| Option | Grade | Course | Fans on a win | Her fit |
-|---|---|---|---|---|
-| Kyoto Daishoten | G2 | Kyoto Turf 2400m (Medium) Right / Outer, Fall, **Soft** | 6,700 | Turf A, Medium A |
-| Mile Championship Nambu Hai | G1 | Morioka **Dirt** 1600m (Mile) Left | 6,000 | Dirt G, Mile B |
+| Option                      | Grade | Course                                                  | Fans on a win | Her fit          |  |
+| --------------------------- | ----- | ------------------------------------------------------- | ------------- | ---------------- |  |
+| Kyoto Daishoten             | G2    | Kyoto Turf 2400m (Medium) Right / Outer, Fall, **Soft** | 6,700         | Turf A, Medium A |  |
+| Mile Championship Nambu Hai | G1    | Morioka **Dirt** 1600m (Mile) Left                      | 6,000         | Dirt G, Mile B   |  |
 
 The Daishoten card: Full Gate 18, held in Classic Year / Senior Year Oct, entry criteria "2,000 fans or
 more" met at 209,245, and fan rewards of 6,700 / 2,680 / 1,675 / 1,005 / 670 for first through fifth,
@@ -227,15 +227,15 @@ levels: Speed 4, Stamina 4, Power 4, **Guts 5**, Wit 4.
 
 The control beside the Team Rank display, opened (`3cc1c271`, `556e1d6c`):
 
-| Field | Value |
-|---|---|
-| Team | Blue Bloom, motto "Dreaming Big", league **8th** |
-| Team Rank | S (five stars), **Team Ranking Bonus: All Attributes + 30** |
-| Team stat grades | Speed A, Stamina A, Power A, **Guts S**, Wit A |
-| Unity Trainings | **55** |
-| Spirit Bursts | **6** |
-| Extreme Spirit Bursts | **5** |
-| Members | **20 / 20** |
+| Field                 | Value                                                       |  |
+| --------------------- | ----------------------------------------------------------- |  |
+| Team                  | Blue Bloom, motto "Dreaming Big", league **8th**            |  |
+| Team Rank             | S (five stars), **Team Ranking Bonus: All Attributes + 30** |  |
+| Team stat grades      | Speed A, Stamina A, Power A, **Guts S**, Wit A              |  |
+| Unity Trainings       | **55**                                                      |  |
+| Spirit Bursts         | **6**                                                       |  |
+| Extreme Spirit Bursts | **5**                                                       |  |
+| Members               | **20 / 20**                                                 |  |
 
 Two of these are decision-bearing. **11 combined bursts** (6 + 5) sits in the 10–12 band, so the
 November event pays the **gold** scenario skill at Lv1, and 13 would pay it at Lv3. And the team's
@@ -255,28 +255,28 @@ Every member carries a stat line in the client. The six deck characters appear a
 card popups; the rest arrive as **Guest** R cards tagged `[Tracen Academy]`. Format is
 Speed / Stamina / Power / Guts / Wit, then the caps the client shows.
 
-| Deck character | Grade | Stats | Caps | Aptitudes of note |
-|---|---|---|---|---|
-| Haru Urara | **A** | 733 / 572 / 728 / **1068** / 621 | 900/860/900/1140/850 | Dirt A, Sprint A, Late A; Turf G |
-| Tokai Teio | B | 885 / 571 / 702 / 754 / 597 | 1080/860/960/880/850 | Turf A, Medium A, Pace A |
-| Nishino Flower | B | 806 / 591 / 680 / 625 / 610 | 1080/860/960/880/850 | Turf A, Sprint A, Mile A, Pace A, Late A |
-| Super Creek | B | 563 / 888 / 527 / 764 / 633 | 860/1100/860/1000/850 | Turf A, Medium A, Long A, Pace A |
-| Biko Pegasus | C | 776 / 534 / 660 / 593 / 534 | 1080/860/960/880/850 | Turf A, Sprint A, Late A |
-| Matikanetannhauser | C | 431 / 418 / 423 / 509 / 377 | 710/700/710/750/700 | Turf A, Medium A, Long A, Pace A, Late A |
+| Deck character     | Grade | Stats                            | Caps                  | Aptitudes of note                        |  |
+| ------------------ | ----- | -------------------------------- | --------------------- | ---------------------------------------- |  |
+| Haru Urara         | **A** | 733 / 572 / 728 / **1068** / 621 | 900/860/900/1140/850  | Dirt A, Sprint A, Late A; Turf G         |  |
+| Tokai Teio         | B     | 885 / 571 / 702 / 754 / 597      | 1080/860/960/880/850  | Turf A, Medium A, Pace A                 |  |
+| Nishino Flower     | B     | 806 / 591 / 680 / 625 / 610      | 1080/860/960/880/850  | Turf A, Sprint A, Mile A, Pace A, Late A |  |
+| Super Creek        | B     | 563 / 888 / 527 / 764 / 633      | 860/1100/860/1000/850 | Turf A, Medium A, Long A, Pace A         |  |
+| Biko Pegasus       | C     | 776 / 534 / 660 / 593 / 534      | 1080/860/960/880/850  | Turf A, Sprint A, Late A                 |  |
+| Matikanetannhauser | C     | 431 / 418 / 423 / 509 / 377      | 710/700/710/750/700   | Turf A, Medium A, Long A, Pace A, Late A |  |
 
-| Guest teammate | Grade | Stats | Caps | Aptitudes of note |
-|---|---|---|---|---|
-| Fine Motion | B | 643 / 599 / 620 / 664 / 549 | 770/750/750/750/750 | Turf A, Mile A, Medium A, Pace A |
-| King Halo | B | 603 / 556 / 633 / 725 / 526 | 800/750/770/750/700 | Turf A, Sprint A, Late A |
-| Seeking the Pearl | C | 655 / 560 / 600 / 581 / 533 | 710/700/710/750/700 | Turf A, Sprint A, Mile A, Late A |
-| Shinko Windy | C | 566 / 544 / 566 / 556 / 528 | 750/700/720/700/700 | Dirt A, Mile A, Pace A |
-| Inari One | C | 576 / 597 / 616 / 556 / 569 | 700/720/750/700/700 | Turf A, Dirt A, Medium A, Long A, End A |
-| Nakayama Festa | C | 533 / 475 / 504 / 666 / 502 | 700/750/700/720/700 | Turf A, Medium A, Late A |
-| Agnes Digital | C | 504 / 493 / 552 / 650 / 494 | 700/720/750/700/700 | Turf A, Dirt A, Mile A, Medium A, Pace A, Late A |
-| Eishin Flash | C | 540 / 501 / 497 / 568 / 542 | 750/700/720/700/700 | Turf A, Medium A, Long A, Late A |
-| Matikanefukukitaru | C | 501 / 483 / 513 / 532 / 543 | 830/780/780/790/900 | Turf A, Medium A, Long A, Late A |
-| Taiki Shuttle | C | 411 / 411 / 467 / 398 / 375 | 750/700/720/700/700 | Turf A, Sprint A, Mile A, Pace A |
-| Gold Ship | C | 475 / 426 / 455 / 403 / 389 | 700/750/700/720/700 | Turf A, Medium A, Long A, End A |
+| Guest teammate     | Grade | Stats                       | Caps                | Aptitudes of note                                |  |
+| ------------------ | ----- | --------------------------- | ------------------- | ------------------------------------------------ |  |
+| Fine Motion        | B     | 643 / 599 / 620 / 664 / 549 | 770/750/750/750/750 | Turf A, Mile A, Medium A, Pace A                 |  |
+| King Halo          | B     | 603 / 556 / 633 / 725 / 526 | 800/750/770/750/700 | Turf A, Sprint A, Late A                         |  |
+| Seeking the Pearl  | C     | 655 / 560 / 600 / 581 / 533 | 710/700/710/750/700 | Turf A, Sprint A, Mile A, Late A                 |  |
+| Shinko Windy       | C     | 566 / 544 / 566 / 556 / 528 | 750/700/720/700/700 | Dirt A, Mile A, Pace A                           |  |
+| Inari One          | C     | 576 / 597 / 616 / 556 / 569 | 700/720/750/700/700 | Turf A, Dirt A, Medium A, Long A, End A          |  |
+| Nakayama Festa     | C     | 533 / 475 / 504 / 666 / 502 | 700/750/700/720/700 | Turf A, Medium A, Late A                         |  |
+| Agnes Digital      | C     | 504 / 493 / 552 / 650 / 494 | 700/720/750/700/700 | Turf A, Dirt A, Mile A, Medium A, Pace A, Late A |  |
+| Eishin Flash       | C     | 540 / 501 / 497 / 568 / 542 | 750/700/720/700/700 | Turf A, Medium A, Long A, Late A                 |  |
+| Matikanefukukitaru | C     | 501 / 483 / 513 / 532 / 543 | 830/780/780/790/900 | Turf A, Medium A, Long A, Late A                 |  |
+| Taiki Shuttle      | C     | 411 / 411 / 467 / 398 / 375 | 750/700/720/700/700 | Turf A, Sprint A, Mile A, Pace A                 |  |
+| Gold Ship          | C     | 475 / 426 / 455 / 403 / 389 | 700/750/700/720/700 | Turf A, Medium A, Long A, End A                  |  |
 
 That is 17 named members plus the trainee. The Roster grid's bottom row is clipped in the capture, so
 two members are unaccounted for against the 20/20 count.
@@ -312,13 +312,13 @@ section the first pass could not write.
 
 The Learn screen prints the discount itself, `Hint Lvl N` above `NN% OFF`:
 
-| Caption | Discount | Observed on |
-|---|---|---|
-| `Hint Lvl 1` | 10% | Rushing Gale!, Outer Swell, Ignited Spirit SPD/PWR, Plan X, Kyoto Racecourse ○, Resplendent Red Ace, Firm Conditions ○, Sunny Days ○, Inner Post Proficiency ○, Gap Closer |
-| `Hint Lvl 2` | 20% | Hesitant Pace Chasers, Cut and Drive!, Countermeasure, Hakodate Racecourse ○ |
-| `Hint Lvl 3` | 30% | It's On!, Ignited Spirit STA, Front Runner Corners ○, Productive Plan |
-| `Hint Lvl 4` | 35% | Unruffled, Pace Chaser Straightaways ◎, Pace Chaser Corners ○, Ignited Spirit GUTS |
-| `Hint Lvl Max` | 40% | Soft Step |
+| Caption        | Discount | Observed on                                                                                                                                                                |  |
+| -------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |  |
+| `Hint Lvl 1`   | 10%      | Rushing Gale!, Outer Swell, Ignited Spirit SPD/PWR, Plan X, Kyoto Racecourse ○, Resplendent Red Ace, Firm Conditions ○, Sunny Days ○, Inner Post Proficiency ○, Gap Closer |  |
+| `Hint Lvl 2`   | 20%      | Hesitant Pace Chasers, Cut and Drive!, Countermeasure, Hakodate Racecourse ○                                                                                               |  |
+| `Hint Lvl 3`   | 30%      | It's On!, Ignited Spirit STA, Front Runner Corners ○, Productive Plan                                                                                                      |  |
+| `Hint Lvl 4`   | 35%      | Unruffled, Pace Chaser Straightaways ◎, Pace Chaser Corners ○, Ignited Spirit GUTS                                                                                         |  |
+| `Hint Lvl Max` | 40%      | Soft Step                                                                                                                                                                  |  |
 
 Displayed cost is base × (1 − discount), floored to the integer. Bases 130, 160, 180 and 200 all
 reconcile: 130 → 104/91/84, 160 → 144/128/112/96, 180 → 162, 200 → 180/140/130. The one fractional case
@@ -332,33 +332,33 @@ carries Hint Levels Lv2, which lands exactly on the Lv4 captions seen on the Pac
 
 ### 2.2 Purchasable at or under 173 SP
 
-| Skill | Cost | Hint | Gate or note |
-|---|---|---|---|
-| Pace Chaser Straightaways ◎ | 91 | Lv4 | Style match. The tier above the ○ she owns |
-| Pace Chaser Corners ○ | 84 | Lv4 | Style match |
-| Straight Descent | 120 | none | (Pace Chaser) |
-| Subdued Pace Chasers | 130 | none | |
-| Subdued Front Runners | 117 | Lv1 | |
-| Hesitant Pace Chasers | 104 | Lv2 | |
-| Ignited Spirit GUTS | 130 | Lv4 | Scenario skill, late-race vigor scaled to team Guts total |
-| Ignited Spirit STA | 140 | Lv3 | Scenario skill, mid-race recovery scaled to team Stamina total |
-| Cut and Drive! | 160 | Lv2 | Front-half, last 200m |
-| Outer Swell | 162 | Lv1 | (Late Surger). She is Late B |
-| Highlander | 160 | none | |
-| Ramp Up | 170 | none | |
-| Straightaway Acceleration | 170 | none | |
-| Calm in a Crowd | 170 | none | |
-| Soft Step | 96 | Lv Max | |
-| Countermeasure | 128 | Lv2 | (Sprint). She is Sprint E |
-| Gap Closer | 144 | Lv1 | (Sprint) |
-| Productive Plan | 112 | Lv3 | (Mile) |
-| Long Shot ○ | 81 | Lv1 | 4th favourite or below |
-| Kyoto Racecourse ○ | 81 | Lv1 | This turn's Daishoten |
-| Hakodate Racecourse ○ | 56 | Lv2 | |
-| Firm Conditions ○ | 81 | Lv1 | |
-| Sunny Days ○ | 81 | Lv1 | |
-| Inner Post Proficiency ○ | 81 | Lv1 | |
-| Front Runner Corners ○ | 91 | Lv3 | Wrong style |
+| Skill                       | Cost | Hint   | Gate or note                                                   |  |
+| --------------------------- | ---- | ------ | -------------------------------------------------------------- |  |
+| Pace Chaser Straightaways ◎ | 91   | Lv4    | Style match. The tier above the ○ she owns                     |  |
+| Pace Chaser Corners ○       | 84   | Lv4    | Style match                                                    |  |
+| Straight Descent            | 120  | none   | (Pace Chaser)                                                  |  |
+| Subdued Pace Chasers        | 130  | none   |                                                                |  |
+| Subdued Front Runners       | 117  | Lv1    |                                                                |  |
+| Hesitant Pace Chasers       | 104  | Lv2    |                                                                |  |
+| Ignited Spirit GUTS         | 130  | Lv4    | Scenario skill, late-race vigor scaled to team Guts total      |  |
+| Ignited Spirit STA          | 140  | Lv3    | Scenario skill, mid-race recovery scaled to team Stamina total |  |
+| Cut and Drive!              | 160  | Lv2    | Front-half, last 200m                                          |  |
+| Outer Swell                 | 162  | Lv1    | (Late Surger). She is Late B                                   |  |
+| Highlander                  | 160  | none   |                                                                |  |
+| Ramp Up                     | 170  | none   |                                                                |  |
+| Straightaway Acceleration   | 170  | none   |                                                                |  |
+| Calm in a Crowd             | 170  | none   |                                                                |  |
+| Soft Step                   | 96   | Lv Max |                                                                |  |
+| Countermeasure              | 128  | Lv2    | (Sprint). She is Sprint E                                      |  |
+| Gap Closer                  | 144  | Lv1    | (Sprint)                                                       |  |
+| Productive Plan             | 112  | Lv3    | (Mile)                                                         |  |
+| Long Shot ○                 | 81   | Lv1    | 4th favourite or below                                         |  |
+| Kyoto Racecourse ○          | 81   | Lv1    | This turn's Daishoten                                          |  |
+| Hakodate Racecourse ○       | 56   | Lv2    |                                                                |  |
+| Firm Conditions ○           | 81   | Lv1    |                                                                |  |
+| Sunny Days ○                | 81   | Lv1    |                                                                |  |
+| Inner Post Proficiency ○    | 81   | Lv1    |                                                                |  |
+| Front Runner Corners ○      | 91   | Lv3    | Wrong style                                                    |  |
 
 The Unity Cup line on the Learn screen is **Ignited Spirit SPD / STA / PWR / GUTS** at 180/140/180/130,
 all four on a base of 200 and separated only by hint level. The series runs to five per the client

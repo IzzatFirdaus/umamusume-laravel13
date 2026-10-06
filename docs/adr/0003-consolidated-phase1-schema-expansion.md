@@ -13,10 +13,14 @@ Related: `PRD.md` US-3, US-4, US-10, FR-C; `CLAUDE.md` Planner Rules 4, 5, 6
 4. **The maiden gate is a distinct lock state** from the fan gate, visually and mechanically. *Clarified 2026-09-27:* "mechanically distinct" means the two are different **kinds** of predicate, not two values of one. The maiden gate is a boolean over race history (`scenario_races.maiden_gated` below), and the fan gate is a numeric comparison against `fans_needed`. Collapsing them into a single `introductory_race_cleared` flag would delete the threshold, so the shape below is already the simplification that survives contact with the data; the visual half of the claim rests separately on D-152, D-173, G-16b and G-28, which are client observations and do not depend on this argument.
 5. **`scenario_races` is generalised to `scenario_slots` with a `kind` discriminator** (owner ruling, 2026-09-27, after the scenario work). Reason: **Trackblazer has no mandatory race goals at all.** A table named for races cannot hold a Grade Point deadline, and the tool must not break on the third scenario. `kind` takes `GoalRace`, `TeamRace`, `GradeDeadline` or `ScriptedEvent`, so one table and one timeline view serve all four scenarios. The section below keeps its original name and columns as the `GoalRace` case; the rename is a schema task, not a redesign, and it is **unfunded work** logged here so it is not lost.
    - **Read this reason narrowly, because the loose wording was challenged on 2026-09-27.** Trackblazer has no mandatory *race* goals — nothing designates "win the Satsuki Sho" — but it has three **mandatory Grade Point thresholds**, and those are objectives with the same run-ending force as a missed goal race: End of Junior Year 60 GP, End of Classic Year 300 GP, End of Senior Year 300 GP, with points consumed at each deadline and **no carry-over** (`docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Grade Points (Replacing Career Goals)"). Because racing is the only GP source, the deadline and the race schedule are one system, which is exactly why `kind = GradeDeadline` exists. Two requirements follow for whoever writes the `scenario_slots` definition:
-     - **Amended 2026-09-28.** An earlier revision of this bullet required the `GradeDeadline` row to carry a **threshold** and a **deadline turn**. That clause contradicts Ruling R1 item 1, which makes `config/scenarios.php` the authoritative source for grade objectives, and it is withdrawn: the slot row carries **calendar position and gates**, the figures stay in config, and no `threshold` or `track` column is to be added. The requirement that survives is the one the schema cannot skip — a deadline must be able to be **missed**, which is a state on the Trainer's side of the relationship, not a column on the reference row.
-     - The threshold is **not one number per scenario**. There are four objectives (Debut race by Late June of Junior Year, then 60 / 300 / 300 Grade Points at the ends of Junior, Classic and Senior), and the three point thresholds split into **three tracks, not two** — `standard` 60 / 300 / 300, `dirt_leaning` 30 / 200 / 300 for a high-dirt or low-turf character such as Haru Urara, and `limited_turf_range` 60 / 200 / 300 for a turf character whose range outside short distances is weak, such as Curren Chan (`docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` sections "Grade Points (Replacing Career Goals)" and "Basic Information", and `config/scenarios.php` `grade_objectives`, which carries all three). An earlier revision of this bullet named two tracks and omitted the plain-turf 60 / 300 / 300 case; a UI that rendered `standard` for a dirt-leaning trainee would show an impossible target. Surplus points do not carry between periods, so each objective is judged against zero.
-     - **Missing a threshold ends the career** (owner-supplied from in-game observation, 2026-09-27). It is a hard fail: the run terminates to the career-end screen and the player either accepts retirement or spends an **Alarm Clock** to retry. The item corroborates the category — `items.json` id 95, `[Global]` "Alarm Clock" / 目覚まし時計, client text "Lets you try again on a Career goal race", already recorded against a missed mandatory placing and a lost Team Race. ❌ Still unverified: **where** a retry resumes; "start of that semester" is recollection, not a sourced value, and the schema must not encode a resume point. What the schema *does* need is that a missed deadline is terminal rather than a deduction, so the `GradeDeadline` row's states are pending / met / **missed-terminal**, not met / unmet.
-6. **The stat bound moves to 0..2000** (owner ruling, 2026-09-27). `ADR-0002` option B, on the ground that `scenarios.json` carries `hard_caps = 2000` as a real field and the current 0..1200 bound has been rejecting live Global runs since the 2026-07-01 rework. The UI must keep the 1,200 halved-gains line and the scenario ceiling as two visible markers rather than silently raising one number; see `ADR-0002` amendment 2 and `DESIGN.md` §6.5.
+
+```text
+ - **Amended 2026-09-28.** An earlier revision of this bullet required the `GradeDeadline` row to carry a **threshold** and a **deadline turn**. That clause contradicts Ruling R1 item 1, which makes `config/scenarios.php` the authoritative source for grade objectives, and it is withdrawn: the slot row carries **calendar position and gates**, the figures stay in config, and no `threshold` or `track` column is to be added. The requirement that survives is the one the schema cannot skip — a deadline must be able to be **missed**, which is a state on the Trainer's side of the relationship, not a column on the reference row.
+ - The threshold is **not one number per scenario**. There are four objectives (Debut race by Late June of Junior Year, then 60 / 300 / 300 Grade Points at the ends of Junior, Classic and Senior), and the three point thresholds split into **three tracks, not two** — `standard` 60 / 300 / 300, `dirt_leaning` 30 / 200 / 300 for a high-dirt or low-turf character such as Haru Urara, and `limited_turf_range` 60 / 200 / 300 for a turf character whose range outside short distances is weak, such as Curren Chan (`docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` sections "Grade Points (Replacing Career Goals)" and "Basic Information", and `config/scenarios.php` `grade_objectives`, which carries all three). An earlier revision of this bullet named two tracks and omitted the plain-turf 60 / 300 / 300 case; a UI that rendered `standard` for a dirt-leaning trainee would show an impossible target. Surplus points do not carry between periods, so each objective is judged against zero.
+ - **Missing a threshold ends the career** (owner-supplied from in-game observation, 2026-09-27). It is a hard fail: the run terminates to the career-end screen and the player either accepts retirement or spends an **Alarm Clock** to retry. The item corroborates the category — `items.json` id 95, `[Global]` "Alarm Clock" / 目覚まし時計, client text "Lets you try again on a Career goal race", already recorded against a missed mandatory placing and a lost Team Race. ❌ Still unverified: **where** a retry resumes; "start of that semester" is recollection, not a sourced value, and the schema must not encode a resume point. What the schema *does* need is that a missed deadline is terminal rather than a deduction, so the `GradeDeadline` row's states are pending / met / **missed-terminal**, not met / unmet.
+```
+
+1. **The stat bound moves to 0..2000** (owner ruling, 2026-09-27). `ADR-0002` option B, on the ground that `scenarios.json` carries `hard_caps = 2000` as a real field and the current 0..1200 bound has been rejecting live Global runs since the 2026-07-01 rework. The UI must keep the 1,200 halved-gains line and the scenario ceiling as two visible markers rather than silently raising one number; see `ADR-0002` amendment 2 and `DESIGN.md` §6.5.
    - **Amended 2026-09-27: 2000 is a value, not the rule.** The export carries `hard_caps = 2500` for scenarios 13 and 14 (`Beyond Dreams` and `らっしゃい！トレセン軒！`), so a flat `0..2000` constant is wrong in principle even though it is right for every scenario live on `[Global]` — both of those rows have `start_en = null`, i.e. they are `[JP]`-only, and this tool's audience is Global. The bound must therefore be **read from the scenario's own stored `scenarios.hard_cap`**, with 2000 as the value that happens to apply to all four Global scenarios today. This costs nothing to do correctly because the column already exists and the parser already populates it; it is only the *constant* that would be a mistake. Note also that `hard_caps` has a sixth element (9999, or 99999 on the newest `[JP]` rows) whose meaning is unverified — `ADR-0002` forbids labelling it as any stat on the strength of position, and it must not be read as a stat ceiling either.
 
 ## Design principle behind every column below
@@ -29,11 +33,11 @@ The schema already stores **absolute per-turn values**, not deltas: `turn_entrie
 
 ### `turn_entries` additions
 
-| Column | Type | Null | Rationale |
-|---|---|---|---|
-| `energy` | `unsignedSmallInteger` | yes | End-of-turn total, 0..100. Nullable because historical runs were logged without it and must not be backfilled with guesses |
-| `fans` | `unsignedInteger` | yes | End-of-turn running total. Drives eligibility display |
-| `mood` | `string`, cast to `MoodTier` enum | yes | Replaces the free-text `condition` as the structured mood home |
+| Column     | Type                                | Null   | Rationale                                                                                                                    |
+| ---------- | ----------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `energy`   | `unsignedSmallInteger`              | yes    | End-of-turn total, 0..100. Nullable because historical runs were logged without it and must not be backfilled with guesses   |
+| `fans`     | `unsignedInteger`                   | yes    | End-of-turn running total. Drives eligibility display                                                                        |
+| `mood`     | `string`, cast to `MoodTier` enum   | yes    | Replaces the free-text `condition` as the structured mood home                                                               |
 
 `condition` stays as free text for notes. `mood` is the queryable enum. The overlap is deliberate and temporary: retiring `condition` in the same change would break the existing run views for no functional gain.
 
@@ -43,15 +47,15 @@ The schema already stores **absolute per-turn values**, not deltas: `turn_entrie
 
 One row per event the Trainer resolved, whatever fired it.
 
-| Column | Purpose |
-|---|---|
-| `training_run_id` FK cascade, `turn` | locates the event, same key shape as `turn_entries` |
-| `event_type` enum-backed | `Character`, `SupportCard`, `Group`, `Scenario` |
-| `source_name` | event title as displayed |
-| `choice_index`, `choice_label` | which option was taken, and its text at the time |
-| `deltas` json | stat, SP, Energy, Mood and Fan changes **as observed** |
-| `support_card_name`, `bond_delta` | nullable, support-card events only |
-| `origin_note` | nullable free text, so an event fitting no category is recorded honestly |
+| Column                                 | Purpose                                                                    |
+| -------------------------------------- | -------------------------------------------------------------------------- |
+| `training_run_id` FK cascade, `turn`   | locates the event, same key shape as `turn_entries`                        |
+| `event_type` enum-backed               | `Character`, `SupportCard`, `Group`, `Scenario`                            |
+| `source_name`                          | event title as displayed                                                   |
+| `choice_index`, `choice_label`         | which option was taken, and its text at the time                           |
+| `deltas` json                          | stat, SP, Energy, Mood and Fan changes **as observed**                     |
+| `support_card_name`, `bond_delta`      | nullable, support-card events only                                         |
+| `origin_note`                          | nullable free text, so an event fitting no category is recorded honestly   |
 
 `deltas` stores observed outcomes only. `turn_entries` remains the source of truth for absolute values; a mismatch between the two is a defect with a named owner, not a second opinion.
 
@@ -59,14 +63,14 @@ One row per event the Trainer resolved, whatever fired it.
 
 The fixed calendar. §1.6.1 confirms the scenario dictates the target-race calendar, and `ura-races.json` in the data export carries `fans_needed` and `fans_gain` per row, so this is real, citable data rather than a guess.
 
-| Column | Purpose |
-|---|---|
-| `scenario_key`, `slot_label` | e.g. `ura-finale` / `Classic Year Late May` |
-| `race_name`, `tier` | display name and tier label |
-| `fans_needed` | the gate value, shown on locked cells |
-| `mandatory` | bool, the Goal flag |
-| `maiden_gated` | bool, the conditional Debut/Maiden lock |
-| provenance fields | `url`, `fetched_at`, `snapshot_path`, `source_timezone`, per FR-A-4 |
+| Column                         | Purpose                                                               |
+| ------------------------------ | --------------------------------------------------------------------- |
+| `scenario_key`, `slot_label`   | e.g. `ura-finale` / `Classic Year Late May`                           |
+| `race_name`, `tier`            | display name and tier label                                           |
+| `fans_needed`                  | the gate value, shown on locked cells                                 |
+| `mandatory`                    | bool, the Goal flag                                                   |
+| `maiden_gated`                 | bool, the conditional Debut/Maiden lock                               |
+| provenance fields              | `url`, `fetched_at`, `snapshot_path`, `source_timezone`, per FR-A-4   |
 
 **Provenance is not optional here.** Every cap and `fans_needed` value traces to sources flagged `⚠️ STALE` (Game8 2025-11-21, Kamigame 2024-02-19), and Grand Masters and L'Arc are marked "single-source, not corroborated". The Data Engineer rule is that a fact without provenance is deleted rather than stored, so a seeded calendar row without a source is a rule violation on arrival.
 
@@ -74,12 +78,12 @@ The fixed calendar. §1.6.1 confirms the scenario dictates the target-race calen
 
 What the Trainer actually did with each calendar slot.
 
-| Column | Purpose |
-|---|---|
-| `training_run_id` FK cascade, `scenario_race_id` FK | the slot |
-| `status` enum-backed | `NotOffered`, `Skipped`, `Entered`, `Completed` |
-| `placement` | nullable, recorded result |
-| `fans_gain` | nullable, observed |
+| Column                                                | Purpose                                           |
+| ----------------------------------------------------- | ------------------------------------------------- |
+| `training_run_id` FK cascade, `scenario_race_id` FK   | the slot                                          |
+| `status` enum-backed                                  | `NotOffered`, `Skipped`, `Entered`, `Completed`   |
+| `placement`                                           | nullable, recorded result                         |
+| `fans_gain`                                           | nullable, observed                                |
 
 `Skipped` being a stored status is the point: the owner required that skipping be a first-class action, and a first-class action needs a first-class value. A nullable-absent row cannot distinguish "not offered" from "declined", which is exactly the distinction the calendar UI renders.
 
@@ -108,12 +112,12 @@ This is a `StoreTurnEntryRequest` change, and Planner Rule 6 says bounds live in
 
 ## Open items this leaves with the owner
 
-| Item | Blocker |
-|---|---|
-| ~~`MoodTier` display labels~~ | **Resolved 2026-09-27**, not a blocker: the client's Mood Effect panel prints all five strings (`GREAT`/`GOOD`/`NORMAL`/`BAD`/`AWFUL`), see §`turn_entries` above and `DESIGN.md` §6.17 |
-| Races per turn | "2 or 3" has no source in this repo |
-| Senior-year Arima Kinen as a hard requirement | No source in this repo |
-| Scenario-specific chrome | The entire 1,160-frame corpus is Unity Cup; there is no visual evidence for the other three scenarios' UI |
+| Item                                            | Blocker                                                                                                                                                                                   |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~`MoodTier` display labels~~                   | **Resolved 2026-09-27**, not a blocker: the client's Mood Effect panel prints all five strings (`GREAT`/`GOOD`/`NORMAL`/`BAD`/`AWFUL`), see §`turn_entries` above and `DESIGN.md` §6.17   |
+| Races per turn                                  | "2 or 3" has no source in this repo                                                                                                                                                       |
+| Senior-year Arima Kinen as a hard requirement   | No source in this repo                                                                                                                                                                    |
+| Scenario-specific chrome                        | The entire 1,160-frame corpus is Unity Cup; there is no visual evidence for the other three scenarios' UI                                                                                 |
 
 ---
 

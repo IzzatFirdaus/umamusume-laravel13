@@ -5,7 +5,6 @@
 **Last Verified:** 2026-09-27 (metadata pass)
 **Superseded By:** `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Unity Cup (GameTora)" for all mechanics numbers
 
-
 > ## ⚠️ Currency of this file — read before using any number in it
 >
 > **`[Global]` reworked Unity Cup on 2026-07-01** (the same rework that raised stat caps and added
@@ -33,6 +32,7 @@ The defining difference from URA Finale: Unity Cup replaces the "train solo, occ
 This makes Unity Cup meaningfully more mechanically dense than URA Finale — most of the extra "elaboration" the game requires you to learn lives in its Team mechanics below.
 
 ### Global Balance Adjustments (Important for EN Players)
+
 On **November 11, 2025 (5 days after Global launch)**, a large balance patch landed early on Global — changes that JP only received months later at their 1st Anniversary. This includes a Guts stat rework, new race mechanics, better bad-condition management, and generally buffed skills/events. **If you're reading older JP-based guides or watching JP gameplay footage, expect the Global version of Unity Cup to feel noticeably different** from pre-patch JP experiences — this isn't a translation error, it's a genuine mechanical divergence introduced specifically for Global.
 
 ## Best Support Deck Setups
@@ -40,28 +40,34 @@ On **November 11, 2025 (5 days after Global launch)**, a large balance patch lan
 Unlike URA Finale's fairly rigid "4-Speed" template, Unity Cup supports **several viable deck archetypes** because of its Wit-energy and Pal-card mechanics:
 
 ### 1. Speed/Wit Deck
+
 - Comfortable, low-maintenance setup. Wit training is the one discipline that **costs no Energy and returns some**, and a Wit-facility Spirit Burst adds **+5 Energy recovery** on top.
 - ⚠️ **Post-rework note:** the extra Energy cost on Special Training was **removed** on 2026-07-01, so a Wit card is no longer the *necessity* it was for energy survival. It is now a comfort and SP-tempo pick, and 06 states plainly that Wit-heavy decks are "less uniquely necessary than before the patch".
 - Best for Sprint/Mile; Medium is achievable with good Stamina rolls and recovery skills.
 
 ### 2. Front Runner Groundwork Variant
+
 - A Speed/Wit variant that swaps some Wit copies for a card that grants **Groundwork**, a skill that specifically benefits Front Runners. Good if your trainee's running style is confirmed Front Runner.
 
 ### 3. Double Pal Deck
+
 - Built around **Pal cards** (Riko Kashimoto, Tazuna Hayakawa) instead of Wit cards for energy/mood comfort — their event effects scale with limit breaks.
 - Gives efficient early-career mood buildup (mood-up on first training with a Pal).
 - ⚠️ **Post-rework note:** with Special Training's Energy penalty gone, this deck's advantage is **event-chain value and Mood**, not energy rescue. Note 06's team-composition rule: **Pal-type cards are excluded from the team roster**, so a Pal buys you no Spirit Bursts at all.
 - Don't need to over-invest in Stamina; good for Sprint/Mile.
 
 ### 4. Speed/Power Deck
+
 - Higher ceiling but "swingier" — you can end up over-training Power relative to Speed if training options don't cooperate.
 - Best suited to Power-hungry running styles (Late Surger/End Closer) or short distances needing burst Power.
 
 ### 5. Speed/Stamina Deck
+
 - Built to guarantee enough Stamina for Long-distance runs, typically anchored by Riko Kashimoto (Pal) + a dedicated Stamina card (e.g. Super Creek).
 - More comfortable than a pure non-Wit, non-Pal deck thanks to Riko's energy management.
 
 **Notable individual cards:**
+
 - **Riko Kashimoto** is the strongest overall pick — her events give strong Stamina/Guts and her Pal effect eases energy management specifically around Unity Training/Spirit Bursts.
 - **Rice Shower (Power SSR)** stands out for longer-distance builds; she can carry the Swinging Maestro skill plus her own scenario-link bonus (Cooldown).
 
@@ -80,12 +86,12 @@ This is the mechanical heart of Unity Cup and the biggest departure from URA Fin
 
 ### Trainee gains by flame count (current patch, Speed/Stamina/Power facilities)
 
-| # of flames | Primary | Secondary | Skill Points |
-|---|---|---|---|
-| 2 | 2 | 0 | 1 |
-| 3 | 4 | 1 | 3 |
-| 4 | 6 | 3 | 5 |
-| **5** | **10** | **5** | **7** |
+| # of flames   | Primary   | Secondary   | Skill Points   |
+| ------------- | --------- | ----------- | -------------- |
+| 2             | 2         | 0           | 1              |
+| 3             | 4         | 1           | 3              |
+| 4             | 6         | 3           | 5              |
+| **5**         | **10**    | **5**       | **7**          |
 
 The Guts and Wit facilities route the secondary differently (Guts at 5 flames = 10 Guts / 3 Speed / 3 Power / 7 SP; Wit at 5 = 6 Wit / 2 Speed / 6 SP). Because of the shape of this curve, **prioritizing facilities where multiple teammates are gathered beats 1-on-1 training** on both raw gain and Burst charge rate. See 06 for every row.
 
@@ -116,13 +122,13 @@ Values: **20 / 10 with 15 SP** normally, **25 / 15 with 20 SP** scenario-linked 
 
 Unlike URA Finale (where facility level comes from repeating the *same stat* 4 times), Unity Cup's **facility level is tied to your team's overall stat rank** for that stat:
 
-| Team Stat Rank | Facility Level |
-|---|---|
-| G–F | 1 |
-| E–D | 2 |
-| C–B | 3 |
-| A | 4 |
-| S | 5 |
+| Team Stat Rank   | Facility Level   |
+| ---------------- | ---------------- |
+| G–F              | 1                |
+| E–D              | 2                |
+| C–B              | 3                |
+| A                | 4                |
+| S                | 5                |
 
 This means facility level in Unity Cup is a **team investment problem**, not a personal-repetition problem — you must raise your whole team's collective stat in that category, not just grind your own trainee.
 
@@ -132,13 +138,13 @@ Raising your **overall Team Power/Rank** (aggregate across all stats) also grant
 
 ## Core Mechanic: Team Races
 
-| Round | Timing |
-|---|---|
-| Round 1 | After Junior Year, Late Dec |
-| Round 2 | After Classic Year, Late June |
-| Round 3 | After Classic Year, Late Dec |
-| Round 4 | After Senior Year, Late June |
-| Finals | After Senior Year, Late Dec |
+| Round     | Timing                          |
+| --------- | ------------------------------- |
+| Round 1   | After Junior Year, Late Dec     |
+| Round 2   | After Classic Year, Late June   |
+| Round 3   | After Classic Year, Late Dec    |
+| Round 4   | After Senior Year, Late June    |
+| Finals    | After Senior Year, Late Dec     |
 
 - Each Team Race is a **set of 5 races**, one per category (Sprint, Mile, Medium, Long, Dirt) — and you field a **sub-team of 3 per category**, structurally the same shape as the Team Trials PvP mode. ⚠️ Earlier drafts of this file said "5-person sub-team"; 3 is the real slot count (and 06 states it as "just like Team Trials").
 - You race **NPC teams, not other players**: the menu offers **3 opponent teams from strongest to weakest**, and beating a stronger one raises your **league rank** further. Before you commit, the game shows a circle-based win-odds estimate per category — **aim for at least 3 circles overall**, because **losing decreases your league rank**.
@@ -149,13 +155,16 @@ Raising your **overall Team Power/Rank** (aggregate across all stats) also grant
 - Your trainee's own individual **race goals still apply on their normal schedule** (same as URA Finale), including the final URA Finale-style races — failing those enough times still ends your run early, exactly like URA Finale. Unity Cup adds Team Races on top; it does not remove the underlying career race-goal structure. Structurally, 06's framing is the clean one: Unity Cup is **"URA Finals plus a team layer"** — same base schedule, same objective shape, same final 3 races.
 
 ### Beating Team Zenith (Finals)
+
 Team Zenith is the hardest scripted opponent, encountered in the finals **after the 4th Team Race**, under Riko Kashimoto with original characters **Little Cocon** and **Bitter Glasse**. Your overall **Team Rank** buffs your attributes against them, which can let a below-top team win — ⚠️ the pre-rework line here read "up to +50 all stats at Rank 5+", a number keyed to `[JP]`'s numeric rank ladder rather than `[Global]`'s letter ladder (F/G → S → **S+**); treat the "+50" as a `[JP]`-side figure and the letter ladder as the live Global one. Recommended approach for reaching the top ranks in the lead-up races:
+
 - Win the **top-tier race option** every time except once.
 - Pick the **middle option exactly once** — commonly recommended for the very first race, since it's the safest slot to "spend" your one non-top pick.
 - If you're winning the top option consistently and reach the 4th race, it's safe to take the middle option there instead without losing much — this also avoids risking a loss against the harder alternative opponents (Turf Queens / The Apex).
 - Beating Zenith **while at Rank S** is what makes Little Cocon and Bitter Glasse appear as **opponents in the URA Finale-style final race** later in the run. Winning the Zenith battle is also what actually grants your team name's skill — simply picking the name isn't enough.
 
 ### Elite ("Powerhouse") Teams — unlocked by the rework
+
 ⚠️ What this file previously listed as a *future* update is **live on `[Global]`**. An Elite Team can appear during the **4th** Team Race if **all three** hold:
 
 1. your **league rank is ≥ 10**,
@@ -175,37 +184,38 @@ They are flagged with a **pink/purple background** and named after **Greek deiti
 
 Around **Junior Year, Late September**, you'll choose a Team Name, determined by which scenario-linked character(s) you're running (in your Support deck or as trainee):
 
-| Team Name | Linked Character(s) | Reward Skill (on beating Team Zenith in Finals) |
-|---|---|---|
-| Happy Hoppers | Taiki Shuttle | Mile Maven |
-| Sunny Runners | Matikane Fukukitaru | Clairvoyance |
-| Carrot Pudding | Haru Urara | Indomitable |
-| Blue Bloom | Rice Shower | Cooldown |
-| Team Carrot (default) | None of the above | No Stopping Me! |
+| Team Name               | Linked Character(s)   | Reward Skill (on beating Team Zenith in Finals)   |
+| ----------------------- | --------------------- | ------------------------------------------------- |
+| Happy Hoppers           | Taiki Shuttle         | Mile Maven                                        |
+| Sunny Runners           | Matikane Fukukitaru   | Clairvoyance                                      |
+| Carrot Pudding          | Haru Urara            | Indomitable                                       |
+| Blue Bloom              | Rice Shower           | Cooldown                                          |
+| Team Carrot (default)   | None of the above     | No Stopping Me!                                   |
 
 Winning the Team Zenith battle in the finals is what actually grants the associated skill — simply picking the team name isn't enough. Strongest picks generally: **Mile Maven** (great for Mile races broadly), **No Stopping Me!** (good general Pace/Late/End skill), **Cooldown** (solid Long-distance recovery skill).
 
 ### Random Scenario-Link Bonus Events
+
 Beyond team name selection, you may randomly encounter events with these characters, giving bigger bonuses if they're scenario-linked (i.e. present in your deck/trainee):
 
-| Character | Normal Bonus | Scenario-Link Bonus |
-|---|---|---|
-| Taiki Shuttle | +10 Speed | +20 Speed, +10 Skill Pts |
-| Rice Shower | +10 Stamina | +20 Stamina, +10 Skill Pts |
-| Haru Urara | +10 Guts | +20 Guts, +10 Skill Pts |
-| Matikanefukukitaru | +10 Wit | +20 Wit, +10 Skill Pts |
-| Riko Kashimoto | +10 Wit, +10 Energy | +20 Wit, +10 Skill Pts, +15 Energy, +1 Mood |
+| Character            | Normal Bonus          | Scenario-Link Bonus                           |
+| -------------------- | --------------------- | --------------------------------------------- |
+| Taiki Shuttle        | +10 Speed             | +20 Speed, +10 Skill Pts                      |
+| Rice Shower          | +10 Stamina           | +20 Stamina, +10 Skill Pts                    |
+| Haru Urara           | +10 Guts              | +20 Guts, +10 Skill Pts                       |
+| Matikanefukukitaru   | +10 Wit               | +20 Wit, +10 Skill Pts                        |
+| Riko Kashimoto       | +10 Wit, +10 Energy   | +20 Wit, +10 Skill Pts, +15 Energy, +1 Mood   |
 
 ## Exclusive Skills from Spirit Burst Count
 
 ⚠️ **Corrected to post-rework values.** The count that matters is **Spirit Bursts + Extreme Spirit Bursts combined**, not normal Bursts alone, and the reward is graded **white → gold** rather than by two skill names.
 
-| Total Bursts (normal + Extreme) | Reward |
-|---|---|
-| 4–6 | **White** hint Lv1, +10 matching stat, +10 SP |
-| 7–9 | **White** hint Lv3, +20 matching stat, +20 SP |
-| 10–12 | **Gold** hint Lv1, +30 matching stat, +30 SP |
-| **13+** | **Gold** hint Lv3, +40 matching stat, +40 SP |
+| Total Bursts (normal + Extreme)   | Reward                                          |
+| --------------------------------- | ----------------------------------------------- |
+| 4–6                               | **White** hint Lv1, +10 matching stat, +10 SP   |
+| 7–9                               | **White** hint Lv3, +20 matching stat, +20 SP   |
+| 10–12                             | **Gold** hint Lv1, +30 matching stat, +30 SP    |
+| **13+**                           | **Gold** hint Lv3, +40 matching stat, +40 SP    |
 
 - **Where each rarity comes from:** the **white**-rarity versions of the scenario skills arrive from triggering **Extreme Spirit Bursts**; the **gold**-rarity versions (plus some additional white hints) arrive from the scripted **"Team Zenith Declares War"** event in **Senior Year, late November**. ⚠️ This file previously dated the payout to "early November" and named the tiers "Burning Spirit X" / "Ignited Spirit X"; 06's white/gold framing supersedes that, and "Ignited Spirit" is specifically the skill the **Extreme Burst** hints.
 - The stat variant (SPD/STA/PWR/GUTS/WIT) is set by your team's **highest overall stat rank**, ties broken randomly among the tied stats, and each variant **scales off the team's total in that stat**, not your trainee's alone — three Power-heavy Aces produce a far stronger Power variant than a mixed-investment team.
@@ -213,17 +223,18 @@ Beyond team name selection, you may randomly encounter events with these charact
 
 The strategy ranking below is **editorial guidance from the community guide, not a client or GameTora figure** — 06 publishes no such order:
 
-| Skill Variant | Effect | Rough Priority |
-|---|---|---|
-| PWR | Late-race acceleration boost, scales with team Power | Best overall pick |
-| GUTS | Late-race velocity + acceleration, scales with team Guts | 2nd |
-| SPD | Mid-race velocity boost, scales with team Speed | 3rd |
-| STA | Mid-race endurance recovery, scales with team Stamina | Situational (recovery needs) |
-| WIT | Early-race navigation improvement | Lowest priority |
+| Skill Variant   | Effect                                                     | Rough Priority                 |
+| --------------- | ---------------------------------------------------------- | ------------------------------ |
+| PWR             | Late-race acceleration boost, scales with team Power       | Best overall pick              |
+| GUTS            | Late-race velocity + acceleration, scales with team Guts   | 2nd                            |
+| SPD             | Mid-race velocity boost, scales with team Speed            | 3rd                            |
+| STA             | Mid-race endurance recovery, scales with team Stamina      | Situational (recovery needs)   |
+| WIT             | Early-race navigation improvement                          | Lowest priority                |
 
 ## "It's On!" Skill (Reaching Rank S and S+)
 
 Reaching **overall Team Rank S** auto-triggers a scripted event granting a hint for the **It's On!** skill family (increases velocity when passing another Umamusume mid-race):
+
 - **Lv1** normally.
 - **Lv3** instead if you are training a scenario story character (e.g. Haru Urara) — that is the "+3 with a scenario-linked trainee" line this file already carried.
 - ✅ **Now live:** reaching **Team Rank S+** grants **another** hint for the same skill, which is how you **max the hint level** — S+ specifically, with a scenario story character in the run.
@@ -232,16 +243,16 @@ Reaching **overall Team Rank S** auto-triggers a scripted event granting a hint 
 
 ⚠️ Every item this section used to file under "Known Future Updates (Not Yet on Global)" **arrived on `[Global]` on 2026-07-01**. It is retained here as a delta list, not as a pending roadmap — and, per the import warning in `docs/UMAMUSUME_REFERENCE.md` §2.4 conflict 6, this is the section an importer previously had to filter. That reason is gone now that the state is current.
 
-| Feature | Status on `[Global]` |
-|---|---|
-| **Stat cap increase** — Speed/Stamina/Power/Guts **1300**, Wit **1800** | **Live.** Matches `1200 + scenarios.json.stats` exactly |
-| **Extreme (purple) Spirit Bursts** — bigger gains, extra hints, **0% training failure** | **Live**, scoped to the facility holding the active Burst |
-| **Stronger opposing teams** (league rank ≥10 + Team Rank ≥A + ≥1 Extreme Burst) → strengthened Team Zenith, extra stats, easier scenario Spark, "+" scenario skill Sparks | **Live**, as **Elite / "Powerhouse" Teams** (above) |
-| **Spirit Burst hints drawn from the triggering card's own hint pool** instead of randomly | **Live** |
-| **Team Rank S+** and the second "It's On!" hint | **Live** |
-| **Alarm Clock retry on a lost Team Race** | **Live** |
-| Additional Energy cost on Special Training | **Removed** by the same patch |
-| `[JP]`'s larger per-facility **Skill Point** payouts (e.g. Speed Lv1 = +4 SP) | ❌ **Not on `[Global]` yet** — Global still pays +2 SP on the four Energy disciplines. Do not assume `[JP]` SP values |
+| Feature                                                                                                                                                                     | Status on `[Global]`                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Stat cap increase** — Speed/Stamina/Power/Guts **1300**, Wit **1800**                                                                                                     | **Live.** Matches `1200 + scenarios.json.stats` exactly                                                                |
+| **Extreme (purple) Spirit Bursts** — bigger gains, extra hints, **0% training failure**                                                                                     | **Live**, scoped to the facility holding the active Burst                                                              |
+| **Stronger opposing teams** (league rank ≥10 + Team Rank ≥A + ≥1 Extreme Burst) → strengthened Team Zenith, extra stats, easier scenario Spark, "+" scenario skill Sparks   | **Live**, as **Elite / "Powerhouse" Teams** (above)                                                                    |
+| **Spirit Burst hints drawn from the triggering card's own hint pool** instead of randomly                                                                                   | **Live**                                                                                                               |
+| **Team Rank S+** and the second "It's On!" hint                                                                                                                             | **Live**                                                                                                               |
+| **Alarm Clock retry on a lost Team Race**                                                                                                                                   | **Live**                                                                                                               |
+| Additional Energy cost on Special Training                                                                                                                                  | **Removed** by the same patch                                                                                          |
+| `[JP]`'s larger per-facility **Skill Point** payouts (e.g. Speed Lv1 = +4 SP)                                                                                               | ❌ **Not on `[Global]` yet** — Global still pays +2 SP on the four Energy disciplines. Do not assume `[JP]` SP values  |
 
 Still `[JP]`-side only, with no `[Global]` release notice found: **Unity Cup's `scenario_linked_characters` roster is 5** (Taiki Shuttle, Rice Shower, Haru Urara, Matikanefukukitaru, Riko Kashimoto) — treat any larger `[JP]` link list from a later scenario as out of scope here. See `docs/UMAMUSUME_REFERENCE.md` §1.4.7 for how Scenario Link is derived rather than stored.
 

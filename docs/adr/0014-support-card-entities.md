@@ -15,11 +15,11 @@ records the schema decisions, the linkage shape, the data source, and what the s
 
 ## Decision: reference data plus run linkage; collection stays out
 
-| Entity | What it is | Built? | Reason |
-|---|---|---|---|
-| `SupportCard` | published reference data about the game | yes | Same class of fact ADR-0004 already admitted: engine-owned, provenance-bearing, `is_manual` protected |
-| `DeckSlot` | the six cards a Trainer equipped for one run | yes | Without it a logged run cannot be re-read: the deck decides training yield as much as the turns do |
-| `UserSupportCard` | the Trainer's collection: level, breaks, perk level | no | Collection tracking is still the feature §6.9 cut. The deck records card *identity*, not ownership state |
+| Entity              | What it is                                            | Built?   | Reason                                                                                                     |
+| ------------------- | ----------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `SupportCard`       | published reference data about the game               | yes      | Same class of fact ADR-0004 already admitted: engine-owned, provenance-bearing, `is_manual` protected      |
+| `DeckSlot`          | the six cards a Trainer equipped for one run          | yes      | Without it a logged run cannot be re-read: the deck decides training yield as much as the turns do         |
+| `UserSupportCard`   | the Trainer's collection: level, breaks, perk level   | no       | Collection tracking is still the feature §6.9 cut. The deck records card *identity*, not ownership state   |
 
 ADR-0005 recommended splitting exactly here, and the owner's authorization took that split.
 

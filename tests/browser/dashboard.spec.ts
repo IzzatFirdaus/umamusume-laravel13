@@ -20,9 +20,9 @@ import { test, expect } from '@playwright/test';
  * logged nothing, so the states this spec can reach on one are the absent ones, which is where the
  * copy matters most.
  *
- * No axe pass: `@axe-core/playwright` is not a dependency and adding one needs owner approval
- * (`AGENTS.md` §5). The hand-rolled checks the plan's §12.2 names are below: target size, the
- * keyboard path, `lang` on Japanese text, and absence rendered as `N/A` rather than as a dash.
+ * Axe coverage is provided by `tests/browser/accessibility.spec.ts`: `@axe-core/playwright` is installed
+ * and scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`; this spec retains the hand-rolled checks
+ * for target size, keyboard path, focus order, reflow and console errors.
  */
 
 const TRAINEE = 'Agnes Digital';
@@ -198,16 +198,16 @@ test('announces a visit in flight and takes over the failure state', async ({ pa
     // Loading: hold the response so the in-flight state is observable rather than raced. This page's
     // only user-initiated async action is following one of its links (ADR-0007), so the state is a
     // status line rather than a skeleton (design-2.0 §30).
-    await page.route('**/training-runs/create', async (route) => {
+    await page.route('**/career/setup/scenario', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         await route.continue();
     });
 
     await page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'New Career' }).click();
     await expect(page.getByRole('status')).toHaveText('Loading…');
-    await page.waitForURL(/\/training-runs\/create$/);
+    await page.waitForURL(/\/career\/setup\/scenario$/);
 
-    await page.unroute('**/training-runs/create');
+    await page.unroute('**/career/setup/scenario');
 
     // Error: a response Inertia cannot read fires `invalid`, and the page's own alert is the surface
     // because the listener suppresses Inertia's default modal.

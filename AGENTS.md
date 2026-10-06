@@ -35,20 +35,20 @@ trackers plus the `uma_musume_race_planner` career-run planner (rev 0.2, repo #4
 Layers, highest first. A lower layer never overrides a higher one; where a lower layer
 disagrees, the higher one wins and the lower one is stale.
 
-| Layer | Where | Authority |
-|---|---|---|
-| Human owner instruction | the task itself | Highest, but it cannot relax the quality bar without a written owner ruling (escalation 4) |
-| Quality bar | `CONSTRAINTS.md` -> `GOVERNANCE.md` §CONSTRAINTS.md | Never weakened to pass a check |
-| Gate registry | `GOVERNANCE.md` §GATE-REGISTRY.md | How each gate runs, its evidence, its allowed exceptions |
-| Binding decisions | `docs/adr/0001`-`0018`, `SUPERSEDED-*` | Accepted ADRs bind; `Proposed` ones do not |
-| Product truth | `PRD.md` | Users, requirements, §6 non-goals |
-| System design | `ARCHITECTURE.md` over `ARCHITECTURE-ESSENTIALS.md` | The digest loses to the full text |
-| Screen behavior | `SCREEN_SPEC.md` §8 authority table | Per-screen states and workflows |
-| Visual system | `DESIGN.md` (+ folded corpus `docs/research-scratch/DESIGN-CORPUS.md`) | Tokens, components, motion |
-| Path-scoped rules | `.ai/rules/index.md` -> `code-style.md`, `eloquent.md`, `architecture.md`, `testing-standards.md` | Conventions for the globs they cover |
-| Coding rules | `CLAUDE.md` | Assistant coding rules, lore gate detail |
-| Slice plans and records | `docs/research-scratch/PROCESS-PLANS.md`, `SLICE-RECORDS.md`, `PLANS-AND-BRIEFS.md` | Local to a slice; cannot override a gate |
-| Tooling-injected guidance | the `<laravel-boost-guidelines>` block Laravel Boost appends to this file | Generic framework advice |
+| Layer                       | Where                                                                                               | Authority                                                                                    |
+| --------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Human owner instruction     | the task itself                                                                                     | Highest, but it cannot relax the quality bar without a written owner ruling (escalation 4)   |
+| Quality bar                 | `CONSTRAINTS.md` -> `GOVERNANCE.md` §CONSTRAINTS.md                                                 | Never weakened to pass a check                                                               |
+| Gate registry               | `GOVERNANCE.md` §GATE-REGISTRY.md                                                                   | How each gate runs, its evidence, its allowed exceptions                                     |
+| Binding decisions           | `docs/adr/0001`-`0018`, `SUPERSEDED-*`                                                              | Accepted ADRs bind; `Proposed` ones do not                                                   |
+| Product truth               | `PRD.md`                                                                                            | Users, requirements, §6 non-goals                                                            |
+| System design               | `ARCHITECTURE.md` over `ARCHITECTURE-ESSENTIALS.md`                                                 | The digest loses to the full text                                                            |
+| Screen behavior             | `SCREEN_SPEC.md` §8 authority table                                                                 | Per-screen states and workflows                                                              |
+| Visual system               | `DESIGN.md` (+ folded corpus `docs/research-scratch/DESIGN-CORPUS.md`)                              | Tokens, components, motion                                                                   |
+| Path-scoped rules           | `.ai/rules/index.md` -> `code-style.md`, `eloquent.md`, `architecture.md`, `testing-standards.md`   | Conventions for the globs they cover                                                         |
+| Coding rules                | `CLAUDE.md`                                                                                         | Assistant coding rules, lore gate detail                                                     |
+| Slice plans and records     | `docs/research-scratch/PROCESS-PLANS.md`, `SLICE-RECORDS.md`, `PLANS-AND-BRIEFS.md`                 | Local to a slice; cannot override a gate                                                     |
+| Tooling-injected guidance   | the `<laravel-boost-guidelines>` block Laravel Boost appends to this file                           | Generic framework advice                                                                     |
 
 Two rules that settle most disputes:
 
@@ -70,37 +70,37 @@ documentation content goes into the relevant master under `docs/research-scratch
 `KNOWN-ISSUES.md`. Documentation files are written or updated only when the task asks
 for it.
 
-| Document | Owns | Does not own |
-|---|---|---|
-| `PRD.md` | users, stories, FR-A..FR-E, NFRs, §6 non-goals, open questions | implementation detail |
-| `ARCHITECTURE.md` | schema, pipeline, API contract, security model, testing strategy | visual design |
-| `ARCHITECTURE-ESSENTIALS.md` | token-efficient digest of the above | anything the full text contradicts |
-| `DESIGN.md` | visual system: tokens, components, surfaces, motion, lore-sensitive iconography | screen behavior (that is `SCREEN_SPEC.md`) |
-| `SCREEN_SPEC.md` | screen inventory, per-screen states, workflows, §8 authority table | schema |
-| `CONSTRAINTS.md` | a pointer to the bar | any rule of its own (adding one is forbidden) |
-| `GOVERNANCE.md` (§CONSTRAINTS.md, §GATE-REGISTRY.md, §PRE-MORTEM.md) | the bar, the gate table, allowed exceptions, risk record | product intent |
-| `KNOWN-ISSUES.md` | live defect register, `KI-nn` | history (that is `AUDIT-AND-VERIFICATION.md`) |
-| `PLAN.md` | a pointer to `PROCESS-PLANS.md` | new slices (do not add any) |
-| `README.md` | onboarding, commands, route and doc tables | governance |
-| `docs/adr/README.md` | ADR index, derived; regenerate with the command in that file | hand-edited index rows |
-| `docs/UMAMUSUME_REFERENCE.md` | source-cited mechanics corpus, eight sections, dated live-ops snapshots | a write-up that cites this repo is not a second source |
-| `docs/scenarios/01`-`09` | per-scenario playing guides (`07` is the sourced guide for the fourth `[Global]` scenario, with its in-scenario client vocabulary still `❌ UNVERIFIED`; `08` is `[JP-Only]` and must not be imported) | shipped copy |
-| `PRODUCT.md`, `SKILL.md` | generated tooling artifacts | hand edits; the generator wins |
-| `docs/deprecated/` | retired legacy PDFs | not a source, not a spec; never copy their display text |
+| Document                                                               | Owns                                                                                                                                                                                                    | Does not own                                              |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `PRD.md`                                                               | users, stories, FR-A..FR-E, NFRs, §6 non-goals, open questions                                                                                                                                          | implementation detail                                     |
+| `ARCHITECTURE.md`                                                      | schema, pipeline, API contract, security model, testing strategy                                                                                                                                        | visual design                                             |
+| `ARCHITECTURE-ESSENTIALS.md`                                           | token-efficient digest of the above                                                                                                                                                                     | anything the full text contradicts                        |
+| `DESIGN.md`                                                            | visual system: tokens, components, surfaces, motion, lore-sensitive iconography                                                                                                                         | screen behavior (that is `SCREEN_SPEC.md`)                |
+| `SCREEN_SPEC.md`                                                       | screen inventory, per-screen states, workflows, §8 authority table                                                                                                                                      | schema                                                    |
+| `CONSTRAINTS.md`                                                       | a pointer to the bar                                                                                                                                                                                    | any rule of its own (adding one is forbidden)             |
+| `GOVERNANCE.md` (§CONSTRAINTS.md, §GATE-REGISTRY.md, §PRE-MORTEM.md)   | the bar, the gate table, allowed exceptions, risk record                                                                                                                                                | product intent                                            |
+| `KNOWN-ISSUES.md`                                                      | live defect register, `KI-nn`                                                                                                                                                                           | history (that is `AUDIT-AND-VERIFICATION.md`)             |
+| `PLAN.md`                                                              | a pointer to `PROCESS-PLANS.md`                                                                                                                                                                         | new slices (do not add any)                               |
+| `README.md`                                                            | onboarding, commands, route and doc tables                                                                                                                                                              | governance                                                |
+| `docs/adr/README.md`                                                   | ADR index, derived; regenerate with the command in that file                                                                                                                                            | hand-edited index rows                                    |
+| `docs/UMAMUSUME_REFERENCE.md`                                          | source-cited mechanics corpus, eight sections, dated live-ops snapshots                                                                                                                                 | a write-up that cites this repo is not a second source    |
+| `docs/scenarios/01`-`09`                                               | per-scenario playing guides (`07` is the sourced guide for the fourth `[Global]` scenario, with its in-scenario client vocabulary still `❌ UNVERIFIED`; `08` is `[JP-Only]` and must not be imported)  | shipped copy                                              |
+| `PRODUCT.md`, `SKILL.md`                                               | generated tooling artifacts                                                                                                                                                                             | hand edits; the generator wins                            |
+| `docs/deprecated/`                                                     | retired legacy PDFs                                                                                                                                                                                     | not a source, not a spec; never copy their display text   |
 
 ## 4. Roles and escalation
 
 The role table says who decides. Adopt the role that owns the change.
 
-| Role | Owns |
-|---|---|
-| Architect | schema, system design, API shapes, performance budgets, `ARCHITECTURE*.md` |
-| Data Engineer | `app/Services/DataPipeline/`, `config/uma.php`, parsers, snapshots, `match_candidates` |
-| Laravel Dev | controllers, Form Requests, Resources, routes, views, factories, seeders |
-| QA / Reviewer | the gates in §9, the Floor, doubt-driven review of non-trivial diffs |
-| Lore Guardian | every user-visible string, identifier, seed value, and doc line in a change |
-| Docs Writer | README currency, ADRs, doc currency after a change |
-| Planner Domain Specialist | the training-run domain: plan-vs-actual, turn/skill states, stat bounds, export, timezone correctness |
+| Role                        | Owns                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Architect                   | schema, system design, API shapes, performance budgets, `ARCHITECTURE*.md`                              |
+| Data Engineer               | `app/Services/DataPipeline/`, `config/uma.php`, parsers, snapshots, `match_candidates`                  |
+| Laravel Dev                 | controllers, Form Requests, Resources, routes, views, factories, seeders                                |
+| QA / Reviewer               | the gates in §9, the Floor, doubt-driven review of non-trivial diffs                                    |
+| Lore Guardian               | every user-visible string, identifier, seed value, and doc line in a change                             |
+| Docs Writer                 | README currency, ADRs, doc currency after a change                                                      |
+| Planner Domain Specialist   | the training-run domain: plan-vs-actual, turn/skill states, stat bounds, export, timezone correctness   |
 
 Escalation paths (mirrored in `GOVERNANCE.md` §13):
 
@@ -150,7 +150,7 @@ source.
 
 ## 6. Repository structure
 
-```
+```text
 app/Actions/                 one-off operations (PromoteMatchedRecord, ResolveMatchCandidate,
                              ImportHistoricalRun, Store* ingest actions)
 app/Services/DataPipeline/   SourceFetcher (the only outbound HTTP), NameNormalizer,
@@ -173,7 +173,7 @@ tests/                       Feature/ (the bulk), Unit/ (no database), Fixtures/
 tools/                       lore.php (lore gate), gate.py (design-artifact gate), doc_census.py,
                              roster-crosscheck.php, check_untracked.py, dev-logs-pane.php
 docs/                        adr/, scenarios/, proposals/, research-scratch/ masters, deprecated/
-```
+```text
 
 ## 7. Coding conventions
 
@@ -262,15 +262,15 @@ Pest 4, feature-first. One global binding in `tests/Pest.php` applies `TestCase`
 
 What to run, by class of change:
 
-| Change | Minimum |
-|---|---|
-| Copy, layout, or styling only | the affected feature test(s); no new test needed |
-| Logic in a model, action, or service | the narrow test file, then `php artisan test --compact` |
-| Route, controller, Form Request, or view behavior | the feature tests for that screen; `SCREEN_SPEC.md` state coverage must hold |
-| Fetch pipeline or a parser | the parser tests plus the fetch/pipeline tests, `Http::fake` only |
-| Schema | migration plus the digest that travels with it (§11), then a fresh migrate and seed on a scratch DB, **and `php artisan migrate:status` clean on the dev database before hand-off** |
-| TypeScript, Vue, or Blade assets | `npm run typecheck`, and `npm run build` if a page references assets |
-| Anything crossing layers | the full suite, then the hand-off sequence below |
+| Change                                              | Minimum                                                                                                                                                                               |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Copy, layout, or styling only                       | the affected feature test(s); no new test needed                                                                                                                                      |
+| Logic in a model, action, or service                | the narrow test file, then `php artisan test --compact`                                                                                                                               |
+| Route, controller, Form Request, or view behavior   | the feature tests for that screen; `SCREEN_SPEC.md` state coverage must hold                                                                                                          |
+| Fetch pipeline or a parser                          | the parser tests plus the fetch/pipeline tests, `Http::fake` only                                                                                                                     |
+| Schema                                              | migration plus the digest that travels with it (§11), then a fresh migrate and seed on a scratch DB, **and `php artisan migrate:status` clean on the dev database before hand-off**   |
+| TypeScript, Vue, or Blade assets                    | `npm run typecheck`, and `npm run build` if a page references assets                                                                                                                  |
+| Anything crossing layers                            | the full suite, then the hand-off sequence below                                                                                                                                      |
 
 Hand-off sequence (the bar's own order): targeted tests green -> `php artisan test --compact`
 -> `vendor/bin/pint --dirty --format agent` -> `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`
@@ -290,22 +290,22 @@ hand-off; a gate that was not run is reported as not run.
 
 Every command below exists in `composer.json`, `package.json`, or artisan on this tree.
 
-| Task | Command |
-|---|---|
-| First-time setup | `composer setup` (install, `.env`, key, migrate, npm install + build) |
-| Dev (serve + queue + logs + Vite HMR) | `composer dev` |
-| Full pipeline (config:clear, typecheck, suite) | `composer test` |
-| Tests, narrowest first | `php artisan test --compact --filter=Name`, or `vendor/bin/pest tests/Feature/XTest.php` |
-| Style fix / style check | `vendor/bin/pint --dirty --format agent` / `composer lint` |
-| Static analysis | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` |
-| TypeScript | `npm run typecheck` |
-| Assets | `npm run build`, `npm run dev` |
-| Lore gate | `composer lore`, `composer lore-code` |
-| Fresh DB with offline catalog data | `php artisan migrate:fresh --seed` (destructive, §11) |
-| Fetch / replay / import / backup | `php artisan uma:fetch`, `uma:reparse <source>`, `uma:import:support-cards`, `uma:backup` |
-| Mirror catalog artwork (manual only) | `php artisan uma:fetch-art` (`--kind`, `--dry-run`, `--refetch`) |
-| Routes / commands / config | `php artisan route:list`, `php artisan list`, `php artisan config:show uma.sources` |
-| Documentation census | `composer docs` (python) |
+| Task                                             | Command                                                                                     |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| First-time setup                                 | `composer setup` (install, `.env`, key, migrate, npm install + build)                       |
+| Dev (serve + queue + logs + Vite HMR)            | `composer dev`                                                                              |
+| Full pipeline (config:clear, typecheck, suite)   | `composer test`                                                                             |
+| Tests, narrowest first                           | `php artisan test --compact --filter=Name`, or `vendor/bin/pest tests/Feature/XTest.php`    |
+| Style fix / style check                          | `vendor/bin/pint --dirty --format agent` / `composer lint`                                  |
+| Static analysis                                  | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`                                |
+| TypeScript                                       | `npm run typecheck`                                                                         |
+| Assets                                           | `npm run build`, `npm run dev`                                                              |
+| Lore gate                                        | `composer lore`, `composer lore-code`                                                       |
+| Fresh DB with offline catalog data               | `php artisan migrate:fresh --seed` (destructive, §11)                                       |
+| Fetch / replay / import / backup                 | `php artisan uma:fetch`, `uma:reparse <source>`, `uma:import:support-cards`, `uma:backup`   |
+| Mirror catalog artwork (manual only)             | `php artisan uma:fetch-art` (`--kind`, `--dry-run`, `--refetch`)                            |
+| Routes / commands / config                       | `php artisan route:list`, `php artisan list`, `php artisan config:show uma.sources`         |
+| Documentation census                             | `composer docs` (python)                                                                    |
 
 **Destructive:** `php artisan migrate:fresh --seed` drops every table in
 `database/database.sqlite` and destroys local Trainer data; back up with
@@ -481,11 +481,11 @@ fails if the logic breaks; a trivial one-liner needs no test.
 
 ## 20. Change log
 
-| Date | Change | Reason |
-|---|---|---|
-| 2026-10-04 | Rewritten as an operational contract: added §2 precedence and the Boost-conflict note, §3 documentation map with the pointer stubs, §9 change-class validation matrix, §11 change-safety, §16 ambiguity handling, §17 legacy handling. Pointer stubs resolved to their masters (`CONSTRAINTS.md` -> `GOVERNANCE.md`). Escaped the banned word families so this file no longer produces lore-gate hits needing a ruling. Role table and the seven escalation paths preserved verbatim in substance. | Agents were reading a stale file: it cited rules that had moved into `docs/research-scratch/` masters, repeated generic Boost guidance that contradicts the no-auth design, and quoted the banned vocabulary. |
-| 2026-10-05 | One cell of the §3 documentation map: `docs/scenarios/07` is no longer described as a known-gap stub. | The owner asked for the fourth `[Global]` scenario to be researched and its documents updated; the primary read landed, so the map's own description of the file went stale. The §6 non-negotiables, the gates and the precedence chain are unchanged. |
-| 2026-10-05 | §8 gains an **Artwork** bullet, §17's "no image uploads" line is disambiguated, and §18 gains a trap about the asset host's HTML 404 body. | `ADR-0021` was accepted the same day and `AGENTS.md` still read as though every image question ended at escalation 7. It does not: uploads stay cut, sourced artwork is authorized and unbuilt. An agent reading only this file would have refused work the owner had just authorized. |
-| 2026-10-06 | §8's Artwork bullet and §17 corrected: **the display half is built**, and the bullet now names the six surfaces, the loopback-only `src` rule, and the two OQ-6 remainders. §18 gains the empty-mirror trap. | The row above and §17 both asserted the display half was unbuilt. It is: `ArtworkSlot.vue` plus `CatalogController.php:121,132,299`, `SupportCardController.php:65,110` and `TrainingRunController.php:1119`, and 128 frames were verified rendering in Chromium with zero console errors after the first `uma:fetch-art` pass. An agent reading only this file would have refused to debug an image question as if nothing displayed it. |
-| 2026-10-06 | §1, §6, §7 and §13 corrected for the frontend stack: the web surface is **Inertia + Vue 3**, `resources/views/` holds 4 Blade files and no components, `resources/js/` holds 51 SFCs, and the scenario components take a required `scenarioLabel` rather than declaring `scenario`. §7's "no Inertia/SPA" ban is withdrawn in place, §9 and §15 widen the asset and typecheck rows to Vue, and §18's Blade-manifest line is de-Bladed. | `8e58b65` folded the Trainer Desk 2.0 line into `master` and `0ea8d43` retired the Blade shell, so the file described a surface that no longer exists. Measured on this tree, not remembered. Per §2 the code wins and the rule is stale; the rule was left standing where it is still true (Livewire, Redis and Excel are absent from `composer.lock`) rather than deleted wholesale. |
-| 2026-10-06 | §9: `migrate:status` on the dev database joins the Schema row and the hand-off, with a paragraph stating that the suite cannot see that file. | KI-60. Four committed migrations sat Pending on `database/database.sqlite` for four days while 1,326 tests passed, because `phpunit.xml:64` forces `DB_DATABASE=:memory:` and every test builds its own schema. A green suite was reported as evidence of a working application and it was not. This tightens the bar, which §5 permits an agent to apply; relaxing it remains escalation 4. |
+| Date         | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Reason                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-04   | Rewritten as an operational contract: added §2 precedence and the Boost-conflict note, §3 documentation map with the pointer stubs, §9 change-class validation matrix, §11 change-safety, §16 ambiguity handling, §17 legacy handling. Pointer stubs resolved to their masters (`CONSTRAINTS.md` -> `GOVERNANCE.md`). Escaped the banned word families so this file no longer produces lore-gate hits needing a ruling. Role table and the seven escalation paths preserved verbatim in substance.   | Agents were reading a stale file: it cited rules that had moved into `docs/research-scratch/` masters, repeated generic Boost guidance that contradicts the no-auth design, and quoted the banned vocabulary.                                                                                                                                                                                                                               |
+| 2026-10-05   | One cell of the §3 documentation map: `docs/scenarios/07` is no longer described as a known-gap stub.                                                                                                                                                                                                                                                                                                                                                                                                | The owner asked for the fourth `[Global]` scenario to be researched and its documents updated; the primary read landed, so the map's own description of the file went stale. The §6 non-negotiables, the gates and the precedence chain are unchanged.                                                                                                                                                                                      |
+| 2026-10-05   | §8 gains an **Artwork** bullet, §17's "no image uploads" line is disambiguated, and §18 gains a trap about the asset host's HTML 404 body.                                                                                                                                                                                                                                                                                                                                                           | `ADR-0021` was accepted the same day and `AGENTS.md` still read as though every image question ended at escalation 7. It does not: uploads stay cut, sourced artwork is authorized and unbuilt. An agent reading only this file would have refused work the owner had just authorized.                                                                                                                                                      |
+| 2026-10-06   | §8's Artwork bullet and §17 corrected: **the display half is built**, and the bullet now names the six surfaces, the loopback-only `src` rule, and the two OQ-6 remainders. §18 gains the empty-mirror trap.                                                                                                                                                                                                                                                                                         | The row above and §17 both asserted the display half was unbuilt. It is: `ArtworkSlot.vue` plus `CatalogController.php:121,132,299`, `SupportCardController.php:65,110` and `TrainingRunController.php:1119`, and 128 frames were verified rendering in Chromium with zero console errors after the first `uma:fetch-art` pass. An agent reading only this file would have refused to debug an image question as if nothing displayed it.   |
+| 2026-10-06   | §1, §6, §7 and §13 corrected for the frontend stack: the web surface is **Inertia + Vue 3**, `resources/views/` holds 4 Blade files and no components, `resources/js/` holds 51 SFCs, and the scenario components take a required `scenarioLabel` rather than declaring `scenario`. §7's "no Inertia/SPA" ban is withdrawn in place, §9 and §15 widen the asset and typecheck rows to Vue, and §18's Blade-manifest line is de-Bladed.                                                               | `8e58b65` folded the Trainer Desk 2.0 line into `master` and `0ea8d43` retired the Blade shell, so the file described a surface that no longer exists. Measured on this tree, not remembered. Per §2 the code wins and the rule is stale; the rule was left standing where it is still true (Livewire, Redis and Excel are absent from `composer.lock`) rather than deleted wholesale.                                                      |
+| 2026-10-06   | §9: `migrate:status` on the dev database joins the Schema row and the hand-off, with a paragraph stating that the suite cannot see that file.                                                                                                                                                                                                                                                                                                                                                        | KI-60. Four committed migrations sat Pending on `database/database.sqlite` for four days while 1,326 tests passed, because `phpunit.xml:64` forces `DB_DATABASE=:memory:` and every test builds its own schema. A green suite was reported as evidence of a working application and it was not. This tightens the bar, which §5 permits an agent to apply; relaxing it remains escalation 4.                                                |

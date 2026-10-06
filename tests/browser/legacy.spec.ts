@@ -16,10 +16,16 @@ import { test, expect } from '@playwright/test';
  *  - the builder and the compare surface are reached by **creating a run through the app's own form**,
  *    so the data under test is real and the creation path is exercised as a side effect.
  *
- * No axe pass here: `@axe-core/playwright` is not a dependency and adding one needs owner approval
- * (`AGENTS.md` §5). The plan's fallback applies, and the checks below are the hand-rolled ones §12.2
- * names — target size, keyboard reachability, `lang` on Japanese text, and absence rendered as
- * `N/A` rather than as a dash.
+ * Axe coverage is provided by `tests/browser/accessibility.spec.ts`: `@axe-core/playwright` is installed
+ * and scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`; this spec retains the hand-rolled checks
+ * for target size, keyboard path, focus order, reflow and console errors.
+ *
+ * **Every navigation waits for `domcontentloaded`, not for `load`.** The property under test is what
+ * the rendered DOM says, and `load` waits for the whole subresource set instead: the module graph from
+ * the Vite dev server and one loopback request per artwork frame, behind a single-process `artisan
+ * serve`. Those requests carry no assertion, so waiting on them turned a slow host into a failed gate.
+ * The `#app > *` check that follows each navigation is the stronger wait anyway, because it proves the
+ * page hydrated rather than that its pictures arrived.
  */
 
 const RECORD_ONLY_NOTICE =
@@ -29,6 +35,29 @@ const RECORD_ONLY_NOTICE =
 const SPARK_KINDS = ['Blue', 'Pink', 'Green', 'White', 'Scenario'];
 
 /**
+ * The runs this file creates, deleted again in `afterEach` exactly as `run-detail.spec.ts` and
+ * `support-deck.spec.ts` do.
+ *
+ * Without this the file was the suite's one leaker: every pass left five runs behind in the scratch
+ * database (57 rows accumulated before this fix), which broke `runs.spec.ts`'s empty-state assertions
+ * and made the whole suite one-shot against a freshly seeded file. Deleting through the run page's own
+ * disclosure also keeps the create → builder → delete loop exercised end to end.
+ */
+const createdRunUrls: string[] = [];
+
+test.afterEach(async ({ page }) => {
+    for (const url of createdRunUrls.splice(0)) {
+        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+        if (response === null || !response.ok()) {
+            continue;
+        }
+        await page.getByText('Delete run').click();
+        await page.getByRole('button', { name: 'Delete this run' }).click();
+        await page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' });
+    }
+});
+
+/**
  * Create one `Active` run through the app's own form, and return its id.
  *
  * The trainee is chosen by typing into the combobox rather than by posting a request, so the run
@@ -36,7 +65,7 @@ const SPARK_KINDS = ['Blue', 'Pink', 'Green', 'White', 'Scenario'];
  * `Active`, which is the only status the Legacy builder opens on (`ADR-0010` D-260 fixity).
  */
 async function createActiveRun(page: import('@playwright/test').Page, traineeName: string): Promise<number> {
-    await page.goto('/training-runs/create');
+    await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     // The combobox is a role=combobox input over a listbox; typing filters and Enter commits the
@@ -50,23 +79,28 @@ async function createActiveRun(page: import('@playwright/test').Page, traineeNam
     await combobox.press('Enter');
 
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/);
+    await page.waitForURL(/\/training-runs\/\d+$/, { waitUntil: 'domcontentloaded' });
 
     const id = Number(page.url().match(/\/training-runs\/(\d+)$/)?.[1]);
     expect(id, 'the created run has no id in its URL').toBeGreaterThan(0);
+
+    createdRunUrls.push(`/training-runs/${id}`);
 
     return id;
 }
 
 test.describe('Legacy Lab browse', () => {
     test('carries the record-only banner and states the empty library in words', async ({ page }) => {
-        await page.goto('/legacy');
+        await page.goto('/legacy', { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
         // The banner is a `role="note"` standing caveat with a decorative glyph, so a screen reader
         // hears the sentence once and the glyph is never read as content.
         const notice = page.getByRole('note');
-        await expect(notice).toHaveText(RECORD_ONLY_NOTICE);
+        // `toContainText`, not `toHaveText`: Playwright reads `textContent`, which includes the
+        // `aria-hidden` glyph, so an exact-match assertion on the whole banner was comparing against
+        // the decorative character as well. The sentence still has to appear in full.
+        await expect(notice).toContainText(RECORD_ONLY_NOTICE);
 
         // design-2.0 §29: the empty state says what is missing, why it matters and what to do. The
         // seeded scratch database holds no Veterans, so this is the state a Trainer meets first.
@@ -83,7 +117,7 @@ test.describe('Legacy Lab browse', () => {
     });
 
     test('sizes the browse controls to the 44px contract', async ({ page }) => {
-        await page.goto('/legacy');
+        await page.goto('/legacy', { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
         // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). `skills.spec.ts` caught the same class of
@@ -98,19 +132,22 @@ test.describe('Legacy Lab browse', () => {
     });
 
     test('links the Legacy Lab from the primary navigation and marks it current', async ({ page }) => {
-        await page.goto('/legacy');
+        await page.goto('/legacy', { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
-        // The sidebar is the visible nav at the default viewport; the mobile bar renders the same
-        // nine destinations below `md`.
+        // The sidebar is the visible nav at the default viewport; the mobile bar carries four slots
+        // plus More below `md` (design-2.0 §41), so the destinations are not the same list in both media.
         const link = page.locator('aside').getByRole('link', { name: 'Legacy Lab' });
         await expect(link).toBeVisible();
         await expect(link).toHaveAttribute('aria-current', 'page');
 
-        // Miller's Law (plan §13): the nav is nine destinations with one named absence. D5 filled the
-        // Legacy Lab placeholder rather than appending a tenth, so the count is unchanged and the
-        // Veterans entry is the remaining absence.
-        await expect(page.locator('aside').getByText('Veterans')).toHaveAttribute('title', 'Coming with Trainer Desk 2.0');
+        // The nav holds ten live destinations and no named absence: the Veteran library landed as D16's
+        // read half, so the one `to: null` placeholder became a link. The old assertion here expected a
+        // "not built" span with a title, which is the shape this row replaced.
+        const veterans = page.locator('aside').getByRole('link', { name: 'Veterans' });
+        await expect(veterans).toBeVisible();
+        await expect(veterans).toHaveAttribute('href', '/veterans');
+        await expect(page.getByText('not built')).toHaveCount(0);
     });
 });
 
@@ -118,10 +155,10 @@ test.describe('Legacy Lab builder', () => {
     test('draws the six-node graph, assigns by keyboard and states every absence', async ({ page }) => {
         const runId = await createActiveRun(page, 'Special Week');
 
-        await page.goto(`/legacy/${runId}`);
+        await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
-        await expect(page.getByRole('note')).toHaveText(RECORD_ONLY_NOTICE);
+        await expect(page.getByRole('note')).toContainText(RECORD_ONLY_NOTICE);
 
         // The six nodes, in the client's order (REFERENCE §1.5.4): the trainee, then Parent A with
         // her own two, then Parent B with hers. They are list items, not a picture, so the count is
@@ -186,7 +223,7 @@ test.describe('Legacy Lab builder', () => {
     test('confirms a selection and shows it back on the compare surface', async ({ page }) => {
         const runId = await createActiveRun(page, 'Silence Suzuka');
 
-        await page.goto(`/legacy/${runId}`);
+        await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
         // Record one parent with one ancestor and one Spark, through the form's own controls.
@@ -203,22 +240,28 @@ test.describe('Legacy Lab builder', () => {
 
         // The write lands on the compare surface for the same run, which is the "now what does this
         // look like" answer to a confirmation.
-        await page.waitForURL(/\/legacy\/compare/);
-        await expect(page.getByRole('note')).toHaveText(RECORD_ONLY_NOTICE);
+        await page.waitForURL(/\/legacy\/compare/, { waitUntil: 'domcontentloaded' });
+        await expect(page.getByRole('note')).toContainText(RECORD_ONLY_NOTICE);
 
         // The recorded values read back as stored, and the row structure is the alignment
         // design-2.0 §46 asks for.
         const table = page.getByRole('table');
         await expect(table).toBeVisible();
 
-        // The Spark chip carries colour AND label AND star count, so nothing is conveyed by colour
-        // alone (WCAG 1.4.1). The accessible name spells all three.
-        const chip = page.getByText('Blue', { exact: true }).first();
-        await expect(chip).toBeVisible();
-        await expect(page.locator('table').getByText('Speed').first()).toBeVisible();
+        // The compare surface holds no per-Spark row. A column carries a variable number of Sparks, so
+        // rows would not align across columns; the surface therefore prints one count per kind, and the
+        // kind is a word in the row header rather than a colour a Trainer has to decode (WCAG 1.4.1).
+        // Where a single stored Spark does read back whole is the builder, so that is where the chip's
+        // three channels are checked: the kind spelled, the target beside it, and the accessible name
+        // carrying all three in words. That navigation goes LAST, because `table` below is this page's
+        // table and Playwright resolves a locator against whatever DOM is current when the assertion
+        // runs: reading the compare rows after leaving the compare surface asserts on the builder.
+        const blueSparks = table.getByRole('rowheader', { name: 'Blue Sparks', exact: true }).locator('..');
+        await expect(blueSparks.locator('td').first()).toHaveText('1');
 
         // Every stored property is a row header, and the absent ones are N/A with a reason rather
-        // than a dash or a zero.
+        // than a dash or a zero. `exact` because a substring match on 'Parent A' also answers to
+        // 'Parent A rank' and 'Parent A ancestors', which is a strict-mode violation, not a pass.
         for (const row of [
             'Trainee',
             'Parent A',
@@ -227,11 +270,18 @@ test.describe('Legacy Lab builder', () => {
             'Parent B',
             'Spark chance',
         ]) {
-            await expect(table.getByRole('rowheader', { name: row })).toBeVisible();
+            await expect(table.getByRole('rowheader', { name: row, exact: true })).toBeVisible();
         }
 
-        await expect(table.getByRole('rowheader', { name: 'Spark chance' })).toBeVisible();
-        await expect(table.getByText('N/A').first()).toBeVisible();
+        // The held figure reads as absent with its reason on the element, not as a zero.
+        const chanceRow = table.getByRole('rowheader', { name: 'Spark chance', exact: true }).locator('..');
+        await expect(chanceRow.locator('td').first()).toHaveText('N/A');
+        await expect(chanceRow.locator('td [title]')).toHaveAttribute('title', /star-roll table/);
+
+        await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+        await expect(page.getByText('Blue', { exact: true }).first()).toBeVisible();
+        await expect(page.getByText('Blue Spark, Speed, 2 stars').first()).toBeVisible();
     });
 });
 
@@ -243,14 +293,14 @@ test.describe('Legacy Lab compare', () => {
         const second = await createActiveRun(page, 'Tokai Teio');
 
         for (const runId of [first, second]) {
-            await page.goto(`/legacy/${runId}`);
+            await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
             await page.locator('#app > *').first().waitFor();
             await page.getByLabel('Assign to Parent A').selectOption({ index: 0 });
             await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
-            await page.waitForURL(/\/legacy\/compare/);
+            await page.waitForURL(/\/legacy\/compare/, { waitUntil: 'domcontentloaded' });
         }
 
-        await page.goto(`/legacy/compare?runs[]=${first}&runs[]=${second}`);
+        await page.goto(`/legacy/compare?runs[]=${first}&runs[]=${second}`, { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
         const table = page.getByRole('table');
@@ -263,20 +313,26 @@ test.describe('Legacy Lab compare', () => {
 
         // Every property is a row header, and the row set is identical for each column: that is what
         // "aligned in rows" means, and a screen reader announces the property with every cell.
+        // Sixteen is the eleven stored properties (trainee, each parent's name, rank and ancestors,
+        // rented, Spark chance, tags, notes) plus the five Spark kinds, and it is the row count that
+        // holds only while every property keeps a row of its own.
         const rowHeaders = table.getByRole('rowheader');
-        await expect(rowHeaders).toHaveCount(12);
+        await expect(rowHeaders).toHaveCount(16);
 
         // No total, no score, no "best" marker. Each of those would rank configurations on a figure
         // the tool does not hold (ADR-0020 §3), and the caption says so in the Trainer's own words.
-        await expect(page.getByText(/nothing is scored, ranked or totalled/i)).toBeVisible();
-        await expect(table.getByText(/best/i)).toHaveCount(0);
-        await expect(table.getByText(/score/i)).toHaveCount(0);
+        // The caption is quoted in full because the sentence is the promise; the absence is then
+        // checked on the `td` cells, because the caption itself sits inside the table and contains the
+        // word "scored", so an unscoped `/score/i` would match the very sentence that disclaims it.
+        await expect(page.getByText(/nothing here is scored, ranked or totalled/i)).toBeVisible();
+        await expect(table.getByRole('cell').filter({ hasText: /best/i })).toHaveCount(0);
+        await expect(table.getByRole('cell').filter({ hasText: /score/i })).toHaveCount(0);
     });
 
     test('scrolls the comparison at 320px without hiding the right-hand columns', async ({ page }) => {
         const run = await createActiveRun(page, 'Special Week');
 
-        await page.goto(`/legacy/compare?runs[]=${run}`);
+        await page.goto(`/legacy/compare?runs[]=${run}`, { waitUntil: 'domcontentloaded' });
         await page.setViewportSize({ width: 320, height: 720 });
         await page.locator('#app > *').first().waitFor();
 
@@ -297,7 +353,7 @@ test.describe('Legacy Lab compare', () => {
     });
 
     test('says so when there is nothing to compare', async ({ page }) => {
-        await page.goto('/legacy/compare');
+        await page.goto('/legacy/compare', { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
         // design-2.0 §29 again: what is missing, why it matters, what to do.

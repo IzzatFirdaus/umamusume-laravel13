@@ -221,7 +221,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             {{ form.errors.deck }}
         </p>
 
-        <div class="mt-5 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div class="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <section aria-labelledby="draft-slots-heading">
                 <h2 id="draft-slots-heading" class="text-lg font-semibold text-ink-strong">The six slots</h2>
 
@@ -339,7 +339,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         <span class="text-ink">Card for {{ fillingLabel() }}</span>
                         <select
                             id="deck-pick"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                            class="h-11 max-w-full rounded-md border border-rule bg-raised px-2 text-ink"
                         >
                             <option value="">Not equipped</option>
                             <option v-for="card in props.picker.options" :key="card.id" :value="String(card.id)">
@@ -402,12 +402,12 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             >
                 Back: Legacy
             </a>
-            <span
-                class="inline-flex min-h-11 items-center rounded-md px-3 text-sm text-ink-muted"
-                title="Preflight is the wizard's own slice (D7) and is not built yet, so there is nothing to continue to from here."
+            <a
+                href="/career/setup/preflight"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
             >
-                Preflight: not built
-            </span>
+                Next: Preflight
+            </a>
         </div>
     </SetupLayout>
 </template>

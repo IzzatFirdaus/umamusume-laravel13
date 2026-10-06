@@ -95,26 +95,69 @@ it('gives every L-F01 target the min-h-11 floor', function (): void {
     $layout = runViewSource('resources/js/layouts/AppLayout.vue');
 
     /*
-     * The census of the nav, so the sweep above cannot pass on an empty list. Deviation from
-     * the Blade shell's six links, stated because the run page now renders AppLayout's 2.0
-     * navigation: nine destinations and one named absence (`to: null`), which renders as a
-     * disabled span; the whole list renders twice (desktop aside and mobile bar). Each of
-     * the four classes a destination can render with is asserted to carry the floor, so a
+     * The census of the nav, so the sweep above cannot pass on an empty list: ten destinations, none of
+     * them a named absence now that the Veteran library landed as D16's read half. The list renders twice
+     * (desktop aside and mobile bar), and the mobile bar renders a third set inside its More disclosure.
+     * Each of the five classes a destination can render with is asserted to carry the floor, so a
      * destination that forgets it fails here rather than sliding past an unchanged count.
      *
-     * The absence count was two until slice D5 landed the Legacy Lab: that slice filled the
-     * one `to: null` placeholder it owned rather than appending a tenth destination, so the
-     * total is still nine and only the Veterans library is still a named absence. The
-     * assertion is the count, not the value 2, so the next slice to fill Veterans lowers it
-     * deliberately instead of being a silent failure.
+     * Four destinations are pinned by target as well as counted, because the nav audit changed where they
+     * point rather than how many there are. "New Career" goes to the wizard's step 1 instead of the
+     * pre-2.0 `runs.create` form, "Careers" is the run list, which had no clickable inbound link at all,
+     * and "Veterans" is the library, which was the nav's one `to: null` placeholder. Reverting any of
+     * them silently orphans a screen, so it has to fail here.
+     *
+     * The mobile bar is `design-2.0` §41's shape: four slots plus a More disclosure, and explicitly not
+     * the sidebar shrunk down. The ten-row `overflow-x-auto` strip that used to render the whole sidebar
+     * is asserted absent, because that is the shape §41 forbids and the reason nothing at 320px looked
+     * scrollable.
      */
-    preg_match('/const items = \[(.*?)\];/s', $layout, $items);
+    preg_match('/const items: NavItem\[\] = \[(.*?)\];/s', $layout, $items);
 
-    expect(substr_count($items[1] ?? '', 'label:'))->toBe(9)
-        ->and(substr_count($items[1] ?? '', 'to: null'))->toBe(1)
-        ->and(substr_count($items[1] ?? '', "label: 'Legacy Lab', to: '/legacy'"))->toBe(1);
+    expect(substr_count($items[1] ?? '', 'label:'))->toBe(10)
+        ->and(substr_count($items[1] ?? '', 'to: null'))->toBe(0)
+        ->and(substr_count($items[1] ?? '', 'inBar: true'))->toBe(4)
+        // Nine of the ten destinations hover-prefetch. The tenth is "New Career", excluded because the
+        // wizard renders session-draft state and Inertia reuses a prefetched response for 30 seconds by
+        // default, which would show the choice the Trainer has just overwritten. Counted, so a tenth
+        // prefetching link is a deliberate act rather than a slip.
+        ->and(substr_count($items[1] ?? '', 'prefetches: true'))->toBe(9)
+        ->and(substr_count($items[1] ?? '', "label: 'New Career'"))->toBe(1)
+        ->and((bool) preg_match("/\{ label: 'New Career',[^}]*prefetches: false/", $items[1] ?? ''))->toBeTrue()
+        // The flag has to reach the render sites, or it is decoration in a data array.
+        ->and(substr_count($layout, "? 'hover' : false"))->toBe(3)
+        ->and(substr_count($layout, '>not built</span>'))->toBe(3);
 
-    foreach (['linkClass', 'disabledClass', 'mobileClass', 'mobileDisabledClass'] as $constant) {
+    foreach ([
+        'New Career' => '/career/setup/scenario',
+        'Careers' => '/training-runs',
+        'Veterans' => '/veterans',
+        'Legacy Lab' => '/legacy',
+    ] as $label => $path) {
+        expect((bool) preg_match("#\\{ label: '$label',[^}]*to: '".preg_quote($path, '#')."'#", $items[1] ?? ''))
+            ->toBeTrue($label.' points at '.$path);
+    }
+
+    foreach (['Home', 'Career', 'Legacy', 'Deck'] as $slot) {
+        expect(substr_count($items[1] ?? '', "mobileLabel: '$slot'"))->toBe(1, $slot);
+    }
+
+    // The §41 violation, stated as its own assertion so a re-introduction is named rather than counted.
+    // Matched against class attributes only: the file's own prose quotes the utility to explain why it
+    // is gone, and a whole-file `not->toContain` would fail on that explanation.
+    expect($layout)->not->toMatch('/class="[^"]*overflow-x-auto/');
+
+    // Five slots that divide the viewport rather than five `shrink-0` labels that add up wider than 320px
+    // and re-create the overflow the bar exists to remove.
+    expect($layout)->toMatch('/const mobileBarClass\s*=\s*\'([^\']*)\'/s')
+        ->and($layout)->toMatch('/const mobileBarClass\s*=\s*\'[^\']*flex-1 min-w-0/');
+
+    // The disclosure is the native widget, so the expanded state and the keyboard path come from the
+    // platform. Escape closes it and focus returns to the summary.
+    expect($layout)->toContain('<details')
+        ->and($layout)->toContain('@keydown.esc="closeMore"');
+
+    foreach (['linkClass', 'disabledClass', 'mobileClass', 'mobileBarClass', 'mobileDisabledClass', 'mobileMoreClass'] as $constant) {
         preg_match('/const '.$constant.'\s*=\s*\'([^\']*)\'/s', $layout, $declared);
 
         expect($declared[1] ?? '', $constant)->toContain('min-h-11');

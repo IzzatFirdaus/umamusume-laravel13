@@ -39,23 +39,26 @@ C-7's loading obligation is interpreted as follows, without weakening the gate:
 
 ## Alternatives Considered
 
-| Option | Description | Why rejected |
-|---|---|---|
-| Add skeleton components everywhere | Literal C-7 compliance | Technique without purpose; ships decoration and implies async work that does not exist (antislop purpose gate, R-01) |
-| Delete the loading clause from C-7 | Relax the bar | Weakens a written constraint to pass a check, forbidden by `CONSTRAINTS.md` preamble; user-initiated async genuinely needs indicators |
-| Do nothing and record FAIL forever | Honest but inert | Blocks every frontend slice exit on a non-issue instead of scoping the requirement |
+| Option                               | Description              | Why rejected                                                                                                                            |
+| ------------------------------------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Add skeleton components everywhere   | Literal C-7 compliance   | Technique without purpose; ships decoration and implies async work that does not exist (antislop purpose gate, R-01)                    |
+| Delete the loading clause from C-7   | Relax the bar            | Weakens a written constraint to pass a check, forbidden by `CONSTRAINTS.md` preamble; user-initiated async genuinely needs indicators   |
+| Do nothing and record FAIL forever   | Honest but inert         | Blocks every frontend slice exit on a non-issue instead of scoping the requirement                                                      |
 
 ## Consequences
 
 ### Positive
+
 - Frontend slices stop being blocked by an unsatisfiable-in-spirit reading of C-7.
 - The real obligation (async feedback for refresh/job status) is stated more sharply than before.
 
 ### Negative
+
 - The gate is no longer greppable as "contains a loading element"; review must judge which
   interactions are async. `docs/GATE-REGISTRY.md` records it as a Review-type check.
 
 ### Risks
+
 - A future view could claim "server-rendered" while doing client fetches. Mitigation: the
   registry requires the async-interaction list to be enumerated per view in design review.
 

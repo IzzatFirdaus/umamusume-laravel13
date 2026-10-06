@@ -34,22 +34,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
-    {
-        Schema::create('invoices', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->index();
-            $table->string('number')->unique();
-            $table->decimal('total', 10, 2);
-            $table->boolean('paid')->default(false);
-            $table->timestamps();
-        });
-    }
 
-    public function down(): void
-    {
-        Schema::dropIfExists('invoices');
-    }
+```text
+public function up(): void
+{
+    Schema::create('invoices', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('user_id')->index();
+        $table->string('number')->unique();
+        $table->decimal('total', 10, 2);
+        $table->boolean('paid')->default(false);
+        $table->timestamps();
+    });
+}
+
+public function down(): void
+{
+    Schema::dropIfExists('invoices');
+}
+```
+
 };
 </code-snippet>
 
@@ -71,20 +75,26 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['user_id', 'number', 'total', 'paid'])]
-#[Hidden(['created_at', 'updated_at'])]
+\# [Fillable(['user_id', 'number', 'total', 'paid'])]
+
+\# [Hidden(['created_at', 'updated_at'])]
+
 class Invoice extends Model
 {
-    /** @use HasFactory<InvoiceFactory> */
-    use HasFactory;
 
-    protected function casts(): array
-    {
-        return [
-            'total' => 'decimal:2',
-            'paid' => 'boolean',
-        ];
-    }
+```text
+/** @use HasFactory<InvoiceFactory> */
+use HasFactory;
+
+protected function casts(): array
+{
+    return [
+        'total' => 'decimal:2',
+        'paid' => 'boolean',
+    ];
+}
+```
+
 }
 </code-snippet>
 
@@ -100,17 +110,21 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InvoiceFactory extends Factory
 {
-    protected $model = Invoice::class;
 
-    public function definition(): array
-    {
-        return [
-            'user_id' => \App\Models\User::factory(),
-            'number' => $this->faker->unique()->numerify('INV-#####'),
-            'total' => $this->faker->randomFloat(2, 10, 1000),
-            'paid' => $this->faker->boolean(),
-        ];
-    }
+```text
+protected $model = Invoice::class;
+
+public function definition(): array
+{
+    return [
+        'user_id' => \App\Models\User::factory(),
+        'number' => $this->faker->unique()->numerify('INV-#####'),
+        'total' => $this->faker->randomFloat(2, 10, 1000),
+        'paid' => $this->faker->boolean(),
+    ];
+}
+```
+
 }
 </code-snippet>
 

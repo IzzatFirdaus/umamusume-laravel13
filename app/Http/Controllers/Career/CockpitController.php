@@ -34,8 +34,9 @@ use Inertia\Response;
  *
  * **The action grid is the spec's seven entries** (SCREEN-009 §12) with at most one `RECOMMENDED`
  * marker, mapped from C2's answer: a stat action marks Training, `Rest` marks Rest, and a declined
- * advisor marks none. Each entry's own screen is D9 to D12 or E1 and none has landed, so every entry
- * is a named absence with the reason rather than a dead link (`AppLayout`'s `to: null` rule).
+ * advisor marks none. Training has its own screen from D9 (SCREEN-010); the rest land at D10 to D12 or
+ * E1, so each entry links to the screen that owns the action today and its `note` names the one that
+ * will replace it. No entry is a dead link.
  */
 class CockpitController extends Controller
 {
@@ -46,9 +47,9 @@ class CockpitController extends Controller
      * @var list<array{key: string, label: string, note: string}>
      */
     private const ACTIONS = [
-        ['key' => 'training', 'label' => 'Training', 'note' => 'Recording a training action arrives with the Training decision screen.'],
+        ['key' => 'training', 'label' => 'Training', 'note' => 'The five training options, and the turn record.'],
         ['key' => 'race', 'label' => 'Race', 'note' => 'Entering a race arrives with the Race decision screen.'],
-        ['key' => 'rest', 'label' => 'Rest', 'note' => 'Recording a rest arrives with the Training decision screen.'],
+        ['key' => 'rest', 'label' => 'Rest', 'note' => 'Rest is a turn choice on the run screen, not one of the five training options.'],
         ['key' => 'recreation', 'label' => 'Recreation', 'note' => 'A Recreation screen of its own is not built yet; the run screen records it as a turn choice.'],
         ['key' => 'scenario', 'label' => 'Scenario action', 'note' => 'Scenario actions arrive with the scenario panels.'],
         ['key' => 'event', 'label' => 'Event', 'note' => 'Event recording arrives with the Event decision screen.'],
@@ -213,9 +214,10 @@ class CockpitController extends Controller
      * Which entry carries it is a property of C2's answer, not of a scenario: a stat action marks
      * Training, `Rest` marks Rest, and a declined advisor marks none.
      *
-     * Every entry links to the screen that owns the action **today** — the run's record screen, whose
-     * guided rail is where a turn is recorded, and the Legacy builder for the ancestry — and the
-     * entry's own 2.0 screen is named in its `note` where that screen has not landed. The slice's
+     * Every entry links to the screen that owns the action **today** — the Training decision screen for
+     * training (SCREEN-010, D9), the run's record screen whose guided rail records the other turn
+     * choices, and the Legacy builder for the ancestry — and the entry's own 2.0 screen is named in its
+     * `note` where that screen has not landed. The slice's
      * brief says "otherwise they are named absences"; a grid of seven unfocusable items would fail
      * this slice's own keyboard-path acceptance and would leave the Cockpit with no way to act, so
      * the absence is named in the copy and the door is a live route. No entry is ever a dead link.
@@ -233,9 +235,11 @@ class CockpitController extends Controller
         return array_map(
             static fn (array $action): array => [
                 ...$action,
-                'href' => $action['key'] === 'inheritance'
-                    ? route('legacy.builder', $run)
-                    : route('runs.show', $run),
+                'href' => match ($action['key']) {
+                    'inheritance' => route('legacy.builder', $run),
+                    'training' => route('runs.training', $run),
+                    default => route('runs.show', $run),
+                },
                 'recommended' => $action['key'] === $recommended,
             ],
             self::ACTIONS,

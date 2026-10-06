@@ -28,22 +28,22 @@
 
 ## Sourced facts
 
-| Fact | Value | Source and grade |
-|---|---|---|
-| `[JP]` title | つなげ、照らせ、ひかれ。私たちのグランドライブ | `scenarios.json` order 4 `[B]` |
-| `[Global]` title, as the export prints it | **Brighter Together Our Grand Concert** (`name_en` and `name_en_full`); export `name_en_old` is "Grand Live" | `scenarios.json` order 4 `[B]` |
-| `[Global]` title, as the official notice prints it | **"Brighter Together! Our Grand Concert."**, with an exclamation mark inside the quotation | [Notice 899](https://umamusume.com/news/899) `[S]`; kept as conflict row 52, not merged |
-| Export label | Grand Live (Grand Concert) | `docs/UMAMUSUME_REFERENCE.md` §2.1, §1.6.1 |
-| `[Global]` live since | **2026-07-22 22:00 UTC**, to the hour: the export's `start_en` 1784757600 decodes to that instant and notice 899 opens "As of 10:00 p.m., Jul 22, 2026 (UTC)" | `[B]` + `[S]` |
-| `[JP]` live since | 2022-08-24 | `scenarios.json` `start_ja` `[B]` |
-| Scenario order | **4** of 14 | `scenarios.json` `[B]` |
-| Permanent | Yes: "This is a permanent scenario and will remain accessible even after additional scenarios are released" | Game8 607337 `[A]` |
-| Stat caps (Sp / St / Pw / Gu / Wi) | **1600 / 1300 / 1300 / 1500 / 1300**, from `stats` `[400, 100, 100, 300, 100]` over the 1200 base | `[B]`, printed identically by Game8 `[A]` and GameTora `[B]`; §2.1 |
-| Speed ceiling | Highest `[Global]` Speed cap in play, above URA Finale's 1400 | derived from the row above |
-| Hard ceiling | 2000 per stat | `scenarios.json` `hard_caps` `[B]` |
-| Scenario Link | **5 characters, now named**: Smart Falcon `1046`, Agnes Tachyon `1032`, Silence Suzuka `1002`, Mihono Bourbon `1026`, Light Hello `9008` | `scenarios.json` `[B]`, corroborated by GameTora `[B]` and Game8 `[A]` |
-| Light Hello's status | An **NPC**, "a new original NPC introduced in the story of Grand Live", and her `9008` id sits in the same band as the trainer NPC Aoi Kiryuin `9004`. She carries two `[Global]` support cards: `10083` `[Event Producer]` R and `30052` `[From the Ground Up]` SSR, both `release_en` 2026-07-22, both type `friend`, printed as **Pal** | GameTora `[B]` + the committed `characters.c6676539.json` and `support-cards.88dea522.json` exports `[B]` + notice 899 `[S]` |
-| Visual evidence | **0 frames.** Still the largest gap in this file | `docs/research-scratch/DESIGN-CORPUS.md`, SCREENSHOT-MANIFEST source |
+| Fact                                                 | Value                                                                                                                                                                                                                                                                                                                                        | Source and grade                                                                                                               |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `[JP]` title                                         | つなげ、照らせ、ひかれ。私たちのグランドライブ                                                                                                                                                                                                                                                                                               | `scenarios.json` order 4 `[B]`                                                                                                 |
+| `[Global]` title, as the export prints it            | **Brighter Together Our Grand Concert** (`name_en` and `name_en_full`); export `name_en_old` is "Grand Live"                                                                                                                                                                                                                                 | `scenarios.json` order 4 `[B]`                                                                                                 |
+| `[Global]` title, as the official notice prints it   | **"Brighter Together! Our Grand Concert."**, with an exclamation mark inside the quotation                                                                                                                                                                                                                                                   | [Notice 899](https://umamusume.com/news/899) `[S]`; kept as conflict row 52, not merged                                        |
+| Export label                                         | Grand Live (Grand Concert)                                                                                                                                                                                                                                                                                                                   | `docs/UMAMUSUME_REFERENCE.md` §2.1, §1.6.1                                                                                     |
+| `[Global]` live since                                | **2026-07-22 22:00 UTC**, to the hour: the export's `start_en` 1784757600 decodes to that instant and notice 899 opens "As of 10:00 p.m., Jul 22, 2026 (UTC)"                                                                                                                                                                                | `[B]` + `[S]`                                                                                                                  |
+| `[JP]` live since                                    | 2022-08-24                                                                                                                                                                                                                                                                                                                                   | `scenarios.json` `start_ja` `[B]`                                                                                              |
+| Scenario order                                       | **4** of 14                                                                                                                                                                                                                                                                                                                                  | `scenarios.json` `[B]`                                                                                                         |
+| Permanent                                            | Yes: "This is a permanent scenario and will remain accessible even after additional scenarios are released"                                                                                                                                                                                                                                  | Game8 607337 `[A]`                                                                                                             |
+| Stat caps (Sp / St / Pw / Gu / Wi)                   | **1600 / 1300 / 1300 / 1500 / 1300**, from `stats` `[400, 100, 100, 300, 100]` over the 1200 base                                                                                                                                                                                                                                            | `[B]`, printed identically by Game8 `[A]` and GameTora `[B]`; §2.1                                                             |
+| Speed ceiling                                        | Highest `[Global]` Speed cap in play, above URA Finale's 1400                                                                                                                                                                                                                                                                                | derived from the row above                                                                                                     |
+| Hard ceiling                                         | 2000 per stat                                                                                                                                                                                                                                                                                                                                | `scenarios.json` `hard_caps` `[B]`                                                                                             |
+| Scenario Link                                        | **5 characters, now named**: Smart Falcon `1046`, Agnes Tachyon `1032`, Silence Suzuka `1002`, Mihono Bourbon `1026`, Light Hello `9008`                                                                                                                                                                                                     | `scenarios.json` `[B]`, corroborated by GameTora `[B]` and Game8 `[A]`                                                         |
+| Light Hello's status                                 | An **NPC**, "a new original NPC introduced in the story of Grand Live", and her `9008` id sits in the same band as the trainer NPC Aoi Kiryuin `9004`. She carries two `[Global]` support cards: `10083` `[Event Producer]` R and `30052` `[From the Ground Up]` SSR, both `release_en` 2026-07-22, both type `friend`, printed as **Pal**   | GameTora `[B]` + the committed `characters.c6676539.json` and `support-cards.88dea522.json` exports `[B]` + notice 899 `[S]`   |
+| Visual evidence                                      | **0 frames.** Still the largest gap in this file                                                                                                                                                                                                                                                                                             | `docs/research-scratch/DESIGN-CORPUS.md`, SCREENSHOT-MANIFEST source                                                           |
 
 ⚠️ **The stub's own correction, stated so it is not silently improved.** This file's gap list used to record "the
 five identities are not recorded anywhere in this repository". That was false when it was written: the five names
@@ -102,31 +102,31 @@ disagree on the language of the title, and **neither column is a measured `[Glob
 figures are printed as a sequence of numbers per Song; which type each figure belongs to is not recoverable from
 either page's text layer, so no figure below names a type.
 
-| Availability | Game8 `[A]`, English | GameTora `[B]`, romaji JP | Effect pair, both pages | Cost figures as printed |
-|---|---|---|---|---|
-| From the start | Believe in Miracles! | Kiseki wo Shinjite! | Training Wit Gain +1 / Speciality Rate Up +5 | 21, 21 |
-| From the start | Zero Is Where the Center Stands! | Tachiichi zero-ban! Juni wa Ichiban! | Training Speed Gain +1 / Support Event Chance Up +1 | 21, 21 |
-| From the start | Getaway! Fallin' Love | Nigekiri! Fallin' Love | Training Guts Gain +1 / Support Event Chance Up +1 | 21, 21 |
-| From the start | Go This Way | Go This Way | Training Power Gain +1 / Support Event Chance Up +1 | 21, 21 |
-| From the start | Ring Ring Diary | Ring Ring Diary | Training Stamina Gain +1 / Support Event Chance Up +1 | 21, 21 |
-| From the start | Full Speed Ahead! Umadol Power☆ | Zensoku! Zenshin! Umadol Power☆ | Speed +22 / Friendship Bonus +5% | 32, 12 |
-| From the start | Here Comes Our Time | Seishun ga Matteru | Power +22 / Friendship Bonus +5% | 32, 12 |
-| From the start | Run n' Run! | RUN×RUN! | Skill Points +22 / Friendship Bonus +5% | 14, 16, 14 |
-| After 4 turns | Make Debut! | Make debut! | All of the resource +10 / Speciality Rate Up +5 | automatic |
-| After the 1st live | Hey, Guess What! | A・NO・NE | Training Guts Gain +2 / Speciality Rate Up +5 | 42, 21 |
-| After the 1st live | Our Blue Bird Days | Bokura no Bluebird Days | Training Speed Gain +2 / Speciality Rate Up +5 | 21, 42 |
-| After the 1st live | Run for Our Dream! | Yume wo Kakeru! | Training Skill Point Bonus +2 / Speciality Rate Up +5 | 21, 21 |
-| After the 2nd live | Grow Up and Shine! | Grow Up, Shine! | Training Skill Point Bonus +3 / Support Event Chance Up +1 | 21, 21, 21 |
-| After the 2nd live | Hoppity Sunny Days ♪ | Pyoitto ♪ Hallelujah! | Training Stamina Gain +2 / Speciality Rate Up +5 | 42, 21 |
-| After the 2nd live | Seven Colors Scenery | Nanairo no Keshiki | Training Power Gain +2 / Speciality Rate Up +5 | 21, 42 |
-| After the 2nd live | Sunbeam Cheer | Komorebi no Yell | Training Wit Gain +2 / Support Event Chance Up +1 | 42, 21 |
-| After the 3rd live | Dream Sky | Yumezora | Wit +22 / Friendship Bonus +5% | 22, 22 |
-| After the 3rd live | Present March ♪ | PRESENT MARCH♪ | Power +22 / Friendship Bonus +5% | 22, 22 |
-| After the 3rd live | Precious Treasure Box | Daisuki no Takarabako | Speed +26 / Friendship Bonus +10% | 42, 26 |
-| After the 3rd live | The World's at Our Whim | Sekai wa Bokura no Iinari Sa | Stamina +22 / Friendship Bonus +5% | 32, 12 |
-| After the 3rd live | Sky-Blue Spring | Harusora BLUE | Guts +22 / Friendship Bonus +5% | 12, 32 |
-| After the 3rd live | Fanfare for the Future! | Fanfare for Future! | Guts +26 / Friendship Bonus +10% | 26, 42 |
-| Finale | Girls' Legend U | GIRLS' LEGEND U | All stats +10 / Friendship Bonus +10% | not a Lesson; special version at 18+ Songs |
+| Availability         | Game8 `[A]`, English               | GameTora `[B]`, romaji JP              | Effect pair, both pages                                      | Cost figures as printed                      |
+| -------------------- | ---------------------------------- | -------------------------------------- | ------------------------------------------------------------ | -------------------------------------------- |
+| From the start       | Believe in Miracles!               | Kiseki wo Shinjite!                    | Training Wit Gain +1 / Speciality Rate Up +5                 | 21, 21                                       |
+| From the start       | Zero Is Where the Center Stands!   | Tachiichi zero-ban! Juni wa Ichiban!   | Training Speed Gain +1 / Support Event Chance Up +1          | 21, 21                                       |
+| From the start       | Getaway! Fallin' Love              | Nigekiri! Fallin' Love                 | Training Guts Gain +1 / Support Event Chance Up +1           | 21, 21                                       |
+| From the start       | Go This Way                        | Go This Way                            | Training Power Gain +1 / Support Event Chance Up +1          | 21, 21                                       |
+| From the start       | Ring Ring Diary                    | Ring Ring Diary                        | Training Stamina Gain +1 / Support Event Chance Up +1        | 21, 21                                       |
+| From the start       | Full Speed Ahead! Umadol Power☆    | Zensoku! Zenshin! Umadol Power☆        | Speed +22 / Friendship Bonus +5%                             | 32, 12                                       |
+| From the start       | Here Comes Our Time                | Seishun ga Matteru                     | Power +22 / Friendship Bonus +5%                             | 32, 12                                       |
+| From the start       | Run n' Run!                        | RUN×RUN!                               | Skill Points +22 / Friendship Bonus +5%                      | 14, 16, 14                                   |
+| After 4 turns        | Make Debut!                        | Make debut!                            | All of the resource +10 / Speciality Rate Up +5              | automatic                                    |
+| After the 1st live   | Hey, Guess What!                   | A・NO・NE                              | Training Guts Gain +2 / Speciality Rate Up +5                | 42, 21                                       |
+| After the 1st live   | Our Blue Bird Days                 | Bokura no Bluebird Days                | Training Speed Gain +2 / Speciality Rate Up +5               | 21, 42                                       |
+| After the 1st live   | Run for Our Dream!                 | Yume wo Kakeru!                        | Training Skill Point Bonus +2 / Speciality Rate Up +5        | 21, 21                                       |
+| After the 2nd live   | Grow Up and Shine!                 | Grow Up, Shine!                        | Training Skill Point Bonus +3 / Support Event Chance Up +1   | 21, 21, 21                                   |
+| After the 2nd live   | Hoppity Sunny Days ♪               | Pyoitto ♪ Hallelujah!                  | Training Stamina Gain +2 / Speciality Rate Up +5             | 42, 21                                       |
+| After the 2nd live   | Seven Colors Scenery               | Nanairo no Keshiki                     | Training Power Gain +2 / Speciality Rate Up +5               | 21, 42                                       |
+| After the 2nd live   | Sunbeam Cheer                      | Komorebi no Yell                       | Training Wit Gain +2 / Support Event Chance Up +1            | 42, 21                                       |
+| After the 3rd live   | Dream Sky                          | Yumezora                               | Wit +22 / Friendship Bonus +5%                               | 22, 22                                       |
+| After the 3rd live   | Present March ♪                    | PRESENT MARCH♪                         | Power +22 / Friendship Bonus +5%                             | 22, 22                                       |
+| After the 3rd live   | Precious Treasure Box              | Daisuki no Takarabako                  | Speed +26 / Friendship Bonus +10%                            | 42, 26                                       |
+| After the 3rd live   | The World's at Our Whim            | Sekai wa Bokura no Iinari Sa           | Stamina +22 / Friendship Bonus +5%                           | 32, 12                                       |
+| After the 3rd live   | Sky-Blue Spring                    | Harusora BLUE                          | Guts +22 / Friendship Bonus +5%                              | 12, 32                                       |
+| After the 3rd live   | Fanfare for the Future!            | Fanfare for Future!                    | Guts +26 / Friendship Bonus +10%                             | 26, 42                                       |
+| Finale               | Girls' Legend U                    | GIRLS' LEGEND U                        | All stats +10 / Friendship Bonus +10%                        | not a Lesson; special version at 18+ Songs   |
 
 GameTora prints the all-Songs cost as five totals, **252 / 201 / 150 / 275 / 196**, one per resource type, and does
 not print the column labels in text, so the totals are recorded without type attribution.
@@ -142,7 +142,7 @@ Both thresholds are printed by both pages, with different amounts of detail.
   `[Global]` skill export.
 
   | Lyric line | Rare hint | Common fallback |
-  |---|---|---|
+  | --- | --- | --- |
   | "A song with some call-and-response"... | Full Speed! `202281` | Full Tilt `202282` |
   | "Gratitude towards the fans, without whom I would not be running"... | Concentration `200431` | Focus `200432` |
   | "I'm home"... | Trackblazer `200711` | Rosy Outlook `200712` |
@@ -226,15 +226,15 @@ scenario's column from the baseline, and `config/scenarios.php` still turns ever
 **decision under review, not an absence of information**: the mechanics are on file, and none of them has a
 component.
 
-| Widget | Our Grand Concert, today |
-|---|---|
-| Turn chip, trainee and scenario identity, Energy gauge, Mood tier, stat band, timeline | **present** |
-| Resource strip | **baseline only** — turn, trainee, scenario, Energy, Fans |
-| Stat cap stack | **present**, 1600 / 1300 / 1300 / 1500 / 1300 over the 1200 base |
-| Fan readout | **present**, and the gate thresholds are now published (60k / 70k / 120k, dirt-leaning 40k / 60k / 80k), so a "next gate" value is no longer barred by silence. It is still barred by scope until a surface is specified |
-| Race Calendar | **off.** The scenario has character race goals, which is what the panel is for, so this cell is the one the read genuinely unsettles. It is an owner decision, not a fact to flip |
-| Grade Point meter, Team Rank gauge, Spirit Burst roster, Shop, epithets, Rival marker, Race Fatigue chip | **off, and correctly so.** None exists here |
-| A resource chip, a Hype gauge or a live marker | **not built, and not to be built from this file.** No component, no client string, and the tests that hold the baseline strip for this scenario (`ResourceStripTest`, `RaceCalendarTest`, `GradePointMeterTest`, `GuidedStepScenarioVariationTest`, `GoalPanelsOnRunDetailTest`) assert the absence |
+| Widget                                                                                                     | Our Grand Concert, today                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Turn chip, trainee and scenario identity, Energy gauge, Mood tier, stat band, timeline                     | **present**                                                                                                                                                                                                                                                                                           |
+| Resource strip                                                                                             | **baseline only** — turn, trainee, scenario, Energy, Fans                                                                                                                                                                                                                                             |
+| Stat cap stack                                                                                             | **present**, 1600 / 1300 / 1300 / 1500 / 1300 over the 1200 base                                                                                                                                                                                                                                      |
+| Fan readout                                                                                                | **present**, and the gate thresholds are now published (60k / 70k / 120k, dirt-leaning 40k / 60k / 80k), so a "next gate" value is no longer barred by silence. It is still barred by scope until a surface is specified                                                                              |
+| Race Calendar                                                                                              | **off.** The scenario has character race goals, which is what the panel is for, so this cell is the one the read genuinely unsettles. It is an owner decision, not a fact to flip                                                                                                                     |
+| Grade Point meter, Team Rank gauge, Spirit Burst roster, Shop, epithets, Rival marker, Race Fatigue chip   | **off, and correctly so.** None exists here                                                                                                                                                                                                                                                           |
+| A resource chip, a Hype gauge or a live marker                                                             | **not built, and not to be built from this file.** No component, no client string, and the tests that hold the baseline strip for this scenario (`ResourceStripTest`, `RaceCalendarTest`, `GradePointMeterTest`, `GuidedStepScenarioVariationTest`, `GoalPanelsOnRunDetailTest`) assert the absence   |
 
 **One consequence the owner has to settle, recorded rather than decided here.** D-241 and gate G-41 name this
 scenario's column as the acceptance case for "an undescribed scenario renders as baseline plus known caps". The

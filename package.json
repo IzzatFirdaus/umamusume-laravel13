@@ -6,9 +6,11 @@
         "build": "vite build",
         "dev": "vite",
         "typecheck": "tsc --noEmit",
+        "test:a11y": "playwright test accessibility.spec.ts",
         "test:browser": "playwright test"
     },
     "devDependencies": {
+        "@axe-core/playwright": "^4.13.0",
         "@playwright/test": "^1.63.0",
         "@tailwindcss/vite": "^4.0.0",
         "axios": "^1.11.0",

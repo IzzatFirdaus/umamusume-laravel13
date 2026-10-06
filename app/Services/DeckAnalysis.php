@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\SupportCard;
+use Illuminate\Support\Collection;
+
 /**
  * The six deck-analysis categories, computed only from the anchors the source states.
  *
@@ -76,6 +79,29 @@ class DeckAnalysis
      * @var list<int>
      */
     public const UNCATEGORISED = [20, 21, 22, 23, 24, 29, 33, 41, 9991];
+
+    /**
+     * The six cards as `build()` reads them, at the anchors `SupportCardEffects::atCap()` resolves.
+     *
+     * One owner for the mapping, because two surfaces now compose the same analysis: the wizard's deck
+     * step and Preflight. A second copy would let the two disagree about what a deck's effects are while
+     * both printing "the analysis".
+     *
+     * @param  Collection<int, SupportCard>  $cards
+     * @return list<CardInput>
+     */
+    public static function inputFor(Collection $cards): array
+    {
+        $dictionary = SupportCardEffects::dictionary();
+
+        return $cards
+            ->map(static fn (SupportCard $card): array => [
+                'card_name' => $card->displayName(),
+                'effects' => SupportCardEffects::atCap($card, $dictionary),
+            ])
+            ->values()
+            ->all();
+    }
 
     /**
      * The deck summary for the six cards equipped, by category.

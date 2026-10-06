@@ -2,14 +2,14 @@
 
 Current version: `0.1.0`, pre-release. Not yet tagged.
 
-| Field | Value | Measured |
-|---|---|---|
-| Version | `0.1.0` | decision recorded in `docs/adr/0019-semver-label-tag-and-release-branch.md` |
-| Pre-release | yes | GitHub Release flag, not a semver hyphen identifier |
-| Git tags | none, local or on `origin` | `git tag`, `git ls-remote --tags origin` |
-| Release commit | not fixed | see Release state below |
-| Framework | `laravel/framework` 13.32.0 | `composer.lock`, constraint `^13.0` |
-| PHP | 8.5.8 | runtime, against `require.php: ^8.3` |
+| Field            | Value                         | Measured                                                                      |
+| ---------------- | ----------------------------- | ----------------------------------------------------------------------------- |
+| Version          | `0.1.0`                       | decision recorded in `docs/adr/0019-semver-label-tag-and-release-branch.md`   |
+| Pre-release      | yes                           | GitHub Release flag, not a semver hyphen identifier                           |
+| Git tags         | none, local or on `origin`    | `git tag`, `git ls-remote --tags origin`                                      |
+| Release commit   | not fixed                     | see Release state below                                                       |
+| Framework        | `laravel/framework` 13.32.0   | `composer.lock`, constraint `^13.0`                                           |
+| PHP              | 8.5.8                         | runtime, against `require.php: ^8.3`                                          |
 
 ## Why 0.y.z
 

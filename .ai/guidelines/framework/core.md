@@ -11,12 +11,16 @@ use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
-    public function index(): JsonResponse
-    {
-        return response()->json([
-            'data' => User::select(['id', 'name', 'email'])->get(),
-        ]);
-    }
+
+```text
+public function index(): JsonResponse
+{
+    return response()->json([
+        'data' => User::select(['id', 'name', 'email'])->get(),
+    ]);
+}
+```
+
 }
 </code-snippet>
 

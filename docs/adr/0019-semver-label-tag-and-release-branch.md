@@ -9,13 +9,13 @@ await that ruling. Nothing was tagged and nothing was published while this was w
 
 The repository has no version of its own. Measured at `fc64bc2` on 2026-10-04:
 
-| Instrument | Result |
-|---|---|
-| `composer.json` `version` | absent; `name` is still the skeleton default `laravel/laravel` |
-| Git tags, local and on `origin` | zero (`git tag` empty, `git ls-remote --tags origin` empty) |
-| `VERSION`, `CHANGELOG.md` at root | neither exists |
-| Commits | 524, spanning `2026-09-27T01:45:31+08:00` to `2026-10-04T11:42:22+08:00` |
-| `AGENTS.md` §14 | "There is no changelog or version file to bump." |
+| Instrument                          | Result                                                                     |
+| ----------------------------------- | -------------------------------------------------------------------------- |
+| `composer.json` `version`           | absent; `name` is still the skeleton default `laravel/laravel`             |
+| Git tags, local and on `origin`     | zero (`git tag` empty, `git ls-remote --tags origin` empty)                |
+| `VERSION`, `CHANGELOG.md` at root   | neither exists                                                             |
+| Commits                             | 524, spanning `2026-09-27T01:45:31+08:00` to `2026-10-04T11:42:22+08:00`   |
+| `AGENTS.md` §14                     | "There is no changelog or version file to bump."                           |
 
 Under Semantic Versioning 2.0.0, item 5 reserves `0.y.z` for initial development where anything may
 change and the public API should not be considered stable, and item 6 makes `1.0.0` the release that

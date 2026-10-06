@@ -325,6 +325,23 @@ class TrainingRun extends Model
      */
     public function stripValues(): array
     {
+        // The relation is read rather than re-queried when the caller already loaded it, which both hot
+        // screens do (`DashboardController::activeCareer()` and `TrainingRunController::show()` both list
+        // `turnEntries` in their eager load). The two queries this used to issue unconditionally — one for
+        // the count, one for the last turn — are the N+1 shape `ARCHITECTURE-ESSENTIALS.md` §6 tells the
+        // codebase to load against.
+        if ($this->relationLoaded('turnEntries')) {
+            // `sortByDesc`, not `last()`: the loaded collection's order is the relation's own, and an
+            // assumption about it is exactly the kind of thing that silently reports a stale Energy.
+            $latest = $this->turnEntries->sortByDesc('turn')->first();
+
+            return [
+                'turn' => $this->turnEntries->count(),
+                'energy' => $latest?->energy,
+                'fans' => $latest?->fans,
+            ];
+        }
+
         // `reorder`, not `latest`: the relation already carries an ascending `turn`
         // order, and appending `latest` yields `turn asc, turn desc`, which puts the
         // *first* turn first and silently reports a stale Energy and Fans.

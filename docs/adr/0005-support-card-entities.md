@@ -39,11 +39,11 @@ abandoned promise, never built anywhere, with repo #4's support-card component l
 Two of the three requested entities sit on opposite sides of that line, and the split is the useful
 thing this ADR contributes:
 
-| Entity | What it actually is | Fetchable? | PRD citation today |
-|---|---|---|---|
-| `SupportCard` | published reference data about the game | yes, from the same export `ADR-0004` already ingests | none. Closest relative is FR-B, which is scoped to the **Umamusume catalogue**, not to support cards |
-| `UserSupportCard` | the Trainer's own collection: level reached, breaks done, perk level | **no** — it is one player's account state | none, and this is precisely the tracker feature §6.9 cut |
-| `DeckSlot` | a Trainer's deck for a run | no | none. `training_runs` has no deck story in §3 or §4 |
+| Entity              | What it actually is                                                    | Fetchable?                                             | PRD citation today                                                                                     |
+| ------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `SupportCard`       | published reference data about the game                                | yes, from the same export `ADR-0004` already ingests   | none. Closest relative is FR-B, which is scoped to the **Umamusume catalogue**, not to support cards   |
+| `UserSupportCard`   | the Trainer's own collection: level reached, breaks done, perk level   | **no** — it is one player's account state              | none, and this is precisely the tracker feature §6.9 cut                                               |
+| `DeckSlot`          | a Trainer's deck for a run                                             | no                                                     | none. `training_runs` has no deck story in §3 or §4                                                    |
 
 So `SupportCard` is the same *class* of fact ADR-0004 already admitted (engine-owned reference data with
 provenance, `is_manual` protected, never hand-seeded), while the other two are a new user-facing

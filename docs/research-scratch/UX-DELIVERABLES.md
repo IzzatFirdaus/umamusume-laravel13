@@ -39,7 +39,6 @@ figures are reproduced side by side in the parts below and are for a human to ad
 
 ## Part 1: UMAMUSUME: PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES
 
-
 > **NOT MERGED — TRIAGED 2026-09-27.** This file is retained for reference, not adopted as a source of
 > values. Its numbers are governed by `docs/design-research/CONSTRAINTS.md` **D-283** (a design write-up
 > supplies patterns, never values or copy), and the item-by-item audit is in
@@ -61,12 +60,12 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 ### Naming Conventions
 
-| Convention   | Rule                                                                                             |
-| ------------ | ------------------------------------------------------------------------------------------------ |
-| Component ID | `UM-<SYSTEM>-<NUMBER>` (e.g., `UM-TRN-001`)                                                      |
-| Server tag   | Every component carries `[JP]`, `[Global]`, or `[Both]`                                          |
-| State naming | `default`, `hover`, `active`, `disabled`, `error`, `success`, `loading`                          |
-| Terminology  | Use `[Global]` client strings as primary labels; `[JP]` strings in parentheses where they differ |
+| Convention     | Rule                                                                                               |
+| -------------- | -------------------------------------------------------------------------------------------------- |
+| Component ID   | `UM-<SYSTEM>-<NUMBER>` (e.g., `UM-TRN-001`)                                                        |
+| Server tag     | Every component carries `[JP]`, `[Global]`, or `[Both]`                                            |
+| State naming   | `default`, `hover`, `active`, `disabled`, `error`, `success`, `loading`                            |
+| Terminology    | Use `[Global]` client strings as primary labels; `[JP]` strings in parentheses where they differ   |
 
 ---
 
@@ -85,15 +84,15 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **States:**
 
-| State              | Visual                             | Trigger                                                           |
-| ------------------ | ---------------------------------- | ----------------------------------------------------------------- |
-| `default`          | Neutral border, level badge grey   | Not selected                                                      |
-| `available`        | Colored border matching stat type  | At least one support card present                                 |
-| `friendship-ready` | Rainbow/orange glow border         | A card with bond ≥ 80 is on its matching facility                 |
-| `summer-camp`      | Gold border + "Lv5" forced badge   | During summer camp window (first half July to second half August) |
-| `selected`         | Filled background, elevated shadow | User taps                                                         |
-| `disabled`         | Greyed out, no interaction         | Failure risk at 100% or scenario lock                             |
-| `wit-special`      | Green tint + "+Energy" icon        | Wit tab always shows energy recovery instead of cost              |
+| State                | Visual                               | Trigger                                                             |
+| -------------------- | ------------------------------------ | ------------------------------------------------------------------- |
+| `default`            | Neutral border, level badge grey     | Not selected                                                        |
+| `available`          | Colored border matching stat type    | At least one support card present                                   |
+| `friendship-ready`   | Rainbow/orange glow border           | A card with bond ≥ 80 is on its matching facility                   |
+| `summer-camp`        | Gold border + "Lv5" forced badge     | During summer camp window (first half July to second half August)   |
+| `selected`           | Filled background, elevated shadow   | User taps                                                           |
+| `disabled`           | Greyed out, no interaction           | Failure risk at 100% or scenario lock                               |
+| `wit-special`        | Green tint + "+Energy" icon          | Wit tab always shows energy recovery instead of cost                |
 
 **Data Displayed:**
 
@@ -135,14 +134,14 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **States:**
 
-| State                | Condition                             | Display                                                                |
-| -------------------- | ------------------------------------- | ---------------------------------------------------------------------- |
-| `normal`             | Energy > 50                           | Standard layout                                                        |
-| `low-energy-warning` | Energy ≤ 50                           | Yellow warning banner: "Failure risk elevated"                         |
-| `critical-energy`    | Energy < 17                           | Red warning banner: "High failure risk"                                |
-| `friendship-active`  | ≥1 card at bond ≥ 80 on matching tile | Rainbow highlight on qualifying cards; multiplier shown: e.g., "×1.25" |
-| `multi-friendship`   | ≥2 cards qualifying                   | Show multiplicative formula: "×1.25 × ×1.30 = ×1.625"                  |
-| `participant-bonus`  | Multiple cards on tile                | Show "+5% per additional participant" line                             |
+| State                  | Condition                               | Display                                                                  |
+| ---------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
+| `normal`               | Energy > 50                             | Standard layout                                                          |
+| `low-energy-warning`   | Energy ≤ 50                             | Yellow warning banner: "Failure risk elevated"                           |
+| `critical-energy`      | Energy < 17                             | Red warning banner: "High failure risk"                                  |
+| `friendship-active`    | ≥1 card at bond ≥ 80 on matching tile   | Rainbow highlight on qualifying cards; multiplier shown: e.g., "×1.25"   |
+| `multi-friendship`     | ≥2 cards qualifying                     | Show multiplicative formula: "×1.25 × ×1.30 = ×1.625"                    |
+| `participant-bonus`    | Multiple cards on tile                  | Show "+5% per additional participant" line                               |
 
 **Data Displayed:**
 
@@ -200,11 +199,11 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Failure Types (mutually exclusive per failure):**
 
-| Type        | Icon | Description            | Stat Impact                                                         |
-| ----------- | ---- | ---------------------- | ------------------------------------------------------------------- |
-| Energy Loss | ⚡↓   | "Lost Energy"          | Additional Energy drain beyond the training cost                    |
-| Mood Drop   | 😞   | "Motivation decreased" | Mood drops one state (e.g., Good → Normal)                          |
-| Injury      | 🩹   | "Sustained an injury"  | One random stat reduced by −5 to −10; negative status label applied |
+| Type          | Icon   | Description              | Stat Impact                                                           |
+| ------------- | ------ | ------------------------ | --------------------------------------------------------------------- |
+| Energy Loss   | ⚡↓    | "Lost Energy"            | Additional Energy drain beyond the training cost                      |
+| Mood Drop     | 😞     | "Motivation decreased"   | Mood drops one state (e.g., Good → Normal)                            |
+| Injury        | 🩹     | "Sustained an injury"    | One random stat reduced by −5 to −10; negative status label applied   |
 
 **Edge Cases:**
 
@@ -231,13 +230,13 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **States:**
 
-| State      | Condition            | Visual                              |
-| ---------- | -------------------- | ----------------------------------- |
-| `healthy`  | > 50                 | Green fill                          |
-| `caution`  | 26–50                | Yellow fill, subtle pulse animation |
-| `critical` | ≤ 25                 | Red fill, rapid pulse, warning icon |
-| `full`     | = max                | Solid green, "MAX" label            |
-| `boosted`  | Max raised above 100 | Extended bar segment in blue        |
+| State        | Condition              | Visual                                |
+| ------------ | ---------------------- | ------------------------------------- |
+| `healthy`    | > 50                   | Green fill                            |
+| `caution`    | 26–50                  | Yellow fill, subtle pulse animation   |
+| `critical`   | ≤ 25                   | Red fill, rapid pulse, warning icon   |
+| `full`       | = max                  | Solid green, "MAX" label              |
+| `boosted`    | Max raised above 100   | Extended bar segment in blue          |
 
 **Interactions:**
 
@@ -266,13 +265,13 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Five States:**
 
-| State (JP) | State (EN)     | Training Effect | Pre-Race Effect | Icon                    |
-| ---------- | -------------- | --------------- | --------------- | ----------------------- |
-| 絶好調        | Peak Condition | +20%            | +10%            | Radiant smile, sparkle  |
-| 好調         | Good           | +10%            | +5%             | Smile                   |
-| 普通         | Normal         | 0%              | 0%              | Neutral                 |
-| 不調         | Poor           | −10%            | −2%             | Frown                   |
-| 絶不調        | Worst          | −20%            | −5%             | Dark cloud, heavy frown |
+| State (JP)   | State (EN)       | Training Effect   | Pre-Race Effect   | Icon                      |
+| ------------ | ---------------- | ----------------- | ----------------- | ------------------------- |
+| 絶好調       | Peak Condition   | +20%              | +10%              | Radiant smile, sparkle    |
+| 好調         | Good             | +10%              | +5%               | Smile                     |
+| 普通         | Normal           | 0%                | 0%                | Neutral                   |
+| 不調         | Poor             | −10%              | −2%               | Frown                     |
+| 絶不調       | Worst            | −20%              | −5%               | Dark cloud, heavy frown   |
 
 **Interactions:**
 
@@ -323,13 +322,13 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Thresholds:**
 
-| Value  | State                | Visual                              |
-| ------ | -------------------- | ----------------------------------- |
-| 0–19   | Empty                | Grey segments                       |
-| 20–39  | Filling              | Yellow, 1 segment                   |
-| 40–59  | Filling              | Yellow, 2 segments                  |
-| 60–79  | Filling              | Yellow, 3 segments                  |
-| 80–100 | **Friendship Ready** | **Orange, 4 segments, glow effect** |
+| Value    | State                  | Visual                                |
+| -------- | ---------------------- | ------------------------------------- |
+| 0–19     | Empty                  | Grey segments                         |
+| 20–39    | Filling                | Yellow, 1 segment                     |
+| 40–59    | Filling                | Yellow, 2 segments                    |
+| 60–79    | Filling                | Yellow, 3 segments                    |
+| 80–100   | **Friendship Ready**   | **Orange, 4 segments, glow effect**   |
 
 **Mechanics:**
 
@@ -360,12 +359,12 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Phase Breakdown:**
 
-| Phase       | ID  | Sections | Share of Race | What Is Decided                        |
-| ----------- | --- | -------- | ------------- | -------------------------------------- |
-| Opening Leg | 0   | 1–4      | First 1/6     | Gate break, early lead contest         |
-| Middle Leg  | 1   | 5–16     | 1/6 to 2/3    | Position holding, then position battle |
-| Final Leg   | 2   | 17–20    | 2/3 to 5/6    | The "move" (仕掛け) begins                |
-| Last Spurt  | 3   | 21–24    | Last 1/6      | Who holds on                           |
+| Phase         | ID    | Sections   | Share of Race   | What Is Decided                          |
+| ------------- | ----- | ---------- | --------------- | ---------------------------------------- |
+| Opening Leg   | 0     | 1–4        | First 1/6       | Gate break, early lead contest           |
+| Middle Leg    | 1     | 5–16       | 1/6 to 2/3      | Position holding, then position battle   |
+| Final Leg     | 2     | 17–20      | 2/3 to 5/6      | The "move" (仕掛け) begins               |
+| Last Spurt    | 3     | 21–24      | Last 1/6        | Who holds on                             |
 
 **Data Displayed:**
 
@@ -494,15 +493,15 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Data Fields:**
 
-| Field    | Example Values                        | Source                        |
-| -------- | ------------------------------------- | ----------------------------- |
-| Surface  | Turf / Dirt                           | `ground_type` 1 or 2          |
-| Distance | 2,200m (Medium)                       | Course meters + distance_type |
-| Turn     | Right-Handed / Left-Handed / Straight | Track config                  |
-| Season   | Spring / Summer / Autumn / Winter     | `season` 1–4                  |
-| Weather  | Sunny / Cloudy / Rain / Snow          | `weather` 1–4                 |
-| Ground   | Firm / Good / Soft / Heavy            | `ground_condition` 1–4        |
-| Time     | Day / Night                           | `time` value                  |
+| Field      | Example Values                          | Source                          |
+| ---------- | --------------------------------------- | ------------------------------- |
+| Surface    | Turf / Dirt                             | `ground_type` 1 or 2            |
+| Distance   | 2,200m (Medium)                         | Course meters + distance_type   |
+| Turn       | Right-Handed / Left-Handed / Straight   | Track config                    |
+| Season     | Spring / Summer / Autumn / Winter       | `season` 1–4                    |
+| Weather    | Sunny / Cloudy / Rain / Snow            | `weather` 1–4                   |
+| Ground     | Firm / Good / Soft / Heavy              | `ground_condition` 1–4          |
+| Time       | Day / Night                             | `time` value                    |
 
 **Mechanical Notes:**
 
@@ -529,12 +528,12 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Four Strategies:**
 
-| ID  | JP  | Global Label | Description                         | Skill Pool |
-| --- | --- | ------------ | ----------------------------------- | ---------- |
-| 1   | 逃げ  | Front Runner | Leads from start; phase 0–1 toolkit | 107 skills |
-| 2   | 先行  | Pace Chaser  | Mid-race positioning; largest pool  | 220 skills |
-| 3   | 差し  | Late Surger  | Late-race move from final corner    | 166 skills |
-| 4   | 追込  | End Closer   | Last spurt closer                   | 115 skills |
+| ID    | JP    | Global Label   | Description                           | Skill Pool   |
+| ----- | ----- | -------------- | ------------------------------------- | ------------ |
+| 1     | 逃げ  | Front Runner   | Leads from start; phase 0–1 toolkit   | 107 skills   |
+| 2     | 先行  | Pace Chaser    | Mid-race positioning; largest pool    | 220 skills   |
+| 3     | 差し  | Late Surger    | Late-race move from final corner      | 166 skills   |
+| 4     | 追込  | End Closer     | Last spurt closer                     | 115 skills   |
 
 **Mechanical Notes:**
 
@@ -569,16 +568,16 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Data Displayed:**
 
-| Field           | Source                                                       |
-| --------------- | ------------------------------------------------------------ |
-| Card name       | `support-cards.json`                                         |
-| Rarity          | R / SR / SSR (export `rarity` 1/2/3)                         |
-| Type            | Speed / Stamina / Power / Guts / Wit / Pal / Group           |
-| Level           | Current level (JP: removed 2025-10-07; Global: still active) |
-| Limit Break     | 0–4 breaks (5 copies for full)                               |
-| Support effects | List of effect IDs with values                               |
-| Hint skills     | Pool of skills this card can hint                            |
-| Event chain     | Number of events in chain                                    |
+| Field             | Source                                                         |
+| ----------------- | -------------------------------------------------------------- |
+| Card name         | `support-cards.json`                                           |
+| Rarity            | R / SR / SSR (export `rarity` 1/2/3)                           |
+| Type              | Speed / Stamina / Power / Guts / Wit / Pal / Group             |
+| Level             | Current level (JP: removed 2025-10-07; Global: still active)   |
+| Limit Break       | 0–4 breaks (5 copies for full)                                 |
+| Support effects   | List of effect IDs with values                                 |
+| Hint skills       | Pool of skills this card can hint                              |
+| Event chain       | Number of events in chain                                      |
 
 **Server Differences:**
 
@@ -599,15 +598,15 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Seven Types:**
 
-| Type Key     | JP Label | Global Label | Color  | Count (JP SSR) | Count (Global SSR) |
-| ------------ | -------- | ------------ | ------ | -------------- | ------------------ |
-| speed        | スピード     | Speed        | Red    | 72             | 28                 |
-| stamina      | スタミナ     | Stamina      | Blue   | 55             | 22                 |
-| power        | パワー      | Power        | Orange | 57             | 21                 |
-| guts         | 根性       | Guts         | Yellow | 59             | 20                 |
-| intelligence | 賢さ       | Wit          | Green  | 53             | 18                 |
-| friend       | 友人       | Pal          | Pink   | 11             | 4                  |
-| group        | グループ     | Group        | Purple | 5              | 2                  |
+| Type Key       | JP Label   | Global Label   | Color    | Count (JP SSR)   | Count (Global SSR)   |
+| -------------- | ---------- | -------------- | -------- | ---------------- | -------------------- |
+| speed          | スピード   | Speed          | Red      | 72               | 28                   |
+| stamina        | スタミナ   | Stamina        | Blue     | 55               | 22                   |
+| power          | パワー     | Power          | Orange   | 57               | 21                   |
+| guts           | 根性       | Guts           | Yellow   | 59               | 20                   |
+| intelligence   | 賢さ       | Wit            | Green    | 53               | 18                   |
+| friend         | 友人       | Pal            | Pink     | 11               | 4                    |
+| group          | グループ   | Group          | Purple   | 5                | 2                    |
 
 **Mechanical Notes:**
 
@@ -818,14 +817,14 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Factor Categories:**
 
-| Category     | JP Name    | Global Name               | Color | Effect                                                     |
-| ------------ | ---------- | ------------------------- | ----- | ---------------------------------------------------------- |
-| Stat         | 青因子        | Blue Spark                | Blue  | One stat +5/+12/+21 at career start (1/2/3 stars)          |
-| Aptitude     | 赤因子        | Pink Spark                | Pink  | Track/distance/strategy: +1 to +4 grades                   |
-| Unique Skill | 緑因子 / 固有因子 | Green Spark               | Green | Carries character's unique skill as 1–3 hint levels        |
-| Skill        | 白因子（スキル因子） | White Spark (skill)       | White | Mid-run hint +1 to +5, or small stat top-up                |
-| Competition  | 白因子（レース因子） | White Spark (competition) | White | From G1 wins; 3/6/9 stat per event                         |
-| Scenario     | シナリオ因子     | Scenario Spark            | Gold  | From clearing scenario's final conditions; ~10–30 per stat |
+| Category       | JP Name              | Global Name                 | Color   | Effect                                                       |
+| -------------- | -------------------- | --------------------------- | ------- | ------------------------------------------------------------ |
+| Stat           | 青因子               | Blue Spark                  | Blue    | One stat +5/+12/+21 at career start (1/2/3 stars)            |
+| Aptitude       | 赤因子               | Pink Spark                  | Pink    | Track/distance/strategy: +1 to +4 grades                     |
+| Unique Skill   | 緑因子 / 固有因子    | Green Spark                 | Green   | Carries character's unique skill as 1–3 hint levels          |
+| Skill          | 白因子（スキル因子） | White Spark (skill)         | White   | Mid-run hint +1 to +5, or small stat top-up                  |
+| Competition    | 白因子（レース因子） | White Spark (competition)   | White   | From G1 wins; 3/6/9 stat per event                           |
+| Scenario       | シナリオ因子         | Scenario Spark              | Gold    | From clearing scenario's final conditions; ~10–30 per stat   |
 
 **Star Rating Display:**
 
@@ -890,13 +889,13 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Current Scenarios (from `scenarios.json`, 14 rows):**
 
-| Order | JP Title                  | Global Title                        | JP Since   | Global Since |
-| ----- | ------------------------- | ----------------------------------- | ---------- | ------------ |
-| 1     | 新設！URAファイナルズ              | URA Finale                          | 2021-02-24 | 2025-06-26   |
-| 2     | アオハル杯                     | Unity Cup                           | 2021-08-30 | 2025-11-06   |
-| 3     | Make a new track!!        | Trackblazer / Twinkle Star Climax   | 2022-02-24 | 2026-03-12   |
-| 4     | つなげ、照らせ、ひかれ。              | Brighter Together Our Grand Concert | 2022-08-24 | 2026-07-22   |
-| 5–14  | Various JP-only scenarios | No Global release                   | 2023–2026  | N/A          |
+| Order   | JP Title                    | Global Title                          | JP Since     | Global Since   |
+| ------- | --------------------------- | ------------------------------------- | ------------ | -------------- |
+| 1       | 新設！URAファイナルズ       | URA Finale                            | 2021-02-24   | 2025-06-26     |
+| 2       | アオハル杯                  | Unity Cup                             | 2021-08-30   | 2025-11-06     |
+| 3       | Make a new track!!          | Trackblazer / Twinkle Star Climax     | 2022-02-24   | 2026-03-12     |
+| 4       | つなげ、照らせ、ひかれ。    | Brighter Together Our Grand Concert   | 2022-08-24   | 2026-07-22     |
+| 5–14    | Various JP-only scenarios   | No Global release                     | 2023–2026    | N/A            |
 
 **Data Displayed per Scenario:**
 
@@ -906,14 +905,14 @@ This document translates every core and scenario game mechanic of *Umamusume: Pr
 
 **Stat Caps by Scenario:**
 
-| Scenario             | SPD  | STA  | PWR  | GUT  | WIT  |
-| -------------------- | ---- | ---- | ---- | ---- | ---- |
-| URA Finale           | 1400 | 1400 | 1400 | 1400 | 1400 |
-| Unity Cup            | 1300 | 1300 | 1300 | 1300 | 1800 |
-| Trackblazer/Climax   | 1200 | 1900 | 1200 | 1500 | 1200 |
-| Grand Concert        | 1600 | 1300 | 1300 | 1500 | 1300 |
-| Grand Masters (ext.) | 1500 | 1400 | 1500 | 1300 | 1300 |
-| L'Arc (ext.)         | 1600 | 1600 | 1500 | 1500 | 1300 |
+| Scenario               | SPD    | STA    | PWR    | GUT    | WIT    |
+| ---------------------- | ------ | ------ | ------ | ------ | ------ |
+| URA Finale             | 1400   | 1400   | 1400   | 1400   | 1400   |
+| Unity Cup              | 1300   | 1300   | 1300   | 1300   | 1800   |
+| Trackblazer/Climax     | 1200   | 1900   | 1200   | 1500   | 1200   |
+| Grand Concert          | 1600   | 1300   | 1300   | 1500   | 1300   |
+| Grand Masters (ext.)   | 1500   | 1400   | 1500   | 1300   | 1300   |
+| L'Arc (ext.)           | 1600   | 1600   | 1500   | 1500   | 1300   |
 
 Hard ceiling across all scenarios: 2000 per stat (from `scenarios.json`).
 
@@ -1075,21 +1074,21 @@ Hard ceiling across all scenarios: 2000 per stat (from `scenarios.json`).
 
 **Rate Display (standard structure):**
 
-| Rarity   | Rate                            |
-| -------- | ------------------------------- |
-| ★3 / SSR | 3.00% total (featured at 0.75%) |
-| ★2 / SR  | 18.00%                          |
-| ★1 / R   | 79.00%                          |
+| Rarity     | Rate                              |
+| ---------- | --------------------------------- |
+| ★3 / SSR   | 3.00% total (featured at 0.75%)   |
+| ★2 / SR    | 18.00%                            |
+| ★1 / R     | 79.00%                            |
 
 **Exchange / Spark System:**
 
-| Item              | JP                                | Global                                                 |
-| ----------------- | --------------------------------- | ------------------------------------------------------ |
-| Currency name     | 育成ウマ娘交換Pt / サポートカード交換Pt           | Trainee Exchange Points / Support Card Exchange Points |
-| Cost for featured | 200 Pt                            | 200 Points                                             |
-| Earn rate         | 1 Pt per pull                     | 1 Point per roll                                       |
-| Carryover         | Never                             | Never                                                  |
-| Expired balance   | Auto-converted to クローバー (Clovers) | Auto-converted to Clovers                              |
+| Item                | JP                                      | Global                                                   |
+| ------------------- | --------------------------------------- | -------------------------------------------------------- |
+| Currency name       | 育成ウマ娘交換Pt / サポートカード交換Pt | Trainee Exchange Points / Support Card Exchange Points   |
+| Cost for featured   | 200 Pt                                  | 200 Points                                               |
+| Earn rate           | 1 Pt per pull                           | 1 Point per roll                                         |
+| Carryover           | Never                                   | Never                                                    |
+| Expired balance     | Auto-converted to クローバー (Clovers)  | Auto-converted to Clovers                                |
 
 **Interactions:**
 
@@ -1141,17 +1140,17 @@ Hard ceiling across all scenarios: 2000 per stat (from `scenarios.json`).
 
 **Critical Mappings:**
 
-| Concept                  | JP                                           | Global                                       |
-| ------------------------ | -------------------------------------------- | -------------------------------------------- |
-| Gacha system             | ガチャ                                          | Scouts                                       |
-| Pull currency            | ジュエル                                         | Carats                                       |
-| Friend-type card         | 友人                                           | Pal                                          |
-| Inheritance factor       | 因子                                           | Spark                                        |
-| Finished character       | 殿堂入りウマ娘                                      | Veteran Umamusume                            |
-| Character being trained  | 育成ウマ娘                                        | Trainee Umamusume                            |
-| Team race mode           | チーム競技場                                       | Team Trials                                  |
-| Champions Meeting naming | Category tag (SPRINT/MILE/CLASSIC/LONG/DIRT) | Zodiac cup (Scorpio Cup, etc.)               |
-| Idle training            | 自主トレ育成                                       | Independent Training (unconfirmed on Global) |
+| Concept                    | JP                                             | Global                                         |
+| -------------------------- | ---------------------------------------------- | ---------------------------------------------- |
+| Gacha system               | ガチャ                                         | Scouts                                         |
+| Pull currency              | ジュエル                                       | Carats                                         |
+| Friend-type card           | 友人                                           | Pal                                            |
+| Inheritance factor         | 因子                                           | Spark                                          |
+| Finished character         | 殿堂入りウマ娘                                 | Veteran Umamusume                              |
+| Character being trained    | 育成ウマ娘                                     | Trainee Umamusume                              |
+| Team race mode             | チーム競技場                                   | Team Trials                                    |
+| Champions Meeting naming   | Category tag (SPRINT/MILE/CLASSIC/LONG/DIRT)   | Zodiac cup (Scorpio Cup, etc.)                 |
+| Idle training              | 自主トレ育成                                   | Independent Training (unconfirmed on Global)   |
 
 **Design Rule:** Never mix server terminology in a single UI. All labels must be resolved to the active server's client strings before rendering.
 
@@ -1161,7 +1160,7 @@ Hard ceiling across all scenarios: 2000 per stat (from `scenarios.json`).
 
 ### Flow 1: Pre-Career Setup (New Run)
 
-```
+```text
 START: User taps "Career" / "Training" from main menu
 │
 ├─ STEP 1: Scenario Selection (UM-SCN-001)
@@ -1213,13 +1212,13 @@ START: User taps "Career" / "Training" from main menu
 │   └─ CONFIRM: Run begins → Flow 2
 │
 END: Career run initialized
-```
+```text
 
 ---
 
 ### Flow 2: Core Training Loop (Single Turn)
 
-```
+```text
 START: Training turn begins
 │
 ├─ STEP 1: Turn Context Display
@@ -1285,13 +1284,13 @@ START: Training turn begins
 │       └─ → Next turn
 │
 END: Turn resolved, calendar advances
-```
+```text
 
 ---
 
 ### Flow 3: Friendship (Rainbow) Training Trigger
 
-```
+```text
 START: User selects a training facility
 │
 ├─ CHECK 1: Is any support card on this tile at bond ≥ 80?
@@ -1325,13 +1324,13 @@ START: User selects a training facility
 │   └─ Display: "+X Energy recovered" instead of cost
 │
 └─ RESOLVE: Training executes with amplified gains → UM-TRN-003
-```
+```text
 
 ---
 
 ### Flow 4: Race Entry and Resolution
 
-```
+```text
 START: User selects "Race" from action menu
 │
 ├─ STEP 1: Race Selection Screen
@@ -1380,13 +1379,13 @@ START: User selects "Race" from action menu
 │   └─ "Continue" → returns to training loop
 │
 END: Race resolved
-```
+```text
 
 ---
 
 ### Flow 5: Skill Acquisition
 
-```
+```text
 START: User opens Skill Shop (UM-SKL-001)
 │
 ├─ STEP 1: Browse Skills
@@ -1427,13 +1426,13 @@ START: User opens Skill Shop (UM-SKL-001)
 │   └─ Can share set by ID
 │
 END: Skill acquired or browsing continues
-```
+```text
 
 ---
 
 ### Flow 6: Inheritance / Factor Farming Loop
 
-```
+```text
 START: User completes a career run
 │
 ├─ STEP 1: Factor Generation
@@ -1474,13 +1473,13 @@ START: User completes a career run
 │   └─ Repeat until desired factor set achieved
 │
 END: Factors banked for future runs
-```
+```text
 
 ---
 
 ### Flow 7: Summer Camp Window
 
-```
+```text
 START: Calendar reaches July (Classic or Senior year)
 │
 ├─ STEP 1: Summer Camp Activates
@@ -1507,13 +1506,13 @@ START: Calendar reaches July (Classic or Senior year)
 │   └─ Normal training resumes
 │
 END: Summer camp window closed
-```
+```text
 
 ---
 
 ### Flow 8: Champions Meeting
 
-```
+```text
 START: Champions Meeting event window opens
 │
 ├─ STEP 1: League Selection (3–4 days before Round 1)
@@ -1558,13 +1557,13 @@ START: Champions Meeting event window opens
 │   └─ [Global] daily missions pay "<Cup> Entry Tickets" ×2
 │
 END: Champions Meeting edition closed
-```
+```text
 
 ---
 
 ### Flow 9: Gacha / Scout Pull
 
-```
+```text
 START: User navigates to Scout/Gacha screen
 │
 ├─ STEP 1: Banner Selection
@@ -1598,7 +1597,7 @@ START: User navigates to Scout/Gacha screen
 │   └─ "Pull Again" / "Go to Deck" options
 │
 END: Pull resolved
-```
+```text
 
 ---
 
@@ -1606,7 +1605,7 @@ END: Pull resolved
 
 #### 10A: Unity Cup — Team Race Cycle
 
-```
+```text
 START: Every 6 months of career
 │
 ├─ STEP 1: Team Formation
@@ -1634,11 +1633,11 @@ START: Every 6 months of career
 │   └─ After 4 team races: Unity Cup Finals vs Team Zenith
 │
 END: Team race cycle complete
-```
+```text
 
 #### 10B: Trackblazer — Special Shop Economy
 
-```
+```text
 START: After Debut Race
 │
 ├─ STEP 1: Special Shop Unlocks
@@ -1679,11 +1678,11 @@ START: After Debut Race
 │   └─ Save ~150 coins for final shop
 │
 END: Trackblazer run complete
-```
+```text
 
 #### 10C: Grand Masters — Three Goddesses System
 
-```
+```text
 START: Turn 3 of Grand Masters scenario
 │
 ├─ STEP 1: Knowledge Fragment Collection
@@ -1714,7 +1713,7 @@ START: Turn 3 of Grand Masters scenario
 │       └─ Activation: ALL cards trigger Friendship Training regardless of bond/type/facility
 │
 END: Goddess activated, bonuses applied
-```
+```text
 
 ---
 
@@ -1740,13 +1739,13 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 **Issues identified:**
 
-| Issue                                                                                                 | Severity | Evidence                                                                                        |
-| ----------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------- |
-| Training failure probability is not shown as a percentage; only implied by energy level               | 2        | Game8 states "failure risk changes character" at 50 Energy but no exact percentage is displayed |
-| Skill activation rate (Wit-gated) is never quantified to the user                                     | 2        | Wit governs "skill activation rate" per Game8 (2026-09-24) but no percentage is shown           |
-| Compatibility grades (△/○/◎) between ancestors are shown but the underlying numerical value is hidden | 1        | User cannot see exact compatibility score, only the grade                                       |
-| Whether Wit training can fail is unresolved even across sources                                       | 2        | Conflict Log row 2: GameWith lists Wit failure; Game8 implies exemption. No in-game clarity     |
-| Scenario stat caps are shown in scenario selection but not during the run itself                      | 1        | User must exit the run to check which cap applies                                               |
+| Issue                                                                                                   | Severity   | Evidence                                                                                          |
+| ------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| Training failure probability is not shown as a percentage; only implied by energy level                 | 2          | Game8 states "failure risk changes character" at 50 Energy but no exact percentage is displayed   |
+| Skill activation rate (Wit-gated) is never quantified to the user                                       | 2          | Wit governs "skill activation rate" per Game8 (2026-09-24) but no percentage is shown             |
+| Compatibility grades (△/○/◎) between ancestors are shown but the underlying numerical value is hidden   | 1          | User cannot see exact compatibility score, only the grade                                         |
+| Whether Wit training can fail is unresolved even across sources                                         | 2          | Conflict Log row 2: GameWith lists Wit failure; Game8 implies exemption. No in-game clarity       |
+| Scenario stat caps are shown in scenario selection but not during the run itself                        | 1          | User must exit the run to check which cap applies                                                 |
 
 **Recommendations:**
 
@@ -1771,14 +1770,14 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 **Issues identified:**
 
-| Issue                                                                                                    | Severity | Evidence                                                                                                                                                                 |
-| -------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Server terminology divergence creates confusion                                                          | 3        | "Scouts" vs "ガチャ", "Pal" vs "友人", "Veteran Umamusume" vs "殿堂入り", "Spark" vs "因子" — same concepts, different words across servers                                         |
-| Champions Meeting naming is completely different between servers                                         | 3        | JP uses category tags (SPRINT/MILE/CLASSIC/LONG/DIRT); Global uses zodiac cups (Scorpio Cup). These are NOT equivalent series; Global runs the series JP retired in 2023 |
-| "Wit" vs "Wisdom" vs "Intelligence" inconsistency                                                        | 2        | Export key is `intelligence`; some client strings say "Wisdom Bonus"; player-facing text uses "Wit" (Conflict Log row 4)                                                 |
-| The fifth stat's display name varies even within Global assets                                           | 2        | Conflict Log row 4: local effect strings alternate between "Wisdom Bonus" and "Intelligence Limit Up"                                                                    |
-| "Trackblazer" vs "Twinkle Star Climax" naming conflict                                                   | 2        | Export says "Trackblazer"; Global mission text says "Twinkle Star Climax"; no official title confirmed (Conflict Log row 31)                                             |
-| Running style labels: "Runner/Leader/Betweener/Chaser" circulate in community but are NOT client strings | 2        | Client strings are "Front Runner/Pace Chaser/Late Surger/End Closer"; community labels appear nowhere in client text                                                     |
+| Issue                                                                                                      | Severity   | Evidence                                                                                                                                                                   |
+| ---------------------------------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Server terminology divergence creates confusion                                                            | 3          | "Scouts" vs "ガチャ", "Pal" vs "友人", "Veteran Umamusume" vs "殿堂入り", "Spark" vs "因子" — same concepts, different words across servers                                |
+| Champions Meeting naming is completely different between servers                                           | 3          | JP uses category tags (SPRINT/MILE/CLASSIC/LONG/DIRT); Global uses zodiac cups (Scorpio Cup). These are NOT equivalent series; Global runs the series JP retired in 2023   |
+| "Wit" vs "Wisdom" vs "Intelligence" inconsistency                                                          | 2          | Export key is `intelligence`; some client strings say "Wisdom Bonus"; player-facing text uses "Wit" (Conflict Log row 4)                                                   |
+| The fifth stat's display name varies even within Global assets                                             | 2          | Conflict Log row 4: local effect strings alternate between "Wisdom Bonus" and "Intelligence Limit Up"                                                                      |
+| "Trackblazer" vs "Twinkle Star Climax" naming conflict                                                     | 2          | Export says "Trackblazer"; Global mission text says "Twinkle Star Climax"; no official title confirmed (Conflict Log row 31)                                               |
+| Running style labels: "Runner/Leader/Betweener/Chaser" circulate in community but are NOT client strings   | 2          | Client strings are "Front Runner/Pace Chaser/Late Surger/End Closer"; community labels appear nowhere in client text                                                       |
 
 **Recommendations:**
 
@@ -1804,14 +1803,14 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 **Issues identified:**
 
-| Issue                                                                                                   | Severity | Evidence                                                                                                                         |
-| ------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| No undo after training commit                                                                           | 3        | Once "Train" is tapped and resolved, there is no way to revert the turn. A failure at low Energy permanently applies the penalty |
-| No undo after skill purchase                                                                            | 2        | SP spent on a skill cannot be refunded. User may accidentally buy the wrong skill                                                |
-| No undo after gacha pull                                                                                | 3        | Carats/jewels spent are non-refundable. Exchange points are earned but the pull itself is irreversible                           |
-| Idle training mode (自主トレ育成) cannot be interrupted or manually controlled once started                   | 2        | Kamigame: "You cannot take manual control partway through." The 50-minute run plays out regardless                               |
-| Inheritance factors are rolled randomly; user cannot choose which factors a finished character produces | 2        | "The player does not pick a fixed list" — factors follow final stats, aptitudes, and skills probabilistically                    |
-| Ancestor selection is locked once the run begins                                                        | 1        | No mid-run ancestor swap                                                                                                         |
+| Issue                                                                                                     | Severity   | Evidence                                                                                                                           |
+| --------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| No undo after training commit                                                                             | 3          | Once "Train" is tapped and resolved, there is no way to revert the turn. A failure at low Energy permanently applies the penalty   |
+| No undo after skill purchase                                                                              | 2          | SP spent on a skill cannot be refunded. User may accidentally buy the wrong skill                                                  |
+| No undo after gacha pull                                                                                  | 3          | Carats/jewels spent are non-refundable. Exchange points are earned but the pull itself is irreversible                             |
+| Idle training mode (自主トレ育成) cannot be interrupted or manually controlled once started               | 2          | Kamigame: "You cannot take manual control partway through." The 50-minute run plays out regardless                                 |
+| Inheritance factors are rolled randomly; user cannot choose which factors a finished character produces   | 2          | "The player does not pick a fixed list" — factors follow final stats, aptitudes, and skills probabilistically                      |
+| Ancestor selection is locked once the run begins                                                          | 1          | No mid-run ancestor swap                                                                                                           |
 
 **Recommendations:**
 
@@ -1836,14 +1835,14 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 **Issues identified:**
 
-| Issue                                                                                            | Severity | Evidence                                                                                                                                                                               |
-| ------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Facility leveling rule differs by scenario without clear indication                              | 2        | URA/Trackblazer: levels up every 4 uses. Unity Cup: tied to team rank. Grand Masters: can exceed Lv5 via Goddess buff. User must know which scenario they're in to understand leveling |
-| Support card upgrade model differs by server                                                     | 3        | JP removed card levels and Support Pt on 2025-10-07; Global retains the original model. Same card, different progression systems                                                       |
-| Champions Meeting entry economy differs by server                                                | 2        | JP: 3 free tickets/day from event top, generic Entry Ticket. Global: first daily entry free, edition-scoped tickets ("Scorpio Cup Entry Ticket")                                       |
-| Open League rank ceiling differs by server                                                       | 2        | JP: up to 育成ランク[UC]. Global: up to Career Rank A+. Same bracket name, different ceiling                                                                                                |
-| Hint level cost reduction is documented at ~10% per level but exact percentages are ❌ UNVERIFIED | 1        | Conflict Log row 16: single source (Game8 JP) for the 30% at Lv3 figure                                                                                                                |
-| Distance band boundary at 1400m is contested                                                     | 2        | Export codes 1400m as Mile (distance_type==2); Umamusume Wiki Career Mode lists it as Sprint/Short. Engine disagrees with wiki                                                         |
+| Issue                                                                                              | Severity   | Evidence                                                                                                                                                                                 |
+| -------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Facility leveling rule differs by scenario without clear indication                                | 2          | URA/Trackblazer: levels up every 4 uses. Unity Cup: tied to team rank. Grand Masters: can exceed Lv5 via Goddess buff. User must know which scenario they're in to understand leveling   |
+| Support card upgrade model differs by server                                                       | 3          | JP removed card levels and Support Pt on 2025-10-07; Global retains the original model. Same card, different progression systems                                                         |
+| Champions Meeting entry economy differs by server                                                  | 2          | JP: 3 free tickets/day from event top, generic Entry Ticket. Global: first daily entry free, edition-scoped tickets ("Scorpio Cup Entry Ticket")                                         |
+| Open League rank ceiling differs by server                                                         | 2          | JP: up to 育成ランク[UC]. Global: up to Career Rank A+. Same bracket name, different ceiling                                                                                             |
+| Hint level cost reduction is documented at ~10% per level but exact percentages are ❌ UNVERIFIED  | 1          | Conflict Log row 16: single source (Game8 JP) for the 30% at Lv3 figure                                                                                                                  |
+| Distance band boundary at 1400m is contested                                                       | 2          | Export codes 1400m as Mile (distance_type==2); Umamusume Wiki Career Mode lists it as Sprint/Short. Engine disagrees with wiki                                                           |
 
 **Recommendations:**
 
@@ -1869,13 +1868,13 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 **Issues identified:**
 
-| Issue                                                                  | Severity | Evidence                                                                                                                         |
-| ---------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| No confirmation dialog before training at critically low Energy        | 3        | User can tap "Train" at 5 Energy and suffer a failure penalty without any additional warning beyond the color change             |
-| No confirmation before spending large amounts of SP on a single skill  | 1        | A 340 SP skill (e.g., Arc Line Maestro) can be purchased with a single tap                                                       |
-| No warning when equipping a deck that violates scenario requirements   | 2        | E.g., Unity Cup requires 4+ distinct types for bonus training; no explicit warning if user brings 3 types                        |
-| Gacha exchange points expire silently at banner close                  | 2        | Unspent points below 200 auto-convert to Clovers; no proactive warning before banner closes                                      |
-| Transfer Requests permanently delete the transferred Veteran Umamusume | 3        | "A transferred Veteran Umamusume disappears and cannot be recovered." No confirmation step documented beyond the transfer itself |
+| Issue                                                                    | Severity   | Evidence                                                                                                                           |
+| ------------------------------------------------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| No confirmation dialog before training at critically low Energy          | 3          | User can tap "Train" at 5 Energy and suffer a failure penalty without any additional warning beyond the color change               |
+| No confirmation before spending large amounts of SP on a single skill    | 1          | A 340 SP skill (e.g., Arc Line Maestro) can be purchased with a single tap                                                         |
+| No warning when equipping a deck that violates scenario requirements     | 2          | E.g., Unity Cup requires 4+ distinct types for bonus training; no explicit warning if user brings 3 types                          |
+| Gacha exchange points expire silently at banner close                    | 2          | Unspent points below 200 auto-convert to Clovers; no proactive warning before banner closes                                        |
+| Transfer Requests permanently delete the transferred Veteran Umamusume   | 3          | "A transferred Veteran Umamusume disappears and cannot be recovered." No confirmation step documented beyond the transfer itself   |
 
 **Recommendations:**
 
@@ -1901,13 +1900,13 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 **Issues identified:**
 
-| Issue                                                                                                       | Severity | Evidence                                                                                                     |
-| ----------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| Factor farming requires memorizing optimal stat thresholds                                                  | 2        | User must recall: "Speed > 1100 for 3★ chance" and "Aptitude at A for 100% roll." No in-game reference table |
-| Skill activation conditions are text-heavy and require parsing                                              | 2        | Conditions like `running_style==1&slope==1&accumulatetime>=10` are translated to prose but remain complex    |
-| Compatibility grades require knowledge of what △/○/◎ mean mechanically                                      | 1        | No tooltip explains that ◎ increases both trigger chance and payout magnitude                                |
-| Scenario-specific mechanics (Spirit Burst, Knowledge Fragments) are taught via a one-time tutorial event    | 2        | After the tutorial, there is no persistent reference for how the mechanic works                              |
-| Summer camp timing (first half July to second half August, 4 turns) is not shown on the calendar in advance | 1        | User must know from external guides when camp is coming                                                      |
+| Issue                                                                                                         | Severity   | Evidence                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------- |
+| Factor farming requires memorizing optimal stat thresholds                                                    | 2          | User must recall: "Speed > 1100 for 3★ chance" and "Aptitude at A for 100% roll." No in-game reference table   |
+| Skill activation conditions are text-heavy and require parsing                                                | 2          | Conditions like `running_style==1&slope==1&accumulatetime>=10` are translated to prose but remain complex      |
+| Compatibility grades require knowledge of what △/○/◎ mean mechanically                                        | 1          | No tooltip explains that ◎ increases both trigger chance and payout magnitude                                  |
+| Scenario-specific mechanics (Spirit Burst, Knowledge Fragments) are taught via a one-time tutorial event      | 2          | After the tutorial, there is no persistent reference for how the mechanic works                                |
+| Summer camp timing (first half July to second half August, 4 turns) is not shown on the calendar in advance   | 1          | User must know from external guides when camp is coming                                                        |
 
 **Recommendations:**
 
@@ -1934,12 +1933,12 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 **Issues identified:**
 
-| Issue                                                            | Severity | Evidence                                                                      |
-| ---------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------- |
-| No auto-training or quick-resolve for standard training turns    | 2        | Every turn requires manual selection, even when the optimal choice is obvious |
-| No batch skill learning                                          | 1        | Each skill must be individually selected and confirmed (except JP's スキルセット)   |
-| Race replay does not allow changing speed mid-race               | 1        | Speed is set before playback begins                                           |
-| No deck save/load templates for quick swapping between scenarios | 1        | User must manually rebuild their 6-card deck for each scenario                |
+| Issue                                                              | Severity   | Evidence                                                                          |
+| ------------------------------------------------------------------ | ---------- | --------------------------------------------------------------------------------- |
+| No auto-training or quick-resolve for standard training turns      | 2          | Every turn requires manual selection, even when the optimal choice is obvious     |
+| No batch skill learning                                            | 1          | Each skill must be individually selected and confirmed (except JP's スキルセット) |
+| Race replay does not allow changing speed mid-race                 | 1          | Speed is set before playback begins                                               |
+| No deck save/load templates for quick swapping between scenarios   | 1          | User must manually rebuild their 6-card deck for each scenario                    |
 
 **Recommendations:**
 
@@ -1963,12 +1962,12 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 **Issues identified:**
 
-| Issue                                                                                                                                                          | Severity | Evidence                                                                                                                                              |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Training detail panel can become visually overwhelming with 6 support cards, bond gauges, multiplier breakdowns, and event triggers all visible simultaneously | 2        | A full friendship training with 3 qualifying cards, 2 events, and a scenario trigger produces a dense modal                                           |
-| Skill shop has 10+ category filters, creating a cluttered filter bar                                                                                           | 1        | Sprint, Mile, Medium, Long, Front Runner, Pace Chaser, Late Surger, End Closer, Corner, Straight, Uphill, Downhill, Weather, Ground, Time, Popularity |
-| Race condition display shows 7 fields (surface, distance, turn, season, weather, ground, time) which can overwhelm pre-race                                    | 1        | Most fields are irrelevant for a given build                                                                                                          |
-| Ancestor circle with 6 nodes, factor tags, star ratings, and compatibility grades is information-dense                                                         | 2        | New users may struggle to parse the diagram                                                                                                           |
+| Issue                                                                                                                                                            | Severity   | Evidence                                                                                                                                                |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Training detail panel can become visually overwhelming with 6 support cards, bond gauges, multiplier breakdowns, and event triggers all visible simultaneously   | 2          | A full friendship training with 3 qualifying cards, 2 events, and a scenario trigger produces a dense modal                                             |
+| Skill shop has 10+ category filters, creating a cluttered filter bar                                                                                             | 1          | Sprint, Mile, Medium, Long, Front Runner, Pace Chaser, Late Surger, End Closer, Corner, Straight, Uphill, Downhill, Weather, Ground, Time, Popularity   |
+| Race condition display shows 7 fields (surface, distance, turn, season, weather, ground, time) which can overwhelm pre-race                                      | 1          | Most fields are irrelevant for a given build                                                                                                            |
+| Ancestor circle with 6 nodes, factor tags, star ratings, and compatibility grades is information-dense                                                           | 2          | New users may struggle to parse the diagram                                                                                                             |
 
 **Recommendations:**
 
@@ -1991,13 +1990,13 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 **Issues identified:**
 
-| Issue                                                                         | Severity | Evidence                                                                                                                          |
-| ----------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Training failure does not explain WHY it failed                               | 3        | The modal shows the penalty but not the failure probability that led to it. User doesn't learn "I should have rested"             |
-| Skill activation failure during a race is silent                              | 2        | If a skill doesn't trigger, there's no indication of why (wrong phase, wrong position, wrong running style). User cannot diagnose |
-| Inheritance "no trigger" events give no explanation                           | 1        | If no factor fires at April of Classic Year, the user sees "No inspiration" with no explanation of probability                    |
-| Gacha exchange point expiry is not warned proactively                         | 2        | Points convert to Clovers at banner close with no advance notification                                                            |
-| Transfer Requests delete characters permanently with limited recovery options | 3        | "A transferred Veteran Umamusume disappears and cannot be recovered." No undo, no confirmation beyond the transfer action         |
+| Issue                                                                           | Severity   | Evidence                                                                                                                            |
+| ------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Training failure does not explain WHY it failed                                 | 3          | The modal shows the penalty but not the failure probability that led to it. User doesn't learn "I should have rested"               |
+| Skill activation failure during a race is silent                                | 2          | If a skill doesn't trigger, there's no indication of why (wrong phase, wrong position, wrong running style). User cannot diagnose   |
+| Inheritance "no trigger" events give no explanation                             | 1          | If no factor fires at April of Classic Year, the user sees "No inspiration" with no explanation of probability                      |
+| Gacha exchange point expiry is not warned proactively                           | 2          | Points convert to Clovers at banner close with no advance notification                                                              |
+| Transfer Requests delete characters permanently with limited recovery options   | 3          | "A transferred Veteran Umamusume disappears and cannot be recovered." No undo, no confirmation beyond the transfer action           |
 
 **Recommendations:**
 
@@ -2021,14 +2020,14 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 **Issues identified:**
 
-| Issue                                                                          | Severity | Evidence                                                                                                                        |
-| ------------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| No in-game reference for the training gain formula                             | 3        | The formula `(base + bonus) × growth × mood × friendship × participants` is documented only on external wikis (Game8, Kamigame) |
-| No in-game guide for factor farming strategy                                   | 2        | Optimal thresholds (stat > 1100 for 3★, grandparent-first ordering) are community knowledge                                     |
-| No in-game explanation of compatibility calculation                            | 2        | How △/○/◎ are derived (shared relationships, similar aptitudes, shared G1 wins) is not explained                                |
-| Scenario-specific mechanics lack persistent reference after the tutorial event | 2        | Once Tazuna's tutorial passes, there's no way to re-read Unity Cup mechanics                                                    |
-| Server-specific differences are not documented in-game                         | 2        | JP vs Global terminology, league ceilings, entry economy differences are only in external guides                                |
-| Rate tables for gacha are only available in-app, not on web                    | 1        | Both servers route to in-app [ガチャ詳細] / Scout Rates tab; no web publication                                                      |
+| Issue                                                                            | Severity   | Evidence                                                                                                                          |
+| -------------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| No in-game reference for the training gain formula                               | 3          | The formula `(base + bonus) × growth × mood × friendship × participants` is documented only on external wikis (Game8, Kamigame)   |
+| No in-game guide for factor farming strategy                                     | 2          | Optimal thresholds (stat > 1100 for 3★, grandparent-first ordering) are community knowledge                                       |
+| No in-game explanation of compatibility calculation                              | 2          | How △/○/◎ are derived (shared relationships, similar aptitudes, shared G1 wins) is not explained                                  |
+| Scenario-specific mechanics lack persistent reference after the tutorial event   | 2          | Once Tazuna's tutorial passes, there's no way to re-read Unity Cup mechanics                                                      |
+| Server-specific differences are not documented in-game                           | 2          | JP vs Global terminology, league ceilings, entry economy differences are only in external guides                                  |
+| Rate tables for gacha are only available in-app, not on web                      | 1          | Both servers route to in-app [ガチャ詳細] / Scout Rates tab; no web publication                                                   |
 
 **Recommendations:**
 
@@ -2153,23 +2152,23 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 ### Heuristic Evaluation Summary
 
-| Heuristic                               | Rating | Top Issue                                      | Severity |
-| --------------------------------------- | ------ | ---------------------------------------------- | -------- |
-| H1: Visibility of System Status         | 7/10   | No failure probability percentage shown        | 2        |
-| H2: Match Between System and Real World | 6/10   | Server terminology divergence                  | 3        |
-| H3: User Control and Freedom            | 7/10   | No undo after training commit                  | 3        |
-| H4: Consistency and Standards           | 6/10   | Facility leveling differs by scenario silently | 2        |
-| H5: Error Prevention                    | 7/10   | No confirmation at critically low Energy       | 3        |
-| H6: Recognition Rather Than Recall      | 7/10   | Factor thresholds require memorization         | 2        |
-| H7: Flexibility and Efficiency of Use   | 8/10   | No auto-training option                        | 2        |
-| H8: Aesthetic and Minimalist Design     | 6/10   | Training detail panel visual density           | 2        |
-| H9: Error Recognition and Recovery      | 5/10   | Training failure doesn't explain cause         | 3        |
-| H10: Help and Documentation             | 4/10   | Gain formula not documented in-game            | 3        |
-| GH1: Feedback Loop Quality              | 8/10   | Skill non-activation is silent                 | 2        |
-| GH2: Reward Cadence                     | 8/10   | Factor farming has long dry spells             | 2        |
-| GH3: Cognitive Load Management          | 6/10   | 6-term gain formula hidden from user           | 2        |
-| GH4: Information Architecture           | 7/10   | Too many flat skill filters                    | 1        |
-| GH5: Progressive Disclosure             | 6/10   | All mechanics exposed from turn 1              | 2        |
+| Heuristic                                 | Rating   | Top Issue                                        | Severity   |
+| ----------------------------------------- | -------- | ------------------------------------------------ | ---------- |
+| H1: Visibility of System Status           | 7/10     | No failure probability percentage shown          | 2          |
+| H2: Match Between System and Real World   | 6/10     | Server terminology divergence                    | 3          |
+| H3: User Control and Freedom              | 7/10     | No undo after training commit                    | 3          |
+| H4: Consistency and Standards             | 6/10     | Facility leveling differs by scenario silently   | 2          |
+| H5: Error Prevention                      | 7/10     | No confirmation at critically low Energy         | 3          |
+| H6: Recognition Rather Than Recall        | 7/10     | Factor thresholds require memorization           | 2          |
+| H7: Flexibility and Efficiency of Use     | 8/10     | No auto-training option                          | 2          |
+| H8: Aesthetic and Minimalist Design       | 6/10     | Training detail panel visual density             | 2          |
+| H9: Error Recognition and Recovery        | 5/10     | Training failure doesn't explain cause           | 3          |
+| H10: Help and Documentation               | 4/10     | Gain formula not documented in-game              | 3          |
+| GH1: Feedback Loop Quality                | 8/10     | Skill non-activation is silent                   | 2          |
+| GH2: Reward Cadence                       | 8/10     | Factor farming has long dry spells               | 2          |
+| GH3: Cognitive Load Management            | 6/10     | 6-term gain formula hidden from user             | 2          |
+| GH4: Information Architecture             | 7/10     | Too many flat skill filters                      | 1          |
+| GH5: Progressive Disclosure               | 6/10     | All mechanics exposed from turn 1                | 2          |
 
 **Overall Score: 6.6/10**
 
@@ -2183,11 +2182,9 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 *End of document. All numerical thresholds, terminology mappings, and mechanical rules are sourced from the Umamusume: Pretty Derby Source-Cited Reference Guide (compiled 2026-09-27) and the skill registry. Server-specific data is tagged `[JP]`, `[Global]`, or `[Both]` throughout. Unverified claims are marked ❌ UNVERIFIED and should not be treated as confirmed.*
 
-
 ---
 
 ## Part 2: UX Behavior Specification: Umamusume Trainer Companion
-
 
 > **Reviewed, largely sound, not merged — 2026-09-27.** Audit: `docs/design-research/FRONTEND-SPEC-DIVERGENCE.md` §6.
 > Three corrections are load-bearing: preferences persist to **SQLite**, not `localStorage` (owner ruling, PRD §6.12;
@@ -2208,14 +2205,14 @@ The app is a **desktop-browser-only** local tool. No auth, no accounts, no serve
 
 **Navigation structure:**
 
-| Surface           | Purpose                                       | Entry point      |
-| ----------------- | --------------------------------------------- | ---------------- |
-| Run List          | All recorded career runs, filterable/sortable | Default landing  |
-| Run Detail        | One run's full timeline, stats, skills        | Click a run card |
-| Guided Turn Input | Log a new turn                                | From Run Detail  |
-| Skill Search      | Find skills by normalized key                 | Global nav       |
-| Catalog           | Umamusume roster with aptitudes               | Global nav       |
-| Settings          | Theme, display timezone, config               | Global nav       |
+| Surface             | Purpose                                         | Entry point        |
+| ------------------- | ----------------------------------------------- | ------------------ |
+| Run List            | All recorded career runs, filterable/sortable   | Default landing    |
+| Run Detail          | One run's full timeline, stats, skills          | Click a run card   |
+| Guided Turn Input   | Log a new turn                                  | From Run Detail    |
+| Skill Search        | Find skills by normalized key                   | Global nav         |
+| Catalog             | Umamusume roster with aptitudes                 | Global nav         |
+| Settings            | Theme, display timezone, config                 | Global nav         |
 
 **The shell must:**
 
@@ -2289,11 +2286,11 @@ The app is a **desktop-browser-only** local tool. No auth, no accounts, no serve
 
 **Available toggles:**
 
-| Setting                  | Options               | Default            | Persistence    |
-| ------------------------ | --------------------- | ------------------ | -------------- |
-| Theme                    | Light / Dark / System | System             | `localStorage` |
-| Display timezone         | IANA timezone list    | Browser default    | `localStorage` |
-| Numeric failure estimate | Off / On              | **Off** (ADR-0001) | `localStorage` |
+| Setting                    | Options                 | Default              | Persistence      |
+| -------------------------- | ----------------------- | -------------------- | ---------------- |
+| Theme                      | Light / Dark / System   | System               | `localStorage`   |
+| Display timezone           | IANA timezone list      | Browser default      | `localStorage`   |
+| Numeric failure estimate   | Off / On                | **Off** (ADR-0001)   | `localStorage`   |
 
 **The numeric failure estimate toggle** is the only config-gated feature (ADR-0001 §3). When enabled, it must render with its formula and parameters visible on the same surface, labeled as "this tool's model" rather than the game's (D-155).
 
@@ -2301,18 +2298,18 @@ The app is a **desktop-browser-only** local tool. No auth, no accounts, no serve
 
 These apply everywhere, always:
 
-| Rule                                                | Source          |
-| --------------------------------------------------- | --------------- |
-| No simulation, prediction, or race-day snapshots    | PRD §6.11       |
-| No support-card database in Phase 1                 | PRD §6.9        |
-| No event/banner calendar in Phase 1                 | PRD §6.6        |
-| No trainee image upload                             | PRD §6.13       |
-| No localStorage-authored runs                       | PRD §6.12       |
-| Every number must be explainable from entered turns | Planner Rule 4  |
-| No unexplained recommended numbers                  | Planner Rule 5  |
-| No equine vocabulary anywhere                       | CONSTRAINTS C-4 |
-| Sentence case in all UI copy                        | CONSTRAINTS C-4 |
-| No decorative emoji in labels                       | DESIGN §6.0     |
+| Rule                                                  | Source            |
+| ----------------------------------------------------- | ----------------- |
+| No simulation, prediction, or race-day snapshots      | PRD §6.11         |
+| No support-card database in Phase 1                   | PRD §6.9          |
+| No event/banner calendar in Phase 1                   | PRD §6.6          |
+| No trainee image upload                               | PRD §6.13         |
+| No localStorage-authored runs                         | PRD §6.12         |
+| Every number must be explainable from entered turns   | Planner Rule 4    |
+| No unexplained recommended numbers                    | Planner Rule 5    |
+| No equine vocabulary anywhere                         | CONSTRAINTS C-4   |
+| Sentence case in all UI copy                          | CONSTRAINTS C-4   |
+| No decorative emoji in labels                         | DESIGN §6.0       |
 
 ---
 
@@ -2324,26 +2321,26 @@ This is the **always-visible frame** during a run. It never scrolls away.
 
 **Layout: two regions**
 
-| Region | Contains                                                      | Behavior                     |
-| ------ | ------------------------------------------------------------- | ---------------------------- |
-| Left   | Run identity, turn chip, stat band, Energy gauge, fan readout | Persistent, never collapses  |
-| Right  | Turn timeline                                                 | Scrollable, grouped by phase |
+| Region   | Contains                                                        | Behavior                       |
+| -------- | --------------------------------------------------------------- | ------------------------------ |
+| Left     | Run identity, turn chip, stat band, Energy gauge, fan readout   | Persistent, never collapses    |
+| Right    | Turn timeline                                                   | Scrollable, grouped by phase   |
 
 **The persistent resource strip** (D-170, D-230):
 
-```
+```text
 [ 13 turn(s) left ]  Rice Shower · Trainee Umamusume · Unity Cup
                      Energy ▓▓▓▓▓░░░░  42  [Caution]   |   1,943 fans · target 3,000
-```
+```text
 
 This strip is **scenario-composed** (D-220, D-240). The base items (turn, trainee, scenario, Energy, fans) are always present. Scenario-specific items appear only when the scenario has them:
 
-| Scenario          | Additional strip items                          |
-| ----------------- | ----------------------------------------------- |
-| URA Finale        | None (baseline)                                 |
-| Unity Cup         | Team Rank, Spirit Burst count                   |
-| Trackblazer       | Grade Points (vs current objective), Shop Coins |
-| Our Grand Concert | Baseline only (mechanics unextracted — D-241)   |
+| Scenario            | Additional strip items                            |
+| ------------------- | ------------------------------------------------- |
+| URA Finale          | None (baseline)                                   |
+| Unity Cup           | Team Rank, Spirit Burst count                     |
+| Trackblazer         | Grade Points (vs current objective), Shop Coins   |
+| Our Grand Concert   | Baseline only (mechanics unextracted — D-241)     |
 
 **Absent beats empty.** A URA run never shows an empty Team Rank slot. A Trackblazer run never shows a Race Calendar panel.
 
@@ -2369,10 +2366,10 @@ This strip is **scenario-composed** (D-220, D-240). The base items (turn, traine
 
 **The cap display is a stack, not a number** (D-162):
 
-```
+```text
 Wit  1,340 / 1,800
      1,200 base · +600 scenario · +0 breakthrough · deck not tracked
-```
+```text
 
 The denominator is the sum of terms the tool actually holds. Each component is labeled. **The disclosure line names what is included and what is not.** (D-162)
 
@@ -2395,11 +2392,11 @@ They are different facts and must not collapse into one line.
 
 **Band word** (not color alone — D-12):
 
-| Band    | Range | Word    | Treatment              |
-| ------- | ----- | ------- | ---------------------- |
-| Safe    | > 50  | Safe    | `ink` on `green-tint`  |
-| Caution | 30–50 | Caution | `ink-strong` on `gold` |
-| Danger  | < 30  | Danger  | white on `risk`        |
+| Band      | Range   | Word      | Treatment                |
+| --------- | ------- | --------- | ------------------------ |
+| Safe      | > 50    | Safe      | `ink` on `green-tint`    |
+| Caution   | 30–50   | Caution   | `ink-strong` on `gold`   |
+| Danger    | < 30    | Danger    | white on `risk`          |
 
 **The 30 boundary is an owner ruling, not a game fact.** No source publishes a threshold below 50 (ADR-0001 §3). Where the Danger band is shown, it must be attributable to the tool's own model.
 
@@ -2438,7 +2435,7 @@ This is where the brief's "not a web form" requirement lands.
 
 **The flow:**
 
-```
+```text
 Step 1: "Which training are you focusing on this turn?"
         → Five banner options (Speed, Stamina, Power, Guts, Wit)
         → Each shows consequence preview
@@ -2454,7 +2451,7 @@ Step 3: "Any skill event?"
 
 Step 4: "Any note?"
         → Optional free text
-```
+```text
 
 **Critical: no numbered step sidebar.** A vertical 1-2-3-4 rail is a SaaS setup wizard and stops feeling like an in-game event (D-117). The flow carries a single `Step 1 of 3` line with three dots at the foot of the card stack, and nothing else.
 
@@ -2477,20 +2474,20 @@ Each is a **banner button** (DESIGN §6.1):
 
 **What each option shows in preview:**
 
-| Training | Preview shows                                                 |
-| -------- | ------------------------------------------------------------- |
-| Speed    | Speed gain, Power gain, SP gain, Energy cost                  |
-| Stamina  | Stamina gain, Guts gain, SP gain, Energy cost                 |
-| Power    | Power gain, Stamina gain, SP gain, Energy cost                |
-| Guts     | Guts gain, Speed gain, Power gain, SP gain, Energy cost       |
-| Wit      | Wit gain, Speed gain, SP gain, **Energy recovery** (not cost) |
-| Rest     | +30 Energy recovery                                           |
+| Training   | Preview shows                                                   |
+| ---------- | --------------------------------------------------------------- |
+| Speed      | Speed gain, Power gain, SP gain, Energy cost                    |
+| Stamina    | Stamina gain, Guts gain, SP gain, Energy cost                   |
+| Power      | Power gain, Stamina gain, SP gain, Energy cost                  |
+| Guts       | Guts gain, Speed gain, Power gain, SP gain, Energy cost         |
+| Wit        | Wit gain, Speed gain, SP gain, **Energy recovery** (not cost)   |
+| Rest       | +30 Energy recovery                                             |
 
 **When Energy is below 50**, the advisory row appears (DESIGN §6.16):
 
-```
+```text
 Wit costs 0 Energy and you are at 42. (GameWith 2026-09-25; source data 2023-02-25)
-```
+```text
 
 The advisory **suggests; it never disables, dims, or reorders** the five options (D-155). The Trainer picks; the tool explains.
 
@@ -2512,28 +2509,28 @@ The advisory **suggests; it never disables, dims, or reorders** the five options
 
 **Unity Cup additions:**
 
-| Panel               | Behavior                                                                                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Team Rank gauge     | Letter per stat + aggregate rank. Facility level derives from per-stat rank. "It's On!" reward derives from aggregate. Two different consumers of one widget. |
-| Spirit Burst roster | Compact list of teammates, each carrying one of six states: chargeable, charged, held, normal-spent, Extreme-chargeable, Extreme-spent                        |
-| Team Race countdown | Under the objective timer, "N turns until next Team Race"                                                                                                     |
+| Panel                 | Behavior                                                                                                                                                        |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Team Rank gauge       | Letter per stat + aggregate rank. Facility level derives from per-stat rank. "It's On!" reward derives from aggregate. Two different consumers of one widget.   |
+| Spirit Burst roster   | Compact list of teammates, each carrying one of six states: chargeable, charged, held, normal-spent, Extreme-chargeable, Extreme-spent                          |
+| Team Race countdown   | Under the objective timer, "N turns until next Team Race"                                                                                                       |
 
 **Spirit Burst state machine** (DESIGN §6.24, D-223):
 
-```
+```text
 chargeable → charged → held → normal spent → Extreme chargeable → Extreme spent
-```
+```text
 
 **A spent-normal teammate is not inert.** They are the next Extreme candidate. Any "consumed" treatment (reduced opacity, strikethrough) is a lie on the fifth state.
 
 **Trackblazer additions:**
 
-| Panel             | Behavior                                                                                                                                                                                |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Grade Point meter | Progress against **current objective only**, with deadline date and "surplus does not carry over" note. A cumulative total would advertise a banking strategy the rules forbid (D-232). |
-| Shop Coin counter | Balance + turns until rotation. The balance is the lesser of the two.                                                                                                                   |
-| Epithet tracker   | Won-of-needed per route. Keep as a list, not a grid.                                                                                                                                    |
-| Race Fatigue chip | Consecutive-race count + consequence. **Vanishes after Late December** (D-230, D-231).                                                                                                  |
+| Panel               | Behavior                                                                                                                                                                                  |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Grade Point meter   | Progress against **current objective only**, with deadline date and "surplus does not carry over" note. A cumulative total would advertise a banking strategy the rules forbid (D-232).   |
+| Shop Coin counter   | Balance + turns until rotation. The balance is the lesser of the two.                                                                                                                     |
+| Epithet tracker     | Won-of-needed per route. Keep as a list, not a grid.                                                                                                                                      |
+| Race Fatigue chip   | Consecutive-race count + consequence. **Vanishes after Late December** (D-230, D-231).                                                                                                    |
 
 **No Race Calendar in Trackblazer.** Its absence is the scenario's defining UI fact (D-221).
 
@@ -2570,23 +2567,23 @@ chargeable → charged → held → normal spent → Extreme chargeable → Extr
 - 24-cell half-month grid under a Junior/Classic/Senior year tab bar (DESIGN §6.20)
 - Cell states (the count is five because there are genuinely five things a Trainer needs to distinguish):
 
-| State                      | Treatment                                                                   | Basis    |
-| -------------------------- | --------------------------------------------------------------------------- | -------- |
-| Empty half-month           | `sunken` fill, muted plus glyph                                             | Measured |
-| Optional race, enterable   | `raised` fill, green plus, race artwork thumbnail                           | Measured |
-| Mandatory Goal race        | Red `Goal` pennant on cell corner, warm outline                             | Measured |
-| Scheduled, already entered | Pink `Scheduled` pill over thumbnail                                        | Measured |
-| Locked by fans             | Dimmed, padlock + exact `fans_needed` figure                                | Derived  |
-| Locked by maiden gate      | Dimmed, dashed outline, distinct marker, "Win Debut or a Maiden race first" | Derived  |
-| Current turn               | Pale yellow fill with warm outline                                          | Measured |
+| State                        | Treatment                                                                     | Basis      |
+| ---------------------------- | ----------------------------------------------------------------------------- | ---------- |
+| Empty half-month             | `sunken` fill, muted plus glyph                                               | Measured   |
+| Optional race, enterable     | `raised` fill, green plus, race artwork thumbnail                             | Measured   |
+| Mandatory Goal race          | Red `Goal` pennant on cell corner, warm outline                               | Measured   |
+| Scheduled, already entered   | Pink `Scheduled` pill over thumbnail                                          | Measured   |
+| Locked by fans               | Dimmed, padlock + exact `fans_needed` figure                                  | Derived    |
+| Locked by maiden gate        | Dimmed, dashed outline, distinct marker, "Win Debut or a Maiden race first"   | Derived    |
+| Current turn                 | Pale yellow fill with warm outline                                            | Measured   |
 
 **Lock state grammar — the three that matter:**
 
-| State          | Fill                                      | Marker                                   | Text                               | Why distinct                                                                          |
-| -------------- | ----------------------------------------- | ---------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------- |
-| Mandatory Goal | `raised`, warm 2px outline                | Red `Goal` pennant                       | Race name at `label-strong`        | Not a lock. An obligation. Reads heavier, never dimmer.                               |
-| Fan-locked     | `sunken`, 55% opacity                     | Padlock glyph                            | `1,000 fans` as a number           | Remedy is measurable. Trainer can see shortfall against header total.                 |
-| Maiden-locked  | `sunken`, 55% opacity, **dashed** outline | Distinct conditional marker, not padlock | "Win Debut or a Maiden race first" | Remedy is an event, not a quantity. Padlock would send Trainer to check wrong number. |
+| State            | Fill                                        | Marker                                     | Text                                 | Why distinct                                                                            |
+| ---------------- | ------------------------------------------- | ------------------------------------------ | ------------------------------------ | --------------------------------------------------------------------------------------- |
+| Mandatory Goal   | `raised`, warm 2px outline                  | Red `Goal` pennant                         | Race name at `label-strong`          | Not a lock. An obligation. Reads heavier, never dimmer.                                 |
+| Fan-locked       | `sunken`, 55% opacity                       | Padlock glyph                              | `1,000 fans` as a number             | Remedy is measurable. Trainer can see shortfall against header total.                   |
+| Maiden-locked    | `sunken`, 55% opacity, **dashed** outline   | Distinct conditional marker, not padlock   | "Win Debut or a Maiden race first"   | Remedy is an event, not a quantity. Padlock would send Trainer to check wrong number.   |
 
 **The dashed outline on the maiden lock is the whole difference** — opacity and a padlock already say "you lack a number," so the conditional gate must break the pattern rather than join it.
 
@@ -2613,67 +2610,67 @@ chargeable → charged → held → normal spent → Extreme chargeable → Extr
 
 #### 3.1 All User Inputs
 
-| Input type                  | Where used                                                 | Behavior                                                    |
-| --------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------- |
-| **Banner button selection** | Training options, race options, event choices              | Select shows preview; commit is separate                    |
-| **Numeric entry**           | Outcome numbers, fan count, Energy, stats                  | Direct field access (escape hatch), paste-and-correct       |
-| **Free text**               | Notes, run name                                            | Optional, never required                                    |
-| **Dropdown**                | Sort order, scenario filter                                | Single-select, immediate effect                             |
-| **Toggle**                  | Theme, numeric failure estimate                            | Immediate effect, persisted to `localStorage`               |
-| **Search field**            | Skill search, catalog search                               | Debounced, cancellable, never fires network request (NFR-1) |
-| **Keyboard**                | 1-5 for disciplines, Enter to confirm, Escape to step back | Full flow completable without pointer (D-55)                |
+| Input type                    | Where used                                                   | Behavior                                                      |
+| ----------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------- |
+| **Banner button selection**   | Training options, race options, event choices                | Select shows preview; commit is separate                      |
+| **Numeric entry**             | Outcome numbers, fan count, Energy, stats                    | Direct field access (escape hatch), paste-and-correct         |
+| **Free text**                 | Notes, run name                                              | Optional, never required                                      |
+| **Dropdown**                  | Sort order, scenario filter                                  | Single-select, immediate effect                               |
+| **Toggle**                    | Theme, numeric failure estimate                              | Immediate effect, persisted to `localStorage`                 |
+| **Search field**              | Skill search, catalog search                                 | Debounced, cancellable, never fires network request (NFR-1)   |
+| **Keyboard**                  | 1-5 for disciplines, Enter to confirm, Escape to step back   | Full flow completable without pointer (D-55)                  |
 
 #### 3.2 All Options
 
-| Option                   | Values                                 | Source                         |
-| ------------------------ | -------------------------------------- | ------------------------------ |
-| Training discipline      | Speed, Stamina, Power, Guts, Wit, Rest | Game's five disciplines + Rest |
-| Race selection           | Available races from calendar          | Scenario calendar data         |
-| Event choice             | A/B/C (typically 2-3 options)          | Game event structure           |
-| Sort order               | Date, turn depth, trainee name         | Run List                       |
-| Filter                   | Scenario, status                       | Run List                       |
-| Theme                    | Light, Dark, System                    | Settings                       |
-| Numeric failure estimate | Off, On                                | Settings (ADR-0001)            |
+| Option                     | Values                                   | Source                           |
+| -------------------------- | ---------------------------------------- | -------------------------------- |
+| Training discipline        | Speed, Stamina, Power, Guts, Wit, Rest   | Game's five disciplines + Rest   |
+| Race selection             | Available races from calendar            | Scenario calendar data           |
+| Event choice               | A/B/C (typically 2-3 options)            | Game event structure             |
+| Sort order                 | Date, turn depth, trainee name           | Run List                         |
+| Filter                     | Scenario, status                         | Run List                         |
+| Theme                      | Light, Dark, System                      | Settings                         |
+| Numeric failure estimate   | Off, On                                  | Settings (ADR-0001)              |
 
 #### 3.3 All Toggles
 
-| Toggle                   | Location | Default                | Effect                                                                      |
-| ------------------------ | -------- | ---------------------- | --------------------------------------------------------------------------- |
-| Theme                    | Settings | System                 | Switches token override before first paint                                  |
-| Numeric failure estimate | Settings | **Off**                | When on, shows percentage with formula visible, labeled "this tool's model" |
-| Phase collapse           | Timeline | Current phase expanded | Collapses/expands phase groups                                              |
+| Toggle                     | Location   | Default                  | Effect                                                                        |
+| -------------------------- | ---------- | ------------------------ | ----------------------------------------------------------------------------- |
+| Theme                      | Settings   | System                   | Switches token override before first paint                                    |
+| Numeric failure estimate   | Settings   | **Off**                  | When on, shows percentage with formula visible, labeled "this tool's model"   |
+| Phase collapse             | Timeline   | Current phase expanded   | Collapses/expands phase groups                                                |
 
 #### 3.4 What Is NOT an Input
 
 These are explicitly **not user inputs** in this tool:
 
-| Not an input               | Why                                                    | Source |
-| -------------------------- | ------------------------------------------------------ | ------ |
-| Race outcome prediction    | PRD §6.11 — no simulation                              |        |
-| Stat projection            | Planner Rule 4 — deterministic over entered turns only |        |
-| Deck composition           | PRD §6.9 — no support-card database in Phase 1         |        |
-| Event calendar             | PRD §6.6 — no event/banner calendar in Phase 1         |        |
-| Trainee image              | PRD §6.13 — no image upload                            |        |
-| Career Rank derivation     | Planner Rule 1 — no simulation; entered only           |        |
-| Scenario selection mid-run | Scenario is fixed at run creation                      |        |
+| Not an input                 | Why                                                      | Source   |
+| ---------------------------- | -------------------------------------------------------- | -------- |
+| Race outcome prediction      | PRD §6.11 — no simulation                                |          |
+| Stat projection              | Planner Rule 4 — deterministic over entered turns only   |          |
+| Deck composition             | PRD §6.9 — no support-card database in Phase 1           |          |
+| Event calendar               | PRD §6.6 — no event/banner calendar in Phase 1           |          |
+| Trainee image                | PRD §6.13 — no image upload                              |          |
+| Career Rank derivation       | Planner Rule 1 — no simulation; entered only             |          |
+| Scenario selection mid-run   | Scenario is fixed at run creation                        |          |
 
 ---
 
 ### 4. State Machine: The Run Lifecycle
 
-```
+```text
 [No Run] → [Active] → [Completed] or [Retired]
               ↑
               └── turns logged one at a time
-```
+```text
 
 **States:**
 
-| State     | Meaning                             | Allowed actions                         |
-| --------- | ----------------------------------- | --------------------------------------- |
-| Active    | Run in progress, turns being logged | Log turn, view timeline, search skills  |
-| Completed | Final turn logged, summary shown    | View summary, view timeline (read-only) |
-| Retired   | Run ended early (failed objectives) | View summary, view timeline (read-only) |
+| State       | Meaning                               | Allowed actions                           |
+| ----------- | ------------------------------------- | ----------------------------------------- |
+| Active      | Run in progress, turns being logged   | Log turn, view timeline, search skills    |
+| Completed   | Final turn logged, summary shown      | View summary, view timeline (read-only)   |
+| Retired     | Run ended early (failed objectives)   | View summary, view timeline (read-only)   |
 
 **Transitions:**
 
@@ -2695,12 +2692,12 @@ These are explicitly **not user inputs** in this tool:
 
 Per root `CONSTRAINTS.md` C-7 and PRD `ARCHITECTURE.md` §7, every data region implements all four states:
 
-| State             | Treatment                                                                                                                                                                  |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Empty             | Panel with capsule header, quiet illustration slot, `title` line naming what belongs here, `body` line saying how to make one, one primary button. Never a bare "No data". |
-| Loading           | Panel's real shape with `idle`-filled skeleton rows. The client never shows a spinner over a blank page; it shows the frame you are about to fill.                         |
-| Refresh in flight | Catalog reads show last-fetched time + quiet progress mark (stale-while-revalidate). UI must not imply data vanished.                                                      |
-| Error             | `crimson` rule on left of panel, icon, failed source's name, retry button. Failed fetch must never blank the catalog (NFR-2).                                              |
+| State               | Treatment                                                                                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Empty               | Panel with capsule header, quiet illustration slot, `title` line naming what belongs here, `body` line saying how to make one, one primary button. Never a bare "No data".   |
+| Loading             | Panel's real shape with `idle`-filled skeleton rows. The client never shows a spinner over a blank page; it shows the frame you are about to fill.                           |
+| Refresh in flight   | Catalog reads show last-fetched time + quiet progress mark (stale-while-revalidate). UI must not imply data vanished.                                                        |
+| Error               | `crimson` rule on left of panel, icon, failed source's name, retry button. Failed fetch must never blank the catalog (NFR-2).                                                |
 
 **The empty state is a designed screen, not a gap.** It is the first screen a Trainer ever sees.
 
@@ -2708,15 +2705,15 @@ Per root `CONSTRAINTS.md` C-7 and PRD `ARCHITECTURE.md` §7, every data region i
 
 ### 6. Motion Contract
 
-| Interaction        | Spec                                                                             |
-| ------------------ | -------------------------------------------------------------------------------- |
-| Button press       | 120ms, translateY 1px, shadow lift to press                                      |
-| Card select        | 140ms ease-out, glow ring fades in, fill crossfades                              |
-| Choice card expand | 180ms, preview slides 8px and fades; card does not move                          |
-| Commit             | 200ms; new turn entry pushes in from bottom of timeline, gain bubble fires first |
-| Panel open         | 160ms ease-out, scale 0.98 to 1 plus fade. No slide-in sheets.                   |
-| Phase collapse     | 180ms height, 120ms chevron rotate                                               |
-| Number change      | Count-up over 240ms, only on the stat band                                       |
+| Interaction          | Spec                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| Button press         | 120ms, translateY 1px, shadow lift to press                                        |
+| Card select          | 140ms ease-out, glow ring fades in, fill crossfades                                |
+| Choice card expand   | 180ms, preview slides 8px and fades; card does not move                            |
+| Commit               | 200ms; new turn entry pushes in from bottom of timeline, gain bubble fires first   |
+| Panel open           | 160ms ease-out, scale 0.98 to 1 plus fade. No slide-in sheets.                     |
+| Phase collapse       | 180ms height, 120ms chevron rotate                                                 |
+| Number change        | Count-up over 240ms, only on the stat band                                         |
 
 **Rules:**
 
@@ -2729,13 +2726,13 @@ Per root `CONSTRAINTS.md` C-7 and PRD `ARCHITECTURE.md` §7, every data region i
 
 ### 7. Accessibility Contract
 
-| Requirement          | Implementation                                                                                 |
-| -------------------- | ---------------------------------------------------------------------------------------------- |
-| Contrast             | Every text pair passes WCAG 2.1 AA at its size (§3.4). Chrome steps never carry text.          |
-| Focus                | 3px `green` ring at 35% alpha, always visible, never `outline: none` without replacement       |
-| Target size          | 44px minimum on anything clickable                                                             |
-| Color independence   | Every state carries a word. Grade badges show the letter. Deltas show sign and direction word. |
-| Keyboard             | Guided flow fully operable without pointer. Turn timeline is a list with roving focus.         |
+| Requirement            | Implementation                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| Contrast               | Every text pair passes WCAG 2.1 AA at its size (§3.4). Chrome steps never carry text.            |
+| Focus                  | 3px `green` ring at 35% alpha, always visible, never `outline: none` without replacement         |
+| Target size            | 44px minimum on anything clickable                                                               |
+| Color independence     | Every state carries a word. Grade badges show the letter. Deltas show sign and direction word.   |
+| Keyboard               | Guided flow fully operable without pointer. Turn timeline is a list with roving focus.           |
 
 **Amended 2026-10-03: the WCAG 2.1 AA mandate this contract cites is superseded. WCAG 2.2 Level AA is the operative mandate, per the owner's ruling of 2026-10-03.**
 | Screen readers       | Stat band is a table or list with explicit labels. Gain bubbles are `aria-live="polite"`.      |
@@ -2745,32 +2742,30 @@ Per root `CONSTRAINTS.md` C-7 and PRD `ARCHITECTURE.md` §7, every data region i
 
 ### 8. What This App Never Does
 
-| Never                                            | Source           |
-| ------------------------------------------------ | ---------------- |
-| Predict race outcomes                            | PRD §6.11        |
-| Simulate training results                        | PRD §6.11        |
-| Store support-card decks                         | PRD §6.9         |
-| Show event/banner calendars                      | PRD §6.6         |
-| Accept trainee images                            | PRD §6.13        |
-| Author runs in localStorage                      | PRD §6.12        |
-| Require auth or accounts                         | PRD §6.1         |
-| Use equine vocabulary                            | CONSTRAINTS C-4  |
-| Show unexplained recommended numbers             | Planner Rule 5   |
-| Derive Career Rank or Rating                     | Planner Rule 1   |
-| Display a race-day snapshot                      | PRD §6.11        |
-| Invent scenario chrome for undescribed scenarios | D-241            |
-| Merge two servers' data                          | Reference doc §1 |
-| Promote unverified items into UI copy            | D-20             |
+| Never                                              | Source             |
+| -------------------------------------------------- | ------------------ |
+| Predict race outcomes                              | PRD §6.11          |
+| Simulate training results                          | PRD §6.11          |
+| Store support-card decks                           | PRD §6.9           |
+| Show event/banner calendars                        | PRD §6.6           |
+| Accept trainee images                              | PRD §6.13          |
+| Author runs in localStorage                        | PRD §6.12          |
+| Require auth or accounts                           | PRD §6.1           |
+| Use equine vocabulary                              | CONSTRAINTS C-4    |
+| Show unexplained recommended numbers               | Planner Rule 5     |
+| Derive Career Rank or Rating                       | Planner Rule 1     |
+| Display a race-day snapshot                        | PRD §6.11          |
+| Invent scenario chrome for undescribed scenarios   | D-241              |
+| Merge two servers' data                            | Reference doc §1   |
+| Promote unverified items into UI copy              | D-20               |
 
 ---
 
 This is the behavioral contract. Every input, option, toggle, state, and transition is sourced from the design documents. Where a behavior is not specified here, it is either out of Phase 1 scope or has not been decided — and the absence is deliberate, not an omission.
 
-
 ---
 
 ## Part 3: Scenario-Specific User Flows & Frontend Specifications
-
 
 > **Reviewed, largely sound, not merged — 2026-09-27.** Audit: `docs/design-research/FRONTEND-SPEC-DIVERGENCE.md` §6.
 > Most of this traces to the repo's sourced tables (Trackblazer caps in the corrected order, shop prices, the
@@ -2793,15 +2788,15 @@ Unity Cup transforms the solo training loop into a team-management problem. The 
 
 **What changes from the baseline (URA Finale):**
 
-| Axis                         | URA Finale                | Unity Cup                          |
-| ---------------------------- | ------------------------- | ---------------------------------- |
-| Facility level driver        | Repeat one stat 4×        | Team aggregate stat rank per stat  |
-| Scenario currency            | None                      | Team Rank, Spirit Burst count      |
-| Periodic event               | None                      | Team Race every 6 months (5 races) |
-| Scenario Link                | Aoi Kiryuin (1 character) | 5 characters, chosen via Team Name |
-| Acting chairman              | Akikawa                   | Riko Kashimoto (Akikawa absent)    |
-| Stat caps                    | 1400 × 5                  | 1300 × 4, Wit 1800                 |
-| April Unique Skill bond gate | 3-bar Akikawa friendship  | No bond condition (Akikawa absent) |
+| Axis                           | URA Finale                  | Unity Cup                            |
+| ------------------------------ | --------------------------- | ------------------------------------ |
+| Facility level driver          | Repeat one stat 4×          | Team aggregate stat rank per stat    |
+| Scenario currency              | None                        | Team Rank, Spirit Burst count        |
+| Periodic event                 | None                        | Team Race every 6 months (5 races)   |
+| Scenario Link                  | Aoi Kiryuin (1 character)   | 5 characters, chosen via Team Name   |
+| Acting chairman                | Akikawa                     | Riko Kashimoto (Akikawa absent)      |
+| Stat caps                      | 1400 × 5                    | 1300 × 4, Wit 1800                   |
+| April Unique Skill bond gate   | 3-bar Akikawa friendship    | No bond condition (Akikawa absent)   |
 
 **What does NOT change:** the five training disciplines, Energy/Mood system, race mechanics, skill acquisition, inheritance, Summer Camp (both years, 4 turns, all facilities Lv5).
 
@@ -2813,7 +2808,7 @@ This is the core loop unique to Unity Cup. It runs continuously alongside normal
 
 #### Flow UC-1: Special Training Decision
 
-```
+```text
 TRAINER OPENS TRAINING SCREEN
 │
 ├─ 1. Read the facility tabs.
@@ -2887,11 +2882,11 @@ TRAINER OPENS TRAINING SCREEN
 └─ 6. Confirm or cancel.
       Confirm → resolve turn → timeline entry appended.
       Cancel → return to training screen, nothing written.
-```
+```text
 
 #### Flow UC-2: Spirit Burst Resolution
 
-```
+```text
 BURST TRIGGERS (on the training turn where the gauge is full
 and the Trainer confirms training on that tile)
 │
@@ -2929,11 +2924,11 @@ and the Trainer confirms training on that tile)
 └─ 5. Timeline entry appended.
       Entry shows: which teammate burst, what stats were gained,
       which skill hint was received, Burst count running total.
-```
+```text
 
 #### Flow UC-3: Team Race (every 6 months)
 
-```
+```text
 TEAM RACE COUNTDOWN REACHES ZERO
 (countdown visible under the standard objective timer)
 │
@@ -2986,11 +2981,11 @@ TEAM RACE COUNTDOWN REACHES ZERO
 └─ 5. Timeline entry appended.
       Entry shows: opponent team name, per-category results,
       overall result, league rank change, new teammates joined.
-```
+```text
 
 #### Flow UC-4: Team Name Selection (Junior Year, 2nd half September)
 
-```
+```text
 TEAM NAME EVENT FIRES
 │
 ├─ 1. The Trainer chooses a team name from 5 options.
@@ -3018,11 +3013,11 @@ TEAM NAME EVENT FIRES
 │
 └─ 3. Timeline entry appended.
       Entry shows: team name chosen, linked character.
-```
+```text
 
 #### Flow UC-5: Scenario Skill Ladder
 
-```
+```text
 TOTAL BURST COUNT IS TRACKED ACROSS THE RUN
 (normal Bursts + Extreme Bursts combined)
 │
@@ -3045,11 +3040,11 @@ TOTAL BURST COUNT IS TRACKED ACROSS THE RUN
 └─ The progress meter's denominator is normal + Extreme combined.
    This changed in the rework. A meter counting only normal
    Bursts would show the wrong progress.
-```
+```text
 
 #### Flow UC-6: Unity Cup Finals
 
-```
+```text
 AFTER THE 4TH TEAM RACE
 │
 ├─ 1. The Trainer faces Team Zenith
@@ -3075,11 +3070,11 @@ AFTER THE 4TH TEAM RACE
 └─ 5. Post-finals:
       URA-style final races proceed (qualifier → semifinal → final).
       Same structure as URA Finale for the last 3 races.
-```
+```text
 
 #### Flow UC-7: Unique Skill Level-Ups (Unity Cup variant)
 
-```
+```text
 SAME FAN THRESHOLDS AS URA FINALE:
   Valentine's (Senior, early Feb):  60,000 Turf / 40,000 Dirt
   Early April (Senior):             70,000 Turf / 60,000 Dirt
@@ -3092,7 +3087,7 @@ DIFFERENCE: The April level-up has NO bond condition.
 
 The tool must NOT show an Akikawa bond requirement
 in the April gate for Unity Cup runs.
-```
+```text
 
 ---
 
@@ -3102,7 +3097,7 @@ in the April gate for Unity Cup runs.
 
 The persistent header strip gains Unity Cup-specific elements.
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────────────┐
 │ [ 13 turn(s) left ]  Rice Shower · Trainee · Unity Cup              │
 │                                                                      │
@@ -3111,14 +3106,14 @@ The persistent header strip gains Unity Cup-specific elements.
 │ Team Rank: B  │  Spirit Bursts: 4/13+  │  League Rank: 7            │
 │ Next Team Race: 3 turns                                              │
 └──────────────────────────────────────────────────────────────────────┘
-```
+```text
 
-| Element                  | Source                                           | Rendering rule                                                                                              |
-| ------------------------ | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| Team Rank                | Trainer-entered after each rank-up               | Letter chip (G through S+). Uses the grade badge palette from §6.7. S+ gets a distinct visual step above S. |
-| Spirit Burst count       | Running total of normal + Extreme Bursts         | Fraction display: `current / next-threshold`. The denominator changes at each ladder rung (6, 9, 12, 13+).  |
-| League Rank              | Trainer-entered after each Team Race             | Numeral. Rises with opponent strength, falls on loss.                                                       |
-| Next Team Race countdown | Derived from turn count and the 6-month interval | "N turns" label. Sits under the objective timer, matching the client's placement.                           |
+| Element                    | Source                                             | Rendering rule                                                                                                |
+| -------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Team Rank                  | Trainer-entered after each rank-up                 | Letter chip (G through S+). Uses the grade badge palette from §6.7. S+ gets a distinct visual step above S.   |
+| Spirit Burst count         | Running total of normal + Extreme Bursts           | Fraction display: `current / next-threshold`. The denominator changes at each ladder rung (6, 9, 12, 13+).    |
+| League Rank                | Trainer-entered after each Team Race               | Numeral. Rises with opponent strength, falls on loss.                                                         |
+| Next Team Race countdown   | Derived from turn count and the 6-month interval   | "N turns" label. Sits under the objective timer, matching the client's placement.                             |
 
 **What is NOT on the strip:** Energy, Fans, turn chip, and scenario name remain identical to the baseline. The strip is composed, not forked (D-220).
 
@@ -3128,19 +3123,19 @@ Each facility tab gains two additions over the baseline:
 
 **a) Occupancy display.** Teammates present on the tile are shown as small circular avatars. Each chargeable teammate carries a white flame icon. The flame count is the primary signal.
 
-| Flame count   | Visual treatment                                 | Meaning                                                                           |
-| ------------- | ------------------------------------------------ | --------------------------------------------------------------------------------- |
-| 0             | No flames. Standard tile.                        | Normal training. No team benefit.                                                 |
-| 1             | One flame. Subtle.                               | Benefits that teammate only. No trainee bonus. The tile should NOT glow or pulse. |
-| ≥2            | Multiple flames. The tile gets a warm highlight. | Trainee gains bonus stats + SP. This is the actionable state.                     |
-| Burst-ready   | Flame icon gains a filled gauge ring.            | Spirit Burst will trigger on this tile if the Trainer confirms.                   |
-| Extreme-ready | Flame icon gains a purple ring.                  | Extreme Spirit Burst available. Failure risk for this facility is 0%.             |
+| Flame count     | Visual treatment                                   | Meaning                                                                             |
+| --------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 0               | No flames. Standard tile.                          | Normal training. No team benefit.                                                   |
+| 1               | One flame. Subtle.                                 | Benefits that teammate only. No trainee bonus. The tile should NOT glow or pulse.   |
+| ≥2              | Multiple flames. The tile gets a warm highlight.   | Trainee gains bonus stats + SP. This is the actionable state.                       |
+| Burst-ready     | Flame icon gains a filled gauge ring.              | Spirit Burst will trigger on this tile if the Trainer confirms.                     |
+| Extreme-ready   | Flame icon gains a purple ring.                    | Extreme Spirit Burst available. Failure risk for this facility is 0%.               |
 
 **b) Facility level source label.** The level chip must state its cause:
 
-```
+```text
 Speed Lvl 4 ← Team Rank A
-```
+```text
 
 Not just `Lvl 4`. In URA Finale, the cause is repetition. In Unity Cup, it is always the team rank. A level chip without its cause is misleading (D-222).
 
@@ -3148,23 +3143,23 @@ Not just `Lvl 4`. In URA Finale, the cause is repetition. In Unity Cup, it is al
 
 A collapsible panel on the right side of the dashboard, below the timeline.
 
-| Column          | Content                                                                                     |
-| --------------- | ------------------------------------------------------------------------------------------- |
-| Teammate name   | From support card, story character, or random recruit                                       |
-| Type badge      | Support card type (Speed/Stamina/Power/Guts/Wit/Pal/Group)                                  |
-| Spirit gauge    | 0–100 fill bar. Orange at full (burst-ready).                                               |
-| Burst state     | One of 6 states: chargeable, charged, held, normal-spent, Extreme-chargeable, Extreme-spent |
-| Stats           | Teammate's own Speed/Stamina/Power/Guts/Wit (raised only through Special Training)          |
-| Scenario-linked | Green pill if the teammate is one of the 5 linked characters                                |
+| Column            | Content                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| Teammate name     | From support card, story character, or random recruit                                         |
+| Type badge        | Support card type (Speed/Stamina/Power/Guts/Wit/Pal/Group)                                    |
+| Spirit gauge      | 0–100 fill bar. Orange at full (burst-ready).                                                 |
+| Burst state       | One of 6 states: chargeable, charged, held, normal-spent, Extreme-chargeable, Extreme-spent   |
+| Stats             | Teammate's own Speed/Stamina/Power/Guts/Wit (raised only through Special Training)            |
+| Scenario-linked   | Green pill if the teammate is one of the 5 linked characters                                  |
 
 **State machine rendering:**
 
-```
+```text
 chargeable ──→ charged ──→ held ──→ normal spent ──→ Extreme chargeable ──→ Extreme spent
    (white)     (filled)   (deliberately              (NOT a dead end;       (final state
                 gauge       untriggered)               purple ring)           for this run)
                 full)
-```
+```text
 
 A "spent" teammate must NEVER render as consumed or resettable. They are one tier spent, one tier pending (D-223).
 
@@ -3172,7 +3167,7 @@ A "spent" teammate must NEVER render as consumed or resettable. They are one tie
 
 Full-width overlay, triggered when the Team Race countdown reaches zero.
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │  TEAM RACE — Round 2 of 4                                    │
 │  Opponent: [strongest] / [middle] / [weakest]                │
@@ -3188,7 +3183,7 @@ Full-width overlay, triggered when the Team Race countdown reaches zero.
 │                                                              │
 │  [ Confirm Lineup ]    [ Cancel ]                            │
 └──────────────────────────────────────────────────────────────┘
-```
+```text
 
 Circle indicators: ○ = disadvantaged, ● = favored. These are the GAME's own estimates, recorded by the Trainer. The tool does not compute them.
 
@@ -3198,11 +3193,11 @@ Circle indicators: ○ = disadvantaged, ● = favored. These are the GAME's own 
 
 A horizontal progress bar in the dashboard, below the resource strip.
 
-```
+```text
 Spirit Burst Progress
 ████████████████░░░░  11 of 13+
 Next reward: Gold hint Lv1, +30 [highest team stat], +30 SP
-```
+```text
 
 The denominator shifts at each threshold (6 → 9 → 12 → 13+). The bar must reflect the CURRENT threshold, not a fixed maximum.
 
@@ -3212,12 +3207,12 @@ The matching stat is determined by the team's highest stat rank. This is display
 
 Same three gates as URA Finale, but the April gate omits the bond requirement:
 
-```
+```text
 Valentine's Gate   60,000 / 40,000 fans   [ reached / not reached ]
 April Gate         70,000 / 60,000 fans   [ reached / not reached ]
                    (no bond requirement in Unity Cup)
 Christmas Gate     120,000 / 80,000 fans  [ reached / not reached ]
-```
+```text
 
 The tool must NOT render an Akikawa bond bar in the April gate for Unity Cup runs. Rendering it would state a requirement that does not exist in this scenario (Akikawa is absent; Riko Kashimoto stands in).
 
@@ -3231,18 +3226,18 @@ Trackblazer inverts the relationship between training and racing. In URA Finale 
 
 **What changes from the baseline:**
 
-| Axis              | URA Finale                                 | Trackblazer                                          |
-| ----------------- | ------------------------------------------ | ---------------------------------------------------- |
-| Goal structure    | Fixed mandatory race goals                 | Grade Point deadlines (no race goals)                |
-| Scenario currency | None                                       | Grade Points, Shop Coins                             |
-| Shop              | None                                       | In-run shop, restocks every 6 turns                  |
-| Facility level    | Repeat 4×                                  | Repeat 4× PLUS permanent +1 from shop                |
-| Scenario Link     | Aoi Kiryuin (1)                            | None (the only scenario with zero linked characters) |
-| Secret events     | Yes                                        | Do NOT trigger                                       |
-| Epithets          | None                                       | Race route bonuses (stat + hint rewards)             |
-| Rival Races       | None                                       | From Early August Junior Year                        |
-| Finale            | URA elimination (qualifier → semi → final) | Twinkle Star Climax: 3-race points league            |
-| Stat caps         | 1400 × 5                                   | 1200 / 1900 / 1200 / 1200 / 1500                     |
+| Axis                | URA Finale                                   | Trackblazer                                            |
+| ------------------- | -------------------------------------------- | ------------------------------------------------------ |
+| Goal structure      | Fixed mandatory race goals                   | Grade Point deadlines (no race goals)                  |
+| Scenario currency   | None                                         | Grade Points, Shop Coins                               |
+| Shop                | None                                         | In-run shop, restocks every 6 turns                    |
+| Facility level      | Repeat 4×                                    | Repeat 4× PLUS permanent +1 from shop                  |
+| Scenario Link       | Aoi Kiryuin (1)                              | None (the only scenario with zero linked characters)   |
+| Secret events       | Yes                                          | Do NOT trigger                                         |
+| Epithets            | None                                         | Race route bonuses (stat + hint rewards)               |
+| Rival Races         | None                                         | From Early August Junior Year                          |
+| Finale              | URA elimination (qualifier → semi → final)   | Twinkle Star Climax: 3-race points league              |
+| Stat caps           | 1400 × 5                                     | 1200 / 1900 / 1200 / 1200 / 1500                       |
 
 **What does NOT change:** the five training disciplines, Energy/Mood system, race mechanics, skill acquisition, inheritance, Summer Camp.
 
@@ -3254,7 +3249,7 @@ Trackblazer inverts the relationship between training and racing. In URA Finale 
 
 #### Flow TB-1: Grade Point Tracking
 
-```
+```text
 THE RUN HAS 4 OBJECTIVES (replacing URA's race goals)
 │
 ├─ Objective 1: Run the Debut Race
@@ -3286,11 +3281,11 @@ THE RUN HAS 4 OBJECTIVES (replacing URA's race goals)
    Over-shooting one deadline cannot fund the next.
    A Grade Point meter that shows a running total
    across periods would state the wrong thing.
-```
+```text
 
 #### Flow TB-2: Grade Point Earning (through racing)
 
-```
+```text
 TRAINER ENTERS A RACE
 │
 ├─ 1. Race selection.
@@ -3321,11 +3316,11 @@ TRAINER ENTERS A RACE
 └─ 4. Timeline entry appended.
       Entry shows: race name, grade, placement,
       Grade Points earned, Shop Coins earned.
-```
+```text
 
 #### Flow TB-3: Shop Coins & The Special Shop
 
-```
+```text
 COINS ARE EARNED THROUGH RACE PLACEMENT
 │
 ├─ Coin yield (independent of race grade):
@@ -3378,11 +3373,11 @@ COINS ARE EARNED THROUGH RACE PLACEMENT
     Unspent coins are worthless.
     Twinkle Star Climax races pay NO coins.
     The final shop before the Climax is the last chance to spend.
-```
+```text
 
 #### Flow TB-4: Epithet Route Tracking
 
-```
+```text
 EPITHETS ARE RACE ROUTE BONUSES
 Winning every race in a named route grants bonus stats or skill hints.
 │
@@ -3431,11 +3426,11 @@ Winning every race in a named route grants bonus stats or skill hints.
     Completed routes show the reward received.
     Routes are a LIST, not a grid of equal-sized cards.
     There are dozens of epithets; only a handful are live routes.
-```
+```text
 
 #### Flow TB-5: Rival Races
 
-```
+```text
 RIVAL RACES APPEAR RANDOMLY FROM EARLY AUGUST, JUNIOR YEAR
 Marked by a red/blue "VS" speech-bubble icon on the race button.
 │
@@ -3462,11 +3457,11 @@ Marked by a red/blue "VS" speech-bubble icon on the race button.
 └─ 5. Timeline entry appended.
       Entry shows: rival name, result (win/draw/loss),
       reward received (hint name or stat gains).
-```
+```text
 
 #### Flow TB-6: Facility Level (Trackblazer variant)
 
-```
+```text
 SAME BASE RULE AS URA: repeat one stat 4× to level up, max Lv5.
 
 PLUS: Permanent +1 levels purchasable from the shop.
@@ -3481,11 +3476,11 @@ The level chip must state its cause:
   Speed Lvl 5 ← 4× repetition + 1 purchased
 
 Not just "Lvl 5." The purchased path is unique to Trackblazer (D-222).
-```
+```text
 
 #### Flow TB-7: Race Fatigue Management
 
-```
+```text
 CONSECUTIVE RACES INCREASE FATIGUE RISK
 │
 ├─ Risk table (sourced from uma.guide):
@@ -3519,11 +3514,11 @@ CONSECUTIVE RACES INCREASE FATIGUE RISK
     It does NOT recommend whether to race or train.
     It shows the count, the sourced risk table, and the
     Trainer decides. (Planner Rules 1, 4, 5)
-```
+```text
 
 #### Flow TB-8: Twinkle Star Climax (The Finale)
 
-```
+```text
 REPLACES THE URA-STYLE ELIMINATION FINALS
 This is a 3-RACE POINTS LEAGUE, not a bracket.
 │
@@ -3576,11 +3571,11 @@ This is a 3-RACE POINTS LEAGUE, not a bracket.
       One entry per Climax race: race name, placement, VP earned,
       running VP total.
       Final entry: overall result, total VP, win/loss.
-```
+```text
 
 #### Flow TB-9: Unique Skill Level-Ups (Trackblazer variant)
 
-```
+```text
 DIFFERENT FROM URA AND UNITY CUP.
 Trackblazer uses an annual "Umamusume of the Year" selection.
 │
@@ -3601,7 +3596,7 @@ Trackblazer uses an annual "Umamusume of the Year" selection.
 │
 └─ The tool shows BOTH the fan count and the bond level
    as co-requirements. Showing only one would be incomplete.
-```
+```text
 
 ---
 
@@ -3609,7 +3604,7 @@ Trackblazer uses an annual "Umamusume of the Year" selection.
 
 #### FC-TB-1: Scenario Resource Strip (replaces baseline strip)
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────────────┐
 │ [ 13 turn(s) left ]  Haru Urara · Trainee · Trackblazer             │
 │                                                                      │
@@ -3618,14 +3613,14 @@ Trackblazer uses an annual "Umamusume of the Year" selection.
 │ Grade Points: 47 / 30 (current objective)  │  Deadline: 12 turns    │
 │ Shop Coins: 240  │  Shop restocks in: 4 turns                       │
 └──────────────────────────────────────────────────────────────────────┘
-```
+```text
 
-| Element            | Source                                       | Rendering rule                                                                                        |
-| ------------------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Grade Points       | Trainer-entered after each race              | Progress against the CURRENT objective only. Resets at each deadline. Never shows a cumulative total. |
-| GP Deadline        | Derived from the turn count to Late December | "N turns" countdown.                                                                                  |
-| Shop Coins         | Trainer-entered after each race              | Numeral. Unspent coins die with the run.                                                              |
-| Shop restock timer | Derived from the 6-turn cycle                | "N turns" countdown. The balance and the timer are both primary numbers.                              |
+| Element              | Source                                         | Rendering rule                                                                                          |
+| -------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Grade Points         | Trainer-entered after each race                | Progress against the CURRENT objective only. Resets at each deadline. Never shows a cumulative total.   |
+| GP Deadline          | Derived from the turn count to Late December   | "N turns" countdown.                                                                                    |
+| Shop Coins           | Trainer-entered after each race                | Numeral. Unspent coins die with the run.                                                                |
+| Shop restock timer   | Derived from the 6-turn cycle                  | "N turns" countdown. The balance and the timer are both primary numbers.                                |
 
 **What is NOT on the strip:** No Team Rank. No Spirit Burst count. No league rank. These are Unity Cup elements and must not appear (D-220: absent beats empty).
 
@@ -3633,7 +3628,7 @@ Trackblazer uses an annual "Umamusume of the Year" selection.
 
 Replaces the Race Calendar panel entirely. There is no calendar in Trackblazer.
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │  GRADE POINTS — Objective 2 of 4                             │
 │  ████████████████░░░░░░░░  47 / 60                          │
@@ -3645,7 +3640,7 @@ Replaces the Race Calendar panel entirely. There is no calendar in Trackblazer.
 │  Objective 3: +300 GP     locked                             │
 │  Objective 4: +300 GP     locked                             │
 └──────────────────────────────────────────────────────────────┘
-```
+```text
 
 **Critical rendering rules:**
 
@@ -3659,7 +3654,7 @@ Replaces the Race Calendar panel entirely. There is no calendar in Trackblazer.
 
 A collapsible panel accessible from the dashboard. Not always visible; the Trainer opens it when they want to spend.
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │  SPECIAL SHOP                                                │
 │  Coins: 240  │  Restocks in: 4 turns                        │
@@ -3680,7 +3675,7 @@ A collapsible panel accessible from the dashboard. Not always visible; the Train
 │  ⚠ Multi-turn items cannot be re-used while active.          │
 │  ⚠ Buying a weaker item after a stronger one overwrites it.  │
 └──────────────────────────────────────────────────────────────┘
-```
+```text
 
 **Rendering rules:**
 
@@ -3695,7 +3690,7 @@ A collapsible panel accessible from the dashboard. Not always visible; the Train
 
 A collapsible list panel, not a grid.
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │  EPITHET ROUTES                                              │
 │                                                              │
@@ -3712,7 +3707,7 @@ A collapsible list panel, not a grid.
 │  Completed:                                                  │
 │  ✓ Sprint Go-Getter (+10 to 2 random stats)                 │
 └──────────────────────────────────────────────────────────────┘
-```
+```text
 
 **Rendering rules:**
 
@@ -3725,7 +3720,7 @@ A collapsible list panel, not a grid.
 
 A badge on the race selection button, not a separate panel.
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │  [VS] Rival Race Available                                   │
 │  Opponent: Silence Suzuka                                    │
@@ -3734,7 +3729,7 @@ A badge on the race selection button, not a separate panel.
 │  ⚠ Only 1st place counts as a win.                          │
 │  ⚠ Requires C aptitude or better in Mile.                   │
 └──────────────────────────────────────────────────────────────┘
-```
+```text
 
 **Rendering rules:**
 
@@ -3746,13 +3741,13 @@ A badge on the race selection button, not a separate panel.
 
 A persistent chip in the dashboard, visible only when consecutive-race count ≥ 1.
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │  Race Fatigue: 2 consecutive races                           │
 │  Risk: Mood Down 33% (at 0 Energy) · Skin Outbreak 8%       │
 │  ⚠ Clears after Late December                                │
 └──────────────────────────────────────────────────────────────┘
-```
+```text
 
 **Rendering rules:**
 
@@ -3763,10 +3758,10 @@ A persistent chip in the dashboard, visible only when consecutive-race count ≥
 
 #### FC-TB-7: Facility Level Chip (Trackblazer variant)
 
-```
+```text
 Speed Lvl 5 ← 4× repetition + 1 purchased
 Stamina Lvl 3 ← 3× repetition
-```
+```text
 
 The purchased level is always called out separately. A level chip that does not distinguish earned from purchased levels would hide the fact that Trackblazer is the only scenario where facility level is partly bought (D-222).
 
@@ -3774,7 +3769,7 @@ The purchased level is always called out separately. A level chip that does not 
 
 Replaces the URA-style qualifier → semifinal → final progression.
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │  TWINKLE STAR CLIMAX                                         │
 │  3-Race Points League                                        │
@@ -3789,7 +3784,7 @@ Replaces the URA-style qualifier → semifinal → final progression.
 │  ⚠ Climax races pay NO Shop Coins.                           │
 │  ⚠ Save Hammers for these races (+10 all stats at base).    │
 └──────────────────────────────────────────────────────────────┘
-```
+```text
 
 **Rendering rules:**
 
@@ -3801,7 +3796,7 @@ Replaces the URA-style qualifier → semifinal → final progression.
 
 #### FC-TB-9: Unique Skill Gate Display (Trackblazer variant)
 
-```
+```text
 Umamusume of the Year — Junior
   Fans: 5,000 / 5,000  ✓
   Akikawa Bond: 19 / 19  ✓
@@ -3815,7 +3810,7 @@ Umamusume of the Year — Classic
 Umamusume of the Year — Senior
   Fans: 0 / 120,000  ✗
   Akikawa Bond: 0 / 51  ✗
-```
+```text
 
 **Rendering rules:**
 
@@ -3844,23 +3839,23 @@ These rules apply to both Unity Cup and Trackblazer, and to every scenario:
 
 The dashboard is one spine. The only thing that changes per scenario is which panels the goal region composes (D-220, D-240).
 
-| Panel                  | URA Finale  | Unity Cup                   | Trackblazer                  |
-| ---------------------- | ----------- | --------------------------- | ---------------------------- |
-| Turn chip              | Present     | Present                     | Present                      |
-| Energy gauge           | Present     | Present                     | Present                      |
-| Fan readout            | Present     | Present                     | Present                      |
-| Stat band              | Present     | Present                     | Present                      |
-| Timeline               | Present     | Present                     | Present                      |
-| Race Calendar          | Present     | Present                     | **ABSENT**                   |
-| Grade Point meter      | Absent      | Absent                      | **Present**                  |
-| Team Rank gauge        | Absent      | **Present**                 | Absent                       |
-| Spirit Burst roster    | Absent      | **Present**                 | Absent                       |
-| Team Race schedule     | Absent      | **Present**                 | Absent                       |
-| Shop Coin counter      | Absent      | Absent                      | **Present**                  |
-| Epithet tracker        | Absent      | Absent                      | **Present**                  |
-| Race Fatigue chip      | Absent      | Absent                      | **Present** (when count ≥ 1) |
-| Scenario Link identity | Aoi Kiryuin | 5 characters, via Team Name | **ABSENT**                   |
-| Facility level cause   | Repetition  | Team Rank                   | Repetition + Purchased       |
+| Panel                    | URA Finale    | Unity Cup                     | Trackblazer                    |
+| ------------------------ | ------------- | ----------------------------- | ------------------------------ |
+| Turn chip                | Present       | Present                       | Present                        |
+| Energy gauge             | Present       | Present                       | Present                        |
+| Fan readout              | Present       | Present                       | Present                        |
+| Stat band                | Present       | Present                       | Present                        |
+| Timeline                 | Present       | Present                       | Present                        |
+| Race Calendar            | Present       | Present                       | **ABSENT**                     |
+| Grade Point meter        | Absent        | Absent                        | **Present**                    |
+| Team Rank gauge          | Absent        | **Present**                   | Absent                         |
+| Spirit Burst roster      | Absent        | **Present**                   | Absent                         |
+| Team Race schedule       | Absent        | **Present**                   | Absent                         |
+| Shop Coin counter        | Absent        | Absent                        | **Present**                    |
+| Epithet tracker          | Absent        | Absent                        | **Present**                    |
+| Race Fatigue chip        | Absent        | Absent                        | **Present** (when count ≥ 1)   |
+| Scenario Link identity   | Aoi Kiryuin   | 5 characters, via Team Name   | **ABSENT**                     |
+| Facility level cause     | Repetition    | Team Rank                     | Repetition + Purchased         |
 
 An undescribed scenario (e.g., Our Grand Concert) renders the baseline strip plus its known caps, and nothing else (D-241).
 
@@ -3868,11 +3863,11 @@ An undescribed scenario (e.g., Our Grand Concert) renders the baseline strip plu
 
 Every facility level chip must state its cause. The cause differs per scenario:
 
-| Scenario    | Level chip text                             |
-| ----------- | ------------------------------------------- |
-| URA Finale  | `Speed Lvl 3 ← 3× repetition`               |
-| Unity Cup   | `Speed Lvl 4 ← Team Rank A`                 |
-| Trackblazer | `Speed Lvl 5 ← 4× repetition + 1 purchased` |
+| Scenario      | Level chip text                               |
+| ------------- | --------------------------------------------- |
+| URA Finale    | `Speed Lvl 3 ← 3× repetition`                 |
+| Unity Cup     | `Speed Lvl 4 ← Team Rank A`                   |
+| Trackblazer   | `Speed Lvl 5 ← 4× repetition + 1 purchased`   |
 
 A level chip without its cause is a review failure (D-222).
 
@@ -3892,13 +3887,13 @@ The tool marks the camp window on the timeline and shows the Lv5 override on all
 
 Timeline entries carry scenario-specific fields:
 
-| Field             | URA Finale          | Unity Cup                                       | Trackblazer                                        |
-| ----------------- | ------------------- | ----------------------------------------------- | -------------------------------------------------- |
-| Training gains    | Standard            | Standard + Special Training bonus + Burst gains | Standard                                           |
-| Teammate stats    | N/A                 | Per-teammate stat gains, Spirit gauge change    | N/A                                                |
-| Skill hint source | Event / card pool   | Burst: card's own hint pool (non-random)        | Event / card pool                                  |
-| Race result       | Placement, fans, SP | Placement, fans, SP, Team Race context          | Placement, Grade Points, Shop Coins                |
-| Scenario-specific | Goal completion     | Team Race result, league rank, Burst count      | Epithet progress, Rival Race result, fatigue count |
+| Field               | URA Finale            | Unity Cup                                         | Trackblazer                                          |
+| ------------------- | --------------------- | ------------------------------------------------- | ---------------------------------------------------- |
+| Training gains      | Standard              | Standard + Special Training bonus + Burst gains   | Standard                                             |
+| Teammate stats      | N/A                   | Per-teammate stat gains, Spirit gauge change      | N/A                                                  |
+| Skill hint source   | Event / card pool     | Burst: card's own hint pool (non-random)          | Event / card pool                                    |
+| Race result         | Placement, fans, SP   | Placement, fans, SP, Team Race context            | Placement, Grade Points, Shop Coins                  |
+| Scenario-specific   | Goal completion       | Team Race result, league rank, Burst count        | Epithet progress, Rival Race result, fatigue count   |
 
 ---
 
@@ -3906,27 +3901,27 @@ Timeline entries carry scenario-specific fields:
 
 ### 4.1 Unity Cup Component States
 
-| Component          | States                                                                                                  |
-| ------------------ | ------------------------------------------------------------------------------------------------------- |
-| Facility tab       | normal, 1-flame, ≥2-flame, burst-ready, extreme-ready, summer-camp-Lv5                                  |
-| Teammate card      | chargeable, charged, held, normal-spent, extreme-chargeable, extreme-spent                              |
-| Team Race panel    | countdown, composition, opponent-select, racing, result, retry-available                                |
-| Spirit Burst meter | filling (0–3), threshold-reached (4–6, 7–9, 10–12, 13+)                                                 |
-| Team Name picker   | locked (before event), selectable, confirmed                                                            |
-| Unique Skill gate  | not-reached, reached (fan-only for Feb/Dec), reached (fan+bond for April in URA; fan-only in Unity Cup) |
+| Component            | States                                                                                                    |
+| -------------------- | --------------------------------------------------------------------------------------------------------- |
+| Facility tab         | normal, 1-flame, ≥2-flame, burst-ready, extreme-ready, summer-camp-Lv5                                    |
+| Teammate card        | chargeable, charged, held, normal-spent, extreme-chargeable, extreme-spent                                |
+| Team Race panel      | countdown, composition, opponent-select, racing, result, retry-available                                  |
+| Spirit Burst meter   | filling (0–3), threshold-reached (4–6, 7–9, 10–12, 13+)                                                   |
+| Team Name picker     | locked (before event), selectable, confirmed                                                              |
+| Unique Skill gate    | not-reached, reached (fan-only for Feb/Dec), reached (fan+bond for April in URA; fan-only in Unity Cup)   |
 
 ### 4.2 Trackblazer Component States
 
-| Component           | States                                                                           |
-| ------------------- | -------------------------------------------------------------------------------- |
-| Grade Point meter   | objective-1 (debut), objective-2, objective-3, objective-4, completed            |
-| Shop panel          | locked (before debut), open, restocking (countdown), sale-active, limited-active |
-| Shop item           | available, held (N/5), active (multi-turn), overwritten, expired                 |
-| Epithet route       | hidden (0 races), active (1+), completed, reward-claimed                         |
-| Rival Race badge    | hidden, available, won, drawn, lost                                              |
-| Race Fatigue chip   | hidden (count 0), visible (count 1+), gone (after Late Dec)                      |
-| Climax panel        | locked, race-1, race-2, race-3, completed                                        |
-| Facility level chip | repetition-only, repetition+purchased, summer-camp-Lv5                           |
+| Component             | States                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------- |
+| Grade Point meter     | objective-1 (debut), objective-2, objective-3, objective-4, completed              |
+| Shop panel            | locked (before debut), open, restocking (countdown), sale-active, limited-active   |
+| Shop item             | available, held (N/5), active (multi-turn), overwritten, expired                   |
+| Epithet route         | hidden (0 races), active (1+), completed, reward-claimed                           |
+| Rival Race badge      | hidden, available, won, drawn, lost                                                |
+| Race Fatigue chip     | hidden (count 0), visible (count 1+), gone (after Late Dec)                        |
+| Climax panel          | locked, race-1, race-2, race-3, completed                                          |
+| Facility level chip   | repetition-only, repetition+purchased, summer-camp-Lv5                             |
 
 ---
 
@@ -3934,13 +3929,13 @@ Timeline entries carry scenario-specific fields:
 
 Items that remain unresolved and must NOT be filled by inference:
 
-| Item                                            | Status                                                                                                                                                                                               |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Our Grand Concert mechanics                     | ❌ Not extracted. Baseline + caps only. (D-241)                                                                                                                                                       |
-| Unity Cup facility activity names per facility  | ❌ Not captured for Unity Cup specifically.                                                                                                                                                           |
-| Trackblazer Debut Race Energy cost              | Sourced as "costs Energy" but exact value not stated.                                                                                                                                                |
-| Radiant Star skill details                      | Name appears in guide; mechanics not extracted.                                                                                                                                                      |
-| Trackblazer aptitude exception thresholds       | 30/200/300 and 60/200/300 sourced from uma.guide. Exact aptitude criteria for "high-dirt/low-turf" and "narrow-range turf" not formally defined.                                                     |
-| Extreme Spirit Burst bond-gauge bypass          | Whether the ≥80 bond requirement is also bypassed (in addition to the facility-type bypass) is NOT stated by any source. Carry as ❌.                                                                 |
-| Trackblazer GP thresholds for the 4th objective | All tracks converge at +300. Confirmed.                                                                                                                                                              |
-| Unity Cup pre-rework values                     | Superseded by the 2026-07-01 rework. Do not use pre-rework numbers. `docs/scenarios/02-unity-cup.md` is superseded by `06-unity-cup-gametora.md` wherever they disagree. |
+| Item                                              | Status                                                                                                                                                                                                 |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Our Grand Concert mechanics                       | ❌ Not extracted. Baseline + caps only. (D-241)                                                                                                                                                        |
+| Unity Cup facility activity names per facility    | ❌ Not captured for Unity Cup specifically.                                                                                                                                                            |
+| Trackblazer Debut Race Energy cost                | Sourced as "costs Energy" but exact value not stated.                                                                                                                                                  |
+| Radiant Star skill details                        | Name appears in guide; mechanics not extracted.                                                                                                                                                        |
+| Trackblazer aptitude exception thresholds         | 30/200/300 and 60/200/300 sourced from uma.guide. Exact aptitude criteria for "high-dirt/low-turf" and "narrow-range turf" not formally defined.                                                       |
+| Extreme Spirit Burst bond-gauge bypass            | Whether the ≥80 bond requirement is also bypassed (in addition to the facility-type bypass) is NOT stated by any source. Carry as ❌.                                                                  |
+| Trackblazer GP thresholds for the 4th objective   | All tracks converge at +300. Confirmed.                                                                                                                                                                |
+| Unity Cup pre-rework values                       | Superseded by the 2026-07-01 rework. Do not use pre-rework numbers. `docs/scenarios/02-unity-cup.md` is superseded by `06-unity-cup-gametora.md` wherever they disagree.                               |

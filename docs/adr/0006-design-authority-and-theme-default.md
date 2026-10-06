@@ -62,23 +62,26 @@ accessible on dark, muted greens on light; see research §3.4/§3.7).
 
 ## Alternatives Considered
 
-| Option | Description | Why Rejected |
-|---|---|---|
-| Keep both claims | Leave root and research contradicting | D5 violation; downstream agents cannot tell which to build |
-| Precedence by timestamp | Newest file wins silently | Works this time, hides exactly the conflict future readers need to see; violates "do not pick a winner silently" (escalation table) |
-| Merge into one document | Fold research into root | Destroys measured-anchor history and the research phase's provenance trail |
+| Option                    | Description                             | Why Rejected                                                                                                                          |
+| ------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Keep both claims          | Leave root and research contradicting   | D5 violation; downstream agents cannot tell which to build                                                                            |
+| Precedence by timestamp   | Newest file wins silently               | Works this time, hides exactly the conflict future readers need to see; violates "do not pick a winner silently" (escalation table)   |
+| Merge into one document   | Fold research into root                 | Destroys measured-anchor history and the research phase's provenance trail                                                            |
 
 ## Consequences
 
 ### Positive
+
 - One authority rule ends the DESIGN.md ambiguity class permanently.
 - The implemented theme-resolver work (D-104) requires no re-verification.
 
 ### Negative
+
 - The earlier "dark-first" sprint-authorization ruling is formally superseded; its
   documentation must carry the blockquote.
 
 ### Risks
+
 - A third same-day ruling arriving mid-implementation is now a demonstrated risk in this worktree
   (two concurrent documentation threads committed 8 docs commits today). Mitigation: this ADR is
   the single reconciliation point; cite it, not chat.
@@ -92,6 +95,7 @@ the `make lore` and `tools/` gates. No research body edits.
 ## Verification
 
 Binary checks:
+
 1. `grep -c "SUPERSEDED" docs/design-research/DESIGN.md DESIGN.md` is exactly 1, in the sprint-authorization artifact.
 2. Root `DESIGN.md` §2.1 and this ADR state the same default (light base).
 3. The theme resolver's fallback order in code matches the accepted option, proven by an HTTP

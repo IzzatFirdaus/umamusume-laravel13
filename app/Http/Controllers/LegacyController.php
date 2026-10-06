@@ -14,6 +14,7 @@ use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\Veteran;
 use App\Services\Legacy\AncestryGraph;
+use App\Services\Legacy\VeteranRow;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -76,7 +77,7 @@ class LegacyController extends Controller
         $rows = $veterans
             ->handle($filters, $request->query('pageSize'))
             ->withQueryString()
-            ->through(fn (Veteran $veteran): array => $this->veteranRow($veteran));
+            ->through(fn (Veteran $veteran): array => VeteranRow::from($veteran));
 
         // The roster the Trainer assigns from. Bounded and unpaginated on purpose: the builder's pick
         // list is a local search over a personal library, and a Trainer's own veterans number in the
@@ -140,7 +141,7 @@ class LegacyController extends Controller
             'run' => [
                 'id' => $run->id,
                 'status_label' => $run->status->label(),
-                'scenario_label' => $this->scenarioLabel($run),
+                'scenario_label' => VeteranRow::scenarioLabel($run),
             ],
             'trainee' => [
                 'id' => $run->umamusume->id,
@@ -153,6 +154,10 @@ class LegacyController extends Controller
             // is a claim about a client screen that cannot be completed that way.
             'hasSelection' => $payload !== null,
             'graph' => $this->graph($payload, $run),
+            // The stored grade, so the select opens on what the run holds rather than on "Not recorded".
+            // The edit form seeds from the payload for every field it carries; a re-confirm that wrote
+            // blank would drop a grade the Trainer already read.
+            'affinity' => $payload?->affinity,
             'roster' => $this->roster(),
             // The names of every `umamusume` the Trainer can type into an ancestor field. Grandparents
             // are frequently absent from the local catalogue, which is why they are names and not ids
@@ -264,9 +269,7 @@ class LegacyController extends Controller
         foreach ($legacies as $legacy) {
             $id = $legacy['legacy_id'] ?? null;
 
-            $ids[] = $id === null
-                ? null
-                : Veteran::query()->with('trainingRun')->find($id)?->trainingRun?->umamusume_id;
+            $ids[] = Veteran::traineeId(is_int($id) ? $id : null);
         }
 
         return [$ids[0] ?? null, $ids[1] ?? null];
@@ -294,30 +297,6 @@ class LegacyController extends Controller
                 'label' => $run->umamusume->name.' · run #'.$run->id,
             ])
             ->all();
-    }
-
-    /**
-     * One library row, as the browse list prints it.
-     *
-     * @return array<string, mixed>
-     */
-    private function veteranRow(Veteran $veteran): array
-    {
-        $run = $veteran->trainingRun;
-        $payload = $run->legacySelection();
-
-        return [
-            'id' => $veteran->id,
-            'run_id' => $run->id,
-            'trainee' => $run->umamusume->name,
-            'trainee_ja' => $run->umamusume->name_ja,
-            'scenario_label' => $this->scenarioLabel($run),
-            'status_label' => $run->status->label(),
-            'tags' => $veteran->tags ?? [],
-            'notes' => $veteran->notes,
-            'hasSelection' => $payload !== null,
-            'builder_url' => $payload === null ? null : route('legacy.builder', $run),
-        ];
     }
 
     /**
@@ -380,23 +359,5 @@ class LegacyController extends Controller
             $run->inheritanceParentA?->name,
             $run->inheritanceParentB?->name,
         ];
-    }
-
-    /**
-     * The scenario's label, or a named absence.
-     *
-     * The storage key is never printed: a label comes from `config/scenarios.php` and a run with no
-     * scenario says so (D-240).
-     */
-    private function scenarioLabel(TrainingRun $run): string
-    {
-        if ($run->scenario === null) {
-            return 'No scenario set';
-        }
-
-        /** @var array<string, array{label: string}> $scenarios */
-        $scenarios = config('scenarios.scenarios');
-
-        return $scenarios[$run->scenario]['label'] ?? $run->scenario;
     }
 }

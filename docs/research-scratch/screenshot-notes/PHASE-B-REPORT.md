@@ -10,13 +10,13 @@ The dispatch's Step 4 item names are used for items 1 through 14. Items 7 and 8 
 
 ## 1. Pre-flight
 
-| Check | Value |
-|---|---|
-| HEAD | `3dc8579`, branch `master` |
-| origin/master | 0 behind, 5 ahead |
-| `git status --short` | 32 entries: 21 modified, 3 staged deletions, 1 unstaged deletion, 6 untracked |
-| DB fingerprint, before | `5bf3ef99ff87f1bd6319cb18e432164ebbe96d2b4d3f7110f1802ecefe51bbbc` |
-| DB fingerprint, after | `5bf3ef99ff87f1bd6319cb18e432164ebbe96d2b4d3f7110f1802ecefe51bbbc` |
+| Check                  | Value                                                                         |  |
+| ---------------------- | ----------------------------------------------------------------------------- |  |
+| HEAD                   | `3dc8579`, branch `master`                                                    |  |
+| origin/master          | 0 behind, 5 ahead                                                             |  |
+| `git status --short`   | 32 entries: 21 modified, 3 staged deletions, 1 unstaged deletion, 6 untracked |  |
+| DB fingerprint, before | `5bf3ef99ff87f1bd6319cb18e432164ebbe96d2b4d3f7110f1802ecefe51bbbc`            |  |
+| DB fingerprint, after  | `5bf3ef99ff87f1bd6319cb18e432164ebbe96d2b4d3f7110f1802ecefe51bbbc`            |  |
 
 The working tree is dirty against tracked files this pass must not touch (`CONSTRAINTS.md`, `KNOWN-ISSUES.md`, `PLAN.md`, `docs/UMAMUSUME_REFERENCE.md`, several ADRs, a migration and a seeder). That is a concurrent peer, not this pass. `research-scratch/` is excluded by `.gitignore:87`, so nothing this pass wrote appears in that count.
 
@@ -28,14 +28,14 @@ Update from revision 5: that reorganization has since run. The two SHAs were re-
 
 ### 2.1 The canonical funnel, unchanged
 
-| Step | Rule | Count |
-|---|---|---|
-| 1 | Source rows | 1160 signature entries, 1159 PNGs on disk, 751 clusters |
-| 2 | `w == 1920 && h == 1080` | 173 frames on disk, held by 44 full-size clusters |
-| 3 | Cluster-rep match | 44 |
-| 4 | Portrait additions | 46 |
-| 5 | `185506` skip | Not applicable, excluded at step 2 |
-| 6 | Final derived | 46 |
+| Step | Rule                     | Count                                                   |  |
+| ---- | ------------------------ | ------------------------------------------------------- |  |
+| 1    | Source rows              | 1160 signature entries, 1159 PNGs on disk, 751 clusters |  |
+| 2    | `w == 1920 && h == 1080` | 173 frames on disk, held by 44 full-size clusters       |  |
+| 3    | Cluster-rep match        | 44                                                      |  |
+| 4    | Portrait additions       | 46                                                      |  |
+| 5    | `185506` skip            | Not applicable, excluded at step 2                      |  |
+| 6    | Final derived            | 46                                                      |  |
 
 The canonical 46 is not re-derived by this dispatch and was not touched. `clusters.json` was opened read-only.
 
@@ -45,11 +45,11 @@ The canonical 46 is not re-derived by this dispatch and was not touched. `cluste
 
 **Branch 1, the 233324 cluster: this is what produced every candidate.** `233324` is not a cluster rep. It is a member of cluster index 726 in `clusters.json`, whose `rep` is `2026-07-18 001811.png` and whose `count` is 58. Reading that member list for skill-selection screens that the canonical rule did not select yielded three frames, all at 1920 by 1080, all in the same temporal run as 233324:
 
-| Candidate | Derivation step | Distinct state |
-|---|---|---|
-| `2026-07-17 233332` | Branch 1, member of cluster 726 | Gold gradient selected row on "Swinging Maestro", three badged rows at 81, 162 and 323, no obstruction |
-| `2026-07-17 233339` | Branch 1, member of cluster 726 | An "Obtained" inverted row beside two rows at the same 144, obstruction |
-| `2026-07-17 233344` | Branch 1, member of cluster 726 | Two of three rows with no hint badge at all, red icon family, saturated Confirm, obstruction |
+| Candidate           | Derivation step                 | Distinct state                                                                                         |  |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------ |  |
+| `2026-07-17 233332` | Branch 1, member of cluster 726 | Gold gradient selected row on "Swinging Maestro", three badged rows at 81, 162 and 323, no obstruction |  |
+| `2026-07-17 233339` | Branch 1, member of cluster 726 | An "Obtained" inverted row beside two rows at the same 144, obstruction                                |  |
+| `2026-07-17 233344` | Branch 1, member of cluster 726 | Two of three rows with no hint badge at all, red icon family, saturated Confirm, obstruction           |  |
 
 **Branch 2, the contact sheets, was not exercised.** The cap of three new notes was reached on branch 1, and the dispatch's own branch-1 clause says no sheet scan is needed once a member candidate is found. It also could not have produced a full-desktop member candidate: see item 13.1.
 
@@ -77,12 +77,12 @@ Unchanged from revision 3, plus the expansion reads. All three expansion frames 
 
 ## 4. Notes produced
 
-| Set | Count | Path |
-|---|---|---|
-| Canonical | 46 | `docs/research-scratch/screenshot-notes/` |
-| Expansion | 3 | `docs/research-scratch/screenshot-notes/` |
-| **Total** | **49** | |
-| Reclassified, outside both sets | 3 | `docs/research-scratch/screenshot-notes-extras/` |
+| Set                             | Count  | Path                                             |  |
+| ------------------------------- | ------ | ------------------------------------------------ |  |
+| Canonical                       | 46     | `docs/research-scratch/screenshot-notes/`        |  |
+| Expansion                       | 3      | `docs/research-scratch/screenshot-notes/`        |  |
+| **Total**                       | **49** |                                                  |  |
+| Reclassified, outside both sets | 3      | `docs/research-scratch/screenshot-notes-extras/` |  |
 
 Expansion notes: `Screenshot 2026-07-17 233332.md`, `233339.md`, `233344.md`. All 11 fields in the canonical order, all `Category: skill-selection`.
 
@@ -96,16 +96,16 @@ Against the corrected 49-note set: **23 notes carry a trainee name in field 4, 2
 
 Recounted across all 49 notes by reading field 1 from each file:
 
-| Category | Canonical | Expansion | Total |
-|---|---|---|---|
-| `training` | 14 | 0 | 14 |
-| `race-entry` | 10 | 0 | 10 |
-| `career-progression` | 9 | 0 | 9 |
-| `other` | 5 | 0 | 5 |
-| `skill-selection` | 2 | 3 | **5** |
-| `menu` | 3 | 0 | 3 |
-| `character-detail` | 3 | 0 | 3 |
-| **Total** | 46 | 3 | **49** |
+| Category             | Canonical | Expansion | Total  |  |
+| -------------------- | --------- | --------- | ------ |  |
+| `training`           | 14        | 0         | 14     |  |
+| `race-entry`         | 10        | 0         | 10     |  |
+| `career-progression` | 9         | 0         | 9      |  |
+| `other`              | 5         | 0         | 5      |  |
+| `skill-selection`    | 2         | 3         | **5**  |  |
+| `menu`               | 3         | 0         | 3      |  |
+| `character-detail`   | 3         | 0         | 3      |  |
+| **Total**            | 46        | 3         | **49** |  |
 
 ## 6. In-scope count
 
@@ -129,12 +129,12 @@ The expansion narrowed no gap. It deepened a category rather than reaching a new
 
 Run against the canonical 46 plus the 3 expansion notes, floor of three, four in-scope categories:
 
-| Category | Count | Floor |
-|---|---|---|
-| `training` | 14 | clears |
-| `race-entry` | 10 | clears |
-| `career-progression` | 9 | clears |
-| `skill-selection` | 5 | clears |
+| Category             | Count | Floor  |  |
+| -------------------- | ----- | ------ |  |
+| `training`           | 14    | clears |  |
+| `race-entry`         | 10    | clears |  |
+| `career-progression` | 9     | clears |  |
+| `skill-selection`    | 5     | clears |  |
 
 **No in-scope category holds fewer than three. The gate CLEARS, and Stage 2 ran.**
 
@@ -166,7 +166,6 @@ This item authorizes Stage 2 for this dispatch. It does not authorize anything b
 
 The paths in the "Read, not written" paragraph above are the paths as they stood when that dispatch read them, and are kept verbatim as a record of what was opened. The `_scratch/` reorganization moved four of them afterwards; item 13.5 and item 14 carry the current locations.
 
-
 ### 11.1 Sequencing rule
 
 Any future structural change to `docs/design-research/_scratch/` requires a provenance freeze first: existing report and synthesis path references are updated in the same dispatch as the move, not in a follow-up. A relocation after the fact leaves stale paths paired with correct hashes, which is worse than either being wrong alone.
@@ -179,12 +178,12 @@ Any corpus edit that cites a note path must cite a path that is tracked.
 
 ## 12. Skills
 
-| Skill | Result |
-|---|---|
-| `ponytail` | Resolved without a Skill invocation. It is loaded as an always-on project rule from `.qoder/rules/ponytail.md` and was in context for the whole pass. No refusal. |
-| `gstack:careful` | Loaded. It activated a session-scoped destructive-command guardrail over `rm -rf`, `DROP TABLE`, force-push, `git reset --hard`, `git checkout .`, `kubectl delete` and `docker rm -f`. No refusal. It then misfired on read-only commands and could not be unloaded, see item 12.1. |
-| `source-driven-development` | Loaded. No refusal. Its process targets framework-specific code decisions, and this pass wrote no code, so steps 1 through 3 had nothing to apply to. Its retrieval-safety clause and its "UNVERIFIED" discipline do apply and are reflected in the synthesis, which names what no note establishes rather than filling the gap. |
-| `antislop-copywriting` | Loaded. No refusal. Applied to the synthesis and this report: no em dashes, no invented fact or figure, no buzzword, no generic conclusion, every claim traceable to a cited note. Its inline-header-list pattern was checked and the numbered invariant labels in the synthesis kept, on the skill's own carve-out for structural labels. Its no-fabrication rule (R-17, R-36, R-38) is what blocked the mood-pill hex edit; see item 15. |
+| Skill                       | Result                                                                                                                                                                                                                                                                                                                                                                                                                                     |  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |  |
+| `ponytail`                  | Resolved without a Skill invocation. It is loaded as an always-on project rule from `.qoder/rules/ponytail.md` and was in context for the whole pass. No refusal.                                                                                                                                                                                                                                                                          |  |
+| `gstack:careful`            | Loaded. It activated a session-scoped destructive-command guardrail over `rm -rf`, `DROP TABLE`, force-push, `git reset --hard`, `git checkout .`, `kubectl delete` and `docker rm -f`. No refusal. It then misfired on read-only commands and could not be unloaded, see item 12.1.                                                                                                                                                       |  |
+| `source-driven-development` | Loaded. No refusal. Its process targets framework-specific code decisions, and this pass wrote no code, so steps 1 through 3 had nothing to apply to. Its retrieval-safety clause and its "UNVERIFIED" discipline do apply and are reflected in the synthesis, which names what no note establishes rather than filling the gap.                                                                                                           |  |
+| `antislop-copywriting`      | Loaded. No refusal. Applied to the synthesis and this report: no em dashes, no invented fact or figure, no buzzword, no generic conclusion, every claim traceable to a cited note. Its inline-header-list pattern was checked and the numbered invariant labels in the synthesis kept, on the skill's own carve-out for structural labels. Its no-fabrication rule (R-17, R-36, R-38) is what blocked the mood-pill hex edit; see item 15. |  |
 
 ### 12.1 `gstack:careful` outlived its dispatch and produced false positives
 
@@ -214,15 +213,15 @@ The pattern across all three is the same: the synthesis summarized its notes and
 
 ## 14. Provenance
 
-| Artefact | Path | SHA-256 | Status |
-|---|---|---|---|
-| Frame signatures | `docs/design-research/_scratch/analysis/scenarios/signatures.json` (moved from `docs/design-research/_scratch/signatures.json` at 2026-10-03 by `reorganize-design-scratch.ps1`), SHA `0111030b32c012fb9e5f4e210ba7af9e589f8ae3efc1e49d384ef30b5a3135bb` | `0111030b32c012fb9e5f4e210ba7af9e589f8ae3efc1e49d384ef30b5a3135bb` | Verified at the new path in Step 0 of the patch dispatch, unchanged from the value revision 2 recorded at the old path. Read only |
-| Screen clusters, canonical | `docs/design-research/_scratch/analysis/color/clusters.json` (moved from `docs/design-research/_scratch/clusters.json` at 2026-10-03 by `reorganize-design-scratch.ps1`), SHA `0ce49656c816c87befc2787c7007c00845806241cc6f350bab9e3bd04d7c4d1d` | `0ce49656c816c87befc2787c7007c00845806241cc6f350bab9e3bd04d7c4d1d` | Verified at the new path in Step 0, unchanged. Read only. Source of the branch-1 member list. **Misfiled:** it is a frame-clustering output and sits under `analysis/color/` because the reorg script matched it on the word "clusters". Left in place; see item 13.5 and the sequencing rule in item 11.1 |
-| Screenshot inventory | `docs/research-scratch/screenshots-inventory.csv` | `aef857cea24cf4cdd3cbc33726b2b8de2053d673cd2f9e7daffccdcb0428810b` | Read only. `hash_group` and `category` both degenerate |
-| Cluster table | `docs/research-scratch/screenshot-notes/_screen-clusters.csv` | regenerated in revision 3 | 751 rows, `full_size` yes on 44, `source_sha` on every row. Not touched by this dispatch |
-| Readability sample | `docs/research-scratch/screenshot-notes/_readability-sample.csv` | regenerated in revision 3 | 46 canonical rows. Does not carry the expansion, see item 10.6 |
-| Derivation script | `docs/research-scratch/screenshot-notes/_derive-csvs.py` | from revision 3 | Reproduction path for the two CSVs above |
-| Phase C synthesis | `research-scratch/phase-c-synthesis.md` | this revision | Handoff. Cites note ids throughout |
+| Artefact                   | Path                                                                                                                                                                                                                                                     | SHA-256                                                            | Status                                                                                                                                                                                                                                                                                                     |  |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |  |
+| Frame signatures           | `docs/design-research/_scratch/analysis/scenarios/signatures.json` (moved from `docs/design-research/_scratch/signatures.json` at 2026-10-03 by `reorganize-design-scratch.ps1`), SHA `0111030b32c012fb9e5f4e210ba7af9e589f8ae3efc1e49d384ef30b5a3135bb` | `0111030b32c012fb9e5f4e210ba7af9e589f8ae3efc1e49d384ef30b5a3135bb` | Verified at the new path in Step 0 of the patch dispatch, unchanged from the value revision 2 recorded at the old path. Read only                                                                                                                                                                          |  |
+| Screen clusters, canonical | `docs/design-research/_scratch/analysis/color/clusters.json` (moved from `docs/design-research/_scratch/clusters.json` at 2026-10-03 by `reorganize-design-scratch.ps1`), SHA `0ce49656c816c87befc2787c7007c00845806241cc6f350bab9e3bd04d7c4d1d`         | `0ce49656c816c87befc2787c7007c00845806241cc6f350bab9e3bd04d7c4d1d` | Verified at the new path in Step 0, unchanged. Read only. Source of the branch-1 member list. **Misfiled:** it is a frame-clustering output and sits under `analysis/color/` because the reorg script matched it on the word "clusters". Left in place; see item 13.5 and the sequencing rule in item 11.1 |  |
+| Screenshot inventory       | `docs/research-scratch/screenshots-inventory.csv`                                                                                                                                                                                                        | `aef857cea24cf4cdd3cbc33726b2b8de2053d673cd2f9e7daffccdcb0428810b` | Read only. `hash_group` and `category` both degenerate                                                                                                                                                                                                                                                     |  |
+| Cluster table              | `docs/research-scratch/screenshot-notes/_screen-clusters.csv`                                                                                                                                                                                            | regenerated in revision 3                                          | 751 rows, `full_size` yes on 44, `source_sha` on every row. Not touched by this dispatch                                                                                                                                                                                                                   |  |
+| Readability sample         | `docs/research-scratch/screenshot-notes/_readability-sample.csv`                                                                                                                                                                                         | regenerated in revision 3                                          | 46 canonical rows. Does not carry the expansion, see item 10.6                                                                                                                                                                                                                                             |  |
+| Derivation script          | `docs/research-scratch/screenshot-notes/_derive-csvs.py`                                                                                                                                                                                                 | from revision 3                                                    | Reproduction path for the two CSVs above                                                                                                                                                                                                                                                                   |  |
+| Phase C synthesis          | `research-scratch/phase-c-synthesis.md`                                                                                                                                                                                                                  | this revision                                                      | Handoff. Cites note ids throughout                                                                                                                                                                                                                                                                         |  |
 
 `research-scratch/` is excluded by `.gitignore:87`, so everything this pass wrote is untracked. `docs/design-research/_scratch/` is tracked, and no revision of this pass wrote into it.
 
@@ -236,13 +235,13 @@ Applied 2026-10-03 on the owner's rulings 1(a), 2(a), 3(a) and 4(a), with 4(c) r
 
 **Five edits applied to the corpus:**
 
-| Edit | Content | Authority |
-|---|---|---|
-| A | `### Preamble: what the 44 representatives are` plus `### Standing note: the corpus spans two trains`, inserted before `### How this was produced` | Ruling 1(a), synthesis item 11 |
-| B | `**Verified against a second measurement, 2026-10-03.**` note beneath the `### Corpus shape` table | Ruling 4(a), synthesis item 12 |
-| C | `### Additions from the Phase B note set`, eight entries appended to the section | Ruling 4(a), synthesis items 2 to 8 and 10 |
-| E | The standing note widened from one frame to the whole `2026-07-14` session | Owner follow-up, item 1 |
-| F | Entry 9 in the additions subsection, the stat denominators | Owner follow-up, item 2, re-authorization of synthesis item 9 |
+| Edit | Content                                                                                                                                            | Authority                                                     |  |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |  |
+| A    | `### Preamble: what the 44 representatives are` plus `### Standing note: the corpus spans two trains`, inserted before `### How this was produced` | Ruling 1(a), synthesis item 11                                |  |
+| B    | `**Verified against a second measurement, 2026-10-03.**` note beneath the `### Corpus shape` table                                                 | Ruling 4(a), synthesis item 12                                |  |
+| C    | `### Additions from the Phase B note set`, eight entries appended to the section                                                                   | Ruling 4(a), synthesis items 2 to 8 and 10                    |  |
+| E    | The standing note widened from one frame to the whole `2026-07-14` session                                                                         | Owner follow-up, item 1                                       |  |
+| F    | Entry 9 in the additions subsection, the stat denominators                                                                                         | Owner follow-up, item 2, re-authorization of synthesis item 9 |  |
 
 No row of the `### Screen-type coverage` table was edited or renumbered, and no scenario-coverage row was touched. After all five edits the section holds its original 8 subsections plus the 2 new ones, and the coverage table is byte-identical.
 
@@ -256,15 +255,15 @@ The premise that this note settles the provisional tokens came from the synthesi
 
 **Trainee classification pass, Ruling 4(c):** `docs/research-scratch/trainee-classification.csv`, 52 rows, one per note across both folders. Columns are the dispatch's five plus `stat_bearing`, which Step 3.4 requires.
 
-| Measure | Count |
-|---|---|
-| Attributed to Rice Shower | 23 |
-| Attributed to Curren Chan | 1 |
-| Attributed to another trainee | 0 |
-| `unattributed` | 28 |
-| `unattributed` and stat-bearing | 16 |
-| Rows resolved by field 2 as screen title | 0 |
-| Rows marked `multi` | 0 |
+| Measure                                  | Count |  |
+| ---------------------------------------- | ----- |  |
+| Attributed to Rice Shower                | 23    |  |
+| Attributed to Curren Chan                | 1     |  |
+| Attributed to another trainee            | 0     |  |
+| `unattributed`                           | 28    |  |
+| `unattributed` and stat-bearing          | 16    |  |
+| Rows resolved by field 2 as screen title | 0     |  |
+| Rows marked `multi`                      | 0     |  |
 
 The single Curren Chan row is `2026-07-14 025344`, which is the hazard's origin. The 28 unattributed rows are unattributed **as a property of the note's wording, not of the frame**: several of these frames render the trainee card and its name, and the note describes that card without quoting it. `2026-07-18 154126` shows the opposite case, an extras note that does quote "[Rosy Dreams] Rice Shower" and so attributes. Per the dispatch's instruction the note is the source and nothing was inferred, so no frame was re-read to promote an unattributed row.
 

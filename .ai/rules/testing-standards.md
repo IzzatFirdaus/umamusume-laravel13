@@ -20,10 +20,12 @@ This project uses **Pest 4** as its test runner. All tests live under `tests/Uni
 
 <code-snippet name="pest-global-binding" lang="php">
 uses(TestCase::class, RefreshDatabase::class)
-    ->in('Feature')
-    ->beforeEach(function (): void {
-        $this->withoutVite();
-    });
+```text
+->in('Feature')
+->beforeEach(function (): void {
+    $this->withoutVite();
+});
+```
 </code-snippet>
 
 - The binding is scoped to `Feature`; `tests/Unit` runs without a database.

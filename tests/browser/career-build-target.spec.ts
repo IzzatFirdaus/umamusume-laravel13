@@ -15,9 +15,9 @@ import { test, expect } from '@playwright/test';
  * on the wrapper: Playwright's `toHaveText` reads `textContent` including `aria-hidden` text, so it
  * would see the glyph the name deliberately hides (`legacy.spec.ts` is red for exactly that reason).
  *
- * No axe pass: `@axe-core/playwright` and `axe-core` are both absent from `node_modules` and adding
- * a dependency needs owner approval (AGENTS.md §5), so the plan §12.5 fallback applies and the checks
- * below are the hand-rolled ones §12.2 names.
+ * Axe coverage is provided by `tests/browser/accessibility.spec.ts`: `@axe-core/playwright` is installed
+ * and scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`; this spec retains the hand-rolled checks
+ * for target size, keyboard path, focus order, reflow and console errors.
  */
 
 test.describe('Build Target and the provenance badge', () => {
@@ -28,7 +28,9 @@ test.describe('Build Target and the provenance badge', () => {
         await expect(page.getByRole('heading', { name: 'Your target' }).first()).toBeVisible();
         await expect(page.getByRole('link', { name: 'Your target' })).toHaveAttribute('aria-current', 'step');
         await expect(page.getByText('Step 3 of 6').first()).toBeVisible();
-        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(3);
+        // All six steps are live links since D7: the `to: null` branch stays in `SetupLayout` for the
+        // next slice that lands a step ahead of its screen, but it renders nothing today.
+        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(0);
 
         // No scenario yet: the page names it and every cap is the base cap with no bonus.
         await expect(page.getByTitle('No scenario has been chosen in this setup draft yet, so every cap below is the base cap with no scenario bonus.'))

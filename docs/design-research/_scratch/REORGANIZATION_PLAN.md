@@ -2,20 +2,20 @@
 
 ## Current State Analysis
 
-| Category | Count | Examples |
-|----------|-------|----------|
-| Python scripts (analysis/patching) | 21 | `patch_*.py`, `probe*.py`, `cluster.py`, `tokens.py`, `triage.py` |
-| JSON data (analysis outputs) | 6 | `clusters.json`, `colorprobes*.json`, `accents.json`, `signatures.json`, `tokens.json` |
-| PNG images - Design system sheets | 19 | `sheet_1of19.png` ... `sheet_19of19.png` |
-| PNG images - Color/cluster analysis | 3 | `cs_bigclusters_1of1.png`, `cs_wide_1of2.png`, `cs_wide_2of2.png` |
-| PNG images - Scenario chips | 1 | `scenario_chips.png` |
-| PNG images - Legacy UI crops | 6 | `affinity_*.png`, `legacyslots_*.png`, `rank_band_*.png`, `sparks_head_*.png`, `statband_*.png` |
-| PNG images - Web UI references (EN/JP) | 10 | `en-home-*.png`, `jp-home-*.png`, `global-*.png` |
-| Error log | 1 | `triage.err` |
+| Category                                 | Count     | Examples                                                                                          |
+| ---------------------------------------- | --------- | ------------------------------------------------------------------------------------------------- |
+| Python scripts (analysis/patching)       | 21        | `patch_*.py`, `probe*.py`, `cluster.py`, `tokens.py`, `triage.py`                                 |
+| JSON data (analysis outputs)             | 6         | `clusters.json`, `colorprobes*.json`, `accents.json`, `signatures.json`, `tokens.json`            |
+| PNG images - Design system sheets        | 19        | `sheet_1of19.png` ... `sheet_19of19.png`                                                          |
+| PNG images - Color/cluster analysis      | 3         | `cs_bigclusters_1of1.png`, `cs_wide_1of2.png`, `cs_wide_2of2.png`                                 |
+| PNG images - Scenario chips              | 1         | `scenario_chips.png`                                                                              |
+| PNG images - Legacy UI crops             | 6         | `affinity_*.png`, `legacyslots_*.png`, `rank_band_*.png`, `sparks_head_*.png`, `statband_*.png`   |
+| PNG images - Web UI references (EN/JP)   | 10        | `en-home-*.png`, `jp-home-*.png`, `global-*.png`                                                  |
+| Error log                                | 1         | `triage.err`                                                                                      |
 
 ## Proposed Folder Structure
 
-```
+```text
 docs/design-research/_scratch/
 ├── analysis/
 │   ├── color/              # Color clustering, probes, accents
@@ -79,26 +79,26 @@ docs/design-research/_scratch/
 │       └── fix_review.py
 └── logs/
     └── triage.err
-```
+```text
 
 ## Mapping Rules
 
-| Pattern | Destination |
-|---------|-------------|
-| `sheet_*.png` | `references/sheets/` |
-| `cs_*.png` | `analysis/color/` |
-| `scenario_chips.png` | `analysis/scenarios/` |
-| `signatures.json` | `analysis/scenarios/` |
-| `accents.json`, `accents.py` | `analysis/color/` |
-| `clusters.json`, `cluster.py` | `analysis/color/` |
-| `colorprobes*.json` | `analysis/color/` |
-| `tokens.json`, `tokens.py` | `analysis/tokens/` |
-| `statband_*.png`, `rank_band_*.png`, `sparks_head_*.png`, `affinity_*.png`, `legacyslots_*.png` | `analysis/components/` |
-| `en-*.png`, `jp-*.png`, `global-*.png` | `references/web/` |
-| `legacy_crops/*` | `analysis/components/` (merged) |
-| `web/*` | `references/web/` (merged) |
-| `patch_*.py` | `scripts/patch/` |
-| `probe*.py`, `scenario_probe.py`, `sheet.py` | `scripts/probe/` |
-| `cluster.py`, `triage.py` | `scripts/analysis/` |
-| `fix_*.py` | `scripts/utils/` |
-| `triage.err` | `logs/` |
+| Pattern                                                                                           | Destination                       |
+| ------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `sheet_*.png`                                                                                     | `references/sheets/`              |
+| `cs_*.png`                                                                                        | `analysis/color/`                 |
+| `scenario_chips.png`                                                                              | `analysis/scenarios/`             |
+| `signatures.json`                                                                                 | `analysis/scenarios/`             |
+| `accents.json`, `accents.py`                                                                      | `analysis/color/`                 |
+| `clusters.json`, `cluster.py`                                                                     | `analysis/color/`                 |
+| `colorprobes*.json`                                                                               | `analysis/color/`                 |
+| `tokens.json`, `tokens.py`                                                                        | `analysis/tokens/`                |
+| `statband_*.png`, `rank_band_*.png`, `sparks_head_*.png`, `affinity_*.png`, `legacyslots_*.png`   | `analysis/components/`            |
+| `en-*.png`, `jp-*.png`, `global-*.png`                                                            | `references/web/`                 |
+| `legacy_crops/*`                                                                                  | `analysis/components/` (merged)   |
+| `web/*`                                                                                           | `references/web/` (merged)        |
+| `patch_*.py`                                                                                      | `scripts/patch/`                  |
+| `probe*.py`, `scenario_probe.py`, `sheet.py`                                                      | `scripts/probe/`                  |
+| `cluster.py`, `triage.py`                                                                         | `scripts/analysis/`               |
+| `fix_*.py`                                                                                        | `scripts/utils/`                  |
+| `triage.err`                                                                                      | `logs/`                           |

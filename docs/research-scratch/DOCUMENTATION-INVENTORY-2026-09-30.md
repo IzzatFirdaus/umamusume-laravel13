@@ -7,18 +7,18 @@ This is an inventory. It merges nothing, deletes nothing, edits nothing. Section
 
 ## 1. Skills invoked
 
-| Skill | Used for | Result |
-|---|---|---|
-| `documentation-and-adrs` | Governing skill. Type classification, ADR lifecycle, the heading-over-line citation convention | Loaded. Its ADR template says `docs/decisions/`; this repo uses `docs/adr/NNNN-title.md` with an inline `Status:` line, so the repo convention won, as the skill instructs |
-| `gstack:careful` | The read-only fence | Loaded. Its own telemetry line writes to `~/.gstack/analytics/skill-usage.jsonl`; I skipped that write because the fence says read-only |
-| `antislop-copywriting` | Every Description cell and every finding in this file | Loaded. No em dash in this document's own prose except inside verbatim filenames |
-| `doubt-driven-development` | The Status column, which carries a burden of proof | Loaded earlier in the session. Its fresh-context reviewer step was not run; see section 2, limit 5 |
-| `source-driven-development` | Citation resolution: a link is live only if the target resolves | Applied through the scan in section 5, not by fetching external docs |
-| `humanizer` | Final prose pass | Requested by the brief. Not invoked before writing this draft; it is still owed on the sections the owner decides to keep |
-| `using-agent-skills` | Confirming the skill set named in the brief is current | Confirmed against the live session roster rather than by loading the skill |
-| `interview-me` | Ambiguous fence | Not needed as a flow: the two ambiguities went to `AskUserQuestion` and both were answered (see section 2, limit 1) |
-| `document-generate` (Diataxis) | Type sanity-check | Unavailable under that bare name in this session; it is `gstack:document-generate`. Diataxis was applied by hand to the reference/explanation split in section 3.1 |
-| `guard` | Alternative fence | Not loaded. The brief allowed `careful` or `guard`; `careful` was taken |
+| Skill                            | Used for                                                                                         | Result                                                                                                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `documentation-and-adrs`         | Governing skill. Type classification, ADR lifecycle, the heading-over-line citation convention   | Loaded. Its ADR template says `docs/decisions/`; this repo uses `docs/adr/NNNN-title.md` with an inline `Status:` line, so the repo convention won, as the skill instructs   |
+| `gstack:careful`                 | The read-only fence                                                                              | Loaded. Its own telemetry line writes to `~/.gstack/analytics/skill-usage.jsonl`; I skipped that write because the fence says read-only                                      |
+| `antislop-copywriting`           | Every Description cell and every finding in this file                                            | Loaded. No em dash in this document's own prose except inside verbatim filenames                                                                                             |
+| `doubt-driven-development`       | The Status column, which carries a burden of proof                                               | Loaded earlier in the session. Its fresh-context reviewer step was not run; see section 2, limit 5                                                                           |
+| `source-driven-development`      | Citation resolution: a link is live only if the target resolves                                  | Applied through the scan in section 5, not by fetching external docs                                                                                                         |
+| `humanizer`                      | Final prose pass                                                                                 | Requested by the brief. Not invoked before writing this draft; it is still owed on the sections the owner decides to keep                                                    |
+| `using-agent-skills`             | Confirming the skill set named in the brief is current                                           | Confirmed against the live session roster rather than by loading the skill                                                                                                   |
+| `interview-me`                   | Ambiguous fence                                                                                  | Not needed as a flow: the two ambiguities went to `AskUserQuestion` and both were answered (see section 2, limit 1)                                                          |
+| `document-generate` (Diataxis)   | Type sanity-check                                                                                | Unavailable under that bare name in this session; it is `gstack:document-generate`. Diataxis was applied by hand to the reference/explanation split in section 3.1           |
+| `guard`                          | Alternative fence                                                                                | Not loaded. The brief allowed `careful` or `guard`; `careful` was taken                                                                                                      |
 
 ## 2. Method note, and its limits
 
@@ -40,13 +40,13 @@ This is an inventory. It merges nothing, deletes nothing, edits nothing. Section
 
 **202 files in scope.** 193 tracked, 9 untracked, 0 ignored-and-in-scope.
 
-| Dimension | Breakdown |
-|---|---|
-| By tracked state | tracked 193, untracked 9 |
-| By extension | `.md` 100, `.txt` 95, `.json` 6, extensionless 1 (`Makefile`) |
-| By directory | `docs/frontend-review/2026-09-28/` 97, `docs/design-research/**` 44, repo root 13, `docs/adr/` 13, `.ai/**` 12, `docs/scenarios/` 9, `docs/requests/**` 8, `docs/` (top) 5, `docs/data/` 3, `docs/flows/` 1, `docs/GATE-REGISTRY.md` and 3 sibling top-level `docs/` files counted above, `public/` 1 |
-| By type | probe-record 104, reference 19, verification 15, adr 13, audit-report 9, constraint 6, brief 6, config-doc 5, spec 5, scenario 5, plan 3, research 3, readme 2, notes 2, other 2, session-log 2, issue-register 1 |
-| By status | current 169, unknown 20, stale 8, superseded 5, duplicate 0 |
+| Dimension          | Breakdown                                                                                                                                                                                                                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| By tracked state   | tracked 193, untracked 9                                                                                                                                                                                                                                                                                |
+| By extension       | `.md` 100, `.txt` 95, `.json` 6, extensionless 1 (`Makefile`)                                                                                                                                                                                                                                           |
+| By directory       | `docs/frontend-review/2026-09-28/` 97, `docs/design-research/**` 44, repo root 13, `docs/adr/` 13, `.ai/**` 12, `docs/scenarios/` 9, `docs/requests/**` 8, `docs/` (top) 5, `docs/data/` 3, `docs/flows/` 1, `docs/GATE-REGISTRY.md` and 3 sibling top-level `docs/` files counted above, `public/` 1   |
+| By type            | probe-record 104, reference 19, verification 15, adr 13, audit-report 9, constraint 6, brief 6, config-doc 5, spec 5, scenario 5, plan 3, research 3, readme 2, notes 2, other 2, session-log 2, issue-register 1                                                                                       |
+| By status          | current 169, unknown 20, stale 8, superseded 5, duplicate 0                                                                                                                                                                                                                                             |
 
 Why `duplicate` is empty: no two files here are duplicates in the sense a consolidation pass can act on. Six pairs cover overlapping ground while describing different things, and section 8 lists them as candidates rather than as duplicates. `probe-record` carrying 104 of 202 rows is also not an accident: 94 of them are one frozen capture set, described in section 4.2.
 
@@ -284,25 +284,25 @@ These three are the prose half of the same capture set. The brief names the dire
 
 ### 5.1 By type
 
-| Type | Files | What the group is |
-|---|---|---|
-| probe-record | 104 | Measurements kept as evidence: 94 browser and API captures, 6 colour and token JSON files, the roster crosscheck, the characters probe |
-| reference | 19 | Lookup material. Diataxis reference: the reader asks a question and looks up an answer. `docs/UMAMUSUME_REFERENCE.md`, `docs/SOURCE-OF-TRUTH.md`, `ARCHITECTURE-ESSENTIALS.md`, `PRODUCT.md`, `SKILL.md`, the flow doc, the two design-research comparison files, the four publisher-sourced scenario files, and the seven `.ai/skills/**` guides |
-| verification | 15 | One record per slice, 2 and 3 and 5 to 15, plus the design pass and the cardless band |
-| adr | 13 | `docs/adr/0001` to `0013`, each with an inline Status line. Two are not standing: 0001 superseded in part, 0013 withdrawn |
-| audit-report | 9 | The frontend audit README, skills gaps, session consolidation, brief audit, spec divergence, mechanics triage, external design review triage, roster closing report, and the C-5 enforcement gap |
-| constraint | 6 | `CONSTRAINTS.md`, `docs/design-research/CONSTRAINTS.md`, `docs/GATE-REGISTRY.md`, `.ai/rules/code-style.md`, `.ai/rules/testing-standards.md`, root `DESIGN.md` |
-| config-doc | 5 | `Makefile`, the two `.ai/guidelines/**`, `.ai/rules/index.md`, `docs/SKILL_AUTOMATION.md` |
-| spec | 5 | `PRD.md`, `ARCHITECTURE.md`, `AGENTS.md`, `docs/design-research/DESIGN.md`, and the untracked UX behaviour spec |
-| brief | 6 | Two repo requests, `DECISIONS-NEEDED.md` from the audit, and three incoming external write-ups parked untracked. Also `TASK-16-RUN-VIEW-FRAME-BRIEF.md` |
-| scenario | 5 | `docs/scenarios/01`, `02`, `03`, `07`, `08`. The four publisher-sourced files, `04`, `05`, `06`, `09`, are typed `reference` instead |
-| plan | 3 | `PLAN.md`, `docs/design-research/replan-mobile-first.md`, the 3999-line roster implementation plan |
-| research | 3 | `docs/PRE-MORTEM.md`, `RAW-FINDINGS.md`, `RACE-CALENDAR-GAPS.md` |
-| readme | 2 | Root `README.md` and `docs/design-research/prototypes/superseded/README.md` |
-| notes | 2 | `source.md`, `docs/design-research/HANDOFF-RACE-READ-PATH-2026-09-29.md` |
-| other | 2 | `public/robots.txt`, `docs/data/roster-crosscheck-table.md`, the generated table |
-| issue-register | 1 | `KNOWN-ISSUES.md` |
-| session-log | 2 | `docs/requests/reports/2026-09-30-port-and-cleanup.md`, and `RESOLUTIONS.md` from the frozen audit |
+| Type             | Files   | What the group is                                                                                                                                                                                                                                                                                                                                   |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| probe-record     | 104     | Measurements kept as evidence: 94 browser and API captures, 6 colour and token JSON files, the roster crosscheck, the characters probe                                                                                                                                                                                                              |
+| reference        | 19      | Lookup material. Diataxis reference: the reader asks a question and looks up an answer. `docs/UMAMUSUME_REFERENCE.md`, `docs/SOURCE-OF-TRUTH.md`, `ARCHITECTURE-ESSENTIALS.md`, `PRODUCT.md`, `SKILL.md`, the flow doc, the two design-research comparison files, the four publisher-sourced scenario files, and the seven `.ai/skills/**` guides   |
+| verification     | 15      | One record per slice, 2 and 3 and 5 to 15, plus the design pass and the cardless band                                                                                                                                                                                                                                                               |
+| adr              | 13      | `docs/adr/0001` to `0013`, each with an inline Status line. Two are not standing: 0001 superseded in part, 0013 withdrawn                                                                                                                                                                                                                           |
+| audit-report     | 9       | The frontend audit README, skills gaps, session consolidation, brief audit, spec divergence, mechanics triage, external design review triage, roster closing report, and the C-5 enforcement gap                                                                                                                                                    |
+| constraint       | 6       | `CONSTRAINTS.md`, `docs/design-research/CONSTRAINTS.md`, `docs/GATE-REGISTRY.md`, `.ai/rules/code-style.md`, `.ai/rules/testing-standards.md`, root `DESIGN.md`                                                                                                                                                                                     |
+| config-doc       | 5       | `Makefile`, the two `.ai/guidelines/**`, `.ai/rules/index.md`, `docs/SKILL_AUTOMATION.md`                                                                                                                                                                                                                                                           |
+| spec             | 5       | `PRD.md`, `ARCHITECTURE.md`, `AGENTS.md`, `docs/design-research/DESIGN.md`, and the untracked UX behaviour spec                                                                                                                                                                                                                                     |
+| brief            | 6       | Two repo requests, `DECISIONS-NEEDED.md` from the audit, and three incoming external write-ups parked untracked. Also `TASK-16-RUN-VIEW-FRAME-BRIEF.md`                                                                                                                                                                                             |
+| scenario         | 5       | `docs/scenarios/01`, `02`, `03`, `07`, `08`. The four publisher-sourced files, `04`, `05`, `06`, `09`, are typed `reference` instead                                                                                                                                                                                                                |
+| plan             | 3       | `PLAN.md`, `docs/design-research/replan-mobile-first.md`, the 3999-line roster implementation plan                                                                                                                                                                                                                                                  |
+| research         | 3       | `docs/PRE-MORTEM.md`, `RAW-FINDINGS.md`, `RACE-CALENDAR-GAPS.md`                                                                                                                                                                                                                                                                                    |
+| readme           | 2       | Root `README.md` and `docs/design-research/prototypes/superseded/README.md`                                                                                                                                                                                                                                                                         |
+| notes            | 2       | `source.md`, `docs/design-research/HANDOFF-RACE-READ-PATH-2026-09-29.md`                                                                                                                                                                                                                                                                            |
+| other            | 2       | `public/robots.txt`, `docs/data/roster-crosscheck-table.md`, the generated table                                                                                                                                                                                                                                                                    |
+| issue-register   | 1       | `KNOWN-ISSUES.md`                                                                                                                                                                                                                                                                                                                                   |
+| session-log      | 2       | `docs/requests/reports/2026-09-30-port-and-cleanup.md`, and `RESOLUTIONS.md` from the frozen audit                                                                                                                                                                                                                                                  |
 
 Two type calls worth defending:
 
@@ -311,50 +311,50 @@ Two type calls worth defending:
 
 ### 5.2 By lifecycle state
 
-| Status | Files | Members worth naming |
-|---|---|---|
-| current | 169 | All 94 captures, all 11 live ADRs, the scenario guides, the slice records, the constraint files |
-| stale | 8 | `SKILL.md`, `AGENTS.md`, `PLAN.md`, `docs/SOURCE-OF-TRUTH.md`, `.ai/guidelines/custom/domain.md`, `.ai/guidelines/framework/core.md`, `.ai/rules/index.md`, `docs/design-research/_scratch/WEB-FINDINGS.md` |
-| superseded | 5 | `ADR-0013` by ADR-0012 Decision 4; `ADR-0001` section 5 by ADR-0003; `ADR-0005` closed by R37; `slice-12` by master's own history; the untracked `COMPREHENSIVE UX DELIVERABLES` by its own triage banner |
-| unknown | 20 | The seven `.ai/skills/**` guides, the five `_scratch/*.json` measurement files, `.ai/rules/code-style.md`, `.ai/rules/testing-standards.md`, the three untracked incoming specs, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `PRODUCT.md`, `docs/SKILL_AUTOMATION.md`, the UX behaviour spec |
-| duplicate | 0 | Nothing met the bar. Section 8 explains the six near-misses |
+| Status       | Files   | Members worth naming                                                                                                                                                                                                                                                                                |
+| ------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| current      | 169     | All 94 captures, all 11 live ADRs, the scenario guides, the slice records, the constraint files                                                                                                                                                                                                     |
+| stale        | 8       | `SKILL.md`, `AGENTS.md`, `PLAN.md`, `docs/SOURCE-OF-TRUTH.md`, `.ai/guidelines/custom/domain.md`, `.ai/guidelines/framework/core.md`, `.ai/rules/index.md`, `docs/design-research/_scratch/WEB-FINDINGS.md`                                                                                         |
+| superseded   | 5       | `ADR-0013` by ADR-0012 Decision 4; `ADR-0001` section 5 by ADR-0003; `ADR-0005` closed by R37; `slice-12` by master's own history; the untracked `COMPREHENSIVE UX DELIVERABLES` by its own triage banner                                                                                           |
+| unknown      | 20      | The seven `.ai/skills/**` guides, the five `_scratch/*.json` measurement files, `.ai/rules/code-style.md`, `.ai/rules/testing-standards.md`, the three untracked incoming specs, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `PRODUCT.md`, `docs/SKILL_AUTOMATION.md`, the UX behaviour spec   |
+| duplicate    | 0       | Nothing met the bar. Section 8 explains the six near-misses                                                                                                                                                                                                                                         |
 
 ### 5.3 By authoring session
 
 The repo has one committer, `IzzatFirdaus`, across every commit, so "which session wrote this" is only recoverable to the commit that last touched the file. Guessing beyond that would be invention. 61 distinct commits last touched a file in scope.
 
-| Last-touching commit | Files | Subject |
-|---|---|---|
-| `c6c0567` | 91 | `docs(frontend-review): screenshot audit of every user-facing page` |
-| `a72ee76` | 12 | `docs: add Laravel project coding rules and boost guidelines` |
-| no commit | 9 | The untracked set: four incoming write-ups, four reports, one spec |
-| `e0e043c` | 8 | `docs(research): commit design research reports and measurement provenance` |
-| `8c9faf9` | 8 | `feat(lore,docs): add a line-scoped lore marker and re-baseline the count on it` |
-| `775b88a` | 4 | `docs: record product truth, design system, and schema ADRs` |
-| `b6fa798` | 4 | `docs(frontend-review): resolutions record, decision requests, and re-captures` |
-| `3acbb06` | 4 | `docs(scenarios): add Type-3 metadata blocks; supersede pre-release Trackblazer` |
-| `26aa9fe` | 3 | `feat(legacy): record the Legacy Select read-back as one typed payload (D-268)` |
-| `3f631fc` | 3 | `docs(scenarios): point 01, 02 and 07 at the race calendar instead of restating` |
-| the other 51 commits | 53 | One, two or three files each |
+| Last-touching commit   | Files   | Subject                                                                            |
+| ---------------------- | ------- | ---------------------------------------------------------------------------------- |
+| `c6c0567`              | 91      | `docs(frontend-review): screenshot audit of every user-facing page`                |
+| `a72ee76`              | 12      | `docs: add Laravel project coding rules and boost guidelines`                      |
+| no commit              | 9       | The untracked set: four incoming write-ups, four reports, one spec                 |
+| `e0e043c`              | 8       | `docs(research): commit design research reports and measurement provenance`        |
+| `8c9faf9`              | 8       | `feat(lore,docs): add a line-scoped lore marker and re-baseline the count on it`   |
+| `775b88a`              | 4       | `docs: record product truth, design system, and schema ADRs`                       |
+| `b6fa798`              | 4       | `docs(frontend-review): resolutions record, decision requests, and re-captures`    |
+| `3acbb06`              | 4       | `docs(scenarios): add Type-3 metadata blocks; supersede pre-release Trackblazer`   |
+| `26aa9fe`              | 3       | `feat(legacy): record the Legacy Select read-back as one typed payload (D-268)`    |
+| `3f631fc`              | 3       | `docs(scenarios): point 01, 02 and 07 at the race calendar instead of restating`   |
+| the other 51 commits   | 53      | One, two or three files each                                                       |
 
 The shape matters more than the rows: 91 of 202 files were written by one commit on one day, and the remaining 111 came from 60 separate decisions. A consolidation pass that touches the capture set touches 45 percent of the inventory at once.
 
 ### 5.4 By directory
 
-| Directory | Files | Role |
-|---|---|---|
-| `docs/frontend-review/2026-09-28/` | 97 | One frozen audit: 3 narrative files, 94 captures |
-| `docs/design-research/` | 44 | 16 top-level, 15 verification records, 6 `_scratch` JSON, 1 prototypes README, plus the 4 untracked files that live here |
-| repo root | 13 | The governing set: PRD, ARCHITECTURE, CONSTRAINTS, DESIGN, KNOWN-ISSUES, PLAN, AGENTS, README, PRODUCT, SKILL, source, ARCHITECTURE-ESSENTIALS, Makefile |
-| `docs/adr/` | 13 | ADR-0001 to 0013, one file per number, no gaps |
-| `.ai/` | 12 | Boost-generated rules, guidelines and skills, all written 2026-09-27 and none updated since |
-| `docs/scenarios/` | 9 | Per-scenario guides and publisher references |
-| `docs/requests/` | 8 | 4 tracked at its top, 3 untracked and 1 tracked under `reports/` |
-| `docs/data/` | 3 | Dated measurements: the crosscheck narrative, its generated table, the characters probe |
-| `docs/` top level | 5 | PRE-MORTEM, SOURCE-OF-TRUTH, GATE-REGISTRY, SKILL_AUTOMATION, UMAMUSUME_REFERENCE |
-| `docs/flows/` | 1 | The create-run flow |
-| `public/` | 1 | robots.txt |
-| 3 untracked files with `docs/` paths | 3 | Two incoming specs and the triaged deliverables write-up, all with spaces in their names |
+| Directory                              | Files   | Role                                                                                                                                                       |
+| -------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/frontend-review/2026-09-28/`     | 97      | One frozen audit: 3 narrative files, 94 captures                                                                                                           |
+| `docs/design-research/`                | 44      | 16 top-level, 15 verification records, 6 `_scratch` JSON, 1 prototypes README, plus the 4 untracked files that live here                                   |
+| repo root                              | 13      | The governing set: PRD, ARCHITECTURE, CONSTRAINTS, DESIGN, KNOWN-ISSUES, PLAN, AGENTS, README, PRODUCT, SKILL, source, ARCHITECTURE-ESSENTIALS, Makefile   |
+| `docs/adr/`                            | 13      | ADR-0001 to 0013, one file per number, no gaps                                                                                                             |
+| `.ai/`                                 | 12      | Boost-generated rules, guidelines and skills, all written 2026-09-27 and none updated since                                                                |
+| `docs/scenarios/`                      | 9       | Per-scenario guides and publisher references                                                                                                               |
+| `docs/requests/`                       | 8       | 4 tracked at its top, 3 untracked and 1 tracked under `reports/`                                                                                           |
+| `docs/data/`                           | 3       | Dated measurements: the crosscheck narrative, its generated table, the characters probe                                                                    |
+| `docs/` top level                      | 5       | PRE-MORTEM, SOURCE-OF-TRUTH, GATE-REGISTRY, SKILL_AUTOMATION, UMAMUSUME_REFERENCE                                                                          |
+| `docs/flows/`                          | 1       | The create-run flow                                                                                                                                        |
+| `public/`                              | 1       | robots.txt                                                                                                                                                 |
+| 3 untracked files with `docs/` paths   | 3       | Two incoming specs and the triaged deliverables write-up, all with spaces in their names                                                                   |
 
 ## 6. Cross-reference map
 
@@ -368,33 +368,33 @@ The adjacency list is at `research-scratch/docinv_xref.json`, next to this file.
 
 94 of them are the capture set, and a capture is not meant to be cited. The other 13 are worth reading as a list, because being uncited is usually a signal.
 
-| Orphan | Reading |
-|---|---|
-| `README.md` | The front door and the documentation map. Nothing links to it, so an agent that starts anywhere else never finds the map. Cheapest orphan to close |
-| `.ai/guidelines/framework/core.md`, `.ai/rules/code-style.md`, `.ai/rules/testing-standards.md`, and all seven `.ai/skills/**/SKILL.md` | Loaded by tooling through `.ai/rules/index.md` and the Boost integration rather than by prose. Orphaned by design, which is why `.ai/rules/index.md` being stale matters |
-| `docs/adr/0006-design-authority-and-theme-default.md` | The ADR that settled the theme default, cited by nobody. PLAN.md's Open Decisions list still names the theme default as open, and that is the cost of an orphaned ruling |
-| `docs/design-research/SESSION-CONSOLIDATION-2026-09-30.md` | The verification of eight session reports, cited by nothing, landed in the same commit as its own subject line |
-| `docs/design-research/EXTERNAL-DESIGN-REVIEW-TRIAGE-2026-09-28.md` | Its erratum is load-bearing and unread |
-| `docs/design-research/prototypes/superseded/README.md` | Says four prototypes are not current. It has to exist for exactly that reason, so this orphan is fine |
-| `docs/design-research/verification/cardless-band-2026-09-30.md` | Newest record in the tree. The ruling it carries lives in its body rather than in a register |
-| `docs/requests/reports/2026-09-30-c5-down-enforcement-gap.md` | Marked "recorded, not filed". It is an orphan because it is waiting |
-| `docs/requests/reports/2026-09-30-characters-source-findings.md` | Handoff material for a slice that has since landed |
-| The three untracked `docs/` specs | Section 9 |
+| Orphan                                                                                                                                    | Reading                                                                                                                                                                    |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `README.md`                                                                                                                               | The front door and the documentation map. Nothing links to it, so an agent that starts anywhere else never finds the map. Cheapest orphan to close                         |
+| `.ai/guidelines/framework/core.md`, `.ai/rules/code-style.md`, `.ai/rules/testing-standards.md`, and all seven `.ai/skills/**/SKILL.md`   | Loaded by tooling through `.ai/rules/index.md` and the Boost integration rather than by prose. Orphaned by design, which is why `.ai/rules/index.md` being stale matters   |
+| `docs/adr/0006-design-authority-and-theme-default.md`                                                                                     | The ADR that settled the theme default, cited by nobody. PLAN.md's Open Decisions list still names the theme default as open, and that is the cost of an orphaned ruling   |
+| `docs/design-research/SESSION-CONSOLIDATION-2026-09-30.md`                                                                                | The verification of eight session reports, cited by nothing, landed in the same commit as its own subject line                                                             |
+| `docs/design-research/EXTERNAL-DESIGN-REVIEW-TRIAGE-2026-09-28.md`                                                                        | Its erratum is load-bearing and unread                                                                                                                                     |
+| `docs/design-research/prototypes/superseded/README.md`                                                                                    | Says four prototypes are not current. It has to exist for exactly that reason, so this orphan is fine                                                                      |
+| `docs/design-research/verification/cardless-band-2026-09-30.md`                                                                           | Newest record in the tree. The ruling it carries lives in its body rather than in a register                                                                               |
+| `docs/requests/reports/2026-09-30-c5-down-enforcement-gap.md`                                                                             | Marked "recorded, not filed". It is an orphan because it is waiting                                                                                                        |
+| `docs/requests/reports/2026-09-30-characters-source-findings.md`                                                                          | Handoff material for a slice that has since landed                                                                                                                         |
+| The three untracked `docs/` specs                                                                                                         | Section 9                                                                                                                                                                  |
 
 ### 6.2 Hubs: 60 files carry five or more inbound citations
 
-| File | Inbound | File | Inbound |
-|---|---|---|---|
-| `CONSTRAINTS.md` | 45 | `docs/scenarios/05-trackblazer-gametora.md` | 15 |
-| `docs/UMAMUSUME_REFERENCE.md` | 41 | `docs/scenarios/09-global-race-calendar.md` | 15 |
-| `DESIGN.md` at the root | 41 | `docs/scenarios/01-ura-finale.md` | 13 |
-| `PRD.md` | 35 | `docs/scenarios/02-unity-cup.md` | 13 |
-| `docs/design-research/CONSTRAINTS.md` | 30 | `docs/scenarios/04-trackblazer-umaguide.md` | 12 |
-| `AGENTS.md` | 27 | `ARCHITECTURE-ESSENTIALS.md` | 12 |
-| `KNOWN-ISSUES.md` | 25 | `docs/GATE-REGISTRY.md` | 12 |
-| `resources/css/app.css` | 21 | `docs/PRE-MORTEM.md` | 11 |
-| `config/uma.php` | 21 | `docs/SOURCE-OF-TRUTH.md` | 10 |
-| `docs/design-research/DESIGN.md` | 21 | `docs/scenarios/07-grand-concert.md` | 10 |
+| File                                    | Inbound   | File                                          | Inbound   |
+| --------------------------------------- | --------- | --------------------------------------------- | --------- |
+| `CONSTRAINTS.md`                        | 45        | `docs/scenarios/05-trackblazer-gametora.md`   | 15        |
+| `docs/UMAMUSUME_REFERENCE.md`           | 41        | `docs/scenarios/09-global-race-calendar.md`   | 15        |
+| `DESIGN.md` at the root                 | 41        | `docs/scenarios/01-ura-finale.md`             | 13        |
+| `PRD.md`                                | 35        | `docs/scenarios/02-unity-cup.md`              | 13        |
+| `docs/design-research/CONSTRAINTS.md`   | 30        | `docs/scenarios/04-trackblazer-umaguide.md`   | 12        |
+| `AGENTS.md`                             | 27        | `ARCHITECTURE-ESSENTIALS.md`                  | 12        |
+| `KNOWN-ISSUES.md`                       | 25        | `docs/GATE-REGISTRY.md`                       | 12        |
+| `resources/css/app.css`                 | 21        | `docs/PRE-MORTEM.md`                          | 11        |
+| `config/uma.php`                        | 21        | `docs/SOURCE-OF-TRUTH.md`                     | 10        |
+| `docs/design-research/DESIGN.md`        | 21        | `docs/scenarios/07-grand-concert.md`          | 10        |
 
 The four highest inbound counts belong to two pairs of files that share a bare name. A citation reading `CONSTRAINTS.md` resolves to one of two files. A citation reading `DESIGN.md` resolves to one of two files. Consolidation must not break either pair, and section 7 shows the ambiguity already broke ten citations.
 
@@ -404,19 +404,19 @@ Two more numbers worth holding. `app/Models/TrainingRun.php` takes 13 inbound ci
 
 Calling these dead links would be wrong, and the distinction is the finding.
 
-| Bucket | Tokens | What it is |
-|---|---|---|
-| Game-client data-file names | 368 | `scenarios.json`, `items.json`, `support-cards.json`, `events__champions-meeting.json`. Provenance for a claim about the client, never a repo path. Correct as written |
-| Local database dumps | 116 | `database/database.sql`, `database/scratch-catalog.sql`, and a `PWD/` variant of the second. Gitignored working data, named as the thing a measurement ran against |
-| Gitignored repo files | 67 | `CLAUDE.md` 22, `.agents/skills.json` 11, `research-scratch/**` and others. These exist on this machine and nowhere else |
-| Bare view names needing a directory | 33 | `catalog/index.blade.php`, `runs/show.blade.php`, `show.blade.php`. Four files share the basename `index.blade.php`. Resolvable to a human, unresolvable to a script |
-| Route names read as filenames | 26 | `runs.sh` 19 and `catalog.sh` 6 are the route names `runs.show` and `catalog.show`. My regex's fault, not the repo's |
-| Renamed or absent JS config | 16 | `resources/js/app.js` 8 while the tree holds `app.ts`; `tailwind.config.js` 5 while Tailwind v4 is CSS-first with no config file |
-| Deleted files | 19 | `welcome.blade.php` 12 plus `resources/views/welcome.blade.php` 7. Real dead links, all left by one deletion, covered in section 7 |
-| Scratch scripts | 8 | `final_measure.py`, `scan-by-gate.py` |
-| Library names | 7 | `Alpine.js`. Not a path |
-| Absent class files | 7 | `app/Providers/EventServiceProvider.php`, `app/Actions/UpsertCharacterCard.php` |
-| Short or fragmentary names | 12 | `DELIVERABLES.md` 6, `Companion.md` 4, the elided migration path 2 |
+| Bucket                                | Tokens   | What it is                                                                                                                                                               |
+| ------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Game-client data-file names           | 368      | `scenarios.json`, `items.json`, `support-cards.json`, `events__champions-meeting.json`. Provenance for a claim about the client, never a repo path. Correct as written   |
+| Local database dumps                  | 116      | `database/database.sql`, `database/scratch-catalog.sql`, and a `PWD/` variant of the second. Gitignored working data, named as the thing a measurement ran against       |
+| Gitignored repo files                 | 67       | `CLAUDE.md` 22, `.agents/skills.json` 11, `research-scratch/**` and others. These exist on this machine and nowhere else                                                 |
+| Bare view names needing a directory   | 33       | `catalog/index.blade.php`, `runs/show.blade.php`, `show.blade.php`. Four files share the basename `index.blade.php`. Resolvable to a human, unresolvable to a script     |
+| Route names read as filenames         | 26       | `runs.sh` 19 and `catalog.sh` 6 are the route names `runs.show` and `catalog.show`. My regex's fault, not the repo's                                                     |
+| Renamed or absent JS config           | 16       | `resources/js/app.js` 8 while the tree holds `app.ts`; `tailwind.config.js` 5 while Tailwind v4 is CSS-first with no config file                                         |
+| Deleted files                         | 19       | `welcome.blade.php` 12 plus `resources/views/welcome.blade.php` 7. Real dead links, all left by one deletion, covered in section 7                                       |
+| Scratch scripts                       | 8        | `final_measure.py`, `scan-by-gate.py`                                                                                                                                    |
+| Library names                         | 7        | `Alpine.js`. Not a path                                                                                                                                                  |
+| Absent class files                    | 7        | `app/Providers/EventServiceProvider.php`, `app/Actions/UpsertCharacterCard.php`                                                                                          |
+| Short or fragmentary names            | 12       | `DELIVERABLES.md` 6, `Companion.md` 4, the elided migration path 2                                                                                                       |
 
 Two rows deserve a sentence each, because they are defects rather than grammar.
 
@@ -434,28 +434,28 @@ One pair needs naming. `docs/design-research/CONSTRAINTS.md` and root `CONSTRAIN
 
 391 citations name a target plus a line or a range. I opened each one and matched it against what the citing sentence claims. Verdicts are deliberately conservative: a citation is only called wrong when the evidence proves it, and 184 stay unknown because proving either direction needs a human reading the citing sentence and the target together.
 
-| Verdict | Count | Basis |
-|---|---|---|
-| Resolvable | 155 | The cited range holds the anchor the citing line names, or a distinctive identifier from it |
-| Stale | 19 | The named anchor exists in the target at a demonstrably different line |
-| Broken | 33 | The target file or the target range does not exist |
-| Unknown | 184 | No anchor and no shared identifier. This is not a claim that they are wrong |
+| Verdict      | Count   | Basis                                                                                         |
+| ------------ | ------- | --------------------------------------------------------------------------------------------- |
+| Resolvable   | 155     | The cited range holds the anchor the citing line names, or a distinctive identifier from it   |
+| Stale        | 19      | The named anchor exists in the target at a demonstrably different line                        |
+| Broken       | 33      | The target file or the target range does not exist                                            |
+| Unknown      | 184     | No anchor and no shared identifier. This is not a claim that they are wrong                   |
 
 Six of the 19 stale rows are false positives of my own detector: it read an ADR's own number as an anchor that had moved. I excluded those from 7.3. The remaining rows are real, and three I confirmed by hand.
 
 ### 7.1 Broken, grouped by cause
 
-| Cause | Rows | Fix shape |
-|---|---|---|
-| Twin-name ambiguity. `DESIGN.md` and `CONSTRAINTS.md` cited bare, and the line only resolves under `docs/design-research/` | 10 | Rewrite with the full path, or as a heading citation |
-| Bare view name where four files share the basename | 9 | Add the directory |
-| `resources/views/welcome.blade.php`, deleted at `65f8b92` on 2026-09-29 while closing KI-20 | 7 | Re-point or retire. `KNOWN-ISSUES.md` carries three, `PLAN.md` one, `slice-7` and `slice-10` one each |
-| Path written as an ellipsis: `...create_scenario_slots_table.php:58-59` | 2 | Write the real filename |
-| `DELIVERABLES.md` standing in for an untracked file whose real name contains an em dash | 1 | Decide the file's fate first, then cite it properly |
-| `Companion.md:136-141` used as a fragment | 1 | Full path |
-| `research-scratch/rehearse-apply.php:69`, a gitignored script cited by a tracked record | 1 | Quote the measured value into the record instead |
-| `design-preview.blade.php:12-27`, a prototype-era view that no longer exists | 1 | Historical, inside a frozen audit. Leave it |
-| `CharacterProfileTest.php:183`, on a branch and never on master | 1 | `docs/requests/reports/2026-09-30-port-and-cleanup.md:144` cites a test that was withdrawn along with ADR-0013 |
+| Cause                                                                                                                        | Rows   | Fix shape                                                                                                        |
+| ---------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| Twin-name ambiguity. `DESIGN.md` and `CONSTRAINTS.md` cited bare, and the line only resolves under `docs/design-research/`   | 10     | Rewrite with the full path, or as a heading citation                                                             |
+| Bare view name where four files share the basename                                                                           | 9      | Add the directory                                                                                                |
+| `resources/views/welcome.blade.php`, deleted at `65f8b92` on 2026-09-29 while closing KI-20                                  | 7      | Re-point or retire. `KNOWN-ISSUES.md` carries three, `PLAN.md` one, `slice-7` and `slice-10` one each            |
+| Path written as an ellipsis: `...create_scenario_slots_table.php:58-59`                                                      | 2      | Write the real filename                                                                                          |
+| `DELIVERABLES.md` standing in for an untracked file whose real name contains an em dash                                      | 1      | Decide the file's fate first, then cite it properly                                                              |
+| `Companion.md:136-141` used as a fragment                                                                                    | 1      | Full path                                                                                                        |
+| `research-scratch/rehearse-apply.php:69`, a gitignored script cited by a tracked record                                      | 1      | Quote the measured value into the record instead                                                                 |
+| `design-preview.blade.php:12-27`, a prototype-era view that no longer exists                                                 | 1      | Historical, inside a frozen audit. Leave it                                                                      |
+| `CharacterProfileTest.php:183`, on a branch and never on master                                                              | 1      | `docs/requests/reports/2026-09-30-port-and-cleanup.md:144` cites a test that was withdrawn along with ADR-0013   |
 
 ### 7.2 The rot the brief predicted, measured
 
@@ -469,25 +469,25 @@ That exchange is the reason section 11 exists. A correction written as a line nu
 
 ### 7.3 Stale rows proven
 
-| Citation | Anchor actually at | Note |
-|---|---|---|
-| `design-pass-trainee-detail-2026-09-29.md:70` to `KNOWN-ISSUES.md:1347` for KI-29 | 1372 | Line 1347 is a table separator. Off by 25 |
-| `MECHANICS-TRANSLATION-TRIAGE.md:173` to `SCENARIO-DIFFERENCES.md:122` for ADR-0002 | 106 | |
-| `SKILLS-GAPS.md:217` to `PRD.md:73` for NFR-3 | 117 | Two rows in the same file, same mistake |
-| `slice-6-2026-09-28.md:147` to `docs/design-research/DESIGN.md:1338` for KI-14 | 1438 | |
-| `slice-10-2026-09-29.md:44` to `app/Enums/SpiritBurstState.php:47` for KI-18 | 40 | |
-| `FRONTEND-SPEC-DIVERGENCE.md:258` to `config/scenarios.php:83,116` | The D-240 marker the sentence means sits at line 13 | The cited range describes markers that file does not have |
+| Citation                                                                              | Anchor actually at                                    | Note                                                        |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------- |
+| `design-pass-trainee-detail-2026-09-29.md:70` to `KNOWN-ISSUES.md:1347` for KI-29     | 1372                                                  | Line 1347 is a table separator. Off by 25                   |
+| `MECHANICS-TRANSLATION-TRIAGE.md:173` to `SCENARIO-DIFFERENCES.md:122` for ADR-0002   | 106                                                   |                                                             |
+| `SKILLS-GAPS.md:217` to `PRD.md:73` for NFR-3                                         | 117                                                   | Two rows in the same file, same mistake                     |
+| `slice-6-2026-09-28.md:147` to `docs/design-research/DESIGN.md:1338` for KI-14        | 1438                                                  |                                                             |
+| `slice-10-2026-09-29.md:44` to `app/Enums/SpiritBurstState.php:47` for KI-18          | 40                                                    |                                                             |
+| `FRONTEND-SPEC-DIVERGENCE.md:258` to `config/scenarios.php:83,116`                    | The D-240 marker the sentence means sits at line 13   | The cited range describes markers that file does not have   |
 
 ### 7.4 Files that carry the rot
 
-| File | Line citations | Of them broken or stale |
-|---|---|---|
-| `KNOWN-ISSUES.md` | 66 | 3 broken |
-| `docs/design-research/FRONTEND-SPEC-DIVERGENCE.md` | 29 | 6 broken, 1 stale |
-| `docs/design-research/verification/slice-10-2026-09-29.md` | 20 | 3 broken, 2 stale |
-| `docs/GATE-REGISTRY.md` | 6 | 0 |
-| `docs/design-research/verification/slice-15-2026-09-29.md` | 4 | 1 broken |
-| `docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md` | 9 of 83 outbound edges | 3 broken |
+| File                                                                     | Line citations           | Of them broken or stale   |
+| ------------------------------------------------------------------------ | ------------------------ | ------------------------- |
+| `KNOWN-ISSUES.md`                                                        | 66                       | 3 broken                  |
+| `docs/design-research/FRONTEND-SPEC-DIVERGENCE.md`                       | 29                       | 6 broken, 1 stale         |
+| `docs/design-research/verification/slice-10-2026-09-29.md`               | 20                       | 3 broken, 2 stale         |
+| `docs/GATE-REGISTRY.md`                                                  | 6                        | 0                         |
+| `docs/design-research/verification/slice-15-2026-09-29.md`               | 4                        | 1 broken                  |
+| `docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md`   | 9 of 83 outbound edges   | 3 broken                  |
 
 `KNOWN-ISSUES.md` holds 66 of the 391 line citations, and the file runs to 1944 lines. Every entry in it has a heading. It is the clearest case in the repository for switching to heading citations.
 
@@ -495,33 +495,33 @@ That exchange is the reason section 11 exists. A correction written as a line nu
 
 No pair met the definition of a duplicate: same content, one file to keep. Six pairs look like duplicates and are not. Three are genuine consolidation targets. All nine are below, with the overlap cited.
 
-| Candidate pair | Shared ground | Newer | More complete | Recommendation |
-|---|---|---|---|---|
-| `CONSTRAINTS.md` at the root (48 lines) and `docs/design-research/CONSTRAINTS.md` (973) | Both are constraint contracts with numbered gates | Root, touched `e9a779d` 2026-09-30 | design-research, by 925 lines | **Keep both.** The root file holds C-1 to C-9 for the whole repo; the other holds D-numbered rules for the user-facing layer only. `docs/GATE-REGISTRY.md:3` states the precedence between them. Merge would destroy a two-level gate system. The real defect is the shared basename, not the shared subject |
-| `DESIGN.md` at the root (394) and `docs/design-research/DESIGN.md` (1640) | Both specify tokens, components and surfaces | Root, `bcd8abe` 2026-09-29 | design-research, by 1246 lines | **Keep both, rename one or disambiguate.** The root file's H1 is "Trainer Desk design system"; the other's is "Umamusume Trainer Companion design system", the name from before OQ-1 closed on 2026-09-27. Ten broken citations in section 7.1 come from readers not knowing which one a bare `DESIGN.md` means |
-| `docs/data/2026-09-29-global-roster-crosscheck.md` and `docs/data/roster-crosscheck-table.md` | The same 107 cards | narrative, `07941eb` | narrative | **Keep both.** Line 141 of the narrative says the table is generated by `php tools/roster-crosscheck.php` and the narrative reads it back. They are a document and its data file. One drift trap: the narrative carries a date in its name and the generated table does not |
-| `docs/scenarios/03-trackblazer.md`, `04-trackblazer-umaguide.md`, `05-trackblazer-gametora.md` | Trackblazer | `3f631fc` 2026-09-29 touched 03 | 04 and 05 by length | **Keep all three.** 03 is this repo's guide. 04 is uma.guide's community framing and 05 is GameTora's reference, each a separate publisher with its own reliability. Merging them would put a primary claim and a secondary claim in the same table cell |
-| `docs/requests/2026-09-29-catalog-roster-and-trainee-selector.md`, `-plan.md`, `-report.md` | One workstream | report, `6300221` 2026-09-30 | plan, at 3999 lines | **Keep all three.** Request, plan and closing report are three different acts. What is missing is a line at the top of each naming the other two, because the filenames differ only by suffix and the reader has to guess the order |
-| `docs/frontend-review/2026-09-28/export-csv-run1.txt` and `.../resolutions/export-csv-run1.txt`, plus the JSON pair | Identical names | `resolutions/`, `b6fa798` 2026-09-29 | differs by content | **Keep both.** This is the one the brief warned about. `git hash-object` gives `37661caa` and `a5d7a771` for the CSV pair, `097e1ce4` and `3e03d32e` for the JSON. The resolutions copies are re-captures that prove a fix landed. A duplicate pass keyed on filename would delete the evidence |
-| `docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md` (2144) and `docs/Scenario-Specific User Flows & Frontend Specifications.md` (1174) and `docs/UX Behavior Specification - Umamusume Trainer Companion.md` (576) | Incoming external UX material, 3894 lines between them | All three dated in their banners as reviewed 2026-09-27 | deliverables, by 968 lines | **Decide, then merge or delete.** All three carry a "not merged" banner and all three are untracked. Their audits, `FRONTEND-SPEC-DIVERGENCE.md` and `MECHANICS-TRANSLATION-TRIAGE.md`, are also untracked. This is the largest single block of undecided documentation in the repo |
-| `README.md` at the root, `docs/frontend-review/2026-09-28/README.md`, `docs/design-research/prototypes/superseded/README.md` | Same filename | root, `bbfa3de` | different jobs | **Keep all three.** The audit's README is a 426-line audit report and the prototypes README is a 16-line warning label. Only the root one is a readme |
-| `.ai/skills/*/SKILL.md` (7 files) and `SKILL.md` at the root | Skill documentation | root, `775b88a` | the seven, each a real skill | **Keep the seven, resolve the root.** Root `SKILL.md` names itself "Skill Registry" and hand-counts what is installed. Section 10 explains why it should go |
+| Candidate pair                                                                                                                                                                                                                    | Shared ground                                            | Newer                                                     | More complete                    | Recommendation                                                                                                                                                                                                                                                                                                    |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CONSTRAINTS.md` at the root (48 lines) and `docs/design-research/CONSTRAINTS.md` (973)                                                                                                                                           | Both are constraint contracts with numbered gates        | Root, touched `e9a779d` 2026-09-30                        | design-research, by 925 lines    | **Keep both.** The root file holds C-1 to C-9 for the whole repo; the other holds D-numbered rules for the user-facing layer only. `docs/GATE-REGISTRY.md:3` states the precedence between them. Merge would destroy a two-level gate system. The real defect is the shared basename, not the shared subject      |
+| `DESIGN.md` at the root (394) and `docs/design-research/DESIGN.md` (1640)                                                                                                                                                         | Both specify tokens, components and surfaces             | Root, `bcd8abe` 2026-09-29                                | design-research, by 1246 lines   | **Keep both, rename one or disambiguate.** The root file's H1 is "Trainer Desk design system"; the other's is "Umamusume Trainer Companion design system", the name from before OQ-1 closed on 2026-09-27. Ten broken citations in section 7.1 come from readers not knowing which one a bare `DESIGN.md` means   |
+| `docs/data/2026-09-29-global-roster-crosscheck.md` and `docs/data/roster-crosscheck-table.md`                                                                                                                                     | The same 107 cards                                       | narrative, `07941eb`                                      | narrative                        | **Keep both.** Line 141 of the narrative says the table is generated by `php tools/roster-crosscheck.php` and the narrative reads it back. They are a document and its data file. One drift trap: the narrative carries a date in its name and the generated table does not                                       |
+| `docs/scenarios/03-trackblazer.md`, `04-trackblazer-umaguide.md`, `05-trackblazer-gametora.md`                                                                                                                                    | Trackblazer                                              | `3f631fc` 2026-09-29 touched 03                           | 04 and 05 by length              | **Keep all three.** 03 is this repo's guide. 04 is uma.guide's community framing and 05 is GameTora's reference, each a separate publisher with its own reliability. Merging them would put a primary claim and a secondary claim in the same table cell                                                          |
+| `docs/requests/2026-09-29-catalog-roster-and-trainee-selector.md`, `-plan.md`, `-report.md`                                                                                                                                       | One workstream                                           | report, `6300221` 2026-09-30                              | plan, at 3999 lines              | **Keep all three.** Request, plan and closing report are three different acts. What is missing is a line at the top of each naming the other two, because the filenames differ only by suffix and the reader has to guess the order                                                                               |
+| `docs/frontend-review/2026-09-28/export-csv-run1.txt` and `.../resolutions/export-csv-run1.txt`, plus the JSON pair                                                                                                               | Identical names                                          | `resolutions/`, `b6fa798` 2026-09-29                      | differs by content               | **Keep both.** This is the one the brief warned about. `git hash-object` gives `37661caa` and `a5d7a771` for the CSV pair, `097e1ce4` and `3e03d32e` for the JSON. The resolutions copies are re-captures that prove a fix landed. A duplicate pass keyed on filename would delete the evidence                   |
+| `docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md` (2144) and `docs/Scenario-Specific User Flows & Frontend Specifications.md` (1174) and `docs/UX Behavior Specification - Umamusume Trainer Companion.md` (576)   | Incoming external UX material, 3894 lines between them   | All three dated in their banners as reviewed 2026-09-27   | deliverables, by 968 lines       | **Decide, then merge or delete.** All three carry a "not merged" banner and all three are untracked. Their audits, `FRONTEND-SPEC-DIVERGENCE.md` and `MECHANICS-TRANSLATION-TRIAGE.md`, are also untracked. This is the largest single block of undecided documentation in the repo                               |
+| `README.md` at the root, `docs/frontend-review/2026-09-28/README.md`, `docs/design-research/prototypes/superseded/README.md`                                                                                                      | Same filename                                            | root, `bbfa3de`                                           | different jobs                   | **Keep all three.** The audit's README is a 426-line audit report and the prototypes README is a 16-line warning label. Only the root one is a readme                                                                                                                                                             |
+| `.ai/skills/*/SKILL.md` (7 files) and `SKILL.md` at the root                                                                                                                                                                      | Skill documentation                                      | root, `775b88a`                                           | the seven, each a real skill     | **Keep the seven, resolve the root.** Root `SKILL.md` names itself "Skill Registry" and hand-counts what is installed. Section 10 explains why it should go                                                                                                                                                       |
 
 ## 9. Untracked material
 
 Nine text files, no history, no owner of record. Nothing here is committed and nothing here should be, until the owner decides.
 
-| Path | Size / lines | Contents in one sentence | Plausible origin | Cited by a tracked file | Reads as |
-|---|---|---|---|---|---|
-| `docs/Scenario-Specific User Flows & Frontend Specifications.md` | 65085 / 1174 | Per-scenario flows and screen specs, with a banner saying it was reviewed and largely sound but not merged | Incoming external write-up, reviewed 2026-09-27 | Yes, by its own banner pointing at `FRONTEND-SPEC-DIVERGENCE.md` section 6. Nothing tracked cites it by path | Finished, and deliberately parked |
-| `docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md` | 103979 / 2144 | An external UX deliverables document triaged on 2026-09-27 and kept for reference rather than adopted | Incoming external write-up | Yes, six times, as the short name `DELIVERABLES.md`, which resolves to nothing. `docs/UMAMUSUME_REFERENCE.md:386` is one | Finished, rejected by its own banner |
-| `docs/UX Behavior Specification - Umamusume Trainer Companion.md` | 32288 / 576 | A behavioural contract synthesised from DESIGN, CONSTRAINTS, PRD, the ADRs and the scenario files | Incoming external write-up, reviewed 2026-09-27 | Only through its banner. Its closing line claims every input and state is sourced from the design documents | Finished, with three load-bearing corrections named in its banner |
-| `docs/design-research/FRONTEND-BRIEF-AUDIT.md` | 14644 / 191 | Compares an incoming frontend brief against the tree and lists the corrections that brief owes | This repo's own analysis, 2026-09-27 | 6 inbound | This repo's output, and the audit side of a pair the repo has not decided to keep |
-| `docs/design-research/FRONTEND-SPEC-DIVERGENCE.md` | 22055 / 297 | Divergence audit between a pasted frontend spec and the app this repo is building | This repo's own analysis | 10 inbound | In progress. PLAN.md lines 556 to 565 list corrections it owes that were never applied, and it holds 6 broken and 1 stale citation of its own |
-| `docs/design-research/MECHANICS-TRANSLATION-TRIAGE.md` | 19343 / 234 | Triage of a write-up that recast every game system as a UX pattern catalog | This repo's own analysis | 10 inbound | Finished. Its section 7 is the item-by-item audit the deliverables banner points at |
-| `docs/design-research/TASK-16-RUN-VIEW-FRAME-BRIEF.md` | 30220 / 481 | Task 16's brief for the run view axis, revised against the tree at `a8a52cd` | A dispatch brief written for another session | 1 inbound, plus 2 broken citations out | In progress. The task it describes has a verification record, `slice-12`, and no landed frame |
-| `docs/requests/reports/2026-09-30-c5-down-enforcement-gap.md` | 4151 / 67 | Says C-5 requires a `down()` on every migration and nothing checks for it | This session's finding, 2026-09-30 | No | Deliberately parked. Its own header says recorded and not filed, because a peer session is mid-write on ten tracked files |
-| `docs/requests/reports/2026-09-30-characters-source-findings.md` | 12477 / 231 | Characters-source findings handed to the profile-block slice | This repo's measurement pass, 2026-09-30 | No | Superseded on the spot. Its subject landed: `docs/data/2026-09-30-characters-source-probe.md` is tracked and covers the same ground |
+| Path                                                                | Size / lines    | Contents in one sentence                                                                                     | Plausible origin                                  | Cited by a tracked file                                                                                                    | Reads as                                                                                                                                        |
+| ------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/Scenario-Specific User Flows & Frontend Specifications.md`    | 65085 / 1174    | Per-scenario flows and screen specs, with a banner saying it was reviewed and largely sound but not merged   | Incoming external write-up, reviewed 2026-09-27   | Yes, by its own banner pointing at `FRONTEND-SPEC-DIVERGENCE.md` section 6. Nothing tracked cites it by path               | Finished, and deliberately parked                                                                                                               |
+| `docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md`    | 103979 / 2144   | An external UX deliverables document triaged on 2026-09-27 and kept for reference rather than adopted        | Incoming external write-up                        | Yes, six times, as the short name `DELIVERABLES.md`, which resolves to nothing. `docs/UMAMUSUME_REFERENCE.md:386` is one   | Finished, rejected by its own banner                                                                                                            |
+| `docs/UX Behavior Specification - Umamusume Trainer Companion.md`   | 32288 / 576     | A behavioural contract synthesised from DESIGN, CONSTRAINTS, PRD, the ADRs and the scenario files            | Incoming external write-up, reviewed 2026-09-27   | Only through its banner. Its closing line claims every input and state is sourced from the design documents                | Finished, with three load-bearing corrections named in its banner                                                                               |
+| `docs/design-research/FRONTEND-BRIEF-AUDIT.md`                      | 14644 / 191     | Compares an incoming frontend brief against the tree and lists the corrections that brief owes               | This repo's own analysis, 2026-09-27              | 6 inbound                                                                                                                  | This repo's output, and the audit side of a pair the repo has not decided to keep                                                               |
+| `docs/design-research/FRONTEND-SPEC-DIVERGENCE.md`                  | 22055 / 297     | Divergence audit between a pasted frontend spec and the app this repo is building                            | This repo's own analysis                          | 10 inbound                                                                                                                 | In progress. PLAN.md lines 556 to 565 list corrections it owes that were never applied, and it holds 6 broken and 1 stale citation of its own   |
+| `docs/design-research/MECHANICS-TRANSLATION-TRIAGE.md`              | 19343 / 234     | Triage of a write-up that recast every game system as a UX pattern catalog                                   | This repo's own analysis                          | 10 inbound                                                                                                                 | Finished. Its section 7 is the item-by-item audit the deliverables banner points at                                                             |
+| `docs/design-research/TASK-16-RUN-VIEW-FRAME-BRIEF.md`              | 30220 / 481     | Task 16's brief for the run view axis, revised against the tree at `a8a52cd`                                 | A dispatch brief written for another session      | 1 inbound, plus 2 broken citations out                                                                                     | In progress. The task it describes has a verification record, `slice-12`, and no landed frame                                                   |
+| `docs/requests/reports/2026-09-30-c5-down-enforcement-gap.md`       | 4151 / 67       | Says C-5 requires a `down()` on every migration and nothing checks for it                                    | This session's finding, 2026-09-30                | No                                                                                                                         | Deliberately parked. Its own header says recorded and not filed, because a peer session is mid-write on ten tracked files                       |
+| `docs/requests/reports/2026-09-30-characters-source-findings.md`    | 12477 / 231     | Characters-source findings handed to the profile-block slice                                                 | This repo's measurement pass, 2026-09-30          | No                                                                                                                         | Superseded on the spot. Its subject landed: `docs/data/2026-09-30-characters-source-probe.md` is tracked and covers the same ground             |
 
 One more untracked path, noted not inventoried as the brief instructs: `docs/vibe_images/` holds 10 PNGs totalling roughly 13 MB, dated 2026-09-29, named after prototype screens such as `screen-a-ura-finale-v9_...png`. They are generated design mockups, not text, and no tracked file names them.
 
@@ -553,19 +553,19 @@ Each row states the evidence, which is in an earlier section, and what acting on
 
 Load-bearing by citation count, by role, or by an instruction that outranks this inventory.
 
-| Item | Why it is off-limits to a consolidation pass |
-|---|---|
-| `docs/frontend-review/2026-09-28/` in full, 97 files | The brief forbids editing the audit's README or its captures. Independently: it is a dated evidence set, and 45 percent of the inventory. Editing one capture invalidates the audit that produced it |
-| `CONSTRAINTS.md` at the root | Gate precedence R-6 puts it first. Agents are told to read it before writing code and never to weaken a threshold. `docs/GATE-REGISTRY.md:3` names it and this registry as the joint source of truth for global gates |
-| `docs/GATE-REGISTRY.md` | Same precedence tier. It also records the gates that are knowingly not automated, and deleting an honest gap entry hides a gap |
-| `KNOWN-ISSUES.md` | 1944 lines, 25 inbound citations, 66 line citations, and the active register. `AGENTS.md` and every slice record write into it. It is the single file where concurrent sessions collide most, and its renumbering history (KI-16 as a hole, KI-30 and KI-31 renumbered from KI-16 and KI-17) shows what editing it carelessly costs |
-| `docs/adr/0001` through `0012` | Accepted decisions. `documentation-and-adrs` is explicit: do not delete old ADRs, and supersede by writing a new one. ADR-0013 is the exception the rule allows, and it already carries its own Withdrawn banner |
-| `PRD.md` | Product truth, and the file the Architect role must cite for every new table, column or class. `AGENTS.md` routes all scope changes through it |
-| The ten hubs with 10 or more inbound | `CONSTRAINTS.md`, `docs/UMAMUSUME_REFERENCE.md`, both `DESIGN.md` files, `PRD.md`, `docs/design-research/CONSTRAINTS.md`, `AGENTS.md`, `KNOWN-ISSUES.md`, `docs/design-research/DESIGN.md`, `docs/PRE-MORTEM.md`, `ARCHITECTURE-ESSENTIALS.md`, `docs/GATE-REGISTRY.md`, `docs/SOURCE-OF-TRUTH.md`. Renaming or merging any of them rewrites citations across a fifth of the corpus |
-| `docs/UMAMUSUME_REFERENCE.md` | 41 inbound and the dated-snapshot policy recorded in project memory. Its eight sections are the mechanics corpus the UI traces to, and its preamble is the current map |
-| `PLAN.md` and `docs/design-research/**` | On the forbidden-edit list from the standing Authorized Execution Turn that governed this session. `docs/design-research/SESSION-CONSOLIDATION-2026-09-30.md` is separately named do-not-touch by the brief |
-| `.ai/guidelines/**` and `.ai/rules/**` | Boost-generated and auto-injected. Hand edits get overwritten by the next regeneration, and the repo's own rule says to record a rule only when the owner asks for one |
-| Anything whose status is `unknown` here | 20 files. Absence of evidence is not evidence of staleness, and an inventory that lets a later pass act on `unknown` as though it meant `stale` has quietly lowered the bar |
+| Item                                                   | Why it is off-limits to a consolidation pass                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/frontend-review/2026-09-28/` in full, 97 files   | The brief forbids editing the audit's README or its captures. Independently: it is a dated evidence set, and 45 percent of the inventory. Editing one capture invalidates the audit that produced it                                                                                                                                                                                  |
+| `CONSTRAINTS.md` at the root                           | Gate precedence R-6 puts it first. Agents are told to read it before writing code and never to weaken a threshold. `docs/GATE-REGISTRY.md:3` names it and this registry as the joint source of truth for global gates                                                                                                                                                                 |
+| `docs/GATE-REGISTRY.md`                                | Same precedence tier. It also records the gates that are knowingly not automated, and deleting an honest gap entry hides a gap                                                                                                                                                                                                                                                        |
+| `KNOWN-ISSUES.md`                                      | 1944 lines, 25 inbound citations, 66 line citations, and the active register. `AGENTS.md` and every slice record write into it. It is the single file where concurrent sessions collide most, and its renumbering history (KI-16 as a hole, KI-30 and KI-31 renumbered from KI-16 and KI-17) shows what editing it carelessly costs                                                   |
+| `docs/adr/0001` through `0012`                         | Accepted decisions. `documentation-and-adrs` is explicit: do not delete old ADRs, and supersede by writing a new one. ADR-0013 is the exception the rule allows, and it already carries its own Withdrawn banner                                                                                                                                                                      |
+| `PRD.md`                                               | Product truth, and the file the Architect role must cite for every new table, column or class. `AGENTS.md` routes all scope changes through it                                                                                                                                                                                                                                        |
+| The ten hubs with 10 or more inbound                   | `CONSTRAINTS.md`, `docs/UMAMUSUME_REFERENCE.md`, both `DESIGN.md` files, `PRD.md`, `docs/design-research/CONSTRAINTS.md`, `AGENTS.md`, `KNOWN-ISSUES.md`, `docs/design-research/DESIGN.md`, `docs/PRE-MORTEM.md`, `ARCHITECTURE-ESSENTIALS.md`, `docs/GATE-REGISTRY.md`, `docs/SOURCE-OF-TRUTH.md`. Renaming or merging any of them rewrites citations across a fifth of the corpus   |
+| `docs/UMAMUSUME_REFERENCE.md`                          | 41 inbound and the dated-snapshot policy recorded in project memory. Its eight sections are the mechanics corpus the UI traces to, and its preamble is the current map                                                                                                                                                                                                                |
+| `PLAN.md` and `docs/design-research/**`                | On the forbidden-edit list from the standing Authorized Execution Turn that governed this session. `docs/design-research/SESSION-CONSOLIDATION-2026-09-30.md` is separately named do-not-touch by the brief                                                                                                                                                                           |
+| `.ai/guidelines/**` and `.ai/rules/**`                 | Boost-generated and auto-injected. Hand edits get overwritten by the next regeneration, and the repo's own rule says to record a rule only when the owner asks for one                                                                                                                                                                                                                |
+| Anything whose status is `unknown` here                | 20 files. Absence of evidence is not evidence of staleness, and an inventory that lets a later pass act on `unknown` as though it meant `stale` has quietly lowered the bar                                                                                                                                                                                                           |
 
 ## 12. Files that resisted the Description column
 
@@ -595,28 +595,28 @@ Selection method: `random.seed("c1e14a3")` then `random.sample` over the 202 tab
 
 Ten rows verified independently of the scripts that produced them: file size from `os.path.getsize`, line count from a fresh read, tracked state from `git ls-files` membership, and last commit from `git log -1 --format='%h %ad' -- <path>`, which is a different code path from the `git log --reverse --name-only` pass that built section 4.
 
-| Row | bytes / lines | tracked | last commit | verdict |
-|---|---|---|---|---|
-| `docs/frontend-review/2026-09-28/catalog-detail-populated-dark.png.network.txt` | 343 / 1 | tracked | `c6c0567` 2026-09-28 | match |
-| `docs/requests/2026-09-29-catalog-roster-report.md` | 18935 / 357 | tracked | `6300221` 2026-09-30 | match |
-| `docs/design-research/verification/slice-7-2026-09-28.md` | 15006 / 246 | tracked | `0d2dbdc` 2026-09-28 | match |
-| `docs/requests/reports/2026-09-30-c5-down-enforcement-gap.md` | 4151 / 67 | untracked | never | match |
-| `docs/frontend-review/2026-09-28/landing-default-light.png.console.txt` | 189 / 1 | tracked | `c6c0567` 2026-09-28 | match |
-| `AGENTS.md` | 26470 / 390 | tracked | `6f9c98a` 2026-09-27 | match |
-| `docs/frontend-review/2026-09-28/run-detail-unpriceable-light.png.console.txt` | 204 / 1 | tracked | `c6c0567` 2026-09-28 | match |
-| `docs/frontend-review/2026-09-28/catalog-index-page2-out-of-range-dark.png.console.txt` | 205 / 1 | tracked | `c6c0567` 2026-09-28 | match |
-| `docs/design-research/verification/slice-13-2026-09-29.md` | 20718 / 344 | tracked | `debc4d0` 2026-09-29 | match |
-| `docs/frontend-review/2026-09-28/review-queue-populated-dark.png.network.txt` | 311 / 1 | tracked | `c6c0567` 2026-09-28 | match |
+| Row                                                                                       | bytes / lines   | tracked     | last commit            | verdict   |
+| ----------------------------------------------------------------------------------------- | --------------- | ----------- | ---------------------- | --------- |
+| `docs/frontend-review/2026-09-28/catalog-detail-populated-dark.png.network.txt`           | 343 / 1         | tracked     | `c6c0567` 2026-09-28   | match     |
+| `docs/requests/2026-09-29-catalog-roster-report.md`                                       | 18935 / 357     | tracked     | `6300221` 2026-09-30   | match     |
+| `docs/design-research/verification/slice-7-2026-09-28.md`                                 | 15006 / 246     | tracked     | `0d2dbdc` 2026-09-28   | match     |
+| `docs/requests/reports/2026-09-30-c5-down-enforcement-gap.md`                             | 4151 / 67       | untracked   | never                  | match     |
+| `docs/frontend-review/2026-09-28/landing-default-light.png.console.txt`                   | 189 / 1         | tracked     | `c6c0567` 2026-09-28   | match     |
+| `AGENTS.md`                                                                               | 26470 / 390     | tracked     | `6f9c98a` 2026-09-27   | match     |
+| `docs/frontend-review/2026-09-28/run-detail-unpriceable-light.png.console.txt`            | 204 / 1         | tracked     | `c6c0567` 2026-09-28   | match     |
+| `docs/frontend-review/2026-09-28/catalog-index-page2-out-of-range-dark.png.console.txt`   | 205 / 1         | tracked     | `c6c0567` 2026-09-28   | match     |
+| `docs/design-research/verification/slice-13-2026-09-29.md`                                | 20718 / 344     | tracked     | `debc4d0` 2026-09-29   | match     |
+| `docs/frontend-review/2026-09-28/review-queue-populated-dark.png.network.txt`             | 311 / 1         | tracked     | `c6c0567` 2026-09-28   | match     |
 
 **Ten for ten on the measurable columns.**
 
 The derived column was checked separately, on ten hub rows, against a recount that reads every in-scope file for the basename. Seven matched exactly. Three did not, and both directions of error are recorded:
 
-| Row | section 4 | recount | why |
-|---|---|---|---|
-| `CONSTRAINTS.md` | 45 | 52 | The recount counts any file whose text contains the basename. 29 files write `docs/design-research/CONSTRAINTS.md` in full and 22 of those also write the bare token. Section 4 counts citations that resolve to this path. The 7 difference is the twin collision from finding 2, leaking into the number |
-| `docs/UMAMUSUME_REFERENCE.md` | 41 | 40 | The recount dropped one citer |
-| `PRD.md` | 35 | 34 | The dropped citer is `docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md`. The recount's own path handling tripped on the em-dash filename, the same `core.quotepath` trap recorded in section 2 limit 3. Section 4 is right here |
+| Row                             | section 4   | recount   | why                                                                                                                                                                                                                                                                                                          |
+| ------------------------------- | ----------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CONSTRAINTS.md`                | 45          | 52        | The recount counts any file whose text contains the basename. 29 files write `docs/design-research/CONSTRAINTS.md` in full and 22 of those also write the bare token. Section 4 counts citations that resolve to this path. The 7 difference is the twin collision from finding 2, leaking into the number   |
+| `docs/UMAMUSUME_REFERENCE.md`   | 41          | 40        | The recount dropped one citer                                                                                                                                                                                                                                                                                |
+| `PRD.md`                        | 35          | 34        | The dropped citer is `docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md`. The recount's own path handling tripped on the em-dash filename, the same `core.quotepath` trap recorded in section 2 limit 3. Section 4 is right here                                                                |
 
 So the counts stand, and the inbound column now carries its definition in section 4 rather than relying on the reader to infer it.
 
@@ -632,27 +632,27 @@ One number in section 6.3 also needs reading as a token count, not a file count.
 
 Counts and locations, no rewrites, per the owner's ruling. Patterns that scored zero are listed so the absence is checkable rather than assumed.
 
-| Pattern | Hits | Where |
-|---|---|---|
-| §1 not-X-but-Y, clipped negative tail | 0 by formula | 21 sentences contain `not`; 6 of them are contrasts that carry information and are kept (`which is the expected result, not a broken gate`; `My regex's fault, not the repo's`; `a working artefact, not a repo document`) |
-| §2 one-line closer, repeated closer | **1, at scale** | The clause "The two copies are not identical, so this pair is a before/after, not a duplicate." appears 4 times verbatim, in the four `export-*-run1.txt` rows of section 4.2. The content is correct and the brief asked for it; the repetition is the tell |
-| §3 aphorism formula | 2 | Section 11 `Anything whose status is unknown here`: "Absence of evidence is not evidence of staleness". Section 8 `CONSTRAINTS.md` row: "The real defect is the shared basename, not the shared subject" |
-| §4 staged run-up | 1 | Section 6 opener, "Method matters here, so it goes first." |
-| §5 arguing with no one | 1, mild | Section 7 table, Unknown row: "This is not a claim that they are wrong". It pre-empts a real misreading of an `unknown` verdict, so it carries information |
-| §6 forced triads | 0 | 2 `A, B, and C` constructions, both inside table cells listing real items |
-| §8 dash as connector | **0** | 5 em dashes in the file, all inside the verbatim filename `docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md`, which section 2 limit 3 explains must stay exact |
-| §9 stacked qualifiers | 0 | |
-| §12 overused AI vocabulary | 1 real, 12 exempt | 9 hits are the technical noun `gate`, which the skill exempts. 2 hits are `actually` inside a literal ADR title or a table column header meaning "the line it really sits at". One is real: section 11, "has quietly lowered the bar" |
-| §13 inflated significance | 0 | |
-| §15 shallow `-ing` riders | 0 | |
-| §16 sales language | 0 | |
-| §18 avoids is/are/has | 0 | |
-| §19 bold as decoration, labeled lists | 0 | Bold appears in table cells and lead-ins, none as `- **Label:**` bullets |
-| §20 decorative headings, rules, repeated title | 0 | Headings are sentence-ish and numbered; no `---` separators between sections; no emoji |
-| §22 chatbot residue | 0 | |
-| §23 knowledge-limit disclaimers and guesses | 0 | Section 11's `unknown` verdicts name what is missing rather than guessing |
-| §24 heading restated in first sentence | 0 | |
-| §25 writing about the previous version | 1, deliberate | Section 2 limit 6 and section 14 exist to correct earlier claims forward instead of overwriting them. That is the repo's stated convention, not a tell |
+| Pattern                                          | Hits                | Where                                                                                                                                                                                                                                                          |
+| ------------------------------------------------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| §1 not-X-but-Y, clipped negative tail            | 0 by formula        | 21 sentences contain `not`; 6 of them are contrasts that carry information and are kept (`which is the expected result, not a broken gate`; `My regex's fault, not the repo's`; `a working artefact, not a repo document`)                                     |
+| §2 one-line closer, repeated closer              | **1, at scale**     | The clause "The two copies are not identical, so this pair is a before/after, not a duplicate." appears 4 times verbatim, in the four `export-*-run1.txt` rows of section 4.2. The content is correct and the brief asked for it; the repetition is the tell   |
+| §3 aphorism formula                              | 2                   | Section 11 `Anything whose status is unknown here`: "Absence of evidence is not evidence of staleness". Section 8 `CONSTRAINTS.md` row: "The real defect is the shared basename, not the shared subject"                                                       |
+| §4 staged run-up                                 | 1                   | Section 6 opener, "Method matters here, so it goes first."                                                                                                                                                                                                     |
+| §5 arguing with no one                           | 1, mild             | Section 7 table, Unknown row: "This is not a claim that they are wrong". It pre-empts a real misreading of an `unknown` verdict, so it carries information                                                                                                     |
+| §6 forced triads                                 | 0                   | 2 `A, B, and C` constructions, both inside table cells listing real items                                                                                                                                                                                      |
+| §8 dash as connector                             | **0**               | 5 em dashes in the file, all inside the verbatim filename `docs/UMAMUSUME PRETTY DERBY — COMPREHENSIVE UX DELIVERABLES.md`, which section 2 limit 3 explains must stay exact                                                                                   |
+| §9 stacked qualifiers                            | 0                   |                                                                                                                                                                                                                                                                |
+| §12 overused AI vocabulary                       | 1 real, 12 exempt   | 9 hits are the technical noun `gate`, which the skill exempts. 2 hits are `actually` inside a literal ADR title or a table column header meaning "the line it really sits at". One is real: section 11, "has quietly lowered the bar"                          |
+| §13 inflated significance                        | 0                   |                                                                                                                                                                                                                                                                |
+| §15 shallow `-ing` riders                        | 0                   |                                                                                                                                                                                                                                                                |
+| §16 sales language                               | 0                   |                                                                                                                                                                                                                                                                |
+| §18 avoids is/are/has                            | 0                   |                                                                                                                                                                                                                                                                |
+| §19 bold as decoration, labeled lists            | 0                   | Bold appears in table cells and lead-ins, none as `- **Label:**` bullets                                                                                                                                                                                       |
+| §20 decorative headings, rules, repeated title   | 0                   | Headings are sentence-ish and numbered; no `---` separators between sections; no emoji                                                                                                                                                                         |
+| §22 chatbot residue                              | 0                   |                                                                                                                                                                                                                                                                |
+| §23 knowledge-limit disclaimers and guesses      | 0                   | Section 11's `unknown` verdicts name what is missing rather than guessing                                                                                                                                                                                      |
+| §24 heading restated in first sentence           | 0                   |                                                                                                                                                                                                                                                                |
+| §25 writing about the previous version           | 1, deliberate       | Section 2 limit 6 and section 14 exist to correct earlier claims forward instead of overwriting them. That is the repo's stated convention, not a tell                                                                                                         |
 
 Sentence cadence across the prose lines runs 5 to 97 words with no even mid-length run, which `humanizer` lists as a human signal rather than something to fix.
 

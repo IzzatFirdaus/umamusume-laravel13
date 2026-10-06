@@ -53,7 +53,7 @@ exists is exactly:
 
 ```text
 ❌ UNVERIFIED: No current source found.
-```
+```text
 
 ...which is itself useful: it locks neutral tints in as the durable design instead
 of a placeholder awaiting drift.
@@ -72,7 +72,7 @@ correction must propagate to every copy of the literal).
 Use neutral tints for the three unverified mood/condition pills.
 Do not present unverified colours as measured client values anywhere
 (tokens, mockups, prototypes, or shipped CSS).
-```
+```text
 
 ---
 
@@ -96,12 +96,12 @@ Four files, four commits, docs-only. Steps 2–5 landed as one set because KI-35
 the rewrite cites KI-35; a half-landed block would leave the register describing a specification defect the
 specification does not yet acknowledge.
 
-| Step | Commit | File | Content |
-|---|---|---|---|
-| 2 | `84faed8` | `KNOWN-ISSUES.md` | KI-33 (+ R-2 and R-5 sub-findings), KI-35, KI-36, KI-37, status block |
-| 3 | `bcd8abe` | `DESIGN.md` | §4.2 rewrite, both stale clauses as one dated withdrawal |
-| 4 | `da8d6c5` | `docs/design-research/SKILLS-GAPS.md` | G-SK-13's two stale clauses |
-| 5 | `d0422ce` | `docs/design-research/CONSTRAINTS.md` | D-289 |
+| Step   | Commit      | File                                    | Content                                                                 |
+| ------ | ----------- | --------------------------------------- | ----------------------------------------------------------------------- |
+| 2      | `84faed8`   | `KNOWN-ISSUES.md`                       | KI-33 (+ R-2 and R-5 sub-findings), KI-35, KI-36, KI-37, status block   |
+| 3      | `bcd8abe`   | `DESIGN.md`                             | §4.2 rewrite, both stale clauses as one dated withdrawal                |
+| 4      | `da8d6c5`   | `docs/design-research/SKILLS-GAPS.md`   | G-SK-13's two stale clauses                                             |
+| 5      | `d0422ce`   | `docs/design-research/CONSTRAINTS.md`   | D-289                                                                   |
 
 **Step 4 landed as an edit, not a no-op — and that was checked, not assumed.** The sequencing brief warned
 that the peer's `edb03d5` *may* have already incorporated the two G-SK-13 wording diffs. Reading the entry
@@ -271,16 +271,16 @@ it is strictly pre-run (D-260).
 
 #### 2. Current implementation status (evidence, not intent)
 
-| Piece | State | Evidence |
-|---|---|---|
-| Routes `runs.create/store/show/update/destroy`, `runs.turns.*`, `runs.skills.sync`, `runs.export` | Live | `routes/web.php:15-26` (HEAD) |
-| Run fields: umamusume_id, scenario (free text), status, notes | Live | `StoreTrainingRunRequest` HEAD lines 29-34 |
-| Inheritance parents in validation | Accepted by the Form Request | `inheritance_parent_a_id` / `_b_id`, nullable exists rules (HEAD) |
-| Legacy Select UI (picker during create) | **Not implemented** | `resources/views/runs/create.blade.php` at HEAD has no parent fields |
-| Turn logging with stats 0..1200, SP, condition, MoodTier | Live | `StoreTurnEntryRequest:40-53`, `app/Enums/MoodTier.php` |
-| Skill states Suggested/Acquired/Skipped | Live | `runs.show` sync form, `TrainingRun::setSkillStatus` |
-| Scenario config driving panels/widgets | In flight (uncommitted) | `config/scenarios.php` tracked at HEAD; component work dirty in tree |
-| `ScenarioSlot`, richer race/inheritance tables | In flight (untracked models/migrations) | working tree only; not committed |
+| Piece                                                                                               | State                                     | Evidence                                                               |
+| --------------------------------------------------------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------- |
+| Routes `runs.create/store/show/update/destroy`, `runs.turns.*`, `runs.skills.sync`, `runs.export`   | Live                                      | `routes/web.php:15-26` (HEAD)                                          |
+| Run fields: umamusume_id, scenario (free text), status, notes                                       | Live                                      | `StoreTrainingRunRequest` HEAD lines 29-34                             |
+| Inheritance parents in validation                                                                   | Accepted by the Form Request              | `inheritance_parent_a_id` / `_b_id`, nullable exists rules (HEAD)      |
+| Legacy Select UI (picker during create)                                                             | **Not implemented**                       | `resources/views/runs/create.blade.php` at HEAD has no parent fields   |
+| Turn logging with stats 0..1200, SP, condition, MoodTier                                            | Live                                      | `StoreTurnEntryRequest:40-53`, `app/Enums/MoodTier.php`                |
+| Skill states Suggested/Acquired/Skipped                                                             | Live                                      | `runs.show` sync form, `TrainingRun::setSkillStatus`                   |
+| Scenario config driving panels/widgets                                                              | In flight (uncommitted)                   | `config/scenarios.php` tracked at HEAD; component work dirty in tree   |
+| `ScenarioSlot`, richer race/inheritance tables                                                      | In flight (untracked models/migrations)   | working tree only; not committed                                       |
 
 Claim limit: nothing here asserts that six-slot Legacy data persists; see §7.
 
@@ -297,12 +297,12 @@ Claim limit: nothing here asserts that six-slot Legacy data persists; see §7.
 
 #### 4. Empty-state remedies
 
-| Missing | Remedy (required rendering) |
-|---|---|
-| No Umamusume in catalog | Create form shows empty state: name the two fills (seed for illustration; `uma:fetch` for facts) and link `/umamusume`; submitting is not possible, so the form states why rather than disabling silently (absent-beats-disabled pattern, D-263) |
-| No runs yet (`runs.index`) | Existing empty card pointing to "New run" (live: `runs/index.blade.php` @empty) |
-| No parents available for Legacy Select | Create the run **without** parents (nullable FKs); do not render empty parent slots (§7) |
-| No scenarios picker | Not an error state; scenario stays optional free text |
+| Missing                                  | Remedy (required rendering)                                                                                                                                                                                                                        |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No Umamusume in catalog                  | Create form shows empty state: name the two fills (seed for illustration; `uma:fetch` for facts) and link `/umamusume`; submitting is not possible, so the form states why rather than disabling silently (absent-beats-disabled pattern, D-263)   |
+| No runs yet (`runs.index`)               | Existing empty card pointing to "New run" (live: `runs/index.blade.php` @empty)                                                                                                                                                                    |
+| No parents available for Legacy Select   | Create the run **without** parents (nullable FKs); do not render empty parent slots (§7)                                                                                                                                                           |
+| No scenarios picker                      | Not an error state; scenario stays optional free text                                                                                                                                                                                              |
 
 #### 5. Step sequence
 
@@ -348,12 +348,12 @@ saved today; it cannot.
 
 #### 8. Error states
 
-| Error | Trigger | Handling |
-|---|---|---|
-| Validation (422/redirect with `$errors`) | bad stats, duplicate turn, unknown umamusume/parent id | field errors on the form; turn errors render in the runs.show error list |
-| 404 | unknown run/slug; turn not owned by the routed run (`abort_unless` in `updateTurn`/`destroyTurn`); unknown export format | framework 404 page; API gets the `{error:{code,message}}` envelope |
-| Engine/fetch failure | only upstream of preconditions (catalog empty) | NFR-2: prior data untouched; run flow never depends on live fetch |
-| Loading | initial navigation: browser-native (ADR-0007 clause 1); user-initiated async (future refresh) requires explicit indicator (clause 2) |
+| Error                                    | Trigger                                                                                                                              | Handling                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| Validation (422/redirect with `$errors`) | bad stats, duplicate turn, unknown umamusume/parent id                                                                               | field errors on the form; turn errors render in the runs.show error list |
+| 404                                      | unknown run/slug; turn not owned by the routed run (`abort_unless` in `updateTurn`/`destroyTurn`); unknown export format             | framework 404 page; API gets the `{error:{code,message}}` envelope       |
+| Engine/fetch failure                     | only upstream of preconditions (catalog empty)                                                                                       | NFR-2: prior data untouched; run flow never depends on live fetch        |
+| Loading                                  | initial navigation: browser-native (ADR-0007 clause 1); user-initiated async (future refresh) requires explicit indicator (clause 2) |                                                                          |
 
 #### 9. Lore-safe copy guidance
 

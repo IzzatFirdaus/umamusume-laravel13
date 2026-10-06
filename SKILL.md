@@ -18,7 +18,7 @@ partial view of the scopes, and then read as current long after it stopped being
 ```bash
 node "$HOME/.qoder/skills/refresh-skill-registry/scripts/scan-skills.cjs" --project "$(pwd)" --names
 node "$HOME/.qoder/skills/refresh-skill-registry/scripts/scan-skills.cjs" --project "$(pwd)" --violations
-```
+```text
 
 The first prints the roster grouped by scope, the second prints only the skills with problems.
 The summary line reads `SKILLS total=N errors=E warnings=W`. Both read each skill's own

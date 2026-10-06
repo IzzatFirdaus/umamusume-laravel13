@@ -41,11 +41,11 @@ violation, not a shortcut.
 
 Both are nullable with no default, so typed runs — the overwhelming majority — say nothing.
 
-| Rejected alternative | Why |
-|---|---|
-| Reuse `created_at` | An import writes the row today. `created_at` is when the record entered the database; `imported_at` is what the Trainer asserts about the run's own past. Collapsing them makes every imported run claim it was created at import time — true of the row, false of the history. |
-| Reuse `is_manual` | Marks a row the **fetch engine** must never overwrite (FR-B-4). An imported run is neither a hand-correction nor a fetch. |
-| Reuse `source_url`/`fetched_at` | That pair carries a *fetched reference row's* origin. Nothing here was fetched. |
+| Rejected alternative              | Why                                                                                                                                                                                                                                                                               |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Reuse `created_at`                | An import writes the row today. `created_at` is when the record entered the database; `imported_at` is what the Trainer asserts about the run's own past. Collapsing them makes every imported run claim it was created at import time — true of the row, false of the history.   |
+| Reuse `is_manual`                 | Marks a row the **fetch engine** must never overwrite (FR-B-4). An imported run is neither a hand-correction nor a fetch.                                                                                                                                                         |
+| Reuse `source_url`/`fetched_at`   | That pair carries a *fetched reference row's* origin. Nothing here was fetched.                                                                                                                                                                                                   |
 
 The names were grepped before being chosen (`git grep import_at\|import_source` → no matches).
 

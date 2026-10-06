@@ -253,7 +253,7 @@ function save(): void {
             {{ errors.deck }}
         </p>
 
-        <div class="mt-5 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div class="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <!-- The six slots -->
             <section aria-labelledby="deck-slots-heading">
                 <h3 id="deck-slots-heading" class="text-lg font-semibold text-ink-strong">The six slots</h3>

@@ -14,6 +14,10 @@ use App\Models\Veteran;
  * payload and derives no figure: the show screen is a later slice (`frontend-development-plan.md` §7's
  * D16), and building its payload here would put a screen's shape into the domain layer. What this buys is
  * the one read the screen needs without an N+1 per relation.
+ *
+ * The two inheritance parents join that list for `SCREEN-021`'s Ancestry view. The six-node graph names
+ * each parent, and a read that left them out would ask the library's detail screen for one query per
+ * parent, which is the N+1 this action exists to prevent.
  */
 final class ShowVeteran
 {
@@ -24,6 +28,8 @@ final class ShowVeteran
             'trainingRun.turnEntries',
             'trainingRun.skills',
             'trainingRun.raceEntries',
+            'trainingRun.inheritanceParentA',
+            'trainingRun.inheritanceParentB',
         ]);
     }
 }

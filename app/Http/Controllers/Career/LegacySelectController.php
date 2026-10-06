@@ -62,7 +62,7 @@ class LegacySelectController extends Controller
             : Umamusume::query()->find($draft['umamusume_id']);
 
         $selection = SetupDraft::legacySelection();
-        $parents = $this->parentNames(SetupDraft::legacyParents());
+        $parents = AncestryGraph::parentNames(SetupDraft::legacyParents());
         $library = $veterans->handle([], 100);
 
         return Inertia::render('Career/LegacySelect', [
@@ -122,26 +122,5 @@ class LegacySelectController extends Controller
         return redirect()
             ->route('career.legacy')
             ->with('status', 'Legacy recorded.');
-    }
-
-    /**
-     * The two parent names behind the draft's library picks, in slot order.
-     *
-     * A Veteran is a run whose trainee is the Umamusume the client shows in the parent slot, so the name is
-     * read through the run rather than stored a second time. An id that no longer resolves is null here and
-     * `N/A, not chosen` on the page, which is the same answer the run screen gives for a foreign key pointing
-     * at a deleted trainee.
-     *
-     * @param  array{0: int|null, 1: int|null}  $parents
-     * @return array{0: string|null, 1: string|null}
-     */
-    private function parentNames(array $parents): array
-    {
-        return array_map(
-            static fn (?int $id): ?string => $id === null
-                ? null
-                : Veteran::query()->with('trainingRun.umamusume')->find($id)?->trainingRun?->umamusume?->name,
-            $parents,
-        );
     }
 }

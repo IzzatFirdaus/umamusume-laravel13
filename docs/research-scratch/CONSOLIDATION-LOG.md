@@ -30,6 +30,7 @@ truth for the candidate list, the cross-reference map, and the protected-file ch
 ## Merge performed
 
 ### SCENARIO-PUBLISHER-REFERENCES.md (priority task 5)
+
 - **Sources merged** (verbatim, headings demoted one level under their own section):
   - `docs/scenarios/04-trackblazer-umaguide.md` (266 lines) -> section "Trackblazer (uma.guide)"
   - `docs/scenarios/05-trackblazer-gametora.md` (216 lines) -> section "Trackblazer (GameTora)"
@@ -53,12 +54,13 @@ truth for the candidate list, the cross-reference map, and the protected-file ch
 ## Candidates skipped (with reason)
 
 The working tree already carries an **uncommitted prior consolidation round** (222 changed
-paths). Its deletions are unstaged ` D` against HEAD; its masters are untracked under
+paths). Its deletions are unstaged `D` against HEAD; its masters are untracked under
 `docs/research-scratch/`. Priority tasks 1-4 were therefore already executed by that round;
 re-running them would create duplicate masters (a file-discipline violation) or restore files
 the prior round deleted.
 
 ### Priority task 1 - twin-name collision (CONSTRAINTS.md / DESIGN.md) - SKIPPED
+
 - The prior round **deleted and embedded** `docs/design-research/CONSTRAINTS.md` (973 lines)
   and `docs/design-research/DESIGN.md` (1,640 lines) into
   `docs/research-scratch/DESIGN-CORPUS.md` (sources 1 and 2). It did **not** "move them to
@@ -72,6 +74,7 @@ the prior round deleted.
   definition in either file was altered; only citation paths changed.
 
 ### Gate-blocking dangling citation fixed
+
 - `tests/Feature/DocSchemaDriftTest.php` read `docs/design-research/CONSTRAINTS.md` as one of
   four governance docs and **failed** (`the drift guard reads this doc and it is not there`)
   once the prior round deleted it. Repointed that list entry to
@@ -79,11 +82,13 @@ the prior round deleted.
   guard reads the same prose). The suite is green again: 5 passed.
 
 ### Priority task 2 - roster trio - SKIPPED
+
 - `docs/requests/2026-09-29-catalog-roster-and-trainee-selector.md`, `...-plan.md`, and the
   report are already embedded in `docs/research-scratch/CATALOG-ROSTER-WORKSTREAM.md`
   (Provenance items 1-3). A second `CATALOG-ROSTER-CONSOLIDATED.md` would duplicate the topic.
 
 ### Priority task 3 - untracked UX write-ups - PARTIALLY PRESENT (merge done; one citation fixed)
+
 - The three write-ups (`docs/UMAMUSUME PRETTY DERBY - COMPREHENSIVE UX DELIVERABLES.md`,
   `docs/UX Behavior Specification - Umamusume Trainer Companion.md`,
   `docs/Scenario-Specific User Flows & Frontend Specifications.md`) are already merged into the
@@ -95,16 +100,20 @@ the prior round deleted.
   surviving master (`docs/research-scratch/DESIGN-CORPUS.md`).
 
 ### Priority task 4 - roster crosscheck - SKIPPED
+
 - `docs/data/2026-09-29-global-roster-crosscheck.md` and `roster-crosscheck-table.md` are
   already embedded in `CATALOG-ROSTER-WORKSTREAM.md` (Provenance items 4-5).
 
 ### Section 10 non-merge tasks - SKIPPED
+
 - Any `.gitignore`/config/`Makefile` item in the (now-absent) ranked candidate list is
   out of type for this run and would touch the lore tooling; skipped per the plan's own rule.
 
 ## Validation state (surfaced, not silently patched)
+
 The prior uncommitted round left several inbound citations pointing at deleted files, which
 fails gates that this run did **not** author:
+
 - `tests/Feature/DocSchemaDriftTest.php:74` reads `docs/design-research/CONSTRAINTS.md` as a
   governance doc and its guard (line 175) **fails when a listed doc is absent**. That is a
   pre-existing break from the prior round, not from task 5.
@@ -191,11 +200,11 @@ Three plan-shaped documents sit outside the master set on purpose. Consolidating
 a status that is still moving, and `PROCESS-PLANS.md` is the wrong home for a document whose acceptance boxes
 are open.
 
-| Document | Why it stays out |
-|---|---|
-| `docs/PLAN-DOC-SYNC-2026-10-02.md` | Task 4 is held on owner gate O-2 and Task 5 is partially executed; Tasks 1, 2, 3, 6, 7 and 8 are complete or scoped. Consolidating a plan with one held task would record a false completion. |
-| `docs/PLAN-UI-UX-2026-10-02.md` | Milestone 1 is partly shipped (WS-1 controls, and the M1 register sweep), WS-2 landed at `80caefd`, and WS-3 through WS-6 are open. It owns its own workstreams and the register entries those workstreams close. |
-| docs/design-research/slice-7-prd-revision-draft-2026-10-01.md | A DRAFT awaiting an owner ruling on PRD shape and on R-02's scope. It is deliberately uncommitted, so it is not a tracked master and cannot be registered in `INDEX.md` without defeating its own review gate. |
+| Document                                                        | Why it stays out                                                                                                                                                                                                    |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/PLAN-DOC-SYNC-2026-10-02.md`                              | Task 4 is held on owner gate O-2 and Task 5 is partially executed; Tasks 1, 2, 3, 6, 7 and 8 are complete or scoped. Consolidating a plan with one held task would record a false completion.                       |
+| `docs/PLAN-UI-UX-2026-10-02.md`                                 | Milestone 1 is partly shipped (WS-1 controls, and the M1 register sweep), WS-2 landed at `80caefd`, and WS-3 through WS-6 are open. It owns its own workstreams and the register entries those workstreams close.   |
+| docs/design-research/slice-7-prd-revision-draft-2026-10-01.md   | A DRAFT awaiting an owner ruling on PRD shape and on R-02's scope. It is deliberately uncommitted, so it is not a tracked master and cannot be registered in `INDEX.md` without defeating its own review gate.      |
 
 **The condition for consolidating any of them:** every acceptance box closed or struck, and gates O-1 (push),
 O-2 (GATE-REGISTRY/PRE-MORTEM restore-or-repoint) and O-3 (root `research-scratch/` disposition) resolved.

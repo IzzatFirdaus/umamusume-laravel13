@@ -8,19 +8,19 @@ Consolidated Umamusume Trainer companion. Local-only Laravel 13 tool. Condensed 
 
 Pinned from `composer show --direct` and `package.json` as installed in this repository (2026-09-27). Per the foundation rules, APIs must match these installed versions; do not assume.
 
-| Layer | Package | Version | Notes |
-|---|---|---|---|
-| Runtime | PHP | 8.5.8 | `declare(strict_types=1)` everywhere; 8.4+ features allowed (readonly, promoted props, `#[Override]`). |
-| Framework | laravel/framework | 13.32.0 | Laravel 13. |
-| Database | SQLite | bundled with PHP (pdo_sqlite) | Only supported driver. WAL mode, `busy_timeout` (see §3). |
-| Cache/Queue | `database` stores | framework built-in | No Redis. Queue worker runs via `composer run dev`. |
-| Testing | pestphp/pest | 4.7.8 | + pest-plugin-laravel 4.1.0. Feature tests by default. |
-| Static analysis | larastan/larastan | 3.12.1 | Level 6 baseline, `phpstan.neon` already configured. |
-| Formatting | laravel/pint | 1.32.1 | `pint.json` (laravel preset). |
-| Frontend CSS | tailwindcss | ^4.0.0 | CSS-first config: theme lives in `resources/css/app.css` `@theme` block. There is deliberately no `tailwind.config.js`; Tailwind v4 ignores one unless loaded via `@config`. |
-| Bundler | vite + laravel-vite-plugin | ^7.0.7 / ^2.0.0 | `@tailwindcss/vite` plugin. |
-| HTTP (client side) | axios | ^1.11.0 | Only if JS needs it; Blade-first. |
-| HTTP (server side) | `Http` facade | framework built-in | Fetch engine only. Timeouts, retries, rate limiting per §6. Ref: https://laravel.com/docs/13.x/http-client |
+| Layer                | Package                      | Version                         | Notes                                                                                                                                                                          |
+| -------------------- | ---------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Runtime              | PHP                          | 8.5.8                           | `declare(strict_types=1)` everywhere; 8.4+ features allowed (readonly, promoted props, `#[Override]`).                                                                         |
+| Framework            | laravel/framework            | 13.32.0                         | Laravel 13.                                                                                                                                                                    |
+| Database             | SQLite                       | bundled with PHP (pdo_sqlite)   | Only supported driver. WAL mode, `busy_timeout` (see §3).                                                                                                                      |
+| Cache/Queue          | `database` stores            | framework built-in              | No Redis. Queue worker runs via `composer run dev`.                                                                                                                            |
+| Testing              | pestphp/pest                 | 4.7.8                           | + pest-plugin-laravel 4.1.0. Feature tests by default.                                                                                                                         |
+| Static analysis      | larastan/larastan            | 3.12.1                          | Level 6 baseline, `phpstan.neon` already configured.                                                                                                                           |
+| Formatting           | laravel/pint                 | 1.32.1                          | `pint.json` (laravel preset).                                                                                                                                                  |
+| Frontend CSS         | tailwindcss                  | ^4.0.0                          | CSS-first config: theme lives in `resources/css/app.css` `@theme` block. There is deliberately no `tailwind.config.js`; Tailwind v4 ignores one unless loaded via `@config`.   |
+| Bundler              | vite + laravel-vite-plugin   | ^7.0.7 / ^2.0.0                 | `@tailwindcss/vite` plugin.                                                                                                                                                    |
+| HTTP (client side)   | axios                        | ^1.11.0                         | Only if JS needs it; Blade-first.                                                                                                                                              |
+| HTTP (server side)   | `Http` facade                | framework built-in              | Fetch engine only. Timeouts, retries, rate limiting per §6. Ref: <https://laravel.com/docs/13.x/http-client>                                                                   |
 
 Not installed, not to be added without approval: sanctum, breeze, maatwebsite/excel, any SPA framework.
 
@@ -55,19 +55,19 @@ flowchart LR
     WORKER --> Engine
     PROMOTE --> DB
     REVIEW --> DB
-```
+```text
 
 Trust boundaries (security-and-hardening §threat model): (1) fetched web content, untrusted, enters only through `SourceFetcher` + parser; (2) Trainer's browser input, validated by Form Requests; (3) everything inside `app/` after those boundaries is trusted. There is no authentication boundary because there is no auth surface (§8).
 
 ## 3. Database Schema & Eloquent Models
 
-SQLite only. Migrations use anonymous classes (Laravel 13 default). All multi-row writes inside `DB::transaction`. Connection configured with `journal_mode=WAL` and `busy_timeout` via `PRAGMA` in the `sqlite` connection options so the web process and queue worker coexist. Ref: https://laravel.com/docs/13.x/database#configuration
+SQLite only. Migrations use anonymous classes (Laravel 13 default). All multi-row writes inside `DB::transaction`. Connection configured with `journal_mode=WAL` and `busy_timeout` via `PRAGMA` in the `sqlite` connection options so the web process and queue worker coexist. Ref: <https://laravel.com/docs/13.x/database#configuration>
 
 Naming: `Umamusume` is the exclusive term for characters (singular and plural identical). Tables are snake_case plurals of models, with one deliberate exception: the characters table is `umamusume` (invariant plural), matching the race name.
 
 ### Catalog domain
 
-```
+```text
 umamusume                     (the character catalog)
   id                bigint PK
   slug              string unique          (url-safe, from English name)
@@ -117,7 +117,7 @@ match_candidates              (review queue for Fuzzy/None matches)
   match_tier string enum-backed (MatchTier: Fuzzy | None),
   status string enum-backed (CandidateStatus: Pending | Confirmed | Aliased | Rejected),
   payload json (full parsed record), created_by_fetch_at datetime, timestamps
-```
+```text
 
 `character_cards` and `umamusume.external_ref` are authorized by
 `docs/adr/0008-character-card-catalog-layer.md` and **are applied**: they landed with
@@ -138,7 +138,7 @@ history rather than a card's.
 
 ### Trainer-data domain
 
-```
+```text
 training_runs
   id, umamusume_id FK->umamusume, scenario string nullable,
   character_card_id FK->character_cards nullable (ADR-0008: the form the run started on; umamusume_id
@@ -185,7 +185,7 @@ run_skills                    (pivot with payload)
   turn_acquired unsigned int nullable
   PK(training_run_id, skill_id)
   -- Suggested = planned pre-run; Acquired/Skipped = outcome [rev 0.2 — repo #4]
-```
+```text
 
 Planner-domain boundary [rev 0.2 — repo #4]: repo #4's career-run planner maps onto `training_runs` + `turn_entries` + `run_skills`. Its race-day snapshots, manual race predictions, dual localStorage/account storage, image uploads, and DB-level enum columns are cut (Pre-Mortem §4.1); no new tables are introduced for the planner. Growth-rate/aptitude/base-stat reference data (repo #4 hardcodes it in seeders) is deferred to PRD OQ-4; no columns added now, so no speculative planner subsystem enters the schema.
 
@@ -223,20 +223,20 @@ join is interchangeable with the other.
 
 ## 4. API Structure (REST, versioned, typed)
 
-Web UI is Blade (server-rendered). The JSON API is a read-only P2 surface for the Trainer's own scripts. Conventions per `api-and-interface-design`: plural nouns, no verbs; camelCase query params and response fields; one error shape; offset pagination on all lists; additive evolution only. Ref: https://laravel.com/docs/13.x/eloquent-resources
+Web UI is Blade (server-rendered). The JSON API is a read-only P2 surface for the Trainer's own scripts. Conventions per `api-and-interface-design`: plural nouns, no verbs; camelCase query params and response fields; one error shape; offset pagination on all lists; additive evolution only. Ref: <https://laravel.com/docs/13.x/eloquent-resources>
 
-```
+```text
 GET /api/v1/umamusume?status=&search=&page=&pageSize=   -> { data: [Umamusume], pagination: { page, pageSize, totalItems, totalPages } }
 GET /api/v1/umamusume/{slug}                            -> { data: Umamusume } (includes aliases, sources)
 GET /api/v1/training-runs?page=                         -> { data: [TrainingRunSummary], pagination }
 GET /api/v1/training-runs/{id}                          -> { data: TrainingRun } (includes turns, skills)
-```
+```text
 
 Error shape (every non-2xx):
 
 ```json
 { "error": { "code": "NOT_FOUND", "message": "No umamusume with slug 'x'." } }
-```
+```text
 
 Status mapping: 400 bad input, 404 missing, 422 validation, 500 internal (generic message, details to log only). Type contracts are expressed as API Resource classes (`app/Http/Resources/`) with PHPDoc array-shapes; no schema-generation tooling (cut in Pre-Mortem §1).
 
@@ -270,7 +270,7 @@ sequenceDiagram
         M->>D: insert match_candidates (review queue)
     end
     C->>C: release lock, log summary (promoted/reviewed/skipped/failed)
-```
+```text
 
 ### Design decisions
 
@@ -283,7 +283,7 @@ sequenceDiagram
 
 ### Scheduling & queueing
 
-Default: manual `php artisan uma:fetch` (PRD OQ-3). Concurrency is controlled by `Cache::lock("uma-fetch:{source}")` in `UmaFetch::fetchOne()` (line 55) so web-triggered refresh and scheduled fetch cannot double-run. Ref: https://laravel.com/docs/13.x/cache#atomic-locks
+Default: manual `php artisan uma:fetch` (PRD OQ-3). Concurrency is controlled by `Cache::lock("uma-fetch:{source}")` in `UmaFetch::fetchOne()` (line 55) so web-triggered refresh and scheduled fetch cannot double-run. Ref: <https://laravel.com/docs/13.x/cache#atomic-locks>
 
 ## 6. Integration Pattern (scraping → normalization → storage → cache)
 
@@ -301,21 +301,21 @@ Blade + Tailwind v4 (CSS-first `@theme`), vanilla JS only where needed (autocomp
 
 Local-only changes the threat list; it does not remove it.
 
-| Concern | Posture |
-|---|---|
-| Auth surface | None by design. No login, no sessions beyond the framework default, no exposed writes via API (read-only). The app must never be deployed publicly; README states `php artisan serve` on loopback. |
-| Untrusted fetched content | Parsed as data only. Parsers extract text fields; no HTML is ever rendered into Blade unescaped (auto-escaping stays on; no `{!! !!}` for source data). Prompt-injection-style text inside fetched pages cannot reach an LLM here (no LLM in the pipeline), but instruction-like strings are treated as plain text regardless. |
-| SSRF | Fetch targets come exclusively from `config('uma.sources')` allowlist; redirects are followed by the fetcher itself, at most two hops, and every hop's host is re-checked against the same allowlist before it is requested (F-9); no user-supplied URLs. |
-| Binary asset files (authorized by `ADR-0021`, unbuilt) | An artwork host is declared in the same `config('uma.sources')` allowlist as an **asset** entry with no parser, so the single rule above stays true of every outbound request the tool makes. Request paths are a config constant plus an integer id read from a catalog row — never from a request, a form, or a fetched body — so there is no path to inject. Files land in gitignored `storage/app/private/artwork/` and are never served by a route the app exposes, which is also what keeps the copy a private one (`PRD.md` §6.10). The host answers a miss with 27,150 bytes of `text/html` at HTTP 404, so availability is judged on the status code, never on "bytes came back". |
-| Input validation | Form Requests at every web write boundary; third-party parsed records validated against array-shape checks before storage. |
-| Output encoding | Blade `{{ }}` everywhere; JSON via API Resources. |
-| Secrets | None exist. No API keys in Phase 1 sources; if a source later needs one, it goes in `.env`, never in config defaults or snapshots. |
-| Data integrity | WAL + transactions (§3); `is_manual` protection; Trainer data unreachable from the engine's write path. |
-| Dependency supply chain | `composer audit` / `npm audit` before release-tagging a local build; no new dependencies without approval (domain rules). |
+| Concern                                                  | Posture                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth surface                                             | None by design. No login, no sessions beyond the framework default, no exposed writes via API (read-only). The app must never be deployed publicly; README states `php artisan serve` on loopback.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Untrusted fetched content                                | Parsed as data only. Parsers extract text fields; no HTML is ever rendered into Blade unescaped (auto-escaping stays on; no `{!! !!}` for source data). Prompt-injection-style text inside fetched pages cannot reach an LLM here (no LLM in the pipeline), but instruction-like strings are treated as plain text regardless.                                                                                                                                                                                                                                                                                                                                                               |
+| SSRF                                                     | Fetch targets come exclusively from `config('uma.sources')` allowlist; redirects are followed by the fetcher itself, at most two hops, and every hop's host is re-checked against the same allowlist before it is requested (F-9); no user-supplied URLs.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Binary asset files (authorized by `ADR-0021`, unbuilt)   | An artwork host is declared in the same `config('uma.sources')` allowlist as an **asset** entry with no parser, so the single rule above stays true of every outbound request the tool makes. Request paths are a config constant plus an integer id read from a catalog row — never from a request, a form, or a fetched body — so there is no path to inject. Files land in gitignored `storage/app/private/artwork/` and are never served by a route the app exposes, which is also what keeps the copy a private one (`PRD.md` §6.10). The host answers a miss with 27,150 bytes of `text/html` at HTTP 404, so availability is judged on the status code, never on "bytes came back".   |
+| Input validation                                         | Form Requests at every web write boundary; third-party parsed records validated against array-shape checks before storage.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Output encoding                                          | Blade `{{ }}` everywhere; JSON via API Resources.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Secrets                                                  | None exist. No API keys in Phase 1 sources; if a source later needs one, it goes in `.env`, never in config defaults or snapshots.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Data integrity                                           | WAL + transactions (§3); `is_manual` protection; Trainer data unreachable from the engine's write path.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Dependency supply chain                                  | `composer audit` / `npm audit` before release-tagging a local build; no new dependencies without approval (domain rules).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 ## 9. Directory Layout (delta from skeleton)
 
-```
+```text
 app/
   Actions/            PromoteMatchedRecord.php, ResolveMatchCandidate.php
   Console/Commands/   UmaFetch.php, UmaReparse.php, UmaBackup.php
@@ -334,7 +334,7 @@ storage/app/private/snapshots/   (gitignored)
 tests/
   Feature/            Catalog, TrainingRun, ApiV1, FetchPipeline, CrossReferenceMatcher
   Unit/               NameNormalizer (pure, no framework)
-```
+```text
 
 ## 10. Testing Strategy
 
@@ -342,11 +342,11 @@ Pest 4, feature-first (repo test rules). HTTP faked (`Http::fake`) for all fetch
 
 ## 11. Source Citations
 
-- HTTP client (timeouts, retries, fake): https://laravel.com/docs/13.x/http-client
-- Atomic locks: https://laravel.com/docs/13.x/cache#atomic-locks
-- Eloquent API Resources: https://laravel.com/docs/13.x/eloquent-resources
-- Database configuration (SQLite): https://laravel.com/docs/13.x/database#configuration
-- Queues, unique jobs: https://laravel.com/docs/13.x/queues
-- Intl `Normalizer` (NFKD): https://www.php.net/manual/en/normalizer.normalize.php
+- HTTP client (timeouts, retries, fake): <https://laravel.com/docs/13.x/http-client>
+- Atomic locks: <https://laravel.com/docs/13.x/cache#atomic-locks>
+- Eloquent API Resources: <https://laravel.com/docs/13.x/eloquent-resources>
+- Database configuration (SQLite): <https://laravel.com/docs/13.x/database#configuration>
+- Queues, unique jobs: <https://laravel.com/docs/13.x/queues>
+- Intl `Normalizer` (NFKD): <https://www.php.net/manual/en/normalizer.normalize.php>
 
 Unverified at writing time (rev 0.1): exact robots.txt/rate-limit posture of candidate sources. Status 2026-09-28: the first source is owner-approved and configured (`gametora-characters`, `config/uma.php`, entry dated 2026-09-27, static JSON so one request per fetch plus lock and TTL); its robots/live-availability check is still outstanding, and PRD OQ-2 remains open for all further sources.

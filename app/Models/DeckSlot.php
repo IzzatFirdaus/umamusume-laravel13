@@ -59,6 +59,18 @@ class DeckSlot extends Model
      */
     public const OWNERSHIP = ['OWNED', 'RENTED'];
 
+    /**
+     * The label a position carries: `Slot 3`, or `Slot 6 · Friends` for the position the client reserves
+     * for a borrowed card (`ADR-0014` correction 1).
+     *
+     * The wizard's deck step, Preflight's summary and the run-scoped builder all print a position, so the
+     * two words live here rather than in three renderers that could drift.
+     */
+    public static function positionLabel(int $position): string
+    {
+        return $position === self::MAX_POSITION ? 'Slot 6 · Friends' : 'Slot '.$position;
+    }
+
     protected function casts(): array
     {
         return [

@@ -159,7 +159,10 @@ it('round-trips the six-node payload through the draft and reads it back on the 
         ->and($payload->legacies[0]['ancestors'])->toBe(['Grass Wonder', 'Mill Raptor'])
         ->and($payload->legacies[0]['sparks'][0]['kind'])->toBe('blue')
         ->and($payload->legacies[1]['is_guest'])->toBeTrue()
-        ->and($payload->legacies[1]['ancestors'])->toBe(['Mayano Top Gun', '']);
+        // A blank ancestor reads back as null, not as the empty string: the form posts `''`,
+        // `ConvertEmptyStringsToNull` and `StoreLegacySelectionRequest::payload()` both fold it to
+        // null, and `LegacySelectionPayload` stores the absent name rather than a zero-length one.
+        ->and($payload->legacies[1]['ancestors'])->toBe(['Mayano Top Gun', null]);
 
     // The two library picks are their own draft key, because the payload has no slot for a parent's
     // identity and a career with no run row has no foreign key to hold it either.
@@ -179,7 +182,11 @@ it('round-trips the six-node payload through the draft and reads it back on the 
             ->where('graph.parents.1.name', Veteran::find($fixture['parents'][1])->trainingRun->umamusume->name)
             ->where('graph.parents.1.spark_counts.0.count', 0));
 
-    expect(TrainingRun::count())->toBe(0);
+    // The two steps wrote no run. `TrainingRun::count()` is not zero here because the fixture's own
+    // `Veteran::factory()` rows each carry a Completed run (`VeteranFactory::definition()`), so the
+    // invariant that says what this step must not do is "every run in the database is a Veteran's
+    // own": a draft that leaked into the table would add a run with no Veteran behind it.
+    expect(TrainingRun::count())->toBe(Veteran::count());
 });
 
 it('refuses an unknown parent, a half-filled node and an off-dictionary Spark, leaving the draft untouched', function (): void {
@@ -343,10 +350,15 @@ it('refuses a card outside the catalogue, a flag outside the dictionary and a sl
     unset($missing['deck'][1]['ownership']);
     $this->put(route('career.deck.store'), $missing)->assertSessionHasErrors('deck.1.ownership');
 
-    // A seventh position is not a deck.
-    $this->put(route('career.deck.store'), draftDeckPayload($fixture['cards'][0], $fixture['cards'][1]) + [
-        'deck' => array_merge(draftDeckPayload($fixture['cards'][0], $fixture['cards'][1])['deck'], [7 => ['support_card_id' => (string) $fixture['cards'][0], 'ownership' => 'OWNED']]),
-    ])->assertSessionHasErrors('deck');
+    // A seventh position is not a deck. Built with `array_replace` rather than `$a + $b`: the union
+    // operator keeps the LEFT operand's existing key, so `['deck' => ...]` on the right was discarded
+    // and the request that was actually posted is a valid six-slot deck. The assertion passed for the
+    // wrong reason in one direction and failed in this one.
+    $seventh = array_replace_recursive(
+        draftDeckPayload($fixture['cards'][0], $fixture['cards'][1]),
+        ['deck' => [7 => ['support_card_id' => (string) $fixture['cards'][0], 'ownership' => 'OWNED']]],
+    );
+    $this->put(route('career.deck.store'), $seventh)->assertSessionHasErrors('deck');
 
     // The same card twice is refused by the shared rule, reported against the deck rather than one row.
     $this->put(route('career.deck.store'), draftDeckPayload($fixture['cards'][0], $fixture['cards'][0]))
@@ -406,9 +418,14 @@ it('leaves the run-scoped ancestry and deck writes exactly as they were', functi
         ],
     ]))->assertRedirect(route('legacy.compare', ['runs' => [$run->id]]));
 
+    // The two foreign keys are resolved through the library rows that were picked, not through any
+    // other run: a Veteran is a run whose trainee is the Umamusume the client shows in the slot, so
+    // the expected id is that trainee's, read the same way `LegacyController` reads it.
     expect($run->fresh()->legacySelection()?->affinity)->toBe('◎')
-        ->and($run->fresh()->inheritance_parent_a_id)->toBe($other->umamusume_id)
-        ->and($run->fresh()->inheritance_parent_b_id)->not->toBeNull();
+        ->and($run->fresh()->inheritance_parent_a_id)
+        ->toBe(Veteran::find($fixture['parents'][0])->trainingRun->umamusume_id)
+        ->and($run->fresh()->inheritance_parent_b_id)
+        ->toBe(Veteran::find($fixture['parents'][1])->trainingRun->umamusume_id);
 
     // A refused write on the run screen still lands back on that run's builder, not on the wizard.
     $this->put(route('legacy.update', $run), ['affinity' => 'X'])->assertRedirect(route('legacy.builder', $run));

@@ -44,31 +44,31 @@ Derived, not hand-maintained. Regenerate with:
 for f in docs/adr/00*.md; do printf '%s\t%s\t%s\n' \
   "$(basename "$f" .md)" "$(head -1 "$f" | sed 's/^# //')" \
   "$(awk '/^Status:/{print substr($0,9,120); exit}' "$f")"; done
-```
+```text
 
-| ADR | Subject | Status as decided |
-|---|---|---|
-| 0001 | Lift the no-prediction non-goal for Energy guidance | Accepted **in part**; §5 schema superseded by `ADR-0003` |
-| 0002 | Scenario-aware stat caps exceed the validation bound | Accepted, amended twice; **its validation bound is superseded by `ADR-0015`** |
-| 0003 | Consolidated Phase 1 schema expansion for Energy, Fans, events and races | Accepted by owner 2026-09-27 |
-| 0004 | Store aptitude letters and scenario stat caps as reference data | Accepted by owner 2026-09-27 |
-| 0005 | Support card entities — proposed, blocked on a PRD non-goal | **Declined** for Phase 1 (R37); superseded by `ADR-0014` |
-| 0006 | Design authority and theme default | Accepted — Option 2, Light base with preference resolution |
-| 0007 | C-7 loading-state scope for server-rendered views | Accepted (owner ruling 2026-09-28) |
-| 0008 | The character-card catalog layer, and a card reference on the run | Accepted 2026-09-29; carries a same-day erratum |
-| 0009 | Seeding `scenario_slots` — three sources, what each unlocks, what stays dark | **Ruled in part** (Option A, URA Finale) |
-| 0010 | Record the Legacy Select read-back as one typed payload on the run | Accepted (Slice 15) |
-| 0011 | The skills reference import — what the export carries, what stays unrendered | Accepted **in part** |
-| 0012 | Card detail fields — stat arrays, images, and objectives | Accepted 2026-09-29; numbered errata |
-| 0013 | Character profile source — basic information at character grain | **Withdrawn**, superseded by `ADR-0012` Decision 4 |
-| 0014 | Support card entities — authorized for Phase 1 | Accepted (Slice 2); supersedes `ADR-0005` |
-| 0015 | A stat's ceiling is its scenario's per-stat cap | Accepted (owner decision 5); **2026-10-01 erratum** |
-| 0016 | Qualitative next-race readiness | **OPEN QUESTION** — no decision taken or implied; Slice 3 held |
-| 0017 | A historical run imports as the CSV this app exports, through a web form | Accepted (Slice 4, built 2026-10-01) |
-| 0018 | One facet contract for the three filter surfaces, and one page-size rule | Accepted (owner dispatch 2026-10-04) |
-| 0019 | A semver label, a tag, and a release branch for a local-only tool | **Proposed** — version and non-`master` target set by owner; pre-release mechanism and the §14 correction owed |
-| 0020 | Trainer Desk 2.0 — SPA frontend, target-based Trainer Advisor, record-only Veteran library (race prediction stays deferred) | Accepted (owner ruling 2026-10-04); amends §6.2, extends `ADR-0001`, builds on `ADR-0010`, reaffirms `ADR-0016` |
-| 0021 | Sourced character and support-card artwork, mirrored locally and derived from ids | **Accepted (owner ruling 2026-10-05)**; supersedes `ADR-0012` Decision 2 for sourced artwork, preserves `PRD.md` §6.13; fetch half built 2026-10-05, display half open (`PRD.md` OQ-6) |
+| ADR    | Subject                                                                                                                       | Status as decided                                                                                                                                                                        |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0001   | Lift the no-prediction non-goal for Energy guidance                                                                           | Accepted **in part**; §5 schema superseded by `ADR-0003`                                                                                                                                 |
+| 0002   | Scenario-aware stat caps exceed the validation bound                                                                          | Accepted, amended twice; **its validation bound is superseded by `ADR-0015`**                                                                                                            |
+| 0003   | Consolidated Phase 1 schema expansion for Energy, Fans, events and races                                                      | Accepted by owner 2026-09-27                                                                                                                                                             |
+| 0004   | Store aptitude letters and scenario stat caps as reference data                                                               | Accepted by owner 2026-09-27                                                                                                                                                             |
+| 0005   | Support card entities — proposed, blocked on a PRD non-goal                                                                   | **Declined** for Phase 1 (R37); superseded by `ADR-0014`                                                                                                                                 |
+| 0006   | Design authority and theme default                                                                                            | Accepted — Option 2, Light base with preference resolution                                                                                                                               |
+| 0007   | C-7 loading-state scope for server-rendered views                                                                             | Accepted (owner ruling 2026-09-28)                                                                                                                                                       |
+| 0008   | The character-card catalog layer, and a card reference on the run                                                             | Accepted 2026-09-29; carries a same-day erratum                                                                                                                                          |
+| 0009   | Seeding `scenario_slots` — three sources, what each unlocks, what stays dark                                                  | **Ruled in part** (Option A, URA Finale)                                                                                                                                                 |
+| 0010   | Record the Legacy Select read-back as one typed payload on the run                                                            | Accepted (Slice 15)                                                                                                                                                                      |
+| 0011   | The skills reference import — what the export carries, what stays unrendered                                                  | Accepted **in part**                                                                                                                                                                     |
+| 0012   | Card detail fields — stat arrays, images, and objectives                                                                      | Accepted 2026-09-29; numbered errata                                                                                                                                                     |
+| 0013   | Character profile source — basic information at character grain                                                               | **Withdrawn**, superseded by `ADR-0012` Decision 4                                                                                                                                       |
+| 0014   | Support card entities — authorized for Phase 1                                                                                | Accepted (Slice 2); supersedes `ADR-0005`                                                                                                                                                |
+| 0015   | A stat's ceiling is its scenario's per-stat cap                                                                               | Accepted (owner decision 5); **2026-10-01 erratum**                                                                                                                                      |
+| 0016   | Qualitative next-race readiness                                                                                               | **OPEN QUESTION** — no decision taken or implied; Slice 3 held                                                                                                                           |
+| 0017   | A historical run imports as the CSV this app exports, through a web form                                                      | Accepted (Slice 4, built 2026-10-01)                                                                                                                                                     |
+| 0018   | One facet contract for the three filter surfaces, and one page-size rule                                                      | Accepted (owner dispatch 2026-10-04)                                                                                                                                                     |
+| 0019   | A semver label, a tag, and a release branch for a local-only tool                                                             | **Proposed** — version and non-`master` target set by owner; pre-release mechanism and the §14 correction owed                                                                           |
+| 0020   | Trainer Desk 2.0 — SPA frontend, target-based Trainer Advisor, record-only Veteran library (race prediction stays deferred)   | Accepted (owner ruling 2026-10-04); amends §6.2, extends `ADR-0001`, builds on `ADR-0010`, reaffirms `ADR-0016`                                                                          |
+| 0021   | Sourced character and support-card artwork, mirrored locally and derived from ids                                             | **Accepted (owner ruling 2026-10-05)**; supersedes `ADR-0012` Decision 2 for sourced artwork, preserves `PRD.md` §6.13; fetch half built 2026-10-05, display half open (`PRD.md` OQ-6)   |
 
 The table is stale the moment a status line changes and no test guards it, so the command above is the
 authoritative form and this prose is a snapshot. This table was stale when `ADR-0019` was written: it ended

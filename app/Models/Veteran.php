@@ -43,6 +43,24 @@ class Veteran extends Model
         return $this->belongsTo(TrainingRun::class);
     }
 
+    /**
+     * The `umamusume` id behind a library row, or null when the id is absent or no longer resolves.
+     *
+     * A Veteran is a run whose trainee is the Umamusume the client shows in a parent slot, so the identity
+     * is read through the run rather than stored a second time (`ADR-0010` Decision). Two writes turn
+     * picked library ids into the run's two `inheritance_parent_*` columns — the Legacy Lab's
+     * `Confirm Inheritance` and Preflight's `Start Career` — so the resolution lives here rather than in
+     * either caller.
+     */
+    public static function traineeId(?int $id): ?int
+    {
+        if ($id === null) {
+            return null;
+        }
+
+        return self::query()->with('trainingRun')->find($id)?->trainingRun?->umamusume_id;
+    }
+
     protected function casts(): array
     {
         return [

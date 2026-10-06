@@ -11,9 +11,9 @@ import { test, expect } from '@playwright/test';
  * the mechanism: unlike the run-creating specs it leaves the shared scratch database exactly as it
  * found it, and each Playwright test gets a fresh browser context, so each starts with no draft.
  *
- * No axe pass: `@axe-core/playwright` and `axe-core` are both absent from `node_modules` and adding a
- * dependency needs owner approval (AGENTS.md §5), so the plan §12.5 fallback applies and the checks
- * below are the hand-rolled ones §12.2 names.
+ * Axe coverage is provided by `tests/browser/accessibility.spec.ts`: `@axe-core/playwright` is installed
+ * and scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`; this spec retains the hand-rolled checks
+ * for target size, keyboard path, focus order, reflow and console errors.
  */
 
 const CARDS = ['URA Finale', 'Unity Cup', 'Trackblazer', 'Our Grand Concert'];
@@ -39,9 +39,9 @@ test.describe('Scenario Selection', () => {
         await expect(page.getByRole('link', { name: 'Scenario' })).toHaveAttribute('aria-current', 'step');
         await expect(page.getByText('Step 1 of 6').first()).toBeVisible();
 
-        // Scoped to the step nav: the page's own closing sentence about step 2 also reads "is not
-        // built yet", and counting it as a fifth absent step would be the test mis-reading the copy.
-        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(3);
+        // Scoped to the step nav: a page-body phrase like "not built" would otherwise be counted as an
+        // absent step. All six steps are live since D7 landed Preflight, so none renders as an absence.
+        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(0);
     });
 
     test('shows Our Grand Concert as baseline-only, read off the matrix', async ({ page }) => {

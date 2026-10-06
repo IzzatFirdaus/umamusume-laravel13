@@ -6,7 +6,6 @@
 **Superseded By:** none. Per `AGENTS.md` and the owner's Global-scope ruling this file must not be
 imported into app data, config, or UI copy until a Global release date exists.
 
-
 > ## ⚠️ Read this first: what this file is and is not
 >
 > **`グランドマスターズ -継ぐ者達へ-` has never been released on the Global English server.** As of the
@@ -54,11 +53,11 @@ third resource tier. It is **not** the stat — 賢さ is **Wit** on `[Global]`,
 bans the wiki's "Wisdom" label for it. A grep for "Wisdom" that lands here is a false positive for that
 rule, and no copy in this file may be reused as a stat label.
 
-| Step | Official rule | Numbers |
-|---|---|---|
-| Fragments | 「知識の欠片を**2つ**集めると…『知識の結晶』」 | 2 fragments = 1 crystal |
-| Fragments → Wisdom | 「知識の欠片を**8つ**集めると…『女神の叡智』」 | 8 fragments = 1 Wisdom, i.e. **8:1** overall |
-| Cap | 「知識の欠片は**8個を越えて**集めることはできません」 | Never above **8** fragments held |
+| Step                 | Official rule                                         | Numbers                                        |
+| -------------------- | ----------------------------------------------------- | ---------------------------------------------- |
+| Fragments            | 「知識の欠片を**2つ**集めると…『知識の結晶』」        | 2 fragments = 1 crystal                        |
+| Fragments → Wisdom   | 「知識の欠片を**8つ**集めると…『女神の叡智』」        | 8 fragments = 1 Wisdom, i.e. **8:1** overall   |
+| Cap                  | 「知識の欠片は**8個を越えて**集めることはできません」 | Never above **8** fragments held               |
 
 The tracker's grid reproduces the same arithmetic: the second row fills at fragment counts
 **2 / 4 / 6 / 8** (four crystals) and the third at **4 / 8** (two), so each tier is exactly ×2 the
@@ -71,11 +70,11 @@ And ⚠️ 「女神の叡智」 is a **one-time, one-turn effect**, not a spend
 Each fragment is one of three colours, one per goddess, and the colour decides both which goddess's
 knowledge rises and what the payoff is:
 
-| Colour | JP | Goddess | Domain |
-|---|---|---|---|
-| Red | 赤 | ダーレーアラビアン | 太陽 (sun) |
-| Blue | 青 | ゴドルフィンバルブ | 大海 (sea) |
-| Yellow | 黄 | バイアリーターク | 大地 (earth) |
+| Colour   | JP    | Goddess            | Domain       |
+| -------- | ----- | ------------------ | ------------ |
+| Red      | 赤    | ダーレーアラビアン | 太陽 (sun)   |
+| Blue     | 青    | ゴドルフィンバルブ | 大海 (sea)   |
+| Yellow   | 黄    | バイアリーターク   | 大地 (earth) |
 
 - Conversion tier follows colour **majority**: 「欠片→結晶→叡智の変化は、**欠片の色の多さ**で決定」.
 - **Lock rule:** 「**1個目と5個目が同じ色**である場合は、その色で確定」 — if the 1st and 5th fragments
@@ -95,11 +94,11 @@ knowledge rises and what the payoff is:
 **All three share** a 「トレーニング効果アップ」 ladder that the English wiki table omits entirely:
 **+5 / +8 / +11 / +13 / +15%** at Lv1→5.
 
-| Goddess | Signature effect, Lv1 → Lv5 | Second effect |
-|---|---|---|
-| **ダーレーアラビアン** | 「体力消費ダウン」 **10 / 15 / 18 / 20 / 23%** | — |
-| **ゴドルフィンバルブ** | 「ヒント発生率アップ」 **20 / 25 / 30 / 33 / 35%** | 「トレーニング後イベント発生率アップ」**+35** |
-| **バイアリーターク** | 「サポートイベントのパラメーター上昇量」 **10 / 15 / 20 / 23 / 25%** | 「サポート連続イベント率アップ」 **20 / 40 / 60 / 80 / 90%** |
+| Goddess                | Signature effect, Lv1 → Lv5                                          | Second effect                                                |
+| ---------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **ダーレーアラビアン** | 「体力消費ダウン」 **10 / 15 / 18 / 20 / 23%**                       | —                                                            |
+| **ゴドルフィンバルブ** | 「ヒント発生率アップ」 **20 / 25 / 30 / 33 / 35%**                   | 「トレーニング後イベント発生率アップ」**+35**                |
+| **バイアリーターク**   | 「サポートイベントのパラメーター上昇量」 **10 / 15 / 20 / 23 / 25%** | 「サポート連続イベント率アップ」 **20 / 40 / 60 / 80 / 90%** |
 
 ⚠️ **Known source defect:** the English wiki assigns these differently (energy reduction → Byerley
 Turk, event effect → Darley Arabian, chain chance → Godolphin Barb, hint rate omitted). **Two

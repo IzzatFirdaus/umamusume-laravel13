@@ -47,21 +47,23 @@ The `cloud.yml` file defines environments, resources, and build settings:
 name: my-app
 environments:
   production:
-    git_branch: main
-    pull_request deployments: true
-    build:
-      commands:
-        - composer install --no-interaction --optimize-autoloader
-        - npm install
-        - npm run build
-    resources:
-      - database:
-          name: app-db
-          size: small
-      - cache:
-          name: app-cache
-      - queue:
-          name: app-queue
+```text
+git_branch: main
+pull_request deployments: true
+build:
+  commands:
+    - composer install --no-interaction --optimize-autoloader
+    - npm install
+    - npm run build
+resources:
+  - database:
+      name: app-db
+      size: small
+  - cache:
+      name: app-cache
+  - queue:
+      name: app-queue
+```
 </code-snippet>
 
 ## Environment Variables

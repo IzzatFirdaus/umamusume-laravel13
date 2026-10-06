@@ -185,6 +185,10 @@ it('draws the six-node graph in the client order, from the run and its payload',
             ->where('graph.parents.0.sparks.1.kind_label', 'White')
             ->where('graph.parents.1.sparks.0.kind_label', 'Pink')
             ->where('graph.parents.1.sparks.0.stars', 3)
+            // The stored Affinity grade travels as its own prop, because `Legacy/Builder.vue` seeds its
+            // edit form from the payload. The graph is read-only display; the form is what a re-confirm
+            // posts, and a form that opened blank would write blank over a recorded selection.
+            ->where('affinity', '◎')
         );
 });
 
@@ -201,6 +205,8 @@ it('reports no Legacy selection as a named absence rather than an empty graph', 
             ->where('graph.parents.0.rank', null)
             ->where('graph.parents.0.ancestors.0.name', null)
             ->where('graph.parents.0.sparks', [])
+            // No payload, so no grade to seed: the select opens on "Not recorded".
+            ->where('affinity', null)
         );
 });
 

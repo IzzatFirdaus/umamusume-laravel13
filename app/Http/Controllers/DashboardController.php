@@ -226,7 +226,7 @@ class DashboardController extends Controller
     private function quickActions(): array
     {
         return [
-            ['label' => 'New Career', 'to' => route('runs.create')],
+            ['label' => 'New Career', 'to' => route('career.scenario')],
             ['label' => 'Legacy Lab', 'to' => route('legacy.index')],
             ['label' => 'Support Cards', 'to' => route('support-cards.index')],
         ];

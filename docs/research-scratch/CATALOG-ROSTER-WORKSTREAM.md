@@ -12,8 +12,8 @@ This master file embeds all content from the following 6 source files verbatim:
 6. docs/deprecated/design-research/verification/cardless-band-2026-09-30.md (135 lines)
 
 ---
-## docs/deprecated/requests/2026-09-29-catalog-roster-and-trainee-selector.md
 
+## docs/deprecated/requests/2026-09-29-catalog-roster-and-trainee-selector.md
 
 **Received:** 2026-09-29, in session (no file was attached; this is the recorded brief).
 **Recorded by:** Architect pass, 2026-09-29, against tree `ec0ee2f`.
@@ -49,11 +49,11 @@ and the scenario docs untouched.
 
 ### 2. Owner rulings, taken in session 2026-09-29
 
-| Question | Ruling |
-|---|---|
-| The card layer has no PRD citation. | **Build the card table, and put a card reference on the run.** The form is to submit the card, not only the trainee. |
-| Where does the data come from? | **Re-fetch live from GameTora through `uma:fetch`.** Not the 2026-09-27 gitignored snapshot. This answers `AGENTS.md` escalation 5 for the live fetch of the already-declared host. |
-| Tier B needs Tier A confirmation. How deep? | **Cross-check all 105 Global cards** against `umamusu.wiki` and Game8, not a spot-check. |
+| Question                                      | Ruling                                                                                                                                                                                |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The card layer has no PRD citation.           | **Build the card table, and put a card reference on the run.** The form is to submit the card, not only the trainee.                                                                  |
+| Where does the data come from?                | **Re-fetch live from GameTora through `uma:fetch`.** Not the 2026-09-27 gitignored snapshot. This answers `AGENTS.md` escalation 5 for the live fetch of the already-declared host.   |
+| Tier B needs Tier A confirmation. How deep?   | **Cross-check all 105 Global cards** against `umamusu.wiki` and Game8, not a spot-check.                                                                                              |
 
 Consequences the rulings accept: a new table plus a second migration on `training_runs`;
 an ADR and a PRD citation before merge; an amendment to the D-30 permitted-surface list;
@@ -67,27 +67,27 @@ recorded above; E-17 to E-21 correct this plan's own text
 measured the same way: re-counted against the committed fixture, or re-run against the installed test
 stack. Line numbers inside the plan are hints the plan's own hints-not-anchors bullet says to re-derive.
 
-| # | The brief says | The data and the code say |
-|---|---|---|
-| E-1 | "~68 H1s plus ~140 H2s" | 68 trainees is right. **105** cards carry a Global release date, out of 268 total. 33 trainees have one form, 33 have two, two have three. Rarity split: 8 x 1-star, 9 x 2-star, 88 x 3-star. Global window 2025-06-26 to 2026-09-24. |
-| E-2 | Gold Ship: "3 forms", `[Red Strife]` "3-star â€¦ Mar 12, 2026" | Gold Ship has three cards, **two** of them Global. `[Red Strife]` is **2-star** and shipped on Global **2025-06-26**. "Mar 12, 2026" is the Trackblazer scenario start. Her third card, `La Mode 564`, has no `release_en` and is excluded by the brief's own Global-only rule. |
-| E-3 | Special Week: "2 forms" | **Three** Global forms: `[Special Dreamer]` 2025-06-26, `[Hopp'nâ™ªHappy Heart]` 2025-10-14, `[Ruler of Japan]` 2026-06-25. |
-| E-4 | "the export marks one card per trainee as the debut form" | No such field exists in the export. Debut is **derived**, and this repo already has the rule: `GametoraCharacterParser::debutForms()` takes the card with the earliest JP `release` per `char_id` â€” `:74-79` inline in `ec0ee2f`, `GametoraCharacterParser::debutForms()` (`:99-127` where it landed) as the shared member since Task 6's extraction `db8603c`. Measured across all 68 Global trainees that derivation is unambiguous (no date ties) and the JP-earliest card, the Global-earliest card and the parser's debut are the same card in every case. |
-| E-5 | `Fe` "narrows the F-set" | Under the brief's own prefix-match rule, `F` returns Fine Motion and Fuji Kiseki plus nine cards whose epithet starts with F. **`Fe` returns nothing**: no Global trainee and no Global epithet begins with those two letters. |
-| E-6 | `Fenomeno` "Fenomeno, with her card forms as options" | Fenomeno has two cards, `Black Flame of Righteousness` (JP 2025-04-21) and `Violet Flame of Fortitude` (JP 2026-08-31), and **neither has a `release_en`**. By the Global-only rule she is one of the 67 trainees who must not appear at all. The same applies to Furioso and Fusaichi Pandora. |
-| E-7 | Selected state `Gold Ship â€” [RUN! RUIN! LAUNCHER!]` | The em dash is a **test failure**. `RenderedCopyHygieneTest`'s `ships no em dash or en dash in rendered Blade copy` test asserts zero em or en dashes in rendered Blade copy, on the standing R-02 and D-79 rulings. The catalog's own separator is `Â·` (`catalog/index.blade.php:43`, the release-status and alias-count line). |
-| E-8 | "Rarity badge per H2" | Fine, but no new colour token: `DesignTokensTest`'s `counts every colour token the static theme declares` test pins the theme at exactly 60 tokens, and G-4 bans hex and arbitrary-value utilities. The badge reuses existing tokens and carries its ordinal in the star glyph, the way `mood-pill.blade.php` carries its arrow. |
-| E-9 | "Re-fetch live via `uma:fetch`" populates the catalog | `CrossReferenceMatcher::match()` returns `None` for any name not already stored, and `PipelineRunner::run()`'s `MatchCandidate::create` branch sends `None` to `match_candidates`. A live fetch therefore **creates zero trainee rows**; it queues 68 candidates. `PRD.md` FR-B-3 is deliberate: only Exact and Alias auto-promote. The roster has to leave the review queue through `ResolveMatchCandidate`, which is the path this plan uses. |
-| E-10 | Catalog search should "filter live" | The existing catalog filter is a GET form behind a submit button, and search is substring (`match_key LIKE %â€¦%`), not prefix. Live-typing there means a page reload per keystroke. The **selector** is the live surface; the catalog page keeps its submit. Recorded as a scope reading, not a silent drop. |
-| E-11 | Unstated | The dataset already sits at `research-scratch/data/json/character-cards.json` (268 rows, fetched 2026-09-27) but `research-scratch/` is gitignored and nothing under `app/` reads it. |
-| E-12 | Unstated | **Live defect, in scope.** `GametoraCharacterParser.php:92` reads `$card['name_ja']`. That number is `ec0ee2f`'s: Task 2's `d755da3` closed the defect and Task 6's `db8603c` moved the corrected read to `:74`, where `GametoraCharacterParser::parse()` reads `name_jp` and still emits the record key `name_ja`; `KNOWN-ISSUES.md` KI-23 holds that trail. The export publishes `name_jp`: `name_ja` appears **0** times in 268 rows, `name_jp` 268 times. So every fetched trainee stores a null Japanese name, and `PRD.md` US-1's acceptance test ("each detail page shows `name`, `name_ja`, â€¦") is not met by fetched data. The test fixture at `tests/Fixtures/gametora-character-cards.sample.json` carries the same wrong key with null values, which is why the suite is green. The brief needs the Japanese name as the `<h1>` secondary label and as a search field, so this is a prerequisite. |
-| E-13 | "One H1 per trainee â€¦ The H2 label is the bracket title alone" | The `<h2>` label is `title_en_gl`, the Global client string, which is **bracketed** (`[Red Strife]`). The prose examples drop the brackets. The binding constraint is "verbatim client names stay verbatim; do not normalize them", so the brackets stay. The Global string is not the JP string: `Run! Fun! Watergun!` is `[RUN! RUIN! LAUNCHER!]`, `Supreme Commander of the Rising Sun` is `[Ruler of Japan]`. |
-| E-14 | Unstated | The parser emits `external_ref` (`gametora:char:{id}`) at line 100 of `ec0ee2f` â€” `GametoraCharacterParser::parse()` still writes that key today â€” and there is **no such column** on `umamusume`, so `PromoteMatchedRecord` drops it. Cards are keyed by `card_id` and have to be attached to a stored trainee, which needs that link. The plan adds the column rather than re-matching on name. |
-| E-15 | Implicit: fetching fills the catalog with the 68 Global trainees | `GametoraCharacterParser` emits one record per `char_id` across the **whole** export, deriving `release_status` from the debut card's `release_en`. Measured on the live body 2026-09-29: **135 records, 68 `GlobalReleased`, 67 `JapanOnly`.** A live fetch therefore queues 133 candidates, not 66. The parser must keep emitting all 135: `PRD.md` US-2 is P0 and its acceptance text is "new JP releases appear with a **JapanOnly** or GlobalAnnounced flag instead of silently missing", which a Global-only guard would delete. The filter belongs at the promotion verdict, so 66 become rows and 67 stay in `/review` awaiting one. |
-| E-16 | Unstated | `SourceFetcher` sends `User-Agent: UmamusumeTrainerCompanion/0.2 (personal local tool)` and no `Accept`. Probed 2026-09-29 before any of this was built: the data endpoint returns **200 with the full 251,242 bytes**, and `679f7c2e` has not rotated. Tasks 8-9 are runnable as ruled, with no header change and no fallback to the gitignored snapshot. |
-| E-17 | Plan Task 6 Step 2 (`:1116-1119`): "Eleven rows in, eight with a Global date", `expect($cardIds)->toHaveCount(8)` | The fixture that same block ships yields **7**: eleven rows, four with `release_en: null` (`100703`, `100303`, `112701`, `112702`), so seven carry a Global date. The plan's own parenthetical named those four, so its arithmetic contradicted its count: 11 - 4 = 7, and E-2 and E-3 already record Special Week's three Global forms and Gold Ship's two, which with Tokai Teio's two make 3 + 2 + 2. Shipped as `toHaveCount(7)` in `tests/Feature/CharacterCardParserTest.php`'s `emits one record per Global card and drops every JP-only one` test; the plan now says seven, in its prose and in Step 8's check. |
-| E-18 | Plan Task 6: Step 2 (`:1205`, `:1212`) asserts a card whose only `release_en` is `9999-12-31` yields no record, while Step 7 (`:1382`, `:1387`) rejects only what `GametoraCharacterParser::dateOrNull()` returns as null | `dateOrNull()` tests the `\d{4}-\d{2}-\d{2}` shape alone, so it **accepts** the export's own placeholder: `GametoraCharacterParser::dateOrNull('9999-12-31')` returned `'9999-12-31'` when re-run against the committed class on 2026-09-29. Step 7 as written therefore emitted the row Step 2 forbids. Fixed at the card read's trust boundary, which skips `GametoraCharacterParser::UNKNOWN_DATE` as well as null (the `GametoraCharacterParser::UNKNOWN_DATE` guard in `GametoraCharacterCardParser::parse()`), and `dateOrNull()` left as it stands: rejecting the placeholder there would move the character parser's `global_debut_date` and `release_status` for a debut card dated `9999-12-31`, an input no existing test covers, so the extraction's behaviour bracket would have gone green while the behaviour moved. |
-| E-19 | Plan `:1110` (Task 6 Step 2) and `:1528` (Task 7 Step 1): `file_get_contents(test()->baseDir().'/tests/Fixtures/â€¦')` | `test()->baseDir()` does not exist on this stack â€” Pest 4.7.8 over PHPUnit 12.5.33 â€” with `method_exists(PHPUnit\Framework\TestCase::class, "baseDir")` and the same call on `Illuminate\Foundation\Testing\TestCase::class` both returning false. Task 6's recorded RED run showed seven tests failing class-not-found as its Step 3 predicted and the **eighth dying inside this helper** with `ReflectionException: Call to undefined method Tests\TestCase::baseDir()`, so Task 7 would meet the same error before its own assertions run. `base_path()` is the convention one file over (`tests/Feature/GametoraCharacterParserTest.php`'s `reads the committed sample of the real dataset without raising` test) and is what shipped (`tests/Feature/CharacterCardParserTest.php`'s `globalCardBody()` helper); both plan lines now read `base_path('tests/Fixtures/gametora-character-cards.global.sample.json')`. |
+| #      | The brief says                                                                                                                                                                                                              | The data and the code say                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| E-1    | "~68 H1s plus ~140 H2s"                                                                                                                                                                                                     | 68 trainees is right. **105** cards carry a Global release date, out of 268 total. 33 trainees have one form, 33 have two, two have three. Rarity split: 8 x 1-star, 9 x 2-star, 88 x 3-star. Global window 2025-06-26 to 2026-09-24.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| E-2    | Gold Ship: "3 forms", `[Red Strife]` "3-star â€¦ Mar 12, 2026"                                                                                                                                                              | Gold Ship has three cards, **two** of them Global. `[Red Strife]` is **2-star** and shipped on Global **2025-06-26**. "Mar 12, 2026" is the Trackblazer scenario start. Her third card, `La Mode 564`, has no `release_en` and is excluded by the brief's own Global-only rule.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| E-3    | Special Week: "2 forms"                                                                                                                                                                                                     | **Three** Global forms: `[Special Dreamer]` 2025-06-26, `[Hopp'nâ™ªHappy Heart]` 2025-10-14, `[Ruler of Japan]` 2026-06-25.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| E-4    | "the export marks one card per trainee as the debut form"                                                                                                                                                                   | No such field exists in the export. Debut is **derived**, and this repo already has the rule: `GametoraCharacterParser::debutForms()` takes the card with the earliest JP `release` per `char_id` â€” `:74-79` inline in `ec0ee2f`, `GametoraCharacterParser::debutForms()` (`:99-127` where it landed) as the shared member since Task 6's extraction `db8603c`. Measured across all 68 Global trainees that derivation is unambiguous (no date ties) and the JP-earliest card, the Global-earliest card and the parser's debut are the same card in every case.                                                                                                                                                                                                                                                                                                                                                               |
+| E-5    | `Fe` "narrows the F-set"                                                                                                                                                                                                    | Under the brief's own prefix-match rule, `F` returns Fine Motion and Fuji Kiseki plus nine cards whose epithet starts with F. **`Fe` returns nothing**: no Global trainee and no Global epithet begins with those two letters.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| E-6    | `Fenomeno` "Fenomeno, with her card forms as options"                                                                                                                                                                       | Fenomeno has two cards, `Black Flame of Righteousness` (JP 2025-04-21) and `Violet Flame of Fortitude` (JP 2026-08-31), and **neither has a `release_en`**. By the Global-only rule she is one of the 67 trainees who must not appear at all. The same applies to Furioso and Fusaichi Pandora.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| E-7    | Selected state `Gold Ship â€” [RUN! RUIN! LAUNCHER!]`                                                                                                                                                                       | The em dash is a **test failure**. `RenderedCopyHygieneTest`'s `ships no em dash or en dash in rendered Blade copy` test asserts zero em or en dashes in rendered Blade copy, on the standing R-02 and D-79 rulings. The catalog's own separator is `Â·` (`catalog/index.blade.php:43`, the release-status and alias-count line).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| E-8    | "Rarity badge per H2"                                                                                                                                                                                                       | Fine, but no new colour token: `DesignTokensTest`'s `counts every colour token the static theme declares` test pins the theme at exactly 60 tokens, and G-4 bans hex and arbitrary-value utilities. The badge reuses existing tokens and carries its ordinal in the star glyph, the way `mood-pill.blade.php` carries its arrow.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| E-9    | "Re-fetch live via `uma:fetch`" populates the catalog                                                                                                                                                                       | `CrossReferenceMatcher::match()` returns `None` for any name not already stored, and `PipelineRunner::run()`'s `MatchCandidate::create` branch sends `None` to `match_candidates`. A live fetch therefore **creates zero trainee rows**; it queues 68 candidates. `PRD.md` FR-B-3 is deliberate: only Exact and Alias auto-promote. The roster has to leave the review queue through `ResolveMatchCandidate`, which is the path this plan uses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| E-10   | Catalog search should "filter live"                                                                                                                                                                                         | The existing catalog filter is a GET form behind a submit button, and search is substring (`match_key LIKE %â€¦%`), not prefix. Live-typing there means a page reload per keystroke. The **selector** is the live surface; the catalog page keeps its submit. Recorded as a scope reading, not a silent drop.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| E-11   | Unstated                                                                                                                                                                                                                    | The dataset already sits at `research-scratch/data/json/character-cards.json` (268 rows, fetched 2026-09-27) but `research-scratch/` is gitignored and nothing under `app/` reads it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| E-12   | Unstated                                                                                                                                                                                                                    | **Live defect, in scope.** `GametoraCharacterParser.php:92` reads `$card['name_ja']`. That number is `ec0ee2f`'s: Task 2's `d755da3` closed the defect and Task 6's `db8603c` moved the corrected read to `:74`, where `GametoraCharacterParser::parse()` reads `name_jp` and still emits the record key `name_ja`; `KNOWN-ISSUES.md` KI-23 holds that trail. The export publishes `name_jp`: `name_ja` appears **0** times in 268 rows, `name_jp` 268 times. So every fetched trainee stores a null Japanese name, and `PRD.md` US-1's acceptance test ("each detail page shows `name`, `name_ja`, â€¦") is not met by fetched data. The test fixture at `tests/Fixtures/gametora-character-cards.sample.json` carries the same wrong key with null values, which is why the suite is green. The brief needs the Japanese name as the `<h1>` secondary label and as a search field, so this is a prerequisite.                 |
+| E-13   | "One H1 per trainee â€¦ The H2 label is the bracket title alone"                                                                                                                                                            | The `<h2>` label is `title_en_gl`, the Global client string, which is **bracketed** (`[Red Strife]`). The prose examples drop the brackets. The binding constraint is "verbatim client names stay verbatim; do not normalize them", so the brackets stay. The Global string is not the JP string: `Run! Fun! Watergun!` is `[RUN! RUIN! LAUNCHER!]`, `Supreme Commander of the Rising Sun` is `[Ruler of Japan]`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| E-14   | Unstated                                                                                                                                                                                                                    | The parser emits `external_ref` (`gametora:char:{id}`) at line 100 of `ec0ee2f` â€” `GametoraCharacterParser::parse()` still writes that key today â€” and there is **no such column** on `umamusume`, so `PromoteMatchedRecord` drops it. Cards are keyed by `card_id` and have to be attached to a stored trainee, which needs that link. The plan adds the column rather than re-matching on name.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| E-15   | Implicit: fetching fills the catalog with the 68 Global trainees                                                                                                                                                            | `GametoraCharacterParser` emits one record per `char_id` across the **whole** export, deriving `release_status` from the debut card's `release_en`. Measured on the live body 2026-09-29: **135 records, 68 `GlobalReleased`, 67 `JapanOnly`.** A live fetch therefore queues 133 candidates, not 66. The parser must keep emitting all 135: `PRD.md` US-2 is P0 and its acceptance text is "new JP releases appear with a **JapanOnly** or GlobalAnnounced flag instead of silently missing", which a Global-only guard would delete. The filter belongs at the promotion verdict, so 66 become rows and 67 stay in `/review` awaiting one.                                                                                                                                                                                                                                                                                    |
+| E-16   | Unstated                                                                                                                                                                                                                    | `SourceFetcher` sends `User-Agent: UmamusumeTrainerCompanion/0.2 (personal local tool)` and no `Accept`. Probed 2026-09-29 before any of this was built: the data endpoint returns **200 with the full 251,242 bytes**, and `679f7c2e` has not rotated. Tasks 8-9 are runnable as ruled, with no header change and no fallback to the gitignored snapshot.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| E-17   | Plan Task 6 Step 2 (`:1116-1119`): "Eleven rows in, eight with a Global date", `expect($cardIds)->toHaveCount(8)`                                                                                                           | The fixture that same block ships yields **7**: eleven rows, four with `release_en: null` (`100703`, `100303`, `112701`, `112702`), so seven carry a Global date. The plan's own parenthetical named those four, so its arithmetic contradicted its count: 11 - 4 = 7, and E-2 and E-3 already record Special Week's three Global forms and Gold Ship's two, which with Tokai Teio's two make 3 + 2 + 2. Shipped as `toHaveCount(7)` in `tests/Feature/CharacterCardParserTest.php`'s `emits one record per Global card and drops every JP-only one` test; the plan now says seven, in its prose and in Step 8's check.                                                                                                                                                                                                                                                                                                         |
+| E-18   | Plan Task 6: Step 2 (`:1205`, `:1212`) asserts a card whose only `release_en` is `9999-12-31` yields no record, while Step 7 (`:1382`, `:1387`) rejects only what `GametoraCharacterParser::dateOrNull()` returns as null   | `dateOrNull()` tests the `\d{4}-\d{2}-\d{2}` shape alone, so it **accepts** the export's own placeholder: `GametoraCharacterParser::dateOrNull('9999-12-31')` returned `'9999-12-31'` when re-run against the committed class on 2026-09-29. Step 7 as written therefore emitted the row Step 2 forbids. Fixed at the card read's trust boundary, which skips `GametoraCharacterParser::UNKNOWN_DATE` as well as null (the `GametoraCharacterParser::UNKNOWN_DATE` guard in `GametoraCharacterCardParser::parse()`), and `dateOrNull()` left as it stands: rejecting the placeholder there would move the character parser's `global_debut_date` and `release_status` for a debut card dated `9999-12-31`, an input no existing test covers, so the extraction's behaviour bracket would have gone green while the behaviour moved.                                                                                             |
+| E-19   | Plan `:1110` (Task 6 Step 2) and `:1528` (Task 7 Step 1): `file_get_contents(test()->baseDir().'/tests/Fixtures/â€¦')`                                                                                                      | `test()->baseDir()` does not exist on this stack â€” Pest 4.7.8 over PHPUnit 12.5.33 â€” with `method_exists(PHPUnit\Framework\TestCase::class, "baseDir")` and the same call on `Illuminate\Foundation\Testing\TestCase::class` both returning false. Task 6's recorded RED run showed seven tests failing class-not-found as its Step 3 predicted and the **eighth dying inside this helper** with `ReflectionException: Call to undefined method Tests\TestCase::baseDir()`, so Task 7 would meet the same error before its own assertions run. `base_path()` is the convention one file over (`tests/Feature/GametoraCharacterParserTest.php`'s `reads the committed sample of the real dataset without raising` test) and is what shipped (`tests/Feature/CharacterCardParserTest.php`'s `globalCardBody()` helper); both plan lines now read `base_path('tests/Fixtures/gametora-character-cards.global.sample.json')`.   |
 
 | E-20 | E-16: "`679f7c2e` has not rotated", and `config/uma.php`'s claim that a stale hash "surfaces as a fetch failure and not as silently old data" | **The hash rotated the same day, and the safety claim is false.** Task 7's Step 5 re-read the manifest on 2026-09-29 and found `character-cards` had moved `679f7c2e` â†’ `e9e9ee6d`; both `config/uma.php` entries now pin the new hash, and the two live instructions that fetched the withdrawn URL (Task 8's Tier A download, Task 9's unresolved-ref probe) were corrected to it, because a cross-check run against a stale document is worse than no cross-check. Re-measured against `e9e9ee6d` with E-1's own method: **107** Global cards in 268 rows across the same **68** trainees â€” forms split 31 x one, 35 x two, 2 x three; rarity 8 x 1-star, 9 x 2-star, **90** x 3-star; window 2025-06-26 to **2026-09-28**. Neither the row total nor the trainee count moved: two existing JP-only rows gained a `release_en`, no card row was added. E-1's 105 / 33 / 33 / 2 / 88 figures are left above as the measurement they were, not rewritten. **And the refutation:** the withdrawn `character-cards.679f7c2e.json` still answers **HTTP 200** with the old 251,242-byte document (105 cards) while `e9e9ee6d` serves 251,294 bytes (107), so a stale pinned hash yields *silent stale data*, exactly the opposite of what both `config/uma.php` sentences promise. That is trunk's **KI-24** ("A stale source hash answers 200 with stale content, so a pinned URL fails silently"), filed independently by the skills pass; this branch does not refile or renumber it. The sentences stay because KI-24's fix is theirs to delete, not a wording task here â€” but the new source's hash note now points at KI-24, so the next Data Engineer adding a fourth pinned source reads the exception with the rule. |
 | E-21 | Plan Task 7: A1's summary line ("the runner case keeps its counts `created 3 / skipped 5 / review 0`") and Step bodies naming `app/Actions/UpsertCharacterCard.php`, a `'records' => 'cards'` config key and a `runCards()` method | Two separate corrections, both found by running something. **(a)** The counts are arithmetically impossible: the parser emits **7** records for the committed fixture â€” `gametora:char:1001` x3, `1007` x2, `1003` x2 â€” so with one trainee stored the truth is `created 3 / skipped 4 / review 0`. The brief's own justification parenthetical ("Gold Ship x2, Tokai Teio x2, no trainee rows yet") already summed to 4, so `5` was never true of any version of this fixture, including the one A1 was written against. Shipped and pinned by `tests/Feature/CharacterCardFetchTest.php`'s `routes the card source past the match stage and into the card table` test. **(b)** A1 superseded all three identifiers and none of them shipped: the action is `app/Actions/StoreCharacterCards`, `handle(array $records, string $url, ?string $snapshotPath, ?string $timezone): array{created,updated,skipped}`, mirroring `StoreRaceCatalogSlots`; routing is by `is_a($parserClass, CharacterCardSourceParser::class, true)` inline in `PipelineRunner::run()` beside the race-catalog branch, so no source config grew a `records` key; and there is no `runCards()`. The step bodies are left as the record of what was briefed. The plan's file inventory and Task 9's `Consumes` line now name the shipped class. |
@@ -114,7 +114,6 @@ stack. Line numbers inside the plan are hints the plan's own hints-not-anchors b
 
 ## docs/deprecated/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md
 
-
 > **Read in order.** Step 2 of three for one workstream. It executes
 > [`â€¦-and-trainee-selector.md`](2026-09-29-catalog-roster-and-trainee-selector.md), the request that
 > authorized it, and its outcome is measured in
@@ -123,7 +122,7 @@ stack. Line numbers inside the plan are hints the plan's own hints-not-anchors b
 > checked, while `app/Models/CharacterCard.php`, `database/migrations/2026_09_29_120100_create_character_cards_table.php`
 > and `resources/js/trainee-combobox.ts` are all tracked on master. Read the report for what landed.
 > Re-ticking these 116 boxes is a separate pass with its own owner, not a side effect of this note.
-
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Populate the catalog with the complete Global roster (68 trainees, 107 costume cards nested under them) and replace the "New training run" trainee `<select>` with a keyboard-operable ARIA combobox that prefix-matches trainee names and card epithets.
@@ -169,41 +168,41 @@ Every task satisfies all of these. Exact values, verbatim from `CONSTRAINTS.md`,
 
 ### File structure
 
-**New PHP â€” schema and domain**
+#### New PHP â€” schema and domain
 
-| Path | Responsibility |
-|---|---|
-| `database/migrations/2026_09_29_120000_add_external_ref_to_umamusume_table.php` | The char-level link the parser has always emitted and the schema never kept (erratum E-14). |
-| `database/migrations/2026_09_29_120100_create_character_cards_table.php` | One row per costume card: `card_id` unique, FK to `umamusume`, verbatim title, rarity, Global date, debut flag, unconfirmed flag. |
-| `database/migrations/2026_09_29_120200_add_character_card_id_to_training_runs_table.php` | The run records which form it started on. Nullable. |
-| `app/Enums/CardRarity.php` | 1/2/3-star as a PHP enum, TitleCase cases. |
-| `app/Models/CharacterCard.php` | Card model, `casts()`, `umamusume()` relation. |
-| `database/factories/CharacterCardFactory.php` | Test data only. |
+| Path                                                                                       | Responsibility                                                                                                                      |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `database/migrations/2026_09_29_120000_add_external_ref_to_umamusume_table.php`            | The char-level link the parser has always emitted and the schema never kept (erratum E-14).                                         |
+| `database/migrations/2026_09_29_120100_create_character_cards_table.php`                   | One row per costume card: `card_id` unique, FK to `umamusume`, verbatim title, rarity, Global date, debut flag, unconfirmed flag.   |
+| `database/migrations/2026_09_29_120200_add_character_card_id_to_training_runs_table.php`   | The run records which form it started on. Nullable.                                                                                 |
+| `app/Enums/CardRarity.php`                                                                 | 1/2/3-star as a PHP enum, TitleCase cases.                                                                                          |
+| `app/Models/CharacterCard.php`                                                             | Card model, `casts()`, `umamusume()` relation.                                                                                      |
+| `database/factories/CharacterCardFactory.php`                                              | Test data only.                                                                                                                     |
 
-**New PHP â€” pipeline**
+#### New PHP â€” pipeline
 
-| Path | Responsibility |
-|---|---|
-| `app/Services/DataPipeline/Contracts/CharacterCardSourceParser.php` | Third parser contract, beside `SourceParser` and `ScenarioSourceParser`. |
-| `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php` | Emits one record per Global card; debut derived, never guessed. |
-| `app/Actions/StoreCharacterCards.php` | Idempotent card upsert by `card_id` plus its provenance row. |
+| Path                                                                  | Responsibility                                                             |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `app/Services/DataPipeline/Contracts/CharacterCardSourceParser.php`   | Third parser contract, beside `SourceParser` and `ScenarioSourceParser`.   |
+| `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php`   | Emits one record per Global card; debut derived, never guessed.            |
+| `app/Actions/StoreCharacterCards.php`                                 | Idempotent card upsert by `card_id` plus its provenance row.               |
 
-**Modified PHP**
+#### Modified PHP
 
 `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php` (`parse()`'s `name_ja` record key, shared debut helper), `app/Actions/PromoteMatchedRecord.php` (persist `external_ref` in `handle()`'s create and fill arrays), `app/Services/DataPipeline/PipelineRunner.php` (cards branch), `config/uma.php` (second source), `app/Models/Umamusume.php` (`cards()`), `app/Models/TrainingRun.php` (`#[Fillable]`), `app/Http/Requests/StoreTrainingRunRequest.php` (`rules()`), `app/Http/Controllers/CatalogController.php`, `app/Http/Controllers/TrainingRunController.php` (`create()`), `lang/en/uma.php`.
 
-**New frontend**
+#### New frontend
 
-| Path | Responsibility |
-|---|---|
-| `resources/js/trainee-combobox.ts` | The combobox: filter, grouping, cap, keyboard, ARIA state. Imported once from `resources/js/app.ts`. |
-| `resources/views/components/rarity-chip.blade.php` | Star-glyph badge, existing tokens only. |
+| Path                                                 | Responsibility                                                                                         |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `resources/js/trainee-combobox.ts`                   | The combobox: filter, grouping, cap, keyboard, ARIA state. Imported once from `resources/js/app.ts`.   |
+| `resources/views/components/rarity-chip.blade.php`   | Star-glyph badge, existing tokens only.                                                                |
 
-**Modified frontend**
+#### Modified frontend
 
 `resources/views/catalog/index.blade.php` (the tree), `resources/views/catalog/show.blade.php` (forms + provenance), `resources/views/runs/create.blade.php` (combobox over the existing select), `resources/js/app.ts`.
 
-**New docs and tests**
+#### New docs and tests
 
 `docs/adr/0008-character-card-catalog-layer.md`, `docs/data/2026-09-29-global-roster-crosscheck.md`, `tools/roster-crosscheck.php`, `docs/design-research/verification/slice-11-2026-09-29.md`; `tests/Feature/CharacterCardSchemaTest.php`, `CharacterCardParserTest.php`, `CharacterCardFetchTest.php`, `CatalogRosterTreeTest.php`, `TraineeSelectorTest.php`, `tests/Fixtures/gametora-character-cards.global.sample.json`.
 
@@ -212,10 +211,12 @@ Every task satisfies all of these. Exact values, verbatim from `CONSTRAINTS.md`,
 ### Task 1: Isolate the work and capture the opening snapshot
 
 **Files:**
+
 - Create: git worktree at `../umamusume-laravel13-catalog-roster`
 - Modify: nothing
 
 **Interfaces:**
+
 - Produces: branch `feat/catalog-roster-and-trainee-selector` off `b387e07`, and the three snapshot lines every later slice record must quote.
 
 - [ ] **Step 1: Record the opening snapshot before any edit** (`PLAN.md`'s "Slice Exit Criteria" section, owner ruling R38)
@@ -224,7 +225,7 @@ Every task satisfies all of these. Exact values, verbatim from `CONSTRAINTS.md`,
 git -C /d/Projects/umamusume-laravel13 branch --show-current
 git -C /d/Projects/umamusume-laravel13 status --porcelain
 git -C /d/Projects/umamusume-laravel13 rev-parse HEAD
-```
+```text
 
 Paste all three outputs verbatim into the slice record. The peer session's modified and untracked files are their work: none of it goes in your commits.
 
@@ -235,7 +236,7 @@ REQUIRED SUB-SKILL: `superpowers:using-git-worktrees`. Run it rather than hand-r
 ```bash
 git -C /d/Projects/umamusume-laravel13 worktree add \
   ../umamusume-laravel13-catalog-roster -b feat/catalog-roster-and-trainee-selector b387e07
-```
+```text
 
 - [ ] **Step 3: Wire the worktree so the gates can run**
 
@@ -249,7 +250,7 @@ cp ../umamusume-laravel13/docs/requests/2026-09-29-catalog-roster-and-trainee-se
    ../umamusume-laravel13/docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md \
    docs/requests/
 ls -l docs/requests/2026-09-29-catalog-roster-and-trainee-selector*.md
-```
+```text
 
 Then provision the gitignored files the suite reads. `git worktree add` checks out **tracked** files only, and `.gitignore`'s AI-agent-tooling block ignores `/.agents` â€” so a fresh worktree has no `.agents/skills.json`, while `SkillRegistry::__construct()` reads exactly `base_path('.agents/skills.json')` and `SkillExecutor::loadConfig()` reads `.agents/config.json`. Without that directory, six of the seven tests in `SkillAutomationTest` fail with `Failed asserting that ... contains 'Route Inspector'`, and none of it has anything to do with this plan.
 
@@ -258,7 +259,7 @@ cp ../umamusume-laravel13/.env .env
 cp -r ../umamusume-laravel13/.agents .agents
 npm ci
 composer install --no-interaction
-```
+```text
 
 Expected: both Markdown files present from the step above; `.agents/skills.json` exists; `npm ci` reports added packages with no `ERESOLVE`; `composer install` completes. Never run `npm audit fix` or `composer update` â€” C-8 forbids dependency movement.
 
@@ -266,14 +267,14 @@ If Step 4 still shows red after this, hunt for another gitignored file the suite
 
 ```bash
 grep -rnE "base_path\('\.[^']+'\)|storage_path\('\.[^']+'\)" app/ | head
-```
+```text
 
 - [ ] **Step 4: Prove the gates are green before you start**
 
 ```bash
 php artisan test --compact
 vendor/bin/phpstan analyse --no-progress --memory-limit=1G
-```
+```text
 
 Expected: both green at `b387e07`. Measured here 2026-09-29: **`6 failed, 2 skipped, 364 passed`** before `.agents` was copied, all six in `SkillAutomationTest`, and PHPStan **`[OK] No errors`** throughout â€” so the red was the provisioning gap in Step 3, not a dirty base. After Step 3's copy the suite must be green; if it is not, name the failing tests and report before writing any code.
 
@@ -286,7 +287,7 @@ Expected: both green at `b387e07`. Measured here 2026-09-29: **`6 failed, 2 skip
 ```bash
 touch database/scratch-catalog.sqlite
 git check-ignore -v database/scratch-catalog.sqlite
-```
+```text
 
 Expected: `check-ignore` prints a matching `.gitignore` rule for `database/*.sqlite`. If it prints nothing, stop: the file would be committable, and a second SQLite file in the repo is not an acceptable outcome.
 
@@ -298,7 +299,7 @@ the approval note over the `gametora-characters` entry in `config/uma.php` recor
 curl -s -o /dev/null -w 'app UA: %{http_code} %{size_download}B\n' \
   -A 'UmamusumeTrainerCompanion/0.2 (personal local tool)' \
   'https://gametora.com/data/umamusume/character-cards.679f7c2e.json'
-```
+```text
 
 Measured 2026-09-29 against this tree: **`app UA: 200 251242B`** â€” the full document, byte-for-byte the size of the snapshot already on disk, so the `679f7c2e` hash in the config has not rotated either. No `Accept` header was needed and an empty UA also returned 200. Tasks 8 and 9 are therefore runnable as written, and `SourceFetcher` needs no header change.
 
@@ -311,12 +312,14 @@ If this returns 403 or a truncated body **when you run it**, stop before Task 6:
 As Task 2 found it, `GametoraCharacterParser::parse()` read `$card['name_ja']` â€” today that read is `parse()`'s `name_ja` record line, fed from `name_jp`. The export publishes `name_jp`: `name_ja` appears **0** times in its 268 rows, `name_jp` **268** times. Every fetched trainee therefore stored a null Japanese name, so `PRD.md` US-1's acceptance test ("each detail page shows `name`, `name_ja`, â€¦") was unmet for fetched data. The sample fixture carries the same wrong key with `null` values, which is why the suite stayed green. The `<h1>` secondary label and the `ã‚¹ãƒšã‚·ãƒ£ãƒ«` search both depend on this, so it lands first.
 
 **Files:**
+
 - Modify: `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php` â€” `parse()`'s `name_ja` record key
 - Modify: `tests/Fixtures/gametora-character-cards.sample.json` (all four rows)
 - Modify: `tests/Feature/GametoraCharacterParserTest.php`
 - Modify: `KNOWN-ISSUES.md` (next free KI number)
 
 **Interfaces:**
+
 - Produces: `GametoraCharacterParser::parse()` records whose `name_ja` is populated from the export's `name_jp`. **The record key stays `name_ja`** â€” it is the contract `SourceParser`, `PromoteMatchedRecord::handle()`'s create and fill arrays and `PipelineRunner::run()`'s `MatchCandidate::create` branch all read, and it matches the `umamusume.name_ja` column. Only the source-side key changes.
 
 - [ ] **Step 1: Write the failing test**
@@ -340,13 +343,13 @@ it('reads the Japanese name from the key the export actually publishes', functio
     // stores a null, and the detail page loses the Japanese name US-1 promises.
     expect($record['name_ja'])->toBe('ã‚´ãƒ¼ãƒ«ãƒ‰ã‚·ãƒƒãƒ—');
 });
-```
+```text
 
 - [ ] **Step 2: Run it and watch it fail**
 
 ```bash
 php artisan test --compact tests/Feature/GametoraCharacterParserTest.php
-```
+```text
 
 Expected: FAIL, `Failed asserting that null is identical to 'ã‚´ãƒ¼ãƒ«ãƒ‰ã‚·ãƒƒãƒ—'.` If it passes, stop â€” you are not on `b387e07`.
 
@@ -357,7 +360,7 @@ Replace `parse()`'s `name_ja` line:
 ```php
                 // GameTora publishes `name_jp`; `name_ja` is this app's own column name.
                 'name_ja' => $this->textOrNull($card['name_jp'] ?? null),
-```
+```text
 
 Do **not** write `$card['name_jp'] ?? $card['name_ja'] ?? null`. The fallback chain silently accepts a body that carries neither key, which is how this defect went unnoticed: a null reads as "the source has no Japanese name" instead of "you are reading the wrong key".
 
@@ -365,19 +368,19 @@ Do **not** write `$card['name_jp'] ?? $card['name_ja'] ?? null`. The fallback ch
 
 In `tests/Fixtures/gametora-character-cards.sample.json`, rename the key on every row and give each trainee the client's real Japanese string â€” a fixture that holds `null` where the live export holds text is what let this ship:
 
-| card_id | replace | with |
-|---|---|---|
-| 100101 | `"name_ja": null` | `"name_jp": "ã‚¹ãƒšã‚·ãƒ£ãƒ«ã‚¦ã‚£ãƒ¼ã‚¯"` |
-| 100201 | `"name_ja": null` | `"name_jp": "ã‚µã‚¤ãƒ¬ãƒ³ã‚¹ã‚¹ã‚ºã‚«"` |
-| 100401 | `"name_ja": null` | `"name_jp": "ã‚¦ã‚ªãƒƒã‚«"` |
-| 100501 | `"name_ja": null` | `"name_jp": "ãƒ€ã‚¤ãƒ¯ã‚¹ã‚«ãƒ¼ãƒ¬ãƒƒãƒˆ"` |
+| card_id   | replace             | with                                         |
+| --------- | ------------------- | -------------------------------------------- |
+| 100101    | `"name_ja": null`   | `"name_jp": "ã‚¹ãƒšã‚·ãƒ£ãƒ«ã‚¦ã‚£ãƒ¼ã‚¯"`   |
+| 100201    | `"name_ja": null`   | `"name_jp": "ã‚µã‚¤ãƒ¬ãƒ³ã‚¹ã‚¹ã‚ºã‚«"`      |
+| 100401    | `"name_ja": null`   | `"name_jp": "ã‚¦ã‚ªãƒƒã‚«"`                  |
+| 100501    | `"name_ja": null`   | `"name_jp": "ãƒ€ã‚¤ãƒ¯ã‚¹ã‚«ãƒ¼ãƒ¬ãƒƒãƒˆ"`   |
 
 Prove each rename happened instead of assuming it:
 
 ```bash
 grep -c '"name_ja"' tests/Fixtures/gametora-character-cards.sample.json   # expect 0
 grep -c '"name_jp"' tests/Fixtures/gametora-character-cards.sample.json   # expect 4
-```
+```text
 
 If the file's fourth row is a different `card_id` than the table above, read the file and use the name that belongs to the `char_id` actually in that row. Do not invent a fourth name to make the count work.
 
@@ -387,13 +390,13 @@ In `tests/Feature/GametoraCharacterParserTest.php`, extend `it('reads the commit
 
 ```php
         ->and($records[0]['name_ja'])->toBe('ã‚¹ãƒšã‚·ãƒ£ãƒ«ã‚¦ã‚£ãƒ¼ã‚¯')
-```
+```text
 
 - [ ] **Step 6: Run the file green**
 
 ```bash
 php artisan test --compact tests/Feature/GametoraCharacterParserTest.php tests/Feature/FetchPipelineTest.php tests/Feature/CatalogTest.php
-```
+```text
 
 Expected: all pass. `CatalogTest`'s `'shows a detail page with Japanese name and provenance'` test sets `name_ja` explicitly through the factory, so it never exercised the parser and stays green either way â€” which is worth noting in the KI entry as a second reason the defect survived: the catalog test seeded the value instead of fetching it.
 
@@ -417,7 +420,7 @@ GameTora publishes name_jp; the parser read name_ja, so every fetched trainee
 stored a null Japanese name and PRD US-1's detail-page requirement went unmet.
 The sample fixture carried the same wrong key as null, and the one catalog test
 that asserts a Japanese name seeded it directly, so nothing caught it."
-```
+```text
 
 ---
 
@@ -426,6 +429,7 @@ that asserts a Japanese name seeded it directly, so nothing caught it."
 `AGENTS.md` (Architect): "Every new table, column, or class must cite a PRD requirement. No citation, no merge." Escalation 2 routes a not-in-PRD feature to the owner, who ruled yes in spec Â§2. `ADR-0005` is this repo's precedent for how such a ruling gets written down.
 
 **Files:**
+
 - Create: `docs/adr/0008-character-card-catalog-layer.md`
 - Modify: `PRD.md` (FR-A gains item 6 after A-5, FR-C-1 is amended, US-1's acceptance cell is extended â€” the three `PRD.md` requirement ids, since those line numbers were already wrong for FR-C-1)
 - Modify: `ARCHITECTURE.md` (Â§3 table inventory, and the "Support-card entities: proposed, not built" section)
@@ -434,6 +438,7 @@ that asserts a Japanese name seeded it directly, so nothing caught it."
 - Modify: `docs/SOURCE-OF-TRUTH.md` (Â§5 note: which fields were A-confirmed, and when)
 
 **Interfaces:**
+
 - Produces the citation strings every later commit quotes: **FR-A-6** (card records), **FR-C-1 as amended** (run references a card), **ADR-0008**.
 
 - [ ] **Step 1: Write ADR-0008**
@@ -453,28 +458,28 @@ Follow the shape of `docs/adr/0004-aptitude-and-scenario-cap-reference-data.md`,
 
 Insert after FR-A-5 in `PRD.md`:
 
-```
+```text
 - A-6 [ADR-0008]: `CharacterCard` record: the source's own card id (unique), its
   Umamusume, the `[Global]` client title verbatim including its brackets, rarity,
   Global release date, and a debut-form flag derived from the earliest JP release
   among that trainee's cards. Only cards carrying a Global release date are stored;
   a trainee with no Global card does not appear in the catalog. A card confirmed by
   the Tier B source alone is stored flagged and hidden unless asked for.
-```
+```text
 
 Append to FR-C-1 in `PRD.md` without disturbing its existing wording:
 
-```
+```text
 , and since ADR-0008 an optional reference to the `CharacterCard` the run was
 started on. `umamusume_id` remains the required owner of a run.
-```
+```text
 
 Extend the US-1 acceptance cell in `PRD.md`:
 
-```
+```text
 `GET /umamusume` lists each Global-released trainee with her cards nested; each
 card row shows its client title, rarity and Global release date.
-```
+```text
 
 - [ ] **Step 3: Amend `ARCHITECTURE.md` and its digest**
 
@@ -484,10 +489,10 @@ Add `character_cards` to the Â§3 table inventory with its columns, and `extern
 
 In `docs/design-research/CONSTRAINTS.md` Â§5, extend the D-30 "Render only what exists" permitted-surface sentence with:
 
-```
+```text
 `CharacterCard` (card_id, title, rarity, global_release_date, is_debut_form,
 unconfirmed), `TrainingRun` (`character_card_id`)
-```
+```text
 
 Leave D-30's opening sentence untouched â€” this entry is the record of a scope question that was asked and answered, which is the rule's whole purpose.
 
@@ -498,7 +503,7 @@ grep -n "A-6\|ADR-0008" PRD.md
 grep -rn "ADR-0008" docs/adr/ ARCHITECTURE.md ARCHITECTURE-ESSENTIALS.md
 grep -n "character_cards" ARCHITECTURE.md ARCHITECTURE-ESSENTIALS.md docs/design-research/CONSTRAINTS.md
 grep -c "^# ADR-0008" docs/adr/0008-character-card-catalog-layer.md
-```
+```text
 
 Expected: the FR-A-6 line, the digest entries, the D-30 entry, and exactly one ADR claiming number 0008. If a second file claims 0008, stop: the concurrent session took the number.
 
@@ -506,7 +511,7 @@ Expected: the FR-A-6 line, the digest entries, the D-30 entry, and exactly one A
 
 ```bash
 php artisan test --compact tests/Feature/LoreGateParityTest.php tests/Feature/RenderedCopyHygieneTest.php
-```
+```text
 
 Expected: green. `make lore` runs over tracked Markdown in Task 13's sweep; this pair is the fast local check.
 
@@ -522,13 +527,14 @@ a scope question rather than a migration. The owner ruled to build it, including
 a card reference on the run. ADR-0008 records the decision and keeps it clear of
 PRD 6.9 and the declined ADR-0005: this is the costume-card table, not the
 support-card database."
-```
+```text
 
 ---
 
 ### Task 4: Schema â€” external link, card table, rarity enum, factory
 
 **Files:**
+
 - Create: `database/migrations/2026_09_29_120000_add_external_ref_to_umamusume_table.php`
 - Create: `database/migrations/2026_09_29_120100_create_character_cards_table.php`
 - Create: `app/Enums/CardRarity.php`
@@ -548,6 +554,7 @@ ESSENTIALS digest in the same change." Amendment A1 widened the table to twelve 
 design documents move here rather than in a later doc pass. Step 13 does it.
 
 **Interfaces:**
+
 - Produces:
   - `Umamusume::cards(): HasMany<CharacterCard>`; column `umamusume.external_ref: string|null`.
   - `CharacterCard` fillable `['card_id','umamusume_id','title','rarity','global_release_date','is_debut_form','unconfirmed','source_url','snapshot_path','fetched_at','source_timezone','is_manual']` (Amendment A1: the last five are the inline provenance set plus the card's own stop sign); casts `rarity => CardRarity::class`, `global_release_date => 'date'`, `fetched_at => 'datetime'`, `is_debut_form`, `unconfirmed` and `is_manual` => `'boolean'`.
@@ -603,13 +610,13 @@ it('deletes a trainee\'s cards with her', function (): void {
 it('stores the source character link the parser has always emitted', function (): void {
     expect(Schema::hasColumn('umamusume', 'external_ref'))->toBeTrue();
 });
-```
+```text
 
 - [ ] **Step 2: Run it and confirm it fails**
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardSchemaTest.php
-```
+```text
 
 Expected: FAIL â€” `Class "App\Models\CharacterCard" not found`, and the `external_ref` column assertion false.
 
@@ -622,7 +629,7 @@ php artisan make:model CharacterCard --factory --no-interaction
 php artisan make:enum CardRarity --no-interaction || php artisan make:class Enums/CardRarity --no-interaction
 php artisan make:migration add_external_ref_to_umamusume_table --no-interaction
 php artisan make:migration create_character_cards_table --no-interaction
-```
+```text
 
 If `make:enum` is unavailable in this Laravel version, `make:class` is the fallback and the file must still declare an `enum`. Rename the two generated migrations to the timestamps in the Files block so they order after the existing `2026_09_27_*` set.
 
@@ -660,7 +667,7 @@ return new class extends Migration
         });
     }
 };
-```
+```text
 
 - [ ] **Step 5: Write the card table migration**
 
@@ -730,7 +737,7 @@ return new class extends Migration
         Schema::dropIfExists('character_cards');
     }
 };
-```
+```text
 
 No explicit index on `umamusume_id` beyond the FK: the table holds ~107 rows (measured 2026-09-29) and the catalog reads it in one `whereIn`. Add the index when the roster is a few thousand rows, not before.
 
@@ -761,7 +768,7 @@ enum CardRarity: int
         return str_repeat('â˜…', $this->value);
     }
 }
-```
+```text
 
 - [ ] **Step 7: Add the labels and extend the enum test**
 
@@ -773,7 +780,7 @@ enum CardRarity: int
         'TwoStar' => 'Two stars',
         'ThreeStar' => 'Three stars',
     ],
-```
+```text
 
 Then in `tests/Feature/EnumLabelTest.php`: add `use App\Enums\CardRarity;`, widen the closure parameter type of `it('labels every case of every rendered enum in human words')` to `AliasLanguage|MatchTier|ReleaseStatus|RunStatus|SkillAcquisition|CardRarity`, and append `...CardRarity::cases(),` to that test's `->with()` dataset. This **adds** coverage; deleting or skipping any existing case is a Floor violation.
 
@@ -845,7 +852,7 @@ class CharacterCard extends Model
         ];
     }
 }
-```
+```text
 
 Amendment A1 put five new columns on the migration and only the model's docblock and `#[Fillable]` list absorbed them; two of them also need a cast, which is why they are in the block above. `fetched_at` must be `'datetime'`: without it the attribute returns a string, and Task 11 Step 5's `$card->fetched_at->timezone(config('uma.display_timezone'))->format('M j, Y')` calls `timezone()` on that string. `is_manual` must be `'boolean'` so the store's guard is an explicit truth test rather than a bet on how this driver represents a tinyint. Assert both in `CharacterCardSchemaTest`: a cast nobody asserts on is a cast that silently regresses.
 
@@ -861,7 +868,7 @@ In `app/Models/Umamusume.php`: add `@property string|null $external_ref` and `@p
     {
         return $this->hasMany(CharacterCard::class);
     }
-```
+```text
 
 `HasMany` and `Collection` are already imported there.
 
@@ -934,7 +941,7 @@ class CharacterCardFactory extends Factory
         return $this->state(fn (): array => ['unconfirmed' => false]);
     }
 }
-```
+```text
 
 `#[Fillable]` does not stop a factory writing unlisted columns â€” factories are unguarded â€” so a factory is never proof a column is mass-assignable. Task 5 proves that with `Model::create()`.
 
@@ -945,18 +952,20 @@ php artisan test --compact tests/Feature/CharacterCardSchemaTest.php tests/Featu
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate:fresh --seed --no-interaction
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate:rollback --step=2 --no-interaction
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate --no-interaction
-```
+```text
 
 Expected: tests pass; `migrate:fresh --seed` succeeds **on the scratch file only** (C-5, and GATE-REGISTRY marks the shared dev file destructive); rollback drops both new migrations without error; re-migrating recreates them. Never aim these at `database/database.sqlite`.
 
 - [ ] **Step 13: Move the design docs with the migration**
 
-    > **NOTE (2026-09-30): the target table widened after this step was written.** `dd90330` added
-    > `skills_innate` and `skills_unique`, so `#[Fillable]` in `app/Models/CharacterCard.php` now lists
-    > **fourteen** columns, not the twelve named in the acceptance criterion below. Reconcile to the
-    > current `#[Fillable]` list, not to the count this step was drafted against. `ARCHITECTURE.md` Â§3 and
-    > `ARCHITECTURE-ESSENTIALS.md` still carry the twelve-name list as of this date; that gap closes when
-    > this step fires, and only here.
+```text
+> **NOTE (2026-09-30): the target table widened after this step was written.** `dd90330` added
+> `skills_innate` and `skills_unique`, so `#[Fillable]` in `app/Models/CharacterCard.php` now lists
+> **fourteen** columns, not the twelve named in the acceptance criterion below. Reconcile to the
+> current `#[Fillable]` list, not to the count this step was drafted against. `ARCHITECTURE.md` Â§3 and
+> `ARCHITECTURE-ESSENTIALS.md` still carry the twelve-name list as of this date; that gap closes when
+> this step fires, and only here.
+```
 
 `AGENTS.md` (Architect) requires it: "Schema changes require a migration plus updated ESSENTIALS digest in
 the same change." `ARCHITECTURE.md` Â§3 and `ARCHITECTURE-ESSENTIALS.md` gained their `character_cards`
@@ -987,7 +996,7 @@ rather than trusting this step's own prose that they landed.
 vendor/bin/pint --dirty --format agent
 vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 php artisan test --compact
-```
+```text
 
 Expected: Pint clean, PHPStan zero errors, full suite green.
 
@@ -1005,19 +1014,21 @@ idempotent by identity rather than by name, and attach through the new
 umamusume.external_ref the parser has emitted from the start but nothing stored.
 A card without a Global date is not a row here, and one the Tier B source stands
 alone behind is stored flagged."
-```
+```text
 
 ---
 
 ### Task 5: The run references a card
 
 **Files:**
+
 - Create: `database/migrations/2026_09_29_120200_add_character_card_id_to_training_runs_table.php`
 - Modify: `app/Models/TrainingRun.php` â€” `#[Fillable]` and its docblock
 - Modify: `app/Http/Requests/StoreTrainingRunRequest.php` â€” `rules()`
 - Test: append to `tests/Feature/CharacterCardSchemaTest.php`
 
 **Interfaces:**
+
 - Produces: `TrainingRun::characterCard(): BelongsTo<CharacterCard>` (nullable), fillable `character_card_id`, and a `character_card_id` validation rule that only accepts a card belonging to the submitted `umamusume_id`.
 
 - [ ] **Step 1: Write the failing tests**
@@ -1065,13 +1076,13 @@ it('still creates a run with only a trainee', function (): void {
 
     expect(TrainingRun::first()->character_card_id)->toBeNull();
 });
-```
+```text
 
 - [ ] **Step 2: Run, confirm failure**
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardSchemaTest.php
-```
+```text
 
 Expected: FAIL on an unknown `character_card_id` column in `training_runs`, and on `characterCard` being undefined.
 
@@ -1115,7 +1126,7 @@ return new class extends Migration
         });
     }
 };
-```
+```text
 
 `umamusume_id` keeps its NOT NULL FK: the card names a form, the trainee still owns the run, and every existing reader (`runs.index`, `runs.show`, the export, `ApiV1`) keeps working untouched.
 
@@ -1131,7 +1142,7 @@ In `app/Models/TrainingRun.php`: append `'character_card_id'` to `TrainingRun`'s
     {
         return $this->belongsTo(CharacterCard::class);
     }
-```
+```text
 
 Add `use Illuminate\Database\Eloquent\Relations\BelongsTo;` if the file does not already import it.
 
@@ -1149,7 +1160,7 @@ In `app/Http/Requests/StoreTrainingRunRequest.php`, immediately after the `umamu
              */
             'character_card_id' => ['nullable', 'integer', Rule::exists('character_cards', 'id')
                 ->where('umamusume_id', $this->input('umamusume_id'))],
-```
+```text
 
 `Rule` is already imported in `StoreTrainingRunRequest`. Add no controller-side check: the Floor bans business logic in controllers, and `TrainingRunController::store()` stays exactly as it is.
 
@@ -1160,7 +1171,7 @@ php artisan test --compact tests/Feature/CharacterCardSchemaTest.php tests/Featu
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate --no-interaction
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate:rollback --step=1 --no-interaction
 vendor/bin/pint --dirty --format agent && vendor/bin/phpstan analyse --no-progress --memory-limit=1G
-```
+```text
 
 Expected: all green â€” including `TrainingRunTest`'s `'creates a run and renders logged turns in order'` test, which posts no `character_card_id`. Its passing is the proof the change is additive.
 
@@ -1172,7 +1183,7 @@ git commit -m "feat(http,schema): let a run name the form it started on
 FR-C-1 as amended by ADR-0008. The column is nullable so a pre-card run is not a
 run with missing data, and the exists rule carries the join to the submitted
 trainee so a mismatched pair never reaches a row."
-```
+```text
 
 ---
 
@@ -1181,6 +1192,7 @@ trainee so a mismatched pair never reaches a row."
 Cards come from the **same** GameTora document the character parser reads. Debut semantics must be identical in both, so the derivation is extracted once rather than restated â€” a second copy is how two surfaces end up disagreeing about which form is the debut.
 
 **Files:**
+
 - Create: `app/Services/DataPipeline/Contracts/CharacterCardSourceParser.php`
 - Create: `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php`
 - Modify: `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php` â€” `parse()`'s inline debut loop, its two `dateOrNull()` call sites, and `dateOrNull()`'s visibility
@@ -1188,6 +1200,7 @@ Cards come from the **same** GameTora document the character parser reads. Debut
 - Test: `tests/Feature/CharacterCardParserTest.php`
 
 **Interfaces:**
+
 - Consumes: a GameTora `character-cards` JSON body.
 - Produces:
   - `GametoraCharacterParser::debutForms(iterable $cards): array<int, array<string,mixed>>` â€” `char_id => debut card`; the single definition of "debut form".
@@ -1213,7 +1226,7 @@ Use the export's own values, not invented ones (G-16: every name must be a real 
   {"char_id":1127,"card_id":112701,"name_en":"Fenomeno","name_jp":"ãƒ•ã‚§ãƒŽãƒ¼ãƒ¡ãƒŽ","title":"Black Flame of Righteousness","rarity":3,"release":"2025-04-21","release_en":null},
   {"char_id":1127,"card_id":112702,"name_en":"Fenomeno","name_jp":"ãƒ•ã‚§ãƒŽãƒ¼ãƒ¡ãƒŽ","title":"Violet Flame of Fortitude","rarity":3,"release":"2026-08-31","release_en":null}
 ]
-```
+```text
 
 Fenomeno is here twice with no `release_en` on either form, so she must yield **zero** records: the fixture keeps the brief's impossible `Fenomeno` case (erratum E-6) as a permanent guard on the Global-only rule.
 
@@ -1358,13 +1371,13 @@ it('treats a card id as a string or an int without losing its identity', functio
         ->and($records[0]['rarity'])->toBe(2)
         ->and($records[0]['is_debut_form'])->toBeTrue();
 });
-```
+```text
 
 - [ ] **Step 3: Run, confirm failure**
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardParserTest.php
-```
+```text
 
 Expected: FAIL â€” class `GametoraCharacterCardParser` not found.
 
@@ -1420,7 +1433,7 @@ In `GametoraCharacterParser.php`, replace `parse()`'s inline debut loop with a `
 
         return trim($value);
     }
-```
+```text
 
 Change `parse()`'s inline debut loop to the single `$debutForms = self::debutForms($cards);` call, and its two inline date parses to `self::dateOrNull(...)`. Leave `textOrNull` private: only this class needs it.
 
@@ -1428,7 +1441,7 @@ Change `parse()`'s inline debut loop to the single `$debutForms = self::debutFor
 
 ```bash
 php artisan test --compact tests/Feature/GametoraCharacterParserTest.php tests/Feature/GametoraAptitudeTest.php tests/Feature/FetchPipelineTest.php tests/Feature/CrossReferenceMatcherTest.php
-```
+```text
 
 Expected: all green. That is the refactor's bracket: identical output, one definition.
 
@@ -1456,7 +1469,7 @@ interface CharacterCardSourceParser
      */
     public function parse(string $body): array;
 }
-```
+```text
 
 - [ ] **Step 7: Write the parser**
 
@@ -1545,13 +1558,13 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
         return $records;
     }
 }
-```
+```text
 
 - [ ] **Step 8: Run green**
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardParserTest.php tests/Feature/GametoraCharacterParserTest.php
-```
+```text
 
 Expected: all pass. If the count is not 7, print the records (`dump($records)`, then delete the dump) and compare against the fixture. Do not adjust the assertion to match the output.
 
@@ -1571,13 +1584,13 @@ every card with a Global release date and nothing else, and both parsers now
 share one debut derivation so the catalog and a flagged debut form cannot
 disagree. Fenomeno sits in the fixture with no Global date on either form: she
 must yield nothing, which holds the Global-only rule down with a test."
-```
+```text
 
 ---
 
 ### Task 7: Second declared source, cards branch, idempotent store
 
-> ### AMENDMENT A1 â€” binding. This task's design changed when trunk's `e7b78a4` merged in.
+> ### AMENDMENT A1 â€” binding. This task's design changed when trunk's `e7b78a4` merged in
 >
 > **Why.** Two things landed on `master` that this task must follow rather than restate.
 >
@@ -1606,18 +1619,19 @@ must yield nothing, which holds the Global-only rule down with a test."
 >
 > **Task 4 and 11 follow from A1.** `CharacterCardFactory` gains `'is_manual' => false`, `'source_url' => 'https://gametora.test/character-cards.json'`, and a `manual()` state. Task 11's card provenance sentence reads the card's own `source_url` and `fetched_at`, which is what the brief asked for anyway â€” "name the source and fetch date" per card, not per character. **[EXECUTED at 545e719 + fe9694b â€” three things in the steps below did not ship as written; read the Task 7 addendum at the foot of this plan before re-running this task.]**
 
-
 The owner ruled the data arrives by live `uma:fetch` (spec Â§2), so the card dataset becomes a declared source. the header comment over `config/uma.php`'s `'sources'` array requires a config entry, one parser class, fixture tests (Task 6) and a robots note; `SourceFetcher` is the only outbound path and its allowlist is `config('uma.sources')`.
 
 **Runner note, added after Task 6 shipped (`db8603c`).** This task touches two lines of `PipelineRunner.php`, not one. `run()`'s `@param` `$sourceConfig` shape types a source's parser as `class-string<SourceParser>`, and `run()`'s interface-routing branch routes only the race-catalog kind (`is_a($parserClass, RaceCatalogSourceParser::class, true)`); everything else falls through to the name-match loop. `CharacterCardSourceParser` is a **third** interface, so the cards branch has to be added **and** that `@param` shape widened â€” register a source pointing at `GametoraCharacterCardParser` without both, and it is typed as a `SourceParser` the class does not implement, then sent into a loop that reads `$record['name']`, a key card records never carry. The named symbols are the locators here; this plan's own hints-not-anchors bullet above says so.
 
 **Files:**
+
 - Modify: `config/uma.php` (the `'sources'` array, and its `Shape:` comment block)
 - Modify: `app/Services/DataPipeline/PipelineRunner.php` â€” `PipelineRunner`'s class header, its promoted constructor dependencies (where `StoreRaceCatalogSlots` sits today and the card store joins), `run()`'s `@param` parser shape, and `run()`'s interface-routing branch. The `:20-33` range this line carried before Task 6 stopped short of the routing branch, which is what the runner note above names; both ranges stand here as that drift record, not as an instruction.
 - Create: `app/Actions/UpsertCharacterCard.php`
 - Test: `tests/Feature/CharacterCardFetchTest.php`
 
 **Interfaces:**
+
 - Consumes: `GametoraCharacterCardParser` records; `umamusume.external_ref`.
 - Produces:
   - source key **`gametora-character-cards`**; config shape extended with an optional `'records' => 'cards'` (default `'umamusume'`).
@@ -1783,7 +1797,7 @@ it('records the declared source in config with its own parser', function (): voi
         ->toBe(GametoraCharacterCardParser::class)
         ->and(config('uma.sources.gametora-character-cards.records'))->toBe('cards');
 });
-```
+```text
 
 `app(PipelineRunner::class)` rather than hand-building it: the container resolves all three constructor arguments, and a test that `new`s its own collaborators is asserting on its own wiring.
 
@@ -1791,7 +1805,7 @@ it('records the declared source in config with its own parser', function (): voi
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardFetchTest.php
-```
+```text
 
 Expected: FAIL â€” `UpsertCharacterCard` not found, and `uma.sources.gametora-character-cards` null.
 
@@ -1865,7 +1879,7 @@ final class UpsertCharacterCard
         });
     }
 }
-```
+```text
 
 `unconfirmed` is deliberately absent from the second argument: a fetch reports what the source says and must not clear a human cross-check verdict. Task 8 owns that column.
 
@@ -1873,7 +1887,7 @@ final class UpsertCharacterCard
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardFetchTest.php
-```
+```text
 
 Expected: the action-level tests pass. The runner and config tests still fail; that is Steps 5-7.
 
@@ -1886,7 +1900,7 @@ curl -sS --compressed \
   -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' \
   -H 'Accept: application/json' \
   'https://gametora.com/data/manifests/umamusume.json' | grep -o '"character-cards":"[^"]*"'
-```
+```text
 
 Expected: `"character-cards":"679f7c2e"`, the hash already in the config. If it now differs, use the new hash in **both** source entries and record the date you read it.
 
@@ -1920,7 +1934,7 @@ Add `use App\Services\DataPipeline\Parsers\GametoraCharacterCardParser;` beside 
             'timezone' => 'Asia/Tokyo',
             'records' => 'cards',
         ],
-```
+```text
 
 - [ ] **Step 7: Add the cards branch to the runner**
 
@@ -1930,7 +1944,7 @@ In `app/Services/DataPipeline/PipelineRunner.php`: add `private readonly UpsertC
         if (($sourceConfig['records'] ?? 'umamusume') === 'cards') {
             return $this->runCards($sourceKey, $sourceConfig, $body, $snapshotPath);
         }
-```
+```text
 
 then add the method:
 
@@ -1997,7 +2011,7 @@ then add the method:
 
         return $counts;
     }
-```
+```text
 
 Add imports: `App\Actions\UpsertCharacterCard`, `App\Models\CharacterCard`, `App\Models\Umamusume`, `App\Services\DataPipeline\Contracts\CharacterCardSourceParser`.
 
@@ -2005,7 +2019,7 @@ Add imports: `App\Actions\UpsertCharacterCard`, `App\Models\CharacterCard`, `App
 
 ```bash
 php artisan test --compact tests/Feature/CharacterCardFetchTest.php tests/Feature/FetchPipelineTest.php tests/Feature/CatalogCacheRenderTest.php tests/Feature/ReviewQueueTest.php
-```
+```text
 
 Expected: all pass. The three KI-2 tests are the guard on the `cached()` path this branch's version bump feeds, and `ReviewQueueTest` proves the character path still routes to review untouched.
 
@@ -2022,7 +2036,7 @@ Cards key on the source's own card id and attach through external_ref, so they
 bypass the match stage entirely: FR-B-3's review queue exists because names are
 ambiguous between servers, and a card id is not. An is_manual trainee blocks her
 cards too, and a re-fetch cannot clear a cross-check verdict it did not write."
-```
+```text
 
 ---
 
@@ -2033,11 +2047,13 @@ cards too, and a re-fetch cannot clear a cross-check verdict it did not write."
 Owner assumption, ruled 2026-09-29, and it is definitional rather than open: `unconfirmed` answers "do two independent sources attest that THIS card exists, with this title, date and rarity?" That is a property of the card, keyed on `card_id`, and never of the trainee it happens to be attached to. This task's cross-check file lists cards by `card_id` and metadata and records no trainee association, so a card that re-parents - the behaviour Task 7's addendum pins - keeps its verdict, because the verdict was never about the association. Do not invalidate `unconfirmed` on an ownership change, and do not key a verdict on `(card_id, umamusume_id)`: that discards correct human work every time the source fixes its own char-ref mapping, which is precisely when nobody wants to re-cross-check.
 
 **Files:**
+
 - Create: `docs/data/2026-09-29-global-roster-crosscheck.md`
 - Create: `tools/roster-crosscheck.php`
 - Create (untracked, scratch): `research-scratch/data/html/*-2026-09-29.html`, `research-scratch/data/json/tier-a-rows.json`
 
 **Interfaces:**
+
 - Produces: one verdict per `card_id` â€” `two-source-confirmed`, `single-source` or `conflict` â€” plus the two URLs and the read date. Task 9 Step 8 turns `single-source` and `conflict` into `unconfirmed = true`.
 
 - [ ] **Step 1: Save the Tier B body and the two Tier A bodies**
@@ -2061,13 +2077,13 @@ curl -sS --compressed -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' \
   'https://game8.co/games/Umamusume-Pretty-Derby/archives/535926' \
   -o research-scratch/data/html/game8-characters-2026-09-29.html
 wc -c research-scratch/data/json/character-cards.json research-scratch/data/html/*-2026-09-29.html
-```
+```text
 
 Expected: the JSON around 251 kB with 268 rows, and both HTML files far above 10 kB. Verify the export rather than trusting the size:
 
 ```bash
 php -r '$r=json_decode(file_get_contents("research-scratch/data/json/character-cards.json"),true); printf("rows=%d global=%d trainees=%d\n",count($r),count(array_filter($r,fn($c)=>is_string($c["release_en"]??null))),count(array_unique(array_column(array_filter($r,fn($c)=>is_string($c["release_en"]??null)),"char_id"))));'
-```
+```text
 
 Expected: `rows=268 global=107 trainees=68`. A different number is not a plan bug, it is the roster having moved since 2026-09-29: stop and re-report the counts before anything downstream quotes 68 and 107.
 
@@ -2085,9 +2101,9 @@ Note before you start: `umamusu.wiki` is Tier A but is not infallible â€” a
 
 `tools/roster-crosscheck.php` â€” plain PHP, no framework, run as `php tools/roster-crosscheck.php > docs/data/roster-crosscheck-table.md`. Inputs: the GameTora body (Task 9's snapshot, or `research-scratch/data/json/character-cards.json`) and `research-scratch/data/json/tier-a-rows.json`. It prints one Markdown row per card:
 
-```
+```text
 | card_id | GameTora title | Game8 title | umamusu.wiki title | GameTora date | Tier A date | rarity | verdict |
-```
+```text
 
 Classify with this rule and no other judgement:
 
@@ -2099,7 +2115,7 @@ $verdict = match (true) {
 };
 // A date or rarity that disagrees with either witness downgrades the row to
 // 'conflict' regardless of how many pages carry the card at all.
-```
+```text
 
 Compare titles on the bracket-stripped, case-folded form and say so in the file's method note: a wiki that prints `Special Dreamer` and GameTora that prints `[Special Dreamer]` are making the same claim, and comparing raw strings would report 107 false conflicts. Keep the script a dumb formatter: it compares strings, classifies, prints. It fetches nothing and writes nothing to the database.
 
@@ -2129,7 +2145,7 @@ Expect real conflicts. Each becomes a row in the file's conflict-log section, ne
 ```bash
 grep -c '^| ' docs/data/roster-crosscheck-table.md
 grep -c 'two-source-confirmed' docs/data/2026-09-29-global-roster-crosscheck.md
-```
+```text
 
 Expected: the row count equals 107 (plus one header row per table, so adjust by the headers you wrote). If it does not, the fixture or the extraction dropped a card; find it before continuing rather than shipping a short table.
 
@@ -2143,7 +2159,7 @@ git commit -m "docs(data): two-source cross-check of all 107 Global cards
 SOURCE-OF-TRUTH 5:152 will not let a Tier B field become app data on its own
 say-so. Every card, every name, date, rarity and title, against umamusu.wiki and
 Game8, with each disagreement kept as a row rather than resolved by preference."
-```
+```text
 
 ---
 
@@ -2152,10 +2168,12 @@ Game8, with each disagreement kept as a row rather than resolved by preference."
 The load-bearing finding, restated because it is the premise of the owner's ruling: `CrossReferenceMatcher::match()` returns `None` for any name not already stored, and `PipelineRunner::run()`'s `MatchCandidate::create` branch routes `None` to `match_candidates`. **A live fetch creates zero trainee rows.** `PRD.md` FR-B-3 is deliberate about that. So the roster leaves the queue the way `PRD.md` US-5 says a Trainer resolves it: `ResolveMatchCandidate` with status `Confirmed`, which reaches `PromoteMatchedRecord::handle(existing: null)` and creates the row with its `data_sources` provenance. No new promotion code, and no loosening of FR-B-3.
 
 **Files:**
+
 - Modify: `docs/design-research/verification/slice-11-2026-09-29.md` (the run record)
 - No application code changes at all in this task.
 
 **Interfaces:**
+
 - Consumes: `uma:fetch`, `MatchCandidate`, `ResolveMatchCandidate`, `UmamusumeAlias`, `StoreCharacterCards`, Task 8's verdict table.
 - Produces: 68 trainees carrying `external_ref` and `name_ja`, 107 cards, and the two count numbers every later task and the final report quote.
 
@@ -2170,7 +2188,7 @@ The load-bearing finding, restated because it is the premise of the owner's ruli
 ls database/database.sqlite 2>/dev/null || echo "absent, as expected for a fresh worktree"
 php artisan migrate --seed --no-interaction
 php artisan tinker --execute 'echo Umamusume::count()." trainees, ".App\Models\Skill::count()." skills, ".App\Models\Scenario::count()." scenarios";'
-```
+```text
 
 Expected: the file is absent before the command; then `2 trainees, 10 skills, ...` â€” the two seeded illustrative rows `UmamusumeSeeder` provides, which is the precondition Step 2's arithmetic depends on. If the count is anything other than `2`, stop and work out why before fetching: every number in Steps 2, 4 and 7 is derived from exactly two rows existing.
 
@@ -2181,7 +2199,7 @@ rm -f database/probe-absent.sqlite
 DB_DATABASE="$PWD/database/probe-absent.sqlite" php artisan migrate --force   # INFO Running migrationsâ€¦ DONE
 ls -l database/probe-absent.sqlite                                            # 225280 bytes, created for us
 rm -f database/probe-absent.sqlite
-```
+```text
 
 Older Laravel errored with "database file does not exist", and a `touch` here is harmless â€” but do not add one on the strength of that older behaviour without re-running the probe, and do not let a reviewer treat its absence as a defect. If a future framework bump makes the connector strict again, this probe is the thing that fails first and the one-line fix is obvious from its output.
 
@@ -2191,7 +2209,7 @@ If the file unexpectedly **does** exist (someone pointed `DB_DATABASE` at an abs
 
 ```bash
 php artisan uma:fetch gametora-characters
-```
+```text
 
 Expected, in shape: `gametora-characters: 2 updated, 0 created, 0 skipped (manual), 133 to review.`
 
@@ -2205,7 +2223,7 @@ If you see `68 to review` instead of 133, the parser gained a filter and US-2 ne
 
 ```bash
 php artisan tinker --execute 'echo Umamusume::whereNotNull("name_ja")->count()." of ".Umamusume::count();'
-```
+```text
 
 Expected: `2 of 2`. Only the two Exact-matched trainees exist at this point; the other 66 arrive in Step 4. This is the early probe that the key fix works on live data at all, on the two rows the fetch could already reach. The full measurement is Step 7's `68 of 68`, which is the number that matters for US-1, and a `0 of 2` here means the parser is still reading `name_ja`.
 
@@ -2244,7 +2262,7 @@ printf("pending %d | global %d | confirmed %d | FAILED %d | trainees %d | still 
     Umamusume::count(), MatchCandidate::where("status", "Pending")->count());
 if ($failed !== []) { echo implode("\n", $failed) . "\n"; }
 '
-```
+```text
 
 Expected: `pending 133 | global 66 | confirmed 66 | FAILED 0 | trainees 68 | still queued 67`.
 
@@ -2338,7 +2356,7 @@ it('leaves a candidate Pending when its verdict throws, so a re-run retries it',
         ->and(App\Models\Umamusume::query()->count())->toBe(0)
         ->and(App\Models\DataSource::query()->count())->toBe(0);
 });
-```
+```text
 
 Run all three, and file **the next free KI** in `KNOWN-ISSUES.md` against the second test, re-derived by the same run-time recipe Task 2 Step 7 uses (KI-25 is the expected number now that trunk holds KI-21 and KI-22 and this branch holds KI-23 and KI-24): nothing in `ResolveMatchCandidate` refuses a verdict on an already-resolved candidate, so a replayed POST to `review.resolve` â€” a back-button double-submit â€” silently forks a catalog row. The review UI hides resolved candidates, so it is not normally reachable, but this plan is the first thing to drive the action at volume. The fix is a one-line guard (no-op or reject when `status !== Pending`) and belongs to a separate slice, not to Task 9; record the deferral here rather than expanding this task's blast radius mid-run.
 
@@ -2350,7 +2368,7 @@ $dupes = App\Models\Umamusume::selectRaw("name, count(*) c")->groupBy("name")->h
 echo $dupes->isEmpty() ? "no duplicated trainee names\n" : $dupes."\n";
 echo "slugs ending in a collision suffix: " . App\Models\Umamusume::where("slug", "like", "%-[0-9]")->count() . "\n";
 '
-```
+```text
 
 Expected: `no duplicated trainee names` and `0` collision-suffixed slugs. Either nonzero means the promotion pass ran twice over overlapping rows; stop, find which names, and rule on it before Step 5 attaches cards to the wrong twin.
 
@@ -2373,7 +2391,7 @@ Umamusume::whereNotNull("name_ja")->get()->each(function ($u) use (&$made) {
 });
 echo "added {$made}, total ".UmamusumeAlias::where('language', 'Japanese')->count();
 '
-```
+```text
 
 Expected: 68 Japanese aliases. Without them the catalog page's **server-side** search cannot find `ã‚¹ãƒšã‚·ãƒ£ãƒ«ã‚¦ã‚£ãƒ¼ã‚¯`, because `match_key` is built from the English name (`specialweek`) and the search `when()` clause in `CatalogController::index()` ORs only `match_key` and `alias`. The selector finds katakana through its own payload; this closes the same capability on the server side, which is what FR-A-3 and US-1 describe. `AliasLanguage::Japanese` is the enum behind the `'Japanese'` string â€” use `AliasLanguage::Japanese->value` if the raw string reads as an untyped claim.
 
@@ -2382,7 +2400,7 @@ Expected: 68 Japanese aliases. Without them the catalog page's **server-side** s
 ```bash
 php artisan uma:fetch gametora-character-cards
 php artisan tinker --execute 'echo CharacterCard::count();'
-```
+```text
 
 Expected: `gametora-character-cards: 0 updated, 107 created, 0 skipped (manual or unresolved), 0 to review.` and `107`. Any nonzero `skipped` means a `char_external_ref` failed to resolve; find which cards before continuing:
 
@@ -2395,7 +2413,7 @@ $missing = array_values(array_filter(
 ));
 echo count($missing)." unresolved char refs";
 '
-```
+```text
 
 Prefer the saved snapshot over a re-downloaded URL for that check â€” `SourceFetcher` wrote it under `storage/app/private/snapshots/gametora-character-cards/<date>/<hash>.html`, and reading the snapshot is what `uma:reparse` exists for. Fetching a second copy inside a verification step makes the step depend on the network.
 
@@ -2417,23 +2435,23 @@ echo "trainees with exactly one debut: ".Umamusume::has("cards")->get()
     ->fn($u) => $u->cards->where("is_debut_form", true)->count() === 1)->count()."\n";
 echo "cards dated after today:   ".CharacterCard::where("global_release_date",">",now()->toDateString())->count()."\n";
 '
-```
+```text
 
 Fill and paste into the slice record:
 
-| Check | Required | Observed |
-|---|---|---|
-| Trainees with at least one card | 68 | |
-| Trainees with zero cards | 0 | |
-| Cards stored | 107 | |
-| Distinct `card_id` | 107 (no duplicates) | |
-| Debut flags set, in total | 68 (one per trainee) | |
-| Trainees with exactly one debut | 68 | |
-| Cards with no Global date | 0 (structural: the column is NOT NULL) | |
-| Cards dated after today | 0 | |
-| `JapanOnly` trainees stored | 0 â€” Step 4 confirms only the Global payloads, so a JP-only trainee is a pending candidate, not a catalog row | |
-| Trainees carrying a `name_ja` | 68 â€” the US-1 requirement, measured on live data rather than a fixture | |
-| Candidates still `Pending` | 67 â€” the JP-only lookahead US-2 wants visible in `/review` | |
+| Check                             | Required                                                                                                         | Observed   |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------- |
+| Trainees with at least one card   | 68                                                                                                               |            |
+| Trainees with zero cards          | 0                                                                                                                |            |
+| Cards stored                      | 107                                                                                                              |            |
+| Distinct `card_id`                | 107 (no duplicates)                                                                                              |            |
+| Debut flags set, in total         | 68 (one per trainee)                                                                                             |            |
+| Trainees with exactly one debut   | 68                                                                                                               |            |
+| Cards with no Global date         | 0 (structural: the column is NOT NULL)                                                                           |            |
+| Cards dated after today           | 0                                                                                                                |            |
+| `JapanOnly` trainees stored       | 0 â€” Step 4 confirms only the Global payloads, so a JP-only trainee is a pending candidate, not a catalog row   |            |
+| Trainees carrying a `name_ja`     | 68 â€” the US-1 requirement, measured on live data rather than a fixture                                         |            |
+| Candidates still `Pending`        | 67 â€” the JP-only lookahead US-2 wants visible in `/review`                                                     |            |
 
 - [ ] **Step 7b: State what the review queue became, and file the follow-up**
 
@@ -2444,7 +2462,7 @@ printf("pending %d | resolved %d | rejected %d\n",
     App\Models\MatchCandidate::where("status","Confirmed")->count(),
     App\Models\MatchCandidate::where("status","Rejected")->count());
 '
-```
+```text
 
 Expected: `pending 67 | resolved 66 | rejected 0`.
 
@@ -2466,7 +2484,7 @@ $stored = CharacterCard::pluck("card_id")->all();
 $jpOnly = array_column(array_udiff($rows, $withDate, fn ($r) => $r["card_id"]), "card_id");
 echo "JP-only card ids present in the table: ".count(array_intersect($jpOnly, $stored))."\n";
 '
-```
+```text
 
 Expected: the two counts equal (107 = 107) and the leak count is `0`. Resolve `PLACEHOLDER` to the real snapshot filename with `ls storage/app/private/snapshots/gametora-character-cards/` first; `uma:reparse` reads the same path, so this is the pipeline's own evidence rather than a fresh download. A nonzero leak count is the single most important failure in this plan: it means the Global-only gate is not where everyone thinks it is.
 
@@ -2479,7 +2497,7 @@ CharacterCard::query()->update(["unconfirmed" => false]);
 if ($notConfirmed !== []) { CharacterCard::whereIn("card_id", $notConfirmed)->update(["unconfirmed" => true]); }
 echo "flagged ".CharacterCard::where("unconfirmed", true)->count()." of ".CharacterCard::count();
 '
-```
+```text
 
 Expected: `flagged N of 107`. Put the list of `N` card ids in the slice record alongside the verdict table that produced it. If N is `0`, state which second source confirmed each row â€” "nothing unverified" is a claim needing evidence like any other, and it is the kind of number that gets cited later.
 
@@ -2499,13 +2517,14 @@ way of ResolveMatchCandidate, the same action /review drives, because FR-B-3 let
 only Exact and Alias auto-promote and a name the catalog has never seen is None.
 No bulk-promote command: that would be an uncited class and a button on the
 guarantee that the engine never guesses."
-```
+```text
 
 ---
 
 ### Task 10: Rebuild the catalog list as a trainee and card tree
 
 **Files:**
+
 - Modify: `resources/views/catalog/index.blade.php:10-51` â€” the `<x-layout>` body from the page `<h1>` through the list's closing `@endif`, below the file's header comment
 - Modify: `app/Http/Controllers/CatalogController.php` â€” `index()` and `cached()`
 - Create: `resources/views/components/rarity-chip.blade.php`
@@ -2513,6 +2532,7 @@ guarantee that the engine never guesses."
 - Test: `tests/Feature/CatalogRosterTreeTest.php`
 
 **Interfaces:**
+
 - Consumes: `Umamusume::cards`, `CardRarity`, `ReleaseStatus`.
 - Produces: `GET /umamusume` rendering one trainee block per `<h2>` with nested `<h3>` card rows; view vars `showAllStatus`, `showUnconfirmed`, `allStatusesLabel`; the `<x-rarity-chip>` component; query params `status=all` and `show_unconfirmed=1`.
 
@@ -2652,13 +2672,13 @@ it('keeps the card tree intact through the database cache store', function (): v
     test()->get('/umamusume')->assertOk()->assertSee('[Full-Color Fangirling]');
     test()->get('/umamusume')->assertOk()->assertSee('[Full-Color Fangirling]');
 });
-```
+```text
 
 - [ ] **Step 2: Run, confirm failure**
 
 ```bash
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php
-```
+```text
 
 Expected: FAIL â€” no card titles in the output, no form counts, and `Japan One` present on the unfiltered default.
 
@@ -2680,7 +2700,7 @@ In `CatalogController::index()`. First the status resolution, replacing the two 
             default => ReleaseStatus::GlobalReleased,
         };
         $showUnconfirmed = $request->query('show_unconfirmed') === '1';
-```
+```text
 
 Then one card scope built once, so the list query and the cached re-read cannot drift:
 
@@ -2708,7 +2728,7 @@ Then one card scope built once, so the list query and the cached re-read cannot 
             });
 
         [$items, $total] = $this->cached($query, $status, $searchKey, $page, $pageSize, $showUnconfirmed)  // [SUPERSEDED: cached() takes no scope arg, it calls cardScope() itself];
-```
+```text
 
 `use Closure;` and `use Illuminate\Database\Eloquent\Relations\HasMany;` as needed for the `$cardScope` parameter type. **[SUPERSEDED SHAPE, corrected 2026-09-29 after the fix rounds - what follows is what actually shipped.]** The briefed `Closure(HasMany): HasMany` is untrue at runtime, because `Relation::__call` forwards `when()` to the query Builder. What shipped is one private `cardScope(bool $showUnconfirmed)` returning `Closure(HasMany<CharacterCard, Umamusume>): void`, consumed by BOTH the list query and the cached re-read, which satisfies the real invariant (the two cannot drift) with honest typing and no suppression. Second, `lower(<col>) like "%<normalized term>%"` can never match a multi-word value: normalize() deletes spaces and hyphens, so "red strife" becomes "redstrife" while the stored title keeps its space, and card titles and aliases have no normalized column of their own. The fix folds the COLUMN at comparison time through `normalizedColumn()`, which nests REPLACE over lower() for exactly the characters `NameNormalizer::FOLDED_CHARACTERS` lists; that list is now the single source, read by normalize() and by the SQL builder alike, because two lists drifting apart is what produced the defect. Third, the bound term is escaped for LIKE metacharacters (percent, underscore, backslash) into one `$like` computed once and passed bound to all three clauses, because normalize() strips separators but not LIKE's own syntax, and unescaped a Trainer typing a percent sign receives the entire catalog. Proven against SQLite rather than by reverting the escape in a working tree: unescaped percent and underscore each match 2 of 2 fixture rows, escaped 0 of 2, and real terms match 1 of 2 either way. Commits `adfc7e9`, `bd0a1e6`, `5297fa2`, `f2c978b`. The durable answer for diacritics and full-width katakana is a stored normalized key beside `title` and `alias`, written by the pipeline the way `match_key` already is; that is a schema change no task here was authorized to make, so it is owed a register entry.
 
@@ -2749,7 +2769,7 @@ In `CatalogController::cached()` both changes are mandatory, or the page renders
 
         return [$items, $total];
     }
-```
+```text
 
 Leave the existing comment block above the re-read intact: `aliases_count` is still deliberately re-queried rather than cached.
 
@@ -2773,7 +2793,7 @@ Create `resources/views/components/rarity-chip.blade.php`:
 --}}
 <span {{ $attributes->merge(['class' => 'font-mono text-xs font-bold text-ink']) }}
     role="img" aria-label="{{ $rarity->label() }}"><span aria-hidden="true">{{ $rarity->stars() }}</span></span>
-```
+```text
 
 No background fill: the row already sits on `bg-raised`, and a chip in its host's own fill reads as nothing. `label()` yields `One star` / `Two stars` / `Three stars` from `lang/en/uma.php`, so no UI string is invented and `EnumLabelTest` covers every one.
 
@@ -2863,7 +2883,7 @@ Replace `catalog/index.blade.php:10-51` â€” the `<x-layout>` body from the 
             {{ $umamusumes->links() }}
         </div>
     @endif
-```
+```text
 
 **Collapse behaviour, decided by row count rather than assumed.** 68 trainees at the existing 25-per-page default is three pages, each showing only its own trainees fully expanded, so **no disclosure control ships**. Nothing on the page needs a click to be readable, and a collapse that is not needed is a keyboard trap for G-11 to catch. `CatalogController::index()` already clamps a `pageSize` query param at 100, so if the fully-expanded page ever outgrows the budget the lever is pagination size, not a widget. Record this reasoning in the slice file: the brief asked for the decision to be made on measurement, so the measurement (68 rows, three pages, 25 each) is the answer.
 
@@ -2873,7 +2893,7 @@ Replace `catalog/index.blade.php:10-51` â€” the `<x-layout>` body from the 
 
 ```bash
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php tests/Feature/CatalogTest.php tests/Feature/CatalogCacheRenderTest.php tests/Feature/DesignTokensTest.php tests/Feature/RenderedCopyHygieneTest.php tests/Feature/TokenPairHygieneTest.php tests/Feature/FlashBannerTokensTest.php tests/Feature/ApiV1Test.php
-```
+```text
 
 Expected: all green. The specific hazards: exactly 60 colour tokens (`DesignTokensTest`'s `counts every colour token the static theme declares` test); no `dark:` utility and no palette-numbered class; no hex or arbitrary value (G-4); no em or en dash (`RenderedCopyHygieneTest`'s `ships no em dash or en dash in rendered Blade copy` test); `bg-raised` on every shell page; and `DesignTokensTest`'s 30 factory rows that own **no cards**, which is precisely why the `N/A` / "no forms recorded" branch is load-bearing rather than decorative.
 
@@ -2885,7 +2905,7 @@ G-5 and G-47 want every new text/background pair computed. The browser half of `
 
 ```bash
 grep -n -- '--color-ink:\|--color-ink-strong:\|--color-raised:\|--color-page:\|--color-risk:' resources/css/app.css
-```
+```text
 
 For each pair: linearise each sRGB channel `c <= 0.03928 ? c/12.92 : ((c+0.055)/1.055)^2.4` on the 0-1 component, then `L = 0.2126 R + 0.7152 G + 0.0722 B`, then `ratio = (L_lighter + 0.05) / (L_darker + 0.05)`. Record in `docs/design-research/DESIGN.md` Â§3.4: `text-ink` on `bg-raised` in light and dark, and `text-risk` on `bg-raised` in light and dark for the unconfirmed warning. `text-ink` on `bg-raised` is an existing measured pair, so the only genuinely new one is `text-risk` â€” that is the line to add, with its two numbers. **Compute them yourself and print the formula, the four hex inputs and the read date next to them.** The three `text-risk` rows already in that section (10.04 light, 4.33 dark-before, 4.77 dark-after, from KI-20) do not reproduce from the very hex values they name under the WCAG formula above: recomputed on 2026-09-29 at `6a7236f` they are 10.89 / 5.51 / 6.22, and no plausible variant formula (no-gamma, simple-average) yields the recorded set either, so the recorded figures were not produced from those inputs. Every one of them still clears 4.5:1 under the correct arithmetic, so no token moves either way, but do not copy the recorded numbers into a new row and do not overwrite the old ones - flag the discrepancy as an open question for KI-20's author. Root cause is unfathomed, not minor: a contract row whose ratio cannot be reproduced from its own inputs is a check that cannot fail for the reason it states.
 
@@ -2903,7 +2923,7 @@ date. The status filter now defaults to Released (Global) with status=all back t
 the unfiltered list, card titles join names in the search scope, and a card the
 Tier B source stands alone behind stays hidden until asked for. Headings sit one
 level below the brief's naming because the page already owns an h1."
-```
+```text
 
 ---
 
@@ -2912,11 +2932,13 @@ level below the brief's naming because the page already owns an h1."
 `catalog/show.blade.php` renders "JP debut" and "Global debut", which after Tasks 2 and 9 carry real dates, and a Provenance [PREMISE PARTLY FALSE, measured 2026-09-29: that line is ALREADY conditional on dataSources->isEmpty() at show.blade.php:125-126, so it was suppressed for fetched rows before this task began. Task 11 review found the briefed red set overstates the work by one test; the forms section and the per-card provenance are the real new surface.] `<h2>` that currently reads *"No fetched sources. This record was seeded or entered by hand."* for the seeded rows. Task 9 gives it real rows. The brief wants the forms here too, and D-33 wants every engine-sourced fact at `meta` weight with its URL and fetched date.
 
 **Files:**
+
 - Modify: `resources/views/catalog/show.blade.php`
 - Modify: `app/Http/Controllers/CatalogController.php` â€” `show()`
 - Test: append to `tests/Feature/CatalogRosterTreeTest.php`
 
 **Interfaces:**
+
 - Consumes: `$umamusume->cards` (including each card's own `source_url` and `fetched_at`, per Amendment A1), `$umamusume->dataSources` (character-level, unchanged), `CharacterCard::$unconfirmed`.
 - Produces: a "Costume forms" section where each row names the source and fetch date carried on that card, plus one sentence under the existing Provenance list that identifies it as the trainee's own fetch history and points at the Tier A cross-check file.
 
@@ -3002,7 +3024,7 @@ it('names each card the source its own row was read from', function (): void {
         ->assertOk()
         ->assertSee('card-199902');
 });
-```
+```text
 
 Add `use App\Models\DataSource;` to the file's imports.
 
@@ -3010,7 +3032,7 @@ Add `use App\Models\DataSource;` to the file's imports.
 
 ```bash
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php
-```
+```text
 
 Expected: FAIL on the new rows that ask for a forms section and for per-card provenance; the hand-entered one at Step 1's third block already passes, and the earlier ones stay green.
 
@@ -3036,7 +3058,7 @@ Replace `CatalogController::show()`'s body:
         abort_if($umamusume === null, 404);
 
         return view('catalog.show', ['umamusume' => $umamusume, 'showUnconfirmed' => $showUnconfirmed]);
-```
+```text
 
 Keep the existing long comment above the method: this page is deliberately not cached, and that reasoning still holds.
 
@@ -3075,7 +3097,7 @@ In `catalog/show.blade.php`, insert after the `<dl>` grid closes (before the Jap
             @endforeach
         </ul>
     @endif
-```
+```text
 
 - [ ] **Step 5: Name the per-card source, and keep the character list for what it is**
 
@@ -3091,7 +3113,7 @@ In the Step 4 `<li>`, after the `<time>` element and inside the enclosing `<span
                                 read {{ $card->fetched_at->timezone(config('uma.display_timezone'))->format('M j, Y') }}
                             </span>
                         @endif
-```
+```text
 
 Four things here are deliberate. The span carries no styling because it inherits `text-xs text-ink-muted` and the `gap-3` from its parent, so the row grows no second line and no new visual tier. `source_url` rides the `title` attribute so the exact URL is one hover away without shipping a clickable outbound link in a local-only tool; `{{ }}` escapes it, and a URL that arrived from fetched content is untrusted (`AGENTS.md`, Data Engineer). The conversion is `config('uma.display_timezone')`, the same expression the existing Provenance list already uses on its `fetched_at` line, because US-7 makes a raw UTC render a defect; reuse that line rather than inventing a second formatting convention. And `fetched_at` is nullable, so the `@if` skips the span instead of printing an empty date.
 
@@ -3104,7 +3126,7 @@ Then this sentence, after the `</ul>` in the existing `@else` branch of the Prov
             confirmed against the two Tier A sources listed in
             docs/data/2026-09-29-global-roster-crosscheck.md. [CLAUSE REMOVED, not merely reworded: docs/data/ does not exist in this tree because Task 8 is blocked, AND the blanket claim it carried was false on its own terms -- unconfirmed defaults to false with no verdict written onto any row yet, so "every card here was checked" rendered for data nobody had cross-checked. The honest statement is the per-row "Not confirmed by two sources" the page already prints. Do not reintroduce a file_exists() guard: it puts a filesystem stat on a provenance claim and vanishes silently when the file lands.]
         </p>
-```
+```text
 
 The JP and Global debut `<dt>` rows keep their existing markup: after Task 2 Step 3 both carry real dates for fetched rows, and the `N/A` disclosure already in the file covers a trainee with neither. Do not add a new fallback for a case that no longer exists.
 
@@ -3112,7 +3134,7 @@ The JP and Global debut `<dt>` rows keep their existing markup: after Task 2 Ste
 
 ```bash
 php artisan test --compact tests/Feature/CatalogRosterTreeTest.php tests/Feature/CatalogTest.php tests/Feature/DesignTokensTest.php tests/Feature/RenderedCopyHygieneTest.php
-```
+```text
 
 Expected: all green. `CatalogTest`'s `'shows a detail page with Japanese name and provenance'` test creates a `DataSource` with a `https://example.test/...` URL and no `source_key`, and the existing Provenance list [STATED WRONG, corrected 2026-09-29: DataSourceFactory supplies source_key => "test", so a test-created row DOES print a key. The instruction is unchanged and still correct -- the added sentence must not read source_key at all -- but it is not justified by the reason above it. Confirm the test stays green rather than editing it, as briefed.]'s `fetched_at` line already prints that key bare, so the added sentence must not read `source_key` at all; that is why it does not. Confirm the test stays green rather than editing it. The per-card span needs no such tolerance because `CharacterCard::factory()` now sets `fetched_at` (Task 4 Step 11), but it does need the `@if`: a row stored before a fetch stamped it has `fetched_at` null, and `null->timezone()` is a fatal.
 
@@ -3128,7 +3150,7 @@ The seeded-data sentence goes when a row genuinely has a fetched source and stay
 when it does not. Each form shows its client title, stars, debut state and Global
 date, and the provenance line records the Tier B source alongside the Tier A
 witness SOURCE-OF-TRUTH 5:152 asks for."
-```
+```text
 
 ---
 
@@ -3139,6 +3161,7 @@ Vanilla TypeScript. `package.json` has **no** runtime dependency and PRD Â§6.2
 Progressive enhancement is not optional here: `resources/js/guided-flow.ts`'s header comment states the repo's rule, "with scripting unavailable the rail is still completable". The existing `<select name="umamusume_id">` stays in the DOM as the no-JS path, disabled by the script when the script runs.
 
 **Files:**
+
 - Create: `resources/js/trainee-combobox.ts`
 - Modify: `resources/js/app.ts`
 - Modify: `resources/views/runs/create.blade.php:9-18` â€” the `Umamusume` `<label>` that wraps `<select name="umamusume_id">`
@@ -3146,6 +3169,7 @@ Progressive enhancement is not optional here: `resources/js/guided-flow.ts`'s he
 - Test: `tests/Feature/TraineeSelectorTest.php`
 
 **Interfaces:**
+
 - Consumes: `Umamusume::with('cards')`, `CharacterCard::$card_id` (the source id), `TrainingRunController::create()`.
 - Produces:
   - controller var `$rosterJson` â€” `list<array{umamusumeId:int, trainee:string, traineeJa:string|null, cards:list<array{selectionId:int, sourceCardId:int, title:string, titleKey:string, releaseDate:string, debut:bool}>}>`, JSON-encoded in a `application/json` script block.
@@ -3324,7 +3348,7 @@ it('carries the chosen card back to the form when another field fails', function
         ->assertSee('[RUN! RUIN! LAUNCHER!]')
         ->assertSee('not_a_scenario', false);
 });
-```
+```text
 
 `assertSee('not_a_scenario', false)` checks the raw `old('scenario')` value survives in the markup, which is the same mechanism carrying the card selection back.
 
@@ -3332,7 +3356,7 @@ it('carries the chosen card back to the form when another field fails', function
 
 ```bash
 php artisan test --compact tests/Feature/TraineeSelectorTest.php
-```
+```text
 
 Expected: FAIL â€” no `role="combobox"`, no `#trainee-roster`.
 
@@ -3397,7 +3421,7 @@ Replace `TrainingRunController::create()`:
 
         return $card === null ? null : $card->umamusume->name.' Â· '.$card->title;
     }
-```
+```text
 
 Import `App\Enums\ReleaseStatus`, `App\Models\CharacterCard` at the top rather than using fully-qualified names inline, matching the file's existing import block. `umamusumes` becomes the trainee collection so the no-JS `<select>` still iterates over it, Global-only, and **not** card-gated: a trainee with no Global card still appears in the no-JS select, because `character_card_id` is nullable per Task 5 and the rail must stay completable on a database that has no card rows at all -- which is every freshly seeded one, since no seeder writes `character_cards`. **[CORRECTED 2026-09-29, commit `1c44698`.** The briefed "she does not appear" is the FR-A-6 *catalog* rule about trainees whose cards are all JP-only; copying it onto the run form turned a display rule into a precondition for training a trainee, and the review caught it as Critical.] The card filter belongs inside the JSON payload only, so the searchable popup still lists forms; where a trainee has no confirmed form the payload simply carries none, and the native select remains the working control.
 
@@ -3454,7 +3478,7 @@ In `resources/views/runs/create.blade.php`, replace the `Umamusume` `<label>` th
         </label>
 
         <script type="application/json" id="trainee-roster">@json($rosterJson)</script>
-```
+```text
 
 **What the no-script path can and cannot carry.** `old('umamusume_id')` survives a 422 on that path through the select's `@selected()`, which is what makes the trainee sticky without JS. The disabled hidden input does **not** resubmit `character_card_id`, so a scriptless Trainer who failed validation on `scenario` comes back to a run naming the trainee but not the form. That is the honest ceiling for a path with no filtering script, not an oversight: `character_card_id` is nullable and Task 5's rule accepts a submission without it. Say this in the commit message so a later reader does not "fix" it by removing `disabled` and breaking the no-JS submit again.
 
@@ -3821,7 +3845,7 @@ export const initTraineeCombobox = (): void => {
 };
 
 initTraineeCombobox();
-```
+```text
 
 The `(debut)` suffix on the typed-name path is the note the brief asked for; the click and arrow path shows the card alone, which is the state where the card was named explicitly.
 
@@ -3833,14 +3857,14 @@ The `(debut)` suffix on the typed-name path is the note the brief asked for; the
 import './bootstrap';
 import './guided-flow';
 import './trainee-combobox';
-```
+```text
 
 - [ ] **Step 7: Run the tests green**
 
 ```bash
 php artisan test --compact tests/Feature/TraineeSelectorTest.php
 npm run build
-```
+```text
 
 Expected: tests pass and the build emits a manifest including `trainee-combobox`. A Vite error here means the TS is not syntactically valid; fix the module rather than the test.
 
@@ -3848,7 +3872,7 @@ Expected: tests pass and the build emits a manifest including `trainee-combobox`
 
 ```bash
 npx tsc --noEmit -p tsconfig.json
-```
+```text
 
 Expected: zero errors. `tsconfig.json` sets `strict: true` and `noEmit: true` over `resources/js/**/*.ts`, so the new file is inside its include pattern by construction. If `tsc` is not on PATH, this is the one step that may be reported as not run rather than skipped silently.
 
@@ -3879,7 +3903,7 @@ it('names the empty and capped states in words a Trainer reads', function (): vo
     expect($source)->toContain('No trainee or card found.')
         ->and($source)->toContain('keep typing');
 });
-```
+```text
 
 Say plainly in the slice record that these pin the module's shape, not its runtime behaviour: the behaviour is Task 13's browser pass, and an assertion that only reads source text must not be reported as if it proved the filter works.
 
@@ -3888,7 +3912,7 @@ Say plainly in the slice record that these pin the module's shape, not its runti
 ```bash
 php artisan test --compact tests/Feature/TraineeSelectorTest.php tests/Feature/KeyboardPathTest.php tests/Feature/DesignTokensTest.php tests/Feature/FlashBannerTokensTest.php tests/Feature/RenderedCopyHygieneTest.php tests/Feature/TrainingRunTest.php tests/Feature/RunUpdateTest.php
 vendor/bin/pint --dirty --format agent && vendor/bin/phpstan analyse --no-progress --memory-limit=1G
-```
+```text
 
 Expected: all green. On the `KeyboardPathTest` hazard, settled against the file rather than left conditional: `'loads the keyboard module from the entry the browser actually runs'` asserts `expect($entry)->toContain("import './guided-flow';")` in `tests/Feature/KeyboardPathTest.php`, which is a containment check, not an exact import list. Adding `trainee-combobox` to `app.ts` therefore leaves it green untouched, and nothing about that test should be edited. The positive wiring check for the new module is the `wires the module into the entry the browser actually runs` test added in Step 1, which borrows the same reasoning that test records: a module on disk proves nothing about it executing.
 
@@ -3907,7 +3931,7 @@ name, trainee Japanese name and the bracket-stripped card title, so RUN finds
 [RUN! RUIN! LAUNCHER!] under Gold Ship; ten rows visible, grouped by trainee,
 arrows and Escape, and the submission carries the card as well as the trainee.
 Vanilla TypeScript, no dependency added."
-```
+```text
 
 ---
 
@@ -3916,6 +3940,7 @@ Vanilla TypeScript, no dependency added."
 Everything in Part 3 that a PHP test cannot prove is proven here, against the real page.
 
 **Files:**
+
 - Modify: `docs/design-research/verification/slice-11-2026-09-29.md`
 - Modify: `KNOWN-ISSUES.md` (close or file what this slice found)
 - Create: `docs/requests/2026-09-29-catalog-roster-report.md`
@@ -3928,7 +3953,7 @@ Never bind the shared dev file to a port another session may already be using. C
 cp database/database.sqlite database/scratch-catalog.sqlite
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan serve --port=8099 --no-interaction &
 sleep 2 && curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8099/umamusume
-```
+```text
 
 **Guard the copy, because it silently destroys the scratch database.** Task 4 and Task 5 point `migrate` at `database/scratch-catalog.sqlite`, so by this point that file holds a schema with real migrations applied and possibly useful data. The `cp` above overwrites it wholesale â€” fine when Task 9 populated `database/database.sqlite`, and a quiet data loss if anyone reorders the tasks or runs Task 13 alone to re-measure after a UI fix, which is exactly what a re-review pass does. Assert the source is populated first:
 
@@ -3938,7 +3963,7 @@ $count = App\Models\Umamusume::count();
 if ($count !== 68) { fwrite(STDERR, "REFUSING TO COPY: database/database.sqlite holds {$count} trainees, expected 68. Task 9 has not populated it. Not overwriting scratch-catalog.sqlite.\n"); exit(1); }
 echo "source verified: {$count} trainees, ".App\Models\CharacterCard::count()." cards\n";
 '
-```
+```text
 
 Expected: `source verified: 68 trainees, 107 cards`, and only then the `cp`. If it refuses, the sequencing broke â€” fix the sequencing or copy in the other direction, rather than flattening a scratch database that another step depends on.
 
@@ -3948,20 +3973,20 @@ Expected after serving: `200`. If the port is taken, probe by PID and pick anoth
 
 Use the available browser MCP against `http://127.0.0.1:8099/training-runs/create`. For each query, record the real result and whether it matches the spec. The table below carries the corrected expectations from errata E-5 and E-6; the brief's own rows for `Fe` and `Fenomeno` are impossible on Global data.
 
-| Input | Expected on the shipped roster | Why |
-|---|---|---|
-| (empty) | 10 most recently released cards, newest first, grouped under their trainees | the default list stays short |
-| `F` | Fine Motion and Fuji Kiseki as trainee groups, plus 9 cards whose title begins with F (`[Formula R]`, `[Frontline Elegance]`, `[Full-Color Fangirling]`, `[Fille Ã‰clair]`, `[Fast as Lightning]`, `[Fair Lady of the Waves]`, `[Fanaticâ™¡Jiangshi]`, `[Flare]`, `[Fluttertail Spirit]`), capped at 10 with the keep-typing line | prefix on names and titles |
-| `Fe` | **"No trainee or card found."** | no Global trainee and no Global epithet begins with `Fe`; Fenomeno is JP-only |
-| `Fenomeno` | **"No trainee or card found."** | both her forms have no `release_en`; the Global-only rule excludes her |
-| `Fu` | Fuji Kiseki with her card forms as options | the working stand-in for the brief's `Fe`/`Fenomeno` rows |
-| `RUN` | `[RUN! RUIN! LAUNCHER!]` under Gold Ship | prefix on the bracket-stripped title |
-| `fenomeno` | identical to `Fenomeno` | case-insensitive |
-| `ã‚¹ãƒšã‚·ãƒ£ãƒ«` | Special Week, with her three forms | Japanese prefix |
-| `zzz` | "No trainee or card found." | no results state, not an empty popup |
-| ArrowDown, ArrowUp, Enter, Escape | highlight moves and wraps; Enter fills the label and sets both hidden fields; Escape closes and leaves the value | keyboard path, G-11 |
-| Tab to the input, then type | the popup opens on focus without a click | combobox expectation |
-| Screen reader / accessibility tree | `role="combobox"`, `aria-expanded` flipping, `aria-activedescendant` tracking, `role="group"` headers not focusable as options | the pattern is required, not decorative |
+| Input                                | Expected on the shipped roster                                                                                                                                                                                                                                                                                                      | Why                                                                             |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| (empty)                              | 10 most recently released cards, newest first, grouped under their trainees                                                                                                                                                                                                                                                         | the default list stays short                                                    |
+| `F`                                  | Fine Motion and Fuji Kiseki as trainee groups, plus 9 cards whose title begins with F (`[Formula R]`, `[Frontline Elegance]`, `[Full-Color Fangirling]`, `[Fille Ã‰clair]`, `[Fast as Lightning]`, `[Fair Lady of the Waves]`, `[Fanaticâ™¡Jiangshi]`, `[Flare]`, `[Fluttertail Spirit]`), capped at 10 with the keep-typing line   | prefix on names and titles                                                      |
+| `Fe`                                 | **"No trainee or card found."**                                                                                                                                                                                                                                                                                                     | no Global trainee and no Global epithet begins with `Fe`; Fenomeno is JP-only   |
+| `Fenomeno`                           | **"No trainee or card found."**                                                                                                                                                                                                                                                                                                     | both her forms have no `release_en`; the Global-only rule excludes her          |
+| `Fu`                                 | Fuji Kiseki with her card forms as options                                                                                                                                                                                                                                                                                          | the working stand-in for the brief's `Fe`/`Fenomeno` rows                       |
+| `RUN`                                | `[RUN! RUIN! LAUNCHER!]` under Gold Ship                                                                                                                                                                                                                                                                                            | prefix on the bracket-stripped title                                            |
+| `fenomeno`                           | identical to `Fenomeno`                                                                                                                                                                                                                                                                                                             | case-insensitive                                                                |
+| `ã‚¹ãƒšã‚·ãƒ£ãƒ«`                    | Special Week, with her three forms                                                                                                                                                                                                                                                                                                  | Japanese prefix                                                                 |
+| `zzz`                                | "No trainee or card found."                                                                                                                                                                                                                                                                                                         | no results state, not an empty popup                                            |
+| ArrowDown, ArrowUp, Enter, Escape    | highlight moves and wraps; Enter fills the label and sets both hidden fields; Escape closes and leaves the value                                                                                                                                                                                                                    | keyboard path, G-11                                                             |
+| Tab to the input, then type          | the popup opens on focus without a click                                                                                                                                                                                                                                                                                            | combobox expectation                                                            |
+| Screen reader / accessibility tree   | `role="combobox"`, `aria-expanded` flipping, `aria-activedescendant` tracking, `role="group"` headers not focusable as options                                                                                                                                                                                                      | the pattern is required, not decorative                                         |
 
 Write each observed outcome into the slice record with a screenshot path. Where an expectation fails, **fix the module and re-run**; do not adjust the table.
 
@@ -3983,7 +4008,7 @@ The schema and the query both changed, so re-check the local budget rather than 
 for i in $(seq 1 20); do
   curl -s -o /dev/null -w '%{time_total}\n' http://127.0.0.1:8099/umamusume
 done | sort -n | awk '{a[NR]=$1} END {printf "median %.3fs p95 %.3fs\n", a[int(NR/2)+1], a[int(NR*0.95)]}'
-```
+```text
 
 Expected: median well under **0.200 s**, which is C-6's budget at ~1,000 Umamusume â€” this catalog holds 68, so the honest statement is "under budget at one-fifteenth the reference size, with one eager card load per page of 25 trainees". Record the two numbers and the query count if you can get it. Do not claim the 1,000-row budget is met; claim what was measured.
 
@@ -3999,7 +4024,7 @@ php artisan test --compact
 make lore
 composer audit
 npm audit --omit=dev
-```
+```text
 
 Expected: Pint clean twice; PHPStan zero errors; the full suite green; `make lore` with no unexplained hits; no reachable critical or high from the audits. Report any audit finding rather than silencing it.
 
@@ -4011,7 +4036,7 @@ On the lore gate, the mechanism moved under this plan and now works in its favou
 rm -f database/scratch-catalog.sqlite && touch database/scratch-catalog.sqlite
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate:fresh --seed --no-interaction
 DB_DATABASE="$PWD/database/scratch-catalog.sqlite" php artisan migrate:rollback --step=3 --no-interaction
-```
+```text
 
 Expected: fresh migrate and seed succeed; three migrations roll back cleanly, proving each `down()`. Delete the scratch file afterwards: `rm -f database/scratch-catalog.sqlite`.
 
@@ -4037,7 +4062,7 @@ git commit -m "docs(slice-10): the roster browser pass, the measured budget, and
 Records the selector behaviour on the real page, the catalog counts against the
 export, the C-6 re-measure the new query shape requires, and every place the
 shipped result differs from the request because the data disagreed with it."
-```
+```text
 
 - [ ] **Step 9: Hand the branch back**
 
@@ -4049,17 +4074,17 @@ REQUIRED SUB-SKILL: `superpowers:finishing-a-development-branch`. Report the com
 
 The brief's Part 3 table, with errata E-5 and E-6 applied. Use this in Task 13 Step 2; the original rows for `Fe` and `Fenomeno` describe data that does not exist on Global.
 
-| Input | Result |
-|---|---|
-| (empty) | ~10 most recently released cards, not all 107 |
-| `F` | Fine Motion, Fuji Kiseki, plus the 9 F-initial card titles; capped with the keep-typing line |
-| `Fe` | "No trainee or card found." |
-| `Fenomeno` | "No trainee or card found." â€” both her forms are `[JP-Only]` |
-| `Fu` | Fuji Kiseki with her card forms as options |
-| `RUN` | `[RUN! RUIN! LAUNCHER!]` under Gold Ship |
-| `fenomeno` | same as `Fenomeno` |
-| `ã‚¹ãƒšã‚·ãƒ£ãƒ«` | Special Week, three forms |
-| `zzz` | "No trainee or card found." |
+| Input               | Result                                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| (empty)             | ~10 most recently released cards, not all 107                                                  |
+| `F`                 | Fine Motion, Fuji Kiseki, plus the 9 F-initial card titles; capped with the keep-typing line   |
+| `Fe`                | "No trainee or card found."                                                                    |
+| `Fenomeno`          | "No trainee or card found." â€” both her forms are `[JP-Only]`                                 |
+| `Fu`                | Fuji Kiseki with her card forms as options                                                     |
+| `RUN`               | `[RUN! RUIN! LAUNCHER!]` under Gold Ship                                                       |
+| `fenomeno`          | same as `Fenomeno`                                                                             |
+| `ã‚¹ãƒšã‚·ãƒ£ãƒ«`   | Special Week, three forms                                                                      |
+| `zzz`               | "No trainee or card found."                                                                    |
 
 ---
 
@@ -4126,7 +4151,6 @@ is broken", the cheap form is one extra integer in the counts array, not a count
 
 ## docs/deprecated/requests/2026-09-29-catalog-roster-report.md
 
-
 > **Read in order.** Step 3 of three, and the latest word on this workstream. It closes
 > [`â€¦-and-trainee-selector.md`](2026-09-29-catalog-roster-and-trainee-selector.md), the request, and
 > measures the outcome of
@@ -4148,12 +4172,12 @@ The character-card layer and the searchable trainee selector, across two merges.
 `bc11d9b` brought the card layer onto master. `236e3a5` (this session) merged the branch's three
 remaining commits forward:
 
-```
+```text
 236e3a5 Merge branch 'feat/catalog-roster-and-trainee-selector'
 4addcd6 fix(ui,http): the payload reaches every trainee the select offers, and ArrowUp opens on the last row
 79d7f62 docs(plan): remove the card precondition Task 12 shipped from the brief
 1c44698 fix(ui,http): the run form stays completable, and Enter means submit
-```
+```text
 
 The merge was **not** a rebase. `b63e111` is already an ancestor of master through `bc11d9b`, so
 re-basing would have rewritten landed history. `git merge` produced no conflicts: the incoming five
@@ -4162,20 +4186,20 @@ files and the concurrent working-tree changes were disjoint, which was checked w
 
 **Migrations** (all three from `bc11d9b`):
 
-| Migration | Adds |
-|---|---|
-| `2026_09_29_120000_add_external_ref_to_umamusume_table` | `umamusume.external_ref`, indexed, nullable, not unique |
-| `2026_09_29_120100_create_character_cards_table` | the card table, 14 columns |
-| `2026_09_29_120200_add_character_card_id_to_training_runs_table` | the nullable run â†’ card reference |
+| Migration                                                          | Adds                                                      |
+| ------------------------------------------------------------------ | --------------------------------------------------------- |
+| `2026_09_29_120000_add_external_ref_to_umamusume_table`            | `umamusume.external_ref`, indexed, nullable, not unique   |
+| `2026_09_29_120100_create_character_cards_table`                   | the card table, 14 columns                                |
+| `2026_09_29_120200_add_character_card_id_to_training_runs_table`   | the nullable run â†’ card reference                       |
 
 **Sources.** `config/uma.php` declares four, of which this slice added one:
 
-| Key | Document | Added by |
-|---|---|---|
-| `gametora-characters` | `character-cards.<hash>.json` (trainee grain) | pre-existing |
-| `gametora-character-cards` | the same document, card grain | this slice |
-| `gametora-race-catalog` | `race_instances.<hash>.json` | this slice |
-| `gametora-skills` | `skills.<hash>.json`, manifest-resolved | `ADR-0011`, already on master |
+| Key                          | Document                                        | Added by                        |
+| ---------------------------- | ----------------------------------------------- | ------------------------------- |
+| `gametora-characters`        | `character-cards.<hash>.json` (trainee grain)   | pre-existing                    |
+| `gametora-character-cards`   | the same document, card grain                   | this slice                      |
+| `gametora-race-catalog`      | `race_instances.<hash>.json`                    | this slice                      |
+| `gametora-skills`            | `skills.<hash>.json`, manifest-resolved         | `ADR-0011`, already on master   |
 
 ---
 
@@ -4183,14 +4207,14 @@ files and the concurrent working-tree changes were disjoint, which was checked w
 
 Fetched live on 2026-09-29: `character-cards.e9e9ee6d.json`, HTTP 200, 251,294 bytes, 268 rows.
 
-| Measure | Export | Database | Agrees |
-|---|---|---|---|
-| Distinct `char_id` with a `release_en` | 68 | 68 `release_status = GlobalReleased` | yes |
-| `char_id` with no `release_en` | 67 | 67 `JapanOnly` | yes |
-| Rows carrying `release_en` | 107 | 107 cards | yes |
-| Total `char_id` across the whole export | 135 | 135 trainees | yes |
-| Cards flagged `is_debut_form` | â€” | 68 | one per Global trainee |
-| Cards flagged `unconfirmed` | â€” | **0** | see Â§4 |
+| Measure                                   | Export   | Database                               | Agrees                   |
+| ----------------------------------------- | -------- | -------------------------------------- | ------------------------ |
+| Distinct `char_id` with a `release_en`    | 68       | 68 `release_status = GlobalReleased`   | yes                      |
+| `char_id` with no `release_en`            | 67       | 67 `JapanOnly`                         | yes                      |
+| Rows carrying `release_en`                | 107      | 107 cards                              | yes                      |
+| Total `char_id` across the whole export   | 135      | 135 trainees                           | yes                      |
+| Cards flagged `is_debut_form`             | â€”      | 68                                     | one per Global trainee   |
+| Cards flagged `unconfirmed`               | â€”      | **0**                                  | see Â§4                  |
 
 Measured with `App\Models\Umamusume::where('release_status', â€¦)->count()` and
 `App\Models\CharacterCard::count()` against `database/database.sqlite`.
@@ -4263,9 +4287,12 @@ table predicted, because the data disagreed with the prediction.
 9. **No collapse control.** The row count is the reason; the fold-list duplication defect is what
    a second control would reintroduce.
 10. **One document is fetched twice**, once per grain, by two config entries. `ADR-0008` calls this
-    "the sentinel at two grains" and rules it acceptable; it is a real duplicate request, not an
-    accident.
-11. **JP per-card dates are not stored.** They are read to derive `is_debut_form` and dropped,
+```text
+"the sentinel at two grains" and rules it acceptable; it is a real duplicate request, not an
+accident.
+```
+
+ 1. **JP per-card dates are not stored.** They are read to derive `is_debut_form` and dropped,
     per `ADR-0008`.
 
 ---
@@ -4295,12 +4322,12 @@ two disagree on punctuation, and the factory is the one that drops it.
 
 Measured over 200 sampled client-named skills: **119 produce a different key**. Examples:
 
-| Name | Factory key | Normalizer key |
-|---|---|---|
-| `Warning Shot!` | `warningshot` | `warningshot!` |
-| `Empress's Pride` | `empressspride` | `empress'spride` |
-| `1st Place Kissâ˜†` | `1stplacekiss` | `1stplacekissâ˜†` |
-| `Class Rep + Speed = Bakushin` | `classrepspeedbakushin` | `classrep+speed=bakushin` |
+| Name                             | Factory key               | Normalizer key              |
+| -------------------------------- | ------------------------- | --------------------------- |
+| `Warning Shot!`                  | `warningshot`             | `warningshot!`              |
+| `Empress's Pride`                | `empressspride`           | `empress'spride`            |
+| `1st Place Kissâ˜†`              | `1stplacekiss`            | `1stplacekissâ˜†`           |
+| `Class Rep + Speed = Bakushin`   | `classrepspeedbakushin`   | `classrep+speed=bakushin`   |
 
 Over 135 trainee names, 3 differ (`Mr. C.B.`, `K.S.Miracle`, `Curren Bouquetd'or`).
 
@@ -4315,13 +4342,13 @@ the same way. Filed as **KI-39**.
 (`NameNormalizer::FOLDED_CHARACTERS`). NFKD does not decompose the Latin ligature letters or the
 stroked letters, and none of them are in that list, so they survive into the match key:
 
-| Pair | Result |
-|---|---|
-| `Cafe` / `CafÃ©` | match |
-| `El Condor` / `El CÃ³ndor` | match |
-| `Tokai` / `TÅkai` | match |
-| `Straights` / `StrÃ¦ight` | **no match** |
-| `Odawara` / `Ã˜dawara` | **no match** |
+| Pair                         | Result         |
+| ---------------------------- | -------------- |
+| `Cafe` / `CafÃ©`             | match          |
+| `El Condor` / `El CÃ³ndor`   | match          |
+| `Tokai` / `TÅkai`            | match          |
+| `Straights` / `StrÃ¦ight`    | **no match**   |
+| `Odawara` / `Ã˜dawara`       | **no match**   |
 
 Severity is low today and the measurement is what makes that claim rather than an assumption:
 `Ã¦` appears 375 times in the export, but only in `name_tw` (144 rows), `title_tw` (81), `title_jp`
@@ -4350,32 +4377,32 @@ confirmed closed (`Unable to connect to the remote server`) before the gates ran
 
 #### 7.1 Selector, `http://127.0.0.1:8099/training-runs/create`
 
-| Input | Observed | Expected | |
-|---|---|---|---|
-| (empty) | 10 options, `10 of 107 (keep typing)`, newest first, grouped by trainee | same | pass |
-| `F` | 10 options, `10 of 14 (keep typing)` | see Â§5.3 | deviation |
-| `Fe` | 0 options, "No trainee or card found." | same | pass |
-| `Fenomeno` | 0 options, "No trainee or card found." | same | pass |
-| `Fu` | Fuji Kiseki group with `[Shooting Star Revue]`, `[SuccÃ¨s Ã‰toilÃ©]`; also Agnes Digital `[Full-Color Fangirling]` | Fuji Kiseki + her forms | pass |
-| `RUN` | `[RUN! RUIN! LAUNCHER!]` and `[Run & Win]` | the former under Gold Ship | pass |
-| `fenomeno` | 0 options | same as `Fenomeno` | pass |
-| `ã‚¹ãƒšã‚·ãƒ£ãƒ«` | 3 options, `3 matches`, one group `Special Week ã‚¹ãƒšã‚·ãƒ£ãƒ«ã‚¦ã‚£ãƒ¼ã‚¯` | Special Week + her three forms | pass |
-| `zzz` | 0 options, "No trainee or card found." | same | pass |
+| Input               | Observed                                                                                                             | Expected                         |             |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ----------- |
+| (empty)             | 10 options, `10 of 107 (keep typing)`, newest first, grouped by trainee                                              | same                             | pass        |
+| `F`                 | 10 options, `10 of 14 (keep typing)`                                                                                 | see Â§5.3                        | deviation   |
+| `Fe`                | 0 options, "No trainee or card found."                                                                               | same                             | pass        |
+| `Fenomeno`          | 0 options, "No trainee or card found."                                                                               | same                             | pass        |
+| `Fu`                | Fuji Kiseki group with `[Shooting Star Revue]`, `[SuccÃ¨s Ã‰toilÃ©]`; also Agnes Digital `[Full-Color Fangirling]`   | Fuji Kiseki + her forms          | pass        |
+| `RUN`               | `[RUN! RUIN! LAUNCHER!]` and `[Run & Win]`                                                                           | the former under Gold Ship       | pass        |
+| `fenomeno`          | 0 options                                                                                                            | same as `Fenomeno`               | pass        |
+| `ã‚¹ãƒšã‚·ãƒ£ãƒ«`   | 3 options, `3 matches`, one group `Special Week ã‚¹ãƒšã‚·ãƒ£ãƒ«ã‚¦ã‚£ãƒ¼ã‚¯`                                         | Special Week + her three forms   | pass        |
+| `zzz`               | 0 options, "No trainee or card found."                                                                               | same                             | pass        |
 
 Screenshot: `docs/design-research/verification/task13-f-query.png` (the `F` query with its
 `10 of 14` line and the trainee group headers).
 
 #### 7.2 Keyboard and ARIA (G-11)
 
-| Path | Observed |
-|---|---|
-| ArrowDown Ã—1 from open | `aria-activedescendant` â†’ `trainee-option-8` |
-| ArrowDown Ã—2 | â†’ `trainee-option-73` |
-| ArrowUp from the first option | wraps to the **last** (`trainee-option-99`) |
-| ArrowDown past the last | wraps to the **first** (`trainee-option-107`) |
-| Enter | label becomes `Fuji Kiseki Â· [SuccÃ¨s Ã‰toilÃ©]`, `aria-expanded` â†’ `false`, and **both** hidden fields set: `umamusume_id=5`, `character_card_id=73` |
-| Escape | popup closes, `aria-expanded` â†’ `false`, **input value left as typed** |
-| Focus with no click | `aria-expanded` â†’ `true`, 10 options rendered |
+| Path                            | Observed                                                                                                                                                   |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ArrowDown Ã—1 from open         | `aria-activedescendant` â†’ `trainee-option-8`                                                                                                             |
+| ArrowDown Ã—2                   | â†’ `trainee-option-73`                                                                                                                                    |
+| ArrowUp from the first option   | wraps to the **last** (`trainee-option-99`)                                                                                                                |
+| ArrowDown past the last         | wraps to the **first** (`trainee-option-107`)                                                                                                              |
+| Enter                           | label becomes `Fuji Kiseki Â· [SuccÃ¨s Ã‰toilÃ©]`, `aria-expanded` â†’ `false`, and **both** hidden fields set: `umamusume_id=5`, `character_card_id=73`   |
+| Escape                          | popup closes, `aria-expanded` â†’ `false`, **input value left as typed**                                                                                   |
+| Focus with no click             | `aria-expanded` â†’ `true`, 10 options rendered                                                                                                            |
 
 Attributes on the input: `role="combobox"`, `aria-controls="trainee-listbox"`,
 `aria-autocomplete="list"`, `aria-activedescendant` tracking and flipping correctly.
@@ -4385,24 +4412,24 @@ trainees remains in the DOM, disabled by the script when the script runs.
 
 #### 7.3 Catalog and selector cannot disagree
 
-| Check | Result |
-|---|---|
-| Selector's option count vs catalog | both read the same 107 cards from the same payload query |
-| H1-equivalent count | "Showing 1 to 10 of **68** results" â€” equals the export's distinct Global `char_id` |
-| `?search=ruin` | HTTP 200, exactly 1 trainee (`Gold Ship`), 2 card titles |
-| Debut leads every card list | Inari One renders `[Edomurasaki]` (debut, May 28 2026) before `[Golden Dream]` (Sep 7 2026) |
-| Gold Ship order | `[Red Strife]` (Jun 26 2025) before `[RUN! RUIN! LAUNCHER!]` (Jul 2 2026), debut first |
+| Check                                | Result                                                                                        |
+| ------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Selector's option count vs catalog   | both read the same 107 cards from the same payload query                                      |
+| H1-equivalent count                  | "Showing 1 to 10 of **68** results" â€” equals the export's distinct Global `char_id`         |
+| `?search=ruin`                       | HTTP 200, exactly 1 trainee (`Gold Ship`), 2 card titles                                      |
+| Debut leads every card list          | Inari One renders `[Edomurasaki]` (debut, May 28 2026) before `[Golden Dream]` (Sep 7 2026)   |
+| Gold Ship order                      | `[Red Strife]` (Jun 26 2025) before `[RUN! RUIN! LAUNCHER!]` (Jul 2 2026), debut first        |
 
 #### 7.4 C-6 against the new query shape
 
 30 sequential requests to `/umamusume`, `Stopwatch` around each:
 
-```
+```text
 min    = 115.8 ms
 median = 135.4 ms
 p95    = 242.1 ms
 max    = 329.2 ms
-```
+```text
 
 **Median 135.4 ms against C-6's 200 ms budget**, measured on `php artisan serve` â€” a single-worker
 development server with no opcache, which is slower than any deployment this tool has. The honest
@@ -4415,16 +4442,16 @@ size, with one eager card load per page of 10 trainees. **The 1,000-row budget i
 
 Run in `CONSTRAINTS.md`'s order, on the merged tree.
 
-| Gate | Result |
-|---|---|
-| `vendor/bin/pint --dirty --format agent` | `{"tool":"pint","result":"passed"}` |
-| `vendor/bin/pint --test --format agent` | `{"tool":"pint","result":"passed"}` |
-| `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` | `[OK] No errors` |
-| `php artisan test --compact` | **782 passed, 2 skipped**, 2715 assertions, 85.06s |
-| `composer lore` | 115 hits, 57 exempt lines |
-| `composer lore-code` | 8 hits |
-| `composer audit` | No security vulnerability advisories found |
-| `npm audit --omit=dev` | found 0 vulnerabilities |
+| Gate                                                           | Result                                               |
+| -------------------------------------------------------------- | ---------------------------------------------------- |
+| `vendor/bin/pint --dirty --format agent`                       | `{"tool":"pint","result":"passed"}`                  |
+| `vendor/bin/pint --test --format agent`                        | `{"tool":"pint","result":"passed"}`                  |
+| `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`   | `[OK] No errors`                                     |
+| `php artisan test --compact`                                   | **782 passed, 2 skipped**, 2715 assertions, 85.06s   |
+| `composer lore`                                                | 115 hits, 57 exempt lines                            |
+| `composer lore-code`                                           | 8 hits                                               |
+| `composer audit`                                               | No security vulnerability advisories found           |
+| `npm audit --omit=dev`                                         | found 0 vulnerabilities                              |
 
 `make lore` is unavailable on this host (GNU make absent â€” the `KI-4` gap the plan itself records),
 so the lore gate was run as `composer lore`, which is the same `tools/lore.php` the Makefile target
@@ -4442,20 +4469,20 @@ the counts that failed to hold; the current suite skips 2, both Playwright-drive
 
 #### C-5, on the scratch file
 
-```
+```text
 migrate:fresh --seed   â†’ UmamusumeSeeder, SkillSeeder, ScenarioSlotSeeder all DONE
 migrate:rollback --step=3
   2026_09_29_120200_add_character_card_id_to_training_runs_table   44.90ms DONE
   2026_09_29_120100_create_character_cards_table                     4.05ms DONE
   2026_09_29_120000_add_external_ref_to_umamusume_table            15.68ms DONE
-```
+```text
 
 Re-migrated, then rolled back four to reach `ADR-0011`'s migration, whose `down()` is the only one
 here that drops an index, a unique constraint and nine columns together:
 
-```
+```text
   2026_09_29_021157_add_reference_fields_to_skills_table            62.80ms DONE
-```
+```text
 
 Scratch file deleted. Shared `database/database.sqlite` re-verified after: 135 trainees, 107 cards.
 
@@ -4493,7 +4520,6 @@ Scratch file deleted. Shared `database/database.sqlite` re-verified after: 135 t
 
 ## docs/deprecated/data/2026-09-29-global-roster-crosscheck.md
 
-
 **Dated observation, read 2026-09-29.** This file records what the two Tier A witnesses said on
 that day, not what they say now: banner cycles move, and a card listed `N/A` today carries a date
 the next time the page is edited. Read it as a snapshot with the same standing as the engine's
@@ -4507,11 +4533,11 @@ confirmation **deep** â€” all of them, not a spot-check â€” and this f
 
 ### Sources
 
-| Role | Tier | Page | Read |
-|---|---|---|---|
-| Tier B dataset | [B] | `https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json` | 2026-09-29 UTC |
-| Tier A witness | [A] | `https://umamusu.wiki/Game:List_of_Trainees` | 2026-09-29 UTC |
-| Tier A witness | [A] | `https://game8.co/games/Umamusume-Pretty-Derby/archives/535926` | 2026-09-29 UTC |
+| Role             | Tier   | Page                                                                  | Read             |
+| ---------------- | ------ | --------------------------------------------------------------------- | ---------------- |
+| Tier B dataset   | [B]    | `https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json`   | 2026-09-29 UTC   |
+| Tier A witness   | [A]    | `https://umamusu.wiki/Game:List_of_Trainees`                          | 2026-09-29 UTC   |
+| Tier A witness   | [A]    | `https://game8.co/games/Umamusume-Pretty-Derby/archives/535926`       | 2026-09-29 UTC   |
 
 The GameTora URL was re-resolved the same day through the publisher's manifest
 (`https://gametora.com/data/manifests/umamusume.json`), which reported
@@ -4532,15 +4558,15 @@ than linked: naive link handling drops everything before it.
 
 ### What was measured, before any comparison
 
-```
+```text
 rows=268 global=107 trainees=68
-```
+```text
 
 over `research-scratch/data/json/character-cards.json`, 251,294 bytes, by
 
 ```bash
 php -r '$r=json_decode(file_get_contents("research-scratch/data/json/character-cards.json"),true); printf("rows=%d global=%d trainees=%d\n",count($r),count(array_filter($r,fn($c)=>is_string($c["release_en"]??null))),count(array_unique(array_column(array_filter($r,fn($c)=>is_string($c["release_en"]??null)),"char_id"))));'
-```
+```text
 
 `global=107` is the population this file cross-checks: **107 cards over 68 trainees**, out of 268
 rows in the export. The remaining 161 rows carry no `release_en`, are `[JP-Only]`, and are out of
@@ -4636,135 +4662,135 @@ Generated by `php tools/roster-crosscheck.php > docs/data/roster-crosscheck-tabl
 are embedded here so this file reads on its own. `not listed` means that page carries no row for the
 card at all; `N/A` is the wiki's own cell.
 
-| card_id | GameTora title | Game8 title | umamusu.wiki title | GameTora date | Tier A date | rarity | verdict |
-|---|---|---|---|---|---|---|---|
-| 100101 | [Special Dreamer] | Special Dreamer | Special Dreamer | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 100102 | [Hopp'nâ™ªHappy Heart] | Hopp'nâ™ªHappy Heart | Hopp'nâ™ªHappy Heart | 2025-10-14 | 2025-10-14 | 3 | two-source-confirmed |
-| 100201 | [Innocent Silence] | Innocent Silence | Innocent Silence | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 100301 | [Peak Joy] | Peak Joy | Peak Joy | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 100302 | [Beyond the Horizon] | Beyond the Horizon | Beyond the Horizon | 2025-07-16 | 2025-07-16 | 3 | two-source-confirmed |
-| 100401 | [Formula R] | Formula R | Formula R | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 100402 | [Hotâ˜†Summer Night] | Hotâ˜†Summer Night | Hotâ˜†Summer Night | 2025-10-14 | 2025-10-14 | 3 | two-source-confirmed |
-| 100501 | [Shooting Star Revue] | Shooting Star Revue | Shooting Star Revue | 2025-10-02 | 2025-10-02 | 3 | two-source-confirmed |
-| 100601 | [Starlight Beat] | Starlight Beat | Starlight Beat | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 100701 | [Red Strife] | Red Strife | Red Strife | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 100801 | [Wild Top Gear] | Wild Top Gear | Wild Top Gear | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 100901 | [Peak Blue] | Peak Blue | Peak Blue | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 101001 | [Wild Frontier] | Wild Frontier | Wild Frontier | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 101101 | [Stone-Piercing Blue] | Stone-Piercing Blue | Stone-Piercing Blue | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 101102 | [Saintly Jade Cleric] | Saintly Jade Cleric | Saintly Jade Cleric | 2025-09-21 | 2025-09-21 | 3 | two-source-confirmed |
-| 101201 | [Azure Amazon] | Azure Amazon | Azure Amazon | 2025-09-17 | 2025-09-17 | 3 | two-source-confirmed |
-| 101301 | [Frontline Elegance] | Frontline Elegance | Frontline Elegance | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 101302 | [End of the Skies] | End of the Skies | End of the Skies | 2025-07-16 | 2025-07-16 | 3 | two-source-confirmed |
-| 101401 | [Elâ˜†NÃºmero 1] | El Numero 1 | Elâ˜†NÃºmero 1 | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 101402 | [Kukulkan Warrior] | Kukulkan Warrior | Kukulkan Warrior | 2025-09-21 | 2025-09-21 | 3 | two-source-confirmed |
-| 101501 | [O Sole Suo!] | O Sole Suo! | O Sole Suo! | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 101601 | [Maverick] | Maverick | Maverick | 2025-08-20 | 2025-08-20 | 3 | two-source-confirmed |
-| 101701 | [Emperor's Path] | Emperor's Path | Emperor's Path | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 101801 | [Empress Road] | Empress Road | Empress Road | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 101802 | [Quercus Civilis] | Quercus Civilis | Quercus Civilis | 2025-08-28 | 2025-08-28 | 3 | two-source-confirmed |
-| 101901 | [Full-Color Fangirling] | Full-Color Fangirling | Full-Color Fangirling | 2025-11-19 | 2025-11-19 | 3 | two-source-confirmed |
-| 102001 | [Reeling in the Big One] | Reeling in the Big One | Reeling in the Big One | 2025-09-07 | 2025-09-07 | 3 | two-source-confirmed |
-| 102301 | [pf. Winning Equation...] | pf. Winning Equation... | pf. Winning Equation... | 2025-07-10 | 2025-07-10 | 3 | two-source-confirmed |
-| 102401 | [Scrambleâ˜†Zone] | Scramble Zone | Scrambleâ˜†Zone | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 102402 | [Sunlight Bouquet] | Sunlight Bouquet | Sunlight Bouquet | 2025-08-28 | 2025-08-28 | 3 | two-source-confirmed |
-| 102601 | [MB-19890425] | MB-19890425 | MB-19890425 | 2025-07-02 | 2025-07-02 | 3 | two-source-confirmed |
-| 102701 | [Down the Line] | Down the Line | Down the Line | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 102801 | [Buono â˜† Alla Moda] | Buonoâ˜†Alla Moda | Buono â˜† Alla Moda | 2025-11-11 | 2025-11-11 | 3 | two-source-confirmed |
-| 103001 | [Rosy Dreams] | Rosy Dreams | Rosy Dreams | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 103201 | [tach-nology] | Tach-nology | tach-nology | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 103501 | [Get to Winning!] | Get to Winning! | Get to Winning! | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 103701 | [Meisterschaft] | Meisterschaft | Meisterschaft | 2025-10-30 | 2025-10-30 | 3 | two-source-confirmed |
-| 103801 | [Fille Ã‰clair] | Fille Ã‰clair | Fille Ã‰clair | 2025-07-27 | 2025-07-27 | 3 | two-source-confirmed |
-| 104001 | [Authentic / 1928] | Authentic / 1928 | Authentic / 1928 | 2025-10-07 | 2025-10-07 | 3 | two-source-confirmed |
-| 104101 | [Blossom in Learning] | Blossom in Learning | Blossom in Learning | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 104501 | [Murmuring Stream] | Murmuring Stream | Murmuring Stream | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 104601 | [LOVEâ˜†4EVER] | LOVEâ˜†4EVER | LOVEâ˜†4EVER | 2025-08-11 | 2025-08-11 | 3 | two-source-confirmed |
-| 105001 | [Nevertheless] | Nevertheless | Nevertheless | 2025-08-03 | 2025-08-03 | 3 | two-source-confirmed |
-| 105201 | [Bestest Prize â™ª] | Bestest Prize | Bestest Prize â™ª | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 105601 | [Risingâ˜†Fortune] | Rising Fortune | Risingâ˜†Fortune | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 105602 | [Lucky Tidings] | Lucky Tidings | Lucky Tidings | 2025-11-06 | 2025-11-06 | 3 | two-source-confirmed |
-| 105801 | [Turbulent Blue] | Turbulent Blue | Turbulent Blue | 2025-10-21 | 2025-10-21 | 3 | two-source-confirmed |
-| 106001 | [Poinsettia Ribbon] | Poinsettia Ribbon | Poinsettia Ribbon | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 106101 | [King of Emeralds] | King of Emeralds | King of Emeralds | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 103002 | [Vampire Makeover!] | Vampire Makeover! | Vampire Makeover! | 2025-11-24 | 2025-11-24 | 3 | two-source-confirmed |
-| 104502 | [Chiffon-Wrapped Mummy] | Chiffon-Wrapped Mummy | Chiffon-Wrapped Mummy | 2025-11-24 | 2025-11-24 | 3 | two-source-confirmed |
-| 103901 | [Princess of Pink] | Princess of Pink | Princess of Pink | 2025-12-01 | 2025-12-01 | 3 | two-source-confirmed |
-| 102501 | [Creeping Shadow] | Creeping Shadow | Creeping Shadow | 2025-12-08 | 2025-12-08 | 3 | two-source-confirmed |
-| 101702 | [Archer by Moonlight] | Archer by Moonlight | Archer by Moonlight | 2025-12-14 | 2025-12-14 | 3 | two-source-confirmed |
-| 104002 | [Autumn Cosmos] | Autumn Cosmos | Autumn Cosmos | 2025-12-14 | 2025-12-14 | 3 | two-source-confirmed |
-| 104801 | [Jokester â˜† Vibes] | Jokester â˜† Vibes | Jokester â˜† Vibes | 2025-12-18 | 2025-12-18 | 3 | two-source-confirmed |
-| 105901 | [Off the Line] | Off the Line | Off the Line | 2025-12-28 | 2025-12-28 | 3 | two-source-confirmed |
-| 100602 | [Ashen Miracle] | Ashen Miracle | Ashen Miracle | 2026-01-05 | 2026-01-05 | 3 | two-source-confirmed |
-| 102302 | [Rouge Caroler] | Rouge Caroler | Rouge Caroler | 2026-01-05 | 2026-01-05 | 3 | two-source-confirmed |
-| 102201 | [Noble Seamair] | Noble Seamair | Noble Seamair | 2026-01-15 | 2026-01-15 | 3 | two-source-confirmed |
-| 102101 | [Fast as Lightning] | Fast as Lightning | Fast as Lightning | 2026-01-22 | 2026-01-22 | 3 | two-source-confirmed |
-| 101502 | [New Year, Same Radiance!] | New Year, Same Radiance! | New Year, Same Radiance! | 2026-01-29 | 2026-01-29 | 3 | two-source-confirmed |
-| 105202 | [New Year â™ª New Urara!] | New Year â™ª New Urara! | New Year â™ª New Urara! | 2026-01-29 | 2026-01-29 | 3 | two-source-confirmed |
-| 106901 | [Strength in Full Bloom] | Strength in Full Bloom | Strength in Full Bloom | 2026-02-11 | 2026-02-11 | 3 | two-source-confirmed |
-| 102602 | [CODE: ICING] | CODE: ICING | CODE: ICING | 2026-02-18 | 2026-02-18 | 3 | two-source-confirmed |
-| 103702 | [Precise Chocolatier] | Precise Chocolatier | Precise Chocolatier | 2026-02-18 | 2026-02-18 | 3 | two-source-confirmed |
-| 107101 | [Crystalline] | Crystalline | Crystalline | 2026-02-25 | 2026-02-25 | 3 | two-source-confirmed |
-| 103301 | [Starry Nocturne] | Starry Nocturne | Starry Nocturne | 2026-03-05 | 2026-03-05 | 3 | two-source-confirmed |
-| 106201 | [Clippety-Tippety-Clop] | Clippety Tippety Clop | Clippety-Tippety-Clop | 2026-03-12 | 2026-03-12 | 2 | two-source-confirmed |
-| 106801 | [Gilded Shrine to Glory] | Gilded Shrine to Glory | Gilded Shrine to Glory | 2026-03-12 | 2026-03-12 | 3 | two-source-confirmed |
-| 106701 | [Natural Brilliance] | Natural Brilliance | Natural Brilliance | 2026-03-22 | 2026-03-22 | 3 | two-source-confirmed |
-| 107401 | [Brunissage Line] | Brunissage Line | Brunissage Line | 2026-03-26 | 2026-03-26 | 3 | two-source-confirmed |
-| 100502 | [SuccÃ¨s Ã‰toilÃ©] | SuccÃ¨s Ã‰toilÃ© | SuccÃ¨s Ã‰toilÃ© | 2026-04-05 | 2026-04-05 | 3 | two-source-confirmed |
-| 102002 | [SoirÃ©e des Chatons] | SoirÃ©e des Chatons | SoirÃ©e des Chatons | 2026-04-05 | 2026-04-05 | 3 | two-source-confirmed |
-| 105101 | [Layered Petals] | Layered Petals | Layered Petals | 2026-04-12 | 2026-04-12 | 3 | two-source-confirmed |
-| 107201 | [Blazed Head, Covered Fists] | Blazed Head, Covered Fists | Blazed Head, Covered Fists | 2026-04-20 | 2026-04-20 | 3 | two-source-confirmed |
-| 106002 | [Run & Win] | Run & Win | Run & Win | 2026-04-26 | 2026-04-26 | 3 | two-source-confirmed |
-| 106102 | [Cheerleader in Noble White] | Cheerleader in Noble White | Cheerleader in Noble White | 2026-04-26 | 2026-04-26 | 3 | two-source-confirmed |
-| 103101 | [Always Electrifying] | Always Electrifying | Always Electrifying | 2026-04-30 | 2026-04-30 | 3 | two-source-confirmed |
-| 106401 | [Line Breakthrough] | Line Breakthrough | Line Breakthrough | 2026-05-10 | 2026-05-10 | 3 | two-source-confirmed |
-| 102202 | [Titania] | Titania | Titania | 2026-05-18 | 2026-05-18 | 3 | two-source-confirmed |
-| 103802 | [Ma ChÃ©rie of the New Moon] | Ma ChÃ©rie of the New Moon | Ma ChÃ©rie of the New Moon | 2026-05-18 | 2026-05-18 | 3 | two-source-confirmed |
-| 103401 | [Edomurasaki] | Edomurasaki | Edomurasaki | 2026-05-28 | 2026-05-28 | 3 | two-source-confirmed |
-| 104401 | [Platanus Witch] | Platanus Witch | Platanus Witch | 2026-06-04 | 2026-06-04 | 3 | two-source-confirmed |
-| 101002 | [Bubblegumâ˜†Memories] | Bubblegum â˜†Memories | Bubblegumâ˜†Memories | 2026-06-11 | 2026-06-11 | 3 | two-source-confirmed |
-| 105902 | [Sapphire Sojourn] | Sapphire Sojourn | Sapphire Sojourn | 2026-06-11 | 2026-06-11 | 3 | two-source-confirmed |
-| 103601 | [unsigned] | unsigned | unsigned | 2026-06-18 | 2026-06-18 | 3 | two-source-confirmed |
-| 100103 | [Ruler of Japan] | Ruler of Japan | Ruler of Japan | 2026-06-25 | N/A | 3 | conflict |
-| 100702 | [RUN! RUIN! LAUNCHER!] | not listed | RUN! RUIN! LAUNCHER! | 2026-07-02 | 2026-07-02 | 3 | single-source |
-| 101303 | [Fair Lady of the Waves] | not listed | Fair Lady of the Waves | 2026-07-02 | 2026-07-02 | 3 | single-source |
-| 105301 | [Iron Ambition] | Iron Ambition | Iron Ambition | 2026-07-07 | 2026-07-07 | 3 | two-source-confirmed |
-| 109801 | [Eightfoldâ˜†Fortune] | Eightfold â˜†Fortune | Eightfoldâ˜†Fortune | 2026-07-16 | 2026-07-16 | 3 | two-source-confirmed |
-| 104602 | [Twilight Triumph] | Twilight Triumph | Twilight Triumph | 2026-07-22 | 2026-07-22 | 3 | two-source-confirmed |
-| 103502 | [Dream Deliverer] | Dream Deliverer | Dream Deliverer | 2026-07-27 | 2026-07-27 | 3 | two-source-confirmed |
-| 105002 | [Difference Engineer] | Difference Engineer | Difference Engineer | 2026-07-27 | 2026-07-27 | 3 | two-source-confirmed |
-| 102901 | [Darl'n Snowflake] | Darl'n Snowflake | Darl'n Snowflake | 2026-08-05 | 2026-08-05 | 3 | two-source-confirmed |
-| 104201 | [Rocketâ˜†Star] | Rocketâ˜†Star | Rocketâ˜†Star | 2026-08-12 | 2026-08-12 | 3 | two-source-confirmed |
-| 101902 | [Fanaticâ™¡Jiangshi] | Fanaticâ™¡ Jiangshi | Fanaticâ™¡Jiangshi | 2026-08-18 | 2026-08-18 | 3 | two-source-confirmed |
-| 105802 | [Dot-o'-Lantern] | Dot-o'-Lantern | Dot-o'-Lantern | 2026-08-18 | 2026-08-18 | 3 | two-source-confirmed |
-| 108701 | [Flare] | Flare | Flare | 2026-08-25 | 2026-08-25 | 3 | two-source-confirmed |
-| 107801 | [Fluttertail Spirit] | Fluttertail Spirit | Fluttertail Spirit | 2026-09-01 | 2026-09-01 | 3 | two-source-confirmed |
-| 102102 | [Raging Thunder] | Raging Thunder | Raging Thunder | 2026-09-07 | 2026-09-07 | 3 | two-source-confirmed |
-| 103402 | [Golden Dream] | Golden Dream | Golden Dream | 2026-09-07 | 2026-09-07 | 3 | two-source-confirmed |
-| 104901 | [Desperate Measures] | Desperate Measures | Desperate Measures | 2026-09-15 | 2026-09-15 | 3 | two-source-confirmed |
-| 110001 | [Butterfly Sting] | Butterfly Sting | Butterfly Sting | 2026-09-24 | 2026-09-23 | 3 | conflict |
-| 100802 | [Fiery Aqua Vitae] | Fiery Aqua Vitae | Fiery Aqua Vitae | 2026-09-28 | N/A | 3 | conflict |
-| 100902 | [Nuit Ã‰toilÃ©e de Scarlet] | Nuit Ã‰toilÃ©e de Scarlet | Nuit Ã‰toilÃ©e de Scarlet | 2026-09-28 | N/A | 3 | conflict |
+| card_id   | GameTora title                 | Game8 title                  | umamusu.wiki title           | GameTora date   | Tier A date   | rarity   | verdict                |
+| --------- | ------------------------------ | ---------------------------- | ---------------------------- | --------------- | ------------- | -------- | ---------------------- |
+| 100101    | [Special Dreamer]              | Special Dreamer              | Special Dreamer              | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 100102    | [Hopp'nâ™ªHappy Heart]         | Hopp'nâ™ªHappy Heart         | Hopp'nâ™ªHappy Heart         | 2025-10-14      | 2025-10-14    | 3        | two-source-confirmed   |
+| 100201    | [Innocent Silence]             | Innocent Silence             | Innocent Silence             | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 100301    | [Peak Joy]                     | Peak Joy                     | Peak Joy                     | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 100302    | [Beyond the Horizon]           | Beyond the Horizon           | Beyond the Horizon           | 2025-07-16      | 2025-07-16    | 3        | two-source-confirmed   |
+| 100401    | [Formula R]                    | Formula R                    | Formula R                    | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 100402    | [Hotâ˜†Summer Night]           | Hotâ˜†Summer Night           | Hotâ˜†Summer Night           | 2025-10-14      | 2025-10-14    | 3        | two-source-confirmed   |
+| 100501    | [Shooting Star Revue]          | Shooting Star Revue          | Shooting Star Revue          | 2025-10-02      | 2025-10-02    | 3        | two-source-confirmed   |
+| 100601    | [Starlight Beat]               | Starlight Beat               | Starlight Beat               | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 100701    | [Red Strife]                   | Red Strife                   | Red Strife                   | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 100801    | [Wild Top Gear]                | Wild Top Gear                | Wild Top Gear                | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 100901    | [Peak Blue]                    | Peak Blue                    | Peak Blue                    | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 101001    | [Wild Frontier]                | Wild Frontier                | Wild Frontier                | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 101101    | [Stone-Piercing Blue]          | Stone-Piercing Blue          | Stone-Piercing Blue          | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 101102    | [Saintly Jade Cleric]          | Saintly Jade Cleric          | Saintly Jade Cleric          | 2025-09-21      | 2025-09-21    | 3        | two-source-confirmed   |
+| 101201    | [Azure Amazon]                 | Azure Amazon                 | Azure Amazon                 | 2025-09-17      | 2025-09-17    | 3        | two-source-confirmed   |
+| 101301    | [Frontline Elegance]           | Frontline Elegance           | Frontline Elegance           | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 101302    | [End of the Skies]             | End of the Skies             | End of the Skies             | 2025-07-16      | 2025-07-16    | 3        | two-source-confirmed   |
+| 101401    | [Elâ˜†NÃºmero 1]               | El Numero 1                  | Elâ˜†NÃºmero 1               | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 101402    | [Kukulkan Warrior]             | Kukulkan Warrior             | Kukulkan Warrior             | 2025-09-21      | 2025-09-21    | 3        | two-source-confirmed   |
+| 101501    | [O Sole Suo!]                  | O Sole Suo!                  | O Sole Suo!                  | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 101601    | [Maverick]                     | Maverick                     | Maverick                     | 2025-08-20      | 2025-08-20    | 3        | two-source-confirmed   |
+| 101701    | [Emperor's Path]               | Emperor's Path               | Emperor's Path               | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 101801    | [Empress Road]                 | Empress Road                 | Empress Road                 | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 101802    | [Quercus Civilis]              | Quercus Civilis              | Quercus Civilis              | 2025-08-28      | 2025-08-28    | 3        | two-source-confirmed   |
+| 101901    | [Full-Color Fangirling]        | Full-Color Fangirling        | Full-Color Fangirling        | 2025-11-19      | 2025-11-19    | 3        | two-source-confirmed   |
+| 102001    | [Reeling in the Big One]       | Reeling in the Big One       | Reeling in the Big One       | 2025-09-07      | 2025-09-07    | 3        | two-source-confirmed   |
+| 102301    | [pf. Winning Equation...]      | pf. Winning Equation...      | pf. Winning Equation...      | 2025-07-10      | 2025-07-10    | 3        | two-source-confirmed   |
+| 102401    | [Scrambleâ˜†Zone]              | Scramble Zone                | Scrambleâ˜†Zone              | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 102402    | [Sunlight Bouquet]             | Sunlight Bouquet             | Sunlight Bouquet             | 2025-08-28      | 2025-08-28    | 3        | two-source-confirmed   |
+| 102601    | [MB-19890425]                  | MB-19890425                  | MB-19890425                  | 2025-07-02      | 2025-07-02    | 3        | two-source-confirmed   |
+| 102701    | [Down the Line]                | Down the Line                | Down the Line                | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 102801    | [Buono â˜† Alla Moda]          | Buonoâ˜†Alla Moda            | Buono â˜† Alla Moda          | 2025-11-11      | 2025-11-11    | 3        | two-source-confirmed   |
+| 103001    | [Rosy Dreams]                  | Rosy Dreams                  | Rosy Dreams                  | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 103201    | [tach-nology]                  | Tach-nology                  | tach-nology                  | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 103501    | [Get to Winning!]              | Get to Winning!              | Get to Winning!              | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 103701    | [Meisterschaft]                | Meisterschaft                | Meisterschaft                | 2025-10-30      | 2025-10-30    | 3        | two-source-confirmed   |
+| 103801    | [Fille Ã‰clair]                | Fille Ã‰clair                | Fille Ã‰clair                | 2025-07-27      | 2025-07-27    | 3        | two-source-confirmed   |
+| 104001    | [Authentic / 1928]             | Authentic / 1928             | Authentic / 1928             | 2025-10-07      | 2025-10-07    | 3        | two-source-confirmed   |
+| 104101    | [Blossom in Learning]          | Blossom in Learning          | Blossom in Learning          | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 104501    | [Murmuring Stream]             | Murmuring Stream             | Murmuring Stream             | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 104601    | [LOVEâ˜†4EVER]                 | LOVEâ˜†4EVER                 | LOVEâ˜†4EVER                 | 2025-08-11      | 2025-08-11    | 3        | two-source-confirmed   |
+| 105001    | [Nevertheless]                 | Nevertheless                 | Nevertheless                 | 2025-08-03      | 2025-08-03    | 3        | two-source-confirmed   |
+| 105201    | [Bestest Prize â™ª]            | Bestest Prize                | Bestest Prize â™ª            | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 105601    | [Risingâ˜†Fortune]             | Rising Fortune               | Risingâ˜†Fortune             | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 105602    | [Lucky Tidings]                | Lucky Tidings                | Lucky Tidings                | 2025-11-06      | 2025-11-06    | 3        | two-source-confirmed   |
+| 105801    | [Turbulent Blue]               | Turbulent Blue               | Turbulent Blue               | 2025-10-21      | 2025-10-21    | 3        | two-source-confirmed   |
+| 106001    | [Poinsettia Ribbon]            | Poinsettia Ribbon            | Poinsettia Ribbon            | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 106101    | [King of Emeralds]             | King of Emeralds             | King of Emeralds             | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 103002    | [Vampire Makeover!]            | Vampire Makeover!            | Vampire Makeover!            | 2025-11-24      | 2025-11-24    | 3        | two-source-confirmed   |
+| 104502    | [Chiffon-Wrapped Mummy]        | Chiffon-Wrapped Mummy        | Chiffon-Wrapped Mummy        | 2025-11-24      | 2025-11-24    | 3        | two-source-confirmed   |
+| 103901    | [Princess of Pink]             | Princess of Pink             | Princess of Pink             | 2025-12-01      | 2025-12-01    | 3        | two-source-confirmed   |
+| 102501    | [Creeping Shadow]              | Creeping Shadow              | Creeping Shadow              | 2025-12-08      | 2025-12-08    | 3        | two-source-confirmed   |
+| 101702    | [Archer by Moonlight]          | Archer by Moonlight          | Archer by Moonlight          | 2025-12-14      | 2025-12-14    | 3        | two-source-confirmed   |
+| 104002    | [Autumn Cosmos]                | Autumn Cosmos                | Autumn Cosmos                | 2025-12-14      | 2025-12-14    | 3        | two-source-confirmed   |
+| 104801    | [Jokester â˜† Vibes]           | Jokester â˜† Vibes           | Jokester â˜† Vibes           | 2025-12-18      | 2025-12-18    | 3        | two-source-confirmed   |
+| 105901    | [Off the Line]                 | Off the Line                 | Off the Line                 | 2025-12-28      | 2025-12-28    | 3        | two-source-confirmed   |
+| 100602    | [Ashen Miracle]                | Ashen Miracle                | Ashen Miracle                | 2026-01-05      | 2026-01-05    | 3        | two-source-confirmed   |
+| 102302    | [Rouge Caroler]                | Rouge Caroler                | Rouge Caroler                | 2026-01-05      | 2026-01-05    | 3        | two-source-confirmed   |
+| 102201    | [Noble Seamair]                | Noble Seamair                | Noble Seamair                | 2026-01-15      | 2026-01-15    | 3        | two-source-confirmed   |
+| 102101    | [Fast as Lightning]            | Fast as Lightning            | Fast as Lightning            | 2026-01-22      | 2026-01-22    | 3        | two-source-confirmed   |
+| 101502    | [New Year, Same Radiance!]     | New Year, Same Radiance!     | New Year, Same Radiance!     | 2026-01-29      | 2026-01-29    | 3        | two-source-confirmed   |
+| 105202    | [New Year â™ª New Urara!]      | New Year â™ª New Urara!      | New Year â™ª New Urara!      | 2026-01-29      | 2026-01-29    | 3        | two-source-confirmed   |
+| 106901    | [Strength in Full Bloom]       | Strength in Full Bloom       | Strength in Full Bloom       | 2026-02-11      | 2026-02-11    | 3        | two-source-confirmed   |
+| 102602    | [CODE: ICING]                  | CODE: ICING                  | CODE: ICING                  | 2026-02-18      | 2026-02-18    | 3        | two-source-confirmed   |
+| 103702    | [Precise Chocolatier]          | Precise Chocolatier          | Precise Chocolatier          | 2026-02-18      | 2026-02-18    | 3        | two-source-confirmed   |
+| 107101    | [Crystalline]                  | Crystalline                  | Crystalline                  | 2026-02-25      | 2026-02-25    | 3        | two-source-confirmed   |
+| 103301    | [Starry Nocturne]              | Starry Nocturne              | Starry Nocturne              | 2026-03-05      | 2026-03-05    | 3        | two-source-confirmed   |
+| 106201    | [Clippety-Tippety-Clop]        | Clippety Tippety Clop        | Clippety-Tippety-Clop        | 2026-03-12      | 2026-03-12    | 2        | two-source-confirmed   |
+| 106801    | [Gilded Shrine to Glory]       | Gilded Shrine to Glory       | Gilded Shrine to Glory       | 2026-03-12      | 2026-03-12    | 3        | two-source-confirmed   |
+| 106701    | [Natural Brilliance]           | Natural Brilliance           | Natural Brilliance           | 2026-03-22      | 2026-03-22    | 3        | two-source-confirmed   |
+| 107401    | [Brunissage Line]              | Brunissage Line              | Brunissage Line              | 2026-03-26      | 2026-03-26    | 3        | two-source-confirmed   |
+| 100502    | [SuccÃ¨s Ã‰toilÃ©]             | SuccÃ¨s Ã‰toilÃ©             | SuccÃ¨s Ã‰toilÃ©             | 2026-04-05      | 2026-04-05    | 3        | two-source-confirmed   |
+| 102002    | [SoirÃ©e des Chatons]          | SoirÃ©e des Chatons          | SoirÃ©e des Chatons          | 2026-04-05      | 2026-04-05    | 3        | two-source-confirmed   |
+| 105101    | [Layered Petals]               | Layered Petals               | Layered Petals               | 2026-04-12      | 2026-04-12    | 3        | two-source-confirmed   |
+| 107201    | [Blazed Head, Covered Fists]   | Blazed Head, Covered Fists   | Blazed Head, Covered Fists   | 2026-04-20      | 2026-04-20    | 3        | two-source-confirmed   |
+| 106002    | [Run & Win]                    | Run & Win                    | Run & Win                    | 2026-04-26      | 2026-04-26    | 3        | two-source-confirmed   |
+| 106102    | [Cheerleader in Noble White]   | Cheerleader in Noble White   | Cheerleader in Noble White   | 2026-04-26      | 2026-04-26    | 3        | two-source-confirmed   |
+| 103101    | [Always Electrifying]          | Always Electrifying          | Always Electrifying          | 2026-04-30      | 2026-04-30    | 3        | two-source-confirmed   |
+| 106401    | [Line Breakthrough]            | Line Breakthrough            | Line Breakthrough            | 2026-05-10      | 2026-05-10    | 3        | two-source-confirmed   |
+| 102202    | [Titania]                      | Titania                      | Titania                      | 2026-05-18      | 2026-05-18    | 3        | two-source-confirmed   |
+| 103802    | [Ma ChÃ©rie of the New Moon]   | Ma ChÃ©rie of the New Moon   | Ma ChÃ©rie of the New Moon   | 2026-05-18      | 2026-05-18    | 3        | two-source-confirmed   |
+| 103401    | [Edomurasaki]                  | Edomurasaki                  | Edomurasaki                  | 2026-05-28      | 2026-05-28    | 3        | two-source-confirmed   |
+| 104401    | [Platanus Witch]               | Platanus Witch               | Platanus Witch               | 2026-06-04      | 2026-06-04    | 3        | two-source-confirmed   |
+| 101002    | [Bubblegumâ˜†Memories]         | Bubblegum â˜†Memories        | Bubblegumâ˜†Memories         | 2026-06-11      | 2026-06-11    | 3        | two-source-confirmed   |
+| 105902    | [Sapphire Sojourn]             | Sapphire Sojourn             | Sapphire Sojourn             | 2026-06-11      | 2026-06-11    | 3        | two-source-confirmed   |
+| 103601    | [unsigned]                     | unsigned                     | unsigned                     | 2026-06-18      | 2026-06-18    | 3        | two-source-confirmed   |
+| 100103    | [Ruler of Japan]               | Ruler of Japan               | Ruler of Japan               | 2026-06-25      | N/A           | 3        | conflict               |
+| 100702    | [RUN! RUIN! LAUNCHER!]         | not listed                   | RUN! RUIN! LAUNCHER!         | 2026-07-02      | 2026-07-02    | 3        | single-source          |
+| 101303    | [Fair Lady of the Waves]       | not listed                   | Fair Lady of the Waves       | 2026-07-02      | 2026-07-02    | 3        | single-source          |
+| 105301    | [Iron Ambition]                | Iron Ambition                | Iron Ambition                | 2026-07-07      | 2026-07-07    | 3        | two-source-confirmed   |
+| 109801    | [Eightfoldâ˜†Fortune]          | Eightfold â˜†Fortune         | Eightfoldâ˜†Fortune          | 2026-07-16      | 2026-07-16    | 3        | two-source-confirmed   |
+| 104602    | [Twilight Triumph]             | Twilight Triumph             | Twilight Triumph             | 2026-07-22      | 2026-07-22    | 3        | two-source-confirmed   |
+| 103502    | [Dream Deliverer]              | Dream Deliverer              | Dream Deliverer              | 2026-07-27      | 2026-07-27    | 3        | two-source-confirmed   |
+| 105002    | [Difference Engineer]          | Difference Engineer          | Difference Engineer          | 2026-07-27      | 2026-07-27    | 3        | two-source-confirmed   |
+| 102901    | [Darl'n Snowflake]             | Darl'n Snowflake             | Darl'n Snowflake             | 2026-08-05      | 2026-08-05    | 3        | two-source-confirmed   |
+| 104201    | [Rocketâ˜†Star]                | Rocketâ˜†Star                | Rocketâ˜†Star                | 2026-08-12      | 2026-08-12    | 3        | two-source-confirmed   |
+| 101902    | [Fanaticâ™¡Jiangshi]           | Fanaticâ™¡ Jiangshi          | Fanaticâ™¡Jiangshi           | 2026-08-18      | 2026-08-18    | 3        | two-source-confirmed   |
+| 105802    | [Dot-o'-Lantern]               | Dot-o'-Lantern               | Dot-o'-Lantern               | 2026-08-18      | 2026-08-18    | 3        | two-source-confirmed   |
+| 108701    | [Flare]                        | Flare                        | Flare                        | 2026-08-25      | 2026-08-25    | 3        | two-source-confirmed   |
+| 107801    | [Fluttertail Spirit]           | Fluttertail Spirit           | Fluttertail Spirit           | 2026-09-01      | 2026-09-01    | 3        | two-source-confirmed   |
+| 102102    | [Raging Thunder]               | Raging Thunder               | Raging Thunder               | 2026-09-07      | 2026-09-07    | 3        | two-source-confirmed   |
+| 103402    | [Golden Dream]                 | Golden Dream                 | Golden Dream                 | 2026-09-07      | 2026-09-07    | 3        | two-source-confirmed   |
+| 104901    | [Desperate Measures]           | Desperate Measures           | Desperate Measures           | 2026-09-15      | 2026-09-15    | 3        | two-source-confirmed   |
+| 110001    | [Butterfly Sting]              | Butterfly Sting              | Butterfly Sting              | 2026-09-24      | 2026-09-23    | 3        | conflict               |
+| 100802    | [Fiery Aqua Vitae]             | Fiery Aqua Vitae             | Fiery Aqua Vitae             | 2026-09-28      | N/A           | 3        | conflict               |
+| 100902    | [Nuit Ã‰toilÃ©e de Scarlet]    | Nuit Ã‰toilÃ©e de Scarlet    | Nuit Ã‰toilÃ©e de Scarlet    | 2026-09-28      | N/A           | 3        | conflict               |
 
 ### Counts, with the arithmetic
 
 Grep-verifiable against `docs/data/roster-crosscheck-table.md` (107 data rows, 1 header row, so
 `grep -c '^| '` returns 108):
 
-| verdict | rows |
-|---|---|
-| `two-source-confirmed` | 101 |
-| `single-source` | 2 |
-| `conflict` | 4 |
-| `unwitnessed` | 0 |
+| verdict                  | rows   |
+| ------------------------ | ------ |
+| `two-source-confirmed`   | 101    |
+| `single-source`          | 2      |
+| `conflict`               | 4      |
+| `unwitnessed`            | 0      |
 
 **101 + 2 + 4 + 0 = 107** â€” the whole Global population, nothing dropped, nothing sampled.
 
 Flag list this file hands to the apply step (`single-source` âˆª `conflict`, 6 cards):
 
-```
+```text
 100103, 100702, 100802, 100902, 101303, 110001
-```
+```text
 
 Under the brief's literal tier-1-only fold the same body reads
 **92 + 11 + 4 + 0 = 107**, and the flag list grows to those 6 plus the 9 spelling-variant cards
@@ -4776,7 +4802,7 @@ Both lines above are the tool's own, not prose derived by hand:
 ```bash
 php tools/roster-crosscheck.php --max-tier=3 > docs/data/roster-crosscheck-table.md   # 101 + 2 + 4 + 0
 php tools/roster-crosscheck.php --max-tier=1 2>&1 >/dev/null | head -1                # 92 + 11 + 4 + 0
-```
+```text
 
 `--max-tier` is the highest fold a witness may be matched on, so the tier-1 run is the brief's rule
 and the tier-3 run is the one this file's table comes from. `--max-tier` outside 1..3 exits 1 rather
@@ -4790,12 +4816,12 @@ page it came from.
 
 #### Global date conflicts (4) â€” `conflict`, `unconfirmed = true`
 
-| card_id | GameTora title | GameTora Global date | umamusu.wiki Global date | wiki row | Game8 |
-|---|---|---|---|---|---|
-| 100103 | `[Ruler of Japan]` | 2026-06-25 | `N/A` | wikitable body row 3 (of 268) | witnessed, table 2 row 6 cell 3 |
-| 100802 | `[Fiery Aqua Vitae]` | 2026-09-28 | `N/A` | wikitable body row 22 (of 268) | witnessed, table 1 row 2 cell 1 |
-| 100902 | `[Nuit Ã‰toilÃ©e de Scarlet]` | 2026-09-28 | `N/A` | wikitable body row 24 (of 268) | witnessed, table 1 row 3 cell 1 |
-| 110001 | `[Butterfly Sting]` | 2026-09-24 | `2026-09-23` | wikitable body row 218 (of 268) | witnessed, table 1 row 4 cell 1 |
+| card_id   | GameTora title                  | GameTora Global date   | umamusu.wiki Global date   | wiki row                          | Game8                             |
+| --------- | ------------------------------- | ---------------------- | -------------------------- | --------------------------------- | --------------------------------- |
+| 100103    | `[Ruler of Japan]`              | 2026-06-25             | `N/A`                      | wikitable body row 3 (of 268)     | witnessed, table 2 row 6 cell 3   |
+| 100802    | `[Fiery Aqua Vitae]`            | 2026-09-28             | `N/A`                      | wikitable body row 22 (of 268)    | witnessed, table 1 row 2 cell 1   |
+| 100902    | `[Nuit Ã‰toilÃ©e de Scarlet]`   | 2026-09-28             | `N/A`                      | wikitable body row 24 (of 268)    | witnessed, table 1 row 3 cell 1   |
+| 110001    | `[Butterfly Sting]`             | 2026-09-24             | `2026-09-23`               | wikitable body row 218 (of 268)   | witnessed, table 1 row 4 cell 1   |
 
 Three of these are the newest and second-newest Global dates in the export (`2026-09-28` is the
 maximum over all 107 rows, `2026-09-24` the next), and the wiki has not caught up; `100103` is the
@@ -4813,10 +4839,10 @@ H1 max-rarity claim is therefore crossed end to end at this hash.
 
 #### `single-source`: one Tier A page witnesses the card (2)
 
-| card_id | GameTora title | witnessing page | silent page |
-|---|---|---|---|
-| 100702 | `[RUN! RUIN! LAUNCHER!]` | umamusu.wiki, wikitable body row 19 (of 268) | Game8 â€” the page carries no tile for it at all (`RUIN` appears nowhere in the saved body) |
-| 101303 | `[Fair Lady of the Waves]` | umamusu.wiki, wikitable body row 35 (of 268) | Game8 â€” `Fair Lady` appears nowhere in the saved body |
+| card_id   | GameTora title               | witnessing page                                | silent page                                                                                   |
+| --------- | ---------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 100702    | `[RUN! RUIN! LAUNCHER!]`     | umamusu.wiki, wikitable body row 19 (of 268)   | Game8 â€” the page carries no tile for it at all (`RUIN` appears nowhere in the saved body)   |
+| 101303    | `[Fair Lady of the Waves]`   | umamusu.wiki, wikitable body row 35 (of 268)   | Game8 â€” `Fair Lady` appears nowhere in the saved body                                       |
 
 Both are witnessed by one Tier A page with a date and a rarity that agree with the export, and both
 are absent from the other page, which lists 105 of the 107. Absence from a page that is not a
@@ -4829,17 +4855,17 @@ Every one of these is a Game8 rendering; the wiki matched at tier 1 on all 107 c
 (96 of 107 are witnessed by **both** pages at tier 1 with no deeper fold; 9 needed one; the remaining
 2 have no Game8 row at all â€” 96 + 9 + 2 = 107).
 
-| card_id | GameTora (client string) | Game8 as printed | tier | Game8 row |
-|---|---|---|---|---|
-| 101401 | `[Elâ˜†NÃºmero 1]` | `El Numero 1` | 3 | table 3 row 2 cell 2 |
-| 102401 | `[Scrambleâ˜†Zone]` | `Scramble Zone` | 3 | table 3 row 1 cell 3 |
-| 102801 | `[Buono â˜† Alla Moda]` | `Buonoâ˜†Alla Moda` | 2 | table 2 row 19 cell 3 |
-| 105201 | `[Bestest Prize â™ª]` | `Bestest Prize` | 3 | table 4 row 2 cell 1 |
-| 105601 | `[Risingâ˜†Fortune]` | `Rising Fortune` | 3 | table 4 row 1 cell 3 |
-| 106201 | `[Clippety-Tippety-Clop]` | `Clippety Tippety Clop` | 2 | table 3 row 1 cell 1 |
-| 101002 | `[Bubblegumâ˜†Memories]` | `Bubblegum â˜†Memories` | 2 | table 2 row 7 cell 3 |
-| 109801 | `[Eightfoldâ˜†Fortune]` | `Eightfold â˜†Fortune` | 2 | table 2 row 6 cell 1 |
-| 101902 | `[Fanaticâ™¡Jiangshi]` | `Fanaticâ™¡ Jiangshi` | 2 | table 2 row 4 cell 1 |
+| card_id   | GameTora (client string)    | Game8 as printed          | tier   | Game8 row               |
+| --------- | --------------------------- | ------------------------- | ------ | ----------------------- |
+| 101401    | `[Elâ˜†NÃºmero 1]`          | `El Numero 1`             | 3      | table 3 row 2 cell 2    |
+| 102401    | `[Scrambleâ˜†Zone]`         | `Scramble Zone`           | 3      | table 3 row 1 cell 3    |
+| 102801    | `[Buono â˜† Alla Moda]`     | `Buonoâ˜†Alla Moda`       | 2      | table 2 row 19 cell 3   |
+| 105201    | `[Bestest Prize â™ª]`       | `Bestest Prize`           | 3      | table 4 row 2 cell 1    |
+| 105601    | `[Risingâ˜†Fortune]`        | `Rising Fortune`          | 3      | table 4 row 1 cell 3    |
+| 106201    | `[Clippety-Tippety-Clop]`   | `Clippety Tippety Clop`   | 2      | table 3 row 1 cell 1    |
+| 101002    | `[Bubblegumâ˜†Memories]`    | `Bubblegum â˜†Memories`   | 2      | table 2 row 7 cell 3    |
+| 109801    | `[Eightfoldâ˜†Fortune]`     | `Eightfold â˜†Fortune`    | 2      | table 2 row 6 cell 1    |
+| 101902    | `[Fanaticâ™¡Jiangshi]`      | `Fanaticâ™¡ Jiangshi`     | 2      | table 2 row 4 cell 1    |
 
 The brief predicted several of these as "genuine renames" â€” `Run! Fun! Watergun!` shipping as
 `[RUN! RUIN! LAUNCHER!]`. Measured at this hash, that rename is real and lives in the export's
@@ -4896,7 +4922,7 @@ SELECT card_id FROM character_cards WHERE is_manual = 1
 SELECT COUNT(*) FROM character_cards
  WHERE card_id IN (100103, 100702, 100802, 100902, 101303, 110001);      -- expect 6
 SELECT source_url, COUNT(*) FROM character_cards GROUP BY source_url;    -- expect one row: the e9e9ee6d URL under Sources
-```
+```text
 
 The last two are the checks the totals cannot do. A population can be exactly 107 rows and still be
 missing `100902`, because a hash rotation replaces cards as well as adding them â€” `COUNT(*)` agrees
@@ -4920,7 +4946,7 @@ UPDATE character_cards
        updated_at  = CURRENT_TIMESTAMP
  WHERE is_manual = 0
    AND card_id IN (100103, 100702, 100802, 100902, 101303, 110001);
-```
+```text
 
 Expected: **0 flagged â†’ 6 flagged** over 107 rows, `updated_at` moved on those 6 only. The
 `is_manual = 0` term is the FR-B-4 guard: a card the Trainer corrected by hand is hers, and a
@@ -4934,7 +4960,7 @@ UPDATE character_cards
        updated_at  = CURRENT_TIMESTAMP
  WHERE is_manual = 0
    AND card_id IN (100103, 100702, 100802, 100902, 101303, 110001);
-```
+```text
 
 Two properties worth knowing before running it:
 
@@ -4954,7 +4980,7 @@ with the 68 trainees and all 107 cards from the **same** export body through the
 `research-scratch/rehearse-apply.php` and aborts before touching anything if its connection resolves
 to `database/database.sqlite`.
 
-```
+```text
 seeded trainees=68
 store: created=107 updated=0 skipped=0
 cards=107 flagged=0 manual=0
@@ -4972,7 +4998,7 @@ after re-fetch: cards=107 flagged=5 flagged-and-manual=0
 undo affected=5
 after undo: cards=107 flagged=0 flagged-and-manual=0
 card 100103 left is_manual=true unconfirmed=false
-```
+```text
 
 Read line by line: `before: flagged=0` matches the preflight expectation. `apply affected=5`, not 6,
 because the rehearsal deliberately makes one flagged card `is_manual = 1` first â€” the guard is
@@ -5001,120 +5027,119 @@ file, because banner cycles move and the `N/A` cells in this table are the proof
 
 ## docs/deprecated/data/roster-crosscheck-table.md
 
-| card_id | GameTora title | Game8 title | umamusu.wiki title | GameTora date | Tier A date | rarity | verdict |
-|---|---|---|---|---|---|---|---|
-| 100101 | [Special Dreamer] | Special Dreamer | Special Dreamer | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 100102 | [Hopp'nâ™ªHappy Heart] | Hopp'nâ™ªHappy Heart | Hopp'nâ™ªHappy Heart | 2025-10-14 | 2025-10-14 | 3 | two-source-confirmed |
-| 100201 | [Innocent Silence] | Innocent Silence | Innocent Silence | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 100301 | [Peak Joy] | Peak Joy | Peak Joy | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 100302 | [Beyond the Horizon] | Beyond the Horizon | Beyond the Horizon | 2025-07-16 | 2025-07-16 | 3 | two-source-confirmed |
-| 100401 | [Formula R] | Formula R | Formula R | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 100402 | [Hotâ˜†Summer Night] | Hotâ˜†Summer Night | Hotâ˜†Summer Night | 2025-10-14 | 2025-10-14 | 3 | two-source-confirmed |
-| 100501 | [Shooting Star Revue] | Shooting Star Revue | Shooting Star Revue | 2025-10-02 | 2025-10-02 | 3 | two-source-confirmed |
-| 100601 | [Starlight Beat] | Starlight Beat | Starlight Beat | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 100701 | [Red Strife] | Red Strife | Red Strife | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 100801 | [Wild Top Gear] | Wild Top Gear | Wild Top Gear | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 100901 | [Peak Blue] | Peak Blue | Peak Blue | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 101001 | [Wild Frontier] | Wild Frontier | Wild Frontier | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 101101 | [Stone-Piercing Blue] | Stone-Piercing Blue | Stone-Piercing Blue | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 101102 | [Saintly Jade Cleric] | Saintly Jade Cleric | Saintly Jade Cleric | 2025-09-21 | 2025-09-21 | 3 | two-source-confirmed |
-| 101201 | [Azure Amazon] | Azure Amazon | Azure Amazon | 2025-09-17 | 2025-09-17 | 3 | two-source-confirmed |
-| 101301 | [Frontline Elegance] | Frontline Elegance | Frontline Elegance | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 101302 | [End of the Skies] | End of the Skies | End of the Skies | 2025-07-16 | 2025-07-16 | 3 | two-source-confirmed |
-| 101401 | [Elâ˜†NÃºmero 1] | El Numero 1 | Elâ˜†NÃºmero 1 | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 101402 | [Kukulkan Warrior] | Kukulkan Warrior | Kukulkan Warrior | 2025-09-21 | 2025-09-21 | 3 | two-source-confirmed |
-| 101501 | [O Sole Suo!] | O Sole Suo! | O Sole Suo! | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 101601 | [Maverick] | Maverick | Maverick | 2025-08-20 | 2025-08-20 | 3 | two-source-confirmed |
-| 101701 | [Emperor's Path] | Emperor's Path | Emperor's Path | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 101801 | [Empress Road] | Empress Road | Empress Road | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 101802 | [Quercus Civilis] | Quercus Civilis | Quercus Civilis | 2025-08-28 | 2025-08-28 | 3 | two-source-confirmed |
-| 101901 | [Full-Color Fangirling] | Full-Color Fangirling | Full-Color Fangirling | 2025-11-19 | 2025-11-19 | 3 | two-source-confirmed |
-| 102001 | [Reeling in the Big One] | Reeling in the Big One | Reeling in the Big One | 2025-09-07 | 2025-09-07 | 3 | two-source-confirmed |
-| 102301 | [pf. Winning Equation...] | pf. Winning Equation... | pf. Winning Equation... | 2025-07-10 | 2025-07-10 | 3 | two-source-confirmed |
-| 102401 | [Scrambleâ˜†Zone] | Scramble Zone | Scrambleâ˜†Zone | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 102402 | [Sunlight Bouquet] | Sunlight Bouquet | Sunlight Bouquet | 2025-08-28 | 2025-08-28 | 3 | two-source-confirmed |
-| 102601 | [MB-19890425] | MB-19890425 | MB-19890425 | 2025-07-02 | 2025-07-02 | 3 | two-source-confirmed |
-| 102701 | [Down the Line] | Down the Line | Down the Line | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 102801 | [Buono â˜† Alla Moda] | Buonoâ˜†Alla Moda | Buono â˜† Alla Moda | 2025-11-11 | 2025-11-11 | 3 | two-source-confirmed |
-| 103001 | [Rosy Dreams] | Rosy Dreams | Rosy Dreams | 2025-06-26 | 2025-06-26 | 3 | two-source-confirmed |
-| 103201 | [tach-nology] | Tach-nology | tach-nology | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 103501 | [Get to Winning!] | Get to Winning! | Get to Winning! | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 103701 | [Meisterschaft] | Meisterschaft | Meisterschaft | 2025-10-30 | 2025-10-30 | 3 | two-source-confirmed |
-| 103801 | [Fille Ã‰clair] | Fille Ã‰clair | Fille Ã‰clair | 2025-07-27 | 2025-07-27 | 3 | two-source-confirmed |
-| 104001 | [Authentic / 1928] | Authentic / 1928 | Authentic / 1928 | 2025-10-07 | 2025-10-07 | 3 | two-source-confirmed |
-| 104101 | [Blossom in Learning] | Blossom in Learning | Blossom in Learning | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 104501 | [Murmuring Stream] | Murmuring Stream | Murmuring Stream | 2025-06-26 | 2025-06-26 | 2 | two-source-confirmed |
-| 104601 | [LOVEâ˜†4EVER] | LOVEâ˜†4EVER | LOVEâ˜†4EVER | 2025-08-11 | 2025-08-11 | 3 | two-source-confirmed |
-| 105001 | [Nevertheless] | Nevertheless | Nevertheless | 2025-08-03 | 2025-08-03 | 3 | two-source-confirmed |
-| 105201 | [Bestest Prize â™ª] | Bestest Prize | Bestest Prize â™ª | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 105601 | [Risingâ˜†Fortune] | Rising Fortune | Risingâ˜†Fortune | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 105602 | [Lucky Tidings] | Lucky Tidings | Lucky Tidings | 2025-11-06 | 2025-11-06 | 3 | two-source-confirmed |
-| 105801 | [Turbulent Blue] | Turbulent Blue | Turbulent Blue | 2025-10-21 | 2025-10-21 | 3 | two-source-confirmed |
-| 106001 | [Poinsettia Ribbon] | Poinsettia Ribbon | Poinsettia Ribbon | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 106101 | [King of Emeralds] | King of Emeralds | King of Emeralds | 2025-06-26 | 2025-06-26 | 1 | two-source-confirmed |
-| 103002 | [Vampire Makeover!] | Vampire Makeover! | Vampire Makeover! | 2025-11-24 | 2025-11-24 | 3 | two-source-confirmed |
-| 104502 | [Chiffon-Wrapped Mummy] | Chiffon-Wrapped Mummy | Chiffon-Wrapped Mummy | 2025-11-24 | 2025-11-24 | 3 | two-source-confirmed |
-| 103901 | [Princess of Pink] | Princess of Pink | Princess of Pink | 2025-12-01 | 2025-12-01 | 3 | two-source-confirmed |
-| 102501 | [Creeping Shadow] | Creeping Shadow | Creeping Shadow | 2025-12-08 | 2025-12-08 | 3 | two-source-confirmed |
-| 101702 | [Archer by Moonlight] | Archer by Moonlight | Archer by Moonlight | 2025-12-14 | 2025-12-14 | 3 | two-source-confirmed |
-| 104002 | [Autumn Cosmos] | Autumn Cosmos | Autumn Cosmos | 2025-12-14 | 2025-12-14 | 3 | two-source-confirmed |
-| 104801 | [Jokester â˜† Vibes] | Jokester â˜† Vibes | Jokester â˜† Vibes | 2025-12-18 | 2025-12-18 | 3 | two-source-confirmed |
-| 105901 | [Off the Line] | Off the Line | Off the Line | 2025-12-28 | 2025-12-28 | 3 | two-source-confirmed |
-| 100602 | [Ashen Miracle] | Ashen Miracle | Ashen Miracle | 2026-01-05 | 2026-01-05 | 3 | two-source-confirmed |
-| 102302 | [Rouge Caroler] | Rouge Caroler | Rouge Caroler | 2026-01-05 | 2026-01-05 | 3 | two-source-confirmed |
-| 102201 | [Noble Seamair] | Noble Seamair | Noble Seamair | 2026-01-15 | 2026-01-15 | 3 | two-source-confirmed |
-| 102101 | [Fast as Lightning] | Fast as Lightning | Fast as Lightning | 2026-01-22 | 2026-01-22 | 3 | two-source-confirmed |
-| 101502 | [New Year, Same Radiance!] | New Year, Same Radiance! | New Year, Same Radiance! | 2026-01-29 | 2026-01-29 | 3 | two-source-confirmed |
-| 105202 | [New Year â™ª New Urara!] | New Year â™ª New Urara! | New Year â™ª New Urara! | 2026-01-29 | 2026-01-29 | 3 | two-source-confirmed |
-| 106901 | [Strength in Full Bloom] | Strength in Full Bloom | Strength in Full Bloom | 2026-02-11 | 2026-02-11 | 3 | two-source-confirmed |
-| 102602 | [CODE: ICING] | CODE: ICING | CODE: ICING | 2026-02-18 | 2026-02-18 | 3 | two-source-confirmed |
-| 103702 | [Precise Chocolatier] | Precise Chocolatier | Precise Chocolatier | 2026-02-18 | 2026-02-18 | 3 | two-source-confirmed |
-| 107101 | [Crystalline] | Crystalline | Crystalline | 2026-02-25 | 2026-02-25 | 3 | two-source-confirmed |
-| 103301 | [Starry Nocturne] | Starry Nocturne | Starry Nocturne | 2026-03-05 | 2026-03-05 | 3 | two-source-confirmed |
-| 106201 | [Clippety-Tippety-Clop] | Clippety Tippety Clop | Clippety-Tippety-Clop | 2026-03-12 | 2026-03-12 | 2 | two-source-confirmed |
-| 106801 | [Gilded Shrine to Glory] | Gilded Shrine to Glory | Gilded Shrine to Glory | 2026-03-12 | 2026-03-12 | 3 | two-source-confirmed |
-| 106701 | [Natural Brilliance] | Natural Brilliance | Natural Brilliance | 2026-03-22 | 2026-03-22 | 3 | two-source-confirmed |
-| 107401 | [Brunissage Line] | Brunissage Line | Brunissage Line | 2026-03-26 | 2026-03-26 | 3 | two-source-confirmed |
-| 100502 | [SuccÃ¨s Ã‰toilÃ©] | SuccÃ¨s Ã‰toilÃ© | SuccÃ¨s Ã‰toilÃ© | 2026-04-05 | 2026-04-05 | 3 | two-source-confirmed |
-| 102002 | [SoirÃ©e des Chatons] | SoirÃ©e des Chatons | SoirÃ©e des Chatons | 2026-04-05 | 2026-04-05 | 3 | two-source-confirmed |
-| 105101 | [Layered Petals] | Layered Petals | Layered Petals | 2026-04-12 | 2026-04-12 | 3 | two-source-confirmed |
-| 107201 | [Blazed Head, Covered Fists] | Blazed Head, Covered Fists | Blazed Head, Covered Fists | 2026-04-20 | 2026-04-20 | 3 | two-source-confirmed |
-| 106002 | [Run & Win] | Run & Win | Run & Win | 2026-04-26 | 2026-04-26 | 3 | two-source-confirmed |
-| 106102 | [Cheerleader in Noble White] | Cheerleader in Noble White | Cheerleader in Noble White | 2026-04-26 | 2026-04-26 | 3 | two-source-confirmed |
-| 103101 | [Always Electrifying] | Always Electrifying | Always Electrifying | 2026-04-30 | 2026-04-30 | 3 | two-source-confirmed |
-| 106401 | [Line Breakthrough] | Line Breakthrough | Line Breakthrough | 2026-05-10 | 2026-05-10 | 3 | two-source-confirmed |
-| 102202 | [Titania] | Titania | Titania | 2026-05-18 | 2026-05-18 | 3 | two-source-confirmed |
-| 103802 | [Ma ChÃ©rie of the New Moon] | Ma ChÃ©rie of the New Moon | Ma ChÃ©rie of the New Moon | 2026-05-18 | 2026-05-18 | 3 | two-source-confirmed |
-| 103401 | [Edomurasaki] | Edomurasaki | Edomurasaki | 2026-05-28 | 2026-05-28 | 3 | two-source-confirmed |
-| 104401 | [Platanus Witch] | Platanus Witch | Platanus Witch | 2026-06-04 | 2026-06-04 | 3 | two-source-confirmed |
-| 101002 | [Bubblegumâ˜†Memories] | Bubblegum â˜†Memories | Bubblegumâ˜†Memories | 2026-06-11 | 2026-06-11 | 3 | two-source-confirmed |
-| 105902 | [Sapphire Sojourn] | Sapphire Sojourn | Sapphire Sojourn | 2026-06-11 | 2026-06-11 | 3 | two-source-confirmed |
-| 103601 | [unsigned] | unsigned | unsigned | 2026-06-18 | 2026-06-18 | 3 | two-source-confirmed |
-| 100103 | [Ruler of Japan] | Ruler of Japan | Ruler of Japan | 2026-06-25 | N/A | 3 | conflict |
-| 100702 | [RUN! RUIN! LAUNCHER!] | not listed | RUN! RUIN! LAUNCHER! | 2026-07-02 | 2026-07-02 | 3 | single-source |
-| 101303 | [Fair Lady of the Waves] | not listed | Fair Lady of the Waves | 2026-07-02 | 2026-07-02 | 3 | single-source |
-| 105301 | [Iron Ambition] | Iron Ambition | Iron Ambition | 2026-07-07 | 2026-07-07 | 3 | two-source-confirmed |
-| 109801 | [Eightfoldâ˜†Fortune] | Eightfold â˜†Fortune | Eightfoldâ˜†Fortune | 2026-07-16 | 2026-07-16 | 3 | two-source-confirmed |
-| 104602 | [Twilight Triumph] | Twilight Triumph | Twilight Triumph | 2026-07-22 | 2026-07-22 | 3 | two-source-confirmed |
-| 103502 | [Dream Deliverer] | Dream Deliverer | Dream Deliverer | 2026-07-27 | 2026-07-27 | 3 | two-source-confirmed |
-| 105002 | [Difference Engineer] | Difference Engineer | Difference Engineer | 2026-07-27 | 2026-07-27 | 3 | two-source-confirmed |
-| 102901 | [Darl'n Snowflake] | Darl'n Snowflake | Darl'n Snowflake | 2026-08-05 | 2026-08-05 | 3 | two-source-confirmed |
-| 104201 | [Rocketâ˜†Star] | Rocketâ˜†Star | Rocketâ˜†Star | 2026-08-12 | 2026-08-12 | 3 | two-source-confirmed |
-| 101902 | [Fanaticâ™¡Jiangshi] | Fanaticâ™¡ Jiangshi | Fanaticâ™¡Jiangshi | 2026-08-18 | 2026-08-18 | 3 | two-source-confirmed |
-| 105802 | [Dot-o'-Lantern] | Dot-o'-Lantern | Dot-o'-Lantern | 2026-08-18 | 2026-08-18 | 3 | two-source-confirmed |
-| 108701 | [Flare] | Flare | Flare | 2026-08-25 | 2026-08-25 | 3 | two-source-confirmed |
-| 107801 | [Fluttertail Spirit] | Fluttertail Spirit | Fluttertail Spirit | 2026-09-01 | 2026-09-01 | 3 | two-source-confirmed |
-| 102102 | [Raging Thunder] | Raging Thunder | Raging Thunder | 2026-09-07 | 2026-09-07 | 3 | two-source-confirmed |
-| 103402 | [Golden Dream] | Golden Dream | Golden Dream | 2026-09-07 | 2026-09-07 | 3 | two-source-confirmed |
-| 104901 | [Desperate Measures] | Desperate Measures | Desperate Measures | 2026-09-15 | 2026-09-15 | 3 | two-source-confirmed |
-| 110001 | [Butterfly Sting] | Butterfly Sting | Butterfly Sting | 2026-09-24 | 2026-09-23 | 3 | conflict |
-| 100802 | [Fiery Aqua Vitae] | Fiery Aqua Vitae | Fiery Aqua Vitae | 2026-09-28 | N/A | 3 | conflict |
-| 100902 | [Nuit Ã‰toilÃ©e de Scarlet] | Nuit Ã‰toilÃ©e de Scarlet | Nuit Ã‰toilÃ©e de Scarlet | 2026-09-28 | N/A | 3 | conflict |
+| card_id   | GameTora title                 | Game8 title                  | umamusu.wiki title           | GameTora date   | Tier A date   | rarity   | verdict                |
+| --------- | ------------------------------ | ---------------------------- | ---------------------------- | --------------- | ------------- | -------- | ---------------------- |
+| 100101    | [Special Dreamer]              | Special Dreamer              | Special Dreamer              | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 100102    | [Hopp'nâ™ªHappy Heart]         | Hopp'nâ™ªHappy Heart         | Hopp'nâ™ªHappy Heart         | 2025-10-14      | 2025-10-14    | 3        | two-source-confirmed   |
+| 100201    | [Innocent Silence]             | Innocent Silence             | Innocent Silence             | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 100301    | [Peak Joy]                     | Peak Joy                     | Peak Joy                     | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 100302    | [Beyond the Horizon]           | Beyond the Horizon           | Beyond the Horizon           | 2025-07-16      | 2025-07-16    | 3        | two-source-confirmed   |
+| 100401    | [Formula R]                    | Formula R                    | Formula R                    | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 100402    | [Hotâ˜†Summer Night]           | Hotâ˜†Summer Night           | Hotâ˜†Summer Night           | 2025-10-14      | 2025-10-14    | 3        | two-source-confirmed   |
+| 100501    | [Shooting Star Revue]          | Shooting Star Revue          | Shooting Star Revue          | 2025-10-02      | 2025-10-02    | 3        | two-source-confirmed   |
+| 100601    | [Starlight Beat]               | Starlight Beat               | Starlight Beat               | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 100701    | [Red Strife]                   | Red Strife                   | Red Strife                   | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 100801    | [Wild Top Gear]                | Wild Top Gear                | Wild Top Gear                | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 100901    | [Peak Blue]                    | Peak Blue                    | Peak Blue                    | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 101001    | [Wild Frontier]                | Wild Frontier                | Wild Frontier                | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 101101    | [Stone-Piercing Blue]          | Stone-Piercing Blue          | Stone-Piercing Blue          | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 101102    | [Saintly Jade Cleric]          | Saintly Jade Cleric          | Saintly Jade Cleric          | 2025-09-21      | 2025-09-21    | 3        | two-source-confirmed   |
+| 101201    | [Azure Amazon]                 | Azure Amazon                 | Azure Amazon                 | 2025-09-17      | 2025-09-17    | 3        | two-source-confirmed   |
+| 101301    | [Frontline Elegance]           | Frontline Elegance           | Frontline Elegance           | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 101302    | [End of the Skies]             | End of the Skies             | End of the Skies             | 2025-07-16      | 2025-07-16    | 3        | two-source-confirmed   |
+| 101401    | [Elâ˜†NÃºmero 1]               | El Numero 1                  | Elâ˜†NÃºmero 1               | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 101402    | [Kukulkan Warrior]             | Kukulkan Warrior             | Kukulkan Warrior             | 2025-09-21      | 2025-09-21    | 3        | two-source-confirmed   |
+| 101501    | [O Sole Suo!]                  | O Sole Suo!                  | O Sole Suo!                  | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 101601    | [Maverick]                     | Maverick                     | Maverick                     | 2025-08-20      | 2025-08-20    | 3        | two-source-confirmed   |
+| 101701    | [Emperor's Path]               | Emperor's Path               | Emperor's Path               | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 101801    | [Empress Road]                 | Empress Road                 | Empress Road                 | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 101802    | [Quercus Civilis]              | Quercus Civilis              | Quercus Civilis              | 2025-08-28      | 2025-08-28    | 3        | two-source-confirmed   |
+| 101901    | [Full-Color Fangirling]        | Full-Color Fangirling        | Full-Color Fangirling        | 2025-11-19      | 2025-11-19    | 3        | two-source-confirmed   |
+| 102001    | [Reeling in the Big One]       | Reeling in the Big One       | Reeling in the Big One       | 2025-09-07      | 2025-09-07    | 3        | two-source-confirmed   |
+| 102301    | [pf. Winning Equation...]      | pf. Winning Equation...      | pf. Winning Equation...      | 2025-07-10      | 2025-07-10    | 3        | two-source-confirmed   |
+| 102401    | [Scrambleâ˜†Zone]              | Scramble Zone                | Scrambleâ˜†Zone              | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 102402    | [Sunlight Bouquet]             | Sunlight Bouquet             | Sunlight Bouquet             | 2025-08-28      | 2025-08-28    | 3        | two-source-confirmed   |
+| 102601    | [MB-19890425]                  | MB-19890425                  | MB-19890425                  | 2025-07-02      | 2025-07-02    | 3        | two-source-confirmed   |
+| 102701    | [Down the Line]                | Down the Line                | Down the Line                | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 102801    | [Buono â˜† Alla Moda]          | Buonoâ˜†Alla Moda            | Buono â˜† Alla Moda          | 2025-11-11      | 2025-11-11    | 3        | two-source-confirmed   |
+| 103001    | [Rosy Dreams]                  | Rosy Dreams                  | Rosy Dreams                  | 2025-06-26      | 2025-06-26    | 3        | two-source-confirmed   |
+| 103201    | [tach-nology]                  | Tach-nology                  | tach-nology                  | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 103501    | [Get to Winning!]              | Get to Winning!              | Get to Winning!              | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 103701    | [Meisterschaft]                | Meisterschaft                | Meisterschaft                | 2025-10-30      | 2025-10-30    | 3        | two-source-confirmed   |
+| 103801    | [Fille Ã‰clair]                | Fille Ã‰clair                | Fille Ã‰clair                | 2025-07-27      | 2025-07-27    | 3        | two-source-confirmed   |
+| 104001    | [Authentic / 1928]             | Authentic / 1928             | Authentic / 1928             | 2025-10-07      | 2025-10-07    | 3        | two-source-confirmed   |
+| 104101    | [Blossom in Learning]          | Blossom in Learning          | Blossom in Learning          | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 104501    | [Murmuring Stream]             | Murmuring Stream             | Murmuring Stream             | 2025-06-26      | 2025-06-26    | 2        | two-source-confirmed   |
+| 104601    | [LOVEâ˜†4EVER]                 | LOVEâ˜†4EVER                 | LOVEâ˜†4EVER                 | 2025-08-11      | 2025-08-11    | 3        | two-source-confirmed   |
+| 105001    | [Nevertheless]                 | Nevertheless                 | Nevertheless                 | 2025-08-03      | 2025-08-03    | 3        | two-source-confirmed   |
+| 105201    | [Bestest Prize â™ª]            | Bestest Prize                | Bestest Prize â™ª            | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 105601    | [Risingâ˜†Fortune]             | Rising Fortune               | Risingâ˜†Fortune             | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 105602    | [Lucky Tidings]                | Lucky Tidings                | Lucky Tidings                | 2025-11-06      | 2025-11-06    | 3        | two-source-confirmed   |
+| 105801    | [Turbulent Blue]               | Turbulent Blue               | Turbulent Blue               | 2025-10-21      | 2025-10-21    | 3        | two-source-confirmed   |
+| 106001    | [Poinsettia Ribbon]            | Poinsettia Ribbon            | Poinsettia Ribbon            | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 106101    | [King of Emeralds]             | King of Emeralds             | King of Emeralds             | 2025-06-26      | 2025-06-26    | 1        | two-source-confirmed   |
+| 103002    | [Vampire Makeover!]            | Vampire Makeover!            | Vampire Makeover!            | 2025-11-24      | 2025-11-24    | 3        | two-source-confirmed   |
+| 104502    | [Chiffon-Wrapped Mummy]        | Chiffon-Wrapped Mummy        | Chiffon-Wrapped Mummy        | 2025-11-24      | 2025-11-24    | 3        | two-source-confirmed   |
+| 103901    | [Princess of Pink]             | Princess of Pink             | Princess of Pink             | 2025-12-01      | 2025-12-01    | 3        | two-source-confirmed   |
+| 102501    | [Creeping Shadow]              | Creeping Shadow              | Creeping Shadow              | 2025-12-08      | 2025-12-08    | 3        | two-source-confirmed   |
+| 101702    | [Archer by Moonlight]          | Archer by Moonlight          | Archer by Moonlight          | 2025-12-14      | 2025-12-14    | 3        | two-source-confirmed   |
+| 104002    | [Autumn Cosmos]                | Autumn Cosmos                | Autumn Cosmos                | 2025-12-14      | 2025-12-14    | 3        | two-source-confirmed   |
+| 104801    | [Jokester â˜† Vibes]           | Jokester â˜† Vibes           | Jokester â˜† Vibes           | 2025-12-18      | 2025-12-18    | 3        | two-source-confirmed   |
+| 105901    | [Off the Line]                 | Off the Line                 | Off the Line                 | 2025-12-28      | 2025-12-28    | 3        | two-source-confirmed   |
+| 100602    | [Ashen Miracle]                | Ashen Miracle                | Ashen Miracle                | 2026-01-05      | 2026-01-05    | 3        | two-source-confirmed   |
+| 102302    | [Rouge Caroler]                | Rouge Caroler                | Rouge Caroler                | 2026-01-05      | 2026-01-05    | 3        | two-source-confirmed   |
+| 102201    | [Noble Seamair]                | Noble Seamair                | Noble Seamair                | 2026-01-15      | 2026-01-15    | 3        | two-source-confirmed   |
+| 102101    | [Fast as Lightning]            | Fast as Lightning            | Fast as Lightning            | 2026-01-22      | 2026-01-22    | 3        | two-source-confirmed   |
+| 101502    | [New Year, Same Radiance!]     | New Year, Same Radiance!     | New Year, Same Radiance!     | 2026-01-29      | 2026-01-29    | 3        | two-source-confirmed   |
+| 105202    | [New Year â™ª New Urara!]      | New Year â™ª New Urara!      | New Year â™ª New Urara!      | 2026-01-29      | 2026-01-29    | 3        | two-source-confirmed   |
+| 106901    | [Strength in Full Bloom]       | Strength in Full Bloom       | Strength in Full Bloom       | 2026-02-11      | 2026-02-11    | 3        | two-source-confirmed   |
+| 102602    | [CODE: ICING]                  | CODE: ICING                  | CODE: ICING                  | 2026-02-18      | 2026-02-18    | 3        | two-source-confirmed   |
+| 103702    | [Precise Chocolatier]          | Precise Chocolatier          | Precise Chocolatier          | 2026-02-18      | 2026-02-18    | 3        | two-source-confirmed   |
+| 107101    | [Crystalline]                  | Crystalline                  | Crystalline                  | 2026-02-25      | 2026-02-25    | 3        | two-source-confirmed   |
+| 103301    | [Starry Nocturne]              | Starry Nocturne              | Starry Nocturne              | 2026-03-05      | 2026-03-05    | 3        | two-source-confirmed   |
+| 106201    | [Clippety-Tippety-Clop]        | Clippety Tippety Clop        | Clippety-Tippety-Clop        | 2026-03-12      | 2026-03-12    | 2        | two-source-confirmed   |
+| 106801    | [Gilded Shrine to Glory]       | Gilded Shrine to Glory       | Gilded Shrine to Glory       | 2026-03-12      | 2026-03-12    | 3        | two-source-confirmed   |
+| 106701    | [Natural Brilliance]           | Natural Brilliance           | Natural Brilliance           | 2026-03-22      | 2026-03-22    | 3        | two-source-confirmed   |
+| 107401    | [Brunissage Line]              | Brunissage Line              | Brunissage Line              | 2026-03-26      | 2026-03-26    | 3        | two-source-confirmed   |
+| 100502    | [SuccÃ¨s Ã‰toilÃ©]             | SuccÃ¨s Ã‰toilÃ©             | SuccÃ¨s Ã‰toilÃ©             | 2026-04-05      | 2026-04-05    | 3        | two-source-confirmed   |
+| 102002    | [SoirÃ©e des Chatons]          | SoirÃ©e des Chatons          | SoirÃ©e des Chatons          | 2026-04-05      | 2026-04-05    | 3        | two-source-confirmed   |
+| 105101    | [Layered Petals]               | Layered Petals               | Layered Petals               | 2026-04-12      | 2026-04-12    | 3        | two-source-confirmed   |
+| 107201    | [Blazed Head, Covered Fists]   | Blazed Head, Covered Fists   | Blazed Head, Covered Fists   | 2026-04-20      | 2026-04-20    | 3        | two-source-confirmed   |
+| 106002    | [Run & Win]                    | Run & Win                    | Run & Win                    | 2026-04-26      | 2026-04-26    | 3        | two-source-confirmed   |
+| 106102    | [Cheerleader in Noble White]   | Cheerleader in Noble White   | Cheerleader in Noble White   | 2026-04-26      | 2026-04-26    | 3        | two-source-confirmed   |
+| 103101    | [Always Electrifying]          | Always Electrifying          | Always Electrifying          | 2026-04-30      | 2026-04-30    | 3        | two-source-confirmed   |
+| 106401    | [Line Breakthrough]            | Line Breakthrough            | Line Breakthrough            | 2026-05-10      | 2026-05-10    | 3        | two-source-confirmed   |
+| 102202    | [Titania]                      | Titania                      | Titania                      | 2026-05-18      | 2026-05-18    | 3        | two-source-confirmed   |
+| 103802    | [Ma ChÃ©rie of the New Moon]   | Ma ChÃ©rie of the New Moon   | Ma ChÃ©rie of the New Moon   | 2026-05-18      | 2026-05-18    | 3        | two-source-confirmed   |
+| 103401    | [Edomurasaki]                  | Edomurasaki                  | Edomurasaki                  | 2026-05-28      | 2026-05-28    | 3        | two-source-confirmed   |
+| 104401    | [Platanus Witch]               | Platanus Witch               | Platanus Witch               | 2026-06-04      | 2026-06-04    | 3        | two-source-confirmed   |
+| 101002    | [Bubblegumâ˜†Memories]         | Bubblegum â˜†Memories        | Bubblegumâ˜†Memories         | 2026-06-11      | 2026-06-11    | 3        | two-source-confirmed   |
+| 105902    | [Sapphire Sojourn]             | Sapphire Sojourn             | Sapphire Sojourn             | 2026-06-11      | 2026-06-11    | 3        | two-source-confirmed   |
+| 103601    | [unsigned]                     | unsigned                     | unsigned                     | 2026-06-18      | 2026-06-18    | 3        | two-source-confirmed   |
+| 100103    | [Ruler of Japan]               | Ruler of Japan               | Ruler of Japan               | 2026-06-25      | N/A           | 3        | conflict               |
+| 100702    | [RUN! RUIN! LAUNCHER!]         | not listed                   | RUN! RUIN! LAUNCHER!         | 2026-07-02      | 2026-07-02    | 3        | single-source          |
+| 101303    | [Fair Lady of the Waves]       | not listed                   | Fair Lady of the Waves       | 2026-07-02      | 2026-07-02    | 3        | single-source          |
+| 105301    | [Iron Ambition]                | Iron Ambition                | Iron Ambition                | 2026-07-07      | 2026-07-07    | 3        | two-source-confirmed   |
+| 109801    | [Eightfoldâ˜†Fortune]          | Eightfold â˜†Fortune         | Eightfoldâ˜†Fortune          | 2026-07-16      | 2026-07-16    | 3        | two-source-confirmed   |
+| 104602    | [Twilight Triumph]             | Twilight Triumph             | Twilight Triumph             | 2026-07-22      | 2026-07-22    | 3        | two-source-confirmed   |
+| 103502    | [Dream Deliverer]              | Dream Deliverer              | Dream Deliverer              | 2026-07-27      | 2026-07-27    | 3        | two-source-confirmed   |
+| 105002    | [Difference Engineer]          | Difference Engineer          | Difference Engineer          | 2026-07-27      | 2026-07-27    | 3        | two-source-confirmed   |
+| 102901    | [Darl'n Snowflake]             | Darl'n Snowflake             | Darl'n Snowflake             | 2026-08-05      | 2026-08-05    | 3        | two-source-confirmed   |
+| 104201    | [Rocketâ˜†Star]                | Rocketâ˜†Star                | Rocketâ˜†Star                | 2026-08-12      | 2026-08-12    | 3        | two-source-confirmed   |
+| 101902    | [Fanaticâ™¡Jiangshi]           | Fanaticâ™¡ Jiangshi          | Fanaticâ™¡Jiangshi           | 2026-08-18      | 2026-08-18    | 3        | two-source-confirmed   |
+| 105802    | [Dot-o'-Lantern]               | Dot-o'-Lantern               | Dot-o'-Lantern               | 2026-08-18      | 2026-08-18    | 3        | two-source-confirmed   |
+| 108701    | [Flare]                        | Flare                        | Flare                        | 2026-08-25      | 2026-08-25    | 3        | two-source-confirmed   |
+| 107801    | [Fluttertail Spirit]           | Fluttertail Spirit           | Fluttertail Spirit           | 2026-09-01      | 2026-09-01    | 3        | two-source-confirmed   |
+| 102102    | [Raging Thunder]               | Raging Thunder               | Raging Thunder               | 2026-09-07      | 2026-09-07    | 3        | two-source-confirmed   |
+| 103402    | [Golden Dream]                 | Golden Dream                 | Golden Dream                 | 2026-09-07      | 2026-09-07    | 3        | two-source-confirmed   |
+| 104901    | [Desperate Measures]           | Desperate Measures           | Desperate Measures           | 2026-09-15      | 2026-09-15    | 3        | two-source-confirmed   |
+| 110001    | [Butterfly Sting]              | Butterfly Sting              | Butterfly Sting              | 2026-09-24      | 2026-09-23    | 3        | conflict               |
+| 100802    | [Fiery Aqua Vitae]             | Fiery Aqua Vitae             | Fiery Aqua Vitae             | 2026-09-28      | N/A           | 3        | conflict               |
+| 100902    | [Nuit Ã‰toilÃ©e de Scarlet]    | Nuit Ã‰toilÃ©e de Scarlet    | Nuit Ã‰toilÃ©e de Scarlet    | 2026-09-28      | N/A           | 3        | conflict               |
 
 ---
 
 ## docs/deprecated/design-research/verification/cardless-band-2026-09-30.md
-
 
 Date: 2026-09-30 local (the measurements below were taken at 2026-09-29 19:25â€“19:37 UTC).
 Branch: `feat/catalog-roster-and-trainee-selector`, worktree `../umamusume-laravel13-catalog-roster`.
@@ -5173,15 +5198,15 @@ the final bundle (`app-CZXqo5_6.js`, the one carrying `isCardless`) and reproduc
 13 options, 13 distinct ids, divider at row 21 with `role=presentation`, live region
 `13 of 107 (keep typing)`, divider at y=601 in a 286 px viewport over 813 px of content.
 
-| check | measured |
-|---|---|
-| live region | `13 of 107 (keep typing)` |
-| options in the paint | 13 (10 carded + 3 cardless) |
-| divider | `role=presentation`, `data-band-divider`, text `No confirmed costume card yet`, at DOM row 21 |
-| cardless option text | `No costume card confirmed yet`, under a header naming her (`Aston Machan ã‚¢ã‚¹ãƒˆãƒ³ãƒžãƒ¼ãƒãƒ£ãƒ³`) |
-| `aria-label` of a cardless option | `Wonder Acute Â· No costume card confirmed yet` |
-| distinct option ids | 13 of 13 (`trainee-option-u65`, `-u62`, `-u68` for the cardless three) |
-| ArrowDown Ã—13 | `aria-activedescendant` named 13 distinct `role=option` elements, never the divider; Ã—14 wraps to the first |
+| check                               | measured                                                                                                       |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| live region                         | `13 of 107 (keep typing)`                                                                                      |
+| options in the paint                | 13 (10 carded + 3 cardless)                                                                                    |
+| divider                             | `role=presentation`, `data-band-divider`, text `No confirmed costume card yet`, at DOM row 21                  |
+| cardless option text                | `No costume card confirmed yet`, under a header naming her (`Aston Machan ã‚¢ã‚¹ãƒˆãƒ³ãƒžãƒ¼ãƒãƒ£ãƒ³`)         |
+| `aria-label` of a cardless option   | `Wonder Acute Â· No costume card confirmed yet`                                                                |
+| distinct option ids                 | 13 of 13 (`trainee-option-u65`, `-u62`, `-u68` for the cardless three)                                         |
+| ArrowDown Ã—13                      | `aria-activedescendant` named 13 distinct `role=option` elements, never the divider; Ã—14 wraps to the first   |
 
 Commit path: pressing the divider changes nothing (`umamusume_id` and `character_card_id` both stay
 empty). Pressing a cardless row sets the visible field to `Aston Machan Â· No costume card confirmed
@@ -5208,13 +5233,13 @@ id, with the reason in the comment and the shape pinned in the test.
 "Recent-10 first" and "cardless above the fold" are in tension at the popup's current height, and the
 numbers are not close:
 
-| | px |
-|---|---|
-| listbox viewport (`max-h-72`) | 286 |
-| content at scrollTop 0 | 813 |
-| divider position | 601 |
-| first cardless option | 662 |
-| rows fully visible without scrolling | 9 of 27 |
+|                                        | px        |
+| -------------------------------------- | --------- |
+| listbox viewport (`max-h-72`)          | 286       |
+| content at scrollTop 0                 | 813       |
+| divider position                       | 601       |
+| first cardless option                  | 662       |
+| rows fully visible without scrolling   | 9 of 27   |
 
 Ten carded trainees cost twenty rows because each one is a header plus an option (~60 px), so the seam
 lands at 601 px no matter what follows it. What this change does deliver: she is in the default paint at
@@ -5249,4 +5274,3 @@ clean; `npm run build` clean; `vendor/bin/pint` passed on the changed test; PHPS
 is quoted rather than re-run per edit). `composer lore` 115 hits / 57 exempt and `composer lore-code` 8,
 both unchanged from the recorded baseline; the new copy carries no dash and no banned term. (The first
 draft of this line used the banned word for the category, which is how the count went up by one.)
-

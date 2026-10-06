@@ -62,15 +62,15 @@ is a key this app refuses. So the parser's absence test reads `array_key_exists`
 sends nulls" is a statement about the projected keys rather than about the file. Coverage, as rows where
 the key is present:
 
-| field | key | present | absent |
-|---|---|---|---|
-| Japanese name | `jp_name` | 163 | 0 |
-| Voice actor (JP) | `va_ja` | 163 | 0 |
-| Voice actor (romanised) | `va_en` | 137 | 26 |
-| Birthday day / month | `birth_day` / `birth_month` | 163 / 163 | 0 / 0 |
-| Birth year | `birth_year` | 146 | **17** |
-| Height | `height` | 163 | 0 |
-| Three sizes | `three_sizes` (`{b,w,h}`) | 127 | **36** |
+| field                     | key                           | present     | absent   |
+| ------------------------- | ----------------------------- | ----------- | -------- |
+| Japanese name             | `jp_name`                     | 163         | 0        |
+| Voice actor (JP)          | `va_ja`                       | 163         | 0        |
+| Voice actor (romanised)   | `va_en`                       | 137         | 26       |
+| Birthday day / month      | `birth_day` / `birth_month`   | 163 / 163   | 0 / 0    |
+| Birth year                | `birth_year`                  | 146         | **17**   |
+| Height                    | `height`                      | 163         | 0        |
+| Three sizes               | `three_sizes` (`{b,w,h}`)     | 127         | **36**   |
 
 The asymmetry in the last four rows is the design driver: **a day and a month exist for every character,
 and a year for 146 of them.** A composite `birth` date would need a representation for "month and day
@@ -111,17 +111,17 @@ allowlist is not a style preference in this decision; it is enforced at two ends
 
 **1. A sibling table `umamusume_profiles`, keyed one-to-one to `umamusume.id`.**
 
-| column | type | null | from |
-|---|---|---|---|
-| `umamusume_id` | `foreignId` → `umamusume`, `cascadeOnDelete`, unique | no | the join |
-| `va_ja` | `string`, nullable | yes | `va_ja` |
-| `va_en` | `string`, nullable | yes | `va_en` |
-| `birth_day` | `unsignedTinyInteger`, nullable | yes | `birth_day` |
-| `birth_month` | `unsignedTinyInteger`, nullable | yes | `birth_month` |
-| `birth_year` | `unsignedSmallInteger`, nullable | yes | `birth_year` |
-| `height_cm` | `unsignedSmallInteger`, nullable | yes | `height` |
-| `bust_cm` / `waist_cm` / `hip_cm` | `unsignedTinyInteger`, nullable | yes | `three_sizes.b` / `.w` / `.h` |
-| `source_url`, `snapshot_path`, `fetched_at`, `source_timezone`, `is_manual` | per R3 | — | provenance |
+| column                                                                        | type                                                   | null   | from                            |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------ | ------ | ------------------------------- |
+| `umamusume_id`                                                                | `foreignId` → `umamusume`, `cascadeOnDelete`, unique   | no     | the join                        |
+| `va_ja`                                                                       | `string`, nullable                                     | yes    | `va_ja`                         |
+| `va_en`                                                                       | `string`, nullable                                     | yes    | `va_en`                         |
+| `birth_day`                                                                   | `unsignedTinyInteger`, nullable                        | yes    | `birth_day`                     |
+| `birth_month`                                                                 | `unsignedTinyInteger`, nullable                        | yes    | `birth_month`                   |
+| `birth_year`                                                                  | `unsignedSmallInteger`, nullable                       | yes    | `birth_year`                    |
+| `height_cm`                                                                   | `unsignedSmallInteger`, nullable                       | yes    | `height`                        |
+| `bust_cm` / `waist_cm` / `hip_cm`                                             | `unsignedTinyInteger`, nullable                        | yes    | `three_sizes.b` / `.w` / `.h`   |
+| `source_url`, `snapshot_path`, `fetched_at`, `source_timezone`, `is_manual`   | per R3                                                 | —      | provenance                      |
 
 `ADR-0003` Amendment R3 is the reason it is a sibling and not five columns on `umamusume`: a reference row
 carries its own provenance, and `umamusume` carries none of those columns. Putting profile fields there

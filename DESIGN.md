@@ -10,13 +10,13 @@ because this file had drifted past the implementation in both directions: it sti
 described a migration that had already happened, and it described browser
 verification that this host cannot currently run.
 
-| Status | Meaning |
-|---|---|
-| **Existing** | Shipped in the tree, read from source on 2026-10-04. |
-| **Established Standard** | Binding decision, owned by an owner ruling, ADR, or `GOVERNANCE.md`. Not optional, not this file's to change. |
-| **Intended** | Shipped, but the build diverges from the contract written here. Named as a gap, not silently normalised. |
-| **Recommended** | A judgement from the audit. Ships nothing until an owner signs it off. |
-| **Unknown** | The claim cannot be checked from this tree. Not asserted either way. |
+| Status                     | Meaning                                                                                                         |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **Existing**               | Shipped in the tree, read from source on 2026-10-04.                                                            |
+| **Established Standard**   | Binding decision, owned by an owner ruling, ADR, or `GOVERNANCE.md`. Not optional, not this file's to change.   |
+| **Intended**               | Shipped, but the build diverges from the contract written here. Named as a gap, not silently normalised.        |
+| **Recommended**            | A judgement from the audit. Ships nothing until an owner signs it off.                                          |
+| **Unknown**                | The claim cannot be checked from this tree. Not asserted either way.                                            |
 
 Screen-level behaviour belongs to `SCREEN_SPEC.md`; this file owns the visual
 system and points at it rather than restating it.
@@ -99,36 +99,36 @@ missing; that directory holds four PNGs and nothing else). Treat every ratio in 
 file as **documented, not re-verified here**. Closing that is a gate decision (R-class),
 not a copy fix.
 
-| Role | Token | Light (default) | Dark (override) | Why |
-|---|---|---|---|---|
-| Page field | `--color-page` | `#F2F1F8` | `#0D0C0F` | pale lavender; raceboard surround, measured |
-| Panel surface | `--color-panel` | `#F8F8FB` | `#121013` | card and modal body; board charcoal |
-| Raised surface | `--color-raised` | `#FFFFFF` | `#24262A` | stat cells; unlit LED cell |
-| Primary ink | `--color-ink` | `#6A5641` | `#ECEAF2` | warm brown, never grey-900, never black |
-| Heading/value ink | `--color-ink-strong` | `#482720` | `#FFFFFF` | display numerals, and every grade letter |
-| Muted ink | `--color-ink-muted` | `#6E6459` | `#AAABB5` | the accessible subordinate tier, 4.5:1+ on every surface |
-| Hairline | `--color-rule` | `#E4E1EA` | `#2E2C33` | separation; `ink-faint` is non-text only |
-| Action green | `--color-green` | `#7FCC09` | `#7FCC09` | client action green; rings, borders, lattice — never behind white text |
-| Ink-bearing green fill | `--color-chrome` / `--color-on-chrome` | `#4E7906` / `#FFFFFF` | `#7FCC09` / `#121013` | the only green allowed to carry button text, and its partner |
-| Increase / gain | `--color-up` | `#B45309` | `#FF9A2C` | **orange, never green.** Light value stepped from the client's `#FF9A2C` for 5.05:1 |
-| Decrease / loss | `--color-down` | `#0667B0` | `#4EA1E8` | **blue, never red.** Stepped from the client's `#0088E0` (3.75:1 on white fails) |
-| Selection fill | `--color-pick` / `--color-on-pick` | `#EFC96A` / `#482720` | `#F5B73C` / `#121013` | gold fill with a **dark** ink in both themes: 8.34 light, 10.57 dark. Not `ink-strong`: that is white in the dark theme, and white on amber measures 1.75:1. **Fill only** — as a boundary it is 1.59:1 on light `raised` (KI-9) |
-| Selection boundary | `--color-pick-line` | `#7A5C10` | `#F5B73C` | the deep end of the same gold, for the 2px outline that says "this one is live": **6.24** on light `raised`, **8.46** on dark `raised`, against WCAG 1.4.11's 3:1. Aliases to `--color-pick` in dark because that value already cleared there. Four consumers, all measured: the calendar's `current` cell, the meter ladder's `aria-current` step, the guided step's selected card, and the step links. Known weakness: it sits 1.24:1 from `--color-goal-line` in luminance, so a goal cell and a current cell are told apart by hue and by the goal's red pennant, not by lightness — both also carry words, so D-12 holds |
-| Skill Points identity | `--color-sp` | `#009FE1` | `#4FC3F7` | the client's cyan, exact; **fills, rules and tint only** |
-| Skill Points text | `--color-sp-ink` | `#0E7490` | `#4FC3F7` | the client cyan measures 2.66-2.98 as text on light surfaces (research §3.4 already recorded the fail), so text uses the stepped value |
-| Risk / rejected | `--color-risk` | `#800014` | `#FF6B7A` | reserved: training failure and rejection only |
-| Turn chip anchor | `--color-anchor` | `#0B6FB8` | `#8FC4EE` | deliberately not `--color-down`; blue already means "went down" |
-| Focus ring | `--color-ring` | `#4E7906` | `#7FCC09` | 3:1 non-text boundary in both themes; `--color-green` alone fails light at 1.88 (see §8). Measured against the surfaces it actually sits on: **5.17 / 4.88 / 4.61** on light `raised` / `panel` / `page`, **7.61 / 9.51 / 9.79** in dark |
+| Role                     | Token                                    | Light (default)         | Dark (override)         | Why                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------ | ---------------------------------------- | ----------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Page field               | `--color-page`                           | `#F2F1F8`               | `#0D0C0F`               | pale lavender; raceboard surround, measured                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Panel surface            | `--color-panel`                          | `#F8F8FB`               | `#121013`               | card and modal body; board charcoal                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Raised surface           | `--color-raised`                         | `#FFFFFF`               | `#24262A`               | stat cells; unlit LED cell                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Primary ink              | `--color-ink`                            | `#6A5641`               | `#ECEAF2`               | warm brown, never grey-900, never black                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Heading/value ink        | `--color-ink-strong`                     | `#482720`               | `#FFFFFF`               | display numerals, and every grade letter                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Muted ink                | `--color-ink-muted`                      | `#6E6459`               | `#AAABB5`               | the accessible subordinate tier, 4.5:1+ on every surface                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Hairline                 | `--color-rule`                           | `#E4E1EA`               | `#2E2C33`               | separation; `ink-faint` is non-text only                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Action green             | `--color-green`                          | `#7FCC09`               | `#7FCC09`               | client action green; rings, borders, lattice — never behind white text                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Ink-bearing green fill   | `--color-chrome` / `--color-on-chrome`   | `#4E7906` / `#FFFFFF`   | `#7FCC09` / `#121013`   | the only green allowed to carry button text, and its partner                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Increase / gain          | `--color-up`                             | `#B45309`               | `#FF9A2C`               | **orange, never green.** Light value stepped from the client's `#FF9A2C` for 5.05:1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Decrease / loss          | `--color-down`                           | `#0667B0`               | `#4EA1E8`               | **blue, never red.** Stepped from the client's `#0088E0` (3.75:1 on white fails)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Selection fill           | `--color-pick` / `--color-on-pick`       | `#EFC96A` / `#482720`   | `#F5B73C` / `#121013`   | gold fill with a **dark** ink in both themes: 8.34 light, 10.57 dark. Not `ink-strong`: that is white in the dark theme, and white on amber measures 1.75:1. **Fill only** — as a boundary it is 1.59:1 on light `raised` (KI-9)                                                                                                                                                                                                                                                                                                                                                                                                |
+| Selection boundary       | `--color-pick-line`                      | `#7A5C10`               | `#F5B73C`               | the deep end of the same gold, for the 2px outline that says "this one is live": **6.24** on light `raised`, **8.46** on dark `raised`, against WCAG 1.4.11's 3:1. Aliases to `--color-pick` in dark because that value already cleared there. Four consumers, all measured: the calendar's `current` cell, the meter ladder's `aria-current` step, the guided step's selected card, and the step links. Known weakness: it sits 1.24:1 from `--color-goal-line` in luminance, so a goal cell and a current cell are told apart by hue and by the goal's red pennant, not by lightness — both also carry words, so D-12 holds   |
+| Skill Points identity    | `--color-sp`                             | `#009FE1`               | `#4FC3F7`               | the client's cyan, exact; **fills, rules and tint only**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Skill Points text        | `--color-sp-ink`                         | `#0E7490`               | `#4FC3F7`               | the client cyan measures 2.66-2.98 as text on light surfaces (research §3.4 already recorded the fail), so text uses the stepped value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Risk / rejected          | `--color-risk`                           | `#800014`               | `#FF6B7A`               | reserved: training failure and rejection only                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Turn chip anchor         | `--color-anchor`                         | `#0B6FB8`               | `#8FC4EE`               | deliberately not `--color-down`; blue already means "went down"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Focus ring               | `--color-ring`                           | `#4E7906`               | `#7FCC09`               | 3:1 non-text boundary in both themes; `--color-green` alone fails light at 1.88 (see §8). Measured against the surfaces it actually sits on: **5.17 / 4.88 / 4.61** on light `raised` / `panel` / `page`, **7.61 / 9.51 / 9.79** in dark                                                                                                                                                                                                                                                                                                                                                                                        |
 
 Status badges (release status is the catalog's load-bearing signal) render through
 `--color-green` / `--color-sp` / `--color-pick` and their ink partners rather than
 literal hexes, so they follow the active theme instead of pinning one.
 
-| ReleaseStatus | Treatment | Rule |
-|---|---|---|
-| `GlobalReleased` | `--color-green` capsule with `--color-on-chrome` ink (dark) or `--color-chrome` fill with white ink (light) | fill + text label always together; never color-only |
-| `GlobalAnnounced` | `--color-sp-ink` text + hairline outline | Proposed mapping, no fill — cyan as a fill reads as selected. Text uses `sp-ink`, not `sp`: the client cyan cannot carry a label on light surfaces |
-| `JapanOnly` | **unimplemented** — the catalog renders this status as `--color-ink-muted` label text today (`catalog/index.blade.php:71`, inside the `text-ink-muted` meta row), not as a badge | never color-only: the word says it (D-12). The treatment written here formerly said `--color-pick` **text** + hairline outline; gold text on a light surface is 1.59:1, so building it as specified would have shipped a text-contrast failure. Corrected during the KI-9 split rather than implemented. If a badge is ever wanted, it needs a fill + ink pair from the pair table above, not the pick hue as text |
+| ReleaseStatus       | Treatment                                                                                                                                                                          | Rule                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GlobalReleased`    | `--color-green` capsule with `--color-on-chrome` ink (dark) or `--color-chrome` fill with white ink (light)                                                                        | fill + text label always together; never color-only                                                                                                                                                                                                                                                                                                                                                                  |
+| `GlobalAnnounced`   | `--color-sp-ink` text + hairline outline                                                                                                                                           | Proposed mapping, no fill — cyan as a fill reads as selected. Text uses `sp-ink`, not `sp`: the client cyan cannot carry a label on light surfaces                                                                                                                                                                                                                                                                   |
+| `JapanOnly`         | **unimplemented** — the catalog renders this status as `--color-ink-muted` label text today (`catalog/index.blade.php:71`, inside the `text-ink-muted` meta row), not as a badge   | never color-only: the word says it (D-12). The treatment written here formerly said `--color-pick` **text** + hairline outline; gold text on a light surface is 1.59:1, so building it as specified would have shipped a text-contrast failure. Corrected during the KI-9 split rather than implemented. If a badge is ever wanted, it needs a fill + ink pair from the pair table above, not the pick hue as text   |
 
 Never use Tailwind default `green-500` etc. as brand tokens; the client's
 action green is hue ~87°, and six degrees of drift breaks the resemblance
@@ -141,16 +141,16 @@ token the static theme declares") — adding a role moves the number in the test
 this file together. The 40 roles with no row above are not undocumented decisions, they
 are token families whose contract lives in their own `app.css` comment block:
 
-| Family | Roles | Why it is not in the table above |
-|---|---|---|
-| Step scale | `sunken`, `idle`, `disabled` | surface steps, never text-bearing on their own |
-| Ink step | `ink-faint` | non-text only: borders, ticks, disabled glyphs. Measured as body text it fails, which is why `ink-muted` is the subordinate text tier |
-| Green family | `on-green`, `green-deep`, `green-tint`, `green-line` | the fill/ink pair and the tint/line pair that `chrome` and `green` are measured against |
-| Goal pair | `goal`, `goal-line` | two colours on one cell (red pennant, warm outline), so neither can borrow |
-| Mood | 5 tier fills + `on-mood` | chrome, deliberately *not* theme-overridden: the client's pill is one pink in both themes |
-| Stat bands | 6 `tint-*` + 6 `line-*` | per-stat whisper tints; stats carry no saturated identity hue |
-| Grade badges | 9 `grade-*` | 9 letters × 2 themes, white letters banned on the light fills |
-| Identity | `rank`, `lattice`, `anchor`, `scrim` | one-off roles; `scrim` is the only overlay treatment |
+| Family         | Roles                                                  | Why it is not in the table above                                                                                                        |
+| -------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Step scale     | `sunken`, `idle`, `disabled`                           | surface steps, never text-bearing on their own                                                                                          |
+| Ink step       | `ink-faint`                                            | non-text only: borders, ticks, disabled glyphs. Measured as body text it fails, which is why `ink-muted` is the subordinate text tier   |
+| Green family   | `on-green`, `green-deep`, `green-tint`, `green-line`   | the fill/ink pair and the tint/line pair that `chrome` and `green` are measured against                                                 |
+| Goal pair      | `goal`, `goal-line`                                    | two colours on one cell (red pennant, warm outline), so neither can borrow                                                              |
+| Mood           | 5 tier fills + `on-mood`                               | chrome, deliberately *not* theme-overridden: the client's pill is one pink in both themes                                               |
+| Stat bands     | 6 `tint-*` + 6 `line-*`                                | per-stat whisper tints; stats carry no saturated identity hue                                                                           |
+| Grade badges   | 9 `grade-*`                                            | 9 letters × 2 themes, white letters banned on the light fills                                                                           |
+| Identity       | `rank`, `lattice`, `anchor`, `scrim`                   | one-off roles; `scrim` is the only overlay treatment                                                                                    |
 
 **Intended:** the test's own comment says a new role is added "here and in DESIGN.md
 §3.1 together", but this file has no §3.1 — the token table is §2.1. The citation
@@ -222,7 +222,7 @@ external fonts (offline constraint + C-8 dependency gate).
   implemented as named `@utility` rules in `app.css`, not as arbitrary values.
 
   | Motif | Spec | Where | Why it is not decoration |
-  |---|---|---|---|
+  | --- | --- | --- | --- |
   | Enamel sheen | research §6.1 | primary action button only | The client's buttons are glossy enamel, and the sheen marks the one confirm control per screen. Hard-edged single split at about 34%, never a feathered ramp (research D-112). |
   | Argyle lattice bleed | research §6.3 | capsule headers | The client's most repeated element, measured across frames `234521`, `230755`, `232345`. It identifies a header as chrome rather than as data. |
   | Torn-page turn chip | research §6.6 | the Turn widget in the resource strip | Frame `194819`. Tab strip plus two punch holes. It is the run's timeline anchor, and in a run list it is the row's identity, because turn depth is the first thing a Trainer reads. |
@@ -252,39 +252,39 @@ loading state has no surface to live on, and the "fetch in flight" affordance §
 is the only thing that would ever create one. That is a deliberate absence, not an
 oversight, and it is cheaper than the indicator would be.
 
-| Component | Route | Purpose | Empty | Error | Reachable |
-|---|---|---|---|---|---|
-| Catalog filter form | `catalog.index` | status + search + unconfirmed opt-in | n/a | n/a | yes |
-| Catalog roster rows | `catalog.index` | trainee header + her costume forms | dashed panel naming the remedy | 404 page | yes |
-| Catalog detail `dl` | `catalog.show` | identity, profile fields, dates | "unpublished" wording | 404 page | yes |
-| Trainee artwork slot | `catalog.index`, `catalog.show` | `ArtworkSlot`: a mirrored portrait streamed from `artwork.show`, geometry per §4.7 | renders nothing; the row stays text-only | the stream route 404s if the file goes missing between page and request | yes |
-| Support-card artwork slot | `support-cards.index`, `support-cards.show` | `ArtworkSlot`: a mirrored thumbnail, same stream and rules | renders nothing; the row stays text-only | the stream route 404s | yes |
-| Costume form tabs | `catalog.show` | one panel per form, CSS/native-radio tabs | single form draws no strip | 404 page | yes |
-| Aptitude grid | `catalog.show` | 10 letters, letter **and** word (D-12) | "unpublished", never half a grid | 404 page | yes |
-| Aliases / provenance lists | `catalog.show` | aliases, source URL + fetched stamp in `display_timezone` | "No aliases yet" | 404 page | yes |
-| Run rows | `runs.index` | trainee, scenario, status, date (mono) | dashed panel, "No runs yet" | n/a | yes |
-| Run create form | `runs.create` | trainee combobox, scenario, status, legacy slots, notes | n/a | `@error` per field | yes |
-| Turn table | `runs.show` | five stats + SP + condition, tabular numerals | "No turns logged yet" | gap | yes |
-| Guided step | `runs.show` | discipline pick, preview, confirm | n/a | one error list for field + request errors | yes |
-| Stat band | `runs.show` | grade badges, values, cap markers | "No turns" | gap | yes |
-| Resource strip | `runs.show` | turn, energy, fans, scenario widgets | n/a | gap | yes |
-| Race calendar | `runs.show` | scenario timeline, gates, goal pennants | n/a | gap | yes |
-| Grade point meter | `runs.show` | Trackblazer objectives, progress | n/a | gap | yes |
-| Race panel / fatigue chip | `runs.show` | race entry + declared fatigue | n/a | `@error` | yes |
-| Shop panel | `runs.show` | purchase form + rotation countdown | n/a | `@error` | yes |
-| Deck panel | `runs.show` | equip one open picker, closed rows post hidden inputs | n/a | `@error` per row | yes |
-| Team panels | `runs.show` | team race, rank gauge, spirit burst roster, epithet checklist | varies | `@error` | yes |
-| Skill state groups | `runs.show` | Suggested / Acquired / Skipped lists | "None." per group | n/a | yes |
-| Skill rows form | `runs.show` | per-row skill id, status, turn acquired | n/a | `@error` per field | yes |
-| Hand-correction form | `runs.show` | `<details>` escape hatch, every field at once | n/a | `$errors` list | yes |
-| Delete run | `runs.show` | `<details>` disclosure wrapping the destructive POST | n/a | n/a | yes |
-| Export links | `runs.show` | csv / json download | n/a | gap | yes |
-| Skill filter form | `skills.index` | search, type, unique-only, all `h-11` | invitation shown only with no query | `@error('type')` | yes |
-| Skill rows | `skills.index` | name, name_ja, Unique mark, type, SP cost | two distinct no-data states | n/a | yes |
-| Candidate cards | `review.index` | proposed name, tier, source, suggestion | "Nothing pending" + command | stacked `role="alert"` list | yes |
-| Resolve form | `review.index` | confirm / alias / reject per candidate | n/a | same stacked list | yes |
-| Pagination | all index routes | two responsive blocks, token-only | n/a | n/a | yes |
-| 404 | error page | branded recovery, named routes out | n/a | n/a | yes |
+| Component                    | Route                                         | Purpose                                                                              | Empty                                      | Error                                                                     | Reachable   |
+| ---------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------- | ----------- |
+| Catalog filter form          | `catalog.index`                               | status + search + unconfirmed opt-in                                                 | n/a                                        | n/a                                                                       | yes         |
+| Catalog roster rows          | `catalog.index`                               | trainee header + her costume forms                                                   | dashed panel naming the remedy             | 404 page                                                                  | yes         |
+| Catalog detail `dl`          | `catalog.show`                                | identity, profile fields, dates                                                      | "unpublished" wording                      | 404 page                                                                  | yes         |
+| Trainee artwork slot         | `catalog.index`, `catalog.show`               | `ArtworkSlot`: a mirrored portrait streamed from `artwork.show`, geometry per §4.7   | renders nothing; the row stays text-only   | the stream route 404s if the file goes missing between page and request   | yes         |
+| Support-card artwork slot    | `support-cards.index`, `support-cards.show`   | `ArtworkSlot`: a mirrored thumbnail, same stream and rules                           | renders nothing; the row stays text-only   | the stream route 404s                                                     | yes         |
+| Costume form tabs            | `catalog.show`                                | one panel per form, CSS/native-radio tabs                                            | single form draws no strip                 | 404 page                                                                  | yes         |
+| Aptitude grid                | `catalog.show`                                | 10 letters, letter **and** word (D-12)                                               | "unpublished", never half a grid           | 404 page                                                                  | yes         |
+| Aliases / provenance lists   | `catalog.show`                                | aliases, source URL + fetched stamp in `display_timezone`                            | "No aliases yet"                           | 404 page                                                                  | yes         |
+| Run rows                     | `runs.index`                                  | trainee, scenario, status, date (mono)                                               | dashed panel, "No runs yet"                | n/a                                                                       | yes         |
+| Run create form              | `runs.create`                                 | trainee combobox, scenario, status, legacy slots, notes                              | n/a                                        | `@error` per field                                                        | yes         |
+| Turn table                   | `runs.show`                                   | five stats + SP + condition, tabular numerals                                        | "No turns logged yet"                      | gap                                                                       | yes         |
+| Guided step                  | `runs.show`                                   | discipline pick, preview, confirm                                                    | n/a                                        | one error list for field + request errors                                 | yes         |
+| Stat band                    | `runs.show`                                   | grade badges, values, cap markers                                                    | "No turns"                                 | gap                                                                       | yes         |
+| Resource strip               | `runs.show`                                   | turn, energy, fans, scenario widgets                                                 | n/a                                        | gap                                                                       | yes         |
+| Race calendar                | `runs.show`                                   | scenario timeline, gates, goal pennants                                              | n/a                                        | gap                                                                       | yes         |
+| Grade point meter            | `runs.show`                                   | Trackblazer objectives, progress                                                     | n/a                                        | gap                                                                       | yes         |
+| Race panel / fatigue chip    | `runs.show`                                   | race entry + declared fatigue                                                        | n/a                                        | `@error`                                                                  | yes         |
+| Shop panel                   | `runs.show`                                   | purchase form + rotation countdown                                                   | n/a                                        | `@error`                                                                  | yes         |
+| Deck panel                   | `runs.show`                                   | equip one open picker, closed rows post hidden inputs                                | n/a                                        | `@error` per row                                                          | yes         |
+| Team panels                  | `runs.show`                                   | team race, rank gauge, spirit burst roster, epithet checklist                        | varies                                     | `@error`                                                                  | yes         |
+| Skill state groups           | `runs.show`                                   | Suggested / Acquired / Skipped lists                                                 | "None." per group                          | n/a                                                                       | yes         |
+| Skill rows form              | `runs.show`                                   | per-row skill id, status, turn acquired                                              | n/a                                        | `@error` per field                                                        | yes         |
+| Hand-correction form         | `runs.show`                                   | `<details>` escape hatch, every field at once                                        | n/a                                        | `$errors` list                                                            | yes         |
+| Delete run                   | `runs.show`                                   | `<details>` disclosure wrapping the destructive POST                                 | n/a                                        | n/a                                                                       | yes         |
+| Export links                 | `runs.show`                                   | csv / json download                                                                  | n/a                                        | gap                                                                       | yes         |
+| Skill filter form            | `skills.index`                                | search, type, unique-only, all `h-11`                                                | invitation shown only with no query        | `@error('type')`                                                          | yes         |
+| Skill rows                   | `skills.index`                                | name, name_ja, Unique mark, type, SP cost                                            | two distinct no-data states                | n/a                                                                       | yes         |
+| Candidate cards              | `review.index`                                | proposed name, tier, source, suggestion                                              | "Nothing pending" + command                | stacked `role="alert"` list                                               | yes         |
+| Resolve form                 | `review.index`                                | confirm / alias / reject per candidate                                               | n/a                                        | same stacked list                                                         | yes         |
+| Pagination                   | all index routes                              | two responsive blocks, token-only                                                    | n/a                                        | n/a                                                                       | yes         |
+| 404                          | error page                                    | branded recovery, named routes out                                                   | n/a                                        | n/a                                                                       | yes         |
 
 **Intended: three components are built and unreachable.** `deck-editor`,
 `energy-gauge`, `run-header`. Two of them matter beyond dead weight, because each
@@ -308,7 +308,6 @@ and the grade letters §2.1 routes through `ink-strong` have one implementation 
 delete it. A component that exists only as an unimplemented decision is the cheapest
 thing in the tree to keep and the most expensive to leave, because a future author will
 read it as the pattern.
-
 
 ## 4. Surface specifications
 
@@ -491,7 +490,7 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   the reserve alone; its label was already 8px from the frame.
 
   | Box | Surface | Click action | Source |
-  |---|---|---|---|
+  | --- | --- | --- | --- |
   | `size-16` | trainee portrait on catalog detail; support thumb on support-card detail | no action | `design-2.0` §45a |
   | `size-12` | trainee portrait on catalog index; support thumb on support-card index | navigates to detail | `design-2.0` §45a |
   | `size-10` | trainee portrait on the catalog index's costume-form row | no action | `design-2.0` §45a |
@@ -613,11 +612,11 @@ more completely than the contract's own text, because nothing eases at all.
 **What is shipped, from `app.css`'s base layer, is three treatments this section did not
 previously name:**
 
-| Treatment | Value | Why it is here |
-|---|---|---|
-| `:focus-visible` ring | `2px solid var(--color-ring)`, `2px` offset | one rule covers every focusable element, so a component cannot ship without a ring |
-| `::selection` | `--color-pick` fill with `--color-on-pick` ink | the amber selection, never white on amber (G-47) |
-| `caret-color` on input/textarea/select | `var(--color-chrome)` | the caret was a browser default belonging to no system, which is the cheapest tell of an assembled page |
+| Treatment                                | Value                                            | Why it is here                                                                                            |
+| ---------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `:focus-visible` ring                    | `2px solid var(--color-ring)`, `2px` offset      | one rule covers every focusable element, so a component cannot ship without a ring                        |
+| `::selection`                            | `--color-pick` fill with `--color-on-pick` ink   | the amber selection, never white on amber (G-47)                                                          |
+| `caret-color` on input/textarea/select   | `var(--color-chrome)`                            | the caret was a browser default belonging to no system, which is the cheapest tell of an assembled page   |
 
 **Intended: two controls specify `focus-visible:outline-green` inline, bypassing
 `--color-ring`.** `resources/views/vendor/pagination/tailwind.blade.php` and the skill
@@ -661,20 +660,20 @@ the MOTION dial stays 1 and no `transition-*` utility was added.
 The gap between these two columns is the honest state of design verification in this
 repo, and it is the finding most worth carrying out of this audit.
 
-| Claim | Enforced by | State 2026-10-04 |
-|---|---|---|
-| No `zinc-*` utility, no `dark:` fork, on shell pages | `DesignTokensTest` (data provider over URLs) | **passing** |
-| Pagination renders from tokens | `DesignTokensTest` | **passing** |
-| Exactly 60 colour tokens in `@theme static` | `DesignTokensTest` | **passing** (11 passed, 42 assertions) |
-| Selection boundary uses `pick-line`, never `pick` | `DesignTokensTest` (whole view tree) | **passing** |
-| Theme preference is one keyed row, SQLite only | `DesignTokensTest` | **passing** |
-| First paint is the resolved theme; unknown stored value ignored | `DesignTokensTest` | **passing** |
-| All 60 tokens resolve non-empty in both themes (D-288) | `DesignTokensTest`, browser block | **skipped** — no Playwright, test is `markTestIncomplete` |
-| All 19 text/background pairs + 9 grade fills clear 4.5:1 in both themes (G-18) | `DesignTokensTest`, browser block | **skipped** — same cause |
-| Rendered copy: `N/A` for absence, never a dash, no `Unknown` | `RenderedCopyHygieneTest`, view tests | **passing** |
-| Flash banners use tokens | `FlashBannerTokensTest` | **passing** |
-| 768px minimum width is safe | nothing | **Unverified** — see §2.3's held proposal |
-| Every ratio quoted in this file | research-phase measurement, files absent | **documented, not reproducible here** |
+| Claim                                                                            | Enforced by                                    | State 2026-10-04                                            |
+| -------------------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------- |
+| No `zinc-*` utility, no `dark:` fork, on shell pages                             | `DesignTokensTest` (data provider over URLs)   | **passing**                                                 |
+| Pagination renders from tokens                                                   | `DesignTokensTest`                             | **passing**                                                 |
+| Exactly 60 colour tokens in `@theme static`                                      | `DesignTokensTest`                             | **passing** (11 passed, 42 assertions)                      |
+| Selection boundary uses `pick-line`, never `pick`                                | `DesignTokensTest` (whole view tree)           | **passing**                                                 |
+| Theme preference is one keyed row, SQLite only                                   | `DesignTokensTest`                             | **passing**                                                 |
+| First paint is the resolved theme; unknown stored value ignored                  | `DesignTokensTest`                             | **passing**                                                 |
+| All 60 tokens resolve non-empty in both themes (D-288)                           | `DesignTokensTest`, browser block              | **skipped** — no Playwright, test is `markTestIncomplete`   |
+| All 19 text/background pairs + 9 grade fills clear 4.5:1 in both themes (G-18)   | `DesignTokensTest`, browser block              | **skipped** — same cause                                    |
+| Rendered copy: `N/A` for absence, never a dash, no `Unknown`                     | `RenderedCopyHygieneTest`, view tests          | **passing**                                                 |
+| Flash banners use tokens                                                         | `FlashBannerTokensTest`                        | **passing**                                                 |
+| 768px minimum width is safe                                                      | nothing                                        | **Unverified** — see §2.3's held proposal                   |
+| Every ratio quoted in this file                                                  | research-phase measurement, files absent       | **documented, not reproducible here**                       |
 
 The two skipped rows are why this file's contrast numbers cannot be treated as verified on
 this host: they were transcribed from research captures whose evidence files are not in

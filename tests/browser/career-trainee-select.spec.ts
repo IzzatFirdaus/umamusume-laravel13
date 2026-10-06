@@ -13,9 +13,9 @@ import { test, expect } from '@playwright/test';
  * seeded scratch catalog (67 trainees), and `Admire Vega` is the first row under the default
  * name-ascending sort.
  *
- * No axe pass: `@axe-core/playwright` and `axe-core` are both absent from `node_modules` and adding a
- * dependency needs owner approval (AGENTS.md §5), so the plan §12.5 fallback applies and the checks
- * below are the hand-rolled ones §12.2 names.
+ * Axe coverage is provided by `tests/browser/accessibility.spec.ts`: `@axe-core/playwright` is installed
+ * and scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`; this spec retains the hand-rolled checks
+ * for target size, keyboard path, focus order, reflow and console errors.
  */
 
 /** The card that names the trainee in its own heading, wherever the heading's other spans sit. */
@@ -42,10 +42,11 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(first.getByRole('button', { name: 'Select Trainee', exact: true })).toBeVisible();
         await expect(first.getByRole('link', { name: 'View Profile' })).toBeVisible();
 
-        // The wizard shell: step 2 is the current step and the three unlanded steps stay named absences.
+        // The wizard shell: step 2 is the current step, and since D7 all six steps are live links, so
+        // the step nav holds no named absence.
         await expect(page.getByRole('link', { name: 'Trainee' })).toHaveAttribute('aria-current', 'step');
         await expect(page.getByText('Step 2 of 6').first()).toBeVisible();
-        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(3);
+        await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(0);
 
         // Nothing is chosen on a fresh draft, so the stored-choice line states the absence and no row
         // is pre-pressed.

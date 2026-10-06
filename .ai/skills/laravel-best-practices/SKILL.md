@@ -33,12 +33,16 @@ use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
-    public function index(): JsonResponse
-    {
-        return response()->json([
-            'data' => User::select(['id', 'name', 'email'])->get(),
-        ]);
-    }
+
+```text
+public function index(): JsonResponse
+{
+    return response()->json([
+        'data' => User::select(['id', 'name', 'email'])->get(),
+    ]);
+}
+```
+
 }
 </code-snippet>
 
@@ -61,20 +65,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email'])]
-#[Hidden(['password', 'remember_token'])]
+# [Fillable(['name', 'email'])]
+
+# [Hidden(['password', 'remember_token'])]
+
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+```text
+/** @use HasFactory<UserFactory> */
+use HasFactory, Notifiable;
+
+protected function casts(): array
+{
+    return [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+}
+```
+
 }
 </code-snippet>
 

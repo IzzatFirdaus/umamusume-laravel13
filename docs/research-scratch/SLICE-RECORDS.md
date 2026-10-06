@@ -4,23 +4,23 @@
 
 This master file is a verbatim embedding of all 15 Group D slice verification records. Source files are located in `docs/deprecated/design-research/verification/`. Each `##` section below reproduces one file in full, with internal headings demoted by one level.
 
-| # | File | Lines |
-|---|------|-------|
-| 1 | \$f\ | 75 |
-| 2 | \$f\ | 327 |
-| 3 | \$f\ | 350 |
-| 4 | \$f\ | 169 |
-| 5 | \$f\ | 231 |
-| 6 | \$f\ | 187 |
-| 7 | \$f\ | 201 |
-| 8 | \$f\ | 110 |
-| 9 | \$f\ | 63 |
-| 10 | \$f\ | 357 |
-| 11 | \$f\ | 177 |
-| 12 | \$f\ | 275 |
-| 13 | \$f\ | 275 |
-| 14 | \$f\ | 197 |
-| 15 | \$f\ | 648 |
+| #     | File     | Lines     |
+| ----- | -------- | --------- |
+| 1     | \$f\     | 75        |
+| 2     | \$f\     | 327       |
+| 3     | \$f\     | 350       |
+| 4     | \$f\     | 169       |
+| 5     | \$f\     | 231       |
+| 6     | \$f\     | 187       |
+| 7     | \$f\     | 201       |
+| 8     | \$f\     | 110       |
+| 9     | \$f\     | 63        |
+| 10    | \$f\     | 357       |
+| 11    | \$f\     | 177       |
+| 12    | \$f\     | 275       |
+| 13    | \$f\     | 275       |
+| 14    | \$f\     | 197       |
+| 15    | \$f\     | 648       |
 
 ---
 
@@ -31,12 +31,12 @@ This master file is a verbatim embedding of all 15 Group D slice verification re
 Date 2026-09-30. Tree: `master` at the commit this record lands in. Read-only browser pass
 against a scratch database; the shared dev file was never opened.
 
-### Setup
+## Setup
 
 ```bash
 DB_DATABASE="$PWD/.scratch-uma/verify-slice1.sqlite" php artisan migrate --seed --force
 DB_DATABASE="$PWD/.scratch-uma/verify-slice1.sqlite" php artisan serve --host=127.0.0.1 --port=8207
-```
+```text
 
 Two runs seeded through `php artisan tinker` scripts under `.scratch-uma/`, both discarded:
 
@@ -53,14 +53,14 @@ section's rendered text.
 
 ### Run 1 â€” Trackblazer (ceilings should be 1200 / 1900 / 1200 / 1200 / 1500)
 
-| Field | band end | rail `max` | raw form `max` |
-|---|---|---|---|
-| Speed | 1,200 / 1,200 | 1200 | 1200 |
-| Stamina | 1,900 / 1,900 | 1900 | 1900 |
-| Power | 1,150 / 1,200 | 1200 | 1200 |
-| Guts | 1,000 / 1,200 | 1200 | 1200 |
-| Wit | 1,480 / 1,500 | 1500 | 1500 |
-| SP | "no cap, no grade" | none | none |
+| Field     | band end             | rail `max`   | raw form `max`   |
+| --------- | -------------------- | ------------ | ---------------- |
+| Speed     | 1,200 / 1,200        | 1200         | 1200             |
+| Stamina   | 1,900 / 1,900        | 1900         | 1900             |
+| Power     | 1,150 / 1,200        | 1200         | 1200             |
+| Guts      | 1,000 / 1,200        | 1200         | 1200             |
+| Wit       | 1,480 / 1,500        | 1500         | 1500             |
+| SP        | "no cap, no grade"   | none         | none             |
 
 The band's ceiling and both forms' `max` agree on every stat, and SP carries no ceiling in
 either place. `ADR-0002`'s UI condition holds: the footer still reads "1,200 is where training
@@ -125,22 +125,21 @@ command that reproduces the rows) or say in the record that the artifact is ephe
 have to be re-authored. Naming the file is not enough; a path under an ignored scratch directory is a
 temporary path.
 
-
 ## slice-2-2026-09-28.md
 
 # Slice 2 verification record â€” 2026-09-28
 
 **Branch at run time:** `docs/audit-remediation`. Commits produced by this slice:
 
-| Step | Commit | What it holds |
-|---|---|---|
-| S1 | `9134206` | `scenario_slot_id` made mass-assignable; backfill and non-nullable refused on measured grounds |
-| S2 | `83084ab` | `calendarCells()`, `gradeObjectives()`, `gradeEarned()` feed the two goal panels |
-| S3 | `bb6eec6` | Red `Goal` pennant, warm outline, greater height, `role="img"` accessible name |
-| S4 | `d53a4b1` | KI-2 closed â€” the catalog stopped caching model objects |
-| S5 | `70f9218` | Progress fills re-lit; two lore-gate prose hits cleared |
-| S5b | `9451659` | `RaceEntryFactory` no longer writes into the frozen `scenario_races` |
-| S6 | this commit | Docs: ADR-0003 R2, KI-2 closed, KI-8 to KI-11, this record |
+| Step   | Commit        | What it holds                                                                                    |
+| ------ | ------------- | ------------------------------------------------------------------------------------------------ |
+| S1     | `9134206`     | `scenario_slot_id` made mass-assignable; backfill and non-nullable refused on measured grounds   |
+| S2     | `83084ab`     | `calendarCells()`, `gradeObjectives()`, `gradeEarned()` feed the two goal panels                 |
+| S3     | `bb6eec6`     | Red `Goal` pennant, warm outline, greater height, `role="img"` accessible name                   |
+| S4     | `d53a4b1`     | KI-2 closed â€” the catalog stopped caching model objects                                        |
+| S5     | `70f9218`     | Progress fills re-lit; two lore-gate prose hits cleared                                          |
+| S5b    | `9451659`     | `RaceEntryFactory` no longer writes into the frozen `scenario_races`                             |
+| S6     | this commit   | Docs: ADR-0003 R2, KI-2 closed, KI-8 to KI-11, this record                                       |
 
 `master` sits at `83084ab`. S3â€“S5 are **not on `master`**: a concurrent session
 created `docs/audit-remediation` from `83084ab`, moved this shared checkout onto
@@ -160,18 +159,18 @@ Substituted with forward migration plus seed against a **throwaway** database fi
 at `.scratch-uma/gate.sqlite`, pointed at by `DB_DATABASE` for each command. The
 shared `database/database.sqlite` was never opened by these commands.
 
-```
+```text
 2026_09_27_153416_create_scenario_slots_table ......................... 39.58ms DONE
 ### db:seed ###
   Database\Seeders\UmamusumeSeeder ....................................... 157 ms DONE
   Database\Seeders\SkillSeeder ............................................ 12 ms DONE
-```
+```text
 
 20 migrations recorded. This also produced S1's evidence in a clean install:
 
-```
+```text
 {"migrations":20,"umamusume":2,"skills":2,"scenario_slots":0,"scenario_races":0}
-```
+```text
 
 `scenario_races` is **empty after a full seed** â€” `DatabaseSeeder` calls only
 `UmamusumeSeeder` and `SkillSeeder` â€” so a backfill from it would have moved zero
@@ -179,10 +178,10 @@ rows. See Â§4.
 
 ### 1.2 `php artisan test --compact`
 
-```
+```text
 Tests:    2 skipped, 235 passed (751 assertions)
 Duration: 35.63s
-```
+```text
 
 **The two skips are skips, not passes.** They are the Playwright cases in
 `tests/Feature/DesignTokensTest.php` (`resolves all 52 tokens in both themesâ€¦` and
@@ -192,16 +191,16 @@ was added to change that. The manual pass in Â§3 is this slice's substitute ev
 
 ### 1.3 `vendor/bin/pint --dirty --format agent`
 
-```
+```text
 {"tool":"pint","result":"passed"}
-```
+```text
 
 ### 1.4 `vendor/bin/phpstan analyse --no-progress`
 
-```
+```text
 Note: Using configuration file D:\Projects\umamusume-laravel13\phpstan.neon.
  [OK] No errors
-```
+```text
 
 `phpstan.neon` analyses `paths: app` only, so test files are outside the gate. That
 is pre-existing configuration, not a change made here.
@@ -220,12 +219,12 @@ line number rather than named.
 
 `lore-code` against application paths, after S5's two rewrites:
 
-```
+```text
 config/queue.php:60:            'prefix' => env('SQS_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
 config/scenarios.php:216:            | One item name trips the `lore-code` gate: "Good-Luck Charm" contains
 config/scenarios.php:217:            | "Luck", which is banned because the JP wikis use it for a stat the
 config/scenarios.php:238:                ['name' => 'Good-Luck Charm', 'cost' => 40, 'effect' => 'Training failure rate 0% for 1 turn'],
-```
+```text
 
 Four hits, all pre-existing: the Laravel scaffold's SQS example URL, and the three
 documented `Good-Luck Charm` lines the owner ruled stay as source data. **Zero new.**
@@ -235,12 +234,12 @@ green.
 
 ### 1.6 `npx vite build`
 
-```
+```text
 public/build/manifest.json             0.33 kB â”‚ gzip:  0.17 kB
 public/build/assets/app-CsqAbBlF.css  69.05 kB â”‚ gzip: 14.22 kB
 public/build/assets/app-DMsN-rLE.js   51.52 kB â”‚ gzip: 19.51 kB
 âœ“ built in 7.69s
-```
+```text
 
 Verified against the built sheet rather than assumed: **all 52 declared colour
 tokens are present, 0 missing**, which is what `@theme static` buys (D-288) â€” an
@@ -249,12 +248,12 @@ pass.
 
 ### 1.7 `python tools/gate.py`
 
-```
+```text
 GATE PASS: 3 prototype(s), all machine-checkable gates green.
   Checked: G-1 lore, G-2 forms, G-3 terminology, G-4 tokens, G-13 rendered text,
            G-16 sample data, D-79 em dash, D-84 emoji.
   Not machine-checkable (reviewer): G-5 contrast, G-6, G-7, G-9, G-11, G-12, G-14, G-15, G-17.
-```
+```text
 
 ---
 
@@ -263,11 +262,11 @@ GATE PASS: 3 prototype(s), all machine-checkable gates green.
 `/umamusume` on a live server against the real `CACHE_STORE=database`, which is the
 configuration the suite never exercises:
 
-```
+```text
 design-preview -> 500
 umamusume     -> 200
 training-runs -> 200
-```
+```text
 
 KI-2 closed. The `design-preview` 500 is a different, previously unreported defect â€”
 see Â§4.
@@ -295,14 +294,14 @@ theme**, not the OS-follow resolution path; the resolution path is covered by
 
 ### Race calendar (`x-race-calendar`, on `/training-runs/1`, ura_finale)
 
-| Measured pair | light | dark | bar |
-|---|---|---|---|
-| goal cell text `ink-strong` on its `raised` fill | **13.24** | **15.15** | 4.5 |
-| goal cell warm outline `--color-goal-line` on `raised` | **5.02** | **6.15** | 3 |
-| `Goal` pennant `--color-goal` on `raised` | **5.74** | **4.49** | 3 |
-| fan-lock cell text `ink-muted` on `sunken` | **4.69** | **7.72** | 4.5 |
-| empty cell text `ink-muted` on `sunken` | **4.69** | **7.72** | 4.5 |
-| goal cell height over its neighbours | **+14px** | **+14px** | â€” |
+| Measured pair                                            | light       | dark        | bar   |
+| -------------------------------------------------------- | ----------- | ----------- | ----- |
+| goal cell text `ink-strong` on its `raised` fill         | **13.24**   | **15.15**   | 4.5   |
+| goal cell warm outline `--color-goal-line` on `raised`   | **5.02**    | **6.15**    | 3     |
+| `Goal` pennant `--color-goal` on `raised`                | **5.74**    | **4.49**    | 3     |
+| fan-lock cell text `ink-muted` on `sunken`               | **4.69**    | **7.72**    | 4.5   |
+| empty cell text `ink-muted` on `sunken`                  | **4.69**    | **7.72**    | 4.5   |
+| goal cell height over its neighbours                     | **+14px**   | **+14px**   | â€”   |
 
 Pennant colour resolved in the browser to `rgb(200, 29, 37)` light and
 `rgb(242, 85, 90)` dark, with both dead edges `rgba(0, 0, 0, 0)` â€” the triangle is
@@ -318,11 +317,11 @@ and the boundary is not the thing a Trainer must see.
 
 ### Grade Point meter (`x-grade-point-meter`, on `/training-runs/2`, trackblazer)
 
-| Measured pair | light before | light after | dark after | bar |
-|---|---|---|---|---|
-| progress fill on its `sunken` track | **1.62 âœ—** | **4.20** | **11.74** | 3 |
-| capsule header `on-chrome` on `chrome` | 5.17 | 5.17 | 9.51 | 4.5 |
-| earned figure `ink-strong` on `raised` | 13.24 | 13.24 | 15.15 | 4.5 |
+| Measured pair                            | light before   | light after   | dark after   | bar   |
+| ---------------------------------------- | -------------- | ------------- | ------------ | ----- |
+| progress fill on its `sunken` track      | **1.62 âœ—**   | **4.20**      | **11.74**    | 3     |
+| capsule header `on-chrome` on `chrome`   | 5.17           | 5.17          | 9.51         | 4.5   |
+| earned figure `ink-strong` on `raised`   | 13.24          | 13.24         | 15.15        | 4.5   |
 
 The 1.62 was the pass's one genuine failure, found on the base theme, and it is what
 `70f9218` fixes in both bars. The capsule confirms D-11's trap is avoided: white on
@@ -404,7 +403,7 @@ session row on every request.
 
 **HTTP sweep, each cached route requested twice so the cache read is covered:**
 
-```
+```text
 /                        200    /training-runs        200
 /umamusume               200    /training-runs/1      200   (URA, slots present)
 /umamusume               200    /training-runs/2      200   (Trackblazer meter)
@@ -412,7 +411,7 @@ session row on every request.
 /umamusume/special-week  200    /training-runs/create 200
 /umamusume?status=...    200    /review               200
 /umamusume/nope-unknown  404    /design-preview       500   (KI-8, unchanged)
-```
+```text
 
 **Console:** zero errors and zero warnings on every page visited.
 
@@ -475,17 +474,17 @@ source hex.
 
 ### Grade badge fills Ã— `--color-ink-strong` â€” all nine, both themes
 
-| Fill | light hex | light ratio | dark hex | dark ratio |
-|---|---|---|---|---|
-| `grade-g` | #D6E2D8 | **9.91** | #2C3A2F | **11.98** |
-| `grade-f` | #DED9E8 | **9.58** | #38343F | **12.13** |
-| `grade-e` | #E4D0F0 | **9.19** | #3E2A4A | **12.84** |
-| `grade-d` | #CFE0F5 | **9.85** | #263A4F | **11.66** |
-| `grade-c` | #D8EFC8 | **10.78** | #2F4220 | **10.93** |
-| `grade-b` | #FBD0E0 | **9.58** | #4A2838 | **12.71** |
-| `grade-a` | #FBD9BC | **9.93** | #4A3520 | **11.53** |
-| `grade-s` | #FBE9BE | **11.03** | #4A3F22 | **10.37** |
-| `grade-ss` | #F6DFAE | **10.14** | #55481F | **9.00** |
+| Fill         | light hex   | light ratio   | dark hex   | dark ratio   |
+| ------------ | ----------- | ------------- | ---------- | ------------ |
+| `grade-g`    | #D6E2D8     | **9.91**      | #2C3A2F    | **11.98**    |
+| `grade-f`    | #DED9E8     | **9.58**      | #38343F    | **12.13**    |
+| `grade-e`    | #E4D0F0     | **9.19**      | #3E2A4A    | **12.84**    |
+| `grade-d`    | #CFE0F5     | **9.85**      | #263A4F    | **11.66**    |
+| `grade-c`    | #D8EFC8     | **10.78**     | #2F4220    | **10.93**    |
+| `grade-b`    | #FBD0E0     | **9.58**      | #4A2838    | **12.71**    |
+| `grade-a`    | #FBD9BC     | **9.93**      | #4A3520    | **11.53**    |
+| `grade-s`    | #FBE9BE     | **11.03**     | #4A3F22    | **10.37**    |
+| `grade-ss`   | #F6DFAE     | **10.14**     | #55481F    | **9.00**     |
 
 Eighteen pairs, minimum **9.00**, against a 4.5:1 requirement for the badge letter. This
 corroborates the figure `FRONTEND-SPEC-DIVERGENCE.md` Â§5 and the DesignTokensTest note
@@ -501,17 +500,17 @@ component that printed `B`.
 
 ### Column header tints Ã— `--color-ink`, and the bar
 
-| Pair | light | dark |
-|---|---|---|
-| `ink` on `tint-speed` | **5.86** | **11.61** |
-| `ink` on `tint-stamina` | **5.81** | **11.52** |
-| `ink` on `tint-power` | **6.18** | **11.56** |
-| `ink` on `tint-guts` | **5.77** | **11.47** |
-| `ink` on `tint-wit` | **6.30** | **11.45** |
-| `ink` on `tint-sp` | **6.17** | **11.61** |
-| bar fill `bg-green-deep` on `sunken` | **4.20** | **11.74** |
-| value `ink-strong` on `raised` | **13.24** | **15.15** |
-| caption `ink-muted` on `page` | **5.15** | **8.55** |
+| Pair                                   | light       | dark        |
+| -------------------------------------- | ----------- | ----------- |
+| `ink` on `tint-speed`                  | **5.86**    | **11.61**   |
+| `ink` on `tint-stamina`                | **5.81**    | **11.52**   |
+| `ink` on `tint-power`                  | **6.18**    | **11.56**   |
+| `ink` on `tint-guts`                   | **5.77**    | **11.47**   |
+| `ink` on `tint-wit`                    | **6.30**    | **11.45**   |
+| `ink` on `tint-sp`                     | **6.17**    | **11.61**   |
+| bar fill `bg-green-deep` on `sunken`   | **4.20**    | **11.74**   |
+| value `ink-strong` on `raised`         | **13.24**   | **15.15**   |
+| caption `ink-muted` on `page`          | **5.15**    | **8.55**    |
 
 The bar row is the stat-band half of the `70f9218` fix, which Slice 2 fixed by source
 inspection but explicitly declined to claim as measured. It is measured now: 4.20 and
@@ -535,7 +534,6 @@ nobody later "fixes" them into visibility and turns a quiet rule into a grid of 
   has no grade, one because a 3rd place has no sourced value. That is the state T3 turns
   into honest copy.
 
-
 ## slice-2-support-cards-2026-10-01.md
 
 # Slice 2 verification â€” support card entities
@@ -552,13 +550,13 @@ Supersedes: the first Slice 2 pass, which was schema-and-models only.
 The review asked for the fingerprint as proof rather than assertion. Recorded before and after every
 `migrate` this slice ran.
 
-| When | Size | mtime |
-|---|---|---|
-| Slice 1 hand-off (as recorded in that pass) | 1,667,072 | 2026-09-30 19:11 |
-| This slice, before any work | 409,600 | 2026-09-30 22:51:41 |
-| Mid-slice observation | 1,179,648 | 2026-09-30 23:59:43 |
-| At this slice's own close | 1,179,648 | 2026-09-30 23:59:43 (unchanged across my whole pass) |
-| Later still, reported by a peer session | 783,616 + `-wal` + `-shm` | 2026-10-01 00:30 |
+| When                                          | Size                        | mtime                                                  |
+| --------------------------------------------- | --------------------------- | ------------------------------------------------------ |
+| Slice 1 hand-off (as recorded in that pass)   | 1,667,072                   | 2026-09-30 19:11                                       |
+| This slice, before any work                   | 409,600                     | 2026-09-30 22:51:41                                    |
+| Mid-slice observation                         | 1,179,648                   | 2026-09-30 23:59:43                                    |
+| At this slice's own close                     | 1,179,648                   | 2026-09-30 23:59:43 (unchanged across my whole pass)   |
+| Later still, reported by a peer session       | 783,616 + `-wal` + `-shm`   | 2026-10-01 00:30                                       |
 
 Nothing in this slice advanced the file between 22:51:41 and my close: the size and mtime are identical
 across those readings, and every command this slice ran against a database named a scratch path instead.
@@ -585,11 +583,11 @@ fixture, which was not what happened.
 than letting it stand.** All three files in `storage/app/backups/` hold `training_runs = 0` and
 `turn_entries = 0`:
 
-| Backup (filename time is UTC; mtime is local) | Size | runs | umamusume | skills | migrations |
-|---|---|---|---|---|---|
-| `uma-backup-20260929-153038` (09-29 23:30) | 1,536,000 | **0** | 135 | 1,910 | 33 |
-| `uma-backup-20260930-145151` (09-30 22:51) | 409,600 | **0** | 2 | 9 | 36 |
-| `uma-backup-20260930-155251` (09-30 23:52) | 1,179,648 | **0** | 67 | 1,910 | 37 |
+| Backup (filename time is UTC; mtime is local)   | Size        | runs    | umamusume   | skills   | migrations   |
+| ----------------------------------------------- | ----------- | ------- | ----------- | -------- | ------------ |
+| `uma-backup-20260929-153038` (09-29 23:30)      | 1,536,000   | **0**   | 135         | 1,910    | 33           |
+| `uma-backup-20260930-145151` (09-30 22:51)      | 409,600     | **0**   | 2           | 9        | 36           |
+| `uma-backup-20260930-155251` (09-30 23:52)      | 1,179,648   | **0**   | 67          | 1,910    | 37           |
 
 So the shared database never held Trainer-authored run data at any snapshot. What a rebuild discarded was
 regenerable reference data, which `migrate:fresh --seed` reproduces offline â€” the peer's stated purpose.
@@ -642,12 +640,12 @@ longer exists. Not caused by this session; reported so the record is not read as
 Four defects, all found by checking the shipped schema against `support-cards.json` rather than against
 intent. Landed in `2026_09_30_151945_correct_support_card_schema_and_constraints`.
 
-| # | Defect | Evidence | Fix |
-|---|---|---|---|
-| 1 | `char_id` declared `foreign â€¦ on umamusume` | `umamusume.id` is an autoincrement surrogate over 268 rows while the source id is 1001..1149 and lives in `external_ref`; 23 records carry a 9000-block staff id | FK dropped, column kept verbatim. Shape copied from `character_cards`, which separates `card_id` from `umamusume_id` |
-| 2 | `name` was a composed string | the export has `char_name` and `title_en`, no `name_en` | Column dropped, `char_name` added, `displayName()` composes at the view boundary |
-| 3 | **The four CHECK constraints rendered no SQL at all** | `Blueprint::check()` does not exist as a table method; as a column modifier the SQLite grammar drops it. `PRAGMA`/`sqlite_master` shows no `CHECK` token | Rebuilt in raw SQL, where SQLite both emits and enforces |
-| 4 | `support_effects.calc` allowed `flat` and `level` | across 35 records: `mult` 3, `add` 1, absent 31. `flat`/`level` are this repo's prose (Â§1.4.8), not export values | CHECK narrowed to `('mult','add')` or null |
+| #     | Defect                                                  | Evidence                                                                                                                                                           | Fix                                                                                                                    |
+| ----- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| 1     | `char_id` declared `foreign â€¦ on umamusume`           | `umamusume.id` is an autoincrement surrogate over 268 rows while the source id is 1001..1149 and lives in `external_ref`; 23 records carry a 9000-block staff id   | FK dropped, column kept verbatim. Shape copied from `character_cards`, which separates `card_id` from `umamusume_id`   |
+| 2     | `name` was a composed string                            | the export has `char_name` and `title_en`, no `name_en`                                                                                                            | Column dropped, `char_name` added, `displayName()` composes at the view boundary                                       |
+| 3     | **The four CHECK constraints rendered no SQL at all**   | `Blueprint::check()` does not exist as a table method; as a column modifier the SQLite grammar drops it. `PRAGMA`/`sqlite_master` shows no `CHECK` token           | Rebuilt in raw SQL, where SQLite both emits and enforces                                                               |
+| 4     | `support_effects.calc` allowed `flat` and `level`       | across 35 records: `mult` 3, `add` 1, absent 31. `flat`/`level` are this repo's prose (Â§1.4.8), not export values                                                 | CHECK narrowed to `('mult','add')` or null                                                                             |
 
 Defect 1 was more wrong than first reported. The reviewer's ruling said "SQLite does not honour CHECK";
 measurement says the CHECKs were never in the DDL, and separately that **all 559** cards would have been
@@ -660,7 +658,7 @@ pinned, at both layers.
 
 **Measured, on a database migrated from zero (`verify-schema.php`):**
 
-```
+```text
 support_cards    CHECK present: YES   FK count: 0
 support_effects  CHECK present: YES   FK count: 0
 deck_slots       CHECK present: YES   FK count: 2
@@ -670,7 +668,7 @@ deck_slots       CHECK present: YES   FK count: 2
   âœ“ rarity 5: rejected            âœ“ calc 'mult': accepted
   âœ“ type 'bogus': rejected        âœ“ calc NULL (the other 31): accepted
   âœ“ calc 'flat': rejected
-```
+```text
 
 `release_status` survived the rebuild as a real generated column (`varchar as (CASE â€¦) stored`), and
 `down()` was exercised by calling the migration object directly against a scratch copy: 2 rows in, 2 rows
@@ -689,11 +687,11 @@ The review required validation that holds even where the DDL does not.
 Three tests, one per layer, plus the model-layer one specifically because factories reach the table
 without passing through a form request:
 
-```
+```text
 âœ“ it rejects a slot position outside one to six at the model layer
 âœ“ it rejects a slot position outside one to six at the column layer
 âœ“ it refuses to build a slot at an impossible position through the factory
-```
+```text
 
 ### 5. R75 framing
 
@@ -727,7 +725,7 @@ Sample list row, read from the live server against the imported catalogue:
   "sourceUrl":"https://gametora.com/data/umamusume/support-cards.88dea522.json",
   "fetchedAt":"2026-09-27T15:49:00+00:00","isManual":false}],
  "pagination":{"page":1,"pageSize":25,"totalItems":559,"totalPages":23}}
-```
+```text
 
 Machine tokens on the wire (`rarity` int, `type` export key), not client words â€” the client vocabulary
 (`Wit`, `Pal`, `SSR`) is a view-boundary mapping, matching how `mood` and `status` are emitted as enum
@@ -738,7 +736,7 @@ values elsewhere.
 ```json
 "deck":[{"slotPosition":6,"isFriendSlot":true,
   "supportCard":{"supportId":10022,"charName":"Aoi Kiryuin","type":"friend",â€¦}}]
-```
+```text
 
 ### 8. UI
 
@@ -748,11 +746,11 @@ has six slots, so a run naming no scenario still had a deck.
 
 Measured through the browser on the imported catalogue (not factories):
 
-| Run | State | selects | options/slot | equipped rows | Scenario Link | empty state |
-|---|---|---|---|---|---|---|
-| 1 | `ura_finale`, six cards | 6 | 253 | 6 | 0 | â€“ |
-| 2 | `unity_cup`, two linked | 6 | 252 | 2 | **2** | â€“ |
-| 3 | blank scenario, none | 6 | 252 | 0 | 0 | **1** |
+| Run   | State                     | selects   | options/slot   | equipped rows   | Scenario Link   | empty state   |
+| ----- | ------------------------- | --------- | -------------- | --------------- | --------------- | ------------- |
+| 1     | `ura_finale`, six cards   | 6         | 253            | 6               | 0               | â€“           |
+| 2     | `unity_cup`, two linked   | 6         | 252            | 2               | **2**           | â€“           |
+| 3     | blank scenario, none      | 6         | 252            | 0               | 0               | **1**         |
 
 Positions arrive as 1..6, slot six reads `Slot 6 Â· Friends` whatever sits there, and the option count is
 `1 blank + 251 Global + any equipped non-Global card` in every case.
@@ -778,12 +776,12 @@ fatalled on `$def['cap_bonus']`.
 
 Three places spelled "is a scenario set" differently, and the model's spelling was the wrong one:
 
-| Site | Before | After |
-|---|---|---|
-| `TrainingRun::hasScenario()` | `$this->scenario !== null` | `filled($this->scenario)` |
-| `TrainingRun::scenarioKey()` | `?? baseline` (so `''` stayed `''`) | `?: baseline` |
-| `runs/show.blade.php:39` caption | `$run->scenario === null` | `$run->hasScenario()` |
-| `runs/index.blade.php:26` label | `$run->scenario === null` | `$run->hasScenario()` |
+| Site                               | Before                                | After                       |
+| ---------------------------------- | ------------------------------------- | --------------------------- |
+| `TrainingRun::hasScenario()`       | `$this->scenario !== null`            | `filled($this->scenario)`   |
+| `TrainingRun::scenarioKey()`       | `?? baseline` (so `''` stayed `''`)   | `?: baseline`               |
+| `runs/show.blade.php:39` caption   | `$run->scenario === null`             | `$run->hasScenario()`       |
+| `runs/index.blade.php:26` label    | `$run->scenario === null`             | `$run->hasScenario()`       |
 
 The view already guarded `! $run->scenario` in one place, so the model and the view disagreed about the
 same value; the view's reading is the one that renders. The web form normalises `''` to `null`, which is
@@ -809,7 +807,7 @@ Named source, verified by measurement rather than by the subagent's report:
 
 Measured on a scratch database migrated from zero:
 
-```
+```text
 first run : 559 created, 0 updated, 0 skipped (manual)   |  35 created
 re-run    :   0 created, 559 updated, 0 skipped          |   0 created  â† idempotent
 
@@ -820,7 +818,7 @@ Global-released cards     251   (expect 251)
 anchors not 12 wide         0   (expect 0)
 calc mult / add / null    3 / 1 / 31                (expect exactly that)
 rarity 1/2/3          [146, 101, 312]              (expect that)
-```
+```text
 
 `is_manual` protection tested against the real command, not a mock: a row was marked manual and renamed,
 `uma:import:support-cards` re-run, and the row came back with `char_name = 'Hand Corrected Name'` and
@@ -842,25 +840,25 @@ the migration docblock now carry a dated correction naming the mistake rather th
 
 All five run against the working tree with every file in place.
 
-| Gate | Command | Result |
-|---|---|---|
-| Tests | `php artisan test --compact` | **972 passed, 2 skipped, 0 failed** (16,232 assertions, 65.53 s) â€” the working tree, import files included |
-| Static analysis | `vendor/bin/phpstan analyse --no-progress` | **[OK] No errors** (level 6) |
-| Formatting | `vendor/bin/pint --test --format agent <my files>` | **passed** |
-| Lore | `composer lore` | **exit 0** |
-| Lore (code) | `composer lore-code` | **exit 0** |
+| Gate              | Command                                              | Result                                                                                                         |
+| ----------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Tests             | `php artisan test --compact`                         | **972 passed, 2 skipped, 0 failed** (16,232 assertions, 65.53 s) â€” the working tree, import files included   |
+| Static analysis   | `vendor/bin/phpstan analyse --no-progress`           | **[OK] No errors** (level 6)                                                                                   |
+| Formatting        | `vendor/bin/pint --test --format agent <my files>`   | **passed**                                                                                                     |
+| Lore              | `composer lore`                                      | **exit 0**                                                                                                     |
+| Lore (code)       | `composer lore-code`                                 | **exit 0**                                                                                                     |
 
 **Two numbers, because the commit and the working tree differ (Â§12).** The 972 above counts the four
 import test files, which are on disk but not committed:
 
-```
+```text
 GametoraSupportCardParserTest    10 passed (12,524 assertions â€” it walks all 559 records)
 GametoraSupportEffectParserTest   9 passed (   277 assertions)
 StoreSupportCardsTest             9 passed (    73 assertions)
 SupportCardFetchTest              8 passed (    41 assertions)
                                  â”€â”€â”€â”€â”€â”€â”€â”€â”€  â”€â”€â”€â”€â”€â”€â”€â”€â”€
                                  36 passed
-```
+```text
 
 So the committed subset alone is **936 passed**. Both figures were run, not derived; `972 âˆ’ 36 = 936` is
 stated because the two files that would have isolated `HEAD` (a stash, or a second worktree) are unsafe to
@@ -894,7 +892,7 @@ is unambiguously one slice's and stops at the seam.
 
 To finish it, whoever owns the seeder work should commit the config and pipeline changes together, then:
 
-```
+```text
 git add app/Actions/StoreSupport{Cards,Effects}.php \
         app/Console/Commands/UmaImportSupportCards.php \
         app/Services/DataPipeline/Contracts/Support{Card,Effect}SourceParser.php \
@@ -902,7 +900,7 @@ git add app/Actions/StoreSupport{Cards,Effects}.php \
         database/seeders/data/support-cards.88dea522.json \
         database/seeders/data/support_effects.ca447e53.json \
         tests/Feature/{GametoraSupportCardParserTest,GametoraSupportEffectParserTest,StoreSupportCardsTest,SupportCardFetchTest}.php
-```
+```text
 
 **Verification limit, stated rather than glossed.** The 972 was measured with the whole tree present. The
 committed subset is smaller and additive, but a strict `HEAD`-only run was not performed: isolating it
@@ -911,17 +909,17 @@ which is how work gets lost. The exclusion list above is the honest boundary.
 
 ### 13. Fence
 
-| Hard stop | Status |
-|---|---|
-| Never write `database/database.sqlite` | **Honoured by me.** No command of this slice opened it for writing; every migrate ran with `DB_DATABASE=<scratch path>`, confirmed by the connection name in the error text. The file did change hands underneath the slice â€” see Â§1, attributed to a live `artisan serve` and a peer's `migrate`, not to this work. |
-| No `migrate:fresh` / `db:wipe` / `migrate:rollback` in any form | **Honoured.** All scratch databases were created by a plain `php artisan migrate` on a new file. `down()` was exercised by calling the migration object directly, never through the rollback command. |
-| No push, no merge | **Honoured.** `origin` is configured (`github.com/IzzatFirdaus/umamusume-laravel13`) and the local branch already sits 48 commits ahead of `origin/master` from prior sessions; no `git push`, `git merge` or `git rebase` was run here. |
-| Shared-worktree safety | A `stash@{0}` from another session is present ("stale forks of branch commits + broken Blade cardless band (triage 2026-09-30)"). It was **not** read, popped, dropped or extended: in a tree another session is writing to, `git stash pop` can restore the wrong work. |
-| No editing `ADR-0002` / `ADR-0003` / `ADR-0005` | **Honoured.** ADR-0005 is cited and superseded in prose only; its file is unmodified. `git status` shows no change to it. |
-| No editing `.gitignore`, `CLAUDE.md`, `docs/deprecated/**`, `docs/frontend-review/**`, `README.md` | **Honoured.** None staged. The legacy PDF's tier column is cited as *reason not to use it*, not read as a source. |
-| No tier labels until a current Global source is confirmed | **Honoured.** No tier column, no tier copy. ADR-0014 states the hold and its real reason. |
-| No ADR-0013 dual-state resolution | **Honoured.** Not touched. |
-| No new dependency | **Honoured.** `composer.lock` and `package.json` unchanged. |
+| Hard stop                                                                                            | Status                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Never write `database/database.sqlite`                                                               | **Honoured by me.** No command of this slice opened it for writing; every migrate ran with `DB_DATABASE=<scratch path>`, confirmed by the connection name in the error text. The file did change hands underneath the slice â€” see Â§1, attributed to a live `artisan serve` and a peer's `migrate`, not to this work.   |
+| No `migrate:fresh` / `db:wipe` / `migrate:rollback` in any form                                      | **Honoured.** All scratch databases were created by a plain `php artisan migrate` on a new file. `down()` was exercised by calling the migration object directly, never through the rollback command.                                                                                                                     |
+| No push, no merge                                                                                    | **Honoured.** `origin` is configured (`github.com/IzzatFirdaus/umamusume-laravel13`) and the local branch already sits 48 commits ahead of `origin/master` from prior sessions; no `git push`, `git merge` or `git rebase` was run here.                                                                                  |
+| Shared-worktree safety                                                                               | A `stash@{0}` from another session is present ("stale forks of branch commits + broken Blade cardless band (triage 2026-09-30)"). It was **not** read, popped, dropped or extended: in a tree another session is writing to, `git stash pop` can restore the wrong work.                                                  |
+| No editing `ADR-0002` / `ADR-0003` / `ADR-0005`                                                      | **Honoured.** ADR-0005 is cited and superseded in prose only; its file is unmodified. `git status` shows no change to it.                                                                                                                                                                                                 |
+| No editing `.gitignore`, `CLAUDE.md`, `docs/deprecated/**`, `docs/frontend-review/**`, `README.md`   | **Honoured.** None staged. The legacy PDF's tier column is cited as *reason not to use it*, not read as a source.                                                                                                                                                                                                         |
+| No tier labels until a current Global source is confirmed                                            | **Honoured.** No tier column, no tier copy. ADR-0014 states the hold and its real reason.                                                                                                                                                                                                                                 |
+| No ADR-0013 dual-state resolution                                                                    | **Honoured.** Not touched.                                                                                                                                                                                                                                                                                                |
+| No new dependency                                                                                    | **Honoured.** `composer.lock` and `package.json` unchanged.                                                                                                                                                                                                                                                               |
 
 ### 14. Second pass: the five gates
 
@@ -941,11 +939,11 @@ slice is owed. Recorded as its own row in `SESSION-CONSOLIDATION-2026-09-30.md` 
 **Gate 3 â€” page weight filed as KI-43.** Measured rather than estimated; `.scratch-uma/measure-deck-weight.php`
 replays it against the saved pages:
 
-| Run state | Page | Deck block | Share |
-|---|---|---|---|
-| six equipped | 360,492 B | 296,537 B | 82.3% |
-| two equipped | 363,341 B | 293,021 B | 80.6% |
-| **nothing equipped** | 329,355 B | 291,547 B | **88.5%** |
+| Run state              | Page        | Deck block   | Share       |
+| ---------------------- | ----------- | ------------ | ----------- |
+| six equipped           | 360,492 B   | 296,537 B    | 82.3%       |
+| two equipped           | 363,341 B   | 293,021 B    | 80.6%       |
+| **nothing equipped**   | 329,355 B   | 291,547 B    | **88.5%**   |
 
 The last row is what makes it a finding rather than a cost: an empty deck still ships 1,512 `<option>`
 elements, 207,504 B, 57.6% of the page. The panel did not add a section to the run screen, it became it.
@@ -954,10 +952,10 @@ Not fixed this slice, per ruling. The WAL rule was filed alongside as **KI-44**,
 
 **Gate 4 â€” the PHPStan attribution conflict resolves clean.** Targeted run:
 
-```
+```text
 vendor/bin/phpstan analyse --no-progress app/Models/SupportCard.php app/Http/Resources/SupportCardResource.php
  â†’ [OK] No errors
-```
+```text
 
 So the peer read a pre-fix snapshot. Slice 2's fixes did land: the `@property` blocks are what moved
 `rarity` from `int` to `CardRarity` and cleared the `match` and undefined-property errors. No stale error
@@ -976,16 +974,14 @@ cross-*process* isolation cannot be tested while paratest refuses, but `:memory:
 (one private database per process, no file, no sidecars), and cross-*test* dependence â€” the failure that
 would actually surface â€” was tested by running the whole suite in a shuffled order:
 
-```
+```text
 vendor/bin/pest --order-by=random --random-order-seed=4321
   Tests: 2 skipped, 972 passed (16232 assertions), Duration: 92.34s
-```
+```text
 
 Identical counts to the sequential run, same assertion total. No test depends on another test's rows.
 The gate's intent is satisfied; its literal command is not available in this project, and that is worth
 knowing before anything schedules paratest against this tree.
-
-
 
 ## slice-3-2026-09-28.md
 
@@ -997,17 +993,17 @@ listed below; this file's own commit is the last one, so it cannot cite itself.
 Slice 3 was a stabilisation slice: clear the blockers Slice 2 filed, then reconcile the branch.
 T1â€“T7 and T9 landed. **T8 did not, and that is the finding of this record** (Â§5).
 
-| Task | Commit | What it holds |
-|---|---|---|
-| T1 | `ab915f8` | Em-dash disclosure glyph replaced with `N/A` across shipped Blade (R12), plus the automated catch |
-| T2 | `726f106`, `78697e9` | Grade fill keyed on the base letter, badge prints the half-step (R13/R19); stat-band measured in both themes |
-| T3 | `2816309` | Grade Point meter given three states instead of two (R18) |
-| T4 | `725a5ff` | `--color-pick-line` split from `--color-pick` (R15), four consumers moved |
-| T5 | `5c65597` | Ten evidenced skill names in the live select; empty slot seeder deleted (R14) |
-| T6 | `5548b9e` | Remote font links deleted from `welcome.blade.php` (KI-3) |
-| T7 | `ee97869`, `cc3f963`, `21f9906`, `ee6786c` | Extended lore grep landed; `composer lore` / `composer lore-code`; parity guarded (KI-4) |
-| T8 | â€” | Branch reconciliation **stopped**, see Â§5 |
-| T9 | this commit | Gates, docs re-baseline, review erratum |
+| Task   | Commit                                       | What it holds                                                                                                  |
+| ------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| T1     | `ab915f8`                                    | Em-dash disclosure glyph replaced with `N/A` across shipped Blade (R12), plus the automated catch              |
+| T2     | `726f106`, `78697e9`                         | Grade fill keyed on the base letter, badge prints the half-step (R13/R19); stat-band measured in both themes   |
+| T3     | `2816309`                                    | Grade Point meter given three states instead of two (R18)                                                      |
+| T4     | `725a5ff`                                    | `--color-pick-line` split from `--color-pick` (R15), four consumers moved                                      |
+| T5     | `5c65597`                                    | Ten evidenced skill names in the live select; empty slot seeder deleted (R14)                                  |
+| T6     | `5548b9e`                                    | Remote font links deleted from `welcome.blade.php` (KI-3)                                                      |
+| T7     | `ee97869`, `cc3f963`, `21f9906`, `ee6786c`   | Extended lore grep landed; `composer lore` / `composer lore-code`; parity guarded (KI-4)                       |
+| T8     | â€”                                          | Branch reconciliation **stopped**, see Â§5                                                                     |
+| T9     | this commit                                  | Gates, docs re-baseline, review erratum                                                                        |
 
 ---
 
@@ -1022,22 +1018,22 @@ classifier again (fifth time in this arc); the recorded substitution in `PLAN.md
 Criteria applies â€” forward `migrate` plus `db:seed` against a brand-new scratch file, so the
 shared `database/database.sqlite` is never opened:
 
-```
+```text
 DB_DATABASE=.scratch-uma/gate-slice3b.sqlite php artisan migrate --force   -> 21 migrations DONE
 DB_DATABASE=.scratch-uma/gate-slice3b.sqlite php artisan db:seed --force   ->  2 seeders  DONE
 tables=24  skills=10  runs=0  slots=0  races=0
-```
+```text
 
 `slots=0` after a clean seed is the expected state, not a failure: populating `scenario_slots` is
 fetch-engine work per ADR-0003 Amendment R3.
 
 **2. Tests.**
 
-```
+```text
 php artisan test --compact
   Tests:    2 skipped, 255 passed (796 assertions)
   Duration: 17.16s
-```
+```text
 
 **3. Style.** `vendor/bin/pint --dirty --format agent` â†’ `{"tool":"pint","result":"passed"}`
 
@@ -1045,10 +1041,10 @@ php artisan test --compact
 
 **5. Lore gates, both implementations, one tree.**
 
-```
+```text
 make lore      (recipe bodies run verbatim)  133      composer lore        lore-docs: 133 hit(s)
 make lore-code (recipe bodies run verbatim)    4      composer lore-code   lore-code:    4 hit(s)
-```
+```text
 
 Equal, which is what `LoreGateParityTest` enforces. Counts are prints, not distinct lines: a line
 matching two of the three greps prints twice. Two of the 133 come from this file: Â§1 and Â§6 both
@@ -1060,12 +1056,12 @@ the three documented `Good-Luck Charm` lines).
 
 **6. Prototype gate.** `python tools/gate.py` â†’
 
-```
+```text
 GATE PASS: 3 prototype(s), all machine-checkable gates green.
   Checked: G-1 lore, G-2 forms, G-3 terminology, G-4 tokens, G-13 rendered text,
            G-16 sample data, D-79 em dash, D-84 emoji.
   Not machine-checkable (reviewer): G-5 contrast, G-6, G-7, G-9, G-11, G-12, G-14, G-15, G-17.
-```
+```text
 
 **7. Build and token survival.** `npm run build` â†’ 69.15 kB CSS / 51.52 kB JS, `âœ“ built in 2.92s`.
 Counted against the built sheet rather than against the source: **55 custom properties declared in
@@ -1091,14 +1087,14 @@ the source hex (D-288). Fixture: the R17 five-run set on an isolated scratch dat
 **Stat band, all nine grade badge fills against `--color-ink-strong`** (full table in
 `slice-2-2026-09-28.md` Â§Addendum T2):
 
-| Badge | light | dark | | Badge | light | dark |
-|---|---|---|---|---|---|---|
-| `grade-g` | 9.91 | 11.98 | | `grade-a` | 9.93 | 11.53 |
-| `grade-f` | 9.58 | 12.13 | | `grade-s` | 11.03 | 10.37 |
-| `grade-e` | 9.19 | 12.84 | | `grade-ss` | 10.14 | **9.00** |
-| `grade-d` | 9.85 | 11.66 | | | | |
-| `grade-c` | 10.78 | 10.93 | | | | |
-| `grade-b` | 9.58 | 12.71 | | | | |
+| Badge       | light   | dark    |       | Badge        | light   | dark       |
+| ----------- | ------- | ------- | ----- | ------------ | ------- | ---------- |
+| `grade-g`   | 9.91    | 11.98   |       | `grade-a`    | 9.93    | 11.53      |
+| `grade-f`   | 9.58    | 12.13   |       | `grade-s`    | 11.03   | 10.37      |
+| `grade-e`   | 9.19    | 12.84   |       | `grade-ss`   | 10.14   | **9.00**   |
+| `grade-d`   | 9.85    | 11.66   |       |              |         |            |
+| `grade-c`   | 10.78   | 10.93   |       |              |         |            |
+| `grade-b`   | 9.58    | 12.71   |       |              |         |            |
 
 Eighteen pairs, minimum **9.00** against the 4.5:1 requirement. Band bar fill
 `bg-green-deep` on `sunken`: **4.20** light / **11.74** dark against 3:1. The half-step rule holds on
@@ -1106,28 +1102,28 @@ the rendered element: a 550-point stat reads `B+` over `rgb(251,208,224)` = `--c
 
 **Selection boundary (`--color-pick-line`), four consumers, both themes:**
 
-| Pair | light | dark |
-|---|---|---|
-| boundary on `raised` (calendar `current` cell, ladder `aria-current` step) | **6.24** | **8.46** |
-| boundary on `panel` (ladder, light only) | **5.89** | â€” |
-| selection fill `--color-pick` Ã— `--color-on-pick` (unchanged by the split) | 8.34 | 10.57 |
-| focus ring `--color-ring` on `raised` / `panel` / `page` | 5.17 / 4.88 / 4.61 | 7.61 / 9.51 / 9.79 |
+| Pair                                                                          | light                | dark                 |
+| ----------------------------------------------------------------------------- | -------------------- | -------------------- |
+| boundary on `raised` (calendar `current` cell, ladder `aria-current` step)    | **6.24**             | **8.46**             |
+| boundary on `panel` (ladder, light only)                                      | **5.89**             | â€”                  |
+| selection fill `--color-pick` Ã— `--color-on-pick` (unchanged by the split)   | 8.34                 | 10.57                |
+| focus ring `--color-ring` on `raised` / `panel` / `page`                      | 5.17 / 4.88 / 4.61   | 7.61 / 9.51 / 9.79   |
 
 Against WCAG 1.4.11's 3:1 for a boundary a user must see. The defect this replaced was 1.59:1
 (`KI-9`).
 
 ### 4. Issue register after this slice
 
-| ID | State | Closed by |
-|---|---|---|
-| KI-3 | RESOLVED | `5548b9e`, guarded by `RenderedCopyHygieneTest` |
-| KI-4 | RESOLVED | `ee97869` + `cc3f963`; untracked-file scope split recorded as still open |
-| KI-7 | RESOLVED | `ab915f8`, plus the automated Blade sweep |
-| KI-8 | RESOLVED | `726f106` (owner ruling R19), measured in `78697e9` |
-| KI-9 | RESOLVED | `725a5ff` |
-| KI-11 | one half closed | seeder deleted in `5c65597`; `--color-green-tint` retirement refused and open |
-| KI-12 | RESOLVED | `2816309`; KI-10's arithmetic deliberately untouched |
-| **KI-13** | **OPEN â€” Blocker** | New. Committed code resolves against five files that exist on no ref. Blocks T8 |
+| ID          | State                  | Closed by                                                                         |
+| ----------- | ---------------------- | --------------------------------------------------------------------------------- |
+| KI-3        | RESOLVED               | `5548b9e`, guarded by `RenderedCopyHygieneTest`                                   |
+| KI-4        | RESOLVED               | `ee97869` + `cc3f963`; untracked-file scope split recorded as still open          |
+| KI-7        | RESOLVED               | `ab915f8`, plus the automated Blade sweep                                         |
+| KI-8        | RESOLVED               | `726f106` (owner ruling R19), measured in `78697e9`                               |
+| KI-9        | RESOLVED               | `725a5ff`                                                                         |
+| KI-11       | one half closed        | seeder deleted in `5c65597`; `--color-green-tint` retirement refused and open     |
+| KI-12       | RESOLVED               | `2816309`; KI-10's arithmetic deliberately untouched                              |
+| **KI-13**   | **OPEN â€” Blocker**   | New. Committed code resolves against five files that exist on no ref. Blocks T8   |
 
 `KI-10` stays open by design: the placement ratio is not in the corpus and the year bucket is
 schema work. T3 changed the sentence the meter prints, not the arithmetic behind it.
@@ -1157,13 +1153,13 @@ without dropping one gives a schema that cannot migrate.
 appear in **zero commits on any ref** (`git log --all --` returns nothing), while committed code
 resolves against them:
 
-```
+```text
 git grep -ln ScenarioSlot HEAD   -> app/Models/RaceEntry.php, app/Models/TrainingRun.php,
                                     tests/Feature/RaceSlotPanelComposerTest.php,
                                     tests/Feature/Schema/RaceEntrySlotLinkTest.php
 git ls-tree -r --name-only HEAD database/migrations | wc -l  -> 17   (disk: 20)
 git cat-file -e master:app/Models/ScenarioSlot.php            -> ABSENT
-```
+```text
 
 `composer.json` maps `App\` to `app/`, so an absent class file is a fatal, not a soft miss. The
 first commit to depend on a file no ref has is `9134206` (Slice 2 S1), so `master` (`83084ab`) is
@@ -1200,7 +1196,6 @@ tests are proof about this directory, not about `ee6786c`.
   own branch does not belong in a registry â€” and the registry's dated figure is now visibly a
   snapshot rather than a threshold.
 
-
 ## slice-5-2026-09-28.md
 
 # Slice 5 verification record â€” 2026-09-28
@@ -1214,16 +1209,16 @@ the flow completable from the keyboard. No model, no migration, no config, no ne
 (C-8). Livewire stays out and this slice produced the evidence its future ADR will need
 (`PLAN.md` Â§Open Decisions).
 
-| Task | Commit | What it holds |
-|---|---|---|
-| T0 | `cd0be38` | Livewire costed against a measured baseline; nothing installed |
-| T1 | `d50a0ec` | Band and rail mounted on `runs/show`, two-stage preview, failure record, mood select, energy advisory |
-| T1b | `2685a37` | The band's `{# â€¦ #}` comment was rendering as page text, plus the guard |
-| T2 | `71bbb4b` | Two-region frame with a pinned state region (D-40, D-41, D-170) |
-| T3 | `6a53c15` | Keyboard path: skip link, number keys, Escape; roving left to the radio group (D-55, G-11) |
-| T1c | `edeb8cd` | Mood delta sign, found in the browser |
-| T1d | `03a5d05` | Hint badge ink, found in the browser |
-| T4/T5 | this commit | Gates, browser pass, docs, scratch cleanup |
+| Task    | Commit        | What it holds                                                                                           |
+| ------- | ------------- | ------------------------------------------------------------------------------------------------------- |
+| T0      | `cd0be38`     | Livewire costed against a measured baseline; nothing installed                                          |
+| T1      | `d50a0ec`     | Band and rail mounted on `runs/show`, two-stage preview, failure record, mood select, energy advisory   |
+| T1b     | `2685a37`     | The band's `{# â€¦ #}` comment was rendering as page text, plus the guard                               |
+| T2      | `71bbb4b`     | Two-region frame with a pinned state region (D-40, D-41, D-170)                                         |
+| T3      | `6a53c15`     | Keyboard path: skip link, number keys, Escape; roving left to the radio group (D-55, G-11)              |
+| T1c     | `edeb8cd`     | Mood delta sign, found in the browser                                                                   |
+| T1d     | `03a5d05`     | Hint badge ink, found in the browser                                                                    |
+| T4/T5   | this commit   | Gates, browser pass, docs, scratch cleanup                                                              |
 
 ---
 
@@ -1238,17 +1233,17 @@ classifier; the PLAN-documented substitution applies - forward `migrate` plus `d
 brand-new scratch file. `database/database.sqlite` is never opened: `SESSION_DRIVER=database`
 writes a session row per request.
 
-```
+```text
 .scratch-uma/slice5.sqlite   20 migrations run (matches `ls database/migrations | wc -l`), 2 seeders
 tables=24  skills=10  runs=5  slots=10  race_entries=5  turn_entries=5
-```
+```text
 
 **Tests.**
 
-```
+```text
 php artisan test --compact
   Tests:    2 skipped, 292 passed (923 assertions)
-```
+```text
 
 **Style.** `vendor/bin/pint --dirty --format agent` â†’ `{"tool":"pint","result":"passed"}`
 (twice during the slice it fixed `new_with_parentheses` in files I had just added, before the
@@ -1258,10 +1253,10 @@ gate was run, and reported `passed` after.)
 
 **Lore gates, both implementations, one tree.**
 
-```
+```text
 make lore       (recipe bodies, verbatim)  133      composer lore        lore-docs: 133 hit(s)
 make lore-code  (recipe bodies, verbatim)    4      composer lore-code   lore-code:    4 hit(s)
-```
+```text
 
 One of the 133 is this slice's own prose, and two more nearly were. A comment in
 `guided-step.blade.php` said "the pairing D-3 forbids", and `pairing` is on the banned <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 -->
@@ -1297,11 +1292,11 @@ nothing is inferred from a class name.
 
 ### Energy band word, three states, both themes
 
-| State | Run | Energy | light pair | light | dark pair | dark |
-|---|---|---|---|---|---|---|
-| Safe | 1 | 74 | `ink` #6A5641 on `green-tint` #F0F8EC | **6.40** | `ink` #ECEAF2 on #1F2A12 | **12.60** |
-| Caution | 2 | 42 | `on-pick` #482720 on `pick` #EFC96A | **8.34** | `on-pick` #121013 on #F5B73C | **10.57** |
-| Danger | 3 | 18 | `on-chrome` #FFF on `risk` #800014 | **10.89** | `on-chrome` #121013 on #FF6B7A | **6.88** |
+| State     | Run   | Energy   | light pair                              | light       | dark pair                        | dark        |
+| --------- | ----- | -------- | --------------------------------------- | ----------- | -------------------------------- | ----------- |
+| Safe      | 1     | 74       | `ink` #6A5641 on `green-tint` #F0F8EC   | **6.40**    | `ink` #ECEAF2 on #1F2A12         | **12.60**   |
+| Caution   | 2     | 42       | `on-pick` #482720 on `pick` #EFC96A     | **8.34**    | `on-pick` #121013 on #F5B73C     | **10.57**   |
+| Danger    | 3     | 18       | `on-chrome` #FFF on `risk` #800014      | **10.89**   | `on-chrome` #121013 on #FF6B7A   | **6.88**    |
 
 All six clear 4.5:1 for text. The Safe row is `--color-green-tint`'s first real consumer, which
 is what R23 committed to instead of retiring the token, and KI-11's open half closes on this
@@ -1318,11 +1313,11 @@ that line is this tool's own ruling: the client publishes no Energy threshold be
 
 ### Advisory, hint badge, and the ink that had to change
 
-| Pair | light | dark |
-|---|---|---|
-| advisory body `ink` on `raised` | **6.95** | **12.71** |
-| Hint badge `on-pick` on `green` | **6.65** | **9.51** |
-| Hint badge as first written, `on-chrome` on `green` | **1.99** | 9.51 |
+| Pair                                                  | light      | dark        |
+| ----------------------------------------------------- | ---------- | ----------- |
+| advisory body `ink` on `raised`                       | **6.95**   | **12.71**   |
+| Hint badge `on-pick` on `green`                       | **6.65**   | **9.51**    |
+| Hint badge as first written, `on-chrome` on `green`   | **1.99**   | 9.51        |
 
 The third row is a defect, not a state. The badge shipped white-on-green and measured 1.99:1 in
 the light theme - the exact combination `app.css` records as forbidden by D-3, introduced by me
@@ -1330,10 +1325,10 @@ in T1f and invisible to every PHP test in the suite. `03a5d05` moves the ink to 
 
 ### Preview panel deltas, both themes
 
-| Delta | colour | light | dark |
-|---|---|---|---|
-| `+70 Speed`, `+35 Stamina`, `+3 Mood` â†’ | `up` #B45309 on `raised` | **5.02** | **7.15** (on #24262A) |
-| `-90 Skill Points`, `-34 Energy` â†’ | `down` #0667B0 on `raised` | **5.87** | **5.48** (#4EA1E8) |
+| Delta                                       | colour                       | light      | dark                    |
+| ------------------------------------------- | ---------------------------- | ---------- | ----------------------- |
+| `+70 Speed`, `+35 Stamina`, `+3 Mood` â†’   | `up` #B45309 on `raised`     | **5.02**   | **7.15** (on #24262A)   |
+| `-90 Skill Points`, `-34 Energy` â†’        | `down` #0667B0 on `raised`   | **5.87**   | **5.48** (#4EA1E8)      |
 
 Gains orange, losses blue, never green and never red (Â§6.16b), and every row carries its word,
 so nothing is colour-only (D-12). The arithmetic is entered value minus stored value against the
@@ -1341,37 +1336,37 @@ row before the turn being entered: turn 3 compares to turn 2, not to the newest 
 
 ### Recorded failure on the timeline
 
-| Pair | light | dark |
-|---|---|---|
-| `Failed` chip `risk` text on the row's effective background | **9.71** (#800014 on #F2F1F8) | **7.09** (#FF6B7A on #0D0C0F) |
+| Pair                                                          | light                           | dark                            |
+| ------------------------------------------------------------- | ------------------------------- | ------------------------------- |
+| `Failed` chip `risk` text on the row's effective background   | **9.71** (#800014 on #F2F1F8)   | **7.09** (#FF6B7A on #0D0C0F)   |
 
 Row text as rendered: `3 Failed | Penalty kind: stat Â· Speed`. The word carries what the colour
 carries, the penalty kind is named, and no cell is a bare zero.
 
 ### Keyboard, with real presses
 
-| Check | Result |
-|---|---|
-| First Tab from load | focus on the skip link, box 137 Ã— 40, revealed by `:focus` |
-| Enter on the skip link | `location.hash = "#main"`, `<main id="main">` exists |
-| Tabs to the first choice | 6 |
-| Focus ring on the choice banner | `outline: 2px solid rgb(78, 121, 6)` = `--color-ring`, with `matches(':focus-visible') === true` |
-| `ArrowRight` from `training-Speed` | lands on `training-Wit`, `checked: true` |
-| `4` with focus on a choice | selects `training-Guts`, exactly one checked |
-| typing `550` into Speed | selection unchanged (`training-Wit` before and after), field holds `550` |
-| `Escape` | focus returns to the checked radio, selection intact |
-| `Enter` with focus on a radio | POST `/training-runs/1/turns`, renders "Step 2 of 3 Â· Record outcome" with the Preview panel, the confirm button and the `previewed` marker |
+| Check                                | Result                                                                                                                                         |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| First Tab from load                  | focus on the skip link, box 137 Ã— 40, revealed by `:focus`                                                                                    |
+| Enter on the skip link               | `location.hash = "#main"`, `<main id="main">` exists                                                                                           |
+| Tabs to the first choice             | 6                                                                                                                                              |
+| Focus ring on the choice banner      | `outline: 2px solid rgb(78, 121, 6)` = `--color-ring`, with `matches(':focus-visible') === true`                                               |
+| `ArrowRight` from `training-Speed`   | lands on `training-Wit`, `checked: true`                                                                                                       |
+| `4` with focus on a choice           | selects `training-Guts`, exactly one checked                                                                                                   |
+| typing `550` into Speed              | selection unchanged (`training-Wit` before and after), field holds `550`                                                                       |
+| `Escape`                             | focus returns to the checked radio, selection intact                                                                                           |
+| `Enter` with focus on a radio        | POST `/training-runs/1/turns`, renders "Step 2 of 3 Â· Record outcome" with the Preview panel, the confirm button and the `previewed` marker   |
 
 No `element.focus()` was used to establish any ring row above; each was reached by a pressed key.
 
 ### Frame persistence (D-40, D-41, D-170)
 
-| Measurement | At `scrollY` 0 | At `scrollY` 1760 (page height 2684) |
-|---|---|---|
-| pinned region box | 992 Ã— 421 | 992 Ã— 421 |
-| resource strip box | 992 Ã— 92 | 992 Ã— 92 |
-| first grade badge top | 387 | 250 (still on screen) |
-| `elementFromPoint` probes across the pinned box | â€” | 9 of 9 resolve inside `[aria-label="Run state"]` |
+| Measurement                                       | At `scrollY` 0   | At `scrollY` 1760 (page height 2684)               |
+| ------------------------------------------------- | ---------------- | -------------------------------------------------- |
+| pinned region box                                 | 992 Ã— 421       | 992 Ã— 421                                         |
+| resource strip box                                | 992 Ã— 92        | 992 Ã— 92                                          |
+| first grade badge top                             | 387              | 250 (still on screen)                              |
+| `elementFromPoint` probes across the pinned box   | â€”              | 9 of 9 resolve inside `[aria-label="Run state"]`   |
 
 The strip's bounding box is unchanged from the top of the document to the bottom, and no log
 content paints over the pinned region at the end of the scroll. The probe count matters: the
@@ -1381,13 +1376,13 @@ sibling. That defect was visible in a screenshot and invisible to every assertio
 
 ### The five R17 states, rendered
 
-| Run | State | HTTP | Band badges | Choice radios | Notes |
-|---|---|---|---|---|---|
-| 1 | URA, Safe | 200 | 5 | 7 | calendar with goal, fan lock, maiden lock |
-| 2 | Unity Cup, Caution | 200 | 5 | 7 | team race not a cell; advisory shown |
-| 3 | Trackblazer, Danger | 200 | 5 | 7 | Danger attribution and advisory both shown |
-| 4 | no scenario, no turns | 200 | **0** | 7 | "No scenario set", first-turn note present |
-| 5 | unpriceable | 200 | 5 | 7 | meter reads "not yet totalled" (KI-12's middle state) |
+| Run   | State                   | HTTP   | Band badges   | Choice radios   | Notes                                                   |
+| ----- | ----------------------- | ------ | ------------- | --------------- | ------------------------------------------------------- |
+| 1     | URA, Safe               | 200    | 5             | 7               | calendar with goal, fan lock, maiden lock               |
+| 2     | Unity Cup, Caution      | 200    | 5             | 7               | team race not a cell; advisory shown                    |
+| 3     | Trackblazer, Danger     | 200    | 5             | 7               | Danger attribution and advisory both shown              |
+| 4     | no scenario, no turns   | 200    | **0**         | 7               | "No scenario set", first-turn note present              |
+| 5     | unpriceable             | 200    | 5             | 7               | meter reads "not yet totalled" (KI-12's middle state)   |
 
 Run 4 is the R17 case that catches borrowed data: no band at all rather than five zeroes, and
 the rail still offers the door with `turn` at 1.
@@ -1404,10 +1399,10 @@ writes a row; both are pinned by `GuidedTurnOnRunViewTest`.
 Same server, same fixture, `curl -w '%{time_starttransfer}'`, one warm-up request to compile the
 views, n=20, loopback, `APP_DEBUG=true`, single-threaded dev server.
 
-| Round trip | median | p95 | min | max | bytes |
-|---|---|---|---|---|---|
-| GET run detail (write-free page render) | **0.047 s** | **0.076 s** | 0.039 | 0.111 | 39,156 |
-| POST stage=preview (option submit â†’ preview render) | **0.071 s** | **0.091 s** | 0.054 | 0.152 | 72,562 |
+| Round trip                                              | median        | p95           | min     | max     | bytes    |
+| ------------------------------------------------------- | ------------- | ------------- | ------- | ------- | -------- |
+| GET run detail (write-free page render)                 | **0.047 s**   | **0.076 s**   | 0.039   | 0.111   | 39,156   |
+| POST stage=preview (option submit â†’ preview render)   | **0.071 s**   | **0.091 s**   | 0.054   | 0.152   | 72,562   |
 
 The preview step costs about 24 ms more than a page render and ships 72.5 kB, of which the
 browser re-parses the whole shell. That is the number a DOM diff would replace, and it is the
@@ -1477,13 +1472,13 @@ the time of writing is `16c851c`.
 
 Re-measured on that tip, so the record is not read as describing it:
 
-| Gate | At `03a5d05` | At the tip |
-|---|---|---|
-| `php artisan test --compact` | 2 skipped, 292 passed | 2 skipped, 364 passed (1,207 assertions) |
-| `make lore` verbatim / `composer lore` | 133 / 133 | 137 / 137 |
-| `make lore-code` verbatim / `composer lore-code` | 4 / 4 | 6 / 6 |
-| `npm run build` CSS | 56.37 kB | 56.83 kB |
-| `gate.py`, `pint --dirty`, PHPStan level 6 | PASS / passed / `[OK] No errors` | PASS / passed / `[OK] No errors` |
+| Gate                                               | At `03a5d05`                       | At the tip                                 |
+| -------------------------------------------------- | ---------------------------------- | ------------------------------------------ |
+| `php artisan test --compact`                       | 2 skipped, 292 passed              | 2 skipped, 364 passed (1,207 assertions)   |
+| `make lore` verbatim / `composer lore`             | 133 / 133                          | 137 / 137                                  |
+| `make lore-code` verbatim / `composer lore-code`   | 4 / 4                              | 6 / 6                                      |
+| `npm run build` CSS                                | 56.37 kB                           | 56.83 kB                                   |
+| `gate.py`, `pint --dirty`, PHPStan level 6         | PASS / passed / `[OK] No errors`   | PASS / passed / `[OK] No errors`           |
 
 Parity between the Makefile and the runner held at every one of those four counts, which is the
 property that survives prose edits; the extra hits are the other session's files and are not
@@ -1497,7 +1492,6 @@ regression and was not: a suite run taken mid-flight reported two failures in
 was landing as `c078ce4` while the run was in progress. The same suite minutes later is green at
 364 passed. A failure observed against a moving tree is evidence about the moment, not about the
 commit, and attributing it either way without re-running is the mistake to avoid.
-
 
 ## slice-6-2026-09-28.md
 
@@ -1524,17 +1518,17 @@ Confirmed with `git ls-remote origin master` before (`e88bb7bâ€¦`) and after
 here, per C-4's "the grep proposes, the Guardian decides", and written into the lore dictionary at
 `docs/design-research/CONSTRAINTS.md` Â§3.2 in `b81df3f`:
 
-| Hit | Matched word | Ruling |
-|---|---|---|
-| `tests/Feature/ReviewFormAccessibilityTest.php:39` "keyed by a stable control identifier" | `stable` | **Allowed, already an enumerated sense.** Â§3.2 bans `stable` only as a noun naming a character container; here it is the adjective, the same sense as "stable growth". The bullet now carries this example and the citation. No KI, no file edited. | <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 -->
-| `tests/Feature/ReviewQueueTest.php:62` "the list the template has to account for" | `account` | **Allowed, new enumerated sense.** `account` and `login` are in the `lore-code` list because `PRD.md` NFR-1 declares this tool has no account and no auth surface, so the words are a scope tripwire, not equine vocabulary. "Account for" is the verb idiom meaning "cover". It was not previously listed, so it is listed now with the citation. No KI, no file edited. | <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 -->
+| Hit                                                                                       | Matched word | Ruling                                                                                                                                                                                                                                                                                                                                                                    |                                                             |
+| ----------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `tests/Feature/ReviewFormAccessibilityTest.php:39` "keyed by a stable control identifier" | `stable`     | **Allowed, already an enumerated sense.** Â§3.2 bans `stable` only as a noun naming a character container; here it is the adjective, the same sense as "stable growth". The bullet now carries this example and the citation. No KI, no file edited.                                                                                                                      | <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 --> |
+| `tests/Feature/ReviewQueueTest.php:62` "the list the template has to account for"         | `account`    | **Allowed, new enumerated sense.** `account` and `login` are in the `lore-code` list because `PRD.md` NFR-1 declares this tool has no account and no auth surface, so the words are a scope tripwire, not equine vocabulary. "Account for" is the verb idiom meaning "cover". It was not previously listed, so it is listed now with the citation. No KI, no file edited. | <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 --> |
 
 A third hit that had never been written down anywhere was added to Â§3.2 in `7da2d22` while the
 dictionary was open, because the C-4 bar is *zero unexplained hits*, not zero hits:
 
-| Hit | Matched word | Ruling |
-|---|---|---|
-| `config/queue.php:60` `'prefix' => env('SQS_PREFIX', 'â€¦/your-account-id')` | `account` | **Allowed: framework-shipped default.** Laravel's own SQS stub, not copy written for this product, and it cannot become an auth surface from inside a queue config. |
+| Hit                                                                            | Matched word   | Ruling                                                                                                                                                                |
+| ------------------------------------------------------------------------------ | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `config/queue.php:60` `'prefix' => env('SQS_PREFIX', 'â€¦/your-account-id')`   | `account`      | **Allowed: framework-shipped default.** Laravel's own SQS stub, not copy written for this product, and it cannot become an auth surface from inside a queue config.   |
 
 The same commit corrected the C-4 row in `docs/GATE-REGISTRY.md`, which said "three allowed hit
 classes" while the block it points at had carried four since the scanner self-hit class was added.
@@ -1569,13 +1563,13 @@ one tier per turn, built by `.scratch-uma/slice6-mood-fixture.php`; `database/da
 never opened. Server: `php artisan serve` on `127.0.0.1:8147` with `SESSION_DRIVER=database`
 pointed at the scratch file.
 
-| Tier | Fill as painted | Ink as painted | Ratio, light | Ratio, dark |
-|---|---|---|---|---|
-| `GREAT` | `rgb(251,85,144)` | `rgb(31,21,8)` | **5.82** | **5.82** |
-| `GOOD` | `rgb(237,128,54)` | `rgb(31,21,8)` | **6.62** | **6.62** |
-| `NORMAL` | `rgb(160,151,142)` | `rgb(31,21,8)` | **6.25** | **6.25** |
-| `BAD` | `rgb(212,133,86)` | `rgb(31,21,8)` | **6.23** | **6.23** |
-| `AWFUL` | `rgb(212,126,158)` | `rgb(31,21,8)` | **6.23** | **6.23** |
+| Tier       | Fill as painted      | Ink as painted   | Ratio, light   | Ratio, dark   |
+| ---------- | -------------------- | ---------------- | -------------- | ------------- |
+| `GREAT`    | `rgb(251,85,144)`    | `rgb(31,21,8)`   | **5.82**       | **5.82**      |
+| `GOOD`     | `rgb(237,128,54)`    | `rgb(31,21,8)`   | **6.62**       | **6.62**      |
+| `NORMAL`   | `rgb(160,151,142)`   | `rgb(31,21,8)`   | **6.25**       | **6.25**      |
+| `BAD`      | `rgb(212,133,86)`    | `rgb(31,21,8)`   | **6.23**       | **6.23**      |
+| `AWFUL`    | `rgb(212,126,158)`   | `rgb(31,21,8)`   | **6.23**       | **6.23**      |
 
 Every pair clears 4.5:1 in both themes; the floor is **5.82:1** (GREAT). The two themes agree to
 the digit, which is what a chrome token that is never overridden should do, and it is the reading
@@ -1626,9 +1620,9 @@ is not overridden in the dark block, so one value serves both themes.
 Measured on the rendered `Hint` badge, `getComputedStyle` for background and colour on the element
 itself, both themes:
 
-| Pair | Light | Dark |
-|---|---|---|
-| `--color-on-green` `rgb(31,21,8)` on `--color-green` `rgb(127,204,9)` | **9.02** | **9.02** |
+| Pair                                                                    | Light      | Dark       |
+| ----------------------------------------------------------------------- | ---------- | ---------- |
+| `--color-on-green` `rgb(31,21,8)` on `--color-green` `rgb(127,204,9)`   | **9.02**   | **9.02**   |
 
 For contrast, the same fill with white is **1.99** â€” the combination D-3 forbids and the reason the
 badge moved off `on-chrome` in Slice 5. `bg-pick text-on-pick` (the Caution band) was left alone:
@@ -1644,14 +1638,14 @@ pair as if it were still live): D-286 says a correction propagates to every copy
 
 ### 4. T1 â€” the six doc amendments, in `61f6165`
 
-| # | Amendment | Where |
-|---|---|---|
-| a | D-40 restated as region lifetimes, citing `UX Behavior Specification:136-141`; the desktop axis is explicitly not the rule, which retires Slice 5's deviation instead of burying it | `docs/design-research/CONSTRAINTS.md` Â§6 D-40 |
-| b | The "never radio inputs" clause reversed: the rail's choices are banner buttons that are also real radios, which is what KI-14 fixed | `docs/design-research/DESIGN.md:1338` |
-| c | Controller inventory added, because a path scope naming `RunController.php` describes a file that has never existed here | `PLAN.md` Â§Controller Inventory |
-| d | Livewire moved from open question to **DECIDED no**, carrying slice-5 Â§4's numbers (0.047/0.076 baseline, 0.071/0.091 preview, 72,562 bytes) and a reopen criterion that lists the seven things a reopen owes | `PLAN.md` Â§Open Decisions |
-| e | The `aria-live` residual closed as correct-by-design: the preview arrives through a navigation, so there is no in-place change to announce, and `DESIGN.md:1406`'s live-region rule is about a bubble that updates under a reader who stays put | `KNOWN-ISSUES.md` KI-14 residual |
-| f | The two `FRONTEND-BRIEF-AUDIT` rows that now describe a tree the audit did not see, recorded rather than edited | `PLAN.md` Â§Corrections Owed |
+| #     | Amendment                                                                                                                                                                                                                                         | Where                                            |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| a     | D-40 restated as region lifetimes, citing `UX Behavior Specification:136-141`; the desktop axis is explicitly not the rule, which retires Slice 5's deviation instead of burying it                                                               | `docs/design-research/CONSTRAINTS.md` Â§6 D-40   |
+| b     | The "never radio inputs" clause reversed: the rail's choices are banner buttons that are also real radios, which is what KI-14 fixed                                                                                                              | `docs/design-research/DESIGN.md:1338`            |
+| c     | Controller inventory added, because a path scope naming `RunController.php` describes a file that has never existed here                                                                                                                          | `PLAN.md` Â§Controller Inventory                 |
+| d     | Livewire moved from open question to **DECIDED no**, carrying slice-5 Â§4's numbers (0.047/0.076 baseline, 0.071/0.091 preview, 72,562 bytes) and a reopen criterion that lists the seven things a reopen owes                                    | `PLAN.md` Â§Open Decisions                       |
+| e     | The `aria-live` residual closed as correct-by-design: the preview arrives through a navigation, so there is no in-place change to announce, and `DESIGN.md:1406`'s live-region rule is about a bubble that updates under a reader who stays put   | `KNOWN-ISSUES.md` KI-14 residual                 |
+| f     | The two `FRONTEND-BRIEF-AUDIT` rows that now describe a tree the audit did not see, recorded rather than edited                                                                                                                                   | `PLAN.md` Â§Corrections Owed                     |
 
 Deviation on (d), stated: the reopen criterion is written here from the measured evidence in
 slice-5 Â§4 and the costs that section already lists. It is the closing slice's formulation of R29's
@@ -1668,18 +1662,18 @@ had not seen land.
 
 CONSTRAINTS order, on the tree this slice leaves behind:
 
-| Gate | Command | Result |
-|---|---|---|
-| Tests | `php artisan test --compact` | **2 skipped, 374 passed (1,247 assertions)** |
-| New tests | `vendor/bin/pest tests/Feature/MoodPillTest.php tests/Feature/TokenPairHygieneTest.php` | 10 passed (40 assertions) |
-| Format | `vendor/bin/pint --dirty --format agent` | `{"result":"passed"}` |
-| Static | `vendor/bin/phpstan analyse --no-progress` | `[OK] No errors` (level 6) |
-| Lore, repo-wide | `composer lore` | 140 hits: 137 on the tree this slice started from, plus three that are this record and PLAN naming the two adjudicated words (`slice-6-2026-09-28.md:26-27`, `PLAN.md:211`). Naming a banned word to rule on it is allowed class 1 in `docs/GATE-REGISTRY.md`. The count prints match lines, not distinct lines, and moves whenever a rules file quotes a word, so it is a measurement of this day, never a threshold. |
-| Lore, app paths | `composer lore-code` | 6 hits, all adjudicated in Â§1 |
-| Gate family | `python tools/gate.py` | `GATE PASS: 3 prototype(s), all machine-checkable gates green` |
-| Build | `npm run build` | 57.37 kB CSS (was 56.83), 52.25 kB JS |
-| Declared vs pruned | grep of the built CSS | all seven new utilities present: `bg-mood-{great,good,normal,bad,awful}`, `text-on-mood`, `text-on-green`; `--color-mood-great:#fb5590` resolves in the bundle |
-| Token count | `DesignTokensTest` | updated 53 â†’ 60 with the reason; the two browser rows still skip (Playwright absent, C-8 forbids installing it) |
+| Gate                 | Command                                                                                   | Result                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| -------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tests                | `php artisan test --compact`                                                              | **2 skipped, 374 passed (1,247 assertions)**                                                                                                                                                                                                                                                                                                                                                                             |
+| New tests            | `vendor/bin/pest tests/Feature/MoodPillTest.php tests/Feature/TokenPairHygieneTest.php`   | 10 passed (40 assertions)                                                                                                                                                                                                                                                                                                                                                                                                |
+| Format               | `vendor/bin/pint --dirty --format agent`                                                  | `{"result":"passed"}`                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Static               | `vendor/bin/phpstan analyse --no-progress`                                                | `[OK] No errors` (level 6)                                                                                                                                                                                                                                                                                                                                                                                               |
+| Lore, repo-wide      | `composer lore`                                                                           | 140 hits: 137 on the tree this slice started from, plus three that are this record and PLAN naming the two adjudicated words (`slice-6-2026-09-28.md:26-27`, `PLAN.md:211`). Naming a banned word to rule on it is allowed class 1 in `docs/GATE-REGISTRY.md`. The count prints match lines, not distinct lines, and moves whenever a rules file quotes a word, so it is a measurement of this day, never a threshold.   |
+| Lore, app paths      | `composer lore-code`                                                                      | 6 hits, all adjudicated in Â§1                                                                                                                                                                                                                                                                                                                                                                                           |
+| Gate family          | `python tools/gate.py`                                                                    | `GATE PASS: 3 prototype(s), all machine-checkable gates green`                                                                                                                                                                                                                                                                                                                                                           |
+| Build                | `npm run build`                                                                           | 57.37 kB CSS (was 56.83), 52.25 kB JS                                                                                                                                                                                                                                                                                                                                                                                    |
+| Declared vs pruned   | grep of the built CSS                                                                     | all seven new utilities present: `bg-mood-{great,good,normal,bad,awful}`, `text-on-mood`, `text-on-green`; `--color-mood-great:#fb5590` resolves in the bundle                                                                                                                                                                                                                                                           |
+| Token count          | `DesignTokensTest`                                                                        | updated 53 â†’ 60 with the reason; the two browser rows still skip (Playwright absent, C-8 forbids installing it)                                                                                                                                                                                                                                                                                                        |
 
 `make lore` / `make lore-code` were not run: GNU make is absent on this host (KI-4), so the
 composer equivalents are the recorded way, and `LoreGateParityTest` is what makes their word lists
@@ -1740,7 +1734,6 @@ nothing was allowed to fail.
   which is the fourth and fifth members of the `on-*` family. If a fifth saturated role arrives,
   the family is worth a rule of its own in Â§3.4 instead of five separate explanations.
 
-
 ## slice-7-2026-09-28.md
 
 # Slice 7 verification record â€” 2026-09-28
@@ -1762,14 +1755,14 @@ inside this slice: `git log --oneline d212311..HEAD` prints six commits, all thi
 Found already carrying all six new pairs, with their measured ratios, at
 `docs/design-research/DESIGN.md:156-161`:
 
-```
+```text
 | `on-mood` `#1F1508` | `mood-great` `#FB5590` | 5.82 | AA |
 | `on-mood` `#1F1508` | `mood-good`  `#ED8036` | 6.62 | AA |
 | `on-mood` `#1F1508` | `mood-normal` `#A0978E`| 6.25 | AA |
 | `on-mood` `#1F1508` | `mood-bad`   `#D48556` | 6.23 | AA |
 | `on-mood` `#1F1508` | `mood-awful` `#D47E9E` | 6.23 | AA |
 | `on-green` `#1F1508`| `green-500`  `#7FCC09` | 9.02 | AAA |
-```
+```text
 
 Nothing sat only in Â§6.17 or in prose, so D-3's mechanism was intact. What was wrong was the
 sentence under it: it said "the last seven rows" over six rows. Corrected in `53fbe70`, which
@@ -1785,19 +1778,19 @@ that framing as not a trigger and keeps the seven items as what a qualifying req
 
 ### 1c. zinc sweep on the run list, verbatim
 
-```
+```text
 $ grep -n "zinc-" resources/views/runs/index.blade.php
 $ echo $?
 1
-```
+```text
 
 No match: the page is clean, and nothing was migrated. Repo-wide the surviving `zinc-` strings
 are not live styling:
 
-| Where | What it is |
-|---|---|
-| `resources/views/catalog/index.blade.php:3`, `components/layout.blade.php:28` and `:62` | Blade comment prose naming the retired skeleton, i.e. documentation of the migration |
-| `resources/views/welcome.blade.php:15` | the vendored Tailwind preflight/theme blob, which declares `--color-zinc-*` custom properties for every default ramp whether or not anything uses them |
+| Where                                                                                     | What it is                                                                                                                                               |
+| ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resources/views/catalog/index.blade.php:3`, `components/layout.blade.php:28` and `:62`   | Blade comment prose naming the retired skeleton, i.e. documentation of the migration                                                                     |
+| `resources/views/welcome.blade.php:15`                                                    | the vendored Tailwind preflight/theme blob, which declares `--color-zinc-*` custom properties for every default ramp whether or not anything uses them   |
 
 A markup-side search finds nothing: `grep -rnoE 'class="[^"]*zinc-[^"]*"' resources/views/` is empty.
 
@@ -1862,10 +1855,10 @@ now inside a period.
 Two readonly value objects under `app/Models/TurnEvents/`, validated on the way in by a `saving`
 guard on `TurnEvent`, and read back through `friendshipPayload()` / `burstPayload()`:
 
-| Payload | Shape | Deliberately not done |
-|---|---|---|
-| `NpcFriendshipPayload` | `{npc: string, bars: int}` | no bar ceiling: the corpus names gates in bars and never says how many a full meter holds, so a denominator would be an invented fact. No NPC registry check either: which NPCs a scenario contains is per-scenario and `config/scenarios.php` has no such list yet |
-| `SpiritBurstPayload` | `{teammate: string, state: SpiritBurstState}` | not a counter: `bursts_triggered = 2` cannot express "charged and deliberately held", and reads Extreme spent as a dead end, which is the pre-patch rule D-223 invalidated |
+| Payload                  | Shape                                           | Deliberately not done                                                                                                                                                                                                                                                 |
+| ------------------------ | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NpcFriendshipPayload`   | `{npc: string, bars: int}`                      | no bar ceiling: the corpus names gates in bars and never says how many a full meter holds, so a denominator would be an invented fact. No NPC registry check either: which NPCs a scenario contains is per-scenario and `config/scenarios.php` has no such list yet   |
+| `SpiritBurstPayload`     | `{teammate: string, state: SpiritBurstState}`   | not a counter: `bursts_triggered = 2` cannot express "charged and deliberately held", and reads Extreme spent as a dead end, which is the pre-patch rule D-223 invalidated                                                                                            |
 
 `SpiritBurstState` is the six states and no seventh. Its case values are this tool's identifiers,
 not captured client copy, so the enum's docblock forbids rendering one as if the client wrote it
@@ -1892,17 +1885,17 @@ No UI was added: the payload has no reader yet, which is what the task asked for
 
 ### 4. T4 â€” gates, in CONSTRAINTS order, with the outputs
 
-| Gate | Command | Output |
-|---|---|---|
-| Tests | `php artisan test --compact` | `Tests: 2 skipped, 390 passed (1287 assertions)` |
-| This slice's tests | `vendor/bin/pest tests/Feature/GradePointPeriodTest.php tests/Feature/TurnEventTypePayloadsTest.php --compact` | `Tests: 16 passed (40 assertions)` |
-| Format | `vendor/bin/pint --format agent app database tests resources` | `{"tool":"pint","result":"passed"}` |
-| Static | `vendor/bin/phpstan analyse --no-progress` | `[OK] No errors` (level 6) |
-| Lore, repo-wide | `composer lore` | `lore-docs: 140 hit(s)`, unchanged from Slice 6's corrected figure; all in allowed classes 1-4 |
-| Lore, app paths | `composer lore-code` | `lore-code: 6 hit(s)`, all six adjudicated in `docs/design-research/CONSTRAINTS.md` Â§3.2 |
-| Gate family | `python tools/gate.py` | `GATE PASS: 3 prototype(s), all machine-checkable gates green.` |
-| Build | `npm run build` | `app-Qssk6Sd5.css 57.37 kB`, `app-LFSC9J26.js 52.25 kB`, both hashes identical to Slice 6's build |
-| Declared vs pruned | `git diff HEAD~8..HEAD --stat -- resources/css resources/js` | empty: this slice touched no CSS or JS, so the token set did not move and the count test (60 declared) needed no change |
+| Gate                 | Command                                                                                                          | Output                                                                                                                    |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Tests                | `php artisan test --compact`                                                                                     | `Tests: 2 skipped, 390 passed (1287 assertions)`                                                                          |
+| This slice's tests   | `vendor/bin/pest tests/Feature/GradePointPeriodTest.php tests/Feature/TurnEventTypePayloadsTest.php --compact`   | `Tests: 16 passed (40 assertions)`                                                                                        |
+| Format               | `vendor/bin/pint --format agent app database tests resources`                                                    | `{"tool":"pint","result":"passed"}`                                                                                       |
+| Static               | `vendor/bin/phpstan analyse --no-progress`                                                                       | `[OK] No errors` (level 6)                                                                                                |
+| Lore, repo-wide      | `composer lore`                                                                                                  | `lore-docs: 140 hit(s)`, unchanged from Slice 6's corrected figure; all in allowed classes 1-4                            |
+| Lore, app paths      | `composer lore-code`                                                                                             | `lore-code: 6 hit(s)`, all six adjudicated in `docs/design-research/CONSTRAINTS.md` Â§3.2                                 |
+| Gate family          | `python tools/gate.py`                                                                                           | `GATE PASS: 3 prototype(s), all machine-checkable gates green.`                                                           |
+| Build                | `npm run build`                                                                                                  | `app-Qssk6Sd5.css 57.37 kB`, `app-LFSC9J26.js 52.25 kB`, both hashes identical to Slice 6's build                         |
+| Declared vs pruned   | `git diff HEAD~8..HEAD --stat -- resources/css resources/js`                                                     | empty: this slice touched no CSS or JS, so the token set did not move and the count test (60 declared) needed no change   |
 
 `make lore` / `make lore-code` again cannot run here (GNU make absent, KI-4), so the composer
 equivalents above are the recorded way, with `LoreGateParityTest` pinning their word lists to the
@@ -1959,20 +1952,20 @@ Written after T4, because the event was found while reporting the push.
 
 The reflog records, between this slice's second and third commits:
 
-```
+```text
 8fd127c HEAD@{5}: checkout: moving from master to docs/frontend-review
-```
+```text
 
 Someone else's working session switched this shared worktree onto an existing branch
 (`docs/frontend-review`, which was created earlier and pointed at the same commit) while
 Slice 7 was mid-flight. This session ran no `checkout`, `switch`, or branch-creating
 command before that point. Consequences, in order:
 
-| Step | What happened |
-|---|---|
-| T0a `53fbe70`, T0b `8fd127c` | landed on `master`, as intended |
-| T1 `e103122`, T2 `17dbc54`, `8955394`, T3 `94db315`, T5 `575a223` | landed on `docs/frontend-review`, because HEAD had moved |
-| T4's authorized single push | `git push origin master` pushed the local `master` ref, which was still at `8fd127c`: `d212311..8fd127c`. Origin received only T0a and T0b. |
+| Step                                                                | What happened                                                                                                                                 |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| T0a `53fbe70`, T0b `8fd127c`                                        | landed on `master`, as intended                                                                                                               |
+| T1 `e103122`, T2 `17dbc54`, `8955394`, T3 `94db315`, T5 `575a223`   | landed on `docs/frontend-review`, because HEAD had moved                                                                                      |
+| T4's authorized single push                                         | `git push origin master` pushed the local `master` ref, which was still at `8fd127c`: `d212311..8fd127c`. Origin received only T0a and T0b.   |
 
 `git log --oneline d212311..HEAD` had printed six commits, all this slice's, and that
 sentence appears in Â§4 above. It was true and it was not sufficient: it described HEAD's
@@ -1999,7 +1992,6 @@ read as a statement about HEAD, not about `master`.
 Suite re-verified after the switch on `master` at `575a223`: `2 skipped, 390 passed (1287
 assertions)`.
 
-
 ## slice-8-2026-09-28.md
 
 # Slice 8 verification record â€” 2026-09-28
@@ -2013,7 +2005,7 @@ route table transcribed into config.
 
 Opening, `22:27`, before any edit:
 
-```
+```text
 branch: master
 HEAD: 0d2dbdc
 origin/master: 0d2dbdc
@@ -2032,7 +2024,7 @@ origin/master: 0d2dbdc
 ?? tests/Feature/ResourceStripOnRunDetailTest.php
 ?? tests/Feature/ResourceStripTest.php
 ?? tests/Feature/Schema/ScenarioSlotMigrationTest.php
-```
+```text
 
 On branch `master`, local equal to origin, and the concurrent session's files visible as
 uncommitted (`KNOWN-ISSUES.md`) and untracked. `KNOWN-ISSUES.md` stayed theirs all slice: every
@@ -2055,13 +2047,13 @@ two entries were never committed here.
 
 ### 3. What landed
 
-| Task | Commit | Content |
-|---|---|---|
-| T1 columns | `7d4b8cf` | `race_entries.circles` (0..5, team-race only, absent elsewhere), `training_runs.shop_resets_in` (bounded by the scenario's own `shop.rotation_turns`), `ShopPurchasePayload` {item, cost, effect} validated against the scenario catalogue, `x-shop-panel`, 13 tests |
-| T1 payloads | `4c6486a` | `TeamRankPayload` (nine letters, `S+` with no facility level), `RaceFatiguePayload` (count plus a word), `latestTeamRank()`, `spiritBurstRoster()`, `latestFatigue()`, `composesPanel()`, `epithetProgress()` â€” and the peer's staged calendar file, see Â§2 |
-| T4 config | `a031d9d` | the Trackblazer epithet route table transcribed from `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Epithets (Race Route Bonuses)", each row declaring whether the tool can evaluate it (`races`, `epithets`, `aggregate`) |
-| T2 writer | `5d7d10a` | `StoreRaceEntryRequest`, `POST runs.races.store`, `x-race-panel`; slot must exist and belong to this run's scenario; circles and period index rendered only where the scenario composes them |
-| T3 + T5 panels | the panels commit | rank gauge with the derived facility level named as derived, six-state burst roster, team race panel with the margin sentence, epithet checklist, fatigue chip, the meter's KI-15 disclosure line, 16 tests in `ScenarioPanelUiTest` |
+| Task             | Commit              | Content                                                                                                                                                                                                                                                                |
+| ---------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T1 columns       | `7d4b8cf`           | `race_entries.circles` (0..5, team-race only, absent elsewhere), `training_runs.shop_resets_in` (bounded by the scenario's own `shop.rotation_turns`), `ShopPurchasePayload` {item, cost, effect} validated against the scenario catalogue, `x-shop-panel`, 13 tests   |
+| T1 payloads      | `4c6486a`           | `TeamRankPayload` (nine letters, `S+` with no facility level), `RaceFatiguePayload` (count plus a word), `latestTeamRank()`, `spiritBurstRoster()`, `latestFatigue()`, `composesPanel()`, `epithetProgress()` â€” and the peer's staged calendar file, see Â§2         |
+| T4 config        | `a031d9d`           | the Trackblazer epithet route table transcribed from `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Epithets (Race Route Bonuses)", each row declaring whether the tool can evaluate it (`races`, `epithets`, `aggregate`)                          |
+| T2 writer        | `5d7d10a`           | `StoreRaceEntryRequest`, `POST runs.races.store`, `x-race-panel`; slot must exist and belong to this run's scenario; circles and period index rendered only where the scenario composes them                                                                           |
+| T3 + T5 panels   | the panels commit   | rank gauge with the derived facility level named as derived, six-state burst roster, team race panel with the margin sentence, epithet checklist, fatigue chip, the meter's KI-15 disclosure line, 16 tests in `ScenarioPanelUiTest`                                   |
 
 ### 4. Browser pass, extended R17 fixture, per D-288
 
@@ -2075,17 +2067,17 @@ up for the first opaque background, in light and in dark by flipping `data-theme
 
 Every pair below is a rendered pair on the new panels, and every one clears 4.5:1:
 
-| Pair (tokens) | Light | Dark | Where |
-|---|---|---|---|
-| `ink-muted` on `sunken` | **4.69** | 6.64 (on `raised`) | ladder rungs, roster meta |
-| `green-deep` on `panel` | **4.88** | â€” | "Complete" on the grade ladder |
-| `ink` on `sunken` | 5.64 | â€” | `open` epithet chip, `â—‹ NormalBurstSpent` |
-| `ink` on `green-tint` | 6.40 | â€” | earned epithet row |
-| `ink-muted` on `green-tint` | 5.33 | 6.58 | route and reward meta line |
-| `on-pick` on `pick` | 8.34 | â€” | current rank rung |
-| `on-mood` on `mood-good` | 6.62 | 6.62 | mood pill beside the new panels |
-| `on-chrome` on `risk` | 10.89 | 6.88 | `â—‡ ExtremeSpent`, Danger band |
-| `on-green` on `green` | 9.02 | 9.02 | Hint badge, unchanged |
+| Pair (tokens)                 | Light      | Dark                 | Where                                         |
+| ----------------------------- | ---------- | -------------------- | --------------------------------------------- |
+| `ink-muted` on `sunken`       | **4.69**   | 6.64 (on `raised`)   | ladder rungs, roster meta                     |
+| `green-deep` on `panel`       | **4.88**   | â€”                  | "Complete" on the grade ladder                |
+| `ink` on `sunken`             | 5.64       | â€”                  | `open` epithet chip, `â—‹ NormalBurstSpent`   |
+| `ink` on `green-tint`         | 6.40       | â€”                  | earned epithet row                            |
+| `ink-muted` on `green-tint`   | 5.33       | 6.58                 | route and reward meta line                    |
+| `on-pick` on `pick`           | 8.34       | â€”                  | current rank rung                             |
+| `on-mood` on `mood-good`      | 6.62       | 6.62                 | mood pill beside the new panels               |
+| `on-chrome` on `risk`         | 10.89      | 6.88                 | `â—‡ ExtremeSpent`, Danger band               |
+| `on-green` on `green`         | 9.02       | 9.02                 | Hint badge, unchanged                         |
 
 Worst pair measured anywhere on the run screens: **4.69 light** (`ink-muted` on `sunken`),
 **5.48 dark** (`down` on `raised`, pre-existing). Content checks in the same pass: the epithet
@@ -2100,14 +2092,14 @@ was not updated and no code was changed by the audit. The bundled detector expos
 verb in this build, so dimension 5 rests on the manual scan: zero hard-coded colours, zero
 arbitrary pixel values across the seven new components.
 
-| # | Dimension | Score | Key finding |
-|---|---|---|---|
-| 1 | Accessibility | 3 | Contrast AA in both themes (measured above); labels, `aria-current`, `role=status`/`alert` present. P1: the roster prints the enum's backing values (`NormalBurstSpent`, `ExtremeChargeable`) as the visible state name |
-| 2 | Performance | 3 | `gradePeriods()` issues 8 queries per render (`gradeEarnedFor` + `gradeUnpricedFor` per period) instead of reading the already eager-loaded collection |
-| 3 | Theming | 4 | Token-only, both themes measured, no `dark:` utilities and no hard-coded colour |
-| 4 | Responsive | 3 | Every panel `flex-wrap`s and the forms cap at `max-w-3xl`; action buttons sit under 44px tall, which the desktop-only brief accepts (D-40) |
-| 5 | Implementation Integrity | 3 | Panels self-gate on the composition matrix and each state is earned-sourced, but the burst label leak above is drift of exactly the kind D-20 exists to stop |
-| **Total** | | **16/20** | **Good â€” address weak dimensions** |
+| #           | Dimension                  | Score       | Key finding                                                                                                                                                                                                               |
+| ----------- | -------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1           | Accessibility              | 3           | Contrast AA in both themes (measured above); labels, `aria-current`, `role=status`/`alert` present. P1: the roster prints the enum's backing values (`NormalBurstSpent`, `ExtremeChargeable`) as the visible state name   |
+| 2           | Performance                | 3           | `gradePeriods()` issues 8 queries per render (`gradeEarnedFor` + `gradeUnpricedFor` per period) instead of reading the already eager-loaded collection                                                                    |
+| 3           | Theming                    | 4           | Token-only, both themes measured, no `dark:` utilities and no hard-coded colour                                                                                                                                           |
+| 4           | Responsive                 | 3           | Every panel `flex-wrap`s and the forms cap at `max-w-3xl`; action buttons sit under 44px tall, which the desktop-only brief accepts (D-40)                                                                                |
+| 5           | Implementation Integrity   | 3           | Panels self-gate on the composition matrix and each state is earned-sourced, but the burst label leak above is drift of exactly the kind D-20 exists to stop                                                              |
+| **Total**   |                            | **16/20**   | **Good â€” address weak dimensions**                                                                                                                                                                                      |
 
 ### Findings worth a fix, in order
 
@@ -2134,7 +2126,6 @@ arbitrary pixel values across the seven new components.
 - Purchase recording has no form either: the payload validates and the panel renders, so the writer
   is a later slice's shop form.
 
-
 ## slice-9-2026-09-28.md
 
 # Slice 9 verification record - 2026-09-28
@@ -2144,11 +2135,13 @@ shop panel its writer, push once.
 
 ### 1. T0 opening snapshot and branch declaration
 
-    23:35  branch: docs/frontend-review  HEAD: 122d12b  master: 7d4b8cf  origin/master: 7d4b8cf
-     M KNOWN-ISSUES.md
-     M docs/scenarios/01-ura-finale.md
-     M docs/scenarios/02-unity-cup.md
-     M docs/scenarios/07-grand-concert.md
+```text
+23:35  branch: docs/frontend-review  HEAD: 122d12b  master: 7d4b8cf  origin/master: 7d4b8cf
+ M KNOWN-ISSUES.md
+ M docs/scenarios/01-ura-finale.md
+ M docs/scenarios/02-unity-cup.md
+ M docs/scenarios/07-grand-concert.md
+```
 
 **Slice 9's branch is `master`** from the T1 fast-forward onward; each of the three commits below
 asserted `git branch --show-current` equals `master` before staging. The `docs/scenarios/*`
@@ -2158,12 +2151,12 @@ modifications are the concurrent session's and were never staged here.
 
 `composer lore` 144, `composer lore-code` 7. Everything the last two slices added, classed:
 
-| Hit | Word | Class | Ruling |
-|---|---|---|---|
-| `PLAN.md:218` | `stable`, `account` | 1 | The row quotes both words to record the ruling on them; naming a banned word to rule on it is the registry's own mechanism. | <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 -->
-| `docs/frontend-review/2026-09-28/README.md:335` | the jockey emoji | 1 | The concurrent session's audit reporting the grep it ran. Not this slice's file, so not reworded here. |
-| `docs/frontend-review/2026-09-28/README.md:338` | `equine` | 1 | Same file and class: it names the ban to state that authored copy does not break it. | <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 -->
-| `tests/Feature/ShopPurchasePayloadTest.php:40` | `luck` | 3 | Verbatim client item name `Good-Luck Charm` used as a catalogue key under test. The same carve-out `config/scenarios.php:216-219` documents: data is gated on the display path, never by editing the data. The test proves the catalogue is complete, which cannot be done without naming a real entry. |
+| Hit                                             | Word                | Class | Ruling                                                                                                                                                                                                                                                                                                  |                                                             |
+| ----------------------------------------------- | ------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `PLAN.md:218`                                   | `stable`, `account` | 1     | The row quotes both words to record the ruling on them; naming a banned word to rule on it is the registry's own mechanism.                                                                                                                                                                             | <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 --> |
+| `docs/frontend-review/2026-09-28/README.md:335` | the jockey emoji    | 1     | The concurrent session's audit reporting the grep it ran. Not this slice's file, so not reworded here.                                                                                                                                                                                                  |                                                             |
+| `docs/frontend-review/2026-09-28/README.md:338` | `equine`            | 1     | Same file and class: it names the ban to state that authored copy does not break it.                                                                                                                                                                                                                    | <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 --> |
+| `tests/Feature/ShopPurchasePayloadTest.php:40`  | `luck`              | 3     | Verbatim client item name `Good-Luck Charm` used as a catalogue key under test. The same carve-out `config/scenarios.php:216-219` documents: data is gated on the display path, never by editing the data. The test proves the catalogue is complete, which cannot be done without naming a real entry. |                                                             |
 
 No reword was needed: none is equine framing of a character. `make lore` cannot run on this host <!-- lore-ignore-line class=1 cite=GATE-REGISTRY.md#C-4 -->
 (GNU make absent, KI-4), so the composer equivalents are the recorded way and
@@ -2179,34 +2172,36 @@ change, not a rewrite. `KNOWN-ISSUES.md` and the three scenario docs came across
 
 ### 4. What landed
 
-| Task | Commit | Content |
-|---|---|---|
-| T2 | `01a1091` | KI-17 and KI-18 filed, status line to 18 filed / 14 closed / 4 open, staged as an index blob of `HEAD` plus these two hunks with the staged hunk list printed first. Superseded 2026-09-29: `18` counted a KI-15 entry that `94db315` had written twice, and `KI-1â€“9, KI-11â€“14` is 13 issues, not 14. The register header now carries the recomputed counts. |
-| T3 | `f7a59e8` | `SpiritBurstState::label()`, roster prints labels, test asserts the six labels and fails on a leaked backing value |
-| T4 | `f7a59e8` | `gradePeriods()` reads the loaded rows; a four-period render on a loaded run is pinned at 0 queries |
-| T5 | `f7a59e8` code, `4282146` docs | hide-after label map, and D-230 amended: the count is entered, KI-17 cited, dated |
-| T6 | `d73a449` | `StoreShopPurchaseRequest`, `POST runs.purchases.store`, the form with the overwrite warning and the 5-copy cap shown before commit, four tests |
+| Task   | Commit                           | Content                                                                                                                                                                                                                                                                                                                                                            |
+| ------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| T2     | `01a1091`                        | KI-17 and KI-18 filed, status line to 18 filed / 14 closed / 4 open, staged as an index blob of `HEAD` plus these two hunks with the staged hunk list printed first. Superseded 2026-09-29: `18` counted a KI-15 entry that `94db315` had written twice, and `KI-1â€“9, KI-11â€“14` is 13 issues, not 14. The register header now carries the recomputed counts.   |
+| T3     | `f7a59e8`                        | `SpiritBurstState::label()`, roster prints labels, test asserts the six labels and fails on a leaked backing value                                                                                                                                                                                                                                                 |
+| T4     | `f7a59e8`                        | `gradePeriods()` reads the loaded rows; a four-period render on a loaded run is pinned at 0 queries                                                                                                                                                                                                                                                                |
+| T5     | `f7a59e8` code, `4282146` docs   | hide-after label map, and D-230 amended: the count is entered, KI-17 cited, dated                                                                                                                                                                                                                                                                                  |
+| T6     | `d73a449`                        | `StoreShopPurchaseRequest`, `POST runs.purchases.store`, the form with the overwrite warning and the 5-copy cap shown before commit, four tests                                                                                                                                                                                                                    |
 
 ### 5. Gates and the browser pass
 
-    php artisan test --compact          Tests: 2 skipped, 424 passed (1395 assertions)
-    vendor/bin/pint <explicit paths>    {"tool":"pint","result":"fixed"} then passed
-    vendor/bin/phpstan analyse          [OK] No errors
-    composer lore / lore-code           144 / 7, unchanged across all four commits
-    python tools/gate.py                GATE PASS: 3 prototype(s), all machine-checkable gates green
-    npm run build                       app-C_4sNgFk.css 74.28 kB, app-LFSC9J26.js 52.25 kB,
-                                        both hashes identical to the Slice 8 build
-    declared-vs-pruned                  resources/css/app.css untouched; 60 declared tokens,
-                                        all seven Slice 6 utilities still in the bundle
+```text
+php artisan test --compact          Tests: 2 skipped, 424 passed (1395 assertions)
+vendor/bin/pint <explicit paths>    {"tool":"pint","result":"fixed"} then passed
+vendor/bin/phpstan analyse          [OK] No errors
+composer lore / lore-code           144 / 7, unchanged across all four commits
+python tools/gate.py                GATE PASS: 3 prototype(s), all machine-checkable gates green
+npm run build                       app-C_4sNgFk.css 74.28 kB, app-LFSC9J26.js 52.25 kB,
+                                    both hashes identical to the Slice 8 build
+declared-vs-pruned                  resources/css/app.css untouched; 60 declared tokens,
+                                    all seven Slice 6 utilities still in the bundle
+```
 
 Browser on `127.0.0.1:8149` against the Slice 8 fixture, read with `getComputedStyle` on the
 element and walking to the first opaque background, light and dark:
 
-| Surface | Worst light | Worst dark | Check |
-|---|---|---|---|
-| Shop form | white on `green-deep` 5.17 | `down` on `raised` 5.48 | "Record purchase" renders; form inputs `ink` on `raised` 6.95 |
-| Fatigue chip | `ink` on `panel` 6.56 | `on-pick` on `risk` 6.88 | the word "likely" renders; no percentage on the page |
-| Burst roster | text check | text check | all five labels present, zero backing values leaked |
+| Surface        | Worst light                  | Worst dark                 | Check                                                           |
+| -------------- | ---------------------------- | -------------------------- | --------------------------------------------------------------- |
+| Shop form      | white on `green-deep` 5.17   | `down` on `raised` 5.48    | "Record purchase" renders; form inputs `ink` on `raised` 6.95   |
+| Fatigue chip   | `ink` on `panel` 6.56        | `on-pick` on `risk` 6.88   | the word "likely" renders; no percentage on the page            |
+| Burst roster   | text check                   | text check                 | all five labels present, zero backing values leaked             |
 
 The roster row is a text check by design: the label change moves no token and no pair, so a
 re-measurement would reproduce the Slice 8 table. Stated rather than passed off as new evidence.
@@ -2220,7 +2215,6 @@ re-measurement would reproduce the Slice 8 table. Stated rather than passed off 
   that path is a bug and not a user mistake. A later slice that prefills cost from the catalogue
   should turn it into a field error, and the assertion should change with it.
 
-
 ## slice-10-2026-09-29.md
 
 # Slice 10 verification record â€” maintenance and drift, plus one bounded proposal
@@ -2233,11 +2227,11 @@ was written, no token was declared, retired or recoloured, and no threshold in `
 
 Date: 2026-09-29. Branch: `master`. Worktree: shared with one concurrent session.
 
-### 1. Opening snapshot (R38, R43)
+## 1. Opening snapshot (R38, R43)
 
 Taken before the first edit and repeated before every commit and push in this slice.
 
-```
+```text
 $ git branch --show-current   â†’ master
 $ git rev-parse --short HEAD  â†’ 68fa190
 $ git rev-parse --short origin/master â†’ 68fa190      (branch and remote equal at open)
@@ -2254,7 +2248,7 @@ $ git status --porcelain      â†’
    ?? tests/Feature/GuidedStepScenarioCompositionTest.php, ?? tests/Feature/GuidedStepScenarioVariationTest.php,
    ?? tests/Feature/ResourceStripOnRunDetailTest.php, ?? tests/Feature/ResourceStripTest.php,
    ?? tests/Feature/Schema/ScenarioSlotMigrationTest.php
-```
+```text
 
 The branch never moved under the work this time: `master` at open, `master` at every pre-commit
 snapshot, `master` at close. The five untracked `tests/Feature/*` files are the concurrent session's
@@ -2263,14 +2257,14 @@ slice's either.
 
 ### 2. T0 â€” register drift
 
-| Item | Commit | What landed |
-|---|---|---|
-| T0c, the peer's two entries | `c20c87a` | The check ran first, per R53: `git grep -c "Run notes are create-only" HEAD -- KNOWN-ISSUES.md` returned nothing, so the entries were not committed by their own session. Their sixteen lines were committed verbatim in their own commit, attributed there, wording untouched, and staged as the whole file after printing `git diff --cached --name-only` (one name). The three `docs/scenarios/*` files dirty in the same worktree stayed dirty. |
-| T0a, KI-18 | `ebfc227` | Closed per R52 against `f7a59e8` and `slice-9-2026-09-28.md` Â§5, whose roster row reads "all five labels present, zero backing values leaked". The entry now carries the resolution with the code and test lines that prove it (`app/Enums/SpiritBurstState.php:47`, `spirit-burst-roster.blade.php:48`, `tests/Feature/ScenarioPanelUiTest.php:105-114`) and a paragraph saying why it stayed marked open: Slice 9 closed it in its own record and never moved the register. |
-| T0b, PLAN erratum | `ec0ee2f` | `68fa190` is prefixed `docs(slice-7)` and its diff is Slice 9 (it adds the slice-9 record). Recorded, not rewritten: the only other fix is a history rewrite of a commit already on `origin/master`, which Slice 9's brief forbade and this one repeats. |
-| Found while doing T0a | `ebfc227` | **KI-15 was filed twice.** `94db315` wrote the entry into `KNOWN-ISSUES.md` two times in one commit â€” `git show 94db315e -- KNOWN-ISSUES.md` adds both headings. The duplicate is removed; the surviving copy is the better-worded one and the only one whose guide citation is right (`05:25` names the third track, the deleted copy said `22-24`). Its code citation was stale in both copies and now points at `TrainingRun.php:378-385`, where `standard` is named the only selected track. |
-| Same | `ebfc227` | The counts were prose, not measurements. `18 issues filed` counted the duplicate, and `KI-1â€“9, KI-11â€“14` has always been 13 resolved, never 14. The header is recomputed from `grep -c "^## KI-"` and says what it corrected. |
-| T2 filings | `fe24dc0`, `99f5784` | KI-19 (the tool cannot update) and KI-20 (the shop error pair has never been measured). Register ends the slice at 19 filed / 14 closed / 5 open. |
+| Item                          | Commit                 | What landed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T0c, the peer's two entries   | `c20c87a`              | The check ran first, per R53: `git grep -c "Run notes are create-only" HEAD -- KNOWN-ISSUES.md` returned nothing, so the entries were not committed by their own session. Their sixteen lines were committed verbatim in their own commit, attributed there, wording untouched, and staged as the whole file after printing `git diff --cached --name-only` (one name). The three `docs/scenarios/*` files dirty in the same worktree stayed dirty.                                                  |
+| T0a, KI-18                    | `ebfc227`              | Closed per R52 against `f7a59e8` and `slice-9-2026-09-28.md` Â§5, whose roster row reads "all five labels present, zero backing values leaked". The entry now carries the resolution with the code and test lines that prove it (`app/Enums/SpiritBurstState.php:47`, `spirit-burst-roster.blade.php:48`, `tests/Feature/ScenarioPanelUiTest.php:105-114`) and a paragraph saying why it stayed marked open: Slice 9 closed it in its own record and never moved the register.                       |
+| T0b, PLAN erratum             | `ec0ee2f`              | `68fa190` is prefixed `docs(slice-7)` and its diff is Slice 9 (it adds the slice-9 record). Recorded, not rewritten: the only other fix is a history rewrite of a commit already on `origin/master`, which Slice 9's brief forbade and this one repeats.                                                                                                                                                                                                                                             |
+| Found while doing T0a         | `ebfc227`              | **KI-15 was filed twice.** `94db315` wrote the entry into `KNOWN-ISSUES.md` two times in one commit â€” `git show 94db315e -- KNOWN-ISSUES.md` adds both headings. The duplicate is removed; the surviving copy is the better-worded one and the only one whose guide citation is right (`05:25` names the third track, the deleted copy said `22-24`). Its code citation was stale in both copies and now points at `TrainingRun.php:378-385`, where `standard` is named the only selected track.   |
+| Same                          | `ebfc227`              | The counts were prose, not measurements. `18 issues filed` counted the duplicate, and `KI-1â€“9, KI-11â€“14` has always been 13 resolved, never 14. The header is recomputed from `grep -c "^## KI-"` and says what it corrected.                                                                                                                                                                                                                                                                    |
+| T2 filings                    | `fe24dc0`, `99f5784`   | KI-19 (the tool cannot update) and KI-20 (the shop error pair has never been measured). Register ends the slice at 19 filed / 14 closed / 5 open.                                                                                                                                                                                                                                                                                                                                                    |
 
 No KI was closed that was not already fixed, and none was reopened.
 
@@ -2307,9 +2301,9 @@ fire was blocked by the session's own safety classifier, and correctly so: writi
 directive into a shared docs file is not how a guard gets proved here. The predicates were instead
 exercised against a real directive and a synthetic malformed one, in-process:
 
-```
+```text
 real docs/GATE-REGISTRY.md:73 shape=1 docs=1 | malformed shape-passes=0 | PLAN.md treated as docs=0
-```
+```text
 
 Each `lore`/`lore-code` recipe assertion is a different case and reads the Makefile itself, so it
 fails the moment a recipe drops the pipe.
@@ -2351,9 +2345,9 @@ to a rules table no longer moves it.
 
 **Version.** `--version` reads `4.0.0` before and after. Both `check` and `update` report:
 
-```
+```text
 Could not verify skill bundle: HTTP 404. Nothing was installed; retry or update the CLI.
-```
+```text
 
 So there is no version delta to measure, and the audit below is a same-version comparison. Filed as
 KI-19. The brief's other instruction, `npx impeccable update`, is not this project's interface:
@@ -2364,21 +2358,21 @@ recorded rather than glossed.
 **Detector.** Slice 8's record noted the build then in use exposed no `detect` verb, so dimension 5
 rested on a manual scan. This build does, and it was run per component:
 
-```
+```text
 race-panel             exit=0 bytes=0     team-race-panel     exit=0 bytes=0
 team-rank-gauge        exit=0 bytes=0     epithet-checklist   exit=0 bytes=0
 spirit-burst-roster    exit=0 bytes=0     race-fatigue-chip   exit=0 bytes=0
 shop-panel             exit=0 bytes=0
-```
+```text
 
 Zero findings across the seven components and the shop form. Non-vacuity proved the same way as the
 guards above, by finding the thing elsewhere: the same detector over `resources/views` returns three
 
-```
+```text
 race-calendar.blade.php:136  [side-tab] border-l-5
 stat-band.blade.php:123      [side-tab] border-r-2
 welcome.blade.php:15         [bounce-easing] animate-bounce
-```
+```text
 
 and all three are false positives, verified in context rather than assumed: `race-calendar:136` is the
 CSS triangle that draws the goal pennant (`h-0 w-0`, transparent top and bottom borders, colour only
@@ -2397,14 +2391,14 @@ block above is kept verbatim: it is what the sweep returned on 2026-09-29.
 
 **Re-score, same rubric as Slice 8 Â§5.**
 
-| # | Dimension | Slice 8 | Slice 10 | Basis for the change |
-|---|---|---|---|---|
-| 1 | Accessibility | 3 | 3 | The P1 that held it down (the roster printing backing values) is gone, and the shop form now identifies each failed field. It stays 3 for a different reason: `text-risk` on `bg-raised` has never been measured as a rendered pair (KI-20), and the two records that touch `risk` measured the opposite direction (`on-chrome` on `risk` 10.89/6.88, `on-pick` on `risk`). |
-| 2 | Performance | 3 | 4 | `gradePeriods()` was the finding (8 queries per render); `f7a59e8` reads the loaded collection and the test pins four periods at zero queries. No script runs on these panels, and the bundle moved +0.21 kB while the JS hash stayed identical. |
-| 3 | Theming | 4 | 4 | Token-only across all eight surfaces, no `dark:` utility, no hex. `.border-risk{border-color:var(--color-risk)}` is present in the built sheet, so the new error border resolves rather than silently doing nothing. |
-| 4 | Responsive | 3 | 3 | Carried, not re-measured: the panels still `flex-wrap`, the forms still cap at `max-w-3xl`, and the controls are still under 44 px tall, which D-40's desktop-only brief accepts. Restated rather than passed off as new evidence. |
-| 5 | Integrity | 3 | 4 | The leak that made it 3 is closed with a test that fails on a backing value reaching the response; the cost-mismatch 500 is closed at the boundary; and the one non-functional control found this pass (`data-cost`, `data-effect`, read by no script) is removed. What is open (KI-15's unsourced track, KI-17's entered count) is disclosed on the panel, which is the intended behaviour, not drift. |
-| **Total** | | **16/20** | **18/20** | **+2 â€” Good, with the two held dimensions named |
+| #           | Dimension       | Slice 8     | Slice 10    | Basis for the change                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------- | --------------- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1           | Accessibility   | 3           | 3           | The P1 that held it down (the roster printing backing values) is gone, and the shop form now identifies each failed field. It stays 3 for a different reason: `text-risk` on `bg-raised` has never been measured as a rendered pair (KI-20), and the two records that touch `risk` measured the opposite direction (`on-chrome` on `risk` 10.89/6.88, `on-pick` on `risk`).                               |
+| 2           | Performance     | 3           | 4           | `gradePeriods()` was the finding (8 queries per render); `f7a59e8` reads the loaded collection and the test pins four periods at zero queries. No script runs on these panels, and the bundle moved +0.21 kB while the JS hash stayed identical.                                                                                                                                                          |
+| 3           | Theming         | 4           | 4           | Token-only across all eight surfaces, no `dark:` utility, no hex. `.border-risk{border-color:var(--color-risk)}` is present in the built sheet, so the new error border resolves rather than silently doing nothing.                                                                                                                                                                                      |
+| 4           | Responsive      | 3           | 3           | Carried, not re-measured: the panels still `flex-wrap`, the forms still cap at `max-w-3xl`, and the controls are still under 44 px tall, which D-40's desktop-only brief accepts. Restated rather than passed off as new evidence.                                                                                                                                                                        |
+| 5           | Integrity       | 3           | 4           | The leak that made it 3 is closed with a test that fails on a backing value reaching the response; the cost-mismatch 500 is closed at the boundary; and the one non-functional control found this pass (`data-cost`, `data-effect`, read by no script) is removed. What is open (KI-15's unsourced track, KI-17's entered count) is disclosed on the panel, which is the intended behaviour, not drift.   |
+| **Total**   |                 | **16/20**   | **18/20**   | **+2 â€” Good, with the two held dimensions named                                                                                                                                                                                                                                                                                                                                                         |
 
 **Fixed as shipped-code defects in this slice** (all three in T3's commit): the price mismatch that
 answered 500 instead of a field error; the combined error paragraph that did not say which field
@@ -2427,10 +2421,10 @@ wrapped form because an error span inside a `<label>` joins the field's accessib
 
 **The bug this found by accident.** Reaching the JSON path for the first time surfaced
 
-```
+```text
 Error: Call to undefined method Illuminate\Validation\ValidationException::message()
   in bootstrap/app.php:38
-```
+```text
 
 The unified API envelope had never rendered a validation error: `/api/v1` ships only GET routes, and
 the one test named for the validation shape asserts the 404 branch. So every `expectsJson` request
@@ -2496,7 +2490,7 @@ that path. The gap is left alone rather than filled by renaming a file the owner
 C-5 first, on a throwaway scratch database (`migrate:fresh` is a destructive drop and is not run in a
 shared worktree; `php artisan migrate` plus `db:seed` on an empty file proves the same thing):
 
-```
+```text
 $ rm -f /tmp/slice10.sqlite && DB_CONNECTION=sqlite DB_DATABASE=/tmp/slice10.sqlite php artisan migrate
   ... 2026_09_28_122929_add_grade_point_period_columns ......... 4.55ms DONE
       2026_09_28_143228_add_scenario_panel_columns ............. 3.84ms DONE
@@ -2504,50 +2498,50 @@ $ DB_CONNECTION=sqlite DB_DATABASE=/tmp/slice10.sqlite php artisan db:seed
   Database\Seeders\UmamusumeSeeder .... 60 ms DONE
   Database\Seeders\SkillSeeder ........ 17 ms DONE
   â†’ 22 migrations, 23 tables, umamusume=2, skills=10, scenario_slots=0
-```
+```text
 
 C-1, the full suite (includes the concurrent session's five untracked test files, which passed):
 
-```
+```text
 $ php artisan test --compact
   Tests:    2 skipped, 431 passed (1412 assertions)
   Duration: 41.74s
-```
+```text
 
 Both skips are `DesignTokensTest.php:221` (`Playwright browser driver not installed; skipping
 D-288/G-18 browser gate`), pre-existing and not introduced here. The narrow runs, each watched failing
 before the code that answers it:
 
-```
+```text
 tests/Feature/ShopPurchasePayloadTest.php   12 passed (39 assertions)
 tests/Feature/ApiV1Test.php                  6 passed (28 assertions)
 tests/Feature/LoreGateParityTest.php        11 passed (24 assertions)
 tests/Feature/ScenarioPanelUiTest.php + RenderedCopyHygieneTest  22 passed (64 assertions)
-```
+```text
 
 C-3, formatting on explicit pathspecs only (R39 â€” `--dirty` treats the peer's untracked scratch files
 as dirty and reformats them, which is what happened in Slice 8):
 
-```
+```text
 $ vendor/bin/pint bootstrap/app.php app/Http/Requests/StoreShopPurchaseRequest.php \
     tests/Feature/ApiV1Test.php tests/Feature/ShopPurchasePayloadTest.php \
     tests/Feature/LoreGateParityTest.php tools/lore.php --format agent
   {"tool":"pint","result":"passed"}
 $ vendor/bin/pint --test <same six paths> --format agent
   {"tool":"pint","result":"passed"}
-```
+```text
 
 C-2, static analysis:
 
-```
+```text
 $ vendor/bin/phpstan analyse --no-progress
  Note: Using configuration file D:\Projects\umamusume-laravel13\phpstan.neon.
  [OK] No errors
-```
+```text
 
 C-4, both lore gates, and the parity proof between them:
 
-```
+```text
 $ composer lore
   lore-docs: 98 hit(s), 49 exempt line(s)
 $ composer lore-code
@@ -2559,7 +2553,7 @@ $ composer lore-code
                                  `slice-9-2026-09-28.md` Â§2).
 $ # the Makefile pipeline, run as its three recipe bodies in bash (GNU make absent, KI-4):
   shell stages: 20 + 35 + 43 = 98        runner: 98        agreement, same tree
-```
+```text
 
 `lore-docs` is 98 with the marker section applied and unchanged by the record you are reading: the
 slice added no new banned-word line outside `docs/` that needed a ruling, and KI-19 and KI-20 are
@@ -2567,12 +2561,12 @@ root-register prose that says "banned word" and "tool identifiers" rather than n
 
 Front build (no UI token changed, so the hashes are the check):
 
-```
+```text
 $ npm run build
   public/build/assets/app-C-jADQVX.css  74.49 kB â”‚ gzip: 15.18 kB
   public/build/assets/app-LFSC9J26.js   52.25 kB â”‚ gzip: 19.86 kB
   âœ“ built in 3.97s
-```
+```text
 
 The JS hash is byte-identical to Slice 9's; the CSS moved +0.21 kB because the error-state utilities
 (`border-risk` and the aria-marked variants) entered the sheet, and `.border-risk{border-color:var(--color-risk)}`
@@ -2584,27 +2578,27 @@ Stated rather than skipped quietly.
 
 ### 8. What landed, in order
 
-| Task | Commit | Scope |
-|---|---|---|
-| T0c | `c20c87a` | `docs(issues)`: the concurrent session's two register entries, verbatim, attributed |
-| T0a | `ebfc227` | `docs(issues)`: KI-18 closed on the register, KI-15 de-duplicated, counts recomputed |
-| T0b | `ec0ee2f` | `docs(plan)`: the `68fa190` subject-prefix erratum, plus the `$PANELS` H1 repair and the re-chained "Last Updated" block |
-| T1 | `8c9faf9` | `feat(lore,docs)`: the marker in both runners, three new guards, 41 lines marked, count re-baselined |
-| T1 | `11525ec` | `docs(registry)`: the reading history 131 â†’ 147 cited to the line that measured each |
-| T2 | `fe24dc0` | `docs(issues)`: KI-19 filed, status line moved |
-| T3 | `6aa81eb` | `fix(api)`: the validation envelope that never rendered |
-| T3 | `3b15a6c` | `fix(http,ui)`: the price answered at the `cost` field, per-field error state, dead attributes removed |
-| T2 | `99f5784` | `docs(issues)`: KI-20 filed for the unmeasured pair |
-| T4 | `802d1b9` | `docs(adr)`: ADR-0009, proposed, no decision |
-| T5 | `268c615` | `docs(verification)`: this file, through T4, with Â§7's gates pasted |
-| T5 | `b387e07` | `docs(verification)`: the record marking its own two lines and stating the syntax as a working example |
-| T5 | `31f97a5` | `docs(plan,gate-registry)`: the re-baseline, criterion 9, the settled lore baseline; the pushed head when Â§10 ran |
+| Task   | Commit      | Scope                                                                                                                      |
+| ------ | ----------- | -------------------------------------------------------------------------------------------------------------------------- |
+| T0c    | `c20c87a`   | `docs(issues)`: the concurrent session's two register entries, verbatim, attributed                                        |
+| T0a    | `ebfc227`   | `docs(issues)`: KI-18 closed on the register, KI-15 de-duplicated, counts recomputed                                       |
+| T0b    | `ec0ee2f`   | `docs(plan)`: the `68fa190` subject-prefix erratum, plus the `$PANELS` H1 repair and the re-chained "Last Updated" block   |
+| T1     | `8c9faf9`   | `feat(lore,docs)`: the marker in both runners, three new guards, 41 lines marked, count re-baselined                       |
+| T1     | `11525ec`   | `docs(registry)`: the reading history 131 â†’ 147 cited to the line that measured each                                     |
+| T2     | `fe24dc0`   | `docs(issues)`: KI-19 filed, status line moved                                                                             |
+| T3     | `6aa81eb`   | `fix(api)`: the validation envelope that never rendered                                                                    |
+| T3     | `3b15a6c`   | `fix(http,ui)`: the price answered at the `cost` field, per-field error state, dead attributes removed                     |
+| T2     | `99f5784`   | `docs(issues)`: KI-20 filed for the unmeasured pair                                                                        |
+| T4     | `802d1b9`   | `docs(adr)`: ADR-0009, proposed, no decision                                                                               |
+| T5     | `268c615`   | `docs(verification)`: this file, through T4, with Â§7's gates pasted                                                       |
+| T5     | `b387e07`   | `docs(verification)`: the record marking its own two lines and stating the syntax as a working example                     |
+| T5     | `31f97a5`   | `docs(plan,gate-registry)`: the re-baseline, criterion 9, the settled lore baseline; the pushed head when Â§10 ran         |
 
 ### 10. Push, once, and its verification (R38)
 
 Fetched before pushing so the check is against the remote as it is, not as it was at open:
 
-```
+```text
 $ git fetch origin
   origin/master: 68fa190     HEAD: 31f97a5
 $ git merge-base --is-ancestor origin/master HEAD   â†’ fast-forward: yes
@@ -2615,7 +2609,7 @@ $ git rev-parse HEAD
   31f97a5f2aa8b18a39ff2394cd1288ee08b373da
 $ git ls-remote origin master
   31f97a5f2aa8b18a39ff2394cd1288ee08b373da        refs/heads/master
-```
+```text
 
 Equal, so the push landed what the slice built and nothing else. One push, plain, no force.
 
@@ -2658,7 +2652,6 @@ staged at any point, and `git diff --cached --name-only` was printed before each
 - `docs/scenarios/01`, `02`, `07` remain dirty from the concurrent session and were never staged here;
   `git diff --cached --name-only` was printed before every commit in this slice and named only mine.
 
-
 ## slice-11-2026-09-29.md
 
 # Slice 11 verification record â€” calendar slots, free-race writer, KI-20 closure
@@ -2674,7 +2667,7 @@ concurrent session.
 
 Taken at slice start (prior session, preserved here for traceability).
 
-```
+```text
 $ git branch --show-current   â†’ master
 $ git rev-parse --short HEAD  â†’ 0d2dbdc
 $ git status --porcelain      â†’
@@ -2684,41 +2677,41 @@ $ git status --porcelain      â†’
    M docs/scenarios/02-unity-cup.md                      peer, untouched all slice
    M docs/scenarios/07-grand-concert.md                  peer, untouched all slice
    ?? (untracked docs and test files from concurrent session)
-```
+```text
 
 Peer files were never staged or committed by this slice.
 
 ### 2. Commits in order
 
-| # | SHA | Subject | Task |
-|---|-----|---------|------|
-| 1 | `c0a743f` | feat(slice-11): add source_key to scenario_slots for multi-race half-months (R54) | T1 |
-| 2 | `f0ae288` | feat(slice-11): seed URA Finale scenario_slots from committed client export (R55) | T2 |
-| 3 | `70248b3` | feat(calendar): multi-slot rendering for half-month cells | T3 |
-| 4 | `5820e77` | feat(slice-11): free-race writer, fifth kind, and lore-code path exclusion (R56, R61, R62) | T4 |
-| 5 | `65f8b92` | fix(slice-11): delete welcome page, measure and close KI-20 (R57, R58) | T5 |
+| #     | SHA         | Subject                                                                                      | Task     |
+| ----- | ----------- | -------------------------------------------------------------------------------------------- | -------- |
+| 1     | `c0a743f`   | feat(slice-11): add source_key to scenario_slots for multi-race half-months (R54)            | T1       |
+| 2     | `f0ae288`   | feat(slice-11): seed URA Finale scenario_slots from committed client export (R55)            | T2       |
+| 3     | `70248b3`   | feat(calendar): multi-slot rendering for half-month cells                                    | T3       |
+| 4     | `5820e77`   | feat(slice-11): free-race writer, fifth kind, and lore-code path exclusion (R56, R61, R62)   | T4       |
+| 5     | `65f8b92`   | fix(slice-11): delete welcome page, measure and close KI-20 (R57, R58)                       | T5       |
 
 All five on `master`, no force-push, no rebase.
 
 ### 3. Gates (CONSTRAINTS order)
 
-| Gate | Result | Evidence |
-|------|--------|----------|
-| Pest | 507 passed, 2 skipped, 1 pre-existing failure | `RunViewFrameTest::it keeps the timelineâ€¦` fails at line 92 on committed tree without slice-11 changes; verified via `git stash` + re-run |
-| Pint | PASS | `vendor/bin/pint --dirty --format agent` â†’ `{"result":"passed"}` |
-| PHPStan level 6 | PASS | `vendor/bin/phpstan analyse` â†’ `[OK] No errors` |
-| lore-code | Baseline 7 | All 7 hits are allowed senses (Good-Luck Charm skill name Ã—2, keyed/validator comments Ã—3, etc.) |
-| Vite build | PASS | 59 modules, 75.84 kB CSS, 52.25 kB JS, built in 8.51s |
+| Gate              | Result                                          | Evidence                                                                                                                                      |
+| ----------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pest              | 507 passed, 2 skipped, 1 pre-existing failure   | `RunViewFrameTest::it keeps the timelineâ€¦` fails at line 92 on committed tree without slice-11 changes; verified via `git stash` + re-run   |
+| Pint              | PASS                                            | `vendor/bin/pint --dirty --format agent` â†’ `{"result":"passed"}`                                                                            |
+| PHPStan level 6   | PASS                                            | `vendor/bin/phpstan analyse` â†’ `[OK] No errors`                                                                                             |
+| lore-code         | Baseline 7                                      | All 7 hits are allowed senses (Good-Luck Charm skill name Ã—2, keyed/validator comments Ã—3, etc.)                                            |
+| Vite build        | PASS                                            | 59 modules, 75.84 kB CSS, 52.25 kB JS, built in 8.51s                                                                                         |
 
 ### 4. Browser pass
 
 Dev server on port 8199 against the main database after running pending migrations and seeding
 URA Finale slots.
 
-| Surface | Status | Verified |
-|---------|--------|----------|
-| `/` | 302 â†’ `/training-runs` | R57 redirect confirmed |
-| `/training-runs/1` | 200 | Free-race cell renders "Naruta Kinpa Cup" (8 occurrences), "Trainer-entered" marker present (5 occurrences), zero server errors |
+| Surface              | Status                     | Verified                                                                                                                          |
+| -------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                  | 302 â†’ `/training-runs`   | R57 redirect confirmed                                                                                                            |
+| `/training-runs/1`   | 200                        | Free-race cell renders "Naruta Kinpa Cup" (8 occurrences), "Trainer-entered" marker present (5 occurrences), zero server errors   |
 
 Free-race data created via tinker: `ScenarioSlot::create(kind=free_race, month=5, half=Early, tier=G3, is_manual=true)` + linked `RaceEntry(status=Completed, placement=1)`.
 
@@ -2726,11 +2719,11 @@ Free-race data created via tinker: `ScenarioSlot::create(kind=free_race, month=5
 
 Computed from CSS token values in `resources/css/app.css`:
 
-| Theme | Foreground | Background | Ratio | Threshold | Verdict |
-|-------|-----------|------------|-------|-----------|---------|
-| Light | #800014 | #FFFFFF | 10.04:1 | 4.5:1 | PASS |
-| Dark (before) | #FF6B7A | #24262A | 4.33:1 | 4.5:1 | FAIL |
-| Dark (after) | #FF7E8C | #24262A | 4.77:1 | 4.5:1 | PASS |
+| Theme           | Foreground    | Background     | Ratio     | Threshold     | Verdict     |
+| --------------- | ------------- | -------------- | --------- | ------------- | ----------- |
+| Light           | #800014       | #FFFFFF        | 10.04:1   | 4.5:1         | PASS        |
+| Dark (before)   | #FF6B7A       | #24262A        | 4.33:1    | 4.5:1         | FAIL        |
+| Dark (after)    | #FF7E8C       | #24262A        | 4.77:1    | 4.5:1         | PASS        |
 
 Cross-pair verification after stepping: `border-risk` on `bg-raised` = 4.77:1 (clears 3:1 boundary);
 `bg-risk` with `text-on-chrome` (#121013 on #FF7E8C) = 6.15:1 (clears 4.5:1 text). Fix follows
@@ -2762,12 +2755,12 @@ Slice 11. It proved only that the failure was in `HEAD`, which was already known
 the suite boots (the first attempt without it failed on a missing `APP_KEY`, which is an
 environment artefact and not a result):
 
-| Ref | Commit | Result |
-|---|---|---|
-| `0d2dbdc` | Slice 10 tip, before this slice | **PASS** (5 assertions) |
-| `70248b3` | T3, calendar multi-slot | **PASS** (5 assertions) |
-| `5820e77` | T4, free-race writer | **FAIL** at `RunViewFrameTest.php:92` |
-| `65f8b92` | T5, this slice's tip | **FAIL** |
+| Ref         | Commit                            | Result                                  |
+| ----------- | --------------------------------- | --------------------------------------- |
+| `0d2dbdc`   | Slice 10 tip, before this slice   | **PASS** (5 assertions)                 |
+| `70248b3`   | T3, calendar multi-slot           | **PASS** (5 assertions)                 |
+| `5820e77`   | T4, free-race writer              | **FAIL** at `RunViewFrameTest.php:92`   |
+| `65f8b92`   | T5, this slice's tip              | **FAIL**                                |
 
 **The regression is T4's.** T4 rewrote `race-panel.blade.php` and gave the entry-mode toggle a
 `role="radiogroup"`, which is the second radiogroup in the scrolling region and breaks D-40's
@@ -2790,11 +2783,11 @@ summary and points at it for the derivations.
 
 ### Opening snapshot
 
-```
-$ git branch --show-current   -> master
-$ git rev-parse --short HEAD  -> ec5b967
-$ git status --porcelain      -> 7 modified, 8 untracked, all from a concurrent session
-```
+```text
+git branch --show-current   -> master
+git rev-parse --short HEAD  -> ec5b967
+git status --porcelain      -> 7 modified, 8 untracked, all from a concurrent session
+```text
 
 Those 7 modified and 8 untracked paths are a peer's. They were never staged. The five files the
 merge brings in were checked for overlap against that list with `Compare-Object` **before** merging,
@@ -2802,9 +2795,9 @@ which is why the merge produced no conflict to resolve.
 
 ### Merge
 
-| SHA | Subject |
-|---|---|
-| `236e3a5` | Merge branch 'feat/catalog-roster-and-trainee-selector' |
+| SHA         | Subject                                                   |
+| ----------- | --------------------------------------------------------- |
+| `236e3a5`   | Merge branch 'feat/catalog-roster-and-trainee-selector'   |
 
 Not a rebase. `b63e111` is already an ancestor of master through `bc11d9b`, so re-basing would have
 rewritten landed history. The branch's three remaining commits (`1c44698`, `79d7f62`, `4addcd6`)
@@ -2813,16 +2806,16 @@ true, which was false when this slice started.
 
 ### Gates (CONSTRAINTS order)
 
-| Gate | Result | Evidence |
-|------|--------|----------|
-| Pint (dirty) | PASS | `{"tool":"pint","result":"passed"}` |
-| Pint (test) | PASS | `{"tool":"pint","result":"passed"}` |
-| PHPStan L6 | PASS | `[OK] No errors` |
-| Pest | **782 passed, 2 skipped**, 2715 assertions, 85.06s | `php artisan test --compact` |
-| lore (docs) | 115 hits, 57 exempt - **unchanged** | `composer lore`; `make` is absent on this host, the KI-4 gap |
-| lore (code) | 8 hits - **unchanged** | `composer lore-code`; all 8 in files this slice did not touch |
-| composer audit | clean | "No security vulnerability advisories found." |
-| npm audit --omit=dev | clean | "found 0 vulnerabilities" |
+| Gate                   | Result                                               | Evidence                                                        |
+| ---------------------- | ---------------------------------------------------- | --------------------------------------------------------------- |
+| Pint (dirty)           | PASS                                                 | `{"tool":"pint","result":"passed"}`                             |
+| Pint (test)            | PASS                                                 | `{"tool":"pint","result":"passed"}`                             |
+| PHPStan L6             | PASS                                                 | `[OK] No errors`                                                |
+| Pest                   | **782 passed, 2 skipped**, 2715 assertions, 85.06s   | `php artisan test --compact`                                    |
+| lore (docs)            | 115 hits, 57 exempt - **unchanged**                  | `composer lore`; `make` is absent on this host, the KI-4 gap    |
+| lore (code)            | 8 hits - **unchanged**                               | `composer lore-code`; all 8 in files this slice did not touch   |
+| composer audit         | clean                                                | "No security vulnerability advisories found."                   |
+| npm audit --omit=dev   | clean                                                | "found 0 vulnerabilities"                                       |
 
 The lore counts were checked rather than assumed. This slice added four `KNOWN-ISSUES.md` entries
 and two documents, and the first run of `composer lore` came back at **116** - one hit from new prose.
@@ -2874,12 +2867,12 @@ opening on focus with no click.
 
 ### Defects filed
 
-| KI | One line |
-|---|---|
-| **KI-38** | Card `103601` stores the source's literal placeholder title `[unsigned]` with a real `release_en`, and the tool renders it as a rated, dated costume |
-| **KI-39** | `SkillFactory` computes `match_key` with `Str::slug`, not `NameNormalizer`; **119 of 200** sampled client-named skills get a different key than production writes |
-| **KI-40** | `NameNormalizer`'s fold leaves the Latin ligature and stroked letters intact; low impact today (the only affected character, `ae`, appears solely in fields this tool does not store) but the failure reads as "no such trainee" |
-| **KI-41** | The run form orders the roster by `name` with no tiebreaker; total in fact (0 duplicate names across 135) but not by construction |
+| KI          | One line                                                                                                                                                                                                                           |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **KI-38**   | Card `103601` stores the source's literal placeholder title `[unsigned]` with a real `release_en`, and the tool renders it as a rated, dated costume                                                                               |
+| **KI-39**   | `SkillFactory` computes `match_key` with `Str::slug`, not `NameNormalizer`; **119 of 200** sampled client-named skills get a different key than production writes                                                                  |
+| **KI-40**   | `NameNormalizer`'s fold leaves the Latin ligature and stroked letters intact; low impact today (the only affected character, `ae`, appears solely in fields this tool does not store) but the failure reads as "no such trainee"   |
+| **KI-41**   | The run form orders the roster by `name` with no tiebreaker; total in fact (0 duplicate names across 135) but not by construction                                                                                                  |
 
 The next free KI number was re-derived at run time by the plan's own recipe and was 38.
 
@@ -2893,7 +2886,6 @@ The guard's intent held and the copy proceeded, but the assertion should be
 that refuses correct data is worse than no guard, because the next person to run this task alone
 will read the refusal as a broken database.
 
-
 ## slice-12-2026-09-29.md
 
 # Slice 12 verification record â€” correction slice
@@ -2905,7 +2897,7 @@ tokens, no schema columns." Date: 2026-09-29. Branch: `master`. Worktree: shared
 
 ### 1. Opening snapshot
 
-```
+```text
 $ git branch --show-current   â†’ master
 $ git rev-parse --short HEAD  â†’ 4992282
 $ git status --porcelain      â†’
@@ -2913,7 +2905,7 @@ $ git status --porcelain      â†’
    M docs/scenarios/02-unity-cup.md                      peer, untouched
    M docs/scenarios/07-grand-concert.md                  peer, untouched
    ?? (untracked docs and test files from concurrent session)
-```
+```text
 
 ### 2. T0 â€” RunViewFrameTest regression (R63)
 
@@ -2926,12 +2918,12 @@ $ git status --porcelain      â†’
 
 **Bisect.** Three scratch worktrees, each with `.env` present:
 
-| Ref | Commit | Result |
-|---|---|---|
-| `0d2dbdc` | Slice 10 tip | PASS |
-| `70248b3` | T3, calendar multi-slot | PASS |
-| `5820e77` | T4, free-race writer | **FAIL** |
-| `65f8b92` | T5, slice tip | **FAIL** |
+| Ref         | Commit                    | Result     |
+| ----------- | ------------------------- | ---------- |
+| `0d2dbdc`   | Slice 10 tip              | PASS       |
+| `70248b3`   | T3, calendar multi-slot   | PASS       |
+| `5820e77`   | T4, free-race writer      | **FAIL**   |
+| `65f8b92`   | T5, slice tip             | **FAIL**   |
 
 **The regression is T4's, and the slice-11 record's "pre-existing" label was wrong.** T4 rewrote
 `race-panel.blade.php` and added `role="radiogroup"` to the entry-mode toggle. D-40's invariant is
@@ -2959,24 +2951,24 @@ full suite is green at the commit that closes T0 (`c86ed9f`).
 
 ### Audit table
 
-| Grade code | Seeded tier (before) | Per-row source | Seeded tier (after) | Row count |
-|-----------|---------------------|----------------|-------------------|-----------|
-| 100 | G1 | Client copy: "G1 Averseness" in `skills.json` id 200311 (Â§1.2.6) | G1 | 34 |
-| 200 | G2 | âŒ UNVERIFIED â€” no cited label map (Â§1.2.6) | null | 42â†’(collisions reduce) |
-| 300 | G3 | âŒ UNVERIFIED â€” no cited label map (Â§1.2.6) | null | 78â†’(collisions reduce) |
-| 400 | OP | Client naming: three rows with ã€Œã‚ªãƒ¼ãƒ—ãƒ³ã€ carry grade 400 (Â§1.2.6) | OP | 118 |
-| 700 | Pre-OP | âŒ UNVERIFIED â€” triage row 12 explicitly marks this | null | 26â†’(collisions reduce) |
+| Grade code    | Seeded tier (before)    | Per-row source                                                                | Seeded tier (after)   | Row count                  |
+| ------------- | ----------------------- | ----------------------------------------------------------------------------- | --------------------- | -------------------------- |
+| 100           | G1                      | Client copy: "G1 Averseness" in `skills.json` id 200311 (Â§1.2.6)             | G1                    | 34                         |
+| 200           | G2                      | âŒ UNVERIFIED â€” no cited label map (Â§1.2.6)                                | null                  | 42â†’(collisions reduce)   |
+| 300           | G3                      | âŒ UNVERIFIED â€” no cited label map (Â§1.2.6)                                | null                  | 78â†’(collisions reduce)   |
+| 400           | OP                      | Client naming: three rows with ã€Œã‚ªãƒ¼ãƒ—ãƒ³ã€ carry grade 400 (Â§1.2.6)    | OP                    | 118                        |
+| 700           | Pre-OP                  | âŒ UNVERIFIED â€” triage row 12 explicitly marks this                         | null                  | 26â†’(collisions reduce)   |
 
 ### Re-seed numbers
 
 Scratch DB (`/tmp/s12-seed-ghRj.sqlite`), two consecutive seeds:
 
-| Metric | First seed | Second seed | Idempotent? |
-|--------|-----------|-------------|-------------|
-| Total rows | 296 | 296 | Yes |
-| G1 | 34 | 34 | Yes |
-| OP | 118 | 118 | Yes |
-| null | 144 | 144 | Yes |
+| Metric       | First seed    | Second seed     | Idempotent?     |
+| ------------ | ------------- | --------------- | --------------- |
+| Total rows   | 296           | 296             | Yes             |
+| G1           | 34            | 34              | Yes             |
+| OP           | 118           | 118             | Yes             |
+| null         | 144           | 144             | Yes             |
 
 ### G-16c grep result
 
@@ -2990,10 +2982,10 @@ that role to address when the parser lands.
 
 Read from the remote in this slice, not from Slice 11's memory of its own run:
 
-```
+```text
 $ git ls-remote origin master
-4992282cc7bb0a2f5ae8888116d72494c30128a1	refs/heads/master
-```
+4992282cc7bb0a2f5ae8888116d72494c30128a1 refs/heads/master
+```text
 
 `4992282` is Slice 11's tip and the remote agrees. Short sha and full sha resolve to the same commit.
 
@@ -3026,10 +3018,10 @@ same thing an "audit", which is why the wrong verb was reached for.
 
 `impeccable.cmd detect` over the two Slice 11 surfaces returns **1 finding**:
 
-```
+```text
 resources\views\components\race-calendar.blade.php
   line 148: [side-tab] border-l-5
-```
+```text
 
 Not acted on. The rule's own exception applies: the left edge marks the mandatory goal race, so it
 carries information rather than decorating a card. `race-panel.blade.php` returns nothing.
@@ -3073,12 +3065,12 @@ closed and is re-closed on different grounds.
 `git log --oneline origin/master..HEAD` at the time of writing returns four commits, and two of them
 are not this slice's:
 
-```
+```text
 2d0c1dc fix(slice-12): null tier for unsourced grade codes in seeder (R65)          T1
 24f9b50 feat(schema): race_entries gains a pointer to the career calendar           peer
 c86ed9f fix(slice-12): race-panel path choice from radiogroup to banner buttons (R63) T0
 7897684 docs(handoff): why the race read path moves to race_catalog_slots            peer
-```
+```text
 
 Both sessions commit to `master` in the same worktree, so the peer's two commits landed interleaved
 with this slice's. **The T4 push carries them to `origin/master`.** They cannot be withheld without
@@ -3088,12 +3080,12 @@ gates, but the green suite is not this slice's endorsement of the peer's schema 
 
 ### 6. Commits
 
-| # | SHA | Subject | Task |
-|---|-----|---------|------|
-| 1 | `c86ed9f` | fix(slice-12): race-panel path choice from radiogroup to banner buttons (R63) | T0 |
-| 2 | `2d0c1dc` | fix(slice-12): null tier for unsourced grade codes in seeder (R65) | T1 |
-| 3 | `b295d16` | docs(slice-12): addendum, register, and the rulings ledger (R64, R66) | T2 |
-| 4 | (this commit) | docs(slice-12): T3 browser pass findings, slice halted before T4 | T3 |
+| #     | SHA             | Subject                                                                         | Task     |
+| ----- | --------------- | ------------------------------------------------------------------------------- | -------- |
+| 1     | `c86ed9f`       | fix(slice-12): race-panel path choice from radiogroup to banner buttons (R63)   | T0       |
+| 2     | `2d0c1dc`       | fix(slice-12): null tier for unsourced grade codes in seeder (R65)              | T1       |
+| 3     | `b295d16`       | docs(slice-12): addendum, register, and the rulings ledger (R64, R66)           | T2       |
+| 4     | (this commit)   | docs(slice-12): T3 browser pass findings, slice halted before T4                | T3       |
 
 ### 7. T3 â€” browser pass, and the two blockers it found
 
@@ -3107,14 +3099,14 @@ background.
 
 ### 7.1 What passed
 
-| Element | Light | Dark | Threshold | Verdict |
-|---|---|---|---|---|
-| Path button "Calendar race" (14px/500) | 6.95 | 12.71 | 4.5:1 | PASS |
-| Path button "Race not on the calendar" | 6.95 | 12.71 | 4.5:1 | PASS |
-| Free-race row title (14px/600) | 13.24 | 15.15 | 4.5:1 | PASS |
-| Race-panel "Trainer-entered" (10px) | 5.78 | 6.64 | 4.5:1 | PASS |
-| Tier text `G3` on the free-race row (12px) | 5.78 | 6.64 | 4.5:1 | PASS |
-| Tier text `no grade` on the null-tier row (12px) | 5.78 | 6.64 | 4.5:1 | PASS |
+| Element                                            | Light   | Dark    | Threshold   | Verdict   |
+| -------------------------------------------------- | ------- | ------- | ----------- | --------- |
+| Path button "Calendar race" (14px/500)             | 6.95    | 12.71   | 4.5:1       | PASS      |
+| Path button "Race not on the calendar"             | 6.95    | 12.71   | 4.5:1       | PASS      |
+| Free-race row title (14px/600)                     | 13.24   | 15.15   | 4.5:1       | PASS      |
+| Race-panel "Trainer-entered" (10px)                | 5.78    | 6.64    | 4.5:1       | PASS      |
+| Tier text `G3` on the free-race row (12px)         | 5.78    | 6.64    | 4.5:1       | PASS      |
+| Tier text `no grade` on the null-tier row (12px)   | 5.78    | 6.64    | 4.5:1       | PASS      |
 
 `radiogroups` in the scrolling region: **1**, in both themes â€” the R63 fix holds on the rendered
 page, not just in the suite.
@@ -3133,7 +3125,7 @@ never displayed, so it cannot produce an empty badge either.
 T4's `race-panel.blade.php` is built on Alpine: `x-data`, `@click`, `:class`, and two
 `<template x-if>` blocks. Alpine is not installed. Measured on the live page:
 
-```
+```text
 window.Alpine                     â†’ false
 document.querySelectorAll('[x-data]')[0] _x internals â†’ absent
 document.querySelectorAll('template[x-if]').length   â†’ 2
@@ -3142,7 +3134,7 @@ input[name="title"]               â†’ absent
 select[name="month"]              â†’ absent
 select[name="half"]               â†’ absent
 input[name="entry_mode"]          â†’ present, value ""
-```
+```text
 
 `package.json` devDependencies are `@tailwindcss/vite`, `axios`, `concurrently`,
 `laravel-vite-plugin`, `tailwindcss`, `vite` â€” no Alpine. `resources/js/app.ts` imports `./bootstrap`
@@ -3180,9 +3172,9 @@ panel's: `class="ml-1 text-[10px] text-ink-muted"`, `closest('form')` false. The
 
 Reading the model directly on the same fixture:
 
-```
+```text
 calendarCells()[4]['halves']['Early']['slots'] â†’ [ { "state": "past", "label": "Naruta Kinpa Cup" } ]
-```
+```text
 
 A free-race slot renders as `past`, not `open`, and without `manual` â€” so it loses both the open-cell
 geometry and the Trainer-entered marker that R61 requires. `grep -n "isFreeRace"` over
@@ -3257,7 +3249,6 @@ screen do."
 pushed, `origin/master` was `4992282`. The deferred push landed in Slice 13 and carries 16 commits,
 9 of them not this session's, itemized in `slice-13-2026-09-29.md` Â§7.
 
-
 ## slice-13-2026-09-29.md
 
 # Slice 13 verification record â€” close KI-21, fix the ordinal, reconcile KI-22, push once
@@ -3275,7 +3266,7 @@ Branch: `master`. Worktree: shared with one concurrent session.
 
 ### 1. T0 â€” opening snapshot (R38, R43)
 
-```
+```text
 $ git branch --show-current   â†’ master
 $ git rev-parse --short HEAD  â†’ 7895e74
 $ git ls-remote origin master â†’ 4992282cc7bb0a2f5ae8888116d72494c30128a1
@@ -3284,15 +3275,15 @@ $ git status --porcelain      â†’
    M docs/scenarios/02-unity-cup.md       peer, untouched all slice
    M docs/scenarios/07-grand-concert.md   peer, untouched all slice
    ?? docs/... (peer untracked docs), ?? tests/Feature/{GuidedStep,ResourceStrip,RaceCatalogFetch}* (peer)
-```
+```text
 
 **The three files R68 names, checked individually:**
 
-| File | State at T0 |
-|---|---|
-| `resources/views/components/race-calendar.blade.php` | CLEAN |
-| `resources/views/runs/show.blade.php` | CLEAN |
-| `app/Models/TrainingRun.php` | CLEAN |
+| File                                                   | State at T0   |
+| ------------------------------------------------------ | ------------- |
+| `resources/views/components/race-calendar.blade.php`   | CLEAN         |
+| `resources/views/runs/show.blade.php`                  | CLEAN         |
+| `app/Models/TrainingRun.php`                           | CLEAN         |
 
 All three clean, so **T3 ran**. `git diff --quiet -- <path>` per file; the dirty list was the three
 `docs/scenarios/*` files and untracked peer documents only.
@@ -3324,16 +3315,16 @@ declarative branch into the HTML and the *browser* is what makes it inert. The t
 resolves every field through `DOMDocument`, reads its `name`, and refuses any field whose ancestor
 chain contains a `template` element. `reachableFieldNames()` is the whole point of the file.
 
-| Test | Against HEAD | After |
-|---|---|---|
-| calendar branch reachable, no manual fields | FAIL | pass |
-| calendar branch carries a real `entry_mode` value | FAIL | pass |
-| manual branch reachable on switch | FAIL | pass |
-| manual branch carries a real `entry_mode` value | FAIL | pass |
-| failed manual entry stores nothing | FAIL | pass |
-| redelivery preserves mode, title, placement, status | FAIL | pass |
-| free race written through the rendered form | FAIL | pass |
-| no Alpine directive survives in the page | FAIL | pass |
+| Test                                                  | Against HEAD   | After   |
+| ----------------------------------------------------- | -------------- | ------- |
+| calendar branch reachable, no manual fields           | FAIL           | pass    |
+| calendar branch carries a real `entry_mode` value     | FAIL           | pass    |
+| manual branch reachable on switch                     | FAIL           | pass    |
+| manual branch carries a real `entry_mode` value       | FAIL           | pass    |
+| failed manual entry stores nothing                    | FAIL           | pass    |
+| redelivery preserves mode, title, placement, status   | FAIL           | pass    |
+| free race written through the rendered form           | FAIL           | pass    |
+| no Alpine directive survives in the page              | FAIL           | pass    |
 
 **One correction, recorded rather than hidden.** The redelivery test was first written as a POST
 followed by a GET of the redirect target. It failed for the wrong reason: `phpunit.xml:30` pins
@@ -3344,13 +3335,13 @@ and the file says so in a comment.
 
 ### 2.2 Zero-Alpine grep (deliverable (b))
 
-```
+```text
 $ grep -n "x-data\|@click\|x-if\|template x-if\|x-model" resources/views/components/race-panel.blade.php
 (no output; grep exit 1)
 
 $ grep -rn "x-data\|x-if\|x-model\|@click" resources/views/
 (no output; grep exit 1)
-```
+```text
 
 Zero in the component, zero across all views. A first attempt showed one hit in the component: my
 own explanatory comment quoting `template x-if`. A grep that a comment can satisfy is not a check,
@@ -3414,33 +3405,33 @@ clicked the "Race not on the calendar" disclosure (a real submit, navigating to
 `?entry_mode=manual`), filled title/month/half/placement, and pressed "Record race". The POST
 redirected to the run screen, which then showed:
 
-```
+```text
 reachable in manual branch   title true, month true, half true, scenario_slot_id false
 entry_mode posted            "manual"
 calendar cell for the row    aria-label "Jul Late: Run, Hokusai Coastal Cup"
 marker inside role="img"     1        pennants page-wide   0
 ordinal rendered             "2nd"    bad ordinals (1th/2th/3th/4th)   0
-```
+```text
 
 ### 5.1 Resolved-property pairs (D-288)
 
 `getComputedStyle` on the element against the first fully opaque ancestor background.
 
-| Pair | Light | Dark | Threshold | Verdict |
-|---|---|---|---|---|
-| Disclosure, selected (14px/500) | 12.49 | 18.93 | 4.5:1 | PASS |
-| Disclosure, unselected | 5.46 | 8.30 | 4.5:1 | PASS |
-| Title input text | 6.95 | 12.71 | 4.5:1 | PASS |
-| Month select text | 6.95 | 12.71 | 4.5:1 | PASS |
-| Half / tier input text | 6.95 | 12.71 | 4.5:1 | PASS |
-| Calendar slot select text | 6.95 | â€” | 4.5:1 | PASS |
-| Calendar Trainer-entered marker (10px) | 5.46 | 8.30 | 4.5:1 | PASS |
-| Entry row title (12px) | 5.46 | 8.30 | 4.5:1 | PASS |
-| Entry row Trainer-entered (10px) | 5.78 | 6.64 | 4.5:1 | PASS |
-| Ordinal "2nd" (12px) | 5.78 | 6.64 | 4.5:1 | PASS |
-| Tier text "no grade" (12px) | â€” | 6.64 | 4.5:1 | PASS |
-| Selected border vs background (non-text) | 5.89 | 10.57 | 3:1 | PASS |
-| Selected vs unselected border (state diff) | 4.83 | â€” | 3:1 | PASS |
+| Pair                                         | Light   | Dark    | Threshold   | Verdict   |
+| -------------------------------------------- | ------- | ------- | ----------- | --------- |
+| Disclosure, selected (14px/500)              | 12.49   | 18.93   | 4.5:1       | PASS      |
+| Disclosure, unselected                       | 5.46    | 8.30    | 4.5:1       | PASS      |
+| Title input text                             | 6.95    | 12.71   | 4.5:1       | PASS      |
+| Month select text                            | 6.95    | 12.71   | 4.5:1       | PASS      |
+| Half / tier input text                       | 6.95    | 12.71   | 4.5:1       | PASS      |
+| Calendar slot select text                    | 6.95    | â€”     | 4.5:1       | PASS      |
+| Calendar Trainer-entered marker (10px)       | 5.46    | 8.30    | 4.5:1       | PASS      |
+| Entry row title (12px)                       | 5.46    | 8.30    | 4.5:1       | PASS      |
+| Entry row Trainer-entered (10px)             | 5.78    | 6.64    | 4.5:1       | PASS      |
+| Ordinal "2nd" (12px)                         | 5.78    | 6.64    | 4.5:1       | PASS      |
+| Tier text "no grade" (12px)                  | â€”     | 6.64    | 4.5:1       | PASS      |
+| Selected border vs background (non-text)     | 5.89    | 10.57   | 3:1         | PASS      |
+| Selected vs unselected border (state diff)   | 4.83    | â€”     | 3:1         | PASS      |
 
 Keyboard: both disclosure controls are focusable and each resolves
 `outline: 2px solid` with `matches(':focus-visible')` true â€” `rgb(127,204,9)` dark,
@@ -3465,15 +3456,15 @@ because nothing here is a demonstrated failure.
 
 ### 6. T5 â€” gates in CONSTRAINTS order
 
-| Gate | Command | Result |
-|---|---|---|
-| Pest | `php artisan test --compact` | **2 skipped, 562 passed (1,754 assertions)**, 43.09s |
-| Pint | `vendor/bin/pint --dirty --format agent` | `{"tool":"pint","result":"passed"}` |
-| PHPStan | `vendor/bin/phpstan analyse --memory-limit=512M --no-progress` | `[OK] No errors` |
-| lore-docs | `php tools/lore.php` | 98 hit(s), 51 exempt line(s) â€” baseline |
-| lore-code | `php tools/lore.php code` | 7 hit(s) â€” baseline |
-| gate.py | `python tools/gate.py` | `GATE PASS: 3 prototype(s), all machine-checkable gates green` |
-| Vite | `npm run build` | 59 modules, 75.99 kB CSS, 52.25 kB JS, 2.97s |
+| Gate        | Command                                                          | Result                                                           |
+| ----------- | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Pest        | `php artisan test --compact`                                     | **2 skipped, 562 passed (1,754 assertions)**, 43.09s             |
+| Pint        | `vendor/bin/pint --dirty --format agent`                         | `{"tool":"pint","result":"passed"}`                              |
+| PHPStan     | `vendor/bin/phpstan analyse --memory-limit=512M --no-progress`   | `[OK] No errors`                                                 |
+| lore-docs   | `php tools/lore.php`                                             | 98 hit(s), 51 exempt line(s) â€” baseline                        |
+| lore-code   | `php tools/lore.php code`                                        | 7 hit(s) â€” baseline                                            |
+| gate.py     | `python tools/gate.py`                                           | `GATE PASS: 3 prototype(s), all machine-checkable gates green`   |
+| Vite        | `npm run build`                                                  | 59 modules, 75.99 kB CSS, 52.25 kB JS, 2.97s                     |
 
 **The first Pest run reported 29 failures and is not the gate result.** Its error was
 `SQLSTATE[HY000]: General error: 5 database is locked`. Cause was this slice's own setup, not the
@@ -3487,7 +3478,7 @@ failure was real at the moment it happened.
 `origin/master` was held at `4992282` through all of Slice 12 and Slice 13's work. One plain push
 (Â§8) carries **16 commits**, 7 of them this slice's and this session's Slice 12 work:
 
-```
+```text
 6c1969f  fix(race-panel): server-driven entry disclosure and ordinal placements (R67, R69)   S13 T1+T2
 cb9b61f  test(slice-13): pin the rendered free_race calendar cell (R68)                       S13 T3
 5ed1ebd  test(slice-13): pin the marker surviving a finish, which the browser found (R68)     S13 T3
@@ -3495,12 +3486,12 @@ c86ed9f  fix(slice-12): race-panel path choice from radiogroup to banner buttons
 2d0c1dc  fix(slice-12): null tier for unsourced grade codes in seeder (R65)                   S12 T1
 b295d16  docs(slice-12): addendum, register, and the rulings ledger (R64, R66)                S12 T2
 37ccc08  docs(slice-12): T3 browser findings, two blockers, slice halted before T4            S12 T3
-```
+```text
 
 **Nine commits are not this slice's**, listed by sha so the record names them rather than leaving
 them to be discovered in a diff:
 
-```
+```text
 7897684  docs(handoff): why the race read path moves to race_catalog_slots
 24f9b50  feat(schema): race_entries gains a pointer to the career calendar
 82959e9  feat(calendar): read the grid from race_catalog_slots
@@ -3510,7 +3501,7 @@ them to be discovered in a diff:
 79ffad5  fix(calendar): stop drawing the Goal pennant from a career obligation
 b6d68b6  fix(calendar): the Trainer-entered marker survives the finish
 e389419  docs(gaps): nine open items on the race read path, with owners
-```
+```text
 
 Both sessions commit to `master` in one worktree, so these interleave with this slice's and cannot be
 withheld without rewriting shared history. `24f9b50` and `82959e9` are schema and read-path work;
@@ -3522,18 +3513,18 @@ suite is this slice's evidence about its own claims, not an endorsement of anoth
 
 Taken from the remote, not from this session's memory of running the command.
 
-```
+```text
 $ git push origin master
    4992282..c849fc1  master -> master
 
 $ git ls-remote origin master
-c849fc15ee819c62c55af767a087aa1dc5eaf94a	refs/heads/master
+c849fc15ee819c62c55af767a087aa1dc5eaf94a refs/heads/master
 
 $ git rev-parse HEAD
 c849fc15ee819c62c55af767a087aa1dc5eaf94a
 
 equality â†’ MATCH: remote tip equals local HEAD
-```
+```text
 
 - **Remote before:** `4992282cc7bb0a2f5ae8888116d72494c30128a1` (Slice 11's tip, held through all of
   Slice 12 and Slice 13's work).
@@ -3559,10 +3550,10 @@ R70 authorizes **one** push for this slice, and R59 requires the verification to
 made after it. Those two cannot both be satisfied by a fully-pushed tip: the commit that records the
 push cannot contain its own sha, and pushing it would be a second push. So the slice closes with:
 
-| | sha | |
-|---|---|---|
-| `origin/master` | `c849fc1` | the 17 commits of Â§7, verified against the remote in Â§8 |
-| local `master` | `4c41380` | the post-push record, one ahead |
+|                   | sha         |                                                             |
+| ----------------- | ----------- | ----------------------------------------------------------- |
+| `origin/master`   | `c849fc1`   | the 17 commits of Â§7, verified against the remote in Â§8   |
+| local `master`    | `4c41380`   | the post-push record, one ahead                             |
 
 This is the same shape Slice 11's record describes as "close one commit ahead." It is not a pending
 push and not a forgotten one: `4c41380` touches only this record, so the pushed tree and the local
@@ -3605,7 +3596,6 @@ stays a dissent and that divergence stays. The 144 figure is this slice's own me
 cross-table divergence is the gaps doc's claim, cited rather than re-measured, because
 `race_catalog_slots` was empty in every fixture this slice built.
 
-
 ## slice-14-2026-09-29.md
 
 # Slice 14 verification record â€” settle the tier question on evidence, record the quiet-edge exception
@@ -3619,19 +3609,19 @@ Date: 2026-09-29. Branch: `master`. Worktree: shared with one concurrent session
 
 ### 1. T0 â€” opening snapshot and the carrying push (R38, R43, R59)
 
-```
-$ git branch --show-current   â†’ master
-$ git rev-parse --short HEAD  â†’ debc4d0
-$ git ls-remote origin master â†’ 4992282cc7bb0a2f5ae8888116d72494c30128a1   (stale by 4 commits)
-```
+```text
+git branch --show-current   â†’ master
+git rev-parse --short HEAD  â†’ debc4d0
+git ls-remote origin master â†’ 4992282cc7bb0a2f5ae8888116d72494c30128a1   (stale by 4 commits)
+```text
 
 **The three R72 files at the snapshot:**
 
-| File | State |
-|---|---|
-| `resources/views/components/race-calendar.blade.php` | CLEAN |
-| `resources/views/runs/show.blade.php` | CLEAN |
-| `app/Models/TrainingRun.php` | CLEAN |
+| File                                                   | State   |
+| ------------------------------------------------------ | ------- |
+| `resources/views/components/race-calendar.blade.php`   | CLEAN   |
+| `resources/views/runs/show.blade.php`                  | CLEAN   |
+| `app/Models/TrainingRun.php`                           | CLEAN   |
 
 Dirty at open, all peer and untouched throughout: `docs/scenarios/01-ura-finale.md`,
 `docs/scenarios/02-unity-cup.md`, `docs/scenarios/07-grand-concert.md`, plus the peer's untracked
@@ -3695,13 +3685,13 @@ Joined on the race's own name. Five names needed an explicit cross-publisher ali
 `Tokyo Yushun (Japanese Derby)` â†” Game8 `Japanese Derby (Tokyo Yushun)`); each alias is recorded in
 the file, because a fuzzy runtime match would have hidden the decision.
 
-| Code | Names | uma.guide | Game8 | Both agree | Label seeded |
-|---|---|---|---|---|---|
-| 100 | 34 | G1 Ã— 34 | G1 Ã— 34 | **34** | G1 |
-| 200 | 42 | G2 Ã— 42 | G2 Ã— 42 | **42** | G2 |
-| 300 | 76 | G3 Ã— 76 | G3 Ã— 76 | **76** | G3 |
-| 400 | 118 | "OP/L (Open/Listed)" Ã— 118 | absent | **0** | OP â€” see Â§2.5 |
-| 700 | 26 | Pre-OP Ã— 26 | absent | **0** | null |
+| Code   | Names   | uma.guide                     | Game8      | Both agree   | Label seeded       |
+| ------ | ------- | ----------------------------- | ---------- | ------------ | ------------------ |
+| 100    | 34      | G1 Ã— 34                      | G1 Ã— 34   | **34**       | G1                 |
+| 200    | 42      | G2 Ã— 42                      | G2 Ã— 42   | **42**       | G2                 |
+| 300    | 76      | G3 Ã— 76                      | G3 Ã— 76   | **76**       | G3                 |
+| 400    | 118     | "OP/L (Open/Listed)" Ã— 118   | absent     | **0**        | OP â€” see Â§2.5   |
+| 700    | 26      | Pre-OP Ã— 26                  | absent     | **0**        | null               |
 
 The graded agreement is not two lookups of one kind: Game8's table is exactly 161 rows and its G2 42
 / G3 76 are **this export's own counts**, which is the independent check the 12-cell claim gestured
@@ -3714,12 +3704,12 @@ at. That claim was not reproduced as stated and is not what this rests on.
 publisher URLs behind it, a snapshot path naming the extraction, and the **evidence** date rather
 than the seed moment.
 
-```
+```text
 $ grep -nE "(100|200|300|400|700)\s*=>\s*'(G1|G2|G3|OP|Pre-OP)'|GRADE_MAP" database/seeders/ScenarioSlotSeeder.php
 (no output; exit 1)
 $ grep -rnE "(100|200|300|400|700)\s*=>\s*'(G1|G2|G3|OP|Pre-OP)'" config/
 (no output; exit 1)
-```
+```text
 
 Green for the seeder and config, and pinned by `TierLabelJoinTest`, which fails if a code-to-label
 constant reappears in the seeder source.
@@ -3752,10 +3742,10 @@ surfaced on purpose.
 `.scratch-uma/s14-reseed.sqlite`, `migrate:fresh` then `db:seed` twice. `database/database.sqlite`
 never opened.
 
-| Pass | Rows | G1 | G2 | G3 | OP | null | rows missing `source_url` |
-|---|---|---|---|---|---|---|---|
-| 1 | 296 | 34 | 42 | 76 | 118 | 26 | 0 |
-| 2 | 296 | 34 | 42 | 76 | 118 | 26 | 0 |
+| Pass   | Rows   | G1    | G2    | G3    | OP    | null   | rows missing `source_url`   |
+| ------ | ------ | ----- | ----- | ----- | ----- | ------ | --------------------------- |
+| 1      | 296    | 34    | 42    | 76    | 118   | 26     | 0                           |
+| 2      | 296    | 34    | 42    | 76    | 118   | 26     | 0                           |
 
 Idempotent. Against Slice 12's `G1 34 / OP 118 / null 144`: **118 tiers restored, none lost**, nulls
 144 â†’ 26.
@@ -3779,40 +3769,40 @@ is 0, and the rendered page holds 0 tier-bearing nodes inside a `role="img"` cel
 "the tier text pairs on the calendar" has no referent and none was invented; what is measured is the
 race panel, where the tier text actually appears.
 
-| Pair | Light | Dark | Threshold | Verdict |
-|---|---|---|---|---|
-| Slot select display, tier-bearing (14px) | 6.95 | 12.71 | 4.5:1 | PASS |
-| Entry row tier `G2` (12px) | 5.78 | 6.64 | 4.5:1 | PASS |
-| Entry row tier `G3` (12px) | 5.78 | 6.64 | 4.5:1 | PASS |
-| Entry row ordinal `1st` (12px) | â€” | 6.64 | 4.5:1 | PASS |
-| Calendar Trainer-entered marker (10px) | â€” | 8.30 | 4.5:1 | PASS |
+| Pair                                       | Light   | Dark    | Threshold   | Verdict   |
+| ------------------------------------------ | ------- | ------- | ----------- | --------- |
+| Slot select display, tier-bearing (14px)   | 6.95    | 12.71   | 4.5:1       | PASS      |
+| Entry row tier `G2` (12px)                 | 5.78    | 6.64    | 4.5:1       | PASS      |
+| Entry row tier `G3` (12px)                 | 5.78    | 6.64    | 4.5:1       | PASS      |
+| Entry row ordinal `1st` (12px)             | â€”     | 6.64    | 4.5:1       | PASS      |
+| Calendar Trainer-entered marker (10px)     | â€”     | 8.30    | 4.5:1       | PASS      |
 
 Restoration is visible in the picker, both themes, identically: **G1 34 / G2 42 / G3 76 / OP 118 /
 "no grade" 26** â€” the same distribution the re-seed reported, read off the rendered DOM.
 
 ### 5. T4 â€” gates in CONSTRAINTS order
 
-| Gate | Result |
-|---|---|
-| Pest | **2 skipped, 569 passed (1,780 assertions)**, 45.25s. Was 562 before this slice's 7 new tests |
-| Pint | `{"tool":"pint","result":"passed"}` |
-| PHPStan | `[OK] No errors` |
-| lore-docs | 98 hit(s), 51 exempt line(s) â€” baseline |
-| lore-code | 7 hit(s) â€” baseline, at every commit |
-| gate.py | `GATE PASS: 3 prototype(s), all machine-checkable gates green` |
-| Vite | 59 modules, 75.99 kB CSS, 52.25 kB JS, 3.06s |
+| Gate        | Result                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------- |
+| Pest        | **2 skipped, 569 passed (1,780 assertions)**, 45.25s. Was 562 before this slice's 7 new tests   |
+| Pint        | `{"tool":"pint","result":"passed"}`                                                             |
+| PHPStan     | `[OK] No errors`                                                                                |
+| lore-docs   | 98 hit(s), 51 exempt line(s) â€” baseline                                                       |
+| lore-code   | 7 hit(s) â€” baseline, at every commit                                                          |
+| gate.py     | `GATE PASS: 3 prototype(s), all machine-checkable gates green`                                  |
+| Vite        | 59 modules, 75.99 kB CSS, 52.25 kB JS, 3.06s                                                    |
 
 The port-8241 server was stopped **before** the suite ran, so the Slice 13 lock failure was not
 reproduced.
 
 ### 6. Commits and the closing push
 
-| sha | scope | task |
-|---|---|---|
-| `329cec1` | feat(seed) â€” per-race tier join | T1 |
-| `24e491c` | docs(r72) â€” D-153, G-16c, Â§1.2.6, PLAN | T1 |
-| `3ae437d` | docs(design) â€” quiet-edge exception | T2 |
-| (closing push commits) | docs(slice-14) record + PLAN/KNOWN-ISSUES | T4 |
+| sha                      | scope                                       | task   |
+| ------------------------ | ------------------------------------------- | ------ |
+| `329cec1`                | feat(seed) â€” per-race tier join           | T1     |
+| `24e491c`                | docs(r72) â€” D-153, G-16c, Â§1.2.6, PLAN   | T1     |
+| `3ae437d`                | docs(design) â€” quiet-edge exception       | T2     |
+| (closing push commits)   | docs(slice-14) record + PLAN/KNOWN-ISSUES   | T4     |
 
 Closing push once, plain. R73 read list in Â§1.1: three commits, all this session's, no peer commit in
 range.
@@ -3833,14 +3823,14 @@ range.
 
 ### 8. Closing push verification (R59, R70) â€” written after the push
 
-```
+```text
 $ git fetch origin          â†’ no movement
 $ git ls-remote origin master   (before)  debc4d0e6bda6db31e8577fe45ff676456e7da42
 $ git push origin master                      debc4d0..94e90ef  master -> master
 $ git ls-remote origin master   (after)   94e90ef18fcb94a33788f35c2b36d6f6aab2e1b7
 $ git rev-parse HEAD                    94e90ef18fcb94a33788f35c2b36d6f6aab2e1b7
 equality â†’ MATCH
-```
+```text
 
 One plain push, no force, no rebase. Remote before was Slice 14's own T0 tip, so the range was a
 fast-forward with nothing of anyone else's at risk.
@@ -3848,12 +3838,12 @@ fast-forward with nothing of anyone else's at risk.
 **A correction to Â§6, which was written before the push and got the count wrong.** Â§6 said the closing
 push carried three commits; it carried **four**:
 
-```
+```text
 329cec1  feat(seed): tiers join per race on a dated two-publisher extraction (R72)
 24e491c  docs(r72): date the tier exceptions where the ban and the corpus are read
 3ae437d  docs(design): record the quiet-edge exception beside the pair table (R74)
 94e90ef  docs(slice-14): record, re-baseline, and the two questions this slice leaves
-```
+```text
 
 The fourth is the record commit itself, which Â§6 had not been written to include. All four are this
 session's and all four were read before the push, so the R73 read list in Â§1.1 is unchanged in
@@ -3863,7 +3853,6 @@ substance: **no peer commit entered the range at any point in Slice 14.**
 at `94e90ef`. That is the same one-commit-ahead shape Slice 13 reasoned through in its Â§9: R70 authorizes
 one push, R59 wants the verification in a commit made after it, and a commit cannot contain its own sha.
 This commit touches only this record.
-
 
 ## slice-15-2026-09-29.md
 
@@ -3891,13 +3880,13 @@ as provenance here. Â§10.1 records what the collision cost: the register was c
 
 ### 1. T0 â€” opening snapshot and the carrying push (R59, R70)
 
-```
-$ git branch --show-current   â†’ master
-$ git rev-parse --short HEAD  â†’ 72e5157
-$ git ls-remote origin master â†’ 94e90efâ€¦ (stale by 1)
-$ git push origin master      â†’ 94e90ef..72e5157  master -> master
-$ git ls-remote origin master â†’ 72e5157f7ab4711040c3758f4ab1a2d9d4380c98 == local HEAD
-```
+```text
+git branch --show-current   â†’ master
+git rev-parse --short HEAD  â†’ 72e5157
+git ls-remote origin master â†’ 94e90efâ€¦ (stale by 1)
+git push origin master      â†’ 94e90ef..72e5157  master -> master
+git ls-remote origin master â†’ 72e5157f7ab4711040c3758f4ab1a2d9d4380c98 == local HEAD
+```text
 
 The range carried one docs-only commit, `72e5157`, authored by this session.
 
@@ -3921,20 +3910,20 @@ disclosure flag either â€” a null tier is itself the disclosure.
 
 ### 2.1 What moved, per code
 
-| Export grade | rows | Slice 14 seeded | Slice 15 seeds | change |
-|---|---|---|---|---|
-| 100 â†’ G1 | 34 | G1 34 | G1 34 | none (two publishers agree) |
-| 200 â†’ G2 | 42 | G2 42 | G2 42 | none (two publishers agree) |
-| 300 â†’ G3 | 76 | G3 76 | G3 76 | none (two publishers agree) |
-| 400 â†’ OP | 118 | OP 118 | **OP 3 / null 115** | the 115 generalised rows go null |
-| 700 â†’ Pre-OP | 26 | null 26 | null 26 | none (already null) |
+| Export grade     | rows   | Slice 14 seeded   | Slice 15 seeds        | change                             |
+| ---------------- | ------ | ----------------- | --------------------- | ---------------------------------- |
+| 100 â†’ G1       | 34     | G1 34             | G1 34                 | none (two publishers agree)        |
+| 200 â†’ G2       | 42     | G2 42             | G2 42                 | none (two publishers agree)        |
+| 300 â†’ G3       | 76     | G3 76             | G3 76                 | none (two publishers agree)        |
+| 400 â†’ OP       | 118    | OP 118            | **OP 3 / null 115**   | the 115 generalised rows go null   |
+| 700 â†’ Pre-OP   | 26     | null 26           | null 26               | none (already null)                |
 
 The three surviving `OP` rows are the ones pinned per row by their own client name carrying
 ã€Œã‚ªãƒ¼ãƒ—ãƒ³ã€, read out of the seeded database after the change:
 
-```
+```text
 Fukushima TV Open, Sapporo Nikkei Open, Kokura Nikkei Open
-```
+```text
 
 `per_row_sourced` is removed from every row of the extraction rather than set to `false`, and the
 `scope` value `code-level-client-naming-pin` is gone; remaining scopes are `two-publishers`,
@@ -3945,12 +3934,12 @@ Fukushima TV Open, Sapporo Nikkei Open, Kokura Nikkei Open
 `tests/Feature/TierLabelJoinTest.php` was rewritten before the extraction was regenerated, and the RED run
 is what pins which three behaviours R75 actually changes:
 
-```
+```text
 Tests:    3 failed, 5 passed (26 assertions)
   âœ— keeps the Open label on rows where it is a disclosed code-level pin, per row
   âœ— seeds the restored graded tiers without losing the Open ones
   âœ— carries no disclosure flag beside a null tier, which is null is the disclosure
-```
+```text
 
 After the regeneration: `Tests: 8 passed (30 assertions)`. The third test is new, and it asserts both
 halves â€” no row carries the key at all, and `counts['400']` reads `{rows: 118, null: 115, OP: 3}`.
@@ -3960,7 +3949,7 @@ unchanged.
 
 ### 2.3 Re-seed, twice, on a scratch DB
 
-```
+```text
 $ touch .scratch-uma/s15/scratch.sqlite
 $ DB_CONNECTION=sqlite DB_DATABASE=â€¦ php artisan migrate:fresh --force      â†’ 38 migrations DONE
 $ â€¦ php artisan db:seed --class='Database\Seeders\ScenarioSlotSeeder' --force  â†’ 1,168 ms DONE
@@ -3968,17 +3957,17 @@ $ â€¦ php artisan db:seed --class='Database\Seeders\ScenarioSlotSeeder' --fo
 $ â€¦ db:seed again                                                            â†’ 1,123 ms DONE
 [{"t":"G1","n":34},{"t":"G2","n":42},{"t":"G3","n":76},{"t":"OP","n":3},{"t":"null","n":141}]
 rows total: 296 Â· distinct titles: 296
-```
+```text
 
 Matches the counts the brief predicted: **G1 34, G2 42, G3 76, OP 3, null 141**. Idempotent across two
 passes, and 141 = the 115 retired Open rows + the 26 Pre-OP rows.
 
 ### 2.4 G-16c
 
-```
+```text
 $ grep -rnE "=> *'(G1|G2|G3|OP|Pre-OP)'|GRADE_MAP" database/seeders/ config/ ; echo "exit: $?"
 exit: 1
-```
+```text
 
 No matches. `exit 1` is the pass, and it is the grep's own verdict rather than a reading of the file: the
 extraction is data with `"tier": "G1"` keys, which this pattern cannot and should not match. The known
@@ -4046,14 +4035,14 @@ every read from a slot tier and a placement, so nothing on the row said what the
 From `config('scenarios.scenarios.trackblazer.grade_point_by_grade')`, transcribed from
 `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` Â§"Grade Points and Shop Coins â€” Exact Values":
 
-| Tier | 1st place | 2nd | 3rd | 4th | 5th | 12th | no placement | no tier |
-|---|---|---|---|---|---|---|---|---|
-| G1 | 100 | null | null | null | null | null | null | null |
-| G2 | 80 | null | null | null | null | null | null | null |
-| G3 | 60 | null | null | null | null | null | null | null |
-| OP | 40 | null | null | null | null | null | null | null |
-| Pre-OP | 20 | null | null | null | null | null | null | null |
-| `Debut` (a real calendar tier, not a GP grade) | null | â€” | â€” | â€” | â€” | â€” | â€” | â€” |
+| Tier                                             | 1st place   | 2nd    | 3rd    | 4th    | 5th    | 12th   | no placement   | no tier   |
+| ------------------------------------------------ | ----------- | ------ | ------ | ------ | ------ | ------ | -------------- | --------- |
+| G1                                               | 100         | null   | null   | null   | null   | null   | null           | null      |
+| G2                                               | 80          | null   | null   | null   | null   | null   | null           | null      |
+| G3                                               | 60          | null   | null   | null   | null   | null   | null           | null      |
+| OP                                               | 40          | null   | null   | null   | null   | null   | null           | null      |
+| Pre-OP                                           | 20          | null   | null   | null   | null   | null   | null           | null      |
+| `Debut` (a real calendar tier, not a GP grade)   | null        | â€”    | â€”    | â€”    | â€”    | â€”    | â€”            | â€”       |
 
 **Only the first column exists in any source.** The same page says placements below first "scale down
 proportionally (similar to how Fan gain scales)" and names no ratio â€” that is KI-10's open half â€” and its
@@ -4091,7 +4080,7 @@ second:
 if ($this->isDirty('grade_points_earned')) return;                    // the Trainer's figure wins
 if ($this->grade_points_earned !== null && ! $this->isDirty('placement')) return;  // survives an unrelated edit
 $this->grade_points_earned = self::gradePointsFor($run, $this->tierKey(), $this->placement);
-```
+```text
 
 A placement change is the one edit that re-prices, in both directions: 2ndâ†’1st stores 100, 1stâ†’3rd stores
 null. Neither would happen with an unconditional derive, and neither would happen with a
@@ -4169,10 +4158,10 @@ missing file, so the seeder **already** completed with every tier null. R76's ac
 `tierLabels()` now logs one warning naming the file and stating what is unaffected, and the test asserts
 exactly one warning, at warning level, containing `race-tier-labels-2026-09-29.json`.
 
-```
+```text
 Tests:  1 failed, 3 passed   â† RED: warning called 0 times, expected exactly 1
 Tests:  4 passed             â† GREEN
-```
+```text
 
 The third test is what makes the first two mean something: it asserts no such warning fires when the file
 is present. Without it the implementation could warn unconditionally and the resilience tests would still
@@ -4200,12 +4189,12 @@ reporting only the first would be reporting a state that no longer exists.
 `vendor/bin/pint --dirty` formats **every** modified file, and in a shared worktree that set includes the
 peer's uncommitted work. At 10:22 the run reported:
 
-```
+```text
 {"tool":"pint","result":"fixed","files":[
   {"path":"app\\Services\\DataPipeline\\PipelineRunner.php", â€¦},
   {"path":"app\\Services\\DataPipeline\\SourceFetcher.php",  â€¦},
   {"path":"tests\\Feature\\SkillsFetchTest.php",             â€¦}]}
-```
+```text
 
 Three files this slice never touched, reformatted. The changes are style-only and repo-standard, so nothing
 the peer wrote is lost and they would have had to apply the same fixes before their own commit â€” but a
@@ -4221,7 +4210,7 @@ explicit pathspec like everything else this slice stages.
 Server processes were stopped before the suite ran, so Slice 13's "database is locked" failure was not
 repeated.
 
-```
+```text
 1. TESTS        php artisan test --compact
                 Tests:    2 skipped, 618 passed (1884 assertions)
                 Duration: 53.73s
@@ -4239,13 +4228,13 @@ repeated.
                 public/build/assets/app-DKPQ1MWR.css  75.78 kB â”‚ gzip: 15.40 kB
                 public/build/assets/app-LFSC9J26.js   52.25 kB â”‚ gzip: 19.86 kB
                 âœ“ built in 3.43s
-```
+```text
 
 ### 7.3 Gates as re-run over the shared tree, twice, because it kept moving
 
 The same sweep at 10:31 and again at 10:47, with the peer's edits landing between them:
 
-```
+```text
                  10:31 shared tree          10:47 shared tree
 TESTS            643 passed, 1 failed       646 passed / 2 skipped / 0 failed
                  (DeadlockException)
@@ -4254,7 +4243,7 @@ PHPSTAN          3 errors                   [OK] No errors
                  SourceFetcher.php:85        their files left the tree)
 LORE code        15 hit(s)                  11 hit(s)
 LORE docs        100 â†’ 98 after Â§7.4        98 hit(s), 55 exempt line(s)
-```
+```text
 
 Three readings, not one. The 618 at Â§7.2 is this slice's own state; 643 and 646 are the tree's. The
 `DeadlockException` was concurrent load with 5 `php.exe` live â€” the test alone is `11 passed / 2 skipped`
@@ -4265,18 +4254,17 @@ numbers is quoted as a verdict: on a shared tree a gate result has an expiry tim
 
 What *does* hold still is the scoped run, because those paths are this slice's and no other session is in them:
 
-```
+```text
 $ vendor/bin/pint --test <this slice's 15 paths>       {"tool":"pint","result":"passed"}
 $ php artisan test --compact tests/Feature/{TierLabelJoin,RaceEntryTurnLink,GradePointsEarned,
                                  LegacySelectionSchema,ScenarioSlotSeederResilience,LoreGateParity}Test.php
                                                        all green, 0 failed
 $ php tools/lore.php                                   98 hit(s), 55 exempt line(s)
-```
+```text
 
 This slice's surfaces were re-checked individually rather than assumed clean inside the shared run: the
 three new migrations' `up()` bodies re-read, PHPStan's error list attributed file by file, and the extra
 `lore-code` hits grouped by path so none of them could be quietly adopted as mine.
-
 
 ### 7.4 Lore: the count, and the prose that first broke it
 
@@ -4293,9 +4281,9 @@ attribute, arrived at from the opposite direction: there a check was satisfied b
 here a claim about prose was falsified by the prose making it. The terms are no longer spelled out, and
 the gate was re-run after the fix rather than cited from the earlier run:
 
-```
-$ php tools/lore.php        â†’ lore-docs: 98 hit(s), 55 exempt line(s)     # after the fix, own files clean
-```
+```text
+php tools/lore.php        â†’ lore-docs: 98 hit(s), 55 exempt line(s)     # after the fix, own files clean
+```text
 
 **The tree is shared, and two of the gate's numbers are no longer this slice's alone.** Re-running at
 T6 against the working tree found `lore-docs: 100` and `lore-code: 15`, with 3 PHPStan errors and one
@@ -4339,30 +4327,30 @@ toward period 2.
 
 Row written by the server, read back out of SQLite:
 
-```
+```text
 slot=297  turn=1  gp=100  period=2  tier='G1'
-```
+```text
 
 ### 8.2 What the browser rendered
 
 Recorded-race row, `innerText`:
 
-```
+```text
 Midsummer Practice Race  Completed  Trainer-entered  G1  1st  turn 1  period 2
-```
+```text
 
 Turn dropdown, read off `select[name="turn_entry_id"]`:
 
-```
+```text
 [ ":not named", "1:Turn 1" ]      field label: "Logged turn"
-```
+```text
 
 Grade meter's accessible name â€” the figure T3 exists to produce, read from the rendered `role="img"`
 label rather than from a test:
 
-```
+```text
 "100 of 60 toward End of Junior Year"
-```
+```text
 
 Empty state, measured on the same screen **before** any turn was logged:
 `value="no turns logged to name" disabled` with the hint "Log the turn first, then name it on its race."
@@ -4371,13 +4359,13 @@ Console: `Total messages: 1 (Errors: 0, Warnings: 0)`.
 
 ### 8.3 Contrast, both themes (D-288 method: computed colour against the first fully opaque ancestor)
 
-| Pair | light | dark | size | verdict |
-|---|---|---|---|---|
-| `turn 1` chip, `text-ink-muted` on `bg-raised` | 5.78 | 6.64 | 12px | passes 4.5 |
-| "Logged turn" field label | 6.95 | 12.71 | 14px | passes |
-| the turn `<select>` itself | 6.95 | 12.71 | 14px | passes |
-| disabled empty-state input (same token pair as its calendar sibling) | â€” | 7.72 | 14px | passes |
-| empty-state hint text | â€” | 6.64 | 12px | passes |
+| Pair                                                                   | light   | dark    | size   | verdict      |
+| ---------------------------------------------------------------------- | ------- | ------- | ------ | ------------ |
+| `turn 1` chip, `text-ink-muted` on `bg-raised`                         | 5.78    | 6.64    | 12px   | passes 4.5   |
+| "Logged turn" field label                                              | 6.95    | 12.71   | 14px   | passes       |
+| the turn `<select>` itself                                             | 6.95    | 12.71   | 14px   | passes       |
+| disabled empty-state input (same token pair as its calendar sibling)   | â€”     | 7.72    | 14px   | passes       |
+| empty-state hint text                                                  | â€”     | 6.64    | 12px   | passes       |
 
 No new token was introduced, so every pair above reuses a pair DESIGN.md Â§3.4 already carries; the numbers
 are the confirmation rather than a new decision.
@@ -4442,19 +4430,19 @@ kind of evidence. That conflation is the finding, and it is the reason the repla
 
 ### 9. Commits and the closing push
 
-| Task | Commit | Claim, with the thing that proves it |
-|---|---|---|
-| T0 opening push | `72e5157` on origin | `ls-remote` = `72e5157f7ab4â€¦` equals local HEAD; range was one docs-only commit, this session's |
-| T1 R75 | `40df14c` | Test rewritten first, `3 failed / 5 passed`; re-seed twice on scratch: G1 34 / G2 42 / G3 76 / OP 3 / null 141, 296 rows both passes; G-16c exit 1 |
-| T2 KI-17 | `d06199c` | `turn_entry_id` nullable FK nullOnDelete; 9 tests RED-then-green; cross-run turn rejected **and no row written**; ESSENTIALS gains the `race_entries` line it never had |
-| T3 KI-10 | `3711894` | `grade_points_earned`; 1st place only, five tiers, everything else null; tier precedence pinned by two disagreeing slots; `GradePointPeriodTest`'s 9 tests untouched, which is the semantics-preservation evidence |
-| T4 Legacy Select | `26aa9fe` | One json payload + ADR-0010 + PRD Â§6.3 pointer; the brief's `legacy_parent_*` pair **not** added, and a test asserts that |
-| T5 R76 | `952f41a` | One warning at warning level naming the file, and no warning when the file is present |
-| T4 follow-up | `49bac80` | The two Spark vocabularies named in the payload's own docblock rather than left in a scratch file |
-| T4 follow-up | `5947a21` | The mass-assign case given **two** legacy parents, which is what the brief's own sentence asked for and the first draft had not done |
-| T6 record | `3f62df0`, `94dfc38` | This record plus the PLAN ledger; the second commit is the shared-tree gate state and the Â§7.1 disclosure |
-| T6 register | `757be1d` | KI-17 closed on the link, KI-10's stored-figure half closed with its ratio half left open, KI-25 filed. **This commit also carries the peer session's uncommitted KI-23, KI-24, their status block and their ADR-0011 prose** â€” the owner directed the register be written rather than deferred, and their authorship is named in the commit message because the vehicle is not the author. |
-| T6 gates + record | `3f62df0`, `94dfc38`, `781e2b9` | Â§7 pasted outputs; Â§8 browser pass; the shared-tree correction and the Â§7.1 disclosure |
+| Task                | Commit                            | Claim, with the thing that proves it                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T0 opening push     | `72e5157` on origin               | `ls-remote` = `72e5157f7ab4â€¦` equals local HEAD; range was one docs-only commit, this session's                                                                                                                                                                                                                                                                                               |
+| T1 R75              | `40df14c`                         | Test rewritten first, `3 failed / 5 passed`; re-seed twice on scratch: G1 34 / G2 42 / G3 76 / OP 3 / null 141, 296 rows both passes; G-16c exit 1                                                                                                                                                                                                                                              |
+| T2 KI-17            | `d06199c`                         | `turn_entry_id` nullable FK nullOnDelete; 9 tests RED-then-green; cross-run turn rejected **and no row written**; ESSENTIALS gains the `race_entries` line it never had                                                                                                                                                                                                                         |
+| T3 KI-10            | `3711894`                         | `grade_points_earned`; 1st place only, five tiers, everything else null; tier precedence pinned by two disagreeing slots; `GradePointPeriodTest`'s 9 tests untouched, which is the semantics-preservation evidence                                                                                                                                                                              |
+| T4 Legacy Select    | `26aa9fe`                         | One json payload + ADR-0010 + PRD Â§6.3 pointer; the brief's `legacy_parent_*` pair **not** added, and a test asserts that                                                                                                                                                                                                                                                                      |
+| T5 R76              | `952f41a`                         | One warning at warning level naming the file, and no warning when the file is present                                                                                                                                                                                                                                                                                                           |
+| T4 follow-up        | `49bac80`                         | The two Spark vocabularies named in the payload's own docblock rather than left in a scratch file                                                                                                                                                                                                                                                                                               |
+| T4 follow-up        | `5947a21`                         | The mass-assign case given **two** legacy parents, which is what the brief's own sentence asked for and the first draft had not done                                                                                                                                                                                                                                                            |
+| T6 record           | `3f62df0`, `94dfc38`              | This record plus the PLAN ledger; the second commit is the shared-tree gate state and the Â§7.1 disclosure                                                                                                                                                                                                                                                                                      |
+| T6 register         | `757be1d`                         | KI-17 closed on the link, KI-10's stored-figure half closed with its ratio half left open, KI-25 filed. **This commit also carries the peer session's uncommitted KI-23, KI-24, their status block and their ADR-0011 prose** â€” the owner directed the register be written rather than deferred, and their authorship is named in the commit message because the vehicle is not the author.   |
+| T6 gates + record   | `3f62df0`, `94dfc38`, `781e2b9`   | Â§7 pasted outputs; Â§8 browser pass; the shared-tree correction and the Â§7.1 disclosure                                                                                                                                                                                                                                                                                                       |
 
 **One number in this table needs reading with its source.** 24 filed / 19 closed / 5 open was checked
 against the register's own headings rather than against either session's memory of it: `grep -oE '^## KI-[0-9]+'`
@@ -4464,7 +4452,7 @@ a **KI-16 hole** â€” the numbering runs KI-15 to KI-17 with no section betw
 
 ### 9.1 Closing push verification (R59, R70) â€” written after the push
 
-```
+```text
 $ git fetch origin
 $ git log --oneline 72e5157..HEAD | wc -l        â†’ 12
 $ git push origin master
@@ -4474,24 +4462,24 @@ $ git ls-remote origin master
    76e070ffebfb79c8930516b105a132434c977559  refs/heads/master
 $ git rev-parse HEAD
    76e070ffebfb79c8930516b105a132434c977559     â† equal: the push carried the whole range
-```
+```text
 
 **This section is wrong about its own count of pushes, and the correction is the
 interesting part.**
 
-```
+```text
 $ git log --oneline origin/master..HEAD | wc -l      â†’ 0     (nothing left unpushed)
 $ git reflog | head -4
    2a7fe7c update_ref: commit: ...
    76e070f update_ref: ...
-```
+```text
 
 R59 and R70 ask for **one** push per slice. There were two:
 
-```
+```text
 72e5157..76e070f   12 commits   the closing push
 76e070f..2a7fe7c    1 commit    this verification section, pushed too
-```
+```text
 
 Slice 14 established the shape this should have taken: its closing push carried the record, and the
 post-push correction commit stayed local and came over as the one-ahead commit at *this* slice's T0. The
@@ -4536,11 +4524,11 @@ commit) and `72e5157..76e070f` closing (Â§9.1, twelve).
 
 What the addendum does not do is smooth the measured count into the ruling. Three pushes left this slice:
 
-```
+```text
 94e90ef..72e5157     1 commit    opening snapshot (Â§1)
 72e5157..76e070f    12 commits   closing (Â§9.1, the first block above)
 76e070f..2a7fe7c     1 commit    this verification section, pushed too
-```
+```text
 
 The first two are the cadence R78 names; the third is the departure this section already convicted, and
 `3796c90` â€” held local deliberately â€” is the one-ahead commit Slice 16's T0 now carries. The ruling and the
@@ -4551,7 +4539,7 @@ count are both recorded because a ledger that keeps only the ruling cannot be ch
 The range the Slice 16 brief predicted was `2a7fe7c..3796c90` â€” one commit, this session's. The range that
 actually went was **nine**:
 
-```
+```text
 $ git push origin master
    To https://github.com/IzzatFirdaus/umamusume-laravel13.git
       2a7fe7c..7eadf45  master -> master
@@ -4559,7 +4547,7 @@ $ git ls-remote origin master
    7eadf457f18890b15222eea843717b53fbf84723  refs/heads/master
 $ git rev-parse HEAD
    7eadf457f18890b15222eea843717b53fbf84723   â† equal: the push carried the whole range
-```
+```text
 
 `7eadf45` is not this slice's commit. The skills session landed seven commits in the shared tree between
 Slice 15's closing push and this one, so the owner approved the carry by name rather than letting it ride
@@ -4570,14 +4558,14 @@ silently â€” which is R70's rule, not a new one. Of the nine, two are this 
 **The read list, run against file lists rather than subject lines**, because R73 gates on paths â€”
 `database/`, `config/`, `app/Services/DataPipeline/` or the research corpus:
 
-| Commit | Guarded paths | What was read |
-|---|---|---|
-| `aa5b05c` | a `skills` migration, `config/uma.php`, `Parsers/GametoraSkillsParser`, `Contracts/SkillSourceParser`, `PipelineRunner`, `SourceFetcher`, `app/Actions/StoreSkills`, `app/Models/Skill`, `ADR-0011` | the migration whole, the new source block whole, the `Skill` model diff |
-| `f71a10e` | `database/seeders/SkillSeeder.php`, `docs/design-research/CONSTRAINTS.md` | the seeder diff â€” it retires `Traightaways` and re-names three rows from `name_en` |
-| `a9fe18c` | `KNOWN-ISSUES.md`, `docs/design-research/SKILLS-GAPS.md` | the gap register's headings and **G-SK-5 in full**, which names `legacy_selection` as a dependency of another session's surface |
-| `83086b0` | tests only | file list |
-| `c3bdda3`, `acab4d8`, `7eadf45` | `docs/design-research/SKILLS-GAPS.md` | commit messages and the G-SK-17 diff |
-| `3796c90`, `b8c0a54` | this session's own | authored here |
+| Commit                            | Guarded paths                                                                                                                                                                                         | What was read                                                                                                                     |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `aa5b05c`                         | a `skills` migration, `config/uma.php`, `Parsers/GametoraSkillsParser`, `Contracts/SkillSourceParser`, `PipelineRunner`, `SourceFetcher`, `app/Actions/StoreSkills`, `app/Models/Skill`, `ADR-0011`   | the migration whole, the new source block whole, the `Skill` model diff                                                           |
+| `f71a10e`                         | `database/seeders/SkillSeeder.php`, `docs/design-research/CONSTRAINTS.md`                                                                                                                             | the seeder diff â€” it retires `Traightaways` and re-names three rows from `name_en`                                              |
+| `a9fe18c`                         | `KNOWN-ISSUES.md`, `docs/design-research/SKILLS-GAPS.md`                                                                                                                                              | the gap register's headings and **G-SK-5 in full**, which names `legacy_selection` as a dependency of another session's surface   |
+| `83086b0`                         | tests only                                                                                                                                                                                            | file list                                                                                                                         |
+| `c3bdda3`, `acab4d8`, `7eadf45`   | `docs/design-research/SKILLS-GAPS.md`                                                                                                                                                                 | commit messages and the G-SK-17 diff                                                                                              |
+| `3796c90`, `b8c0a54`              | this session's own                                                                                                                                                                                    | authored here                                                                                                                     |
 
 **Two of those reads invalidate an assumption Slice 16 was briefed on**, so they are recorded rather than
 absorbed. Their commit messages report `skills` going from ten seeded rows to 1,910 stored with 623
@@ -4587,7 +4575,6 @@ name against the skills catalogue" now sits on a different set than the one the 
 and on **their** numbers, not mine: nothing in this slice re-ran their import, and the database this
 session can see still reports 10 rows. The distinction is kept because a peer's gate output is not this
 slice's measurement, which is exactly the error R85 withdraws in Â§8.4.1.
-
 
 ---
 
@@ -4692,7 +4679,6 @@ invented sentence under `R77` would be indistinguishable later from a ruling the
 which is the one outcome worse than a gap â€” R60 exists precisely so a ruling is a repo artifact with
 provenance, and provenance here is absent.
 
-
 ## ws1-control-sizing-2026-10-02.md
 
 M1, Workstream 1: the 44px control contract on the catalog index, measured in a browser rather than read
@@ -4707,14 +4693,14 @@ present but overridden.
 
 **Measured, `http://127.0.0.1:8125/umamusume`:**
 
-| Viewport | Control | Selector | Size (w × h) | Computed height | Contract |
-|---|---|---|---|---|---|
-| 1280×800 | search input | `input[name=search]` | 188 × **44** | `44px` | `h-11` ✓ |
-| 1280×800 | status select | `select[name=status]` | 163 × **44** | `44px` | `h-11` ✓ |
-| 1280×800 | submit button | `button[type=submit]` | 58.23 × **44** | `44px` | `h-11` ✓ |
-| 390×844 | search input | `input[name=search]` | 188 × **44** | `44px` | `h-11` ✓ |
-| 390×844 | status select | `select[name=status]` | 163 × **44** | `44px` | `h-11` ✓ |
-| 390×844 | submit button | `button[type=submit]` | 58.23 × **44** | `44px` | `h-11` ✓ |
+| Viewport   | Control         | Selector                | Size (w × h)     | Computed height   | Contract   |
+| ---------- | --------------- | ----------------------- | ---------------- | ----------------- | ---------- |
+| 1280×800   | search input    | `input[name=search]`    | 188 × **44**     | `44px`            | `h-11` ✓   |
+| 1280×800   | status select   | `select[name=status]`   | 163 × **44**     | `44px`            | `h-11` ✓   |
+| 1280×800   | submit button   | `button[type=submit]`   | 58.23 × **44**   | `44px`            | `h-11` ✓   |
+| 390×844    | search input    | `input[name=search]`    | 188 × **44**     | `44px`            | `h-11` ✓   |
+| 390×844    | status select   | `select[name=status]`   | 163 × **44**     | `44px`            | `h-11` ✓   |
+| 390×844    | submit button   | `button[type=submit]`   | 58.23 × **44**   | `44px`            | `h-11` ✓   |
 
 All six measurements are exactly 44.00px, which is `h-11` at the default 16px root — so the class is doing the
 work and nothing overrides it. `h-11` is the mandatory control size in `DESIGN-CORPUS.md`'s gate table

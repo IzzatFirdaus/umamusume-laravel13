@@ -18,12 +18,12 @@ Relates to: `ADR-0001` (Energy scope), `PRD.md` FR-C-2 / US-3, `CLAUDE.md` Plann
 
 `UMAMUSUME_REFERENCE.md` §1.3.4 records that every live Global scenario caps higher. The table below is now restated from the game's own data — see the second amendment — with one row corrected:
 
-| Scenario | Speed | Stamina | Power | Guts | Wit | Hard cap |
-|---|---|---|---|---|---|---|
-| URA Finale | 1400 | 1400 | 1400 | 1400 | 1400 | 2000 |
-| Unity Cup | 1300 | 1300 | 1300 | 1300 | **1800** | 2000 |
-| Trackblazer | 1200 | **1900** | 1200 | 1200 | 1500 | 2000 |
-| Our Grand Concert | **1600** | 1300 | 1300 | 1500 | 1300 | 2000 |
+| Scenario            | Speed      | Stamina    | Power   | Guts   | Wit        | Hard cap   |
+| ------------------- | ---------- | ---------- | ------- | ------ | ---------- | ---------- |
+| URA Finale          | 1400       | 1400       | 1400    | 1400   | 1400       | 2000       |
+| Unity Cup           | 1300       | 1300       | 1300    | 1300   | **1800**   | 2000       |
+| Trackblazer         | 1200       | **1900**   | 1200    | 1200   | 1500       | 2000       |
+| Our Grand Concert   | **1600**   | 1300       | 1300    | 1500   | 1300       | 2000       |
 
 **The tool cannot record a real run.** A Unity Cup Trainer reaching Wit 1350 is refused by a P0 feature, and so is a Trackblazer Trainer at Stamina 1350. This is not a display problem and no amount of UI work fixes it; the bound itself is wrong. It has been wrong for every Global player who crossed 1200 since the 2026-07-01 rework.
 

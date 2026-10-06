@@ -225,7 +225,7 @@ const group = (n: number): string => n.toLocaleString('en-US');
                     and nothing here changes until you log your first turn.
                 </p>
                 <Link
-                    href="/training-runs/create"
+                    href="/career/setup/scenario"
                     class="enamel mt-4 inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome"
                 >
                     Start a new training run
