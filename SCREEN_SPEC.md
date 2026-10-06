@@ -37,9 +37,10 @@ Areas used (the repository's own grouping, not forced onto generic categories):
 - **Skills** (reference data; the PRD's "Screen D") — `SCR-SKL-*`
 - **Support cards** (reference data) — `SCR-SUP-*`
 - **Review** (Trainer decisions over engine proposals) — `SCR-REV-*`
+- **Career** (the Trainer Desk 2.0 Inertia screens; `ADR-0020` §1) — `SCR-CAR-*`
 - **System** — `SCR-SYS-*`
 
-Navigation shell (`resources/views/components/layout.blade.php`): six primary nav links, in DOM order — Catalog, Skills, Support cards, Training runs, Review, Preferences — plus a focus-revealed "Skip to content" link targeting `main#main`. `/` redirects to `/training-runs` (`routes/web.php:12`, route name `home`), so Training runs is the de-facto landing screen. The Preferences link is the §7-5 control's entry point; the form itself is on its own screen, because a form in the shell precedes every page's own form in document order and six page-wide control-count tests read that.
+Navigation shell: `resources/js/layouts/AppLayout.vue`, the Inertia SPA shell (`ADR-0020` §1). Nine primary nav destinations in DOM order — Dashboard, New Career, Legacy Lab, Support Cards, Skills, Review, Veterans, Database, Settings — plus a focus-revealed "Skip to content" link targeting `main#main`. Veterans is a named absence (`to: null`) until the D16 slice lands, so the count is eight live plus one, which is Miller's Law (plan §13). `/` renders `SCR-CAR-001` (route name `home`), so the Dashboard is the landing screen. The Blade shell this paragraph used to describe (`resources/views/components/layout.blade.php`) was deleted in slice B1; the three error documents render themselves (`AppServiceProvider` composes them in place of the shell).
 
 ## 3. Screen Matrix
 
@@ -57,6 +58,11 @@ Navigation shell (`resources/views/components/layout.blade.php`): six primary na
 | SCR-SUP-001 | Support-card catalog | Support cards | Trainer | none required | `GET /support-cards` (`support-cards.index`) | Implemented |
 | SCR-SUP-002 | Support-card detail | Support cards | Trainer | none required | `GET /support-cards/{card}` (`support-cards.show`) | Implemented |
 | SCR-REV-001 | Match review queue | Review | Trainer | none required | `GET /review` (`review.index`) | Implemented |
+| SCR-CAR-001 | Dashboard (2.0 landing screen) | Career | Trainer | none required | `GET /` (`home`) | Implemented 2026-10-06 (D1); panels for builds and legacy-goal gaps are named absences |
+| SCR-CAR-002 | Scenario Selection (wizard step 1) | Career | Trainer | none required | `GET /career/setup/scenario` (`career.scenario`), written by `PUT` (`career.scenario.store`) | Implemented 2026-10-06 (D2); steps 4 to 6 are named absences until D5-wizard, D6-wizard and D7 land |
+| SCR-CAR-003 | Trainee Selection (wizard step 2) | Career | Trainer | none required | `GET /career/setup/trainee` (`career.trainee`), written by `PUT` (`career.trainee.store`) | Implemented 2026-10-06 (D3); the growth-rate and scenario-suitability filters are omitted, no column holds either |
+| SCR-CAR-004 | Trainee Profile (wizard step 2, read screen) | Career | Trainer | none required | `GET /career/setup/trainee/{umamusume}` (`career.trainee.profile`) | Implemented 2026-10-06 (D3); career goals, growth rates, hint skills and evolution skills are omitted by ruling; version, stat distribution, inheritance and support types are named absences |
+| SCR-CAR-005 | Build Target (wizard step 3) | Career | Trainer | none required | `GET /career/setup/target` (`career.target`), written by `PUT` (`career.target.store`) | Implemented 2026-10-06 (D4); the brief's fifth purpose (Competitive Build), risk tolerance and per-skill marks are not recorded, each stated on the page |
 | SCR-SYS-001 | Page not found (404) | System | Trainer | none required | error rendering for any 404 | Implemented |
 | SCR-SYS-002 | Preferences | System | Trainer | none required | `GET /preferences` (`preferences.edit`), written by `PUT /preferences` (`preferences.update`) | Implemented 2026-10-04 (§7-5) |
 | SCR-SYS-003 | Session expired (419) | System | Trainer | none required | error rendering for any 419 | Implemented 2026-10-04 (§7-8) |
@@ -917,6 +923,261 @@ Implemented 2026-10-04. §7-5 resolved; the failure-estimate *display* half stay
 
 ---
 
+### SCR-CAR-001 — Dashboard (Trainer Desk 2.0 landing screen)
+
+#### Purpose
+The front door of the 2.0 SPA (`ADR-0020` §1): resume the career in progress, reach the three destinations a returning Trainer wants first, see the newest Veterans, and read the state of the tool's own data. `screen-spec-2.0.md` SCREEN-001; `design-2.0.md` §4 (hierarchy), §29 (empty states), §48 (data versioning).
+
+#### Actor / Access
+Any; no auth concept applies (PRD NFR-1).
+
+#### Route / Location
+`GET /` name `home` (`DashboardController::index`). Reached by the first nav destination and by any bare loopback URL. The Blade landing page this route used to redirect to (`/training-runs`) is still reachable at its own route; the redirect is gone.
+
+#### Layout / Content
+`<Head title="Dashboard">` and the `#title` slot, then five panels in order:
+
+1. **Active career** — trainee name (with the Japanese name in `lang="ja"`), scenario label, career position (`Senior Year · Early July`, on the client's 24-turn grid), logged turn count, Energy, and the scenario's one widget beyond the three every scenario composes (Team Rank, Grade Points, and so on), read from `config/scenarios.php` `widgets[]` by subtraction against the baseline entry. Primary action "Resume Career" links to the run.
+2. **Quick actions** — New Career, Legacy Lab, Support Cards. Every destination is a live route; a destination whose slice had not landed would render as a named absence, not a dead link.
+3. **Recent Veterans** — the three newest rows from C3's `ListVeterans`, each linking to its run, plus a link to the full library.
+4. **Recent builds** — a named absence. A build is the Career Plan a run holds (`build_target`, C1) and the wizard that enters one is D2–D7, so there is no build record to list.
+5. **Data status** — the `GLOBAL DATA ● Current` badge with the verification date from `config('scenarios.verified_at')`, the ruleset row, and the three catalogue counts.
+
+#### States
+
+| State | Behaviour |
+|---|---|
+| Empty (no active career) | The active-career panel states what is missing, why it matters and what to do: "No active career. Start a new training run.", one sentence on what a career holds, and a "Start a new training run" action. The rest of the page is unchanged, so the screen is usable on first load (Paradox of the Active User, plan §13). |
+| Empty (no Veterans) | The Veterans panel states the absence and the path out of it (finish a run, set it to Completed, save it from the Legacy Lab) with a link to the library. `total` is `0`, never a count printed as though it were a fact about the Trainer. |
+| Empty (no turn logged) | Career position and Energy render `N/A` with a `title` naming the absence, never `0` and never Early January (D-220). |
+| Empty (scenario resource) | The resource renders `N/A` with its reason on the element: no column records a scenario resource yet. |
+| Loading | Page-level `role="status"` "Loading…" while an Inertia visit started from this screen is in flight. This page has no other user-initiated async action, so no skeleton is drawn (`design-2.0` §30, ADR-0007). |
+| Error | Page-level `role="alert"` for a visit that could not complete. The `invalid` and `exception` listeners return `false`, which takes the failure out of Inertia's default modal so this screen's own alert is the single surface; both listeners are removed on unmount. A failed *read* of this page itself renders `SCR-SYS-004`. |
+
+#### Validation & Error Handling
+No inputs and no writes, so no Form Request and no validation. The ruleset row prints `N/A` with a `title` because `app.ruleset` is null: no source defines a Global ruleset version (`design-2.0` §48).
+
+#### Implementation References
+`app/Http/Controllers/DashboardController.php`; `resources/js/pages/Dashboard.vue`; `config/scenarios.php` `verified_at`, `widget_labels`, `baseline`; `App\Models\TrainingRun::stripValues()` / `careerYearForTurn()`; `App\Actions\ListVeterans`; shared props in `app/Http/Middleware/HandleInertiaRequests.php`. Tests: `tests/Feature/DashboardTest.php` (props), `tests/browser/dashboard.spec.ts` (rendered copy, 44px sweep, keyboard path).
+
+#### Status
+Implemented 2026-10-06 (slice D1). The empty/loading/error states above ship with the screen.
+
+#### Gaps
+Three, each stated on the screen or in the slice report rather than hidden:
+
+1. **Recent builds** is a named absence until the Career Plan wizard lands (D2–D7). Not a bug.
+2. **Legacy-goal gaps** is omitted entirely: a gap is the run's targets set against inherited stats, which is the inheritance computation `ADR-0020` §3 bans. C1 and C3 hold no honest comparison.
+3. **A scenario resource value** is always `N/A` because no column records one; the run page's resource strip renders it the same way. Wiring Team Rank and Grade Points to their own readers (`latestTeamRank()`, `gradeEarned()`) is a follow-up that needs the D4 provenance badge, because `gradeEarned()` is calculated rather than entered or stored.
+
+---
+
+### SCR-CAR-002 — Scenario Selection (setup wizard step 1)
+
+#### Purpose
+Choose the career scenario that decides which resources the tool tracks, which systems it can show and which stat ceilings apply (`docs/proposals/screen-spec-2.0.md` SCREEN-002; `design-2.0` §13, §25, §48).
+
+#### Actor / Access
+Any; no auth concept applies (PRD NFR-1).
+
+#### Route / Location
+`GET /career/setup/scenario` name `career.scenario` and `PUT /career/setup/scenario` name `career.scenario.store` (`App\Http\Controllers\Career\ScenarioSelectController`). Reached from the Dashboard's New Career flow and by URL; the wizard shell is `resources/js/layouts/SetupLayout.vue`, which is this screen's and no other's until its sibling steps land.
+
+#### Layout / Content
+`SetupLayout` step 1 of 6, then one card per scenario the matrix composes, in the matrix's own order. Each card states the scenario's name, what it optimizes, its systems, its tracked resources, its turn loop, its Global availability date, its ruleset version, a description slot and a recommended-use slot. One `Select Scenario` action per card (`aria-pressed`), and a stored-choice line above the grid.
+
+**Every field is derived from `config/scenarios.php` by `ScenarioSelectController::cards()`, and the page holds no `config()` lookup and no scenario name.** Optimization focus is read off `cap_bonus` (highest-bonus stat, or a stated uniform tie), systems are the `panels` entries that are `true` labelled through `panel_labels`, tracked resources are the `widgets` beyond the baseline entry's own list labelled through `widget_labels`, and the documentation badge comes from `documented`. `CareerScenarioSelectTest` proves the claim by injecting a fifth scenario into the matrix at runtime and reading its card back, so a new scenario is one config entry and zero component edits (D-240, gate G-33).
+
+#### States
+
+| State | Behaviour |
+|---|---|
+| Empty (no draft choice) | The stored-choice line renders `N/A` with a `title` naming the absence, and every card's action is `aria-pressed="false"`. Nothing is pre-selected, so the screen never implies a choice nobody made. |
+| Empty (no scenario composed) | The grid is replaced by a statement that the matrix holds no scenario, so the screen cannot show an empty grid and call it a choice. Reachable only by deleting every entry from `config/scenarios.php`. |
+| Absent field per card | Ruleset `N/A` (`app.ruleset` is null by ruling), Description `N/A` and Recommended use `N/A`, each with a `title` giving the reason. No scenario composes systems or resources beyond the baseline: those read "No scenario system" and "None beyond the generic strip" rather than as blank rows. |
+| Loading | `role="status"` "Saving your choice…" while the PUT is in flight, and the clicked button reads "Saving…" while its own visit runs. A custom state is required here because the action is user-initiated (ADR-0007); there is no cold-load skeleton (Inertia renders after the props arrive). |
+| Error | `role="alert"` carrying the Form Request's message, referenced from the actions by `aria-describedby`, so the refusal is announced with the control that caused it. The draft is left untouched: an unknown key never reaches the session. |
+| After a successful write | The PUT redirects back to this step and the choice is read from the session, so the pressed state reflects stored data rather than client memory. Focus is restored to the same action in the visit's `onSuccess` — not on mount, because a component instance survives a client-side visit and stealing focus on cold load would be a defect (WCAG 2.4.3). |
+| Unbuilt steps | The step nav renders steps 4 to 6 as named absences (`to: null`, "not built") and the page states that there is nothing to continue to. No dead link. |
+
+#### Validation & Error Handling
+`App\Http\Requests\Career\StoreScenarioRequest`: `scenario` required, string, and `Rule::in` the keys of `config('scenarios.scenarios')`. A key outside the matrix is refused rather than stored, because `SetupDraft::read()` validates the stored key on the way out and a refused write is honest while a stored-then-dropped one is not. A stale key left by a later config change reads as no scenario.
+
+#### Persistence
+The choice goes to `session('career.setup')` through `App\Services\Career\SetupDraft`, **not** to a `training_runs` row. `SetupDraft`'s class docblock carries the reasoning: `RunStatus` has no draft case, and an `Active` run created here would surface as a phantom career on SCR-CAR-001 and as a phantom builder target in SCR-CAR-006. The run is created once, at Preflight (D7). Accepted costs, stated rather than hidden: two tabs share one draft (last write wins), and an expired session loses it.
+
+#### Implementation References
+`ScenarioSelectController`, `StoreScenarioRequest`, `SetupDraft`, `SetupLayout.vue`, `pages/Career/ScenarioSelect.vue`, `config/scenarios.php` (`widget_labels`, `panel_labels`, `baseline`, `verified_at`). Tests: `tests/Feature/CareerScenarioSelectTest.php` (10 cases) and `tests/browser/career-scenario-select.spec.ts` (6 cases: card count, baseline-only derivation, badge state, keyboard selection with focus restore and cross-navigation survival, 44px sweep, 320px reflow with a clean console).
+
+#### Status
+Implemented 2026-10-06 (slice D2). Steps 2 to 6 of the wizard are D3, D4, the D5 and D6 wizard steps, and D7.
+
+#### Gaps
+1. **Description and recommended use are named absences.** Neither the corpus nor the matrix holds a one-line player-facing description or a recommended use for any scenario, so the card prints `N/A` with a reason. Whether `config/scenarios.php` should gain a sourced `description` per scenario is an owner question.
+2. **The documentation badge is driven by a flag that currently reads true.** `our_grand_concert.documented` became `true` when commit `ab53861` recovered the 2026-10-05 primary read, so no card renders PARTIALLY DOCUMENTED today. The badge mechanism is pinned against a falsified matrix in the props test, and its positive rendering needs no component change if the owner rules the scenario only partially documented. The scenario's *baseline* state (no systems, no resources) is visible either way.
+3. **No axe run.** `@axe-core/playwright` and `axe-core` are both absent and adding a dependency needs owner approval (`AGENTS.md` §5), so the plan §12.5 fallback applies: the browser spec asserts target size, keyboard path, focus order, reflow and a clean console by hand.
+
+---
+
+### SCR-CAR-003 — Trainee Selection (setup wizard step 2)
+
+#### Purpose
+Choose the trainee a career is built on, from the fetched catalog, before the run exists (`docs/proposals/screen-spec-2.0.md` SCREEN-003; `design-2.0` §13, §17).
+
+#### Actor / Access
+Any; no auth concept applies (PRD NFR-1).
+
+#### Route / Location
+`GET /career/setup/trainee` name `career.trainee` and `PUT /career/setup/trainee` name `career.trainee.store` (`App\Http\Controllers\Career\TraineeSelectController`). Reached from `SetupLayout`'s step nav (step 2) and by URL. Each row's "View Profile" action leads to SCR-CAR-004 at `GET /career/setup/trainee/{umamusume}` (`career.trainee.profile`), which binds the local primary key rather than the slug, because the id this step stores is the one a later step writes to `training_runs.umamusume_id`.
+
+#### Layout / Content
+`SetupLayout` step 2 of 6, then a scenario line read through `SetupDraft::scenarioLabel()` (`N/A` with a `title` when no scenario has been chosen), a stored-choice line, the filter form, and one card per trainee in the catalog's own order (debut form first, then Global release date, then card id, with solo-sourced forms hidden).
+
+The filter form offers four kinds of filter and one sort, every one a real column: name/slug substring search; a Surface facet over `aptitude_turf`/`aptitude_dirt`; a Distance facet over the four distance columns; a Running style facet over the four style columns (facet letters are the parser's `S A B C D E F G` domain, `GametoraCharacterParser.php:143`); a unique-skill select over the `character_cards.skills_unique` exports that survive `Skill::scopeAvailableOnGlobal()`; a sort allowlist over the same columns with a direction control; Filter and Clear filters. The facet vocabulary, the letter domain, the sort keys and the unique-skill options all arrive as props from `TraineeSearchRequest` and the controller, so the page holds no column name, no letter list and no scenario name.
+
+Each card prints name and `name_ja` (`lang="ja"`), release status, the `size-10` `ArtworkSlot` row geometry (`reserve`, decorative `alt=""`, because the row already prints the name), the ten `AptitudeBadge` letters (letter plus band word, never colour alone), per-form `RarityChip` with the client's rarity word and a debut marker, a primary "Select Trainee" action (`aria-pressed`) and a "View Profile" link. No growth-rate figure and no scenario-suitability rank appear, because no column holds either (see Gaps).
+
+#### States
+
+| State | Behaviour |
+|---|---|
+| Empty (no draft choice) | The stored-choice line renders `N/A` with a `title` naming the absence, and every action is `aria-pressed="false"`. Nothing is pre-selected, so the screen never implies a choice nobody made. |
+| Empty (no row matches the filters) | The grid is replaced by one sentence stating that no trainee matches, with the path out of it: the roster is filled by seed data or `php artisan uma:fetch`, and Clear filters shows every row the catalog holds. |
+| Empty (no aptitude published) | The row's grid is replaced by "Aptitude: N/A" with a `title`: the parser writes all ten columns or none, so one absent letter means the whole set is absent (D-220). |
+| Absent filter (growth rate, scenario suitability) | The form does not offer them at all: no column holds either figure, and a facet for a column that does not exist would be a filter that can never narrow. Recorded in Gaps. |
+| Loading | `role="status"` "Loading the roster…" while a filter visit is in flight, and the pressed action reads "Saving…" while its own PUT runs. A custom state is required here because the action is user-initiated (ADR-0007); there is no cold-load skeleton (Inertia renders after the props arrive). |
+| Error (refused filter) | The Form Request redirects back to the step and the message is listed per field with `role="alert"`, so the refusal is announced where it was typed. The roster stays unfiltered: a refused value never narrows the list as though it had been applied. |
+| Error (refused write) | `StoreTraineeRequest` messages re-render this step; the draft is left untouched, so an unknown id never reaches the session. |
+| After a successful write | The PUT redirects back to this step and the pressed state is read from the session, so it reflects stored data rather than client memory. Focus is restored to the same action in the visit's `onSuccess` (not on mount: a component instance survives a client-side visit, and stealing focus on cold load would be a defect, WCAG 2.4.3). |
+| Unbuilt steps | The step nav renders steps 4 to 6 as named absences (`to: null`, "not built"); step 4 is not linked, because the Legacy wizard step has not landed. |
+
+#### Validation & Error Handling
+`App\Http\Requests\Career\TraineeSearchRequest`: `search` nullable string, max 255; `surface`, `distance` and `style` nullable and in the seven letters the parser writes; `skill` nullable integer existing in `skills.export_id`; `direction` in `asc`/`desc`. An empty facet value reads as "no filter chosen". An unknown `sortBy` degrades to the default (`name`) rather than refusing, the way `PageSize::clamp` degrades: the key usually arrives from a pasted URL, and the allowlist is the only path into `orderBy()`, so an off-list key never becomes SQL. An aptitude sort ranks S to G through a CASE expression rather than the alphabet, so a G trainee is not presented as the best choice in the list. `App\Http\Requests\Career\StoreTraineeRequest`: `umamusume_id` required, integer, existing in `umamusume.id`.
+
+#### Persistence
+The choice goes to `session('career.setup')` through `App\Services\Career\SetupDraft`, the same draft step 1 writes, **not** to a `training_runs` row: an `Active` run made here would surface as a phantom career on SCR-CAR-001 and as a phantom builder target in SCR-CAR-006, and the run is created once, at Preflight (D7). SCR-CAR-002's section carries the full reasoning; the accepted costs are the same (two tabs share one draft, an expired session loses it).
+
+#### Implementation References
+`TraineeSelectController`, `TraineeSearchRequest`, `StoreTraineeRequest`, `SetupDraft`, `SetupLayout.vue`, `pages/Career/TraineeSelect.vue`, `AptitudeBadge.vue`, `RarityChip.vue`, `ArtworkSlot.vue`; `App\Services\PageSize`. Tests: `tests/Feature/CareerTraineeSelectTest.php` (props, filters, sort, draft) and `tests/browser/career-trainee-select.spec.ts` (rendered copy, filters and the empty match, keyboard selection with focus restore, the 44px sweep, 320px reflow, clean console).
+
+#### Status
+Implemented 2026-10-06 (slice D3). Step 4 and beyond are the D5-wizard, D6-wizard and D7 slices.
+
+#### Gaps
+1. **Growth rate and scenario suitability are omitted, with citations.** Neither has a column: `docs/research-scratch/GOVERNANCE.md:600` defers a growth-rate column ("No column added now") and `docs/research-scratch/DESIGN-CORPUS.md:727-728` keeps the figure off a rendered surface; a suitability facet would read `config/scenarios.php`'s `scenario_links` cast list as a ranking, which is a listing, not a judgement the tool holds a source for.
+2. **Rarity is a form's fact, not a trainee's.** `character_cards.rarity` is the only rarity in the schema, so the card prints it per costume form and offers no trainee-level aggregate, which would state a property the data does not carry.
+3. **The unique-skill option list is built from the card rows in PHP.** `skills_unique` is a JSON column and a portable SQL distinct over it does not exist; this is one bounded read per page load on the current catalog. The upgrade path is a pivot if the catalog grows an order of magnitude.
+4. **No axe run.** `@axe-core/playwright` and `axe-core` are both absent and adding a dependency needs owner approval (`AGENTS.md` §5), so the plan §12.5 fallback applies and the browser spec's hand-rolled checks are the coverage.
+
+---
+
+### SCR-CAR-004 — Trainee Profile (setup wizard step 2, read screen)
+
+#### Purpose
+State what the catalog holds about one trainee before the choice is committed: basic facts, her own aptitude letters, and the skills of each costume form (`docs/proposals/screen-spec-2.0.md` SCREEN-004; `design-2.0` §13, §17).
+
+#### Actor / Access
+Any; no auth concept applies (PRD NFR-1).
+
+#### Route / Location
+`GET /career/setup/trainee/{umamusume}` name `career.trainee.profile` (`App\Http\Controllers\Career\TraineeProfileController`), reached from SCR-CAR-003's "View Profile" action. The parameter binds the local primary key; an unknown id is the binding's 404, which is what a stale bookmarked draft deserves. The Select action posts to the shared `career.trainee.store` PUT.
+
+#### Layout / Content
+`SetupLayout` step 2 of 6, a back link to the roster and the scenario line, then four sections:
+
+1. **Basic** — `size-16` artwork, name with `name_ja` (`lang="ja"`), availability, voice actor, birthday, height, Version and whether the row is Trainer-edited. The profile document is read through `hasFullBirthday()`/`hasThreeSizes()` guards, so a partial birthday or measurement is never printed as a whole one. There is no weight column, so no weight row exists.
+2. **Aptitude** — the ten letters once for the trainee, through `AptitudeGrid.vue`; never repeated per costume form (ADR-0008), and stated as aptitude rather than as an "ideal" judgement.
+3. **Costume forms** — one block per confirmed form: `size-10` artwork, form title, `RarityChip` with the client's rarity word, debut marker and Global release date, then the form's four skill lists (unique, starting, awakening, event). Skill names resolve through `Skill::scopeAvailableOnGlobal()`, so every printed name has a link that resolves on the Global client; `sp_cost` prints `N/A` with a `title` where the source publishes none; an id that resolves to no Global skill is counted in words rather than dropped. `skills_evo` is deliberately not listed (SCR-CAT-002's ruling).
+4. **Build analysis** — recommended stat distribution, useful inheritance and useful support types as named absences, each `N/A` with its reason on the element, plus the distance/style reading labelled as aptitude. Career goals is not rendered at all: `trainee_goals` has never been migrated (the filing is reserved as KI-34), and `race_catalog_slots`' own comment says its obligation rows are scenario-scoped and "deliberately not the per-character Goal".
+
+#### States
+
+| State | Behaviour |
+|---|---|
+| Empty (no draft choice) | The Select action is `aria-pressed="false"` and no "Chosen" word appears, so the screen never implies a choice nobody made. |
+| Empty (no profile document) | Voice actor, birthday and height render `N/A` with a `title`; the rest of the screen is unchanged, so a trainee fetched without a profile document is still readable. |
+| Empty (no confirmed costume form) | The forms list is replaced by one sentence: every form for this trainee is confirmed by a single source, so no skill list can be stated until a second source confirms one. |
+| Empty (no aptitude published) | "Aptitude: N/A" with a `title`, the same all-or-nothing read as the roster. |
+| Empty (a skill list publishes nothing this catalog can resolve) | `N/A` with a `title` when the source lists none; where the source lists ids this catalog cannot resolve, the count is stated in words instead of a short list presented as the whole (6 of the catalog's 237 awakening ids are in that state). |
+| Absent (version, stat distribution, inheritance, support types) | Each renders `N/A` with its reason on the element: an unrecorded value is never a dash and never a default. |
+| Omitted (career goals, growth rates, hint skills, evolution skills) | No heading and no row: each has no column or no per-trainee store, and a heading over nothing would advertise a fact the tool is known not to hold. |
+| Loading | The Select action reads "Saving…" while its PUT is in flight (ADR-0007). The page itself is a read with no other async action, so no skeleton is drawn. |
+| Error | A refused write re-renders SCR-CAR-003 with the message: `StoreTraineeRequest` redirects to the roster step, which is where the choice is made. A failed read of this page renders SCR-SYS-004. |
+| After a successful write | The PUT redirects to SCR-CAR-003, where the stored choice rather than this screen's client state states what is selected. |
+
+#### Validation & Error Handling
+The read takes no untrusted input beyond the route key; the only write is the shared `StoreTraineeRequest` (see SCR-CAR-003). An unknown route id is a 404 through the model binding before any query runs.
+
+#### Persistence
+The same `session('career.setup')` draft as SCR-CAR-003, through the same PUT. Nothing on this screen writes a database row.
+
+#### Implementation References
+`TraineeProfileController`, `pages/Career/TraineeProfile.vue`, `AptitudeGrid.vue`, `SkillRow.vue`, `RarityChip.vue`, `ArtworkSlot.vue`; `App\Models\Skill::scopeAvailableOnGlobal()`. Tests: `tests/Feature/CareerTraineeSelectTest.php` (props, resolution counts, absences) and `tests/browser/career-trainee-select.spec.ts` (rendered sections, N/A titles, the omitted headings).
+
+#### Status
+Implemented 2026-10-06 (slice D3).
+
+#### Gaps
+1. **Career goals is omitted, not stubbed.** No `trainee_goals` migration, model or factory exists; the filing is reserved as KI-34 and needs a fetch-source decision, so the section the SCREEN-004 brief asks for has nothing to render today.
+2. **Growth rates, hint skills and evolution skills are omitted.** Growth rates have no column and are kept off rendered surfaces by `DESIGN-CORPUS.md:727-728`; hint skills live only on `support_cards`; `skills_evo` is stored but SCR-CAT-002's ruling refuses to list evolved pairs.
+3. **Six of the catalog's 237 awakening ids name no Global skill row** and are counted rather than resolved; closing that needs a source comparison, not a UI change.
+4. **The three build-analysis absences are by ruling**, not by omission: there is no recommendation column, `support_cards` carries no `umamusume_id`, and inheritance is run-scoped. The rows stay in place so a future source has a surface waiting.
+5. **No axe run.** The same plan §12.5 fallback as SCR-CAR-003.
+
+---
+
+### SCR-CAR-005 — Build Target (setup wizard step 3)
+
+#### Purpose
+Record what the Trainer intends to build for this career, as one object entered before the run exists (`docs/proposals/screen-spec-2.0.md` SCREEN-005; `design-2.0` §49 for the provenance states; `ADR-0020` §1, §2).
+
+#### Actor / Access
+Any; no auth concept applies (PRD NFR-1).
+
+#### Route / Location
+`GET /career/setup/target` name `career.target` and `PUT /career/setup/target` name `career.target.store` (`App\Http\Controllers\Career\BuildTargetController`). Reached from `SetupLayout`'s step nav (step 3) and by URL. The write is validated by `App\Http\Requests\Career\StoreDraftBuildTargetRequest`, which extends the run-scoped `StoreBuildTargetRequest` so both entry points share one rule set and one `payload()` builder; the ceiling resolves against the route's run when there is one and against `SetupDraft::planningRun()` when there is not.
+
+#### Layout / Content
+`SetupLayout` step 3 of 6, heading "Your target", then the scenario line (label through `SetupDraft::scenarioLabel()`, `N/A` with a reason when none is chosen), the absence line when no target is stored, and one form with three groups plus a summary:
+
+1. **What the career is for** — purpose, distance, surface and style. Purpose options are `BuildPurpose`'s four cases labelled through `uma.build_purpose`; the other three vocabularies are `BuildTargetPayload::DISTANCE_BANDS`, `::SURFACES` and `::STYLES`, sent from the controller so the form and the payload's own reader cannot drift. One line discloses that the design also names a fifth purpose (Competitive Build) this tool does not record.
+2. **Stat targets** — five numeric inputs, one per `config('scenarios.stat_order')` entry, each with its cap printed beside it (`ScenarioCaps::forRun`, the same call the turn validator makes, `ADR-0015`) and a labelled bar showing the entered value against that cap. The bar never renders without its number beside it, and it is not a readiness verdict: whether a target is reachable in the turns left is held computation in this repository.
+3. **Skill priorities** — free-text entry plus an ordered list with "Move up", "Move down" and "Remove" buttons, each at least 44px; no drag path is required (WCAG 2.5.7). One line states that a risk tolerance and per-skill marks (Required, High, Optional, Ignore) are not recorded.
+4. **Summary** — one sentence assembled by the page from the entered values alone (`ProvenanceBadge` state `calculated`), with an empty field named in the sentence rather than omitted.
+
+`ProvenanceBadge.vue` is the single owner of the four provenance states from `design-2.0` §49: ✓ Confirmed, ∑ Calculated, ~ Estimated, ? Unknown, each a distinct glyph and a distinct word held in one map, and no other source repeats either. The accessible name is the state word plus the caller's `title` when one was given; the glyph is `aria-hidden="true"`; and the badge sits beside the figure it labels, never in a page-level legend (Law of Proximity).
+
+#### States
+
+| State | Behaviour |
+|---|---|
+| Empty (no stored target) | The page states that no target is recorded and every field starts empty; no stat input is pre-filled with a zero. The summary names each absence. |
+| Empty (no scenario chosen) | The caps fall back to the base cap with no bonus (`ScenarioCaps::forRun(null)`'s own answer) and the scenario line renders `N/A` with a `title` saying so. Nothing lends a bonus nobody chose. |
+| Absent (design items the payload cannot hold) | The fifth purpose, risk tolerance and per-skill marks are each stated in one line: `BuildTargetPayload::KEYS` is exactly six keys and `assertKeys()` refuses an unknown one, so offering them would be a stored-shape change needing owner approval. |
+| Loading | The submit button reads "Saving…" and a `role="status"` line says "Saving your target…" while the PUT is in flight (ADR-0007: the action is user-initiated). There is no cold-load skeleton (Inertia renders after the props arrive). |
+| Error | Each message renders with `role="alert"` under its own control and is referenced by `aria-describedby`; on a failed submit focus moves to the first invalid control in DOM order. The refusal names the bound it enforced ("Speed must be between 0 and 1200.", D-56) and the draft is untouched. |
+| After a successful write | The PUT redirects back to this step with "Build target saved." and the stored state is read from the draft, so the form reflects stored data rather than client memory. |
+| Unbuilt steps | The step nav renders steps 4 to 6 as named absences (`to: null`, "not built"). Step 3 is live and carries `aria-current="step"`. |
+
+#### Validation & Error Handling
+`StoreDraftBuildTargetRequest` (extends `StoreBuildTargetRequest`): `purpose` required and one of `BuildPurpose`'s four cases; `distance`, `surface` and `style` required and in `BuildTargetPayload`'s constants; `targets` required and key-restricted to the stat matrix, all five stats required by name, `min:0`, each checked in `withValidator` against `ScenarioCaps::forRun` for the draft's planned scenario with the bound named. A hand-made POST cannot store a sixth stat, an unknown purpose or a value outside the vocabularies. The form is `novalidate` by design: the `max` attribute mirrors the cap as a browser convenience only, and the server's message is the one the page renders. The server is the authority on the clamp (`ADR-0015`).
+
+#### Persistence
+The target goes to `session('career.setup')` under the `build_target` key through `App\Services\Career\SetupDraft`, **not** to a `training_runs` row: the run is created once, at Preflight (D7), and SCR-CAR-002's section carries the reasoning. `SetupDraft::write()` merges into the raw session bag, so a later step-1 or step-2 write cannot drop the target. The run-scoped write (`runs.build-target.update` → `training_runs.build_target`) is unchanged and shares the same rule set.
+
+#### Implementation References
+`BuildTargetController`, `StoreDraftBuildTargetRequest`, `StoreBuildTargetRequest`, `SetupDraft` (`planningRun()`, `buildTarget()`, `write()`), `ScenarioCaps::forRun`, `BuildTargetPayload`, `BuildPurpose`, `uma.build_purpose`, `pages/Career/BuildTarget.vue`, `components/ProvenanceBadge.vue`, `SetupLayout.vue`. Tests: `tests/Feature/CareerBuildTargetTest.php` (props, draft round trip, the ceiling clamp with its bound named, refusal of off-vocabulary values, the untouched run-scoped write, the glyph sweep) and `tests/browser/career-build-target.spec.ts` (rendered copy, the save round trip with the calculated summary, the refused stat with focus, keyboard reorder, the 44px sweep, 320px reflow with a clean console).
+
+#### Status
+Implemented 2026-10-06 (slice D4).
+
+#### Gaps
+1. **The design's fifth purpose is not recorded.** The brief names six; `BuildPurpose` holds four, and its docblock already maps one design name (General Training) onto a stored case. "Competitive Build" has no case, and adding one would widen the advisor's contract, so the page discloses the gap in one line instead. Whether the case should exist is an owner question.
+2. **Risk tolerance and per-skill marks (Required, High, Optional, Ignore) are not recorded.** Both would need a new `build_target` key, and `BuildTargetPayload::assertKeys()` refuses an unknown one, so this is a stored-shape change needing owner approval. `skill_priorities` stays a flat ordered list of names.
+3. **No axe run.** `@axe-core/playwright` and `axe-core` are both absent and adding a dependency needs owner approval (`AGENTS.md` §5), so the plan §12.5 fallback applies and the browser spec's hand-rolled checks are the coverage.
+
+---
+
 ### 4.15 Non-screen surfaces (for completeness)
 
 - **Read-only JSON API (P2, US-9, FR-E)** — `routes/api.php`: `GET /api/v1/umamusume[/{slug}]`, `/training-runs[/{id}]`, `/support-cards[/{id}]`. No visual surface; list envelope `{data, pagination{page,pageSize,totalItems,totalPages}}`; every non-2xx renders `{error:{code,message}}` centrally (`bootstrap/app.php`: VALIDATION_ERROR/422, NOT_FOUND/404, HTTP_ERROR, INTERNAL/500). Controllers `app/Http/Controllers/Api/V1/*`, Resources `app/Http/Resources/*` (camelCase). Tests: `ApiV1Test`, `ApiV1ValidationEnvelopeTest`, `ApiV1RunIndexPaginationTest`, `ApiV1SupportCardTest`.
@@ -1082,4 +1343,7 @@ left.
 | 2026-10-04 | Section 7 carries a status line for every gap (1 to 15). Resolved: 1, 2, 4, 5 (display half still open), 8, 11, 13 (partly). Deferred with reason: 3, 6, 7, 10, 15. Decision recorded: 9 (`ADR-0018`). Unchanged and not closed: 12, 14. New screen SCR-SYS-002 (Preferences); nav shell now six links; `runs.turns.update`/`runs.turns.destroy` no longer UI-less; SCR-SYS-001's "only one custom error view" state corrected. | Screen-system gaps dispatch, items A to G. No verdict in `docs/UIX-AUDIT-TRAINING-RUNS.md` was edited and no open audit item was closed. |
 | 2026-10-04 | Trainer Desk 2.0 design target filed for reference: `docs/proposals/screen-spec-2.0.md` (screen set) and `docs/proposals/design-2.0.md` (visual system). These are the Inertia/Vue rewrite target (`ADR-0020` §1), **reference-only** — this document still describes the shipped Blade app. The target's deferred-computation sections (race win-probability, per-training stat-yield and numeric failure, inheritance computation, shop recommendation) carry a governance banner naming the holding ADR and are not authorization. | Owner-supplied design brief, filed as the 2.0 target. No shipped screen changed. |
 | 2026-10-05 | Gap §7-16 added, and one §8 authority row for artwork. No screen section, state table or workflow changed. | `ADR-0021` authorized sourced artwork on 2026-10-05 while the placement question stays open (PRD OQ-6). The screen system records an authorization it has not yet implemented rather than letting the ADR be the only place a future build looks. |
+| 2026-10-06 | New area `SCR-CAR-*` and screen `SCR-CAR-001` (Dashboard), with the §4 section and its empty / loading / error state table. §2's nav-shell paragraph corrected: it described `resources/views/components/layout.blade.php`, deleted in slice B1, and claimed `/` redirects to `/training-runs`, which the Dashboard row makes false. No other screen section, state table or workflow changed. | Slice D1 enriched the Dashboard (`docs/proposals/frontend-development-plan.md` §8). Plan §11 risk 5 requires Phase D screens to get their `SCR-*` entries with their first slice, and §10 requires the screen's state table to agree with the view. |
 | 2026-10-05 | §7-16 marked **superseded in part**, with a dated correction appended under it rather than the original sentence rewritten. No screen section, state table, workflow or §8 authority row changed. The correction names the four placed screens with their recorded geometry, states the pre-run Legacy Select as unplaceable with its reason, keeps the skill-row deferral, and carries forward two open items (the index/detail portrait-source drift, and the components' single `decorative` flag). | The read half of `ADR-0021` landed, so §7-16's own claim that `grep -rn "<img" resources/views` returns zero no longer holds. `AGENTS.md` §16 says a stale written rule is reported rather than edited to match the code; the sentence is preserved verbatim and marked false-for-four-screens, with the correction dated beside it, which is the same shape §7-4 and §7-14 already use for their own closures. PRD OQ-6 stays **open**: a subset of placements is answered, not the question. |
+| 2026-10-06 | New screens `SCR-CAR-003` (Trainee Selection) and `SCR-CAR-004` (Trainee Profile) with their §3 rows, §4 sections and empty/loading/error state tables, inserted before §4.15. `SCR-CAR-002`'s status cell corrected from "steps 2 to 6" to "steps 3 to 6", because step 2 landed with D3. No other screen section, state table, workflow or §8 authority row changed. | Slice D3 built the wizard's second step (`docs/proposals/frontend-development-plan.md` §8). Plan §11 risk 5 requires Phase D screens to get their `SCR-*` entries with their first slice, and §10 requires the screen's state table to agree with the view. The two screens omit the brief's growth-rate, scenario-suitability, career-goal, hint and evolution items because no column or table holds them, which the Gaps sections record with citations. |
+| 2026-10-06 | New screen `SCR-CAR-005` (Build Target, wizard step 3) with its §3 row, §4 section and empty/loading/error state table, inserted before §4.15. The step-nav statements that step 3 was a named absence are corrected in place: `SCR-CAR-002`'s status cell to "steps 4 to 6", its §4 "Unbuilt steps" row, and `SCR-CAR-003`'s §4 "Unbuilt steps" row and Status line. No other screen section, state table, workflow or §8 authority row changed. | Slice D4 built the wizard's third step (`docs/proposals/frontend-development-plan.md` §8), including the shared `ProvenanceBadge` whose four states come from `design-2.0` §49. Plan §11 risk 5 requires Phase D screens to get their `SCR-*` entries with their first slice, and §10 requires the screen's state table to agree with the view. The brief's fifth purpose, risk tolerance and per-skill marks are omitted because the stored payload's key set is closed, which the Gaps section records as owner questions. |

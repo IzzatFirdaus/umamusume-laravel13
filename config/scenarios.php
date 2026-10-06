@@ -30,8 +30,50 @@ declare(strict_types=1);
 
 return [
 
+    /*
+    | The date this matrix was last checked against its sources. The header above
+    | states the same date and the three Global prose sources the caps were read
+    | against; this key exists so the Dashboard's data-status badge (SCREEN-001,
+    | design-2.0 §48) can print it instead of the controller carrying a literal.
+    | It is a verification date, not an "updated" one: nothing here was fetched
+    | on it.
+    */
+    'verified_at' => '2026-09-27',
+
     // Display order and labels. Global client strings only.
     'stat_order' => ['Speed', 'Stamina', 'Power', 'Guts', 'Wit'],
+
+    /*
+    | What each `widgets[]` entry is called on screen. Beside the widget lists
+    | rather than inside them so the composition matrix stays a list of keys, and
+    | here rather than in a view so a fifth scenario's widget is named once
+    | (D-240, gate G-33). The Dashboard reads this to label the scenario's primary
+    | resource; the run page's strip owns its own presentation labels.
+    */
+    'widget_labels' => [
+        'turn' => 'Turn',
+        'energy' => 'Energy',
+        'fans' => 'Fans',
+        'team_rank' => 'Team Rank',
+        'spirit_bursts' => 'Spirit Bursts',
+        'grade_points' => 'Grade Points',
+        'shop_coins' => 'Shop Coins',
+    ],
+
+    /*
+    | What each `panels` key is called on screen, for the Scenario Selection cards
+    | (SCREEN-002). A panel that is off is simply not printed, so a scenario never
+    | claims a system it does not compose, and a fifth scenario names its own panels
+    | here rather than in a component (D-240, gate G-33).
+    */
+    'panel_labels' => [
+        'race_calendar' => 'Race calendar',
+        'team_race' => 'Team races',
+        'grade_objectives' => 'Grade Point objectives',
+        'shop' => 'Pro Shop',
+        'epithet_routes' => 'Epithet routes',
+        'team_rank_ladder' => 'Team Rank ladder',
+    ],
 
     // The 1200 line is a game mechanic where training gains halve, not an
     // application limit. It is drawn as its own marker on every bar.
