@@ -7,13 +7,19 @@ namespace App\Http\Requests;
 use App\Enums\BuildPurpose;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\TrainingRun;
+use App\Services\Career\SetupDraft;
 use App\Services\ScenarioCaps;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 /**
- * Validates the build target a Trainer enters for one run (FR-F-1, `ADR-0020` §2, `SCREEN-005`).
+ * Validates the build target a Trainer enters (FR-F-1, `ADR-0020` §2, `SCREEN-005`).
+ *
+ * One rule set for both entry points: the run-scoped write (`runs.build-target.update`, C1) and the
+ * setup wizard's step 3 draft write (`career.target.store`, D4, through `StoreDraftBuildTargetRequest`,
+ * which only changes the destination and the redirect). The ceiling resolves against the route's run
+ * when there is one and against the draft's scenario when there is not.
  *
  * Two owners are reused rather than restated. The value vocabularies come from
  * `BuildTargetPayload`'s constants, because the payload is what reads them back and a second copy
@@ -83,10 +89,18 @@ class StoreBuildTargetRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
+            // The clamp target is the run when the request is run-scoped (`runs.build-target.update`,
+            // C1) and the setup draft's scenario when it is the wizard's step 3
+            // (`career.target.store`, D4, through `StoreDraftBuildTargetRequest`). One rule set, two
+            // entry points: `SetupDraft::planningRun()` returns a saved=false `TrainingRun` carrying
+            // the draft's scenario, and `ScenarioCaps::forRun()` reads only `hasScenario()` and
+            // `scenarioKey()`, so a career that does not exist yet is clamped against the same
+            // ceiling a saved one is. A draft with no scenario yet resolves to null, and
+            // `forRun(null)` answers with the base cap and no bonus rather than no clamp at all.
             $run = $this->route('run');
 
             if (! $run instanceof TrainingRun) {
-                return;
+                $run = SetupDraft::planningRun();
             }
 
             $targets = (array) $this->input('targets');

@@ -53,6 +53,16 @@ return [
         'ThreeStar' => 'Three stars',
     ],
 
+    // The label map `BuildPurpose`'s docblock owes (FR-F-1, SCREEN-005 "Target purpose").
+    // `StoryClear` is the case the design brief calls "General Training"; the design's
+    // fifth name, "Competitive Build", has no case and so has no label.
+    'build_purpose' => [
+        'StoryClear' => 'Story Clear',
+        'ChampionsMeeting' => 'Champions Meeting',
+        'ParentFarming' => 'Parent Farming',
+        'SkillFarming' => 'Skill Farming',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | JP to Global game-term map

@@ -3,6 +3,10 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\ArtworkAssetController;
+use App\Http\Controllers\Career\BuildTargetController;
+use App\Http\Controllers\Career\ScenarioSelectController;
+use App\Http\Controllers\Career\TraineeProfileController;
+use App\Http\Controllers\Career\TraineeSelectController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LegacyController;
@@ -16,6 +20,38 @@ use Illuminate\Support\Facades\Route;
 // Trainer Desk 2.0 home (ADR-0020 §1): the SPA Dashboard is the front door. The Blade
 // screens below still serve their own routes during the rewrite.
 Route::get('/', [DashboardController::class, 'index'])->name('home');
+
+/*
+ * The career setup wizard (SCREEN-002 onward, `ADR-0020` §1). Step 1 chooses the scenario and writes
+ * it to the session draft, not to a run: `RunStatus` has no draft case and an `Active` run created
+ * here would surface as a phantom career on the Dashboard and as a phantom builder target in the
+ * Legacy Lab. `SetupDraft`'s class docblock carries the whole reasoning. The run is created once, at
+ * Preflight (D7).
+ */
+Route::get('/career/setup/scenario', [ScenarioSelectController::class, 'show'])->name('career.scenario');
+Route::put('/career/setup/scenario', [ScenarioSelectController::class, 'store'])->name('career.scenario.store');
+
+/*
+ * Step 2 (SCREEN-003, SCR-CAR-003). The roster is read from the catalog and the choice is written to the
+ * same session draft as the scenario, so a trainee selected here creates no run either. `{umamusume}`
+ * binds the local primary key rather than the slug, because this is the wizard's own hand-off: the id
+ * `SetupDraft` stores is the one a later step writes to `training_runs.umamusume_id`. The profile route
+ * sits under the same prefix so the two steps can link each other without a literal path appearing
+ * twice.
+ */
+Route::get('/career/setup/trainee', [TraineeSelectController::class, 'show'])->name('career.trainee');
+Route::put('/career/setup/trainee', [TraineeSelectController::class, 'store'])->name('career.trainee.store');
+Route::get('/career/setup/trainee/{umamusume}', [TraineeProfileController::class, 'show'])->name('career.trainee.profile');
+
+/*
+ * Step 3 (SCREEN-005, SCR-CAR-005). The target is entered before the run exists and written to the
+ * same session draft as the scenario and the trainee, under `build_target`. The PUT shares C1's rule
+ * set (`StoreBuildTargetRequest` through `StoreDraftBuildTargetRequest`): the clamp resolves against
+ * `SetupDraft::planningRun()` instead of a run row, which is what lets the ceiling be enforced for a
+ * career Preflight has not created yet.
+ */
+Route::get('/career/setup/target', [BuildTargetController::class, 'show'])->name('career.target');
+Route::put('/career/setup/target', [BuildTargetController::class, 'store'])->name('career.target.store');
 
 Route::get('/umamusume', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catalog.show');
