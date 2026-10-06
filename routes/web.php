@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Controllers\Career\BuildTargetController;
+use App\Http\Controllers\Career\CockpitController;
 use App\Http\Controllers\Career\DeckSelectController;
 use App\Http\Controllers\Career\LegacySelectController;
 use App\Http\Controllers\Career\ScenarioSelectController;
@@ -90,6 +91,13 @@ Route::get('/training-runs/import', [TrainingRunController::class, 'importForm']
 Route::post('/training-runs/import', [TrainingRunController::class, 'importStore'])->name('runs.import.store');
 Route::post('/training-runs/import/preview', [TrainingRunController::class, 'importPreview'])->name('runs.import.preview');
 Route::get('/training-runs/{run}', [TrainingRunController::class, 'show'])->name('runs.show');
+/*
+ * The Career Cockpit (SCREEN-009, `SCR-CAR-011`, plan §8 D8). It descends from the run's own URL, as
+ * the spec says it does, and it is read-only: the one write it offers posts to `runs.turns.update`
+ * below, so no second turn-write route exists. Registered after `runs.show` for readability; the two
+ * cannot collide, because the cockpit's path carries an extra segment.
+ */
+Route::get('/training-runs/{run}/cockpit', [CockpitController::class, 'show'])->name('runs.cockpit');
 Route::put('/training-runs/{run}', [TrainingRunController::class, 'update'])->name('runs.update');
 Route::delete('/training-runs/{run}', [TrainingRunController::class, 'destroy'])->name('runs.destroy');
 Route::get('/training-runs/{run}/export/{format}', [TrainingRunController::class, 'export'])->name('runs.export');

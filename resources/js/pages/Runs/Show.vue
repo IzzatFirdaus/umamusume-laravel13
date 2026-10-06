@@ -33,6 +33,7 @@ interface Run {
     turn_count: number;
     export_csv_url: string;
     export_json_url: string;
+    cockpit_url: string;
     update_url: string;
     destroy_url: string;
 }
@@ -253,6 +254,9 @@ const railStep = computed(() => props.rail as unknown as {
                 {{ run.scenario_label ?? 'No scenario set' }}
             </p>
             <div class="flex gap-3 text-sm">
+                <!-- The record screen is the door to the Career Cockpit (SCREEN-009), which descends
+                     from this run's URL. It sits first because it is the 2.0 primary screen. -->
+                <a :href="run.cockpit_url" class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline">Career Cockpit</a>
                 <a :href="run.export_csv_url" class="inline-flex min-h-11 items-center hover:underline">Export CSV</a>
                 <a :href="run.export_json_url" class="inline-flex min-h-11 items-center hover:underline">Export JSON</a>
             </div>

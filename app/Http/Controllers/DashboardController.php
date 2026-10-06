@@ -108,7 +108,9 @@ class DashboardController extends Controller
             'turn' => $turn,
             'energy' => $strip['energy'],
             'resource' => $this->primaryResource($run, $strip),
-            'resume_url' => route('runs.show', $run),
+            // "Resume" continues the career, so it opens the Cockpit (SCREEN-009, `SCR-CAR-011`), the
+            // screen the run is read from every turn, not the record sheet that logs its turns.
+            'resume_url' => route('runs.cockpit', $run),
         ];
     }
 

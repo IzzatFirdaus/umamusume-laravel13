@@ -338,7 +338,7 @@ class TrainingRunController extends Controller
      * null when the run names no scenario: the page then says "No scenario set" rather than
      * borrowing the baseline's name, which is a composition device and not a fact (D-220).
      *
-     * @return array{id: int, umamusume_id: int, umamusume_name: string, status: string, status_label: string, scenario: string|null, scenario_label: string|null, has_scenario: bool, notes: string|null, imported_display: string|null, import_source: string|null, turn_count: int, export_csv_url: string, export_json_url: string, update_url: string, destroy_url: string}
+     * @return array{id: int, umamusume_id: int, umamusume_name: string, status: string, status_label: string, scenario: string|null, scenario_label: string|null, has_scenario: bool, notes: string|null, imported_display: string|null, import_source: string|null, turn_count: int, export_csv_url: string, export_json_url: string, cockpit_url: string, update_url: string, destroy_url: string}
      */
     private function runHeader(TrainingRun $run): array
     {
@@ -362,6 +362,9 @@ class TrainingRunController extends Controller
             'turn_count' => $run->turnEntries->count(),
             'export_csv_url' => route('runs.export', ['run' => $run, 'format' => 'csv']),
             'export_json_url' => route('runs.export', ['run' => $run, 'format' => 'json']),
+            // The Career Cockpit (SCREEN-009) descends from this run's URL; this is the record
+            // screen's own door to it, so the cockpit is reachable rather than URL-only.
+            'cockpit_url' => route('runs.cockpit', $run),
             'update_url' => route('runs.update', $run),
             'destroy_url' => route('runs.destroy', $run),
         ];
@@ -1765,6 +1768,12 @@ class TrainingRunController extends Controller
     /**
      * Update a nested turn; the turn must belong to the routed run (404
      * otherwise), since route binding alone does not scope it.
+     *
+     * The redirect returns to the page the form was submitted from rather than to a fixed route,
+     * because a turn write now has two surfaces: this run screen's row form, and the Career Cockpit's
+     * manual correction (SCREEN-009, `design-2.0` §38). Pinning `runs.show` here sent a Trainer who
+     * corrected a reading on the Cockpit off the screen they were reading. For the row form the two
+     * are the same URL, so the run screen is unchanged.
      */
     public function updateTurn(StoreTurnEntryRequest $request, TrainingRun $run, TurnEntry $turn): RedirectResponse
     {
@@ -1772,7 +1781,7 @@ class TrainingRunController extends Controller
 
         $turn->update($request->validated());
 
-        return redirect()->route('runs.show', $run)->with('status', 'Turn '.$turn->turn.' updated.');
+        return redirect()->back(fallback: route('runs.show', $run))->with('status', 'Turn '.$turn->turn.' updated.');
     }
 
     public function destroyTurn(TrainingRun $run, TurnEntry $turn): RedirectResponse

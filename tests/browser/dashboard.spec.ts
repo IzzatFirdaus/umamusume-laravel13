@@ -156,7 +156,8 @@ test('names the active career and resumes it from the keyboard', async ({ page }
     await resume.focus();
     await expect(resume).toBeFocused();
     await page.keyboard.press('Enter');
-    await page.waitForURL(/\/training-runs\/\d+$/);
+    // Resuming continues the career, so it lands on the Cockpit (SCREEN-009), not the record sheet.
+    await page.waitForURL(/\/cockpit$/);
 });
 
 test('reflows at 320px, logs no console error, and renders under reduced motion', async ({ page }) => {

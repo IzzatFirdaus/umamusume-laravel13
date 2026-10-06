@@ -42,7 +42,12 @@ final class TrainerAdvisor
      */
     public const RISK_NOT_MEASURED = 'RiskNotMeasured';
 
-    private const REST = 'Rest';
+    /**
+     * `Rest` is public because it is already the advisor's published vocabulary — `ACTIONS` lists it —
+     * and a surface that maps the advisor's answer onto its own controls has to name it rather than
+     * repeat the string. `Wit` stays private: no surface needs to name it.
+     */
+    public const REST = 'Rest';
 
     private const WIT = 'Wit';
 

@@ -101,7 +101,10 @@ it('saves a corrected turn through the row form', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
     $entry = turnFor($run, 2);
 
-    $this->put(route('runs.turns.update', [$run, $entry]), turnRowPayload())
+    // The redirect returns to the page the form was posted from, so the run screen is seeded as the
+    // referer: the same URL the row form lives on, and the same target as before the Cockpit arrived.
+    $this->from(route('runs.show', $run))
+        ->put(route('runs.turns.update', [$run, $entry]), turnRowPayload())
         ->assertRedirect(route('runs.show', $run))
         ->assertSessionHas('status', 'Turn 2 updated.');
 

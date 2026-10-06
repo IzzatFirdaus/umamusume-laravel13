@@ -35,7 +35,15 @@ export type ProvenanceState = 'confirmed' | 'calculated' | 'estimated' | 'unknow
  *
  * Contrast comes from the measured token pairs (`text-ink-strong` on `bg-sunken`), never a raw hex,
  * and each state carries a distinct glyph AND a distinct word, so the state is never colour-only.
+ *
+ * `copy` and `name` are `computed`, not plain consts. Inertia patches a page in place, so a component
+ * whose props change underneath it keeps its instance: a value derived once at setup stays frozen at
+ * the first render's state. Nothing renders this badge with a changing `state` today, but a screen
+ * that does (the Career Timeline is the likely first) would otherwise print the previous state's word
+ * beside the new figure. The Career Cockpit hit exactly that with its advisor band.
  */
+import { computed } from 'vue';
+
 const props = defineProps<{
     state: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
     /** Optional reason or arithmetic note; appended to the accessible name and shown as a tooltip. */
@@ -49,9 +57,9 @@ const BADGES: Record<'confirmed' | 'calculated' | 'estimated' | 'unknown', { gly
     unknown: { glyph: '?', word: 'Unknown' },
 };
 
-const copy = BADGES[props.state];
+const copy = computed(() => BADGES[props.state]);
 
-const name = props.title ? `${copy.word}: ${props.title}` : copy.word;
+const name = computed(() => (props.title ? `${copy.value.word}: ${props.title}` : copy.value.word));
 </script>
 
 <template>

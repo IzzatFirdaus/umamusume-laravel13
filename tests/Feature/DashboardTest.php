@@ -90,7 +90,7 @@ it('names the active career with its scenario, position, turn, energy and primar
             ->where('activeCareer.resource.label', 'Team Rank')
             ->where('activeCareer.resource.value', null)
             ->has('activeCareer.resource.value_hint')
-            ->where('activeCareer.resume_url', route('runs.show', $run)));
+            ->where('activeCareer.resume_url', route('runs.cockpit', $run)));
 });
 
 it('reads the primary resource from the scenario config rather than from a scenario name', function (): void {
