@@ -13,6 +13,7 @@ use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\Veteran;
+use App\Services\Legacy\AncestryGraph;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -60,18 +61,6 @@ class LegacyController extends Controller
      * reword one of them until it promises less than the ban requires.
      */
     public const RECORD_ONLY_NOTICE = 'Record only. This screen stores and compares what you enter. It does not compute inheritance.';
-
-    /**
-     * The one Spark a node can show per kind, for the count beside each chip. A node with three White
-     * Sparks prints `3 White`; the breakdown per Spark is on the node itself.
-     */
-    private const SPARK_KIND_LABELS = [
-        'blue' => 'Blue',
-        'pink' => 'Pink',
-        'green' => 'Green',
-        'white' => 'White',
-        'scenario' => 'Scenario',
-    ];
 
     /**
      * `GET /legacy` — browse the recorded Veterans and open a builder on one.
@@ -169,7 +158,7 @@ class LegacyController extends Controller
             // are frequently absent from the local catalogue, which is why they are names and not ids
             // (`ADR-0010` Consequences §2), so the list is a spelling aid and never a requirement.
             'knownNames' => Umamusume::query()->orderBy('name')->pluck('name')->all(),
-            'sparkKinds' => self::SPARK_KIND_LABELS,
+            'sparkKinds' => AncestryGraph::SPARK_KIND_LABELS,
             'affinityGrades' => LegacySelectionPayload::AFFINITY_GRADES,
             'notice' => self::RECORD_ONLY_NOTICE,
         ]);
@@ -215,7 +204,7 @@ class LegacyController extends Controller
             'columns' => $columns,
             'maxRuns' => LegacyCompareRequest::MAX_RUNS,
             'comparable' => $this->comparableRuns(),
-            'sparkKinds' => self::SPARK_KIND_LABELS,
+            'sparkKinds' => AncestryGraph::SPARK_KIND_LABELS,
             'notice' => self::RECORD_ONLY_NOTICE,
         ]);
     }
@@ -354,19 +343,9 @@ class LegacyController extends Controller
     /**
      * The six-node graph, as the run and its payload hold it.
      *
-     * Node order is the client's: the trainee, then Parent A with her two ancestors, then Parent B
-     * with hers (`REFERENCE` §1.5.4). `rank`, `is_guest` and every star count stay nullable because a
-     * half-read screen is a real state the payload exists to hold, so a null is `null` here and the
-     * page renders it as `N/A` with a `title` rather than as a zero or a dash.
-     *
-     * **Where each node's name comes from** is worth stating, because the graph reads two sources and
-     * the reason is `ADR-0010`. The payload holds no name for a parent: the owner ruling kept the
-     * existing `inheritance_parent_a_id` / `_b_id` foreign keys as the parent's identity and put only
-     * the read-back details in the json, so those two names are read from the run's own columns. The
-     * four grandparents are read from the payload's `ancestors`, which is a list of **names** and
-     * always has been, because a Trainer's grandparents are frequently absent from the local
-     * catalogue and an id column would be a second, emptier version of the same fact. A node whose
-     * name neither source holds is `N/A` on the page, which is a real state and not a gap in the query.
+     * The shape itself lives in `AncestryGraph`, which the setup wizard's ancestry step reads through the
+     * same call, so the run screen, the compare surface and the draft screen cannot disagree about what a
+     * node is. This method supplies the three names the payload does not hold.
      *
      * @return array{trainee: array{name: string|null}, parents: list<array<string, mixed>>}
      */
@@ -374,13 +353,12 @@ class LegacyController extends Controller
     {
         $parentNames = $this->parentNames($run);
 
-        return [
-            'trainee' => ['name' => $run?->umamusume?->name],
-            'parents' => [
-                $this->parentNode($payload?->legacies[0] ?? null, 'parent_a', 'Parent A', 'Grandparent A1', 'Grandparent A2', $parentNames[0]),
-                $this->parentNode($payload?->legacies[1] ?? null, 'parent_b', 'Parent B', 'Grandparent B1', 'Grandparent B2', $parentNames[1]),
-            ],
-        ];
+        return AncestryGraph::build(
+            $payload,
+            $run?->umamusume?->name,
+            $parentNames[0],
+            $parentNames[1],
+        );
     }
 
     /**
@@ -401,82 +379,6 @@ class LegacyController extends Controller
         return [
             $run->inheritanceParentA?->name,
             $run->inheritanceParentB?->name,
-        ];
-    }
-
-    /**
-     * One parent node and her own two, with everything the payload does not hold named as absent.
-     *
-     * @param  array<string, mixed>|null  $legacy
-     * @return array<string, mixed>
-     */
-    private function parentNode(
-        ?array $legacy,
-        string $slot,
-        string $parentLabel,
-        string $a1,
-        string $a2,
-        ?string $name = null,
-    ): array {
-        $sparks = [];
-
-        /** @var list<array{kind: string, target: mixed, stars: int|null}> $recorded */
-        $recorded = $legacy['sparks'] ?? [];
-
-        foreach ($recorded as $spark) {
-            $sparks[] = [
-                'kind' => (string) $spark['kind'],
-                'kind_label' => self::SPARK_KIND_LABELS[(string) $spark['kind']] ?? ucfirst((string) $spark['kind']),
-                'target' => $spark['target'] === null ? null : (string) $spark['target'],
-                'stars' => $spark['stars'],
-            ];
-        }
-
-        $counts = [];
-
-        foreach (self::SPARK_KIND_LABELS as $kind => $label) {
-            $counts[] = [
-                'kind' => $kind,
-                'kind_label' => $label,
-                'count' => count(array_filter($sparks, static fn (array $spark): bool => $spark['kind'] === $kind)),
-            ];
-        }
-
-        $ancestors = [];
-
-        /** @var list<mixed> $ancestorNames */
-        $ancestorNames = $legacy['ancestors'] ?? [];
-
-        // `$ancestorName`, not `$name`: the loop variable must not shadow the parent node's own name
-        // parameter, or the last ancestor read wins and Parent A renders as her own grandparent. That
-        // bug is invisible in the ancestor rows (they read correctly) and corrupts only the parent name
-        // one line later, which is exactly the kind of defect a props assertion on all six nodes
-        // catches and a rendered-copy check does not.
-        foreach ([[$a1, 0], [$a2, 1]] as [$label, $index]) {
-            $ancestorName = $ancestorNames[$index] ?? null;
-
-            $ancestors[] = [
-                'slot' => $label,
-                'name' => $ancestorName === null ? null : (string) $ancestorName,
-            ];
-        }
-
-        return [
-            'slot' => $slot,
-            'label' => $parentLabel,
-            'name' => $name,
-            'rank' => isset($legacy['rank']) ? (int) $legacy['rank'] : null,
-            'is_guest' => (bool) ($legacy['is_guest'] ?? false),
-            'ancestors' => $ancestors,
-            'sparks' => $sparks,
-            'spark_counts' => $counts,
-            'probability' => [
-                'value' => null,
-                // Named on the element itself rather than only in the page's copy, so the reason
-                // travels with the value and cannot be lost by a reader that only sees the table.
-                'title' => 'This tool holds no sourced star-roll table, so it states no chance for a Spark. '
-                    .'The published odds are a wiki pair flagged stale in REFERENCE §1.5.3.',
-            ],
         ];
     }
 

@@ -9,9 +9,10 @@
  * leave a six-step flow and no way to tell which step they are on.
  *
  * A step whose slice has not landed is a named absence (`to: null`), the same rule `AppLayout`
- * `items[]` uses for Veterans. Steps 1 to 3 are live: the remaining three are the D5-wizard,
- * D6-wizard and D7 slices, and the Legacy Lab and deck builder that do exist are run-scoped, so they
- * cannot be reached before the run is created at Preflight.
+ * `items[]` uses for Veterans. Steps 1 to 5 are live: the ancestry step (D5-wizard) and the deck step
+ * (D6-wizard) carry their values in the session draft rather than on a run, which is what lets them exist
+ * before Preflight creates one, unlike the run-scoped Legacy Lab and deck builder. Only Preflight (D7) is
+ * still an absence.
  */
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -25,8 +26,8 @@ const steps = [
     { label: 'Scenario', to: '/career/setup/scenario' },
     { label: 'Trainee', to: '/career/setup/trainee' },
     { label: 'Your target', to: '/career/setup/target' },
-    { label: 'Legacy', to: null },
-    { label: 'Support Cards', to: null },
+    { label: 'Legacy', to: '/career/setup/legacy' },
+    { label: 'Support Cards', to: '/career/setup/deck' },
     { label: 'Preflight', to: null },
 ];
 

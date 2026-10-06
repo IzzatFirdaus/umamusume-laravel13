@@ -6,6 +6,7 @@ namespace App\Http\Requests;
 
 use App\Models\DeckSlot;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 /**
@@ -52,6 +53,12 @@ class StoreDeckRequest extends FormRequest
             // Key-restricted so a hand-made POST cannot address slot 9 and have it stored.
             'deck' => ['present', 'array:'.implode(',', DeckSlot::POSITIONS)],
             'deck.*.support_card_id' => ['required', 'integer', 'exists:support_cards,id'],
+            // The owned-or-rented flag, bounded by `DeckSlot::OWNERSHIP` rather than by a copy of the two
+            // words. The run-scoped write (`runs.deck.sync`) has no column to put it in and drops it, which
+            // is what its screen says out loud; the setup wizard's step 5 keeps it in the session draft
+            // (`StoreDraftDeckRequest::payload()`), which needs no migration. One rule for both entry
+            // points is the point: `nullable` because a slot the Trainer cleared carries no flag at all.
+            'deck.*.ownership' => ['nullable', 'string', Rule::in(DeckSlot::OWNERSHIP)],
         ];
     }
 
@@ -65,6 +72,7 @@ class StoreDeckRequest extends FormRequest
             'deck.array' => 'A deck has slots one to six and nothing else.',
             'deck.*.support_card_id.required' => 'Pick a card for this slot, or set it to "Not equipped".',
             'deck.*.support_card_id.exists' => 'That card is not in the catalogue. Import the support cards first.',
+            'deck.*.ownership.in' => 'A slot holds a card you own or one you rented, and nothing else.',
         ];
     }
 

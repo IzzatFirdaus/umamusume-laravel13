@@ -84,11 +84,11 @@ class DeckAnalysis
      * a category with no data, and its absence is what the `strengths` and `weaknesses` sentences
      * state.
      *
-     * @param  list<self::CardInput>  $cards
+     * @param  list<CardInput>  $cards
      * @return array{
      *   covered: int,
-     *   categories: array<string, array{label: string, blank: bool, effects: list<self::EffectLine>}>,
-     *   uncategorised: list<self::EffectLine>,
+     *   categories: array<string, array{label: string, blank: bool, effects: list<EffectLine>}>,
+     *   uncategorised: list<EffectLine>,
      *   strengths: list<string>,
      *   weaknesses: list<string>
      * }
@@ -127,7 +127,7 @@ class DeckAnalysis
      * Every effect in the deck that is in no category, gathered the same way the categories gather
      * theirs so it gets the same mode and total treatment.
      *
-     * @param  list<self::CardInput>  $cards
+     * @param  list<CardInput>  $cards
      * @return array<int, array<string, mixed>>
      */
     private static function uncategorised(array $cards): array
@@ -154,15 +154,16 @@ class DeckAnalysis
     }
 
     /**
-     * @param  self::EffectEntry  $effect
+     * @param  EffectEntry  $effect
      * @param  array<int, array<string, mixed>>  $byEffect
      */
     private static function collect(array $effect, string $cardName, array &$byEffect): void
     {
-        $entry = &$byEffect[$effect['effect_id']];
-
-        if ($entry === null) {
-            $entry = [
+        // `isset` rather than a null comparison on the reference: taking `&$byEffect[$id]` creates a
+        // null entry, so the old `$entry === null` was true only on the first carry of an effect, and
+        // a static analyser reads a created array slot as an array and calls that check dead.
+        if (! isset($byEffect[$effect['effect_id']])) {
+            $byEffect[$effect['effect_id']] = [
                 'name' => $effect['name'],
                 'calc' => $effect['calc'],
                 'symbol' => $effect['symbol'],
@@ -170,6 +171,8 @@ class DeckAnalysis
                 'values' => [],
             ];
         }
+
+        $entry = &$byEffect[$effect['effect_id']];
 
         $entry['cards'][] = ['card_name' => $cardName, 'display' => $effect['display']];
         $entry['values'][] = $effect['value'];
@@ -180,7 +183,7 @@ class DeckAnalysis
      * card carrying it met it.
      *
      * @param  array<int, array<string, mixed>>  $byEffect
-     * @return list<self::EffectLine>
+     * @return list<EffectLine>
      */
     private static function lines(array $byEffect): array
     {
@@ -225,7 +228,7 @@ class DeckAnalysis
      * equipped carry an effect in it. A count restated in words, with no threshold deciding whether a
      * number is good.
      *
-     * @param  array<string, array{label: string, blank: bool, effects: list<self::EffectLine>}>  $categories
+     * @param  array<string, array{label: string, blank: bool, effects: list<EffectLine>}>  $categories
      * @return list<string>
      */
     private static function strengths(array $categories, int $covered): array
@@ -255,7 +258,7 @@ class DeckAnalysis
      * One line per category the deck carries nothing in. The category names the effect group, so the
      * Trainer can tell "no card has this" from "I have not looked yet".
      *
-     * @param  array<string, array{label: string, blank: bool, effects: list<self::EffectLine>}>  $categories
+     * @param  array<string, array{label: string, blank: bool, effects: list<EffectLine>}>  $categories
      * @return list<string>
      */
     private static function weaknesses(array $categories): array

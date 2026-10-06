@@ -22,10 +22,24 @@ import SparkChip from './SparkChip.vue';
 
 interface SparkRow {
     kind: string;
-    kind_label: string;
+    /**
+     * The `[Global]` word for the kind, sent by the server for a stored Spark. Optional because a row the
+     * Trainer is adding in this session has no server-side label yet, and `SparkChip`'s `kindLabel` is a
+     * required string: passing it `undefined` threw inside its render, which took the whole node down
+     * with it and made "Add Spark" look like a button that did nothing.
+     */
+    kind_label?: string | null;
     target: string | null;
     stars: number | null;
 }
+
+/**
+ * The kind's own word, from the stored key, for a Spark the Trainer is mid-entry on. `blue` reads
+ * `Blue`: the five `[Global]` display words are the capitalised storage keys, which is the pairing
+ * `AncestryGraph::SPARK_KIND_LABELS` states server-side and `LegacyController::parentNode()` already
+ * falls back to for an unmapped kind. A stored Spark still prints the label the server sent.
+ */
+const sparkKindWord = (kind: string): string => kind.charAt(0).toUpperCase() + kind.slice(1);
 
 withDefaults(defineProps<{
     label: string;
@@ -80,7 +94,7 @@ withDefaults(defineProps<{
         <ul v-if="sparks.length > 0" class="mt-2 flex flex-wrap gap-1.5">
             <li v-for="(spark, index) in sparks" :key="`${spark.kind}-${spark.target ?? 'none'}-${index}`">
                 <SparkChip
-                    :kind-label="spark.kind_label"
+                    :kind-label="spark.kind_label || sparkKindWord(spark.kind)"
                     :target="spark.target"
                     :stars="spark.stars"
                 />

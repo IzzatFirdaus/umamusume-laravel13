@@ -47,7 +47,15 @@ const props = defineProps<{
     label: string;
     is_friend: boolean;
     card: SlotCard | null;
-    ownership: 'OWNED';
+    /**
+     * The flag, or null when nothing has recorded it.
+     *
+     * The run-scoped builder passes `'OWNED'`, the one value its table can be read as, and the markup is
+     * unchanged by the wider type. The setup wizard's deck step passes null for a slot that holds no card,
+     * because "owned or rented" describes nothing when nothing sits in the position, and an unrecorded value
+     * renders as `N/A` with a `title` rather than as a default (AGENTS.md §5).
+     */
+    ownership: 'OWNED' | 'RENTED' | null;
     /** Which slot the picker's Equip buttons write to, for the button's own label. */
     fillingSlot: number;
 }>();
@@ -153,6 +161,13 @@ function focusRow(): void {
                 :aria-label="`Ownership of ${label}`"
             >
                 <span class="text-xs text-ink-muted">Ownership</span>
+                <!-- Neither button pressed and the value named as absent: the state is in words, not in an
+                     unfilled control a Trainer has to interpret. -->
+                <span
+                    v-if="ownership === null"
+                    class="text-xs text-ink-muted"
+                    title="No ownership has been recorded for this slot yet."
+                >N/A</span>
                 <div class="flex gap-1">
                     <button
                         v-for="option in (['OWNED', 'RENTED'] as const)"

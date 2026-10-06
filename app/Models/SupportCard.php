@@ -166,4 +166,41 @@ class SupportCard extends Model
 
         return in_array($this->char_name, $linked, true);
     }
+
+    /**
+     * The Scenario Link badge as three states rather than one boolean, derived on read and never stored
+     * (`ADR-0014` correction 3; §1.4.7).
+     *
+     * `isScenarioLink()` answers `false` for two unrelated things: a character that is genuinely not on
+     * the scenario's linked list, and a card with nothing to compare against. Printing the badge for the
+     * second would be a claim the repository cannot make, so it becomes `unknown`, which every surface
+     * renders as `N/A` with the reason as its `title`. This is the one owner of that derivation: the
+     * run-scoped deck builder and the setup wizard's deck step read it here rather than each keeping a
+     * copy that could drift from the other.
+     *
+     * The `$noScenarioNote` is the caller's sentence, because the screen that has no scenario differs: a
+     * run names none, while a setup draft has not chosen one yet, and saying the wrong one is a small lie.
+     *
+     * @return array{state: string, note: string|null}
+     */
+    public function scenarioLinkState(?string $scenarioKey, string $noScenarioNote): array
+    {
+        if ($scenarioKey === null) {
+            return ['state' => 'unknown', 'note' => $noScenarioNote];
+        }
+
+        $linked = config("scenarios.scenarios.{$scenarioKey}.scenario_links");
+
+        if (! is_array($linked)) {
+            return ['state' => 'unknown', 'note' => 'The scenario config states no linked list, so the badge cannot be derived.'];
+        }
+
+        if ($this->char_name === null) {
+            return ['state' => 'unknown', 'note' => 'The source stores no character name for this card, so there is nothing to match against the linked list.'];
+        }
+
+        return $this->isScenarioLink($scenarioKey)
+            ? ['state' => 'linked', 'note' => null]
+            : ['state' => 'not_linked', 'note' => null];
+    }
 }

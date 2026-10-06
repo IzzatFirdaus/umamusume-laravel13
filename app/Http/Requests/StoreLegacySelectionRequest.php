@@ -7,7 +7,9 @@ namespace App\Http\Requests;
 use App\Enums\RunStatus;
 use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\TrainingRun;
+use App\Models\Umamusume;
 use App\Models\Veteran;
+use App\Services\Career\SetupDraft;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -205,9 +207,9 @@ class StoreLegacySelectionRequest extends FormRequest
      */
     private function assertNoOwnTrainee(Validator $validator, int $index, array $legacy): void
     {
-        $run = $this->route('run');
+        $ownName = $this->ownTraineeName();
 
-        if (! $run instanceof TrainingRun || ! isset($legacy['legacy_id'])) {
+        if ($ownName === null || ! isset($legacy['legacy_id'])) {
             return;
         }
 
@@ -221,12 +223,35 @@ class StoreLegacySelectionRequest extends FormRequest
             return;
         }
 
-        if ($parent->trainingRun->umamusume->name === $run->umamusume->name) {
+        if ($parent->trainingRun->umamusume->name === $ownName) {
             $validator->errors()->add(
                 "legacies.{$index}.legacy_id",
                 'A run may not name its own trainee as a parent (REFERENCE §1.5.4).',
             );
         }
+    }
+
+    /**
+     * The trainee a picked parent may not be, or null when nothing names one yet.
+     *
+     * The run's own trainee on the run-scoped write, and the setup draft's chosen trainee on the wizard's
+     * ancestry step (`StoreDraftLegacyRequest`, which writes the same payload shape to the session). Both
+     * entry points enforce one rule, the way `StoreBuildTargetRequest` clamps against the route's run when
+     * there is one and against `SetupDraft::planningRun()` when there is not: a draft that let a Trainer
+     * name the trainee as her own parent while the run screen refused it would store a choice the client
+     * rejects, and Preflight would land it on the run with nothing to refuse it.
+     */
+    private function ownTraineeName(): ?string
+    {
+        $run = $this->route('run');
+
+        if ($run instanceof TrainingRun) {
+            return $run->umamusume->name;
+        }
+
+        $traineeId = SetupDraft::read()['umamusume_id'];
+
+        return $traineeId === null ? null : Umamusume::query()->find($traineeId)?->name;
     }
 
     /**

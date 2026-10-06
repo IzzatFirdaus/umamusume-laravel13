@@ -46,6 +46,19 @@ class DeckSlot extends Model
      */
     public const POSITIONS = [self::MIN_POSITION, self::MIN_POSITION + 1, self::MIN_POSITION + 2, self::MIN_POSITION + 3, self::MIN_POSITION + 4, self::MAX_POSITION];
 
+    /**
+     * The two ways a Trainer can hold the card in a slot.
+     *
+     * `deck_slots` has no column for this and adding one is the owner's call (`ADR-0014`), which is why
+     * the run-scoped deck builder prints the flag it can read and says the rest out loud. The setup
+     * wizard's draft does carry it, because a session key needs no migration, so this is the one place
+     * the pair of words is written down: the rule that refuses a value outside it, the six slot rows the
+     * page renders and `components/support/SupportSlot.vue`'s two-button group all read it from here.
+     *
+     * @var list<string>
+     */
+    public const OWNERSHIP = ['OWNED', 'RENTED'];
+
     protected function casts(): array
     {
         return [

@@ -34,14 +34,20 @@ final class SetupDraft
     public const SESSION_KEY = 'career.setup';
 
     /**
-     * The draft, always with both keys present so a reader never tests for a missing array offset.
+     * The step 1 and step 2 choices, always with both keys present so a reader never tests for a
+     * missing array offset.
+     *
+     * This stays the two-key view it was when only those two keys existed, because SCREEN-002 and
+     * SCREEN-003's tests pin that shape. The later steps' keys are read through `buildTarget()`,
+     * `legacySelection()`, `legacyParents()` and `deck()`, each with its own stable default, so the
+     * rule this method exists for (no caller testing for a missing offset) holds for every key in the
+     * bag rather than only for the first two.
      *
      * @return array{scenario: string|null, umamusume_id: int|null}
      */
     public static function read(): array
     {
-        /** @var array<string, mixed> $raw */
-        $raw = (array) session(self::SESSION_KEY, []);
+        $raw = self::bag();
 
         $scenario = $raw['scenario'] ?? null;
         $traineeId = $raw['umamusume_id'] ?? null;
@@ -85,12 +91,109 @@ final class SetupDraft
      */
     public static function buildTarget(): ?array
     {
+        return self::stored('build_target');
+    }
+
+    /**
+     * The ancestry step 4 stored, or null before one is entered.
+     *
+     * The same raw-read style as `buildTarget()`, and the same reason. The shape is
+     * `LegacySelectionPayload::toArray()` exactly — `{ legacies, affinity }` and nothing else — because
+     * Preflight writes this value into `training_runs.legacy_selection`, where
+     * `TrainingRun::legacySelection()` runs it back through `fromArray()` and refuses an unknown key. A
+     * draft that carried one extra convenience field would be a payload the run cannot store.
+     *
+     * @return array{legacies: list<array<string, mixed>>, affinity: string|null}|null
+     */
+    public static function legacySelection(): ?array
+    {
+        /** @var array<string, mixed>|null $selection */
+        $selection = self::stored('legacy_selection');
+
+        return is_array($selection) ? $selection : null;
+    }
+
+    /**
+     * The two library rows the ancestry step picked, as Veteran ids in slot order, or `[null, null]`
+     * before a pick.
+     *
+     * They are a draft key of their own rather than a field inside `legacy_selection` for the reason
+     * that method states: the payload has no slot for a parent's identity, because the run carries it in
+     * `training_runs.inheritance_parent_a_id` and `_b_id` (`ADR-0010` Decision). A career with no run row
+     * has nowhere else to put it, so the draft holds it and Preflight writes it to those two columns
+     * alongside the json — the same pair `LegacyController::update()` writes together for a live run.
+     *
+     * @return array{0: int|null, 1: int|null}
+     */
+    public static function legacyParents(): array
+    {
+        /** @var list<mixed> $raw */
+        $raw = (array) (self::bag()['legacy_parents'] ?? []);
+
+        return [
+            is_int($raw[0] ?? null) ? $raw[0] : null,
+            is_int($raw[1] ?? null) ? $raw[1] : null,
+        ];
+    }
+
+    /**
+     * The deck step 5 stored, or null before one is entered.
+     *
+     * Six rows in position order, each `{ position, support_card_id, ownership }`, and
+     * `support_card_id` null where the Trainer left the slot on "Not equipped". It is a draft shape, not
+     * a table shape: `deck_slots` is a pivot with no ownership column and one row per equipped card
+     * (`ADR-0014`), so the empty slots and the rented flag exist only here until Preflight creates the
+     * rows it can create.
+     *
+     * @return list<array{position: int, support_card_id: int|null, ownership: string|null}>|null
+     */
+    public static function deck(): ?array
+    {
+        /** @var list<mixed> $raw */
+        $raw = (array) (self::bag()['deck'] ?? []);
+
+        $slots = [];
+
+        foreach ($raw as $slot) {
+            // A row that is not a record is not a slot: a bag edited by hand or left by an older shape
+            // must not reach the page as a half-row the slot loop then indexes blindly.
+            if (! is_array($slot)) {
+                continue;
+            }
+
+            $slots[] = [
+                'position' => (int) ($slot['position'] ?? 0),
+                'support_card_id' => isset($slot['support_card_id']) ? (int) $slot['support_card_id'] : null,
+                'ownership' => isset($slot['ownership']) && is_string($slot['ownership']) ? $slot['ownership'] : null,
+            ];
+        }
+
+        return $slots === [] ? null : $slots;
+    }
+
+    /**
+     * The raw session bag, unnormalised.
+     *
+     * @return array<string, mixed>
+     */
+    private static function bag(): array
+    {
         /** @var array<string, mixed> $raw */
         $raw = (array) session(self::SESSION_KEY, []);
 
-        $target = $raw['build_target'] ?? null;
+        return $raw;
+    }
 
-        return is_array($target) ? $target : null;
+    /**
+     * One stored key, or null when the draft has never carried it.
+     *
+     * @return array<string, mixed>|null
+     */
+    private static function stored(string $key): ?array
+    {
+        $value = self::bag()[$key] ?? null;
+
+        return is_array($value) ? $value : null;
     }
 
     public static function reset(): void

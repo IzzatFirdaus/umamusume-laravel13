@@ -945,7 +945,7 @@ class TrainingRunController extends Controller
         return Inertia::render('Support/Builder', [
             'run' => [
                 'id' => $run->id,
-                'name' => $run->umamusume?->name,
+                'name' => $run->umamusume->name,
                 'status_label' => $run->status->label(),
                 'scenario' => $run->scenario,
                 'has_scenario' => $run->hasScenario(),
@@ -1139,23 +1139,13 @@ class TrainingRunController extends Controller
      */
     private function scenarioLinkState(SupportCard $card, TrainingRun $run): array
     {
-        if (! $run->hasScenario()) {
-            return ['state' => 'unknown', 'note' => 'This run names no scenario, so there is no linked list to check this card against.'];
-        }
-
-        $linked = config('scenarios.scenarios.'.$run->scenarioKey().'.scenario_links');
-
-        if (! is_array($linked)) {
-            return ['state' => 'unknown', 'note' => 'The scenario config states no linked list, so the badge cannot be derived.'];
-        }
-
-        if ($card->char_name === null) {
-            return ['state' => 'unknown', 'note' => 'The source stores no character name for this card, so there is nothing to match against the linked list.'];
-        }
-
-        return $card->isScenarioLink($run->scenarioKey())
-            ? ['state' => 'linked', 'note' => null]
-            : ['state' => 'not_linked', 'note' => null];
+        // The derivation itself moved to `SupportCard::scenarioLinkState()`, the one owner both this
+        // screen and the setup wizard's deck step read through. The three states, their wording and this
+        // screen's own no-scenario sentence are unchanged.
+        return $card->scenarioLinkState(
+            $run->hasScenario() ? $run->scenarioKey() : null,
+            'This run names no scenario, so there is no linked list to check this card against.',
+        );
     }
 
     /**
@@ -1204,7 +1194,11 @@ class TrainingRunController extends Controller
     /**
      * The rarity words the picker offers, keyed by the value the query string carries.
      *
-     * @return array<string, string>
+     * `array<int, string>`, not `array<string, string>`: the keys are `CardRarity`'s backing ints, and
+     * PHP stores the numeric strings this loop writes as ints. JSON emits them as object keys either
+     * way, so the picker reads the same payload; the narrower annotation is the true one.
+     *
+     * @return array<int, string>
      */
     private function rarityWords(): array
     {

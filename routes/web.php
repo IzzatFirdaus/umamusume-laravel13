@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Controllers\Career\BuildTargetController;
+use App\Http\Controllers\Career\DeckSelectController;
+use App\Http\Controllers\Career\LegacySelectController;
 use App\Http\Controllers\Career\ScenarioSelectController;
 use App\Http\Controllers\Career\TraineeProfileController;
 use App\Http\Controllers\Career\TraineeSelectController;
@@ -52,6 +54,21 @@ Route::get('/career/setup/trainee/{umamusume}', [TraineeProfileController::class
  */
 Route::get('/career/setup/target', [BuildTargetController::class, 'show'])->name('career.target');
 Route::put('/career/setup/target', [BuildTargetController::class, 'store'])->name('career.target.store');
+
+/*
+ * Steps 4 and 5 (SCR-CAR-008, SCR-CAR-009; plan §8 D5-wizard and D6-wizard). The ancestry and the deck
+ * are entered before the run exists and written to the same session draft, under `legacy_selection`,
+ * `legacy_parents` and `deck`. Both PUTs share the run-scoped rule sets rather than restating them
+ * (`StoreLegacySelectionRequest` through `StoreDraftLegacyRequest`, `StoreDeckRequest` through
+ * `StoreDraftDeckRequest`), which is what makes a draft value and a saved one obey the same dictionary.
+ * The two surfaces that already hold these facts are run-scoped (`/legacy/{run}`,
+ * `/training-runs/{run}/deck`), so before these steps landed there was nowhere to put either choice
+ * until Preflight created a run.
+ */
+Route::get('/career/setup/legacy', [LegacySelectController::class, 'show'])->name('career.legacy');
+Route::put('/career/setup/legacy', [LegacySelectController::class, 'store'])->name('career.legacy.store');
+Route::get('/career/setup/deck', [DeckSelectController::class, 'show'])->name('career.deck');
+Route::put('/career/setup/deck', [DeckSelectController::class, 'store'])->name('career.deck.store');
 
 Route::get('/umamusume', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catalog.show');
