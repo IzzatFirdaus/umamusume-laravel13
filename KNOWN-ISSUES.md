@@ -11,6 +11,13 @@ OPEN. KI-60's dev-database half was remediated on 2026-10-06 and stays open for 
 entry records which is which. The count is stated as composition rather than a total, because the
 totals that used to live here went stale the moment the history moved.
 
+**Status correction (2026-10-07, D8 hand-off):** the composition above is superseded, and the dated
+claim is left standing rather than rewritten. This file now carries KI-57 through **KI-63**. KI-61
+(D7's red landing, filed with the wizard's rerun fix) was appended without this line being updated.
+KI-62 and KI-63 were filed by the D8 hand-off; KI-62 also applied its fix in the working tree. All are
+OPEN, and each names its own closure conditions. `master` remains unpushed (`O-1`), so none can close
+yet.
+
 ## This file is still the append target
 
 `AGENTS.md` and every slice record write into `KNOWN-ISSUES.md`, so this file was a poor
@@ -66,7 +73,9 @@ commit `e0e043c`.
 Reproducer: three hexes that `resources/css/app.css` declares as current token values are in
 neither `tokens.json` nor the hardcoded three, so an artifact using any of them fails G-4:
 `--color-up: #B45309` (`app.css:168`), `--color-down: #0667B0` (`app.css:169`), `--color-ink-muted:
-#6E6459` (`app.css:48`). Their prior values `#FF9A2C`, `#0088E0` and `#7A7067` remain recoverable at
+
+\#6E6459`(`app.css:48`). Their prior values`#FF9A2C`,`#0088E0` and `#7A7067` remain recoverable at
+
 `git show e0e043c:docs/design-research/DESIGN.md`.
 
 Fix options, in priority order: repoint `tools/gate.py:94` at `resources/css/app.css` and read the
@@ -76,7 +85,7 @@ the anchor is refreshed. Not fixed here; this entry files the finding. First rec
 `docs/research-scratch/DESIGN-CORPUS.md` section "scratch-priors.md" §2.1 (2026-10-03, priors pass;
 the priors file moved there on 2026-10-03 when root `research-scratch/` was emptied).
 
-### KI-59 The catalog detail browser case asserts a portrait absence a populated mirror cannot produce, and its sibling guard makes the pair mutually exclusive - FILED 2026-10-05 (Task B1 closure pass, from the Playwright run), CORRECTED 2026-10-05, OPEN
+## KI-59 The catalog detail browser case asserts a portrait absence a populated mirror cannot produce, and its sibling guard makes the pair mutually exclusive - FILED 2026-10-05 (Task B1 closure pass, from the Playwright run), CORRECTED 2026-10-05, OPEN
 
 `tests/browser/catalog-detail.spec.ts:140-152` asserts unconditionally that the catalog detail Identity
 section holds no `<img>`, while its sibling at `:113` asserts the frame is present but only once it is
@@ -243,3 +252,222 @@ Schema row of the §9 change-class table, the hand-off sequence carries a paragr
 `database/database.sqlite`, and §18 gains the matching trap. The paragraph above stands as the record of
 what was fenced when this entry was filed; what is now false in it is "no gate runs `migrate:status`".
 Still open: the plan's `Landed` leg, and this entry's closure, which waits on **O-1**.
+
+### KI-61 The D7 wizard halves landed red at `0006b17` on the owner's instruction, because no browser-spec gate existed for the Preflight screen at the time of commit - FILED 2026-10-06 (D7 hand-off verification phase), OPEN
+
+**Symptom, observed.** After the Preflight controller, StartCareerRequest and the four-step setup
+wizard routes were committed, `tests/browser/career-preflight.spec.ts:95` (the case titled `Start
+Career creates the run and lands on it`) was observed returning HTTP 500 when Playwright drove the
+Inertia PUT against an empty body. The server logged:
+
+`ValueError: "" is not a valid backing value for enum App\Enums\RunStatus`
+
+thrown from `app/Http/Requests/Career/StartCareerRequest.php:113` inside `runAttributes()`. The same
+code path tested green via Pest `put()`/`putJson()` for an identical payload, so the failure was
+visible only from a real browser Inertia client posting JSON Content-Type.
+
+**Cause, measured.** The compound root cause has two independent layers, both triggered only when the
+outer request arrives as `Content-Type: application/json` (the shape Inertia's `useForm({}).put(url)`
+produces):
+
+1. **Laravel framework alias layer.** Symfony's `Request::createFromBase()` writes
+   `$this->request = $this->json` (shared object reference) for every JSON Content-Type request.
+   Because `FormRequest::createFrom($parent)` shallow-copies every ParameterBag by reference rather
+   than deep-copying them, a child `FormRequest` produced by `createFrom` shares the parent's
+   `request` / `json` bag exactly. Any `replace()` on the child's input therefore mutates the
+   parent's input through the same pointer.
+
+2. **The wizard's rerun pattern.** `StartCareerRequest::withValidator()` re-runs each of the three
+   child step FormRequests (`StoreDraftDeckRequest`, `StoreDraftLegacyRequest`,
+   `StoreDraftBuildTargetRequest`) against its own slice of the composed SetupDraft — calling
+   `createFrom` followed by `$child->replace($slice)` exactly once per slice. Each slice has one
+   or two keys and replaces the whole shared bag, so after the third child (the deck slice with a
+   single `deck` key holding position-filtered slots), every key the parent's own
+   `prepareForValidation()` had merged in (`status`, `umamusume_id`, `scenario`, `build_target`,
+   `legacy_selection`, `legacy_parents`) was overwritten to absent. The next line of parent code
+   that reads `$this->input('status')` received `""` (the ConvertEmptyStringsToNull middleware did
+   not run a second time on the mutated bag), and `RunStatus::from("")` raised the ValueError.
+
+Verification evidence: a new Pest regression test titled `it survives all three child reruns with every
+merged key intact on an Inertia JSON PUT` was added to `tests/Feature/CareerPreflightTest.php` (lines
+308–353), which fires `putJson(route('career.preflight.store'), [], ['X-Inertia' => 'true'])` and
+asserts all fourteen merged-key properties (status=Active, scenario, trainee id, build_target purpose +
+distance + Speed=800, legacy_selection affinity + legacies count=2, both inheritance_parent_*_ids
+resolved, 6 deck slots). The test failed red against the pre-fix rerun body and passed green after
+rebuilding the child independently.
+
+**Scope, wider than the screen.** The `createFrom + replace($slice)` anti-pattern is latent in any
+Form Request re-validation scheme that runs against a JSON outer request, not just this wizard. Any
+future code that composes a child FormRequest from a parent with `createFrom` and then calls
+`replace`, `merge` or `set` on the child's input will quietly destroy the parent's own input on the
+JSON Content-Type code path, while passing identical tests written in the form-encoded path. The
+correct pattern (this entry's closure) is always `FormRequest::create()` with fresh bags rather than
+`createFrom`, combined with stripping JSON Content-Type from the child's `$server` so the child
+resolves its input source from the populated form ParameterBag and not the empty JSON one.
+
+**Why no gate caught it.** The browser-spec gate for `career-preflight.spec.ts` did not exist in the
+handoff at the moment the wizard code landed at `0006b17`; the file was written by the peer's
+concurrent session and landed a short time after the wizard commit. Feature tests (`tests/Feature/`)
+used `put()` (form-encoded) or internal request routing that preserved separate ParameterBag
+instances because they did not go through `Request::createFromBase()` with JSON Content-Type set —
+the path the Laravel `call()` implementation takes sets up a custom Request object that bypasses the
+`json = request` alias, so the sharing never manifested in the suite. 1,326+ tests passed green
+with the crash sitting on the browser path alone.
+
+**Fix, applied without committing (local worktree, awaiting owner approval of the series).**
+
+1. `StartCareerRequest::rerun()` was rewritten to build the child via
+   `FormRequest::create($this->fullUrl(), $this->method(), $slice, cookies, files, $server)` where
+   `$server` is `$this->server->all()` filtered to strip `CONTENT_TYPE`, `HTTP_CONTENT_TYPE`,
+   `HTTP_ACCEPT` and `HTTP_X_INERTIA` keys. This guarantees freshly-allocated ParameterBags for
+   every source (query, request, json, attributes) so the child's input mutation never touches the
+   parent.
+2. Session is reattached (`setLaravelSession` guarded by `hasSession()`), container and redirector
+   are copied, and Content-Type is explicitly forced to `application/x-www-form-urlencoded` as a
+   defense-in-depth so any sub-path reading headers rather than `isJson()` still sees form.
+3. Stray `logger()->info('preflight.probe', …)` debug probe left in `prepareForValidation()` was
+   removed, and two unused imports (`Symfony\Component\HttpFoundation\ParameterBag`,
+   `Symfony\Component\HttpFoundation\InputBag`) were cleaned.
+4. The regression test described above was appended to `CareerPreflightTest.php`.
+
+Post-fix evidence on this worktree (all local — nothing pushed):
+
+- `tests/Feature/CareerPreflightTest.php`: 11 passed, 171 assertions (was 9/153 before the new case
+  and the ParameterBag fix).
+- `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`: [OK] No errors.
+- `vendor/bin/pint --dirty --format agent`: passed.
+- `npm run typecheck` (tsc --noEmit): clean.
+- `php artisan migrate:status` against `database/database.sqlite`: 44/44 Ran, 0 Pending.
+- `composer audit`: one HIGH advisory in `league/commonmark` (GFM Table quadratic DoS,
+  `PKSA-m4t9-vsgq-8khn`), pre-existing on this tree, not reachable from a local-only Trainer tool
+  with no untrusted Markdown parse path.
+- Browser runs against `career-preflight.spec.ts` and `career-build-target.spec.ts`: listed in the
+  hand-off checklist, not yet re-run after the fix as of this filing (the Playwright sandbox was
+  intermittent in this dispatch; the closure below covers them).
+
+**Closure.** This entry is open pending four things:
+
+1. Owner approval of the commit series (the rerun() fix, the regression test, the import and probe
+   cleanup) so the worktree state lands on `master` and can be pushed — the original `0006b17`
+   commit that landed red is history, and its fix is still sitting in `git diff` only.
+2. `PLAYWRIGHT_BASE_URL=http://127.0.0.1:8141 npx playwright test career-preflight.spec.ts` run
+   four times against the built-bundle scratch server and producing 4/4 green, confirming that the
+   red Playwright case at line 95 is resolved on the exact code path that reproduced it.
+3. The owed D4 browser evidence run `npx playwright test career-build-target.spec.ts` against the
+   same base URL, filed alongside §5.4 of the D7 hand-off.
+4. `composer lore` and `composer lore-code` re-runs against the final tree, with any new hits
+   carrying a one-line context ruling and no forbidden-lexicon hits on display copy.
+
+Once (1) through (4) are done and the work passes a fresh hand-off run of
+`php artisan test --compact`, the entry can move to CORRECTED with the closing commit. Closure is
+additionally held on **O-1**: register discipline closes an entry only when the fix is on
+`origin/master`, and `master` is unpushed.
+
+### KI-62 `ProvenanceBadge.vue` derived its glyph and word once at setup, so a prop that changed in place would print the previous state's word beside the new figure - FILED 2026-10-07 (D8 hand-off), FIXED IN TREE, NOT CLOSED
+
+**Symptom, latent.** `resources/js/components/ProvenanceBadge.vue` read its two render values into
+plain consts:
+
+```js
+const copy = BADGES[props.state];
+const name = props.title ? `${copy.word}: ${props.title}` : copy.word;
+```
+
+A `<script setup>` body runs **once per component instance**. Inertia patches a page in place, so a
+component whose props change underneath it keeps its instance and its setup does not re-run: `copy`
+and `name` stay frozen at the first render's `state`. A screen that re-rendered the badge with a
+changed `state` would print the old word (and old glyph) beside the new figure, with no error and no
+console warning. Nothing calls it that way today, which is why this is filed as latent rather than as
+an observed defect.
+
+**Cause, measured.** The same class was reproduced live, in the same slice, one component over.
+`resources/js/components/career/RecommendationCard.vue` derived its band the same way. The D8 browser
+case `records Energy through the cockpit correction and then marks one action`
+(`tests/browser/career-cockpit.spec.ts`) records Energy through the page's own correction, Inertia
+patches the Cockpit in place, and the card kept printing `Recommendation unavailable because Energy
+has not been entered.` while the reason lines and the `Go to …` button beside it, read straight from
+`props`, updated correctly. That asymmetry — direct `props.x` reads updating and a setup-time `const`
+not — is the defect, and it is what makes the badge's case a certainty rather than a suspicion.
+
+**Fix, in tree.** `ProvenanceBadge.vue` now derives both values with `computed`, so they track the
+prop:
+
+```js
+const copy = computed(() => BADGES[props.state]);
+const name = computed(() => (props.title ? `${copy.value.word}: ${props.title}` : copy.value.word));
+```
+
+A comment in the file names the Cockpit as the case that proved it, so the next reader does not
+"simplify" it back. `RecommendationCard.vue` carries the same fix and the browser case above is its
+regression proof.
+
+**Closure.** This entry is open pending:
+
+1. The commit that carries the two `computed` derivations, so the fix is on `master`. Nothing is
+   pushed (`O-1`), and register discipline closes an entry only when the fix is on `origin/master`.
+2. A regression proof for the badge **itself**, which does not exist yet: no test renders
+   `ProvenanceBadge` with a `state` that changes in place. The Cockpit case proves the class, not this
+   component. The likely first caller is the Career Timeline (`SCREEN-018`, D14), which re-renders a
+   run's history; that slice owes the case. Until then this entry's own evidence is inspection plus
+   the sibling reproduction, and the entry says so rather than claiming a green test it does not have.
+3. `npm run typecheck` and `npm run build` on the final tree, since the component's props contract is
+   unchanged but its two bindings are now refs (both were re-run green on 2026-10-07 with the fix in
+   tree; they are listed here as the gate the closing commit re-runs).
+
+### KI-63 Inertia's bundled NProgress bar carries `role="bar"`, an invalid ARIA role, so a page-wide axe scan fails at WCAG 2.2 A 4.1.2 whenever a visit is in flight - FILED 2026-10-07 (D8 hand-off), OPEN
+
+**Symptom, observed.** The D8 Cockpit's axe case failed with one critical `aria-roles` violation:
+
+```json
+{
+  "id": "aria-roles", "impact": "critical", "tags": ["cat.aria", "wcag2a", "wcag412"],
+  "nodes": [{ "html": "<div class=\"bar\" role=\"bar\" style=\"transform: translate3d(0%, 0px, 0px); transition: 200ms linear;\"><div class=\"peg\"></div></div>",
+              "target": [".bar"],
+              "none": [{ "id": "invalidrole", "data": ["bar"], "message": "Role must be one of the valid ARIA roles: bar" }] }]
+}
+```
+
+The same scan passed on an earlier run, which is the tell: the node is **transient**.
+
+**Cause, measured.** The node is not this repository's markup. It is NProgress, which Inertia ships
+and drives for every visit. Its default configuration is in the built bundle
+(`public/build/assets/spa-*.js`) and reads:
+
+```js
+{ positionUsing: 'translate3d', speed: 200, trickle: true,
+  barSelector: '[role="bar"]', spinnerSelector: '[role="spinner"]', parent: 'body',
+  template: ['<div class="bar" role="bar">', '<div class="peg"></div>', '</div>', …].join('') }
+```
+
+NProgress appends that template to `<body>`, as a **sibling** of the app root `#app`, and removes it
+when the visit settles. `role="bar"` is not in the WAI-ARIA role list, so axe reports it as a critical
+`aria-roles` failure under 4.1.2 Name, Role, Value for as long as the bar is mounted. Every Inertia
+screen in this app is exposed to it, not the Cockpit alone: `tests/browser/accessibility.spec.ts`'s
+two page-wide scans have the same exposure and pass only because a settled `goto` usually leaves no
+visit in flight.
+
+**Impact, scoped.** A conformance claim of "axe A + AA clean on each screen" is not true while a visit
+is in flight on any screen, and the failure is timing-dependent, so it is exactly the kind of
+violation that disappears from one run and returns in the next. Nothing here is a Trainer-visible
+defect: the bar draws a progress indicator and carries no text or control.
+
+**Workaround, in tree.** `tests/browser/career-cockpit.spec.ts` scopes both of its scans with
+`buildAxe(page).include('#app')`, which excludes the framework's chrome and asserts this application's
+own tree. That is scoping, not suppression: the excluded node is a sibling of `#app` and belongs to
+Inertia, and the reason is written in the spec so a reader does not read the narrowing as a fix. The
+shared `tests/utils/accessibility.ts` builder was left unchanged, because its other consumer
+(`accessibility.spec.ts`) is another slice's file.
+
+**Closure.** This entry is open pending a decision, and it is the owner's rather than a slice's:
+
+1. **Disable Inertia's progress bar** (`createInertiaApp({ progress: false })` in `resources/js/spa.ts`)
+   and re-scan page-wide. Cheapest, and the app already carries its own loading affordance: every page
+   that starts a visit renders a `role="status"` line (`Dashboard.vue`, `Cockpit.vue`), so NProgress
+   is a second, unlabelled indicator. The cost is losing the bar as a visual affordance on screens
+   that have not added their own status line yet.
+2. **Keep the bar and narrow every scan** to `#app`, with the exclusion written down. No code change,
+   and the conformance claim is restated as "the application tree" rather than "the document".
+3. **Keep the bar and file it as an accepted exception** in the gate registry, naming 4.1.2 and the
+   third-party origin.
+4. Whichever is chosen, `tests/utils/accessibility.ts` is the one place a default scope belongs, so
+   that the two page-wide scans in `accessibility.spec.ts` stop being timing-dependent.
