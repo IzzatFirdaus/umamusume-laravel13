@@ -178,9 +178,12 @@ test.describe('Setup step 5 — Support Cards', () => {
         // invented fact the Floor forbids.
         await expect(page.locator('[title="No ownership has been recorded for this slot yet."]')).toHaveCount(6);
 
-        // The seven types print as server-labelled words beside their marks (`SupportTypeMark`).
-        await expect(page.getByText('The seven support types')).toBeVisible();
-        await expect(page.getByText('Wit')).toBeVisible();
+        // The seven types print as server-labelled words beside their marks (`SupportTypeMark`). The
+        // assertion is scoped to their own paragraph and matches each word as written: a bare
+        // `getByText('Wit')` is a case-insensitive substring match, and it resolved to 54 elements
+        // (every "with", every option label) rather than to the one this case is about.
+        const typeWords = page.locator('p').filter({ hasText: 'The seven support types' });
+        await expect(typeWords).toHaveText(/The seven support typesSpeedStaminaPowerGutsWitPalGroup/);
 
         // The flag's honest scope, stated beside the six toggles it describes (`ADR-0014`).
         await expect(page.getByText(/The deck table has no column for it/)).toBeVisible();
