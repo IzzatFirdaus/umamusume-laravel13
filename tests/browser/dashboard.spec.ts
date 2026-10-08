@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { deleteRun } from '../utils/delete-run';
 
 /*
  * Rendered-copy, state and accessibility evidence for SCREEN-001, the 2.0 landing screen
@@ -10,7 +11,7 @@ import { test, expect } from '@playwright/test';
  * Fixture strategy. The seeded scratch database holds zero training runs, which is the precondition
  * `playwright.config.ts`, `legacy.spec.ts` and `runs.spec.ts` all state, so the empty-career state is
  * asserted as itself. The active-career case creates its own run through the create form and deletes
- * it through the run page's own disclosure before it finishes, so this spec leaves the database
+ * it over HTTP in `afterEach` (`tests/utils/delete-run.ts`), so this spec leaves the database
  * exactly as it found it (the `run-detail.spec.ts` pattern).
  *
  * What is not browser-asserted, and why: the populated numbers on the card (a real turn count, a
@@ -33,15 +34,7 @@ const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
     for (const url of createdRunUrls.splice(0)) {
-        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-        if (response === null || !response.ok()) {
-            continue;
-        }
-
-        await page.getByText('Delete run').click();
-        await page.getByRole('button', { name: 'Delete this run' }).click();
-        await page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' });
+        await deleteRun(page, url);
     }
 });
 

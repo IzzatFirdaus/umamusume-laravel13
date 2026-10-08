@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { deleteRun } from '../utils/delete-run';
 
 // Rendered-DOM evidence for the deck builder (SCREEN-007, `SCR-CAR-007`). The server-side
 // `SupportDeckBuilderTest` asserts the resolved props; these assert what only a browser can reach: the
@@ -14,13 +15,7 @@ const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
     for (const url of createdRunUrls.splice(0)) {
-        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-        if (response === null || !response.ok()) {
-            continue;
-        }
-        await page.getByText('Delete run').click();
-        await page.getByRole('button', { name: 'Delete this run' }).click();
-        await page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' });
+        await deleteRun(page, url);
     }
 });
 

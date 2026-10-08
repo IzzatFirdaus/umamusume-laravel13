@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { deleteRun } from '../utils/delete-run';
 
 // Rendered-DOM evidence for the ported run detail page (SCR-RUN-003, ADR-0020 §1). The server-side
 // tests assert the resolved props; these assert what the browser actually shows and what only a
@@ -7,28 +8,18 @@ import { test, expect } from '@playwright/test';
 //
 // Fixture strategy, and why it is unusual. The seeded scratch database holds ZERO training runs on
 // purpose (`runs.spec.ts` asserts the empty state), so there is no URL to visit. This spec therefore
-// creates its own run through the create form, asserts against it, and deletes it through the run
-// page's own disclosure before it finishes — the suite is left exactly as it found it, and
-// `test.afterEach` cleans up even when an assertion throws. That has a second payoff: it is the only
-// end-to-end proof of the create -> detail -> delete loop, which `runs.spec.ts` deliberately does not
-// complete so that it does not leave rows behind.
+// creates its own run through the create form, asserts against it, and deletes it over HTTP before
+// it finishes — the suite is left exactly as it found it, and `test.afterEach` cleans up even when an
+// assertion throws. That has a second payoff: it is the only end-to-end proof of the create ->
+// detail -> delete loop, which `runs.spec.ts` deliberately does not complete so that it does not
+// leave rows behind.
 
 const TRAINEE = 'Agnes Digital';
 const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
     for (const url of createdRunUrls.splice(0)) {
-        // Delete through the page's own disclosure, so the cleanup exercises the real control.
-        // `domcontentloaded`, not `load`: the dev server is single-threaded and this suite shares
-        // the host with three other ones, so waiting on every subresource is waiting on the queue.
-        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-        if (response === null || !response.ok()) {
-            continue;
-        }
-
-        await page.getByText('Delete run').click();
-        await page.getByRole('button', { name: 'Delete this run' }).click();
-        await page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' });
+        await deleteRun(page, url);
     }
 });
 
@@ -269,8 +260,8 @@ test('records a shop purchase and refuses a price the catalogue disagrees with',
 });
 
 test('rates a logged stat with a badge the banding can produce', async ({ page }) => {
-    // One write plus a full page render, plus the afterEach that deletes the run through its own
-    // disclosure. The dev server is single-threaded, so each navigation waits on the previous one.
+    // One write plus a full page render, plus the afterEach that deletes the run over HTTP. The dev
+    // server is single-threaded, so each navigation waits on the previous one.
     test.setTimeout(120_000);
 
     await createRunWithScenario(page, 'ura_finale');

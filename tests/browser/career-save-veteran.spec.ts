@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
+import { deleteRun } from '../utils/delete-run';
 
 /*
  * Rendered-copy, keyboard and accessibility evidence for Save Veteran (`SCR-VET-003`, plan §8 D16's write
@@ -9,8 +10,8 @@ import { buildAxe } from '../utils/accessibility';
  *
  * Fixture strategy. The run is created through the create form and finished through the run screen's own
  * status control (`select[name="status"]` plus `Change status`), because that is the path a Trainer takes
- * and `RecordVeteran` refuses anything but a Completed run. It is deleted through the run page's own
- * disclosure in `afterEach`, the `career-race-decision` pattern, which also removes the library row: the
+ * and `RecordVeteran` refuses anything but a Completed run. It is deleted over HTTP in `afterEach`
+ * (`tests/utils/delete-run.ts`), which also removes the library row: the
  * migration makes a Veteran cascade on its run.
  *
  * The write gets 60s rather than the config's 15s, for the reason `career-race-decision.spec.ts` records:
@@ -29,17 +30,7 @@ const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
     for (const url of createdRunUrls.splice(0)) {
-        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-        if (response === null || !response.ok()) {
-            continue;
-        }
-
-        await page.getByText('Delete run').click();
-        await Promise.all([
-            page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' }),
-            page.getByRole('button', { name: 'Delete this run' }).click(),
-        ]);
+        await deleteRun(page, url);
     }
 });
 

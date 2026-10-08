@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { deleteRun } from '../utils/delete-run';
 
 /*
  * Rendered-copy and accessibility evidence for the Legacy Lab (SCREEN-006; PRD FR-G, ADR-0020 §3,
@@ -40,20 +41,15 @@ const SPARK_KINDS = ['Blue', 'Pink', 'Green', 'White', 'Scenario'];
  *
  * Without this the file was the suite's one leaker: every pass left five runs behind in the scratch
  * database (57 rows accumulated before this fix), which broke `runs.spec.ts`'s empty-state assertions
- * and made the whole suite one-shot against a freshly seeded file. Deleting through the run page's own
- * disclosure also keeps the create → builder → delete loop exercised end to end.
+ * and made the whole suite one-shot against a freshly seeded file. The cleanup is the shared
+ * `tests/utils/delete-run.ts` HTTP DELETE, so it reaches `runs.destroy` without depending on a screen's
+ * markup.
  */
 const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
     for (const url of createdRunUrls.splice(0)) {
-        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-        if (response === null || !response.ok()) {
-            continue;
-        }
-        await page.getByText('Delete run').click();
-        await page.getByRole('button', { name: 'Delete this run' }).click();
-        await page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' });
+        await deleteRun(page, url);
     }
 });
 

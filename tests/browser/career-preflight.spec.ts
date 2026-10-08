@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { deleteRun } from '../utils/delete-run';
 
 /*
  * Rendered-copy and interaction evidence for the wizard's Preflight step (SCREEN-008, `SCR-CAR-010`).
@@ -27,13 +28,7 @@ const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
     for (const url of createdRunUrls.splice(0)) {
-        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-        if (response === null || !response.ok()) {
-            continue;
-        }
-        await page.getByText('Delete run').click();
-        await page.getByRole('button', { name: 'Delete this run' }).click();
-        await page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' });
+        await deleteRun(page, url);
     }
 });
 
@@ -129,8 +124,8 @@ test('Start Career creates the run and lands on it', async ({ page }) => {
 
     await page.getByRole('button', { name: 'Start Career' }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
-    // The cleanup deletes through the run record screen's own disclosure, so the record URL is what is
-    // remembered rather than the Cockpit the write lands on.
+    // The record URL is what gets remembered rather than the Cockpit the write lands on, because the
+    // teardown addresses the run by the id carried in that path.
     createdRunUrls.push(page.url().replace(/\/cockpit$/, ''));
 
     // The destination is the Cockpit (SCREEN-009, `SCR-CAR-011`), and its heading names the trainee the

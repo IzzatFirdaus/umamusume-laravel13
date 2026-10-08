@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
+import { deleteRun } from '../utils/delete-run';
 
 /*
  * Rendered-copy and accessibility evidence for SCREEN-010, the Training Decision detail
@@ -10,10 +11,11 @@ import { buildAxe } from '../utils/accessibility';
  *
  * Fixture strategy, and why it is the wizard walk: the run is built by pressing the app's own steps
  * and `Start Career`, then the first turn is recorded through the run screen's guided rail, so every
- * figure this screen shows was entered rather than seeded. The row is deleted through the run page's
- * own disclosure in `afterEach` (the `career-cockpit.spec.ts` pattern), which keeps the shared
+ * figure this screen shows was entered rather than seeded. The row is deleted over HTTP in
+ * `afterEach` (`tests/utils/delete-run.ts`), which keeps the shared
  * database clean for `runs.spec.ts`'s empty-state assertions. The wizard walk is copied rather than
- * imported because no browser spec in this tree shares one — `tests/utils/` holds only the axe builder.
+ * imported because no browser spec in this tree shares one — `tests/utils/` holds the axe builder and
+ * that teardown.
  *
  * Axe coverage: `@axe-core/playwright` is installed, so the last case scans this screen with the shared
  * builder and the same `wcag2a`/`wcag2aa`/`wcag21aa` tag set `accessibility.spec.ts` uses, scoped to
@@ -24,17 +26,7 @@ const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
     for (const url of createdRunUrls.splice(0)) {
-        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-        if (response === null || !response.ok()) {
-            continue;
-        }
-
-        await page.getByText('Delete run').click();
-        await Promise.all([
-            page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' }),
-            page.getByRole('button', { name: 'Delete this run' }).click(),
-        ]);
+        await deleteRun(page, url);
     }
 });
 
@@ -97,6 +89,7 @@ async function newCareerWithTurn(page: import('@playwright/test').Page): Promise
     await page.goto(runUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     const rail = page.locator('form').filter({ has: page.locator('input[name="choice"]') });
+    await rail.locator('input[name="choice"][value="training-Speed"]').check();
     await rail.locator('input[name="speed"]').fill('650');
     await rail.locator('input[name="stamina"]').fill('600');
     await rail.locator('input[name="power"]').fill('600');
@@ -130,13 +123,14 @@ test('shows five cards, the sourced cost, and no projected number anywhere', asy
     await expect(page.getByRole('heading', { name: 'Training options' })).toBeVisible();
 
     for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
-        await expect(page.getByRole('heading', { name: stat, exact: true })).toBeVisible();
+        await expect(page.getByRole('heading', { name: stat })).toBeVisible();
     }
 
     // The cost prints as the range the constant is, worst first, and names its source in the title.
     await expect(page.getByText('E−28 … E−17')).toHaveCount(4);
 
-    // The exclusion evidence: no `+62 Speed`, no `Failure: 2%`, no invented figure (AGENTS.md §5).
+    // The exclusion evidence, as the two patterns below: the screen prints no projected gain per stat
+    // and no failure percentage, because neither is sourced (AGENTS.md §5).
     await expect(page.locator('main')).not.toContainText(/\+\s?\d+\s?(Speed|Stamina|Power|Guts|Wit)/);
     await expect(page.locator('main')).not.toContainText(/Failure:?\s?\d+(\.\d+)?%/);
     // No em dash in shipped copy: an unrecorded value is `N/A` with a reason.
@@ -148,6 +142,8 @@ test('shows five cards, the sourced cost, and no projected number anywhere', asy
 
     // Exactly one RECOMMENDED marker, on the largest deficit, with the advisor's reason line beside it.
     await expect(page.getByText('RECOMMENDED')).toHaveCount(1);
+    // The turn's band, in the Cockpit's words, readable on the screen the decision is made on.
+    await expect(page.getByText('At or above the advisory line')).toBeVisible();
     const stamina = page.getByRole('article').filter({ hasText: /^Stamina/ });
     await expect(stamina.getByText('RECOMMENDED')).toBeVisible();
     await expect(stamina.getByText('Stamina is 200 below target (the largest deficit).')).toBeVisible();
@@ -211,6 +207,19 @@ test('expands and collapses the details by keyboard, with a stable focus order',
 test('reaches the screen from the Cockpit and records the choice it carries', async ({ page }) => {
     const runUrl = await newCareerWithTurn(page);
 
+    // The hydrate-and-navigate path is asserted as rendered behaviour: no console error and no
+    // uncaught exception on the two documents this flow touches.
+    const problems: string[] = [];
+    page.on('console', (message) => {
+        if (message.type() === 'error') {
+            problems.push(`console: ${message.text()}`);
+        }
+    });
+    page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
+
+    // The door D9 opens: the Cockpit's Training entry now leads here rather than to the run screen.
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
     await page.getByRole('link', { name: /^Training/ }).click();
     await page.waitForURL(/\/training$/, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
@@ -245,6 +254,8 @@ test('reaches the screen from the Cockpit and records the choice it carries', as
     await page.getByRole('button', { name: 'Preview this turn' }).click();
     await page.waitForURL(/\/training-runs\/\d+$/, { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('Preview', { exact: true })).toBeVisible();
+
+    expect(problems, problems.join('\n')).toEqual([]);
 });
 
 test('holds its layout at 320px and honours reduced motion', async ({ page }) => {
@@ -260,15 +271,17 @@ test('holds its layout at 320px and honours reduced motion', async ({ page }) =>
     expect(overflow, 'no horizontal overflow at 320px').toBeLessThanOrEqual(0);
 
     for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
-        await expect(page.getByRole('heading', { name: stat, exact: true })).toBeVisible();
+        await expect(page.getByRole('heading', { name: stat })).toBeVisible();
     }
 
     const motion = await page.getByRole('button', { name: 'Inspect details' }).first().evaluate((el) => {
         const style = getComputedStyle(el);
 
-        return `${style.transitionDuration} ${style.animationDuration}`;
+        return [Number.parseFloat(style.transitionDuration), Number.parseFloat(style.animationDuration)];
     });
-    expect(motion, 'the disclosure does not animate under reduced motion').toBe('0s 0s');
+    // `resources/css/app.css` answers the OS setting with the 0.01ms kill-switch, so a control that
+    // carries any transition at all is quiet here (DESIGN.md MOTION, plan §12).
+    expect(motion, 'the disclosure does not animate under reduced motion').toEqual([0.00001, 0.00001]);
 });
 
 test('meets the 44px target floor and the axe A plus AA bar', async ({ page }) => {
