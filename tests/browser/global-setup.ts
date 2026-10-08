@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process';
-import { rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { rmSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * The browser suite's data contract (KI-69).
@@ -14,20 +15,63 @@ import { join } from 'node:path';
  * KI-69 records, and the reason a green suite proved nothing about the empty-state surfaces.
  *
  * Deleting a file is not weakening an assertion: the tests still require an empty runs table, and now
- * that requirement is established rather than assumed.
+ * that requirement is established rather than assumed. Nothing here writes to `database/database.sqlite`;
+ * the dev file is a different path and is never named.
  *
- * The path is absolute and named here, so no `DB_DATABASE` in a cached config or a stray `.env` can
- * redirect it onto `database/database.sqlite`. Reference data arrives from the committed seeders, which
- * is what the wizard screens and the catalog tests read.
+ * The path is absolute and reaches the server as `DB_DATABASE`. That holds while `bootstrap/cache/config.php`
+ * is absent, which is the state on this tree; a cached config would win over the environment and silently
+ * point the suite back at the dev file.
+ *
+ * Guardrail additions (2026-10-08 incident): the harness must prove the application will open the scratch
+ * database, not the canonical one. This setup runs the `uma:db-guard` command with the same environment the
+ * server receives and asserts the identity is safe and the expected database matches the scratch file.
  */
-export const SCRATCH_DATABASE = join(__dirname, '..', '..', 'database', 'browser-scratch.sqlite');
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+export const SCRATCH_DATABASE = join(repoRoot, 'database', 'browser-scratch.sqlite');
 
 export default async function globalSetup(): Promise<void> {
-    rmSync(SCRATCH_DATABASE, { force: true });
+    // Fail if a cached config would override the harness environment and point the server
+    // at the canonical development database instead of the scratch file.
+    try {
+        execSync('php artisan config:clear', {
+            cwd: repoRoot,
+            stdio: 'ignore',
+        });
+    } catch {
+        // Config cache might not exist; that's fine.
+    }
 
-    execSync('php artisan migrate --seed', {
-        cwd: join(__dirname, '..', '..'),
-        env: { ...process.env, DB_DATABASE: SCRATCH_DATABASE },
+    // The write-ahead siblings go with the main file. WAL is on for this connection, so a leftover
+    // -wal beside a deleted database reads as `file is not a database` rather than as an empty schema.
+    // `maxRetries` because Windows answers EPERM for a file a dying process still holds a handle to, and
+    // a gate that aborts on that reads as a broken harness rather than a slow one.
+    for (const suffix of ['', '-wal', '-shm']) {
+        rmSync(`${SCRATCH_DATABASE}${suffix}`, { force: true, maxRetries: 10, retryDelay: 500 });
+    }
+
+    // Laravel refuses a SQLite path that does not exist — `SQLiteDatabaseDoesNotExistException` from
+    // `SQLiteConnector::parseDatabasePath()` — so the file is created empty and `migrate` fills it.
+    writeFileSync(SCRATCH_DATABASE, '');
+
+    const harnessEnv = {
+        ...process.env,
+        DB_DATABASE: SCRATCH_DATABASE,
+        UMA_DATABASE_ROLE: 'browser',
+        UMA_EXPECTED_DATABASE: SCRATCH_DATABASE,
+    };
+
+    execSync('php artisan migrate --seed --no-interaction', {
+        cwd: repoRoot,
+        env: harnessEnv,
+        stdio: 'inherit',
+    });
+
+    // Prove the application will open the scratch database with the harness environment.
+    // `uma:db-guard` returns non-zero if the resolved identity is unsafe for the declared role.
+    execSync('php artisan uma:db-guard', {
+        cwd: repoRoot,
+        env: harnessEnv,
         stdio: 'inherit',
     });
 }

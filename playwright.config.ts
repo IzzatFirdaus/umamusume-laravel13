@@ -6,8 +6,17 @@ import { SCRATCH_DATABASE } from './tests/browser/global-setup';
 // accessibility the repo asserts on are checked in a real browser here. Runs against a scratch
 // database the harness builds (`tests/browser/global-setup.ts`, KI-69) via `php artisan serve`;
 // run with `npm run test:browser`.
-const port = 8127;
+// The port is overridable via `PLAYWRIGHT_PORT`. `reuseExistingServer: false` is mandatory:
+// a reused server would carry whatever database it was started with (usually the shared dev file),
+// which defeats the KI-69 contract that the suite owns its scratch database.
+const port = Number(process.env.PLAYWRIGHT_PORT ?? 8127);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
+
+const webServerEnv = {
+    DB_DATABASE: SCRATCH_DATABASE,
+    UMA_DATABASE_ROLE: 'browser',
+    UMA_EXPECTED_DATABASE: SCRATCH_DATABASE,
+};
 
 export default defineConfig({
     testDir: './tests/browser',
@@ -39,14 +48,14 @@ export default defineConfig({
     projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
     webServer: {
         command: `php artisan serve --port=${port}`,
-        // The server the harness starts must serve the database the setup step just built. The one hole
-        // left by design: `reuseExistingServer` below means a server another session already owns keeps
-        // *its* database, and `.env` still points at the shared dev file. `KI-69` records that as the
-        // config-versus-plan disagreement this closes for a harness-started server; a reused server is the
-        // case a run must not treat as gated, and `KI-73`/`KI-74` cover why a contended port is void.
-        env: { DB_DATABASE: SCRATCH_DATABASE },
-        url: baseURL,
-        reuseExistingServer: true,
+        // The server the harness starts must serve the database the setup step just built.
+        // `reuseExistingServer: false` is mandatory — a reused server would carry whatever database
+        // it was started with (usually the shared dev file), which defeats the KI-69 contract that
+        // the suite owns its scratch database. The health probe is `/up` (Laravel's built-in health
+        // endpoint) rather than the root URL, so a slow cold cache doesn't time out the ready check.
+        env: webServerEnv,
+        url: `${baseURL}/up`,
+        reuseExistingServer: false,
         timeout: 60_000,
     },
 });
