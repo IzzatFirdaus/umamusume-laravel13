@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Career;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StoreScenarioRequest;
+use App\Models\Preference;
 use App\Services\Career\SetupDraft;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -46,9 +47,31 @@ class ScenarioSelectController extends Controller
 
         return Inertia::render('Career/ScenarioSelect', [
             'scenarios' => $this->cards(),
-            'selected' => $draft['scenario'],
+            // The Trainer's stored default pre-selects nothing when the draft already names a
+            // scenario: a career in progress is what the Trainer chose for it, and a preference
+            // must not stand in for that.
+            'selected' => $draft['scenario'] ?? $this->storedDefault(),
             'ruleset' => $this->ruleset(),
         ]);
+    }
+
+    /**
+     * The Default-scenario preference (SCREEN-024), or null when none is stored or the stored one
+     * no longer names a matrix entry.
+     *
+     * The config check is `SetupDraft::read()`'s own rule for the same question — a stale key left
+     * by a config change reads as no scenario rather than as one that renders a blank card — held
+     * here too, so a preference cannot pre-select a card the matrix does not compose.
+     */
+    private function storedDefault(): ?string
+    {
+        $stored = Preference::settings()['default_scenario'] ?? null;
+
+        if (is_string($stored) && array_key_exists($stored, (array) config('scenarios.scenarios'))) {
+            return $stored;
+        }
+
+        return null;
     }
 
     public function store(StoreScenarioRequest $request): RedirectResponse

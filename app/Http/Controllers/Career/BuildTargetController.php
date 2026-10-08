@@ -8,6 +8,7 @@ use App\Enums\BuildPurpose;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StoreDraftBuildTargetRequest;
 use App\Models\Advisor\BuildTargetPayload;
+use App\Models\Preference;
 use App\Services\Career\SetupDraft;
 use App\Services\ScenarioCaps;
 use Illuminate\Http\RedirectResponse;
@@ -50,8 +51,15 @@ class BuildTargetController extends Controller
     {
         return Inertia::render('Career/BuildTarget', [
             // The stored payload as entered, or null before one exists: the page names the absence
-            // and pre-fills no zeroes.
+            // rather than inventing a target. _Dated note 2026-10-08 (D18b): the page now pre-fills
+            // the five stat inputs from the Trainer's stored defaults where no target is stored —
+            // `statDefaults` below — which is a preference standing in for nothing, because there
+            // is nothing stored to stand in for. The sentence above keeps its original wording.
             'target' => SetupDraft::buildTarget(),
+            // D18b (SCREEN-024): the Trainer's stored stat-target defaults. The page applies them
+            // only where no stored target exists, so a career's own target is never overwritten
+            // by a preference.
+            'statDefaults' => $this->statDefaults(),
             'caps' => ScenarioCaps::forRun(SetupDraft::planningRun()),
             'statOrder' => array_values((array) config('scenarios.stat_order')),
             'purposeOptions' => $this->purposeOptions(),
@@ -73,6 +81,30 @@ class BuildTargetController extends Controller
         SetupDraft::write(['build_target' => $request->payload()]);
 
         return redirect()->route('career.target')->with('status', 'Build target saved.');
+    }
+
+    /**
+     * The Default-scenario preference's stat map (SCREEN-024), or null when none is stored.
+     *
+     * Only integers survive: a hand-edited blob cannot reach the page as a half-number the form
+     * would then render as zero, which is the invented value this screen refuses.
+     *
+     * @return array<string, int>|null
+     */
+    private function statDefaults(): ?array
+    {
+        $stored = Preference::settings()['stat_target_defaults'] ?? null;
+
+        if (! is_array($stored)) {
+            return null;
+        }
+
+        $defaults = array_filter(
+            array_map(static fn (mixed $value): ?int => is_int($value) ? $value : null, $stored),
+            static fn (?int $value): bool => $value !== null,
+        );
+
+        return $defaults === [] ? null : $defaults;
     }
 
     /**

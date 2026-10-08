@@ -54,6 +54,18 @@ class ScenarioCaps
     }
 
     /**
+     * The engine ceiling no stat may pass, whatever the scenario's bonus says.
+     *
+     * The number the form validators clamp against, so a validator and a renderer read the same
+     * bound from the same place (`ADR-0015`) instead of each reading `config('scenarios.hard_cap')`
+     * and trusting the other to have read it too.
+     */
+    public static function hardCap(): int
+    {
+        return (int) config('scenarios.hard_cap');
+    }
+
+    /**
      * One stat's ceiling in one scenario.
      */
     public static function stat(string $scenarioKey, string $stat): int

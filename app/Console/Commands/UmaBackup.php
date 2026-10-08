@@ -4,44 +4,29 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Actions\BackupDatabase;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 /**
- * Produces a consistent single-file copy of the SQLite database (NFR-5):
- * wal_checkpoint(TRUNCATE) folds the write-ahead log into the main file first,
- * then a plain copy is safe to restore by file replacement.
+ * Produces a consistent single-file snapshot of the SQLite database (NFR-5).
+ *
+ * The copy lives in `App\Actions\BackupDatabase` so the Settings screen's Backup action and this
+ * command cannot drift: one implementation, and the mechanism (`VACUUM INTO`) is the one that
+ * holds a consistent snapshot of a live WAL database.
  */
 class UmaBackup extends Command
 {
     protected $signature = 'uma:backup {destination? : Target file path; defaults to storage/app/backups/uma-backup-<timestamp>.sqlite}';
 
-    protected $description = 'Checkpoint the WAL and copy the SQLite database to a single backup file (NFR-5)';
+    protected $description = 'Copy the SQLite database to a single consistent backup file (NFR-5)';
 
     public function handle(): int
     {
-        /** @var string $database */
-        $database = config('database.connections.sqlite.database');
-
-        if ($database === ':memory:' || ! file_exists($database)) {
-            $this->error('SQLite database file not found at '.config('database.default').' connection path; nothing to back up.');
-
-            return self::FAILURE;
-        }
-
-        DB::statement('PRAGMA wal_checkpoint(TRUNCATE);');
-
-        $destination = $this->argument('destination')
-            ?? storage_path('app/backups/uma-backup-'.now()->format('Ymd-His').'.sqlite');
-
-        $destinationDir = dirname((string) $destination);
-
-        if (! is_dir($destinationDir)) {
-            mkdir($destinationDir, 0755, true);
-        }
-
-        if (! copy($database, (string) $destination)) {
-            $this->error("Copy failed to {$destination}");
+        try {
+            $destination = BackupDatabase::to($this->argument('destination'));
+        } catch (RuntimeException $e) {
+            $this->error($e->getMessage());
 
             return self::FAILURE;
         }

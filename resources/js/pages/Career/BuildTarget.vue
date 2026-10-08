@@ -44,6 +44,8 @@ interface StoredTarget {
 const props = defineProps<{
     /** The stored payload as entered, or null before one exists. */
     target: StoredTarget | null;
+    /** The Trainer's stored stat-target defaults (SCREEN-024), applied only where no target is stored. */
+    statDefaults: Record<string, number> | null;
     /** One ceiling per stat, from `ScenarioCaps::forRun` — base cap only when no scenario yet. */
     caps: Record<string, number>;
     statOrder: string[];
@@ -68,8 +70,15 @@ const form = useForm<{
     surface: props.target?.surface ?? '',
     style: props.target?.style ?? '',
     // No stored value is an empty field, never a pre-filled zero: a zero is a number the Trainer
-    // did not enter, and the payload's required rule asks for every stat by name.
-    targets: Object.fromEntries(props.statOrder.map((stat) => [stat, props.target?.targets?.[stat] ?? ''])),
+    // did not enter, and the payload's required rule asks for every stat by name. The Trainer's
+    // stored stat-target defaults (SCREEN-024) fill the gap only where no target is stored, so a
+    // career's own target is never overwritten by a preference.
+    targets: Object.fromEntries(
+        props.statOrder.map((stat) => [
+            stat,
+            props.target?.targets?.[stat] ?? props.statDefaults?.[stat] ?? '',
+        ]),
+    ),
     skill_priorities: props.target?.skill_priorities ? [...props.target.skill_priorities] : [],
 });
 

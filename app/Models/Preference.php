@@ -8,6 +8,7 @@ use Database\Factories\PreferenceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use JsonException;
 
 /**
  * One Trainer UI preference, one row per key (PRD US-11).
@@ -34,8 +35,34 @@ class Preference extends Model
      * The keys PRD US-11 authorizes (SCREEN_SPEC.md §7-5). One list for the store, the writer's
      * validation and the screen that reads them back, so a third key is added in the one place
      * the ruling lives rather than in three.
+     *
+     * `settings` is the structured preferences' one key: a JSON object in `value` whose own key
+     * set is `SETTINGS_KEYS`, so the table stays one-row-per-key and the blob is one preference
+     * among them rather than a second storage shape.
      */
-    public const KEYS = ['theme', 'failure_estimate'];
+    public const KEYS = ['theme', 'failure_estimate', 'settings'];
+
+    /**
+     * The keys the `settings` blob carries (SCREEN-024, the D18b slice plan). One list for the
+     * writer's validation, the screen that renders them and every reader that pre-fills from
+     * them, for the same reason `KEYS` exists.
+     *
+     * `units` is deliberately absent: `RaceCatalogSlot::distanceLabel()` prints metres because
+     * the client does, no source publishes an imperial rendering, and a key with no reader is
+     * the drift `KEYS` exists to refuse. `race_risk_thresholds` is held on `ADR-0016`.
+     */
+    public const SETTINGS_KEYS = ['default_scenario', 'recommendation_aggressiveness', 'stat_target_defaults', 'language'];
+
+    /**
+     * The recommendation-aggressiveness values the screen offers. Stored now; `TrainerAdvisor`
+     * reads it in a follow-up slice, which the control's own `title` says.
+     */
+    public const AGGRESSIVENESS = ['conservative', 'balanced', 'aggressive'];
+
+    /**
+     * The languages this build can render. The corpus is Global-labelled, so there is one.
+     */
+    public const LANGUAGES = ['en'];
 
     public $incrementing = false;
 
@@ -58,5 +85,46 @@ class Preference extends Model
     public static function put(string $key, string $value): void
     {
         static::query()->updateOrCreate(['key' => $key], ['value' => $value]);
+    }
+
+    /**
+     * The structured preferences, keyed by `SETTINGS_KEYS`, or an empty array when the Trainer has
+     * never saved one.
+     *
+     * An empty array rather than null, so a reader never tests for a missing offset — the same
+     * contract `SetupDraft::read()` states for its own bag. An empty array cannot be stored (the
+     * writer drops the row instead, the way `theme`'s follow-the-OS does), so `[]` unambiguously
+     * means "not set".
+     *
+     * @return array<string, mixed>
+     */
+    public static function settings(): array
+    {
+        $raw = static::get('settings');
+
+        if ($raw === null) {
+            return [];
+        }
+
+        try {
+            $decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            // A blob that does not decode is not a preference the app can read, and inventing
+            // defaults for it would be a second claim about what the Trainer chose. Absence is
+            // the honest answer; the row stays so the Trainer can see and overwrite it.
+            return [];
+        }
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
+     * Writes the whole settings blob, replacing whatever was there.
+     *
+     * @param  array<string, mixed>  $blob
+     */
+    public static function putSettings(array $blob): void
+    {
+        static::put('settings', (string) json_encode($blob, JSON_THROW_ON_ERROR));
     }
 }

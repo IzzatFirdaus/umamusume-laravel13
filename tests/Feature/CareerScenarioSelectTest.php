@@ -53,7 +53,10 @@ it('names each scenario systems and resources from the matrix rather than from a
     $this->get('/career/setup/scenario')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('scenarios.0.systems', ['Race calendar'])
+            // E2 turns the career goals flag on for URA, so the matrix now names two systems here.
+            // This is the same read the Cockpit's panel takes: the list is derived from the flags,
+            // never kept beside the scenario as prose.
+            ->where('scenarios.0.systems', ['Race calendar', 'Career goals'])
             // URA composes exactly the baseline widget set, so it claims no scenario resource.
             ->where('scenarios.0.resources', [])
             ->where('scenarios.1.systems', ['Race calendar', 'Team races', 'Team Rank ladder'])
