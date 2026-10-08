@@ -40,7 +40,8 @@ export type ProvenanceState = 'confirmed' | 'calculated' | 'estimated' | 'unknow
  * whose props change underneath it keeps its instance: a value derived once at setup stays frozen at
  * the first render's state. Nothing renders this badge with a changing `state` today, but a screen
  * that does (the Career Timeline is the likely first) would otherwise print the previous state's word
- * beside the new figure. The Career Cockpit hit exactly that with its advisor band.
+ * beside the new figure. The Career Cockpit hit exactly that with its advisor band. The in-place case
+ * is pinned by `tests/browser/provenance-badge.spec.ts`; reverting these two lines to consts fails it.
  */
 import { computed } from 'vue';
 
