@@ -127,6 +127,15 @@ it('refuses a payload whose shape it cannot read', function (array $broken, stri
         ]], 'affinity' => null],
         'ancestors',
     ],
+    'an ancestor stored as a slot record rather than a name' => [
+        // The shape the Inheritance page used to read and threw on. ADR-0010 §2 says an ancestor is a
+        // name; a `slot`/`name` record is a second shape nothing writes, so it is refused here.
+        ['legacies' => [[
+            'rank' => null, 'is_guest' => false,
+            'ancestors' => [['slot' => 'grandparent_a1', 'name' => 'Symboli Rudolf']], 'sparks' => [],
+        ]], 'affinity' => null],
+        'not a name',
+    ],
 ]);
 
 it('keeps a payload with an unread figure out of the exception path', function (): void {

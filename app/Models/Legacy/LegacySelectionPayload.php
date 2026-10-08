@@ -71,7 +71,7 @@ final readonly class LegacySelectionPayload
     }
 
     /**
-     * @param  list<array{rank: int|null, is_guest: bool, ancestors: list<mixed>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
+     * @param  list<array{rank: int|null, is_guest: bool, ancestors: list<string|null>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
      */
     public function __construct(
         public array $legacies,
@@ -110,7 +110,7 @@ final readonly class LegacySelectionPayload
     }
 
     /**
-     * @return array{rank: int|null, is_guest: bool, ancestors: list<mixed>, sparks: list<array<string, mixed>>}
+     * @return array{rank: int|null, is_guest: bool, ancestors: list<string|null>, sparks: list<array<string, mixed>>}
      */
     private static function legacy(int|string $index, mixed $legacy): array
     {
@@ -133,6 +133,17 @@ final readonly class LegacySelectionPayload
                 'Legacy #'.$index.' names '.count($legacy['ancestors']).' ancestors; the diagram holds '
                 .self::MAX_ANCESTORS.' per parent (REFERENCE §1.5.4).',
             );
+        }
+
+        // An ancestor is a name, not a slot record (`ADR-0010` Consequences §2). The position is the
+        // slot, so a record with `slot`/`name` keys is a shape no writer produces and a reader must
+        // not silently accept: it is what made the Inheritance page throw on a UI-created run.
+        foreach ($legacy['ancestors'] as $ancestorIndex => $ancestor) {
+            if ($ancestor !== null && ! is_string($ancestor)) {
+                throw new InvalidArgumentException(
+                    "Legacy #{$index} ancestor #{$ancestorIndex} is not a name: ".gettype($ancestor).'.',
+                );
+            }
         }
 
         $sparks = [];

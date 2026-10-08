@@ -118,7 +118,7 @@ class InheritanceEventController extends Controller
      * The legacy selection payload, flattened for the predicted section.
      *
      * @param  array{0: string|null, 1: string|null}  $parentNames
-     * @return array{affinity: string|null, parents: list<array{slot: string, label: string, name: string|null, rank: int|null, is_guest: bool, ancestors: list<array{slot: string, name: string|null}>, sparks: list<array{kind: string, kind_label: string, target: string|null, stars: int|null}>, spark_counts: list<array{kind: string, kind_label: string, count: int}>}>}
+     * @return array{affinity: string|null, parents: list<array{slot: string, label: string, name: string|null, rank: int|null, is_guest: bool, ancestors: list<string|null>, sparks: list<array{kind: string, kind_label: string, target: string|null, stars: int|null}>, spark_counts: list<array{kind: string, kind_label: string, count: int}>}>}
      */
     private function legacySection(LegacySelectionPayload $legacy, array $parentNames): array
     {
@@ -158,10 +158,9 @@ class InheritanceEventController extends Controller
                 'name' => $name,
                 'rank' => $legacyData['rank'] ?? null,
                 'is_guest' => $legacyData['is_guest'],
-                'ancestors' => array_map(
-                    fn (array $a): array => ['slot' => $a['slot'] ?? '', 'name' => $a['name'] ?? null],
-                    $legacyData['ancestors']
-                ),
+                // `ancestors` is a list of names, not slot records (`ADR-0010` Consequences §2): the
+                // position is the slot, and the wizard writes names (`StoreLegacySelectionRequest`).
+                'ancestors' => $legacyData['ancestors'],
                 'sparks' => $sparks,
                 'spark_counts' => $sparkCounts,
             ];

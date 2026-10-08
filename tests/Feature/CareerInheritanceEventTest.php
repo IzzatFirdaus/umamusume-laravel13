@@ -45,10 +45,9 @@ function inheritanceLegacyPayload(): array
             [
                 'rank' => 3,
                 'is_guest' => false,
-                'ancestors' => [
-                    ['slot' => 'grandparent_a1', 'name' => 'Symboli Rudolf'],
-                    ['slot' => 'grandparent_a2', 'name' => 'Mejiro McQueen'],
-                ],
+                // Names, not slot records: the wizard writes `ancestors` as a list of names
+                // (ADR-0010 §2, `StoreLegacySelectionRequest::payload()`), and the position is the slot.
+                'ancestors' => ['Symboli Rudolf', 'Mejiro McQueen'],
                 'sparks' => [
                     ['kind' => 'blue', 'target' => 'Speed', 'stars' => 3],
                     ['kind' => 'pink', 'target' => 'Medium', 'stars' => 2],
@@ -58,10 +57,7 @@ function inheritanceLegacyPayload(): array
             [
                 'rank' => 2,
                 'is_guest' => true,
-                'ancestors' => [
-                    ['slot' => 'grandparent_b1', 'name' => 'Special Week'],
-                    ['slot' => 'grandparent_b2', 'name' => 'Grass Wonder'],
-                ],
+                'ancestors' => ['Special Week', 'Grass Wonder'],
                 'sparks' => [
                     ['kind' => 'blue', 'target' => 'Stamina', 'stars' => 2],
                     ['kind' => 'green', 'target' => 'Endless Bloom', 'stars' => 3],
@@ -97,12 +93,13 @@ it('renders the inheritance event page for a run with a legacy configuration', f
             ->where('legacy.parents.0.rank', 3)
             ->where('legacy.parents.0.is_guest', false)
             ->has('legacy.parents.0.ancestors', 2)
-            ->where('legacy.parents.0.ancestors.0.slot', 'grandparent_a1')
-            ->where('legacy.parents.0.ancestors.0.name', 'Symboli Rudolf')
+            ->where('legacy.parents.0.ancestors.0', 'Symboli Rudolf')
+            ->where('legacy.parents.0.ancestors.1', 'Mejiro McQueen')
             ->where('legacy.parents.1.label', 'Parent B')
             ->where('legacy.parents.1.rank', 2)
             ->where('legacy.parents.1.is_guest', true)
             ->has('legacy.parents.1.ancestors', 2)
+            ->where('legacy.parents.1.ancestors.0', 'Special Week')
             ->has('predicted')
             ->has('predicted.predicted_sparks')
             ->where('predicted.expected_inheritance.label', 'N/A')
@@ -131,6 +128,48 @@ it('renders the inheritance event page for a run with a legacy configuration', f
             ->where('write.action', route('runs.inheritance.store', $run))
             ->has('write.turns', 18)
             ->has('write.sources', 5));
+});
+
+it('renders a legacy selection whose ancestors are the name list the wizard writes', function (): void {
+    // The wizard stores `ancestors` as names (`ADR-0010` §2). The page used to map each entry as an
+    // array with `slot`/`name` keys and threw `array_map(): Argument #1 ($a) must be of type array`
+    // on every run created through the UI. One parent names two ancestors, the other names none.
+    $run = inheritanceRun(['scenario' => 'unity_cup'], turns: 18);
+    $run->update(['legacy_selection' => [
+        'legacies' => [
+            ['rank' => null, 'is_guest' => false, 'ancestors' => ['Daiwa Scarlet', 'Seiun Sky'], 'sparks' => []],
+            ['rank' => null, 'is_guest' => true, 'ancestors' => [], 'sparks' => []],
+        ],
+        'affinity' => null,
+    ]]);
+
+    $this->get(route('runs.inheritance', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('legacy.parents.0.ancestors', 2)
+            ->where('legacy.parents.0.ancestors.0', 'Daiwa Scarlet')
+            ->where('legacy.parents.0.ancestors.1', 'Seiun Sky')
+            ->has('legacy.parents.1.ancestors', 0));
+});
+
+it('renders a legacy selection with a single ancestor and a null one', function (): void {
+    $run = inheritanceRun(['scenario' => 'unity_cup'], turns: 18);
+    $run->update(['legacy_selection' => [
+        'legacies' => [
+            ['rank' => null, 'is_guest' => false, 'ancestors' => ['Mejiro McQueen'], 'sparks' => []],
+            ['rank' => null, 'is_guest' => false, 'ancestors' => [null, 'Taiki Shuttle'], 'sparks' => []],
+        ],
+        'affinity' => null,
+    ]]);
+
+    $this->get(route('runs.inheritance', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('legacy.parents.0.ancestors', 1)
+            ->where('legacy.parents.0.ancestors.0', 'Mejiro McQueen')
+            ->has('legacy.parents.1.ancestors', 2)
+            ->where('legacy.parents.1.ancestors.0', null)
+            ->where('legacy.parents.1.ancestors.1', 'Taiki Shuttle'));
 });
 
 it('renders the predicted sparks aggregated across both parents and grandparents', function (): void {

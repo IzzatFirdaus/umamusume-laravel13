@@ -47,7 +47,8 @@ interface LegacyParent {
     name: string | null;
     rank: number | null;
     is_guest: boolean;
-    ancestors: { slot: string; name: string | null }[];
+    /** A list of names, not slot records: the position is the slot (`ADR-0010` Consequences §2). */
+    ancestors: (string | null)[];
     sparks: { kind: string; kind_label: string; target: string | null; stars: number | null }[];
     spark_counts: { kind: string; kind_label: string; count: number }[];
 }
