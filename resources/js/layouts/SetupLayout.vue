@@ -30,7 +30,7 @@ const steps = [
     { label: 'Trainee', to: '/career/setup/trainee' },
     { label: 'Your target', to: '/career/setup/target' },
     { label: 'Legacy', to: '/career/setup/legacy' },
-    { label: 'Support Cards', to: '/career/setup/deck' },
+    { label: 'Support deck', to: '/career/setup/deck' },
     { label: 'Preflight', to: '/career/setup/preflight' },
 ];
 

@@ -129,6 +129,19 @@ const fillingLabel = (): string =>
     props.slots.find((slot) => slot.position === filling.value)?.label ?? `Slot ${filling.value}`;
 
 /**
+ * A refusal names the slot in the words the slot already carries on this screen. The validation key is a
+ * field path (`deck.3.ownership`, `deck.2.support_card_id`), and a Trainer reading it learns the shape of
+ * the request rather than which of the six slots to fix. `deck` itself is the whole-deck refusal — the
+ * duplicate pair — and it has no slot to name.
+ */
+function errorLabel(field: string): string {
+    const position = field.split('.')[1];
+    const slot = props.slots.find((row) => String(row.position) === position);
+
+    return slot?.label ?? `Slot ${position}`;
+}
+
+/**
  * The one navigation that is not a save: narrowing the picker. The draft already holds every pick, so a
  * filter change has nothing to carry and a GET cannot lose one — which is the whole reason this step can
  * keep its slots out of the URL.
@@ -197,8 +210,8 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
 
 <template>
     <SetupLayout :step="5">
-        <Head title="Support Cards" />
-        <template #title>Support Cards</template>
+        <Head title="Support deck" />
+        <template #title>Support deck</template>
 
         <p class="max-w-2xl text-sm text-ink-muted">
             A deck is the six cards equipped before the career starts. Position six is the friend slot, and
@@ -381,7 +394,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         :key="field"
                         class="text-sm text-risk"
                     >
-                        {{ field }}: {{ message }}
+                        {{ errorLabel(field) }}: {{ message }}
                     </li>
                 </ul>
             </section>

@@ -152,14 +152,14 @@ test.describe('Setup step 4 — Legacy', () => {
     });
 });
 
-test.describe('Setup step 5 — Support Cards', () => {
+test.describe('Setup step 5 — Support deck', () => {
     test('renders six slots, the seven spelled types and the ownership flag as a named absence', async ({ page }) => {
         await hydrate(page, '/career/setup/deck');
 
-        await expect(page.getByRole('heading', { name: 'Support Cards', level: 1 })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Support deck', level: 1 })).toBeVisible();
         await expect(page.getByText('Step 5 of 6').first()).toBeVisible();
         await expect(
-            page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Support Cards' }),
+            page.getByRole('navigation', { name: 'Setup steps' }).getByRole('link', { name: 'Support deck' }),
         ).toHaveAttribute('aria-current', 'step');
 
         // No scenario in the draft yet, and the page says so with its reason rather than defaulting
@@ -275,7 +275,7 @@ test.describe('Setup step 5 — Support Cards', () => {
         // Step 5 through the page's own next-step link: one equipped card. The card is whichever the
         // deterministic picker order puts first, so the test lifts its name off the rendered slot
         // rather than hardcoding today's first row.
-        await page.getByRole('link', { name: 'Next: Support Cards' }).click();
+        await page.getByRole('link', { name: 'Next: Support deck' }).click();
         await page.locator('#app > *').first().waitFor();
         await expect(page).toHaveURL(/\/career\/setup\/deck/);
         await page.selectOption('#deck-pick', { index: 1 });
@@ -301,7 +301,7 @@ test.describe('Setup step 5 — Support Cards', () => {
         await expect(page.getByText(/This setup already holds a Legacy/)).toBeVisible();
 
         // And forward again: the deck survived the round trip too.
-        await nav.getByRole('link', { name: 'Support Cards' }).click();
+        await nav.getByRole('link', { name: 'Support deck' }).click();
         await page.locator('#app > *').first().waitFor();
         await expect(page.locator('#deck-slot-1')).toContainText(cardName);
 

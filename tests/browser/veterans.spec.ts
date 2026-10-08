@@ -23,7 +23,7 @@ test.describe('Mobile navigation', () => {
         await page.goto('/');
         await page.locator('#app > *').first().waitFor();
 
-        const bar = page.getByRole('navigation', { name: 'Primary' }).last();
+        const bar = page.getByRole('navigation', { name: 'Bottom navigation' });
 
         // The four destinations, and More as the disclosure. The brief's word for the slot is the
         // accessible name, so the count is the claim rather than a label list kept in two places. `More`
@@ -48,7 +48,7 @@ test.describe('Mobile navigation', () => {
         await page.goto('/');
         await page.locator('#app > *').first().waitFor();
 
-        const more = page.getByRole('navigation', { name: 'Primary' }).last().getByText('More');
+        const more = page.getByRole('navigation', { name: 'Bottom navigation' }).getByText('More');
 
         // Closed by default, and the hidden destinations are not in the tab order while it is shut.
         await expect(page.getByRole('link', { name: 'Veterans' })).not.toBeVisible();

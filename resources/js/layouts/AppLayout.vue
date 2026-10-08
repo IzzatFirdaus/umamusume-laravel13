@@ -306,7 +306,7 @@ const mobileMoreClass =
              desktop sidebar onto mobile") and the reason nothing at 320px looked scrollable: a
              horizontal-only scroller under a vertical gesture offers no affordance and answers no wheel. -->
         <nav
-            aria-label="Primary"
+            aria-label="Bottom navigation"
             class="fixed inset-x-0 bottom-0 z-40 flex border-t border-rule bg-panel md:hidden"
         >
             <template v-for="item in barItems" :key="item.label">

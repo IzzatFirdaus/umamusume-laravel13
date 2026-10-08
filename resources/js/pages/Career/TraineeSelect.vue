@@ -93,6 +93,26 @@ const props = defineProps<{
 const page = usePage();
 const errors = computed(() => (page.props.errors as Record<string, string | undefined> | undefined) ?? {});
 
+/**
+ * A refusal is announced in the words the control it belongs to already prints. `aptitude_speed: That
+ * rating is not one of S to G` hands the Trainer a schema to read instead of a form to fix, and the
+ * message from `TraineeSearchRequest` is already plain; only the key was not.
+ */
+const filterLabels = computed(() =>
+    Object.fromEntries(props.facets.map((facet) => [facet.param, facet.label])),
+);
+
+const STATIC_FILTER_LABELS: Record<string, string> = {
+    search: 'Search',
+    skill: 'Unique skill',
+    sortBy: 'Sort by',
+    direction: 'Order',
+};
+
+function errorLabel(field: string): string {
+    return filterLabels.value[field] ?? STATIC_FILTER_LABELS[field] ?? 'This filter';
+}
+
 // Mirrored from the resolved props rather than from the URL, so a filter the server refused (and therefore
 // ignored) never stays highlighted on the form as though it had been applied. The three aptitude facets
 // share one keyed record because the facet list arrives from the server, so the form must bind by key
@@ -302,7 +322,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                 role="alert"
                 class="rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
             >
-                {{ field }}: {{ message }}
+                {{ errorLabel(field) }}: {{ message }}
             </li>
         </ul>
 
