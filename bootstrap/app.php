@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Validation\ValidationException;
+use Native\Desktop\Http\Middleware\PreventRegularBrowserAccess;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -22,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
         ]);
+
+        $middleware->prepend(PreventRegularBrowserAccess::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Unified API error shape (ARCHITECTURE §4): { "error": { "code", "message" } }
