@@ -18,7 +18,7 @@ partial view of the scopes, and then read as current long after it stopped being
 ```bash
 node "$HOME/.qoder/skills/refresh-skill-registry/scripts/scan-skills.cjs" --project "$(pwd)" --names
 node "$HOME/.qoder/skills/refresh-skill-registry/scripts/scan-skills.cjs" --project "$(pwd)" --violations
-```text
+```
 
 The first prints the roster grouped by scope, the second prints only the skills with problems.
 The summary line reads `SKILLS total=N errors=E warnings=W`. Both read each skill's own
@@ -29,12 +29,42 @@ Five scopes are covered: `~/.claude/skills`, `~/.qoder/skills`, `<project>/.agen
 `~/.qoder/plugins/installed_plugins_v2.json`. A count that omits any of those five is the defect
 this file used to have.
 
+## What the five scopes do not cover
+
+The scanner reads only those five roots. Three more skill homes exist on or in this repository
+and no scanner total includes them:
+
+- `.ai/skills/` — the repository's own tracked skills (eight as of 2026-10-06, one directory per
+  skill with the same frontmatter shape). They ship in git, are read by the agent hosts pointed
+  at `.ai/`, and are invisible to `scan-skills.cjs`.
+- `skills/` plus the gitignored `skills-lock.json` at the repository root — an installer-managed
+  local directory pulling skills from GitHub sources; untracked, host-specific.
+- Per-agent directories under the repo root (`.claude/skills/`, `.cursor/skills/`, and similar):
+  gitignored local scaffolding per `AGENTS.md` §11, not repository truth.
+
+A roster question about this repository's skills therefore has two answers: the scanner prints
+the installed-on-this-host inventory, and `git ls-files .ai/skills` prints the tracked ones.
+
+## Repository-authored skills
+
+| Skill | Purpose | Added |
+|---|---|---|
+| `.ai/skills/fetch-pipeline` | Work the stage-isolated ingest engine: add or change a `config('uma.sources')` source and its parser, reparse snapshots, keep promote and provenance rules intact | 2026-10-06 |
+
+This is a pointer to where the skills live, not a spec copy: each skill's own `SKILL.md` holds
+its triggers, workflow, and validation, and is tracked, so it cannot drift from git.
+
 ## State at the time of writing
 
 Measured 2026-10-02 at commit `31592ac`, with the scanner above: **205 skills, 4 errors,
 62 warnings**. Pinned to a sha on purpose. It is an example of what the command returns, not a
 baseline to compare against, and it is wrong the moment a skill is installed or removed. The
 durable facts above are the five scopes and the command; this line is a dated measurement.
+
+Re-measured 2026-10-06 at commit `55be0cd`: **205 skills, 4 errors, 61 warnings** (one warning
+fewer; the installed set otherwise unchanged). The eight tracked `.ai/skills/` entries, including
+`fetch-pipeline` added the same day, sit outside that count by design — see the coverage section
+above.
 
 ## Provenance
 
@@ -54,3 +84,11 @@ Two things follow from that, and both are the owner's to settle rather than this
 2. `PRODUCT.md` beside it is owned by the `impeccable` plugin and regenerates itself. Neither of
    these two root files is documentation to consolidate, which is why `INDEX.md` exempts them by
    type.
+
+Updated 2026-10-06 by owner instruction, with the scanner re-run for the new dated measurement
+rather than a hand count. The additions record what that run and `git ls-files` prove: the
+repository now authors its own skills under `.ai/skills/` — `fetch-pipeline` is the first — and
+the five scanner scopes do not cover them, the installer-managed `skills/` directory, or the
+gitignored per-agent directories. The stray ```text fence that opened instead of closed the
+bash block was corrected in the same pass. No roster was reintroduced: the pointer rule and the
+dated-measurement rule both still hold.
