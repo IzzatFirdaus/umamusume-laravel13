@@ -25,8 +25,9 @@
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import TrainingCard from '../../components/career/TrainingCard.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, nextTick, onUnmounted, ref, watch } from 'vue';
+import { Head, useForm } from '@inertiajs/vue3';
+import { computed, nextTick, ref, watch } from 'vue';
+import { useVisitState } from '../../composables/useVisitState';
 
 interface Cost {
     min: number;
@@ -75,35 +76,7 @@ const props = defineProps<{
     };
 }>();
 
-const visiting = ref(false);
-const visitFailed = ref(false);
-
-const stopStart = router.on('start', () => {
-    visiting.value = true;
-    visitFailed.value = false;
-});
-const stopFinish = router.on('finish', () => {
-    visiting.value = false;
-});
-const stopException = router.on('exception', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-
-    return false;
-});
-const stopInvalid = router.on('invalid', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-
-    return false;
-});
-
-onUnmounted(() => {
-    stopStart();
-    stopFinish();
-    stopException();
-    stopInvalid();
-});
+const { visiting, visitFailed } = useVisitState();
 
 // The choice the Trainer holds for the turn, set by a card's Train button. Null until one is pressed,
 // which is the honest state: nothing here presumes which training this turn was.

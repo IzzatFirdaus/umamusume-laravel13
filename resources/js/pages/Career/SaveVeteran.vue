@@ -23,8 +23,9 @@
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import SparkChip from '../../components/legacy/SparkChip.vue';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { computed, onUnmounted, reactive, ref } from 'vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { computed, reactive, ref } from 'vue';
+import { useVisitState } from '../../composables/useVisitState';
 
 interface HeldFigure {
     value: null;
@@ -75,28 +76,7 @@ const props = defineProps<{
     library_url: string;
 }>();
 
-const visiting = ref(false);
-const visitFailed = ref(false);
-
-const stopStart = router.on('start', () => {
-    visiting.value = true;
-});
-const stopFinish = router.on('finish', () => {
-    visiting.value = false;
-});
-const stopException = router.on('exception', () => {
-    visitFailed.value = true;
-});
-const stopInvalid = router.on('invalid', () => {
-    visitFailed.value = true;
-});
-
-onUnmounted(() => {
-    stopStart();
-    stopFinish();
-    stopException();
-    stopInvalid();
-});
+const { visiting, visitFailed } = useVisitState();
 
 const form = useForm<{ tags: string[]; notes: string }>({
     tags: props.saved?.tags ?? [],

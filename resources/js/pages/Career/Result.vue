@@ -19,8 +19,9 @@
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import AptitudeBadge from '../../components/AptitudeBadge.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
-import { Head, router } from '@inertiajs/vue3';
-import { onUnmounted, ref } from 'vue';
+import { Head } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { useVisitState } from '../../composables/useVisitState';
 
 interface StatRow {
     key: string;
@@ -72,35 +73,7 @@ const props = defineProps<{
     empty: { reason: string; message: string } | null;
 }>();
 
-const visiting = ref(false);
-const visitFailed = ref(false);
-
-const stopLoading = router.on('start', () => {
-    visiting.value = true;
-    visitFailed.value = false;
-});
-const stopLoaded = router.on('finish', () => {
-    visiting.value = false;
-});
-const stopFailed = router.on('exception', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-
-    return false;
-});
-const stopInvalid = router.on('invalid', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-
-    return false;
-});
-
-onUnmounted(() => {
-    stopLoading();
-    stopLoaded();
-    stopFailed();
-    stopInvalid();
-});
+const { visiting, visitFailed } = useVisitState();
 
 const statValue = (value: number | null): string => (value === null ? 'N/A' : String(value));
 

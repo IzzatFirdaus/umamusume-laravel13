@@ -16,8 +16,9 @@
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import SkillPlanRow from '../../components/career/SkillPlanRow.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, onUnmounted, ref, watch } from 'vue';
+import { Head, useForm } from '@inertiajs/vue3';
+import { computed, ref, watch } from 'vue';
+import { useVisitState } from '../../composables/useVisitState';
 
 interface CostEntry {
     level: string;
@@ -76,35 +77,7 @@ const props = defineProps<{
     ladder: { level: string; percent: number }[];
 }>();
 
-const visiting = ref(false);
-const visitFailed = ref(false);
-
-const stopLoading = router.on('start', () => {
-    visiting.value = true;
-    visitFailed.value = false;
-});
-const stopLoaded = router.on('finish', () => {
-    visiting.value = false;
-});
-const stopFailed = router.on('exception', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-
-    return false;
-});
-const stopInvalid = router.on('invalid', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-
-    return false;
-});
-
-onUnmounted(() => {
-    stopLoading();
-    stopLoaded();
-    stopFailed();
-    stopInvalid();
-});
+const { visiting, visitFailed } = useVisitState();
 
 // The reorder is a local edit to the Trainer's list until it is saved, so it lives outside the
 // props; a props change (the save's own response among them) re-syncs it to what the server

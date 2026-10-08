@@ -19,8 +19,9 @@
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import RaceCard from '../../components/career/RaceCard.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { computed, onUnmounted, ref } from 'vue';
+import { Head, Link } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { useVisitState } from '../../composables/useVisitState';
 
 interface Fact {
     key: string;
@@ -57,35 +58,7 @@ const props = defineProps<{
     empty: string | null;
 }>();
 
-const visiting = ref(false);
-const visitFailed = ref(false);
-
-const stopLoading = router.on('start', () => {
-    visiting.value = true;
-    visitFailed.value = false;
-});
-const stopLoaded = router.on('finish', () => {
-    visiting.value = false;
-});
-const stopFailed = router.on('exception', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-
-    return false;
-});
-const stopInvalid = router.on('invalid', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-
-    return false;
-});
-
-onUnmounted(() => {
-    stopLoading();
-    stopLoaded();
-    stopFailed();
-    stopInvalid();
-});
+const { visiting, visitFailed } = useVisitState();
 
 // The next obligation is the Level 1 item; the rest are context, so only one row is emphasised.
 const nextDeadline = computed(() => props.deadlines.find((row) => row.is_next) ?? null);

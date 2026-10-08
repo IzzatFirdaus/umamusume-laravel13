@@ -1465,3 +1465,50 @@ wanted it; that behavior was incidental, not the contract. It does not decide wh
 Backup action and `uma:backup` should keep sharing one implementation, which is what `BackupDatabase` now
 does. And nothing here lands the change: `uma:backup`'s old semantics remain HEAD's until the slice is
 committed.
+
+### KI-79 Eleven pages set their loading state from Inertia's `start` event, which a `Link` hover prefetch also fires, and an interrupted request never fires `finish`, so a page can announce a load that already ended and never clear it - FILED 2026-10-08 (NFR hardening pass, from the attached performance task), FIXED IN TREE, NOT CLOSED
+
+**Status: FIXED IN TREE, NOT CLOSED.** The eleven pages that carried the block now call one composable,
+`resources/js/composables/useVisitState.ts`, which ignores a prefetch visit and owns the four listeners
+once. Nothing is committed.
+
+**The mechanism, from the installed library.** `@inertiajs/core` 2.3.28. `Request::send()`
+(`node_modules/@inertiajs/core/dist/index.esm.js:2283`) calls `fireStartEvent(...)` **before** it looks at
+`prefetch`, so a hover prefetch dispatches the same document `inertia:start` a real visit does. `Request::finish()`
+(`:2327-2333`) returns early when `wasCancelledAtAll()` — `cancelled || interrupted` (`:1772-1774`) — so a
+cancelled request fires `start` and then **nothing**. `Router::visit()` calls `syncRequestStream.interruptInFlight()`
+(`:2554`) on every non-async visit, and that stream is `{maxConcurrent: 1, interruptible: true}` (`:2415-2418`),
+so a second navigation always interrupts the first; `cancelInFlight({prefetch: false})` (`:2552`) cancels in-flight
+prefetches when the destination changes.
+
+**What that produced.** Each of eleven pages carried its own copy of a four-listener block that set
+`visiting = true` on `start` and cleared it only on `finish` / `exception` / `invalid`. `AppLayout.vue` prefetches
+eight of its ten destinations on hover (`:prefetch="item.prefetches ? 'hover' : false"`, 75 ms delay). Two
+consequences, both matching the task's reported symptoms: the page the Trainer is already on announced
+"Loading…" every time the pointer crossed the sidebar; and a prefetch superseded by the next one was cancelled
+without a `finish`, so the flag was never cleared and the page stayed in that state. A real visit that is
+interrupted self-heals on the interrupting visit's `finish`, which is why the defect read as intermittent.
+
+**Proving commands.**
+
+```bash
+grep -n "fireStartEvent\|wasCancelledAtAll\|interruptInFlight" node_modules/@inertiajs/core/dist/index.esm.js
+grep -rn "router\.on(" resources/js/pages          # 11 files before, 0 after
+grep -n "prefetch" node_modules/@inertiajs/core/dist/index.esm.js | head -1   # hoverDelay: 75
+```
+
+**The regression test.** `tests/browser/navigation-determinism.spec.ts` holds the prefetch response open with
+`page.route`, hovers a nav link, and asserts no `role="status"` appears; a second case interrupts one held
+prefetch with another. Both fail on the pre-fix tree and pass on the fixed one. `useVisitState.ts` also returns
+`false` from `exception`/`invalid`, which `SaveVeteran.vue` did not do before, so that page now suppresses
+Inertia's default error modal the way the other ten already did.
+
+**Owner.** Laravel Dev / frontend owner for the composable; QA / Reviewer for whether the eleven-page
+duplication should have been collapsed in the same change.
+
+**Closure owed.** A commit. Nothing else: the behaviour is the standard the other ten pages already implemented.
+
+**What closure would not cover.** It does not address `start` firing for a prefetch at all, which is Inertia's
+behaviour and not this app's to change; it does not make `cancel` a usable event — the type map declares
+`cancel` (`types/types.d.ts:204-208`) but 2.3.28 never fires it, so a listener keyed on it would be a check that
+cannot fail; and it does not touch KI-76, which is a server-side defect with its own remedy choice.

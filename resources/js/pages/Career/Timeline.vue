@@ -13,8 +13,9 @@
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import CareerTimeline from '../../components/career/CareerTimeline.vue';
-import { Head, router } from '@inertiajs/vue3';
-import { computed, onUnmounted, ref } from 'vue';
+import { Head } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { useVisitState } from '../../composables/useVisitState';
 
 const props = defineProps<{
     run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; cockpit_url: string };
@@ -39,33 +40,7 @@ const props = defineProps<{
     empty: string | null;
 }>();
 
-const visiting = ref(false);
-const visitFailed = ref(false);
-
-const stopLoading = router.on('start', () => {
-    visiting.value = true;
-    visitFailed.value = false;
-});
-const stopLoaded = router.on('finish', () => {
-    visiting.value = false;
-});
-const stopFailed = router.on('exception', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-    return false;
-});
-const stopInvalid = router.on('invalid', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-    return false;
-});
-
-onUnmounted(() => {
-    stopLoading();
-    stopLoaded();
-    stopFailed();
-    stopInvalid();
-});
+const { visiting, visitFailed } = useVisitState();
 
 // Filter state is local-only: the rail is a presentation over an already-fetched list.
 const activeKinds = ref<string[]>([]);

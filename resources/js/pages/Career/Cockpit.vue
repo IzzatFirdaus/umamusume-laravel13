@@ -30,8 +30,9 @@ import ActionGrid from '../../components/career/ActionGrid.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
 import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, nextTick, onUnmounted, ref, watch } from 'vue';
+import { Head, useForm } from '@inertiajs/vue3';
+import { computed, nextTick, ref, watch } from 'vue';
+import { useVisitState } from '../../composables/useVisitState';
 
 interface Header {
     scenario_label: string;
@@ -87,35 +88,7 @@ const props = defineProps<{
     correction: Correction | null;
 }>();
 
-const visiting = ref(false);
-const visitFailed = ref(false);
-
-const stopLoading = router.on('start', () => {
-    visiting.value = true;
-    visitFailed.value = false;
-});
-const stopLoaded = router.on('finish', () => {
-    visiting.value = false;
-});
-const stopFailed = router.on('exception', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-
-    return false;
-});
-const stopInvalid = router.on('invalid', () => {
-    visiting.value = false;
-    visitFailed.value = true;
-
-    return false;
-});
-
-onUnmounted(() => {
-    stopLoading();
-    stopLoaded();
-    stopFailed();
-    stopInvalid();
-});
+const { visiting, visitFailed } = useVisitState();
 
 const empty = computed(() => props.header.turn === 0);
 
