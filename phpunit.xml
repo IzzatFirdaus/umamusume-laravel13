@@ -81,5 +81,11 @@
         <server name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false" force="true"/>
         <server name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Database safety guard: declare the test role so the guard knows this is an isolated
+             workflow. The test suite uses :memory: so targetsCanonical() returns false, but
+             declaring the role ensures the guard's config-cache and absolute-path assertions
+             run and are exercised by the test suite (DatabaseSafetyTest). -->
+        <env name="UMA_DATABASE_ROLE" value="test" force="true"/>
+        <server name="UMA_DATABASE_ROLE" value="test"/>
     </php>
 </phpunit>

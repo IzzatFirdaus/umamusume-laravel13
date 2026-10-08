@@ -65,7 +65,7 @@ return [
             ]) : [],
         ],
 
-        'mariadb' => [
+        'maridb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
@@ -83,6 +83,21 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+        ],
+
+        'mysql_backup' => [
+            'driver' => 'mariadb',
+            'host' => config('mysql-backup.host'),
+            'port' => config('mysql-backup.port'),
+            'database' => config('mysql-backup.database'),
+            'username' => config('mysql-backup.username'),
+            'password' => config('mysql-backup.password'),
+            'charset' => config('mysql-backup.charset'),
+            'collation' => config('mysql-backup.collation'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => 'InnoDB',
         ],
 
         'pgsql' => [
