@@ -30,9 +30,10 @@ use Inertia\Response;
  * or a single probability. So neither arrives on the wire at all: `CareerTrainingDetailTest` pins an
  * option payload to a declared key set, and a field that could hold a projected number fails that test
  * before it can reach a screen. The page renders `N/A` with the exclusion named in its `title`. The
- * design brief that shows `+62 Speed` and `2% Failure` states intent, not data, and its own
- * correction table rules those figures unsourced
- * (`docs/proposals/screen-spec-2.0.md`, PRODUCT DIRECTION CORRECTIONS, SCREEN-010 row).
+ * design brief for this screen prints a projected gain and a failure percentage per card, which states
+ * intent rather than data; its own correction table rules those figures unsourced
+ * (`docs/proposals/screen-spec-2.0.md`, PRODUCT DIRECTION CORRECTIONS, SCREEN-010 row). They are not
+ * quoted here, so a grep for a hard-coded yield or failure number over this slice has one answer.
  *
  * **Every figure comes from one of four places, and none of them is this controller**: entered values
  * (`TurnEntry`), the run's own target (`BuildTargetPayload`), declared constants with their source and
@@ -348,8 +349,9 @@ class TrainingDecisionController extends Controller
 
     /**
      * ponytail: `CockpitController::currentStat()`'s body, kept private to each controller rather than
-     * extracted into a `TurnEntry` accessor for two callers. Upgrade path: one accessor on the model
-     * when a third career screen reads a stat by matrix name.
+     * extracted for two callers (the third reading of the same map is `TrainerAdvisor::current()`, which
+     * throws rather than returning null). Upgrade path: one accessor on `TurnEntry` when a third career
+     * screen reads a stat by matrix name.
      */
     private function currentStat(?TurnEntry $latest, string $stat): ?int
     {

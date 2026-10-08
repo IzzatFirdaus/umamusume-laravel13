@@ -2,12 +2,12 @@
 /*
  * One training option, as the Trainer compares it (SCREEN-010, design-2.0 §24 and §35).
  *
- * **The card's headline slot is empty on purpose.** The brief that shaped this screen prints
- * `+62 Speed / +25 Power` and `Failure: 2%`; both are unsourced, and the advisor spec puts them out of
- * scope (`docs/research-scratch/PROCESS-PLANS.md` section `trainer-advisor.md` §1 and §5, `ADR-0001` §3).
- * They render `N/A` with the exclusion named in the `title`, never a number and never a dash
- * (`AGENTS.md` §5). `CareerTrainingDetailTest` pins the option payload to a key set that has no home
- * for a projected figure, so this file cannot be handed one.
+ * **The card's headline slot is empty on purpose.** The brief that shaped this screen prints a
+ * projected gain per stat and a failure percentage for each card; both are unsourced, and the advisor
+ * spec puts them out of scope (`docs/research-scratch/PROCESS-PLANS.md` section `trainer-advisor.md`
+ * §1 and §5, `ADR-0001` §3). They render `N/A` with the exclusion named in the `title`, never a
+ * number and never a dash (`AGENTS.md` §5). `CareerTrainingDetailTest` pins the option payload to a
+ * key set that has no home for a projected figure, so this file cannot be handed one.
  *
  * **Three facts in the collapsed card, the modifiers on expansion** (design-2.0 §35, plan §13 under
  * Cognitive Load): the cost, the supports entered, and the deficit against the Trainer's own target.
@@ -151,11 +151,17 @@ const supportsTitle = computed(() =>
         : 'No Support Cards are recorded for this run, so nothing can be counted for this training.',
 );
 
-const scenarioTitle = computed(() =>
-    props.option.scenario_effects === null
-        ? 'This run declares no scenario, so no scenario effect is claimed.'
-        : `Read from the ${props.scenarioLabel} entry of config/scenarios.php.`,
-);
+const scenarioTitle = computed(() => {
+    if (props.option.scenario_effects === null) {
+        return 'This run declares no scenario, so no scenario effect is claimed.';
+    }
+
+    if (props.option.scenario_effects.length === 0) {
+        return `The ${props.scenarioLabel} entry declares nothing that bears on this training beyond its cap bonus.`;
+    }
+
+    return `Read from the ${props.scenarioLabel} entry of config/scenarios.php.`;
+});
 
 const capTitle = computed(() =>
     props.option.cap_bonus === null

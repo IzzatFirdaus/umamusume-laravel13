@@ -21,7 +21,10 @@ use App\Models\TrainingRun;
 it('creates a manual scenario_slot and a linked race_entry in one request', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
 
-    $response = $this->post(route('runs.races.store', $run), [
+    // The write returns to the page the form was posted from, so the run screen is seeded as the
+    // referer: the same URL the panel lives on, and the same target as before the Race Decision
+    // screen arrived (`SCR-CAR-013`).
+    $response = $this->from(route('runs.show', $run))->post(route('runs.races.store', $run), [
         'entry_mode' => 'manual',
         'title' => 'My Custom Race',
         'month' => 6,
@@ -111,7 +114,7 @@ it('stores the override when tier differs from a seeded slot prefill', function 
         'tier' => 'G1',
     ]);
 
-    $response = $this->post(route('runs.races.store', $run), [
+    $response = $this->from(route('runs.show', $run))->post(route('runs.races.store', $run), [
         'entry_mode' => 'calendar',
         'scenario_slot_id' => $slot->id,
         'tier_override' => 'G2',

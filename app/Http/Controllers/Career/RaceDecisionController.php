@@ -10,11 +10,12 @@ use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Services\RaceFacts;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * The Race Decision, `SCR-CAR-012` (SCREEN-011, plan §8 D10). Whether and where to race, at the turn
+ * The Race Decision, `SCR-CAR-013` (SCREEN-011, plan §8 D10). Whether and where to race, at the turn
  * being decided.
  *
  * **Everything here is a catalogue fact, an entered value, or a named absence.** The card's fact list
@@ -28,8 +29,10 @@ use Inertia\Response;
  * `ADR-0016`, which is an OPEN QUESTION rather than a permission, and `PRD.md` §6.11 is unamended by
  * it. `readiness` is therefore `N/A` with a `title` naming the blocker, and no percentage is computed,
  * stored or rendered anywhere in this slice. The screen-spec's correction row asks for
- * Excellent/Good/Borderline/Poor bands instead of fake precision; bands are a prediction of the same
- * shape and are equally held, so they are named as absent rather than invented.
+ * Excellent/Good/Borderline/Poor bands instead of fake precision. A band describes preparation and a
+ * percentage predicts an outcome, so they are not the same claim, and whether a descriptive band is
+ * permitted here is a ruling the owner owes rather than one `ADR-0016` has made (`SCREEN_SPEC.md`
+ * SCR-CAR-013, "The held figure"). Nothing is computed either way, so the row prints `N/A`.
  *
  * **A mandatory race is a career obligation, not a Goal.** `is_mandatory` is true on seven rows: the
  * Junior Make Debut, the qualifier, the semifinal and the four scenario finals. `79ffad5` withdrew it
@@ -57,6 +60,10 @@ class RaceDecisionController extends Controller
             'deadlines' => $this->deadlineRows($run, $next),
             'readiness' => $this->readiness(),
             'entry' => $this->entrySection($run),
+            // The door to the Scenario Race Planner (`SCR-CAR-023`, plan §9 E5). A screen reachable
+            // only by URL is a defect (D14's finding on `runs.timeline`), and this is the screen whose
+            // action grid entry the planner extends, so the link belongs here.
+            'planner_url' => route('runs.races.planner', $run),
             'empty' => $this->emptyState($run, $next, count($races)),
         ]);
     }
@@ -146,7 +153,7 @@ class RaceDecisionController extends Controller
             'maiden_gated' => $slot->hasMaidenGate(),
             'is_mandatory' => $slot->is_mandatory,
             'is_special' => $slot->is_special_race,
-            'facts' => $this->facts($slot),
+            'facts' => RaceFacts::forSlot($slot),
             // What the Trainer has already recorded for this slot, or null when they have not
             // reached it. The status is the enum's own value; the word is the enum's, not a label
             // this screen invents.
@@ -154,72 +161,6 @@ class RaceDecisionController extends Controller
             'placement' => $entry?->placementOrdinal(),
             'fans_gain' => $entry?->fans_gain,
             'grade_points' => $entry?->grade_points_earned,
-        ];
-    }
-
-    /**
-     * The brief's field list for one race, present or absent, each absence carrying its reason.
-     *
-     * Built server-side rather than in the component, so the reason a figure is missing travels with
-     * the figure and one place owns the wording (`LegacyController`'s Spark-chance cell made the same
-     * call).
-     *
-     * @return list<array{key: string, label: string, value: string|null, title: string|null}>
-     */
-    private function facts(RaceCatalogSlot $slot): array
-    {
-        return [
-            $this->fact('grade', 'Grade', $slot->tier, 'This catalogue row carries no tier label.'),
-            $this->fact(
-                'distance',
-                'Distance',
-                $slot->distance === null ? null : $slot->distanceLabel(),
-                'This catalogue row carries no distance, so the client decides it from the trainee\'s most-run types.',
-            ),
-            $this->fact(
-                'distance_band',
-                'Distance band',
-                $slot->distance_band,
-                'This catalogue row carries no distance band.',
-                $slot->distance_band === null ? null : 'Band names are the export\'s own. The corpus disagrees with itself at the 1400 m line (Game8 calls it Sprint, the export calls it Mile), so the band is printed as the export states it and no band is derived from a metre count.',
-            ),
-            $this->fact('surface', 'Surface', $slot->surface, 'This catalogue row carries no surface.'),
-            $this->fact(
-                'running_style',
-                'Running style',
-                null,
-                'A running style is the trainee\'s aptitude, not a property of the race, and no column here holds a per-race one. The trainee\'s own style letters are on her profile.',
-            ),
-            $this->fact(
-                'fan_gain',
-                'Fan gain',
-                null,
-                'No column holds a fan payout. This row carries the payout curve id the export publishes'
-                    .($slot->fans_gain_curve === null ? ' (none on this row)' : " ({$slot->fans_gain_curve})")
-                    .', and no payout table for those curves is stored, so the figure cannot be read off it.',
-            ),
-            $this->fact('reward', 'Reward', null, 'No column holds a race reward, and no source in this repository states one per race.'),
-            $this->fact('skill_points', 'Skill Points', null, 'No column holds a skill-point payout. The Trainer records what the client paid, on the run screen.'),
-            $this->fact('scenario_reward', 'Scenario reward', null, 'No column holds a scenario reward, and the scenario panels that would state one are not built.'),
-            $this->fact(
-                'win_probability',
-                'Estimated win probability',
-                null,
-                'Held: race prediction is blocked on the requirement data `ADR-0016` measures, which is an open question and not a permission. `PRD.md` §6.11 stands unamended, so this tool computes and prints no win figure.',
-            ),
-        ];
-    }
-
-    /**
-     * @return array{key: string, label: string, value: string|null, title: string|null}
-     */
-    private function fact(string $key, string $label, ?string $value, string $absentTitle, ?string $presentTitle = null): array
-    {
-        return [
-            'key' => $key,
-            'label' => $label,
-            'value' => $value,
-            'title' => $value === null ? $absentTitle : $presentTitle,
         ];
     }
 
@@ -265,8 +206,7 @@ class RaceDecisionController extends Controller
                 // The first obligation the run has not cleared is the one in front of it. One row
                 // carries the marker, so the region never becomes a wall of emphasis (Von Restorff).
                 'is_next' => ! $marked && ! $cleared,
-                'reached' => $next !== null
-                    && ($slot->year < $next['year'] || ($slot->year === $next['year'] && ($slot->turn ?? 0) <= $next['turn'])),
+                'reached' => $slot->isAtOrBeforeTurn($next),
             ];
 
             $marked = $marked || ! $cleared;

@@ -160,6 +160,31 @@ class RaceCatalogSlot extends Model
         return $this->turn;
     }
 
+    /**
+     * Whether the career position in `$next` has reached this row.
+     *
+     * One integer orders the two, because a career year is a fixed number of turns: year times the
+     * year length plus the turn is monotonic across the year boundary, which turn 24 of Junior rolling
+     * into turn 1 of Classic is the reason for. The finale block has no turn, so it reads as the first
+     * instant of the fourth year rather than as no position at all.
+     *
+     * `null` means the caller has no position to compare from, which is not the same claim as "the
+     * calendar has reached this row"; it answers false and leaves the screen to say why.
+     *
+     * @param  array{year: int, turn: int}|null  $next
+     */
+    public function isAtOrBeforeTurn(?array $next): bool
+    {
+        if ($next === null) {
+            return false;
+        }
+
+        $at = (int) $this->year * TrainingRun::TURNS_PER_YEAR + (int) ($this->turn ?? 0);
+        $now = (int) $next['year'] * TrainingRun::TURNS_PER_YEAR + (int) $next['turn'];
+
+        return $at <= $now;
+    }
+
     public function yearLabel(): string
     {
         return self::YEARS[$this->year] ?? (string) $this->year;

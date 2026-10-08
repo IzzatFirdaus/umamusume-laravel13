@@ -165,7 +165,7 @@ it('prices a win recorded through the race form, not only one written by hand', 
         'tier' => 'G1',
     ]);
 
-    $this->post(route('runs.races.store', $run), [
+    $this->from(route('runs.show', $run))->post(route('runs.races.store', $run), [
         'entry_mode' => 'calendar',
         'scenario_slot_id' => $slot->id,
         'status' => RaceEntryStatus::Completed->value,

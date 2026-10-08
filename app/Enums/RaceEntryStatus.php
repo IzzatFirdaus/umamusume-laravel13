@@ -11,6 +11,8 @@ namespace App\Enums;
  */
 enum RaceEntryStatus: string
 {
+    use HasLabel;
+
     case NotOffered = 'NotOffered';
     case Skipped = 'Skipped';
     case Entered = 'Entered';

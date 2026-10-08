@@ -28,6 +28,13 @@ return [
         'Retired' => 'Retired',
     ],
 
+    'race_entry_status' => [
+        'NotOffered' => 'Not offered',
+        'Skipped' => 'Skipped',
+        'Entered' => 'Entered',
+        'Completed' => 'Completed',
+    ],
+
     'skill_acquisition' => [
         'Suggested' => 'Starting',
         'Acquired' => 'Acquired',

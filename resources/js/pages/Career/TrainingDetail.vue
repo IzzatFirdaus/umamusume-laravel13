@@ -148,8 +148,23 @@ const form = useForm({
 
 const placeholder = (name: string): string | undefined =>
     props.write.previous?.[name] === null || props.write.previous?.[name] === undefined
-        ? undefined
+        ? 'no logged turn'
         : String(props.write.previous[name]);
+
+/*
+ * The turn's Energy band, in the same words the Cockpit's recommendation card prints
+ * (`components/career/RecommendationCard.vue`), because a Trainer who arrives here by URL is making
+ * the same decision and SC 3.2.4 forbids two vocabularies for one state. `RecommendationCard.vue`
+ * holds its own copy of this pair today; a third screen reading the band extracts it.
+ */
+const BANDS: Record<'AtOrAboveAdvisory' | 'BelowAdvisory', string> = {
+    AtOrAboveAdvisory: 'At or above the advisory line',
+    BelowAdvisory: 'Below the advisory line',
+};
+
+const bandWord = computed(() =>
+    props.advisor.band === null ? null : BANDS[props.advisor.band],
+);
 
 const alert = ref<HTMLElement | null>(null);
 
@@ -257,6 +272,12 @@ const capFor = (label: string): number =>
                 <span class="font-semibold text-ink-strong">{{ recommended.key }}</span>:
                 <span v-if="recommended.reason !== null">{{ recommended.reason }}</span>
                 The marker sits on that card alone.
+            </p>
+
+            <!-- The band is a word and a figure, never a colour, and 50 is the only Energy line any
+                 source states (`ADR-0001` §3). -->
+            <p v-if="bandWord !== null" class="mt-2 text-sm text-ink-muted">
+                This turn is {{ bandWord }}; the line it is measured against is the sourced 50.
             </p>
         </section>
 

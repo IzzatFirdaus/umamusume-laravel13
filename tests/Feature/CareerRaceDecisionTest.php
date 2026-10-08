@@ -27,7 +27,7 @@ use Inertia\Testing\AssertableInertia as Assert;
  *
  * The career grid is 24 turns a year, two a month: turn 13 is Junior Year, Early July.
  */
-function raceRun(int $turns = 0, string|null $scenario = 'ura_finale'): TrainingRun
+function raceRun(int $turns = 0, ?string $scenario = 'ura_finale'): TrainingRun
 {
     $run = TrainingRun::factory()->create([
         'scenario' => $scenario,
@@ -98,7 +98,9 @@ it('renders the races at the turn being decided, with every brief field present 
             // The empty-state sentence is null when there is a race to decide about.
             ->where('empty', null)
             // The one write reuses the existing route; no second race-write route exists.
-            ->where('entry.action', route('runs.races.store', $run)));
+            ->where('entry.action', route('runs.races.store', $run))
+            // And the door to the planner, so that screen is not reachable by URL alone.
+            ->where('planner_url', route('runs.races.planner', $run)));
 });
 
 it('states the fields the corpus holds and names the reason for each one it does not', function (): void {

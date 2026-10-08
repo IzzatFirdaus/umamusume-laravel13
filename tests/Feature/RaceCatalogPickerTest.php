@@ -89,7 +89,7 @@ it('records the race against the catalogue row the picker named', function (): v
         'year' => 1, 'month' => 4, 'half' => 'Early', 'turn' => 7, 'title' => 'Oka Sho',
     ]);
 
-    $this->post(route('runs.races.store', $run), [
+    $this->from(route('runs.show', $run))->post(route('runs.races.store', $run), [
         'entry_mode' => 'calendar',
         'race_catalog_slot_id' => $slot->id,
         'status' => RaceEntryStatus::Completed->value,
@@ -176,7 +176,7 @@ it('keeps a hand-entered race on its own control, apart from the calendar list',
     expect($panel)->toMatch('/<select[^>]*v-model="form\.race_catalog_slot_id"[^>]*name="race_catalog_slot_id"/')
         ->and($panel)->toMatch('/<select[^>]*v-model="form\.scenario_slot_id"[^>]*name="scenario_slot_id"/');
 
-    $this->post(route('runs.races.store', $run), [
+    $this->from(route('runs.show', $run))->post(route('runs.races.store', $run), [
         'entry_mode' => 'calendar',
         'scenario_slot_id' => $free->id,
         'status' => RaceEntryStatus::Completed->value,
