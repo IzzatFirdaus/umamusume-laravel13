@@ -1,0 +1,665 @@
+#!/usr/bin/env python
+"""End-to-end proof for jev-ultrafast-mcp against a deliberately awkward page.
+
+Runs the real thing: launches Chrome, serves the fixture over HTTP, drives it
+through the same code paths the MCP tools use, and asserts on outcomes. Also
+accounts for the two things that decide whether an agent loop is usable:
+round trips and bytes handed to the model.
+
+    python scripts/smoke.py [--headed] [--keep]
+"""
+
+from __future__ import annotations
+
+import argparse
+import http.server
+import json
+import shutil
+import socket
+import sys
+import tempfile
+import threading
+import time
+from functools import partial
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from jev_ultrafast_mcp import macros as macros_mod  # noqa: E402
+from jev_ultrafast_mcp import server as server_mod  # noqa: E402
+from jev_ultrafast_mcp.browser import BrowserManager, Session  # noqa: E402
+from jev_ultrafast_mcp.config import Config  # noqa: E402
+
+RESULTS: list[tuple[str, bool, str]] = []
+LIVE_MANAGERS: list = []
+METRICS: dict[str, object] = {"observes": 0, "acts": 0, "ops": 0, "view_bytes": 0,
+                              "full_bytes": 0, "delta_bytes": 0, "wall_ms": 0}
+
+# How long `/slow.json` is held open. It has to outlast the render in
+# `late-shell.html` (700ms), or the request has landed before the control
+# appears and the fixture stops testing anything.
+SLOW_REQUEST_SECONDS = 1.5
+
+
+def check(name: str, ok: bool, detail: str = "") -> bool:
+    RESULTS.append((name, bool(ok), detail))
+    flag = "ok  " if ok else "FAIL"
+    print(f"  [{flag}] {name}" + (f"  — {detail}" if detail else ""), flush=True)
+    return bool(ok)
+
+
+def section(title: str) -> None:
+    print(f"\n\033[1m{title}\033[0m", flush=True)
+
+
+def wait_until(pred, timeout: float = 10.0, interval: float = 0.1):
+    """Poll `pred` until it returns something truthy, or give up.
+
+    A fixed `time.sleep` is a flake waiting to happen: it is tuned on a warm
+    laptop and then runs on a cold, oversubscribed CI runner. Poll the condition
+    you actually care about instead.
+    """
+    deadline = time.monotonic() + timeout
+    while True:
+        value = pred()
+        if value:
+            return value
+        if time.monotonic() >= deadline:
+            return None
+        time.sleep(interval)
+
+
+# ------------------------------------------------------------------ plumbing
+
+
+def free_port() -> int:
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
+class _QuietHandler(http.server.SimpleHTTPRequestHandler):
+    """The fixture server, minus the per-request log.
+
+    The log has to be suppressed on the class: assigning `log_message` to the
+    `partial` handed to the server sets an attribute on the partial object and
+    never reaches the handler, so the noise this was meant to hide came through
+    anyway -- interleaved with the check results it was meant to keep readable.
+    """
+
+    def log_message(self, *args, **kwargs):  # noqa: ARG002
+        return
+
+    def do_GET(self):  # noqa: N802 - the name is `http.server`'s to choose
+        """Hold `/slow.json` open, so that a page can be *fetching* on purpose.
+
+        `late-shell.html` is about the gap between "the DOM stopped moving" and
+        "the page stopped fetching", and a file answered from disk closes that
+        gap in microseconds -- the fixture would pass whatever the reader did.
+        One path is delayed; everything else is served normally.
+        """
+        if self.path.startswith("/slow.json"):
+            time.sleep(SLOW_REQUEST_SECONDS)
+        super().do_GET()
+
+
+def serve(directory: Path, port: int = 0) -> tuple[http.server.ThreadingHTTPServer, str]:
+    """Serve `directory`. `port=0` picks a free one; pin it to keep the origin.
+
+    The origin of a page is scheme + host + *port*, so a caller that needs two
+    runs to be the same site -- a check-in that must notice it already ran
+    today -- has to pin the port, or the browser sees a different site each
+    time and every run starts from an empty localStorage.
+    """
+    handler = partial(_QuietHandler, directory=str(directory))
+    port = port or free_port()
+    httpd = http.server.ThreadingHTTPServer(("127.0.0.1", port), handler)
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    return httpd, f"http://127.0.0.1:{port}"
+
+
+def ref_of(observation, name: str, role: str | None = None) -> str | None:
+    matches = observation.find(role, name)
+    return matches[0].ref if matches else None
+
+
+def observe(session: Session, *, mode: str = "auto", count: bool = True):
+    started = time.monotonic()
+    observation = session.observe()
+    text = observation.render(observation.previous, mode=mode)
+    if count:
+        METRICS["observes"] = int(METRICS["observes"]) + 1
+        METRICS["view_bytes"] = int(METRICS["view_bytes"]) + len(text)
+        if observation.previous is None:
+            METRICS["full_bytes"] = int(METRICS["full_bytes"]) + len(text)
+        else:
+            METRICS["delta_bytes"] = int(METRICS["delta_bytes"]) + len(text)
+    observation.last_view = text  # type: ignore[attr-defined]
+    observation.last_ms = int((time.monotonic() - started) * 1000)  # type: ignore[attr-defined]
+    return observation
+
+
+def act(session: Session, ops: list[dict], **kwargs):
+    started = time.monotonic()
+    payload = session.act(ops, **kwargs)
+    payload["wall_ms"] = int((time.monotonic() - started) * 1000)
+    METRICS["acts"] = int(METRICS["acts"]) + 1
+    METRICS["ops"] = int(METRICS["ops"]) + len(ops)
+    METRICS["view_bytes"] = int(METRICS["view_bytes"]) + len(payload.get("view") or "")
+    METRICS["delta_bytes"] = int(METRICS["delta_bytes"]) + len(payload.get("view") or "")
+    return payload
+
+
+def op_ok(payload: dict, index: int = 0) -> bool:
+    ops = payload.get("ops") or []
+    return bool(ops) and ops[index].get("ok", False)
+
+
+def op_error(payload: dict, index: int = 0) -> str:
+    ops = payload.get("ops") or []
+    return (ops[index].get("error") or "") if ops else "no ops"
+
+
+def _shot_path(payload: dict) -> Path | None:
+    """The file a screenshot op wrote, or None when it reported none.
+
+    `None` rather than `Path("")` on purpose: the empty path resolves to the
+    current directory, which exists and on Linux is 4096 bytes. A screenshot
+    that was never taken therefore read as "4096B, exists", so the check passed
+    or failed depending on the size of a directory inode -- which is how a real
+    failure reached CI as a passing line and, one run later, as a failing one.
+    """
+    target = (payload.get("ops") or [{}])[0].get("target")
+    return Path(target) if target else None
+
+
+def _shot_is_real(path: Path | None) -> bool:
+    return path is not None and path.is_file() and path.stat().st_size > 1000
+
+
+def _report_retry(what: str, payload: dict) -> None:
+    """Say so when a capture had to be retried.
+
+    A screenshot whose first attempt stalls is retried once, and the retry is
+    recorded in the step rather than swallowed -- but a step detail is not
+    something anyone reads on a green run, and the whole risk of a retry is that
+    it becomes invisible. CI intermittently stalls this exact capture (see
+    `Session._capture`), so the frequency is the open question, and this line is
+    what answers it: a retry per run is a flake being absorbed, and a retry on
+    every capture is a defect being hidden.
+    """
+    ops = payload.get("ops") or [{}]
+    note = ops[0].get("detail") if ops else ""
+    if note:
+        print(f"  [note] {what} needed a second attempt  —  {note}")
+
+
+def _shot_detail(payload: dict, path: Path | None) -> str:
+    """What was written, or why nothing was.
+
+    A failed op reports no `target` and carries its reason in `error` (a short
+    code) and `detail` (the exception's own words). Both are printed: the code
+    alone says `browser_error`, which is where the trail stopped the first time
+    this was chased.
+    """
+    if path is None or not path.is_file():
+        ops = payload.get("ops") or [{}]
+        reason = " / ".join(
+            part for part in (ops[0].get("error"), ops[0].get("detail")) if part
+        ) or "the op reported no error"
+        where = "reported no file" if path is None else f"{path.name} is missing"
+        return f"{where} — {reason}"
+    return f"{path.name} {path.stat().st_size}B"
+
+
+# ---------------------------------------------------------------------- flow
+
+
+def run(base: str, headed: bool, keep: bool = False) -> int:
+    """`_run`, with the browser and its profile reclaimed either way.
+
+    `main` stops whatever is in `LIVE_MANAGERS`, but nothing ever put a manager
+    there, so that loop always ran over an empty list and no run ever stopped
+    its browser: measured across a session of runs, 49 `jev-smoke-` profiles
+    were still on disk with a browser attached to each.
+
+    The profile is what a run leaves behind in bulk and nothing reads it after
+    the run, so it goes. The directory itself stays, and the reason is narrower
+    than "something reads it": nothing does, not the code and not CI, which
+    only ever tees this script's stdout into `smoke.log`. `_run` prints the
+    path, and the files it points at -- `metrics.json`, and the shots section
+    13 leaves behind -- are for whoever is reading that log after a failure.
+    Measured after the profile removal: 104K per run, 92K of it those shots,
+    against the 50MB of profiles this used to leak. Left as it is because
+    $TMPDIR is cleared on its own schedule and the evidence is the point.
+    """
+    workdir = Path(tempfile.mkdtemp(prefix="jev-smoke-"))
+    cfg = Config.from_env()
+    cfg.headless = not headed
+    cfg.profile_dir = workdir / "profile"
+    cfg.state_dir = workdir / "state"
+    cfg.window = (1280, 860)
+    cfg.allow_js = False
+
+    manager = BrowserManager(cfg)
+    LIVE_MANAGERS.append(manager)
+    try:
+        return _run(base, cfg, manager, workdir)
+    finally:
+        if not keep:
+            manager.shutdown()
+            shutil.rmtree(workdir / "profile", ignore_errors=True)
+
+
+def _run(base: str, cfg: Config, manager: BrowserManager, workdir: Path) -> int:
+    started = time.monotonic()
+    session = manager.session("smoke")
+    session.navigate(f"{base}/fixture.html")
+    observation = observe(session, mode="full")
+
+    print(f"\033[2mchrome: {manager.cdp.call('Browser.getVersion').get('product')}\033[0m")
+
+    # ---------------------------------------------------------------- 1. read
+    section("1. Observation — one atomic read, indexed refs")
+    check("page title read", observation.title == "Ultrafast Fixture", observation.title)
+    check("element table is not empty", len(observation.elements) >= 12,
+          f"{len(observation.elements)} elements")
+    from_ref = ref_of(observation, "Where from?", "textbox")
+    check("text field indexed", from_ref is not None, f"Where from? -> {from_ref}")
+    check("native select exposes options",
+          any(element.options for element in observation.elements),
+          next((f"{element.ref} opts={len(element.options)}" for element in observation.elements
+                if element.options), ""))
+    shadow = ref_of(observation, "Shadow action", "button")
+    check("shadow DOM element indexed", shadow is not None, f"Shadow action -> {shadow}")
+    iframe_btn = ref_of(observation, "Iframe action", "button")
+    check("same-origin iframe element indexed", iframe_btn is not None,
+          f"Iframe action -> {iframe_btn}")
+    password = next((e for e in observation.elements if e.secret), None)
+    check("password field visible but value withheld",
+          password is not None and password.value == "",
+          f"{password.ref if password else '-'} name={password.name if password else '-'} "
+          f"value={password.value!r}")
+
+    # --------------------------------------------------- 2. batch of primitives
+    section("2. Batch execution — three ops, one round trip")
+    pax = ref_of(observation, "Passengers")
+    nonstop = ref_of(observation, "Nonstop only")
+    payload = act(session, [
+        {"op": "type", "ref": from_ref, "text": "Zurich"},
+        {"op": "select", "ref": pax, "label": "3 adults"},
+        {"op": "toggle", "ref": nonstop},
+    ])
+    check("all three ops succeeded", payload["ok"],
+          "  ".join(f"{o['op']}:{'ok' if o['ok'] else o.get('error')}" for o in payload["ops"]))
+    observation = observe(session)
+    check("typed value landed", any(e.value == "Zurich" for e in observation.elements),
+          next((f"{e.ref}={e.value!r}" for e in observation.elements if e.value == "Zurich"), ""))
+    check("select applied", any((e.current or "") == "3 adults" for e in observation.elements),
+          next((f"{e.ref} current={e.current!r}" for e in observation.elements
+                if (e.current or "") == "3 adults"), ""))
+    check("checkbox toggled on",
+          any(e.checked is True for e in observation.elements),
+          next((f"{e.ref} checked={e.checked}" for e in observation.elements
+                if e.checked is not None), ""))
+    check("delta observation is far smaller than the full one",
+          len(observation.last_view) < len(observation.render(None, mode="full")) * 0.8,
+          f"delta={len(observation.last_view)}B vs full="
+          f"{len(observation.render(None, mode='full'))}B")
+
+    # ------------------------------------------------------- 3. autocomplete
+    section("3. Combobox — type, then pick the suggestion")
+    to_ref = ref_of(observation, "Where to?", "combobox")
+    check("combobox indexed with TYPE + CLICK", to_ref is not None, f"Where to? -> {to_ref}")
+    act(session, [{"op": "type", "ref": to_ref, "text": "Lon"}])
+    observation = observe(session)
+    options = observation.find("option")
+    check("suggestions became real elements", bool(options),
+          ", ".join(f"{o.ref} {o.name!r}" for o in options[:4]))
+    london = next((o for o in options if o.name == "London"), None)
+    if london:
+        payload = act(session, [{"op": "click", "ref": london.ref}])
+        check("suggestion clicked", op_ok(payload))
+        observation = observe(session)
+        check("input now holds the picked city",
+              any(e.value == "London" for e in observation.elements),
+              next((f"{e.ref}={e.value!r}" for e in observation.elements if e.value == "London"), ""))
+    else:
+        check("suggestion clicked", False, "no 'London' option observed")
+
+    # ------------------------------------------------------------ 4. execute
+    section("4. Submit and read the result")
+    go = ref_of(observation, "Search", "button")
+    payload = act(session, [{"op": "click", "ref": go}])
+    check("search clicked", op_ok(payload))
+    observation = observe(session)
+    selects = observation.find("button", "Select")
+    check("three result rows appeared", len(selects) == 3,
+          ", ".join(f"{e.ref}@{e.context[:28]}" for e in selects))
+    check("duplicate labels disambiguated by context",
+          len({e.context for e in selects}) == 3,
+          f"{len({e.context for e in selects})} distinct contexts")
+
+    from jev_ultrafast_mcp import assertions as assertions_mod
+    verdict = assertions_mod.run([
+        {"type": "text_contains", "text": "Option 1"},
+        {"type": "count_at_least", "role": "button", "name": "Select", "min": 3},
+        {"type": "element_exists", "role": "button", "name": "Select"},
+    ], observation)
+    check("deterministic assertions pass", verdict["pass"],
+          "; ".join(c["detail"] for c in verdict["checks"]))
+
+    # -------------------------------------------------------------- 5. modal
+    section("5. Occlusion — precomputed, not discovered by a failed click")
+    open_modal = ref_of(observation, "Open modal", "button")
+    act(session, [{"op": "click", "ref": open_modal}])
+    observation = observe(session)
+    go_now = ref_of(observation, "Search", "button")
+    go_element = observation.by_ref.get(go_now or "")
+    check("covering dialog reported", bool(observation.overlays),
+          json.dumps(observation.overlays))
+    check("covered control flagged before any click", bool(go_element and go_element.occluded),
+          f"{go_now} occluded={go_element.occluded if go_element else '-'}")
+    blocked = act(session, [{"op": "click", "ref": go_now}])
+    check("click on a covered control is refused with a reason",
+          (not op_ok(blocked)) and op_error(blocked) in {"occluded", "stale"},
+          op_error(blocked))
+    close_modal = ref_of(observation, "Close", "button")
+    payload = act(session, [{"op": "click", "ref": close_modal}])
+    check("dialog dismissed", op_ok(payload))
+    observation = observe(session)
+    go_now = ref_of(observation, "Search", "button")
+    go_element = observation.by_ref.get(go_now or "")
+    check("control reachable again", bool(go_element and not go_element.occluded),
+          f"{go_now} occluded={go_element.occluded if go_element else '-'}")
+
+    # -------------------------------------------------- 6. shadow + iframe
+    section("6. Coverage beyond the MVP — shadow DOM and same-origin frames")
+    shadow_now = ref_of(observation, "Shadow action", "button")
+    payload = act(session, [{"op": "click", "ref": shadow_now}])
+    check("shadow DOM button clicked", op_ok(payload), op_error(payload) if not payload["ok"] else "")
+    check("shadow DOM handler ran",
+          session._safe_eval("document.querySelector('shadow-widget').dataset.clicked") == "yes")
+
+    frame_input = ref_of(observation, "City", "textbox")
+    frame_button = ref_of(observation, "Iframe action", "button")
+    check("iframe controls distinct from the top document",
+          frame_input is not None and frame_input != from_ref,
+          f"City -> {frame_input}, Where from? -> {from_ref}")
+    payload = act(session, [
+        {"op": "type", "ref": frame_input, "text": "Lisbon"},
+        {"op": "click", "ref": frame_button},
+    ])
+    check("typed and clicked inside an iframe", payload["ok"],
+          "  ".join(f"{o['op']}:{'ok' if o['ok'] else o.get('error')}" for o in payload["ops"]))
+    frame_value = session._safe_eval(
+        "document.getElementById('frame').contentDocument.getElementById('if-city').value")
+    frame_out = session._safe_eval(
+        "document.getElementById('frame').contentDocument.getElementById('if-out').textContent")
+    check("keystrokes reached the frame document", frame_value == "Lisbon", f"value={frame_value!r}")
+    check("click reached the frame document", frame_out == "iframe clicked:Lisbon", f"{frame_out!r}")
+
+    # ----------------------------------------------------- 7. guards + upload
+    section("7. Policy envelope and file upload")
+    observation = observe(session)
+    danger = ref_of(observation, "Delete account", "button")
+    payload = act(session, [{"op": "click", "ref": danger}])
+    check("destructive click held for confirmation", op_error(payload) == "needs_confirmation",
+          op_error(payload))
+    payload = act(session, [{"op": "click", "ref": danger, "confirm": True}])
+    check("same click runs once confirmed", op_ok(payload))
+
+    secret_ref = next((e.ref for e in observation.elements if e.secret), None)
+    payload = act(session, [{"op": "type", "ref": secret_ref, "text": "hunter2"}])
+    check("typing into a secret field held for confirmation",
+          op_error(payload) == "needs_confirmation", op_error(payload))
+
+    upload_target = Path(workdir / "cv.txt")
+    upload_target.write_text("fixture upload\n", encoding="utf-8")
+    file_ref = next((e.ref for e in observation.elements if e.role == "file"), None)
+    check("off-screen controls are still addressable", file_ref is not None,
+          f"file input -> {file_ref}, offscreen={observation.offscreen}")
+    payload = act(session, [{"op": "upload", "ref": file_ref, "path": str(upload_target)}])
+    check("file upload accepted", op_ok(payload), op_error(payload) if not payload["ok"] else "")
+    check("file actually attached",
+          session._safe_eval("document.getElementById('cv').files.length") == 1)
+
+    # ------------------------------------------------------------- 8. stale
+    section("8. Staleness — a replaced node invalidates its ref")
+    stale_ref = selects[0].ref
+    act(session, [{"op": "click", "ref": go_now}])  # rebuilds the result list
+    payload = act(session, [{"op": "click", "ref": stale_ref}])
+    check("ref to a replaced node is rejected", not op_ok(payload), op_error(payload))
+    check("reason is stale/detached", op_error(payload) in {"stale", "detached", "target_changed"},
+          op_error(payload))
+
+    # ----------------------------------------------------- 9. stable refs
+    section("9. Stable refs across observations")
+    before = ref_of(session.last, "Nonstop only")
+    observe(session)
+    observe(session)
+    after = ref_of(session.last, "Nonstop only")
+    check("ref survives repeated observations", before == after, f"{before} -> {after}")
+
+    # ------------------------------------------------------------- 10. macro
+    section("10. Macro — record once, replay with no model calls")
+    session.navigate(f"{base}/fixture.html")
+    observe(session, mode="full")
+    session.start_recording()
+    snapshot = session.last
+    act(session, [{"op": "type", "ref": ref_of(snapshot, "Where from?"), "text": "Lyon"}])
+    act(session, [{"op": "select", "ref": ref_of(snapshot, "Passengers"), "label": "2 adults"}])
+    act(session, [{"op": "click", "ref": ref_of(session.last, "Search", "button")}])
+    saved = session.stop_recording("smoke-search", goal="search Lyon for 2 adults")
+    check("macro saved with semantic steps", saved["steps"] == 3, json.dumps(saved))
+    stored = macros_mod.load(cfg, "smoke-search")
+    check("macro stores no refs, only role+name",
+          all("ref" not in step and "target" in step for step in stored["steps"]),
+          json.dumps(stored["steps"][0], ensure_ascii=False))
+
+    session.navigate(f"{base}/fixture.html")
+    fresh = observe(session, mode="full")
+    ops, report = macros_mod.resolve(stored["steps"], fresh)
+    check("all steps resolved against a fresh page",
+          all(item.get("score", 0) >= 0.7 for item in report),
+          " ".join(f"{i['op']}@{i.get('score')}" for i in report))
+    replay = act(session, ops)
+    check("replay succeeded", replay["ok"],
+          "  ".join(f"{o['op']}:{'ok' if o['ok'] else o.get('error')}" for o in replay["ops"]))
+    final = observe(session)
+    verdict = assertions_mod.run([
+        {"type": "count_at_least", "role": "button", "name": "Select", "min": 3},
+        {"type": "text_contains", "text": "Lyon"},
+    ], final)
+    check("replayed macro produced the real outcome", verdict["pass"],
+          "; ".join(c["detail"] for c in verdict["checks"]))
+
+    # A macro's start_url has to be where the task *began*. It used to be read
+    # at stop time, so any flow that finished on a different page recorded the
+    # destination -- and replay then began somewhere the first step could not
+    # be found. Recording a navigation makes the two positions different.
+    session.navigate(f"{base}/fixture.html")
+    observe(session, mode="full")
+    session.start_recording()
+    act(session, [{"op": "nav", "url": f"{base}/frame.html"}])
+    wandered = session.stop_recording("smoke-wander")
+    check("a macro remembers where the task started, not where it ended",
+          "fixture" in wandered["start_url"] and "frame" not in wandered["start_url"],
+          wandered["start_url"] or "(empty)")
+    macros_mod.delete(cfg, "smoke-wander")
+    # Put the session back where the next section expects to find it.
+    session.navigate(f"{base}/fixture.html")
+    observe(session, mode="full")
+
+    # ------------------------------------------------------------- 11. delta
+    section("11. Delta economy")
+    observe(session)
+    second = observe(session)
+    check("no-op observation collapses to one line",
+          "= no change" in second.last_view, second.last_view.splitlines()[-1][:80])
+    check("delta is a fraction of a full table",
+          len(second.last_view) < len(second.render(None, mode="full")) * 0.25,
+          f"{len(second.last_view)}B vs {len(second.render(None, mode='full'))}B")
+
+    # ------------------------------------------------------- 12. new tab
+    section("12. Tabs — a page-opened tab is reported, not lost")
+    session.navigate(f"{base}/fixture.html")
+    observation = observe(session, mode="full")
+    popup = ref_of(observation, "Open popup", "link")
+    act(session, [{"op": "click", "ref": popup}])
+
+    def popup_tab():
+        return next((t for t in session._refresh_tabs() if "popup" in t["url"]), None)
+
+    def fixture_tab():
+        return next((t for t in session._refresh_tabs() if "fixture" in t["url"]), None)
+
+    popped = wait_until(popup_tab, timeout=15.0)
+    observation = observe(session)
+    check("page-opened tab surfaced", popped is not None or len(observation.tabs) >= 2,
+          json.dumps([t["url"] for t in observation.tabs]))
+    if popped is not None:
+        # Carry the stable target_id, not the index: indexes are positional and
+        # get renumbered whenever the target list changes, so "close tab 1" can
+        # close the wrong tab a call later.
+        session.switch_tab(target_id=popped["target_id"])
+        check("switched into the new tab",
+              "popup" in (session.last.url if session.last else "")
+              or "popup" in (session._safe_eval("location.href") or ""),
+              session._safe_eval("location.href"))
+        session.close_tab(target_id=popped["target_id"])
+        # Closing the tab we were driving must leave the session on a live one by
+        # itself. The closed target keeps showing up in the target list for a
+        # moment, so "the list is non-empty" is not "there is somewhere to go" --
+        # picking the dying target and attaching to it is a race, and CI won it.
+        live = session._refresh_tabs()
+        check("closed the driven tab and landed on a survivor on its own",
+              live and all("popup" not in tab["url"] for tab in live),
+              json.dumps([tab["url"] for tab in live]))
+        back = wait_until(fixture_tab, timeout=15.0)
+        if back is not None:
+            session.switch_tab(target_id=back["target_id"])
+        check("closed the tab and returned",
+              "fixture" in (session._safe_eval("location.href") or ""),
+              session._safe_eval("location.href"))
+
+    # --------------------------------------------------------- 13. screenshot
+    section("13. Screenshot goes to disk, never into the context")
+    payload = act(session, [{"op": "screenshot"}])
+    shot = _shot_path(payload)
+    check("screenshot written to a file", _shot_is_real(shot), _shot_detail(payload, shot))
+    _report_retry("screenshot", payload)
+    # `quality` is JPEG-only and CDP rejects an explicit null, so asking for
+    # PNG used to fail while the default JPEG path worked.
+    png_payload = act(session, [{"op": "screenshot", "format": "png"}])
+    png = _shot_path(png_payload)
+    check("png screenshots work as well as jpeg",
+          png is not None and png.suffix == ".png" and _shot_is_real(png),
+          _shot_detail(png_payload, png))
+    _report_retry("png screenshot", png_payload)
+
+    # ------------------------------------------- 14. client-rendered pages
+    section("14. Client-rendered pages — waits for evidence, not for a timer")
+    # csr.html ships an empty body and draws its controls 1.2s later. This is
+    # not a synthetic edge case: it is what React, Vue, an admin dashboard and
+    # Bing's home page all look like after `readyState` says "complete".
+    session.navigate(f"{base}/csr.html")
+    started_csr = time.monotonic()
+    observation = observe(session, mode="full")
+    waited = time.monotonic() - started_csr
+    go = ref_of(observation, "Go", "button")
+    check("a page that renders late is still readable", go is not None,
+          f"{len(observation.elements)} elements, first read took {waited:.2f}s")
+    check("it waited for the render instead of trusting readyState", waited >= 1.0,
+          f"{waited:.2f}s")
+    payload = act(session, [{"op": "click", "ref": go}])
+    check("the late-rendered control is actually clickable", op_ok(payload),
+          payload["ops"][0].get("error") or "clicked")
+
+    # The wait is bounded and it must not tax pages that are simply empty: an
+    # entirely blank document has nothing to render, so it is reported at once.
+    session.navigate("about:blank")
+    blank_started = time.monotonic()
+    blank = observe(session, mode="full")
+    blank_ms = time.monotonic() - blank_started
+    check("an empty document is not waited on", blank_ms < 1.5 and not blank.elements,
+          f"{blank_ms:.2f}s, {len(blank.elements)} elements")
+
+    # ------------------------------------------------- 15. still is not finished
+    section("15. A shell that is still fetching — still is not the same as finished")
+    # One step harder than csr.html, and the shape that actually bit: the shell
+    # arrives *with* controls on it, so the observer has something to report and
+    # answers at once, and what the page is really about only appears after a
+    # request that is still in flight. The element table is identical in the
+    # meantime, so a reader watching only the DOM has nothing to go on.
+    session.navigate(f"{base}/late-shell.html")
+    fetching = session.page_is_idle()
+    check("a request in flight is not mistaken for a finished page", fetching is False,
+          f"page_is_idle() -> {fetching}")
+    settled = server_mod._first_read(session)
+    claim = ref_of(settled, "Claim reward", "button")
+    check("the read waits for the page to stop fetching, not just for the DOM",
+          claim is not None,
+          f"{len(settled.elements)} elements, Claim reward -> {claim or 'absent'}")
+    if claim:
+        payload = act(session, [{"op": "click", "ref": claim}])
+        check("the control that arrived with the response is clickable", op_ok(payload),
+              payload["ops"][0].get("error") or "clicked")
+    else:
+        check("the control that arrived with the response is clickable", False,
+              "no 'Claim reward' button observed")
+
+    elapsed = int((time.monotonic() - started) * 1000)
+    METRICS["wall_ms"] = elapsed
+
+    # ------------------------------------------------------------- summary
+    section("Summary")
+    ops = int(METRICS["ops"])
+    acts = int(METRICS["acts"])
+    print(f"  ops executed          : {ops}")
+    print(f"  act() calls           : {acts}   (batch factor {ops / max(acts, 1):.2f} ops per call)")
+    print(f"  observe() calls       : {METRICS['observes']}")
+    print(f"  bytes shown to agent  : {METRICS['view_bytes']:,} "
+          f"(~{METRICS['view_bytes'] // 4:,} tokens)")
+    print(f"    of which full tables: {METRICS['full_bytes']:,}")
+    print(f"    of which deltas     : {METRICS['delta_bytes']:,}")
+    print(f"  wall clock            : {elapsed / 1000:.1f}s")
+
+    failed = [name for name, ok, _ in RESULTS if not ok]
+    print(f"\n  {len(RESULTS) - len(failed)}/{len(RESULTS)} checks passed")
+    if failed:
+        print("  failures:")
+        for name in failed:
+            print(f"    - {name}")
+
+    (workdir / "metrics.json").write_text(json.dumps(
+        {"metrics": METRICS, "checks": [{"name": n, "ok": o, "detail": d} for n, o, d in RESULTS]},
+        indent=2), encoding="utf-8")
+    print(f"\n  work dir: {workdir}")
+
+    return 1 if failed else 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--headed", action="store_true", help="run with a visible window")
+    parser.add_argument("--keep", action="store_true", help="leave the browser running")
+    args = parser.parse_args()
+
+    httpd, base = serve(ROOT / "tests")
+    print(f"fixture server: {base}/fixture.html")
+    try:
+        return run(base, args.headed, args.keep)
+    finally:
+        httpd.shutdown()
+        if not args.keep:
+            for manager in LIVE_MANAGERS:
+                try:
+                    manager.shutdown()
+                except Exception:
+                    pass
+
+
+if __name__ == "__main__":
+    sys.exit(main())

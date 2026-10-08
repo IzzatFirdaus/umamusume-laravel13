@@ -88,10 +88,20 @@ Homestead.yaml
 # Local-only artifacts (this app is never deployed; PRD NFR-1)
 /research-scratch/
 /.scratch-uma/
-/jev-inspect/
 /testing
 /database/*.sqlite*
 *.sql
+
+# jev-inspect: keep source, ignore only local artifacts
+/jev-inspect/.venv/
+/jev-inspect/.venv-Scripts/
+/jev-inspect/__pycache__/
+/jev-inspect/**/__pycache__/
+/jev-inspect/*.pyc
+/jev-inspect/dist/
+/jev-inspect/build/
+/jev-inspect/*.egg-info
+/jev-inspect/*.egg
 # IDE language-server scratch files written into the framework cache directory
 /storage/framework/lsp-*.php
 
