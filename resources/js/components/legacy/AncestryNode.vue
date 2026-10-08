@@ -82,12 +82,14 @@ withDefaults(defineProps<{
 
         <div class="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs text-ink-muted">
             <div class="flex items-baseline gap-1">
-                <!-- The label and its value stay one text run: `Rank 4` is what the node reads back as,
-                     and splitting the two across elements makes the pair unmatchable as one unit. -->
-                <span>Rank <template v-if="rank !== null">{{ rank }}</template></span>
-                <!-- The disclosure distinguishes "you did not record her rank" from "she has no rank",
-                     which are different statements and read the same as a bare N/A. -->
-                <AbsenceValue v-else reason="You have not recorded this Legacy’s own rank." compact />
+                <!-- The label and its value stay one text run when there is a value: `Rank 4` is the unit
+                     the node reads back as. When there is none, the disclosure is a sibling of the label
+                     rather than a child of it, because `<details>` is flow content. -->
+                <span v-if="rank !== null">Rank {{ rank }}</span>
+                <template v-else>
+                    <span>Rank</span>
+                    <AbsenceValue reason="You have not recorded this Legacy’s own rank." compact />
+                </template>
             </div>
             <span v-if="isGuest">Rented from a friend</span>
         </div>
