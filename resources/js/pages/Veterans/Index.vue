@@ -40,6 +40,9 @@ const props = defineProps<{
     totalCount: number;
     notice: string;
     filingNotice: string;
+    file_veteran_url: string;
+    find_parents_url: string;
+    compare_url: string;
     absences: Absence[];
     searchAction: string;
 }>();
@@ -158,6 +161,17 @@ const filtered = computed(
         <p v-if="errors.scenario" role="alert" class="mt-2 text-sm text-risk">Scenario: {{ errors.scenario }}</p>
         <p v-if="errors.tag" role="alert" class="mt-2 text-sm text-risk">Tag: {{ errors.tag }}</p>
 
+        <!-- `SCREEN-021`'s "Find Parents for This Build". A search, not an optimizer: it hands the tags this
+             list is filtered by to the Legacy Lab's browse list, which answers on stored columns only. No
+             candidate is scored here, because `ADR-0020` §3 keeps a recommendation out of the record screens. -->
+        <p class="mt-3 flex flex-wrap items-center gap-3 text-sm">
+            <a
+                :href="props.find_parents_url"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
+            >Find parents for this build</a>
+            <span class="text-ink-muted">Searches the Legacy Lab with the tags you are filtering by.</span>
+        </p>
+
         <p v-if="loading" role="status" class="mt-4 text-sm text-ink-muted">Loading results…</p>
 
         <p class="mt-6 text-sm text-ink-muted">
@@ -173,13 +187,19 @@ const filtered = computed(
         </p>
 
         <!-- The two lines are different states and neither is an error: an empty library means nothing has
-             been filed, and a filtered empty list means the filters asked a question no row answers. -->
-        <p
+             been filed, and a filtered empty list means the filters asked a question no row answers. The
+             empty one carries a door now that D16's write half exists: a career is filed from its own
+             Result screen, so the way in is the run list rather than an unexplained box. -->
+        <div
             v-if="totalCount === 0"
             class="mt-4 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
         >
-            {{ props.filingNotice }}
-        </p>
+            <p>{{ props.filingNotice }}</p>
+            <a
+                :href="props.file_veteran_url"
+                class="enamel mt-3 inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-semibold text-on-chrome"
+            >Open the run list</a>
+        </div>
 
         <p
             v-else-if="veterans.data.length === 0"
@@ -236,11 +256,15 @@ const filtered = computed(
                     >
                         Open in Legacy Lab
                     </a>
+                    <!-- The library's own comparison, which lines careers up. It takes the Veteran id rather
+                         than the run id, and it does not require a Legacy read-back: the career a Trainer
+                         most wants beside another is often the one they just filed. The Legacy Lab's compare
+                         stays where it belongs, comparing the configurations behind `builder_url` above. -->
                     <a
-                        :href="`/legacy/compare?runs[]=${veteran.run_id}`"
+                        :href="`/veterans/compare?veterans[]=${veteran.id}`"
                         class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
                     >
-                        Compare
+                        Compare this career
                     </a>
                 </div>
             </li>

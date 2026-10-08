@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
+import { deleteRun } from '../utils/delete-run';
 
 /*
  * Rendered-copy, keyboard and accessibility evidence for the Veteran comparison (`SCR-VET-004`, plan §8
@@ -9,8 +10,8 @@ import { buildAxe } from '../utils/accessibility';
  *
  * Fixture strategy. Each career is created through the create form, finished through the run screen's own
  * status control, and filed through Save Veteran, because that is the path a Trainer takes and it is the
- * only path that puts a row in `veterans`. Runs are deleted through the run page's disclosure in
- * `afterEach`, which cascades the library row with the run.
+ * only path that puts a row in `veterans`. Runs are deleted over HTTP in
+ * `afterEach` (`tests/utils/delete-run.ts`), which cascades the library row with the run.
  *
  * The four-at-once cap is not repeated in a browser case here on purpose: proving it in the DOM needs five
  * filed careers, five create-and-file cycles, and it would assert a rule the request layer already refuses
@@ -27,17 +28,7 @@ const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
     for (const url of createdRunUrls.splice(0)) {
-        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-        if (response === null || !response.ok()) {
-            continue;
-        }
-
-        await page.getByText('Delete run').click();
-        await Promise.all([
-            page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' }),
-            page.getByRole('button', { name: 'Delete this run' }).click(),
-        ]);
+        await deleteRun(page, url);
     }
 });
 
@@ -100,7 +91,11 @@ test('lines careers up with one property per row, reached from the library row',
     // again would deselect it and leave the Compare button with nothing to act on.
     await page.getByRole('checkbox', { name: 'Agnes Digital' }).check();
     await page.getByRole('button', { name: 'Compare' }).click();
-    await page.waitForURL(/\/veterans\/compare\?veterans\[\]=\d+&veterans\[\]=\d+/, WRITE);
+    // The path, not the query. The library row's door is a server-rendered href and lands as
+    // `?veterans[]=N`; this button is `router.get` with an array value, and Inertia serialises that as
+    // `?veterans%5B0%5D=N`. PHP builds the same array from either spelling, so the wire format is not
+    // the property — the two columns below are, and they only render if both picks arrived.
+    await page.waitForURL(/\/veterans\/compare\?/, WRITE);
 
     // A career's name is printed once on this page, in its `th scope="col"`, so both columns are asserted
     // through that role and the section's own count agrees with the number of careers filed.

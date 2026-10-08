@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\ListVeterans;
 use App\Actions\ShowVeteran;
+use App\Http\Requests\VeteranCompareRequest;
 use App\Http\Requests\VeteranSearchRequest;
 use App\Models\Umamusume;
 use App\Models\Veteran;
@@ -17,11 +18,13 @@ use Inertia\Response;
  * The Veteran library: the Trainer's own filed careers, browsed and opened (`SCREEN-021`, PRD FR-G-2,
  * `frontend-development-plan.md` §8's D16).
  *
- * **This is the read half of D16, and the split is a fact about the data, not a convenience.** The write
- * half, Save Veteran (`SCREEN-020`), is the thing that puts a row in this table, and `RecordVeteran` has
- * no route to it yet: no screen in the build files a career. So a library that looks empty is a library
- * nothing has been filed into, and both screens say that plainly rather than leaving an unexplained blank
- * list. The plan gates Save Veteran behind D15 (Career Result), which is unbuilt.
+ * **The read half of D16, with its write half beside it.** Save Veteran (`SCREEN-020`) is
+ * `Career\SaveVeteranController`, and it is the first caller of `RecordVeteran`, so a library that looks
+ * empty is a library no career has been filed into yet. `filingNotice` says that in those words and names the
+ * door. What this block used to record — that no route could file a career and the plan gated the screen
+ * behind an unbuilt D15 — was true when it was written and is the kind of claim that goes false silently, so
+ * it is corrected here rather than left standing: `tests/browser/veterans.spec.ts` asserts the copy, and the
+ * copy and the spec travel together.
  *
  * **It computes nothing**, the same rule `LegacyController` states at length (FR-G-4, `ADR-0020` §3). The
  * row shape is `VeteranRow`, which the Legacy Lab's browse list reads through the identical call, so the
@@ -70,7 +73,17 @@ final class VeteranController extends Controller
             ),
             'totalCount' => Veteran::query()->count(),
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
-            'filingNotice' => 'A Veteran is a completed career filed into the library. Nothing in this build files one yet: the save screen arrives with the other half of slice D16, so an empty library means no career has been filed, not that none exists.',
+            // True as of D16's write half: Save Veteran is a screen now, so the empty library is a library
+            // nothing has been filed into yet, and the door to filing one is named rather than the absence.
+            'filingNotice' => 'A Veteran is a completed career filed into the library. Nothing is filed here: a career is saved from its own Result screen, so open one that finished and choose Save Veteran.',
+            'file_veteran_url' => route('runs.index'),
+            // `SCREEN-021`'s "Find Parents for This Build". A search, not an optimizer: it carries the
+            // library's own tag filter onto the Legacy Lab's browse list, because the tags are the distance,
+            // surface and style facets a parent would need to match, and it applies no score to the result.
+            // The trainee and scenario filters are deliberately not carried: one parent search does not
+            // exclude a trainee by name, and the Lab's own scenario facet is where that belongs.
+            'find_parents_url' => route('legacy.index', $filters['tags'] === [] ? [] : ['tags' => $filters['tags']]),
+            'compare_url' => route('veterans.compare'),
             'absences' => self::absences(),
             'searchAction' => route('veterans.index'),
         ]);
@@ -117,6 +130,112 @@ final class VeteranController extends Controller
     }
 
     /**
+     * `GET /veterans/compare` — up to four filed careers, one property per row (`SCREEN-022`,
+     * `design-2.0` §46).
+     *
+     * **Why this exists beside the Legacy Lab's compare.** That surface refuses a run with no Legacy
+     * read-back, on the reasoning that a column of absences looks compared and is not. The comparison the
+     * library offers is between *careers*, and the career a Trainer most wants beside another is usually the
+     * one they just filed and have built no Legacy on, so refusing it would delete the subject of the screen.
+     * Different eligibility, so a different selector (`VeteranCompareRequest`), while the row itself is still
+     * `VeteranRow` — one shape, so the list, the detail screen, both compare surfaces and the Legacy Lab
+     * picker cannot print four different Veterans.
+     *
+     * **Every cell is a stored column, and the three rows the brief asks for that are not stored are named,
+     * not scored.** `design-2.0` §46 and `SCREEN-022`'s correction row want inheritance usefulness, a
+     * compatibility calculation and a factor comparison. `ADR-0020` §3 keeps those out of the record screens
+     * and no table prices them, so they arrive in `absences` with their reason. `FR-G-4` is why nothing here
+     * orders the columns by anything it derived.
+     *
+     * The eager load is the request's own (`veteransInOrder()`), so four careers cost three queries rather
+     * than one per row.
+     */
+    public function compare(VeteranCompareRequest $request): Response
+    {
+        $veterans = $request->veteransInOrder();
+
+        $columns = array_map(static function (Veteran $veteran): array {
+            $run = $veteran->trainingRun;
+            $latest = $run->turnEntries->sortByDesc('turn')->first();
+            $strip = $run->stripValues();
+
+            return array_merge(VeteranRow::from($veteran), [
+                'career' => [
+                    'turns' => $strip['turn'],
+                    'energy' => $strip['energy'],
+                    'fans' => $strip['fans'],
+                ],
+                // The last logged turn's totals, never a sum of deltas (ADR-0003).
+                'stats' => [
+                    'Speed' => $latest?->speed,
+                    'Stamina' => $latest?->stamina,
+                    'Power' => $latest?->power,
+                    'Guts' => $latest?->guts,
+                    'Wit' => $latest?->wit,
+                ],
+                'counts' => [
+                    'skills' => $run->skills->count(),
+                    'races' => $run->raceEntries->count(),
+                ],
+                'aptitudes' => $run->umamusume->aptitudeAxes(),
+            ]);
+        }, $veterans);
+
+        // A Trainer picks from the library, not from every run: an unfiled career has no row here to name.
+        $comparable = Veteran::query()
+            ->with('trainingRun.umamusume')
+            ->get()
+            ->map(static fn (Veteran $veteran): array => [
+                'id' => $veteran->id,
+                'label' => $veteran->trainingRun->umamusume->name,
+            ])
+            ->sortBy('label')
+            ->values()
+            ->all();
+
+        return Inertia::render('Veterans/Compare', [
+            'columns' => $columns,
+            'selected' => $request->veteranIds(),
+            'max' => VeteranCompareRequest::MAX_VETERANS,
+            'comparable' => $comparable,
+            // The axis list travels once, beside the cells that read it. Deriving the rows from the first
+            // column would make a career with no published letters decide the shape for every career, and
+            // the ten axes are `Umamusume`'s own columns, not a property of whichever row came first.
+            'aptitude_axes' => Umamusume::APTITUDE_AXES,
+            'empty' => $columns === [] ? [
+                'message' => 'Nothing is selected, so there is nothing to line up. Choose up to '
+                    .VeteranCompareRequest::MAX_VETERANS.' careers below, or open the library and use a row\'s Compare link.',
+                'library_url' => route('veterans.index'),
+            ] : null,
+            'notice' => LegacyController::RECORD_ONLY_NOTICE,
+            'absences' => self::compareAbsences(),
+        ]);
+    }
+
+    /**
+     * What `SCREEN-022` asks for that this build cannot give, each with the reason on the screen.
+     *
+     * @return list<array{label: string, reason: string}>
+     */
+    private static function compareAbsences(): array
+    {
+        return [
+            [
+                'label' => 'Inheritance usefulness and a compatibility calculation',
+                'reason' => 'Held computation under `ADR-0020` §3: the library stores and compares what was entered and derives no outcome, and no table in this repository prices a parent combination.',
+            ],
+            [
+                'label' => 'A factor comparison',
+                'reason' => 'The factor inventory is the recorded Spark set. Two careers can be shown side by side and read, and no sourced table grades one against the other.',
+            ],
+            [
+                'label' => 'Scenario fit',
+                'reason' => 'A career records the scenario it ran in, which is a stored fact and is printed. Whether it suits another scenario is a judgement no column holds.',
+            ],
+        ];
+    }
+
+    /**
      * What `SCREEN-021` asks for that this build cannot give, each with the reason on the screen.
      *
      * @return list<array{label: string, reason: string}>
@@ -136,10 +255,9 @@ final class VeteranController extends Controller
                 'label' => 'The Factors view',
                 'reason' => 'The factor inventory is the Spark set, which is the same unsourced table the sort above names.',
             ],
-            [
-                'label' => 'Comparison and "Find parents for this build"',
-                'reason' => 'Comparison of two records lives in the Legacy Lab. Choosing a parent by a computed score is the recommendation `ADR-0020` §3 keeps out of the record screens.',
-            ],
+            // The fourth absence this list carried — comparison and "find parents for this build" — is built
+            // as of this slice's write half: `veterans.compare` lines careers up and `find_parents_url` runs
+            // the Legacy Lab's search with the library's own tags. Neither is a score.
         ];
     }
 }

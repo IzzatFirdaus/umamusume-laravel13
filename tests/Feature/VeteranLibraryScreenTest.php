@@ -41,9 +41,10 @@ function veteranScreenFiled(?Umamusume $trainee = null, ?string $scenario = null
     ]);
 }
 
-it('shows an empty library as nothing filed yet, with the reason on the page', function (): void {
-    // A fresh install lands here, and the plan gates Save Veteran behind D15, so the empty state is the
-    // state most Trainers meet. It is not an error and it does not pretend to be a filter result.
+it('shows an empty library as nothing filed yet, with the reason and the door on the page', function (): void {
+    // A fresh install lands here: the table exists, `RecordVeteran` exists, and no career has been filed
+    // through it yet. The empty state is therefore the truth rather than an error, and since D16's write half
+    // landed it carries a door (`file_veteran_url`) as well as a reason.
     test()->get(route('veterans.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
@@ -52,8 +53,14 @@ it('shows an empty library as nothing filed yet, with the reason on the page', f
             ->where('totalCount', 0)
             ->where('order', 'newest')
             ->has('filingNotice')
+            ->where('file_veteran_url', route('runs.index'))
+            ->where('compare_url', route('veterans.compare'))
+            ->where('find_parents_url', route('legacy.index'))
             ->has('notice')
-            ->has('absences', 4)
+            // Three, not four: the fourth entry this test used to pin claimed comparison and "find parents
+            // for this build" were absent. Both are built now, one as this screen's own page and one as a
+            // search that carries the library's tags.
+            ->has('absences', 3)
             ->where('searchAction', route('veterans.index')));
 });
 
@@ -121,7 +128,10 @@ it('opens one Veteran with the career facts it was built from', function (): voi
             ->where('parents.b', null)
             ->where('runUrl', route('runs.show', $run))
             ->where('traineeUrl', route('catalog.show', $trainee->slug))
-            ->has('absences', 4));
+            // Three, not the four this case pinned on 2026-10-06. The fourth said comparison and
+            // "find parents for this build" were absent; D16's write half built both, one as
+            // `SCR-VET-004` and one as a search carrying the library's own tags.
+            ->has('absences', 3));
 });
 
 it('renders the unrecorded career figures as absent rather than as zero', function (): void {

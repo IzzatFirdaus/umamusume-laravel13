@@ -7,7 +7,7 @@
  * `overflow-x-auto` strip, which is why nothing at 320px looked scrollable: a horizontal-only scroller
  * under a vertical gesture shows no affordance and answers no wheel. The second claim is the library's
  * empty state, which is the state a fresh install actually shows: the scratch database holds no Veterans
- * and nothing in the build files one yet.
+ * and no career has been filed into it on this database.
  *
  * Axe coverage is provided by `tests/browser/accessibility.spec.ts`: `@axe-core/playwright` is installed
  * and scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`; this spec retains the hand-rolled checks
@@ -90,8 +90,12 @@ test.describe('Veteran library', () => {
         await expect(page.getByRole('heading', { name: 'Veteran library', exact: true }).first()).toBeVisible();
         await expect(page.getByText('Record only.')).toBeVisible();
         await expect(page.getByText('The library holds no Veterans yet.')).toBeVisible();
-        // The reason, not an empty box: no shipped screen files a career yet.
-        await expect(page.getByText(/the save screen arrives with the other half of slice D16/)).toBeVisible();
+        // The reason and the door, not an empty box. Save Veteran landed with D16's write half, so the
+        // empty library is "nothing filed yet" with a route to filing rather than a wait for a slice.
+        await expect(page.getByText(/A Veteran is a completed career filed into the library/)).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Open the run list' })).toBeVisible();
+        // `SCREEN-021`'s parent search, which is a search rather than an optimizer.
+        await expect(page.getByRole('link', { name: 'Find parents for this build' })).toBeVisible();
 
         // The three facets the query answers, and no others.
         await expect(page.getByRole('combobox', { name: 'Trainee' })).toBeVisible();
