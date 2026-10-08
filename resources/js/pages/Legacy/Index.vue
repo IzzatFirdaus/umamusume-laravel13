@@ -14,8 +14,8 @@
  * write on this page, so there is no `useForm` here.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, router, usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 
 interface VeteranRow {
     id: number;
@@ -49,6 +49,11 @@ const trainee = ref(props.filters.trainee === null ? '' : String(props.filters.t
 const scenario = ref(props.filters.scenario ?? '');
 const tag = ref(props.filters.tag ?? '');
 const loading = ref(false);
+
+// A refused facet lands back here with its message, and this screen had no place to print it. The shape
+// is `Veterans/Index.vue`'s, which answers the same three facets through the same `ADR-0018` contract.
+const page = usePage();
+const errors = computed(() => (page.props.errors ?? {}) as Record<string, string>);
 
 function applyFilters(): void {
     router.get(
@@ -134,6 +139,10 @@ function applyFilters(): void {
                 Filter
             </button>
         </form>
+
+        <p v-if="errors.trainee" role="alert" class="mt-2 text-sm text-risk">Trainee: {{ errors.trainee }}</p>
+        <p v-if="errors.scenario" role="alert" class="mt-2 text-sm text-risk">Scenario: {{ errors.scenario }}</p>
+        <p v-if="errors.tag" role="alert" class="mt-2 text-sm text-risk">Tag: {{ errors.tag }}</p>
 
         <p v-if="loading" role="status" class="mt-4 text-sm text-ink-muted">Loading results…</p>
 

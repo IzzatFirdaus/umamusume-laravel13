@@ -21,6 +21,11 @@
  * **Energy absent is the refusal, printed.** The band is null exactly when the run has recorded no
  * Energy — that is C2's own first rule — so the card prints the sentence rather than a band read off
  * nothing.
+ *
+ * **The heading says "Recommendation", not "Best action".** The engine's verdict is the largest deficit
+ * against the Trainer's own target (`TrainerAdvisor.php` rule 4), which is not a claim that the action is
+ * best; `screen-spec-2.0.md:1321` prints the superlative as design intent and that file is reference
+ * only, so its wording is not the shipped copy (`ADR-0020`, `PRD.md` FR-F-3).
  */
 import { computed } from 'vue';
 
@@ -48,9 +53,7 @@ const band = computed(() => (props.band === null ? null : BANDS[props.band]));
 
 <template>
     <div class="rounded-md border-2 border-pick-line bg-raised p-4">
-        <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-            <span aria-hidden="true">★</span> Best action
-        </p>
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Recommendation</h3>
 
         <p v-if="band === null" class="mt-2 text-sm text-ink-strong">
             Recommendation unavailable because Energy has not been entered.

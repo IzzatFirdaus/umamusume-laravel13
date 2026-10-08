@@ -171,9 +171,9 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
 
         <!-- Warnings: glyph plus text, never colour alone, and each one links to the step it came from. -->
         <section v-if="props.contract.warnings.length > 0" class="mt-6" aria-labelledby="warnings-heading">
-            <h3 id="warnings-heading" class="text-base font-semibold text-ink-strong">
+            <h2 id="warnings-heading" class="text-base font-semibold text-ink-strong">
                 Warnings
-            </h3>
+            </h2>
             <ul class="mt-2 space-y-2">
                 <li
                     v-for="warning in props.contract.warnings"
@@ -199,7 +199,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         </p>
 
         <section class="mt-6" aria-labelledby="build-heading">
-            <h3 id="build-heading" class="text-base font-semibold text-ink-strong">Build</h3>
+            <h2 id="build-heading" class="text-base font-semibold text-ink-strong">Build</h2>
 
             <dl class="mt-2 grid gap-2 sm:grid-cols-2">
                 <div class="rounded-md border border-rule bg-panel p-3">
@@ -293,7 +293,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         </section>
 
         <section class="mt-6" aria-labelledby="deck-heading">
-            <h3 id="deck-heading" class="text-base font-semibold text-ink-strong">Support deck</h3>
+            <h2 id="deck-heading" class="text-base font-semibold text-ink-strong">Support deck</h2>
 
             <p v-if="props.contract.deck === null" class="mt-2 rounded-md border border-rule bg-panel p-3 text-sm text-ink">
                 <span title="No six-slot deck is recorded in this setup yet.">N/A</span>. The deck step has not been saved.
@@ -325,12 +325,22 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                     {{ props.contract.deck.equipped }} of six positions carry a card.
                 </p>
 
+                <!-- The flag is printed above, and `StartCareerRequest::deckByPosition()` writes the six
+                     positions and nothing else: there is no `deck_slots` column for it (`ADR-0014`). Said
+                     at the commitment screen because this page's own promise is "everything the six steps
+                     recorded", and the flag is the one entered fact that will not be recorded. -->
+                <p class="mt-2 rounded-md border border-dashed border-rule bg-raised p-3 text-xs text-ink-muted">
+                    The owned or rented flag is in this setup draft. The deck table has no column for it yet,
+                    so starting the career writes the six cards it can store and the flag stays in the draft
+                    until one exists.
+                </p>
+
                 <DeckAnalysis class="mt-3" v-bind="props.contract.deck.analysis" />
             </template>
         </section>
 
         <section class="mt-6" aria-labelledby="target-heading">
-            <h3 id="target-heading" class="text-base font-semibold text-ink-strong">Target</h3>
+            <h2 id="target-heading" class="text-base font-semibold text-ink-strong">Target</h2>
 
             <dl class="mt-2 grid gap-2 sm:grid-cols-3">
                 <div v-for="stat in props.contract.target.stats" :key="stat.key" class="rounded-md border border-rule bg-panel p-3">
