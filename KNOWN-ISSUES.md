@@ -569,6 +569,8 @@ to an untracked file, with the audit above as its check. Closure is whichever la
 **What closure would not cover.** It does not land the seven controllers and does not retire KI-71, the
 condition underneath: whole slices existing only in the working tree. Adding `route:list` to the sequence
 makes the failure visible sooner; it does not make a partial commit safe. This slice did not fix any of
-it: its own patch to `routes/web.php` was built against HEAD's version of the file and contains only the
-three `database.*` routes, which is the workaround, not the cure.
+it: no route-only patch was built. This slice's three routes can land only on HEAD's version of the file,
+and the hub they belong to needs six more of D17's routes plus its `databaseIndex` methods on three tracked
+catalogue controllers and six uncommitted page components, so the patch widened past the slice before it
+was written. That widening is this entry's finding, not its fix.
 
