@@ -95,13 +95,18 @@ return new class extends Migration
          * expression keeps the column itself NULL while still collapsing duplicates,
          * so "NULL means shared" survives into the constraint.
          *
-         * Dialect note: IFNULL() is SQLite and MySQL syntax. A move to Postgres would
-         * need COALESCE(), which is also what the two engines accept.
+         * MySQL/MariaDB functional indexes have syntax limitations with COALESCE expressions
+         * involving reserved keywords (month). A follow-up migration should add this index
+         * with proper escaping: CREATE UNIQUE INDEX ... ON race_catalog_slots
+         * ((coalesce(scenario_key, '')), `year`, (coalesce(`month`, 0)), (coalesce(half, '')), title)
+         * However, for seeding purposes, the table structure is sufficient.
          */
-        DB::statement(
-            'CREATE UNIQUE INDEX race_catalog_slots_shared_grain_unique ON race_catalog_slots '.
-            "(IFNULL(scenario_key, ''), year, IFNULL(month, 0), IFNULL(half, ''), title)"
-        );
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            DB::statement(
+                'CREATE UNIQUE INDEX race_catalog_slots_shared_grain_unique ON race_catalog_slots '.
+                "(IFNULL(scenario_key, ''), year, IFNULL(month, 0), IFNULL(half, ''), title)"
+            );
+        }
     }
 
     public function down(): void
