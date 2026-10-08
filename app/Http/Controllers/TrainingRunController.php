@@ -84,7 +84,10 @@ class TrainingRunController extends Controller
                         : null,
                     'status_label' => $run->status->label(),
                     'created_date' => $run->created_at->toDateString(),
-                    'url' => route('runs.show', $run),
+                    // The Cockpit is the canonical career destination (F1, plan §9's 2.0 line):
+                    // selecting a career from the list must not route through the 0.1.0 run-detail
+                    // page. `runs.show` stays a compatibility doorway until the redirect ruling.
+                    'url' => route('runs.cockpit', $run),
                 ]),
         ]);
     }
@@ -365,6 +368,13 @@ class TrainingRunController extends Controller
             // The Career Cockpit (SCREEN-009) descends from this run's URL; this is the record
             // screen's own door to it, so the cockpit is reachable rather than URL-only.
             'cockpit_url' => route('runs.cockpit', $run),
+            // The Skills Planner (plan §8 D13) for the same reason: the run's skills live here,
+            // so this is the door to the screen that reads them against the build target.
+            'skills_planner_url' => route('runs.skills.planner', $run),
+            // The Career Result (plan §8 D15): a finished career's summary. The screen itself
+            // answers the unfinished case, so the door does not gate on status here — a Trainer
+            // who opens it too early is told what is missing rather than finding no door.
+            'result_url' => route('runs.result', $run),
             'update_url' => route('runs.update', $run),
             'destroy_url' => route('runs.destroy', $run),
         ];
@@ -1575,12 +1585,19 @@ class TrainingRunController extends Controller
      * The target is replaced whole rather than merged: it is entered and read as one object, and a
      * merge would leave a field the Trainer cleared sitting in the column while nothing on screen
      * still claimed it. Validation is the request's; this method writes what it was handed.
+     *
+     * The redirect returns to the page the form was submitted from, for the reason `storeRace()`
+     * records: a target write now has two surfaces, the Skills Planner's reorder save (plan §8
+     * D13) and this screen's own target editing, and pinning `runs.show` sent a Trainer who saved
+     * from the planner off it. For the record screen the two are the same URL.
      */
     public function updateBuildTarget(StoreBuildTargetRequest $request, TrainingRun $run): RedirectResponse
     {
         $run->update(['build_target' => $request->payload()]);
 
-        return redirect()->route('runs.show', $run)->with('status', 'Build target saved.');
+        return redirect()
+            ->back(fallback: route('runs.show', $run))
+            ->with('status', 'Build target saved.');
     }
 
     /**
@@ -1591,6 +1608,11 @@ class TrainingRunController extends Controller
      * guards are the ones that decide whether circles or a period index are admissible
      * here; a guard that only runs on the form path would be a guard that bulk writes
      * walk straight past.
+     *
+     * The redirect returns to the page the form was submitted from, for the reason `updateTurn()`
+     * records: a race write now has two surfaces, this run screen's panel and the Race Decision
+     * screen's drawer (`SCREEN-011`, `SCR-CAR-013`), and pinning `runs.show` sent a Trainer who
+     * entered a race from the decision screen off it. For the panel the two are the same URL.
      */
     public function storeRace(StoreRaceEntryRequest $request, TrainingRun $run): RedirectResponse
     {
@@ -1633,7 +1655,7 @@ class TrainingRunController extends Controller
         });
 
         return redirect()
-            ->route('runs.show', $run)
+            ->back(fallback: route('runs.show', $run))
             ->with('status', 'Race recorded.');
     }
 

@@ -72,7 +72,7 @@ it('links each row to the run', function (): void {
     test()->get('/training-runs')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('runs.data.0.url', route('runs.show', $run)));
+            ->where('runs.data.0.url', route('runs.cockpit', $run)));
 });
 
 it('sends newest first', function (): void {
@@ -82,8 +82,8 @@ it('sends newest first', function (): void {
     test()->get('/training-runs')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('runs.data.0.url', route('runs.show', $newer))
-            ->where('runs.data.1.url', route('runs.show', $older)));
+            ->where('runs.data.0.url', route('runs.cockpit', $newer))
+            ->where('runs.data.1.url', route('runs.cockpit', $older)));
 });
 
 it('paginates at twenty-five and reaches a second page', function (): void {
