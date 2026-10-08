@@ -111,7 +111,12 @@ const items: NavItem[] = [
     { label: 'Support Cards', mobileLabel: 'Deck', to: '/support-cards', spa: true, inBar: true, prefetches: true, icon: 'cards' },
     { label: 'Skills', mobileLabel: null, to: '/skills', spa: true, inBar: false, prefetches: true, icon: 'spark' },
     { label: 'Review', mobileLabel: null, to: '/review', spa: true, inBar: false, prefetches: true, icon: 'triangle' },
-    { label: 'Database', mobileLabel: null, to: '/umamusume', spa: true, inBar: false, prefetches: true, icon: 'book' },
+    // /database, not /umamusume: the Database hub (SCREEN-023, plan §8 D17) is the label's
+    // destination, and /umamusume is one of its five areas. Repointed rather than added, so this slice
+    // contributes no destination. The count is ten live items with zero named absences, which is above
+    // `frontend-development-plan.md` §13's "at or under eight"; the breach predates D17 and its repair is
+    // the owner's ruling, not a quiet merge of two entries.
+    { label: 'Database', mobileLabel: null, to: '/database', spa: true, inBar: false, prefetches: true, icon: 'book' },
     { label: 'Settings', mobileLabel: null, to: '/preferences', spa: true, inBar: false, prefetches: true, icon: 'gear' },
 ];
 
@@ -285,11 +290,12 @@ const mobileMoreClass =
             </header>
             <main id="main" class="flex-1 px-6 py-6 pb-24 md:pb-6">
                 <p
-                    v-if="flashStatus"
-                    class="mb-4 rounded border border-green-line bg-green-tint px-3 py-2 text-sm text-ink"
-                >
-                    {{ flashStatus }}
-                </p>
+                     v-if="flashStatus"
+                     role="status"
+                     class="mb-4 rounded border border-green-line bg-green-tint px-3 py-2 text-sm text-ink"
+                 >
+                     {{ flashStatus }}
+                 </p>
                 <slot />
             </main>
         </div>
