@@ -371,3 +371,63 @@ Pest 4, feature-first (repo test rules). HTTP faked (`Http::fake`) for all fetch
 - Intl `Normalizer` (NFKD): <https://www.php.net/manual/en/normalizer.normalize.php>
 
 Unverified at writing time (rev 0.1): exact robots.txt/rate-limit posture of candidate sources. Status 2026-09-28: the first source is owner-approved and configured (`gametora-characters`, `config/uma.php`, entry dated 2026-09-27, static JSON so one request per fetch plus lock and TTL); its robots/live-availability check is still outstanding, and PRD OQ-2 remains open for all further sources.
+
+## 12. Runtime Performance and Reliability (NFR-8 to NFR-20)
+
+Added 2026-10-08 (NFR hardening pass). `PRD.md` §5 owns the requirements; this section records the
+mechanism and the measurements behind them, and what is still deferred.
+
+**Why the two failures occurred.**
+
+1. **A document load could block for thirty seconds and answer 500 (KI-76).** The app publishes no
+   `config/inertia.php`, so the package default governs: `ssr.enabled` is `true` and `ssr.timeout` is
+   `null` (`vendor/inertiajs/inertia-laravel/config/inertia.php:24,34`). `HttpGateway::dispatch()`
+   skips its "no bundle" guard while Vite is hot (`Vite::isRunningHot()`, true whenever `public/hot`
+   exists), so it posts the page to the hot origin's `/__inertia_ssr`, which no Vite dev server
+   answers. With no timeout the request waits until PHP's `max_execution_time` fatals the script. Only
+   **full document requests** render the root view, so client-side Inertia visits were unaffected —
+   which is why the symptom read as intermittent and as "nothing renders after a refresh".
+2. **A page could announce a load that had already ended (KI-79).** `Request::send()` fires the
+   document `inertia:start` event before it looks at `prefetch`, and `Request::finish()` returns early
+   once the request is `cancelled` or `interrupted`. A `Link` hover prefetch therefore set the current
+   page's loading flag, and a prefetch superseded by the next one was cancelled without ever clearing
+   it. Eleven pages each carried their own copy of that listener block.
+
+**What was measured (2026-10-08, this worktree, seeded `database/database.sqlite`).**
+
+| Surface                              | Before                                    | After           |
+| ------------------------------------ | ----------------------------------------- | --------------- |
+| `GET /` (full document)              | 500 after ~30 s (PHP execution limit)     | 200 in 0.69 s   |
+| `GET /training-runs` (full document) | 500 after ~30 s                           | 200 in 0.88 s   |
+| `public/build` entry chunk           | —                                         | 276 kB (96 kB gzip), one chunk per page |
+
+The before figure is KI-76's own discriminating pair, reproduced here; the after figures are `curl -w`
+on a fresh `php artisan serve`.
+
+**What was changed.**
+
+- `INERTIA_SSR_ENABLED=false` in `.env.example` (tracked) and the local `.env`, closing KI-76's remedy
+  (b). The tool is local-only on loopback, has no crawler and no first-paint requirement, and has no
+  SSR bundle or entry point, so SSR cannot work here; leaving it on only adds a failure mode. KI-76
+  records the choice between this and a bounded timeout as the owner's, so this needs ratifying.
+- `resources/js/composables/useVisitState.ts` — one owner of the page-level visit lifecycle, ignoring
+  prefetch visits. The eleven pages that carried the duplicated block now call it (KI-79).
+
+**Budgets selected.** Query ceilings, payload bounds and per-route latency budgets are specified in
+`PRD.md` NFR-10, NFR-11 and NFR-8 but are **not yet pinned to numbers**: the audit measured the two
+defects above and the build, not per-route query counts, and inventing ceilings without measuring them
+would be the fabrication the PRD's own copy rules forbid. Pinning them is the next step, and it needs a
+quiet worktree (KI-74).
+
+**Automated tests that protect the behaviour.**
+
+- `tests/browser/navigation-determinism.spec.ts` — a hover prefetch announces no load; an interrupted
+  prefetch strands nothing; a settled navigation clears the state; a refresh renders in one navigation.
+- `tests/browser/dashboard.spec.ts` — the in-flight and `invalid` states on the landing screen.
+- `tests/browser/screen-speed.spec.ts` and the other migrated specs cover rendered copy per screen.
+
+**Intentionally deferred.** Route-level query-count tests (NFR-11) and a development-only diagnostics
+surface (NFR-19) are not built. `CockpitController` still loads whole `race_catalog_slots` sets per
+request (bounded by scenario, not by page) and `PreferenceController::backup()` runs `VACUUM INTO` on
+the request thread; both are recorded here rather than changed, because neither is on the path that was
+breaking and both need their own measurement.
