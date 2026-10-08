@@ -19,6 +19,7 @@
  * input because the client's red banner means this character's objective. The marker therefore says
  * "Mandatory", never "Goal".
  */
+import AbsenceValue from '../AbsenceValue.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -125,11 +126,13 @@ const group = (n: number): string => n.toLocaleString('en-US');
         <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-3">
             <div v-for="fact in props.race.facts" :key="fact.key" class="flex flex-col">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ fact.label }}</dt>
-                <dd
-                    class="text-ink-strong"
-                    :title="fact.title ?? undefined"
-                >
-                    {{ fact.value ?? 'N/A' }}
+                <dd class="text-ink-strong">
+                    <AbsenceValue
+                        v-if="fact.value === null && fact.title !== null"
+                        :reason="fact.title"
+                        compact
+                    />
+                    <span v-else :title="fact.title ?? undefined">{{ fact.value ?? 'N/A' }}</span>
                 </dd>
             </div>
         </dl>
@@ -163,7 +166,14 @@ const group = (n: number): string => n.toLocaleString('en-US');
                 <dl class="flex flex-col gap-2 text-sm">
                     <div v-for="fact in props.race.facts" :key="fact.key">
                         <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ fact.label }}</dt>
-                        <dd class="text-ink-strong" :title="fact.title ?? undefined">{{ fact.value ?? 'N/A' }}</dd>
+                        <dd class="text-ink-strong">
+                            <AbsenceValue
+                                v-if="fact.value === null && fact.title !== null"
+                                :reason="fact.title"
+                                compact
+                            />
+                            <span v-else :title="fact.title ?? undefined">{{ fact.value ?? 'N/A' }}</span>
+                        </dd>
                     </div>
                 </dl>
 

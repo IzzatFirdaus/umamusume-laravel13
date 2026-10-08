@@ -3153,6 +3153,26 @@ left.
    number is not the goal.
    *No state table above changes: an absence keeps its words and gains a disclosure.*
 
+   **Same day, second pass: the sweep's remainder, and where the pattern does not fit.** Migrated now, each
+   with its own caller's sentence and nothing else changed: `TrainingCard` (8 sites — the expected gains,
+   the target deficit's absent arm, the risk line, Energy after this turn's absent arm, the failure
+   probability, the support-effects row, bond gains and the scenario row), `RunRaceStrip` (the untied turn
+   and the goal-races line), `SaveVeteran` (the three held figures and the per-stat no-turn row),
+   `AncestryNode` (the Spark chance and the node's own rank) and `RaceCard` (both fact rows, and only where
+   the server sent a reason). Two rules came out of doing it, and both live in `DESIGN.md` §5: the summary
+   keeps its disclosure triangle only while its display stays `list-item`, and `<details>` is flow content,
+   so the pattern belongs in a field or cell container rather than inline in a sentence. That second one is
+   why `SkillsPlanner`'s two coverage figures and `UraPanel`'s deadline stayed as they are: each sits inside
+   a prose sentence, and moving it means restructuring the sentence into a row, which is a design change
+   rather than a migration. **Corrected on this pass, the entry's own earlier claim:** `RaceCard.vue:132`
+   was counted there as an absence carrying no reason at all. It carries one — the `title` sits on the `dd`
+   at `:130` and the `N/A` renders at `:132`, which is two lines, and the single-line sweep that produced
+   the count cannot see that. Both fact lists come from `RaceFacts::forSlot()`, whose `fact()` helper takes
+   the absent-case title as a required `string`, so no row can reach the template with no value and no
+   reason. The specs that pinned the old hover channel were re-pinned to the disclosure's accessible name
+   in the same change, at `career-training-detail`, `career-save-veteran`, `career-race-strip`,
+   `career-race-decision`, `legacy` and `career-legacy-deck-steps`.
+
 ## 8. Source of Truth
 
 | Question                                                      | Authority                                                                                                                                                                                                       | Corroboration                                                                                                                             |

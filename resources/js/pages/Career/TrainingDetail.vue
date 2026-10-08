@@ -9,8 +9,9 @@
  *
  * **Nothing here projects a number.** The five cards show entered values, declared constants with their
  * source and date, the advisor's own arithmetic, the deck's stated anchors and the scenario matrix
- * (`ADR-0001` §2 and §7, `ADR-0020` §2). A yield or a failure rate renders `N/A` with the exclusion in
- * its `title`; `TrainingCard.vue` and `CareerTrainingDetailTest` hold that line together.
+ * (`ADR-0001` §2 and §7, `ADR-0020` §2). A yield or a failure rate renders `N/A` through
+ * `AbsenceValue.vue`, whose disclosure carries the exclusion; `TrainingCard.vue` and
+ * `CareerTrainingDetailTest` hold that line together.
  *
  * **The write is the guided turn's.** `Train` on a card holds that card's choice for the form below —
  * carried, never re-asked (WCAG 3.3.7) — and the form posts `stage=preview` to `runs.turns.store` with

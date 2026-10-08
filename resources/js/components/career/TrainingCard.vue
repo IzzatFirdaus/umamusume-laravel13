@@ -5,9 +5,11 @@
  * **The card's headline slot is empty on purpose.** The brief that shaped this screen prints a
  * projected gain per stat and a failure percentage for each card; both are unsourced, and the advisor
  * spec puts them out of scope (`docs/research-scratch/PROCESS-PLANS.md` section `trainer-advisor.md`
- * §1 and §5, `ADR-0001` §3). They render `N/A` with the exclusion named in the `title`, never a
- * number and never a dash (`AGENTS.md` §5). `CareerTrainingDetailTest` pins the option payload to a
- * key set that has no home for a projected figure, so this file cannot be handed one.
+ * §1 and §5, `ADR-0001` §3). They render through `AbsenceValue.vue`: `N/A` plus the exclusion named in
+ * the disclosure, never a number and never a dash (`AGENTS.md` §5). A `title` was the first channel here
+ * and it reached a mouse and nothing else, which is why the pattern moved. `CareerTrainingDetailTest`
+ * pins the option payload to a key set that has no home for a projected figure, so this file cannot be
+ * handed one.
  *
  * **Three facts in the collapsed card, the modifiers on expansion** (design-2.0 §35, plan §13 under
  * Cognitive Load): the cost, the supports entered, and the deficit against the Trainer's own target.
@@ -23,6 +25,7 @@
  * pairs, and `recommended` is a boolean from the advisor rather than a verdict made here. The badge
  * beside a figure is `ProvenanceBadge.vue`'s, the only owner of the four glyphs.
  */
+import AbsenceValue from '../AbsenceValue.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import { computed, ref } from 'vue';
 
@@ -108,6 +111,17 @@ const energyAfterTitle = computed(() => {
     return after.min === after.max
         ? `${fmt(after.min)} leaves the entered Energy minus the declared cost. Calculated, not a reading.`
         : `${fmt(after.min)} to ${fmt(after.max)}: the entered Energy minus each end of the cost range. Calculated, not a reading.`;
+});
+
+/** The figure for the present case; the absent case renders through `AbsenceValue` and has no text. */
+const energyAfterText = computed(() => {
+    const after = props.option.energy_after;
+
+    if (after === null) {
+        return '';
+    }
+
+    return after.min === after.max ? fmt(after.min) : `${fmt(after.min)} to ${fmt(after.max)}`;
 });
 
 const gainsTitle =
@@ -199,7 +213,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
             <div>
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Expected gains</dt>
                 <dd class="mt-0.5">
-                    <span :title="gainsTitle" class="font-mono tabular-nums text-ink-strong">N/A</span>
+                    <AbsenceValue class="font-mono tabular-nums" :reason="gainsTitle" compact />
                     <ProvenanceBadge state="unknown" class="ml-1 align-middle" />
                 </dd>
             </div>
@@ -223,10 +237,11 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
             <div>
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Target deficit</dt>
                 <dd class="mt-0.5">
-                    <span :title="deficitTitle" class="font-mono tabular-nums text-ink-strong">
-                        {{ showDeficit ? deficitText : 'N/A' }}
-                    </span>
-                    <ProvenanceBadge v-if="showDeficit" state="calculated" class="ml-1 align-middle" />
+                    <template v-if="showDeficit">
+                        <span :title="deficitTitle" class="font-mono tabular-nums text-ink-strong">{{ deficitText }}</span>
+                        <ProvenanceBadge state="calculated" class="ml-1 align-middle" />
+                    </template>
+                    <AbsenceValue v-else class="font-mono tabular-nums" :reason="deficitTitle" compact />
                 </dd>
             </div>
 
@@ -238,7 +253,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                         :title="witRiskTitle"
                         class="font-mono text-ink-strong"
                     >RiskNotMeasured</span>
-                    <span v-else :title="riskTitle" class="font-mono text-ink-strong">N/A</span>
+                    <AbsenceValue v-else class="font-mono" :reason="riskTitle" compact />
                 </dd>
             </div>
         </dl>
@@ -275,14 +290,14 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Energy after this turn</dt>
                     <dd class="mt-0.5">
-                        <span :title="energyAfterTitle" class="font-mono tabular-nums text-ink-strong">
-                            <template v-if="props.option.energy_after === null">N/A</template>
-                            <template v-else-if="props.option.energy_after.min === props.option.energy_after.max">
-                                {{ fmt(props.option.energy_after.min) }}
-                            </template>
-                            <template v-else>
-                                {{ fmt(props.option.energy_after.min) }} to {{ fmt(props.option.energy_after.max) }}
-                            </template>
+                        <AbsenceValue
+                            v-if="props.option.energy_after === null"
+                            class="font-mono tabular-nums"
+                            :reason="energyAfterTitle"
+                            compact
+                        />
+                        <span v-else :title="energyAfterTitle" class="font-mono tabular-nums text-ink-strong">
+                            {{ energyAfterText }}
                         </span>
                         <ProvenanceBadge
                             v-if="props.option.energy_after !== null"
@@ -295,7 +310,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Failure probability</dt>
                     <dd class="mt-0.5">
-                        <span :title="failureTitle" class="font-mono text-ink-strong">N/A</span>
+                        <AbsenceValue class="font-mono" :reason="failureTitle" compact />
                         <ProvenanceBadge state="unknown" class="ml-1 align-middle" />
                     </dd>
                 </div>
@@ -330,14 +345,14 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                         </div>
                     </dd>
                     <dd v-else class="mt-0.5">
-                        <span :title="supportsTitle" class="font-mono text-ink-strong">N/A</span>
+                        <AbsenceValue class="font-mono" :reason="supportsTitle" compact />
                     </dd>
                 </div>
 
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Bond gains</dt>
                     <dd class="mt-0.5">
-                        <span :title="bondTitle" class="font-mono text-ink-strong">N/A</span>
+                        <AbsenceValue class="font-mono" :reason="bondTitle" compact />
                         <ProvenanceBadge state="unknown" class="ml-1 align-middle" />
                     </dd>
                 </div>
@@ -357,7 +372,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                         </ul>
                     </dd>
                     <dd v-else class="mt-0.5">
-                        <span :title="scenarioTitle" class="font-mono text-ink-strong">N/A</span>
+                        <AbsenceValue class="font-mono" :reason="scenarioTitle" compact />
                     </dd>
                 </div>
 

@@ -19,6 +19,7 @@
  * narrow the presentation, or replace the column. That is why the data arrives as one prop bundle and
  * the component reads nothing but it.
  */
+import AbsenceValue from '../AbsenceValue.vue';
 import { computed } from 'vue';
 
 interface RecordedRow {
@@ -92,11 +93,11 @@ const thisTurn = computed(() => props.strip.this_turn);
                 >
                     <span class="font-medium text-ink-strong">{{ row.title }}</span>
                     <span v-if="row.tier !== null" class="text-xs text-ink-muted">{{ row.tier }}</span>
-                    <span class="text-xs text-ink-muted">
+                    <div class="text-xs text-ink-muted">
                         Turn
-                        <span v-if="row.turn === null" :title="props.strip.absences.turn_link">N/A</span>
+                        <AbsenceValue v-if="row.turn === null" :reason="props.strip.absences.turn_link" compact />
                         <template v-else>{{ row.turn }}</template>
-                    </span>
+                    </div>
                     <span class="text-xs font-semibold text-ink-strong">{{ row.status_label }}</span>
                     <span v-if="row.placement !== null" class="text-xs text-ink-muted">{{ row.placement }}</span>
                 </li>
@@ -166,10 +167,10 @@ const thisTurn = computed(() => props.strip.this_turn);
 
             <!-- The goal races the client prints are per trainee, and no table here holds them, so the
                  region names the absence once rather than printing a flag it cannot source. -->
-            <p class="mt-2 text-xs text-ink-muted">
+            <div class="mt-2 text-xs text-ink-muted">
                 Goal races:
-                <span :title="props.strip.absences.goal">N/A</span>.
-            </p>
+                <AbsenceValue :reason="props.strip.absences.goal" compact />.
+            </div>
         </section>
     </div>
 </template>

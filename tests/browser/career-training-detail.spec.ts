@@ -6,8 +6,13 @@ import { deleteRun } from '../utils/delete-run';
  * Rendered-copy and accessibility evidence for SCREEN-010, the Training Decision detail
  * (`SCR-CAR-012`, plan §8 D9). `CareerTrainingDetailTest` asserts the resolved props, including the
  * option payload's exact key set; these cases assert what only a browser reaches: the `N/A` sentences
- * and the exclusions in their `title`s, the disclosure by keyboard, the 44px sweep, the reflow at
- * 320px, the reduced-motion path, and that no projected yield or failure rate is printed anywhere.
+ * and the exclusions on the disclosure that carries them, the disclosure by keyboard, the 44px sweep,
+ * the reflow at 320px, the reduced-motion path, and that no projected yield or failure rate is printed
+ * anywhere.
+ *
+ * The exclusion channel was a `title` until this pass. A `title` reaches a mouse and nothing else, so
+ * these cases now address each exclusion through the summary's accessible name and open it by keyboard
+ * (`AbsenceValue.vue`); the strings they pin are unchanged.
  *
  * Fixture strategy, and why it is the wizard walk: the run is built by pressing the app's own steps
  * and `Start Career`, then the first turn is recorded through the run screen's guided rail, so every
@@ -116,6 +121,10 @@ async function openTrainingDetail(page: import('@playwright/test').Page): Promis
     return runUrl;
 }
 
+/** The visible reason of an `AbsenceValue`: the span that follows its summary inside the `details`. */
+const reasonOf = (disclosure: import('@playwright/test').Locator) =>
+    disclosure.locator('xpath=following-sibling::span');
+
 test('shows five cards, the sourced cost, and no projected number anywhere', async ({ page }) => {
     await openTrainingDetail(page);
 
@@ -153,22 +162,35 @@ test('shows five cards, the sourced cost, and no projected number anywhere', asy
     await expect(page.getByText(/of six Support Card slots are recorded/)).toBeVisible();
 });
 
-test('names each exclusion in the title of the N/A that shows it', async ({ page }) => {
+test('names each exclusion on a disclosure a keyboard and a screen reader reach', async ({ page }) => {
     await openTrainingDetail(page);
 
     const speed = page.getByRole('article').filter({ hasText: /^Speed/ });
-    await expect(speed.locator('span[title*="per-training stat yield"]').first()).toContainText('N/A');
-    await expect(speed.locator('span[title*="trainer-advisor.md §1"]').first()).toContainText('N/A');
+
+    // The exclusion rides in the summary's accessible name, so a screen reader states it before the
+    // Trainer decides whether to open anything. Measured here: Chromium exposes the `<details>` as a
+    // group whose name is `N/A , <reason>` and keeps the `<summary>` as the focusable element, so
+    // `getByRole('button')` finds nothing and the summary is the honest anchor.
+    const gains = speed.locator('summary', { hasText: 'No source publishes a per-training stat yield' });
+    await expect(gains).toBeVisible();
+    await expect(reasonOf(gains)).toBeHidden();
+
+    // Opening it is a focus-and-press path, not a hover: the sighted keyboard route to the same sentence.
+    await gains.focus();
+    await expect(gains).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(reasonOf(gains)).toHaveText(/Excluded from the advisor by design/);
 
     // The modifiers arrive on expansion, and each unsourced one says which rule excluded it.
     await speed.getByRole('button', { name: 'Inspect details' }).click();
-    await expect(speed.getByText('Failure probability')).toBeVisible();
-    await expect(speed.locator('span[title*="failure curve"]')).toContainText('N/A');
-    await expect(speed.locator('span[title*="deck_slots holds a card"]')).toContainText('N/A');
-    await expect(speed.getByText('Scenario cap')).toBeVisible();
+    const details = speed.locator('#training-details-speed');
+    await expect(details.getByText('Failure probability')).toBeVisible();
+    await expect(details.locator('summary', { hasText: 'No source publishes a failure curve' })).toBeVisible();
+    await expect(details.locator('summary', { hasText: 'Bond is not stored for a Support Card' })).toBeVisible();
+    await expect(details.getByText('Scenario cap')).toBeVisible();
 });
 
-test('expands and collapses the details by keyboard, with a stable focus order', async ({ page }) => {
+test('expands and collapses the details by keyboard, and keeps the tab order with the document', async ({ page }) => {
     await openTrainingDetail(page);
 
     const power = page.getByRole('article').filter({ hasText: /^Power/ });
@@ -177,7 +199,13 @@ test('expands and collapses the details by keyboard, with a stable focus order',
     const focusedLabel = () => page.evaluate(() => document.activeElement?.textContent?.trim().slice(0, 16) ?? '');
 
     await expect(details).toBeHidden();
+
+    // Where the order leads while the region is shut, so the walk below can prove it returns here.
     await toggle.focus();
+    await page.keyboard.press('Tab');
+    const shutNext = await focusedLabel();
+    await page.keyboard.press('Shift+Tab');
+
     await expect(toggle).toBeFocused();
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
@@ -189,10 +217,15 @@ test('expands and collapses the details by keyboard, with a stable focus order',
     // by their own press (WCAG 2.4.3).
     await expect(toggle).toBeFocused();
 
-    // The next tab stop is the same control whether the region is open or closed: the modifiers are
-    // reading matter, so expansion does not insert a stop into the page's order.
+    // The region carries stops of its own now: an exclusion inside it is a disclosure, and a control a
+    // Trainer must be able to reach is a tab stop. What holds is that the order is still the document's —
+    // the stop after the toggle is the region's first exclusion, it opens under the same Enter that
+    // opens it for a mouse, and closing the region takes the stops out again.
     await page.keyboard.press('Tab');
-    const openNext = await focusedLabel();
+    const firstExclusion = details.locator('summary', { hasText: 'No source publishes a failure curve' });
+    await expect(firstExclusion).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(reasonOf(firstExclusion)).toHaveText(/ADR-0001 §3 keeps a numeric/);
 
     await page.keyboard.press('Shift+Tab');
     await expect(toggle).toBeFocused();
@@ -201,7 +234,7 @@ test('expands and collapses the details by keyboard, with a stable focus order',
     await expect(details).toBeHidden();
 
     await page.keyboard.press('Tab');
-    expect(await focusedLabel()).toBe(openNext);
+    expect(await focusedLabel()).toBe(shutNext);
 });
 
 test('reaches the screen from the Cockpit and records the choice it carries', async ({ page }) => {

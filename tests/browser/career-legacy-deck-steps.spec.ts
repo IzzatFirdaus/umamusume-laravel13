@@ -75,10 +75,10 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.getByText('N/A, not chosen')).toHaveCount(3);
         await expect(page.getByText('No Sparks recorded.')).toHaveCount(4);
 
-        // The chance a Spark rolls is a named absence on each parent node, with the reason on the
-        // element rather than in a footnote (`ADR-0020` §3: no star-roll table exists).
+        // The chance a Spark rolls is a named absence on each parent node, and the reason is on the
+        // disclosure rather than in a footnote or a hover (`ADR-0020` §3: no star-roll table exists).
         await expect(page.getByText('Spark chance')).toHaveCount(2);
-        await expect(page.locator('[title*="star-roll"]')).toHaveCount(2);
+        await expect(page.locator('summary', { hasText: 'star-roll' })).toHaveCount(2);
     });
 
     test('sizes the ancestry controls to the 44px contract', async ({ page }) => {

@@ -13,7 +13,7 @@
  *
  * **Three figures the brief asks for are not here, and the page says why.** Factor analysis, a legacy value
  * and a best use are `ADR-0020` §3's held computation and no table in this repository prices them, so each
- * prints `N/A` with the ruling as its tooltip rather than a score, a star rating or a sentence beginning
+ * prints `N/A` with the ruling as its disclosure rather than a score, a star rating or a sentence beginning
  * with advice. Nothing on this page recommends anything.
  *
  * **Tags are a suggestion, not a menu.** The groups come from `config('uma.veteran.suggested_tags')` in the
@@ -22,6 +22,7 @@
  * order, so the keyboard path is the same path as the mouse path.
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import SparkChip from '../../components/legacy/SparkChip.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, reactive, ref } from 'vue';
@@ -226,7 +227,11 @@ function save(): void {
                         <dt class="text-xs text-ink-muted">{{ stat.label }}</dt>
                         <dd class="text-ink-strong">
                             <template v-if="props.stats[stat.key] !== null">{{ props.stats[stat.key] }}</template>
-                            <span v-else title="This run logged no turn, so it recorded no value for this stat.">N/A</span>
+                            <AbsenceValue
+                                v-else
+                                reason="This run logged no turn, so it recorded no value for this stat."
+                                compact
+                            />
                         </dd>
                     </div>
                 </dl>
@@ -265,7 +270,9 @@ function save(): void {
                 <dl class="mt-2 grid gap-3 text-sm sm:grid-cols-3">
                     <div v-for="(figure, name) in props.held" :key="name">
                         <dt class="text-xs text-ink-muted">{{ name === 'factor_analysis' ? 'Factor analysis' : name === 'legacy_value' ? 'Legacy value' : 'Best use' }}</dt>
-                        <dd class="text-ink-strong" :title="figure.title">N/A</dd>
+                        <dd class="text-ink-strong">
+                            <AbsenceValue :reason="figure.title" compact />
+                        </dd>
                     </div>
                 </dl>
             </section>

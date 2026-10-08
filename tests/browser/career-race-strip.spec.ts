@@ -128,10 +128,11 @@ test('keeps an entered race in the run region and out of the list ahead of it', 
     const recorded = page.getByRole('region', { name: 'Recorded in this run' });
     await expect(recorded.getByText('Junior Make Debut')).toBeVisible();
     await expect(recorded.getByText('Entered')).toBeVisible();
-    // The turn the race was run on is not tied, so the row says N/A with the reason on it.
-    const unrecorded = recorded.getByTitle(/KI-17/);
+    // The turn the race was run on is not tied, so the row says N/A on a disclosure that names the
+    // reason for a keyboard and a screen reader as well as a mouse.
+    const unrecorded = recorded.locator('summary', { hasText: 'KI-17' });
     await expect(unrecorded).toBeVisible();
-    await expect(unrecorded).toHaveText('N/A');
+    await expect(unrecorded).toContainText('N/A');
 
     // One race, one region: the debut is mandatory, it is entered, and it is not still to come.
     await expect(page.getByRole('region', { name: 'Still to come' }).getByText('Junior Make Debut')).toHaveCount(0);
@@ -151,10 +152,10 @@ test('says so when there is no turn being decided, and prints no figure it canno
     await expect(page.getByText('No race on this scenario\'s calendar falls at turn 2.')).toBeVisible();
     await expect(page.getByRole('link', { name: 'Open Race Decision for turn 2' })).toHaveCount(0);
 
-    // The goal races the client prints per trainee have no column, so the line is an N/A with its
-    // reason rather than a flag or an empty list.
-    const goal = page.getByTitle(/KI-34/);
-    await expect(goal).toHaveText('N/A');
+    // The goal races the client prints per trainee have no column, so the line is an N/A whose
+    // disclosure states the reason, rather than a flag or an empty list.
+    const goal = page.locator('summary', { hasText: 'KI-34' });
+    await expect(goal).toContainText('N/A');
     await expect(page.getByText('Goal races:')).toBeVisible();
 
     // No percentage anywhere in the strip: readiness and win probability are held (`ADR-0016`).

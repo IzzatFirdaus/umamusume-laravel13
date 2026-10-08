@@ -180,7 +180,7 @@ test.describe('Legacy Lab builder', () => {
         // tree holds them as data, so the honest cell is N/A plus the reason.
         const chance = page.getByText('Spark chance').first().locator('..');
         await expect(chance).toContainText('N/A');
-        await expect(page.locator('[title*="no sourced star-roll table"]').first()).toBeVisible();
+        await expect(page.locator('summary', { hasText: 'no sourced star-roll table' }).first()).toBeVisible();
 
         // Assignment is a labelled `<select>`, so it is in the tab order, arrow-keyable and named
         // for a screen reader with no custom key handling. WCAG 2.2 SC 2.5.7 forbids a drag-only

@@ -16,6 +16,16 @@
  * 2.5.8's floor. The house 44px is the bar for a primary control (`DESIGN.md` §12), and a disclosure
  * inside a data cell is not one.
  *
+ * **The summary must stay `display: list-item`, and that is not a styling choice.** Measured in
+ * Chromium: `inline-flex`, `block` and `inline-block` each compute a `disclosure-closed` marker and paint
+ * none of it, so the value reads as plain text with no hint that it opens, while `list-item` renders the
+ * triangle. `inline-list-item` is unsupported and falls back to `list-item`. The rest of the class list
+ * has to keep that display intact or the affordance disappears silently.
+ *
+ * **The reason is width-capped** because the marker box is shrink-to-fit: uncapped, an open sentence
+ * measured 795px on a 1200px viewport and pushed the provenance badge beside it to x=824, far from the
+ * value it annotates. At `max-w-sm` the same row is 384px with the badge at 413.
+ *
  * **No type is set here, on purpose.** The marker inherits the size and family of the value it stands in
  * for, so `N/A` reads at the same weight as the numbers beside it; a caller in a numeric context adds
  * `class="font-mono"`, which Vue merges onto the root element. A component that picked its own font would
@@ -38,13 +48,13 @@ defineProps<{
     <details class="inline-block align-baseline">
         <summary
             :class="[
-                'inline-flex cursor-pointer items-baseline text-ink-muted',
+                'list-item cursor-pointer text-ink-muted',
                 compact === true ? 'min-h-6' : 'min-h-11',
             ]"
         >
             N/A<span class="sr-only">, {{ reason }}</span>
         </summary>
-        <span :class="['mt-1 block text-ink-muted', compact === true ? 'text-xs' : 'text-sm']">
+        <span :class="['mt-1 block max-w-sm text-ink-muted', compact === true ? 'text-xs' : 'text-sm']">
             {{ reason }}
         </span>
     </details>

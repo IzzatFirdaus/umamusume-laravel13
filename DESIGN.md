@@ -572,6 +572,15 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   `compact` is the dense-row form at 24px, WCAG 2.2 SC 2.5.8's floor, against the house 44px for a
   primary control (§12). Recorded 2026-10-08: the pattern is shipped and the migration is partial, with
   the migrated screens named in `SCREEN_SPEC.md` and the remaining ones counted there.
+- **Three measured constraints on where the marker may sit.** Measured in Chromium the same day: the
+  summary keeps its disclosure triangle only while its display stays `list-item`, so `inline-flex`,
+  `block` and `inline-block` each compute a `disclosure-closed` marker and paint none of it, which leaves
+  an absence that opens with no visible hint that it opens. The open reason is width-capped, because the
+  marker box is shrink-to-fit: uncapped, one sentence measured 795px on a 1200px viewport and pushed the
+  provenance badge beside it to x=824, away from the value it explains. And `<details>` is flow content,
+  so it belongs in a field or cell container (`dd`, `div`, `td`, `li`) and not inline in a `<p>` or a
+  `<span>`; an absence inside a sentence needs the sentence restructured into a row, which is a design
+  change and not a migration.
 - **Absences are worded by kind, and the component does not decide the kind.** "not recorded" is the
   Trainer's own gap, "no source" is the corpus's, and a held computation is the product's refusal; the
   caller owns its sentence and passes it through. This is deliberately not the unresolved provenance

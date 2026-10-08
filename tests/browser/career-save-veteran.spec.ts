@@ -110,11 +110,13 @@ test('names the held figures as held, and prints no recommendation anywhere', as
 
     // Each held figure is `N/A` carrying the ruling that keeps it that way. The pair is addressed through
     // the `dt` element rather than `getByRole('term')`, which did not resolve for a `dt` inside the `div`
-    // wrapper this definition list uses.
+    // wrapper this definition list uses, and the ruling now rides on the disclosure's accessible name
+    // rather than a `title` only a mouse could read.
     for (const label of ['Factor analysis', 'Legacy value', 'Best use']) {
         const cell = page.locator('dt', { hasText: label }).locator('xpath=following-sibling::dd[1]');
-        await expect(cell).toHaveText('N/A');
-        await expect(cell).toHaveAttribute('title', /ADR-0020/);
+        const ruling = cell.locator('summary', { hasText: 'ADR-0020' });
+        await expect(ruling).toContainText('N/A');
+        await expect(ruling.locator('xpath=following-sibling::span')).toHaveText(/ADR-0020/);
     }
 
     // The brief's own recommendation wording must not appear, in any element or attribute.

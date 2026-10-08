@@ -14,10 +14,12 @@
  * labelled with no custom key handling at all, and it is `min-h-11` for the 44px floor. A drag handle
  * would have needed a full keyboard equivalent written from scratch to reach the same place.
  *
- * **Nothing here is computed.** A node prints the name the Trainer entered, the Sparks a run recorded,
- * and `N/A` with a `title` for anything the tool does not hold. The probability slot is passed in and is
- * always null from the controller, which is the honest answer: this tree holds no star-roll table.
+ * **Nothing here is computed.** A node prints the name the Trainer entered, the Sparks a run recorded, and
+ * `N/A` carrying its reason on a disclosure (`AbsenceValue.vue`) for anything the tool does not hold. The
+ * probability slot is passed in and is always null from the controller, which is the honest answer: this
+ * tree holds no star-roll table.
  */
+import AbsenceValue from '../AbsenceValue.vue';
 import SparkChip from './SparkChip.vue';
 
 interface SparkRow {
@@ -78,17 +80,17 @@ withDefaults(defineProps<{
             </span>
         </p>
 
-        <p class="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs text-ink-muted">
-            <span>
-                Rank
-                <!-- `title` distinguishes "you did not record her rank" from "she has no rank",
+        <div class="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs text-ink-muted">
+            <div class="flex items-baseline gap-1">
+                <!-- The label and its value stay one text run: `Rank 4` is what the node reads back as,
+                     and splitting the two across elements makes the pair unmatchable as one unit. -->
+                <span>Rank <template v-if="rank !== null">{{ rank }}</template></span>
+                <!-- The disclosure distinguishes "you did not record her rank" from "she has no rank",
                      which are different statements and read the same as a bare N/A. -->
-                <span class="text-ink" :title="rank === null ? 'You have not recorded this Legacy’s own rank.' : undefined">
-                    {{ rank ?? 'N/A' }}
-                </span>
-            </span>
+                <AbsenceValue v-else reason="You have not recorded this Legacy’s own rank." compact />
+            </div>
             <span v-if="isGuest">Rented from a friend</span>
-        </p>
+        </div>
 
         <!-- The Spark list. A node with none says so rather than rendering an empty row (D-220). -->
         <ul v-if="sparks.length > 0" class="mt-2 flex flex-wrap gap-1.5">
@@ -105,15 +107,15 @@ withDefaults(defineProps<{
         </p>
 
         <!--
-            The chance a Spark rolls. Always `N/A` from the controller, and the `title` says why, so
+            The chance a Spark rolls. Always `N/A` from the controller, and the disclosure says why, so
             the cell is a disclosure rather than a blank. The brief asks for `~10% ★★★`; the odds it
             would come from exist in the corpus only as a wiki pair flagged stale (§1.5.3), and the
             plan's rule for a silent corpus is that the screen renders absence, never a number.
         -->
-        <p class="mt-2 text-xs text-ink-muted">
+        <div class="mt-2 text-xs text-ink-muted">
             Spark chance
-            <span class="text-ink" :title="probability.title">{{ probability.value ?? 'N/A' }}</span>
-        </p>
+            <AbsenceValue :reason="probability.title" compact />
+        </div>
 
         <!-- The assignment control. Present only where the screen assigns; the compare surface renders
              the same node with no picker, so the two cannot disagree about what a node is. -->

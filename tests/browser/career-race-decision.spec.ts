@@ -96,9 +96,10 @@ test('names each absent race field with its reason, and refuses a readiness band
     const readiness = page.getByRole('heading', { name: 'Readiness' }).locator('..').getByText('N/A');
     await expect(readiness).toHaveAttribute('title', /ADR-0016/);
 
-    // A brief field with no column behind it: the reason travels with the value.
+    // A brief field with no column behind it: the reason travels with the value on a disclosure a
+    // keyboard and a screen reader reach, not only on hover.
     await expect(page.getByText('Running style').first()).toBeVisible();
-    await expect(page.getByTitle(/aptitude, not a property of the race/).first()).toBeVisible();
+    await expect(page.locator('summary', { hasText: 'aptitude, not a property of the race' }).first()).toBeVisible();
 
     // Level 1 is a glyph plus the word, in three places: the region heading, the next obligation in
     // the list, and the card itself. The `!` is aria-hidden, so the heading matched by accessible name
