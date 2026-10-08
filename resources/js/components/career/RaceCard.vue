@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * One race on the Race Decision screen (SCREEN-011, `SCR-CAR-012`). A summary card, the brief's field
+ * One race on the Race Decision screen (SCREEN-011, `SCR-CAR-013`). A summary card, the brief's field
  * list, and a drawer holding the two actions the brief names.
  *
  * **Nothing here predicts the race.** There is no win figure, no percentage and no readiness band:
@@ -86,6 +86,11 @@ const group = (n: number): string => n.toLocaleString('en-US');
 
 <template>
     <li class="rounded-md border border-rule bg-panel p-4">
+        <!-- A slot rather than a prop, because the only caller that fills it is the planner's
+             comparison picker (`RacePlanList.vue`), and a card with no selection control must render
+             exactly as D10 left it. Unfilled, this contributes nothing. -->
+        <slot name="select" />
+
         <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <h3 class="text-base font-semibold text-ink-strong">{{ props.race.title }}</h3>
             <p class="flex flex-wrap items-baseline gap-x-2 text-xs text-ink-muted">

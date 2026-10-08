@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*
- * The Race Decision, `SCR-CAR-012` (SCREEN-011, plan §8 D10). Whether and where to race, at the turn
+ * The Race Decision, `SCR-CAR-013` (SCREEN-011, plan §8 D10). Whether and where to race, at the turn
  * being decided.
  *
  * The page pattern is `Catalog/Index.vue`'s: `CareerLayout`, `<Head title>`, the `#title` slot, and
@@ -19,7 +19,7 @@
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import RaceCard from '../../components/career/RaceCard.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, onUnmounted, ref } from 'vue';
 
 interface Fact {
@@ -53,6 +53,7 @@ const props = defineProps<{
     deadlines: { id: number; title: string; year_label: string; turn: number | null; state: string; is_next: boolean; reached: boolean }[];
     readiness: { label: string; title: string };
     entry: { action: string; turns: { id: number; turn: number }[] };
+    planner_url: string;
     empty: string | null;
 }>();
 
@@ -169,6 +170,13 @@ const nextDeadline = computed(() => props.deadlines.find((row) => row.is_next) ?
 
         <section aria-labelledby="race-list-heading" class="mt-4">
             <h2 id="race-list-heading" class="text-base font-semibold text-ink-strong">Races to decide between</h2>
+            <!-- The door to the Scenario Race Planner, which draws the whole calendar rather than this
+                 turn. A screen reachable only by URL is a defect (D14). -->
+            <p class="mt-1 text-sm">
+                <Link :href="props.planner_url" class="inline-flex min-h-11 items-center rounded-md px-3 font-semibold text-ink underline">
+                    Plan the whole calendar
+                </Link>
+            </p>
 
             <p
                 v-if="props.empty !== null"
