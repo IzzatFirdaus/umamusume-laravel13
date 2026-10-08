@@ -22,5 +22,6 @@ enum TurnEventType: string
     case SupportCard = 'SupportCard';
     case Group = 'Group';
     case Scenario = 'Scenario';
+    case Inheritance = 'Inheritance';
     case Failure = 'Failure';
 }

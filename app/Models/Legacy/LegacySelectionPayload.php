@@ -55,6 +55,22 @@ final readonly class LegacySelectionPayload
     public const MAX_ANCESTORS = 2;
 
     /**
+     * The [Global] display labels for each Spark kind.
+     *
+     * @return array<string, string>
+     */
+    public static function sparkKindLabels(): array
+    {
+        return [
+            'blue' => 'Blue',
+            'pink' => 'Pink',
+            'green' => 'Green',
+            'white' => 'White',
+            'scenario' => 'Scenario',
+        ];
+    }
+
+    /**
      * @param  list<array{rank: int|null, is_guest: bool, ancestors: list<mixed>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
      */
     public function __construct(
