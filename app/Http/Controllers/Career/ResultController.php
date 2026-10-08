@@ -39,10 +39,12 @@ use Inertia\Response;
  * computation, and neither has a column to read even if it were permitted. The omission is
  * recorded in `SCREEN_SPEC.md` SCR-CAR-018's Gaps.
  *
- * **Save Veteran is a named absence, not a button.** The brief reads "Primary action 'Save Veteran'
- * to D16"; D16 is the Veteran library slice, which the plan's own §4 table has depending on this
- * one, so its route does not exist. A link would be a dead link, which `SCREEN-009`'s action grid
- * already refused for the same reason: the absence is named in copy.
+ * **Save Veteran was a named absence; it is a door since D16 landed.** The brief reads "Primary action
+ * 'Save Veteran' to D16"; when this slice shipped, D16's route did not exist, so a link would have been a
+ * dead link and the absence was named in copy instead. `7b04b6c` then landed `runs.veteran` and
+ * `RecordVeteran`, and `saveVeteranSection()` below carries the door with its reason beside it. The
+ * paragraph above is kept as the record of what was true when the screen was written; it stopped being
+ * true at that commit, and `tests/browser/career-result.spec.ts` was corrected to match on 2026-10-08.
  */
 class ResultController extends Controller
 {

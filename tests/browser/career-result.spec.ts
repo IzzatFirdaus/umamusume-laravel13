@@ -87,7 +87,7 @@ test('a Retired career is a different absence, with no Cockpit door anywhere on 
     await expect(page.getByRole('link', { name: 'Run record' }).first()).toBeVisible();
 });
 
-test('a Completed career renders the three sections and the named Save Veteran absence', async ({ page }) => {
+test('a Completed career renders the three sections and the Save Veteran door', async ({ page }) => {
     await createRun(page);
     await setStatus(page, 'Completed');
     await page.goto(`${createdRunUrls[createdRunUrls.length - 1]}/result`, { waitUntil: 'domcontentloaded' });
@@ -101,10 +101,17 @@ test('a Completed career renders the three sections and the named Save Veteran a
     // the stat against zero.
     await expect(page.getByText(/No build target was set for this run/).first()).toBeVisible();
 
-    // Save Veteran is a named absence, not a button.
-    await expect(page.getByText(/Saving a Veteran belongs to the Veteran library slice/)).toBeVisible();
-    await expect(page.getByRole('link', { name: /Save Veteran/i })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: /Save Veteran/i })).toHaveCount(0);
+    // The door to `SCREEN-020` is real. This case asserted the opposite until 2026-10-08: it expected the
+    // D15 sentence "Saving a Veteran belongs to the Veteran library slice" and a count of zero links,
+    // which was true only while D16 was unlanded. `7b04b6c` landed `runs.veteran` and `RecordVeteran`, and
+    // `ResultController::saveVeteranSection()` has offered the link with its reason since — so the screen
+    // was right and this assertion was the stale artifact (`SCREEN_SPEC.md` SCR-CAR-018: "Save Veteran is
+    // a door to `SCR-VET-003`").
+    const next = page.getByRole('region', { name: 'What you can do next' });
+    await expect(next.getByRole('link', { name: 'Save Veteran' })).toBeVisible();
+    await expect(
+        next.getByText(/Adds your own tags and note to this career in the Veteran library/),
+    ).toBeVisible();
 
     // The ruleset line is an absence with its reason.
     await expect(page.getByText(/No source defines a Global ruleset version/)).toBeVisible();

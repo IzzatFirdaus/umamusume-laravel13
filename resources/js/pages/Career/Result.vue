@@ -304,7 +304,8 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                 </p>
             </section>
 
-            <!-- The doors. Save Veteran belongs to D16 and is named rather than linked. -->
+            <!-- The doors. The Save Veteran link below is D16's, and the line that used to sit here said
+                 it was named rather than linked: true while D16 was unlanded, false since `7b04b6c`. -->
             <section aria-labelledby="result-actions-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
                 <h2 id="result-actions-heading" class="text-base font-semibold text-ink-strong">What you can do next</h2>
 
