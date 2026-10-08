@@ -25,6 +25,15 @@
 > Where this target and a landed ADR conflict, the ADR wins (`AGENTS.md` §2). The deferred sections are
 > kept verbatim so the design intent survives for the slice that closes their blocker.
 
+> _Dated close-out 2026-10-08 (documentation-sync pass): the Inertia + Vue rewrite this banner says "§1
+> targets" landed through Phases A–E, and each screen in this inventory shipped under the union-with-
+> `design-2.0.md` mapping the plan's §4 preamble records. `SCREEN_SPEC.md` §3/§4 is the authoritative record
+> of what exists (`SCR-CAR-001`–`024`, `SCR-VET-001`–`004`, `SCR-SYS-005`–`007`), and the plan's §4–§9
+> close-outs record each slice. The governance holds above still bind: the win-probability, per-training
+> yield, expected-inheritance, shop-recommendation and numeric-confidence sections remain unbuilt and
+> render `N/A` with the blocker named, exactly as this banner states. Nothing in this file's screen set was
+> changed to match what shipped — it remains the design target it was filed as._
+
 ---
 
 ## Product direction corrections (added 2026-10-05)

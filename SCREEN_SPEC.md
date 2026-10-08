@@ -40,7 +40,7 @@ Areas used (the repository's own grouping, not forced onto generic categories):
 - **Career** (the Trainer Desk 2.0 Inertia screens; `ADR-0020` §1) — `SCR-CAR-*`
 - **System** — `SCR-SYS-*`
 
-Navigation shell: `resources/js/layouts/AppLayout.vue`, the Inertia SPA shell (`ADR-0020` §1). Nine primary nav destinations in DOM order — Dashboard, New Career, Legacy Lab, Support Cards, Skills, Review, Veterans, Database, Settings — plus a focus-revealed "Skip to content" link targeting `main#main`. Veterans is a named absence (`to: null`) until the D16 slice lands, so the count is eight live plus one, which is Miller's Law (plan §13). `/` renders `SCR-CAR-001` (route name `home`), so the Dashboard is the landing screen. The Blade shell this paragraph used to describe (`resources/views/components/layout.blade.php`) was deleted in slice B1; the three error documents render themselves (`AppServiceProvider` composes them in place of the shell).
+Navigation shell: `resources/js/layouts/AppLayout.vue`, the Inertia SPA shell (`ADR-0020` §1). Ten primary nav destinations in DOM order — Dashboard, New Career, Careers, Legacy Lab, Veterans, Support Cards, Skills, Review, Database, Settings — plus a focus-revealed "Skip to content" link targeting `main#main`, and zero named absences (`to: null`). _Corrected 2026-10-07; the paragraph previously read "Nine … Veterans is a named absence (`to: null`) until the D16 slice lands, so the count is eight live plus one, which is Miller's Law (plan §13)." D16 landed and Veterans became a real screen, "Careers" was added when the run list gained its only inbound link, and the Database hub repointed an existing label rather than adding one. The count is therefore ten live destinations against plan §13's "at or under eight", which is a constraint breach rather than a cosmetic note. Only four carry `inBar` on mobile (Dashboard, Careers, Legacy Lab, Support Cards) and the other six sit behind the More panel, so the ten-row list is the desktop sidebar. Whether that merges is an owner ruling rather than this slice's call._ `/` renders `SCR-CAR-001` (route name `home`), so the Dashboard is the landing screen. The Blade shell this paragraph used to describe (`resources/views/components/layout.blade.php`) was deleted in slice B1; the three error documents render themselves (`AppServiceProvider` composes them in place of the shell).
 
 ## 3. Screen Matrix
 
@@ -58,8 +58,10 @@ Navigation shell: `resources/js/layouts/AppLayout.vue`, the Inertia SPA shell (`
 | SCR-SUP-001   | Support-card catalog                             | Support cards   | Trainer   | none required                | `GET /support-cards` (`support-cards.index`)                                                                                                  | Implemented                                                                                                                                                                                        |
 | SCR-SUP-002   | Support-card detail                              | Support cards   | Trainer   | none required                | `GET /support-cards/{card}` (`support-cards.show`)                                                                                            | Implemented                                                                                                                                                                                        |
 | SCR-REV-001   | Match review queue                               | Review          | Trainer   | none required                | `GET /review` (`review.index`)                                                                                                                | Implemented                                                                                                                                                                                        |
-| SCR-VET-001   | Veteran library                                  | Veterans        | Trainer   | none required                | `GET /veterans` (`veterans.index`)                                                                                                            | Implemented 2026-10-06 (D16 read half); favorite, archive, delete and the Spark-graded sorts are named absences, and nothing in the build files a Veteran yet                                      |
+| SCR-VET-001   | Veteran library                                  | Veterans        | Trainer   | none required                | `GET /veterans` (`veterans.index`)                                                                                                            | Implemented 2026-10-06 (D16 read half); favorite, archive, delete and the Spark-graded sorts are named absences. _Corrected 2026-10-07 (D16 write half): this row also said nothing in the build files a Veteran yet. That was true on 2026-10-06 and is now false; `SCR-VET-003` files one_ |
 | SCR-VET-002   | Veteran detail                                   | Veterans        | Trainer   | none required                | `GET /veterans/{veteran}` (`veterans.show`)                                                                                                   | Implemented 2026-10-06 (D16 read half); the six-node graph is not re-rendered here, it is one link away in the Legacy Lab                                                                          |
+| SCR-VET-003   | Save Veteran                                     | Veterans        | Trainer   | none required                | `GET /training-runs/{run}/veteran` (`runs.veteran`), written by `POST` (`runs.veteran.store`)                                                  | **Built, not landed** 2026-10-07 (D16 write half): props and request gates green, browser spec written and unrun, `npm run build` blocked by another session's `Preferences/Edit.vue`. First caller of `RecordVeteran`. Factor analysis, a legacy value and a best use are held (`ADR-0020` §3) and print `N/A` with the ruling. **Corrected same day: the build cleared, the gate ran on a scratch database, all five cases green.** It found and fixed one axe-only defect: the Japanese name was printed in `text-ink-faint`, a documented non-text token at 2.99:1 |
+| SCR-VET-004   | Veteran comparison                               | Veterans        | Trainer   | none required                | `GET /veterans/compare` (`veterans.compare`)                                                                                                  | **Built, not landed** 2026-10-07 (D16): same blocker and same gate state. Up to four careers, recorded values only, and distinct from `legacy.compare`, which compares configurations and needs a read-back. **Corrected same day: the gate ran and is RED.** `Compare.vue:85` sends `router.get` the key `'veterans[]'` over an array, so the request refuses it and `back()` lands on `/veterans` instead of a two-column comparison. Defect named; ruled and fixed at `Compare.vue:86`, and the re-run is 8 passed / 1 failed (exit 1) with the one failure this screen's own URL assertion, which matches `veterans[]=N` while Inertia emits `veterans[0]=N`. Two-column render still unasserted in a browser, so gate 8/9 and not landed |
 | SCR-CAR-001   | Dashboard (2.0 landing screen)                   | Career          | Trainer   | none required                | `GET /` (`home`)                                                                                                                              | Implemented 2026-10-06 (D1); panels for builds and legacy-goal gaps are named absences                                                                                                             |
 | SCR-CAR-002   | Scenario Selection (wizard step 1)               | Career          | Trainer   | none required                | `GET /career/setup/scenario` (`career.scenario`), written by `PUT` (`career.scenario.store`)                                                  | Implemented 2026-10-06 (D2); all six wizard steps are live now that Preflight landed (`SCR-CAR-010`, D7), so the step nav holds no named absence                                                   |
 | SCR-CAR-003   | Trainee Selection (wizard step 2)                | Career          | Trainer   | none required                | `GET /career/setup/trainee` (`career.trainee`), written by `PUT` (`career.trainee.store`)                                                     | Implemented 2026-10-06 (D3); the growth-rate and scenario-suitability filters are omitted, no column holds either                                                                                  |
@@ -70,13 +72,31 @@ Navigation shell: `resources/js/layouts/AppLayout.vue`, the Inertia SPA shell (`
 | SCR-CAR-008   | Legacy Select (wizard step 4)                    | Career          | Trainer   | none required                | `GET /career/setup/legacy` (`career.legacy`), written by `PUT` (`career.legacy.store`)                                                        | Implemented 2026-10-06 (D5-wizard); the six-node graph as nested list items, record-only, and the two library picks carried in the draft's `legacy_parents` key                                    |
 | SCR-CAR-009   | Support Deck Select (wizard step 5)              | Career          | Trainer   | none required                | `GET /career/setup/deck` (`career.deck`), written by `PUT` (`career.deck.store`)                                                              | Implemented 2026-10-06 (D6-wizard); six slots with OWNED/RENTED in the draft, seven types, the D6 analysis beside them                                                                             |
 | SCR-CAR-010   | Career contract, "Preflight" (wizard step 6)     | Career          | Trainer   | none required                | `GET /career/setup/preflight` (`career.preflight`), written by `PUT` (`career.preflight.store`)                                               | Implemented 2026-10-06 (D7); the wizard's one write, composing the five entered steps and creating the run                                                                                         |
-| SCR-CAR-011   | Career Cockpit (the run-scoped primary screen)   | Career          | Trainer   | none required                | `GET /training-runs/{run}/cockpit` (`runs.cockpit`), the one write posting to `PUT /training-runs/{run}/turns/{turn}` (`runs.turns.update`)   | Implemented 2026-10-06 (D8); read-only, the action grid's seven entries each link to the screen that owns the action today, and the milestone timeline and the scenario panel are named absences |
+| SCR-CAR-011   | Career Cockpit (the run-scoped primary screen)   | Career          | Trainer   | none required                | `GET /training-runs/{run}/cockpit` (`runs.cockpit`), the one write posting to `PUT /training-runs/{run}/turns/{turn}` (`runs.turns.update`)   | Implemented 2026-10-06 (D8); read-only, the action grid's seven entries each link to the screen that owns the action today, and the milestone timeline and the scenario panel are named absences. *Dated note 2026-10-07 (E1): the second absence is closed. The scenario region mounts `ScenarioPanel.vue` (`SCR-CAR-019`); the milestone timeline stays an absence in this region, where the left column renders the run race strip.* |
 | SCR-CAR-012   | Training Decision detail                         | Career          | Trainer   | none required                | `GET /training-runs/{run}/training` (`runs.training`), the one write posting to `POST /training-runs/{run}/turns` (`runs.turns.store`) | Implemented 2026-10-07 (D9); five option cards, the per-training yield and the failure rate held unsourced and rendered `N/A` with the exclusion in the `title` |
+| SCR-CAR-013   | Race Decision                                    | Career          | Trainer   | none required                | `GET /training-runs/{run}/races` (`runs.races.decision`), the one write posting to `POST /training-runs/{run}/races` (`runs.races.store`) | Implemented 2026-10-07 (D10); the races at the turn being decided, the win figure held on `ADR-0016` and the readiness band pending the owner's ruling, both rendered `N/A`, and four of the brief's ten fields named absent with their reason |
+| SCR-CAR-014   | Event Decision                                  | Career          | Trainer   | none required                | `GET /training-runs/{run}/events` (`runs.events.decision`), the one write posting to `POST /training-runs/{run}/events` (`runs.events.store`) | Implemented 2026-10-07 (D11); record-only: known outcomes are derived from this run's own recorded choices, the advisor refuses with its reason, and a choice without a recorded outcome carries the incomplete warning; no score or probability is computed |
+| SCR-CAR-015   | Inheritance Event                                | Career          | Trainer   | none required                | `GET /training-runs/{run}/inheritance` (`runs.inheritance`), written by `POST` (`runs.inheritance.store`) | Implemented 2026-10-07 (D12); record-only: predicted section shows sourced Spark probabilities and star-roll odds, observed section records the Trainer's entered inspiration outcomes via TurnEvent, milestone timeline with three fixed events |
+| SCR-CAR-016   | Skills Planner                                   | Career          | Trainer   | none required                | `GET /training-runs/{run}/skills` (`runs.skills.planner`), the one write posting to `PUT /training-runs/{run}/build-target` (`runs.build-target.update`) | Implemented 2026-10-07 (D13); the four skill states, the SP coverage warning, the sourced hint ladder priced per skill, and the race-fit cells that compare only what a source maps |
+| SCR-CAR-017   | Career Timeline                                  | Career          | Trainer   | none required                | `GET /training-runs/{run}/timeline` (`runs.timeline`)                                                                                         | Implemented 2026-10-07 (D14); read-only, corrections flagged by timestamp comparison because the model has no prior-values column, no separate corrections log, and the `◉`/`○` glyphs are reserved for Phase E deadlines |
+| SCR-CAR-018   | Career Result                                    | Career          | Trainer   | none required                | `GET /training-runs/{run}/result` (`runs.result`)                                                                                             | Implemented 2026-10-07 (D15); "build quality" omitted as a ruling (a target-completion percentage, a skill-coverage figure and an inheritance-quality figure are all held computation), Save Veteran is a door to `SCR-VET-003`, and the deficit is `TrainerAdvisor::deficits()` rather than a second copy |
+| SCR-CAR-019   | Scenario panel shell                             | Career          | Trainer   | none required                | mounted inside `SCR-CAR-011` (the Cockpit's scenario region); no route of its own                                                                                                       | Implemented 2026-10-07 (E1), browser gate green at 8 passed: branch-free registry per gate G-33, no renderer registered yet, every widget falls to `ResourceMeter` or `WidgetFallback`, and the PARTIALLY DOCUMENTED badge does not render today because all four Global scenarios are documented or silent. *Dated note 2026-10-07 (E2): "no renderer registered yet" is superseded. `career_goals` now resolves to `UraPanel.vue` (`SCR-CAR-020`); widgets still fall to `ResourceMeter`, and the flags E3 and E4 own still fall to `WidgetFallback`.* *Dated note 2026-10-07 (E6): the badge's partial arm renders. The badge reads `partially_documented`, per the owner's ruling at plan §4.1 item 6, and the strip that arm belongs to is `SCR-CAR-024`.* |
+| SCR-CAR-020   | URA panel (SCREEN-014)                           | Career          | Trainer   | none required                | mounted by `SCR-CAR-019` inside the Cockpit's scenario region, reached by the `career_goals` flag; no route of its own                                                                        | Built 2026-10-07 (slice E2), browser gate green at 10 passed. Three modules, two of them named absences. Career goals are unrecorded (no `trainee_goals` table) and Happy Meek has no stored level, so both render `N/A` with the reason; the mandatory race set is the one module with real data, read through `RaceCatalogSlot::isAtOrBeforeTurn()` |
+| SCR-CAR-021   | Unity Cup panel — the Team Cockpit (SCREEN-015)  | Career          | Trainer   | none required                | mounted by `SCR-CAR-019` inside the Cockpit's scenario region, reached by the `team_race` and `team_rank_ladder` flags; no route of its own                                                  | Built 2026-10-07 (E3); read-only — no UI write records a team rank, a burst state or a Spirit reading, so every recorded figure the run lacks renders `N/A` or a named absence, and the burst-band table renders with the Extreme-counting caveat of run report §8.2 |
+| SCR-CAR-022   | Trackblazer panel (SCREEN-016)                   | Career          | Trainer   | none required                | mounted by `SCR-CAR-019` inside the Cockpit's scenario region, reached by the `grade_objectives`, `shop` and `epithet_routes` flags; no route of its own                                  | Built 2026-10-07 (slice E4); read-only mirror of `TurnEvents\ShopPurchasePayload` for purchases, of `TrainingRun::gradePeriods()` for grade rows, and of `TrainingRun::epithetProgress()` for the checklist. Catalogue is config order; no `recommended` flag, no "best value" sort, no default selection, and the shop rotation is named absent in copy. The Cockpit's action area gains a "Shop" button (Trackblazer only) that scrolls and focuses the Shop heading. The official finale name "Twinkle Star Climax" is §7 conflict row 31 (UNVERIFIED) and renders as a named absence, never as a string. |
+| SCR-CAR-023   | Scenario Race Planner (SCREEN-017)               | Career          | Trainer   | none required                | `GET /training-runs/{run}/races/planner` (`runs.races.planner`), the one write posting to `POST /training-runs/{run}/races` (`runs.races.store`) | Implemented 2026-10-07 (slice E5); the whole calendar in four groups (mandatory / upcoming / optional / rival, the last a named absence because no column marks a rival race), a reward comparison of up to four selected races with the ten aligned rows, and the target alignment in plain words with no score and no percentage. Win probability and expected risk render `N/A` with the `ADR-0016` blocker in the `title`; the brief's recommendation block is not built, and the deadline region states the next obligation and its turn rather than promising none will be missed |
+| SCR-CAR-024   | Our Grand Concert baseline strip (SCR-017)        | Career          | Trainer   | none required                | mounted by `SCR-CAR-019` inside the Cockpit's scenario region, drawn where every panel flag is off; no route of its own                                  | Built 2026-10-07 (slice E6); the strip the panel region draws when a scenario composes no panel, which is the fourth `[Global]` scenario's whole surface. The badge reads `partially_documented` (owner ruling 2026-10-07), the five published caps render as base + bonus + cap through `ScenarioCaps`, and the scenario's own one-line reason its panels are off comes from config. No song, lesson or token string renders: the mechanics are sourced, the client's screen text is not measured |
 | SCR-SYS-001   | Page not found (404)                             | System          | Trainer   | none required                | error rendering for any 404                                                                                                                   | Implemented                                                                                                                                                                                        |
-| SCR-SYS-002   | Preferences                                      | System          | Trainer   | none required                | `GET /preferences` (`preferences.edit`), written by `PUT /preferences` (`preferences.update`)                                                 | Implemented 2026-10-04 (§7-5)                                                                                                                                                                      |
+| SCR-SYS-002   | Preferences                                      | System          | Trainer   | none required                | `GET /preferences` (`preferences.edit`), written by `PUT /preferences` (`preferences.update`); Export by `GET /preferences/export` (`preferences.export`), Backup by `POST /preferences/backup` (`preferences.backup`)                                                 | Implemented 2026-10-04; extended 2026-10-07 (D18) with category shell and Game version panel (§7-5); extended 2026-10-08 (D18b) with the four stored preferences in one `settings` row, the Export stream and the server-side Backup, and the absence reasons named per class (Units is a sourcing absence, not a schema one)                                                                                                                                                                     |
 | SCR-SYS-003   | Session expired (419)                            | System          | Trainer   | none required                | error rendering for any 419                                                                                                                   | Implemented 2026-10-04 (§7-8)                                                                                                                                                                      |
 | SCR-SYS-004   | Server error (500)                               | System          | Trainer   | none required                | error rendering for any uncaught failure                                                                                                      | Implemented 2026-10-04 (§7-8); standalone document, no database read                                                                                                                               |
 | —             | Design preview                                   | System          | —         | —                            | `GET /design-preview`                                                                                                                         | Deleted; README's stale row removed 2026-10-04 (§7-1)                                                                                                                                              |
+| SCR-SYS-005   | Database hub                                     | System          | Trainer   | none required                | `GET /database` (`database.index`)                                                                                                           | Implemented 2026-10-07 (D17); links to Trainees, Support Cards, Skills, Races, Scenarios; three render the shared catalog component at their own `/database/*` address (no redirect, none ruled), two are new: Races from `RaceCatalogSlot` (`SCR-SYS-006`) and Scenarios from `config/scenarios.php` (`SCR-SYS-007`). Extended 2026-10-08 to eight area links: Events, Shop Items and Sparks. The "Not in this build" section that named those three as absences is deleted, not softened. |
+| SCR-SYS-006   | Race database                                    | System          | Trainer   | none required                | `GET /database/races` (`database.races`)                                                                                                     | Implemented 2026-10-07 (D17); paginated `race_catalog_slots`, the offline state names the fetch command, unrecorded cells render `N/A` with their reason, and the wide table scrolls inside its own focusable region at 320px. No win probability and no readiness band (`ADR-0016`)                   |
+| SCR-SYS-007   | Scenario matrix                                  | System          | Trainer   | none required                | `GET /database/scenarios` (`database.scenarios`)                                                                                              | Implemented 2026-10-07 (D17); prints `config/scenarios.php` as resolved (caps base+bonus+sum, widgets, every panel on or off as a word, `live_on_global`, `partially_documented`), with the config's `verified_at` labelled as a verification date. No scenario name in the page (D-240, gate G-33)                   |
+| SCR-SYS-008   | Events reference                                 | System          | Trainer   | none required                | `GET /database/events` (`database.events`)                                                                                                   | Implemented 2026-10-08; ten recurring event types read from `config/reference.php`, transcribed from `docs/UMAMUSUME_REFERENCE.md` §4.4. Read-only, no write path, no filter. Server tags print as bracketed text, each row carries a `ProvenanceBadge`, and the §48 metadata row names the doc section, the anchor date and how to re-check it. Not an ingest: the config is a dated snapshot the tool never refreshes. |
+| SCR-SYS-009   | Shop Items reference                             | System          | Trainer   | none required                | `GET /database/shop-items` (`database.shopItems`)                                                                                             | Implemented 2026-10-08; ten catalogue rows from §1.6.10 (eight consumables plus the two currency items that section describes in prose), with kind and spend-site as words. The Trackblazer Pro Shop block below them is the same `config/scenarios.php` data the scenario matrix prints, reused rather than retyped, so the two destinations cannot disagree. No purchase form and no prices this tool did not record. |
+| SCR-SYS-010   | Sparks reference                                 | System          | Trainer   | none required                | `GET /database/sparks` (`database.sparks`)                                                                                                    | Implemented 2026-10-08; six Spark categories from §1.5.2 with their record counts, the JP name in a `lang="ja"` span, and the three-band star-roll odds table from §1.5.3/§1.5.4 inside its own focusable scroll region. Odds are printed as the source words them ("about 50%"), never as a computed probability. No `factor` in any displayed string (`lore-code`). |
 
 Action endpoints (no screens of their own, owned by the screens that host their forms): `runs.store`, `runs.update`, `runs.destroy`, `runs.export/{format}`, `runs.turns.store`, `runs.turns.update`, `runs.turns.destroy`, `runs.skills.sync`, `runs.deck.sync`, `runs.races.store`, `runs.purchases.store`, `runs.import.store`, `review.resolve`, `preferences.update`. As of 2026-10-04 every one of these has a form posting to it; the two that did not, `runs.turns.update` and `runs.turns.destroy`, gained the turn-row editor (§7-2).
 
@@ -122,9 +142,11 @@ None.
 
 | Action     | Trigger     | Result        | Navigation      | Feedback   |
 | ---------- | ----------- | ------------- | --------------- | ---------- |
-| Open run   | row link    | run detail    | `runs.show`     | —          |
+| Open run   | row link    | Career Cockpit | `runs.cockpit` | —          |
 | New run    | pill        | create form   | `runs.create`   | —          |
 | Import     | text link   | import form   | `runs.import`   | —          |
+
+*Dated correction 2026-10-07 (F1, career surface cutover): the Open run row pointed at `runs.show` (SCR-RUN-003, the 0.1.0 run-detail page) and now carries `runs.cockpit` (`SCR-CAR-011`), because selecting a career from the list must land on the 2.0 Cockpit directly. `runs.show` remains registered as a compatibility doorway pending the owner's ruling on the redirect itself, whose blast radius — 38 feature files and 9 browser specs' afterEach cleanups still depending on SCR-RUN-003 rendering — is recorded in this slice's hand-off.*
 
 #### Screen States
 
@@ -403,6 +425,28 @@ Implemented. `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-
 - Goals surface (client header "Place 1st in Arima Kinen, 5 turns") does not exist (O-12).
 - Per-card deck state (level, limit break, bond, hint) is cut by design (ADR-0014 "identity, not collection") but the audit records the trainer-facing cost; a schema proposal needs an Architect/PRD gate before it can change.
 - Race calendar correctness is data-blocked: 406 of 410 `race_catalog_slots` rows carry no `scenario_key` (O-5 correction note), so year/scenario filtering cannot be honest until seeded.
+
+_Dated notes 2026-10-08 (documentation-sync pass, on the Phases A–E completion brief; each line above is
+preserved as written and re-read against the tree)._
+- The `runs.turns.update` / `runs.turns.destroy` gap (§7-2) is **resolved 2026-10-04**: every turn row
+  carries "Edit turn N" and the opened row holds the PUT and DELETE forms, pinned by `TurnRowActionsTest`.
+  The line above is the record of the gap before that resolution and is left standing.
+- The capture gap (R-2, O-6/O-7) **changed half and half**: E3 landed the read-only Unity Cup panel
+  (`SCR-CAR-021`), which is the display half this line's explanatory panels became; the no-capture half is
+  unchanged — no write path records a team rank, a burst state or a Spirit reading, the strip still prints
+  `N/A` with no entry path, and the capture proposal of `RACE-AND-SLICE-RESEARCH.md` §unity-cup-capture.md
+  stays the owner's (§7-6).
+- The goals-surface line (O-12) **is closed in its run-page half and open in its per-trainee half**: the
+  run page's goals panel landed at Part 8 A.4 (`RunGoalsPanelTest`, the ported `goalRows` prop), while the
+  client's per-trainee goal header this line quotes remains absent because no `trainee_goals` table exists
+  (`KI-34`), and the UIX audit's dated re-read records the same split.
+- The per-card deck state line is unchanged: `ADR-0014` still cuts it and the gate is still the PRD §6.9 /
+  US-12 call (Part 9).
+- The race-calendar line is unchanged and now has a sharper blocker: the pinned GameTora document answers
+  **404** (`KI-67`), so no refresh can add the scenario keys that scoping needs.
+- The `Fail` verdict this section's Status line quotes was revised by the audit's own Part 7 and measured a
+  page A4b replaced; the audit's dated re-read records the per-item verdict and this section's §7-12 note
+  carries the summary._
 
 ---
 
@@ -1088,6 +1132,70 @@ None found. (Bulk actions are not built and no story asks.)
 
 ---
 
+### SCR-SYS-005/006/007/008/009/010 — Database hub, race database, scenario matrix, reference views
+
+`GET /database` (`database.index`), `GET /database/races` (`database.races`), `GET /database/scenarios`
+(`database.scenarios`), and the three reference views `GET /database/events` (`database.events`),
+`GET /database/shop-items` (`database.shop-items`), `GET /database/sparks` (`database.sparks`);
+`App\Http\Controllers\DatabaseController` for the hub and the five areas it owns, and
+`CatalogController::databaseIndex()`, `SupportCardController::databaseIndex()` and
+`SkillController::databaseIndex()` for the three reused ones. SCREEN-023, plan §8 D17 (the first five
+areas) and the reference-view slice (the last three). Read-only: nothing in this area writes, and no
+route takes a run.
+
+**Reuse, not a fork.** The three catalog areas each render the shared list component
+(`components/catalog/TraineeCatalog.vue`, `support/SupportCardCatalog.vue`, `skills/SkillCatalog.vue`) under
+their own `/database/*` address. The query lives in one private `indexProps()` per controller and both the
+original route and the database route call it, so `/umamusume`, `/support-cards` and `/skills` are unchanged
+in behaviour and the pagination path is the only argument that differs. A redirect was the smaller diff and
+is what an earlier draft of this section claimed; `routes/web.php:249-253` records that no owner ruling
+authorises a redirect, so the pages render in place and `database.spec.ts` asserts the address stays.
+
+| Screen | State | Behavior |
+| --- | --- | --- |
+| Hub | Rendered | Eight area links, `prefetch: 'hover'`, each `min-h-11`. The "Not in this build" section that once named Events, Shop Items and Sparks as absences is **deleted**, not softened: all three are destinations now, and a row saying otherwise would be false. |
+| Hub | Loading / error | None of its own: the hub is one server render with no user-initiated async action (`ADR-0007`), and a failed visit is the shell's. |
+| Trainees, Supports, Skills | Rendered | The shared component's own states, unchanged from the original screens (search, filters, `Loading results…` `role="status"`, the catalog empty state, pagination clamped 1..100 by `PageSize::clamp`). |
+| Races (`SCR-SYS-006`) | Empty, unseeded | "The race database is offline", why it matters (no turn number, distance, surface or fan gate to plan against), and the two commands that fill it: `php artisan uma:fetch gametora-race-catalog`, or `uma:reparse` when a fetch reports the document unchanged. No placeholder row. |
+| Races | Populated | `{{ total }} of {{ totalCount }} slots`, one row per race per turn, ordered year then turn then sort order. |
+| Races | Unrecorded cell | `N/A` with the reason on the element ("The source records no distance for this slot", and for a race with no gate, "No entry gate: open to a trainee at this point of the career"). Never a zero, never a dash. Measured on this tree's first page: 2 of 25 rows carry no distance, surface or fan gate, 23 of 25 carry no entry gate. |
+| Races | Narrow viewport | The table scrolls inside `div[role="region"] tabindex="0" aria-label="Race slots, scrollable"`, never the document (`DESIGN.md` §6, the same shape as `Runs/Show.vue`'s turn log). Density is permitted here and nowhere else (plan §13). |
+| Races | Held | No win probability, no readiness band, no percentage, no `distance_band` derived from a metre count (`ADR-0016`; the corpus disagrees at 1400 m). |
+| Scenarios (`SCR-SYS-007`) | Rendered | Every entry of `config/scenarios.php`, as resolved: the published cap as base + bonus + sum (never collapsed, the config's own instruction), `widgets[]` and all six `panels.*` keys printed on or off as words (a reference matrix states the off panels rather than hiding them), `live_on_global`, and `PARTIALLY DOCUMENTED` where the config sets `partially_documented`. |
+| Scenarios | Empty | Not reachable: the config is the source and it has entries. Rendering nothing would mean the config lost every scenario, which is a different failure than an absent dataset. |
+| Scenarios | Provenance line | `Verified {{ verified_at }} against the GameTora scenarios.json field stats`, reading the config's `verified_at` (`2026-09-27`) and its header note that this is a verification date, not an update date (`config/scenarios.php:41-42`). |
+| Events (`SCR-SYS-008`) | Rendered | The ten recurring event types from `docs/UMAMUSUME_REFERENCE.md` §4.4, read from `config/reference.php`. Each row carries the type name, the server tags as bracketed text (`[JP]`, `[Global]`), the cadence and the mechanics summary, plus a `ProvenanceBadge`. A row click opens the shared drawer with the detail and the source `title`. The §48 metadata row prints the doc section, the anchor date and the "how to re-check" pointer. |
+| Events | Empty | "No recurring event types are sourced", with what is missing, why it matters (no cadence to plan around) and what to do (re-read the guide's §4.4 table). The table is not empty today; the state is the shape a config with no rows renders. |
+| Events | Held | No live or upcoming instance is rendered: §4.1 to §4.3 are a dated snapshot and rot, so only the recurring-type cadence table ships. |
+| Shop Items (`SCR-SYS-009`) | Rendered | Ten catalogue rows from §1.6.10 (eight consumables plus the two currency items that section describes in prose), each with the client's effect string, a spend-site pill and a kind pill (Consumable / Currency, as words), plus a `ProvenanceBadge` and a drawer carrying the detail. Below them, the Trackblazer Pro Shop block is read from `config/scenarios.php` `trackblazer.shop_items` (19 items) with the matrix's own rotation length, reused rather than retyped. |
+| Shop Items | Empty | "Item catalogue not loaded in this build", naming the guide's §1.6.10 as where the client strings are and noting the Pro Shop block renders either way. |
+| Shop Items | Held | No recommendation, no best-value sort and no default selection: the shop rotation is not modelled, so no row is promoted. |
+| Sparks (`SCR-SYS-010`) | Rendered | The six Spark categories from §1.5.2, each with the category word, the `[Global]` name, the `[JP]` name carrying `lang="ja"`, the effect summary, the record count and a `ProvenanceBadge`. The star-roll-odds table from §1.5.3 renders on the page in its own labelled, focusable scroll region, with the "rolled, never chosen" note beneath it. |
+| Sparks | Empty | "No Spark categories are sourced", with the three §29 clauses. |
+| Sparks | Record counts | Five of the six counts are cells in the local Spark export (5, 10, 452, 37, 34); the sixth, 268, is the guide's own reading of part of that export's 336-record bucket. The export is gitignored and no runtime path reads it, so the counts are cited, never re-derived, and no count is invented. Beneath the list the view names the difference the sum implies: the guide counts **68 further records** in the same export that no page in its pass explains, so the 806 the six rows sum to is the described total while the export holds 874. The `SourceNote` row carries the same reading date. |
+| Reference views | Provenance | Every row uses `ProvenanceBadge.vue`, the single owner of the four glyphs. The vocabulary is Confirmed / Calculated / Estimated / Unknown (`ADR-0020` §2), not the `screen-spec-2.0` §31 or `design-2.0` §45 variants. The badge's accessible name is the state word; its glyph is `aria-hidden`. |
+| Reference views | Drawer | The shared `components/database/ReferenceDrawer.vue`: non-modal `role="dialog"` with a name, focus on open, Escape or the Close button to dismiss, and focus returned to the row that opened it. §32's pattern, not §31's modal. |
+| Reference views | Narrow viewport | Rows are stacked cards, not a wide table, so no reference view scrolls the document sideways at 320 px. The one real table (the star-roll odds) scrolls inside its own labelled, focusable region. |
+
+**Gaps.** (1) No scenario name appears in any of the six pages, and the matrix branches only on resolved
+config values, so a fifth scenario is one config entry and no component edit (D-240, gate G-33). (2) The
+scenario `notes` string is rendered verbatim from config; a scenario whose note is long wraps, and no
+truncation is applied. (3) Skill icons have no column (`skills.iconid`), so the Skills area renders the
+text-only row and reserves no frame (`DESIGN.md` §4.7, `ADR-0021` Decision 5); the "omit the slot cell at
+narrow viewports" half of design-2.0 §45a is not implemented anywhere in `ArtworkSlot.vue` and is
+inherited by this area rather than introduced by it. (4) The Race database's offline state is unreachable on
+a seeded database, so the browser spec asserts whichever of the two states the tree holds (KI-69). (5) The
+area has no density preference control: `design-2.0` §34 asks for one eventually and `Preference::KEYS`
+holds two keys authorised by `PRD.md` US-11, so widening it is an owner decision, not a slice's.
+
+`tests/Feature/DatabaseTest.php` (7 cases) pins the props: the hub's five areas and three deferred labels, the
+three reused areas' component and pager shape, the Races offline payload on an empty table, the populated
+table's `N/A` fields, the scenario matrix's caps/widgets/panels with the `partially_documented` flag on one
+entry only, and the verification date. `tests/browser/database.spec.ts` (7 cases) asserts the rendered hub,
+that each reused area keeps its own address, both race states with every `N/A` carrying its reason, the
+matrix's four labels plus exactly one `PARTIALLY DOCUMENTED`, and the 320px pair (document does not scroll,
+the race region does and is focusable).
+
 ### SCR-SYS-001 — Page not found (404)
 
 #### Purpose
@@ -1128,7 +1236,14 @@ None open. A stale-session POST used to surface the framework page; it now rende
 
 #### Purpose
 
-Let a Trainer set the two UI preferences PRD US-11 authorizes. Before 2026-10-04 the `preferences` table and the server-side theme render both existed with no way to write them, so the dark theme was reachable only by inserting a row by hand (audit O-1, §7-5).
+Let a Trainer set the two UI preferences PRD US-11 authorizes, and read the Data Verification badge (SCREEN-024). Before 2026-10-04 the `preferences` table and the server-side theme render both existed with no way to write them, so the dark theme was reachable only by inserting a row by hand (audit O-1, §7-5). D18 (2026-10-07) organizes the surface into four Settings categories per `screen-spec-2.0.md` SCREEN-024:
+
+- **General** — Theme (control, column exists); Language (a disabled single-option control, "English (Global)", because the corpus is Global-labelled); Units (`N/A`, a *sourcing* absence: race distance is the only unit this tool prints and it prints metres because the client does); Default scenario (control, stored, pre-selects the new-career screen until a career is chosen).
+- **Recommendation** — Numeric failure estimate (control, column exists); Recommendation aggressiveness (control, stored, and its `title` says the advisor reads it in a follow-up slice); Stat-target defaults (five controls against the engine ceiling, pre-filling Build Target where no target is stored); Risk tolerance (`N/A`, naming D4's open question on whether it enters `BuildTargetPayload`). Race-risk thresholds is omitted entirely (held on `ADR-0016`).
+- **Data** — Import (link to `runs.import`); Export (link, a streamed JSON download of `training_runs`, `turn_entries`, `veterans` and the settings blob); Backup (a server-side `VACUUM INTO` snapshot under `storage/app/backups/`, path returned in the flash, never streamed); Restore / Reset (named absences — destructive, owner-scoped per `AGENTS.md` §5).
+- **Game version** — Global Ruleset (N/A, `app.ruleset` is null) + Verified date from `config('scenarios.verified_at')`.
+
+_Dated note 2026-10-08 (D18b): the three "no column" absences in General and Recommendation became controls. The structured preferences live in one row of the `preferences` table keyed `settings`, a JSON blob whose key set is `Preference::SETTINGS_KEYS` — not a column, because a nullable column on a key-value table would be read by nothing, and the row the blob would live in cannot exist without also filling the NOT NULL `value` it duplicates. The plan's §8.6 D18b records the reasoning._
 
 #### Actor / Access
 
@@ -1136,31 +1251,46 @@ Any; no auth concept applies.
 
 #### Route / Location
 
-`GET /preferences` name `preferences.edit` (`PreferenceController::edit`), written by `PUT /preferences` name `preferences.update`. Reached by the sixth nav link in `components/layout.blade.php`. One endpoint for both keys, because writing a preference is one action on the store, not one per key.
+`GET /preferences` name `preferences.edit` (`PreferenceController::edit`), written by `PUT /preferences` name `preferences.update`. Reached by the "Settings" nav link in `resources/js/layouts/AppLayout.vue` (SPA). One endpoint for all writable preferences, because writing preferences is one action on the key-value store, not one per key. The Data panel's two actions have their own routes: `GET /preferences/export` (`preferences.export`) streams the JSON download, and `POST /preferences/backup` (`preferences.backup`) writes the server-side snapshot.
 
 #### Layout / Content
 
-Title "Preferences" → one form: Theme select (Follow the system / Light / Dark) and a "Numeric failure estimate" checkbox → a visible note stating that the estimate changes no screen yet → Save preferences.
+`<Head title="Settings">` and the `#title` slot; h2 "Preferences"; an intro line stating storage is server-side. One `<form>` wraps a labelled tablist (General, Recommendation, Data, Game version) whose arrow-key and click path switches `role="tabpanel"` visibility. The General panel holds Theme, Language, Default scenario and the Units absence; the Recommendation panel holds Recommendation aggressiveness, the five stat-target-default inputs, and the Risk-tolerance absence; the Data panel holds the Import and Export links, the Backup action in its own form (it is a second action, not a field of the preferences form), and the Restore/Reset absences; the Game-version panel holds the ruleset row and the verified date. Form errors and the Save button sit below the panels, always reachable. The Save button is the screen's only Level 2 element; Backup is a secondary action and carries its own sentence saying it writes server-side and downloads nothing.
 
 #### States
 
-No row for `theme` means follow the OS, and the select shows that option selected; absence is a value, not a blank. `failure_estimate` defaults to `off` (US-11, ADR-0001 §3). A refused submission re-renders the screen with the field error and the other control untouched. First paint stays correct because the theme is composed server-side (D-104); the control never writes to browser storage (§6 non-goal 12).
+| State               | Behaviour                                                                                                                                                                                                          |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Default (General)   | Theme select shows the stored value or the follow-the-OS option; the failure-estimate checkbox reflects `off`/`on`. Both controls are in the tab panel that is visible first, so the first browser assertion finds them. |
+| Tab switched        | `v-if` swaps the panel; the old panel's controls leave the DOM and the new panel renders. ArrowLeft/ArrowRight/Home/End move between four tabs; each tab is a `<button role="tab">` with `aria-selected` and `tabindex`. |
+| Named absence       | Renders `N/A` with a `title` naming which of the **four classes** it answers to. The vocabulary is closed and the names do not move: **schema absence** (no key exists to store it, including a key whose existence is another screen's open question); **governance hold** (the action is destructive and `AGENTS.md` §5 scopes it to the owner); **trust-model absence** (no source at all publishes the value, so there is nothing to print); **sourcing absence** (the client itself prints the value, and no source publishes an alternative form of it, so a preference over it has nothing to convert to). Never a default and never a dash. The rule applies to every unrecorded value on the surface (`AGENTS.md` §13). |
+| Constrained control | A fifth *shape*, not a fifth class: the control is present and enabled-looking but cannot change, because there is exactly one legal value. Language is the case: a disabled single-option select whose `title` names the constraint. A disabled control that hid the one available value would be a lie, and offering a second value would be a false choice. The write path still accepts the key, so what the screen states is what the store holds. |
+| Form error          | The refused submission keeps the user on the page; Inertia sets `form.errors`, the relevant message renders with an `id` referenced by `aria-describedby` on its control, and focus moves to the first invalid control, whose category is revealed first. |
+| Export              | A streamed JSON download (`StreamedResponse`), rows written through a cursor rather than buffered whole, with `Content-Disposition: attachment`. The four top-level keys are the export's contract and `PreferenceControlsTest` pins them. |
+| Backup              | A server-side snapshot under `storage/app/backups/`, the path returned in the same `role="status"` flash the save uses. Nothing is downloaded. A failure is unhandled on purpose: there is no second feedback channel to invent, and the app's own 500 document (`SCR-SYS-004`) is the error state the rest of this tool uses. |
+| Loading (submit)    | `:aria-busy` on the form and a "Saving…" button label; the tablist stays in the tab order and is not trapped.                                                                                                          |
+
+First paint stays correct because the theme is composed server-side (D-104); the control never writes to browser storage (§6 non-goal 12).
 
 #### Validation & Error Handling
 
-`UpdatePreferenceRequest`: `theme` present-and-nullable, in `light`/`dark` (the empty string is the stated follow-the-OS answer, and `ConvertEmptyStringsToNull` turns the form's empty choice into null before the rules are read); `failure_estimate` present, in `off`/`on`; any other input key is refused outright, because `validated()` would drop it silently and the screen would keep believing the preference was stored. Follow-the-OS deletes the row rather than storing the word `system`.
+`UpdatePreferenceRequest`: `theme` present-and-nullable, in `light`/`dark` (the empty string is the stated follow-the-OS answer, and `ConvertEmptyStringsToNull` turns the form's empty choice into null before the rules are read); `failure_estimate` present, in `off`/`on`; `settings` present-and-nullable, carrying the structured blob whose own keys are `Preference::SETTINGS_KEYS` — `default_scenario` must be a key the matrix composes, `recommendation_aggressiveness` is one of `conservative`/`balanced`/`aggressive`, `stat_target_defaults` carries exactly the matrix's five stats between 0 and `ScenarioCaps::hardCap()`, and `language` is `en`. Any other input key, top-level or nested, is refused outright, because `validated()` would drop it silently and the screen would keep believing the preference had been stored. Follow-the-OS deletes the row rather than storing the word `system`, and a blob whose keys are all cleared deletes its row for the same reason: absence is the default, not a null to interpret.
 
 #### Implementation References
 
-`PreferenceController`, `UpdatePreferenceRequest`, `Preference::KEYS`, `AppServiceProvider`'s layout composer, `resources/views/preferences/edit.blade.php`; tests `tests/Feature/PreferenceControlsTest.php` and the theme cases in `DesignTokensTest.php:100-131`.
+`PreferenceController` (props: `theme`, `failureEstimate`, `verifiedAt`, `importUrl`, `settings`, `scenarioOptions`, `aggressivenessOptions`, `statOrder`, `hardCap`, `exportUrl`, `backupUrl`; actions: `export`, `backup`), `UpdatePreferenceRequest`, `Preference::{KEYS, SETTINGS_KEYS, settings, putSettings}`, `App\Actions\BackupDatabase` (the snapshot both `uma:backup` and this screen's Backup action share), `App\Services\ScenarioCaps::hardCap()`, `AppServiceProvider`'s layout composer, `resources/js/pages/Preferences/Edit.vue` (tablist shell), `resources/js/layouts/AppLayout.vue` (flash `role="status"` + `aria-live="polite"`), and the two read-side pre-fills (`Career\ScenarioSelectController::storedDefault()`, `Career\BuildTargetController::statDefaults()`); tests `tests/Feature/PreferenceControlsTest.php` (props, the blob's round trip and refusals, the export's shape, the backup's integrity) and `tests/browser/preferences.spec.ts` (rendered copy, keyboard path, tablist, the absence titles, 44px, 320px, reduced motion, axe).
 
 #### Status
 
-Implemented 2026-10-04. §7-5 resolved; the failure-estimate *display* half stays blocked on a sourced model, which the screen states rather than hides.
+Implemented 2026-10-04 (§7-5). Extended 2026-10-07 (D18): four-category tablist shell, Game-version panel reading `config('scenarios.verified_at')` + the shared `app.ruleset` (null), named absences for every preference without a column. The failure-estimate *display* half stays blocked on a sourced model, which the screen states rather than hides. Extended 2026-10-08 (D18b, the owner's authorization of that slice's open question 1): Language, Default scenario, Recommendation aggressiveness and Stat-target defaults became controls stored in one `settings` row; Export and Backup became routes; Units stays `N/A` for a *sourcing* reason rather than a schema one, and Restore, Reset and Risk tolerance stay absences with their reasons named.
 
 #### Gaps
 
-`failure_estimate` records a choice no surface reads yet. That is deliberate and disclosed on the screen: ADR-0001 §3 forbids printing a failure percentage without its formula and parameters, and no source publishes a curve, so there is no honest number to show. Not a calculation change waiting on a flag; it needs a model first (owner question).
+1. The six named-absence preferences (Language, Units, Default scenario, Aggressiveness, Stat-target defaults, and Race-risk thresholds) have no column. D18 records the single open question: add a nullable `settings` JSON column to `preferences` validated by `Preference::KEYS` at its top level (matching the `build_target` json-column precedent), or approve individual columns? `DesignTokensTest:168` asserts `preferences` has exactly `['key','value','created_at','updated_at']` and is a one-line update in the same commit if approved. Not a bug; a product-scope decision.
+2. `race_risk_thresholds` is not rendered at all: `ADR-0016` blocks any race-outcome prediction, and the screen does not invent a placeholder for it.
+3. Reset has no route: it is a destructive action that `AGENTS.md` §5 puts behind owner approval. The Data panel states the absence; no confirmation dialog ships without a backend.
+4. Export is run-scoped (`/training-runs/{run}/export/{format}`) with no global route; the Data panel renders the absence.
+5. Backup and Restore are CLI-only (`uma:backup`); the Data panel renders the absence.
 
 ---
 
@@ -1628,6 +1758,10 @@ The recommendation stays above the actions on mobile (design-2.0 §40), and the 
 
 `layouts/CareerLayout.vue` (the career bar over `AppLayout`), `components/career/CareerHeader.vue`, `components/career/CareerStatePanel.vue`, `components/career/ActionGrid.vue`, `components/career/RecommendationCard.vue`, `components/career/AdvisorRail.vue`. Reused, not rewritten: `ResourceStrip` (the scenario's own widgets), `EnergyGauge`, `MoodPill`, `RaceCalendar`.
 
+_Dated note 2026-10-07 (D14a): the last of those four is no longer reused here. `components/career/RunRaceStrip.vue`
+takes the left column, and `RaceCalendar.vue` is unchanged and stays the run record screen's component
+(`SCR-RUN-001`). Gap 2 below carries the reason and the original sentence._
+
 #### The advisor contract, and what it deliberately cannot carry
 
 `advisor` is exactly `{ action, band, reasons, alternative, risk }` (plan §8, "Recommendation contract (D8)"). There is **no score and no numeric confidence**: both are unsourced (`ADR-0001` §3) and C2's `Advice` has no field for either. `band` is `AtOrAboveAdvisory` / `BelowAdvisory` / null, printed as a word plus a glyph so the state is never colour-only. `risk` is null in this slice: a delay or a reachability verdict is held computation (`ADR-0020` §3).
@@ -1645,15 +1779,78 @@ The recommendation stays above the actions on mobile (design-2.0 §40), and the 
 | Error (a refused correction)               | A `role="alert"` block with `tabindex="-1"` inside the disclosure names the fields and focuses itself; the message is `StoreTurnEntryRequest`'s own. Nothing was written.                                                                                                      |
 | After a successful correction              | The write returns to the page the form was posted from (`redirect()->back()`), so a correction made here stays here; the flash banner names the turn.                                                                                                                          |
 
+#### The race strip (D14a, 2026-10-07)
+
+The left column is `components/career/RunRaceStrip.vue`, fed by one `raceStrip` bundle
+(`CockpitController::raceStripSection()`). It answers "where am I in the run" in three bounded regions,
+each a `<section>` with its own accessible name: **Recorded in this run** (this run's `race_entries`,
+oldest logged turn first, unlinked rows last), **This turn** (the turn `nextTurnToPlay()` names, how many
+catalogue rows fall on it, and what the run has already entered against them), and **Still to come**
+(the mandatory catalogue rows strictly ahead of that turn which the run has not recorded). One race
+appears in exactly one region.
+
+Three decisions the data forced, each of which a future reader should not re-litigate:
+
+- **This Turn counts instead of listing.** `race_catalog_slots` holds eleven rows at Senior turn 19
+  (measured on `database/database.sqlite` at 410 rows, 2026-10-07: year 1 begins at turn 12, years 2 and 3
+  run 1..24, the finale block carries six rows with no turn). A single "the race at this turn" would have
+  to drop ten or pick one, and picking one is `SCR-CAR-013`'s job. The prop is therefore
+  `{turn, year_label, offered, recorded[]}` and the option list stays on the screen that owns it.
+- **No goal races.** `trainee_goals` has never been migrated (KI-34), `race_catalog_slots` has no
+  trainee-bearing column, and `scenario_slots` holds `goal_race` rows for `ura_finale` alone (296 rows;
+  `GROUP BY scenario_key, kind` on the dev database returns one row, measured 2026-10-07). A per-row
+  `goal` flag would print a claim with no source, so the rows carry no `goal` key and the region states
+  the absence once as `N/A` with its reason. `is_mandatory` is a career obligation and is labelled
+  "Mandatory", never "Goal" (`79ffad5`).
+- **No state column on the Ahead rows.** A recorded obligation belongs to Run and not to the list of
+  things still to come, so an Ahead row is by construction unrecorded and a state column would repeat
+  "Not recorded yet" on every line. `SCR-CAR-013` keeps the obligation list with states, the `is_next`
+  marker and the fan-gap arithmetic.
+
+Provenance: every figure is a stored row (the run's own entries, or the catalogue's title, tier and
+mandatory flag), so no `ProvenanceBadge` glyph appears in the region. The one derived value is the count of
+catalogue rows at a turn, which is a read of the set rather than an inference from it. Nothing here
+predicts: no readiness band, no win figure, no percentage, no distance band derived from metres and no
+condition applicability (`ADR-0016`, `ADR-0020` §3). The strip introduces no motion of its own, so reduced
+motion stays the global block's, and `RunRaceStripTest` greps the component for that absence.
+
+| State | Behavior |
+| --- | --- |
+| Scenario composes no `race_calendar` | One sentence says the matrix closes the calendar, and the three regions are absent rather than drawn empty. No catalogue rows are printed for such a run. |
+| No race recorded | The Recorded region names the absence, why it matters, and links to the run record screen. |
+| No turn being decided | This Turn and Still to come both say the run has no turn to measure against, rather than listing every obligation as future. |
+| Turn carries no race | "No race on this scenario's calendar falls at turn N", with the door to Race Decision. Never a race borrowed from another turn. |
+| Race entered but not tied to a turn | The row prints `Turn N/A` with the KI-17 reason on the element, not `0` and not a dash. |
+| No mandatory race ahead | The region says so and points at Race Decision for the full obligation list. |
+| Goal races | `N/A` with the KI-34 reason, once per region. No row carries a `goal` field. |
+| Race already entered | Appears under Recorded only. `career-race-strip.spec.ts` asserts the debut is absent from Still to come once entered. |
+
+`raceStrip` replaces the `calendar` prop bundle entirely rather than sitting beside it, so no unused
+calendar payload crosses the wire and the Cockpit keeps no `?year=` query state. `RunRaceStripTest`
+(10 cases) asserts the shapes, the region separation, the two absences, the closed-matrix case and that no
+string reaching the page carries a percent sign; `tests/browser/career-race-strip.spec.ts` (6 cases)
+asserts the rendered copy, the gone-catalogue, the keyboard path and focus ring, the 44px targets, the
+320px and 640x512 (200-percent width) reflow with no sideways scroll, the reduced-motion probe and an axe
+scan. The four §12.5 manual checks map onto it as: keyboard-only (case 4), reflow (case 5 at 320 and at
+the 200-percent width), reduced motion (case 5's probe, the one that can fail), and axe in place of the
+colour-only read the hand-rolled checks used to stand in for (`@axe-core/playwright` is installed, so
+§4.1 item 8's "no axe dependency" no longer holds).
+
+_Dated note 2026-10-07, after D14 landed: D14 shipped as its own page (`Career/Timeline.vue`,
+`SCR-CAR-017`, `TimelineController`, with `components/career/CareerTimeline.vue` mounted only by that
+page). It did not take the Cockpit's left column, so this strip is not temporary in the way the D14a brief
+assumed. The column's ownership is still D14's to change, but the replacement it anticipated has already
+happened elsewhere and the strip is what the Cockpit shows until someone rules otherwise._
+
 #### Validation & Error Handling
 
 Every value is a stored fact, a config value, or a named absence. The one write reuses `StoreTurnEntryRequest` unchanged — no inline `$request->validate()`, no second endpoint — and `updateTurn()` scopes the turn to the routed run (`abort_unless`). The controller reads `$run->turnEntries` once (two queries for the page) and derives the latest turn from the loaded collection, so the turn log costs no N+1.
 
 #### Gaps
 
-1. **The action grid links to the screens that own each action today, not to D9–D12.** The brief says "otherwise they are named absences". Seven unfocusable items would fail this slice's own keyboard-path acceptance and leave the Cockpit with no way to act, so each entry links to the run record screen (whose guided rail records a turn) or, for Inheritance, to the Legacy builder, and the entry's own 2.0 screen is named in its note. No entry is a dead link. Reported as a deviation. *Dated note 2026-10-07: D9 landed, so the Training entry now links to `runs.training` (`SCR-CAR-012`). The other six still link to the screens that own them today.*
-2. **The left column carries the race calendar, not the milestone timeline.** `career/CareerTimeline.vue` is D14. The column renders the scenario's race calendar (a real, reused component) and names the milestone absence in one line.
-3. **The scenario region is a named absence.** The scenario panels are Phase E (E1). The region says so rather than inventing a panel.
+1. **The action grid links to the screens that own each action today, not to D9–D12.** The brief says "otherwise they are named absences". Seven unfocusable items would fail this slice's own keyboard-path acceptance and leave the Cockpit with no way to act, so each entry links to the surface that owns the action — the run record screen (whose guided rail records a turn and whose panels record events and scenario actions), the Legacy builder for Inheritance, and the Race Decision screen (`SCR-CAR-013`) for Race — and the entry's own 2.0 screen is named in its note. No entry is a dead link. *Dated note 2026-10-07: D9 landed, so the Training entry now links to `runs.training` (`SCR-CAR-012`).* *Dated note 2026-10-07 (D10): the Race entry now links to `runs.races.decision` (`SCR-CAR-013`).* *Dated note 2026-10-07 (D12): the Inheritance entry now links to `runs.inheritance` (`SCR-CAR-015`), so four remain on the screens that own them today.* *Dated note 2026-10-07 (D11): the Event entry now links to `runs.events.decision` (`SCR-CAR-014`), so three remain on the screens that own them today, and its note now names the Event decision screen rather than an arrival.*
+2. **The left column carries the race calendar, not the milestone timeline.** `career/CareerTimeline.vue` is D14. The column renders the scenario's race calendar (a real, reused component) and names the milestone absence in one line. _Dated correction 2026-10-07 (D14a): the first sentence stands and the second is superseded. The column now renders `RunRaceStrip.vue`, a run-scoped view of the same catalogue, because the full grid at a 20-share column is a wall of races the run has no business deciding (the interim-slice brief's problem statement, confirmed against the seed data: eleven rows at Senior turn 19). D14 still owns this column's future and may absorb the strip's contract, narrow it, or replace it with the timeline. The milestone absence is still named in one line._
+3. **The scenario region is a named absence.** The scenario panels are Phase E (E1). The region says so rather than inventing a panel. _Dated correction 2026-10-07 (E1): the first sentence is superseded and the second stands in its own terms. The region now mounts `components/scenario/ScenarioPanel.vue` (`SCR-CAR-019`), which draws the scenario, its documentation state and its widget and panel keys from the `scenario` section the controller emits. It invents no panel: what this build cannot draw renders a named fallback sentence, and what is off draws nothing._
 4. **`risk` is always null.** No source states a delay or a reachability verdict, and both are held computation.
 5. **The stat bar measures the target, not the ceiling.** `StatBand` was deliberately not reused here: its bar is the scenario ceiling with the 1,200 halved-gains marker, which is the run record screen's question. Giving it a second, target-shaped meaning would change a landed component's contract for one caller.
 6. **`runs.turns.update` now returns to the page the form was posted from.** It redirected to a fixed `runs.show`, which sent a Trainer who corrected a reading on the Cockpit off the screen they were reading. `TurnRowActionsTest` seeds the run screen as the referer, so its assertion is unchanged in substance.
@@ -1666,6 +1863,14 @@ Implemented 2026-10-06 (slice D8).
 #### Implementation References
 
 `CockpitController`, `TrainerAdvisor` (C2), `Advice`, `AdvisorOption`, `ScenarioCaps::forRun()`, `TrainingRun::{buildTarget,careerYearForTurn,calendarCells,nextTurnToPlay,composesPanel,scenarioKey,hasScenario}`, `RaceCatalogSlot::YEARS`, `StoreTurnEntryRequest` (the reused write), `pages/Career/Cockpit.vue`, `layouts/CareerLayout.vue`, `components/career/*`, `components/{ResourceStrip,EnergyGauge,MoodPill,RaceCalendar}.vue`. Tests: `tests/Feature/CareerCockpitTest.php` (8 cases: the empty run, the contract with Energy present and absent, the single marker across the three ranking rules, the config-driven widget list, current-over-target with the cap, the correction's route and values, a completed run) and `tests/browser/career-cockpit.spec.ts` (7 cases: the refusal copy, three breakpoints with no horizontal scroll, the keyboard path and focus ring, reduced motion, the 44px sweep, the correction then the marker, and an axe A+AA scan).
+
+_Dated addition 2026-10-07 (D14a): the left column's references are `CockpitController::{raceStripSection,stripRow}`,
+`RaceCatalogSlot::{scopeForScenario,scopeOnTurn,isAtOrBeforeTurn,YEARS,yearLabel,turnNumber,tier}`,
+`RaceEntry::{tierKey,placementOrdinal}`, `RaceEntryStatus::label()` (via `HasLabel`, with the four words in
+`lang/en/uma.php`'s `race_entry_status` map), `TrainingRun::{nextTurnToPlay,composesPanel,scenarioKey,hasScenario}`
+and `components/career/RunRaceStrip.vue`. `calendarCells()` and `careerYearForTab()` are no longer called from
+this screen (both stay on `SCR-RUN-001`), and `RaceCalendar.vue` is no longer mounted here. Tests:
+`tests/Feature/RunRaceStripTest.php` (10 cases) and `tests/browser/career-race-strip.spec.ts` (6 cases)._
 
 ---
 
@@ -1713,6 +1918,7 @@ What the cards do state, and where each figure comes from:
 | Empty (no turn logged)                       | A panel headed "No turn recorded yet" names what is missing (the five stats, Energy, Mood, Fans, Skill Points), why it matters (the advisor has nothing to read a deficit from and nothing to rank), and what to do (a link to the run record screen). The five cards still render, with `N/A` rather than zeros.       |
 | No build target                              | The deficit is `N/A` with "No build target was entered for this stat" in the `title`, and the advisor's own absence sentence is printed in the Advisor region. No marker.                                                                               |
 | Energy absent                                | C2 declines; `band`, `deficit` and `energy_after` are null on every card and the refusal sentence is the advisor line. Wit still prints its sourced zero cost, because its cost does not read Energy.                                                   |
+| Energy present                               | The Advisor region names the turn's band in the words `SCR-CAR-011` uses ("At or above the advisory line" / "Below the advisory line"), because a Trainer who arrives here by URL is making the same decision against the same sourced 50 line (SC 3.2.4). It is a word, never a colour.                            |
 | Advisor recommends `Rest`                    | No card carries the marker — `Rest` is not one of the five — and the Advisor region says so in words with a link to the run record screen.                                                                                                             |
 | No deck recorded                             | "No Support Cards are recorded for this run, so no card above can count a support" with a link to the deck step. A deck with no card of this training's type counts zero, which is a real entered answer.                                                |
 | No scenario declared                         | `cap_bonus` and the scenario effect lines are `N/A` with "This run declares no scenario, so no scenario effect is claimed."                                                                                                                            |
@@ -1728,11 +1934,15 @@ Trainer input goes through `StoreTurnEntryRequest`, unchanged and not duplicated
 #### Gaps
 
 1. **`Train` does not fire the write on its own.** The brief says "Train posts through the existing guided-turn write", and it does — but the request requires five absolute stat totals and a declared outcome, which only the client can supply. A press that posted immediately would either fabricate them or return a refusal on every press, so `Train` holds the choice, moves focus to the record form, and the form's `Preview this turn` button posts. The write, the route and the Form Request are the existing ones.
-2. **The preview and the confirm live on the run record screen.** `storeTurn()` redirects a preview to `runs.show`, whose rail renders the deltas and gates the confirm behind `previewed`. Rendering a second preview here would duplicate a landed, tested screen; a Trainer who starts a turn here finishes it there. Whether `storeTurn()` should honour an `intended` target so the loop closes on one screen is an owner question.
+2. **The preview and the confirm live on the run record screen.** `storeTurn()` redirects a preview to `runs.show`, whose rail renders the deltas and gates the confirm behind `previewed`. Rendering a second preview here would duplicate a landed, tested screen; a Trainer who starts a turn here finishes it there. Whether `storeTurn()` should honour an `intended` target so the loop closes on one screen is an owner question. *Ruled 2026-10-07: no. `StoreTurnEntryRequest` requires five absolute totals plus an outcome, and a single-screen flow has no source for either, so "hold the choice, focus the record form" is the shape until a Trainer-entered preview column exists. Do not build a second preview renderer.*
 3. **`facility_level_source` is not rendered.** The scenario matrix states how a facility level is measured, but no column stores a facility level and the config word has no client-vocabulary map, so a card cannot say which level a training is at. The `SCENARIO_EFFECTS` map in the controller names the two keys that do bear on this decision.
 4. **Bond is absent at the data layer, not only on this screen.** `turn_events.bond_delta` holds a past turn's observed delta; nothing holds a bond for a deck slot, so "bond gains" has no entered state to show. Reporting one turn's delta on a card about the next turn would be the wrong object.
 5. **The `N/A` reasons are `title` tooltips**, following the landed pattern (`CareerStatePanel.vue`, `SCR-CAR-011`). They are dismissable and persistent (SC 1.4.13) but a touch-only reader cannot hover them; making the exclusion body copy instead is a `DESIGN.md` §33 decision this slice did not widen to.
 6. **The wizard walk is duplicated across browser specs.** `tests/browser/career-training-detail.spec.ts` carries its own copy of the five-step fixture because no browser spec in this tree shares one and `tests/utils/` holds only the axe builder. A third copy is the point to extract it.
+7. **The record form re-types the rail's field list.** `GuidedStep.vue` is a scenario rail (step progress, shop and Team Race panels), not a field set, so it is not reusable here; its slot in `pages/Runs/Show.vue` is inline markup. The field names, bounds and the `no logged turn` placeholder fallback are matched to it so the two surfaces of one write cannot read differently. Extracting a shared turn-fields component is the fix, and it touches a landed page and its browser spec, so it is not this slice's change. *Ruled 2026-10-07: yes, but as its own slice after D11 — extract once and align the placeholder fallback across all three copies; do not fold a refactor into a feature diff.*
+8. **`RiskNotMeasured` prints as the engine's token.** `ADR-0001` §3's prose is "Risk not measured" and displayed vocabulary normally lives in `lang/en/uma.php`; the plan's D8/D9 rows and `TrainerAdvisor::RISK_NOT_MEASURED` use the token, and the two words are the same claim. Renaming it is a copy ruling for the owner, not a silent change by this slice. *Ruled 2026-10-07: the prose form wins. One-line polish when `TrainingCard.vue` is next touched, not its own slice; the displayed phrase belongs in `lang/en/uma.php` rather than a bare enum token.*
+9. **No field can carry an observed failure percentage.** `frontend-development-plan.md` §3's per-training row permits a figure the Trainer reads off the client and enters, "record-as-observed with Confirmed provenance"; this screen's payload has no such field, because the same slice's brief holds the failure number. The recording path stays the run screen's turn form, which stores what is typed and prints the delta against the stored row. *Confirmed 2026-10-07: the payload stays as-is; the §3 row is permissive ("may"), no column carries the field, and adding one is a schema change needing an ADR.*
+10. **`routes/web.php` labels two peer-built screens `SCR-CAR-013`.** The Race Decision block and the Inheritance Event block both cite `SCR-CAR-013` in their route comments; `SCREEN_SPEC.md` §2 is the authority and holds `SCR-CAR-013` for Race Decision alone, with D9 at `SCR-CAR-012` and Inheritance Event unregistered in that table as of this date. The typo sits inside peer sessions' uncommitted hunks, so it is flagged here rather than edited (shared-worktree rule, owner instruction 2026-10-07: fix only if the comment can be changed without touching their hunks).
 
 #### Status
 
@@ -1741,6 +1951,210 @@ Implemented 2026-10-07 (slice D9).
 #### Implementation References
 
 `Career\TrainingDecisionController`, `Career\CockpitController` (the `training` entry now links here), `TrainerAdvisor` (C2), `Advice`, `AdvisorOption`, `ScenarioCaps::forRun()`, `SupportCardEffects::{dictionary,atCap}`, `SupportCard::{typeWord,displayName}`, `BuildTargetPayload`, `StoreTurnEntryRequest` and `TrainingRunController::storeTurn()` (the reused write), `MoodTier`, `config/advisor.php`, `config/scenarios.php`, `pages/Career/TrainingDetail.vue`, `components/career/TrainingCard.vue`, `layouts/CareerLayout.vue`, `components/ProvenanceBadge.vue`. Tests: `tests/Feature/CareerTrainingDetailTest.php` (10 cases: the five cards in matrix order with the config cost, the exact option key set and the absent yield fields, the deficit and `RiskNotMeasured` and the energy-after range, one marker then none for `Rest` then none for a decline, the deck match by client word, the no-deck state, the scenario keys and the no-scenario absence, the preview round trip through `runs.turns.store` into the rail, the refusal naming the empty fields, and every run status) and `tests/browser/career-training-detail.spec.ts` (6 cases: rendered copy with no projected number, the `N/A` titles, the disclosure by keyboard with a stable focus order, the cockpit entry point and the record round trip, 320px reflow with reduced motion, and the 44px sweep with an axe A+AA scan).
+
+---
+
+### SCR-CAR-013 — Race Decision
+
+`GET /training-runs/{run}/races` name `runs.races.decision`, `App\Http\Controllers\Career\RaceDecisionController`. SCREEN-011, plan §8 D10. Whether and where to race, at the turn being decided. It descends from the run's own URL the way the Cockpit does, and it is **read-only except one write it does not own**: the drawer's `Enter Race` posts to the existing `runs.races.store` and its `StoreRaceEntryRequest`, so no second race-write route exists.
+
+Reached from the Cockpit's action grid, whose Race entry opens it (`SCR-CAR-011`), and by URL.
+
+#### Layout / Structure
+
+`CareerLayout` → the turn being decided → the mandatory-race region (Level 1) → the readiness absence → the race list, one `components/career/RaceCard.vue` per race, or the empty-state sentence. Each card carries the race's headline (title, tier, mandatory/special marker, year and turn), the catalogue's fan gate and maiden rule, whatever the run has already recorded for the slot, and the brief's ten-field fact list. A `Details and actions` button opens a drawer holding the same facts, the readiness row, and the two actions.
+
+#### The brief's ten fields, and the four that have no column
+
+| Field | Source |
+|---|---|
+| Race name | `race_catalog_slots.title` |
+| Grade | `race_catalog_slots.tier`, set on all 410 seeded rows |
+| Distance | `race_catalog_slots.distance`, printed by `distanceLabel()` |
+| Distance band | `race_catalog_slots.distance_band` (402 of 410), printed with the 1400 m conflict note: the export and Game8 disagree at that line, so no band is derived from a metre count |
+| Surface | `race_catalog_slots.surface` |
+| Fan gate | `race_catalog_slots.fans_needed`, rendered on the card rather than in the fact list, because it is a quantity to work toward |
+| Running style | **`N/A`.** A running style is the trainee's aptitude, not a property of the race, and no column holds a per-race one |
+| Fan gain | **`N/A`.** The row carries a payout *curve id*; no payout table for those curves is stored |
+| Reward | **`N/A`.** No column holds a race reward |
+| Skill Points | **`N/A`.** No column holds a skill-point payout; the Trainer records what the client paid, on the run screen |
+| Scenario reward | **`N/A`.** No column holds one, and the scenario panels are Phase E |
+| Estimated win probability | **`N/A`.** Held on `ADR-0016` |
+
+#### The held figure
+
+`readiness` is `{label: 'N/A', title: …}` and the `title` names the blocker: race prediction is blocked on the requirement data `ADR-0016` measures, that decision is an open question rather than a permission, and `PRD.md` §6.11 stands unamended. The brief's risk indicator and its `< 10` / `10-30` / `> 30` thresholds are percentages and are **not built**: the rendered surface carries no percent sign at all, and `CareerRaceDecisionTest` asserts that of both Vue files and of every prop that could print one.
+
+The screen-spec's correction row asks for Excellent/Good/Borderline/Poor readiness bands instead of a percentage. A band is a category about preparation, and a percentage is a prediction of outcome, so the two are not the same claim; whether this tool may print a descriptive band (no number, no threshold, no outcome claim) is a ruling the owner owes, not something `ADR-0016` has decided. The row renders `N/A` pending that ruling, and the plan's D10 row and the correction row disagree, which is recorded here rather than resolved silently. **What changed 2026-10-07:** this paragraph first said a band "is a prediction of the same shape and is equally held". The owner ruled that reasoning wrong, and the screen is unchanged by the correction: it prints `N/A` either way.
+
+#### Mandatory races
+
+Read from `race_catalog_slots.is_mandatory` (7 of 410 rows: the Junior Make Debut, the qualifier, the semifinal and the four scenario finals), in calendar order, each with what the run has recorded for it. Read from the catalogue rather than from the run's entries, because an obligation not yet reached has no entry and is exactly what the region exists to show.
+
+**A mandatory race is a career obligation, not a Goal.** `79ffad5` withdrew `is_mandatory` as the Goal pennant's input, because the client's red banner means this character's objective and the Goal sets differ per trainee (`docs/scenarios/09-global-race-calendar.md`). The region therefore says "Mandatory", never "Goal", and the Level 1 treatment is a glyph plus the word, never colour alone.
+
+#### States
+
+| State | Behavior |
+|---|---|
+| Empty (no scenario) | The sentence names the missing scenario, why it matters (no calendar, so nothing to decide between) and what to do (choose one on the run screen). |
+| Empty (no turn logged) | The sentence says no turn has been logged, so there is no turn to decide about, and points at the run screen for the first turn. |
+| Empty (every turn played) | A different sentence: the career is finished, so there is no next race, and the run record screen has the history. |
+| Empty (no race at this turn) | A fourth sentence, scoped to the turn, pointing at the run screen's calendar for which turns carry a race. Never merged with the others, because the four mean different things. |
+| Loading | Page-level (ADR-0007): `role="status"` "Loading…" while a visit is in flight. The drawer's `Enter Race` carries its own "Entering…" label, because that write is user-initiated. |
+| Error (a visit failed) | `role="alert"`: "That screen did not load. Nothing was saved; try again." Inertia's `invalid` and `exception` are both cancelable and return `false`, so this is the single surface. |
+| Error (a refused write) | A `role="alert"` inside the drawer printing the first message `StoreRaceEntryRequest` returned. Nothing was written. |
+| After a successful write | `storeRace()` returns to the page the form was posted from, so entering a race from here stays here; the flash banner names it. |
+
+#### Gaps
+
+1. **`Skip for now` records nothing.** The brief says "Skip returns without recording", so it is a link back to the run screen. `ADR-0003` stores a declined race as a row with status `Skipped` and the run screen's race panel offers that status, so the fact stays recordable; what this screen does not do is write it. Reported as a deviation from `ADR-0003`'s grain, for the owner. **The affordance is deferral, not refusal, and the label says so:** "Skip for now" leaves the turn undecided, so it owes no row. Were it ever relabelled "Decline this race" it would be a refusal, and `ADR-0003` would owe a `Skipped` row for it. The run panel's `Skipped` status is that refusal path and is not contradicted by this screen, which never offers it.
+2. **The drawer is a native modal `<dialog>`, not a side drawer.** `design-2.0` §32 lists race details as drawer content. `showModal()` is the one place the platform already provides a focus trap and Escape-to-close, which is what this slice is accepted on, so the mechanism is a dialog styled as a right-hand panel. What the component adds is the focus return to the button that opened it.
+3. **Only the turn link is offered as an optional field.** A finish, a fan gain and a placement are outcomes rather than decisions and are recorded on the run screen's race panel, which is where the run's history is kept.
+4. **`is_special_race` renders as a marker but is not a deadline.** Eight rows carry it; the region lists only `is_mandatory`, and a special race is marked on its own card.
+5. **Axe coverage is in `tests/browser/career-race-decision.spec.ts`** through the shared `tests/utils/accessibility.ts` builder, which scopes every scan to `#app` (KI-63).
+
+#### Implementation References
+
+`RaceDecisionController`, `RaceCatalogSlot` (`is_mandatory`, `hasFanGate`, `hasMaidenGate`, `distanceLabel`, `yearLabel`, `turnNumber`, `scopeForScenario`, `scopeOnTurn`), `RaceEntry` (`placementOrdinal`, `MAX_CIRCLES`), `RaceEntryStatus`, `TrainingRun::{nextTurnToPlay,hasScenario,scenarioKey}`, `StoreRaceEntryRequest` (the reused write), `pages/Career/RaceDecision.vue`, `components/career/RaceCard.vue`, `layouts/CareerLayout.vue`. Tests: `tests/Feature/CareerRaceDecisionTest.php` (the races at the turn, the ten facts present and absent, the readiness refusal, the mandatory list with its marker and cleared state, a slot already recorded, the four empty states, and the no-percentage assertion) and `tests/browser/career-race-decision.spec.ts`.
+
+#### Status
+
+Implemented 2026-10-07 (slice D10).
+
+---
+
+### SCR-CAR-014 — Event Decision
+
+`GET /training-runs/{run}/events` name `runs.events.decision`, and `POST /training-runs/{run}/events` name `runs.events.store`, `App\Http\Controllers\Career\EventDecisionController`. SCREEN-012, plan §8 D11. Record-only: an event choice and its observed outcome go to the existing TurnEvent mechanism (`ADR-0003`), the same write grain the run screen's panels use, with one new Form Request (`StoreTurnEventRequest`) rather than an inline validation. No new column, no migration, no event catalog table.
+
+Reached from the Cockpit's action grid, whose Event entry opens it (`SCR-CAR-011`), and by URL.
+
+#### Layout / Structure
+
+`CareerLayout` → the advisor refusal → the current career state → the known outcomes → the recorded history (one `components/career/EventCard.vue` per row) → the record form, or the named absence when the run has no turns. The state section prints the five stats against their targets and the `ScenarioCaps::forRun()` ceiling plus Energy, Mood, Fans and Skill Points, in the same shape the Cockpit prints them.
+
+#### Known outcomes are derived, not looked up
+
+There is no event catalog in the schema, so "known outcomes" are grouped from **this run's own recorded TurnEvents** by (event type, event name), first occurrence oldest first, each choice carrying its recorded outcome text or the incomplete flag. A choice whose row carries neither an `origin_note` nor non-empty `deltas` renders the glyph-and-word warning "⚠ Event outcome incomplete — choose manually" with the reason in its `title`. Failure and Inheritance rows are excluded from both the history and the groups; those screens own them.
+
+The source picker offers the four enum cases a choice event can carry — Character, Support Card, Group, Scenario. The brief's "Random" source has no `TurnEventType` case, so it is an **absence, not an invented enum**: the write rejects it (`StoreTurnEventRequest` inlines `Rule::in` over the four), and this is recorded here rather than resolved by widening the enum.
+
+#### The advisor refuses
+
+`TrainerAdvisor` ranks training actions only and holds no event advice, so `advisor` ships `{ recommendation: null, band: null, reasons: [the refusal line], alternative: null, risk: null }`. The page prints "No recommendation available" with a `title` naming the blocker and the reason line beneath. Nothing is recommended, no option is preselected, and the Trainer's choice is the default path rather than an override. The known-choice radio group appears only when the event name and source being recorded match a recorded group; it starts unchecked and fills the choice fields when one is selected with the keyboard or pointer.
+
+#### States
+
+| State | Behavior |
+|---|---|
+| Empty (no recorded choices) | The `empty` sentence: no event choices recorded yet, use the record form below, each entry becomes a known outcome next time. History renders the sentence, not a blank list. |
+| Empty (no turns logged) | The record form is replaced by the named absence: no turns logged yet, record a turn first. No disabled or empty form is offered. |
+| Loading | Page-level (ADR-0007): `role="status"` "Loading…" while a visit is in flight; the record form's button carries its own "Recording…" label. |
+| Error (a visit failed) | `role="alert"`: "That screen did not load. Nothing was saved; try again." Inertia's `invalid` and `exception` are both cancelable and return `false`, so this is the single surface. |
+| Error (a refused write) | A `role="alert"` with `tabindex="-1"` inside the form lists `StoreTurnEventRequest`'s messages and focuses itself. Nothing was written. |
+| After a successful write | Redirects to the same screen with the flash banner "Event choice recorded."; the per-choice fields clear, the source and event name stay put so the new choice reappears in the picker, and nothing is left selected. |
+| Unrecorded state figures | `N/A` with a `title` naming the absence (no turn yet, no target recorded). Never a default, never a dash. |
+
+#### Gaps
+
+1. **No score, confidence, total or probability reaches this screen.** A choice's worth is a claim about outcome; the screen records what was chosen and what it gave, and `CareerEventDecisionTest` asserts the absence structurally in every prop.
+2. **The new write route and Form Request are a deviation from plan §8 D11's reuse shape.** D11 asked for reuse of the existing write grain; TurnEvent is the grain, but no existing endpoint accepts a choice event outside inheritance's payload, so one route plus one Form Request was the smallest correct write. The Floor's ban on inline `$request->validate()` made a controller-level validation impossible, and D12's inline validation is noted as the contrast in the hand-off.
+3. **Known outcomes are per-run, not global.** A second run that has seen the same event shows nothing until it records it. A cross-run corpus is a data-engineering question (provenance, matching) and belongs to a later slice, not to this screen's read path.
+4. **Axe coverage is in `tests/browser/career-event-decision.spec.ts`** through the shared `tests/utils/accessibility.ts` builder (KI-63).
+
+#### Implementation References
+
+`EventDecisionController`, `StoreTurnEventRequest`, `TurnEventType` (the four choice cases), `TurnEvent`, `ScenarioCaps::forRun()`, `TrainingRun::{hasScenario,scenarioKey,buildTarget}`, `CockpitController` (the grid's Event entry), `pages/Career/EventDecision.vue`, `components/career/EventCard.vue`, `layouts/CareerLayout.vue`. Tests: `tests/Feature/CareerEventDecisionTest.php` (9 cases: the props contract, the grouping with per-choice flags, the incomplete flag, the Failure/Inheritance exclusion, the store, the unknown source rejection, the required fields, the held-computation absence, and the no-turn state) and `tests/browser/career-event-decision.spec.ts` (6 cases: the refusal with N/A titles, the keyboard record then the radio picker, the incomplete warning, the 44px sweep, an axe A+AA scan, and the no-turn absence).
+
+#### Status
+
+Implemented 2026-10-07 (slice D11).
+
+---
+
+### SCR-CAR-015 — Inheritance Event
+
+`GET /training-runs/{run}/inheritance` name `runs.inheritance`, and `POST /training-runs/{run}/inheritance` name `runs.inheritance.store`, `App\Http\Controllers\Career\InheritanceEventController`. SCREEN-013, plan §8 D12. Record-only inheritance tracking: the predicted section shows sourced probabilities and star-roll odds, the observed section records what the Trainer entered via the existing TurnEvent mechanism. No inheritance computation is performed (ADR-0020 §3).
+
+Reached from the Cockpit's action grid, whose Inheritance entry opens it (`SCR-CAR-015`), and by URL.
+
+#### Layout / Structure
+
+`CareerLayout` → `<Head title>` → `#title` slot → milestone timeline (three fixed inheritance events: Career Start at turn 1, Classic Early April at turn 31, Senior Early April at turn 55; glyphs: ● completed, ◉ current, ○ upcoming, × missed) → **Predicted** region (Estimated badge): parent and grandparent Sparks from `legacy_selection`, spark counts by kind, sourced star-roll odds table (UMAMUSUME_REFERENCE.md §1.5.3), "expected inheritance" rendered as `N/A` with `title` citing ADR-0020 §3 → **Observed** region (Confirmed badge): recorded Inheritance-type TurnEvents listed by turn with source, choice, deltas and origin note, write form to record a new observed event.
+
+The page follows the established career screen pattern: `CareerLayout`, `<Head title>`, `#title` slot, `router.get` with `preserveState`/`preserveScroll` for async visits, and the observed form posts to `runs.inheritance.store` via `useForm` with `@submit.prevent`.
+
+#### Data Displayed
+
+- Milestone timeline: three fixed events derived from the run's turn count (turn 1, 31, 55 per REFERENCE §1.5.1), each with a status glyph and tooltip.
+- Predicted section: parent/grandparent Sparks from `legacy_selection` payload, grouped by kind (Blue/Pink/Green/White/Scenario) with counts, the sourced star-roll odds table (stat range → ★/★★/★★★ probabilities as Estimated).
+- "Expected inheritance" field: always `N/A` with `title` "Not computed. Inheritance outcome computation is banned by ADR-0020 §3."
+- Observed section: list of TurnEvent records with `event_type = Inheritance`, each showing turn, source name, choice label, deltas, origin note. Provenance badge: "Confirmed — entered by the Trainer" or "No inheritance events recorded yet."
+- Write form: turn select (populated from logged turns), source name select (Inspiration Event, Classic April, Senior April, Golden Event, Other), choice label (optional), deltas (optional), origin note (optional). Submits to `runs.inheritance.store`.
+
+#### Inputs
+
+| Field          | Type      | Req        | Validation source        |
+| -------------- | --------- | ---------- | ------------------------ |
+| `turn`         | select    | required   | integer, min:1, max:72   |
+| `source_name`  | select    | required   | string, max:100          |
+| `choice_label` | text      | optional   | string, max:200          |
+| `deltas`       | hidden    | optional   | array                    |
+| `origin_note`  | textarea  | optional   | string, max:1000         |
+
+#### User Actions
+
+| Action                          | Trigger | Preconditions                     | Result                                        | Feedback                          |
+| ------------------------------- | ------- | --------------------------------- | --------------------------------------------- | --------------------------------- |
+| Record inheritance event        | submit  | valid turn, source_name           | TurnEvent created with `event_type=Inheritance` | flash "Inheritance event recorded." |
+
+#### Screen States
+
+| State                          | Behavior                                                                                                                                                                                                          |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No legacy selection            | Empty state sentence: "No Legacy configuration recorded for this run. Enter the parents and their Sparks on the Legacy Select screen (wizard step 4) or the Legacy Lab, then return here to track inheritance events." |
+| No observed events             | Observed region shows "No inheritance events recorded yet." with Confirmed provenance badge.                                                                                                                    |
+| Loading                        | Page-level (ADR-0007): `role="status"` "Loading…" while a visit is in flight. The write form's submit carries its own "Recording…" label.                                                                    |
+| Error (a visit failed)         | `role="alert"`: "That screen did not load. Nothing was saved; try again." Inertia's `invalid` and `exception` are both cancelable and return `false`, so this is the single surface.                            |
+| Error (a refused write)        | `role="alert"` block with `tabindex="-1"` printing `StoreTurnEntryRequest`'s own messages. Nothing was written.                                                                                                 |
+| After a successful write       | Redirect back to `runs.inheritance` with flash status.                                                                                                                                                          |
+
+#### Validation & Error Handling
+
+Server-authoritative inline validation via `request()->validate([...])` in the controller's `store()` method. The `turn` must exist for the run (1..72). The `source_name` is required. No Form Request class — the write reuses the existing TurnEvent model and the controller validates directly. Errors render per field in the form, with the `role="alert"` block focusing itself.
+
+#### Security & Privacy
+
+CSRF through the framework XSRF cookie header Inertia sends with every write. All user-entered content is Trainer's own statements; no third-party data displayed. No rate limits (local tool).
+
+#### Accessibility
+
+Form controls meet 44px target (`min-h-11` / `h-11`). The milestone timeline glyphs have `aria-hidden` and their meaning is conveyed in tooltips (`title`). Provenance badges use the single `ProvenanceBadge.vue` component with the four standard glyphs, ensuring colour is not the only channel. Keyboard path: tab through milestone glyphs (tooltips on focus), tab through Predicted region headings, tab through Observed list, tab through form fields, submit with Enter. `prefers-reduced-motion` respected.
+
+#### Responsive Behavior
+
+Milestone timeline wraps at narrow widths. Predicted and Observed regions stack vertically at mobile widths. The form fields stack single-column.
+
+#### Localization / Content
+
+Hardcoded English. Source vocabulary from `UMAMUSUME_REFERENCE.md` §1.5.3. No em dashes in shipped copy. Unrecorded values render as `N/A` with `title`.
+
+#### Navigation & Workflow Relationships
+
+Cockpit action grid entry "Inheritance" → `runs.inheritance`. Run detail screen "Inheritance" link → `runs.inheritance`. Preflight step 4 (Legacy) → after recording parents, Trainer can visit this screen to track events.
+
+#### Dependencies
+
+`TrainingRun`, `TurnEvent`, `TurnEventType::Inheritance`, `LegacySelectionPayload`, `ScenarioCaps` (for milestone turn calculations), `config/scenarios.php` (for career year labels), `ProvenanceBadge.vue`, `SparkChip.vue`, `CareerLayout.vue`.
+
+#### Implementation References
+
+`InheritanceEventController`, `TurnEvent` model, `LegacySelectionPayload::sparkKindLabels()`, `UMAMUSUME_REFERENCE.md` §1.5.1 and §1.5.3, `pages/Career/InheritanceEvent.vue`, `layouts/CareerLayout.vue`, `components/ProvenanceBadge.vue`, `components/legacy/SparkChip.vue`. Tests: `tests/Feature/CareerInheritanceEventTest.php` (12 cases: predicted section with/without legacy, observed section empty/with events, write form submission, milestone glyphs at various turn counts, empty state, N/A with title on expected inheritance, star-roll table rendered as Estimated, provenance badges, validation errors, 44px sweep, axe A+AA scan) and `tests/browser/career-inheritance-event.spec.ts` (rendered copy, the predicted/observed separation, the milestone glyphs, the write form keyboard path, 320px reflow, axe scan).
+
+#### Status
+
+Implemented 2026-10-07 (slice D12).
 
 ---
 
@@ -1770,7 +2184,7 @@ AppLayout shell → record-only notice → filter row (Trainee, Scenario, Tag, F
 
 | State                             | Behavior                                                                                                                                                                                                                                                                                                                                                                                                      |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Empty (library holds nothing)     | Two sentences, not an empty box: "The library holds no Veterans yet." plus the reason (`filingNotice`), which is the truth of this build, that no screen files a career yet and Save Veteran arrives with the other half of D16.                                                                                                                                                                              |
+| Empty (library holds nothing)     | Two sentences, not an empty box: "The library holds no Veterans yet." plus the reason (`filingNotice`) and the door (`file_veteran_url`). Corrected 2026-10-07: this cell said the reason was that no screen files a career yet, which was true of the tree until D16's write half landed.                                                                                                                                                                              |
 | Empty (filters matched nothing)   | A different sentence, scoped to the filters, and it names the all-of tag rule. Never merged with the first state, because the two mean different things.                                                                                                                                                                                                                                                      |
 | Filtered                          | The three facets `ListVeterans` answers and no others: `trainee`, `scenario`, one `tag`. The blank option means no filter, handled by the parent request's `prepareForValidation`.                                                                                                                                                                                                                            |
 | Order                             | `Newest first` / `Oldest first`, a button pair rather than a fourth select, with `aria-current="true"` on the live one. It orders by the row's own id, and the `title` on Oldest first says so: no column holds the date a career finished, so this is not a completion-date sort.                                                                                                                            |
@@ -1780,7 +2194,7 @@ AppLayout shell → record-only notice → filter row (Trainee, Scenario, Tag, F
 
 #### Persistence
 
-Read-only. It writes nothing, and there is deliberately no write route here: `RecordVeteran` is landed and has no caller, because Save Veteran (`SCREEN-020`) is gated behind D15 (Career Result), which is unbuilt.
+Read-only, as this screen always was. The write that fills the table lives on `SCR-VET-003` (`runs.veteran`), which landed 2026-10-07 and is the first caller of `RecordVeteran`; this section previously recorded that no such route existed and that Save Veteran was gated behind an unbuilt D15.
 
 #### Implementation References
 
@@ -1792,7 +2206,7 @@ Implemented 2026-10-06 (D16 read half).
 
 #### Gaps
 
-1. **Nothing can create a row.** Until Save Veteran lands, the library's own empty state is permanent. This is stated on the page rather than left for a Trainer to infer.
+1. **An empty library is still the fresh-install state.** A row appears only when a Trainer files a finished career through `SCR-VET-003`; the empty state is stated on the page with the door to that, rather than left for a Trainer to infer. It used to be permanent, because nothing could create a row.
 2. **`SCREEN-021`'s three views are one view here.** The Veterans list is built; Factors is the Spark inventory, which is unsourced; Ancestry is not re-rendered here (see SCR-VET-002).
 3. **Axe coverage is provided by `tests/browser/accessibility.spec.ts`.** `@axe-core/playwright` is installed and scans pages against `wcag2a`, `wcag2aa`, and `wcag21aa`; the screen's own Playwright spec retains the hand-rolled checks for target size, keyboard path, focus order, reflow and console errors.
 
@@ -1830,6 +2244,335 @@ Implemented 2026-10-06 (D16 read half).
 1. **The six-node graph is not rendered here.** `components/legacy/AncestryNode.vue` is an editable node (pick control, options, field errors), so a read-only copy would be a second mapping of the same shape beside `Legacy/Builder.vue`'s. The detail screen names the two parents and links to the one surface that renders the graph. Marked in the controller as a deliberate simplification with its promotion path.
 2. **No final stat block.** The five stats live on the run's turns and the run page composes them; this screen links to the run rather than restating a composition it does not own.
 
+### SCR-CAR-016 — Skills Planner
+
+`GET /training-runs/{run}/skills` name `runs.skills.planner`, `App\Http\Controllers\Career\SkillsPlannerController`. Plan §8 D13; the plan ids it `SCR-013` because it is design-2.0-only, so nothing in `screen-spec-2.0.md` describes it. Whether and what to learn, against the build target. Reached from the run record screen's header (`runs.skills_planner_url`), and by URL. The Cockpit's action grid does not grow an entry for it: that grid is the turn's decisions, and skills are build-level.
+
+Read-only except one write it does not own: the reorder posts to the existing `runs.build-target.update` and its `StoreBuildTargetRequest`, because `skill_priorities` lives in `build_target` and that write owns the field. `runs.skills.sync` validates acquisition statuses only and the `run_skills` pivot carries no order column, so the plan's wording that the reorder saves through it cannot hold; the deviation is recorded in the D13 hand-off.
+
+#### The four states, and their precedence
+
+Highest first; a skill carries exactly one state.
+
+| State | Glyph | Read from |
+|---|---|---|
+| Learned | ● | `run_skills.pivot.status = Acquired`. The outcome beats the plan: a priority the Trainer then learned shows here and costs nothing in the coverage sum. |
+| Required | ! | `build_target.skill_priorities`, in the Trainer's own order, minus the learned. A `Suggested` or `Skipped` pivot row beside it renders as a recorded fact, not a second state. A name the catalogue has no row for is kept as entered, every figure it cannot state rendered as the absence it is. |
+| Available | + | `run_skills.pivot.status = Suggested`, not named in the priorities. |
+| Inherited | ◇ | Nothing: no column holds the skills a Legacy configuration passes down (`legacy_selection` carries parents and Sparks, never skills), so the group is the named absence. |
+
+A `Skipped` row no priority names does not appear; the run screen's skill list owns the full acquisition record, and the planner says so. The glyphs are not the provenance set (ProvenanceBadge owns ✓, ∑, ~ and ?), never colour-only, and `aria-hidden` beside a visible word.
+
+#### Skill Point coverage
+
+The sum of the base prices of the skills still to learn, against the latest `turn_entries.sp`, badge `Calculated`. Both figures can be unstated: no turn logged means no recorded total, and a priority skill whose catalogue row carries no price means the sum would be a guess — a missing price is refused, never read as zero. The warning (glyph plus text) fires when the sum exceeds the recorded total, and the strip states that the total prices every skill at its base because no column holds hint levels (G-SK-3).
+
+#### The hint ladder
+
+`Hint Lvl 1` 10% off through `Hint Lvl Max` 40%, the client's own captions, read off the `[Global]` Learn screen on 2026-10-03 (`UMAMUSUME_REFERENCE.md` §1.1.4, `SKILLS-MECHANICS.md` §2.4, run report §2.1), badge `Confirmed` from `ProvenanceBadge`. Each skill's costs are `base × (1 − discount)` floored to the integer, in config (`uma.skills.hint_discount`), never inline. The percentages here are a sourced display, not a prediction; no win figure exists on this screen.
+
+#### Race-fit assessment
+
+Seven cells per skill, in the order distance, surface, style, course, weather, ground, phase, each exactly "Matches", "Does not match" or "Not recorded", against the build target, with the raw conditions printed as the source states them. A cell evaluates only where a source publishes the number map: `distance_type` 1-4 and `ground_type` 1-2, both decoded in `UMAMUSUME_REFERENCE.md` §1.2, so every evaluated cell cites that section in its `title`. Style is the cell where a recommendation would sneak in (PRD OQ-5): the condition records a number and no source maps the numbers to the client's labels, so the cell refuses to compare. The other dimensions are unconstrained because the build target records none of them. With no target set, nothing compares against anything.
+
+#### States
+
+| State | Behavior |
+|---|---|
+| Empty (no build target) | The target section and the Required group each name the absence, why the list is empty, and that this screen reorders priorities rather than adding them. The Available and Learned groups render normally. |
+| Empty (a group with no rows) | The group's own absence sentence: nothing marked, nothing learned, or the Inherited named absence. |
+| Empty (no turn logged) | The coverage strip renders `N/A` with the reason in the `title`, and no warning can fire. |
+| Loading | Page-level (ADR-0007): `role="status"` "Loading…" while a visit is in flight. |
+| Error (a visit failed) | `role="alert"`: "That screen did not load. Nothing was saved; try again." Inertia's `invalid` and `exception` are both cancelable and return `false`, so this is the single surface. |
+| Error (a refused save) | A `role="alert"` beside the save button printing the first message `StoreBuildTargetRequest` returned. Nothing was written. |
+| After a successful save | `updateBuildTarget()` returns to the page the form was posted from, so saving from here stays here; the flash banner names it. |
+
+#### Gaps
+
+1. **No screen edits a saved run's build target.** Priorities are enterable at the wizard's target step; the run-scoped write has no editor yet, so this planner can reorder but not add. The no-target state says so in as many words.
+2. **A priority name that matches no catalogue row is inert.** It renders with its reason and rides along in every save; renaming it needs an editor this screen does not have (gap 1).
+3. **Inherited has no source.** Listed as a state because the brief's state model names it; the group is the named absence until a schema decision (G-SK-3's owner question) gives the run somewhere to read them from.
+4. **Style fit is unclaimed, on purpose.** OQ-5's precondition (resolve the style number-to-label map from client strings first) is unmet; when it is met, the cell's state and `title` move together.
+5. **Axe coverage** is in `tests/browser/career-skills-planner.spec.ts` through the shared `tests/utils/accessibility.ts` builder, which scopes every scan to `#app` (KI-63).
+
+#### Implementation References
+
+`SkillsPlannerController`, `config('uma.skills')` (the ladder, the two fit maps, the prerequisite pair), `BuildTargetPayload` (`skill_priorities`, the vocabulary constants), `Skill::scopeAvailableOnGlobal`, `TurnEntry` (`sp`), `StoreBuildTargetRequest` (the reused write), `pages/Career/SkillsPlanner.vue`, `components/career/SkillPlanRow.vue`, `ProvenanceBadge`. Tests: `tests/Feature/CareerSkillsPlannerTest.php` (11 cases) and `tests/browser/career-skills-planner.spec.ts`.
+
+#### Status
+
+Implemented 2026-10-07 (slice D13).
+
+### SCR-CAR-017 — Career Timeline
+
+`GET /training-runs/{run}/timeline` name `runs.timeline`, `App\Http\Controllers\Career\TimelineController`. SCREEN-018, plan §8 D14. A read screen that flattens the run's `turn_entries`, race log entries tied to a turn, and event log entries into one ordered rail the page renders oldest-first. Reached from the Cockpit's left column and by URL. **No new write route**; every value on the page comes from data the existing routes already own.
+
+#### Layout / Structure
+
+`<CareerLayout>` → heading + reproduction-rule paragraph → type-filter chips (`Turn`, `Race`, `Event`, `Inheritance`, `Failure` — only the kinds the data layer returned; the chip list is the controller's own composition) → the rail (`<ol>` of `<details>` rows) → a single back link to the Cockpit. No element is hidden at a breakpoint.
+
+The rail's row order: every `TurnEntry` first, then the `RaceEntry` rows whose `turn_entry_id` points at that turn, then the `TurnEvent` rows whose `turn` is the same number. Within a turn, the events are in storage order. A run with no logged turns prints the empty state and no rail.
+
+#### The five audit fields and what each reads
+
+| Audit field | Source | What it shows | When it is `N/A` |
+|---|---|---|---|
+| BEFORE | previous logged turn's stored row | the five stats, sp, energy, fans the Trainee had at the end of the prior turn | turn 1 has no prior turn; non-turn rows drop the field |
+| ACTION | one of: turn description (`Turn recorded`), race (`Race: <title> (<tier>)`), event (`<source>: <choice>`) | the action the Trainer's row captures | never |
+| EXPECTED | the row's stored values for a turn row; null for non-turn rows | ADR-0003 stores absolute end-of-turn, so EXPECTED === ACTUAL | non-turn rows drop the field |
+| ACTUAL | the row's stored values for a turn row; `result` for non-turn rows | the same values, the recorded `outcome_note` for events, or `'Outcome incomplete — choose manually'` when an event row carries neither | non-turn rows show the `result` text, not the stat block |
+| RESULT | `'Recorded as entered'` on a turn row that has not been edited, `"<gained> instead of <expected>"` on a Failure row with a non-null `origin_note`, `'Outcome incomplete — choose manually'` on an event row with no recorded outcome, the race status plus placement on a race row | the stored fact, with prose that names what's unstored | never; the cell always renders |
+
+The four stat values in the BEFORE / EXPECTED / ACTUAL blocks render as `N/A` with a `title` when `turn_entries.energy` or `turn_entries.fans` is null, which is the same rule ADR-0003 gives for those columns.
+
+#### Glyphs and states
+
+| Glyph | Meaning | Where it appears |
+|---|---|---|
+| `●` | completed (a stored row at this turn) | turn, race, event kinds |
+| `◉` | current (the turn being decided) | reserved for the next-turn indicator on the Cockpit; not produced by this page today |
+| `○` | upcoming (an unrecorded future obligation) | reserved for scenario deadlines (Phase E); not produced today |
+| `×` | missed or failed | `TurnEventType::Failure` rows |
+
+The four glyphs are the only places the rail carries `font-mono` text in `text-base`; the kind chip beside them is the textual state, so the rail never depends on colour or shape alone.
+
+#### Type filters
+
+A button group with one button per kind the controller found. Pressing a chip toggles its `aria-pressed` and adds or removes the kind from the client's active-filter list; the rail hides rows whose `kind_label` is not in the list. With no chips pressed, every row is visible. The handler is local-only: no extra request, no payload shrinks.
+
+#### Corrections
+
+`runs.turns.update` mutates `updated_at` but the model has no edit log column, so a corrected row carries `corrected: true` plus a deterministic `correction_id` (`turn-N`) the page renders as an `Updated` chip with the `title` "Correction turn-N: row was updated." The link on the row points at `runs.show?edit_turn={id}`, which is the run screen's open-edit affordance (see SCR-RUN-003). **No separate corrections log.** A future slice may add one; the controller updates `corrected` to read the new log rather than the timestamp comparison. The flag is the honest limit; the page does not silently rewrite a past decision.
+
+#### Each row's `decision_url`
+
+A row that points at one of the existing decision screens links to it: race rows → `runs.races.decision`, event rows → `runs.events.decision`, inheritance rows → `runs.inheritance`, failure rows → `runs.show` (the failure has no write path of its own; the run screen is where it was filed). Turn rows link to `runs.show?edit_turn={id}` for the on-screen edit affordance.
+
+#### Validation & Error Handling
+
+There is no write route, so there is no Form Request. The two collections the controller maps over are `turnEntries` and `turnEvents` plus `raceEntries` (with its slots eager-loaded), so the page costs three queries against the run. The per-row BEFORE reads the previous row's stored values in the same map, so the audit never re-queries the run.
+
+#### Empty / Loading / Error
+
+| State | Behavior |
+|---|---|
+| No turns logged | One paragraph names the absence and points at the run record screen. The rail is not rendered. |
+| Loading | `role="status"` "Loading…" while an Inertia visit is in flight (ADR-0007 user-initiated). |
+| Error  | `role="alert"` single surface, the page's own not the framework's modal. |
+
+#### Gaps
+
+1. **A separate corrections log is not built.** Today's indicator is the timestamp comparison (`updated_at > created_at`); the model has no prior-values column, so the page cannot show what the row used to read. Filed as the limit, with the upgrade path named in the section.
+2. **`◉` and `○` glyphs are reserved, not produced.** "Current" is the Cockpit's job (it points at `nextTurnToPlay()`); "upcoming" is the scenario deadlines (Phase E). This screen renders neither because neither has a row today.
+3. **A confirmed "missed terminal" state from `ADR-0003 R1` amendment 1 is not produced.** A `GradeDeadline` row in `scenario_slots` would carry it; the data layer is empty (ADR-0003 R3), and Phase E is what fills it.
+4. **Axe scope is `#app`.** This screen reads its keyboard path, the disclosure's `aria-expanded`, the filter's `aria-pressed`, the 320px reflow and the 44px sweep through the page's own browser spec, and the `axe` scan runs against `#app` (CareerLayout's mount) the same way every other career spec scopes it, per `tests/utils/accessibility.ts`.
+
+#### Status
+
+Implemented 2026-10-07 (slice D14).
+
+#### Implementation References
+
+`App\Http\Controllers\Career\TimelineController` (one controller method, no model changes, no migration), `routes/web.php` (one `GET` route registered after `runs.events.store`), `TrainingRun::nextTurnToPlay` (read by the Cockpit, not by this page), `RaceEntry::raceCatalogSlot` / `scenarioSlot` / `turnEntry`, `TurnEntry::mood`, `TurnEventType`, `ADR-0003` §"Store the end-of-turn total, not the delta". Tests: `tests/Feature/CareerTimelineTest.php` (4 cases — the empty state, the BEFORE/AFTER mapping, the `corrected` flag, and the rows-under-turns interleaving) and `tests/browser/career-timeline.spec.ts` (5 cases — empty state, glyph-plus-text + keyboard disclosure, filter chip toggle, 44px sweep + 320px reflow, axe A+AA).
+
+_Dated addition 2026-10-07 (D15): the "Reached from the Cockpit's left column" claim above was **false when D14 landed** — no file under `resources/js` or `app/` linked to `runs.timeline`, so the route was reachable by URL only. D15 made it true by replacing the left column's stale "arrive with the Career Timeline screen" sentence with the link, and the props test now pins `run.timeline_url` on `CockpitController::runSection()`. The Career Result screen is a second door (`runs.result`'s "View Career Timeline")._
+
+### SCR-CAR-018 — Career Result
+
+`GET /training-runs/{run}/result` name `runs.result`, `App\Http\Controllers\Career\ResultController`. SCREEN-019, plan §8 D15. What a finished career adds up to. Reached from the run record screen's header (`result_url`) and by URL. **Read-only: the screen records nothing and has no write route of its own.** It links to Save Veteran (`SCR-VET-003`), which is where the one write a finished career gets is entered.
+
+_Dated addition 2026-10-08 (F1): the sentence above was the only door when it was written, and the record screen is the 0.1.0 page being retired, so a 2.0 surface had to take one. The Cockpit's left column now carries `run.result_url` beside the Career Timeline door (`CockpitController::runSection()`), pinned by `CareerCockpitTest` and by the browser case "the Cockpit carries the door to the Career Result" in `career-surface-cutover.spec.ts`. The door does not gate on run status, for the reason the record screen's door already gave: this screen answers an unfinished career itself (the `Active` and `Retired` rows below), so a Trainer who opens it too early is told what is missing rather than finding no door._
+
+#### Layout / Structure
+
+`<CareerLayout>` → heading + one-paragraph note that the tool computes no grade → **Final build** (five stat tiles with target and deficit, the entered target, skills learned, the trainee's aptitudes) → **Race history** (five counts and a table of completed races) → **Scenario result** (the Grade Point ladder where the scenario composes one, the reward absence) → **What you can do next** (the two doors and the Save Veteran link, or its refusal on a career that has not finished) → the ruleset line. No element is hidden at a breakpoint.
+
+#### The three states
+
+| State | Behavior |
+|---|---|
+| `Completed` | The three sections render. This is the only state that is "finished". |
+| `Active` | One empty state: the career is still running, so there is no result to read. The Cockpit door is offered, because an active career still has a next turn to decide. |
+| `Retired` | A **different** empty state: the career was abandoned before completion. **No Cockpit door is rendered anywhere on the page**, including the footer back-link, which points at the run record instead; the Timeline and run record are offered. Reusing the Active copy or door is the defect this separation exists to prevent, and `career-result.spec.ts` asserts `a[href$="/cockpit"]` has count 0. |
+
+#### The four race counts, and why not two
+
+`race_entries.status` and `race_entries.placement` are independent facts, so the counts are `completed`, `wins` (`placement` 1), `below_first` (`placement` above 1), `placement_unrecorded` (completed with no finish entered) and `g1_wins` (`placement` 1 with `tierKey()` `G1`, a stored label, never inferred from a grade code). A two-count shape would fold an unrecorded finish into "losses" and assert a placing nobody entered. `Skipped` and `NotOffered` rows are not races the career ran and no count reads them. The counts' key set is pinned by the props test so no win-rate percentage can arrive without a test naming it.
+
+#### The deficit, and the null target
+
+Per-stat deficit is the **only** arithmetic on the screen, and it is `TrainerAdvisor::deficits()`'s own number rather than a second copy (`ADR-0015`): the advisor ranks against it, and the result reports it, so the two cannot disagree. A run with no build target reports `deficit: null` with a `title` — never `current − 0`, which would make every stat look short by its own value. The props test asserts both `target` and `deficit` are null in that case.
+
+#### Omitted as a ruling: "Build quality"
+
+`screen-spec-2.0`'s SCREEN-019 correction row asks for "build quality" — a target-completion figure, a skill-coverage figure and an inheritance-quality figure. **All three are omitted by ruling, not by oversight.** A completion percentage is an aggregate over the same targets the per-stat deficits already state one by one, and the slice's own doubt pass rejected it; skill coverage and inheritance quality are `ADR-0020` §3's held computation and have no column to read even if permitted. No quality, completion, legacy-value or best-use string reaches the page, and the browser spec greps the main region for two of those words.
+
+#### Save Veteran: the door, not the absence
+
+_This section read "a named absence" until 2026-10-07, and the paragraph below is kept as the record of why it was one._ The brief reads "Primary action 'Save Veteran' to D16". When D15 landed, D16 was the Veteran library slice and the plan's §4 table had this slice depending on it, so no route existed and a link would have been a dead link (`SCR-CAR-011`'s action grid refused the same for the same reason). D16's write half landed on 2026-10-07 as `SCR-VET-003`, so the section now renders a link on a Completed career and one sentence on any other, and the props test pins the key set to `[available, reason, url]` — a score or a recommendation still cannot arrive without a test naming it.
+
+#### Empty / Loading / Error
+
+| State | Behavior |
+|---|---|
+| Empty | The two states in the table above, each with what is missing, why, and the door that applies. |
+| Loading | `role="status"` "Loading…" while an Inertia visit is in flight (ADR-0007, user-initiated). |
+| Error | `role="alert"` single surface, this page's own rather than the framework modal. |
+
+#### Gaps
+
+1. **The "already saved" branch is reachable only after a save.** `SCR-VET-003` files the row and prefills from it, so the branch's copy is true of a second visit; nothing else in the build creates a Veteran, and a fresh install still shows the unsaved sentence. (This gap used to read "Nothing can create a Veteran", which was the state of the tree before 2026-10-07.)
+2. **`aptitudes` is the trainee's, not the career's.** No column records an aptitude changing during a run, so the section prints what the trainee came with and says so rather than implying the career earned it.
+3. **Scenario rewards stay `N/A`.** No column on any table this tool reads holds a race reward, a Skill Point payout or a fan gain, so the section names the absence once (the same ruling `SCR-CAR-013` made).
+4. **The fourth private `currentStat()` copy.** `CockpitController`, `TrainingDecisionController`, `EventDecisionController` and now `ResultController` each hold the same matrix-name lookup. D9's ponytail comment named the upgrade path — one accessor on `TurnEntry` — and it is now overdue; the refactor edits three landed controllers and their tests, so it is its own slice.
+5. **Axe scope is `#app`**, per `tests/utils/accessibility.ts`, the same scope every career spec uses.
+
+#### Status
+
+Implemented 2026-10-07 (slice D15).
+
+#### Implementation References
+
+`App\Http\Controllers\Career\ResultController` (one action, no model change, no migration), `routes/web.php` (one `GET` route after `runs.timeline`), `TrainerAdvisor::deficits()` (widened from private to public for this second reader, `ADR-0015`), `TrainingRun::{buildTarget, composesGradeObjectives, gradePeriods, gradeEarned, gradeUnpricedCount, gradeUnassignedCount, veteran}`, `BuildTargetPayload`, `RunStatus`, `SkillAcquisition`, `AptitudeBadge.vue`, `ProvenanceBadge.vue`, `TrainingRunController`'s `result_url`. Tests: `tests/Feature/CareerResultTest.php` (8 cases — the completed sections, the two empty states, the no-target deficit, the advisory-matching deficit, the four race counts, the Save Veteran key set, the ruleset absence and the learned skills) and `tests/browser/career-result.spec.ts` (5 cases — the Active state, the Retired state with no Cockpit door, the completed sections with the named absences, the 44px sweep and 320px reflow, axe A+AA).
+
+### SCR-CAR-019 — Scenario panel shell
+
+`components/scenario/ScenarioPanel.vue` mounted inside the Cockpit's scenario region (`SCR-CAR-011`), over the `scenario` section `CockpitController` emits. SCREEN-014 / 015 / 016, plan §9 E1. **No route of its own and no write of its own**: the shell is a region of the Cockpit, and E2 to E4 plug renderers into it rather than adding screens.
+
+#### The contract E2 to E4 consume
+
+`{ label, declared, documented, version, version_title, widgets, widget_labels, widget_values, widgets_absence, panels, objectives, actions, alerts, recommendations, recommendations_absence, finale, finale_absence }` — the brief's §49 shape with the run's own facts folded in. `version` is `null` with a `title` because `app.ruleset` is null and no source defines a Global ruleset version.
+
+**There is no scenario identity field.** No `key`, `id`, `scenario_key` or `config_key` crosses the wire; `label` is display text and nothing compares it. `ScenarioPanelTest` pins the section's key list, so an identity field cannot arrive without a test naming it, and the branch-free property of the shell itself is verified by reading it rather than by a grep.
+
+**The registry** (`components/scenario/registry.ts`) is a `Map` with `register(key, component)` / `resolve(key)`. The shell owns the fallback chain: for a widget key `resolve(key) ?? ResourceMeter ?? WidgetFallback`, where the meter's turn is skipped unless the matrix labels the key; for an ON panel flag `resolve(flag) ?? WidgetFallback`. E1 registers nothing; E3 and E4 register their own renderers, and a fifth scenario is one `config/scenarios.php` entry and zero component edits (gate G-33, `D-240`).
+
+#### The four states
+
+| State | Behavior |
+|---|---|
+| Empty — no panel is on | The sentence differs by why: a run that names no scenario is told none is set and that the baseline caps apply; a scenario that composes no panel of its own (Our Grand Concert) is told that, and the baseline strip still renders. A fifth scenario that turns one flag on leaves this state without a code change. |
+| Loading — Inertia visit in flight | `role="status"` "Loading…" on the page (`ADR-0007`: user-initiated). The shell adds no loading state of its own: it is server-rendered with the page and never fetches. |
+| Error — a visit failed | `role="alert"` on the page, one surface. The shell has no request to fail, so it carries no error state of its own and one is not invented. |
+| Panel fallback | **A real state, not an error.** A widget or flag the matrix declares but this build cannot draw renders a labelled notice naming the key or the panel. `WidgetFallback` is the shell's last resort, so an unrecognised key is a sentence rather than a blank or a thrown render. |
+
+#### AlertRow's tones, and the dead one E2 removed
+
+`AlertRow` takes `tone: 'note' | 'critical'`. **E1 shipped a `warning` tone mapped to `text-warning`,
+and `--color-warning` has never existed in `resources/css/app.css`** — Tailwind emitted no rule for it,
+so the branch silently inherited its parent colour. Both callers (the fallback notice and the shell's
+empty state) pass `note`, so nothing rendered wrong, which is exactly why an axe run cannot find it: the
+class was decoration that did nothing. E2 deleted the dead branch rather than leaving it beside a new
+one, and added `critical` on `text-ink-strong` with weight, because `design-2.0` §4's Level 1 asks for
+emphasis and a word, not a colour, and `--color-risk` is reserved for an error state while `--color-goal`
+is the client's Goal pennant (`SCR-CAR-020` states the alert's rule in full).
+
+#### Resource meters, and the bar
+
+`ResourceMeter` renders a value and a bar for the same reading. No value prints `N/A` with a reason rather than `0` (D-220, `AGENTS.md` §5), which is every meter's state today because no column holds a scenario resource. No sourced maximum means no fill: a proportional width needs a denominator, and inventing one would draw a share of nothing. The bar is labelled (`role="img"` with an accessible name stating the reading), and the number beside it is the primary readout, so no state depends on the bar.
+
+#### The PARTIALLY DOCUMENTED badge, and why it does not render today
+
+`ScenarioStatusBadge` renders the partial state on an explicit `documented => false` and the documented state otherwise, because a scenario that says nothing about its documentation has not admitted a gap. **All four Global scenarios are documented or silent, so this build only ever draws the documented state.** The brief's correction table marks Our Grand Concert "PARTIALLY DOCUMENTED", and `documented` flipped to `true` on 2026-10-05 when the mechanics read landed, so the key records provenance rather than the badge's meaning. A dedicated `partially_documented` switch is drafted in a sibling slice's working tree and is not committed; E1 will not read a key that exists only in a working tree, and the hand-off sits at plan §4.1 item 6. Which key drives the badge is the **owner's ruling alone**, not this slice's and not the sibling slice's; when it lands, E1's one controller line changes in a follow-up commit rather than inside this slice.
+
+*Dated correction 2026-10-07 (slice E6, the follow-up the paragraph above anticipated; the original sentence is kept because it is the record of what E1 shipped).* The owner ruled on 2026-10-07 and **`partially_documented` now drives the badge**: `CockpitController::scenarioSection()` reads it, `documented` stays a provenance marker that no screen reads, and Our Grand Concert renders "Partially documented" while the other three render "Documented". The partial arm is therefore reachable, and the strip it belongs to is `SCR-CAR-024`. The ruling and the hand-off are recorded at plan §4.1 item 6; the sibling's key and its reader are still in the working tree rather than in `HEAD`, which `SCR-CAR-024`'s gaps state as a dependency.
+
+#### Gaps
+
+1. **E1 ships no renderer.** Every widget resolves to the meter and every ON flag to the fallback, which is why Unity Cup and Trackblazer show fallback lines today. E3 (team rank, spirit bursts, team races) and E4 (grade points, shop, epithets) register theirs; E2's URA panel and E6's Grand Concert strip follow.
+2. **`WidgetFallback` is unreachable by config today.** Every widget key the four scenarios declare is labelled in `widget_labels`, so the fallback's widget arm needs a config entry that names an unlabelled key — which `ScenarioPanelTest` adds through `config()->set` to prove the payload carries it.
+3. **`objectives`, `actions`, `alerts` and `finale` are carried empty.** They are the §49 sections each panel fills for itself; E1 carries them rather than inventing a row, and `recommendations` carries a named absence because no source states scenario advice.
+4. **design-2.0 §30 prefers skeletons; this repo forbids skeleton classes.** `DesignTokensTest` and the plan's §10 checklist both require no skeleton palette class, so the repo wins and the shell has no skeleton state. Recorded here rather than silently diverging from the brief.
+
+#### Status
+
+Landed 2026-10-07 (slice E1), with its browser gate green. `tests/browser/scenario-panel.spec.ts` is **8 passed (3.5m)** against a scratch-database server on port 8161, and `npm run build` exits 0; the earlier blocker (a concurrent slice's uncommitted `resources/js/pages/Preferences/Edit.vue`) cleared before the run. The props test, typecheck, Pint, PHPStan and the lore gate are green on E1's own files; see plan §4's E1 row for the full inventory. **The gate run found one real defect and it was D14's, not E1's:** the `Career Timeline` door on the Cockpit was an inline link measuring 32px, so E1's page-wide sweep failed it; it now uses the standalone `inline-flex min-h-11` treatment its sibling link already had, and the re-probe reports no control under 44px. The gate closed inside the session, so the recorded criterion owes no `KI-nn` entry (owed past 24 hours would earn one). E2 registers its renderer into this shell next.
+
+#### Implementation References
+
+`CockpitController::scenarioSection()` (assembled from `config/scenarios.php`'s `widget_labels`, `panel_labels` and the scenario entry, plus `TrainingRun::scenarioWidgets()`), `resources/js/components/scenario/{ScenarioPanel,ResourceMeter,ScenarioStatusBadge,AlertRow,WidgetFallback}.vue`, `components/scenario/registry.ts`, `types.ts`'s `ScenarioPanelSection`, `Cockpit.vue`'s `career-scenario-heading` region. Tests: `tests/Feature/ScenarioPanelTest.php` (5 cases — the §49 shape with the pinned key list, the same payload shape across all four scenarios, the `documented` default, the fifth scenario from config alone, and the unlabelled widget key) and `tests/browser/scenario-panel.spec.ts` (8 cases — the registry's `register`/`resolve` seam, the meter's reading and labelled bar, the ON-flag fallback naming its panel, the OFF flags drawing nothing, the baseline strip's scenario name and documentation and ruleset absence, the scenario that composes no panel, the 44px sweep with 320px reflow, and axe A+AA).
+
+### SCR-CAR-020 — URA panel (SCREEN-014)
+
+`components/scenario/UraPanel.vue`, the first renderer E1's registry resolves. It is reached by the
+`career_goals` flag in `config/scenarios.php`, so it draws for any scenario whose matrix turns that
+flag on and for none that leaves it off, and it never reads `scenario.label` (gate G-33, `D-240`).
+Plan §9 E2. No route and no write of its own.
+
+**Two of the three modules are absences, and that is the screen's honest state.** Measured on the dev
+database copy on 2026-10-07, not read off the brief: no table holds a trainee's per-character goals
+(`TrainingRun.php:599-616` stopped drawing the Goal pennant for exactly this reason, and the banner
+"returns when `trainee_goals` exists"), nothing stores a Happy Meek level, and no source publishes the
+reward table or the finale's contribution. The owner ruled all three absent on 2026-10-07. What the
+repository does hold is the mandatory race set, so that is the one module with figures in it.
+
+| Module | Source | Renders |
+|---|---|---|
+| Career goals | no table | `N/A` plus the three-part sentence: what is missing, what it costs, and that a `trainee_goals` schema proposal with a PRD citation unblocks it (`design-2.0` §29) |
+| Mandatory races | `race_catalog_slots` where `is_mandatory`, scoped by `forScenario()` | one row each: state glyph **and word**, the career year, the recorded turn, and a door to `runs.races.decision` unless it is already recorded |
+| URA progression and finale preparation | the same recorded rows | carried by the mandatory-race rows rather than by a second strip: the three Finals rounds *are* those rows, and drawing them twice would be the same data wearing two shapes |
+| Happy Meek | nothing stored, nothing sourced | four rows, each `N/A` with its own reason. No level means nothing to badge as Confirmed; the last two fields are unsourced, not merely unrecorded, and say so differently |
+| Duel availability | no field exists | `N/A` with the reason; the brief allows the field only "if a stored or configured field exists", and none does |
+
+#### States
+
+| State | Behavior |
+|---|---|
+| Empty — no mandatory row | The group says the calendar records none, rather than printing a heading over a blank. |
+| Empty — a scenario that leaves the flag off | Nothing at all. The shell never mounts the renderer, and `ura-panel.spec.ts` asserts a Unity Cup cockpit draws no URA heading. |
+| Loading | The page's Inertia visit state (`ADR-0007`); the panel adds none, being server-rendered with the Cockpit. |
+| Error | The page's one `role="alert"` surface; the panel makes no request to fail. |
+| Unrecorded reading | `N/A` with the reason in a `title` **and** printed as visible text, because a `title` alone is not reliably announced. |
+| Alert — a mandatory race due and unrecorded | Level 1 Critical `AlertRow`: `▲` plus the words `Critical: <race> is due and not recorded`, with the turn detail in a `title`. |
+
+#### The alert, and why it has no window
+
+`design-2.0` §4's **Level 1 — Critical** names "mandatory race" as its first example and prescribes
+emphasis, a clear icon and prominent placement, never a colour. So `AlertRow`'s `critical` tone is
+`text-ink-strong` with weight, and the level travels as the word. `--color-risk` stays an error state
+(validation failures) and `--color-goal` stays the client's Goal pennant, which this repository refuses
+to emit until a per-character goal table exists: a mandatory race whose turn has passed is neither a
+fault nor a pennant.
+
+The rule is the derivable one the owner ruled on 2026-10-07: the turn the calendar records has arrived
+or passed, and the run records nothing for it. **No window length exists in any source, so none is
+invented**, and the copy says "due and not recorded" rather than "inside the deadline window". The
+finale block carries no turn, so it can be current and can never be missed, and it raises no alert.
+
+The position is never re-derived in the panel or the controller: `RaceCatalogSlot::isAtOrBeforeTurn()`
+is the same owner the race strip already calls (`ADR-0015`), so the two regions cannot disagree about
+whether a turn has arrived.
+
+#### Gaps
+
+1. **The `Recorded` state has no browser case.** Reaching it needs a race written through the race
+   screen, which is `SCR-CAR-013`'s surface; `UraPanelTest` proves the arm, and the spec covers the
+   three states a turn write can reach (upcoming, due now, missed).
+2. **No write path exists for a Happy Meek level.** The brief forbids a migration, so the module is
+   read-only and every row says the reason. An entry path is a schema proposal, not a UI decision.
+3. **`race_calendar` is still ON for URA and has no renderer**, so the shell prints its fallback
+   sentence beside this panel. The Cockpit's own left column already shows the run's races
+   (`RunRaceStrip.vue`), so whether that flag should stay on for URA is an owner question, not a
+   defect E2 can settle.
+
+#### Status
+
+Built 2026-10-07 (slice E2). See plan §4's E2 row for the gate inventory.
+
+#### Implementation References
+
+`CockpitController::careerGoalSections()` and `happyMeekRows()`, `config/scenarios.php`'s
+`panel_labels.career_goals` and `ura_finale.panels.career_goals`, `RaceCatalogSlot::isAtOrBeforeTurn()`
+/ `forScenario()` / `yearLabel()` / `turnNumber()` (all reused, none re-derived), `TrainingRun::nextTurnToPlay()`,
+`components/scenario/{UraPanel,AlertRow}.vue`, `registry.ts` reached by `ScenarioPanel.vue`'s
+`register('career_goals', UraPanel)`. Tests: `tests/Feature/UraPanelTest.php` (7 cases — the flag
+composed on for URA and off for the other three, the recorded mandatory rows with their states and
+calendar positions, the completed arm, the Critical alert at its turn and the missed arm, the career
+goals absence, the four Happy Meek readings, and no leak into a cockpit whose flag is off) and
+`tests/browser/ura-panel.spec.ts` (10 cases — the three module headings and the race rows as text, the
+goals absence visible, the four `N/A` cells, the alert copy, the missed state, the finale's `N/A`
+deadline, the flag-off leak guard, the keyboard door, the 44px sweep with 320px reflow, and axe A+AA).
+
 ### 4.18 Global navigation (the shell, not a screen)
 
 `resources/js/layouts/AppLayout.vue` owns the product navigation; `CareerLayout.vue` and, since 2026-10-06, `SetupLayout.vue` mount it rather than re-declaring a shell, so the skip link, the banner, the one `main` landmark and the mobile bar exist exactly once on career and wizard screens alike.
@@ -1840,7 +2583,379 @@ Implemented 2026-10-06 (D16 read half).
 - **Collapsible rail, added 2026-10-06.** A `Collapse navigation` button in the sidebar header, `aria-expanded` plus `aria-controls="primary-nav"`, a 44px target, keyboard-operable. Collapsed is `w-64` to `w-14` and shows a mark from `components/NavGlyph.vue` in place of each destination's word. **The marks appear at one width only: the full rail is text, with no mark beside the word** (owner instruction, 2026-10-06). Collapsing is still safe because the word never leaves the DOM: it moves to `sr-only`, the link gains a `title` carrying it, and the active destination keeps `aria-current="page"` and adds a left rule on top of its fill, because `design-2.0` §42 asks for text alternatives to icons and forbids colour-only state. The width transition is `motion-reduce:transition-none` (§43, MOTION dial 1). Desktop only: below `md` the §41 bar keeps its four text slots.
 - **The marks** are `design-2.0` §44's conceptual mapping, filtered through the `DESIGN.md` §6 motif gate: home, flag, list, network, trophy, cards, spark, triangle, book, gear, chevron, drawn as stroked paths (never emoji as the primary icon system, §44). Two of §44's suggestions change under that gate: its "DNA" for Legacy becomes the **node graph**, the shape the six-node ancestry already prints, because §6 separately refuses a family-tree treatment; and its **Trophy** for Veterans is the one mark §6's allowed list does not name, which the owner chose in the 2026-10-06 task instruction rather than an agent assuming it. `DESIGN.md` §6 is where that ruling belongs permanently, and writing it is the Lore Guardian's, not this file's. `list` (Careers) and `spark` (Skills) are marks for two destinations §44 does not name a row for.
 - **Persistence is `localStorage`** (`trainer-desk.nav-rail`, `wide|compact`, default `wide`), deliberately not a third `Preference` key: `Preference::KEYS` is exactly `theme` and `failure_estimate` because PRD US-11 authorises those two, so a stored rail width is a product-scope widening plus a Settings change. The cost is stated rather than hidden: the rail follows this browser, not this Trainer, and it is absent from SCR-SYS-002.
+  - _Erratum 2026-10-08: the sentence above held at the time it was written and no longer does. `Preference::KEYS` is now `theme`, `failure_estimate` and `settings` (D18b, the owner's ruling on the plan's §8.6 open question 1). The conclusion it carried is untouched: the rail width is still `localStorage`, because the `settings` blob's own key set (`Preference::SETTINGS_KEYS`) is the PRD US-11 list and a rail width is still not in it._
 - Tests: the nav census in `tests/Feature/RunViewTargetSizeTest.php` (counts, pinned targets, the §41 slots, the forbidden utility class, the 44px floor on all six render classes), `tests/Feature/KeyboardPathTest.php` (the wizard inherits the shell without duplicating it; the rail collapses without losing a name, with the emoji and preference checks scoped to markup so they cannot fail on the prose that documents the rule) and `tests/browser/veterans.spec.ts` (collapse by keyboard, every destination still named and titled, the left rule, the narrower box, and the choice surviving a reload).
+
+### 4.19 SCR-VET-003 — Save Veteran
+
+**Purpose.** File a finished career into the Veteran library with the Trainer's own tags and note (PRD FR-G-1, `SCREEN-020`, plan §8's D16 write half). This is the screen that puts a row in `veterans`, and the first caller of `RecordVeteran`; before it landed the library could only ever be empty.
+
+#### Route / Location
+
+`GET /training-runs/{run}/veteran` (name `runs.veteran`) and the write `POST` to the same URI (name `runs.veteran.store`), the pair `runs.inheritance` uses. Run-scoped and `whereNumber`, because a Veteran is a pointer to one career and never a standalone record (`ADR-0010`). Reached from `SCR-CAR-018`'s "What you can do next" and from the library's empty state; entered with nothing typed, it is the wizard's last step in spirit and none in the draft.
+
+#### Layout / Structure
+
+CareerLayout shell → record-only notice → **What this career recorded** (trainee with `lang="ja"`, turns, skills learned, races run, the five stats at the last logged turn, and the Sparks each parent carries, read-only through `SparkChip`) → **Not computed** (factor analysis, legacy value, best use) → the form (**Tags**: five server-labelled suggestion groups as `aria-pressed` chips, then a free-text tag of the Trainer's own, then the chosen customs as removable chips; **Note**: a textarea) → save → NOT IN THIS BUILD.
+
+#### States
+
+| State | Behavior |
+| --- | --- |
+| Run not Completed | The form is absent. "Nothing to file yet" names the status the run actually holds and links to the run list and the career record, because a save button that can only refuse is a worse answer than a sentence. |
+| Already filed | The same screen prefills from the existing row and the button reads `Update Veteran`; one run is one Veteran, so a second save rewrites rather than duplicating. |
+| No logged turn | Every stat is `N/A` with the reason, never `0` (AGENTS.md §5). Turns, skills and races are real zeros because the counts are counted, not inferred. |
+| No parents recorded | "This career records no parents, so it carries no Sparks", beside the Legacy Lab where a parent is chosen. |
+| Held figures | Factor analysis, a legacy value and a best use print `N/A` with the `ADR-0020` §3 ruling as the `title`. No recommendation sentence appears in any element or attribute. |
+| Tag refused | Field errors for `tags`, `tags.N` and the run-level refusal render with `role="alert"` in a list under the group; the note's error is `aria-describedby` from the textarea. |
+| Loading | `Loading…` with `role="status"` while a visit is in flight. |
+| Error | `This screen did not load. Nothing was saved; try again.` with `role="alert"`, on a failed or invalid response. |
+| Saved | Redirect to the new library row with the flash `Veteran saved: {trainee}.`, so the confirmation is the record itself, not a toast over an empty form. |
+
+#### Implementation References
+
+`Career\SaveVeteranController::{show,store}`, `StoreVeteranRequest` (which owns trimming, case-insensitive de-duplication, the length and control-character bounds, and the Completed refusal as a field error), `RecordVeteran`, `AncestryGraph::{build,SPARK_KIND_LABELS}`, `TrainingRun::stripValues`, `config/uma.php`'s `veteran.suggested_tags`, `components/legacy/SparkChip.vue`, `pages/Career/SaveVeteran.vue`. Tests: `tests/Feature/SaveVeteranTest.php` (16 cases) and `tests/browser/career-save-veteran.spec.ts` (5 cases).
+
+#### Status
+
+**Built, not landed: browser gate owed** as of 2026-10-07 (D16 write half). `tests/Feature/SaveVeteranTest.php` is green (16 cases, 110 assertions) inside the full suite, and `tests/browser/career-save-veteran.spec.ts` is written but has never run, because `npm run build` fails on another session's uncommitted `resources/js/pages/Preferences/Edit.vue:81` and a page absent from the manifest cannot be opened. The completing command, against a scratch database per §4.1 item 7: `npm run build && PLAYWRIGHT_BASE_URL=http://127.0.0.1:8141 npx playwright test career-save-veteran`.
+
+**Dated correction, same day.** The blocker cleared when another session fixed its own file, the build returned
+exit 0 and the gate ran on a scratch database at port 8147. All five `career-save-veteran` cases pass. It found
+one defect the props tests could not see: `<span lang="ja">` was printing the trainee's Japanese name in
+`text-ink-faint`, which `resources/css/app.css:49-53` documents as a non-text token and axe measured at 2.99:1
+against the 4.5:1 AA floor; it is now `text-ink-muted`, the value every landed page uses for the same span. This
+screen's own gate is therefore green; the slice is still open because `SCR-VET-004`'s is not.
+
+#### Gaps
+
+1. **Favorite, archive and delete are not built.** `veterans` holds no column for any of the three; `SCREEN-021` asks for them and adding one is a stored-shape decision for the schema owner, not a UI slice. The screen says so rather than shipping a control that does nothing, so there is no destructive flow here and no confirmation dialog to test.
+2. **A Veteran cannot be named apart from her trainee.** `SCREEN-020` lists "veteran name"; the table stores none, and `ADR-0010` keeps the run's foreign keys as the identity, so the name prints read-only through the run. An independent name is a column.
+3. **The suggestions are one list for every scenario.** `config/uma.php` publishes the eighteen words `screen-spec-2.0` §24 names; nothing derives a suggested set from the career, because that is a recommendation with the same `ADR-0020` §3 bar as a legacy value.
+
+### 4.20 SCR-VET-004 — Veteran comparison
+
+**Purpose.** Up to four filed careers aligned property by property, recorded values only (PRD FR-G-2, `SCREEN-022`, `design-2.0` §46).
+
+#### Route / Location
+
+`GET /veterans/compare` (name `veterans.compare`), declared **before** `/veterans/{veteran}` with the binding `whereNumber` — the same pair of decisions `/legacy/compare` records, without which the literal word `compare` reads as a model id. The selection is `?veterans[]=`, so the view is a URL: shareable, reload-safe, no client state to rehydrate.
+
+#### Layout / Structure
+
+AppLayout shell → record-only notice → picker (a `fieldset` of filed careers, checkboxes at 44px, the Compare button inert while nothing is picked) → the table: one `<th scope="row">` per property, one column per career, inside `role="region" tabindex="0"` so the horizontal scroll is keyboard-reachable → NOT IN THIS BUILD.
+
+Properties, in reading order: Scenario, Status, Turns logged, Energy, Fans, the five stats, Skills learned, Races run, the ten aptitude axes, Tags, Note, Legacy read-back.
+
+#### States
+
+| State | Behavior |
+| --- | --- |
+| Nothing selected | "Nothing selected" says what to do and links to the library, rather than rendering a table of one column of headers. |
+| A career with no Legacy read-back | A column like any other. This is the difference from `legacy.compare`, which refuses such a run: here it is usually the career the Trainer came to look at. |
+| Fifth career asked for | Refused by `VeteranCompareRequest`, and the picker disables the unchosen boxes at the cap so the limit is a message rather than a failed request. |
+| Unrecorded figure | `N/A` with the reason (`title`): no logged turn, no source-published letter, no note recorded. "No tags recorded" is a phrase, not an empty cell. |
+| Held rows | Inheritance usefulness, a compatibility calculation and a factor comparison are named once, as absences, never as a per-career score. |
+| Refused id | A `veterans[]` value that is not in the library returns as a field error on the picker, not an absent column, so a stale link admits itself. |
+
+#### Implementation References
+
+`VeteranController::compare`, `VeteranCompareRequest::{veteranIds,veteransInOrder}` (which eager-loads once and re-keys to the posted order, because a comparison of the wrong two things reads as a correct answer), `VeteranRow::from`, `Umamusume::aptitudeAxes`, `pages/Veterans/Compare.vue`. Tests: `tests/Feature/VeteranCompareTest.php` (7 cases) and `tests/browser/veteran-compare.spec.ts` (4 cases).
+
+#### Status
+
+**Built, not landed: browser gate owed** as of 2026-10-07 (D16). `tests/Feature/VeteranCompareTest.php` is green (7 cases) inside the full suite; `tests/browser/veteran-compare.spec.ts` has never run, for the same `Preferences/Edit.vue` blocker as `SCR-VET-003`. Completing command: `npm run build && PLAYWRIGHT_BASE_URL=http://127.0.0.1:8141 npx playwright test veteran-compare`.
+
+**Dated correction, same day: gate ran, RED, and the screen was not closed.** On a scratch database at port 8147,
+one of the four cases passes on its own terms and the round trip fails. Clicking `Compare` in the picker
+navigates to `/veterans`, not to a two-column comparison: `Compare.vue:83-86` calls `router.get` with the key
+`'veterans[]'` mapped onto an array, so the parameter does not arrive as `veterans`, `VeteranCompareRequest`
+refuses it, and `redirect()->back()` follows the session's previous URL, which is the library. The route, the
+URL literal and the `selected` prop are correct; the param key is the defect. Two further cases in that pass were
+lost when the scratch server stopped mid-run, and a third measures the picker's `label` row (44px, `min-h-11`)
+rather than the native 24px checkbox box, a measurement choice flagged for the owner.
+
+**Dated correction 2, same day.** The owner ruled the key, `{ 'veterans[]': … }` became `{ veterans: … }` at
+`Compare.vue:86`, and the re-run (port 8150, scratch `d22.sqlite`, `npm run build` exit 0, server alive at the
+end) is **8 passed, 1 failed, exit 1**. The browser now lands on the comparison with both ids — `waitForURL`
+reported `/veterans/compare?veterans%5B0%5D=3&veterans%5B1%5D=2` — so the navigation defect above is closed. The
+one remaining failure is this screen's own spec: it matches the library href's `veterans[]=N` form, while Inertia
+serialises the same array as indexed `veterans[0]=N`, which PHP reads identically. Until that assertion is
+loosened, no case asserts the two-column table's contents in a browser, so this row stays **built, gate 8/9**,
+not landed. `SCR-VET-003` is landed green on its five cases. Full log:
+`docs/research-scratch/SLICE-RECORDS.md` §`## D16-SAVE-VETERAN-2026-10-07.md`.
+
+#### Gaps
+
+1. **No four-at-once browser case.** The cap is refused at the request and asserted in `VeteranCompareTest`; a DOM version would file five careers through the UI to re-check the same rule, so the disabled checkbox is the browser-side evidence.
+2. **The skills and races are counted, not listed.** A column per skill or race would make the table as wide as the library is deep; the counts link onward to the career record, which owns the lists.
+3. **No ordering of the columns by anything.** `FR-G-4` forbids ranking, so the columns keep the order the URL named.
+
+### SCR-CAR-021 — Unity Cup panel (SCREEN-015)
+
+**Purpose.** Manage scenario-specific team progression (`SCREEN-015`, `design-2.0` §27, plan §9.1). The §27 first-class Team Panel: team rank with its ladder, the per-stat team grades, the member rows, Spirit with the burst machine, the burst-count bands, Special Training, and the team races. Registered against the two Unity-Cup panel flags; the component's file name is the brief's own and nothing else about it names a scenario (G-33).
+
+#### Route / Location
+
+No route of its own: `ScenarioPanel.vue` (the Cockpit's scenario region, `SCR-CAR-011`) renders it once per ON flag — the `team_race` registration draws the ported race panel, the `team_rank_ladder` registration draws the Team Panel. The `race_calendar` flag draws a note pointing at the left column, because `RunRaceStrip` already renders that calendar and the shell's fallback would have printed a false "cannot draw" beside it.
+
+#### Layout / Structure
+
+Desktop: team cards (rank gauge, ranking bonus, stat grades, member roster) beside the burst regions (Spirit meter, readiness and held-advice sentences, band table, Special Training); mobile stacks the two columns, no horizontal scroll. The three ported references keep their props and copy: `TeamRankGauge`, `SpiritBurstRoster`, `TeamRacePanel` — the same components the run record screen mounts, so the two screens cannot disagree about one fact.
+
+#### Data and provenance
+
+Recorded on the run: the rank letter (`TurnEvents\TeamRankPayload`, the facility level derived through the config mapping), the per-teammate burst states (`TurnEvents\SpiritBurstPayload`), and team race entries with circles and placement (`scenario_slots` rows of kind `team_race`). Configured: the ladder, the circle margin, the burst-count bands (`config/scenarios.php` `spirit_burst_bands`, transcribed from `docs/scenarios/02-unity-cup.md:213-218`), the payout timing, and the two Special Training facts (`team_training_energy_penalty`, `wit_burst_energy_bonus`). The +30 Team Ranking Bonus renders **Estimated** beside Rank S only — the rank the recorded frame shows it at; other ranks pay a figure this corpus does not state. The band table carries one `Estimated` badge and one warning line naming all three publisher conflicts the run report records (§7.4: the Skill Point figures and the payout month; §8.2: whether Extreme Bursts count), and never places this run in a band — the count the bands read is not recorded, and D-223 keeps bursts as states, not counters.
+
+**Not built, on the record.** Burst readiness is not computed: the bands are thresholds, but no Spirit reading has a writer, so there is nothing to set against them — named absence. "Recommended timing" and "projected benefit" are held advice (`ADR-0020` §3) — named absences with the ruling in the `title`; the trigger rule itself is stated (a burst fires on the next Special Training with a teammate whose gauge is full), and nothing beyond it is computed. Per-stat team grades, member stats and roles, current Spirit, Unity Trainings and burst counts, team name, motto and league standing have no writer: each is `N/A` or a named absence. Recording any of them waits on the capture proposal of §7-6, which stays the owner's; the panel is read-only.
+
+#### States
+
+| State | Behavior |
+| --- | --- |
+| No rank recorded | The gauge's "Rank not recorded" sentence, the ladder rendered as reference, and no +30 bonus claim at all — the bonus binds to a rank, and none exists. |
+| Rank recorded | The letter, its derived facility level with the cause named (D-222), and the current rung marked `aria-current="step"`. `widget_values.team_rank` and `header.values.team_rank` carry the same letter, so the header strip, the widget meter and the gauge cannot disagree. |
+| Rank S recorded | The one rank the client frame shows a Team Ranking Bonus beside: "All Attributes +30" renders with the `Estimated` badge. Any other rank prints no bonus figure, because the corpus states none. |
+| Roster empty | `SpiritBurstRoster`'s own empty state, naming the six states; a recorded roster renders each teammate as a row with the state's glyph AND word (never colour alone). |
+| Spirit unrecorded | `N/A` with the reason as the `title`, on a meter whose labelled track renders empty — no sourced maximum, no invented fill. |
+| Burst readiness | A named absence: not derivable from anything this build holds. |
+| Timing / benefit | Named absences with the `ADR-0020` §3 ruling as the `title`. |
+| No team races | The ported panel's margin line ("Aim for at least 3 circles — a margin, not a win condition") and its empty state; recorded entries render with the margin word per entry. |
+| Run in a band | Never shown: the band table is reference, and the absence of the run's own position is stated beneath it. |
+| Loading / error | None of its own: server-rendered with the page, which carries the `role="status"` and `role="alert"` surfaces (`ADR-0007`). |
+| Flag off | The registration does not draw; no renderer output exists for a flag the scenario does not compose. |
+
+#### Implementation References
+
+`CockpitController::teamSection()` and the `team` key of `scenarioSection()` (the uniform shape the pinned key list in `ScenarioPanelTest` names), `resources/js/components/scenario/{UnityCupPanel,RaceCalendarNote}.vue`, the registration block on `ScenarioPanel.vue`, `components/{TeamRankGauge,SpiritBurstRoster,TeamRacePanel}.vue` (unmodified), `ProvenanceBadge` (Estimated), `config/scenarios.php` `unity_cup.spirit_burst_bands` and `burst_payout_timing`, `types.ts`'s `ScenarioTeamSection`. Tests: `tests/Feature/UnityCupPanelTest.php` (6 cases — full team, partial teams, none, the non-team scenarios, a fifth scenario) and `tests/browser/unity-cup-panel.spec.ts`.
+
+#### Status
+
+Built 2026-10-07 (slice E3). `UnityCupPanelTest` 7 cases; targeted 20 passed (583 assertions) across `UnityCupPanelTest`, `ScenarioPanelTest` and `CareerCockpitTest`; `unity-cup-panel.spec.ts` 7 passed and `scenario-panel.spec.ts` 8 passed (15 together, 4.2m) against a `VACUUM INTO` scratch copy on port 8166; `npm run typecheck` and `npm run build` exit 0; Pint run scoped to this slice's files (a concurrent session's half-written test file blocked the whole-suite load mid-hand-off); PHPStan clean on this slice's files; lore-code 115 tree hits with none in this slice's files. The doubt review's three accepted findings are in the artifact (Rank-S-only +30, the three-conflict band caveat, the readiness sentence), and two of this slice's own spec defects (an unsatisfiable exact-text ladder assertion; a keyboard case that asserted nothing) were fixed before this run. The data states a browser cannot reach (populated roster, recorded rank) are covered at props level because no write path exists.
+
+**Dated note, same day (follow-up review).** One red browser gate was found on this slice's account and cleared by it: `career-cockpit.spec.ts:107` asserted no RECOMMENDED marker page-wide, and `getByText` matches case-insensitively as a substring, so the assertion matched this panel's absence sentence "Recommended timing and projected benefit are not built" rather than the grid's marker. A probe run proved it (`recommendedKeys` empty, the advisor's refusal printed, the only matching node the panel's prose). The assertion is now scoped to the Actions region, the same way the ranked case in that file already scopes itself, and the file re-runs 7 passed; E4 met the identical collision in its own rotation-absence copy and scoped it the same way, which is the durable note for later slices: **panel prose naming a held field will collide with any page-wide word assertion on this screen.**
+
+#### Gaps
+
+1. **No write path for team rank or burst states.** The structured payloads ride `turn_events` but no Form Request or screen records them (the "own Requests" line in `StoreTurnEventRequest`'s docblock is aspirational). Until the §7-6 capture proposal is ruled on, the panel is a read-only mirror of what the run screen's payloads hold, and the browser suite can only exercise absence states.
+2. **The browser cannot see a populated roster.** A consequence of gap 1, not a test gap: the roster's glyph-and-text rows, a recorded rank and a recorded team race are asserted in `UnityCupPanelTest` at props level. If the owner rules a capture path, the browser cases follow it.
+3. **The +30 bonus is one number with an inference attached.** The corpus saw it beside Rank S only, and its binding to the rank rather than the league standing is inferred from screen position; it renders `Estimated` and only for that rank, because a figure for the other rungs would be invented. A source that states the rule would move it to Confirmed and widen the gate.
+4. **One registry Map serves both chains.** `registry.ts` keys widget renderers and panel renderers in the same Map, so a matrix that ever names a widget exactly like a registered panel flag (`team_race`, `team_rank_ladder`, `race_calendar`, `career_goals`) would resolve the panel component against the narrow widget props and throw inside the render. No scenario declares that today, and the fix belongs to the shell owner (two Maps, or a prefixed key), not to a panel slice.
+
+### SCR-CAR-022 — Trackblazer panel (SCREEN-016)
+
+**Purpose.** Manage Trackblazer-specific resources (`SCREEN-016`, `design-2.0` §28, plan §9 E4): Grade Points, Shop Coins, the Pro Shop catalogue and its purchase write, rival races from `RaceCatalogSlot`, the points-league finale (`finale.kind === 'points_league'`, `finale.races === 3`), and the epithet routes checklist. The component file name is the brief's own (`TrackblazerPanel.vue`) and the brief's other two retired reads (`x-grade-point-meter`, `x-shop-panel`, `x-epithet-checklist`) ported here for behaviour parity; nothing about the component names a scenario or label (gate G-33, D-240).
+
+#### Route / Location
+
+No route of its own: `ScenarioPanel.vue` (the Cockpit's scenario region, `SCR-CAR-011`) renders `TrackblazerPanel.vue` once per ON flag — `grade_objectives`, `shop` and `epithet_routes`. The Cockpit's action area (`SCR-CAR-011`) gains a single "Shop" button when `scenario.shop !== null` (Trackblazer only), which scrolls the Shop region into view and focuses its heading (WCAG 2.4.11).
+
+#### Layout / Structure
+
+Three regions, each mounted by name:
+
+- **Grade Point** (`grade_objectives` mount): a working-toward line, a numeric-and-bar meter (the bar labelled), the surplus / remaining text, the ladder as an ordered `<ol>` with a row per period carrying `name`, `required`, and that period's own `earned` (no running total — D-232, no two deadlines share), and the rival-race list from `RaceCatalogSlot::forScenario('trackblazer')` as facts only.
+- **Pro Shop** (`shop` mount): the rotation countdown with `countdown not recorded` for an absent `shop_resets_in`, the catalogue list in config order, the recorded purchases list, the purchase form posting to `runs.purchases.store`, the spend-total line, and "Shop Coins: not yet recorded" with the no-earning-side-writer reason in the copy.
+- **Epithet routes** (`epithet_routes` mount): the checklist as `<li>` rows, each carrying the route, the epithet, the state pill (glyph plus word; never colour alone, plan §13 Selective Attention), the reward, the outstanding named races, and a final line citing the points-league finale and the named absence for "Twinkle Star Climax" (§7 conflict row 31).
+
+#### Data and provenance
+
+Recorded on the run: turn_events carrying `ShopPurchasePayload` (item, cost, effect) for purchases, `current_objective_index` (nullable 1-based) and `race_entries.grade_points_earned` for Grade Points, and `race_entries.scenario_slot_id` for the seen-titles the epithet checklist compares. Configured: `trackblazer.shop_items` (transcribed verbatim from `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` "Full Shop Item List", GameTora), `trackblazer.epithet_routes` ("Epithets (Race Route Bonuses)", uma.guide, post 2026-07-01 rework), `trackblazer.grade_objectives.standard` plus `grade_objective_labels`, `trackblazer.shop` (`rotation_turns`, `max_copies_per_item`, `locked_until_debut`), and `trackblazer.finale` (`kind`, `races`). The grade-point ladder shows only the standard track because dirt-leaning and limited-turf-range tracks have no aptitude input that places a trainee on them (KI-15).
+
+**Not built, on the record.** "Recommended Purchase" is named absent: the rotation is not modelled (plan §3 knowledge groundings), and a "best value" sort, a default selection, or any row-level highlight would state a state of a lineup this tool cannot see (D-256). Shop Coins balance is named absent: no earning-side writer exists (`shop_coins_by_placement` is config-only and the per-rotation yield is not stored). The official finale name is a named absence with `title` citation citing §7 conflict row 31. Per-stat team grades, member stats and unity-training/burst counts are team concepts Trackblazer does not compose. The "Twinkle Star Climax" string is never printed anywhere on this slice.
+
+#### States
+
+| State | Behavior |
+| --- | --- |
+| Period not reported | "No period reported" sentence; the bar stays empty; the surplus line states the meter has no target to measure. `unassignedCount` races print a separate sentence ("results have no period entered against it, so none of them counts toward any total below"). |
+| Period recorded, no races logged | The bar is empty; "not yet recorded" copy with the season caveat ("no races are logged for this run"). |
+| Period recorded, races logged but unpriceable | The bar is empty; "not yet totalled" copy with the unpriced count, never a running total. |
+| Period recorded, total met | The bar fills to the requirement; the line carries `earned / required · remaining to go` or `· over the objective` once surpassed; the surplus line names "Surplus does not carry over", not bankable. |
+| Rotation unrecorded | "countdown not recorded" sentence; the form still accepts a purchase. |
+| No purchases | The empty-state copy "No purchases recorded for this run"; catalogue and form still render. |
+| Off-catalogue item post | Field-bound error on `item`, `aria-describedby="purchase-item-error"`; the page comes back with `role="alert"` reading the per-field message. |
+| Wrong price post | Field-bound error on `cost`. |
+| Held-copies cap exceeded | Field-bound error on `item` ("You already hold N of M copies…"). |
+| Epithet `unverifiable` | Distinct rendering path, never folded into `open` (D-220, D-256): the state pill shows `?` plus the word "Unverifiable", the sentence is "<em>aggregate condition</em>, which this surface cannot read". |
+| Cockpit Shop jump | Trackblazer-only: a button under `ActionGrid` scrolls and focuses `#trackblazer-shop-heading` (WCAG 2.4.11). Non-Trackblazer scenarios render no Shop affordance. |
+| Loading / error | None of the panel's own: server-rendered with the page; `role="status"` and `role="alert"` live at the page level (`ADR-0007`). |
+| Flag off | The registration does not draw; no renderer output exists for a flag the matrix does not turn on. |
+
+#### Implementation References
+
+`CockpitController::gradeSection()`, `shopSection()`, `epithetSection()`, `rivalSection()` and `finaleOfficialTitleAbsence()` build the payload that `scenarioSection()` returns; the keys are part of the ScenarioPanelTest pin (plan §9 E4 part 2). `resources/js/components/scenario/TrackblazerPanel.vue` branches on the flag key in `props.name`, never on a scenario name. The Cockpit's "Shop" jump lives on `resources/js/pages/Career/Cockpit.vue` (a `jumpToShop` helper, `hasShop` computed). Types in `resources/js/types.ts`: `ScenarioPanelSection` carries five Trackblazer-specific nullable keys, three new interfaces (`TrackblazerGradeSection`, `TrackblazerShopSection`, `TrackblazerEpithetSection`). Tests: `tests/Feature/TrackblazerPanelTest.php` (10 cases — Trackblazer exposure, catalogue order, no-`recommended` audit, recorded purchase read-back, off-catalogue refusal, wrong-price refusal, held-copies cap refusal, non-trackblazer uniform shape, grade ladder with no invented totals, points-league finale + Twinkle Star Climax absence citation) and `tests/browser/trackblazer-panel.spec.ts` (keyboard path, purchase round-trip, validation error tied to input by `aria-describedby`, epithet glyph+text, 44px sweep, 320px reflow, axe A+AA scoped to `#app`).
+
+#### Status
+
+Landed 2026-10-07 (slice E4). Slice plan at `docs/research-scratch/PLANS-AND-BRIEFS.md` §"E4 — Trackblazer scenario panel (SCREEN-016), 2026-10-07". Hand-off: targeted **`TrackblazerPanelTest` 10 passed (127 assertions)**, **`trackblazer-panel.spec.ts` 10 passed (6.0m)** against the shared `:8127` server, sibling re-runs green (`scenario-panel.spec.ts` 8 passed, `ura-panel.spec.ts` 10 passed, `unity-cup-panel.spec.ts` 7 passed), full Pest suite **1541 passed / 2 skipped (26600 assertions)** before the layout cap, Pint clean, `vendor/bin/phpstan analyse app/Http/Controllers/Career/CockpitController.php app/Http/Requests/StoreShopPurchaseRequest.php app/Models/TrainingRun.php --no-progress --memory-limit=1G` `[OK] No errors`, `npm run typecheck` exit 0, `npm run build` exit 0 with `Cockpit-D-WiUHWv.js` 53.65 kB, `composer lore` and `composer lore-code` clean on E4 files.
+
+**Two decisions the panel makes that the test surface holds.**
+- The rival list caps at eight rows (Miller's Law, plan §13). The Junior-Year seed's 50+ entries pushed the page over WCAG 1.4.10 reflow at 320px; the Race Database screen shows the full set, and the panel's "First 8 of N catalogued races. The full set is on the Race Database screen" line names the cap.
+- The grade bar renders only when a period is reported (design-2.0 §49 absent-is-text-only). The browser case asserts the no-period sentence, not the bar; this is the same trade-off E3 made for the Spirit meter.
+
+**Two test-side findings the browser pass produced and tightened in place, not cut.**
+- A tampered item value reaches the boundary through a `<datalist>`-backed text input rather than a `<select>`. The Form Request is the authority; the option list was a convenience.
+- "No `Recommended` text" scopes to "Recommended Purchase" card / heading / accessible image name, because the panel's own rotation-absence copy carries the word as a negation.
+
+#### Gaps
+
+1. **The browser cannot see a populated roster of purchases or grade rows.** A consequence of the panel's write path going through `runs.purchases.store` and the grade write through `race_entries.grade_points_earned`. The browser suite exercises the empty + keyboard paths; populated states are asserted at props level because no in-browser seeding harness exists.
+2. **No catalogue rotation flag exists.** The component contract reserves space for `sale` and `limited` per-row flags, but the matrix does not carry them and no rotation writer exists. Adding a rotation would unblock the flags without a component edit (gate G-33).
+3. **Shop Coins balance is permanently `not yet recorded`.** The earning side of the shop economy is not stored today (`shop_coins_by_placement` is config-only). A `TurnEvents\ShopCoinAwardPayload` model would let the panel render a balance, but D-232's "unspent coins die with the run" still applies.
+
+### SCR-CAR-023 — Scenario Race Planner
+
+`GET /training-runs/{run}/races/planner` name `runs.races.planner`, `App\Http\Controllers\Career\RacePlannerController`. SCREEN-017, plan §9 E5. The whole calendar, grouped, with the races the Trainer picks compared side by side. It descends from the run's own URL the way the Cockpit does, and it is **read-only except one write it does not own**: each card's `Enter Race` posts to the existing `runs.races.store` and its `StoreRaceEntryRequest`, so no second race-write route exists.
+
+Reached from the Race Decision screen's "Plan the whole calendar" door (`SCR-CAR-013`), and by URL. A screen reachable only by URL is a defect (D14's finding on `runs.timeline`), which is why the door exists.
+
+#### Layout / Structure
+
+`CareerLayout` → the position being planned from → the held figures → the deadlines region → the four groups, each one `components/career/RacePlanList.vue` rendering a heading, its rule, and either `components/career/RaceCard.vue` per race (D10's card, reused) or its named empty state → the reward comparison, a real `<table>` with one `<th scope="row">` per property and one column per selected race (design-2.0 §46) → the target alignment, the same columns with plain words.
+
+#### The four groups, and the rule each is built by
+
+One query over `race_catalog_slots` (`scopeForScenario`, ordered by year, turn, sort_order) with the run's own `raceEntries` eager-loaded, partitioned by two citable facts: `is_mandatory`, and `RaceCatalogSlot::isAtOrBeforeTurn()`, which is the single owner of the position comparison (`ADR-0015`), so this screen and the run race strip cannot disagree about whether a turn has arrived.
+
+| Group | Rule | Empty state |
+|---|---|---|
+| Mandatory races | `is_mandatory = true` (7 of 410 rows) | "No mandatory race is on this scenario's calendar." |
+| Upcoming races | not mandatory, and the turn has not arrived | named, or the position sentence when no turn is logged |
+| Optional races | not mandatory, the turn has arrived, and the run recorded no entry for it | named, or the position sentence when no turn is logged |
+| Rival races | **none.** No column marks a rival race | the absence names why, with the corpus citation |
+
+A reached race the run has already entered is left out of every group: the run screen's race panel owns the history, and the same row in two groups reads as two races.
+
+#### The reward comparison and the alignment
+
+Ten rows, in one order for every race: Grade, Distance, Distance band, Surface, Fan gate, Fan gain, Reward, Skill Points, Grade Points, Shop Coins. Five of them and Grade Points have a source behind them; Fan gain, Reward, Skill Points and Shop Coins are `N/A` with a `title` naming the missing column, and Grade Points is filled by `TrainingRun::gradePointsForTier()`, which returns null unless the run's own scenario entry defines a `grade_point_by_grade` table — so the cell is driven by config presence and never by a scenario name (gate G-33).
+
+The alignment compares the race with the run's recorded `BuildTargetPayload` on distance band, surface and running style, in plain words: `Matches`, `Does not match` or `Not recorded`, never a score and never a percentage, with the `ProvenanceBadge` `calculated`. A running style is the trainee's aptitude and no column holds a per-race one, so that row is always `Not recorded`. A run with no target records nothing and the section says where the target is entered.
+
+#### The held figures, and the promise not made
+
+`Win probability: N/A` and `Expected risk: N/A`, each with a `title` naming the `ADR-0016` blocker. The brief's recommendation block is not built and no LOW / MEDIUM / HIGH wording appears. The deadline region states the next uncleared mandatory race and its turn, and raises the Level 1 `AlertRow` (E1's component, `tone="critical"`, glyph plus word) when `isAtOrBeforeTurn()` says that obligation's turn has arrived. It never claims "no critical training deadline will be missed": that is a promise about the whole career, which this tool cannot make.
+
+#### States
+
+| State | Behavior |
+|---|---|
+| Empty (no scenario) | One sentence naming the missing scenario, why it matters (no calendar to plan against) and what to do (choose one on the run screen). The four groups do not render at all. |
+| Empty (no turn logged) | The mandatory group still renders, because an obligation does not need a position; the two position groups carry the sentence saying no turn has been logged, so neither claims a race is "ahead". |
+| Empty (a group, with a calendar) | Each group states its own absence rather than drawing a blank region, and the rival group always states its own because no column marks a rival race. |
+| Truncated | A position group lists at most eight rows, and the cap is named with the full count and a pointer at the Race Database screen. A list that stopped silently would read as a complete calendar that happens to hold eight races. |
+| Nothing selected | The comparison says what to do rather than drawing an empty table; a comparison needs two columns to be a comparison. |
+| Loading | Page-level (ADR-0007): `role="status"` "Loading…" while a visit is in flight. Each card's `Enter Race` carries its own "Entering…" label, because that write is user-initiated. |
+| Error (a visit failed) | `role="alert"`: "That screen did not load. Nothing was saved; try again." Inertia's `invalid` and `exception` are both cancelable and return `false`, so this is the single surface. |
+| Error (a refused write) | The `role="alert"` inside the card's drawer printing the first message `StoreRaceEntryRequest` returned. Nothing was written. |
+| After a successful write | `storeRace()` returns to the page the form was posted from, so entering a race from here stays here; the flash banner names it. |
+
+#### Gaps
+
+1. **Rival races have no source.** The corpus says rival appearance is random and bounded by the trainee's aptitude array (`docs/scenarios/03-trackblazer.md`; `docs/research-scratch/DESIGN-CORPUS.md` records that a rival at a distance she is D-rated in is impossible), and no column marks one, so the group renders a named absence rather than listing races the client might never mark. A rival marker column would unblock it without a component edit.
+2. **"Optional" is the brief's word, and the plan defines it.** The group is "not mandatory, the turn has arrived, nothing recorded", because that is the only reading that does not overlap the other two. Whether that is the intended set is an owner question, recorded in the slice plan.
+3. **A position group caps at eight rows.** The full calendar is ~1.6 MB of props and `php -S` is one process, so the payload is paid on every request; eight is the ceiling E4's rival list already uses, and the truncation is named. A career-year filter or a paginator is the upgrade path.
+4. **`Skip` records nothing.** As on `SCR-CAR-013`: the card's link returns to the run screen, and the run screen's race panel offers the `Skipped` status. `ADR-0003`'s grain and this screen's deferral are recorded in `SCR-CAR-013`'s gaps, not re-decided here.
+5. **Axe coverage is in `tests/browser/career-race-planner.spec.ts`** through the shared `tests/utils/accessibility.ts` builder, which scopes every scan to `#app` (KI-63).
+
+#### Implementation References
+
+`RacePlannerController`, `RaceFacts` (the ten-field list, shared with `RaceDecisionController` so the two screens cannot drift), `RaceCatalogSlot` (`is_mandatory`, `isAtOrBeforeTurn`, `hasFanGate`, `hasMaidenGate`, `distanceLabel`, `yearLabel`, `turnNumber`, `scopeForScenario`), `RaceEntry` (`placementOrdinal`), `RaceEntryStatus`, `TrainingRun::{nextTurnToPlay,hasScenario,scenarioKey,buildTarget,gradePointsForTier}`, `BuildTargetPayload`, `StoreRaceEntryRequest` (the reused write), `pages/Career/RacePlanner.vue`, `components/career/RacePlanList.vue`, `components/career/RaceCard.vue`, `components/scenario/AlertRow.vue`, `components/ProvenanceBadge.vue`, `layouts/CareerLayout.vue`. Tests: `tests/Feature/CareerRacePlannerTest.php` (the four groups and their rules, a recorded entry moving a race out of the optional group, the ten comparison cells present and absent, Grade Points from the config table, the three alignment words, no target, the held pair naming `ADR-0016`, the next obligation and the Critical alert, the two calendar absences, the group cap, and the no-percentage assertion) and `tests/browser/career-race-planner.spec.ts`.
+
+#### Status
+
+Implemented 2026-10-07 (slice E5).
+
+### SCR-CAR-024 — Our Grand Concert baseline strip (SCR-017)
+
+**Purpose.** Give the fourth `[Global]` scenario a surface that states only what a source holds. Its
+every panel flag is off, so the panel region has nothing to mount and draws its baseline strip instead:
+the scenario's name and documentation state, the five published stat caps, the scenario's own one-line
+reason no panel is drawn, and what the advisor does and does not do here (plan §9 E6, `D-241`, gate
+G-41). The brief's name for this surface is `SCR-017`, which is **not** `SCREEN-017` (the Scenario Race
+Planner, `SCR-CAR-023`); `design-2.0` §29's "Grand Concert (basic tracker only, advanced advisor
+limited)" is what the strip implements, and the brief's fuller panel is deliberately not built.
+
+#### Route / Location
+
+No route of its own. `ScenarioPanel.vue` (`SCR-CAR-019`, mounted in the Cockpit's scenario region,
+`SCR-CAR-011`) draws it in the branch where no panel flag is on. There is no flag to register against,
+because "every panel off" is the absence of a flag rather than a flag's value, and the strip is
+therefore config-driven: a fifth scenario that leaves every flag off reaches it for one config entry and
+no component edit (gate G-33, `D-240`).
+
+#### Layout / Structure
+
+One region, in this order:
+
+- the scenario's label and `ScenarioStatusBadge`;
+- the ruleset `N/A` line and its `title` (E1's own, unchanged);
+- the **published stat caps** as a table of five rows, one per stat in `config('scenarios.stat_order')`,
+  each carrying `base`, `bonus` and `cap` as three separate cells. The header carries a `ProvenanceBadge`
+  reading **Confirmed** with a `title` naming `config/scenarios.php`, and the matrix's verification date
+  beside it. Drawn only for a scenario the run declared;
+- the scenario's **own reason** its panels are off, as an `AlertRow` with a `ProvenanceBadge` reading
+  **Unknown**, whose `title` names the file the reason is recorded in. The generic "no panels of its own"
+  sentence renders only where the entry declares no line of its own, so the two never print twice;
+- the **advisor-scope** line, `recommendations_absence`, saying no scenario advice is offered and the
+  advisor ranks the turn being decided.
+
+#### Data and provenance
+
+Configured: `our_grand_concert.cap_bonus` (Speed 400, Stamina 100, Power 100, Guts 300, Wit 100) over
+`base_cap` 1200, which is the 1600/1300/1300/1500/1300 the plan §3 row records as corroborated
+2026-10-05 by two independent sources; `verified_at` (2026-09-27), labelled a verification date and not
+a fetch date; and the entry's own `panel_absence` and `panel_absence_title` display strings. `cap` is
+read through `ScenarioCaps::forRun()`, the single owner of the base-plus-bonus arithmetic (`ADR-0015`),
+so the strip and the header's stat bars cannot disagree about a ceiling. Recorded on the run: nothing
+the strip adds — the scenario's own widgets are empty for this scenario (its `widgets` are the baseline
+three, subtracted), and the run's tracked values are the header's figures above.
+
+#### States
+
+| State | Behavior |
+| --- | --- |
+| Rendered | Every panel flag off, the run declared: the label, the partial badge, the caps table, the scenario's own reason and the advisor-scope line. |
+| No panel of its own | The generic sentence renders only when the entry declares no `panel_absence`; the specific reason replaces it rather than joining it. |
+| Run declared no scenario | The caps table and the absence line do not render. The strip keeps E1's wording for an undeclared run, because lending it the baseline entry's caps would state a composition nobody chose. |
+| Caps unrecorded | Not reachable: `config/scenarios.php` is the source and it carries a `cap_bonus` for every entry. A missing row is a config failure, not an empty state. |
+| Loading / error | None of its own: server-rendered with the page, and the region has no user-initiated async action (`ADR-0007`). |
+| Held | No song, lesson, Performance Token or other unmeasured mechanic appears anywhere in the payload or the markup. The mechanics are sourced in `docs/scenarios/07-grand-concert.md`; the client's own screen text is not measured, and the strip says that rather than rendering the guide. |
+
+#### Implementation References
+
+`CockpitController::scenarioSection()` (the badge line reads `partially_documented`, per the owner's
+2026-10-07 ruling at plan §4.1 item 6) and its `capsSection()` helper; `ScenarioCaps::forRun()`;
+`config/scenarios.php` `our_grand_concert.{panel_absence,panel_absence_title}`;
+`resources/js/components/scenario/ScenarioPanel.vue` (the every-panel-off branch);
+`resources/js/types.ts` (`ScenarioPanelSection.caps`, `.panel_absence`, `.panel_absence_title`). Tests:
+`tests/Feature/GrandConcertPanelTest.php` (the every-flag-off G-41 property, the five cap rows against
+`ScenarioCaps`, the source citation, the unmeasured-mechanic floor, the absence declared on one scenario
+only, and the fifth-scenario strip) and `tests/browser/grand-concert-panel.spec.ts` (the badge text, the
+caps table, the two provenance badges, the honesty sentence and its `title`, the 44px sweep, the 320px
+reflow and the axe A + AA scan scoped to `#app`).
+
+#### Status
+
+Built 2026-10-07 (slice E6). Slice plan at `docs/research-scratch/PLANS-AND-BRIEFS.md` §"E6 — Our Grand
+Concert baseline strip (SCR-017), 2026-10-07". Three of the dispatch brief's premises did not hold on
+this tree and are corrected in that plan: `documented` reads `true` rather than `false`;
+`docs/scenarios/07-grand-concert.md` is a sourced guide rather than a stub, so the brief's sentence
+about the corpus was not printable; and the badge key was the owner's ruling, not a slice's.
+
+#### Gaps
+
+1. **The badge's key is uncommitted with D17.** `partially_documented` and the Scenarios database screen
+   that reads it are in the same working tree and are not in `HEAD`. If D17 is reverted the badge falls
+   back to `Documented` and this screen's browser case goes red. Owner call: land D17 with or before E6.
+2. **The caps render twice on one screen.** The header's stat bars and this strip both print the same
+   ceilings. That is deliberate (G-41's own wording is "baseline strip plus known caps"), and dropping
+   either is a later decision rather than an oversight.
+3. **The strip is the extension point, and it is one config key.** When the client's own strings are
+   captured, the scenario gains surfaces by a config edit plus new widget renderers, never by editing the
+   strip: a widget key reaches `ResourceMeter` or a registered renderer through the existing chain, and a
+   flag reaches the registry. `panel_absence` is what should be dropped at that point.
 
 ## 5. Workflow Specifications
 
@@ -1923,6 +3038,7 @@ Shop panel → purchase form (turn, item from the scenario catalogue, cost as re
    **Resolved 2026-10-04, with one half still blocked.** `GET /preferences` + `PUT /preferences` (SCR-SYS-002) write the two authorized keys, validated by `UpdatePreferenceRequest`, which refuses an unknown *key* as well as an unknown value because `validated()` would otherwise drop it silently. Follow-the-OS is stored as the absence of a row, which is what the theme composer already resolves. The control lives on its own screen behind a sixth nav link, not in the nav: a form in `components/layout` precedes every page's own form in document order and broke six page-wide control-count tests. `failure_estimate` persists and reads back and **changes no calculation**: ADR-0001 §3 records that no source publishes a failure curve and requires any number to print its formula beside it, so there is nothing honest to render. The screen says so rather than offering a silent switch. That display half stays blocked on a sourced model, not on this app.
 6. **Scenario panels without capture (Unity Cup).** Team-rank gauge, spirit-burst roster, team-race panel render explanations; the only capture is `circles`/`placement` on the race form; the resource strip prints `N/A` with no entry path (audit R-2, O-6/O-7). *Implementation Gap blocked on a schema proposal with PRD citation (owner backlog item 2).*
    **Blocked item discharged, still Deferred 2026-10-04.** The schema proposal the gap was waiting on now exists: `docs/research-scratch/RACE-AND-SLICE-RESEARCH.md`, section `## unity-cup-capture.md`. It separates the four figures into three per-turn readings needing columns on `turn_entries` (team rank, league position, burst counts, on the `energy`/`fans` precedent) and the team-race rounds needing **rows** in `scenario_slots` rather than any schema at all, since `circles` and `placement` already exist and `circles` is already gated to `kind = team_race`. It cites US-10 for the slot kind, ADR-0003 R3 for provenance, PRD §6.11 and §6.3 for what stays unbuilt, and reads the value vocabulary out of `config/scenarios.php:119-146` instead of inventing it. It writes no migration and closes nothing: the six open questions there, led by "is there a PRD story for this at all", are the owner's, and ADR-0010's precedent says a column that outlives its screen should be removed rather than kept.
+   **Dated note 2026-10-08 (documentation-sync pass):** E3 landed the read-only Unity Cup panel (`SCR-CAR-021`) on 2026-10-07, which changed the gap's display half and not its capture half. The panel's own gap list records "no write path for team rank or burst states"; the resource strip still prints `N/A` with no entry path; and the capture proposal this item names is still the owner's, with none of its six open questions answered by a Phase E slice — E3's slice plan (plan §9.1) records which of them E3 answered, which is none of the schema ones, and the register records the reading in the RACE-AND-SLICE-RESEARCH.md note this pass appends beside §unity-cup-capture.md.
 7. **Race calendar data unscoped.** `race_catalog_slots` seeded 410 rows with `scenario_key` on 4; calendar/picker cannot honestly scope years/scenarios (audit O-5 corrected, R-7; `TrainingRunController::raceSlotsFor` comment says empty-by-design until fetch lands, KI-11). *Implementation Gap, data-first.*
    **Deferred with reason 2026-10-04. No code change, as the gap is data.** Scope is blocked on scenario-tagged catalogue rows, not on a screen: the table holds 410 races and four carry a `scenario_key`, so `forScenario()` honestly returns nothing for the other 406 and the picker is right to look thin. Two corrections to this line while I am in it. First, the citation is stale: `KI-11` is **closed** in the committed register (`git show HEAD:KNOWN-ISSUES.md`, the Slice 13 status line: "18 resolved/closed (KI-1–9, KI-11–14...)"), while `TrainingRunController.php:208` still says "Empty by design until the fetch engine lands (KI-11)". The comment's premise is also superseded, since the fetch did land and filled 410 rows. Which text is corrected, and whether the comment moves to the open fetch work or to a new KI, is the owner's call and no code in this dispatch touches it. Second, a measured blocker on top of the scoping: `migrate --seed` on a fresh in-memory database reports `gametora-race-catalog: FAILED (table race_catalog_slots has no column named export_slot_id) — skipped` and **exits 0** (audit F-2), because `GametoraRaceCatalogParser.php:163` emits `export_slot_id`, no migration defines it, and `SourceDocumentSeeder.php:82-90` swallows the failure. Until that column is settled, no source refresh can add the scenario scoping this gap is waiting for.
 8. **Error-state coverage asymmetry.** Custom 404 view only; no 500/419 views; framework default pages are off-theme (G-20 first-paint rule holds only for shipped screens). *Documentation/UX Gap, minor.*
@@ -1935,10 +3051,12 @@ Shop panel → purchase form (turn, item from the scenario catalogue, cost as re
    **Resolved 2026-10-04.** Verified first: all four command strings the views print name a key that exists in `config/uma.sources`, and all four sources are declared. The README's count claim is gone rather than corrected to a new number, because correcting it re-creates the same line for the next source to break; the sibling session's README restructure, still uncommitted in this worktree, went further and lists all seven. The durable part is `EmptyStateCommandNamesTest`, which sweeps every Blade view for `uma:fetch <source>` and checks each token against the declared set, checks the README's source names the same way, and checks the Web surface table's paths against the registered routes. It has floors on all three sweeps, so it cannot pass by finding nothing.
 12. **Run page carries an open adversarial review.** `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` verdict "Fail on the run page" (2026-10-03) with a still-open list (O-3 total-vs-delta semantics, O-8 deck tiles/reset, O-11 skills panel design, O-12 goals, Infirmary/Races choices, contested Rest figure). The screen is implemented; the review is not closed. This spec records both, per Step 3, rather than declaring either done. *Mixed; tracked in the audit's own backlog.*
    **Unchanged 2026-10-04, and not closed by this work.** Three of the four code items touched the run page (turn rows, status select, nav count), and none of them is an audit item; the verdict and its open list stand as the audit wrote them. Per the dispatch's hard rule no verdict in that file was edited and no open item was marked closed.
+   **Dated re-read 2026-10-08 (documentation-sync pass):** the audit section now carries a per-item tree verdict appended at its own "Still open" ledger. On this tree, O-2, O-4, R-5 and R-8 are closed by the audit's own Part 7 commits and the A4b port; O-3's wording and O-12's run-page goals panel are closed with the modelling and per-trainee-goal halves recorded as open (`KI-34`); O-8's never-closing bar is gone from `DeckPanel.vue` while the per-card state half stays gated (`ADR-0014`); O-11, O-5/R-7, R-2/R-3 and the Infirmary/Races choices remain open as recorded. The `Fail` verdict itself was revised by Part 7 and measured a page A4b replaced; neither this item nor the audit marks it closed — the verdict is a 2026-10-03 statement about the Blade page that no longer exists, and the audit's own re-read says so in place.
 13. **Orphaned library components.** `run-header`, `deck-editor`, `energy-gauge` (used only inside `run-header`), `app-button`, `advisory-row`, `capsule-header`, `support-card-rail`, `grade-badge` are referenced only by `FrontendComponentLibraryTest` (and compiled view cache) since `/design-preview` was deleted. They are exercised but mounted on no screen. *Consistency Gap (dead surface kept alive by tests); removal or re-mounting is a decision, not this document's.*
    **Status: partly Resolved 2026-10-04 (app-button mounted, two components deleted); five Deferred with reason, listed below.** Checked against the tree after items B to D, and none of the eight had gained a mount site: every `<x-…>` tag on every page is enumerated in the commit report, and the new turn editor, status form and preferences screen are inline markup. `app-button` is now mounted on three submit controls, and its `secondary` variant renders the exact class list two of them hand-carried. `advisory-row` and `support-card-rail` are deleted with their dataset entries and their two dedicated cases: zero call sites, and neither is named by DESIGN.md's three motif/energy/grade bullets.
    Kept and still owed to the owner: `run-header` and `energy-gauge` (coupled, one cannot go without the other's tests breaking; `energy-gauge` is also the only consumer of the `bg-lattice` utility, and the token-pruning gate that would notice self-skips with no browser package installed), `capsule-header` and `grade-badge` (both artifacts of open design rulings, in a file a sibling session is editing now), and `deck-editor` (the nearest existing thing to O-8's six card tiles, and O-8 is mid-flight at `b21f356`). Worth correcting in this line: `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` names **none** of the eight components, so a caution about O-8 depending on them is a near-neighbour risk, not a documented dependency.
    **Further resolved 2026-10-04, and the two open design rulings it was waiting on are now closed in code.** The reason this item held `capsule-header` and `grade-badge` was that both were waiting on a ruling about how they render, not about whether they render: DESIGN.md §2.1 and §2.3 had already decided the treatment (grade fill keyed on the base letter with the modifier stripped, nine tint families; capsule chrome fill with the lattice bleed). The surfaces were simply still carrying their own copies. `capsule-header` is now mounted on all eight panels that hand-copied its div, and `grade-badge` now owns the grade fill in `stat-band`, which had its own nine-letter map and its own badge span. Nothing about either ruling changed; what changed is that the ruled implementation is the only one left. `FrontendComponentLibraryTest` asserts both visuals are defined in exactly one view, so a second copy fails the suite. Remaining on this item: `run-header`, `energy-gauge` (coupled, and the unreachable one is the one whose hue treatment §2.2 rules not material) and `deck-editor` (still gated on the per-card state decision PRD §6.9 and US-12 exclude). Reachability across the 24 remaining components: 22 from a route, those two with no call site at all.
+   **Closed by deletion 2026-10-05 (slice B1, `0ea8d43`), dated note appended by the documentation-sync pass 2026-10-08.** The three components this item's last line kept "remaining" — `run-header`, `energy-gauge` and `deck-editor` — are gone from the tree: B1 deleted the zero-consumer Blade set (`app-button`, `capsule-header`, `deck-editor`, `energy-gauge`, `grade-badge`, `grade-point-meter`, `guided-step`, `race-calendar`, `resource-strip`, `run-header`) and `resources/views/components/` itself, and the Vue ports replaced them on the run page and the deck surfaces (`frontend-development-plan.md` §4's B1 row records the deletion). The `FrontendComponentLibraryTest` guard the item names was repointed at the Vue equivalents in the same pass. `grep -rn "<x-" resources/views` is zero on this tree, so the dead-surface question this item opened is closed by deletion, not by adoption — the outcome the plan's B1 section chose and the item's own "removal or re-mounting is a decision" allowed.
 14. **Terminology drift caught and ruled.** `Wisdom/Motivation` (JP-wiki English) vs `Wit/Mood` (client words) is gated by `tools/lore.php` and the lang file's terms map; UI shows only client words. Recorded so a future reader does not "fix" the lang map's JP-side entries. *Consistency, resolved.*
    **Unchanged 2026-10-04; mechanism re-verified and it holds as written.** The ruling stands and was followed: the new turn-row editor, status select and preferences screen print Wit, Mood and the five client mood strings, and no JP-wiki gloss entered any of them. Re-checking what enforces it found both halves of this sentence true. `tools/lore.php:64` carries `wisdom|motivation` (with `strength|endurance|luck|agility|charisma`, and `gacha|jewel|factor`) in the pattern scanned over the app paths, and `lang/en/uma.php:70-90` is the terms map that states the Global label, `'card_wit' => 'Wit'`, with `:78-79` recording that 賢さ keys as `intelligence` in the export while the player-facing word is Wit. That is the JP-side entry the dispatch forbids editing, and it was not touched. `AGENTS.md`'s "Practical notes" line describes the same list from the other side ("the Global client terminology (`Wisdom` for Wit, `Motivation` for Mood...)"), which reads as though the wiki glosses are the client words; §7-14 and this dispatch both say the opposite, and the rendered copy plus the lang file agree with §7-14. The wording in `AGENTS.md` and in this item's first sentence is what needs the owner's ruling; neither file was edited here, and nothing in `tools/lore.php` or the lang map was touched.
 15. **Import cannot carry skills/deck/races.** Stated on-screen; no story requests the wider format. *Unresolved Requirement, acceptable.*
@@ -2017,3 +3135,7 @@ left.
 | 2026-10-06   | New screens `SCR-CAR-003` (Trainee Selection) and `SCR-CAR-004` (Trainee Profile) with their §3 rows, §4 sections and empty/loading/error state tables, inserted before §4.15. `SCR-CAR-002`'s status cell corrected from "steps 2 to 6" to "steps 3 to 6", because step 2 landed with D3. No other screen section, state table, workflow or §8 authority row changed.                                                                                                                                                                  | Slice D3 built the wizard's second step (`docs/proposals/frontend-development-plan.md` §8). Plan §11 risk 5 requires Phase D screens to get their `SCR-*` entries with their first slice, and §10 requires the screen's state table to agree with the view. The two screens omit the brief's growth-rate, scenario-suitability, career-goal, hint and evolution items because no column or table holds them, which the Gaps sections record with citations.                                                                    |
 | 2026-10-06   | New screen `SCR-CAR-005` (Build Target, wizard step 3) with its §3 row, §4 section and empty/loading/error state table, inserted before §4.15. The step-nav statements that step 3 was a named absence are corrected in place: `SCR-CAR-002`'s status cell to "steps 4 to 6", its §4 "Unbuilt steps" row, and `SCR-CAR-003`'s §4 "Unbuilt steps" row and Status line. No other screen section, state table, workflow or §8 authority row changed.                                                                                       | Slice D4 built the wizard's third step (`docs/proposals/frontend-development-plan.md` §8), including the shared `ProvenanceBadge` whose four states come from `design-2.0` §49. Plan §11 risk 5 requires Phase D screens to get their `SCR-*` entries with their first slice, and §10 requires the screen's state table to agree with the view. The brief's fifth purpose, risk tolerance and per-skill marks are omitted because the stored payload's key set is closed, which the Gaps section records as owner questions.   |
 | 2026-10-06   | Numbering settled for the career screens past the first three steps, and the two run-scoped builder screens that were claimed in prose and code but had no row are registered. `SCR-CAR-006` (Legacy Lab) and `SCR-CAR-007` (Support Deck Builder) gain their §3 rows and §4 sections, inserted before §4.15; `SCR-CAR-008` (wizard step 4), `SCR-CAR-009` (wizard step 5) and `SCR-CAR-010` (Preflight) were filed by a sibling pass on the same day. No other screen section, state table or workflow changed.                        | The collision the plan's §4.1 item 1 named: `TraineeSelectController` and the `SetupDraft` prose already read the run's builder as "SCR-CAR-006", and `Support/Builder.vue` and `support-deck.spec.ts` already read the deck builder as "SCR-CAR-007", but the registry had no rows for either, while steps 4 and 5 were about to take numbers. The settlement keeps the committed claims: the two builders own 006/007, the wizard's ancestry and deck take 008/009, and Preflight takes 010.                                 |
+| 2026-10-07   | New screen `SCR-CAR-015` (Inheritance Event, SCREEN-013) with its §3 row and §4 section (states, data, inputs, actions, validation, accessibility, responsive, navigation, dependencies, implementation references), inserted before §4.15. The Cockpit action grid's Inheritance entry (gap §4-1656 item 1) updated to link to `runs.inheritance` (`SCR-CAR-015`) instead of `legacy.builder`. The `TurnEventType` enum gained the `Inheritance` case. `LegacySelectionPayload` gained `sparkKindLabels()`. No other screen section, state table, workflow or §8 authority row changed. | Slice D12 built the Inheritance Event record-only screen (`docs/proposals/frontend-development-plan.md` §8). The predicted section shows sourced Spark probabilities and star-roll odds; the observed section records Trainer-entered inspiration outcomes via TurnEvent. The "expected inheritance" renders `N/A` with a `title` citing ADR-0020 §3. The three inheritance milestones (turns 1, 31, 55) come from UMAMUSUME_REFERENCE.md §1.5.1. |
+| 2026-10-07   | New screen `SCR-CAR-023` (Scenario Race Planner, SCREEN-017) with its §3 row and §4 section (the four group rules, the comparison and alignment tables, the held figures, the states, the gaps, the implementation references), inserted before §5. `SCR-CAR-013`'s §4 section gained the "Plan the whole calendar" door, and its props gained `planner_url`. The ten-field race fact list moved from `RaceDecisionController` to `App\Services\RaceFacts`, so the two screens that print it share one owner. No other screen section, state table, workflow or §8 authority row changed. | Slice E5 built the planner (`docs/proposals/frontend-development-plan.md` §9.5). Plan §11 risk 5 requires Phase E screens to get their `SCR-*` entries with their first slice, and §10 requires the screen's state table to agree with the view. The brief's win probability, expected risk, recommendation block and "no deadline will be missed" sentence are held or unsourced, which the section records with citations; the rival group has no source at all, and says so. |
+| 2026-10-07   | New screen `SCR-CAR-024` (Our Grand Concert baseline strip, the brief's `SCR-017`) with its §3 row and §4 section (purpose, location, layout, provenance, states, gaps, implementation references), inserted before §5. `SCR-CAR-019`'s status cell gained the dated note that the badge's partial arm is now reachable and which key drives it. No other screen section, state table, workflow or §8 authority row changed. | Slice E6 built the strip the panel region draws when a scenario composes no panel (`docs/proposals/frontend-development-plan.md` §9 E6). Plan §11 risk 5 requires Phase E screens to get their `SCR-*` entries with their first slice, and §10 requires the screen's state table to agree with the view. The dispatch brief's premises were stale in three places, recorded in the slice plan: `documented` reads `true`, `docs/scenarios/07-grand-concert.md` is a sourced guide rather than a stub, and the badge key was the owner's ruling of 2026-10-07 (plan §4.1 item 6), which this slice applies. The row is `SCR-CAR-024` because `SCR-CAR-023` is E5's Scenario Race Planner. |
+| 2026-10-08   | Documentation-sync pass: §7 gap 13 gained its B1 deletion close-out, §7 gap 6 gained the E3 dated note, §7 gap 12 gained the audit re-read summary, and `SCR-RUN-003`'s Gaps list gained dated notes re-reading each item against the tree. No §3 row, §4 section state table or workflow changed; the screen set was already complete with `SCR-CAR-024` (E6) filed 2026-10-07, so this pass records statuses, not screens. | Owner asked for the documentation set to be brought into agreement with the completion of Phases A–E. The gap statuses this pass touched are the ones the slice landings changed; each original sentence is preserved and a dated note is appended beside it, per this file's established pattern. This pass did not run `npm run test:browser`; the browser-gate claims it quotes are the slices' own. |

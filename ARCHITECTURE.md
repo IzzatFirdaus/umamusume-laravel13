@@ -24,6 +24,12 @@ Pinned from `composer show --direct` and `package.json` as installed in this rep
 
 Not installed, not to be added without approval: sanctum, breeze, maatwebsite/excel, any SPA framework.
 
+_Dated correction 2026-10-08 (documentation-sync pass): the "any SPA framework" clause and the `Blade-first`
+note on the HTTP row above are superseded in the same way the §4 clause below is. The 2.0 line shipped
+**Inertia + Vue 3** (`ADR-0020` §1; `AGENTS.md` §7 withdrew the older "no Inertia/SPA" ban), so the
+frontend is a server-driven SPA over the loopback backend; `axios` is not used (the Inertia client is),
+and the fetch engine's outbound `Http` facade row is unchanged._
+
 ## 2. System Design
 
 ```mermaid
@@ -225,6 +231,14 @@ join is interchangeable with the other.
 
 Web UI is Blade (server-rendered). The JSON API is a read-only P2 surface for the Trainer's own scripts. Conventions per `api-and-interface-design`: plural nouns, no verbs; camelCase query params and response fields; one error shape; offset pagination on all lists; additive evolution only. Ref: <https://laravel.com/docs/13.x/eloquent-resources>
 
+_Dated correction 2026-10-08 (documentation-sync pass): the "Web UI is Blade" clause above is superseded
+for the shipped browser surface. Since `ADR-0020` (§1) the web surface is Inertia + Vue 3
+(`resources/views/app.blade.php` is the Inertia shell), and Phase D–E shipped the career 2.0 screens on
+it (`resources/js/pages/Career/`, `Veterans/`, `Database/`, with `app/Http/Controllers/Career/*` and
+`DatabaseController` as their controllers and the scenario panels in
+`resources/js/components/scenario/`). Blade survives only as the shell, the three error documents and
+this paragraph's older reading. The JSON API line below it is unchanged._
+
 ```text
 GET /api/v1/umamusume?status=&search=&page=&pageSize=   -> { data: [Umamusume], pagination: { page, pageSize, totalItems, totalPages } }
 GET /api/v1/umamusume/{slug}                            -> { data: Umamusume } (includes aliases, sources)
@@ -296,6 +310,13 @@ Default: manual `php artisan uma:fetch` (PRD OQ-3). Concurrency is controlled by
 ## 7. Frontend
 
 Blade + Tailwind v4 (CSS-first `@theme`), vanilla JS only where needed (autocomplete). Layout via the `layout` Blade component. UI states mandatory on every data view: empty, loading (fetch in flight), error (fetch failed), per antislop R-27. All strings pass the lore audit: "Umamusume" only, never equine terms, never animal framing.
+
+_Dated correction 2026-10-08 (documentation-sync pass): the "Blade + Tailwind" framing and the "Layout
+via the `layout` Blade component" clause are superseded the way §4's are. The web surface is Inertia +
+Vue 3 (`resources/js/layouts/AppLayout.vue`, with `SetupLayout.vue` for the career setup wizard and
+`CareerLayout.vue` for the run-scoped career screens), the `layout` Blade component was deleted in slice
+B1, and the Vue pages follow the same state-they-are-mandatory rule (`empty`; a `role="status"` loading
+line for user-initiated async per ADR-0007; error). The lore clause is unchanged._
 
 ## 8. Security Model
 

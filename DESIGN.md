@@ -189,6 +189,10 @@ external fonts (offline constraint + C-8 dependency gate).
   for the in-page forms and long copy blocks on the run screen, and `max-w-lg` for the
   single-column create form. Mobile must not break (R-03 floor: no overflow, tap targets
   via labeled controls) but is not a design driver (PRD §2, PRODUCT Operating Context).
+  _Dated correction 2026-10-08 (documentation-sync pass): the shell the 5xl width belongs to is no
+  longer a Blade component. Slice B1 deleted `components/layout.blade.php`; the shipped shell is the
+  Inertia `AppLayout.vue` (with `CareerLayout.vue` / `SetupLayout.vue` for the career surfaces).
+  The width value stands — only the host it is named on is stale._
 - **Recommended:** retire the `max-w-6xl` line rather than keep a proposed token that
   no surface uses. Ratified widths, in one place: 5xl shell, 3xl form, lg narrow form.
 - **768px is the supported minimum (amended 2026-09-29, KI-25), and the floor above
@@ -232,17 +236,28 @@ external fonts (offline constraint + C-8 dependency gate).
   1.99:1 (research §6.3, D-3). And none of the three is a shadow: the rule above is
   untouched.
 
-## 3. Component inventory (actual committed Blade)
+## 3. Component inventory (Vue, and the surviving Blade)
 
-All views render through `resources/views/components/layout.blade.php`
-(`x-layout`: nav, flash, slot), which is the shell and is not one of the count below.
-**Existing:** 11 Blade components exist, and 26 Vue single-file components sit under
-`resources/js/components/`. The Blade count is small because the port has been retiring it:
-`character-portrait` and `support-thumb` were added on 2026-10-05 for the artwork slots and
-deleted the same day, because the three Blade screens that were their only call sites were
-retired by the A1 to A3 ports and the slots moved to `ArtworkSlot.vue` with them.
+The shell is `resources/js/layouts/AppLayout.vue` (sidebar + mobile bottom nav + skip link,
+`ADR-0020` §1). The Blade shell this section used to name — `resources/views/components/layout.blade.php`
+— was deleted in slice B1, along with `resources/views/components/` itself: the ports A1–A4 retired the
+views that consumed those components, and B1 removed the remainder (`app-button`, `capsule-header`,
+`deck-editor`, `energy-gauge`, `grade-badge`, `grade-point-meter`, `guided-step`, `race-calendar`,
+`resource-strip`, `run-header`). `resources/views/` now holds `app.blade.php` (the Inertia root) and
+`errors/{404,419,500}.blade.php` (which render themselves and are composed by `AppServiceProvider` in
+place of the shell).
 
-Of the 11, 2 have no call site at all, and `energy-gauge` is reachable only through
+**Existing:** 0 Blade components, 30+ Vue single-file components under `resources/js/components/` and
+`resources/js/pages/**`, 9 browser specs under `tests/browser/`. `resources/views/components/` is an
+empty directory; `grep -rn "<img" resources/views` is zero, because the `<img>` elements now come from
+`.vue` files. The ported pages are `Dashboard.vue`, `Catalog/{Index,Show}.vue`, `Review/Index.vue`,
+`Preferences/Edit.vue`, `Skills/{Index,Show}.vue`, `SupportCards/{Index,Show}.vue`,
+`Runs/{Index,Create,Show,Import}.vue`, `Legacy/{Index,Builder,Compare}.vue`, `Support/Builder.vue`, and
+the `Career/*` set (`ScenarioSelect`, `TraineeSelect`, `TraineeProfile`, `BuildTarget`, `Cockpit`,
+`TrainingDetail`, `RaceDecision`, `EventDecision`, `InheritanceEvent`, `SkillsPlanner`, `Timeline`,
+`Result`, `Preflight`, `SaveVeteran`), with `Veterans/{Index,Show,Compare}.vue` and `Database/Database.vue`.
+
+Of the Vue tree, 2 have no call site at all, and `EnergyGauge` is reachable only through
 one of those 2. All of them are token-only — the skeleton-palette migration is finished,
 so no row below is blocked on it. `design-preview` is removed from the tree and struck.
 
@@ -251,6 +266,15 @@ intent. **Loading** is uniformly `gap`: the app is server-rendered end to end, s
 loading state has no surface to live on, and the "fetch in flight" affordance §7 defers
 is the only thing that would ever create one. That is a deliberate absence, not an
 oversight, and it is cheaper than the indicator would be.
+
+**This table is the Blade-era surface map, kept for reference and mostly superseded by the ports.** The
+surfaces it lists are now Vue pages or components; the Reachable column reflects the 2026-10-04 read and
+has not been re-measured against the Vue tree. `run-header`, `deck-editor` and `energy-gauge` no longer
+exist. `capsule-header` and `grade-badge` are still mounted in Blade, but the ports reimplement both in
+Vue, so the "adopted since this section was written" paragraph below is now a claim about a pair of
+components whose only remaining consumer is the run record screen (`runs/show.blade.php`), which A4b
+replaced with `Runs/Show.vue` and B1 deleted. The two art-slot rows (`character-portrait`, `support-thumb`)
+were deleted the same day they were added and replaced by `ArtworkSlot.vue`; see §4.7.
 
 | Component                    | Route                                         | Purpose                                                                              | Empty                                      | Error                                                                     | Reachable   |
 | ---------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------- | ----------- |
@@ -286,25 +310,22 @@ oversight, and it is cheaper than the indicator would be.
 | Pagination                   | all index routes                              | two responsive blocks, token-only                                                    | n/a                                        | n/a                                                                       | yes         |
 | 404                          | error page                                    | branded recovery, named routes out                                                   | n/a                                        | n/a                                                                       | yes         |
 
-**Intended: three components are built and unreachable.** `deck-editor`,
-`energy-gauge`, `run-header`. Two of them matter beyond dead weight, because each
-duplicates a pattern the tree renders elsewhere:
+**Closed 2026-10-05.** The three components this block named (`deck-editor`, `energy-gauge`,
+`run-header`) are gone: A4b retired the run page's Blade, and B1 deleted the zero-consumer remainder.
+The two energy representations this block flagged as a defect (`run-header`→`energy-gauge` against
+`resource-strip`/`guided-step`) are now one, because the Vue tree ships `EnergyGauge.vue` and the
+other two Blade components no longer exist. The unreachable-component question is closed by deletion,
+not by adoption, and the reasoning is preserved here because a future author who reads §3 in an older
+commit needs to know which of the two answers landed.
 
-- `run-header` → `energy-gauge` is a ten-segment energy gauge. `resource-strip` and
-  `guided-step` ship the run's energy readout instead. Two energy representations, and the
-  unreachable one is the one whose hue treatment §2.2 rules *not* material: a stat colour on
-  a track gradient reads as a threshold the client never states.
-- `deck-editor` is the deck-slot read view. Mounting it means per-card level and limit-break
-  state, which PRD §6.9 and US-12 keep out, so it stays gated on that decision.
-
-**Adopted since this section was written.** `capsule-header` and `grade-badge` had call
+**Blade-era note (superseded by the ports):** `capsule-header` and `grade-badge` had call
 sites that re-implemented them: eight panels hand-copied the lattice-bleed capsule div and
 `stat-band` carried its own copy of the nine grade fills beside its own badge span. Both are
 mounted now, so the franchise motif §2.3 rules material reaches the surfaces it was ruled for
 and the grade letters §2.1 routes through `ink-strong` have one implementation instead of two.
 `FrontendComponentLibraryTest` fails if either visual is defined a second time.
 
-**Recommended:** for each of the three, either adopt the component at its call site or
+**Blade-era note (superseded by the ports):** for each of the three, either adopt the component at its call site or
 delete it. A component that exists only as an unimplemented decision is the cheapest
 thing in the tree to keep and the most expensive to leave, because a future author will
 read it as the pattern.
@@ -373,6 +394,11 @@ written for the 0.1.0 view it describes, and the eight-section workspace below i
 **Absence has exactly two forms on this page.** A value the record does not carry renders as `N/A` with a
 `title` naming the kind of absence, per the reasoning already written into
 `resources/views/components/resource-strip.blade.php` — never `Unknown`, never a dash, never zero. A
+_Dated correction 2026-10-08 (documentation-sync pass): the Blade file this reasoning was "already
+written into" was deleted in slice B1; the landed owner of the same reasoning is
+`resources/js/components/ResourceStrip.vue` (and its `ResourceMeter` / `StatBand` companions). The
+rule — an unrecorded value renders `N/A` with a `title`, never `Unknown`, never a dash, never zero —
+is unchanged._
 section the record cannot yet supply keeps its heading and says **"not yet recorded"**, which is the
 pattern every run-screen panel already uses. The heading is the honest part: a missing section states "she
 has none" where a heading with an empty body states "this tool has not recorded it", and on sections 3, 4
@@ -681,6 +707,19 @@ the tree. Installing `pestphp/pest-plugin-browser` plus a Playwright driver and 
 the two `markTestIncomplete` calls with real assertions is the single change that would move
 the whole §2.1 table from *documented* to *enforced*.
 
+_Dated re-read 2026-10-08 (documentation-sync pass, on the Phases A–E completion brief; the table
+above is preserved as the 2026-10-04 read it records). The enforcement story has moved twice since
+that read, and both moves are upward. First, the two `markTestIncomplete` rows are no longer skipped
+for lack of a driver: `@axe-core/playwright@^4.13.0` is installed (`package.json:13`) and the
+browser suite asserts axe A + AA clean on `#app` across the career screens, so G-18's pair checks are
+exercised in Chromium rather than skipped in PHPUnit. Second, the assertion base is no longer the
+Blade page set this table's "renders each legacy shell page" wording assumes: the ported Inertia pages
+are the shipped surface, `DesignTokensTest` sweeps both source trees for `dark:` and skeleton-palette
+classes, and the browser specs carry the 44px floor and the reflow checks the Blade era could not run.
+What the re-read does **not** change: the ratio figures themselves stay "documented, not re-verified",
+because the evidence files the §2.1 comment cites are still absent from the tree, and the §2.3 768px
+row stays Unverified as §2.3's held proposal records._
+
 ## 11. Open questions for the owner
 
 Not defects; decisions this file cannot make for itself.
@@ -702,6 +741,25 @@ Not defects; decisions this file cannot make for itself.
    where a picture appears or whether the layout reserves its box. Recorded as PRD OQ-6.
    No pixel value is proposed here for the same reason §2.3's 768px number is question 5:
    a number this file invents is a number no measurement supports.
+
+_Dated close-outs 2026-10-08 (documentation-sync pass, on the Phases A–E completion brief; the
+question list above is preserved as written)._
+- **Question 1 is closed by deletion.** The three unreachable components the question names were the
+  zero-consumer Blade set; slice B1 (`0ea8d43`, 2026-10-05) deleted `run-header`, `deck-editor` and
+  `energy-gauge` along with `resources/views/components/` itself, and the Vue ports replaced them on
+  the run record screen and the deck surfaces (`frontend-development-plan.md` §4's B1 row). The
+  question's "adopt or delete" pair was answered with delete, which its own framing allowed. The §3
+  table above records the same outcome in its dated paragraphs.
+- **Question 6 is answered by the tree the way the question's own first reading suggested, and the
+  answer is now stronger than the question assumed.** The 2.0 screens that initiate async visits
+  (the Cockpit and the career detail screens) render their own `role="status"` loading line while a
+  visit is in flight (ADR-0007's user-initiated-async exception), so "no loading state, because
+  nothing loads client-side" is false for those surfaces and true for the reference-data reads. The
+  fetch-in-flight affordance §7 defers is still unbuilt.
+- **Question 7's placement half is answered in part and recorded as such.** §4.7 now names the four
+  slot-bearing screens and the run-create and skill-row remainders; the question itself stays open as
+  PRD OQ-6, exactly as §4.7 records.
+- **Questions 2, 3, 4 and 5 are unchanged by Phases A–E** and stay open as written.
 
 ## 12. Accessibility conformance
 
@@ -791,6 +849,19 @@ system owns.
   roster tree not a table). Added the status legend, the 40 undocumented token roles,
   reachability across all 28 components, the shipped base-layer treatments, the
   enforcement table, and the owner questions. No owner ruling was changed or reversed.
+- **2026-10-08** — Documentation-sync pass (owner brief: bring the documentation set into
+  agreement with the completion of Phases A–E). §11 gained dated close-outs for questions 1
+  (closed by B1's deletion of the unreachable Blade set), 6 (answered by the career screens'
+  own `role="status"` loading lines) and 7 (placement half answered, OQ-6 stays open), with
+  2–5 recorded as unchanged. §10 gained a dated re-read recording the browser-spec enforcement
+  of the two formerly-skipped rows and the move from the Blade page set to the ported Inertia
+  pages, without re-verifying the ratio figures, whose evidence files are still absent. §3 and
+  §4.7 were already corrected by the 2026-10-05 pass and needed no change this pass. | The owner
+  asked for the documentation set to be brought into agreement with the frontend completion; this
+  file's own §11 and §10 were the two places that still read against the pre-port tree. Every
+  original sentence is preserved and a dated note is appended beside it, per the file's established
+  pattern. This pass did not run the browser suite; the enforcement claims it records are the
+  slices' own, taken on their own trees.
 - 2026-09-29 — Catalog detail specification withdrawn and rewritten; 768px minimum
   recorded as a held proposal rather than a contract.
 - 2026-09-27 — Light-first owner ruling; lattice/enamel/torn-chip motifs ruled material.

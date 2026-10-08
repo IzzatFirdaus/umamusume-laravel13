@@ -24,6 +24,12 @@ trackers plus the `uma_musume_race_planner` career-run planner (rev 0.2, repo #4
   Tailwind CSS v4, Vite), with 51 single-file components under `resources/js/`. Blade survives only
   as the `resources/views/app.blade.php` shell and `resources/views/errors/`; there are no Blade view
   components. JSON is a read-only `/api/v1` surface (P2, three controllers).
+  _Dated correction 2026-10-08 (documentation-sync pass): the "51 single-file components" figure is
+  superseded — the tree now carries 58 single-file components under `resources/js/components/` and 54
+  page files under `resources/js/pages/`, after the Phase D–E career, Veterans and Database sets
+  landed. Counts like these age the moment a slice lands, so this is a snapshot note, not a number to
+  keep in step; what holds is the shape: the career set and the scenario panels are Vue, and
+  `resources/views/components/` is empty since slice B1._
 - **Data arrives through a stage-isolated fetch engine** that cross-references JP and
   Global catalog sources, snapshots each body, and promotes engine-owned facts with
   provenance.

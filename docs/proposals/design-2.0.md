@@ -16,6 +16,16 @@
 >
 > **Scenario architecture note:** the "Scenario Adapter" this document's appendix calls for already exists
 > as the config-driven composition matrix (`config/scenarios.php`, gate G-33). The SPA rewrite binds panels
+> (_Dated close-out 2026-10-08, documentation-sync pass: the Inertia + Vue rewrite this banner says "§1
+> targets" landed through Phases A–E. The shipped surface and every screen's real shape are recorded in
+> `SCREEN_SPEC.md` §3/§4 (`SCR-CAR-001`–`024`, `SCR-VET-001`–`004`), the visual decisions in `DESIGN.md`,
+> and the slice-by-slice landings in `docs/proposals/frontend-development-plan.md` §4–§9, which this file's
+> screen inventory was deliberately built as the union-with-`screen-spec-2.0.md` input for. Two of this
+> document's Grand Concert premises are superseded by the tree and recorded in the plan's E6 close-out and
+> `SCREEN_SPEC.md` SCR-CAR-024: `docs/scenarios/07-grand-concert.md` is a sourced guide rather than a stub,
+> and the config key that drives the PARTIALLY DOCUMENTED badge is `partially_documented` (the owner's
+> ruling of 2026-10-07), not `documented => false`. This file stays the reference target its banner calls
+> it; the close-outs it points to are the record of what shipped._
 > to it rather than re-deriving per-scenario logic in components.
 
 ---

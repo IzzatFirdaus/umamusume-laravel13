@@ -1918,6 +1918,18 @@ No migration, no column created, no model change, no seeder. The repo rule for a
 is proposal-then-ruling, and `CONSTRAINTS.md` outranks this file: nothing here weakens a gate, and no
 item in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## UIX-AUDIT-TRAINING-RUNS.md` is closed by writing it.
 
+_Dated note 2026-10-08 (documentation-sync pass): E3 landed the read-only Unity Cup panel
+(`resources/js/components/scenario/UnityCupPanel.vue`, `SCR-CAR-021`) on 2026-10-07, and this proposal's
+status line ("Not authorized, no migration written, no column created") is still true — the panel is the
+display half §4's resource strip assumed, and the capture half remains unbuilt. Measured against the six
+open questions, **E3 answered none of them as a decision**: Q1 is unanswered (no PRD story was added for
+capture), Q2 and Q3 are unanswered (no column or payload was added), Q4 is unanswered (no team-race round
+write exists — `scenario_slots` still has no `unity_cup` `team_race` rows, and the roster renders
+read-only), Q5 is unanswered (the panel reads the ladder but writes nothing, so the `S+`-capturable
+question is untouched), and Q6 is answered only by restraint — the read-only panel adds no
+Trainer-entered column, which is the deferral this proposal already counted, not a ruling. The proposal
+stays the owner's input; `SCREEN_SPEC.md` §7-6 records the same reading._
+
 ---
 
 ## calendar-tables.md

@@ -395,6 +395,17 @@ complete and green at `8c16edc`; this record does not block it.
 > 37 closed and 42 open. This section is the authoritative copy; the separate working file was deleted in
 > the 2026-10-03 consolidation commit, and open steps continue here.
 
+_Dated close-out 2026-10-08 (documentation-sync pass): the "still 42 open" snapshot above is the read it
+was taken on; it is superseded en bloc. The 2.0 frontend this plan's M1–M5 workstreams were sequencing
+for landed through Phases A–E of `docs/proposals/frontend-development-plan.md` (A1–A4c, B1, C1–C3,
+D1–D18, E1–E6), and the screens those workstreams targeted — the trainee detail, the skill selector, the
+support deck, the scenario panels, the responsive contract — now exist as `SCR-CAR-001`–`024` /
+`SCR-VET-001`–`004` / `SCR-SYS-005`–`007` in `SCREEN_SPEC.md`, which is where this plan's per-screen
+acceptance now lives. The embedded task briefs below are preserved as the historical record of the
+sequencing, per this master's precedent of keeping a superseded plan rather than deleting it; a reader
+executing a brief should start from the landed status in `SCREEN_SPEC.md` and the plan's §4 table, not
+from this section's closed/open column._
+
 UI/UX Frontend Development Update Plan
 
 **Version:** 1.2
@@ -2447,6 +2458,17 @@ Status: **Spec — awaiting owner review.** No code yet.
 Date: 2026-10-04
 Authorization: `ADR-0020` Decision §2 (target-based Trainer Advisor), extending `ADR-0001`; `PRD.md` US-13, US-14, FR-F.
 Approach: A (minimal honest advisor; domain-only, no UI — the SPA rewrite hosts the interface later).
+
+_Dated close-out 2026-10-08 (documentation-sync pass): the status line above is the pre-C2 read and is
+superseded; the spec body below it stands as the record of what C2 implemented. Phase C slice C2 landed
+the v1 engine (`app/Services/Advisor/TrainerAdvisor.php` + `config/advisor.php`, `FR-F`; plan §7's C2 row);
+the Career Cockpit (`SCR-CAR-011`, D8) then hosted the interface this spec's Approach line said the SPA
+rewrite would host later. The in-scope v1 list — per-run `BuildTarget` (C1), the engine ranking the six
+energy-relevant options, the two-state energy band against the sourced threshold and the per-suggestion
+reason line — is shipped. Everything the spec's "Out of scope (v1)" list names is still unbuilt and still
+banned by its evidence bar: no stat-yield projection, no numeric failure estimate (`ADR-0001` §3), no race
+advisory. This close-out is a landing note, not a re-description: the spec preserves its original status
+line as the 2026-10-04 record it is._
 
 ### 1. Purpose and scope
 

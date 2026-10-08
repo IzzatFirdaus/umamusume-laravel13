@@ -12,11 +12,29 @@ entry records which is which. The count is stated as composition rather than a t
 totals that used to live here went stale the moment the history moved.
 
 **Status correction (2026-10-07, D8 hand-off):** the composition above is superseded, and the dated
-claim is left standing rather than rewritten. This file now carries KI-57 through **KI-63**. KI-61
+claim is left standing rather than rewritten. This file now carries KI-57 through **KI-64**. KI-61
 (D7's red landing, filed with the wizard's rerun fix) was appended without this line being updated.
-KI-62 and KI-63 were filed by the D8 hand-off; KI-62 also applied its fix in the working tree. All are
-OPEN, and each names its own closure conditions. `master` remains unpushed (`O-1`), so none can close
-yet.
+KI-62 and KI-63 were filed by the D8 hand-off, KI-62 applying its fix in the working tree; KI-64 was
+filed by the D10 hand-off, which found it by trying to use the import it needed. All are OPEN, and each
+names its own closure conditions. `master` remains unpushed (`O-1`), so none can close yet.
+
+**Status correction (2026-10-07, D14a hand-off):** the composition above is superseded again, and the dated
+claim is left standing rather than rewritten. This file now carries KI-57 through **KI-67**. KI-65 and KI-66
+were filed by the D9 hand-off; KI-67 (the withdrawn `race_instances` pin, which stops any refresh of the
+career catalogue) by this one. `KI-59` carries `## ` rather than `### `, which is why a heading count reads
+ten while the numbering reads sixty-seven. Status is per entry in its own heading: KI-62, KI-65 and KI-66 are
+FIXED IN TREE, NOT CLOSED, and the rest are OPEN.
+
+**Status correction (2026-10-08, documentation-sync pass):** the composition above is superseded again, and
+the dated claim is left standing rather than rewritten. This file now carries KI-57 through **KI-74**.
+Entries added since the D14a read: KI-68 (D12's inline validation, OPEN — the tree still proves it: see the
+entry's own note below), KI-69 (the fixture-data contract), KI-70 (four shared files, process hazard) and
+KI-71 (career files only in the working tree) filed by the D13 session, KI-72 (the tag filter) and a second
+KI-70 (E1's 44px sweep, **CLOSED 2026-10-07**) filed on the D16 follow-up, a second KI-71 (the Grand
+Concert `grand_concert` key mismatch, OPEN) filed by the E5 hand-off, and KI-73 and KI-74 (a leaked
+`:8127` server and a contended-worktree gate) filed 2026-10-08. Per earlier entries in this file, timing
+entries with the same number (two KI-70, two KI-71) are reported rather than renumbered, per the register's
+convention. `master` remains unpushed (`O-1`), so closure of any FIXED IN TREE entry stays held.
 
 ## This file is still the append target
 
@@ -472,6 +490,743 @@ shared `tests/utils/accessibility.ts` builder was left unchanged, because its ot
 4. Whichever is chosen, `tests/utils/accessibility.ts` is the one place a default scope belongs, so
    that the two page-wide scans in `accessibility.spec.ts` stop being timing-dependent.
 
+### KI-64 The CSV import's Confirm step always fails validation in a browser, because `confirmImport()` posts the run's columns and never the file body - FILED 2026-10-07 (D10 hand-off), OPEN
+
+**Symptom, observed.** Driving `/training-runs/import` through a browser — preview a twelve-row CSV,
+then press the confirm button — leaves the page on `/training-runs/import` with no run created and no
+visible error, and the confirm button holding focus. The URL never changes.
+
+**Cause, measured.** The two halves of the write disagree about the payload.
+
+`resources/js/pages/Runs/Import.vue:112`:
+
+```js
+function confirmImport(): void {
+    router.post('/training-runs/import', props.preview?.run ?? {});
+}
+```
+
+`props.preview.run` is composed by `TrainingRunController::importPreview()` from
+`$request->only(['umamusume_id', 'scenario', 'status', 'notes'])` — the run's own columns. The CSV
+body and the parsed rows are sibling props (`csv`, `preview.turns`), and neither is sent.
+
+`app/Http/Requests/ImportHistoricalRunRequest::rules()` requires both:
+
+```php
+$rules['csv'] = ['required', 'string'];
+$rules['turns'] = ['required', 'array', 'min:1', 'max:'.self::MAX_ROWS];
+```
+
+So the POST is refused at the boundary, the refusal redirects back to the same URL, and because the
+confirm form renders no error block of its own the Trainer sees nothing happen.
+
+**Why no test caught it, and why the register is not the cover.** `tests/browser/run-import.spec.ts` says
+so in its own header: "Nothing here completes a commit: the confirm step is reached and read, never posted".
+That sentence is the spec *documenting* the gap, not covering it: a two-step flow whose second step is never
+posted is a spec hiding a defect rather than testing a flow, and it has been green while import could not
+complete. The Pest tests drive `importStore` directly with a correct payload, so they never exercise the
+component. The browser path is the only one that is broken and the only one with no coverage, and the
+failure is **silent at both ends**: the refusal redirects back to the same URL, and the confirm form renders
+no error block, so neither the Trainer nor a test that only reads the page sees a validation message.
+
+**Impact.** Import is one of the two ways a run enters this tool, and its second step cannot complete
+in the browser at all. `PRD` FR-C-3 and `SCR-RUN-004/005` both describe a working two-step import, and
+`SCREEN_SPEC.md` records the screen as implemented.
+
+**Closure.** This entry is open pending:
+
+1. A fix that sends the body with the run: `router.post('/training-runs/import', { ...props.preview.run,
+   csv: props.csv, turns: props.preview.turns })`, with `csv` declared as a page prop if it is not
+   already. The Pest half already passes, so the fix is component-side only.
+2. A browser case that actually posts the confirm step and asserts the run exists, which is the case
+   `run-import.spec.ts` deliberately does not have. Without it the fix is unproven.
+3. A decision on what the confirm form shows when the write is refused. Today it shows nothing, which
+   is the second half of this defect: a refusal that renders no message is indistinguishable from a
+   button that does nothing.
+
+The D10 slice did not fix it. Its browser spec needed a run with turns logged, the import would have
+been one write instead of eleven, and the defect was found by trying to use it; the spec logs its
+turns through the run screen's own form instead, and this entry records what was left.
+
+**Escalated, 2026-10-07.** Two rulings are owed and neither is D10's to make. The component fix is
+Laravel Dev's, in `Import.vue`, and it is a small one. The register ruling is QA / Reviewer's: whether a
+browser spec that reaches a write and never posts it may continue to be counted as coverage of that flow.
+Today `SCR-RUN-004/005` is recorded as implemented on the strength of a spec that does not exercise the
+step this defect lives in, and that is the part a reader should not infer.
+
+### KI-65 The D5/D6 wizard halves landed red at `0006b17` and carried a private copy of the parent-name resolution - FILED 2026-10-07 (D9 hand-off, from the plan's §4.1 queue), FIXED IN TREE, NOT CLOSED
+
+**Symptom, as recorded.** `frontend-development-plan.md` §4.1 item 1 and the §15 changelog row for
+2026-10-06 record that the step-4 and step-5 wizard halves landed at `0006b17` with three failing tests
+and three PHPStan errors, no browser spec, and no `SCR-CAR-*` rows, and that no `KNOWN-ISSUES.md` entry
+was filed for it at the time. This entry is that entry.
+
+**Cause, measured today.** The item records the cause as the step-4 draft write never producing the
+parent identity the run path holds: a draft has no `training_runs` row, so `inheritance_parent_a_id` /
+`_b_id` cannot be written, and the wizard has to name each parent through the draft's `legacy_parents`
+library picks. Measured on this tree, the landed fix is exactly that reuse: `git diff 0006b17 HEAD --
+app/Http/Controllers/Career/LegacySelectController.php` shows the controller's own private
+`parentNames()` (22 lines, a second implementation of the same query) deleted and the call replaced by
+`AncestryGraph::parentNames(SetupDraft::legacyParents())`, the shared owner `LegacyController` already
+uses for the builder and the compare surface.
+
+**Closure, on this tree.** Measured today, against the current code rather than by re-running the bad
+commit:
+
+1. `vendor/bin/pest tests/Feature/CareerLegacyDeckStepsTest.php` - **12 passed (248 assertions)**,
+   including `it leaves the run-scoped ancestry and deck writes exactly as they were` and
+   `it shapes the six nodes the same way for the draft and for a run`.
+2. `tests/browser/career-legacy-deck-steps.spec.ts` exists and is **9 passed** on the scratch harness
+   (port 8137, `PLAYWRIGHT_BASE_URL`), which is the browser gate whose absence the item names.
+3. `SCREEN_SPEC.md` §2 holds both rows: `SCR-CAR-008` (Legacy Select, wizard step 4) and `SCR-CAR-009`
+   (Support Deck Select, wizard step 5), each `Implemented 2026-10-06`.
+4. PHPStan level 6 reads `[OK] No errors` on this tree (KI-65's second half).
+
+**What closure does not cover.** The three failing tests and three PHPStan errors were recorded from the
+plan's status read, not reproduced at `0006b17`: running that commit's suite would need a checkout with
+its own `vendor/`, and the fix has since replaced the code they pointed at. The entry closes the process
+gap the plan names (a red landing with no register entry), not a live defect: no failing test or
+analysis error attributable to D5/D6 remains on this tree as of 2026-10-07.
+
+### KI-66 The wizard's deck step bound `:is-friend` against a snake_case prop, so the "Friend slot" chip never rendered on step 5 - FILED 2026-10-07 (D9 hand-off, browser pass), FIXED IN TREE, NOT CLOSED
+
+**Symptom, observed.** `tests/browser/career-legacy-deck-steps.spec.ts:174` failed: `#deck-slot-6`
+carried `Slot 6 · Friends` and no `Friend slot` chip, while the run-scoped deck builder rendered the chip
+correctly. The DOM showed the binding falling through: `<li ... is-friend="true" class="...">` - the
+attribute present as a plain HTML attribute, which is what Vue does with an attribute that matches no
+declared prop.
+
+**Cause, measured.** `SupportSlot.vue:48` declares the prop as `is_friend` (snake_case, matching the page
+payload key the server sends). `Career/DeckSelect.vue:234` bound it as `:is-friend="slot.is_friend"`.
+Vue camelizes a kebab-case attribute to `isFriend`, which does not match `is_friend`, so the declared prop
+stayed `undefined` and `v-if="is_friend"` never rendered the chip. The other caller,
+`pages/Support/Builder.vue:270`, spreads `v-bind="slot"` and therefore passes the snake_case key intact -
+which is why the same component rendered the chip on the run-scoped builder and not on the wizard step.
+
+**Fix.** One line, in the caller: `:is_friend="slot.is_friend"`. The prop name was deliberately not
+renamed to `isFriend`: `v-bind="slot"` on the other caller passes the payload key, so a rename would have
+required touching the server-side payload shape to keep that caller working, for a name the component
+shares with its own payload contract.
+
+**Verification.** `career-legacy-deck-steps.spec.ts` 9 passed after a rebuild (`public/build` serves the
+component, so a source edit alone does not reach the browser). `support-deck.spec.ts:67` already asserted
+the same chip on the run-scoped builder and was green before and after, which is what made the wizard the
+odd screen rather than the component the odd component.
+
+
+### KI-67 The race catalogue's pinned GameTora document has been withdrawn, so `uma:fetch` can no longer refresh the career calendar at all - FILED 2026-10-07 (D14a hand-off), OPEN
+
+**Status: OPEN.** `config/uma.php:141` pins `gametora-race-catalog` at
+`https://gametora.com/data/umamusume/race_instances.294424fc.json`. That path now answers **HTTP 404 with a
+`text/html` body**. The publisher's live manifest names `race_instances` at `8993fc1b`. The source declares
+no `manifest` block, so `SourceFetcher::resolveUrl()` takes the `! is_array($manifest)` branch at `:151` and
+requests the pin directly: every `php artisan uma:fetch` of this source fails from here on, and nothing
+about the failure is visible in the app.
+
+This is the case `docs/research-scratch/AUDIT-AND-VERIFICATION.md` predicted in the `ADR-0011` scope note:
+"`race_instances` is pinned at `294424fc`, which matches the manifest right now and will therefore go stale
+silently at its next republish, the same way the characters pin already did." It is a sharper form of KI-24:
+there the withdrawn document kept answering `200` with stale content, here it answers `404`.
+
+**Proving commands** (both read 2026-10-07, no proxy):
+
+```bash
+curl -sI -H 'User-Agent: Mozilla/5.0' -H 'Accept: application/json' \
+  https://gametora.com/data/umamusume/race_instances.294424fc.json   # HTTP/1.1 404 Not Found
+curl -s -H 'User-Agent: Mozilla/5.0' -H 'Accept: application/json' \
+  https://gametora.com/data/manifests/umamusume.json | grep race_instances   # "race_instances":"8993fc1b"
+```
+
+**What still works, and why that makes this easy to miss.** The offline path is unaffected:
+`'seed_file' => 'race_instances.json'` (`config/uma.php:146`, landed `8b17703`) fills 410 `race_catalog_slots`
+rows from the committed body, and `database/database.sqlite` holds those 410 rows with `fetched_at`
+2026-10-01. `migrate:fresh --seed` on a fresh worktree therefore looks healthy and the calendar renders; the
+only thing that breaks is a refresh nobody can currently complete. That is the state the scenario-scoping gap
+is waiting behind: `SCREEN_SPEC.md` records that 406 of 410 rows carry no `scenario_key`, and a fetch that
+cannot reach its document cannot add it.
+
+**Second question for the same owner, deliberately not claimed here.** The same manifest read gives
+`characters` = `e0aa6d43` and `character-cards` = `bc892aba`, neither of them the `e9e9ee6d` named in the
+`gametora-characters` entry's `seed_file`. Whether that is the same drift, a different document, or the two
+grains of one document is the Data Engineer's reading under escalation 5, and this entry does not assert it.
+
+**Closure.** The fix `ADR-0011` already approved for `gametora-skills`: give the entry a `manifest` block
+(`url`, `base`, `key`) so the hash resolves per run, with the pinned `url` staying as the documented fallback.
+Closure does not cover: the robots and rate-limit note a source change owes `AGENTS.md` §11, the
+`characters`/`character-cards` question above, the fact that a resolved hash changes which rows land (so the
+410-row figure quoted in `SCREEN_SPEC.md` and in `RaceCalendar.vue`'s comment moves with it), or any of the
+scenario-scoping work the refresh unblocks.
+
+### KI-68 D12's Inheritance write validates inline in the controller, which is a Floor breach and leaves `StoreTurnEventRequest` as a second, disagreeing owner of the same boundary - FILED 2026-10-07 (D14a session, on the owner's D12 close-out), OPEN
+
+**Status: OPEN.** Found while answering the D12 close-out review, not by this slice's own change.
+
+**The defect.** `app/Http/Controllers/Career/InheritanceEventController.php:83` runs
+
+```php
+$validated = request()->validate([ 'turn' => [...], 'source_name' => [...], ... ]);
+```
+
+`AGENTS.md` §5's Floor lists "no inline `$request->validate()`" beside "no business logic in a
+controller", and §7 requires a Form Request for every write. This is the only occurrence of the pattern
+in `app/Http/Controllers/Career/`: `StoreTurnEventRequest`, `StoreRaceEntryRequest`,
+`StoreBuildTargetRequest`, `StoreActionBatchRequest` and the rest of the career writes all use a
+Form Request, so the breach is local and the house pattern is intact to copy.
+
+**Proving command.**
+
+```bash
+grep -rn 'request()->validate(\|\$request->validate(' app/Http/Controllers/Career/
+# one hit: InheritanceEventController.php:83
+```
+
+**The second half, which is why this is more than style.** `StoreTurnEventRequest:39` restricts
+`event_type` to `self::SOURCES` (the four choice cases: Character, Support Card, Group, Scenario) and
+its message at `:56` names exactly those four. D12 writes a `TurnEventType::Inheritance` row from the
+controller instead, so the two paths now disagree about what a turn event may be: the Form Request
+would refuse the value the controller writes. `SCREEN_SPEC.md:1905` records D11's ruling that the enum
+must **not** be widened to satisfy a displayed source ("the write rejects it … recorded here rather than
+resolved by widening the enum"), and no owner ruling names the `Inheritance` case: the only record is
+`SCREEN_SPEC.md:2357`'s change-log line, which states the fact rather than authorizing it.
+`TurnEventType::Failure` is the in-repo precedent for a non-choice, machine-written event type
+(`TrainingRunController.php:1750`, documented at `SCREEN_SPEC.md:350`), so the case itself is
+defensible; what is missing is the ruling, and an agent reading only the enum will take it as
+precedent for the next case. `turn_events.event_type` is a plain `string(30)`
+(`database/migrations/*create_turn_events*`), so no schema change is needed either way.
+
+**Closure.** Move the write to a Form Request (its own, or an inheritance branch of
+`StoreTurnEventRequest` decided by whoever owns that request), and have the owner either rule the
+`Inheritance` case in or record why `Failure`'s precedent covers it. Closure does not cover: whether
+D12's seven feature cases still pass once the boundary moves (`tests/Feature/CareerInheritanceEventTest.php`
+is untracked and was written against the inline path), the `StoreTurnEventRequest::SOURCES` vocabulary
+itself, or any of the D11 screen's behaviour.
+
+**Attribution note.** D12 was built by another session in this shared worktree; this entry is filed by
+the D14a session because the close-out review asked for the enum's authorization and the search turned
+up the breach. The D12 author owns the fix.
+
+### KI-69 The browser suite has no fixture-data contract: five cases assert an empty-state surface, seven need a populated Veteran library and one reads the artwork mirror off the disk - FILED 2026-10-07 (D13 session, on the owner's D11 close-out review), OPEN
+
+**Status: OPEN.** Filed while answering the D11 review's question "is the suite flaky, or did something
+regress after those closures". The answer is neither: every one of the fourteen failures is
+**deterministic**, and each is a harness precondition rather than a product defect. Nothing here is
+flaky across runs on a fixed harness.
+
+**The shared cause.** `playwright.config.ts:7` hardcodes `const port = 8127`, and `webServer.command`
+is `php artisan serve --port=8127` with `reuseExistingServer: true`. That server takes its database from
+`.env`, which is `DB_DATABASE=database/database.sqlite`: the **shared dev file**. Plan §4.1 item 7 states
+the opposite requirement, that "the browser suite still runs against a scratch database on port 8137 with
+`PLAYWRIGHT_BASE_URL`: it asserts an empty runs and veterans table". The config and the plan disagree, and
+an unqualified `npm run test:browser` follows the config. The D11 full-suite reading was taken that way:
+its own log line names `http://127.0.0.1:8127/training-runs/150`, and `database/database.sqlite` holds
+five Active runs (`id` 7, 52, 107, 136, 216) with `sqlite_sequence` at 216.
+
+**Class 1, empty-state assertions (5 of the 14).** Each of these depends on a surface that only renders
+when the runs table holds no rows: `runs.spec.ts:41` and `career-legacy-deck-steps.spec.ts:268` assert
+`getByText('No runs yet')`, `dashboard.spec.ts:65` asserts `getByText('No active career. Start a new
+training run.')`, and `dashboard.spec.ts:163` asserts the `Start a new training run` link.
+Proven both directions on a scratch DB at `.scratch-uma/d11-iso.sqlite` (`migrate --seed`, served on the
+session's own port 8141 with `DB_DATABASE` and `PLAYWRIGHT_BASE_URL` set):
+
+```bash
+# wiped scratch: PASS
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:8141 npx playwright test runs --grep "empty"                 # 2 passed
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:8141 npx playwright test dashboard --grep "empty career"     # 1 passed
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:8141 npx playwright test career-legacy-deck-steps            # 9 passed (2.8m)
+# shared dev file, five runs: the same four cases FAIL with `getByText('No runs yet') … element(s) not found`
+```
+
+`dashboard.spec.ts:105` is the same class for a different reason: at `:120` it calls `boundingBox()` on
+`getByRole('link', { name: 'Start a new training run' })`, and a dashboard that holds runs replaces that
+empty-state call to action with career content, so the locator never resolves and the case times out at the
+180s budget.
+
+**This also voids §4.1 item 4's closure as a durable claim.** That closure records the empty-table defect
+being cleared because "the scratch database holding a stale run from a crashed spec … was deleted from
+that database". Deleting one row is a one-time manual reset, not a fix; the premise returns as soon as any
+spec crashes or any other session writes. Item 4 is closed for that pass, not closed forward. The closure's
+other fix is uncommitted too: `git status --porcelain tests/browser/career-legacy-deck-steps.spec.ts` reads
+`M`, and the diff is the scoped `The seven support types…` assertion replacing the 54-element
+`getByText('Wit')`. So `HEAD` at `55be0cd` still holds the selector the closure says was fixed
+(`git show HEAD:tests/browser/career-legacy-deck-steps.spec.ts | grep -c "getByText('Wit')"` reads 1), and a
+fresh worktree checking out `HEAD` reproduces that failure as well.
+
+**Class 2, the artwork mirror (1 of the 14).** `support-cards.spec.ts:171` asserts
+`#support-card-results img` has count 0, i.e. that the mirror holds no file. `storage/app/private/artwork`
+on this tree holds **665 PNG files**, so the precondition is false on disk and the case fails on a wiped
+database too (proven above: `1 failed` with the scratch runs table empty). This is not a new ruling to
+make. Plan §4.1 item 5 already ruled exactly this class for `catalog-detail.spec.ts` — "was asserting the
+disk rather than the screen; it now asserts the shape of whichever state the tree is in, the same ruling
+`support-deck.spec.ts` recorded for the picker's thumbnails" — and `support-cards.spec.ts` is the third
+instance that the per-file fix missed.
+
+**Class 3, the fixture needs data no code path creates (7 of the 14).**
+`tests/browser/career-inheritance-event.spec.ts` is **untracked**, as is the whole of D12:
+`git status --porcelain` reads `??` for `app/Http/Controllers/Career/InheritanceEventController.php`,
+`resources/js/pages/Career/InheritanceEvent.vue`, `tests/Feature/CareerInheritanceEventTest.php` and the
+spec (KI-68 records the same status for the feature test). Every case except `:234` calls
+`openInheritanceEvent()`, which at `:80` does
+`select('select[name="legacies.0.legacy_id"]', {label: 'Symboli Rudolf'})`. That select is seeded from
+`LegacyController::roster()` (`:308`), which reads the **`veterans` table**. Two measured facts:
+
+- `veterans` is empty on every database in reach: `database/database.sqlite` 0 rows,
+  `.scratch-uma/browser.sqlite` 0, and a fresh `migrate --seed` 0. No seeder touches it
+  (`grep -ril veteran database/seeders/` returns nothing) and `app/Actions/RecordVeteran.php` is referenced
+  only in docblocks, never called. So the roster picker renders no options, and Playwright waits out its
+  180s budget on `did not find some options`. Re-running the whole spec on the fresh seeded scratch
+  database reads **7 failed, 1 passed (22.9m)**, and all seven stack traces end at
+  `career-inheritance-event.spec.ts:80:63` — the same seven names and the same failure point the D11
+  full-suite run recorded. The one green case is `:234`, the only case that never calls the fixture.
+- Inserting four Completed runs with matching `veterans` rows moves the failure off `:80` and onto `:81`,
+  `input[name="legacies.0.rank"]`, which the shipped `Builder.vue` **never renders**: its inputs carry
+  `v-model` and `:id="rank-${parent.slot}"` with no `name` attribute at all. The only `name` the page
+  emits is `legacies.${index}.legacy_id`, plus `affinity`. `ancestors.N` and `sparks.N.kind` are missing
+  the same way. The spec was written against a form contract the component does not have.
+
+**So the plan holds two contradictory requirements at once.** Item 7 says the suite needs an *empty*
+veterans table; this fixture needs veterans with specific names. No single scratch database satisfies
+both, which is the actual defect: there is no fixture-data contract for `veterans`, and no committed
+path that populates it.
+
+**Nothing here is flaky.** Each class above was measured twice on the same harness and landed in the same
+place both times, on the same database state.
+
+**Class 4, the trainee step loses its flash (1 of the 14).** `career-trainee-select.spec.ts:88` **also
+reproduces on a wiped scratch database**, so it is not the empty-table class. It fails at `:104` on
+`getByText('Trainee set: Admire Vega.')`. The three candidate causes were tested in order and two are
+cleared:
+
+1. *Redirect shape or the shared `flash` prop.* **Cleared.** `TraineeSelectController::store()` does
+   `redirect()->route('career.trainee')->with('status', "Trainee set: {$trainee->name}.")` and
+   `HandleInertiaRequests:49` shares `'flash' => ['status' => fn () => $request->session()->get('status')]`.
+   A feature-level probe on the same middleware chain passed both
+   `assertSessionHas('status', 'Trainee set: Admire Vega.')` and
+   `assertInertia(...->where('flash.status', 'Trainee set: Admire Vega.'))`. The server side is correct.
+2. *`preserveState` or `only` skipping shared props.* **Cleared.** `choose()` at `TraineeSelect.vue:172`
+   passes only `preserveScroll` plus `onSuccess`/`onFinish`; neither `preserveState` nor `only` appears in the
+   write. The filter form's `router.get(..., {preserveState: true})` at `:144` is not on this path: `</form>`
+   closes at `:292`, well before the card list at `:321` and the button at `:375`, so Enter on the button
+   cannot submit that form. Measured directly: a mouse click and a keyboard Enter fail identically, so the
+   keyboard path is not the defect.
+3. *The layout remount eats the one-shot flash.* **Partly supported, and the mechanism is now narrower.**
+   A request trace on the live page shows exactly two requests after the write:
+   `PUT /career/setup/trainee [X-Inertia=true]` answered **303**, then
+   `GET /career/setup/trainee [X-Inertia=-]`. The follow-up carries no `X-Inertia` header at all, i.e. it is
+   a **top-level document navigation**, not the Inertia XHR visit the client normally makes. The page that
+   renders from it has no flash element (`main p.mb-4` contents `[]`), while the draft state it does render
+   (`Stored choice: Admire Vega`) proves the write landed.
+
+**Still open, stated as the live hypothesis rather than as unknown:** why does this write's 303 resolve to a
+document reload where the wizard's other writes do not? `LegacySelectController:124` and
+`DeckSelectController:117` flash the same way, on the same `SetupLayout`/`AppLayout` pair, and their text
+renders (`career-legacy-deck-steps.spec.ts:268` asserts `Legacy recorded.` and `Deck saved.` and is 9 passed
+in isolation). The one structural difference measured so far is that `store()` redirects to the URL the SPA is
+already on, so the reload re-enters the same route; the other two are being tested as the discriminator. Who
+ever picks this up should start there, and the reproduction is four lines of scratch spec, not a theory.
+
+**Closure.** Name the harness in `playwright.config.ts` instead of leaving it in prose: point the suite at
+a scratch database it creates and wipes itself, so class 1 cannot recur when a peer writes to the dev
+file. Apply item 5's existing disk-state ruling to `support-cards.spec.ts:171` (class 2). For class 3,
+the D12 author either seeds the Veterans the fixture picks (a committed seeder or an in-spec data setup)
+and corrects the selectors to the `:id` contract `Builder.vue` actually renders, or the spec stops driving
+the Builder and reaches `legacy_selection` the way the run screen does. Class 4 needs its own investigation
+from whoever owns the wizard's trainee step.
+
+Closure does not cover: whether `RecordVeteran` should gain a caller (that is D16's open half, and a product
+decision rather than a test fix); whether class 4 is a page-side or controller-side fix; and any product
+behaviour of the Legacy Lab, the runs list or the dashboard, none of which this pass found broken.
+
+**Attribution note.** None of these fourteen is a D11 or D13 defect. Filed by the D13 session because the
+owner's D11 close-out review asked whether the queue was flakiness or regression; the D12 author owns
+class 3, and the harness owner owns the config change.
+
+**Dated re-read 2026-10-08 (documentation-sync pass): one of the "closure does not cover" clauses is now
+false, and the entry stays OPEN for its reported classes.** The clause "whether `RecordVeteran` should
+gain a caller (that is D16's open half...)" is superseded: D16 landed `SaveVeteranController` as
+`RecordVeteran`'s first caller, wired at `routes/web.php:237-240` (the `runs.veteran` / `runs.veteran.store`
+pair), so the write path the class-3 fixture needs now exists. That resolves the *populate-the-library*
+half; it does **not** resolve the entry's reported defects, each still measured on this tree:
+`playwright.config.ts:7` still hardcodes `port = 8127` with no `DB_DATABASE`, so an unqualified
+`npm run test:browser` still points at the shared dev file (class 1 and the harness half, open);
+`support-cards.spec.ts:171` still asserts the artwork-mirror-empty condition (class 2, open);
+`resources/js/pages/Legacy/Builder.vue` still emits no `name="legacies.0.rank"` (or ancestors/sparks)
+attribute while `tests/browser/career-inheritance-event.spec.ts:72` still drives one, so the class-3
+selector contract mismatch stands (measured by grep on 2026-10-08); and class 4's investigation is
+unattributed. The entry's status line stays OPEN; this note records that one of its premises changed, not
+that the defect it names closed._
+
+### KI-70 Four shared files are being edited by concurrent sessions in one working tree, and one committed screen's route exists only in the working copy - FILED 2026-10-07 (D13 session, on the owner's instruction), OPEN
+
+**Status: OPEN.** This is a process hazard, not a code defect. It is filed because the next editor can
+silently destroy another session's in-flight work, and one instance has already happened: the owner reports
+that a concurrent session edited `app/Http/Controllers/Career/CockpitController.php` underneath the D11 pass
+and reverted its event note. The re-application survived; this pass did not observe the revert itself and
+reports the measured state below rather than the incident.
+
+**Measured state, 2026-10-07.** `git diff --stat` against the working tree:
+
+| File | Uncommitted churn |
+| --- | --- |
+| `SCREEN_SPEC.md` | 426 lines |
+| `app/Http/Controllers/Career/CockpitController.php` | 222 lines |
+| `routes/web.php` | 44 insertions unstaged, plus 1 deletion staged |
+
+The owner's review cited 228 changed lines for `SCREEN_SPEC.md`; it measures 426 now, so the file grew while
+this session worked. Treat any number quoted for these four paths as stale until re-read.
+
+**Two concrete instances, both at 07:19:43 on 2026-10-07.** A concurrent session wrote a batch of files in
+one second, and two of them broke another session's work:
+
+- `config/scenarios.php` was caught mid-write by a `php artisan test` run, which aborted with
+  `strict_types declaration must be the very first statement in the script`. The file lints clean and returns
+  its array now, so the reading was torn, not wrong — but 15 of that run's 15 failures were
+  `LegacySearchRequest.php:44` `array_keys(): Argument #1 ($array) must be of type array, null given`, i.e.
+  five unrelated suites reported a configuration that no longer existed. A gate result taken during that
+  window is not evidence about the tree; re-run before believing a count.
+- `resources/js/pages/Preferences/Edit.vue:81` — **CLOSED 2026-10-07, no KI owed.** The stray brace stood in the working tree and failed `npm run build` for every session in this tree, because Vite builds the whole page glob: a screen none of them is touching makes the bundle for all of them, and that in turn blocked the browser gate for any slice, since `public/build/manifest.json` could not be regenerated to include a new page. It is a D18 file, not a peer's, and D18 closed it. **Blocked, then unblocked; final state verified by rebuild + browser spec.** Four reports gave four incompatible stories for one character; the authorship of the intermediate version is not knowable from the current tree and is not recorded. The plain facts that matter: the file now compiles, the build succeeds (955 modules), and the tablist renders in `scenario-panel.spec.ts`'s output. The entry is closed rather than re-litigated.
+
+The second is the expensive shape of the hazard: it is not a lost edit but a shared gate held hostage by one
+unsaved file. Closure does not extend to fixing another session's in-flight file; the owner's standing rule
+on this is that a peer's mid-edit work is left alone and named, as the CockpitController analysis error was
+in the D13 hand-off.
+
+**The sharpest instance is `routes/web.php`.** The `runs.races.decision` route — D10's Race Decision screen,
+recorded in plan §8 as `Landed` at `55be0cd` — is present in the **working copy only**:
+
+```
+55be0cd: use App\Http\Controllers\Career\RaceDecisionController;   (import, no route: 1 occurrence)
+index  : (the import deleted by a staged change from another session: 0 occurrences)
+worktree: use …; + Route::get('/training-runs/{run}/races', [RaceDecisionController::class, 'show'])  (2)
+```
+
+So `git show 55be0cd:routes/web.php` registers no route for a screen the plan calls landed, and a working-tree
+reset of this file takes the route with it. The staged deletion of the import is a second session's edit
+pointing the other way; neither is wrong on its own, and the pair is why this needs a rule rather than a fix.
+
+**Instruction to the next editor of these four paths.** Re-read the file immediately before writing, and
+re-read it again after any `git add`, `git stash` or commit you did not make: `git diff --stat` and
+`git diff --cached --name-only` are two commands and they are the whole check. Commit with an explicit
+pathspec (`git commit -m … -- <path>`) so a peer's staged entry stays staged and untouched — verified working
+on this tree at `b5d69be`, where the two index entries survived the commit. Never `git add -A`, never
+`git stash pop`, and never treat a clean `git status` as evidence that a shared path is yours to rewrite.
+
+**Proving command.**
+
+```bash
+git diff --stat -- SCREEN_SPEC.md app/Http/Controllers/Career/CockpitController.php routes/web.php
+git diff --cached --name-only
+php -r '$h=shell_exec("git show 55be0cd:routes/web.php");echo substr_count($h,"RaceDecision");'   # 1, no route
+```
+
+**Closure.** No commit is possible here without an owner decision on sequencing, because four sessions share
+one working tree and `master` is the branch of record with no CI to catch a partial landing. Closure needs
+either per-slice worktrees (the `.worktrees/` sibling directory this project already uses) or a written rule
+naming who owns each of these four paths at a given time. Closure does not cover: the correctness of any
+concurrent session's edits, the staged entries themselves, or whether `55be0cd` should be amended (it should
+not; a follow-up commit is the only safe shape here).
+
+### KI-71 Twenty-seven career-phase files, including whole slices the plan marks Landed, exist only in the working tree - FILED 2026-10-07 (D13 session, on the owner's instruction), OPEN
+
+**Status: OPEN.** A `git checkout`, a `git clean`, or any session resetting the working tree deletes these
+slices outright: there is no commit to restore them from, and no CI, remote branch or bundle holds a copy.
+Filed because the KI-69 attribution depends on D12's untracked state, and because a reader of plan §8
+currently cannot tell which "Landed" rows are in `master` and which are in a directory.
+
+**Census.** `git status --porcelain` names 49 untracked paths on this tree, **27** of them career-phase code
+(filtered on `Career`/`career` plus `RunRaceStripTest.php`; this session's own
+`docs/research-scratch/D13-SKILLS-PLANNER-2026-10-07.md` is untracked too and is not in the 27). The
+per-slice shape:
+
+| Slice | Plan §8 status | Untracked files |
+| --- | --- | --- |
+| D11 Event Decision | Landed | `Career/EventDecisionController.php`, `Career/EventDecision.vue`, `career/EventCard.vue`, `CareerEventDecisionTest.php`, `career-event-decision.spec.ts` |
+| D12 Inheritance Event | Landed, "All gates passed" | `Career/InheritanceEventController.php`, `Career/InheritanceEvent.vue`, `CareerInheritanceEventTest.php`, `career-inheritance-event.spec.ts` |
+| D13 Skills Planner | built this session | `Career/SkillsPlannerController.php`, `Career/SkillsPlanner.vue`, `career/SkillPlanRow.vue`, `CareerSkillsPlannerTest.php`, `career-skills-planner.spec.ts` |
+| D14a Race Strip | Landed | `career/RunRaceStrip.vue`, `RunRaceStripTest.php`, `career-race-strip.spec.ts` |
+| D10 Race Decision | Landed at `55be0cd` | its browser spec `career-race-decision.spec.ts` is untracked, though its controller is committed |
+| not numbered in §8 | — | `Career/ResultController.php`, `Career/Result.vue`, `CareerResultTest.php`, `Career/TimelineController.php`, `Career/Timeline.vue`, `career/CareerTimeline.vue`, `CareerTimelineTest.php`, `career-result.spec.ts`, `career-timeline.spec.ts` |
+
+The registry rows are untracked too: `SCR-CAR-014`, `SCR-CAR-015` and `SCR-CAR-016` are in the working
+`SCREEN_SPEC.md` and **absent from `55be0cd`** — `git show 55be0cd:SCREEN_SPEC.md` contains none of the three.
+`routes/web.php` shows the same split in the opposite direction, per KI-70.
+
+**What this does to the plan's own claims.** For these slices "Landed, all gates passed" is a statement about
+an uncommitted directory. It also dissolves one KI-69 reading without further argument: §8 records D12's
+browser spec green while that spec is unrunnable on the tree as seeded, and there is no commit at which it
+could have been either.
+
+**Closure.** Commit each slice as its own change with its tests, in slice order, with the owner fixing the
+sequence because four sessions share the tree (KI-70). The verification cost is small and the loss cost is
+total: a green suite does not protect a file `git` has never seen. Closure does not cover *which* session
+commits which slice; whether D12's spec should land before its KI-68 boundary fix and its KI-69 class-3
+fixture defect do (recommended: not); or the `veterans` fixture ruling now open as plan §4.1 item 10.
+
+**Attribution note.** D13's five files are this session's and are named here rather than committed: the owner
+authorized exactly one commit in this follow-up, `b5d69be` for the D5/D6 selector fix, and a slice commit is
+not implied by a file edit.
+
+### KI-72 The library's tag filter is case-sensitive, so a hand-typed tag is unfindable by its capitalised suggestion - FILED 2026-10-07 (D16 follow-up, on the owner's ruling), OPEN
+
+**Status: OPEN.** `StoreVeteranRequest::prepareForValidation()` de-duplicates tags by `mb_strtolower`
+(`app/Http/Requests/StoreVeteranRequest.php:131`) and stores the first spelling exactly as typed, so a
+Trainer who types `speed` keeps `speed`. The library's tag filter answers the `Speed` suggestion with
+`whereJsonContains('tags', 'Speed')` (`app/Actions/ListVeterans.php:61`), and SQLite compares JSON string
+elements case-sensitively. The stored row and the chip then disagree silently: the Veteran exists, the
+filter says it does not, and nothing errors. The suggestion chip is the library's discovery path, so the
+miss lands on exactly the free-text half of the field the Save Veteran screen exists to offer.
+
+**Proving file.** `ListVeterans.php:60-62` (one `whereJsonContains` per tag, case-sensitive) against
+`StoreVeteranRequest.php:99-141` (case-insensitive de-duplication, verbatim storage). The D16 review
+reproduced it end to end: a career filed with the tag `speed` returns no row for the filter value `Speed`
+and returns the row for `speed`.
+
+**Closure.** A normalized companion column (the stored tags keep the Trainer's spelling; the filter matches
+a lowercase twin) is a schema change under §11's migration package, not a UI edit, which is why this is
+filed rather than folded into D16. Closure does not cover the filter's displayed wording, nor the
+`veterans` fixture ruling that KI-69 class 1 and plan §4.1 item 10 hold open, which any browser-level
+regression test for this defect needs first.
+
+---
+
+## KI-70 — E1's 44px-floor sweep fails on a cockpit control, not the scenario panel
+
+**Filed 2026-10-07, by the D18 close-out. CLOSED 2026-10-07 by the E1/E2 pass (closure below). Owner: the E1 session.**
+
+`tests/browser/scenario-panel.spec.ts:153` ("keeps the 44px floor across the cockpit and reflows at 320
+px") fails on **control 11 at 32px**:
+
+```
+Error: control 11 is not sized to the 44px contract
+Expected: >= 44
+Received:    32
+```
+
+**Not D18's defect, and not the scenario panel's.** The test sweeps `main a, main button` across the
+whole Unity Cup cockpit page, so its index counts every control on the page, not only the ones the
+scenario panel draws. The error-context snapshot shows the failing page is the cockpit after a
+run-delete, and control 11 is an element on the cockpit — D18's slice touches `Preferences/Edit.vue`,
+`PreferenceController.php`, `AppLayout.vue` and the preferences specs, none of which is the cockpit.
+
+The panel itself renders correctly in all seven passing cases, including the 320px reflow check (the
+overflow assertion at line 175 passes — no sideways scroll). The 44px failure is a cockpit control
+that predates E1 and sits outside every Phase D slice's scope.
+
+**Proving file.** `test-results/scenario-panel-keeps-the-4-31c62-ckpit-and-reflows-at-320-px-chromium/error-context.md`,
+page snapshot ref `f2e3`, showing the cockpit shell with control 11 measuring 32px.
+
+**Owner.** The E1 session, when its panel row is next opened. The cockpit control is not in E1's
+remit either, so the fix is either a `min-h-11` hoist onto the offending element (the same pattern the
+`Go to the run record screen` link uses) or a narrowing of the sweep to the panel's own controls — the
+E1 session chooses. Not filed against D18, and not closed by D18's close-out.
+
+**Closed 2026-10-07 by the E1/E2 pass, first remedy of the two the entry names.** The offending control
+is identified: `resources/js/pages/Career/Cockpit.vue:327`, the `Career Timeline` door the D14 pass added
+as an inline link inside a `text-xs` sentence, carrying `font-medium text-ink-strong underline` and no
+`min-h-11`, so it measured 32px. It was hoisted out of the sentence to the standalone
+`mt-2 inline-flex min-h-11 items-center` pattern its sibling `Go to the run record screen` link already
+used, which is the option the entry prescribes; the sweep was not narrowed.
+
+**Proving command.** A Playwright probe over `main a, main button` on the Unity Cup cockpit reported
+`total controls: 13 | under 44px: 0`, and the link as `{"h":44,"cls":"mt-2 inline-flex min-h-11 items-center
+text-xs font-medium text-ink-strong under…"}`. `scenario-panel.spec.ts` then passed its 44px case: 8 passed
+alone, 18 passed with `ura-panel.spec.ts` together.
+
+**What closure does not cover.** The fix ships in this slice's commit, so a checkout before it still fails
+the sweep. It does not cover the second, unrelated 44px finding this pass made in E2's own run: a control
+measuring 0px inside a collapsed `<details>` on the URA cockpit, which is not a target-size violation (a
+control that is not placed cannot be hit) and which `ura-panel.spec.ts` now handles by measuring visible
+controls only, with a floor on the measured count so the skip cannot become a way to pass on nothing. It
+also does not resolve the **numbering collision**: this KI-70 and the process hazard filed above it as
+"Four shared files are being edited by concurrent sessions" share a number. The register says never
+renumber an existing entry, and renumbering this one would break the inbound `KI-70` anchors in the plan
+and in this file, so the collision is reported for the owner to settle rather than fixed by inference.
+
+### KI-71 The Grand Concert final is tagged with a scenario key no run carries - FILED 2026-10-07 (E5 hand-off), OPEN
+
+**Status: OPEN.** Not caused by E5 and not fixed by it. It is filed here because E5 reads the same career
+calendar D10 reads, and reading it whole is what made the mismatch visible.
+
+`app/Services/DataPipeline/Parsers/GametoraRaceCatalogParser.php` maps the export's `final_live` source key
+to `grand_concert`. `config/scenarios.php` keys the same scenario `our_grand_concert`, and that is the key
+`ScenarioSelectController` stores on the run. `RaceCatalogSlot::scopeForScenario($run->scenarioKey())`
+matches `scenario_key IS NULL` plus the run's own key, so the row tagged `grand_concert` is matched by no
+run at all.
+
+**Effect.** The fourth Global scenario's own final is the one `is_mandatory` row tagged `grand_concert`
+(`URA Finals Final (Grand Live)`). It therefore never appears on a Grand Concert run's calendar, on
+`SCR-CAR-013` (Race Decision), on `SCR-CAR-023` (the planner this hand-off landed) or in the Cockpit's
+mandatory list. The other three scenarios are unaffected: their finals are tagged with the key their config
+entry carries. The planner's mandatory group and deadline region are consequently short one obligation for
+that scenario, and the planner says nothing about it, because it reads the calendar and the calendar has no
+such row.
+
+**Proving commands** (both read 2026-10-07):
+
+```bash
+php -r '$d=new PDO("sqlite:database/database.sqlite"); foreach ($d->query("select scenario_key, title from race_catalog_slots where scenario_key is not null") as $r) echo $r["scenario_key"]." | ".$r["title"]."\n";'
+# grand_concert | Twinkle Star Climax  (and unity_cup, ura_finale, trackblazer; no our_grand_concert row)
+grep -n "final_live" app/Services/DataPipeline/Parsers/GametoraRaceCatalogParser.php
+# 'final_live' => 'grand_concert',
+```
+
+**Closure owed.** Either the parser's map or the config key has to move, and which one is an owner call: the
+config key is the one the wizard stores and every scenario-aware lookup reads, while the parser's value is
+what the fetched source publishes. Either way the fix needs a reparse (`php artisan uma:reparse <source>`)
+to retag the stored row, so it is filed rather than changed by inference.
+
+**What closure would not cover.** `race_catalog_slots` holds no `our_grand_concert` row today, so any screen
+that reads a scenario's own races stays one row short until that reparse runs. And the register's existing
+numbering collision (two entries numbered KI-70, recorded in the entry above) is untouched by this one.
+
+### KI-73 A leaked `php artisan serve` holding :8127 takes the default browser entry point down for every session in the worktree - FILED 2026-10-08 (E6 follow-up 2, on the owner's instruction to diagnose rather than work around), OPEN
+
+**Status: OPEN.** Not caused by E6 and not fixed by it. E6 found it while trying to make `npm run
+test:browser` work with no override, and the reason it is filed instead of fixed is in "Closure owed".
+
+`playwright.config.ts:7` pins one port (`const port = 8127`), `:36` starts the dev server on it, `:38`
+sets `reuseExistingServer: true`, `:37` polls `url: baseURL` for readiness and `:39` allows 60s. The
+combination means **one `php -S` on :8127 is the browser gate for the whole worktree**, and every session
+shares it.
+
+The failure measured on 2026-10-08: a `php artisan serve` left running by a concurrent session held the
+port, and its `DB_DATABASE` pointed at `storage/app/private/planner-scratch.sqlite`, a scratch file that
+had since been deleted. Every request therefore threw
+`Illuminate\Database\SQLiteDatabaseDoesNotExistException` at `app/Http/Controllers/DashboardController.php:93`
+(the home route's `TrainingRun::where('status', RunStatus::Active)->first()`) and answered **HTTP 500 in
+4.7s**. Playwright never accepted that listener as ready and never replaced it, so `npm run test:browser`
+spent its 60s polling a 500 and reported the web server as unable to start. Freeing the port made the same
+command work immediately: it bound :8127 itself (new PID 11544) and ran "251 tests using 1 worker", with
+the first eight cases passing at 4.6-14.3s each. So the defect is the shared fixed port plus
+`reuseExistingServer`, not the pages.
+
+Two things follow that are worth stating separately, because each one burned an hour.
+
+**A server that dies between turns is worse than one that never starts.** The scratch-server recipe the
+worktree has been using backgrounds `php artisan serve` inside one Bash call. When the call ends the
+process is reaped, but when it does *not* end cleanly the listener survives with the caller's environment
+still baked into it, and that is exactly the 500-ing holder above. The port then reads as "in use by
+something" to every later session.
+
+**`kill <pid>` from Git Bash cannot reap a Windows pid, and the usual compound check cannot fail.** The
+first attempt this pass was `kill 1472 && ... || echo "port_freed"`: Git Bash reported
+`kill: (1472) - No such process`, the `||` arm ran anyway and printed `port_freed`, and the port was still
+listening afterwards. `taskkill //PID 1472 //F` returned `SUCCESS` and `netstat` then showed no LISTENING
+socket on :8127. **How to apply:** reap with `taskkill`, and prove it with
+`netstat -ano | grep ":8127.*LISTENING"` as a command of its own, never as the tail of a chain whose
+fallback echoes success.
+
+**A leak does not follow every run.** Checked on 2026-10-08 after the sweep below finished: the server that
+run's own `webServer` started (PID 11544) was **not** left holding the port. `taskkill //PID 11544 //F`
+returned `ERROR: The process "11544" not found` (exit 128) and `netstat -ano | grep ":8127"` returned no
+line at all (exit 1), with a positive control for that check earlier in the same pass, when the identical
+command did list PID 1472 as LISTENING. So Playwright reaped the server it started, and the hazard this
+entry names is narrower than "every browser run leaks a holder": it is a **session that dies without
+teardown**, leaving a listener whose environment outlives its scratch database. That is still enough to
+take the default entry point down for every later session, which is why the entry stands, but a reader
+should not add a post-sweep reap to their own hand-off as if it were the fix.
+
+**Proving commands** (all run 2026-10-08):
+
+```bash
+netstat -ano | grep ":8127"                      # LISTENING 1472
+powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter 'ProcessId=1472' |
+  Select-Object ProcessId,CreationDate,CommandLine | Format-List"
+# php.exe -S 127.0.0.1:8127 D:\Projects\umamusume-laravel13\vendor\...\resources\server.php
+# CreationDate 7/10/2026 10:53:00 PM
+curl -s -o /dev/null -w "%{http_code} %{time_total}\n" http://127.0.0.1:8127/   # 500 4.727490s
+ls storage/app/private/*.sqlite                   # No such file or directory
+taskkill //PID 1472 //F                           # SUCCESS
+npm run test:browser                              # Running 251 tests using 1 worker
+```
+
+**Closure owed.** Three candidate remedies, none of them E6's to choose, because all three change the
+instrument every other session reads: a per-session port (read from an env var so `reuseExistingServer`
+can no longer be poisoned by a neighbour), a readiness check that fails fast on a 5xx instead of polling it
+for 60s, or a worktree-wide convention that a scratch server is always reaped in the call that starts it.
+The first is the only one that survives two sessions on one box. This is a tooling-owner call under
+`GOVERNANCE.md` §GATE-REGISTRY, and a scenario slice editing the shared `playwright.config.ts` mid-slice
+would move the gate for concurrent sessions without their knowing, which is the thing this entry exists to
+prevent.
+
+**What closure would not cover.** Closing this does not explain the collapse the sweep went on to have. The
+unoverridden run finished at **19 passed, 52 failed, 180 did not run** of 251 in 1.2h (exit 1). Of the 52,
+39 are `worker process exited unexpectedly (code=3221225794)` (0xC0000142, a Chromium worker that could not
+initialise), 18 are `Test timeout of 180000ms exceeded` at `page.goto`/`page.waitForURL`, and one is
+`browserContext.newPage: Target crashed`. Two independent measurements say the host, not the pages, was the
+limit: a single indexed `PDO` read of `training_runs` on the dev file took **over 120s** to return, and the
+process table at the same moment showed a peer `php` at 510s CPU alongside four long-lived agent `node`
+processes at 12,000-17,000s CPU. A single-process `php -S` serves one document at a time under that load,
+which is the contention `playwright.config.ts:19-28` already documents when it explains why its own timeout
+is 180s. **This sweep is therefore void as a product signal**, and no case in it is proven either way: the
+two E6 cases it reached, `grand-concert-panel.spec.ts:48` and `scenario-panel.spec.ts:58`, are both reported
+at `(0ms)`, meaning the worker was already dead and they never executed. Establishing E6's browser gate
+needs the run repeated on a quiet box, or against a scratch database copy on a private port per the recipe
+the worktree already uses, and the result recorded here rather than inferred.
+
+### KI-74 A gate run on a contended worktree is void as a signal, and a red sweep under load reads as a product regression - FILED 2026-10-08 (E6 follow-up 3), OPEN
+
+**Status: OPEN.** This is the class, not one run. It invalidated two different gates in one night on this
+worktree, and each time the first reading was "the product is broken".
+
+`AGENTS.md` §1 describes the shape of the problem: this is a local-only, single-Trainer tool with **no CI**,
+so a command's output is the only evidence that exists. Everything in §9's hand-off therefore runs on the
+same box that every concurrent session is running on, against the same `database/database.sqlite`, served by
+a single-process `php -S`. `playwright.config.ts:19-28` already documents the consequence and was edited to
+180s because of it ("a document queued behind another session's page (or behind `php artisan test`, which is
+CPU-bound here) costs what that request costs - 11-16s each, observed at `:8141`"). What it does not say is
+that once the box passes a certain load the instrument stops measuring anything at all.
+
+**Measured 2026-10-08, during the unoverridden `npm run test:browser` sweep:**
+
+| Signal | Reading |
+| --- | --- |
+| Suite outcome | 19 passed, 52 failed, **180 did not run** of 251, 1.2h, exit 1 |
+| Failure family 1 | 39 `worker process exited unexpectedly (code=3221225794)` (0xC0000142, worker could not initialise) |
+| Failure family 2 | 18 `Test timeout of 180000ms exceeded` at `page.goto` / `page.waitForURL` |
+| Failure family 3 | 1 `browserContext.newPage: Target crashed` |
+| A single indexed `PDO` read of `training_runs` | **over 120s** to return (exit 0 when it finished) |
+| `cat` of a small file | exceeded a 120s tool timeout |
+| `Glob` over `node_modules` | exceeded a 20s ripgrep timeout |
+| `laravel.log` mtime | unchanged through the timeouts, so the stalled requests were never exceptions |
+| Peer load at the same moment | `php` PID 10360 at 510s CPU; four agent `node` processes at 12,000-17,000s CPU |
+
+The suite's own two E6 cases (`grand-concert-panel.spec.ts:48`, `scenario-panel.spec.ts:58`) are reported at
+`(0ms)`, which is what a test that never executed looks like. **A sweep like this proves nothing about the
+pages it touched**, in either direction, and must not be recorded as a regression list.
+
+**Rule to apply.** Before starting a tree-level browser sweep, take the cheap measurement first: time one
+trivial SQLite read (`php -r` on `select id from training_runs limit 1`). If it exceeds a few seconds the box
+is contended and the sweep is void before it starts; either wait for a quiet box or run the slice's own specs
+against a scratch database copy on a private port, and say which of the two the evidence is. If a sweep has
+already come back red under load, report it **void with the counts and the contention readings attached**,
+not as a defect list - and do not re-run it repeatedly hoping for a different result, which costs an hour per
+attempt and was the mistake made here.
+
+**Proving commands** (all 2026-10-08):
+
+```bash
+php -r '$d=new PDO("sqlite:database/database.sqlite"); foreach($d->query("select id from training_runs order by id desc limit 5") as $r) echo $r["id"]."\n";'
+# returned 2 rows, after exceeding a 120s timeout
+powershell -NoProfile -Command "Get-Process php,node | Select-Object Id,StartTime,CPU | Format-Table -AutoSize"
+grep -c "worker process exited unexpectedly" <sweep log>   # 39
+grep -c "Test timeout of 180000ms exceeded" <sweep log>     # 18
+```
+
+**Owner.** QA / Reviewer for the bar (this is a gate-validity rule, so it belongs beside `GOVERNANCE.md`
+§CONSTRAINTS.md and the hand-off sequence in `AGENTS.md` §9), and the tooling owner for anything that makes
+the box's load visible in advance. It is not a slice's to fix.
+
+**Closure owed.** A written gate-validity rule: which runs count as evidence, and what a void run must report
+with it. The alternative is a contention pre-flight check baked into `npm run test:browser` that refuses to
+start a 251-test sweep while a trivial read is stalling. Either one is small; neither is E6's to choose, and
+the second edits the shared script every session uses, which is the same objection KI-73 records.
+
+**What closure would not cover.** Closing this does not answer what the 180 unreached cases and the 18 goto
+timeouts would say on a quiet box; they still need one clean sweep, and until then the tree-level browser
+gate is simply **not run**, which is a reportable state under `AGENTS.md` §15 rather than a failure. It also
+does not cover KI-73, which is a different defect on the same port: a surviving listener with a dead database
+path. A quiet box with PID-style leak on :8127 still cannot start.
+
 ### KI-75 `pint --dirty` reformats another session's uncommitted file in the shared worktree - FILED 2026-10-08 (Database reference views hand-off, on the owner's instruction), OPEN
 
 **What happens.** `AGENTS.md` §9 puts `vendor/bin/pint --dirty --format agent` in the hand-off sequence.
@@ -510,6 +1265,92 @@ that edit stays, and the session owning the file will carry Pint's change inside
 does not touch the condition underneath, several sessions' uncommitted work in one working tree; any
 future gate in the sequence that writes rather than reads inherits the same hazard the moment it is given a
 `--fix` mode, and `phpstan` escapes it only because it never rewrites.
+### KI-76 With a Vite dev server hot, every Inertia render POSTs to the SSR endpoint with no timeout, so a page blocks 30s and answers 500 - FILED 2026-10-08 (F1 residual, on the owner's instruction), OPEN
+
+**Status: OPEN.** Not caused by F1, not fixed by it, and not fixed in the slice that filed it. The remedy is
+shared configuration that every session reads, which is the same objection KI-73 records against a slice
+editing the shared harness. Filed with the owner's instruction: "File it; leave it."
+
+**The mechanism, from the files.** The app publishes no `config/inertia.php` (measured: `ls config/inertia.php`
+-> no such file), and no service provider touches SSR (`grep -n "ssr" app/Providers bootstrap/app.php
+resources/views/app.blade.php` -> no match), so the package's own defaults govern:
+`vendor/inertiajs/inertia-laravel/config/inertia.php:24` `'enabled' => (bool) env('INERTIA_SSR_ENABLED', true)`,
+`:30` `'url' => env('INERTIA_SSR_URL', 'http://127.0.0.1:13714')`, `:32` `'hot_url' => env('INERTIA_SSR_HOT_URL')`
+(null), and **`:34` `'timeout' => env('INERTIA_SSR_TIMEOUT')` -> null**. `HttpGateway::pendingRequest()`
+(`vendor/inertiajs/inertia-laravel/src/Ssr/HttpGateway.php:120-132`) applies a timeout **only when that config
+value is truthy**, so the SSR request carries none.
+
+`HttpGateway::dispatch()` has two guards before it sends: `:51-53` returns early when SSR is disabled, and
+`:55-57` skips the send when the bundle is missing — **but only when Vite is not hot**. While any session runs
+`npm run dev`, `public/hot` exists, `Vite::isRunningHot()` is true, the bundle check is bypassed, and the
+target becomes the hot origin. `public/hot` on this worktree read `http://[::1]:5174` at 06:11 on 2026-10-08.
+
+**Measured on the live hot origin, read-only, nothing in the tree touched:**
+
+```
+curl -s -o /dev/null -w "%{http_code} %{time_total}s" --max-time 20 "http://[::1]:5174/__inertia_ssr"
+-> code=000 time=20.037s   (curl exit 28, operation timeout)
+```
+
+The dev server accepts the connection and never answers that path. A Laravel render that posts to it has no
+timeout to give up on, so the request sits until the CLI server's `max_execution_time=30` kills the script
+mid-render: **HTTP 500**, and on a single-process `php -S` every document behind it queues.
+
+**The discriminating pair** (same `VACUUM INTO` scratch database, `SESSION_DRIVER=file`, differing only in the
+env the harness was started with, 2026-10-08):
+
+| Harness | `/` | `/training-runs` |
+| --- | --- | --- |
+| SSR at the package default (enabled), port 8186 | **500 after 33.47s** | **500 after 30.39s** |
+| `INERTIA_SSR_ENABLED=false`, port 8185 | 200 after 1.97s | 200 after 2.45s |
+
+The fatal names the path: `PHP Fatal error: Maximum execution time of 30 seconds exceeded in
+vendor/guzzlehttp/guzzle/src/Handler/CurlHandler.php`, frames `#21 .../Ssr/SsrState.php(43):
+Inertia\Ssr\HttpGateway->dispatch()` and `#22 storage/framework/views/<root view>.php(18):
+SsrState->dispatch()`.
+
+**What this cost, and what it did not.** Measured cost: any case that opens `/` or `/training-runs` on an
+SSR-enabled harness gets a 500 instead of a page, which is the Dashboard and the Careers list, two of the three
+surfaces F1 asserts on. What is **not** attributable to it: the F1 hand-off's two voided browser passes (8 of 20
+tests, then 4 of 16, every failure at `page.goto`) were re-tested with `INERTIA_SSR_ENABLED=false` and failed
+the same way, while the same harness answered `curl` on `/` in 0.80s and on `/career/setup/scenario` in 1.48s.
+A wedged server does not do that. Those passes were client-side starvation - 25 `chrome`, 13 `node` and 32
+`php` processes on the box at the same moment - which is KI-74's defect, not this one. The two hazards
+compound: this entry costs 30s and a 500 per affected document, KI-74 costs a whole sweep its meaning.
+
+A previous slice's workaround was to move `public/hot` aside for the length of its run, which cannot be a
+standing rule because the file belongs to whichever session is running Vite, and removing it from under that
+session is exactly the cross-session interference KI-70 and KI-75 record.
+
+**One correction to a reading made in the same pass.** `/` and `/training-runs` first looked route-specific: on
+port 8186 those two hung and the two following documents, the Cockpit and the scenario step, returned in about
+2s. Re-probing the same shape later showed `/` fail at 2.0s with a curl error, then answer 200 in 1.86s, and
+`/training-runs` 200 in 3.28s. The accurate statement is **intermittent per request**, dependent on whether the
+hot origin is up-and-unresponsive at that moment; I did not attribute what made the two later requests fast,
+and the entry does not claim to.
+
+**Config-plumbing control, because that was the other hypothesis.** There is no cached config
+(`bootstrap/cache/config.php` absent), and booting with the variable unset prints
+`ssr.enabled=true url=http://127.0.0.1:13714` while booting with `INERTIA_SSR_ENABLED=false` prints `false`.
+The flag reaches the application, so the defect is the missing timeout on a target that does not answer, not
+the env wiring.
+
+**Owner.** Laravel Dev or the tooling owner for the configuration (it is not a screen and not a slice's), and
+QA / Reviewer for the consequence to the §9 hand-off sequence, which is where "a claim is the command output"
+is written.
+
+**Closure owed.** Two remedies, and the choice is the owner's: (a) set a real SSR timeout, either by publishing
+`config/inertia.php` or by `INERTIA_SSR_TIMEOUT=3` in `.env.example` and the local `.env`, so a dead endpoint
+degrades to a client-side render in seconds instead of a 500 in thirty; or (b) turn SSR off by default for this
+application, with the reason written down: the tool is local-only on loopback with no hosting or deploy path
+(`AGENTS.md` §1, §12), it has no crawler and no first-paint requirement, and `resources/views/app.blade.php`
+renders the Inertia root for the browser anyway. (b) edits the env file every session reads, which is the KI-73
+objection, so whichever lands should land as an owner ruling rather than as a slice's convenience.
+
+**What closure would not cover.** It does not make a contended-box sweep valid, which is KI-74's problem, and it
+does not recover the two voided passes: the 18 migrated specs named in the F1 hand-off still need one run on a
+harness that answers. It also does not decide who may remove `public/hot`; that file remains whichever session
+started Vite's.
 
 ### KI-77 The working-tree `routes/web.php` imports seven controllers that `HEAD` does not carry, so no single slice can commit the file - FILED 2026-10-08 (Database reference views hand-off, on the owner's instruction), OPEN
 
@@ -574,3 +1415,53 @@ and the hub they belong to needs six more of D17's routes plus its `databaseInde
 catalogue controllers and six uncommitted page components, so the patch widened past the slice before it
 was written. That widening is this entry's finding, not its fix.
 
+### KI-78 `uma:backup` changed mechanism, destination handling and timestamp zone on 2026-10-08, and two documents still state the old one - FILED 2026-10-08 (D18b hand-off, on the owner's instruction), OPEN
+
+**Status: OPEN.** Not a defect report. The command works, the new mechanism is the safer one, and the
+change is uncommitted in the working tree as this is written. This entry is the record the change owed a
+reader who relied on the old semantics, because all three of the differences below are observable from
+outside the class that was edited.
+
+**The three changes.** HEAD's `app/Console/Commands/UmaBackup.php` (last touched `f0f508c`, 2026-09-27)
+versus the working-tree file, which now delegates to `app/Actions/BackupDatabase.php`.
+
+| Aspect | Before, at HEAD | After, in the working tree | What a reader relied on |
+| --- | --- | --- | --- |
+| Mechanism | `DB::statement('PRAGMA wal_checkpoint(TRUNCATE);')` on the application connection, then PHP `copy()` | `VACUUM INTO` on a PDO connection of its own | The old form **mutated the source database**: a TRUNCATE checkpoint folds the write-ahead log into the main file and empties the `-wal`. Anyone who ran `uma:backup` and then looked at `database/database.sqlite-wal` saw it truncated, and the new form leaves it alone |
+| Existing destination | `copy()` overwrote it silently and returned SUCCESS | `RuntimeException`, "A file already exists at ... and a snapshot never overwrites one." | A script that re-ran the same destination path to refresh a snapshot now fails instead of replacing it |
+| File name timestamp | `now()->format('Ymd-His')`, the machine's local zone | `now()->utc()->format('Ymd-His')` | Two names in different zones sort differently against a wall clock. `docs/research-scratch/SLICE-RECORDS.md:588-590` already prints both readings side by side (`uma-backup-20260929-153038` against 09-29 23:30 local, an eight-hour offset), so the stored names were UTC-shaped while the code said local. This brings the code in line with what the record already shows |
+
+**Why the mechanism moved.** `VACUUM INTO` runs inside a read transaction of its own, so the target is a
+consistent snapshot of a database that may be mid-write. Checkpoint-then-copy is not: under WAL, a `copy()`
+can read a main file whose newest frames are still sitting in the log, which is precisely the failure NFR-5
+exists to prevent. The Action also opens its own connection rather than borrowing the caller's, because
+SQLite refuses a `VACUUM` inside an open transaction outright.
+
+**Proving commands (2026-10-08).**
+
+```bash
+git show HEAD:app/Console/Commands/UmaBackup.php    # lines 32-47: PRAGMA wal_checkpoint(TRUNCATE), then copy()
+git show HEAD:app/Console/Commands/UmaBackup.php | grep -n "now()->format"   # 35, local time
+cat app/Actions/BackupDatabase.php                  # 46: now()->utc(), 53-55: refuse existing, 61: VACUUM INTO
+grep -n "uma:backup" PRD.md ARCHITECTURE-ESSENTIALS.md   # the two stale lines, below
+```
+
+**The two documents that now read wrong.** `PRD.md:178` states NFR-5 as "`uma:backup` produces a consistent
+single-file copy (WAL checkpoint, then copy)", and `ARCHITECTURE-ESSENTIALS.md:74` lists "uma:backup (WAL
+checkpoint + file copy)". Both name the retired mechanism as the requirement. Per `AGENTS.md` §2 the code
+wins and the rule is stale, so each needs a dated note rather than a silent rewrite (§11). Not edited in
+this slice: the PRD's NFR text is product truth and the correction is the Architect's and the Docs Writer's
+call, not the slice's.
+
+**Owner.** Docs Writer for the two dated notes; Architect for whether NFR-5's wording moves from mechanism
+to property (a consistent single-file snapshot) and leaves SQLite's choice of mechanism to
+`ARCHITECTURE.md`; Laravel Dev for the command itself.
+
+**Closure owed.** The two dated notes above, plus one line stating that snapshot names are UTC, so the next
+reader treats the `SLICE-RECORDS.md` eight-hour offset as the rule rather than as an unexplained oddity.
+
+**What closure would not cover.** It does not restore the truncated `-wal` side effect for anyone who
+wanted it; that behavior was incidental, not the contract. It does not decide whether the Settings screen's
+Backup action and `uma:backup` should keep sharing one implementation, which is what `BackupDatabase` now
+does. And nothing here lands the change: `uma:backup`'s old semantics remain HEAD's until the slice is
+committed.

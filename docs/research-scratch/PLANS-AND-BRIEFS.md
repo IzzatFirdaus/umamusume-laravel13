@@ -1935,6 +1935,348 @@ shipped.
 the catalog index wire-up (`Task 7`), the absent-file-renders-nothing rule, the local-`src`-only
 rule, and the `skills.iconid` deferral. All five remain as specified.
 
+---
+
+## E4 — Trackblazer scenario panel (SCREEN-016), 2026-10-07
+
+Slice row: `docs/proposals/frontend-development-plan.md` line 195 (E4, SCREEN-016, depends on E1,
+plan §9 E4). Status before this slice: `config/scenarios.php` `trackblazer` entry present and
+verified 2026-09-27 against three Global prose sources; matrix flags `grade_objectives`,
+`shop`, `epithet_routes` ON; matrix flag `race_calendar` OFF (no mandatory calendar). The
+E1 shell (`ScenarioPanel.vue`) plus `UraPanel.vue` and `UnityCupPanel.vue` already register
+`career_goals`, `team_race`, `team_rank_ladder`. No Trackblazer renderer exists; the
+Cockpit falls back to `WidgetFallback` on every Trackblazer flag.
+
+Plan phase per `spec-driven-development`; task list per `planning-and-task-breakdown`.
+
+### What this slice is
+
+The Trackblazer scenario panel set, mounted inside the Cockpit's scenario region as one
+component per ON flag: grade-points meter, Pro Shop catalogue + purchase flow, epithet
+checklist, rival races from `RaceCatalogSlot`, and the points-league finale. The
+component file name `TrackblazerPanel.vue` is fixed by the brief; the component branches
+on the flag key (`props.name`), never on a scenario name or label — a fifth scenario is
+one config entry and zero component edits (gate G-33, `D-240`, plan §9 E1, design-2.0 §25).
+
+### Files
+
+- Modify: `app/Http/Controllers/Career/CockpitController.php` — `scenarioSection()` gains
+  `grade`, `shop`, `epithet`, `rival` and `finale_official_title_absence` keys, each
+  `null` for any scenario that does not compose the matching flag so the shape stays
+  uniform across the four Global scenarios.
+- Modify: `resources/js/types.ts` — extend `ScenarioPanelSection` with the same keys,
+  each nullable.
+- Create: `resources/js/components/scenario/TrackblazerPanel.vue` — branches on
+  `props.name` to render `grade_objectives`, `shop`, or `epithet_routes`. Same props
+  contract as `UraPanel.vue` and `UnityCupPanel.vue` (`{ scenario, label, kind, name }`).
+- Modify: `resources/js/components/scenario/ScenarioPanel.vue` — register
+  `TrackblazerPanel` against `grade_objectives`, `shop`, `epithet_routes`. No change
+  beyond three `register(...)` lines.
+- Modify: `resources/js/pages/Career/Cockpit.vue` — add a scenario-actions subregion
+  immediately above the existing ActionGrid that renders a single "Shop" button when
+  `scenario.shop !== null` (Trackblazer) and scrolls/focuses `#trackblazer-shop-heading`
+  on click (WCAG 2.4.11, plan §12). The button is hidden when there is no shop section.
+- Modify: `SCREEN_SPEC.md` — add the SCREEN-016 / `SCR-CAR-022` row, with empty,
+  loading and error states on TrackblazerPanel.
+- Create: `tests/Feature/TrackblazerPanelTest.php` — props contract under a
+  Trackblazer run; no scenario identity in any assertion; catalogue is in
+  `config('shop_items')` order; a rejected purchase yields field-bound errors.
+- Create: `tests/browser/trackblazer-panel.spec.ts` — keyboard path through the shop
+  region, purchase round-trip + rejected-purchase error text bound to its input by
+  `aria-describedby`, epithet glyph+text, 44px control sweep, 320px reflow, axe A+AA
+  scoped to `#app`.
+
+### Registration and the three mounts
+
+The shell renders one component per ON flag. Trackblazer has three ON: `grade_objectives`,
+`shop`, `epithet_routes`. `TrackblazerPanel` registers for the three flags and branches
+on `props.name`, the flag key the shell mounted it for. `race_calendar` is OFF for
+Trackblazer per `config/scenarios.php`; rival races are drawn directly from
+`RaceCatalogSlot` rather than via a separate panel flag, because the matrix has them
+off but the brief still names them as facts to surface.
+
+- `name === 'grade_objectives'` — grade-points meter (working-toward + bar + ladder +
+  surplus line + rotation countdown).
+- `name === 'shop'` — catalogue + purchased list + rotation countdown + purchase form +
+  finale absence.
+- `name === 'epithet_routes'` — checklist (earned / open / unverifiable) rendered as
+  ordered `<li>` with a pill badge per row.
+
+### Shop: catalogue-order, no recommendation, no default, no highlight
+
+The catalogue list is the §E4 rule. Items render in
+`config('scenarios.scenarios.trackblazer.shop_items')` order. Item, cost, effect and
+rotation-time facts print verbatim from config; no "Recommended purchase" card, no
+`recommended` flag, no "best value" sort or highlight, no default-selected item. The
+state copy says in text that the shop rotation is not modelled, so what the panel
+prints is the catalogue and only the catalogue. A fifth catalogue entry from config
+alone would land at the same place with no component edit.
+
+### Purchase write: validate at the boundary
+
+`runs.purchases.store` and its `StoreShopPurchaseRequest` are the authority: the
+catalogue, the price, and the held-copies cap (`shop.max_copies_per_item`) all reject
+bad submissions before they reach the database. The Vue form only posts
+`{turn, item, cost, effect}`. Inputs are labelled by `for`/`id`. Error text is
+rendered outside the `<label>` so the input's accessible name stays clean, and
+`aria-describedby` ties each per-field message to its input (WCAG 3.3.1, plan §12).
+A purchase form is rendered only when `scenario.shop !== null`.
+
+### Quick access from the Cockpit's action area
+
+A small scenario-actions subregion above the ActionGrid renders a single "Shop"
+button when Trackblazer is the active scenario. On click the button scrolls the
+shop region into view and focuses its heading (`tabindex="-1"`). Other scenarios
+use the ActionGrid only; no other scenario-actions entries are added by E4.
+
+### Cited inputs (every number or label below traces to the source noted)
+
+- `trackblazer` matrix entry: `config/scenarios.php` lines 211-362 (verified
+  2026-09-27 against `scenarios.json` caps and three Global prose sources).
+- Shop catalogue rows: `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md`
+  section "Full Shop Item List" (GameTora, 2026). Source rows carry item name
+  spelled as the client spells it; `Good-Luck Charm`'s "Luck" is the verbatim
+  client item name and stays outside the C-4 copy ban per its docblock.
+- Epithet routes: same reference, section "Epithets (Race Route Bonuses)"
+  (uma.guide, after 2026-07-01 rework).
+- Finale kind and races: `config/scenarios.php` line 358, `finale.kind === 'points_league'`,
+  `finale.races === 3`.
+- `Twinkle Star Climax` exclusion: `screen-spec-2.0.md` line 138 conflict row 31;
+  `docs/UMAMUSUME_REFERENCE.md` §7 conflict row 31; the named-absence `title` cites
+  the conflict row.
+- Purchase validation rules and held-copies cap: `app/Http/Requests/StoreShopPurchaseRequest.php`
+  docblock + body.
+- Trust vocabulary: `design-2.0.md` §49 (`Confirmed / Calculated / Estimated / Unknown`)
+  and `ADR-0020` §2.
+- 44px / `min-h-11` target rule + WCAG 2.4.11: `frontend-development-plan.md` §12.
+
+### Not built, and why
+
+- Shop item recommendation (rotation not modelled; plan §3 Knowledge groundings).
+- Shop balance (no earning-side writer; rendered as "Shop Coins: not yet recorded"
+  with `title`, same carve-out as the original Blade).
+- Win probability, readiness band, race risk (ADR-0016, plan §3).
+- Official finale title (conflict row 31 UNVERIFIED; named absence with `title`).
+- Scenario-specific advisor output for the rival races (ADR-0020 §3; rivalry is
+  rendered as catalogued facts only).
+
+### Acceptance
+
+- `grep` over the diff finds none of: `recommended`, `best value`, `Twinkle Star
+  Climax` outside the named-absence phrase.
+- `TrackblazerPanelTest` asserts: Trackblazer scenario exposes `grade`, `shop`,
+  `epithet` sections in `scenarioSection()`; `shop.catalogue` is in `shop_items` order;
+  `shop` carries no `recommended` field; no scenario identity in any assertion key;
+  `StoreShopPurchaseRequest` rejects an off-catalogue item and a price mismatch with
+  field-bound errors; a recorded purchase reads back through the same payload path
+  (`ShopPurchasePayload::fromArray()`) the Blade form used.
+- `trackblazer-panel.spec.ts`: keyboard reading through the shop, purchase round-trip,
+  rejected-purchase error text bound to its `<input>` by `aria-describedby`, epithet
+  glyph+text, 44px control sweep, 320px reflow, axe A+AA inside `#app` if the
+  dependency is installed.
+- Hand-off sequence: targeted tests → `php artisan test --compact` →
+  `vendor/bin/pint --dirty --format agent` → `vendor/bin/phpstan analyse
+  --no-progress --memory-limit=1G` → `npm run typecheck` → `npm run build` →
+  `npm run test:browser` → `composer lore` + `composer lore-code` with a one-line
+  ruling per hit. An unrun gate is reported as not run, per AGENTS.md §9.
+- `SCREEN_SPEC.md` SCR-CAR-022 row exists in §2 with empty / loading / error sub-rows.
+- Diff scope: none of URA / Unity Cup / Cockpit / Scenario is touched beyond the
+  registration lines and a Cockpit scenario-actions subregion; no Blade component
+  is reintroduced.
+
+### Open questions
+
+- A "Twinkle Star Climax" patch in any official client update would let the
+  finale absence read a real name. Out of scope; record in
+  `docs/UMAMUSUME_REFERENCE.md` §4.6 if and when it lands. The slice leaves the
+  absence in place.
+- A future `shop.rotation` writer would let the catalogue render `on sale` or
+  `limited` flags. The component contract supports them; the catalogue that ships
+  with E4 does not carry any flag because no rotation exists.
+
+---
+
+## E6 — Our Grand Concert baseline strip (SCR-017), 2026-10-07
+
+Written before code. The dispatch brief for this slice is
+`docs/Trainer-Docs-2.0-E-Prompts.md` §"PROMPT E6". Three of its premises do not hold on
+this tree; they are corrected in the section below rather than followed, because following
+them would put a false sentence in shipped copy and would take a ruling the plan reserves
+to the owner.
+
+### What this slice is
+
+The fourth `[Global]` scenario composes no panel: `our_grand_concert.panels` is false on
+every flag, so `ScenarioPanel.vue`'s panel region has nothing to mount. That region's
+`v-else` branch is the baseline strip, and this slice is what goes in it. It is not a new
+component and not a new flag: there is no flag to register, because "every panel off" is
+the absence of a flag. The brief's phrase "registered in the E1 registry for the every
+panel off case" is therefore read as the shell's own empty branch, and the strip stays
+config-driven so a fifth scenario inherits it for one config entry (gate G-33).
+
+### Premise corrections (dispatch brief vs. this tree)
+
+1. **`documented => false` is stale.** `config/scenarios.php` `our_grand_concert.documented`
+   reads `true`, in `HEAD` and in the working tree. The entry's own comment dates the flip
+   to the 2026-10-05 primary read and states that `documented` is a provenance marker, not
+   a rendering switch. Plan §9's E6 row and the brief both still quote `false`.
+2. **"Songs, lessons and Performance Tokens do not exist in the corpus" is false.**
+   `docs/scenarios/07-grand-concert.md` is a 32.9 KB, 262-line sourced guide, refilled
+   2026-10-05 from a primary read; its own header records that Global notice 905 prints
+   *Performance*, *Promo Concert*, *Grand Live*, *lessons*, *songs* and *concert
+   techniques*. What is **not** measured is the text on the client's screens (0 frames in
+   the screenshot corpus), which is the reason the panels stay off. The strip states that
+   reason instead. The brief also calls the file a stub; it stopped being one on 2026-10-05.
+3. **The badge key was not this slice's to choose.** Plan §4.1 item 6 and
+   `SCREEN_SPEC.md:2425` reserve "which key drives the badge" to the owner alone. The owner
+   ruled on 2026-10-07: **`partially_documented` drives the badge.** That is the one
+   controller line §4.1 item 6 anticipated changing in a follow-up commit, and E6 is that
+   follow-up. `partially_documented` and its reader (`DatabaseController` / the Scenarios
+   screen, D17) are still uncommitted in the shared working tree, so E6 depends on a
+   sibling slice's unlanded work and says so here.
+
+Two smaller findings, recorded and not acted on: the config cites `DESIGN.md §6.22` for the
+base-plus-bonus rendering rule, and `DESIGN.md` has no §6.22 (the rule survives in the
+config comment itself); and gate G-41's own premise ("a scenario with no guide") is now
+false for this scenario, which the config comment already records as the gate registry's
+wording to amend, not a slice's.
+
+### Files
+
+| File | Change |
+| --- | --- |
+| `config/scenarios.php` | `our_grand_concert` gains `panel_absence` and `panel_absence_title` (display strings for the strip's one honesty line). Nothing else moves; `documented` stays a provenance marker. |
+| `app/Http/Controllers/Career/CockpitController.php` | `scenarioSection()`: the badge line now reads `partially_documented`; three new uniform-shape keys, `caps`, `panel_absence`, `panel_absence_title`. |
+| `resources/js/components/scenario/ScenarioPanel.vue` | The every-panel-off branch becomes the baseline strip. |
+| `resources/js/types.ts` | `ScenarioSection` gains the three keys. |
+| `tests/Feature/GrandConcertPanelTest.php` | New. |
+| `tests/Feature/ScenarioPanelTest.php` | Pinned key list gains the three keys; the documentation-flag case now pins `partially_documented`. |
+| `tests/browser/grand-concert-panel.spec.ts` | New. |
+| `tests/browser/scenario-panel.spec.ts` | E1's Grand Concert case: `Documented` becomes `Partially documented`, and the empty-state sentence becomes the strip. |
+| `SCREEN_SPEC.md` | §2 row `SCR-CAR-024` and its state table. `SCR-CAR-023` is E5's Scenario Race Planner, which landed in the same working tree. |
+
+**Dependency:** E6 requires D17's `partially_documented` reader (`DatabaseController` / Scenarios screen) to be present and committed; both must land together or E6's badge reverts to the prior `documented` key. The two boolean keys in `config/scenarios.php` are disambiguated by comment: `documented` is a provenance marker recording whether a guide is held (no screen reads it), while `partially_documented` is the rendering switch that drives `ScenarioStatusBadge`.
+
+No new package, no migration, no route, no ADR. `ScenarioStatusBadge`, `ResourceMeter`,
+`AlertRow` and `ProvenanceBadge` are used as they are; nothing Grand-Concert-specific is
+added beyond the strip.
+
+### Props contract
+
+Three keys join the `scenario` section, uniform for all four scenarios so one renderer can
+draw any of them without branching:
+
+```php
+'caps' => [
+    'verified_at' => '2026-09-27',          // config('scenarios.verified_at'), a verification date
+    'base' => 1200,                          // config('scenarios.base_cap')
+    'hard_cap' => 2000,                      // config('scenarios.hard_cap')
+    'source_title' => '...',                 // what the caps are and where they come from
+    'rows' => [                              // one row per config('scenarios.stat_order') stat
+        ['key' => 'Speed', 'label' => 'Speed', 'base' => 1200, 'bonus' => 400, 'cap' => 1600],
+        // ... Stamina 1300, Power 1300, Guts 1500, Wit 1300
+    ],
+],
+'panel_absence' => '...' | null,             // the scenario's own reason its panels are off
+'panel_absence_title' => '...' | null,       // where that reason is recorded
+```
+
+`base` and `bonus` are emitted as separate terms, never collapsed into `cap`, because the
+config's own header forbids collapsing them and one JP scenario carries a negative bonus.
+`cap` is read through `ScenarioCaps::caps()`, the single owner of the arithmetic
+(`ADR-0015`), so the strip and the stat bars cannot disagree. `panel_absence` is null for
+every scenario that declares none, which is the shape `grade`/`shop`/`epithet` already use.
+
+### The baseline strip
+
+Rendered only where the panel region has nothing to mount. A scenario with every flag off
+draws, in this order:
+
+1. the label and `ScenarioStatusBadge` (E1, unchanged);
+2. the ruleset `N/A` line and its title (E1, unchanged);
+3. the sentence saying no panel is composed (E1, unchanged);
+4. **the caps table**: one row per stat with `base`, `bonus` and `cap` as labelled columns,
+   under a `ProvenanceBadge state="confirmed"` whose title names the source, with the
+   verification date printed beside it;
+5. **the honesty line**, when the scenario declares one, as an `AlertRow` carrying a
+   `ProvenanceBadge state="unknown"` whose title points at `docs/scenarios/07-grand-concert.md`;
+6. **the advisor-scope line**: `recommendations_absence`, already in the payload and
+   rendered nowhere until now, so the Trainer is told the scenario contributes no advice of
+   its own and the recommendation is the generic engine's.
+
+The caps table is drawn only for a scenario the run declared (`declared === true`); an
+undeclared run keeps E1's sentence and shows no caps, because lending it the baseline
+entry's caps would state a composition nobody chose.
+
+### Cited inputs
+
+Every number and string below traces to a source, and nothing else appears:
+
+- the five caps, `1200 + bonus`, from `config/scenarios.php` `our_grand_concert.cap_bonus`
+  (Speed 400, Stamina 100, Power 100, Guts 300, Wit 100) over `base_cap` 1200, which is the
+  1600/1300/1300/1500/1300 the plan §3 row records as corroborated 2026-10-05 by two
+  independent sources;
+- the verification date, `config('scenarios.verified_at')` = `2026-09-27`, labelled a
+  verification date and not an "updated" one;
+- the honesty line and its title, new display strings on the scenario's own config entry,
+  stating the reason `docs/scenarios/07-grand-concert.md` gives in its own header (0 frames
+  captured, so the client's screen text is unmeasured);
+- the advisor-scope line, `recommendations_absence`, which the controller already composes.
+
+### Tests
+
+`GrandConcertPanelTest` (Pest, feature):
+
+- **G-41 as an assertion.** Every key of `config('scenarios.panel_labels')` is present with
+  `on === false` for `our_grand_concert`, and the section carries the strip's keys; the same
+  run in a scenario with a flag on carries a different set. The assertion reads the flag set
+  from config, so E2's seventh flag cannot rot it.
+- **No invented mechanic.** The whole Inertia payload for the run is walked, keys and
+  values, and asserted to contain none of a small list of strings no source measures. The
+  list is the brief's own three nouns plus the client's song/skill vocabulary, and the case
+  states that it is a floor, not a proof of absence.
+- **The badge key.** `scenario.documented` is `false` for `our_grand_concert` and `true` for
+  the other three, which is the owner's 2026-10-07 ruling pinned.
+- **The caps rows.** Five rows in `stat_order`, each `base + bonus === cap`, and `cap`
+  equal to `ScenarioCaps::caps()` for the same key, which is the ADR-0015 agreement.
+- **The absence is a named absence.** `panel_absence` and its title are non-null for
+  `our_grand_concert` and null for the other three.
+- **A fifth scenario gets the strip from config alone.** One config entry with every flag
+  off, zero component edits: the strip's keys arrive and nothing scenario-specific does.
+
+`ScenarioPanelTest` gains the three keys in its pinned list (the pin exists to make a
+contract change test-visible) and its documentation case moves from `documented` to
+`partially_documented`.
+
+### Acceptance
+
+G-41's assertion is a test; no songs, lessons or token strings appear in the rendered props
+or markup; a grep proves no scenario-name branching in the new code; and
+`grand-concert-panel.spec.ts` covers the badge text, the caps list, the honesty sentence and
+its title, the 320 px reflow and the 44 px sweep in a real browser.
+
+### Extension point, for the owner
+
+When the client's own strings are captured, this scenario gains surfaces by **one config
+edit plus new widget renderers**, never by editing the strip: a widget key added to
+`our_grand_concert.widgets` reaches `ResourceMeter` or a newly registered renderer through
+the existing chain, and a flag added to `panels` reaches the registry. The strip needs no
+change for either. The `panel_absence` line is what should be dropped at that point, and it
+is one config key.
+
+### Open questions
+
+1. `partially_documented` and its D17 reader are uncommitted in the shared working tree.
+   E6 depends on them landing; if D17 is reverted, the badge silently reverts to
+   `Documented` and E6's browser case goes red. Owner call: land D17 before or with E6.
+2. The strip renders the caps the header's stat bars already render. The owner chose the
+   strip list on 2026-10-07 (G-41's own wording is "baseline strip plus known caps"), so the
+   duplication is deliberate; a later pass could drop one of the two.
+3. `config/scenarios.php` cites `DESIGN.md §6.22`, which does not exist. Left as found; it
+   is a documentation defect, not this slice's.
+
+---
+
 ## Database reference views — Events, Shop Items, Sparks (SCR-SYS-008/009/010), 2026-10-08
 
 Completes `SCREEN-023`, whose Sections list already carries all eight areas. The D17 slice
@@ -2109,6 +2451,10 @@ stay untouched.
   seven untracked controllers). KI-76 was taken between drafting and writing by another session's Vite-SSR
   entry, which is also the mechanism behind this slice's `public/hot` harness failures; the numbering
   collision is recorded inside KI-77 because the register has no duplicate-number check.
+- **Numbering collision, owed to the register (KI-70/KI-71/KI-76).** The file holds two headings numbered
+  KI-70 (`KNOWN-ISSUES.md:858` and `:991`) and two numbered KI-71 (`:928` and `:1044`), and KI-76 itself is
+  shared with another session's Vite-SSR entry. KI-77's own text names all three. Nothing is renumbered here:
+  the register forbids it and each collision has inbound anchors in this plan and in `KNOWN-ISSUES.md`.
 - `public/hot` appears and disappears as sessions run `npm run dev`. The clean browser-harness state is **no
   `public/hot` file** with `public/build/manifest.json` present: check the file and the Vite origin
   (`curl -m 8 -o /dev/null -w '%{http_code}' http://127.0.0.1:5174/resources/js/spa.ts`) before reading a

@@ -80,6 +80,18 @@ The established page pattern is `resources/js/pages/Catalog/Index.vue`: local `P
 filters via `router.get(url, params, { preserveState, preserveScroll })`, forms via `useForm` +
 `@submit.prevent`, `<Head title>` + `#title` slot. Copy it; do not invent a second pattern.
 
+_Dated close-out 2026-10-08 (documentation-sync pass; the table above is preserved as the read it was
+taken on, 2026-10-05): that read is superseded in both directions. The counts it states — 13 page
+components, 25 shared components, 9 browser specs, 15 Blade files still in `resources/views/` — are
+stale for this tree, which now holds 54 page files under `resources/js/pages/` (the 2.0 career set,
+the Veterans set and the Database set in addition to the ported 0.1.0 pages), 58 single-file Vue
+components under `resources/js/components/`, 44 browser specs under `tests/browser/`, and no
+`resources/views/components/` at all: slice B1 deleted that directory, and `resources/views/` now
+holds `app.blade.php` (the Inertia root) and `errors/{404,419,500}.blade.php` only, which the "Still
+on Blade" row's own B1-pending reading was awaiting. The "B1 pending" state is closed: the deletion
+landed with slice B1 and the `resources/views/components/` entry the row names is gone, so the row's
+last column is false on this tree in the same way the "D16–E6 Not begun" reading is false in §4._
+
 ## 2. Conventions the rewrite must keep
 
 1. **Page registration.** Add a file under `resources/js/pages/**`; `spa.ts` globs it. No registry edit.
@@ -196,14 +208,77 @@ Concert panel and omits Inheritance Event, Career Timeline and Veteran Compariso
 | **E**   | E5      | Scenario Race Planner (race facts only; **no** win probability)             | SCREEN-017           | D8                       |
 | **E**   | E6      | Grand Concert panel — baseline strip only *(design-2.0 only)*               | SCR-017              | E1                       |
 
-**Phase A–D status, 2026-10-06.** A1, A2, A3, A4a, A4b and A4c landed green, B1 landed on their back,
+**Phase A–D status, 2026-10-07.** A1, A2, A3, A4a, A4b and A4c landed green, B1 landed on their back,
 and Phase C's three slices landed frontend-agnostic per `ADR-0020` §3. Phase D has begun: D1 landed
 green, D2 to D4 landed green, and D5 and D6 landed run-scoped in `05e9584` before their own slice
 numbers were reached. The wizard halves of D5 and D6 — steps 4 and 5 — are in the tree but **not
-green**, and D7 onwards has not begun. No Phase E slice has begun.
+green**. D7 landed green. D8, D9, D10 and D12 landed green. D11 has not begun. No Phase E slice
+has begun.
+_Dated correction 2026-10-08 (documentation-sync pass): the "D7 landed green" clause of this paragraph
+is the one this pass keeps live. D7 is registered at `routes/web.php:91-92`
+(`career.preflight`, `career.preflight.store`), and the six-step wizard is what the `SCR-CAR-002`
+status cell records as "all six live". Everything after "D11 has not begun" is superseded by the
+close-out note appended under the "Dated status, 2026-10-07" paragraph above._
+
+**Dated status, 2026-10-07 (later the same day; the paragraph above is preserved as written).**
+D11, D14 and D15 have landed green since this read. **D11** was built by a concurrent session
+(`EventDecisionController`, `Career/EventDecision.vue`, `runs.events.*`) and was verified rather
+than rebuilt. **D14** is `App\Http\Controllers\Career\TimelineController` plus
+`resources/js/pages/Career/Timeline.vue` and `components/career/CareerTimeline.vue`
+(`SCR-CAR-017`); its first landing left `runs.timeline` reachable by URL only, and **D15 closed
+that defect** by adding the Cockpit left column's door. **D15** is
+`App\Http\Controllers\Career\ResultController` plus `resources/js/pages/Career/Result.vue`
+(`SCR-CAR-018`), reached from the run record screen's header. Three rulings rode with D15 and
+belong to later slices: the Screen-019 brief's "build quality" section is **omitted as a ruling**
+(see `SCREEN_SPEC.md` SCR-CAR-018), Save Veteran stays a named absence until D16, and
+`TrainerAdvisor::deficits()` widened from private to public so the Result screen reads the
+advisor's own subtraction rather than a second copy of it (`ADR-0015`). D13 landed green earlier
+the same day. **D16** (Save Veteran, `SCR-VET-003`), **D17** (Database hub, `SCR-SYS-005`) and
+**D18** (the four-category Settings shell over the ported Preferences) have since landed in the
+working tree as untracked files. **E1** (`SCR-CAR-019`, the scenario panel shell) landed 2026-10-07
+with its browser gate green at 8 passed, and **E2** (`SCR-CAR-020`, the URA panel) is the first
+renderer registered into it, drawn from the `career_goals` flag rather than a scenario name. **E3** has
+a `components/scenario/UnityCupPanel.vue` sitting in the working tree from a concurrent session, which
+this pass neither read nor claims; **E5–E6 remain Not begun.** *Dated correction 2026-10-07 (E4):
+"E4 remain Not begun" is superseded — E4 (`SCR-CAR-022`, the Trackblazer panel) landed this session
+with props tests 10 passed and browser 10 passed. E5–E6 are unbuilt.*
+
+* *Dated close-out 2026-10-08 (documentation-sync pass; the rows above are preserved as written): the
+**"D16, D17, D18 and every Phase E slice remain Not begun"** reading is false on this tree. Every slice in
+the §4 sequence has since landed, in order: **D16** (Save Veteran, `SCR-VET-003`; the read half of the
+library and the write half are both in the tree, with `runs.veteran` / `runs.veteran.store` wired in
+`routes/web.php:232-240`), **D17** (the Database hub, `SCR-SYS-005/006/007`, over the `database.*` routes
+`routes/web.php:269-279`), **D18** (the four-category Settings shell over the ported Preferences,
+`PreferenceController` + `Preferences/Edit.vue`'s tablist), **E1** (the scenario panel shell,
+`SCR-CAR-019`), **E2** (the URA panel, `SCR-CAR-020`, the first `career_goals` registration in
+`resources/js/components/scenario/ScenarioPanel.vue:55`), **E3** (the Unity Cup panel, `SCR-CAR-021`,
+registering `team_race` / `team_rank_ladder` at `:59-60`), **E4** (the Trackblazer panel, `SCR-CAR-022`,
+registering `grade_objectives` / `shop` / `epithet_routes` at `:63-65`), **E5** (the Scenario Race
+Planner, `SCR-CAR-023`, its own page and `runs.races.planner` at `routes/web.php:133`) and **E6** (the
+Grand Concert baseline strip, `SCR-CAR-024`, the branch the panel shell draws where every flag is off).
+The gate claims below for E1, E2, E4, E5 and E6 were made by the sessions that built those slices on
+their own trees; this pass did not re-run `npm run test:browser`, and it says so rather than treating a
+green recorded elsewhere on another day as a green on this tree. The `D7 ... Not begun` row and the
+"`E5–E6 remain Not begun`" clause are the two live false statements this pass supersedes; both are
+corrected in place under their own rows with a dated note, the way the D11 close-out corrected the D11
+row, so the original text stays the record of the read it was taken on._
 
 The table below is the read at `0006b17`. Where a slice carries an open defect, the defect is in the
 third column rather than in a commit message, because §4 is where the next slice decides what to start.
+
+**Tree state at hand-off, 2026-10-08 (measured, so a fresh session does not rediscover it).** `HEAD` is
+`2ffe521`, `master` is **9 ahead of `origin/master`** and unpushed — the O-1 push gate is still the owner's
+to lift, and `7b04b6c` is the last commit that moved the tree rather than the register. Both this slice and
+the sibling (Database reference views) are uncommitted: the whole of each is in the working tree, with
+`routes/web.php` carrying the two `preferences.*` routes as a HEAD-version patch and nothing else from
+either slice staged. The dev database holds **12 `training_runs`** from other sessions' leaks and **2
+`preferences`** rows (`failure_estimate = off`, plus a `settings` key whose value is a JSON blob) — there is
+no `settings` *table*, so a query against it errors rather than returning 0. `storage/app/backups/` is empty.
+Port 8127 remains wedged at PIDs `30320`/`30528`; per KI-73 its owner reaps it and this slice did not kill
+either listener. `public/hot` points at `[::1]:5174` with nothing answering (KI-76); the clean browser-harness
+state is **no `public/hot` file**, with `public/hot.save` present as a moved-aside copy from an earlier
+session. `app/Http/Controllers/PreferenceController.php` carries a peer's D18b work (138 of its 185 lines,
+uncommitted) and is not part of either patch. KI-75, KI-76, KI-77 and KI-78 are all open.
 
 | Slice                 | State                 | Evidence, and what is still open                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | --------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -224,10 +299,42 @@ third column rather than in a commit message, because §4 is where the next slic
 | D5                    | Landed (run-scoped)   | Commit `05e9584`, before its slice number was reached. `pages/Legacy/{Index,Builder,Compare}.vue` over `ListVeterans`, `RecordVeteran` and `LegacySelectionPayload`, record-only, with the six-node graph as nested list items and `border-l` connectors. Spark probability renders `N/A` with the reason. Its browser spec is red for the reasons in the row below.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | D6                    | Landed (run-scoped)   | Commit `05e9584`, before its slice number was reached. `pages/Support/Builder.vue` over `runs.deck.sync`, with `components/support/{SupportSlot,SupportTypeMark,DeckAnalysis}.vue`; six slots, seven types, Scenario Link derived and never stored, `DeckAnalysis` limited to stated `SupportCardEffects` anchors with no score. **Open: 7 failures across `legacy.spec.ts` and `support-deck.spec.ts`.** Four are selector bugs — `toHaveText` reads `textContent` including an `aria-hidden` glyph, and one locator resolves to 25 elements because the picker renders one equip button per card. Two need investigation before any assertion is touched: the text-only picker rows, and a click timeout. `AGENTS.md` §18 warns that a never-run `uma:fetch-art` mirror looks exactly like the first of those.                                                 |
 | D5/D6 wizard halves   | **Landed un-green**   | Commit `0006b17`. Steps 4 and 5 (`Career/LegacySelect.vue`, `Career/DeckSelect.vue`) carry ancestry and deck in the session draft, because both landed screens are run-scoped and the run is not created until D7. Shared bodies were extracted into `App\Services\Legacy\AncestryGraph` and the deck path rather than duplicated. Committed on the owner's instruction while red so the work is not stranded. **Three failures and three PHPStan errors, no browser spec, and no `SCR-CAR-*` rows.** The failures share one cause: the step-4 write saves `legacy_selection` but never sets `inheritance_parent_a_id` / `inheritance_parent_b_id`, which `LegacyController::update()` writes in the same statement because `ADR-0010` keeps those columns as the parent's identity. Reuse that resolution. A `KNOWN-ISSUES.md` entry is owed for landing red.   |
-| D7                    | Not begun             | Blocked behind the row above: a Preflight that composes a draft whose ancestry keys never persist would inherit the defect silently. §8.3 now names the recorded Rice Shower run as the canonical acceptance seed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| D8–D18, E1–E6         | Not begun             | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| D7                    | Landed (un-green)   | Working tree, untracked at the 2026-10-07 read; its gate run is recorded in the D7 hand-off at `docs/research-scratch/SLICE-RECORDS.md` §"D7 / SCREEN-008 (Preflight)". `Career/Preflight.vue`, `PreflightController`, `Career/StartCareerRequest`, `SCR-CAR-010`. Composes the five entered steps into one read-only contract and creates the run exactly once; `career.preflight` is wired at `routes/web.php:91`. *Dated close-out 2026-10-08:* the "Not begun" status the row carried is the defect this close-out supersedes; the row above is preserved as written, and its blocker reading is false on this tree.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| D8                    | Landed                | Commit `e8f75bd`. `CareerLayout`, `Career/Cockpit.vue`, `components/career/*`. Cockpit reads C2's advisor and renders the seven-entry action grid. `tests/browser/career-cockpit.spec.ts` (7 cases) green.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| D9                    | Landed                | Commit `55be0cd` (part). `Career/TrainingDetail.vue`, `components/career/TrainingCard.vue`. Five training option cards with sourced costs, deficit calculation, `RiskNotMeasured` for Wit, energy-after range. Preview round trip through `runs.turns.store`. `CareerTrainingDetailTest` (10 cases) and `career-training-detail.spec.ts` (6 cases) green.                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| D10                   | Landed                | Commit `55be0cd` (part). `Career/RaceDecision.vue`, `components/career/RaceCard.vue`. Race catalogue facts, mandatory races, readiness `N/A` with `title` citing `ADR-0016`, no percentage. `CareerRaceDecisionTest` (the four empty states, readiness refusal, mandatory list, no-percentage assertion) and `career-race-decision.spec.ts` green.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| D11                   | Landed                | *Dated close-out 2026-10-08:* the "Not begun" status this row carried is the defect the close-out above names; the row above is preserved as written, and its blocker reading is false on this tree. `Career/EventDecision.vue`, `EventDecisionController`, `career/EventCard.vue`, `runs.events.*` wired at `routes/web.php:158-159`; `SCR-CAR-014`. Record-only: known outcomes are derived from this run's own recorded choices, the advisor refuses with its reason, and a choice without a recorded outcome carries the incomplete warning. `CareerEventDecisionTest` and `career-event-decision.spec.ts` gate it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| D12                   | Landed                | Commit in working tree. `Career/InheritanceEvent.vue`, `InheritanceEventController`. Predicted section: parent/grandparent Sparks from `legacy_selection`, star-roll odds table (REFERENCE §1.5.3), "expected inheritance" = `N/A` citing `ADR-0020` §3. Observed section: Inheritance-type TurnEvents recorded via existing mechanism. Milestone timeline (turns 1, 31, 55). `CareerInheritanceEventTest` (12 cases, 276 assertions) and `career-inheritance-event.spec.ts` green. All gates passed. _Dated note 2026-10-07 (D14a session, on the owner's close-out): two things this row leaves unsaid. First, ordering: D12 landed ahead of D11, the same out-of-order shape the D5/D6 rows record, so the row above ("D11 Not begun") is not evidence that D11 was skipped. Second, the tree already holds D11's halves (`Career/EventDecision.vue`, `EventDecisionController`, `career-event-decision.spec.ts`, `CareerEventDecisionTest.php`, and `SCREEN_SPEC.md` SCR-CAR-014 with its own test counts), so D11's status is for its own hand-off to claim, not this note. Close-out review also filed `KNOWN-ISSUES.md` KI-68 against this slice's write boundary (`InheritanceEventController.php:83` validates inline, which the Floor bans) and recorded that no owner ruling names the `TurnEventType::Inheritance` case._ |
+| D14a                  | Landed                | Interim slice before D14, briefed 2026-10-07. `components/career/RunRaceStrip.vue` replaces the reused `RaceCalendar` in the Cockpit's left column with three run-scoped regions: this run's recorded races, the turn being decided, and the mandatory races still to come. `RaceCalendar.vue` is unchanged and stays `runs.show`'s component. The brief's single `this_turn` object became a count, because the seed catalogue holds eleven rows at Senior turn 19; its per-row `goal` flag became one named absence, because no column records per-trainee goals (KI-34). Tests: `RunRaceStripTest` (10 cases) and `career-race-strip.spec.ts` (6 cases). D14 still owns this column's future. _Note 2026-10-07, after D14: `TimelineController`, `Career/Timeline.vue`, `components/career/CareerTimeline.vue`, `CareerTimelineTest` and `career-timeline.spec.ts` are in the tree as `SCR-CAR-017`, and D14 mounted its timeline on its own page rather than the Cockpit column, so the strip is what the Cockpit shows until a ruling changes it. D14's own status row is its hand-off's to claim._ |
+| D13                   | Landed                | Working tree (untracked). `Career/SkillsPlanner.vue`, `SkillsPlannerController`. `SCR-CAR-016`. `CareerSkillsPlannerTest` (11 cases) and `career-skills-planner.spec.ts` green. |
+| D14                   | Landed                | Working tree (untracked). `Career/Timeline.vue`, `TimelineController`, `components/career/CareerTimeline.vue`. `SCR-CAR-017`. `CareerTimelineTest` (4 cases) and `career-timeline.spec.ts` (5 cases) green. Its first landing left `runs.timeline` URL-reachable only; D15 closed that by adding the Cockpit left column's door. |
+| D15                   | Landed                | Working tree (untracked). `Career/Result.vue`, `ResultController`. `SCR-CAR-018`. `TrainerAdvisor::deficits()` widened from private to public so this screen reads the advisor's own subtraction rather than a second copy of it (`ADR-0015`). "Build quality" omitted as a ruling. `CareerResultTest` (8 cases) and `career-result.spec.ts` (5 cases) green. |
+| D16                   | Landed                | Working tree (untracked). `VeteranController`, `SaveVeteranController`, `Veterans/{Index,Show,Compare}.vue`, `Career/SaveVeteran.vue`. `SCR-VET-001`–`SCR-VET-004`. The first caller of `RecordVeteran`; read half (Index/Show) and write half (Save Veteran) are both in the tree. |
+| D17                   | Landed                | Working tree (untracked). `DatabaseController`, `Database/Database.vue`. `SCR-SYS-005`. Three destinations redirect to existing catalog surfaces; two are new (Races from `RaceCatalogSlot`, Scenarios from `config/scenarios.php`). *Dated close-out 2026-10-08: SCREEN-023 lists eight areas and this landed five, so the hub's "Not in this build" section naming Events, Shop Items and Sparks is deleted, not softened, and the three become `SCR-SYS-008/009/010` over `database.events`, `database.shopItems` and `database.sparks`. The rows are transcribed into `config/reference.php` with a `source` and a `recheck` per table, read from `docs/UMAMUSUME_REFERENCE.md` §4.4, §1.6.10, §1.5.2 and §1.5.3/§1.5.4; nothing is ingested and no source is allowlisted. The Shop Items view re-uses the scenario matrix's own 19-item Pro Shop block rather than retyping it. `DatabaseTest` **11 passed (220 assertions)**; `database.spec.ts` **12 passed (2.3m)**; `npm run typecheck` and `npm run build` exit 0; PHPStan `[OK] No errors` on its two PHP files; lore-code 124 hits tree-wide with **0 in this slice's files**; full suite **1586 passed, 2 skipped (27,273 assertions)**, exit 0. Slice plan `docs/research-scratch/PLANS-AND-BRIEFS.md` §"Database reference views".* |
+| D18                   | Landed                | Working tree (untracked). `Preferences/Edit.vue` extended into a four-category tablist; `PreferenceController` gains `verifiedAt` and `importUrl` props; `AppLayout.vue`'s flash gains `role="status"` (`aria-live` dropped as redundant). `PreferenceControlsTest` and `preferences.spec.ts` extended. **Blocked, then unblocked; final state verified by rebuild + browser spec.** |
+| E1                    | **Landed**            | Working tree (untracked). `components/scenario/{ScenarioPanel,ResourceMeter,ScenarioStatusBadge,AlertRow,WidgetFallback}.vue` and `registry.ts`; `types.ts`'s `ScenarioPanelSection`; `CockpitController::scenarioSection()`; `SCR-CAR-019`. `ScenarioPanelTest` **5 passed / 123 assertions**; `npm run build` **exits 0**; `scenario-panel.spec.ts` **8 passed (3.5m)** against a scratch-DB server on port 8161; PHPStan clean on its files; Pint clean; `npm run typecheck` clean; zero lore hits. **The gate run found one real defect, and it belonged to D14 rather than to E1:** the `Career Timeline` door E1's sibling slice added to the Cockpit (`Cockpit.vue:327`) was an inline link measuring 32px with no `min-h-11`, so E1's page-wide sweep failed the first run (`control 11 is not sized to the 44px contract`, received 32). Hoisted to the standalone `inline-flex min-h-11` pattern the sibling `Go to the run record screen` link already uses; the re-probe reports 0 controls under 44px on the Unity Cup cockpit, and the fix is what let the sweep pass. The earlier blocker (D18's uncommitted `Edit.vue:81`) cleared before this run. **Blocked, then unblocked; final state verified by rebuild + browser spec.** No author is recorded for the intermediate state: four reports gave four incompatible stories for one character, and the authorship of the intermediate version is not knowable from the current tree. The plain facts that matter are that the file now compiles, the build succeeds (955 modules), and the tablist renders in this spec's output. The gate closed inside the session, so per the recorded criterion no `KI-nn` entry was owed: a browser gate owed past 24 hours earns one, a gate owed within the session does not. That sweep failure is the defect `KNOWN-ISSUES.md` files as **KI-70 (the 44px entry)**, and this change closes it with the `min-h-11` hoist the entry itself prescribes; the register carries two entries numbered KI-70, which is a numbering collision rather than the same defect. **Cross-slice note for the E1 session:** E1's `AlertRow` gained a critical tone; its warning tone was deleted by E2 as dead code (the token never existed in `resources/css/app.css`). No renderer is registered: every widget resolves to `ResourceMeter`, every ON panel flag to `WidgetFallback`. Two fallback arms therefore have no rendered case — the registered-renderer arm lands with E3's first `register()` call, and the unlabelled-widget arm is unreachable while the matrix labels every declared key. *Dated correction 2026-10-07 (E2): that sentence held until E2 registered `career_goals` against `UraPanel.vue`, so the registered-renderer arm now has a rendered case and is no longer owed; the unlabelled-widget arm is still unreachable.* |
+| E2                    | **Landed**            | Working tree (untracked). `components/scenario/UraPanel.vue`; `AlertRow.vue` tone change; `ScenarioPanel.vue` first `register()` call; `CockpitController::careerGoalSections()` and `happyMeekRows()`; `config/scenarios.php` one `panel_labels` row plus the `ura_finale` flag; `SCR-CAR-020`. `UraPanelTest` **7 passed / 125 assertions**; `ura-panel.spec.ts` **10 passed (6.2m)** against a scratch-DB server (`VACUUM INTO` copy, port 8175, `SESSION_DRIVER=file`); `scenario-panel.spec.ts` re-run as the `AlertRow` regression at **8 passed**, and both files together **18 passed (2.9m)**; full suite **1530 passed, 2 skipped (26,446 assertions)**, exit 0; `npm run typecheck` and `npm run build` exit 0; Pint clean on its files; PHPStan `[OK] No errors`. Slice plan §9.2. **Three of SCREEN-014's five components have no data**, ruled absent by the owner: no `trainee_goals` table, no Happy Meek level column, no sourced reward. They render as named absences with `N/A` plus the reason, visible and in a `title`. The mandatory race set is the one sourced module, read through the existing `RaceCatalogSlot::isAtOrBeforeTurn()` owner, never re-derived. The alert says "due and not recorded"; no window length is invented. Deviations found by the gate itself: `AlertRow` carried a `warning` tone mapped to `text-warning`, a token that has never existed in `resources/css/app.css`, so Tailwind emitted nothing for it, and it is replaced rather than left dead; and the spec's first three failures were the spec's own wrong assumptions (a stale CSRF token reused across eleven writes, a nested-`li` filter that resolved to three elements, and one no-turn finale row assumed where the calendar holds three). |
+| E3                    | **Landed**            | Working tree (untracked, this session). `components/scenario/{UnityCupPanel,RaceCalendarNote}.vue`; three `register()` calls beside E2's on `ScenarioPanel.vue` (the home E2 chose; an earlier home on `Cockpit.vue` was converged into it rather than kept as a second one); `CockpitController::teamSection()` plus the uniform `team` key on `scenarioSection()`; `config/scenarios.php` `unity_cup.spirit_burst_bands` + `burst_payout_timing`; `types.ts`'s `ScenarioTeamSection`; `SCR-CAR-021`. `UnityCupPanelTest` **7 cases**; targeted **20 passed (583 assertions)** across `UnityCupPanelTest`/`ScenarioPanelTest`/`CareerCockpitTest`; `unity-cup-panel.spec.ts` **7 passed** and `scenario-panel.spec.ts` **8 passed** (15 together, 4.2m) against a `VACUUM INTO` scratch copy on port 8166 with `SESSION_DRIVER=file`; `npm run typecheck` and `npm run build` exit 0; Pint run scoped to this slice's files after a concurrent session's half-written test file blocked the whole-suite load, then `--dirty` clean across the tree; PHPStan **`[OK] No errors`** tree-wide at hand-off. `career-cockpit.spec.ts:107` went red on this slice's account and is fixed here: `getByText('RECOMMENDED')` is a case-insensitive substring, so it matched the new panel's absence sentence "Recommended timing and projected benefit are not built", not the grid marker; the assertion is scoped to the Actions region the way the ranked case in the same file already scopes itself, and the file re-runs **7 passed (4.7m)**. A probe (created, run and deleted in this session) is the evidence: `recommendedKeys: []`, the advisor's refusal printed, and the only matching node was the panel's prose. lore-code 115 hits, none in this slice's files (the tree rose from the 97 baseline through peers' files). Slice plan at this file's §9.1. The doubt review's three accepted findings are in the artifact: the +30 bonus renders only beside Rank S (the only rank the client frame shows it at), the band table carries an `Estimated` badge plus one warning line naming all three publisher conflicts (§7.4 SP figures and payout month, §8.2 the counting rule), and the readiness sentence states the bands are thresholds with no recorded Spirit to set against them. Two spec defects of this slice's own were fixed before landing: an exact-text ladder assertion the gauge's `G lv 1` rung could never satisfy, and a keyboard case that asserted nothing. Deviations recorded: E1's fallback DOM case is rewritten to the property that still holds (`cannot draw yet` count 0) because E2's, E3's and E4's registrations left no Global scenario an unclaimed flag; E1's meter locator is retargeted to the accessible name because the Team Panel legitimately prints a second "Team Rank" heading. |
+| E4–E6                 | E4 Landed, E5–E6 Landed | **E4 Landed 2026-10-07** (this session, working tree untracked). `components/scenario/TrackblazerPanel.vue`; three `register()` calls (`grade_objectives`, `shop`, `epithet_routes`) on `ScenarioPanel.vue`; `CockpitController::scenarioSection()` gains the five uniform-shape nullable keys (`grade`, `shop`, `epithet`, `rival`, `finale_official_title_absence`) and five section builders; `types.ts`'s `Trackblazer{Grade,Shop,Epithet}Section`; `Cockpit.vue`'s action-area Shop jump (`hasShop` + `jumpToShop` to `#trackblazer-shop-heading`, WCAG 2.4.11); `SCREEN_SPEC.md` `SCR-CAR-022`. `TrackblazerPanelTest` **10 passed / 127 assertions**; `trackblazer-panel.spec.ts` **10 passed (6.0m)** against the shared `:8127` server; `scenario-panel.spec.ts` + `ura-panel.spec.ts` + `unity-cup-panel.spec.ts` re-run green at **29 passed / 581 assertions** scoped to the E1/E2/E3/E4 surface; full Pest suite **1541 passed / 2 skipped (26600 assertions)**; Pint clean; `vendor/bin/phpstan analyse app/Http/Controllers/Career/CockpitController.php app/Http/Requests/StoreShopPurchaseRequest.php app/Models/TrainingRun.php --no-progress --memory-limit=1G` **[OK] No errors**; `npm run typecheck` exit 0; `npm run build` exit 0 with `Cockpit-D-WiUHWv.js` 53.65 kB; `composer lore` + `composer lore-code` clean on E4 files. Slice plan `docs/research-scratch/PLANS-AND-BRIEFS.md` §"E4 — Trackblazer scenario panel". Two layout decisions the panel makes and the props tests hold: the rival list caps at eight rows (Miller's Law, plan §13; the Junior-Year seed's 50+ entries would push the page over WCAG 1.4.10 reflow at 320px) and the grade bar renders only when a period is reported (design-2.0 §49 absent-is-text-only, the same trade-off E3 made for Spirit). Two cases the browser spec found and tightened rather than dropped: a tampered item value reaches the boundary through a `<datalist>`-backed text input (the Form Request is the authority, not the option list); the "no `Recommended`" assertion scopes to "Recommended Purchase" / heading / image-name because the panel's own rotation-absence copy carries the word. _Dated close-out 2026-10-08 (documentation-sync pass): "E5–E6 untouched" is the false clause this close-out supersedes; both landed 2026-10-07 and the close-out note above the D16/D17/D18 rows is the record, which this row's own status cell now matches._ |
+| F1 (selection half)   | Landed; redirect **held by the owner's ruling of 2026-10-08** | **The 0.1.0 run-detail page still owns four write paths, and it stays live until each has a 2.0 owner** (plan §9.6): the run status change (`runs.update`), a recorded turn's edit and delete (`runs.turns.update` for any row but the latest, and `runs.turns.destroy` for every row), the free-race entry (`runs.races.store`'s `entry_mode=manual` branch), and the CSV/JSON exports (`runs.export/{format}`). That is why `GET /training-runs/{run}` does not yet redirect; the test count is downstream of it and resolves as one sweep once the writes have owners. What this slice delivered is the selection half: `TrainingRunController::index()` row URLs now carry `runs.cockpit` (`SCR-CAR-011`) instead of `runs.show`, so Careers -> Select Career opens the 2.0 Cockpit directly, and the Dashboard's `resume_url` already did. `RunsIndexTest`'s two row-URL assertions repointed with the contract they assert; `CareerSurfaceCutoverTest` pins the index rows, the Dashboard resume, and (as an invariant, not a literal) that every Veteran row's link resolves to a career screen that renders; `tests/browser/career-surface-cutover.spec.ts` (6 cases) passed on a `VACUUM INTO` scratch copy. Pint, PHPStan `[OK] No errors`, typecheck and lore-code clean. Since the first report the hold's two named blockers moved: **the browser cleanups are no longer one** (23 specs' `afterEach` deletes now go over HTTP through `tests/utils/delete-run.ts`, measured as 23 rather than the 9 first reported, because `git grep` skips untracked files), and the Career Result door is no longer legacy-only (`run.result_url` from `CockpitController::runSection()`, rendered in the Cockpit's left column beside the timeline door, §9.6 records both). The 38 feature files that assert `component('Runs/Show')` (158 assertions) are the flip's sweep, listed in §9.6. The full audit table is in the F1 hand-off. |
 
 ### 4.1 Open work carried out of this status read
+
+**Tree state as measured at 07:5x on 2026-10-08, for the next session to start from.** `master` is at
+`7b04b6c`, unpushed and **7 commits ahead of `origin/master`** (`git status -sb`). Two slices sit in the
+working tree uncommitted: this F1 residual (thirty-one paths) and the Database reference views slice, and
+`app/Http/Controllers/PreferenceController.php` carries a third session's D18b work (settings blob,
+`scenarioOptions`, streamed `export()`, `backup()`) rather than the one-line Pint change this thread caused
+there. **The D11-D17 screens are not in HEAD at all**: `routes/web.php` at HEAD has no `runs.result` and no
+`runs.timeline` (181 lines; both routes exist only in the working tree), and
+`app/Http/Controllers/Career/{ResultController,TimelineController,RacePlannerController,SkillsPlannerController,EventDecisionController,InheritanceEventController}.php`
+are all untracked - KI-71's condition, still open. Two consequences: the Career Result door landed here
+cannot be committed apart from that block, because its controller line calls a route HEAD does not define,
+and a browser pass cannot be treated as evidence while the shared harness on `:8127` is held by PIDs
+30320/30528 and answers nothing (`curl /` returns no code at 12s and at 20s), which is KI-73's shape and
+needs that holder's owner to reap it. `database/database.sqlite` holds **12** `training_runs` (1 at this
+session's start); those rows are other sessions' leaks and nobody's cleanup has been authorised. **KI-76 is
+open with its config untouched**, the two named remedies being a 2-3s SSR timeout or SSR off by default.
 
 In order, smallest first. Items 1 to 5 are defects; 6 to 9 are decisions and standing constraints that
 every later slice inherits.
@@ -245,12 +352,72 @@ every later slice inherits.
    reach green.
 5. **Decide whether the two never-run artwork assertions are environment artefacts.** Prove it with
    `uma:fetch-art --dry-run` rather than by editing the expectation.
+
+*Dated closures, 2026-10-07 (the D9 session's queue pass; original text kept above).* **Item 1** closed:
+`LegacySelectController`'s private `parentNames()` (22 lines) is gone in `b494d6f`, replaced by
+`AncestryGraph::parentNames(SetupDraft::legacyParents())`; `CareerLegacyDeckStepsTest` is 12 passed /
+248 assertions, `tests/browser/career-legacy-deck-steps.spec.ts` is 9 passed on the 8137 harness, both
+`SCR-CAR-008` and `SCR-CAR-009` rows exist, and the owed register entry is `KNOWN-ISSUES.md` KI-65.
+**Item 2** closed: `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` reads `[OK] No errors`
+on the current tree. **Item 3** closed: `career-build-target.spec.ts` ran for the first time, 6 passed
+(D4 has browser evidence). **Item 4** closed: `career-legacy-deck-steps.spec.ts` 9 passed after two
+defects were fixed and one environment one cleared. One was a product defect (KI-66: `DeckSelect.vue`
+bound `:is-friend` against the snake_case prop, so the "Friend slot" chip never rendered on step 5); one
+was the test's own selector (`getByText('Wit')` is a case-insensitive substring match and resolved to 54
+elements — replaced with one scoped, ordered assertion of the seven type words); the third was the
+scratch database holding a stale run from a crashed spec, which voided
+`career-legacy-deck-steps.spec.ts`'s empty-table premise and was deleted from that database (not the dev
+one). Six of the seven cases the item named were already green when the pass began. _Dated correction
+2026-10-07 (D13 session, on the owner's D11 close-out): item 4 was closed for that pass, not closed
+forward._ Two facts the closure leaves unsaid. First, the green was bought by deleting one row by hand, so
+the premise returns the moment a spec crashes or a concurrent session writes to the served database; that is
+exactly what happened, and `career-legacy-deck-steps.spec.ts:268` failed again in the D11 full-suite read for
+that reason alone (it is 9 passed again when re-run in isolation against a wiped scratch database). Second,
+the selector fix was not in history either: `git show 55be0cd:tests/browser/career-legacy-deck-steps.spec.ts`
+carried the live `await expect(page.getByText('Wit')).toBeVisible();` at `:183`, so a fresh checkout of
+`b494d6f` or `55be0cd` reproduced the case this closure reports fixed. Committed 2026-10-07 as `b5d69be`,
+which replaces that line with the scoped paragraph locator and one ordered `toHaveText`; `55be0cd` is left
+as it is, because a fix in the working tree is not a fix in the plan's own record of it. Read "closed" here
+as "green in one working tree on one day". Recorded as `KNOWN-ISSUES.md` KI-69. **Item 5** closed:
+`uma:fetch-art --dry-run` on the scratch DB reports `card_portrait 106 ids, already on disk 106,
+unresolved 0` and `support_thumb 559, already on disk 559, unresolved 0`, so the mirror is full and
+`catalog-detail.spec.ts`'s "mirror holds no file" case was asserting the disk rather than the screen; it
+now asserts the shape of whichever state the tree is in, the same ruling `support-deck.spec.ts` recorded
+for the picker's thumbnails. _Dated note 2026-10-07 (D13 session): the ruling is sound and stands; the
+sweep that applied it missed its third instance._ `support-cards.spec.ts:171` is the same defect:
+`await expect(page.locator('#support-card-results img')).toHaveCount(0)` asserts that the mirror holds no
+file, and `storage/app/private/artwork` holds 665 PNGs on this tree, so the case fails on a wiped scratch
+database too (measured: `1 failed` with `runs=0`). It belongs in the spec, in the shape item 5 already set
+at `catalog-detail.spec.ts:149`: assert `img[src=""]` count 0, which is a fact about the screen, and read
+the frame's presence or absence from whichever state the disk is in rather than demanding the empty one.
+Recorded as `KNOWN-ISSUES.md` KI-69. **D11** is no longer "Not begun": a concurrent session landed
+`EventDecisionController`, `Career/EventDecision.vue`, `career/EventCard.vue`, the `runs.events.*`
+routes, `CareerEventDecisionTest` (9 passed / 173 assertions) and `career-event-decision.spec.ts` while
+this pass ran, so this session verified it rather than rebuilding it.
 6. **Owner decisions that block content, not code:** whether `BuildPurpose` gains a "Competitive Build"
    case; whether risk tolerance and per-skill priority marks enter `BuildTargetPayload` (both are
    stored-shape changes); whether `config/scenarios.php` gains a sourced one-line scenario `description`
    and `recommended_use`; and whether `our_grand_concert.documented` should still read `true` now that
    `ab53861` recovered the primary read, since the flag being `true` makes the PARTIALLY DOCUMENTED
    badge unreachable while the client vocabulary in that scenario is still recorded as unverified.
+   **Narrowed 2026-10-07 by slice E1.** The `documented` half is answered by a sibling slice's prose:
+   a concurrent pass added `partially_documented` to `our_grand_concert` in the working tree, with the
+   argument that `documented` is a provenance marker whose value flipped on 2026-10-05 and must not
+   double as a badge condition, and that the Scenarios database screen reads the new key. That answers
+   the first half of this item: `documented` stays a provenance marker reading `true`. What remains is
+   **one** question and it is the owner's alone, not an agent's and not a slice's: **which key drives
+   the badge.** E1 does not own that ruling and does not wait on it. Its controller read stays on the
+   committed `documented`, and it will not read a key that exists only in a working tree, so its
+   badge renders "Documented" for all four Global scenarios and `SCREEN_SPEC.md` SCR-CAR-019 records
+   the partial arm as unreachable. Committing `partially_documented` (with the Scenarios screen's read
+   of it) is the one change that makes the state reachable; when the owner rules, E1's controller line
+changes in a follow-up commit, never inside this slice, and `scenario-panel.spec.ts` already has a
+    case shape ready for it.
+    _Dated correction 2026-10-08 (documentation-sync pass): the ruling this item was waiting on landed
+    with E6. `config/scenarios.php` carries `our_grand_concert.partially_documented` and the badge now
+    reads that key, so the PARTIALLY DOCUMENTED arm is reachable and `SCR-CAR-024` records the strip it
+    drives. The owner's ruling is the one recorded in the E6 close-out; this item's own text stands as
+    the record of the question it asked, which is now answered rather than open._
 7. **Environment gate.** Resolved 2026-10-06. `create_veterans_table` and
    `add_build_target_to_training_runs_table` (with `add_condition_groups_to_skills_table` and
    `add_awakening_event_evo_to_character_cards_table`) sat Pending on `database/database.sqlite` for
@@ -259,18 +426,85 @@ every later slice inherits.
    reported "Nothing to migrate". Verified on the port-8000 server attached to that database: both
    routes return 200, `Veteran::count()` queries without a missing-table exception, and
    `Schema::hasColumn('training_runs', 'build_target')` is true. `migrate:status` stays in every
-   hand-off regardless, because a green suite proves nothing about that file. The browser suite still
-   runs against a scratch database on port 8137 with `PLAYWRIGHT_BASE_URL`: it asserts an empty runs
-   and veterans table, and the dev database now holds Trainer rows that would break that assertion.
+   hand-off regardless, because a green suite proves nothing about that file.
+
+   _Dated correction 2026-10-07 (D13 session, on the owner's D11 close-out; the original sentence is quoted
+   rather than deleted because it is the record of a false premise)._ The sentence read: "The browser suite
+   still runs against a scratch database on port 8137 with `PLAYWRIGHT_BASE_URL`: it asserts an empty runs
+   and veterans table, and the dev database now holds Trainer rows that would break that assertion." It does
+   not. `playwright.config.ts:7` hardcodes `const port = 8127`, and `webServer.command` is
+   `php artisan serve --port=8127` with `reuseExistingServer: true`, so that server reads `DB_DATABASE` from
+   `.env`, which is `database/database.sqlite`: the **shared dev file**. The fourteen-failure read in the D11
+   hand-off was taken there, and its own log line names `http://127.0.0.1:8127/training-runs/150`; at the
+   time of that read the file held five Active runs (ids 7, 52, 107, 136, 216; `sqlite_sequence` 216). This
+   contradicts the requirement in this same item, that the suite needs an isolated database because it
+   asserts empty tables. Port 8137 belongs to a concurrent session, not to this plan. The fix is one of two
+   things, and neither is a note: commit an isolated harness (a scratch database the suite creates and
+   wipes, named in `playwright.config.ts` rather than in prose), or drop the claim that an isolated harness
+   exists. Recorded as `KNOWN-ISSUES.md` KI-69.
+   _Dated correction 2026-10-07 (measured during the D12 close-out sweep): that harness has lapsed, and the
+   drift is the defect. `playwright.config.ts:7` sets `const port = 8127`, `:36` starts
+   `php artisan serve --port=8127` with no `DB_DATABASE`, `:8` falls back to `http://127.0.0.1:8127` when
+   `PLAYWRIGHT_BASE_URL` is unset (it is unset in this shell), and `config('database.connections.sqlite.database')`
+   resolves `database/database.sqlite`. So `npm run test:browser` runs against the shared dev database, which
+   is exactly the state this item says breaks the empty-table assertions: it held 4 `training_runs` rows
+   (ids 7, 52, 107, 136, created Oct 3 and Oct 6) and 0 veterans when 152 passed and 14 failed. Two
+   consequences. First, `dashboard.spec.ts:65`, `:105`, `:163` and `runs.spec.ts:41` are red on the dev file
+   by construction, not because the screens regressed. Second, an empty `veterans` table is **not** a scratch
+   artifact: no seeder touches that table and `RecordVeteran` has no caller, so a browser spec that needs a
+   Veteran cannot pass on either database. Restoring the scratch harness is a separate decision from adding a
+   fixture, and `KNOWN-ISSUES.md` KI-69 records the class._
 8. **Toolchain constraints now binding on every Phase D and E slice.** TypeScript 7 removed
    `lib/typescript.js`, so `@vue/compiler-sfc` cannot resolve an imported type in `defineProps` and each
    page declares its props contract locally. There is no Ziggy, so pages state literal URLs. There is no
    axe dependency, so §12.5's hand-rolled checks are the accessibility evidence and "axe clean" must not
    be claimed.
+   _Dated correction 2026-10-07: the axe clause is withdrawn, and the change is upward. `package.json:13`
+   carries `@axe-core/playwright@^4.13.0`, `tests/utils/accessibility.ts` wraps it and scopes the scan to
+   `#app` (the scoping is what makes it deterministic, KI-63), and nine browser specs assert `violations`
+   is empty: `accessibility.spec.ts` and eight career specs (`grep -l buildAxe tests/browser` was the
+   count, 2026-10-07). "axe clean" may therefore be claimed,
+   and §12.5's four manual checks stay required beside it rather than in place of it: keyboard-only and axe
+   are now cases, while reflow at 320px, reflow at a 200-percent width and the reduced-motion probe are the
+   ones a slice must add. `career-race-strip.spec.ts:204` is the pattern (320 and 640x512 measured in one
+   case, with the probe that can fail under `no-preference`)._
 9. **Focus and accessible-name rules learned the expensive way.** Restore focus in a visit's `onSuccess`
    plus `nextTick`, never `onMounted`; put the `id` on the focusable element; keep state words out of
    headings, because they join the accessible name; and assert with `getByRole(..., { name })` rather
    than `toHaveText` on any element containing an `aria-hidden` glyph.
+10. **The browser suite has two contradictory database preconditions, and an owner ruling is owed before
+    D12's spec is committed.** OPEN, filed 2026-10-07. Item 7 requires an isolated database because the suite
+    asserts an **empty** `veterans` table; D12's `career-inheritance-event.spec.ts` needs that same table
+    **populated** with named Veterans, because `LegacyController::roster():308` seeds the parent picker from
+    it and the fixture selects `Symboli Rudolf` and `Special Week` by label. No single scratch database
+    satisfies both, and today nothing satisfies either half: `veterans` holds 0 rows in
+    `database/database.sqlite`, in `.scratch-uma/browser.sqlite` and in a fresh `migrate --seed`, no seeder
+    touches it, and `app/Actions/RecordVeteran.php` is referenced only in docblocks, so the picker renders no
+    options and all seven fixture-driven cases time out at the 180s budget. **Recommended resolution:** the
+    fixture owns its rows. Seed the Veterans the case picks inside the spec and delete them in teardown, so a
+    browser test depends on data it created rather than on shared database state, and pair that with the
+    item-7 harness fix so port 8127 stops serving the shared dev file. This is a D12 fix and its spec is
+    untracked, along with its controller, page and feature test. The second half of the same defect is a
+    selector contract: `Builder.vue` emits `name` only for `legacies.${index}.legacy_id` and `affinity`, while
+    rank, ancestors and Spark fields carry `v-model` and `:id` and no `name` at all, so the fixture's
+    `input[name="legacies.0.rank"]` cannot resolve even once the roster is populated (measured: supplying four
+     Veterans moves the failure off `:80` onto `:81`). Recorded as `KNOWN-ISSUES.md` KI-69.
+     _Dated correction 2026-10-08 (documentation-sync pass): the "no seeder touches it" and "RecordVeteran
+     has no caller" halves are the stale readings this correction supersedes. D16 landed `RecordVeteran`'s
+     first caller in `SaveVeteranController`, wired at `routes/web.php:237-240`, so the picker this item's
+     fixture drives now has a write path. The harness question named in item 7 — whether the browser suite
+     runs against a scratch database at all — is the half that stays open; this correction does not close
+     it, and `KNOWN-ISSUES.md` KI-69 records that reading._
+11. **The `completed` goal state has no browser case.** E2's `UraPanelTest` proves the branch (a mandatory
+    race the run records renders `Recorded` and raises no alert), but reaching that state in a browser needs
+    a race written through `SCR-CAR-013`'s write path, which E2 does not own. Open item for whichever pass
+    next runs `career-race-decision.spec.ts`: record the debut there, then assert `Recorded` in
+    `ura-panel.spec.ts`. No fixture is invented to green it (owner ruling 2026-10-07).
+    _Dated correction 2026-10-08 (documentation-sync pass): the `ura_finale` strip on the URA panel's
+    career-goals module renders the `Recorded` arm only when the run records the mandatory race; this item's
+    browser case is still open as written, because `ura-panel.spec.ts` has not been re-run on a tree where
+    the debut race is written through `runs.races.store` first. The close-out does not mark it closed; the
+    next pass that runs the URA panel spec owes the case the item describes._
 
 Race prediction (the win-probability field on `SCREEN-011` and `SCREEN-017`), inheritance optimization
 (`SCREEN-006`), and per-training stat yields (`SCREEN-010`) are **not built**: they are held on `ADR-0016`
@@ -627,7 +861,7 @@ starts.
 | D9      | `career/TrainingCard.vue`, `Career/TrainingDetail.vue`                                                                                                                               | Per-option breakdown shows only sourced terms; the unsourced yield renders `N/A`                                                                                                                                                                                                                    |
 | D10     | `career/RaceCard.vue`, `Career/RaceDecision.vue`                                                                                                                                     | Race facts from `RaceCatalogSlot` where present; win probability renders `N/A` with a `title` naming the `ADR-0016` blocker                                                                                                                                                                         |
 | D11     | `career/EventCard.vue`, `Career/EventDecision.vue`                                                                                                                                   | Records the choice over `TurnEvent`; the advisor's override is always available                                                                                                                                                                                                                     |
-| D12     | `Career/InheritanceEvent.vue`                                                                                                                                                        | Records observed inspiration outcomes over the existing event recording; predicted vs observed are kept apart (`ADR-0020` §3)                                                                                                                                                                       |
+| D12     | `Career/InheritanceEvent.vue`                                                                                                                                                        | Record-only: predicted section shows parent/grandparent Sparks from `legacy_selection` with sourced star-roll odds (REFERENCE §1.5.3), "expected inheritance" = `N/A` citing `ADR-0020` §3. Observed section records Trainer-entered inspiration outcomes via existing TurnEvent mechanism. Milestone timeline (turns 1, 31, 55 per REFERENCE §1.5.1). Two clear regions with Estimated/Confirmed badges per antislop-ui.                                                                                                                                                                       |
 | D13     | `Career/SkillsPlanner.vue` *(design-2.0 only)*                                                                                                                                       | States Required/Available/Learned/Inherited; warns when SP cannot cover required; hint level discount calculation (base cost × (1 - discount%)); skill race-fit assessment (distance/surface/style/course/weather/ground/phase); no skill recommendation (OQ-5 stays open, `ADR-0020` §2)           |
 | D14     | `career/CareerTimeline.vue`, `Career/Timeline.vue`                                                                                                                                   | Renders `TurnEntry` / `TurnEvent` history; before/after state; no silent rewrite of a past decision                                                                                                                                                                                                 |
 | D15     | `Career/Result.vue`                                                                                                                                                                  | Reads the finished run; no derived "build quality" score                                                                                                                                                                                                                                            |
@@ -879,6 +1113,14 @@ The third and fourth Phase D bite-sized slice plans, embedded 2026-10-06 from `.
 Depends on D2, which is **not landed** (`resources/js/pages/Career/` does not exist; only
 `resources/js/layouts/AppLayout.vue`). Verified on 2026-10-06 at `40c91d4`. So D3 carries the
 wizard contract itself. See §Wizard below.
+_Dated close-out 2026-10-08 (documentation-sync pass): the "not landed" reading this plan's premise
+states is the stale claim the close-out supersedes. `resources/js/pages/Career/` now exists and holds
+the full career set (ScenarioSelect, TraineeSelect, TraineeProfile, BuildTarget, Cockpit,
+TrainingDetail, RaceDecision, EventDecision, InheritanceEvent, SkillsPlanner, Timeline, Result,
+Preflight, SaveVeteran), `CareerLayout.vue` and `SetupLayout.vue` are in `resources/js/layouts/`,
+and D2 itself landed green on 2026-10-06 at `17b793a` (its own §4 row records the commit). This
+section's body stands as the record of the read it was taken on at `40c91d4`, when D2's route had
+not yet landed, and is preserved as written rather than re-described against the tree._
 
 Everything in the Filters/Sections tables below was measured read-only against the seeded scratch
 database (`umamusume` 67 rows, `character_cards` 106, `umamusume_profiles` 67, `skills` 1,910), not
@@ -976,6 +1218,13 @@ No new package. No migration. No ADR.
 1. **D2 and D4 are unbuilt**, so "goes to D4" and "Back keeps the chosen scenario" can only be proven
    as: the draft carries `scenario` and survives a round trip (props test seeds the session; the
    browser proves survival across D3's own two screens). Steps 1 and 4–6 are named absences.
+   _Dated close-out 2026-10-08 (documentation-sync pass): the "unbuilt" reading this item states is
+   the stale claim the close-out supersedes. D2 landed green at `17b793a` and D4 landed green at the
+   same commit (both recorded in §4), so step 1 and step 3 of the wizard are live on this tree;
+   steps 4 and 5 are the two the §4.1 item 1 pass greened and registered as `SCR-CAR-008` and
+   `SCR-CAR-009`, and step 6 landed as `SCR-CAR-010` with D7. The full six-step wizard is live, and
+   the `SCR-CAR-002` status cell records it as such. This item's own text stands as the record of
+   the read it was taken on at `40c91d4`, when D2's route had not yet landed._
 2. **Out-of-slice defect found, not fixed:** `umamusume_profiles.name_ja` is **0 of 67** populated
    because `GametoraCharacterProfileParser.php:139` reads `jp_name` while the committed body
    (`database/seeders/data/characters.c6676539.json`) carries `name_ja`. Consequence:
@@ -998,6 +1247,14 @@ Depends on **C1 only**, which is landed (`BuildTargetPayload`, `StoreBuildTarget
 invent the wizard shell: the page mounts in `AppLayout` and re-wraps into `SetupLayout` when D2/D3
 land. The route is run-scoped, which is what C1's Form Request already requires (`withValidator`
 reads `$this->route('run')`).
+_Dated close-out 2026-10-08 (documentation-sync pass): the "D2/D3 are unbuilt" reading this
+plan's premise states is the stale claim the close-out supersedes. Both landed green at
+`17b793a` (their §4 rows record the commit), and the re-wrap this plan anticipated has since
+happened: D4's `BuildTarget.vue` now mounts inside `SetupLayout` step 3 alongside D2 and D3, which
+is what the §8.4 wizard-contract table this section builds on describes. The re-wrap is a fact of
+the tree now rather than a forward-looking expectation, and the plan's own §8.1/§8.2 precedent
+records it the same way: the body of a slice plan preserved as written, with a dated close-out
+beside it, rather than re-described against the tree._
 
 Verified at `40c91d4`. Gate baseline to beat: PHPStan 18 errors (`TrainingRunController` 2,
 `DeckAnalysis` 16), `php artisan test --compact` 1326 passed / 2 skipped, browser suite 73 passed /
@@ -1022,6 +1279,13 @@ Contract rules, decided here so no later slice re-decides them:
   `export type ProvenanceState = 'confirmed' | 'calculated' | 'estimated' | 'unknown'`. The glyphs and
   words live in one `const` map inside this file and nowhere else. **Grep gate** in the slice test:
   the four state words must not appear as a rendered literal in any other `.vue`.
+  _Dated correction 2026-10-07: the gate as shipped does not enforce the last sentence. `CareerBuildTargetTest.php:193-221`
+  sweeps two glyphs, `✓` and `∑`, and its own comment at `:215-217` excludes `~` and `?` as unquotable (a tilde sits in
+  two Legacy comments, a question mark in every ternary). The word clause was never implemented and cannot be, as
+  written: `InheritanceEvent.vue:378` and `:420` print sentences containing "Confirmed", which is ordinary English
+  rather than a second map. The enforceable contract is therefore **the glyph pair and the state→word map live in
+  `ProvenanceBadge.vue` and nowhere else**. If the owner wants the words gated too, the sweep must target the map
+  shape (a `BADGES`-style literal assigning `glyph:` alongside `word:`), not any mention of the four words._
 - **Type export caveat, stated once:** consumers can import `ProvenanceState` for `ref<…>()` and
   helper signatures, but **cannot** put it in their own `defineProps<>` — TS 7 ships no
   `lib/typescript.js`, so `@vue/compiler-sfc` cannot resolve an imported type there (proven in D1:
@@ -1119,7 +1383,170 @@ No new package. No migration. No ADR.
 4. Should `Unknown` badges be *required* on every absent figure app-wide (which would let a test
    enforce "no bare N/A without a badge"), or is the `title` sufficient until D8?
 
----
+--- 
+
+### 8.6 D18 — Settings categories (SCREEN-024): slice plan
+
+Extends `Preferences/Edit.vue` into four categories (General, Recommendation, Data, Game
+version) per `docs/proposals/screen-spec-2.0.md` SCREEN-024. The page already ships theme and
+failure-estimate controls; this slice adds the tablist shell, the Game-version panel (the only new
+fact surface), and named absences for every preference that has no column.
+
+Depends on: nothing (PreferenceController and the two controls landed as the 2026-10-04 port).
+
+### Files
+
+| File | Change |
+| --- | --- |
+| `app/Http/Controllers/PreferenceController.php` | add `verifiedAt` and `importUrl` to `edit()` props |
+| `resources/js/layouts/AppLayout.vue` | add `role="status"` and `aria-live="polite"` to the flash `<p>` |
+| `resources/js/pages/Preferences/Edit.vue` | restructure into tablist: General, Recommendation, Data, Game version; render named absences; Game version panel reads `app.ruleset` + `verifiedAt` |
+| `tests/Feature/PreferenceControlsTest.php` | append prop tests for `verifiedAt` and `importUrl` |
+| `tests/browser/preferences.spec.ts` | append D18 cases: tablist keyboard nav, N/A ruleset row |
+| `SCREEN_SPEC.md` | extend §7-5 with the four-category structure and states table |
+
+### Props contract
+
+```php
+Inertia::render('Preferences/Edit', [
+    'theme' => in_array($theme, ['light', 'dark'], true) ? $theme : null,
+    'failureEstimate' => Preference::get('failure_estimate') ?? 'off',
+    'verifiedAt' => config('scenarios.verified_at'),   // '2026-09-27'
+    'importUrl' => route('runs.import'),
+]);
+// ruleset comes from the shared app.ruleset prop (null by ruling), read in the component.
+```
+
+### Decisions (and why)
+
+1. **Heading stays "Preferences"; the page is organized by category, not renamed.** The existing
+   browser test asserts an h2 reading "Preferences"; the SCREEN-024 name is "Settings" but the route
+   and the nav label already say Settings, so the h2 does not carry the screen name. No rename avoids
+   re-breaking the shell control-count.
+2. **Tablist, not anchored fieldsets.** Four named views of one form; a tablist gives arrow-left/right
+   switching with a stable Help placement and preserves the single POST to `/preferences`.
+3. **Race-risk thresholds is omitted from the tree entirely.** It is held on ADR-0016 (win probability),
+   so it is not rendered as an absence-with-a-column — there is no column to absent.
+4. **Game version panel reads `app.ruleset` from shared props** (null), same as the Dashboard's
+   `dataStatus` row, to avoid a second copy of the same null.
+5. **Save feedback is a polite live region.** `role="status"` + `aria-live="polite"` on the flash `<p>`
+   in `AppLayout`, so screen readers announce "Preferences saved." after the redirect-back visit without
+   stealing focus.
+6. **Data category: Import is a real link; Export/Backup/Restore/Reset are named absences.**
+   `route('runs.import')` exists; the others have no route — Reset is destructively scoped per
+   AGENTS §5, so it is absent, not a confirmation dialog without a backend.
+
+### Tests
+
+- Props: on an unset DB, `verifiedAt` is the config value and `importUrl` is the import route URL;
+  existing theme/failureEstimate assertions remain green.
+- Browser: tablist arrow navigation lands on each tab; the active tab panel's controls render; the
+  ruleset row reads "N/A" with its title; save shows the live-region message.
+
+### Open questions
+
+1. **(Owner decision, recommended)** Add a nullable `settings` JSON column to `preferences` — one column,
+   one migration — so Language, Units, Default scenario, Aggressiveness, Stat-target defaults and
+   Race-risk thresholds live in a single JSON blob validated by `Preference::KEYS` at the top level?
+   *Rationale:* `training_runs.build_target` already carries a `build_target` json column
+   (`add_build_target_to_training_runs_table`); the precedent exists and the write path reuses
+   `UpdatePreferenceRequest`'s key-set refusal at the blob's top level. Ranked alternatives if no:
+   (a) which individual columns to approve, (b) whether the Reset route is approved as a destructive
+   action.
+2. **DesignTokensTest column assertion.** If the owner approves (1), `DesignTokensTest:168` asserts
+   `preferences` has exactly `['key','value','created_at','updated_at']` — a one-line update in the
+   same commit. Noted, not gating.
+
+**Closed 2026-10-08 by the owner, on the D18b hand-off.** The authorization was wrong and the schema refused
+it: (1) closes as the **`settings` row**, not a column. `preferences` is a key-value table with
+`value TEXT NOT NULL` and no-row-means-unset, so the `training_runs.build_target` precedent does not
+transfer, and the one row that could carry a nullable column must also fill the `value` it duplicates. The
+key set is the contract the open question was actually describing: `Preference::KEYS` gains `settings` as the
+top-level check, `Preference::SETTINGS_KEYS` validates the interior, and `UpdatePreferenceRequest` refuses an
+unknown nested key. (2) closes as **not applicable**: the column list never changed, so the assertion never
+moved, and editing it would have blessed an unread column. The `ALTER TABLE` alternative is explicitly
+rejected and is not to be implemented.
+
+#### D18b — Settings stored preferences (SCREEN-024, 2026-10-08): slice plan
+
+The owner authorized open question 1. Building it surfaced one premise that fails its own check, and it
+is recorded here rather than worked around.
+
+**The store is a row, not a column.** The authorization says "add a nullable `settings` JSON column to
+`preferences`, on the pattern of `training_runs.build_target`". That pattern does not transfer:
+`training_runs` has a numeric key and real rows, so a JSON column per row is meaningful; `preferences` is
+a key-value table (`2026_09_27_121500_create_preferences_table.php`) whose `value` is `text()` NOT NULL
+and whose own docblock says "a preference that has never been set has no row, and that absence is the
+default rather than a NULL to interpret". A nullable `settings` column on that table would be read by
+nothing, and the one row that would carry it cannot exist without also filling the NOT NULL `value` it
+duplicates. The settings blob is therefore **one row keyed `settings` with JSON in `value`** — the same
+shape `build_target` uses on its own table — and `Preference::KEYS` gains `'settings'`, which is the
+top-level validation open question 1 actually describes. `DesignTokensTest`'s column assertion stays
+exactly as it is, because the column list does not change; updating it would bless an unread column,
+which is the drift that assertion exists to prevent. If the owner still wants the column, the migration
+is `ALTER TABLE preferences ADD COLUMN settings TEXT NULL` plus that one assertion line, and nothing in
+this slice's code changes shape.
+
+**Files.** `app/Models/Preference.php` (`KEYS` + `SETTINGS_KEYS` + `settings()`/`putSettings()`);
+`app/Http/Requests/UpdatePreferenceRequest.php` (the blob's rules and its nested key-set refusal);
+`app/Http/Controllers/PreferenceController.php` (`edit()` gains the settings, scenario options, stat
+order and hard cap; `update()` persists the blob; new `export()` and `backup()`); `routes/web.php`
+(`preferences.export`, `preferences.backup`); `app/Actions/BackupDatabase.php` (new — the snapshot,
+extracted so the CLI command and the web route share one implementation); `app/Console/Commands/UmaBackup.php`
+(delegates; its mechanism moves from checkpoint-then-copy to `VACUUM INTO`, which holds a consistent
+snapshot of a live WAL database where checkpoint-then-copy cannot while a request is in flight);
+`app/Services/ScenarioCaps.php` (`hardCap()`, the one-line accessor the prompt names that did not exist);
+`resources/js/pages/Career/BuildTarget.vue` and `app/Http/Controllers/Career/BuildTargetController.php`
+(the stat-target pre-fill); `app/Http/Controllers/Career/ScenarioSelectController.php` (the
+default-scenario pre-select); `resources/js/pages/Preferences/Edit.vue`; `tests/Feature/PreferenceControlsTest.php`;
+`tests/browser/preferences.spec.ts`.
+
+**Scope decisions.**
+
+| Preference | Decision |
+| --- | --- |
+| Default scenario | Built. `settings.default_scenario`, validated against `config('scenarios.php')`'s own keys; Scenario Select pre-selects it when the draft names none |
+| Recommendation aggressiveness | Built. `conservative` / `balanced` / `aggressive`; stored, and a `title` says the advisor reads it in a follow-up slice |
+| Stat-target defaults | Built. Five ints keyed by the matrix's stat names, `min:0` and `max:ScenarioCaps::hardCap()`; Build Target pre-fills them only when no target is stored |
+| Language | Built as a disabled single-option control ("English (Global)") with the corpus's Global-only scope in its `title`; the write path accepts only `en` |
+| Units | **Left as `N/A`**, and not for the reason the prompt guessed. The prompt said "if no unit-bearing surface exists" — one does: `RaceCatalogSlot::distanceLabel()` prints metres, and its two callers are the Race Decision screen (`RaceDecisionController.php:156`) and the Race Planner (`RacePlannerController.php:306`, both through `RaceFacts::forSlot()`). The real reason is sourcing: the client prints metres, no source in the corpus publishes an imperial rendering, and converting would make this tool's copy disagree with the client's own display. A **sourcing absence**, one of the four classes now pinned in `SCREEN_SPEC.md`'s SCR-SYS-002 Named-absence row |
+| Export | Built. `preferences.export`, a streamed JSON download of `training_runs`, `turn_entries`, `veterans` and the settings blob |
+| Backup | Built. `preferences.backup`, a server-side `VACUUM INTO` snapshot under `storage/app/backups/`, the path returned in the flash, never streamed |
+| Race-risk thresholds | Held on `ADR-0016`; absent from the tree entirely (D18 decision 3) |
+| Restore, Reset | Destructive, owner-scoped (`AGENTS.md` §5); absent, not disabled |
+| Risk tolerance | `N/A` with a `title` naming D4's open question on whether it enters `BuildTargetPayload` |
+
+**Design-language boundary.** §4 (Level 3 rows, Level 2 Save), §5 (state by word, not colour alone),
+§6 (tokens only), §7 (`tabular-nums` on the stat inputs), §8/§9 (the screen's existing values), §11
+(the save confirmation is the shell's one `role="status"` flash, not a second surface), §12
+(one concept per category), §13 (one primary action), §14 (Save primary, Import/Export/Backup
+secondary), §29 (`N/A` rows as micro empty states), §30 (the Backup button's own pending state, ADR-0007),
+§33 (`title` explains terminology), §34 (moderate density), §35 (current value shown, the why in a
+`title`), §40 (the 320px reflow the spec measures), §42 (labels, tablist), §43 (`prefers-reduced-motion`,
+measured as the parsed `transitionDuration` under `0.01s`, because the app's global reduce sets `0.00001s`
+rather than `none`), §48 (the Game-version panel stays). Not applied, with the
+reason: §2, §15–24 and §25–28 are cockpit or catalog constructs a preferences form has none of; §36 has
+no recommendation to explain; §37–39 are the Trainer's own state, acknowledged by the flash; §41 is the
+shell's; §44 adds no glyph to a form; §45–47 have no data to visualise and no expert surface; §49 has no
+engine fact to trust-rate, every value on this screen is the Trainer's own input; §50 is a question a
+settings screen does not answer.
+
+**Three defects, all found by browser verification and none by static analysis.** `npm run typecheck` passed
+and `vendor/bin/phpstan` was clean over all three. (1) `form.errors.value[key]` — `useForm` returns a
+reactive object, so `.value` is `undefined` and the first render threw `TypeError: Cannot read properties of
+undefined (reading 'theme')`; every `/preferences` case failed at the hydration wait for 180s. This is the
+strongest single argument in the record for the browser suite's cost: the Feature test asserts the Inertia
+props and cannot see it, and the pattern **would have shipped as a TypeError on first render to any screen
+that inherited it**. (2) The focus-on-refusal handler named only `theme` and `failure_estimate`, so no new
+control could receive focus; replaced with `document.getElementById(controlId(firstKey))?.focus()`, the
+idiom `BuildTarget.vue:140` already uses, and the five control ids unified onto `controlId()` so the id, the
+`aria-describedby` reference and the focus target agree. (3) `min="0"` and `:max="hardCap"` on the stat
+inputs gave the engine ceiling two owners and stopped the submit before the Form Request saw it, which made
+the server's refusal unreachable from a browser and left the bound untested; removing the attributes leaves
+one owner and the refusal is now asserted in `tests/browser/preferences.spec.ts`. (3) is the subtle one: an
+HTML clamp looks like defence and is actually a second validator.
+
+--- 
 
 ## 9. Phase E — scenario panels
 
@@ -1137,6 +1564,496 @@ the shop renders the catalogue list and **no** "recommended purchase" (the rotat
 `ADR-0016` blocker. **E6 Grand Concert** — the baseline strip only: every panel off, per
 `our_grand_concert.documented => false` (D-241, G-41). No songs, lessons, or Performance Tokens exist in
 the corpus; the panel says so.
+
+_Dated close-out 2026-10-08 (documentation-sync pass; the slice descriptions above are preserved as
+written): every Phase E slice this section describes as work to be done has since landed. **E1** shipped
+the shell (`SCR-CAR-019`, `components/scenario/ScenarioPanel.vue` and its registry, `registry.ts`),
+**E2** registered the URA panel (`SCR-CAR-020`, `UraPanel.vue`, the `career_goals` key), **E3**
+registered the Unity Cup panel (`SCR-CAR-021`, `UnityCupPanel.vue`, the `team_race` /
+`team_rank_ladder` / `race_calendar` keys), **E4** registered the Trackblazer panel (`SCR-CAR-022`,
+`TrackblazerPanel.vue`, the `grade_objectives` / `shop` / `epithet_routes` keys), **E5** landed the
+Scenario Race Planner as its own page (`SCR-CAR-023`, `Career/RacePlanner.vue`, `runs.races.planner`),
+and **E6** drew the Grand Concert baseline strip where every flag is off (`SCR-CAR-024`, the badge arm
+that reads `partially_documented` per the owner's ruling recorded in the §4.1 item 6 correction). The
+§4 table's E1–E4 rows carry each slice's own gate evidence as it was run on its own tree; this close-out
+does not re-run those gates and does not claim a green it has not taken. The `SCR-CAR-019` status cell in
+`SCREEN_SPEC.md` records the same completion for the shell and names the key the E6 strip drives._
+
+### 9.1 E3 — Unity Cup panel, the Team Cockpit (SCREEN-015): slice plan
+
+Written before code, 2026-10-07. The Blade references were retired by B1 but their Vue ports
+(`components/{TeamRankGauge,SpiritBurstRoster,TeamRacePanel}.vue`, ported at A4b) are live on the run
+record screen, so the port is a composition, not a recovery: carry their props and logic verbatim
+(behaviour parity first), composed inside `components/scenario/UnityCupPanel.vue`.
+
+**Files.** `CockpitController::scenarioSection()` gains a `team` key (uniform shape for every
+scenario; `turnEvents` joins the eager load); `headerSection()`'s `values.team_rank` and the section's
+`widget_values.team_rank` fill with the recorded letter so the header strip, the panel meter and the
+gauge cannot disagree; `types.ts` gains `ScenarioTeamSection`; `ScenarioPanelTest`'s pinned key list
+gains `team` (the contract anticipates it: panel data cannot be smuggled in without a test naming it);
+`config/scenarios.php` `unity_cup` gains `spirit_burst_bands` and `burst_payout_timing`, transcribed
+from `docs/scenarios/02-unity-cup.md:213-220` (post-rework corrected values) with the Extreme-counting
+disagreement of run report §8.2 rendered as a caveat, per §8.3's grounding; new
+`components/scenario/UnityCupPanel.vue` and `components/scenario/RaceCalendarNote.vue`; the shell's
+registration block (E2 moved it into `ScenarioPanel.vue`) registers `team_race` and
+`team_rank_ladder` → `UnityCupPanel` and `race_calendar` → `RaceCalendarNote`;
+`tests/Feature/UnityCupPanelTest.php`; `tests/browser/unity-cup-panel.spec.ts`; `SCREEN_SPEC.md`
+`SCR-CAR-020`.
+
+**Registration and the two mounts.** The shell renders one component per ON flag, and Unity Cup has
+three ON. `UnityCupPanel` registers for the two Unity-Cup flags and branches on `props.name` — the
+flag key the shell mounted it for, never a scenario name: the `team_race` mount renders the ported
+`TeamRacePanel` (guidance, entries, margin word); the `team_rank_ladder` registration is the §27 first-class
+Team Panel — `TeamRankGauge` (recorded letter, ladder, facility level with its cause, S+ note), the
+five per-stat team grades as `N/A`, member rows as the recorded burst roster (`SpiritBurstRoster`,
+glyph plus word), Spirit as a `ResourceMeter` (value and bar), the burst-band table with the caveat
+and the payout timing, and Special Training from its two configured facts
+(`team_training_energy_penalty`, `wit_burst_energy_bonus`). `race_calendar` gets the note renderer
+because the Cockpit's left column already draws that calendar and E1's fallback would print a false
+"cannot draw" beside it.
+
+**Data that exists.** Team rank letter (`TeamRankPayload` via `latestTeamRank()`), burst states per
+teammate (`SpiritBurstPayload` via `spiritBurstRoster()`), and team race entries (`raceEntries` where
+`scenarioSlot.kind === 'team_race'`, carrying `circles`/`placement`). Nothing else in the brief's
+Team Info field set (team name, motto, league standing, per-stat grades, Unity Trainings and burst
+counts, member count, member stats and roles, current Spirit) has a column or payload, so each is a
+named absence, and the run's own band position is `N/A` because D-223 stores states, not counters.
+
+**Not built, and why.** Burst readiness ("current Spirit versus the configured threshold") is not
+derivable: the bands are thresholds, but no Spirit reading has a writer, so there is nothing to set
+against them — named absence.
+"Recommended timing" and "projected benefit" are held advice (ADR-0020 §3) — named absences with
+`title`s. Recording team rank or burst states has no UI write (the "own Requests" line in
+`StoreTurnEventRequest`'s docblock names requests that do not exist) — the panel is read-only and the
+capture schema proposal of `SCREEN_SPEC.md` §7-6 stays the owner's. The +30 ranking bonus renders
+`Estimated` and **only beside Rank S**, the rank the recorded client frame shows it at (run report
+§1.8, §7.5): other ranks pay a figure this corpus does not state, and a badge would not excuse
+printing +30 for them. The band table carries one `Estimated` badge and one warning line naming all
+three publisher conflicts the run report records (§7.4: the Skill Point figures and the payout month;
+§8.2: whether Extreme Bursts count), not only the counting one.
+
+**Tests.** Props: full team, partial team, no team data, uniform shape across the four scenarios plus
+a fifth from config alone, `widget_values.team_rank` filled only when a rank is recorded. Browser:
+the empty-run Unity Cup Cockpit (what a real run shows today) — band table, named absences for
+timing/benefit/readiness, Spirit meter text and track, roster empty state, Special Training facts;
+keyboard reading order, the 44px sweep, 320px reflow, reduced motion, axe A + AA scoped to `#app`.
+Data states (roster rows with glyphs, a recorded rank) are asserted at props level because no write
+path can produce them in a browser.
+
+_Dated close-out 2026-10-08 (documentation-sync pass; the plan body above is preserved as written): this
+slice plan is the plan E3 executed, and the §4 table's E3 row records the landing with its gate
+evidence — `UnityCupPanelTest`, `unity-cup-panel.spec.ts`, the `team_race` / `team_rank_ladder` /
+`race_calendar` registrations in `ScenarioPanel.vue:59-60`, and the `SCR-CAR-021` row it filed. The
+"Not built, and why" section's reading — that recording team rank or burst states has no UI write, and
+the capture schema proposal of `SCREEN_SPEC.md` §7-6 stays the owner's — is the half this close-out
+keeps live: no write path exists on this tree, the panel is read-only, and the owner's call on the
+`unity-cup-capture.md` schema proposal is not made by any Phase E slice. The tree state this pass
+measures is the same state the plan's body describes; the close-out is a landing note, not a
+re-description._
+
+ ---
+
+ ### 9.2 E2 — URA panel (SCREEN-014): slice plan
+
+ Embedded 2026-10-07 from `docs/research-scratch/E2-URA-PANEL-2026-10-07.md`, headings demoted one level.
+
+ Written before code, per the brief's PLAN PHASE. Read against the tree at the E1 landing (browser gate
+ green: `npm run build` exit 0; `scenario-panel.spec.ts` 8 passed).
+
+ #### 1. Dependency and preconditions
+
+ - **D8 landed** (the Cockpit exists; `SCR-CAR-011`). **E1 landed** with its browser gate green, so
+   the shell E2 registers against is verified, not just props-green.
+ - E1 registers no renderer, so every ON flag draws `WidgetFallback` today. E2 is the first `register()`
+   call, which is also the arm E1's spec could not render (plan §4, E1 row).
+
+ #### 2. The headline finding: four of SCREEN-014's five components have no data
+
+ Measured on a `VACUUM INTO` copy of `database/database.sqlite` (2026-10-07), not remembered:
+
+ | SCREEN-014 component | Repo state | Verdict |
+ | --- | --- | --- |
+ | character goals | no table holds them. `TrainingRun.php:599-616` says it outright: the Goal pennant "returns when `trainee_goals` exists to drive it; until then an unearned pennant is a worse claim than an absent one". No `trainee_goals`, no `goals` column, no `Goal` model. | **unsourced** |
+ | URA progression | `config/scenarios.php`'s `ura_finale` entry has no `finale` and no milestone key. `'finale' => ['kind' => 'points_league', 'races' => 3]` belongs to **trackblazer** (E4), not to URA. | **unsourced as a per-character goal set** |
+ | Happy Meek level | no column anywhere stores it; no write route exists. | **unsourced, and the module is read-only** (brief: no migration) |
+ | Happy Meek duel availability | nothing stored, nothing in config. | **unsourced** |
+ | Happy Meek potential reward, final-race contribution | the brief already orders `N/A` "unless the repo already holds a sourced value". It does not. | **unsourced** |
+ | upcoming mandatory races | `race_catalog_slots` holds them: `is_mandatory = 1` on 4 rows — `Junior Make Debut` (year 1, turn 12), `URA Finals Qualifier` (year 4 early), `URA Finals Semifinal` (year 4 late), `URA Finals Final (URA)` (scenario-scoped `ura_finale`). All four are `is_special_race = 1`. | **present, sourced** |
+ | finale preparation | the three URA Finals rounds are those recorded rows; the run's position against them is derivable. | **present, derived** |
+
+ So E2 is not "render the goal data" — it is **a panel whose two honest modules are the mandatory-race
+ record and the finale rounds, plus named absences for goals and Happy Meek, each saying what is missing,
+ why it matters, and what to do** (design-2.0 §29, and the brief's empty-state rule).
+
+ This is the shape the brief already anticipates for Happy Meek ("render each as `N/A` with a title").
+ It does **not** anticipate it for character goals, so the plan says it here for the owner rather than
+ inventing a goal set from `docs/scenarios/09-global-race-calendar.md`, which holds four *different*
+ per-character Goal sets and is exactly what `TrainingRun.php:606-610` refuses to guess from.
+
+ #### 3. Composition: the flag, and why a new one
+
+ Registration must be by flag or widget key (G-33). URA's entry declares `widgets => ['turn','energy','fans']`
+ (all labelled, all shared with other scenarios) and exactly one ON panel flag, `race_calendar` — which
+ `unity_cup` and `trackblazer` also turn on, so registering URA content against it would draw URA content
+ in their cockpits.
+
+ So E2 adds **one composition key**, in config only:
+
+ - `panel_labels` gains `'career_goals' => 'Career goals'`.
+ - `ura_finale.panels` gains `'career_goals' => true`; every other scenario omits it (the controller's
+   `?? false` covers them, and `ScenarioPanelTest:120` asserts the flag set equals `panel_labels`' keys).
+ - `CareerScenarioSelectTest` builds a sixth test-fixture scenario whose `panels` map lists the six flags
+   by hand (`:157-164`); the payload will gain the seventh key automatically. Whether that test asserts the
+   map exactly is **to verify in the build** — if it does, the fixture needs the seventh row.
+
+ Zero component edits are needed to add a fifth scenario, which is the point. `CareerScenarioSelectTest`
+ pins a six-flag `panels` map and will need the seventh row.
+
+ #### 4. Payload contract (E2's additions to E1's section)
+
+ E1 carries `objectives`, `actions`, `alerts`, `finale` empty, "the §49 sections each panel fills for
+ itself". E2 fills them, gated on the same flag, and adds no top-level key (E1's pinned 17-key list stays
+ valid; a new key would need a test naming it, which E2 does not need):
+
+ - `objectives[]` — one row per mandatory race: `{ label, state, deadline, race_url, absence }`, where
+   `state` uses the brief's four glyph words (completed / current / upcoming / missed) plus an absence row
+   for the per-character goals. `deadline` is the recorded turn's `year`/`turn` or `null` with a `title`.
+ - `finale` — the three URA Finals rounds in order, each `{ label, state, turn }` where a source states one.
+ - `alerts[]` — a **Level 1 Critical** `AlertRow` when a mandatory race's recorded turn **has arrived or
+   passed** and the run records no race entry for it. Derived from the calendar and the run's own records
+   only; no window is invented (see the open question).
+ - Absence statements are carried as text on the rows themselves, the way E1's widgets already carry
+   `absence`, rather than as new top-level keys.
+
+ **The alert's level is sourced, and its treatment is not colour.** `design-2.0` §4 defines four visual
+ hierarchy levels; **Level 1 — Critical** lists "mandatory race" as its first example and prescribes
+ "strong emphasis, clear icon, prominent placement" — no colour. So E2 extends E1's `AlertRow`
+ (today `tone: 'note' | 'warning'`) with a `critical` tone drawn from the existing `text-risk` token, and
+ the level's own word travels as text beside the glyph, per the repo's "never state by colour alone" rule.
+
+ **Same-owner rule (ADR-0015):** the run's current turn is read through `TrainingRun::nextTurnToPlay()`,
+ the owner the Cockpit's race section already calls (`CockpitController.php:371`), not a second subtraction.
+
+ #### 5. Files
+
+ | File | Change |
+ | --- | --- |
+ | `config/scenarios.php` | one `panel_labels` row, one `ura_finale.panels` flag |
+ | `app/Http/Controllers/Career/CockpitController.php` | `scenarioSection()` fills `objectives` / `finale` / `alerts` when the flag is on |
+ | `resources/js/components/scenario/UraPanel.vue` | new: goals/absence module, finale strip, Happy Meek module, alert |
+ | `resources/js/components/scenario/AlertRow.vue` | a `critical` tone beside `note`/`warning`, on the existing `text-risk` token |
+ | `resources/js/components/scenario/ScenarioPanel.vue` | the first `register()` call — it imports `UraPanel.vue` and registers it against the flag key. `registry.ts` itself is unchanged; the shell today imports only `resolve` |
+ | `tests/Feature/ScenarioPanelTest.php` (or a new `UraPanelTest.php`) | the E2 props cases |
+ | `tests/browser/scenario-panel.spec.ts` or a new `ura-panel.spec.ts` | goal states as text, the N/A titles, the alert, keyboard path, 44px sweep |
+ | `SCREEN_SPEC.md` | `SCR-CAR-019`'s contract section and the state table gain the panel's states |
+
+ **No migration, no new route, no write** — the brief's read-only instruction, stated here for the owner.
+
+ #### 6. Tests (RED first)
+
+ Props: goals in each state; the absence row when no goal set exists; Happy Meek with and without a
+ recorded level (both `N/A`); `N/A` carries a `title`; the mandatory-race rows match the calendar; the
+ alert fires only when a mandatory race's turn has arrived with no record; **no scenario-name branching**
+ (the E1 shape: the same payload for all four scenarios, and the flag set stays config-derived).
+ Browser: rendered goal-state text, the absent-module copy, the alert as glyph plus text, the 44px sweep,
+ keyboard path, axe A+AA under `#app`.
+
+ #### 7. Open questions, and the rulings
+
+ **All three were ruled on 2026-10-07 before the build.** Kept here with the ruling, because this file is
+ where a later slice reads why the shape is what it is.
+
+ 1. **`career_goals` in the matrix: APPROVED**, config only: one `panel_labels` row plus the `ura_finale`
+    flag. The owner also confirmed the refusal to register against `race_calendar`, which Unity Cup and
+    Trackblazer both turn on.
+ 2. **Deadline window: derivable form only.** Due or overdue means `is_mandatory = 1`, the recorded turn
+    has arrived or passed, and the run records nothing for it. Copy reads **"due and not recorded"**, never
+    "inside the deadline window"; an N appears nowhere, so none is invented. The level stays design-2.0
+    §4's Level 1 Critical: emphasis, icon, placement, word carried as text, never colour alone.
+ 3. **Character goals: absent.** E2 renders the named absence in design-2.0 §29's three parts and does
+    **not** open the `trainee_goals` schema in this slice. The same three-part shape carries the Happy
+    Meek, progression, duel, reward and final-race-contribution modules.
+
+ ##### Decided while building, and why
+
+ 4. **`AlertRow`'s `warning` tone was dead, not merely unused.** E1 mapped it to `text-warning`, and
+    `--color-warning` does not exist in `resources/css/app.css`, so Tailwind never emitted a rule for it;
+    both callers passed `note`, which is why no run could see the difference. E2 replaced the branch with
+    `critical` on `text-ink-strong` plus weight rather than leaving a dead class beside a new one.
+    Recorded at `SCREEN_SPEC.md` `SCR-CAR-019`.
+ 5. **`career_goals` sits last in `panel_labels`.** Inserting it first renumbered the D17 session's
+    `DatabaseTest.php:104` pin on `panels.0.label`, in a file that is untracked and not E2's to edit.
+    Ordering the new flag last keeps that test honest and untouched.
+ 6. **The `completed` arm has no browser case.** Proving it needs a race written through `SCR-CAR-013`'s
+    screen; the props test covers it and the spec covers the three states a turn write can reach. Stated
+    as a gap rather than papered over by POSTing a race entry.
+
+ ---
+
+ ### 9.5 E5 — Scenario Race Planner (SCREEN-017): slice plan
+
+**Authorization.** §4's E5 row (race facts only, **no** win probability, SCREEN-017, depends on D8)
+and §9's E5 entry. D8 landed at `e8f75bd` and D10 at `55be0cd`, so both dependencies are met.
+
+**What it is.** A Cockpit sub-page, not a panel: it descends from the run's URL the way D9 to D15 do
+(`GET /training-runs/{run}/races/planner`, `runs.races.planner`), because §4 puts E5 on D8 rather than
+on E1, and because the brief's four groups need a page's worth of room. It registers no widget and no
+panel flag, so the E1 registry and `ScenarioPanel.vue` are untouched.
+
+**Files.** `app/Http/Controllers/Career/RacePlannerController.php` (new); `routes/web.php` (one GET,
+beside `runs.races.decision`); `resources/js/pages/Career/RacePlanner.vue` (new);
+`resources/js/components/career/RacePlanList.vue` (new); `app/Services/RaceFacts.php` (new — the
+brief's ten-field list, moved out of `RaceDecisionController`, which keeps its behaviour and loses its
+private copies, so the two screens cannot drift on the list they both print);
+`resources/js/pages/Career/RaceDecision.vue` (one door link to the planner, so the page is not
+URL-only — D14 ruled URL-only reachability a defect); `tests/Feature/CareerRacePlannerTest.php` (new);
+`tests/browser/career-race-planner.spec.ts` (new); `SCREEN_SPEC.md` (`SCR-CAR-023`, the matrix row and
+the section with its state table).
+
+**Props contract** (explicit arrays, never Eloquent models):
+
+```text
+run        { id, trainee, trainee_ja, scenario_label, status_label, run_url }
+nextTurn   { year_label, turn, position_label } | null
+groups     { mandatory, upcoming, optional, rival }   each:
+           { key, label, definition, empty: string|null, races: Race[] }
+           rival is null when the run's scenario is not declared (no calendar at all)
+comparison { rows: [{ key, label, title }] }          the aligned row labels, in §46 order
+alignment  { recorded: bool, absence: string|null,
+             rows: [{ key, label, value: 'Matches'|'Does not match'|'Not recorded', title }] }
+held       { win_probability: {label,title}, expected_risk: {label,title} }
+deadline   { next: {id,title,year_label,turn,state}|null, alert: {text,detail}|null }
+entry      { action, turns: [{id,turn}] }
+Race       the D10 `RaceCard` shape, plus `comparison: [{key,label,value,title}]`
+```
+
+**The four groups, and the rule that defines each.** One calendar query per page
+(`forScenario()->orderBy(year)->orderBy(turn)->orderBy(sort_order)`, one eager load of the run's
+entries), partitioned by two citable facts — `is_mandatory` and `RaceCatalogSlot::isAtOrBeforeTurn()`
+(the single owner of the position comparison, `ADR-0015`):
+
+| Group | Rule | Empty state |
+| --- | --- | --- |
+| `mandatory` | `is_mandatory = true` (7 of 410 rows) | none needed; the catalogue always carries them |
+| `upcoming` | `is_mandatory = false` **and** the turn has not arrived | named: nothing is ahead of the run |
+| `optional` | `is_mandatory = false` **and** the turn has arrived and the run recorded no entry | named: every reached race was entered |
+| `rival` | rows the run's scenario itself authors | named absence: no column marks a rival race |
+
+**Reward comparison.** One real `<table>` (design-2.0 §46, the `Legacy/Compare.vue` pattern: `<th
+scope="row">` per property, `role="region"` + `tabindex="0"` scroll container), columns are the races
+the Trainer ticks, capped at four. Rows: Grade, Distance, Distance band, Surface, Fan gate, Fan gain,
+Reward, Skill Points, Grade Points, Shop Coins. Only the first five and Grade Points have a source;
+the rest are `N/A` with a `title`. Grade Points comes from `TrainingRun::gradePointsForTier()`, which
+returns null when the run's scenario defines no `grade_point_by_grade` table, so the row is filled by
+config presence and never by a scenario name.
+
+**Target alignment.** `BuildTargetPayload` against the race: distance band, surface and style, each
+`Matches` / `Does not match` / `Not recorded`, with `ProvenanceBadge` `calculated`. Style has no race
+column (it is the trainee's aptitude), so it is always `Not recorded` with that reason; a run with no
+target records nothing and says so.
+
+**Held figures.** `Win probability: N/A` and `Expected risk: N/A`, each with a `title` naming the
+`ADR-0016` blocker. The brief's recommendation block is not built, and no LOW / MEDIUM / HIGH wording
+appears (design-2.0 §21 is read as the thing to refuse).
+
+**Deadline awareness.** The next uncleared mandatory race and its turn, plus a Level 1 `AlertRow`
+(`tone="critical"`, E1's own component) when `isAtOrBeforeTurn()` says its turn has arrived. The copy
+states the next obligation and its turn; it never claims "no critical training deadline will be
+missed".
+
+**Tests.** `CareerRacePlannerTest` — each group present and absent, the `N/A` fields with their
+titles, a four-race comparison with aligned rows, the three alignment values, the held pair naming
+`ADR-0016`, the Critical alert on a reached obligation, and the no-percent assertion over the Vue
+files and every prop. `career-race-planner.spec.ts` — the keyboard path through the groups and the
+comparison table, the `N/A` titles, the Critical alert text, 320px reflow, the 44px sweep, axe A + AA.
+
+**Open questions for the owner.** (1) "Optional" is the brief's own word; the plan defines it as
+"reached, non-mandatory, not entered" because no other reading is non-overlapping — is that the
+intended set? (2) The rival group has no source: the corpus says rival appearance is random and gated
+on the trainee's aptitude, and no column marks one, so the group renders a named absence. Should a
+rival marker column be added instead? (3) `race_catalog_slots` tags the Grand Concert final
+`grand_concert` while `config/scenarios.php` keys it `our_grand_concert`, so `forScenario()` cannot
+match that row; this is pre-existing and shared with D10, and E5 neither fixes nor depends on it.
+
+_Dated close-out 2026-10-08 (documentation-sync pass; the plan body above is preserved as written):
+E5 executed this slice plan and landed it as `SCR-CAR-023`, with `Career/RacePlanner.vue`,
+`RacePlannerController`, `components/career/RacePlanList.vue`, `app/Services/RaceFacts.php` and
+`runs.races.planner` (wired at `routes/web.php:133`); the §4 table's E5 row records the gate
+evidence (`CareerRacePlannerTest`, `career-race-planner.spec.ts`). Two of the three owner questions
+are the ones the landing records as still open: question (1)'s "optional" reading is the definition
+the page shipped with, and question (2)'s rival group is a named absence because no column marks a
+rival race. Question (3) — the Grand Concert final's `grand_concert` vs `our_grand_concert` key
+mismatch — is the defect `KNOWN-ISSUES.md` files as **KI-71** (OPEN, filed 2026-10-07 by the E5
+hand-off), whose closure is the owner's call between the parser's map and the config key; E5 neither
+fixed it nor depends on it, exactly as the plan body says._
+
+
+---
+
+### 9.6 F2 — the record screen's write owners: slice plan
+
+**Authorization.** The owner's F1 ruling of 2026-10-08. Ruling (a) is the direction: the 2.0 surfaces
+own these writes. The redirect of `GET /training-runs/{run}` flips only once each of them has an owner
+reachable from inside the Cockpit, and the flip lands with the test sweep in the same commit. This
+section is the plan the ruling asked for; the ruling that accepts it is the owner's to write.
+
+**What the 0.1.0 record screen still owns, measured 2026-10-08.** The ruling named four writes. Reading
+every write target in `Runs/Show.vue` and `components/RacePanel.vue` (the two files that mount only on that
+page) and checking each against every `.put(`/`.post(`/`.delete(` in `resources/js/pages/Career/`,
+`components/career/` and `components/scenario/` finds **nine controls on seven routes** that no 2.0 surface
+offers. Every route below already exists and its Form Request already validates; nothing here is a new
+write path.
+
+| # | Control | Route (and validator) | Where it lives today | In the ruling's four? | Size |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Run status change | `PUT runs.update` (`StoreTrainingRunRequest`) | `Show.vue`'s `Change status` form | yes | small |
+| 2 | Scenario assignment | `PUT runs.update` | `Show.vue`'s scenario form | no - found by measurement | small |
+| 3 | Grade-point period | `PUT runs.update` | `Show.vue`'s period form | no - found by measurement | small |
+| 4 | Correct a recorded turn | `PUT runs.turns.update` (`StoreTurnEntryRequest`, the same one `runs.turns.store` uses) | `Show.vue`'s per-row edit forms | yes | substantial |
+| 5 | Delete a recorded turn | `DELETE runs.turns.destroy` (no Form Request; the controller scopes the row to the run and deletes its failure event in one transaction) | `Show.vue`'s per-row delete | yes | rides along with 4 |
+| 6 | Free-race entry | `POST runs.races.store` with `entry_mode=manual` (also writes a `scenario_slots` row of kind `free_race`) | `RacePanel.vue`'s manual disclosure | yes | medium |
+| 7 | Skill acquisition status | `POST runs.skills.sync` | `Show.vue`'s skills form | no - found by measurement | medium |
+| 8 | Export CSV / JSON | `GET runs.export/{format}` | `Show.vue`'s header links | yes | small (links only) |
+| 9 | Delete the run | `DELETE runs.destroy` | `Show.vue`'s disclosure | no - found by measurement | small |
+
+Rows 1-3 share one route and one validator but are three different controls with three different
+consequences, so an owner that hosts one does not host the others. Row 9 is the one a flip would strand
+hardest: after `runs.show` redirects there is no UI anywhere that deletes a run, and `tests/utils/delete-run.ts`
+reaching the route over HTTP is a spec's teardown, not a Trainer's door.
+
+**Two premises the ruling carried, corrected against the tree.**
+
+1. *Turn-row edit is partly owned already.* `CockpitController::correctionSection()` posts to
+   `runs.turns.update` and `Cockpit.vue` renders the form, but only for `$latest` - the most recent turn.
+   `career-cockpit.spec.ts`'s "records Energy through the cockpit correction" case walks that path. What row
+   4 above lacks an owner is an **arbitrary** recorded turn's edit, so the gap is narrower than "turn-row
+   edit has no 2.0 owner", and the existing correction block is the pattern the new owner should follow
+   rather than a second correction UI.
+2. *The browser half of the blast radius is already closed.* The nine cleanups the first F1 report named are
+   twenty-three, and all of them now go over HTTP, so the flip's sweep is a feature-test sweep only.
+
+**Non-goals.** No new write route, no new Form Request, no migration, no package, no token. Do not
+redesign the Cockpit or any 2.0 screen: giving a write an owner is the whole scope. Do not delete
+`Runs/Show.vue`, `RacePanel.vue`, or any assertion of the 38 files below until the owners are reachable
+from inside the Cockpit.
+
+**The flip that follows this slice** (one commit, with the redirect line):
+
+- The 38 feature files that assert `component('Runs/Show')` (158 assertions, re-measured 2026-10-08):
+  `FlashBannerTokensTest`, `FreeRaceCalendarCellTest`, `FrontendAuditFixesTest`,
+  `FrontendComponentLibraryTest`, `GoalPanelsOnRunDetailTest`, `GradePointMeterTest`,
+  `GradePointPeriodTest`, `GuidedFirstTurnTest`, `GuidedStepScenarioCompositionTest`,
+  `GuidedStepScenarioVariationTest`, `GuidedTurnOnRunViewTest`, `GuidedTurnValidationTest`,
+  `MoodPillTest`, `RaceCalendarTest`, `RaceCalendarYearTabsTest`, `RaceCatalogPickerTest`,
+  `RaceEntryCirclesTest`, `RaceEntryDisclosureTest`, `RaceEntryTurnLinkTest`,
+  `RenderedCopyHygieneTest`, `ResourceStripOnRunDetailTest`, `ResourceStripTest`, `RunDeckTest`,
+  `RunGoalsPanelTest`, `RunSaveConfirmationTest`, `RunSkillPickerTest`, `RunSkillRowLabelsTest`,
+  `RunStatusControlTest`, `RunUpdateTest`, `RunViewErrorEnvelopeTest`, `RunViewFrameTest`,
+  `RunViewNoScriptTest`, `ScenarioPanelSchemaTest`, `ScenarioPanelUiTest`, `ScenarioStatCapsTest`,
+  `SkillsFetchTest`, `TrainingRunTest`, `TurnRowActionsTest`. Per file: retire the assertion with the
+  screen, or move it to the 2.0 owner that now carries that surface's behaviour. Deleting a test needs
+  the owner's approval (AGENTS.md §9, §14), so the disposition list goes in the hand-off before the
+  redirect line is touched.
+- The copy sweep, made test-aware in the same commit: `SCREEN_SPEC.md`'s SCR-RUN-003 row and section,
+  `README.md`'s route table, and any `runs.show` label that now reads as a redirect rather than a page.
+- Already resolved, so they are not part of the sweep: the browser cleanups (23 specs' `afterEach`
+  deletes now go over HTTP through `tests/utils/delete-run.ts`), the Career Result door
+  (`run.result_url`, rendered in the Cockpit's left column), and `CareerSurfaceCutoverTest`'s Veteran-row
+  pin, which now asserts that a Veteran row's link resolves to a career screen that renders
+  (`Runs/Show` today, `Career/Cockpit` after the flip) rather than pinning `runs.show` forever.
+
+**The `run_url` producers that become self-loops at the flip.** Each of these prints the 0.1.0 record
+screen's URL from a 2.0 surface, so after the redirect they loop back through it. Each needs a
+disposition in the flip commit, and the owner's ruling of 2026-10-08 named two options for the first one
+(`runs.cockpit`, or a non-run Veterans surface) — the rest are the same question:
+
+- `DashboardController::veteranRow()['run_url']` — a Veteran row is a career-selection link, and F1's rule
+  says no normal navigation path may open the 0.1.0 page. `CareerSurfaceCutoverTest`'s pin no longer
+  hardcodes it, so this is now a product decision rather than a test edit.
+- `CockpitController::runSection()['run_url']` — the Cockpit's own "Run record" door, which the action grid
+  and `CareerLayout` both route through today.
+- `Career\RaceDecisionController`, `Career\TrainingDecisionController`,
+  `Career\SaveVeteranController` and `VeteranController` each print a `run_url` on the record screen, and
+  `Career\CockpitController` prints three: `runSection()`, the action grid's `default` arm for the entries
+  with no 2.0 screen yet, and `strip.links.run_url` on the race strip. `Career\ResultController` is already
+  off the list: it points its own `run_url` at `runs.cockpit`, which `CareerResultTest` pins.
+- `TrainingRunController`'s own write redirects and `back()` fallbacks (`store`, `update`, `destroyTurn`,
+  `syncSkills`, `syncDeck`, `storeRace`, `storePurchase`) land on `runs.show`. They are the legacy
+  surface's destinations today; the flip makes each one a redirect hop, so each is a disposition too.
+- 2.0 empty-state copy that instructs the Trainer to use "the run record screen" (Race Decision's refusal
+  line, E5's history line). This is copy, so it sweeps with the screen's behaviour and with the browser
+  specs that assert those sentences.
+
+**Verification state of the migration, as the plan holds it.** The patch should be self-consistent; it is
+**not verified as green**. Static verification holds: all imports in the 7 patched specs resolve to tracked
+files or to the new helper, the patched set compiles, and no patched file carries a peer hunk. Individual
+specs run green with the helper: `run-detail`, `veteran-compare`, `career-preflight` (first case),
+`career-cockpit`, `career-surface-cutover`, `trackblazer-panel`. Five specs have never executed since the
+migration (`career-preflight`'s remaining cases, `career-save-veteran`, `dashboard`, `legacy`,
+`support-deck`), and three browser attempts were voided - one by gate runs on the box beside the pass, two by
+reaping or deleting a harness while its own pass was live. The claim upgrades only when §4.1's harness state
+clears and the five-spec pass runs start to finish with nothing else on the box.
+
+**Suite rule this slice should record.** A browser spec's teardown goes through
+`tests/utils/delete-run.ts`. A spec must not reach a product write through a screen it is not asserting;
+if a case needs state, it uses the app's own write route, the way `career-skills-planner.spec.ts`'s
+build-target PUT and the eleven turn writes do. `KNOWN-ISSUES.md` KI-76 is the other standing hazard for
+these specs: while a session's Vite dev server is hot, an Inertia render POSTs to a dead SSR endpoint with no
+timeout and answers 500 after 30s, so a browser pass must boot its harness with `INERTIA_SSR_ENABLED=false` or
+the run is void before it starts.
+
+**Tests.** Per owner: one feature assertion that the write lands when posted from the 2.0 surface (the
+props that change, the redirect target, and the row), and one browser case that the control is reachable
+by keyboard from inside the Cockpit and prints its own state afterwards. No test asserts the legacy
+screen's copy on the way.
+
+**Open questions for the owner.** (1) Does the status change belong on the Cockpit header, where it is
+always visible, or on the Career Result surface, where a finished career is summarised? Ruling (a) names
+both. (2) Turn correction on the Timeline (D14) changes that screen's contract: `routes/web.php` records
+it as a read screen with no write route, so this is a real edit to a landed decision, not an added link.
+(3) Free-race entry: `career/RaceCard.vue` posts only the calendar branch, so is the manual arm a second
+arm on Race Decision or a drawer on E5's planner card? (4) Does the run delete keep a UI door at all, and
+on which surface? (5) Rows 2, 3 and 7 were not in the ruling's list. Scenario assignment and the
+grade-point period are both `runs.update` fields, so the same host that takes row 1 can take them at the
+cost of two more fields on one form - but the period control is Grade-Point machinery and may belong with
+the ladder that prints it. Skill acquisition status (`runs.skills.sync`) has no obvious 2.0 home: D13's
+Skills Planner writes the build target, not the acquired/skipped marks. Confirm which of these three the
+slice owns and which stay on the legacy surface with `runs.show` un-redirected for them.
+
+
+**One recommendation per question, drafted for the ruling.** These are the options I would take and why;
+accepting or replacing them is the owner's decision, and the plan is not executed until it is ruled. Each one
+carries the cost of the option not taken, because that is the half the ruling has to weigh.
+
+1. **Status control on the Cockpit header, not the Career Result surface.** The Result screen's own route
+   block and controller state that it records nothing and has no write route, and its `Retired` state refuses
+   even the Cockpit door, so a status form there contradicts a landed contract; the header already prints
+   `status_label`, so a select replaces a label rather than adding a region. Cost of the alternative: a write
+   lands on a screen whose contract says it records nothing, and a career that was abandoned is offered a
+   control its own empty state then refuses.
+2. **Arbitrary-turn correction extends the Cockpit's existing correction block; the Timeline takes no
+   write.** `routes/web.php` and `TimelineController` both record the Timeline as a read screen with no write
+   route, so putting a write there is a second contract change on a screen D14 just landed, while widening
+   `correctionSection()` from `$latest` to a row the Trainer names reuses the form, the validator and the
+   focus behaviour the Cockpit already has. Cost of the alternative: two correction UIs on two screens, and a
+   read screen's documented promise reversed in the same phase it landed.
+3. **The manual race arm goes on Race Decision, not the planner card.** `entry_mode=manual` creates a slot at
+   a month and half, which is the turn-scoped question Race Decision already asks; E5's planner lists are
+   partitioned by calendar position rules, so a hand-entered race would be a row those rules did not produce.
+   Cost of the alternative: the planner's four groups start carrying rows their own definitions exclude, and
+   the group rules stop being explainable in one line each.
+4. **Keep a run-delete door, on the Cockpit, behind a two-step disclosure that names the cascade.** The
+   delete is the one write whose consequence reaches outside the run (a Veteran files from its run and
+   cascades with it, which `career-save-veteran.spec.ts` records), so the control belongs where the rest of
+   the run's identity is edited and must state the loss in its own copy; the legacy disclosure's two-step
+   shape is the pattern to carry, not a native `confirm()`. Cost of the alternative: after the flip the tool
+   has no way at all to remove a career, and the only caller of `runs.destroy` left is a spec's teardown.
+5. **Rows 2 and 3 ride with row 1; row 7 goes to the Skills Planner.** Scenario assignment and the
+   grade-point period are `runs.update` fields on the same validator, so one header form with three fields is
+   a smaller diff than three hosts and no new route. Skill acquisition status has no other candidate: D13's
+   Skills Planner is the 2.0 screen that already renders the run's skills against its target, and it writes
+   that run today. Cost of the alternative: three hosts for one validator, and the acquired/skipped marks stay
+   editable only on the page being retired, so the flip drops the control with nothing to replace it.
 
 ---
 
@@ -1159,6 +2076,7 @@ Program-level (a phase is done when): the full suite is green, PHPStan L6 is cle
 `npm run typecheck` and `npm run build` are clean, `npm run test:browser` is green, and the phase's slice
 plans are filed.
 
+
 ---
 
 ## 11. Risks and open questions
@@ -1173,6 +2091,11 @@ plans are filed.
    sourced. Until then it renders `N/A`.
 5. **Phase D screens have no current `SCREEN_SPEC.md` rows.** D2–D16 need new `SCR-*` entries (a new area,
    e.g. `SCR-CAR-*` for career) before or with their first slice; `SCREEN_SPEC.md` §2 is the place.
+   _Dated correction 2026-10-08 (documentation-sync pass): the risk is closed, not by an exception but
+   by the row being met for every slice. `SCREEN_SPEC.md` §3 carries `SCR-CAR-001` through
+   `SCR-CAR-024` and `SCR-VET-001` through `SCR-VET-004`, each with a §4 section whose Status line
+   names the slice that shipped it, and the `SCR-CAR-0NN` numbers in the §4 body match the §3 matrix —
+   the "one screen, one §4 section" rule this risk warned about is now held by the file itself._
 6. **Held computation stays held.** Race prediction, inheritance optimization, per-training yields, and the
    Grand Concert mechanics have no task here. A later slice that closes `ADR-0016`'s data blocker is what
    unlocks them, not a UI decision.
@@ -1308,6 +2231,11 @@ mobile nav (2.4.11); confirm the skip link and `<main id="main">` in both shells
 labelled `nav`, one `main`, one `contentinfo` per page; nav targets at or above 44px with `aria-current`
 on the active item.
 
+**Landed 2026-10-07 (D18):** `role="status"` added to the `AppLayout` flash `<p>` (WCAG 4.1.3); the
+explicit `aria-live="polite"` on the same element was dropped as redundant, because `role="status"`
+already implies an `aria-live` of `polite`. The flash banner's accessible name is its text content,
+asserted by `tests/browser/preferences.spec.ts:48` (`getByRole('status', { name: 'Preferences saved.' })`).
+
 **A0b — ported Vue pages** (`Dashboard.vue`, `Catalog/Index.vue`, `Review/Index.vue`,
 `Preferences/Edit.vue`): add loading and error states (R-27, ADR-0007); keep the existing empty states;
 add `lang="ja"` to Japanese names.
@@ -1340,3 +2268,181 @@ reduced-motion check; each screen's browser spec asserts the criteria it names.
 | 2026-10-06   | §8 gains §8.4 (D3, Trainee Selection and Trainee Profile: the wizard contract as shipped, the measured eight-filter roster table with the two omissions, the sixteen-row profile sections table, reuse, files, four reports) and §8.5 (D4, Build Target and `ProvenanceBadge`: the four-state badge contract, the BuildTarget field table, the two challenged conflicts, four open questions). Both originals deleted from `.scratch-uma/` after verification.                                                                                                                                                                                                                                                                                                                                                                                                                         | A scan for unconsolidated `.scratch-uma` markdown on 2026-10-06 found exactly these two; the owner ruled them folded here, the same treatment as §8.1 and §8.2. Both describe slices that landed, so they are historical records of what shipped, embedded verbatim with headings demoted one level and their title lines re-titled into the §8.4 / §8.5 headings. Numbered 8.4 and 8.5 rather than 8.3 and 8.4 because a concurrent pass had already claimed §8.3 (the run-informed acceptance section above them) in this same working tree.                                                                                                                |
 | 2026-10-06   | §4's status block renamed from Phase A–C to Phase A–D and its table extended with D1, D2, D3, D4, D5, D6, the D5/D6 wizard halves and a Not begun row for D8–D18 and E1–E6, each with its commit and its open defect. New §4.1 carries the open work as an ordered queue: five defects, three owner decisions, the environment gate, and the toolchain and focus rules every later slice inherits. §8's D5 and D6 rows describe run-scoped screens that landed in `05e9584` ahead of their slice numbers, so the table records the fact rather than pretending the order held.                                                                                                                                                                                                                                                                                                         | The plan still read "No Phase D or E slice has begun" while four Phase D slices sat in `master`. §4 is where the next slice decides what to start, so a stale block silently sends someone to rebuild landed work; that has already happened three times this pass, with D5 and D6 dispatched as if unbuilt. The red state of the D5/D6 wizard halves is written down instead of smoothed over, because the tree at `0006b17` has three failing tests and three PHPStan errors and no `KNOWN-ISSUES.md` entry yet. §1's file counts were deliberately not re-measured in this pass and are stale; `AGENTS.md` §6 carries the current read as of 2026-10-06.   |
 | 2026-10-06   | §3's per-training-yield row updated to record-as-observed (the client prints the preview and failure % on the tile) and five rows added from the recorded Rice Shower Unity Cup run (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md`): Energy as band-only, the turn-counter discrepancy, the burst reward tiers with the live Extreme-counting disagreement, the +30 Team Rank bonus as Estimated, and the client-read hint discount ladder. New §8.3 makes that run the canonical acceptance seed for D7–D16 and E3, with per-slice deltas (D6 catalog-max vs client-current and the padlock rule, D9 record-as-observed, D10 condition-skill applicability, D13 the sourced ladder and the prerequisite, D14 the client counter wins, E3 the Team Info spine and the five-category finals). §11 gains the Energy-band contract question and a parked list of write-up-sourced ideas.   | The owner asked for plan updates grounded in the run report; it closes rows the plan previously marked silent, and its live disagreements (burst counting, turn counter) must render as uncertainty rather than resolve silently.                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 2026-10-08   | Documentation-sync pass: the plan's own status reads are corrected in place with dated close-outs where the tree moved past them. §1's inventory gained a close-out (54 pages / 58 components / 44 browser specs / `resources/views/components/` gone). §4's dated-status paragraph, the "Phase A–D status" paragraph, the D7 and D11 table rows and the E4–E6 row now carry close-outs recording D16, D17, D18, E1, E2, E3, E4, E5 and E6 as landed, each naming the route or registration in the tree. §4.1 items 6, 10 and 11 gained dated corrections (the badge key ruling, the `RecordVeteran` caller, the URA `Recorded` browser case still open). §8.4's and §8.5's pre-landing premises and §9's "work to be done" reading gained close-outs; §9.1's and §9.5's slice plans gained landing notes; §11 risk 5 is marked closed by the full `SCR-CAR-*` matrix. The embedded D7 slice spec gained a close-out at its end. | Owner asked for the documentation set to be brought into agreement with the completion of Phases A–E. Every close-out preserves the original sentence and appends a dated correction beside it, per the pattern this file's §4.1 and §8.1–§8.6 already use; no slice body was rewritten as if the work were still in flight. This pass did not run `npm run test:browser`; the browser-gate claims quoted in the §4 table are the slices' own, taken on their own trees and recorded there. |
+# D7 / SCREEN-008 — Run Preflight ("Career Contract") — slice spec and task list
+
+Slice row: `docs/proposals/frontend-development-plan.md` line 180 (D7, SCREEN-008, deps D4/D5/D6).
+Plan phase per `spec-driven-development`; task list per `planning-and-task-breakdown`.
+
+## 1. What this screen is
+
+Step 6 of the setup wizard. It composes the five entered steps into one read-only contract, states the
+warnings that are derivable from that entered data, and creates the run exactly once, on "Start Career".
+Nothing is re-asked (WCAG 3.3.7). Every figure is read from the session draft (`App\Services\Career\SetupDraft`),
+which already carries all five keys.
+
+Blocker check, done before writing this plan: `SetupDraft::legacyParents()` and
+`StoreDraftLegacyRequest::parentIds()` exist and `LegacySelectController::store()` writes both
+`legacy_selection` and `legacy_parents` (`app/Http/Controllers/Career/LegacySelectController.php:115-125`),
+so the defect the plan flagged at line 227 is already closed in the tree. D7 is unblocked.
+
+## 2. Files
+
+| Action | Path |
+|---|---|
+| Create | `app/Http/Controllers/Career/PreflightController.php` |
+| Create | `app/Http/Requests/Career/StartCareerRequest.php` |
+| Create | `resources/js/pages/Career/Preflight.vue` |
+| Modify | `routes/web.php` (two routes, beside the other five wizard pairs) |
+| Modify | `resources/js/layouts/SetupLayout.vue` (step 6 `to: '/career/setup/preflight'`) |
+| Create | `tests/Feature/CareerPreflightTest.php` |
+| Create | `tests/browser/career-preflight.spec.ts` |
+| Modify | `SCREEN_SPEC.md` (new `SCR-CAR-010` row + §4 state table) |
+| Modify | `docs/proposals/frontend-development-plan.md` (D7 status row; §4.1 items 1, 3, 4) |
+
+Reuse, do not re-implement: `SetupDraft` (all five keys), `ScenarioCaps::forRun(SetupDraft::planningRun())`,
+`AncestryGraph::build()` via a `LegacySelectionPayload::fromArray()`, `DeckAnalysis::build()` with the same
+input builder `DeckSelectController::analysisInput()` uses, `SupportCardEffects::dictionary()/atCap()`,
+`StoreTrainingRunRequest::scenarios()`, `DeckSlot::POSITIONS|OWNERSHIP|MAX_POSITION`,
+`AptitudeBadge.vue`, `ProvenanceBadge.vue`.
+
+## 3. Props contract (one typed object, lossless round trip)
+
+```ts
+interface PreflightProps {
+    step: number                                  // 6
+    contract: {
+        complete: boolean                         // every section present
+        build: {
+            trainee: { id: number; name: string; name_ja: string | null } | null
+            scenario: { key: string; label: string; focus: string | null } | null
+            target: { purpose: string | null; purpose_label: string | null
+                      distance: string | null; surface: string | null; style: string | null
+                      aptitude_floor: string | null; stat_priority: number[]
+                      notes: string | null } | null
+            legacy: {
+                affinity: string | null
+                members: Array<{ slot: string; label: string; name: string | null
+                                 rank: number | null; is_guest: boolean
+                                 ancestors: Array<{ slot: string; name: string | null }>
+                                 sparks: Array<{ kind: string; kind_label: string|null; target: string|null; stars: number|null }>
+                                 probability: { value: null; title: string } }>
+            } | null
+        }
+        deck: {
+            slots: Array<{ position: number; label: string; is_friend: boolean
+                           ownership: string | null
+                           card: { id: number; name: string; type_label: string
+                                   rarity_word: string; artworkURL: string|null
+                                   effects: Array<{ effect_id: number; name: string|null; display: string }> } | null }>
+            analysis: ReturnType<DeckAnalysis::build>   // covered / categories / uncategorised / strengths / weaknesses
+        } | null
+        target: {
+            stats: Array<{ key: string; label: string; rank: number|null }>   // stat_priority, in order
+            skills: { value: null; title: string }                            // named absence, see §5
+            races: { distance: string|null; surface: string|null; style: string|null }
+        }
+        warnings: Array<{ key: string; title: string; detail: string; href: string }>
+        ruleset: { label: string; title: string }    // "N/A" + reason (app.ruleset is null, §48)
+    }
+    edit: { scenario: string; trainee: string; target: string; legacy: string; deck: string }
+    startAction: string                              // route('career.preflight.store')
+    notice: string                                   // LegacyController::RECORD_ONLY_NOTICE for §4
+}
+```
+
+All URLs resolved server-side with `route()` (no Ziggy in this repo). "N/A" is rendered as text with a
+`title` and never as a dash (AGENTS.md §5).
+
+## 4. Warning table (each row is one test)
+
+Only warnings whose inputs are entered facts or stated anchors. No scoring, no held computation.
+
+| Key | Trigger (data read) | Reason line | Source |
+|---|---|---|---|
+| `missing_section` (one per absent key) | draft `scenario`, `umamusume_id`, `build_target`, `legacy_selection`, `deck` is null | "No scenario chosen yet. Step 1 holds this." + href | draft |
+| `deck_incomplete` | fewer than six slots carry a card | "2 of six positions carry a card." | draft `deck` |
+| `legacy_slot_empty` | a legacy member has no name | "Parent B has no Legacy chosen." | draft `legacy_parents` |
+| `aptitude_below_target` | target `distance`/`surface`/`style` set and the trainee's `aptitude_{x}` letter is D/E/F/G | "Your target is Long; this trainee's Long aptitude is D (Weak)." | `umamusume.aptitude_*`, band words are design-2.0 §17 |
+| `deck_category_blank` | `DeckAnalysis::build()['categories'][$k]['blank']` is true for a category | "Training power: no card in the deck carries an effect here." | DeckAnalysis (restatement of a count) |
+| `stat_priority_unsourced` | a `stat_priority` stat that no card in the deck contributes a training effect for | "Speed is your first priority; no card in the deck carries a Speed training effect." | SupportCardEffects anchors via DeckAnalysis lines |
+| `ruleset_absent` | always, while `app.ruleset` is null | "No source defines a Global ruleset version." | `HandleInertiaRequests` |
+
+The aptitude cut-off is the brief's D-or-lower, which is design-2.0 §17's Weak and Very weak bands
+(`S|A Strong`, `B|C Neutral`, `D|E Weak`, `F|G Very weak`). It is not a number this slice invented.
+`stat_priority_unsourced` reads stat→effect through the effect names the dictionary states; if the
+mapping is not exact for a stat, that stat is skipped rather than guessed (see §5).
+
+**Skipped, with the reason recorded in the page copy and the report:** "weak stamina plan" and "poor
+support synergy" (per-training yields and synergy weights are unsourced/held, PRD §6.4, C2),
+"missing scenario requirement" (no per-scenario requirement data exists in `config/scenarios.php`),
+"low factor probability" (star-roll odds are held, REFERENCE §1.5.3), per-skill priorities (no key
+exists in `BuildTargetPayload`; D4's owed owner decision).
+
+Warnings never block. Only a refused `StartCareerRequest` blocks.
+
+## 5. Open questions for the owner (carried, not blocking)
+
+1. `BuildPurpose` has four cases; the brief names five ("Competitive Build"). Same as D4's open item.
+2. Per-skill priorities and risk tolerance need keys in `BuildTargetPayload::KEYS` (stored-shape change).
+3. "Skill priorities" on the Target section: rendered as a named absence with the D4 reason until (2) lands.
+4. `config/scenarios.php` `our_grand_concert.documented` reads `true` after `ab53861`, so the
+   PARTIALLY DOCUMENTED badge is unreachable; reported, not changed.
+
+## 6. Tasks (TDD, each ends green)
+
+1. **RED:** `tests/Feature/CareerPreflightTest.php` — props test: `GET /career/setup/preflight` with a full
+   draft asserts the whole contract shape (trainee, scenario, target, six legacy members, six deck slots,
+   analysis keys, warnings list, ruleset). Run it: fails (route missing).
+2. **GREEN:** `routes/web.php` (`career.preflight`, `career.preflight.store`) + `PreflightController::show()`
+   composing the contract from the draft. Re-run: the props test passes.
+3. **RED:** warning tests — one per table row, each a draft state; assert the key is present (and absent
+   when the trigger is not met). Implement the warning builder in the controller (private method,
+   table-driven). Re-run.
+4. **RED:** `Start Career` tests — (a) a full draft creates exactly one run with the draft's `umamusume_id`,
+   `scenario`, `status = Active`, the two `inheritance_parent_*` ids resolved from the Veteran rows, the
+   `legacy_selection` json, the `build_target` json, six `deck_slots` rows and seeded start skills;
+   (b) a tampered draft (support card id that no longer exists / scenario removed from config / unknown
+   `build_target` key) is refused with the run count unchanged and an error naming the section;
+   (c) `SetupDraft::reset()` on success, so a second Start Career cannot double-create.
+5. **GREEN:** `StartCareerRequest` (composed rules; re-runs the three step requests by hydrating them with
+   the draft slice and calling `validateResolved()`; see §7) + `PreflightController::store()` in one
+   transaction.
+6. **Vue:** `Career/Preflight.vue` following `pages/Catalog/Index.vue`'s pattern, `SetupLayout step=6`,
+   three sections, warning list with glyph + text, Edit hrefs, `router.visit` for Back, `useForm` posting
+   `startAction`; focus to the first error (`role="alert"` summary is `tabindex="-1"`, focused when
+   `form.hasErrors`).
+7. **Gates:** typecheck, build, targeted tests, full suite, Pint, PHPStan, lore, `migrate:status`.
+8. **Browser:** `tests/browser/career-preflight.spec.ts` — values carried in from all five steps, the
+   warning text, Edit → return keeps values, Start Career lands on the run, and the error-focus path.
+
+## 7. Start Career refusal mechanics (the trust boundary)
+
+The preview is not the boundary. `store()`:
+
+```php
+$draft = [ 'umamusume_id' => ..., 'scenario' => ..., 'status' => RunStatus::Active->value,
+           'build_target' => SetupDraft::buildTarget(), 'legacy_selection' => SetupDraft::legacySelection(),
+           'legacy_parents' => SetupDraft::legacyParents(), 'deck' => SetupDraft::deck() ];
+```
+
+`StartCareerRequest` validates the composed array and, in `withValidator()`, re-runs each step's own
+Form Request against its slice of the draft by hydrating a child instance
+(`StoreDraftDeckRequest::createFrom($this->duplicate($slice))`, `->setContainer(app())`,
+`->validateResolved()`, wrapping `ValidationException` into the same error bag with the section named).
+That keeps one rule set per step (no duplication) and refuses a draft that a config change or a deleted
+row has made stale. The payload readers (`LegacySelectionPayload::fromArray()`,
+`BuildTargetPayload::fromArray()`) stay the one owner of the accepted vocabularies and are the second
+gate. Run creation, deck rows, legacy json + the two foreign keys and the build target are one
+transaction; nothing is written on refusal, and the draft is reset only after the commit.
+
+_Dated close-out 2026-10-08 (documentation-sync pass; the slice spec above is preserved as written):
+this spec is the plan D7 executed, and D7 landed 2026-10-06 — the §4 table row records the landing,
+`career.preflight` / `career.preflight.store` are wired at `routes/web.php:91-92`, and the route reads
+the same `StartCareerRequest` trust boundary this spec's §7 describes. Its §5 open question 4 — the
+`our_grand_concert.documented => true` reading that made the PARTIALLY DOCUMENTED badge unreachable —
+is the question the owner's E6 ruling answered: the badge now reads `partially_documented`
+(`config/scenarios.php`), recorded in the §4.1 item 6 correction above. The defect this spec's blocker
+check says is already closed — the step-4 draft write never persisting the parent ids — was the subject
+of plan §4.1 item 1 and was closed by the `b494d6f` reuse of `AncestryGraph::parentNames()`, filed as
+`KNOWN-ISSUES.md` KI-65._

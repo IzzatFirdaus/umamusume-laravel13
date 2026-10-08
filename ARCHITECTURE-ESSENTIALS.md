@@ -2,6 +2,22 @@
 
 Token-efficient digest of ARCHITECTURE.md for agent context injection. If this file and ARCHITECTURE.md disagree, ARCHITECTURE.md wins.
 
+_Dated correction 2026-10-08 (documentation-sync pass). Several statements below describe the pre-2.0
+surface. The web surface is now Inertia + Vue 3 (`ADR-0020` §1): `resources/views/` holds
+`app.blade.php` (the Inertia shell) and the three error documents only, `resources/views/components/`
+is empty since slice B1, and the career 2.0 screens (the setup wizard `Career/*`, the cockpit and its
+detail screens, the scenario panels) are Vue pages under `resources/js/pages/Career/`, `Veterans/` and
+`Database/`, driven by controllers under `app/Http/Controllers/Career/` plus `DatabaseController`.
+Phase C–E added a bounded set of services and read routes the schema lines below do not yet name:
+`App\Services\Advisor\TrainerAdvisor` (+ `config/advisor.php`, C2); `App\Services\Career\SetupDraft`;
+`App\Services\Legacy\AncestryGraph`; `App\Services\DeckAnalysis`; `App\Services\RaceFacts` (the shared
+ten-field race list); `App\Actions\RecordVeteran`'s first caller `SaveVeteranController`; and the
+`career.*`, `runs.cockpit`, `runs.{training,races.decision,races.planner,events,inheritance,skills.planner,timeline,result,veteran}` and
+`veterans.*` / `database.*` routes. The veterans line below says "no routes or screens yet (slice D16
+builds those)" — that is now false; D16 built them. Statements that read "Blade" as the shipped surface,
+or list the deleted `x-*` Blade components, are superseded by this note and kept as the record of the
+pre-2.0 shape._
+
 ## Stack (pinned, installed 2026-09-27)
 
 - PHP 8.5.8, laravel/framework 13.32.0, SQLite only (WAL + busy_timeout), `database` cache + queue stores

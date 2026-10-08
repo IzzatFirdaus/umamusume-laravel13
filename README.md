@@ -8,7 +8,7 @@ The characters are Umamusume, a humanoid race. Repository text and code never us
 
 ## Overview
 
-- **Catalog**: server-rendered Blade screens over data the fetch engine cross-references between JP and Global sources. Every engine-written fact carries provenance (source URL, fetched timestamp, raw snapshot on disk).
+- **Catalog**: Inertia + Vue 3 screens over data the fetch engine cross-references between JP and Global sources. Every engine-written fact carries provenance (source URL, fetched timestamp, raw snapshot on disk).
 - **Training runs**: Trainer-owned CRUD. Per-turn stat logging, skill states `Suggested` / `Acquired` / `Skipped`, equipped support-card deck, race entries, and shop purchases. Export is CSV or JSON; historical runs re-import from this app's own CSV export.
 - **Review queue**: fuzzy or unmatched source records go to `/review` for the Trainer to confirm, alias, or reject. The engine proposes, the Trainer disposes; the engine never overwrites a row flagged `is_manual`.
 
@@ -24,12 +24,12 @@ Phase 1 of `PRD.md`, substantially implemented and in active development (no rel
 | Framework         | Laravel 13 (`laravel/framework` 13.32.0)                                                                                                             |
 | Database          | SQLite only, WAL mode + `busy_timeout` (`database/database.sqlite`, gitignored)                                                                      |
 | Cache / Queue     | framework `database` stores (no Redis)                                                                                                               |
-| Frontend          | Blade + Tailwind CSS v4 (CSS-first `@theme` in `resources/css/app.css`, no `tailwind.config.js`), Vite 7, TypeScript sources under `resources/js/`   |
+| Frontend          | Inertia + Vue 3 + TypeScript (`inertiajs/inertia-laravel`, `@inertiajs/vue3`), Tailwind CSS v4 (CSS-first `@theme` in `resources/css/app.css`, no `tailwind.config.js`), Vite 7   |
 | Testing           | Pest 4 (feature-first), `Http::fake`, in-memory SQLite for tests; Playwright for browser/E2E and accessibility                                       |
 | Static analysis   | Larastan level 6 (`phpstan.neon`), Pint (laravel preset, `pint.json`)                                                                                |
 | Type check        | `tsc --noEmit` (`npm run typecheck`)                                                                                                                 |
 
-Deliberately absent (PRD §6): auth packages, SPA frameworks, Excel export, Redis, MySQL/PostgreSQL, deploy tooling. `compose.yaml` is stock Laravel Sail (MySQL/Redis) and is **not** the supported database path for this app.
+Deliberately absent (PRD §6): auth packages, Livewire, Excel export, Redis, MySQL/PostgreSQL, deploy tooling. The web surface is Inertia + Vue 3 (`ADR-0020` §1), which superseded the pre-2.0 Blade-only surface and the older "no SPA" note this file used to carry; the 2.0 line is a client-rendered shell over the same loopback-only, single-Trainer backend. `compose.yaml` is stock Laravel Sail (MySQL/Redis) and is **not** the supported database path for this app.
 
 ## Requirements
 
@@ -122,7 +122,7 @@ Verified against `php artisan route:list`:
 
 | Route                                                 | Purpose                                                                                                                                                                                                                  |                                      |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
-| `/`                                                   | redirects to `/training-runs`                                                                                                                                                                                            |                                      |
+| `/` (`home`)                                         | the Dashboard, the Inertia landing screen (`SCR-CAR-001`)                                                                                                                                                                |                                      |
 | `/umamusume`, `/umamusume/{slug}`                     | catalog index (release-status filter, normalized search) and detail with aliases, cards, and provenance                                                                                                                  |                                      |
 | `/skills`, `/skills/{skill}`                          | skill search (Screen D) and detail; Global-filtered, paginated                                                                                                                                                           |                                      |
 | `/support-cards`, `/support-cards/{card}`             | support-card catalog (reference data only, no collection state)                                                                                                                                                          |                                      |
@@ -132,8 +132,15 @@ Verified against `php artisan route:list`:
 | `/training-runs/{run}/deck`                           | the six support cards the run was equipped with                                                                                                                                                                          |                                      |
 | `/training-runs/{run}/races`, `.../purchases`         | race entries and shop purchases per turn                                                                                                                                                                                 |                                      |
 | `/training-runs/import` (+ preview, store)            | historical-run import from this app's own CSV export (`ADR-0017`)                                                                                                                                                        |                                      |
-| `/training-runs/{run}/export/csv\                     | json`                                                                                                                                                                                                                    | run download, no data lock-in (US-6) |
+| `/training-runs/{run}/export/{format}`                | run download (`csv`/`json`), no data lock-in (US-6)                                                                                                                                                                      |                                      |
 | `/review`, `POST /review/{candidate}`                 | match review queue                                                                                                                                                                                                       |                                      |
+| `/career/setup/{scenario,trainee,target,legacy,deck,preflight}` | the six-step career setup wizard (`SCR-CAR-002`–`SCR-CAR-010`), session draft until Preflight creates the run                                                                                                 |                                      |
+| `/training-runs/{run}/cockpit`                        | the run-scoped Career Cockpit (`SCR-CAR-011`)                                                                                                                                                                            |                                      |
+| `/training-runs/{run}/{training,races,events,inheritance,skills,timeline,result,races/planner}` | the career detail screens (`SCR-CAR-012`–`SCR-CAR-023`): training, race decision and planner, event decision, inheritance, skills planner, timeline, result |                                      |
+| `/training-runs/{run}/veteran`                        | Save Veteran (write half of the library, `SCR-VET-003`)                                                                                                                                                                  |                                      |
+| `/veterans` (+ `/compare`, `/{veteran}`)              | Veteran library, comparison and detail (`SCR-VET-001`/`002`/`004`)                                                                                                                                                        |                                      |
+| `/database` (+ `/trainees/supports/skills/races/scenarios`) | the Database hub (`SCR-SYS-005`–`007`), read-only reference surfaces                                                                                                              |                                      |
+| `/legacy` (+ `/compare`, `/{run}`)                    | the run-scoped Legacy Lab (`SCR-CAR-006`), record-only                                                                                                                                                                    |                                      |
 | `/up`                                                 | framework health route                                                                                                                                                                                                   |                                      |
 
 The former `/design-preview` route has been deleted; component review now happens on the real screens and their tests.
@@ -217,9 +224,8 @@ app/Services/DataPipeline/ SourceFetcher (only outbound HTTP), NameNormalizer (N
 app/Services/             ScenarioCaps (per-stat ceilings), SupportCardEffects (+ the Skill* automation trio below)
 config/uma.php            fetch allowlist, politeness, thresholds; config/scenarios.php scenario layout data
 database/                 migrations, factories for every model, seeders, seeders/data (committed source bodies)
-resources/views/          Blade: catalog, skills, support-cards, runs, review, components (stat-band,
-                          resource-strip, race-calendar, guided-step, deck-panel, layout, ...)
-resources/js/             TS: trainee-combobox, guided-flow, app/bootstrap
+resources/views/          Blade: `app.blade.php` (the Inertia shell) and `errors/{404,419,500}.blade.php`; `resources/views/components/` is empty since slice B1
+resources/js/             Inertia + Vue 3 + TypeScript: `spa.ts`, `bootstrap.ts`, `types.ts`, `pages/**/*.vue` (54), `components/**/*.vue` (58), `layouts/`
 routes/                   web.php, api.php (named routes throughout)
 tests/                    Pest: Feature (100+ files) + Unit; tests/Fixtures stored bodies
 docs/                     adr/, scenarios/, UMAMUSUME_REFERENCE.md, research-scratch/ (governance masters)
@@ -279,7 +285,7 @@ There is none, by decision (PRD §6.10): no hosting, deployment, or cloud path. 
 
 ## Troubleshooting
 
-- **Vite manifest error on a Blade page** → the built assets are missing or stale. Cause: no `npm run build` after edits or clone. Fix: `npm run build` (or `composer dev` for HMR).
+- **Vite manifest error on a page** → the built assets are missing or stale. Cause: no `npm run build` after edits or clone. Fix: `npm run build` (or `composer dev` for HMR).
 - **`migrate` fails to find the database** → `database/database.sqlite` does not exist yet. Fix: create an empty file at that path, then `php artisan migrate`.
 - **A fetch says "unchanged since last snapshot" but the screen is empty** → KI-27: the snapshot short-circuit keys on the document hash under today's date in a `storage/` directory shared by every database in the working tree, so a second database asked the same day is told nothing changed. Fix: `php artisan uma:reparse <source>` (zero network, upserts on source identity, safe on a populated database).
 - **A pinned source URL serves old data** → KI-24: withdrawn documents still answer `200`. Manifest-resolved sources exist to avoid this; `uma:fetch` warns when it falls back to the pinned URL.
@@ -290,9 +296,9 @@ There is none, by decision (PRD §6.10): no hosting, deployment, or cloud path. 
 
 Evidence-backed current state, distinct from the PRD non-goals in §6:
 
-- Next-race readiness is not a shipped judgement: fatigue data is recorded (`x-race-fatigue-chip`) but the threshold is an open question (`ADR-0016`).
+- Next-race readiness is not a shipped judgement: fatigue data is recorded but the threshold is an open question (`ADR-0016`).
 - Support cards are reference data and per-run deck only; card collection state (ownership, levels, limit breaks) is cut (`ADR-0014`). Card tier labels are held for want of a Global source.
-- Sourced artwork is authorized and **not built** (`ADR-0021`, 2026-10-05): the tool may fetch id-addressable game art from an allowlisted host into a gitignored local mirror; nothing renders a picture yet and no command exists. `ADR-0012` Decision 2's earlier "no card images" is superseded for that object only, by `ADR-0021`. There are still no trainee image uploads (PRD §6.13), and which screens get a slot is open (PRD OQ-6).
+- Sourced artwork is authorized and **built** (`ADR-0021`, 2026-10-05): `uma:fetch-art` mirrors id-addressable game art from an allowlisted host into a gitignored local mirror, and `ArtworkSlot.vue` renders it on the catalog and support-card surfaces; an absent file paints nothing (`DESIGN.md` §4.7). Which further screens get a slot is the open placement remainder (PRD OQ-6). There are still no trainee image uploads (PRD §6.13).
 - The GameTora robots.txt / rate-limit verification is formally outstanding (PRD OQ-2); sources are bounded by config politeness settings instead.
 - Fetch scheduling is manual; the scheduler default is open (PRD OQ-3).
 - Aptitude letters and per-scenario caps are engine-owned facts (`ADR-0004`); growth rates and base stats are not implemented (PRD OQ-4 scope).

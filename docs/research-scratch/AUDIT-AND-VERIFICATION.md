@@ -5309,6 +5309,53 @@ O-11 (skills panel), O-8 (deck tiles and per-card state), O-5 and R-7 (the 406-r
 catalog; Architect), R-2 and R-3 (schema), the Infirmary and Races choices. None of those landed
 here; they were in Dispatch A's held-or-future list, not its scope.
 
+_Dated re-read 2026-10-08 (documentation-sync pass, on the owner's Phases A–E completion brief; the
+ledger above is preserved as written). The "Fail on the run page" verdict this section carries was
+revised by its own Part 7, which closed the page's blockers in code, and the page it was written
+against no longer exists: A4b ported `runs/show` to `resources/js/pages/Runs/Show.vue` and B1
+deleted the Blade view and its components. Each item's state on this tree, measured rather than
+remembered:
+
+- **O-2** (sticky region two thirds of the viewport) — **closed**. Part 7 pinned the Resources
+  strip to 176px (measured 22% at 1280x800), and the ported `Runs/Show.vue` keeps the
+  `lg:sticky` strip pin; `SCR-RUN-003`'s Accessibility section records it as closed.
+- **O-3** (four `N/A` cells, total-vs-delta ambiguity) — **closed in its wording half, open in its
+  modelling half**. The 2026-10-03 ruling (fields store totals, display computes the delta) and
+  Part 8 A.2 shipped the "after this turn" labels; `SCR-RUN-003` §Localization records that the
+  model question stays open (§7).
+- **O-4** (Mood placement, section nesting) — **closed**. Part 7 landed the nesting and Mood
+  placement at `f5a91b2`; the ported page keeps one labelled `section` per panel
+  (`SCR-RUN-003` Accessibility).
+- **O-5 / R-7** (unscoped race calendar) — **open, data-first, unchanged by Phases A–E**. The
+  catalogue still holds 410 rows with 4 carrying a `scenario_key`; `SCREEN_SPEC.md` §7-7 records
+  the deferral, and `KI-67` (the pinned GameTora document answering 404) now blocks the refresh
+  that could add scoping.
+- **O-8** (deck as a bar of selects that never closes; per-card state) — **closed in its first
+  half, open in its second**. The ported `DeckPanel.vue` renders equipped slots as closed rows and
+  opens one picker at a time (`openSlot`, `?deck_slot=`), so the never-closing bar is gone; the
+  per-card state half (level, limit break, bond, hint) stays gated on the PRD §6.9 / US-12 call
+  (`ADR-0014`, Part 9).
+- **O-11** (skills panel design) — **open, unchanged**. The R-6/O-11 copy ruling
+  ("Suggested" → "Starting") landed at `b1814cc`, but the panel-design question the audit's ledger
+  names is not closed by any Phase D/E slice.
+- **O-12** (goals surface) — **closed as the run page's goals panel, with the client's per-trainee
+  goal header still absent**. Part 8 A.4 landed the goals panel (`RunGoalsPanelTest`, the
+  ported `goalRows` prop); the client's "Place 1st in Arima Kinen, 5 turns" header remains absent
+  because no `trainee_goals` table exists (`KI-34`).
+- **R-2 / R-3** (Unity Cup state capture, schema) — **open, schema-gated**. E3's Unity Cup panel is
+  read-only with no write path, exactly as the E3 slice plan records; the capture proposal at
+  `RACE-AND-SLICE-RESEARCH.md` §unity-cup-capture.md stays the owner's.
+- **R-5** (save confirmation) — **closed**. Part 7 landed it (`04244a4`, `b27328e`,
+  `RunSaveConfirmationTest`).
+- **R-8** (duplicate submit label) — **closed**. Part 7 landed it (`767de93`).
+- **Infirmary and Races choices** — **open, unchanged**. `TrainingRunController::turnChoices()`
+  still offers the five training stats plus Rest and Recreation; no Infirmary or Races choice
+  exists on this tree.
+
+This re-read closes nothing in the audit's own terms — the ledger above stays the audit's record —
+but it records the tree verdict per item so a future reader does not read a 2026-10-03 "Fail" as a
+statement about the Vue page that replaced the one it measured._
+
 ---
 
 ### Part 9: deck tiles and per-card state, gated (2026-10-03)
