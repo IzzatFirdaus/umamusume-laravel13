@@ -9,15 +9,15 @@
  * order is CSS only — no element is hidden at a breakpoint, so nothing leaves the accessibility tree
  * and no primary decision needs a horizontal scroll.
  *
- * **The page pattern is `Catalog/Index.vue`'s**: the layout, `<Head title>`, the `#title` slot, and
- * `router.get` with `preserveState`/`preserveScroll` for the calendar's year tabs. There is one form,
+ * **The page pattern is `Catalog/Index.vue`'s**: the layout, `<Head title>` and the `#title` slot. The
+ * calendar's year tabs left the page with D14a, so the only query-string state here is none at all. There is one form,
  * the manual correction, and it posts to the route that already owns a turn write.
  *
- * **Loading and error are page-level** (ADR-0007): the only user-initiated async actions here are the
- * year tabs and the correction, and Inertia keeps the current page on screen during a visit, so the
- * state is announced rather than drawn as a skeleton. `invalid` and `exception` are both cancelable,
- * and returning `false` takes the failure out of Inertia's default modal so this page's own
- * `role="alert"` is the single surface.
+ * **Loading and error are page-level** (ADR-0007): the only user-initiated async action here is the
+ * correction, and Inertia keeps the current page on screen during a visit, so the state is announced
+ * rather than drawn as a skeleton. `invalid` and `exception` are both cancelable, and returning
+ * `false` takes the failure out of Inertia's default modal so this page's own `role="alert"` is the
+ * single surface.
  *
  * The props contract is declared locally: `defineProps<Imported>()` cannot resolve an imported type,
  * because TypeScript 7 ships no `lib/typescript.js` for `@vue/compiler-sfc` to load (plan §11). Every
@@ -28,7 +28,8 @@ import CareerHeader from '../../components/career/CareerHeader.vue';
 import CareerStatePanel from '../../components/career/CareerStatePanel.vue';
 import ActionGrid from '../../components/career/ActionGrid.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
-import RaceCalendar from '../../components/RaceCalendar.vue';
+import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
+import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue';
 
@@ -63,7 +64,7 @@ interface Correction {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; status: string; status_label: string; scenario_label: string; run_url: string };
+    run: { id: number; trainee: string; trainee_ja: string | null; status: string; status_label: string; scenario_label: string; run_url: string; timeline_url: string; result_url: string };
     header: Header;
     state: {
         stats: { key: string; label: string; current: number | null; target: number | null; cap: number }[];
@@ -77,14 +78,12 @@ const props = defineProps<{
         alternative: string | null;
         risk: string | null;
     };
-    calendar: {
-        show: boolean;
-        cells: unknown[];
-        year: number;
-        yearTabs: { year: number; label: string; url: string }[];
-        yearWord: string | null;
-        nextTurn: number | null;
-    };
+    // The strip's own shape is declared at `components/career/RunRaceStrip.vue`, the one place that
+    // reads it. The page forwards the bundle untouched, the way it forwarded the calendar cells.
+    raceStrip: Record<string, unknown>;
+    // The scenario panel's shape is declared at `components/scenario/ScenarioPanel.vue` for the same
+    // reason: the shell is its one reader, and E2 to E4 register renderers against it.
+    scenario: Record<string, unknown>;
     correction: Correction | null;
 }>();
 
@@ -170,6 +169,31 @@ const statFields = [
     { name: 'guts', label: 'Guts' },
     { name: 'wit', label: 'Wit' },
 ] as const;
+
+// E4: the Cockpit renders a "Shop" jump only when the matrix composes one. The shape is the
+// same across scenarios (the key is always present), so a `null` check carries the whole
+// branch. Other scenarios see no Shop affordance.
+const hasShop = computed((): boolean => {
+    const shop = (props.scenario as { shop?: unknown }).shop;
+
+    return shop !== null && shop !== undefined;
+});
+
+/*
+ * Scroll to and focus the Shop heading (§28 "quick access from the Cockpit"). We do not rely
+ * on `:focus-visible` scroll-margin because the heading carries `tabindex="-1"` and would
+ * otherwise miss the visible scroll target.
+ */
+const jumpToShop = (): void => {
+    const heading = document.getElementById('trackblazer-shop-heading');
+
+    if (heading === null) {
+        return;
+    }
+
+    heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    heading.focus({ preventScroll: true });
+};
 </script>
 
 <template>
@@ -296,6 +320,21 @@ const statFields = [
                 </section>
 
                 <ActionGrid :actions="props.actions" />
+
+                <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
+                     E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
+                     Cockpit"). The button is rendered only when the matrix composes a shop, so
+                     other scenarios see no Shop affordance. WCAG 2.4.11: focus moves to the
+                     Shop heading after the visit, and the body has `scroll-margin-top` so the
+                     sticky mobile nav does not cover the focused control. -->
+                <button
+                    v-if="hasShop"
+                    type="button"
+                    class="mt-2 inline-flex min-h-11 items-center justify-center rounded-full border-2 border-rule px-4 font-semibold text-ink-strong"
+                    @click="jumpToShop"
+                >
+                    Shop
+                </button>
             </div>
 
             <section
@@ -303,37 +342,46 @@ const statFields = [
                 aria-labelledby="career-scenario-heading"
             >
                 <h2 id="career-scenario-heading" class="text-base font-semibold text-ink-strong">Scenario</h2>
-                <p class="mt-1 text-sm text-ink">
-                    <span title="No scenario panel has landed yet.">N/A</span>.
-                    The scenario's own panel, its objectives and its deadlines arrive with the scenario
-                    panels; nothing is invented here in the meantime.
-                </p>
+
+                <!-- The shell switches on the matrix's own flags and widget keys and knows no
+                     scenario name (plan §9 E1, gate G-33). The prop's own shape is declared at
+                     `components/scenario/ScenarioPanel.vue`; the page forwards it untouched. -->
+                <div class="mt-2">
+                    <ScenarioPanel :scenario="props.scenario as never" />
+                </div>
             </section>
 
             <section
                 class="order-5 min-w-0 rounded-md border border-rule bg-panel p-4 md:order-none md:col-span-2 md:row-start-1 lg:col-span-1 lg:col-start-1 lg:row-span-2 lg:row-start-1"
                 aria-labelledby="career-timeline-heading"
             >
-                <h2 id="career-timeline-heading" class="text-base font-semibold text-ink-strong">Race calendar</h2>
+                <h2 id="career-timeline-heading" class="text-base font-semibold text-ink-strong">
+                    Races in this run
+                </h2>
 
-                <RaceCalendar
-                    v-if="props.calendar.show"
-                    class="mt-3"
-                    :cells="props.calendar.cells as never"
-                    :year="props.calendar.year"
-                    :year-tabs="props.calendar.yearTabs"
-                    :year-word="props.calendar.yearWord"
-                    :next-turn="props.calendar.nextTurn"
-                />
-                <p v-else class="mt-1 text-sm text-ink">
-                    <span title="This scenario composes no race calendar.">N/A</span>.
-                    This scenario has no race calendar, so none is drawn.
-                </p>
+                <RunRaceStrip :strip="props.raceStrip as never" />
 
                 <p class="mt-3 text-xs text-ink-muted">
-                    Career milestones (debut, Classic, Senior, finale) arrive with the Career Timeline
-                    screen. This region carries the race calendar until then.
+                    This region carries the run's own races. Every logged turn, race and event, in order,
+                    is on the Career Timeline.
                 </p>
+
+                <a
+                    :href="props.run.timeline_url"
+                    class="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
+                >
+                    Career Timeline
+                </a>
+
+                <!-- The Career Result's only other door was the 0.1.0 record page's header, so it sits
+                     beside the timeline door here rather than in the action grid: the grid is the
+                     advisor's answer about the next turn, and this is a summary of the career. -->
+                <a
+                    :href="props.run.result_url"
+                    class="mt-1 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
+                >
+                    Career Result
+                </a>
             </section>
         </div>
     </CareerLayout>

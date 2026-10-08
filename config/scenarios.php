@@ -73,6 +73,7 @@ return [
         'shop' => 'Pro Shop',
         'epithet_routes' => 'Epithet routes',
         'team_rank_ladder' => 'Team Rank ladder',
+        'career_goals' => 'Career goals',
     ],
 
     // The 1200 line is a game mechanic where training gains halve, not an
@@ -120,6 +121,7 @@ return [
                 'shop' => false,
                 'epithet_routes' => false,
                 'team_rank_ladder' => false,
+                'career_goals' => true,
             ],
             'scenario_links' => ['Aoi Kiryuin'],
             'facility_level_source' => 'repetition',
@@ -178,6 +180,23 @@ return [
                 'loss_retryable_with_alarm_clock' => true,
             ],
             'spirit_burst_states' => ['chargeable', 'charged', 'held', 'spent', 'extreme_ready', 'extreme_spent'],
+            /*
+            | The burst-count reward bands, transcribed from docs/scenarios/02-unity-cup.md:213-218
+            | ("Exclusive Skills from Spirit Burst Count", corrected to post-rework values, the
+            | white/gold framing superseding the withdrawn tier names). Whether Extreme Bursts count
+            | toward the threshold is a live publisher disagreement (run report §8.2), so the panel
+            | renders the caveat beside the table and never places this run in a band: the count the
+            | bands read is not recorded here, and D-223 keeps it that way.
+            */
+            'spirit_burst_bands' => [
+                ['total' => '4–6', 'reward' => 'White hint Lv1, +10 matching stat, +10 SP'],
+                ['total' => '7–9', 'reward' => 'White hint Lv3, +20 matching stat, +20 SP'],
+                ['total' => '10–12', 'reward' => 'Gold hint Lv1, +30 matching stat, +30 SP'],
+                ['total' => '13+', 'reward' => 'Gold hint Lv3, +40 matching stat, +40 SP'],
+            ],
+            // 02-unity-cup.md:220 — the gold versions arrive from the scripted event in Senior
+            // Year, late November. "Late November" is the calendar vocabulary the run screens use.
+            'burst_payout_timing' => 'Senior Year, Late November',
             'team_rank_ladder' => [
                 ['ranks' => ['G', 'F'], 'level' => 1],
                 ['ranks' => ['D', 'E'], 'level' => 2],
@@ -375,6 +394,25 @@ return [
             */
             'documented' => true,
             /*
+            | The rendering switch the two screens above read, and the only one. documented above is a
+            | provenance marker and stays unread by app code, so it cannot double as the badge condition
+            | without inventing a meaning for it: that key flipped to true on 2026-10-05 when the mechanics
+            | read landed, and no screen reads it, so nothing today proves the value means what a badge
+            | would need it to mean.
+            |
+            | true is the owner's own words for this scenario: the PRODUCT CORRECTION table marks it
+            | "PARTIALLY DOCUMENTED", and the notes below are why, the client strings behind the panels
+            | are still third-party renderings, so the panels render off and only the baseline strip plus
+            | the published caps is drawn. The word "partially" is what the badge prints, so the flag
+            | names what is printed rather than a state the screen has to interpret.
+            |
+            | Absent from every other entry, which is false: a scenario with no marker renders no badge.
+            | Setting false here instead of omitting it would be the same output, and omission is the
+            | shape of "nothing to say" this matrix already uses.
+            */
+            'partially_documented' => true,
+
+            /*
             | Mechanics are extracted and live in docs/scenarios/07-grand-concert.md, with the raw read in
             | docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section
             | "Our Grand Concert: the 2026-10-05 primary read" and the changelog in docs/UMAMUSUME_REFERENCE.md
@@ -387,6 +425,21 @@ return [
             | surfaces is the owner's call, and D-241's named acceptance case is now a described scenario: that
             | wording is the gate registry's to amend, not a slice's.
             */
+            /*
+            | The one line the baseline strip prints where a panel would be, and the only scenario that
+            | declares one. It is display copy on the config entry rather than a sentence in a component
+            | because the fact it states is this scenario's own: a fifth scenario that leaves every panel
+            | off supplies its own line here or none, and the shell reads whichever it finds (D-240, gate
+            | G-33). `panel_absence_title` is the strip's `title`, and it names the file the reason is
+            | recorded in.
+            |
+            | The sentence says the true reason the panels are off, which is not that the mechanics are
+            | unread: `docs/scenarios/07-grand-concert.md` holds them, refilled 2026-10-05. What no source
+            | here measures is the text on the client's own screens, so no panel can be drawn from a guide
+            | without inventing the words above it (D-165, D-241).
+            */
+            'panel_absence' => 'The mechanics for this scenario are sourced, but no capture of the client\'s own screens exists yet, so no panel is drawn.',
+            'panel_absence_title' => 'Sourced in docs/scenarios/07-grand-concert.md. The client\'s own screen text is not measured in this build.',
             'notes' => 'Live on `[Global]` since 2026-07-22 and caps Speed highest of any scenario here. '
                 .'Mechanics sourced 2026-10-05 by a primary read; every panel stays off because the client '
                 .'strings behind them are still third-party renderings, so the strip renders baseline plus the '

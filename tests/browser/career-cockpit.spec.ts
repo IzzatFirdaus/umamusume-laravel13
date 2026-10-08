@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
+import { deleteRun } from '../utils/delete-run';
 
 /*
  * Rendered-copy, layout and accessibility evidence for SCREEN-009, the Career Cockpit
@@ -10,9 +11,9 @@ import { buildAxe } from '../utils/accessibility';
  * sentence a run with no Energy prints.
  *
  * Fixture strategy. The run is built by walking the wizard's own steps and pressing `Start Career`, so
- * every fact under test was entered through the app rather than seeded, and the row is deleted through
- * the run page's own disclosure in `afterEach` — the `career-preflight.spec.ts` pattern, which is what
- * keeps this spec from breaking `runs.spec.ts`'s empty-state assertions.
+ * every fact under test was entered through the app rather than seeded, and the row is deleted over
+ * HTTP in `afterEach` — the shared `tests/utils/delete-run.ts` teardown, which is what keeps this
+ * spec from breaking `runs.spec.ts`'s empty-state assertions.
  *
  * Axe coverage. `@axe-core/playwright` is installed, so the last case below scans this screen with
  * the shared `tests/utils/accessibility.ts` builder and the same `wcag2a`/`wcag2aa`/`wcag21aa` tag
@@ -25,17 +26,7 @@ const createdRunUrls: string[] = [];
 
 test.afterEach(async ({ page }) => {
     for (const url of createdRunUrls.splice(0)) {
-        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-        if (response === null || !response.ok()) {
-            continue;
-        }
-
-        await page.getByText('Delete run').click();
-        await Promise.all([
-            page.waitForURL(/\/training-runs$/, { waitUntil: 'domcontentloaded' }),
-            page.getByRole('button', { name: 'Delete this run' }).click(),
-        ]);
+        await deleteRun(page, url);
     }
 });
 
@@ -89,8 +80,8 @@ async function newCareer(page: import('@playwright/test').Page): Promise<string>
     await page.locator('#app > *').first().waitFor();
     await page.getByRole('button', { name: 'Start Career' }).click();
     // `Start Career` lands on the Cockpit, not the run record screen (SCR-CAR-010 redirects to
-    // `runs.cockpit`), so this waits for the Cockpit and remembers the *record* URL for the cleanup:
-    // the delete disclosure lives on the record screen, not here.
+    // `runs.cockpit`), so this waits for the Cockpit and remembers the *record* URL: the cleanup
+    // addresses the run by the id in that path, which is the plainest form of it.
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
     createdRunUrls.push(page.url().replace(/\/cockpit$/, ''));
@@ -129,7 +120,12 @@ test('names every absent value and refuses to rank until Energy is entered', asy
     // Seven entries, and no RECOMMENDED marker at all while the advisor declines.
     await expect(page.getByRole('link', { name: /^Training/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /^Inheritance/ })).toBeVisible();
-    await expect(page.getByText('RECOMMENDED')).toHaveCount(0);
+    // Scoped to the Actions region the way the ranked case below is, and for the same reason:
+    // `getByText` matches case-insensitively as a substring, and since Phase E the word also occurs
+    // in panel prose naming a held field ("Recommended timing and projected benefit are not built",
+    // Unity Cup's SCREEN-015 absence). The claim here is about the grid's marker, not about the word.
+    const actions = page.getByRole('region', { name: 'Actions' });
+    await expect(actions.getByText('RECOMMENDED')).toHaveCount(0);
 });
 
 test('lays out at 1280, 768 and 320 without a horizontal scroll', async ({ page }) => {
@@ -146,7 +142,7 @@ test('lays out at 1280, 768 and 320 without a horizontal scroll', async ({ page 
         expect(overflow, `the cockpit scrolls sideways at ${width}px`).toBeLessThanOrEqual(1);
 
         // Every region is in the accessibility tree at every width: nothing is hidden by a breakpoint.
-        await expect(page.getByRole('heading', { name: 'Race calendar' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Races in this run' })).toBeVisible();
         await expect(page.getByRole('heading', { name: 'Actions' })).toBeVisible();
         await expect(page.getByRole('heading', { name: 'Advisor' })).toBeVisible();
         await expect(page.getByRole('heading', { name: 'Scenario' })).toBeVisible();
@@ -219,7 +215,9 @@ test('sizes the cockpit controls to the 44px contract', async ({ page }) => {
         page.getByRole('link', { name: /^Scenario action/ }),
         page.getByRole('link', { name: /^Event/ }),
         page.getByRole('link', { name: /^Inheritance/ }),
-        page.getByRole('link', { name: 'Run record' }),
+        // `exact`, because `getByRole`'s name match is a case-insensitive substring: the career bar's
+        // door and the race strip's own "Go to the run record screen" both contain this phrase.
+        page.getByRole('link', { name: 'Run record', exact: true }),
         page.getByRole('link', { name: 'Dashboard' }).first(),
         page.getByRole('link', { name: 'Record the first turn on the run screen' }),
     ];
@@ -235,7 +233,7 @@ test('records Energy through the cockpit correction and then marks one action', 
 
     // A turn has to exist before there is a state to correct, so the run screen records one through
     // its own raw form — the surface this slice reuses rather than replaces.
-    await page.getByRole('link', { name: 'Run record' }).click();
+    await page.getByRole('link', { name: 'Run record', exact: true }).click();
     await page.waitForURL(/\/training-runs\/\d+$/, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 

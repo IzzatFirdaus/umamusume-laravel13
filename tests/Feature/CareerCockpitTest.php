@@ -72,6 +72,9 @@ it('renders the cockpit for a run with no logged turn, and names what is missing
             ->where('run.status', 'Active')
             ->where('run.status_label', 'Active')
             ->where('run.run_url', route('runs.show', $run))
+            // F1: the Career Result had no door on a 2.0 screen, only in the 0.1.0 record page's
+            // header. The left column carries it now, so retiring that page cannot strand the screen.
+            ->where('run.result_url', route('runs.result', $run))
             ->where('header.turn', 0)
             // A run with nothing logged has no position to claim: null, never Early January (D-220).
             ->where('header.year_label', null)
