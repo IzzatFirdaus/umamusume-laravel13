@@ -352,4 +352,79 @@ return [
         ],
     ],
 
+    /*
+     * Skill-planner constants (SCREEN plan D13). Versioned constants live in config, never
+     * hardcoded (ADR-0001 §2's rule for the advisor's arithmetic, applied to the same class of
+     * number here), and each carries its source beside it.
+     */
+    'skills' => [
+
+        /*
+         * The hint discount ladder, read off the [Global] Learn screen on 2026-10-03: the client
+         * prints `Hint Lvl N` above `NN% OFF`. `UMAMUSUME_REFERENCE.md` §1.1.4 carries the read,
+         * `docs/research-scratch/SKILLS-MECHANICS.md` §2.4 the caption table, and
+         * `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §2.1 the frame evidence. `Lv Max` is a
+         * caption, not a level number. Displayed cost is base x (1 - discount) floored to the
+         * integer, which the sampled bases reconcile (130 -> 104/91/84, 160 -> 144/128/112/96,
+         * 180 -> 162, 200 -> 180/140/130).
+         */
+        'hint_discount' => [
+            ['level' => 'Hint Lvl 1', 'percent' => 10],
+            ['level' => 'Hint Lvl 2', 'percent' => 20],
+            ['level' => 'Hint Lvl 3', 'percent' => 30],
+            ['level' => 'Hint Lvl 4', 'percent' => 35],
+            ['level' => 'Hint Lvl Max', 'percent' => 40],
+        ],
+
+        /*
+         * The number maps the race-fit comparison is allowed to read. `distance_type` is decoded
+         * 1..4 against the client's own band tags and `ground_type` 1 and 2 are pinned by the
+         * client's own skill copy, both in `UMAMUSUME_REFERENCE.md` §1.2. The `running_style`
+         * numbers have no sourced label map in this repository (PRD OQ-5), so no style comparison
+         * is made anywhere below them.
+         */
+        'fit_distance_type' => [1 => 'Sprint', 2 => 'Mile', 3 => 'Medium', 4 => 'Long'],
+        'fit_surface_type' => [1 => 'Turf', 2 => 'Dirt'],
+
+        /*
+         * The one prerequisite pair a source publishes: the gold "Burning Spirit" skills name an
+         * "Ignited Spirit" skill as their prerequisite (run report §8.1, game8.co 2026-09-23 and
+         * game8.jp 2026-10-02). Whether learning the gold suppresses or replaces the white in a
+         * race is not established on either side, so the planner states the prerequisite and
+         * leaves that question Unknown.
+         */
+        'gold_prerequisites' => ['Burning Spirit' => 'Ignited Spirit'],
+    ],
+
+    /*
+     * Veteran-library constants (`SCREEN-020`, plan §8's D16).
+     */
+    'veteran' => [
+
+        /*
+         * The tag vocabulary the Save Veteran screen offers, group by group. `screen-spec-2.0` §24 lists
+         * these eighteen as *suggestions* the Trainer toggles, and custom tags are allowed beside them, so
+         * this is the picker's content, not an allow-list: `StoreVeteranRequest` bounds a tag's length and
+         * shape and never its membership.
+         *
+         * It is grouped rather than flat because the page renders each group under its own label, and a
+         * page that hardcoded the grouping would hold a second copy of the brief's vocabulary — the same
+         * reason `config/scenarios.php` is the only place a scenario name enters the layout. Before this,
+         * the pieces lived split across `lang/en/uma.php`'s `terms` and the two `skills.fit_*` maps above,
+         * with no key holding the list at all.
+         *
+         * `ListVeterans` searches these through the `tags` json column, so a new entry here is searchable
+         * the moment it is offered, with no query change.
+         *
+         * @var array<string, list<string>>
+         */
+        'suggested_tags' => [
+            'Stat' => ['Speed', 'Stamina', 'Power', 'Guts', 'Wit'],
+            'Distance' => ['Sprint', 'Mile', 'Medium', 'Long'],
+            'Surface' => ['Turf', 'Dirt'],
+            'Running style' => ['Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer'],
+            'Record kind' => ['Skill', 'Race', 'Scenario'],
+        ],
+    ],
+
 ];

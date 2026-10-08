@@ -1,0 +1,171 @@
+import { test, expect } from '@playwright/test';
+import { buildAxe } from '../utils/accessibility';
+import { deleteRun } from '../utils/delete-run';
+
+/*
+ * Rendered-copy, keyboard and accessibility evidence for the Skills Planner (plan §8 D13,
+ * `SCR-CAR-016`). `CareerSkillsPlannerTest` asserts the resolved props - the four states and their
+ * precedence, the coverage figures, the priced ladder, the fit cells, the reorder write. These cases
+ * assert what only a browser reaches: the warning block a sighted Trainer reads, the keyboard path
+ * through the reorder and its live announcement, the 44px sweep, and an axe scan.
+ *
+ * Fixture strategy. The run is created through the create form (the app's supported path in) and
+ * deleted over HTTP in `afterEach` (`tests/utils/delete-run.ts`).
+ * The build target is set with a direct PUT because no screen edits a saved run's target yet - the
+ * planner's own gap 1 - using the page's XSRF cookie and the URL-encoded form body
+ * `StoreBuildTargetRequest` parses. The priority names are seeded catalogue rows (skill ids 1 and 2,
+ * 180 SP each at the time of writing); if a reseed moves them, the warning case fails visibly rather
+ * than passing vacuously, because an unpriced priority refuses the total.
+ *
+ * The write gets 60s rather than the config's 15s, for the reason `career-race-decision.spec.ts`
+ * records: `php artisan serve` is a single-process `php -S`, so a write queues behind whatever else
+ * is on the box.
+ */
+
+const WRITE = { timeout: 60_000 } as const;
+
+const createdRunUrls: string[] = [];
+
+/** Two seeded catalogue rows, 180 SP base each: 360 together, against the 100 SP the fixture logs. */
+const PRIORITIES = ['Gourmand', 'Unstoppable'];
+
+test.afterEach(async ({ page }) => {
+    for (const url of createdRunUrls.splice(0)) {
+        await deleteRun(page, url);
+    }
+});
+
+async function openPlanner(page: import('@playwright/test').Page): Promise<void> {
+    await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.locator('#trainee-combobox').fill('Agnes Digital');
+    await page.keyboard.press('Enter');
+    await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
+    await page.getByRole('button', { name: 'Create run' }).click();
+    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
+    const runUrl = page.url();
+    createdRunUrls.push(runUrl);
+
+    // The build target, straight to the run-scoped write its Form Request owns. `back()` from
+    // there falls back to the run screen, so the redirect target is the run's own URL and the
+    // response that matters is the props the planner renders next.
+    const cookie = (await page.context().cookies()).find((c) => c.name === 'XSRF-TOKEN');
+    const body = new URLSearchParams({
+        purpose: 'StoryClear',
+        distance: 'Medium',
+        surface: 'Turf',
+        style: 'Pace Chaser',
+        'targets[Speed]': '900',
+        'targets[Stamina]': '800',
+        'targets[Power]': '700',
+        'targets[Guts]': '600',
+        'targets[Wit]': '500',
+    });
+    for (const name of PRIORITIES) {
+        body.append('skill_priorities[]', name);
+    }
+
+    // The write is asserted at its own status, not at wherever `back()` sends the follow-up: a
+    // no-Referer PUT has no header for Laravel's `previous()` to prefer, so the redirect goes to
+    // the session's last full-page GET, which this flow never guarantees. The data is proven by
+    // the planner's own render below.
+    const saved = await page.request.put(`${runUrl}/build-target`, {
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            ...(cookie ? { 'X-XSRF-TOKEN': decodeURIComponent(cookie.value) } : {}),
+        },
+        data: body.toString(),
+        maxRedirects: 0,
+    });
+    expect(
+        saved.status(),
+        `the fixture build-target PUT failed: ${saved.status()} ${saved.headers()['location'] ?? ''}`,
+    ).toBe(302);
+
+    // One turn logged at 100 SP, through the run screen's own raw form, so the coverage warning
+    // has a recorded total to miss. The hatch also carries a `turn` input on the guided rail, so
+    // every locator is scoped to the disclosure.
+    const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
+    await page.getByText('Correct a turn by hand').click();
+    await hatch.locator('input[name="turn"]').fill('1');
+    await hatch.locator('input[name="speed"]').fill('600');
+    await hatch.locator('input[name="stamina"]').fill('500');
+    await hatch.locator('input[name="power"]').fill('500');
+    await hatch.locator('input[name="guts"]').fill('500');
+    await hatch.locator('input[name="wit"]').fill('500');
+    await hatch.locator('input[name="sp"]').fill('100');
+    await hatch.getByRole('button', { name: 'Save correction' }).click();
+    await expect(page.getByText('Turn 1 logged.')).toBeVisible(WRITE);
+
+    await page.goto(`${runUrl}/skills`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+}
+
+test('warns when SP cannot cover the skills still to learn, and prices the sourced ladder', async ({ page }) => {
+    await openPlanner(page);
+
+    // The warning is glyph plus text, and the text carries both numbers: the base-price sum and
+    // the recorded total.
+    const warn = page.getByRole('status').filter({ hasText: 'The skills still to learn cost 360 SP' });
+    await expect(warn).toBeVisible();
+    await expect(warn).toContainText('the run holds 100');
+
+    // The ladder legend, with its Confirmed badge beside it.
+    await expect(page.getByText('Hint Lvl 1 10% off')).toBeVisible();
+    await expect(page.getByText('Hint Lvl Max 40% off')).toBeVisible();
+    await expect(page.getByRole('img', { name: /Confirmed/ })).toBeVisible();
+
+    // Per-row costs are base x (1 - discount) floored: 180 x 0.9 = 162.
+    await expect(page.getByText('Hint Lvl 1: 162 SP').first()).toBeVisible();
+
+    // The fit cells render their three states as words, not colour.
+    await expect(page.getByText('Not recorded').first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Required/ })).toBeVisible();
+});
+
+test('reorders the priority list from the keyboard, announces the new position, and saves it', async ({ page }) => {
+    await openPlanner(page);
+
+    const requiredRows = page.locator('ol').filter({ has: page.getByRole('button', { name: /Move / }) }).first();
+    const first = requiredRows.getByRole('button', { name: `Move ${PRIORITIES[0]} down, position 1 of 2` });
+    await first.focus();
+    await expect(first).toBeFocused();
+
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('status').filter({ hasText: 'moved to position 2 of 2' })).toBeVisible();
+
+    // Focus travels with the moved row, because the list moves the keyed DOM node rather than
+    // rebuilding it.
+    await expect(requiredRows.getByRole('button', { name: `Move ${PRIORITIES[0]} up, position 2 of 2` })).toBeFocused();
+
+    // The saved order comes back from the server: after the save the rows render in the new order.
+    await page.getByRole('button', { name: 'Save order' }).click();
+    await page.waitForURL(/\/skills$/, WRITE);
+    await expect(page.getByText('Build target saved.')).toBeVisible(WRITE);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(requiredRows.locator('li').first()).toContainText(PRIORITIES[1]);
+    await expect(requiredRows.locator('li').first()).not.toContainText(PRIORITIES[0]);
+});
+
+test('sizes the skills planner controls to the 44px contract', async ({ page }) => {
+    await openPlanner(page);
+
+    for (const control of [
+        page.getByRole('button', { name: `Move ${PRIORITIES[0]} down, position 1 of 2` }),
+        page.getByRole('button', { name: 'Save order' }),
+    ]) {
+        const box = await control.boundingBox();
+        expect(box?.height ?? 0, 'a skills planner control is not sized to the 44px contract')
+            .toBeGreaterThanOrEqual(44);
+    }
+});
+
+test('passes an axe scan at WCAG A and AA', async ({ page }) => {
+    await openPlanner(page);
+
+    // `buildAxe` scopes to `#app`, which is what makes this deterministic (KI-63).
+    const results = await buildAxe(page).analyze();
+
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
