@@ -130,7 +130,13 @@ class DatabaseGuard
 
     public function isAbsolute(string $path): bool
     {
-        return str_starts_with($path, '/') || preg_match('/^[A-Za-z]:[\\/]/', $path) === 1;
+        // Normalise the separator first. The class written as `[\\/]` compiles to a class holding
+        // only `/`, so every Windows drive path (`D:\...`) read as relative and the browser harness
+        // could not boot. Both separators name the same root, and the rest of this class already
+        // normalises them the same way.
+        $path = str_replace('\\', '/', $path);
+
+        return str_starts_with($path, '/') || preg_match('/^[A-Za-z]:\//', $path) === 1;
     }
 
     public function allowsCanonicalDestructive(): bool
