@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Career;
 
 use App\Enums\TurnEventType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreInheritanceEventRequest;
 use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
@@ -78,15 +79,9 @@ class InheritanceEventController extends Controller
         ]);
     }
 
-    public function store(TrainingRun $run): RedirectResponse
+    public function store(StoreInheritanceEventRequest $request, TrainingRun $run): RedirectResponse
     {
-        $validated = request()->validate([
-            'turn' => ['required', 'integer', 'min:1', 'max:72'],
-            'source_name' => ['required', 'string', 'max:100'],
-            'choice_label' => ['nullable', 'string', 'max:200'],
-            'deltas' => ['nullable', 'array'],
-            'origin_note' => ['nullable', 'string', 'max:1000'],
-        ]);
+        $validated = $request->validated();
 
         TurnEvent::create([
             'training_run_id' => $run->id,
