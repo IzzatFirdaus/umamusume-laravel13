@@ -20,8 +20,8 @@ use Illuminate\Support\Carbon;
  * nothing is computed here; the computation ban is FR-G-4 and ADR-0020 §3.
  *
  * The stored `tags` are the Trainer's spelling, unmodified. `tags_normalized` is their case-folded
- * twin and exists only so the library's tag filter can match either casing (KI-72); it is written by
- * `RecordVeteran` beside the tags, never by a Trainer.
+ * twin and exists only so the library's tag filter can match either casing (KI-72); this model's own
+ * guard folds it from `tags` on every save, so no writer can desync it and no Trainer ever types it.
  *
  * @property int $id
  * @property int $training_run_id
@@ -40,6 +40,25 @@ class Veteran extends Model
 {
     /** @use HasFactory<VeteranFactory> */
     use HasFactory;
+
+    /**
+     * `tags_normalized` is derived data and is maintained here rather than at any one write site:
+     * every writer of `tags` — the Save Veteran form through `RecordVeteran`, a factory, a direct
+     * model update — must not be able to desync the twin silently (KI-72). A write-site derivation
+     * was tried and failed exactly that way: a `$veteran->update(['tags' => …])` left the twin empty
+     * and the library's filter answered nothing. The same reasoning `TrainingRun`'s guard states
+     * applies one table over: this is what keeps a writer that is not a Form Request honest.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (self $veteran): void {
+            $tags = $veteran->tags;
+
+            $veteran->tags_normalized = is_array($tags)
+                ? array_map(static fn (string $tag): string => mb_strtolower($tag), array_values(array_filter($tags, 'is_string')))
+                : null;
+        });
+    }
 
     /**
      * @return BelongsTo<TrainingRun, $this>

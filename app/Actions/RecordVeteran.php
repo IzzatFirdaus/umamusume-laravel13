@@ -36,14 +36,7 @@ final class RecordVeteran
 
         return Veteran::updateOrCreate(
             ['training_run_id' => $run->id],
-            [
-                'tags' => $tags,
-                // The case-folded twin the library's tag filter matches against (KI-72). Derived here,
-                // at the one write this action owns, so every caller of `RecordVeteran` maintains it
-                // and the stored `tags` keep the Trainer's own spelling untouched.
-                'tags_normalized' => array_map(static fn (string $tag): string => mb_strtolower($tag), $tags),
-                'notes' => $notes,
-            ],
+            ['tags' => $tags, 'notes' => $notes],
         );
     }
 }
