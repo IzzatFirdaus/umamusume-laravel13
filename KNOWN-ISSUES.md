@@ -471,3 +471,104 @@ shared `tests/utils/accessibility.ts` builder was left unchanged, because its ot
    third-party origin.
 4. Whichever is chosen, `tests/utils/accessibility.ts` is the one place a default scope belongs, so
    that the two page-wide scans in `accessibility.spec.ts` stop being timing-dependent.
+
+### KI-75 `pint --dirty` reformats another session's uncommitted file in the shared worktree - FILED 2026-10-08 (Database reference views hand-off, on the owner's instruction), OPEN
+
+**What happens.** `AGENTS.md` §9 puts `vendor/bin/pint --dirty --format agent` in the hand-off sequence.
+`--dirty` collects every file that differs from `HEAD`, which in this worktree is not the same set as the
+slice's own files, because several sessions work in one tree (KI-70, KI-71). Measured 2026-10-08: a slice
+that touched no controller ran the gate and Pint rewrote
+`app/Http/Controllers/PreferenceController.php` with `no_unused_imports`, a file carrying 138 lines of
+another session's uncommitted D18b work. The reported result was
+`{"result":"fixed","files":[{"path":"app\Http\Controllers\PreferenceController.php","fixers":["no_unused_imports"]}]}`.
+Nothing in the output says the file was not the caller's.
+
+**Why it matters.** The bar's own definition of done says "no unrelated file changed" (`AGENTS.md` §15). A
+mandatory gate guarantees that clause is broken in a shared tree, so the honest hand-off must report a
+change it did not author, and the only repair, `git checkout -- <file>`, would delete the other session's
+work. The agent is left choosing between a false report and a destructive revert, which is the shape KI-70
+was filed for.
+
+**Proving command.**
+
+```bash
+vendor/bin/pint --dirty --format agent          # names a file the run's own slice never opened
+git diff --stat -- app/Http/Controllers/PreferenceController.php   # 138 insertions, two authors
+```
+
+**Owner.** QA / Reviewer for the hand-off wording in `AGENTS.md` §9, and the tooling owner for the command.
+It is not a slice's to fix, and this slice did not fix it.
+
+**Closure owed.** One of the two remedies, plus the §9 row rewritten to name it: (a) the gate runs on the
+slice's own explicit paths (`vendor/bin/pint app/Http/Controllers/DatabaseController.php config/reference.php`),
+which is what E3 did and what makes the "no unrelated file" clause satisfiable; or (b) a `composer fmt`
+alias that reads its pathspec from the file list of the change being handed off. Closure is whichever lands
+with the §9 row that cites it.
+
+**What closure would not cover.** It does not undo the line already sitting in `PreferenceController.php`:
+that edit stays, and the session owning the file will carry Pint's change inside its own commit. It also
+does not touch the condition underneath, several sessions' uncommitted work in one working tree; any
+future gate in the sequence that writes rather than reads inherits the same hazard the moment it is given a
+`--fix` mode, and `phpstan` escapes it only because it never rewrites.
+
+### KI-77 The working-tree `routes/web.php` imports seven controllers that `HEAD` does not carry, so no single slice can commit the file - FILED 2026-10-08 (Database reference views hand-off, on the owner's instruction), OPEN
+
+**What happens.** KI-70 records a route registration pointing at a class that exists only in the working
+copy. The same defect now sits one line earlier in the same file: in the *import statement*.
+`git show HEAD:routes/web.php` carries ten `App\Http\Controllers\Career` imports and no
+`DatabaseController` at all; every one of those ten resolves to a tracked file. The working-tree version
+of the same tracked file adds seven imports whose files are untracked. The file is one object with eight
+authors' lines in it, and committing it as it stands records a `HEAD` that names classes `HEAD` does not
+contain.
+
+**The seven, with the slice each belongs to** (each row is the controller's own docblock, not an
+inference): D11 `EventDecisionController` (`SCR-CAR-014`), D12 `InheritanceEventController`
+(`SCR-CAR-015`), D13 `SkillsPlannerController`, D14 `TimelineController` (`SCR-CAR-017`), D15
+`ResultController` (`SCR-CAR-018`), E5 `RacePlannerController` (`SCR-CAR-023`), and D17
+`DatabaseController` (`SCREEN-023`). Six of the seven belong to sessions other than the one filing this.
+
+**Consequence, stated precisely.** A commit of the file as it stands boots, and then cannot serve those
+URLs: dispatch resolves the action to a class that is not in the checked-out tree, and the request dies
+with `Class "App\Http\Controllers\...Controller" not found`. `php artisan route:list` cannot resolve the
+action either. That half of this entry is reasoned from the framework's action-resolution path, not
+measured here, because measuring it means committing the file whole; the file-state half above is measured
+and reproducible.
+
+**Proving commands (2026-10-08).**
+
+```bash
+git show HEAD:routes/web.php > /tmp/head-routes.php
+grep -cE '^use App\Http\Controllers\Career' /tmp/head-routes.php   # 10, and 0 DatabaseController
+git ls-files app/Http/Controllers > /tmp/tracked.txt                   # 25 files
+# every `use App\...` line in the working routes/web.php mapped to app/...php and tested against that list
+# -> 7 imports have no tracked file: the seven named above
+```
+
+**Why it matters.** `AGENTS.md` §14 makes `master` the branch of record with no CI to catch a partial
+landing, and §15 requires that a committed change be self-consistent. This file cannot satisfy either
+while the six other slices stay untracked: the first session that commits `routes/web.php` wholesale ships
+dead routes under a green-looking diff.
+
+**Number note, and it is not incidental.** This entry was drafted against KI-76 and found the number taken
+on arrival: another session filed the Vite-SSR hot-file finding as KI-76 between the two runs, so this one
+sits at KI-77. The register already carries two KI-70 headings and two KI-71 headings, recorded in KI-70's
+and KI-71's own text. Nothing in the tree checks for a duplicate KI number, which is why three collisions
+now exist; `§11`'s "never renumber an existing entry" rule has no instrument behind it, and in a shared
+worktree two sessions can pick the same next number within minutes.
+
+**Owner.** Architect, for the per-slice worktree discipline KI-70 and KI-71 already ask for; QA / Reviewer
+for the hand-off gate in `AGENTS.md` §9 that would catch it.
+
+**Closure owed.** Three things, and any one of them is small: (a) `php artisan route:list` joins the
+hand-off sequence, since it fails on a missing action class immediately and costs one line in §9; (b) the
+worktree discipline of KI-70 applied to the tracked files, so a slice's route lines and its controllers
+move together; (c) a rule naming `routes/web.php` as not-committable-whole while any import in it resolves
+to an untracked file, with the audit above as its check. Closure is whichever lands, plus the §9 or
+`GOVERNANCE.md` row that cites it.
+
+**What closure would not cover.** It does not land the seven controllers and does not retire KI-71, the
+condition underneath: whole slices existing only in the working tree. Adding `route:list` to the sequence
+makes the failure visible sooner; it does not make a partial commit safe. This slice did not fix any of
+it: its own patch to `routes/web.php` was built against HEAD's version of the file and contains only the
+three `database.*` routes, which is the workaround, not the cure.
+

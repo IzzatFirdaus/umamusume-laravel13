@@ -1934,3 +1934,182 @@ shipped.
 `/artwork/{kind}/{id}` loopback route with its `kind` allowlist and `whereNumber` guard (`Task 2`),
 the catalog index wire-up (`Task 7`), the absent-file-renders-nothing rule, the local-`src`-only
 rule, and the `skills.iconid` deferral. All five remain as specified.
+
+## Database reference views — Events, Shop Items, Sparks (SCR-SYS-008/009/010), 2026-10-08
+
+Completes `SCREEN-023`, whose Sections list already carries all eight areas. The D17 slice
+landed five and declared the other three "Not in this build"; both halves of that label are
+now false (the sections are in the brief, and the source data exists). The section is deleted,
+not softened.
+
+**Numbering note.** `SCR-SYS-006` and `SCR-SYS-007` are already taken (the race database and
+the scenario matrix, both documented inside the `SCR-SYS-005` section). The three new areas are
+therefore `SCR-SYS-008`, `009` and `010`, and they extend the `SCR-SYS-005` section the way
+`006` and `007` do.
+
+### Corpus re-check (2026-10-08), and what moved
+
+Read against `docs/UMAMUSUME_REFERENCE.md`:
+
+| Section | Read | Delta from the dispatch brief |
+| --- | --- | --- |
+| §4.4 Recurring event types | 2083-2102 | The table holds **ten** rows, not nine: the brief's list omits *Story-unlock campaign*, which is row 10. Cadence figures are stated per server and are dated to the export read. |
+| §1.6.10 Consumables | 790-811 | The table holds **eight** rows plus **two** currency items described in the prose above it (the Cleat family and the Goddess Statue). The brief's list matches the eight; the two currencies are added because the brief's own text names them. |
+| §1.5.2 Factor categories | 615-630 | **Six** rows; the record counts are 5 / 10 / 268 / 452 / 37 / 34 = **806**, which matches the brief's 806 across six categories. The doc also notes 68 further records in an `other` bucket that "no page in this pass explains"; they are counted, not described. *Ruled 2026-10-08 by the owner, and shipped with this slice:* the Sparks view names that remainder in one muted line under the categories instead of leaving the sum to imply otherwise. See the `factors.json` cross-check below for what the bucket actually holds. |
+| §1.5.3 Star ratings and ceilings | 632-648 | The star-roll-odds table is three rows by final stat value; the aptitude-roll rule and the three ceilings are prose. Rendered as the odds table plus one prose row. |
+| §1.6.5 Racing Carnival | 756-760 | Prices are guide-sourced: Rainbow Crystal Shards 30,000 Pt, Gold 15,000 Pt, Scout and Support tickets 6,000 Pt. Used only in the Shop Items drawer note for the two Crystal Shard rows. |
+| §2.2.3 Trackblazer | 909-916 | The Pro Shop is the scenario's own block; the item class already lives in `config/scenarios.php` `trackblazer.shop_items` and is **reused, not duplicated**. |
+
+**Local export availability, checked and reported.** `database/seeders/data/` holds
+`characters`, `gametora-characters`, `race-tier-labels`, `race_instances`, `races`, `skills`,
+`support-cards`, `support_effects` and `ura-races`. It holds **no** `factors.json`, **no**
+`items.json` and **no** `events__*.json`; `storage/app/private/` holds only `artwork` and
+`snapshots`. Per the brief's rule, no fetch step is added in this slice: the views render from
+the doc's tables and cite the doc as the source, not the export.
+
+**Dated correction, 2026-10-08, same session, before hand-off: that read was wrong, and the paragraph
+above is kept as a record of the mistake.** The exports DO exist on this machine, under
+`research-scratch/data/json/` (`factors.json`, `items.json`, `career-rivals.json`, the `events__*` and
+`en__events__*` files), with file dates 2026-09-27 and 2026-09-28. The original read looked only in
+`database/seeders/data/` and `storage/app/private/` and stopped there. The conclusion the slice acted on
+still stands, for a different reason: that directory is **gitignored**, so no fresh worktree is
+guaranteed to hold it and no runtime path reads it. The rows stay transcribed, and the files were then
+used as the cross-check they should have been from the start:
+
+- `factors.json`: `blue` 5, `pink` 10, `skill` 452, `race` 37, `scenario` 34, `other` 336, total **874**.
+  Five of the six counts the Sparks view prints match those cells exactly. The sixth, 268, is the guide's
+  own reading of part of `other`, and **336 − 268 = 68** is the remainder the guide calls counted but not
+  described. So the 806 the six rows sum to is the described total, not the export's 874.
+- `items.json`: 205 records. Four of the Shop Items view's ten rows match a client name in it exactly
+  (Alarm Clock, Toughness 30, Pleasing Parfait, Goddess Statue); the other six are the guide's grouped
+  labels, several client items under one row, so no single name matches them.
+
+### Data home
+
+A new `config/reference.php`, transcribed from the doc, with one key per view and a `source`
+block per view (section anchor, doc path, "how to re-check"). This follows the D17
+**config-derived** pattern the Scenarios view already established, needs **no migration**, and
+keeps the tables in one versioned artifact. It is not an inventory: the Sparks key holds six
+category rows, not the 806 records the doc counts.
+
+`config/scenarios.php` is **read, not edited**: the Shop Items view reuses
+`config('scenarios.scenarios.trackblazer.shop_items')` for its scenario block.
+
+### Provenance mapping (stated once, applied per row)
+
+The prompt's own definition is the rule: *Confirmed* = sourced with a URL or an S-file;
+*Estimated* = a third-party guide or an export read this build cannot re-verify; *Unknown* =
+the doc marks the value ❌ UNVERIFIED; *Calculated* = a value this app derives (none here).
+The state is authored per row in `config/reference.php` and passed through unchanged; the view
+renders it with `ProvenanceBadge.vue`, the single owner of the four glyphs. No second badge.
+
+### Files
+
+| File | Change |
+| --- | --- |
+| `config/reference.php` | New. The three tables plus per-view `source` blocks. |
+| `app/Http/Controllers/DatabaseController.php` | Three methods: `events()`, `shopItems()`, `sparks()`. Each `Inertia::render` with an explicit array. `index()` gains three areas. |
+| `routes/web.php` | Three `Route::get('/database/...')` lines. |
+| `resources/js/pages/Database/Index.vue` | "Not in this build" section deleted; three areas added. |
+| `resources/js/pages/Database/Events.vue` | New. |
+| `resources/js/pages/Database/ShopItems.vue` | New. |
+| `resources/js/pages/Database/Sparks.vue` | New. |
+| `resources/js/components/database/ReferenceDrawer.vue` | New. One drawer shared by all three views (§32). |
+| `resources/js/components/database/SourceNote.vue` | New. The §48 metadata row, shared. |
+| `tests/Feature/DatabaseTest.php` | Extended: three new cases; the hub case's area count moves 5 → 8. |
+| `tests/browser/database.spec.ts` | Extended: the hub's deferred-section case is replaced; three view cases added. |
+| `SCREEN_SPEC.md` | `SCR-SYS-008` / `SCR-SYS-009` / `SCR-SYS-010` rows and sections; `SCR-SYS-005`'s row notes the completion. |
+
+### Props contract
+
+```php
+// Database/Events
+'events' => [
+    'rows' => [ ['name','servers'=>['JP'|'Global'],'cadence','mechanics','state','source_title'], ... ],
+    'recheck' => ['text' => '...', 'url' => '...'],
+    'source' => ['section' => '§4.4', 'anchor' => '2026-10-02', 'doc' => 'docs/UMAMUSUME_REFERENCE.md'],
+    'totalCount' => 10,
+],
+
+// Database/ShopItems
+'shopItems' => [
+    'rows' => [ ['name','effect','spend_site','kind' => 'consumable'|'currency','state','source_title','detail'], ... ],
+    'scenarioShop' => ['label' => 'Trackblazer', 'rotation_turns' => 6, 'items' => [['name','cost','effect'], ...]],
+    'source' => ['section' => '§1.6.10', ...],
+    'totalCount' => 10,
+],
+
+// Database/Sparks
+'sparks' => [
+    'categories' => [ ['category','jp_name','global_name','effect','records','state','source_title'], ... ],
+    'rollOdds' => [ ['band','one_star','two_stars','three_stars'], ... ],
+    'source' => ['section' => '§1.5.2', ...],
+    'totalCount' => 6,
+],
+```
+
+Every figure is a string or an int from the config; no Eloquent model crosses the wire.
+
+### What is deliberately not built
+
+Per the design brief's "does not apply" list, stated so a reviewer can check the boundary: no
+recommendation, no confidence, no risk, no chart, no primary action, no Expert-mode toggle, no
+modal. The drawer is §32's detail pattern, not §31's modal. No scenario visual language is
+borrowed — the Shop Items view draws the corpus table, not §28's Trackblazer panel.
+
+### Tests
+
+`DatabaseTest` gains: the hub has **8** areas and no deferred section; `Database/Events` with
+10 rows, the first named, a server list, and one row carrying `unknown`; `Database/ShopItems`
+with 10 rows, the reused Trackblazer block present with its **19** config items, and a `currency`
+row; `Database/Sparks` with 6 categories summing to 806 and the three-row odds table.
+
+`database.spec.ts` gains: each view renders its heading and rows; the provenance badge's
+accessible name is read with `getByRole('img', { name })` and never `toHaveText`; a drawer
+opens on row click and returns focus to the row on close; the 44 px sweep on `main a, main
+button`; 320 px reflow; the empty-state copy is present in the markup.
+
+### Acceptance
+
+`php artisan test --compact` green; Pint, PHPStan L6, `npm run typecheck`, `npm run build`,
+`npm run test:browser` green; `composer lore` + `composer lore-code` clean on the new files
+with a ruling per hit. Committed on explicit pathspecs only (KI-70); the E1–E6 career files
+stay untouched.
+
+### Open questions for the owner
+
+1. **Should the 68 unexplained `other` records be surfaced?** The doc counts them and says no page
+   explains them. Rendering a row for them would be honest (a count with an `Unknown` badge) but the
+   brief does not ask for it. Left out, stated here. **Ruled 2026-10-08 by the owner: closed by a named
+   absence in copy, not by a row.** `Sparks.vue` prints one muted line under the categories carrying the
+   guide's own sentence; the view's sum stays 806 because that is the described total, and the line says
+   the export holds more than that. No seventh category row and no invented badge, and no new screen id.
+2. **A future export snapshot would upgrade the provenance.** Written before the cross-check, so its
+   premise was wrong: `factors.json` and `items.json` ARE held on a developed machine, under the
+   gitignored `research-scratch/data/json/`. What is still owed is a *committed* snapshot of the subset
+   these views print, which is what would let the Sparks counts and the Shop Items effect strings move
+   from doc-cited to export-cited with a `source_url` and a `fetched_at`. The config's `source` block is
+   where that lands. Until then the two `recheck` strings carry the 2026-10-08 read and its limits.
+
+
+### Tree state at hand-off, 2026-10-08 (measured, so the next session does not rediscover it)
+
+- `HEAD` is `7b04b6c` and `master` is **7 ahead of `origin/master`**, unpushed (the O-1 push gate is still
+  the owner's to lift). This slice's commit is the first to move `HEAD` since `b5d69be`.
+- Port 8127 carries **two** listeners, PIDs `30320` and `30528`. Neither belongs to a committed slice, and
+  a `php -S` on that port is what every session's Playwright config reuses. Per KI-73 its owner reaps it;
+  this slice did not kill either listener and ran its browser gate against the one that answered `200`.
+- The dev database holds **12 `training_runs`** rows and **0 `veterans`**. Those runs are other sessions'
+  leaks, not this slice's: this slice writes no table at all, and its three views read `config/reference.php`
+  and `config/scenarios.php` only.
+- `app/Http/Controllers/PreferenceController.php` carries a peer's D18b work (138 uncommitted lines) plus one
+  import line that `pint --dirty` removed during this hand-off. It is not in this commit and must not be
+  reverted to undo that line. See KI-75.
+- `KNOWN-ISSUES.md` gained **KI-75** (Pint in a shared tree) and **KI-77** (the tracked route file importing
+  seven untracked controllers). KI-76 was taken between drafting and writing by another session's Vite-SSR
+  entry, which is also the mechanism behind this slice's `public/hot` harness failures; the numbering
+  collision is recorded inside KI-77 because the register has no duplicate-number check.
+- `public/hot` appears and disappears as sessions run `npm run dev`. The clean browser-harness state is **no
+  `public/hot` file** with `public/build/manifest.json` present: check the file and the Vite origin
+  (`curl -m 8 -o /dev/null -w '%{http_code}' http://127.0.0.1:5174/resources/js/spa.ts`) before reading a
+  180-second per-case timeout as a page defect.

@@ -629,6 +629,8 @@ The ten aptitude records are the two surfaces, four distances, and four running 
 
 **Sources:** ⚠️ STALE: Kamigame factor mechanics dated 2025-06-05, JP color names, star thresholds, scenario values: <https://kamigame.jp/umamusume/page/154134787475434233.html>; ⚠️ STALE: Umamusume Wiki Inspiration dated 2025-11-24, Global Spark names and payout table: <https://umamusu.wiki/Game:Inspiration>; `[A]` Game8 guide, 2026-08-24, four color families on Global: <https://game8.co/games/Umamusume-Pretty-Derby/archives/536822>; `[B]` `factors.json` (categories blue, pink, skill, race, scenario, other with the counts above)
 
+**Erratum, 2026-10-08 (counts, re-checked for the Database Sparks view, `SCR-SYS-010`).** The table above carries six rows and states no total; its `Export records` column sums to **806**. Read against `research-scratch/data/json/factors.json` on 2026-10-08 (gitignored, 874 records in six buckets), five of the six figures are cells in that file exactly: `blue` 5, `pink` 10, `skill` 452, `race` 37, `scenario` 34. The sixth is not. That file's sixth bucket is `other`, holding 336 records: the table prints 268 of them as the Unique skill category, and the paragraph above names the remaining **68** as counted but not described, so 268 + 68 accounts for the bucket exactly. The 268 is therefore a reading of part of `other`, not a bucket of that name. What the table cannot say on its own is that 806 is the *described* total while the export holds 874, and a reader adding the column cannot recover the difference; the shipped view prints it. Stated plainly for the next re-check: **the export carries 874 records across six buckets, the guide's six described categories sum to 806, and the difference is the 68 sitting in `other`.**
+
 #### 1.5.3 Star ratings and the ceilings parents face
 
 Factors carry 1 to 3 stars and three is the ceiling; more stars mean larger payouts and better trigger odds `[Both]`. The count is rolled from the run's results, never chosen, and the published `[Global]` odds for a stat factor follow the final value of that stat:
@@ -809,6 +811,8 @@ Spendable items are not support effects, and the two are conflated constantly in
 ⚠️ **Spend-site error to avoid:** the mood, weather and gate items above are **Team Trials** (`[JP]` チーム競技場) and **Daily Races** consumables. Guides routinely place them in **Champions Meeting**, which publishes no such item path (1.6.2, 1.6.4). ❌ **`"Special Katsu Curry"` appears in no Global item list found**; treat it as not-Global rather than as a hidden Energy item.
 
 **Sources:** [game8.co Global item list, 2026-07-14](https://game8.co/games/Umamusume-Pretty-Derby/archives/538152); [game8.co consumables list, 2026-07-13](https://game8.co/games/Umamusume-Pretty-Derby/archives/543018); [game8.co Cleat exchange, 2026-03-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/543930); [game8.co Statue Exchange, 2026-03-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/542870); [Game8 JP item list, 2026-09-15](https://game8.jp/umamusume/418448); [Game8 JP Cleat shop, 2025-11-20](https://game8.jp/umamusume/419913); data export `items.json` ids 48 to 50, 97, 116 to 120, 144 to 150, 159, 168, 195, 268 with `[Global]` `name_en` / `desc_en` (tier B, fetched 2026-09-27).
+
+**Erratum, 2026-10-08 (row count, re-checked for the Database Shop Items view, `SCR-SYS-009`).** This section states no count. Its table holds **eight** rows, and its prose names two further items the table omits: the Goddess Statue, marked pure currency above, and the Cleat, which §7's disposition line records as this section's own currency item. Read as one reference list that is **ten** rows, four of them a single client item and six of them labels over a pair or a tier set. Checked against `research-scratch/data/json/items.json` on 2026-10-08 (gitignored, 205 records): the four single items match a client name there exactly, and the six grouped labels cannot, because each covers several records. The count is recorded here so a re-read does not have to recount it; no item's effect string changed.
 
 ## Section 2: Scenario Strategies and Mechanics, `[Global]`
 
@@ -2102,6 +2106,8 @@ Lore note for this subsection: the character data in these exports contains a `r
 **How to re-check (4.4).** Official pages: `https://umamusume.jp/news/?t=game` for JP editions and `https://umamusume.com/news/` for Global editions. Wiki pages: re-download the same event exports (`events__champions-meeting.json`, `events__story-events.json`, `events__legend-race.json`, `en/events/champions-meeting`) and diff the date columns, then confirm each new edition name on `https://kamigame.jp/umamusume/`.
 
 ---
+
+**Erratum, 2026-10-08 (row count, re-checked for the Database Events view, `SCR-SYS-008`).** The table above holds **ten** rows and the section states no total. A downstream brief read it as nine and dropped *Story-unlock campaign*, the last row; the count is recorded here so a re-read does not have to recount it. No row's server status, cadence, mechanism summary or source tier is changed by this note.
 
 ### 4.6. Live-ops refresh, 2026-10-05: the whole Global archive, read through the API
 
