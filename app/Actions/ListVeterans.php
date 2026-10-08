@@ -56,9 +56,11 @@ final class ListVeterans
         }
 
         // Every named tag must be present: a Veteran tagged Mile and Turf matches both, and the filters
-        // narrow rather than widen as more are chosen.
+        // narrow rather than widen as more are chosen. Matched case-insensitively against the folded
+        // twin, because SQLite's `whereJsonContains` compares JSON strings exactly and the chips the
+        // Trainer clicks carry a casing a hand-typed tag may not (KI-72).
         foreach ($tags as $tag) {
-            $query->whereJsonContains('tags', $tag);
+            $query->whereJsonContains('tags_normalized', mb_strtolower($tag));
         }
 
         // The toggle orders by the row's own id, which is the order the library recorded them in. It is

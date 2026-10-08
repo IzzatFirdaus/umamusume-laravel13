@@ -146,6 +146,27 @@ it('excludes a non-matching Veteran when a tag it does not carry is filtered on'
         ->and($ids)->not->toContain($longStamina->id);
 });
 
+it('answers a hand-typed tag through any casing via the folded twin, and keeps the typed spelling', function (): void {
+    $run = TrainingRun::factory()->state(['status' => RunStatus::Completed])->create();
+
+    $this->post(route('runs.veteran.store', $run), ['tags' => ['speed', 'Front Runner']])->assertSessionHasNoErrors();
+
+    $veteran = Veteran::query()->where('training_run_id', $run->id)->sole();
+
+    // The chips keep exactly what the Trainer typed (KI-72)...
+    expect($veteran->tags)->toBe(['speed', 'Front Runner'])
+        // ...while the twin is the folded list the filter matches against.
+        ->and($veteran->tags_normalized)->toBe(['speed', 'front runner']);
+
+    // The library's suggestion is capitalised and the lowercase tag still answers it, in both
+    // directions. Before the twin, `Speed` found nothing and the row disagreed with its own chip.
+    foreach (['Speed', 'speed', 'FRONT RUNNER', 'front runner'] as $filter) {
+        $found = (new ListVeterans)->handle(['tags' => [$filter]])->getCollection()->pluck('id')->all();
+
+        expect($found)->toBe([$veteran->id], "filter '{$filter}' did not find the row");
+    }
+});
+
 it('returns the whole library when no filter is given', function (): void {
     Veteran::factory()->count(3)->create();
 

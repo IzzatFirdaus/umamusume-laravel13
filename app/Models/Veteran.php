@@ -19,17 +19,23 @@ use Illuminate\Support\Carbon;
  * record — is read back through `trainingRun()` from the run that recorded it. Nothing is derived and
  * nothing is computed here; the computation ban is FR-G-4 and ADR-0020 §3.
  *
+ * The stored `tags` are the Trainer's spelling, unmodified. `tags_normalized` is their case-folded
+ * twin and exists only so the library's tag filter can match either casing (KI-72); it is written by
+ * `RecordVeteran` beside the tags, never by a Trainer.
+ *
  * @property int $id
  * @property int $training_run_id
  * @property array<array-key, mixed>|null $tags the Trainer's own facets, a flat list of strings
  *                                              (design-2.0 SCREEN-020's suggested tag vocabulary);
  *                                              null when they tagged nothing
+ * @property array<array-key, mixed>|null $tags_normalized the same list folded to lowercase, the
+ *                                                     column the tag filter matches (KI-72)
  * @property string|null $notes
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read TrainingRun $trainingRun
  */
-#[Fillable(['training_run_id', 'tags', 'notes'])]
+#[Fillable(['training_run_id', 'tags', 'tags_normalized', 'notes'])]
 class Veteran extends Model
 {
     /** @use HasFactory<VeteranFactory> */
@@ -65,6 +71,7 @@ class Veteran extends Model
     {
         return [
             'tags' => 'array',
+            'tags_normalized' => 'array',
         ];
     }
 }
