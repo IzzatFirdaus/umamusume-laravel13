@@ -189,6 +189,37 @@ it('round-trips the six-node payload through the draft and reads it back on the 
     expect(TrainingRun::count())->toBe(Veteran::count());
 });
 
+it('discards only the semantically empty Spark rows and keeps every real one (D2)', function (): void {
+    // The editor appends an empty trailing row on `Add Spark` (kind only, no target, no stars). Posted
+    // as-is it used to be stored as a real Spark: the audit found a bare `Blue` with no target and no
+    // stars on the Preflight contract, and the dev database holds exactly that phantom on run 8.
+    $fixture = wizardFixture();
+    SetupDraft::write(['umamusume_id' => $fixture['trainee']->id]);
+
+    $this->put(route('career.legacy.store'), draftLegacyPayload([
+        'legacies' => [
+            array_merge(draftLegacyPayload()['legacies'][0], ['sparks' => [
+                ['kind' => 'blue', 'target' => 'Power', 'stars' => 1],
+                // The blank trailing row the editor adds.
+                ['kind' => 'blue', 'target' => null, 'stars' => null],
+                // A blank row left between two real ones is the same draft row, posted as `''`.
+                ['kind' => 'pink', 'target' => '', 'stars' => null],
+                // A half-read Spark is real data: it has a target and the stars may come later.
+                ['kind' => 'pink', 'target' => 'Late Surger', 'stars' => null],
+                // A star count with no target is still something the Trainer read.
+                ['kind' => 'green', 'target' => null, 'stars' => 2],
+            ]]),
+            draftLegacyPayload()['legacies'][1],
+        ],
+    ]))->assertRedirect(route('career.legacy'));
+
+    $sparks = LegacySelectionPayload::fromArray(SetupDraft::legacySelection())->legacies[0]['sparks'];
+
+    expect($sparks)->toHaveCount(3)
+        ->and(array_column($sparks, 'target'))->toBe(['Power', 'Late Surger', null])
+        ->and(array_column($sparks, 'stars'))->toBe([1, null, 2]);
+});
+
 it('refuses an unknown parent, a half-filled node and an off-dictionary Spark, leaving the draft untouched', function (): void {
     $fixture = wizardFixture();
     SetupDraft::write(['umamusume_id' => $fixture['trainee']->id]);

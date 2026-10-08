@@ -98,7 +98,7 @@ const saving = (): void => {
             ...legacy,
             legacy_id: legacy.legacy_id === '' ? null : Number(legacy.legacy_id),
             rank: legacy.rank === '' ? null : Number(legacy.rank),
-            sparks: legacy.sparks.map((spark) => ({
+            sparks: legacy.sparks.filter((spark) => !isBlankSpark(spark)).map((spark) => ({
                 kind: spark.kind,
                 target: spark.target === '' ? null : spark.target,
                 stars: spark.stars === '' ? null : Number(spark.stars),
@@ -134,13 +134,23 @@ function removeSpark(index: number, sparkIndex: number): void {
 }
 
 /**
+ * A draft row the Trainer added and left blank. The editor appends one on `Add Spark`, and it is not a
+ * Spark until it carries a target or a star count: the server discards the same shape
+ * (`StoreLegacySelectionRequest::payload()`), and this keeps the chip list and the posted payload honest
+ * while it is still a draft.
+ */
+function isBlankSpark(spark: SparkDraft): boolean {
+    return spark.target === '' && spark.stars === '';
+}
+
+/**
  * The chips a node shows are the rows in the form, so a Spark reads the same while it is being typed as it
  * does once saved. `kind_label` comes from the server map for a stored Spark and from the kind's own word
  * for one being added now; either way `SparkChip` spells the kind in words beside its star count, so
  * nothing is carried by colour alone (WCAG 1.4.1).
  */
 const nodeSparks = (index: number): SparkRow[] =>
-    form.legacies[index].sparks.map((spark) => ({
+    form.legacies[index].sparks.filter((spark) => !isBlankSpark(spark)).map((spark) => ({
         kind: spark.kind,
         kind_label: props.sparkKinds[spark.kind] ?? spark.kind,
         target: spark.target === '' ? null : spark.target,

@@ -170,11 +170,19 @@ class StoreLegacySelectionRequest extends FormRequest
             $postedSparks = (array) ($legacy['sparks'] ?? []);
 
             foreach ($postedSparks as $spark) {
-                $sparks[] = [
-                    'kind' => (string) $spark['kind'],
-                    'target' => $spark['target'] === null ? null : (string) $spark['target'],
-                    'stars' => isset($spark['stars']) ? (int) $spark['stars'] : null,
-                ];
+                $target = $spark['target'] === null || $spark['target'] === '' ? null : (string) $spark['target'];
+                $stars = isset($spark['stars']) ? (int) $spark['stars'] : null;
+
+                // The editor appends an empty trailing row on `Add Spark`, and a blank row left between two
+                // real ones is the same draft row. A Spark carries at least a target or a star count, so a
+                // row with neither is discarded here rather than stored as the bare kind the audit found on
+                // the Preflight contract. This is the write boundary; the reader still holds a half-read
+                // Spark, which is a real state (`ADR-0010` Consequences §3).
+                if ($target === null && $stars === null) {
+                    continue;
+                }
+
+                $sparks[] = ['kind' => (string) $spark['kind'], 'target' => $target, 'stars' => $stars];
             }
 
             $legacies[] = [
