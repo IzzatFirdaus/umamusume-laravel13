@@ -36,6 +36,34 @@ class SupportCardController extends Controller
 {
     public function index(SupportCardSearchRequest $request): Response
     {
+        return $this->renderPage('SupportCards/Index', $this->indexProps($request));
+    }
+
+    /**
+     * The same support-card catalog as the Database hub's Supports area (SCREEN-023, plan §8 D17).
+     * Same query, same row mapper, shared rather than redirected: the slice brief refuses a redirect
+     * here because no owner ruling authorises one. The pager keeps the request's own path.
+     */
+    public function databaseIndex(SupportCardSearchRequest $request): Response
+    {
+        return $this->renderPage('Database/Supports', $this->indexProps($request));
+    }
+
+    /**
+     * @param  array<string, mixed>  $props
+     */
+    private function renderPage(string $page, array $props): Response
+    {
+        return Inertia::render($page, $props);
+    }
+
+    /**
+     * The catalog page's data, shared by `index()` and `databaseIndex()`.
+     *
+     * @return array<string, mixed>
+     */
+    private function indexProps(SupportCardSearchRequest $request): array
+    {
         $rarity = $request->validated('rarity');
         $type = $request->validated('type');
         $status = $request->validated('status');
@@ -71,7 +99,7 @@ class SupportCardController extends Controller
                 'effects' => SupportCardEffects::atCap($card, $dictionary),
             ]);
 
-        return Inertia::render('SupportCards/Index', [
+        return [
             'cards' => $cards,
             'rarity' => $rarity,
             'type' => $type,
@@ -83,7 +111,7 @@ class SupportCardController extends Controller
             'sorts' => $this->sortLabels(),
             'totalCount' => SupportCard::query()->count(),
             'askedFor' => $this->describeAsk($rarity, $type, $status),
-        ]);
+        ];
     }
 
     /**

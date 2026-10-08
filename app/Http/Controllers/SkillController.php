@@ -45,6 +45,35 @@ class SkillController extends Controller
      */
     public function index(SkillSearchRequest $request): Response|RedirectResponse
     {
+        return $this->renderPage('Skills/Index', $this->indexProps($request));
+    }
+
+    /**
+     * The same skill search as the Database hub's Skills area (SCREEN-023, plan §8 D17). One query
+     * and one props array, shared rather than re-asked of a redirect: the slice brief refuses a
+     * redirect here because no owner ruling authorises one. The pager keeps the request's own path,
+     * so the Database URL pages within itself.
+     */
+    public function databaseIndex(SkillSearchRequest $request): Response|RedirectResponse
+    {
+        return $this->renderPage('Database/Skills', $this->indexProps($request));
+    }
+
+    /**
+     * @param  array<string, mixed>  $props
+     */
+    private function renderPage(string $page, array $props): Response
+    {
+        return Inertia::render($page, $props);
+    }
+
+    /**
+     * The search page's data, shared by `index()` and `databaseIndex()`.
+     *
+     * @return array<string, mixed>
+     */
+    private function indexProps(SkillSearchRequest $request): array
+    {
         $perPage = min(100, max(1, (int) ($request->query('pageSize') ?? 25)));
 
         $search = $request->validated('search');
@@ -63,7 +92,7 @@ class SkillController extends Controller
                 'sp_cost' => $skill->sp_cost,
             ]);
 
-        return Inertia::render('Skills/Index', [
+        return [
             'skills' => $skills,
             'search' => $search,
             'searchKey' => $search === null ? null : $this->normalizer->normalize($search),
@@ -73,7 +102,7 @@ class SkillController extends Controller
             'unique' => $request->boolean('unique'),
             'totalCount' => $this->availableCount(),
             'askedFor' => $this->describeAsk($search, $type, $request->boolean('unique')),
-        ]);
+        ];
     }
 
     /**

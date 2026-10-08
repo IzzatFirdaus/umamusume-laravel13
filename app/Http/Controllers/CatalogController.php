@@ -52,6 +52,40 @@ class CatalogController extends Controller
      */
     public function index(CatalogSearchRequest $request, NameNormalizer $normalizer, ArtworkMirror $mirror): Response|RedirectResponse
     {
+        return $this->renderPage('Catalog/Index', $this->indexProps($request, $normalizer, $mirror, route('catalog.index')));
+    }
+
+    /**
+     * The same roster tree as the Database hub's Trainees area (SCREEN-023, plan §8 D17).
+     *
+     * One query, one row mapper, one props array: the two URLs render one screen, and the only
+     * difference is the page name and the path the pager and the filter form write back to. A redirect
+     * was the smaller diff and it is refused by the slice brief, because no owner ruling authorises
+     * one, so the body is shared instead of the URL being borrowed. The `path` argument keeps the
+     * pager links and the form's own address on the page a Trainer is standing on, rather than on the
+     * URL this query was first written for.
+     */
+    public function databaseIndex(CatalogSearchRequest $request, NameNormalizer $normalizer, ArtworkMirror $mirror): Response|RedirectResponse
+    {
+        return $this->renderPage('Database/Trainees', $this->indexProps($request, $normalizer, $mirror, route('database.trainees')));
+    }
+
+    /**
+     * @param  array<string, mixed>  $props
+     */
+    private function renderPage(string $page, array $props): Response
+    {
+        return Inertia::render($page, $props);
+    }
+
+    /**
+     * The list page's data, shared by `index()` and `databaseIndex()`. See `index()` for the
+     * behaviour it states; the `$path` argument is the only argument that differs between them.
+     *
+     * @return array<string, mixed>
+     */
+    private function indexProps(CatalogSearchRequest $request, NameNormalizer $normalizer, ArtworkMirror $mirror, string $path): array
+    {
         $status = $request->validated('status');
         $search = $request->query('search');
         $page = max(1, (int) $request->query('page', '1'));
@@ -90,7 +124,7 @@ class CatalogController extends Controller
         // `withQueryString()` because the paginator is built by hand here: without it the
         // pager links carry a bare `?page=N` and paging silently reverts status, search
         // and the unconfirmed opt-in.
-        $umamusumes = (new LengthAwarePaginator($items, $total, $pageSize, $page, ['path' => route('catalog.index')]))
+        $umamusumes = (new LengthAwarePaginator($items, $total, $pageSize, $page, ['path' => $path]))
             ->withQueryString()
             ->through(static function (Umamusume $umamusume) use ($mirror): array {
                 // The badge and the form count both read the collection the card scope loaded,
@@ -134,7 +168,7 @@ class CatalogController extends Controller
                 ];
             });
 
-        return Inertia::render('Catalog/Index', [
+        return [
             'umamusumes' => $umamusumes,
             'statuses' => collect(ReleaseStatus::cases())
                 ->map(static fn (ReleaseStatus $status): array => ['value' => $status->value, 'label' => $status->label()])
@@ -144,7 +178,7 @@ class CatalogController extends Controller
             'showAllStatus' => $showAllStatus,
             'showUnconfirmed' => $showUnconfirmed,
             'allStatusesLabel' => 'All statuses',
-        ]);
+        ];
     }
 
     /**

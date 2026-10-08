@@ -1,4 +1,12 @@
 <script setup lang="ts">
+/*
+ * The Database hub's Trainees area (SCREEN-023, plan §8 D17).
+ *
+ * The Umamusume catalog, on the Database URL. It renders the same shared list body the catalog index
+ * mounts, and the controller behind this route is `CatalogController::databaseIndex`, which runs that
+ * controller's own query. A redirect to `/umamusume` was the smaller diff and is refused by the slice
+ * brief, because no owner ruling authorises one.
+ */
 import AppLayout from '../../layouts/AppLayout.vue';
 import TraineeCatalog from '../../components/catalog/TraineeCatalog.vue';
 import { Head } from '@inertiajs/vue3';
@@ -46,8 +54,8 @@ const props = defineProps<{
 
 <template>
     <AppLayout>
-        <Head title="Umamusume catalog" />
-        <template #title>Database</template>
+        <Head title="Trainees" />
+        <template #title>Trainees</template>
 
         <TraineeCatalog
             :umamusumes="props.umamusumes"
@@ -57,7 +65,7 @@ const props = defineProps<{
             :show-all-status="props.showAllStatus"
             :show-unconfirmed="props.showUnconfirmed"
             :all-statuses-label="props.allStatusesLabel"
-            filter-path="/umamusume"
+            filter-path="/database/trainees"
         />
     </AppLayout>
 </template>

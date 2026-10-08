@@ -118,6 +118,58 @@ class Umamusume extends Model
     }
 
     /**
+     * The ten aptitude axes, in the order the trainee screens print them.
+     *
+     * On the model because these are the model's own ten columns. It is the first shared owner of the list,
+     * not the only copy: `CatalogController`, `Career\TraineeProfileController` and
+     * `Career\TraineeSelectController` each still map the axes by hand, `components/AptitudeGrid.vue` holds
+     * a fourth label list client-side, and `GametoraCharacterParser::APTITUDE_COLUMNS` fixes the ingest
+     * order. Folding those four in is a refactor across landed screens and their tests, so it is its own
+     * slice; two career screens reading one list is the reason it exists today.
+     *
+     * @var list<array{key: string, label: string}>
+     */
+    public const APTITUDE_AXES = [
+        // ponytail: display strings do not belong on a model; read these labels from `uma.terms.style_*`
+        // (`lang/en/uma.php`, their one owner) instead of holding them here.
+        ['key' => 'turf', 'label' => 'Turf'],
+        ['key' => 'dirt', 'label' => 'Dirt'],
+        ['key' => 'sprint', 'label' => 'Sprint'],
+        ['key' => 'mile', 'label' => 'Mile'],
+        ['key' => 'medium', 'label' => 'Medium'],
+        ['key' => 'long', 'label' => 'Long'],
+        ['key' => 'front_runner', 'label' => 'Front Runner'],
+        ['key' => 'pace_chaser', 'label' => 'Pace Chaser'],
+        ['key' => 'late_surger', 'label' => 'Late surger'],
+        ['key' => 'end_closer', 'label' => 'End closer'],
+    ];
+
+    /**
+     * The trainee's own ten letters, or nothing at all when the source published none.
+     *
+     * The empty arm is the whole point: a trainee with no published aptitudes is not a trainee with ten
+     * unknown letters, and printing ten `N/A` cells would report a fact the source never stated. The caller
+     * gets `[]` and says so once.
+     *
+     * @return list<array{key: string, label: string, letter: string|null}>
+     */
+    public function aptitudeAxes(): array
+    {
+        if ($this->aptitude_turf === null) {
+            return [];
+        }
+
+        return array_map(
+            fn (array $axis): array => [
+                'key' => $axis['key'],
+                'label' => $axis['label'],
+                'letter' => $this->{'aptitude_'.$axis['key']},
+            ],
+            self::APTITUDE_AXES,
+        );
+    }
+
+    /**
      * @return HasMany<DataSource, $this>
      */
     public function dataSources(): HasMany

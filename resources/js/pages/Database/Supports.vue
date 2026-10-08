@@ -1,4 +1,11 @@
 <script setup lang="ts">
+/*
+ * The Database hub's Supports area (SCREEN-023, plan §8 D17).
+ *
+ * The support-card catalog, on the Database URL. The same shared list body the catalog mounts, behind
+ * `SupportCardController::databaseIndex`. See `Trainees.vue` for why this is a shared screen rather
+ * than a redirect to `/support-cards`.
+ */
 import AppLayout from '../../layouts/AppLayout.vue';
 import SupportCardCatalog from '../../components/support/SupportCardCatalog.vue';
 import { Head } from '@inertiajs/vue3';
@@ -45,8 +52,8 @@ const props = defineProps<{
 
 <template>
     <AppLayout>
-        <Head title="Support cards" />
-        <template #title>Support cards</template>
+        <Head title="Support Cards" />
+        <template #title>Support Cards</template>
 
         <SupportCardCatalog
             :cards="props.cards"
@@ -60,7 +67,7 @@ const props = defineProps<{
             :sorts="props.sorts"
             :total-count="props.totalCount"
             :asked-for="props.askedFor"
-            filter-path="/support-cards"
+            filter-path="/database/supports"
         />
     </AppLayout>
 </template>

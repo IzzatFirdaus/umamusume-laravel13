@@ -141,10 +141,30 @@ test('leaves the Identity section text-only when the mirror holds no file', asyn
     await page.goto('/umamusume/special-week');
     await page.locator('#app > *').first().waitFor();
 
-    // Absence is a normal state (`DESIGN.md` §4.7): no frame, and nothing that would draw a box
-    // where one could have been.
-    await expect(page.locator('section[aria-labelledby="basic-information"] img')).toHaveCount(0);
+    const section = page.locator('section[aria-labelledby="basic-information"]');
+    const frame = section.locator('img');
+
+    // An empty `src` is the one shape §4.7 never allows, and it is a fact about this screen rather
+    // than about the disk, so it is asserted whatever the mirror holds.
     await expect(page.locator('img[src=""]')).toHaveCount(0);
+
+    // Whether this trainee has a frame is a property of the disk, not of the screen: `uma:fetch-art
+    // --dry-run` reports 106 of 106 `card_portrait` ids already on disk on this tree, so the case may
+    // not assume either state (`AGENTS.md` §18's empty-mirror note, from the other side;
+    // `support-deck.spec.ts` settled the same question for the picker's thumbnails). Each branch
+    // therefore asserts its own shape rather than skipping, and the absent-file path itself is proven
+    // server-side by `CatalogDetailArtworkSlotTest`.
+    if ((await frame.count()) === 0) {
+        // Absence is a normal state (`DESIGN.md` §4.7): no frame, and nothing that would draw a box
+        // where one could have been.
+        await expect(section.locator('img')).toHaveCount(0);
+    } else {
+        // A populated mirror takes the other branch: the frame is decorative and carries no anchor,
+        // which is the defect the port replaced (an unnamed focusable link around a blanked image).
+        await expect(frame.first()).toHaveAttribute('alt', '');
+        await expect(frame.first()).toHaveAttribute('src', /\/artwork\/card_portrait\/\d+$/);
+        await expect(section.locator('a img')).toHaveCount(0);
+    }
 
     // And the section still reads: the heading and the page name are what the screen is for.
     await expect(page.getByRole('heading', { name: 'Basic information' })).toBeVisible();
