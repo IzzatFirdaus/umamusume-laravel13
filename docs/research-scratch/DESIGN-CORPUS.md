@@ -4288,6 +4288,12 @@ second representative is `Screenshot 2026-07-17 235511.png`. The row is left sta
 line; this erratum is the correction. Reproducer: `ls docs/game-screenshots/ | grep 235511` returns
 exactly one name, `Screenshot 2026-07-17 235511.png`.
 
+**Same defect, second occurrence, one correction.** The Screen inventory's `S9` row (`### 2. Screen
+inventory`, line 3879 at this writing) writes the pair as `Screenshot 2026-07-18 000919.png`,
+`.../235511.png`, and the `.../` inherits the same wrong date. Read literally it names the same
+non-existent file; it means `Screenshot 2026-07-17 235511.png`, and the line above is left standing for
+it too. (KI-57, folded 2026-10-08 on the owner's instruction rather than filed as a sibling.)
+
 ### Facility activity names observed
 
 Extracted from the discipline banner across the montage. **Scope of the claim, corrected 2026-09-27:** every frame that shows one of these names is a **Unity Cup** frame (see the coverage table, which records zero Trackblazer and zero Our Grand Concert training HUDs). So the list evidences that activity names vary **per facility within Unity Cup**, and that the banner carries them. It does **not** evidence that facility layouts differ *between* scenarios — that comparison is not available on this corpus, and this file's own methodology line says so. Any artifact that cited these six names as cross-scenario evidence was over-reading a single scenario's data; the claim is corrected in `CONSTRAINTS.md` D-187 and `DESIGN.md` §6.4b and §6.22, and the rule D-187 states (a banner without its activity line is incomplete) is unaffected.
