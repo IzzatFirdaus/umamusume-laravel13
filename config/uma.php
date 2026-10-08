@@ -139,6 +139,25 @@ return [
          */
         'gametora-race-catalog' => [
             'url' => 'https://gametora.com/data/umamusume/race_instances.294424fc.json',
+            /*
+             * KI-67. The pin above matched the manifest when this entry was reviewed and was
+             * withdrawn at the publisher's next republish — the exact stale-pin failure the
+             * `ADR-0011` scope note predicted: `race_instances.294424fc.json` now answers 404,
+             * so a pinned-only entry cannot refresh the career calendar at all. The resolution
+             * route is the one already approved for `gametora-skills` above, re-used rather than
+             * re-argued: the hash comes from the publisher's manifest per run, the pin stays as
+             * the documented fallback (`uma:reparse` runs with zero network and a manifest
+             * outage must not leave the source addressless), and the hash is shape-checked
+             * before it reaches a URL.
+             *
+             * Like skills, this source now issues two requests per fetch, inside the same
+             * politeness bounds (`delay_ms` is waited per request, not per fetch).
+             */
+            'manifest' => [
+                'url' => 'https://gametora.com/data/manifests/umamusume.json',
+                'base' => 'https://gametora.com/data/umamusume/',
+                'key' => 'race_instances',
+            ],
             'parser' => GametoraRaceCatalogParser::class,
             'delay_ms' => 1000,
             'timeout_s' => 15,

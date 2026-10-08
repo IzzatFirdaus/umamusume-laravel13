@@ -6,6 +6,9 @@ use App\Models\MatchCandidate;
 use App\Models\RaceCatalogSlot;
 use App\Services\DataPipeline\Parsers\GametoraRaceCatalogParser;
 use App\Services\DataPipeline\PipelineRunner;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * A three-row slice of `race_instances`: two Classic slots and one Senior
@@ -48,12 +51,17 @@ function raceCatalogSourceConfig(array $overrides = []): array
     return [...$declared, ...$overrides];
 }
 
-it('is declared as a fetch source with the race-catalog parser', function (): void {
-    expect(config('uma.sources.gametora-race-catalog'))->toMatchArray([
-        'url' => 'https://gametora.com/data/umamusume/race_instances.294424fc.json',
-        'timezone' => 'Asia/Tokyo',
-    ])->and(config('uma.sources.gametora-race-catalog.parser'))
-        ->toBe(GametoraRaceCatalogParser::class);
+it('is declared as a fetch source with the race-catalog parser and a manifest block', function (): void {
+    expect(config('uma.sources.gametora-race-catalog.timezone'))->toBe('Asia/Tokyo')
+        ->and(config('uma.sources.gametora-race-catalog.parser'))
+        ->toBe(GametoraRaceCatalogParser::class)
+        ->and(config('uma.sources.gametora-race-catalog.manifest.key'))->toBe('race_instances')
+        ->and(config('uma.sources.gametora-race-catalog.manifest.base'))->toBe('https://gametora.com/data/umamusume/')
+        ->and(config('uma.sources.gametora-race-catalog.manifest.url'))->toBe('https://gametora.com/data/manifests/umamusume.json')
+        // The withdrawn pin stays declared: it is what `uma:reparse` and a manifest outage fall
+        // back to, and KI-67 records why the manifest leg exists at all.
+        ->and(config('uma.sources.gametora-race-catalog.url'))
+        ->toBe('https://gametora.com/data/umamusume/race_instances.294424fc.json');
 });
 
 it('routes a race-catalogue source to the writer, not to character matching', function (): void {
@@ -154,4 +162,40 @@ it('stores the export decodings the grid and picker depend on', function (): voi
         'fans_needed' => 5000,
         'is_mandatory' => false,
     ])->and($nhk->hasKnownFanGain())->toBeTrue();
+});
+
+it('resolves the document URL through the manifest and records that resolved URL', function (): void {
+    Storage::fake('local');
+    config(['uma.sources.gametora-race-catalog.delay_ms' => 0]);
+
+    Http::preventStrayRequests();
+    Http::fake([
+        'gametora.com/data/manifests/umamusume.json' => Http::response(['race_instances' => 'abcd1234']),
+        'gametora.com/data/umamusume/race_instances.abcd1234.json' => Http::response(raceCatalogFixture(), 200),
+    ]);
+
+    $this->artisan('uma:fetch', ['source' => 'gametora-race-catalog'])->assertExitCode(0);
+
+    Http::assertSent(fn (Request $r): bool => str_contains($r->url(), 'race_instances.abcd1234.json'));
+
+    // Provenance carries the document actually fetched, not the withdrawn pin declared in config.
+    expect(RaceCatalogSlot::where('title', 'Oka Sho')->where('year', 2)->value('source_url'))
+        ->toBe('https://gametora.com/data/umamusume/race_instances.abcd1234.json');
+});
+
+it('uses the pinned URL when the manifest itself will not answer', function (): void {
+    Storage::fake('local');
+    config(['uma.sources.gametora-race-catalog.delay_ms' => 0]);
+
+    Http::preventStrayRequests();
+    Http::fake([
+        'gametora.com/data/manifests/umamusume.json' => Http::response('', 500),
+        'gametora.com/data/umamusume/race_instances.294424fc.json' => Http::response(raceCatalogFixture(), 200),
+    ]);
+
+    $this->artisan('uma:fetch', ['source' => 'gametora-race-catalog'])->assertExitCode(0);
+
+    expect(RaceCatalogSlot::count())->toBe(3)
+        ->and(RaceCatalogSlot::where('title', 'Oka Sho')->where('year', 2)->value('source_url'))
+        ->toBe('https://gametora.com/data/umamusume/race_instances.294424fc.json');
 });
