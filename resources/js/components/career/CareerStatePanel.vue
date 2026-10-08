@@ -8,14 +8,16 @@
  * question nobody asked. The bar is `aria-hidden` and the numbers are printed beside it, so nothing
  * here is a value carried by a fill alone (SCREEN-009 §34, WCAG 1.4.1).
  *
- * An unrecorded value renders `N/A` with a `title` naming what is missing, never a zero and never a
- * dash (AGENTS.md §5, D-220). A run with no target set has no target bar, and says so in words rather
- * than drawing an empty track that reads as "at zero".
+ * An unrecorded value is `AbsenceValue`'s: the marker plus its reason, which a keyboard and a screen
+ * reader can both reach. It used to be `N/A` with a `title`, and a `title` answers a mouse only
+ * (`DESIGN.md` §5). A zero is still printed as `0`, never as an absence, and a run with no target set has
+ * no target bar and says so in words rather than drawing an empty track that reads as "at zero".
  *
  * StatBand was deliberately not reused here. Its bar is the scenario ceiling with the 1,200
  * halved-gains marker, which is the run record screen's question; giving it a second, target-shaped
  * meaning would change a landed component's contract for one caller.
  */
+import AbsenceValue from '../AbsenceValue.vue';
 import EnergyGauge from '../../components/EnergyGauge.vue';
 import MoodPill from '../../components/MoodPill.vue';
 
@@ -59,11 +61,13 @@ function percent(stat: Stat): number {
             <li v-for="stat in props.stats" :key="stat.key" class="rounded-md border border-rule bg-raised p-2">
                 <div class="flex items-baseline justify-between gap-3">
                     <span class="text-sm font-semibold text-ink-strong">{{ stat.label }}</span>
-                    <span class="font-mono text-sm tabular-nums text-ink-strong">
-                        <span :title="currentHint(stat)">{{ stat.current === null ? 'N/A' : group(stat.current) }}</span>
-                        <span class="text-ink-muted"> / </span>
-                        <span :title="targetHint(stat)">{{ stat.target === null ? 'N/A' : group(stat.target) }}</span>
-                    </span>
+                    <div class="flex items-baseline gap-1 font-mono text-sm tabular-nums text-ink-strong">
+                        <AbsenceValue v-if="stat.current === null" :reason="currentHint(stat)" compact />
+                        <span v-else>{{ group(stat.current) }}</span>
+                        <span class="text-ink-muted">/</span>
+                        <AbsenceValue v-if="stat.target === null" :reason="targetHint(stat)" compact />
+                        <span v-else>{{ group(stat.target) }}</span>
+                    </div>
                 </div>
 
                 <div v-if="stat.current !== null && stat.target !== null" class="mt-1.5 h-1.5 overflow-hidden rounded bg-sunken" aria-hidden="true">
@@ -81,13 +85,13 @@ function percent(stat: Stat): number {
                 <dd class="mt-1 text-sm text-ink-strong">
                     <EnergyGauge v-if="row.key === 'energy'" :energy="row.value as number | null" />
                     <MoodPill v-else-if="row.key === 'mood'" :tier="row.value as string | null" unrecorded="N/A, not recorded" />
-                    <span
-                        v-else
+                    <AbsenceValue
+                        v-else-if="row.value === null"
                         class="font-mono tabular-nums"
-                        :title="row.value === null ? `${row.label} has not been recorded for this run.` : undefined"
-                    >
-                        {{ row.value === null ? 'N/A' : group(row.value as number) }}
-                    </span>
+                        :reason="`${row.label} has not been recorded for this run.`"
+                        compact
+                    />
+                    <span v-else class="font-mono tabular-nums">{{ group(row.value as number) }}</span>
                 </dd>
             </div>
         </dl>

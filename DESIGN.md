@@ -562,6 +562,21 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   the form enforces.
 - Timestamps: always `display_timezone`, always with zone suffix; date-only
   values never render a time (PRD US-7).
+- **An absence states its reason where a keyboard and a screen reader can reach it.**
+  `N/A` carrying only a `title` was the shipped idiom, and a `title` is reachable with a mouse and by
+  nothing else, so the reason behind an absence — the half that tells a Trainer whether to go and enter a
+  reading or to stop looking — was unavailable to everyone else. `components/AbsenceValue.vue` is the
+  pattern: the marker is a native `<details>` whose summary carries the reason as its accessible name, so
+  it is one statement in two media and opens for a sighted keyboard user with no script. A caller that
+  already prints the reason as visible prose beside the marker keeps doing that and needs no component.
+  `compact` is the dense-row form at 24px, WCAG 2.2 SC 2.5.8's floor, against the house 44px for a
+  primary control (§12). Recorded 2026-10-08: the pattern is shipped and the migration is partial, with
+  the migrated screens named in `SCREEN_SPEC.md` and the remaining ones counted there.
+- **Absences are worded by kind, and the component does not decide the kind.** "not recorded" is the
+  Trainer's own gap, "no source" is the corpus's, and a held computation is the product's refusal; the
+  caller owns its sentence and passes it through. This is deliberately not the unresolved provenance
+  vocabulary question — that one is recorded in `PRODUCT.md` under "Open" and stays the owner's, and
+  nothing here re-badges a figure.
 
 ## 6. Lore-sensitive design rules (hard gate)
 

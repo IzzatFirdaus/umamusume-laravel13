@@ -265,10 +265,12 @@ test('records Energy through the cockpit correction and then marks one action', 
     await correction.locator('input[name="energy"]').fill('60');
     await correction.getByRole('button', { name: 'Save correction' }).click();
 
-    // The header is the proof the write landed, and the proof it landed where the form was posted:
-    // a correction made on the Cockpit returns to the Cockpit rather than to the run screen.
-    const header = page.locator('section[aria-labelledby="career-header-heading"]');
-    await expect(header.getByText('60/100')).toBeVisible();
+    // The state panel is the proof the write landed, and the proof it landed where the form was posted:
+    // a correction made on the Cockpit returns to the Cockpit rather than to the run screen. Energy is
+    // read here rather than in the header because the header stopped printing the four readings on
+    // 2026-10-08; they are the state panel's, beside the stats the advisor ranks against.
+    const state = page.locator('section[aria-labelledby="career-state-heading"]');
+    await expect(state.getByText('60/100')).toBeVisible();
 
     // With Energy recorded, the advisor ranks: Speed carries the largest deficit, so it is the
     // recommendation, and exactly one entry carries the marker (Von Restorff, plan §13).
