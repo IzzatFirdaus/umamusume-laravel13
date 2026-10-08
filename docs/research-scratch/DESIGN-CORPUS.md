@@ -4281,6 +4281,13 @@ This is the section that matters for the comparative request, and the honest ans
 | NPC coaching bubble        | `025519`, `038100`, `038751`, `058814`, `194319`   | Unity Cup   | Green-clad staff avatar with white bubble; the advisory pattern                                                                                                                                          |
 | Inheritance select         | `121214`, `122453`                                 | Unity Cup   | Trainer Select / Legacy Select, `Affinity`                                                                                                                                                               |
 
+**Erratum, 2026-10-08 (KI-57).** The Race result / live row above elides its second representative as
+`235511`, inheriting `2026-07-18` from the first frame; read literally that names
+`Screenshot 2026-07-18 235511.png`, which is in no directory, no cluster and no signature record. The
+second representative is `Screenshot 2026-07-17 235511.png`. The row is left standing as the historical
+line; this erratum is the correction. Reproducer: `ls docs/game-screenshots/ | grep 235511` returns
+exactly one name, `Screenshot 2026-07-17 235511.png`.
+
 ### Facility activity names observed
 
 Extracted from the discipline banner across the montage. **Scope of the claim, corrected 2026-09-27:** every frame that shows one of these names is a **Unity Cup** frame (see the coverage table, which records zero Trackblazer and zero Our Grand Concert training HUDs). So the list evidences that activity names vary **per facility within Unity Cup**, and that the banner carries them. It does **not** evidence that facility layouts differ *between* scenarios — that comparison is not available on this corpus, and this file's own methodology line says so. Any artifact that cited these six names as cross-scenario evidence was over-reading a single scenario's data; the claim is corrected in `CONSTRAINTS.md` D-187 and `DESIGN.md` §6.4b and §6.22, and the rule D-187 states (a banner without its activity line is incomplete) is unaffected.
