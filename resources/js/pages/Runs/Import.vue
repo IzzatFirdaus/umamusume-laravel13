@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 interface Trainee {
@@ -48,7 +48,14 @@ const form = useForm({
     file: null as File | null,
 });
 
-const errors = computed(() => form.errors);
+// The form shows the merged bag: its own errors while the Trainer retries, and the shared page
+// errors after a refused write redirects back here — the commit posts with `router`, so its refusal
+// lands in the page props rather than in `form.errors`, and without them a refused import rendered
+// no message at all (KI-64).
+const errors = computed(() => ({
+    ...((usePage().props.errors ?? {}) as Record<string, string | undefined>),
+    ...form.errors,
+}));
 const statNames = ['speed', 'stamina', 'power', 'guts', 'wit'];
 
 function onFile(event: Event): void {
@@ -110,7 +117,17 @@ const scenarioName = computed(() => {
 });
 
 function confirmImport(): void {
-    router.post('/training-runs/import', props.preview?.run ?? {});
+    if (props.preview === null) {
+        return;
+    }
+
+    // Both halves of the file travel with the run's columns: the commit step re-runs the same Form
+    // Request the preview did, and `csv` and `turns` are what its rules require (KI-64).
+    router.post('/training-runs/import', {
+        ...props.preview.run,
+        csv: props.preview.csv,
+        turns: props.preview.turns,
+    });
 }
 </script>
 

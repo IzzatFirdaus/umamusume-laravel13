@@ -50,6 +50,20 @@ class ImportHistoricalRunRequest extends StoreTrainingRunRequest
     private const MAX_ROWS = 200;
 
     /**
+     * A refused submit returns to the import form, never to `back()`.
+     *
+     * `back()` resolves from the session's previous URL, and between the preview and the commit the
+     * most recent request is the preview POST itself, so a refused commit was redirected to
+     * `/training-runs/import/preview` — whose GET answers 405 — and the failure navigated nowhere,
+     * rendered no error and read as a button that does nothing (KI-64). The form is the one surface
+     * that can show the errors and the pasted body again (`old`), so both steps fail there.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return route('runs.import');
+    }
+
+    /**
      * Parse the CSV into `turns`, and normalise the two places where a real spreadsheet differs from this
      * app's own output: Excel writes a UTF-8 BOM, which would make the first header cell read as
      * "\xEF\xBB\xBFturn" and reject a file the app itself produced; and it writes CRLF line endings.

@@ -8,9 +8,13 @@ import { test, expect } from '@playwright/test';
 // per-stat messages ("A speed value is outside what this scenario allows:") and said the composite was
 // "not verified here: it needs a browser pass on the landed view". That pass is the ceiling test below.
 //
-// Nothing here completes a commit: the confirm step is reached and read, never posted, so no run is
-// written into the development database the browser suite shares. The write itself is proven in Pest,
-// where the database is per-test.
+// Nothing here used to complete a commit — the confirm step was reached and read, never posted — and
+// that gap was KI-64's silent half: the flow could not complete in a browser at all. The commit is
+// now exercised end to end by the last case below: preview a two-row sheet, press confirm, and
+// assert the redirect lands on the written run. That case writes a run, so it belongs on the
+// scratch-database harness (plan §4.1 item 7: `PLAYWRIGHT_BASE_URL` pointing at a private-port
+// server over a scratch copy, never the shared dev file). Pest still proves the write against a
+// per-test database; this proves the browser flow.
 //
 // Fixtures are the app's own seeded scratch database. `unity_cup` sets a speed ceiling of 1300, so a
 // row at 1400 is a ceiling break the scenario owns rather than a number invented for the test.
@@ -23,14 +27,17 @@ function csv(rows: string[]): string {
 
 const okRow = (turn: string): string => `${turn},600,400,300,250,200,40,,70,GOOD,1200`;
 
-async function fillForm(page: import('@playwright/test').Page, body: string): Promise<void> {
+async function fillForm(page: import('@playwright/test').Page, body: string): Promise<string> {
     const trainee = page.locator('select[name="umamusume_id"]');
-    const first = await trainee.locator('option').nth(1).getAttribute('value');
-    await trainee.selectOption(first ?? '');
+    const option = trainee.locator('option').nth(1);
+    const traineeName = ((await option.textContent()) ?? '').split('·')[0]?.trim() ?? '';
+    await trainee.selectOption((await option.getAttribute('value')) ?? '');
 
     await page.locator('select[name="scenario"]').selectOption('unity_cup');
     await page.locator('textarea[name="csv"]').fill(body);
     await page.getByRole('button', { name: 'Preview import' }).click();
+
+    return traineeName;
 }
 
 test('states the column list the export writes, so the paste target is checkable before typing', async ({ page }) => {
@@ -112,4 +119,22 @@ test('refuses a file the app never wrote, in the words that say what to fix', as
     await expect(
         page.getByText(/That file has no usable turn rows\. The first line must be the header:/)
     ).toBeVisible();
+});
+
+test('commits the previewed file: confirm writes the run and the page leaves the import URL', async ({ page }) => {
+    await page.goto('/training-runs/import');
+    await page.locator('#app > *').first().waitFor();
+
+    const traineeName = await fillForm(page, csv([okRow('1'), okRow('2')]));
+    await expect(page.getByRole('heading', { name: 'Confirm the import', level: 2 })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Import 2 turns' }).click();
+
+    // The commit redirects to the run's own page, and the URL leaving the import path is exactly the
+    // step KI-64 recorded as never reached: the POST used to omit the file body, get refused, and
+    // leave the page (and its visitor) sitting on the same URL with nothing said.
+    await page.waitForURL((url) => /\/training-runs\/\d+$/.test(url.pathname));
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(traineeName);
+    // The run's own provenance line names the pasted body, so the page read is the run just written.
+    await expect(page.getByText(/from pasted CSV \(/)).toBeVisible();
 });
