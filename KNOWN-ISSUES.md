@@ -1041,10 +1041,11 @@ also does not resolve the **numbering collision**: this KI-70 and the process ha
 renumber an existing entry, and renumbering this one would break the inbound `KI-70` anchors in the plan
 and in this file, so the collision is reported for the owner to settle rather than fixed by inference.
 
-### KI-71 The Grand Concert final is tagged with a scenario key no run carries - FILED 2026-10-07 (E5 hand-off), OPEN
+### KI-71 The Grand Concert final is tagged with a scenario key no run carries - FILED 2026-10-07 (E5 hand-off), FIXED IN TREE 2026-10-08, NOT CLOSED
 
-**Status: OPEN.** Not caused by E5 and not fixed by it. It is filed here because E5 reads the same career
-calendar D10 reads, and reading it whole is what made the mismatch visible.
+**Status: FIXED IN TREE, NOT CLOSED.** Not caused by E5 and not fixed by it. It is filed here because E5 reads
+the same career calendar D10 reads, and reading it whole is what made the mismatch visible. The fix below is
+uncommitted, so a checkout of `HEAD` still carries the defect.
 
 `app/Services/DataPipeline/Parsers/GametoraRaceCatalogParser.php` maps the export's `final_live` source key
 to `grand_concert`. `config/scenarios.php` keys the same scenario `our_grand_concert`, and that is the key
@@ -1077,6 +1078,52 @@ to retag the stored row, so it is filed rather than changed by inference.
 **What closure would not cover.** `race_catalog_slots` holds no `our_grand_concert` row today, so any screen
 that reads a scenario's own races stays one row short until that reparse runs. And the register's existing
 numbering collision (two entries numbered KI-70, recorded in the entry above) is untouched by this one.
+
+**Fixed in tree 2026-10-08 (Grand Concert Slice 2), parser side.** The two candidates were not equally
+weighted once the const was read whole: `GLOBAL_FINALS_BY_SLOT`'s other three values are `ura_finale`,
+`unity_cup` and `trackblazer`, and all three are *the app's* keys, identical to the keys `config/scenarios.php`
+declares. The const's contract is therefore the app scenario key, `grand_concert` is the single value that
+breaks it, and the config key is the one the wizard stores and every surface reads, so the parser moved:
+`'final_live' => 'our_grand_concert'`.
+
+**A reparse alone would not have retagged the row, and this is the part worth carrying forward.**
+`StoreRaceCatalogSlots::find()` includes `scenario_key` in the row's identity (`:72`, the null-coalescing
+grain the unique index is built on), so changing the emitted key makes the row *unmatchable* rather than
+updatable. Running `php artisan uma:reparse gametora-race-catalog` accordingly reported `409 updated, 1
+created` and left the old row in place beside the new one:
+
+```
+409 | grand_concert     | URA Finals Final (Grand Live)   <- orphan, reachable by no run
+411 | our_grand_concert | URA Finals Final (Grand Live)   <- the correct row
+```
+
+The orphan was removed on the same day: it was engine-owned (`is_manual = 0`), referenced by no
+`race_entries` row (`count(*) where race_catalog_slot_id = 409` was 0), tagged with a key no config declares,
+and reproducible from the snapshot. It was dumped to `.scratch-uma/ki71-orphan-row-409.json` before the
+single-row delete, which reported `rows_deleted=1`.
+
+**Proving commands** (2026-10-08, after the fix, the reparse and the cleanup):
+
+```bash
+grep -n "final_live" app/Services/DataPipeline/Parsers/GametoraRaceCatalogParser.php
+# 'final_live' => 'our_grand_concert',
+# scopeForScenario's own predicate, run against the dev file:
+#   select ... where (scenario_key is null or scenario_key = 'our_grand_concert') and title like '%Grand Live%'
+# 411 | URA Finals Final (Grand Live) | mand=1 | y4      -> grand_live_rows_reachable=1
+# rows tagged grand_concert: 0 ; tagged keys are now exactly the four config declares, one each
+```
+
+**Regression test.** `tests/Feature/GametoraRaceCatalogParserTest.php` gains the invariant beside the
+existing value pin: every scenario key the parser emits on a final slot must be a key
+`config('scenarios.scenarios')` declares, asserted over all four slots. The value pin alone would have
+passed a fifth scenario's wrong key; the invariant is what makes an undeclared tag a failure, which is the
+property that made `grand_concert` a defect rather than a spelling.
+
+**What the fix does not cover.** The identity semantics above are unchanged: a future rename of any
+scenario key re-creates this exact orphan, and nothing in the pipeline removes the stale row, so the class
+outlives this instance. Nothing here re-runs the parser against a fresh fetch either, so a later export that
+renames the slot id would need the same two steps. And the numbering collisions recorded above are still
+open.
 
 ### KI-73 A leaked `php artisan serve` holding :8127 takes the default browser entry point down for every session in the worktree - FILED 2026-10-08 (E6 follow-up 2, on the owner's instruction to diagnose rather than work around), OPEN
 
@@ -1226,6 +1273,61 @@ timeouts would say on a quiet box; they still need one clean sweep, and until th
 gate is simply **not run**, which is a reportable state under `AGENTS.md` §15 rather than a failure. It also
 does not cover KI-73, which is a different defect on the same port: a surviving listener with a dead database
 path. A quiet box with PID-style leak on :8127 still cannot start.
+
+### KI-80 The browser suite's scratch database is one shared repo path, so two sessions in a worktree cannot both run the suite and the second one's setup deletes the first one's data - FILED 2026-10-08 (E6 Grand Concert audit slice), OPEN
+
+**Status: OPEN.** Found while re-taking the Grand Concert browser evidence on a quiet box; not caused by that
+slice and not fixed by it. Filed as KI-75 and renumbered to KI-80 within the hour: a concurrent session's
+"Database reference views hand-off" filed a different KI-75 while this entry was being written, and the
+register's rule is never to renumber an existing entry, so this one moved instead. That is the third
+numbering collision this register has recorded in two days, after the two KI-70s and the two KI-71s.
+
+`tests/browser/global-setup.ts:27` fixes `SCRATCH_DATABASE` to `database/browser-scratch.sqlite`, and `:32-34`
+deletes that file plus its `-wal` and `-shm` siblings with `rmSync(..., { force: true })` before re-creating
+and re-seeding it. The path is repo-wide, exactly as the port in KI-73 is, so the suite is **single-instance
+per worktree** and nothing in the file says so.
+
+Measured 2026-10-08, with the port free and no `PLAYWRIGHT_BASE_URL` set:
+
+```
+npx playwright test tests/browser/grand-concert-panel.spec.ts tests/browser/scenario-panel.spec.ts
+Error: EPERM, Permission denied: \\?\D:\Projects\umamusume-laravel13\database\browser-scratch.sqlite
+   at global-setup.ts:33
+exit=1
+```
+
+`database/browser-scratch.sqlite` was present at 2,220,032 bytes with an mtime from that evening; three peer
+`php` processes had been alive since earlier that afternoon and none held a port in the 8127-8149 range, so
+the handle belonged to a concurrent session's run rather than to the browser server.
+
+**Two failure modes, and only the first one is visible.** The observed `EPERM` merely stops the second
+session from starting. The unobserved one is worse: the delete is guarded only by what Windows permits, so
+where the handle does allow the unlink, session B removes the database session A is actively serving and A's
+remaining cases read an empty schema mid-run. That is the exact class KI-69 was filed to end, re-introduced
+between sessions instead of between specs, and it would surface as a red sweep that looks like a product
+regression (which is KI-74's misreading).
+
+The observation is not that the peer did anything wrong. KI-69 correctly made the suite own its database
+rather than read `.env`'s shared dev file, and correctly did not consider two sessions on one checkout.
+
+**Proving commands** (2026-10-08):
+
+```bash
+npx playwright test tests/browser/grand-concert-panel.spec.ts    # EPERM at global-setup.ts:33, exit 1
+ls -la database/browser-scratch.sqlite*                          # 2220032 bytes, mtime that evening
+netstat -ano | grep LISTENING | grep -E ":(8127|8128|8129|813[0-9]|814[0-9])"   # no rows
+powershell -NoProfile -Command "Get-Process php,node | Select-Object Id,StartTime,CPU | Sort-Object StartTime"
+```
+
+**Closure owed.** A per-session scratch path, keyed on the same identity a per-session port would use, so the
+file is as private as the port is not. That is the same tooling-owner call KI-73 records and the two should
+be settled as one question, because they are one design assumption: the worktree's browser instrument assumes
+one session and names no owner for that assumption.
+
+**What closure would not cover.** KI-74's contention class, which voids a suite that starts cleanly. And the
+Grand Concert browser evidence this slice could not re-take: with the file held, the slice's browser gate
+rests on the earlier accepted run rather than a fresh one, which is recorded in the slice report rather than
+implied away here.
 
 ### KI-75 `pint --dirty` reformats another session's uncommitted file in the shared worktree - FILED 2026-10-08 (Database reference views hand-off, on the owner's instruction), OPEN
 

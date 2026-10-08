@@ -103,13 +103,25 @@ it('drops the [JP-Only] Grand Masters final and keeps the four [Global] finals',
     ['final', 'ura_finale'],
     ['final_aoharu', 'unity_cup'],
     ['final_mant', 'trackblazer'],
-    ['final_live', 'grand_concert'],
+    ['final_live', 'our_grand_concert'],
     ['final_masters', null],
 ]);
 
 it('leaves scenario_key null on the shared monthly slots that every scenario draws from', function (): void {
     expect(parseRaceRow()['scenario_key'])->toBeNull();
 });
+
+it('tags every final with a scenario key config declares, so the row is reachable by a run', function (string $slot): void {
+    // KI-71. `final_live` was tagged `grand_concert` while `config/scenarios.php`, the wizard and
+    // `TrainingRun::scenarioKey()` all use `our_grand_concert`, and `RaceCatalogSlot::scopeForScenario()`
+    // matches a row only on the run's own key plus the nulls, so that row was reachable by no run at all.
+    // The case above pins the value; this one pins the invariant that made a wrong value a defect rather
+    // than a typo, and it covers a fifth scenario's entry for free.
+    $row = parseRaceRow(['id' => $slot, 'year' => 4, 'month' => 99999, 'half' => 3]);
+
+    expect($row['scenario_key'])->not->toBeNull()
+        ->and(array_keys(config('scenarios.scenarios')))->toContain($row['scenario_key']);
+})->with(['final', 'final_aoharu', 'final_mant', 'final_live']);
 
 it('turns the export sentinels into null rather than storing a fake measurement', function (): void {
     $row = parseRaceRow(['id' => 'debut', 'year' => 1, 'month' => 6, 'half' => 2, 'fans_needed' => null], [

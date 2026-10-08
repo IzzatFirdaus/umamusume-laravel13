@@ -422,8 +422,12 @@ return [
             | decide the finale's hints. Panels still render off, and no resource chip, live marker or goal
             | calendar is invented from a guide, because none has a component and no English name for any of it
             | is a measured client string (§7 rows 48 to 52 of the reference guide). Whether this scenario gains
-            | surfaces is the owner's call, and D-241's named acceptance case is now a described scenario: that
-            | wording is the gate registry's to amend, not a slice's.
+            | surfaces was the owner's call, and on 2026-10-08 the owner ruled yes: Our Grand Concert is to gain
+            | its own surfaces as part of Trainer Desk 2.0. The ruling authorises the experience, not the
+            | invention of data, so the `❌ UNVERIFIED` boundary in docs/scenarios/07 stays authoritative for
+            | everything unmeasured, and a surface that needs a value no source publishes stays unbuilt rather
+            | than filled with a plausible number. D-241's named acceptance case is now a described scenario:
+            | that wording is the gate registry's to amend, not a slice's.
             */
             /*
             | The one line the baseline strip prints where a panel would be, and the only scenario that

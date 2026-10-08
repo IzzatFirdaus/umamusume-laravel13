@@ -75,7 +75,7 @@ final class GametoraRaceCatalogParser implements RaceCatalogSourceParser
         'final' => 'ura_finale',
         'final_aoharu' => 'unity_cup',
         'final_mant' => 'trackblazer',
-        'final_live' => 'grand_concert',
+        'final_live' => 'our_grand_concert',
     ];
 
     /**

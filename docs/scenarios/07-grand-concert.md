@@ -226,6 +226,13 @@ scenario's column from the baseline, and `config/scenarios.php` still turns ever
 **decision under review, not an absence of information**: the mechanics are on file, and none of them has a
 component.
 
+**Ruled 2026-10-08.** The owner answered the question this paragraph raised: **Our Grand Concert is to gain
+its own surfaces as part of Trainer Desk 2.0.** The ruling authorises the scenario experience and nothing
+else: it is not authority to invent game data or client-facing strings, so the `❌ UNVERIFIED` boundary above
+stays authoritative, and a surface that needs a value no source publishes is left unbuilt rather than filled
+with a plausible number. The table below therefore describes the state before that work starts, not a
+position anyone needs to re-argue. `config/scenarios.php` records the same ruling on the scenario's entry.
+
 | Widget                                                                                                     | Our Grand Concert, today                                                                                                                                                                                                                                                                              |
 | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Turn chip, trainee and scenario identity, Energy gauge, Mood tier, stat band, timeline                     | **present**                                                                                                                                                                                                                                                                                           |
