@@ -10,7 +10,6 @@ Exit 0 = all gates pass. Non-zero = failures listed.
 """
 import glob
 import html as htmllib
-import json
 import os
 import re
 import subprocess
@@ -85,30 +84,22 @@ TEXT_DEFECTS = [r"\bundefined\b", r"\bNaN\b", r"\[object Object\]", r"\blorem ip
                 r"\bTODO\b", r"\bFIXME\b", r"\bplaceholder text\b", r"\bJohn Doe\b",
                 r"example\.com", r"\bComing soon\b"]
 
-# Token map, read from the design contract rather than hand-maintained here.
-# Anything DESIGN.md itself declares as a token is legal in an artifact; anything it does
-# not is a bypass. Keeping this file's list separate would guarantee drift, which is
+# Token map, read from the shipped theme rather than hand-maintained here.
+# Anything resources/css/app.css declares as a token is legal in an artifact; anything it
+# does not is a bypass. Keeping this file's list separate would guarantee drift, which is
 # exactly what CONSTRAINTS.md D-2 forbids.
 def load_token_hexes():
     found = set()
-    doc = os.path.join(ROOT, "design-research", "DESIGN.md")
-    if not os.path.exists(doc):
+    css = os.path.join(os.path.dirname(ROOT), "resources", "css", "app.css")
+    if not os.path.exists(css):
         return found
-    body = open(doc, encoding="utf-8").read()
-    # every fenced css block: the light @theme, the dark override, the sheen recipe
-    for block in re.findall(r"```css\s*([\s\S]*?)```", body):
+    body = open(css, encoding="utf-8").read()
+    # Both shipped themes: the default @theme static block and the dark override, so an
+    # artifact may use either theme's token values.
+    blocks = (re.findall(r"@theme\s+static\s*\{([\s\S]*?)^\}", body, flags=re.M)
+              + re.findall(r"html\[data-theme='dark'\]\s*\{([\s\S]*?)^\}", body, flags=re.M))
+    for block in blocks:
         found |= {h.upper() for h in re.findall(r"#[0-9A-Fa-f]{6}\b", block)}
-    # measured-anchor and dark-surface tables quote hexes in backticks
-    for sec in re.findall(r"### 3\.1[\s\S]*?### 3\.2", body) + re.findall(r"### 3\.7[\s\S]*?```", body):
-        found |= {h.upper() for h in re.findall(r"`(#[0-9A-Fa-f]{6})`", sec)}
-    # the per-stat tint table in 3.6
-    tint = re.search(r"\| Stat \| Hue \| Band tint[\s\S]*?\n\n", body)
-    if tint:
-        found |= {h.upper() for h in re.findall(r"`(#[0-9A-Fa-f]{6})`", tint.group(0))}
-    tok = os.path.join(ROOT, "design-research", "_scratch", "tokens.json")
-    if os.path.exists(tok):
-        for ramp in json.load(open(tok, encoding="utf-8")).get("ramps", {}).values():
-            found |= {v.upper() for v in ramp.values() if isinstance(v, str) and v.startswith("#")}
     return found
 
 
@@ -118,7 +109,7 @@ ALLOWED_HEX = load_token_hexes() | {
     "#B3C9EF",  # stat band header, blue-300
 }
 if len(ALLOWED_HEX) < 40:
-    print("GATE SETUP WARNING: DESIGN.md/tokens.json yielded few tokens; the hex allowlist may be broken.")
+    print("GATE SETUP WARNING: resources/css/app.css yielded few tokens; the hex allowlist may be broken.")
 
 # --- G-16 sample data must be real catalog strings ---
 REAL_TRAINEES = ["Rice Shower", "Oguri Cap", "Mejiro McQueen", "Special Week",
