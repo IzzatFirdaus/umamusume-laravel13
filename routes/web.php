@@ -6,15 +6,23 @@ use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Controllers\Career\BuildTargetController;
 use App\Http\Controllers\Career\CockpitController;
 use App\Http\Controllers\Career\DeckSelectController;
+use App\Http\Controllers\Career\EventDecisionController;
+use App\Http\Controllers\Career\InheritanceEventController;
 use App\Http\Controllers\Career\LegacySelectController;
 use App\Http\Controllers\Career\PreflightController;
 use App\Http\Controllers\Career\RaceDecisionController;
+use App\Http\Controllers\Career\RacePlannerController;
+use App\Http\Controllers\Career\ResultController;
+use App\Http\Controllers\Career\SaveVeteranController;
 use App\Http\Controllers\Career\ScenarioSelectController;
+use App\Http\Controllers\Career\SkillsPlannerController;
+use App\Http\Controllers\Career\TimelineController;
 use App\Http\Controllers\Career\TraineeProfileController;
 use App\Http\Controllers\Career\TraineeSelectController;
 use App\Http\Controllers\Career\TrainingDecisionController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\LegacyController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ReviewController;
@@ -111,11 +119,56 @@ Route::get('/training-runs/{run}', [TrainingRunController::class, 'show'])->name
  */
 Route::get('/training-runs/{run}/cockpit', [CockpitController::class, 'show'])->name('runs.cockpit');
 /*
+ * The Race Decision (SCREEN-011, `SCR-CAR-013`, plan §8 D10). A read screen over the run's own
+ * calendar; its one write is the existing `runs.races.store` below, so no second race-write route
+ * exists. It descends from the run's URL the way the Cockpit does.
+ */
+Route::get('/training-runs/{run}/races', [RaceDecisionController::class, 'show'])->name('runs.races.decision');
+/*
+ * The Scenario Race Planner (SCREEN-017, `SCR-CAR-023`, plan §9 E5). The whole calendar, grouped into
+ * the obligations, the races ahead, the ones reached and unrecorded, and the rival set. Its one write
+ * is the existing `runs.races.store` below, so no second race-write route exists. The path carries an
+ * extra segment over the Race Decision, so the two cannot collide.
+ */
+Route::get('/training-runs/{run}/races/planner', [RacePlannerController::class, 'show'])->name('runs.races.planner');
+/*
+ * The Skills Planner (plan §8 D13, design-2.0 only). A read screen over the run's own skills and
+ * build target; its one write is the existing `runs.build-target.update` below (the priority list
+ * lives there), so no second target-write route exists.
+ */
+Route::get('/training-runs/{run}/skills', [SkillsPlannerController::class, 'show'])->name('runs.skills.planner');
+/*
  * The Training Decision detail (SCREEN-010, `SCR-CAR-012`, plan §8 D9). Read-only: its one write is the
  * guided turn, which posts to `runs.turns.store` below with that route's own Form Request, so no second
  * turn-write route exists (the same rule the cockpit's correction follows).
  */
 Route::get('/training-runs/{run}/training', [TrainingDecisionController::class, 'show'])->name('runs.training');
+/*
+ * The Inheritance Event (SCREEN-013, `SCR-CAR-015`, plan §8 D12). Record-only: the predicted section
+ * shows sourced probabilities, the observed section records what the Trainer saw via the existing
+ * TurnEvent mechanism. No inheritance computation is performed (ADR-0020 §3).
+ */
+Route::get('/training-runs/{run}/inheritance', [InheritanceEventController::class, 'show'])->name('runs.inheritance');
+Route::post('/training-runs/{run}/inheritance', [InheritanceEventController::class, 'store'])->name('runs.inheritance.store');
+/*
+ * The Event Decision (SCREEN-012, `SCR-CAR-014`, plan §8 D11). Record-only over TurnEvent: the
+ * run's own recorded choices become the known outcomes, and the advisor refuses rather than
+ * ranking. One new write route with one Form Request; no other screen's write changes.
+ */
+Route::get('/training-runs/{run}/events', [EventDecisionController::class, 'show'])->name('runs.events.decision');
+Route::post('/training-runs/{run}/events', [EventDecisionController::class, 'store'])->name('runs.events.store');
+/*
+ * The Career Timeline (SCREEN-018, `SCR-CAR-017`, plan §8 D14). A read screen that flattens the
+ * run's turns, races and events into one ordered rail. No new write route; every value on the
+ * page comes from data the existing routes already own.
+ */
+Route::get('/training-runs/{run}/timeline', [TimelineController::class, 'show'])->name('runs.timeline');
+/*
+ * The Career Result (SCREEN-019, `SCR-CAR-018`, plan §8 D15). A read screen over a finished run:
+ * its final build, its race history and its scenario objectives. No write route; the screen
+ * records nothing, and Save Veteran is D16's.
+ */
+Route::get('/training-runs/{run}/result', [ResultController::class, 'show'])->name('runs.result');
 Route::put('/training-runs/{run}', [TrainingRunController::class, 'update'])->name('runs.update');
 Route::delete('/training-runs/{run}', [TrainingRunController::class, 'destroy'])->name('runs.destroy');
 Route::get('/training-runs/{run}/export/{format}', [TrainingRunController::class, 'export'])->name('runs.export');
@@ -156,22 +209,46 @@ Route::put('/legacy/{run}', [LegacyController::class, 'update'])
     ->name('legacy.update');
 
 /*
- * The Veteran library (SCREEN-021, PRD FR-G-2, plan §8 D16's read half). Two reads and no writes: the row
- * is `ListVeterans` and the detail is `ShowVeteran`, both landed at C3, and `VeteranRow` is the shape the
- * Legacy Lab's own browse list prints, so the two surfaces cannot describe one Veteran differently.
+ * The Veteran library (SCREEN-021, PRD FR-G-2, plan §8 D16). Three reads: the list is `ListVeterans`, the
+ * detail is `ShowVeteran` — both landed at C3 — and the comparison is `SCREEN-022`. `VeteranRow` is the shape
+ * all three print, and the Legacy Lab's browse list reads it too, so no surface describes one Veteran
+ * differently from another.
  *
- * There is no write route here on purpose. `RecordVeteran` is landed and has no caller, because the screen
- * that files a career (`SCREEN-020`, Save Veteran) is the other half of D16 and the plan gates it behind
- * D15, Career Result. A library with no rows is therefore the true state of a fresh install, not a broken
- * read, and both pages say so rather than leaving an unexplained empty list.
+ * `/veterans/compare` is declared before `/veterans/{veteran}` and the binding is `whereNumber`. The
+ * constraint is what makes the literal unreachable as a model id; the order matches how the `/legacy/compare`
+ * block above is arranged, so the two cannot drift into disagreeing about which half is load-bearing.
  */
 Route::get('/veterans', [VeteranController::class, 'index'])->name('veterans.index');
-Route::get('/veterans/{veteran}', [VeteranController::class, 'show'])->name('veterans.show');
+Route::get('/veterans/compare', [VeteranController::class, 'compare'])->name('veterans.compare');
+Route::get('/veterans/{veteran}', [VeteranController::class, 'show'])
+    ->whereNumber('veteran')
+    ->name('veterans.show');
+
+/*
+ * Save Veteran (SCREEN-020, PRD FR-G-1, plan §8 D16's write half). The pair follows `runs.inheritance`: the
+ * screen on GET, the write on POST, both under the run the career belongs to, because a Veteran is a pointer
+ * to one career and never a standalone record (`ADR-0010` keeps the run's foreign keys as the identity).
+ *
+ * This is `RecordVeteran`'s first caller. The block above used to say no route could file a career; the
+ * screen that files one is the reason that sentence is now false.
+ */
+Route::get('/training-runs/{run}/veteran', [SaveVeteranController::class, 'show'])
+    ->whereNumber('run')
+    ->name('runs.veteran');
+Route::post('/training-runs/{run}/veteran', [SaveVeteranController::class, 'store'])
+    ->whereNumber('run')
+    ->name('runs.veteran.store');
 
 // The two UI preferences PRD US-11 authorizes (SCREEN_SPEC.md §7-5). One PUT for both keys,
 // because writing a preference is one action on the store rather than one action per key.
 Route::get('/preferences', [PreferenceController::class, 'edit'])->name('preferences.edit');
 Route::put('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
+
+// The Data panel's two actions (SCREEN-024, the D18b slice plan). Export streams this tool's own
+// data as a JSON download; Backup writes a server-side snapshot and never streams the database
+// file. Restore and Reset stay absent: they are destructive and owner-scoped (AGENTS.md §5).
+Route::get('/preferences/export', [PreferenceController::class, 'export'])->name('preferences.export');
+Route::post('/preferences/backup', [PreferenceController::class, 'backup'])->name('preferences.backup');
 
 // Streams a mirrored artwork file to an <img src> (ADR-0021 read half). A web route, not /api/v1:
 // it serves a browser asset, reads a Storage path, and opens no second outbound surface. `id` is
@@ -179,3 +256,24 @@ Route::put('/preferences', [PreferenceController::class, 'update'])->name('prefe
 Route::get('/artwork/{kind}/{id}', [ArtworkAssetController::class, 'show'])
     ->whereNumber('id')
     ->name('artwork.show');
+
+/*
+ * The Database hub (SCREEN-023, plan §8 D17). Five reference-data areas, all read-only.
+ *
+ * Three of them are the ported catalog surfaces: the route stays under /database/ so the hub has one
+ * URL space, but the controller that owns the query renders the page. A redirect would have been the
+ * smaller diff, and no owner ruling authorises one, so the three areas render the shared list component
+ * the originals use instead of borrowing their address. /umamusume, /skills and /support-cards are
+ * unchanged.
+ */
+Route::get('/database', [DatabaseController::class, 'index'])->name('database.index');
+Route::get('/database/trainees', [CatalogController::class, 'databaseIndex'])->name('database.trainees');
+Route::get('/database/supports', [SupportCardController::class, 'databaseIndex'])->name('database.supports');
+Route::get('/database/skills', [SkillController::class, 'databaseIndex'])->name('database.skills');
+Route::get('/database/races', [DatabaseController::class, 'races'])->name('database.races');
+Route::get('/database/scenarios', [DatabaseController::class, 'scenarios'])->name('database.scenarios');
+// The three reference views (`SCR-SYS-008` to `010`): config-derived tables transcribed from
+// `docs/UMAMUSUME_REFERENCE.md`, completing the eight areas SCREEN-023 lists.
+Route::get('/database/events', [DatabaseController::class, 'events'])->name('database.events');
+Route::get('/database/shop-items', [DatabaseController::class, 'shopItems'])->name('database.shop-items');
+Route::get('/database/sparks', [DatabaseController::class, 'sparks'])->name('database.sparks');
