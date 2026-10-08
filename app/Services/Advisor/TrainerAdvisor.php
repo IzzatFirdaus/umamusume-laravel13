@@ -240,9 +240,17 @@ final class TrainerAdvisor
     }
 
     /**
+     * How far each stat sits below the Trainer's own target, clamped at zero.
+     *
+     * Public because a second surface states the same number: the Career Result screen prints the
+     * final deficit per stat, and `ADR-0015`'s rule — where two surfaces read a number, both call
+     * the same owner — is cheaper honoured than restated. An empty array means the question has no
+     * answer (no turn recorded, or no target entered), which is what makes the caller render `N/A`
+     * rather than a deficit against a target nobody set.
+     *
      * @return array<string, int>
      */
-    private function deficits(?TurnEntry $latest, ?BuildTargetPayload $target): array
+    public function deficits(?TurnEntry $latest, ?BuildTargetPayload $target): array
     {
         if ($latest === null || $target === null) {
             return [];
