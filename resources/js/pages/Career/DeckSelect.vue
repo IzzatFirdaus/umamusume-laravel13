@@ -231,7 +231,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                         :key="slot.position"
                         :position="slot.position"
                         :label="slot.label"
-                        :is-friend="slot.is_friend"
+                        :is_friend="slot.is_friend"
                         :card="slot.card"
                         :ownership="slot.ownership"
                         :filling-slot="filling"
