@@ -29,7 +29,7 @@ use Illuminate\Support\Carbon;
  *                                              (design-2.0 SCREEN-020's suggested tag vocabulary);
  *                                              null when they tagged nothing
  * @property array<array-key, mixed>|null $tags_normalized the same list folded to lowercase, the
- *                                                     column the tag filter matches (KI-72)
+ *                                                         column the tag filter matches (KI-72)
  * @property string|null $notes
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
