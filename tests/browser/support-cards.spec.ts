@@ -128,11 +128,12 @@ test('separates a list the source states as empty from a list nothing stored', a
 });
 
 // The `ADR-0021` thumbnail slots on the two support-card screens (`design-2.0` §45a "Support-card
-// index, card row" and "Support-card detail, header"). The mirror ships empty and nothing in this
-// suite runs `uma:fetch-art`, so each case derives its state from the rendered DOM and asserts only
-// when that state is present, following the catalog index spec's `:36` rarity-chip precedent. The
-// props, including the `support_id`-versus-local-`id` discipline, are proven server-side by
-// `SupportCardsArtworkSlotTest`.
+// index, card row" and "Support-card detail, header"). Whether the mirror holds files is a property
+// of the host, not of the suite — a tree that has run `uma:fetch-art` holds all of them, a fresh one
+// holds none — so each case derives its state from the rendered DOM and asserts the shape of
+// whichever state is present, following the catalog index spec's `:36` rarity-chip precedent and
+// plan §4.1 item 5's standing ruling (KI-69 class 2). The props, including the `support_id`-versus-
+// local-`id` discipline, are proven server-side by `SupportCardsArtworkSlotTest`.
 test('renders a mirrored row thumbnail as a named link to the same card', async ({ page }) => {
     await page.goto('/support-cards');
     await page.locator('#app > *').first().waitFor();
@@ -168,15 +169,30 @@ test('renders a mirrored row thumbnail as a named link to the same card', async 
     }
 });
 
-test('leaves support-card rows text-only when the mirror holds no file', async ({ page }) => {
+test('leaves support-card rows text-only when the mirror holds no file, and decorative when it does', async ({ page }) => {
     await page.goto('/support-cards');
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.locator('#support-card-results img')).toHaveCount(0);
+    // An empty `src` is the one shape `DESIGN.md` §4.7 never allows, and it is a fact about this
+    // screen rather than about the disk, so it is asserted whatever the mirror holds.
     await expect(page.locator('#support-card-results img[src=""]')).toHaveCount(0);
 
-    // No stray anchor either: absence must not leave a clickable frame-shaped hole in the row.
-    await expect(page.locator('#support-card-results a:has(img)')).toHaveCount(0);
+    // Whether a frame exists at all is a property of the disk (`uma:fetch-art --dry-run` reports
+    // every `support_thumb` id already on disk on this tree), so the case may not assume either
+    // state: each branch asserts its own shape, and the populated branch's full contract is the
+    // sibling case above.
+    const framed = page.locator('#support-card-results > li:has(img)').first();
+
+    if ((await framed.count()) === 0) {
+        // Absence is a normal state (§4.7): no frame anywhere, and no clickable frame-shaped hole.
+        await expect(page.locator('#support-card-results img')).toHaveCount(0);
+        await expect(page.locator('#support-card-results a:has(img)')).toHaveCount(0);
+    } else {
+        // A populated mirror takes the other branch: the frame is decorative and framed by the
+        // row's named link, which is the contract the sibling case reads in full.
+        await expect(framed.locator('img').first()).toHaveAttribute('alt', '');
+        await expect(framed.locator('a:has(img)')).toHaveCount(1);
+    }
 
     // The rows still read as before.
     await expect(page.locator('#support-card-results > li').first().locator('a').first()).toBeVisible();
