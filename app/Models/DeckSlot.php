@@ -23,12 +23,13 @@ use InvalidArgumentException;
  * @property int $training_run_id
  * @property int $support_card_id
  * @property int $slot_position one to six: guarded on saving and by the column's CHECK
+ * @property string|null $ownership `OWNED` or `RENTED`, or null when nobody has recorded it
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read TrainingRun $trainingRun
  * @property-read SupportCard $supportCard
  */
-#[Fillable(['training_run_id', 'support_card_id', 'slot_position'])]
+#[Fillable(['training_run_id', 'support_card_id', 'slot_position', 'ownership'])]
 class DeckSlot extends Model
 {
     /** @use HasFactory<DeckSlotFactory> */
@@ -49,11 +50,11 @@ class DeckSlot extends Model
     /**
      * The two ways a Trainer can hold the card in a slot.
      *
-     * `deck_slots` has no column for this and adding one is the owner's call (`ADR-0014`), which is why
-     * the run-scoped deck builder prints the flag it can read and says the rest out loud. The setup
-     * wizard's draft does carry it, because a session key needs no migration, so this is the one place
-     * the pair of words is written down: the rule that refuses a value outside it, the six slot rows the
-     * page renders and `components/support/SupportSlot.vue`'s two-button group all read it from here.
+     * `ADR-0014` left this unrecorded, and `ADR-0023` (D3) added the column: the flag is per run and per
+     * slot, so it lives on the slot, and null means nobody has recorded it rather than "owned". This is
+     * the one place the pair of words is written down: the rules that refuse a value outside it, the
+     * saving guard, the six slot rows the pages render and `components/support/SupportSlot.vue`'s
+     * two-button group all read it from here.
      *
      * @var list<string>
      */
@@ -114,6 +115,14 @@ class DeckSlot extends Model
             if (! in_array($slot->slot_position, self::POSITIONS, true)) {
                 throw new InvalidArgumentException(
                     "Deck slot position {$slot->slot_position} is outside the one to six a run has."
+                );
+            }
+
+            // Same reason as the position: factories and seeders reach this table without a form
+            // request, so the column's own vocabulary is enforced here as well.
+            if ($slot->ownership !== null && ! in_array($slot->ownership, self::OWNERSHIP, true)) {
+                throw new InvalidArgumentException(
+                    "Deck slot ownership [{$slot->ownership}] is not one of ".implode(', ', self::OWNERSHIP).'.'
                 );
             }
         });

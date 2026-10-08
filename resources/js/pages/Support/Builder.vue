@@ -52,7 +52,8 @@ interface Slot {
     is_friend: boolean;
     selected: string;
     card: Card | null;
-    ownership: 'OWNED';
+    /** The flag the slot records, or null when nobody has said (`ADR-0023`). */
+    ownership: 'OWNED' | 'RENTED' | null;
 }
 
 interface Paginator<T> {
@@ -107,27 +108,25 @@ const errors = computed(
     () => (page.props.errors as Record<string, string | undefined> | undefined) ?? {},
 );
 
-/**
- * The ownership flags. Client-side only, and the page says so under the deck: `deck_slots` has no
- * column for the flag, and adding one needs the owner's approval, so the value a slot ships with is the
- * only value the run can be read as. Held here rather than in a prop so the toggle responds at once
- * without a round trip that would have nowhere to store the answer.
- */
-const ownership = ref<Record<number, 'OWNED' | 'RENTED'>>(
-    Object.fromEntries(props.slots.map((slot) => [slot.position, slot.ownership])),
-);
-
 const type = ref(props.picker.type ?? '');
 const rarity = ref(props.picker.rarity ?? '');
 const status = ref(props.picker.status ?? '');
 const search = ref(props.picker.query ?? '');
 const loading = ref(false);
 
-/** The deck the form posts: one entry per position, blank meaning "not equipped". */
+/**
+ * The deck the form posts: one entry per position, blank meaning "not equipped", each carrying the
+ * owned-or-rented flag the slot holds. The flag travels in the same form as the card because it is part
+ * of the same record (`ADR-0023`): a slot the Trainer never classified posts null, which the server
+ * stores as "not recorded" rather than as a defaulted Owned.
+ */
 const form = useForm({
     deck: Object.fromEntries(
-        props.slots.map((slot) => [slot.position, { support_card_id: slot.selected }]),
-    ) as Record<number, { support_card_id: string }>,
+        props.slots.map((slot) => [
+            slot.position,
+            { support_card_id: slot.selected, ownership: slot.ownership },
+        ]),
+    ) as Record<number, { support_card_id: string; ownership: 'OWNED' | 'RENTED' | null }>,
 });
 
 /**
@@ -268,19 +267,16 @@ function save(): void {
                         v-for="slot in slots"
                         :key="slot.position"
                         v-bind="slot"
-                        :ownership="ownership[slot.position] ?? 'OWNED'"
+                        :ownership="form.deck[slot.position].ownership"
                         :filling-slot="picker.fillingSlot"
                         @replace="startReplace"
-                        @ownership="(position, value) => (ownership[position] = value)"
+                        @ownership="(position, value) => (form.deck[position].ownership = value)"
                     />
                 </ul>
 
-                <!-- The ownership flag has nowhere to go yet, and a control that looked like it saved
-                     would be a lie. Said here, in words, next to the six toggles it describes. -->
-                <p class="mt-3 rounded-md border border-dashed border-rule bg-raised p-3 text-xs text-ink-muted">
-                    The run record stores no field for the owned or rented flag yet, so the six toggles
-                    above hold their choice on this page only and a reload returns them to Owned. Nothing
-                    is posted for them, so nothing is claimed to have been saved.
+                <p class="mt-3 text-xs text-ink-muted">
+                    The owned or rented flag is saved with the deck, one value per slot, and stays on the
+                    run after a reload. A slot you have not classified reads as N/A rather than as Owned.
                 </p>
 
                 <form class="mt-4 flex flex-wrap items-center gap-3" @submit.prevent="save">

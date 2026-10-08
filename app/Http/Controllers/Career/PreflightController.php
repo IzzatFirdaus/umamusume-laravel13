@@ -130,10 +130,14 @@ class PreflightController extends Controller
         $run = DB::transaction(function () use ($request): TrainingRun {
             $run = TrainingRun::create($request->runAttributes());
 
+            $ownership = $request->ownershipByPosition();
+
             foreach ($request->deckByPosition() as $position => $cardId) {
                 $run->deckSlots()->create([
                     'support_card_id' => $cardId,
                     'slot_position' => $position,
+                    // The flag the deck step recorded, carried onto the run (ADR-0023, D3).
+                    'ownership' => $ownership[$position] ?? null,
                 ]);
             }
 

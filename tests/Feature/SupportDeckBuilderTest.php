@@ -54,16 +54,22 @@ it('renders six slots in order, with the sixth named Friends whatever card sits 
 
 it('gives every slot an ownership flag a Trainer can read and change', function (): void {
     $run = builderRun();
+    $friend = SupportCard::factory()->create();
+    DeckSlot::factory()->atPosition(6)->create([
+        'training_run_id' => $run->id,
+        'support_card_id' => $friend->id,
+        'ownership' => 'RENTED',
+    ]);
 
-    // The run record holds no field for it, so the value the page ships is the one the run can be read
-    // as. The control is per slot rather than structural: no slot's flag is computed from its position.
+    // The flag is the run's own record now (`ADR-0023`, D3), so a slot nobody has said anything about
+    // reads as an absence rather than as a defaulted `Owned`, and the control is per slot: no slot's
+    // flag is computed from its position.
     test()->get("/training-runs/{$run->id}/deck")
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Support/Builder')
-            ->where('slots', fn (Collection $slots): bool => $slots->every(
-                fn (array $slot): bool => $slot['ownership'] === 'OWNED'
-            )));
+            ->where('slots.5.ownership', 'RENTED')
+            ->where('slots.0.ownership', null));
 });
 
 // ── the seven types ────────────────────────────────────────────────────────

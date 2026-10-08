@@ -200,6 +200,31 @@ it('warns about a half-filled deck, an empty parent slot and a skill priority no
         );
 });
 
+it('carries the deck step\'s owned-or-rented flag onto the run it creates', function (): void {
+    // The audit's case: the friend card in slot six is borrowed, and the flag was lost the moment the
+    // run existed because nothing wrote it down (D3). The draft already holds it; this is the write
+    // that puts it on the run.
+    $fixture = preflightFixture();
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'], [
+        'deck' => [
+            ['position' => 1, 'support_card_id' => $fixture['cards'][0], 'ownership' => 'OWNED'],
+            ['position' => 2, 'support_card_id' => null, 'ownership' => null],
+            ['position' => 3, 'support_card_id' => null, 'ownership' => null],
+            ['position' => 4, 'support_card_id' => null, 'ownership' => null],
+            ['position' => 5, 'support_card_id' => null, 'ownership' => null],
+            ['position' => 6, 'support_card_id' => $fixture['cards'][1], 'ownership' => 'RENTED'],
+        ],
+    ])]);
+
+    test()->put(route('career.preflight.store'))->assertRedirect();
+
+    $slots = TrainingRun::query()->where('umamusume_id', $fixture['trainee']->id)->sole()->deckSlots->keyBy('slot_position');
+
+    expect($slots)->toHaveCount(2)
+        ->and($slots[1]->ownership)->toBe('OWNED')
+        ->and($slots[6]->ownership)->toBe('RENTED');
+});
+
 it('creates the run from an Inertia JSON body, where the session draft is the only source', function (): void {
     // The browser's own shape: Inertia PUTs `{}` as JSON, so the request's input source is the json bag
     // rather than the request bag. The draft is composed in `prepareForValidation()` either way, and this

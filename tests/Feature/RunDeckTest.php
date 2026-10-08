@@ -389,3 +389,59 @@ it('renders no effect line for a card whose vector states nothing at any level',
             ->where('deck.equipped.0.card_name', 'Quiet Star [Tracen Academy]')
             ->has('deck.equipped.0.effects', 0));
 });
+
+// ── the owned-or-rented flag (D3, ADR-0023) ────────────────────────────────
+
+it('stores the owned-or-rented flag per slot and keeps it across a reload', function (): void {
+    // Before ADR-0023 the flag lived only in a page's own state, so the audit found a card borrowed
+    // from another account reading back as `Owned: true, Rented: false` the moment the run existed.
+    $run = deckRun();
+    $cards = SupportCard::factory()->count(2)->create();
+
+    test()->post("/training-runs/{$run->id}/deck", [
+        'deck' => [
+            1 => ['support_card_id' => $cards[0]->id, 'ownership' => 'OWNED'],
+            6 => ['support_card_id' => $cards[1]->id, 'ownership' => 'RENTED'],
+        ],
+    ])->assertRedirect("/training-runs/{$run->id}");
+
+    $slots = $run->fresh()->deckSlots->keyBy('slot_position');
+
+    expect($slots[1]->ownership)->toBe('OWNED')
+        ->and($slots[6]->ownership)->toBe('RENTED');
+});
+
+it('reads the stored flag back on the run-scoped deck builder', function (): void {
+    $run = deckRun();
+    $friend = SupportCard::factory()->create();
+    DeckSlot::factory()->atPosition(6)->create([
+        'training_run_id' => $run->id,
+        'support_card_id' => $friend->id,
+        'ownership' => 'RENTED',
+    ]);
+
+    test()->get("/training-runs/{$run->id}/deck")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Support/Builder')
+            ->where('slots.5.ownership', 'RENTED')
+            // A slot nobody has written still has no flag: null is "not recorded", not "owned".
+            ->where('slots.0.ownership', null));
+});
+
+it('keeps a slot flag when a surface with no ownership control saves the deck', function (): void {
+    // The run screen's deck panel posts six cards and no flag. The flag belongs to the slot, so a
+    // re-save from that screen must not erase what the builder recorded.
+    $run = deckRun();
+    $card = SupportCard::factory()->create();
+    DeckSlot::factory()->atPosition(6)->create([
+        'training_run_id' => $run->id,
+        'support_card_id' => $card->id,
+        'ownership' => 'RENTED',
+    ]);
+
+    test()->post("/training-runs/{$run->id}/deck", deckPayload([6 => $card->id]))
+        ->assertRedirect("/training-runs/{$run->id}");
+
+    expect($run->fresh()->deckSlots->firstWhere('slot_position', 6)->ownership)->toBe('RENTED');
+});

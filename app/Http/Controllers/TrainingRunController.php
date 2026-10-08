@@ -978,7 +978,7 @@ class TrainingRunController extends Controller
     }
 
     /**
-     * The six slot rows, each with the card it holds and the flag the run record cannot yet store.
+     * The six slot rows, each with the card it holds and the owned-or-rented flag the run records.
      *
      * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
      * @return list<array<string, mixed>>
@@ -999,10 +999,9 @@ class TrainingRunController extends Controller
                 'is_friend' => $position === DeckSlot::MAX_POSITION,
                 'selected' => (string) $selected,
                 'card' => $card === null ? null : $this->builderCard($card, $run, $dictionary),
-                // The only value the run can be read as. `RENTED` is a per-slot fact the table has no
-                // column for, and inventing one needs owner approval, so the control ships with the
-                // value and the screen says the run record does not keep it (see the hand-off).
-                'ownership' => 'OWNED',
+                // The flag the slot records, or null when nobody has said (ADR-0023). It is the run's
+                // own fact, read from `deck_slots`, never derived from the player's current inventory.
+                'ownership' => $stored->get($position)?->ownership,
             ];
         }
 
@@ -1861,12 +1860,20 @@ class TrainingRunController extends Controller
     public function syncDeck(StoreDeckRequest $request, TrainingRun $run): RedirectResponse
     {
         DB::transaction(function () use ($request, $run): void {
+            // Read the flags before the delete. The run screen's deck panel posts six cards and no
+            // flag, and the flag belongs to the slot, so a re-save from a surface that offers no
+            // ownership control keeps what the slot already recorded rather than erasing it (ADR-0023).
+            /** @var array<int, string|null> $existing */
+            $existing = $run->deckSlots()->pluck('ownership', 'slot_position')->all();
+            $posted = $request->ownershipByPosition();
+
             $run->deckSlots()->delete();
 
             foreach ($request->slotsByCardId() as $position => $cardId) {
                 $run->deckSlots()->create([
                     'support_card_id' => $cardId,
                     'slot_position' => (int) $position,
+                    'ownership' => $posted[(int) $position] ?? $existing[(int) $position] ?? null,
                 ]);
             }
         });

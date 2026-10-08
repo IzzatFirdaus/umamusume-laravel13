@@ -142,6 +142,31 @@ class StartCareerRequest extends FormRequest
     }
 
     /**
+     * The owned-or-rented flag per position, from the composed draft, for the slots that carry a card.
+     *
+     * The wizard's deck step already holds the flag (`StoreDraftDeckRequest::payload()`); this is the
+     * half that carries it onto the run, so a borrowed card stops becoming an owned one at the moment
+     * the career starts (`ADR-0023`, D3). A cleared position is a gap with no card to describe.
+     *
+     * @return array<int, string|null>
+     */
+    public function ownershipByPosition(): array
+    {
+        $slots = (array) $this->input('deck');
+        $ownership = [];
+
+        foreach ($slots as $slot) {
+            if (! is_array($slot) || $slot['support_card_id'] === null) {
+                continue;
+            }
+
+            $ownership[(int) $slot['position']] = isset($slot['ownership']) ? (string) $slot['ownership'] : null;
+        }
+
+        return $ownership;
+    }
+
+    /**
      * Validate the composed draft with the rules that own each section, and report a failure against the
      * section rather than the field.
      *

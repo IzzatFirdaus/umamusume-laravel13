@@ -200,3 +200,18 @@ apply" written as the reason for a hold will go looking for the wrong gate.
 Effect-value computation at runtime (which card was on which tile in which turn), friendship-trigger
 arithmetic, hint-level accumulation, limit-break material economy, Unique Perk values, and any collection
 surface. §1.4.3–§1.4.4 describe the mechanics; none become schema until asked for.
+
+## Erratum — 2026-10-09
+
+The table row above that reads "The deck records card *identity*, not ownership state" stood from
+2026-09-30 to 2026-10-09 and no longer holds as written: `ADR-0023` adds a nullable
+`deck_slots.ownership` holding `OWNED`, `RENTED` or nothing, and both deck writers record it.
+
+What that sentence was written to protect still holds and is unchanged. The **collection** stays cut —
+no `UserSupportCard`, no level, no limit breaks, no perk level, no "which cards the player owns" — and
+the new flag is per run and per slot, never derived from the player's inventory. The line separated
+collection tracking from the run's own deck record, and it still does.
+
+The cost of leaving it out was measured, not assumed: the Rice Shower / Unity Cup UX walk (2026-10-09)
+recorded a borrowed friend card in slot six through the wizard and read it back as `Owned: true,
+Rented: false` the moment the run existed, because nothing wrote the flag down.

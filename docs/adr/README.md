@@ -69,6 +69,7 @@ for f in docs/adr/00*.md; do printf '%s\t%s\t%s\n' \
 | 0019   | A semver label, a tag, and a release branch for a local-only tool                                                             | **Proposed** — version and non-`master` target set by owner; pre-release mechanism and the §14 correction owed                                                                           |
 | 0020   | Trainer Desk 2.0 — SPA frontend, target-based Trainer Advisor, record-only Veteran library (race prediction stays deferred)   | Accepted (owner ruling 2026-10-04); amends §6.2, extends `ADR-0001`, builds on `ADR-0010`, reaffirms `ADR-0016`                                                                          |
 | 0021   | Sourced character and support-card artwork, mirrored locally and derived from ids                                             | **Accepted (owner ruling 2026-10-05)**; supersedes `ADR-0012` Decision 2 for sourced artwork, preserves `PRD.md` §6.13; fetch half built 2026-10-05, display half open (`PRD.md` OQ-6)   |
+| 0023   | Record the deck slot's owned-or-rented state on the slot                                                                       | **Proposed** — drafted 2026-10-09 for the owner's ruling (D3 remediation of the Rice Shower / Unity Cup walk); amends `ADR-0014` by dated erratum                                            |
 
 The table is stale the moment a status line changes and no test guards it, so the command above is the
 authoritative form and this prose is a snapshot. This table was stale when `ADR-0019` was written: it ended
@@ -77,6 +78,11 @@ in full (0005 declined, 0013 withdrawn, 0016 an open question, 0019 proposed), t
 0011), one superseded within its own subject by a later ADR (0002's bound, by 0015), and one whose subject is
 only half landed (0021: its fetch mechanism built the day it was accepted, its display slots still open on
 `PRD.md` OQ-6, and no live pass run against the asset host).
+
+*Dated note 2026-10-09: `0023` is on disk and indexed above. `0022` is on disk and is **not** indexed,
+because its own status line reserves the number, the status and this regeneration to the owner, and the
+ADR-0023 author did not land another draft's row. The count in the paragraph above therefore still reads
+twenty-one and the table above it is a snapshot either way; re-run the command to derive the real one.*
 
 This file holds no decisions. An ADR is written when a question is answered, not to hold a fork open — which
 is why `ADR-0016` carries no verdict and the row above says so rather than smoothing it.

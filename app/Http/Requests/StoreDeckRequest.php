@@ -105,4 +105,26 @@ class StoreDeckRequest extends FormRequest
             $deck
         );
     }
+
+    /**
+     * The owned-or-rented flag per position, for the slots that carried one.
+     *
+     * A surface that offers no ownership control (the run screen's deck panel) sends no flag, and the
+     * write keeps whatever the slot already recorded rather than erasing it (`ADR-0023`). A slot the
+     * Trainer cleared carries no entry here at all, because the blank row is dropped before the rules
+     * run and there is no card for the flag to describe.
+     *
+     * @return array<int, string|null>
+     */
+    public function ownershipByPosition(): array
+    {
+        $deck = (array) ($this->validated()['deck'] ?? []);
+        $ownership = [];
+
+        foreach ($deck as $position => $row) {
+            $ownership[(int) $position] = isset($row['ownership']) ? (string) $row['ownership'] : null;
+        }
+
+        return $ownership;
+    }
 }
