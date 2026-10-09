@@ -454,3 +454,28 @@ it('renders the rail with no turn rows at all rather than inventing a first turn
             ->where('rail.energy', null)
             ->has('rail.choices', 7));
 });
+
+it('counts the rail\'s indicator against its own two stages, not the scenario vocabulary (D7)', function (): void {
+    // `def.steps` names the scenario's turn vocabulary — Unity Cup has five — and the rail only ever
+    // lands on two of them, so counting the indicator against that list read "Step 2 of 5" and then
+    // "Step 4 of 5" with no step 3. The flow is what the rail actually offers, and `current` is
+    // always a member of it.
+    $run = guidedRun('unity_cup');
+
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.flow', ['training', 'outcome'])
+            ->where('rail.current', 'training')
+            // The scenario vocabulary is still sent, and it is still longer than the flow.
+            ->has('rail.def.steps', 5));
+
+    // Stage two: the flow's second entry, so the indicator reads "Step 2 of 2".
+    test()->post(route('runs.turns.store', $run), previewPayload($run))->assertRedirect();
+
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('rail.current', 'outcome')
+            ->where('rail.flow', ['training', 'outcome']));
+});

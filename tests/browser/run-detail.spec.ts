@@ -178,6 +178,9 @@ test('carries the guided rail keyboard path and its advertised shortcuts', async
     // The first turn has a previous turn to compare against (the create form seeded none, so this run
     // is genuinely empty), and the rail still offers the door.
     await expect(page.getByRole('button', { name: 'Preview this turn' })).toBeVisible();
+
+    // D7: the indicator counts the rail's own two stages, not the scenario's longer step vocabulary.
+    await expect(page.getByText('Step 1 of 2 · Choose activity')).toBeVisible();
 });
 
 // Prose that the server-side ScenarioPanelUiTest now asserts as resolved props, moved here as

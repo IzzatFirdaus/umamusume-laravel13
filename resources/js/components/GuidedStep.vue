@@ -47,6 +47,12 @@ const props = defineProps<{
     // decides only whether the rail may name the scenario out loud (D-220).
     declared: boolean;
     current: string;
+    /**
+     * The rail's own stages, in order. Not `def.steps`: that is the scenario's turn vocabulary and
+     * names stages this rail never lands on, so counting against it made the indicator jump from
+     * "Step 2 of 5" to "Step 4 of 5" with no step 3 (D7).
+     */
+    flow: string[];
     selected: string | null;
     choices: Choice[];
     preview: Delta[];
@@ -69,7 +75,7 @@ const form = ref<HTMLFormElement | null>(null);
 const group = ref<HTMLDivElement | null>(null);
 
 const index = computed(() => {
-    const found = props.def.steps.indexOf(props.current);
+    const found = props.flow.indexOf(props.current);
 
     return found === -1 ? 0 : found;
 });
@@ -172,7 +178,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
         <div class="mb-3 flex flex-wrap items-center gap-2">
             <div class="flex gap-1.5" role="group" aria-label="Guided turn progress">
                 <span
-                    v-for="(step, stepIndex) in def.steps"
+                    v-for="(step, stepIndex) in flow"
                     :key="step"
                     class="h-1.5 w-8 rounded"
                     :class="stepIndex <= index ? 'bg-green' : 'bg-idle'"
@@ -180,7 +186,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
                 ></span>
             </div>
             <span class="text-xs font-semibold text-ink-muted">
-                Step {{ index + 1 }} of {{ def.steps.length }} · {{ STEP_LABELS[current] ?? current }}
+                Step {{ index + 1 }} of {{ flow.length }} · {{ STEP_LABELS[current] ?? current }}
             </span>
             <span v-if="declared" class="ml-auto text-xs text-ink-muted">{{ def.label }}</span>
         </div>

@@ -77,12 +77,12 @@ it('places the shop between the activity and the outcome, from config order', fu
         ->where('rail.def.shop.max_copies_per_item', 5)
         ->where('rail.def.shop.locked_until_debut', true));
 
-    // The step name and the position come from the same two places the old template read them
-    // from: the label map and `steps.indexOf(current)`.
+    // The step name comes from the label map, and the position from the rail's own `flow` — not from
+    // `def.steps`, which is the scenario's longer turn vocabulary (D7).
     expect(variationSource())
         ->toContain("shop: 'Spend Shop Coins',")
-        ->toContain('const found = props.def.steps.indexOf(props.current);')
-        ->toContain('Step {{ index + 1 }} of {{ def.steps.length }} · {{ STEP_LABELS[current] ?? current }}');
+        ->toContain('const found = props.flow.indexOf(props.current);')
+        ->toContain('Step {{ index + 1 }} of {{ flow.length }} · {{ STEP_LABELS[current] ?? current }}');
 });
 
 it('shows the rotation timer as the shop primary number, not a balance', function (): void {

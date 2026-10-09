@@ -1371,6 +1371,17 @@ class TrainingRunController extends Controller
     }
 
     /**
+     * The rail's own stages, in order: choose what the turn did, then record how it ended.
+     *
+     * `def.steps` is the scenario's turn vocabulary — three to five entries naming stages this rail
+     * never lands on — so counting the indicator against it made the flow read "Step 2 of 5" and then
+     * "Step 4 of 5" with no step 3 (D7). The flow is what the rail actually offers.
+     *
+     * @var list<string>
+     */
+    private const RAIL_FLOW = ['training', 'outcome'];
+
+    /**
      * The guided rail. `$previewed` is the response's own marker, never a read of `$preview`: a
      * first turn previews to an empty list and still has to offer its confirm step (D-1, D-51).
      * `previous` is the row the typed numbers are compared against, as placeholders only: an
@@ -1378,7 +1389,7 @@ class TrainingRunController extends Controller
      *
      * @param  array<string, mixed>  $staged
      * @param  list<array{direction: string, text: string}>  $preview
-     * @return array{def: array<string, mixed>, declared: bool, current: string, previewed: bool, choices: list<array<string, mixed>>, selected: string|null, values: array<string, mixed>, preview: list<array{direction: string, text: string}>, energy: int|null, mood: string|null, turn: int, has_previous: bool, previous: array<string, int|null>|null, action: string}
+     * @return array{def: array<string, mixed>, declared: bool, current: string, flow: list<string>, previewed: bool, choices: list<array<string, mixed>>, selected: string|null, values: array<string, mixed>, preview: list<array{direction: string, text: string}>, energy: int|null, mood: string|null, turn: int, has_previous: bool, previous: array<string, int|null>|null, action: string}
      */
     private function railPayload(TrainingRun $run, array $staged, array $preview, bool $previewed, ?TurnEntry $latest): array
     {
@@ -1391,6 +1402,9 @@ class TrainingRunController extends Controller
             'declared' => $run->hasScenario(),
             // Stage one asks what the turn did; stage two records how it ended.
             'current' => $previewed ? 'outcome' : 'training',
+            // The rail's own two stages, so the indicator counts the flow the Trainer walks rather
+            // than the scenario's longer vocabulary (D7).
+            'flow' => self::RAIL_FLOW,
             'previewed' => $previewed,
             'choices' => $this->turnChoices(),
             'selected' => isset($staged['choice']) ? (string) $staged['choice'] : null,

@@ -227,6 +227,7 @@ const railStep = computed(() => props.rail as unknown as {
     def: { label: string; steps: string[]; panels: Record<string, boolean> } & Record<string, unknown>;
     declared: boolean;
     current: string;
+    flow: string[];
     previewed: boolean;
     choices: unknown[];
     selected: string | null;
@@ -569,6 +570,7 @@ const railStep = computed(() => props.rail as unknown as {
                 :def="railStep.def"
                 :declared="railStep.declared"
                 :current="railStep.current"
+                :flow="railStep.flow"
                 :selected="railStep.selected"
                 :choices="railStep.choices as never"
                 :preview="railStep.preview"
