@@ -209,6 +209,8 @@ class TimelineController extends Controller
             'actual' => $this->stats($turn),
             'mood' => $turn->mood?->value,
             'facilities' => $this->facilities($turn),
+            'failure_rate' => $turn->failure_rate,
+            'preview_gains' => $this->previewGains($turn),
             'result' => 'Recorded as entered',
             'corrected' => $corrected,
             'correction_id' => $corrected ? 'turn-'.$turn->turn : null,
@@ -356,6 +358,42 @@ class TimelineController extends Controller
         foreach ($levels as $label => $level) {
             if ($level !== null) {
                 $rows[] = ['label' => $label, 'level' => (int) $level];
+            }
+        }
+
+        return $rows === [] ? null : $rows;
+    }
+
+    /**
+     * The preview row the client printed for this turn, labelled and ordered the way the entry form
+     * asks for it. Null when the Trainer read none of it, which is the ordinary case for a turn logged
+     * from the rail. A member stored without a figure is dropped rather than shown as zero: zero is a
+     * preview of no change, which is a reading, and an absent one is not.
+     *
+     * @return list<array{label: string, value: int}>|null
+     */
+    private function previewGains(TurnEntry $turn): ?array
+    {
+        $gains = $turn->preview_gains;
+
+        if (! is_array($gains) || $gains === []) {
+            return null;
+        }
+
+        $labels = [
+            'speed' => 'Speed',
+            'stamina' => 'Stamina',
+            'power' => 'Power',
+            'guts' => 'Guts',
+            'wit' => 'Wit',
+            'sp' => 'Skill Points',
+        ];
+
+        $rows = [];
+
+        foreach ($labels as $key => $label) {
+            if (isset($gains[$key])) {
+                $rows[] = ['label' => $label, 'value' => (int) $gains[$key]];
             }
         }
 

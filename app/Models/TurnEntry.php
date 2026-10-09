@@ -40,9 +40,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $facility_power
  * @property int|null $facility_guts
  * @property int|null $facility_wit
+ * @property int|null $failure_rate
+ * @property array<string, int>|null $preview_gains
  * @property-read TrainingRun $trainingRun
  */
-#[Fillable(['training_run_id', 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'energy_state', 'energy_band', 'mood', 'fans', 'facility_speed', 'facility_stamina', 'facility_power', 'facility_guts', 'facility_wit'])]
+#[Fillable(['training_run_id', 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'energy_state', 'energy_band', 'mood', 'fans', 'facility_speed', 'facility_stamina', 'facility_power', 'facility_guts', 'facility_wit', 'failure_rate', 'preview_gains'])]
 class TurnEntry extends Model
 {
     /** @use HasFactory<TurnEntryFactory> */
@@ -70,6 +72,8 @@ class TurnEntry extends Model
             'energy_state' => EnergyState::class,
             'mood' => MoodTier::class,
             'fans' => 'integer',
+            'failure_rate' => 'integer',
+            'preview_gains' => 'array',
         ];
     }
 }

@@ -649,6 +649,7 @@ class TrainingRunController extends Controller
             array_flip([
                 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans',
                 'facility_speed', 'facility_stamina', 'facility_power', 'facility_guts', 'facility_wit',
+                'failure_rate', 'preview_gains',
             ]),
         );
     }

@@ -34,6 +34,10 @@ interface Entry {
     mood: string | null;
     /** The facility levels a turn row recorded, or null when it recorded none. */
     facilities?: { label: string; level: number }[] | null;
+    /** The failure percentage the client showed before this turn, or null when it was not read. */
+    failure_rate?: number | null;
+    /** The preview row the client printed for this turn, or null when none of it was read. */
+    preview_gains?: { label: string; value: number }[] | null;
     result: string;
     corrected: boolean;
     correction_id: string | null;
@@ -141,6 +145,29 @@ const kindVisible = (entry: Entry): boolean =>
                                     </li>
                                 </ul>
                                 <span v-else class="text-xs text-ink-muted">Facilities not recorded</span>
+                            </dd>
+                        </div>
+
+                        <!-- The two readings the client printed before the turn resolved. One named
+                             absence for the block, like FACILITIES above: a turn logged without reading
+                             either is the ordinary case, not two missing readings. -->
+                        <div v-if="entry.kind === 'turn'">
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">PREVIEW</dt>
+                            <dd class="mt-1 font-mono tabular-nums">
+                                <p v-if="entry.failure_rate !== null && entry.failure_rate !== undefined" class="text-ink-strong">
+                                    <span class="pr-3 text-xs text-ink-muted">Failure rate</span>{{ entry.failure_rate }}%
+                                </p>
+                                <ul v-if="entry.preview_gains !== null && entry.preview_gains !== undefined" class="space-y-0.5">
+                                    <li v-for="gain in entry.preview_gains" :key="gain.label">
+                                        <span class="pr-3 text-xs text-ink-muted">{{ gain.label }}</span>
+                                        <span>{{ gain.value > 0 ? `+${gain.value}` : gain.value }}</span>
+                                    </li>
+                                </ul>
+                                <span
+                                    v-if="(entry.failure_rate === null || entry.failure_rate === undefined)
+                                        && (entry.preview_gains === null || entry.preview_gains === undefined)"
+                                    class="text-xs text-ink-muted"
+                                >Preview not recorded</span>
                             </dd>
                         </div>
 

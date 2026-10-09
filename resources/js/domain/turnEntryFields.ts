@@ -42,3 +42,16 @@ export const TURN_ENTRY_FACILITY_FIELDS = TURN_ENTRY_STAT_FIELDS.map((field) => 
     name: `facility_${field.name}`,
     label: field.label,
 }));
+
+/**
+ * The client's preview row: the five stats and skill points, keyed the way `preview_gains` stores them.
+ *
+ * The five stats are spread from the shared list for the same reason the facility levels are derived,
+ * so `TurnEntryFieldSourceTest`'s quoted-pair pin still sees exactly five stat fields. Skill points is
+ * written here because it is not a stat field on the entry (it is a separate column there) and its
+ * label has a space, so it does not match that pin's pattern either.
+ */
+export const TURN_ENTRY_PREVIEW_FIELDS = [
+    ...TURN_ENTRY_STAT_FIELDS,
+    { name: 'sp', label: 'Skill Points' },
+];

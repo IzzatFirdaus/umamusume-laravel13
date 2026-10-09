@@ -32,6 +32,24 @@ class StoreTurnEntryRequest extends FormRequest
     }
 
     /**
+     * The preview row arrives as one object whose members the form posts whether or not the Trainer
+     * filled them, so an untouched disclosure would store six nulls and claim a reading that was never
+     * taken. Members that carry no value are dropped here, and the whole key goes when nothing is left.
+     */
+    protected function prepareForValidation(): void
+    {
+        $gains = $this->input('preview_gains');
+
+        if (! is_array($gains)) {
+            return;
+        }
+
+        $read = array_filter($gains, static fn ($value): bool => $value !== null && $value !== '');
+
+        $this->merge(['preview_gains' => $read === [] ? null : $read]);
+    }
+
+    /**
      * Each stat is bounded by the run's own scenario ceiling, not a flat number
      * (ADR-0015, superseding ADR-0002's flat framing and implementing ADR-0003 decision 6).
      *
@@ -79,6 +97,26 @@ class StoreTurnEntryRequest extends FormRequest
             'facility_power' => ['nullable', 'integer', 'min:1', 'max:5'],
             'facility_guts' => ['nullable', 'integer', 'min:1', 'max:5'],
             'facility_wit' => ['nullable', 'integer', 'min:1', 'max:5'],
+            /*
+             * The failure rate and the preview gains the client showed before the turn resolved. Both
+             * are readings the Trainer transcribes, not figures this tool derives (`ADR-0016`,
+             * `ADR-0020` §3), and neither is an input to the advisor (`PRD.md` §6.11): setting them
+             * must not move the advice, which `TurnFailurePreviewTest` pins.
+             *
+             * The rate is a percentage and carries its own ceiling. The gains are the client's preview
+             * row, six values keyed by stat and skill points; `array:` refuses a seventh key rather
+             * than dropping it, so a new reading is a deliberate schema change. Each value is
+             * unconstrained in sign because a preview can show a penalty as readily as a gain, and a
+             * floor of zero here would refuse a figure the client printed.
+             */
+            'failure_rate' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'preview_gains' => ['nullable', 'array:speed,stamina,power,guts,wit,sp'],
+            'preview_gains.speed' => ['nullable', 'integer'],
+            'preview_gains.stamina' => ['nullable', 'integer'],
+            'preview_gains.power' => ['nullable', 'integer'],
+            'preview_gains.guts' => ['nullable', 'integer'],
+            'preview_gains.wit' => ['nullable', 'integer'],
+            'preview_gains.sp' => ['nullable', 'integer'],
             // Energy is 0..100 (ADR-0001); mood is the client's five tiers, not
             // free text. The 0..1200 stat bound above is unchanged here:
             // ADR-0003 decision 6 replaces it with the scenario's own hard_cap,

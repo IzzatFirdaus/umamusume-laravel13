@@ -33,7 +33,7 @@ import TrainingCard from '../../components/career/TrainingCard.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
-import { TURN_ENTRY_ENERGY_BANDS, TURN_ENTRY_ENERGY_STATES, TURN_ENTRY_FACILITY_FIELDS, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
+import { TURN_ENTRY_ENERGY_BANDS, TURN_ENTRY_ENERGY_STATES, TURN_ENTRY_FACILITY_FIELDS, TURN_ENTRY_PREVIEW_FIELDS, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 
 interface Cost {
     min: number;
@@ -129,6 +129,10 @@ const energyBands = TURN_ENTRY_ENERGY_BANDS;
 // spread in, so TypeScript checks each `form[field.name]` binding against a key the form actually has.
 const facilityFields = TURN_ENTRY_FACILITY_FIELDS;
 
+// The client's preview row, from the shared source. Read as one object on the form and posted as one,
+// because `preview_gains` is stored as a single payload rather than six columns.
+const previewFields = TURN_ENTRY_PREVIEW_FIELDS;
+
 const form = useForm({
     turn: String(props.write.turn),
     speed: '',
@@ -150,6 +154,15 @@ const form = useForm({
     facility_power: '',
     facility_guts: '',
     facility_wit: '',
+    failure_rate: '',
+    preview_gains: {
+        speed: '',
+        stamina: '',
+        power: '',
+        guts: '',
+        wit: '',
+        sp: '',
+    },
 });
 
 // A state that is not `exact` carries no figure, so the number is cleared rather than left behind a
@@ -518,6 +531,49 @@ const capFor = (label: string): number =>
                     <p class="mt-2 text-xs text-ink-muted">
                         One to five, the ladder's own range. Leave a facility blank when this turn did
                         not read it.
+                    </p>
+                </details>
+
+                <!-- The two readings the client prints before a turn resolves: the failure rate and the
+                     preview gains. Transcribed, not computed: the tool stores what the Trainer read
+                     and never projects an outcome (`ADR-0016`, `PRD.md` §6.11). Optional by design, so
+                     a turn logged without reading them stores neither. -->
+                <details class="rounded-md border border-rule bg-raised p-3 md:col-span-3">
+                    <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                        Preview readings
+                    </summary>
+                    <div class="mt-2 grid grid-cols-2 gap-3 md:grid-cols-6">
+                        <label class="col-span-2 flex flex-col gap-1 md:col-span-1">
+                            <span class="text-ink-muted">Failure rate</span>
+                            <input
+                                id="turn-failure_rate"
+                                v-model="form.failure_rate"
+                                type="number"
+                                name="failure_rate"
+                                min="0"
+                                max="100"
+                                :aria-describedby="describedBy('failure_rate')"
+                                class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                            >
+                            <span v-if="errorOf('failure_rate')" id="turn-failure_rate-error" class="text-xs text-risk">{{ errorOf('failure_rate') }}</span>
+                        </label>
+                        <label v-for="field in previewFields" :key="field.name" class="flex flex-col gap-1">
+                            <span class="text-ink-muted">{{ field.label }}</span>
+                            <input
+                                :id="`turn-preview_gains-${field.name}`"
+                                v-model="form.preview_gains[field.name]"
+                                type="number"
+                                :name="`preview_gains[${field.name}]`"
+                                :aria-describedby="errorOf(`preview_gains.${field.name}`) === undefined ? undefined : `turn-preview_gains-${field.name}-error`"
+                                class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                            >
+                            <span v-if="errorOf(`preview_gains.${field.name}`)" :id="`turn-preview_gains-${field.name}-error`" class="text-xs text-risk">{{ errorOf(`preview_gains.${field.name}`) }}</span>
+                        </label>
+                    </div>
+                    <p class="mt-2 text-xs text-ink-muted">
+                        What the client showed: the failure percentage and the gains it previewed. Enter
+                        a negative number when the preview showed a drop. Leave them blank when this turn
+                        did not read them.
                     </p>
                 </details>
 
