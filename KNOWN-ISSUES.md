@@ -1833,6 +1833,40 @@ while those gates are blocked for want of a `[Global]` capture. Restoration rema
 deleting session's act; this entry records the state, and KI-86 carries the code defect the same commit
 caused.
 
+**Disposition recorded 2026-10-09 (the text above and the first erratum are left exactly as written).** The
+owner approval this entry said was missing is on record: `docs/proposals/frontend-development-plan.md`, its
+F2 close-out dated 2026-10-09, states "All five rulings were approved as recommended (R-1 approve
+retirement; R-2 move assertions and retire the flow-only remainder; R-3 split per assertion)." The 24 files
+`91494a1` deleted split exactly across the two approved groups, and each disposition is executed, so the
+Floor's approval requirement is met and no file is restored:
+
+- **R-1, retired (9)** — legacy-only assertions; the flip removes the component or Blade asset and there is
+  no 2.0 successor: `FlashBannerTokensTest`, `FrontendComponentLibraryTest`, `GoalPanelsOnRunDetailTest`,
+  `GradePointMeterTest`, `MoodPillTest`, `ResourceStripTest`, `ResourceStripOnRunDetailTest`, `RunDeckTest`,
+  `RaceCatalogPickerTest`.
+- **R-2, moved (15)** — the assertion lives in the 2.0 owner and the original file is superseded:
+  `GuidedFirstTurnTest`, `GuidedTurnValidationTest`, `GuidedTurnOnRunViewTest` and `RunViewErrorEnvelopeTest`
+  to `CareerCockpitTest`; `GuidedStepScenarioCompositionTest` and `GuidedStepScenarioVariationTest` to
+  `ScenarioPanelTest` (both cases carry `Ported from ...` docblocks); `RaceCalendarTest` and
+  `RaceCalendarYearTabsTest` to `RunRaceStripTest`; `RaceEntryCirclesTest`, `RaceEntryTurnLinkTest` and
+  `FreeRaceCalendarCellTest` to `CareerRaceDecisionTest`; `RunSkillPickerTest` and `RunSkillRowLabelsTest` to
+  `CareerSkillsPlannerTest`; `RunViewFrameTest` and `RunViewNoScriptTest` retired with the flow (the Cockpit
+  reproduces neither the pinned-region frame nor a no-script state).
+
+Verification, run on this tree: restoring all 24 from `91494a1~1` and running them gives **174 failed / 97
+passed**, every failure a `302` from the `runs.show` redirect or a missing `Runs/Show.vue`. No file is
+green, so no restoration is owed; the deletions are the authorized retirement the close-out records.
+
+The three Grand Concert guards this entry named are R-1 retirements, and their absence claim did not go
+unowned: `GrandConcertPanelTest` asserts the named `scenario.panel_absence` string on the Cockpit payload,
+and `ScenarioPanelTest` asserts the widget, recommendation and finale absences. The absence of the Phase B,
+C and D surfaces is asserted at the panel level, which is the live owner after the run-detail screen's
+retirement.
+
+**Closure owed.** None for the file question: the approval is on record and the moves are landed. What this
+correction does not do is decide the two orphan components the retirement left (`RaceCalendar.vue`,
+`RacePanel.vue`, and `StatBand.vue`/`GradeBadge.vue`), which the F2 close-out names as still unclaimed.
+
 ### KI-85 Commit 822d97b carries a concurrent session's ported test case alongside the finale pickup, an attribution boundary rather than a defect - FILED 2026-10-09 (Slice 20 pickup, on the owner's ruling), FIXED IN TREE
 
 **Status: FIXED IN TREE - the note is the fix.** No history rewrite was attempted and none is owed:
