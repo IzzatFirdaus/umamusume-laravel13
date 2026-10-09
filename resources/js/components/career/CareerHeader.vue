@@ -37,6 +37,13 @@ const props = defineProps<{
     trainee: string;
     traineeJa: string | null;
     header: Header;
+    /**
+     * Turns until the scenario's next milestone, carried by an imported position. Null is the common
+     * case - a new career derives its position from its own turn log and a scenario with no pending
+     * milestone has no number - so the row is drawn only when a figure exists rather than printed as
+     * an absence on every career that never had one.
+     */
+    countdown?: number | null;
 }>();
 
 const group = (n: number): string => n.toLocaleString('en-US');
@@ -78,6 +85,12 @@ const absent = (what: string): string => `${what} has not been recorded for this
             <div class="flex flex-col">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Turn</dt>
                 <dd class="font-mono tabular-nums text-ink-strong">{{ group(props.header.turn) }}</dd>
+            </div>
+            <div v-if="props.countdown !== null && props.countdown !== undefined" class="flex flex-col">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Scenario countdown</dt>
+                <dd class="font-mono tabular-nums text-ink-strong">
+                    {{ group(props.countdown) }} {{ props.countdown === 1 ? 'turn' : 'turns' }}
+                </dd>
             </div>
         </dl>
 

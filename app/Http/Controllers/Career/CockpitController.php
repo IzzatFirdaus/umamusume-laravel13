@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Career;
 
+use App\Domain\Career\CareerPosition;
 use App\Enums\RunStatus;
 use App\Enums\TurnEventType;
 use App\Http\Controllers\Controller;
@@ -14,6 +15,7 @@ use App\Models\TurnEntry;
 use App\Models\TurnEvent;
 use App\Services\Advisor\Advice;
 use App\Services\Advisor\TrainerAdvisor;
+use App\Services\CareerCalendar;
 use App\Services\Scenario\FinaleReader;
 use App\Services\ScenarioCaps;
 use Illuminate\Support\Collection;
@@ -120,9 +122,20 @@ class CockpitController extends Controller
         // Built once: the header's rank and the scenario section's team panel read the same pass.
         $team = $this->teamSection($run);
 
+        // Built once for the same reason: a run with no stored position derives one with a
+        // `max(turn)` query, and three props read it.
+        $position = $run->careerPosition();
+
         return Inertia::render('Career/Cockpit', [
             'run' => $this->runSection($run),
-            'header' => $this->headerSection($run, $latest, $team),
+            'header' => $this->headerSection($run, $latest, $team, $position),
+            // Where the career stands, and whether that answer was named or derived. A snapshot's
+            // position is the one its Trainer entered; a new career's is read off its own turn log.
+            // The distinction crosses the wire because the header prints a named position and the
+            // review screen reads the confidence map that rides the same value object.
+            'careerPosition' => $position?->toArray(),
+            'hasImportedPosition' => $run->hasImportedPosition(),
+            'scenarioCountdown' => $position?->scenarioCountdown,
             'gradeObjectives' => $run->gradeObjectives(),
             'state' => $this->stateSection($run, $latest),
             'actions' => $this->actionSection($run, $advice),
@@ -222,19 +235,37 @@ class CockpitController extends Controller
      * @param  TeamSectionShape  $team  built once by `show()` so the header and the panel read one pass
      * @return array<string, mixed>
      */
-    private function headerSection(TrainingRun $run, ?TurnEntry $latest, array $team): array
+    private function headerSection(TrainingRun $run, ?TurnEntry $latest, array $team, ?CareerPosition $position = null): array
     {
         $turn = $run->turnEntries->count();
-        $position = $turn < 1 ? null : (($turn - 1) % TrainingRun::TURNS_PER_YEAR) + 1;
+        $positionInYear = $turn < 1 ? null : (($turn - 1) % TrainingRun::TURNS_PER_YEAR) + 1;
         $year = $turn < 1 ? null : TrainingRun::careerYearForTurn($turn);
+
+        $yearLabel = $year === null ? null : (RaceCatalogSlot::YEARS[$year] ?? (string) $year).' Year';
+        $monthLabel = $positionInYear === null
+            ? null
+            : ($positionInYear % 2 === 1 ? 'Early ' : 'Late ').self::MONTHS[intdiv($positionInYear - 1, 2)];
+
+        // A position the Trainer named outranks the count of turns this tool happens to hold.
+        // `CreateSnapshotRun` writes one entry at the imported turn, so a career entered at Senior
+        // Early October counts one logged turn and would otherwise print as Junior Early January -
+        // the exact misreading `CareerPosition` exists to close. A new career keeps the derivation
+        // above, which is its own turn log and needs no override.
+        $named = $run->hasImportedPosition() ? ($position ?? $run->careerPosition()) : null;
+
+        if ($named !== null) {
+            $turn = $named->turnIndex;
+            $yearLabel = $named->year->label();
+            $monthLabel = $named->phase->value.' '.CareerCalendar::monthLabel($named->month);
+        }
 
         return [
             'scenario_label' => $run->hasScenario()
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
             'scenario_declared' => $run->hasScenario(),
-            'year_label' => $year === null ? null : (RaceCatalogSlot::YEARS[$year] ?? (string) $year).' Year',
-            'month_label' => $position === null ? null : ($position % 2 === 1 ? 'Early ' : 'Late ').self::MONTHS[intdiv($position - 1, 2)],
+            'year_label' => $yearLabel,
+            'month_label' => $monthLabel,
             'turn' => $turn,
             'energy' => $latest?->energy,
             'mood' => $latest?->mood?->value,

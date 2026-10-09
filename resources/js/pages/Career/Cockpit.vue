@@ -77,6 +77,23 @@ interface Correction {
 const props = defineProps<{
     run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; timeline_url: string; result_url: string; training_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null };
     header: Header;
+    /**
+     * Where the career stands, as `CareerPosition::toArray()` carries it. The header's Year, Month and
+     * Turn are resolved from it server-side when `hasImportedPosition` is true, because the month and
+     * year spellings already live in `CareerCalendar` and `CareerYear::label()`; spelling them again
+     * here would be a second place for the calendar to be wrong (ADR-0015).
+     */
+    careerPosition: {
+        year: number;
+        month: number;
+        phase: string;
+        turn_index: number;
+        scenario_countdown: number | null;
+        field_states: Record<string, string> | null;
+        field_values: Record<string, number> | null;
+    } | null;
+    hasImportedPosition: boolean;
+    scenarioCountdown: number | null;
     gradeObjectives: GradeObjective[];
     state: {
         stats: { key: string; label: string; current: number | null; target: number | null; cap: number }[];
@@ -296,7 +313,7 @@ const jumpToShop = (): void => {
             That screen did not load. Nothing was saved; try again.
         </p>
 
-        <CareerHeader :trainee="props.run.trainee" :trainee-ja="props.run.trainee_ja" :header="props.header" />
+        <CareerHeader :trainee="props.run.trainee" :trainee-ja="props.run.trainee_ja" :header="props.header" :countdown="props.scenarioCountdown" />
 
         <!-- The header edit forms (F2, plan §9.6 ruling 1). Status, scenario and grade-point period
              all write through `runs.update`, the route and validator the 0.1.0 record screen used. A
