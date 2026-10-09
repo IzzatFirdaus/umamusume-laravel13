@@ -882,7 +882,7 @@ Use existing cockpit composition patterns.
 
 ## Slice 23 — Cross-Feature Consistency Audit
 
-**Status: PLANNED**
+**Status: COMPLETE** (`aa5d975`; see the Cross-Feature Consistency entry in the Current Status table, page 1125)
 
 Audit the complete chain:
 
@@ -921,7 +921,7 @@ No broad refactor for aesthetic reasons.
 
 ## Slice 24 — Full Grand Concert Acceptance Pass
 
-**Status: FINAL PLANNED SLICE**
+**Status: COMPLETE** (see the acceptance record at 2026-10-09, below)
 
 Perform the final scenario readiness assessment.
 
