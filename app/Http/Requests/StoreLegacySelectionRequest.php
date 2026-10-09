@@ -113,6 +113,10 @@ class StoreLegacySelectionRequest extends FormRequest
             'legacies.*.ancestors_sparks.*.*.stars' => ['nullable', 'integer', 'min:1', 'max:'.LegacySelectionPayload::MAX_SPARK_STARS],
             'legacies.*.sparks' => ['present', 'array'],
             'legacies.*.sparks.*.kind' => ['required', 'string', Rule::in(LegacySelectionPayload::SPARK_KINDS)],
+            // The Spark's target category, a transient form field: it is validated here and never stored,
+            // because the payload keeps the target string verbatim (`ADR-0010`) and the category exists so
+            // a write can refuse `Stat -> Late Surger` at the boundary rather than only in the UI.
+            'legacies.*.sparks.*.category' => ['nullable', 'string', Rule::in(LegacySelectionPayload::SPARK_CATEGORIES)],
             // `target` is the Spark's own subject as the client renders it: a stat name, an aptitude,
             // or a skill. The client spells those and this tool never rewrites them, so it is bounded
             // as free text and read back verbatim.
@@ -149,8 +153,57 @@ class StoreLegacySelectionRequest extends FormRequest
 
             foreach ($legacies as $index => $legacy) {
                 $this->assertNoOwnTrainee($validator, (int) $index, $legacy);
+
+                /** @var list<array<string, mixed>> $sparks */
+                $sparks = (array) ($legacy['sparks'] ?? []);
+
+                foreach ($sparks as $sparkIndex => $spark) {
+                    $this->assertTargetMatchesCategory($validator, (int) $index, (int) $sparkIndex, $spark);
+                }
             }
         });
+    }
+
+    /**
+     * A Spark's target must belong to the category the Trainer picked, at the write boundary.
+     *
+     * The category is the form's own control and is not stored; a hand-made POST with no category keeps
+     * the free-text target the rules already allow. When a category is posted, `Stat` is checked against
+     * the stat matrix and `Aptitude` against the ten client dimensions. `Skill` is left as the verbatim
+     * name the resolver reads from the skills catalogue (`ADR-0011`); the UI offers only catalogue rows,
+     * and the stored target is the string the Trainer read, not an id.
+     *
+     * @param  array<string, mixed>  $spark
+     */
+    private function assertTargetMatchesCategory(Validator $validator, int $index, int $sparkIndex, array $spark): void
+    {
+        $category = $spark['category'] ?? null;
+        $target = $spark['target'] ?? null;
+
+        if (! is_string($category) || ! in_array($category, LegacySelectionPayload::SPARK_CATEGORIES, true)) {
+            return;
+        }
+
+        if (! is_string($target) || $target === '') {
+            return;
+        }
+
+        $allowed = match ($category) {
+            'Stat' => array_values((array) config('scenarios.stat_order')),
+            'Aptitude' => LegacySelectionPayload::SPARK_APTITUDES,
+            default => null,
+        };
+
+        if ($allowed === null) {
+            return;
+        }
+
+        if (! in_array($target, $allowed, true)) {
+            $validator->errors()->add(
+                "legacies.{$index}.sparks.{$sparkIndex}.target",
+                "A {$category} Spark names one of ".implode(', ', $allowed)."; [{$target}] is not.",
+            );
+        }
     }
 
     /**

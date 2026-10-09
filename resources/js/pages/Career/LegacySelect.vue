@@ -48,6 +48,7 @@ interface ParentNode {
 
 interface SparkDraft {
     kind: string;
+    category: string;
     target: string;
     stars: string | number;
 }
@@ -66,8 +67,31 @@ const props = defineProps<{
     sparkKinds: Record<string, string>;
     affinityGrades: string[];
     rankLetters: string[];
+    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: string[] };
     notice: string;
 }>();
+
+/**
+ * The three target categories, and the one inference the read-back needs: the payload stores only the
+ * target string, so a stored Spark's category is recovered from which list holds it.
+ */
+const SPARK_CATEGORIES = ['Stat', 'Aptitude', 'Skill'];
+
+function inferCategory(target: string): string {
+    if (target === '') {
+        return 'Stat';
+    }
+
+    if (props.sparkTargets.Stat.includes(target)) {
+        return 'Stat';
+    }
+
+    if (props.sparkTargets.Aptitude.includes(target)) {
+        return 'Aptitude';
+    }
+
+    return 'Skill';
+}
 
 /**
  * The form is seeded from the draft, not left blank: a step the Trainer returns to shows what they entered.
@@ -87,11 +111,13 @@ const form = useForm({
         // blank one is a draft the write discards.
         ancestors_sparks: parent.ancestors.map((ancestor) => ancestor.sparks.map((spark) => ({
             kind: spark.kind,
+            category: inferCategory(spark.target ?? ''),
             target: spark.target ?? '',
             stars: spark.stars === null ? '' : spark.stars,
         }))),
         sparks: parent.sparks.map((spark) => ({
             kind: spark.kind,
+            category: inferCategory(spark.target ?? ''),
             target: spark.target ?? '',
             stars: spark.stars === null ? '' : spark.stars,
         })),
@@ -114,11 +140,13 @@ const saving = (): void => {
                 .filter((spark) => !isBlankSpark(spark))
                 .map((spark) => ({
                     kind: spark.kind,
+                    category: spark.category,
                     target: spark.target === '' ? null : spark.target,
                     stars: spark.stars === '' ? null : Number(spark.stars),
                 }))),
             sparks: legacy.sparks.filter((spark) => !isBlankSpark(spark)).map((spark) => ({
                 kind: spark.kind,
+                category: spark.category,
                 target: spark.target === '' ? null : spark.target,
                 stars: spark.stars === '' ? null : Number(spark.stars),
             })),
@@ -145,7 +173,7 @@ function assignParent(index: number, value: string): void {
 }
 
 function addSpark(index: number): void {
-    form.legacies[index].sparks.push({ kind: 'blue', target: '', stars: '' } as SparkDraft);
+    form.legacies[index].sparks.push({ kind: 'blue', category: 'Stat', target: '', stars: '' } as SparkDraft);
 }
 
 function removeSpark(index: number, sparkIndex: number): void {
@@ -153,7 +181,7 @@ function removeSpark(index: number, sparkIndex: number): void {
 }
 
 function addAncestorSpark(index: number, ancestorIndex: number): void {
-    form.legacies[index].ancestors_sparks[ancestorIndex].push({ kind: 'blue', target: '', stars: '' } as SparkDraft);
+    form.legacies[index].ancestors_sparks[ancestorIndex].push({ kind: 'blue', category: 'Stat', target: '', stars: '' } as SparkDraft);
 }
 
 function removeAncestorSpark(index: number, ancestorIndex: number, sparkIndex: number): void {
@@ -353,7 +381,16 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                             </label>
                                             <label class="flex flex-col gap-1 text-xs text-ink">
                                                 <span>Applies to</span>
-                                                <input v-model="spark.target" type="text" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm">
+                                                <select v-model="spark.category" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm" @change="spark.target = ''">
+                                                    <option v-for="category in SPARK_CATEGORIES" :key="category" :value="category">{{ category }}</option>
+                                                </select>
+                                            </label>
+                                            <label class="flex flex-col gap-1 text-xs text-ink">
+                                                <span>Target</span>
+                                                <select v-model="spark.target" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm">
+                                                    <option value="">Not recorded</option>
+                                                    <option v-for="target in props.sparkTargets[spark.category]" :key="target" :value="target">{{ target }}</option>
+                                                </select>
                                             </label>
                                             <label class="flex flex-col gap-1 text-xs text-ink">
                                                 <span>Stars</span>
@@ -456,11 +493,17 @@ const ancestorError = (index: number, slot: number): string | undefined =>
 
                                         <label class="flex flex-col gap-1 text-xs text-ink">
                                             <span>Applies to</span>
-                                            <input
-                                                v-model="spark.target"
-                                                type="text"
-                                                class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm"
-                                            >
+                                            <select v-model="spark.category" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm" @change="spark.target = ''">
+                                                <option v-for="category in SPARK_CATEGORIES" :key="category" :value="category">{{ category }}</option>
+                                            </select>
+                                        </label>
+
+                                        <label class="flex flex-col gap-1 text-xs text-ink">
+                                            <span>Target</span>
+                                            <select v-model="spark.target" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm">
+                                                <option value="">Not recorded</option>
+                                                <option v-for="target in props.sparkTargets[spark.category]" :key="target" :value="target">{{ target }}</option>
+                                            </select>
                                         </label>
 
                                         <label class="flex flex-col gap-1 text-xs text-ink">

@@ -61,6 +61,25 @@ final readonly class LegacySelectionPayload
 
     public const SPARK_KINDS = ['blue', 'pink', 'green', 'white', 'scenario'];
 
+    /**
+     * The three things a Spark's target can be, and the ten aptitude dimensions. The category is a
+     * transient form field, not a stored one: the payload keeps the target string verbatim (`ADR-0010`),
+     * and the category exists so a write can refuse `Stat -> Late Surger` at the boundary.
+     *
+     * @var list<string>
+     */
+    public const SPARK_CATEGORIES = ['Stat', 'Aptitude', 'Skill'];
+
+    /**
+     * The ten aptitude dimensions a Spark can name, as the client's own words.
+     *
+     * @var list<string>
+     */
+    public const SPARK_APTITUDES = [
+        'Turf', 'Dirt', 'Sprint', 'Mile', 'Medium', 'Long',
+        'Front Runner', 'Pace Chaser', 'Late Surger', 'End Closer',
+    ];
+
     public const AFFINITY_GRADES = ['△', '○', '◎'];
 
     public const MAX_SPARK_STARS = 3;

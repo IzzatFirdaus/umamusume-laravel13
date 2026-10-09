@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\LegacyController;
 use App\Http\Requests\Career\StoreDraftLegacyRequest;
 use App\Models\Legacy\LegacySelectionPayload;
+use App\Models\Skill;
 use App\Models\Umamusume;
 use App\Models\Veteran;
 use App\Services\Career\SetupDraft;
@@ -116,6 +117,15 @@ class LegacySelectController extends Controller
             'sparkKinds' => AncestryGraph::SPARK_KIND_LABELS,
             'affinityGrades' => LegacySelectionPayload::AFFINITY_GRADES,
             'rankLetters' => LegacySelectionPayload::RANK_LETTERS,
+            // The target options per category. `Stat` is the matrix's own order, `Aptitude` the ten
+            // client dimensions, and `Skill` the catalogue the resolver reads (`ADR-0011`): the UI offers
+            // only these, so a free-text target is no longer enterable, while the stored payload keeps the
+            // target string verbatim (`ADR-0010`).
+            'sparkTargets' => [
+                'Stat' => array_values((array) config('scenarios.stat_order')),
+                'Aptitude' => LegacySelectionPayload::SPARK_APTITUDES,
+                'Skill' => Skill::query()->orderBy('name')->pluck('name')->all(),
+            ],
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
         ]);
     }
