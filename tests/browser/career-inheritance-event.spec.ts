@@ -146,9 +146,7 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
     await page.getByRole('spinbutton', { name: 'Stars' }).nth(6).fill('1');
 
     // Save the legacy on the builder's own contract: the button is `Confirm Inheritance` (`Save Legacy`
-    // is the wizard's). The write does not return to the builder at all — `LegacyController::update()`
-    // redirects to `legacy.compare` with the flash `Inheritance recorded.` — so that flash is the signal
-    // that the payload landed.
+    // is the wizard's). The write does not return to the builder at all.
     // The write's own redirect is the completion signal: `LegacyController::update()` reaches
     // `legacy.compare` only after the column is written, so the URL proves the write and the page
     // assertions prove the payload. The flash is a session value a second render can consume, which
