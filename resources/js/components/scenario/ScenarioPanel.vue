@@ -229,8 +229,10 @@ const emptyText = computed<string>(() =>
                 </table>
             </section>
 
-            <!-- The scenario's own reason its panels are off, where its entry declares one. `Unknown`
-                 is §49's state for a figure that does not exist, which is what an undrawn panel is. -->
+            <!-- The scenario's own reason its panels are off, where its entry declares one. This is an
+                 absence, not a figure, so the `AlertRow` owns the whole statement: the owner ruled on
+                 2026-10-09 that `ProvenanceBadge` qualifies a displayed value and `AbsenceValue`-shaped
+                 prose owns the claim that no value exists. `DESIGN.md` §4.2 says the same in terms. -->
             <div
                 v-if="props.scenario.panel_absence !== null"
                 class="flex flex-wrap items-start gap-2"
@@ -241,10 +243,6 @@ const emptyText = computed<string>(() =>
                     :text="props.scenario.panel_absence"
                     :detail="props.scenario.panel_absence_title"
                     tone="note"
-                />
-                <ProvenanceBadge
-                    state="unknown"
-                    :title="props.scenario.panel_absence_title ?? undefined"
                 />
             </div>
 

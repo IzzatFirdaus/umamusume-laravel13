@@ -71,16 +71,18 @@ test('draws the five published caps as a table of base, bonus and cap', async ({
     await expect(section.getByText(/Verified 2026-09-27/)).toBeVisible();
 });
 
-test('names the caps Confirmed and the undrawn panel Unknown, and says why in a title', async ({ page }) => {
+test('names the caps Confirmed and says why the panel is undrawn in a visible line', async ({ page }) => {
     await openGrandConcertCockpit(page);
 
     const section = page.getByRole('region', { name: 'Scenario' });
 
-    // §49's four states. The caps are published, so Confirmed; an undrawn panel has no figure at all,
-    // which is what Unknown is for rather than "we forgot". The badge's accessible name is the word,
-    // so the glyph is not what this asserts.
+    // The caps are published, so they carry Confirmed. The undrawn panel is an absence, not a figure,
+    // so the prose line owns the whole statement and no badge accompanies it: the owner ruled on
+    // 2026-10-09 that `ProvenanceBadge` qualifies a displayed value (`DESIGN.md` §4.2). The count is
+    // asserted rather than the visibility, so the chip cannot come back unnoticed, and the reason is
+    // already proven by the `title` check below.
     await expect(section.getByRole('img', { name: /^Confirmed/ })).toBeVisible();
-    await expect(section.getByRole('img', { name: /^Unknown/ })).toBeVisible();
+    await expect(section.getByRole('img', { name: /^Unknown/ })).toHaveCount(0);
 
     const sentence = section.getByText(/The mechanics for this scenario are sourced/).first();
     await expect(sentence).toBeVisible();
