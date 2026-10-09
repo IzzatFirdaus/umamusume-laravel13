@@ -102,6 +102,9 @@ Route::put('/career/setup/preflight', [PreflightController::class, 'store'])->na
  */
 Route::get('/career/snapshot', [SnapshotController::class, 'entry'])->name('career.snapshot');
 Route::get('/career/snapshot/setup', [SnapshotController::class, 'setup'])->name('career.snapshot.setup');
+// The read-back between the form and the write: a GET over the submitted form, so the Trainer reads
+// exactly what will be recorded before the confirm button posts it to the commit route below.
+Route::get('/career/snapshot/review', [SnapshotController::class, 'review'])->name('career.snapshot.review');
 Route::post('/career/snapshot', [SnapshotController::class, 'store'])->name('career.snapshot.store');
 
 Route::get('/umamusume', [CatalogController::class, 'index'])->name('catalog.index');

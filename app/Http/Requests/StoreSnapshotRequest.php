@@ -6,6 +6,7 @@ namespace App\Http\Requests;
 
 use App\Enums\CareerPhase;
 use App\Enums\CareerYear;
+use App\Enums\SnapshotFieldState;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -26,6 +27,14 @@ use Illuminate\Validation\Rule;
 class StoreSnapshotRequest extends FormRequest
 {
     /**
+     * The fields whose confidence the form marks. The position fields are required and so are always
+     * Known; the state fields are the ones a Trainer reads off a client and can be unsure about.
+     *
+     * @var list<string>
+     */
+    public const STATE_FIELDS = ['speed', 'stamina', 'power', 'guts', 'wit', 'energy', 'fans', 'skill_points'];
+
+    /**
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -45,6 +54,11 @@ class StoreSnapshotRequest extends FormRequest
             'fans' => ['nullable', 'integer', 'min:0'],
             'skill_points' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:5000'],
+            // The per-field state companion: one entry per STATE_FIELDS key, and only those keys. A
+            // field with no entry is read as not provided, which is the absence the form leaves when
+            // the Trainer neither typed a number nor ticked "I don't know this value".
+            'field_states' => ['nullable', 'array'],
+            'field_states.*' => ['nullable', 'string', Rule::enum(SnapshotFieldState::class)],
         ];
     }
 }

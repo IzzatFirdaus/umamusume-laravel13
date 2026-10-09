@@ -9,6 +9,8 @@ use App\Enums\CareerPhase;
 use App\Enums\CareerYear;
 use App\Enums\RunMode;
 use App\Enums\RunStatus;
+use App\Enums\SnapshotFieldState;
+use App\Http\Requests\StoreSnapshotRequest;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Services\CareerCalendar;
@@ -21,20 +23,35 @@ use Illuminate\Support\Facades\DB;
  * position's turn index is derived through the calendar that owns the arithmetic and stored on the
  * run - a stored position wins over a derived one, which is the whole point of the column.
  *
- * The snapshot's current state rides the run's own turn log: when the Trainer entered any stat, the
- * action writes one turn entry at the position's turn carrying what was read. That is not a workaround
- * - the entry records what the client showed at that turn, which is exactly what a turn entry is -
- * and it is why the run then needs no new read path at all: every surface that reads the run's latest
- * turn reads the imported values, and the run's next turn is the one after the position.
+ * The snapshot's current state rides the run's own turn log: when the Trainer read all five core stats,
+ * the action writes one turn entry at the position's turn carrying what was read. That is not a
+ * workaround - the entry records what the client showed at that turn, which is exactly what a turn
+ * entry is - and it is why the run then needs no new read path at all: every surface that reads the
+ * run's latest turn reads the imported values, and the run's next turn is the one after the position.
+ * A reading that marks any core stat Unknown or Not provided cannot form a complete turn row, so no
+ * entry is written and the per-field states on the stored position are the record.
  */
 final class CreateSnapshotRun
 {
+    /**
+     * The five stat columns a turn entry cannot be written without: the schema holds them non-null, so
+     * a reading that does not carry all five cannot form a complete turn row and no entry is written.
+     */
+    private const CORE_STATE_FIELDS = ['speed', 'stamina', 'power', 'guts', 'wit'];
+
+    /**
+     * The state fields whose columns are nullable, so a complete entry may carry them or omit them.
+     */
+    private const OPTIONAL_STATE_FIELDS = ['energy', 'fans', 'skill_points'];
+
     /**
      * @param  array<string, mixed>  $data  the request's validated payload
      */
     public function handle(array $data): TrainingRun
     {
         return DB::transaction(function () use ($data): TrainingRun {
+            $states = $this->fieldStates($data);
+
             $turnIndex = CareerCalendar::turnIndexFor(
                 CareerYear::from((int) $data['career_year']),
                 (int) $data['career_month'],
@@ -46,6 +63,7 @@ final class CreateSnapshotRun
                 'month' => (int) $data['career_month'],
                 'phase' => (string) $data['career_phase'],
                 'turn_index' => $turnIndex,
+                'field_states' => $states,
             ]);
 
             $run = TrainingRun::create([
@@ -58,18 +76,9 @@ final class CreateSnapshotRun
                 'career_position_source' => 'imported',
             ]);
 
-            $state = array_filter([
-                'speed' => $data['speed'] ?? null,
-                'stamina' => $data['stamina'] ?? null,
-                'power' => $data['power'] ?? null,
-                'guts' => $data['guts'] ?? null,
-                'wit' => $data['wit'] ?? null,
-                'energy' => $data['energy'] ?? null,
-                'fans' => $data['fans'] ?? null,
-                'sp' => $data['skill_points'] ?? null,
-            ], static fn (mixed $value): bool => $value !== null);
+            $state = $this->completeEntryState($data, $states);
 
-            if ($state !== []) {
+            if ($state !== null) {
                 TurnEntry::create($state + [
                     'training_run_id' => $run->id,
                     'turn' => $turnIndex,
@@ -78,5 +87,88 @@ final class CreateSnapshotRun
 
             return $run;
         });
+    }
+
+    /**
+     * A complete turn entry for the snapshot, or null when one cannot be formed honestly.
+     *
+     * The five core stats are non-null in the schema, so a reading that marks any of them Unknown or
+     * Not provided cannot become a turn row: filling the gap with a zero would print a number the
+     * Trainer never read, which is the guess the snapshot flow exists to refuse. In that case the
+     * per-field states on the stored position are the record, and no turn entry is written.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<string, string>  $states
+     * @return array<string, int>|null
+     */
+    private function completeEntryState(array $data, array $states): ?array
+    {
+        $state = [];
+
+        foreach (self::CORE_STATE_FIELDS as $field) {
+            $value = $this->knownValue($data, $states, $field);
+
+            if ($value === null) {
+                return null;
+            }
+
+            $state[$field] = $value;
+        }
+
+        foreach (self::OPTIONAL_STATE_FIELDS as $field) {
+            $value = $this->knownValue($data, $states, $field);
+
+            if ($value !== null) {
+                $state[$field === 'skill_points' ? 'sp' : $field] = $value;
+            }
+        }
+
+        return $state;
+    }
+
+    /**
+     * The integer a field carries when the Trainer marked it Known, or null otherwise.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<string, string>  $states
+     */
+    private function knownValue(array $data, array $states, string $field): ?int
+    {
+        if (($states[$field] ?? null) !== SnapshotFieldState::Known->value) {
+            return null;
+        }
+
+        $value = $data[$field] ?? null;
+
+        return ($value === null || $value === '') ? null : (int) $value;
+    }
+
+    /**
+     * Each state field's confidence, defaulted from whether a value came with it.
+     *
+     * A form that posts no companion map is the flat shape the action has always taken, and there a
+     * present value is Known and an absent one is Not provided. An explicit map wins: it is how the
+     * review screen's "I don't know this value" survives into the store as a state of its own.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, string>
+     */
+    private function fieldStates(array $data): array
+    {
+        $provided = is_array($data['field_states'] ?? null) ? $data['field_states'] : [];
+
+        $states = [];
+
+        foreach (StoreSnapshotRequest::STATE_FIELDS as $field) {
+            $explicit = is_string($provided[$field] ?? null)
+                ? SnapshotFieldState::tryFrom($provided[$field])
+                : null;
+
+            $states[$field] = ($explicit ?? (($data[$field] ?? null) === null || ($data[$field] ?? null) === ''
+                ? SnapshotFieldState::NotProvided
+                : SnapshotFieldState::Known))->value;
+        }
+
+        return $states;
     }
 }
