@@ -12,8 +12,11 @@ use App\Models\Umamusume;
 use App\Services\Advisor\TrainerAdvisor;
 use Inertia\Testing\AssertableInertia as Assert;
 
-/*
- * Slice 23, the finale's payload vocabulary (`docs/Our-Grand-Concert-plan.md` §9 E8).
+ /*
+ * The finale's payload vocabulary, sourced from `app/Services/Scenario/FinaleReader.php` (the one
+ * reader behind `finale_state` on the Cockpit at `CockpitController.php:678` and `finale` on the
+ * Career Result at `ResultController.php:72`), and the determinations recorded in the plan's
+ * Slice 19 and Slice 20 bodies at `docs/Our-Grand-Concert-plan.md:786` and `:811`.
  *
  * Before this commit one word answered two questions on two screens. `scenario.finale` on the Cockpit
  * was what `config/scenarios.php` declares a scenario composes, and it is null for three of the four
