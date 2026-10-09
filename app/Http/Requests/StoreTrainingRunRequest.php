@@ -65,6 +65,15 @@ class StoreTrainingRunRequest extends FormRequest
             'trainee_rarity' => ['nullable', 'integer', 'between:1,3'],
             'potential_level' => ['nullable', 'integer', 'between:1,5'],
             /*
+             * The trainee's growth-rate row as the Trainer reads it off the card, keyed by the stat
+             * matrix so a hand-made POST cannot store a sixth stat. Entered, never derived: no
+             * catalogue holds a growth figure (the trainee filter omits one for that reason), so a
+             * stored bag is the only source. Sparse: a stat with no growth is simply absent, and a
+             * run that stated none stores null rather than an invented row of zeroes (D-220).
+             */
+            'growth_rate' => ['nullable', 'array:'.implode(',', self::stats())],
+            'growth_rate.*' => ['nullable', 'integer', 'between:0,30'],
+            /*
              * The Grade Point period the Trainer reports as live (US-10, ADR-0003).
              * Entered, never derived (D-270): nothing in the corpus names a formula
              * that puts a career in a period, so "null until set" is the honest state
@@ -150,5 +159,15 @@ class StoreTrainingRunRequest extends FormRequest
     public static function scenarios(): array
     {
         return array_keys(config('scenarios.scenarios'));
+    }
+
+    /**
+     * The stat matrix, the only keys a run-level stat bag may carry.
+     *
+     * @return list<string>
+     */
+    public static function stats(): array
+    {
+        return array_values((array) config('scenarios.stat_order'));
     }
 }

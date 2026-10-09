@@ -56,6 +56,11 @@ use Illuminate\Support\Carbon;
  * @property int|null $trainee_rarity the trainee's rarity (1..3) as the Trainer read it; null until
  *                                    they say, never derived from the card layer
  * @property int|null $potential_level the trainee's potential level (1..5); null until stated
+ * @property array<string, int|null>|null $growth_rate the trainee's growth-rate row as the Trainer
+ *                                                     read it off the card, keyed by the stat matrix
+ *                                                     (`config('scenarios.stat_order')`), each a
+ *                                                     percentage or null; null until stated, never
+ *                                                     derived, since no catalogue holds a figure
  * @property int|null $current_objective_index the Grade Point period the Trainer
  *                                             reports as live (1..4, US-10); null
  *                                             until they say, which the meter shows
@@ -81,7 +86,7 @@ use Illuminate\Support\Carbon;
  *                                       run with a Legacy selection stays comparable before it is
  *                                       filed)
  */
-#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
 class TrainingRun extends Model
 {
     /**
@@ -1064,6 +1069,7 @@ class TrainingRun extends Model
             'shop_resets_in' => 'integer',
             'legacy_selection' => 'array',
             'build_target' => 'array',
+            'growth_rate' => 'array',
             'imported_at' => 'datetime',
             'career_position' => CareerPositionCast::class,
             'mode' => RunMode::class,
