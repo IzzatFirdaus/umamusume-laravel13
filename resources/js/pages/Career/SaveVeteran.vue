@@ -243,9 +243,9 @@ function save(): void {
                 <ul v-else class="mt-2 space-y-3">
                     <li v-for="parent in props.graph.parents" :key="parent.slot" class="text-sm">
                         <span class="font-semibold text-ink-strong">{{ parent.label }}</span>
-                        <span class="text-ink">{{ parent.name ?? 'Not recorded' }}</span>
+                        <span class="text-ink" title="You have not recorded a parent for this slot.">{{ parent.name ?? 'N/A' }}</span>
                         <span v-if="parent.is_guest" class="ml-2 text-xs text-ink-muted">(rented)</span>
-                        <span class="ml-2 text-xs text-ink-muted" title="The parent's own rank as the career recorded it.">
+                        <span class="ml-2 text-xs text-ink-muted" title="You have not recorded a rank for this parent.">
                             Rank: {{ parent.rank ?? 'N/A' }}
                         </span>
                         <ul v-if="parent.sparks.length > 0" class="mt-1 flex flex-wrap gap-2">
