@@ -1928,3 +1928,65 @@ only. It does not settle what the finale row should be *titled* (KI-82, still OP
 reader belongs in `app/Services/Scenario/` at all rather than on `TrainingRun` — an Architect call, not a
 Slice 21 one. And because the blob is unchanged, nothing about the reader's *logic* was re-examined here:
 any defect inside it travelled with the restore untouched.
+
+### KI-87 The cockpit reads its finale through two queries that select different rows, and prints one scenario's client noun on all four - FILED 2026-10-09 (Slice 22 strip/reader agreement), OPEN
+
+**Status: OPEN.** Found by writing the agreement test this slice owes, not by reading the code for a
+disagreement. Both halves are pinned green in `tests/Feature/CockpitFinaleStripTest.php` at `31d4af1`,
+which is why they are filed as defects rather than asserted as intent: a passing test records what the
+code does, and here what it does is two surfaces of one page answering about different races.
+
+**Half one: the two queries do not select the same rows.** The strip asks the model's own scope, and the
+scope is shared-inclusive:
+
+```text
+app/Models/RaceCatalogSlot.php:130  public function scopeForScenario(Builder $query, string $scenarioKey): Builder
+app/Models/RaceCatalogSlot.php:133      $q->whereNull('scenario_key')->orWhere('scenario_key', $scenarioKey);
+
+app/Services/Scenario/FinaleReader.php:44   ->where('scenario_key', $run->scenarioKey())
+```
+
+Measured on the dev catalogue through the app's own model on 2026-10-09, `race_catalog_slots` where
+`year = RaceCatalogSlot::YEAR_FINALE` holds six mandatory rows: two with `scenario_key` NULL (`URA Finals
+Qualifier`, `URA Finals Semifinal`) and one per scenario (`Twinkle Star Climax` for `trackblazer`, `URA
+Finals Final (Aoharu)` for `unity_cup`, `URA Finals Final (Grand Live)` for `our_grand_concert`, `URA
+Finals Final (URA)` for `ura_finale`). These are engine-owned catalogue rows, written by
+`app/Actions/StoreRaceCatalogSlots.php` through `PipelineRunner`, and no seeder holds them: the URA corpus
+at `database/seeders/data/ura-races.json` fills `scenario_slots` through `ScenarioSlotSeeder.php`, which
+is a different table. So the shared rows are the pipeline's own answer about the career calendar, and the
+strip lists them as obligations still to come while the reader never sees them. One run can complete the
+shared Qualifier and be told, on the same screen, that its finale has no outcome. That is the case the
+third test pins.
+
+Which reading is right is not this slice's call. `ADR-0015` makes the point that where a validator and a
+renderer read the same number, both must call the same owner with the same argument; here two renderers
+read the same *row set* with different arguments, and the question "is the finale one keyed row, or the
+Finale year's whole block" has no answer in the repository's documents. Nothing today invents it.
+
+**Half two: one label for four scenarios.** `FinaleReader.php:69` returns `'label' => 'Grand Concert'`
+whatever the run's scenario is, and that value is what three surfaces print: the baseline row
+(`ScenarioPanel.vue:266`), the advisor's proximity line (`RecommendationCard.vue`) and the Career Result
+block. A Unity Cup career therefore reads "Finale: Grand Concert" and "The Grand Concert is 4 turns
+away" while its own catalogue row is titled "URA Finals Final (Aoharu)", and a `trackblazer` career reads
+the same noun over a row called "Twinkle Star Climax". The line's own comment at `:27-30` says the value
+is hardcoded until KI-82 closes and that the upgrade path is `$slot->title`; what that note does not
+cover is that the hardcoding is scenario-blind, so on the day KI-82 closes three other scenarios are
+still wearing Our Grand Concert's name. Displayed copy is the Lore Guardian's C-4 territory (`AGENTS.md`
+§5, escalation 3), and the fix is a per-row label or a per-scenario one, neither of which is a decision
+to take inside a slice.
+
+`tests/Feature/CockpitFinaleStripTest.php` asserts the word on a `unity_cup` run with a comment marking
+it as a defect to move rather than a value to keep, so the day either half closes the test trips and
+points at this entry.
+
+**Closure owed.** One ruling on the row set (does the finale mean the keyed row or the Finale year's
+mandatory rows, and which of the two queries becomes the owner both surfaces call?) and one on the label
+(per-scenario noun, catalogue title, or no noun at all). The naming half of the same collision, the
+`scenario.finale` versus `scenario.finale_state` key pair, is not waiting on a ruling: it is renamed in
+tree by Slice 23 and is not part of this entry's closure.
+
+**What closure would not cover.** It does not settle KI-82, which is about the stored *title* of the
+Grand Concert row and stays OPEN beside this. It does not restore the coverage the deleted suites held
+(KI-84). And closing the two questions here would not make the cockpit's two regions agree in *timing*:
+an exhausted grid legitimately reads as reached to the reader and as no-turn-to-decide to the strip, and
+that case is pinned as correct rather than as a defect.
