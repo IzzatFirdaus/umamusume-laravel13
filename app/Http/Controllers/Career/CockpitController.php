@@ -618,9 +618,7 @@ class CockpitController extends Controller
             'recommendations' => [],
             'recommendations_absence' => 'No source this tool reads states scenario advice, so none is offered here. The advisor ranks the turn you are deciding.',
             'finale' => $def['finale'] ?? null,
-            'finale_absence' => isset($def['finale'])
-                ? null
-                : 'This scenario declares no finale structure, so none is shown.',
+            'finale_absence' => $this->finaleAbsence($run, $def),
             // The five Trackblazer-specific sections (plan §9 E4). Each is null for any scenario
             // whose matrix does not turn the matching flag on, so the section's key set stays
             // uniform across the four Global scenarios and the ScenarioPanelTest pin holds.
@@ -848,6 +846,46 @@ class CockpitController extends Controller
         }
 
         return 'No published client name. "Twinkle Star Climax" is §7 conflict row 31 of the reference guide, marked UNVERIFIED, so the export label "Trackblazer" stands until the guide publishes a client string.';
+    }
+
+    /**
+     * Why no finale structure is shown, where the two answers are different claims.
+     *
+     * The config's `finale` key describes a composition the shell could draw. An absent key has never
+     * meant the career has no finale, and for the four `[Global]` scenarios it would be false: each
+     * carries exactly one scenario-scoped row in the finale block
+     * (`GametoraRaceCatalogParser::GLOBAL_FINALS_BY_SLOT`), and Our Grand Concert's is the row KI-71
+     * corrected to `our_grand_concert` at `480b711`. Telling that Trainer the scenario "declares no
+     * finale structure" reads as though the career ends without an ending, which is the false-absence
+     * shape the bar's disclosure rule refuses (D-220).
+     *
+     * The row's presence is read from the catalogue rather than from the config entry, because the
+     * catalogue is where the fact lives and `config/scenarios.php` stays the only place a scenario
+     * name enters the layout path (D-240). No `finale` key is invented to make the sentence pass:
+     * nothing reads that key's contents today, so a value there would be dead config.
+     *
+     * What is shown is still nothing beyond the calendar row, and the sentence says so.
+     *
+     * @param  array<string, mixed>  $def
+     */
+    private function finaleAbsence(TrainingRun $run, array $def): ?string
+    {
+        if (isset($def['finale'])) {
+            return null;
+        }
+
+        if (! $run->hasScenario()) {
+            return 'This scenario declares no finale structure, so none is shown.';
+        }
+
+        $onCalendar = RaceCatalogSlot::query()
+            ->where('scenario_key', $run->scenarioKey())
+            ->where('year', RaceCatalogSlot::YEAR_FINALE)
+            ->exists();
+
+        return $onCalendar
+            ? 'The finale is on the career calendar as a mandatory race; this scenario declares no structure beyond it, so nothing further is drawn.'
+            : 'This scenario declares no finale structure, so none is shown.';
     }
 
     /**
