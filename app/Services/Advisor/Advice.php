@@ -18,6 +18,7 @@ final readonly class Advice
 {
     /**
      * @param  list<AdvisorOption>  $options  every option that could be derived, ranked or not
+     * @param  array{label: string, state: string, turns_away: int|null}|null  $finale_context
      */
     public function __construct(
         public ?string $band,
