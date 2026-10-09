@@ -104,6 +104,8 @@ final class TrainerAdvisor
      *
      * `turns_away` counts inclusively from the turn being decided, so the turn the block arrives on
      * reads as 1 and not 0; it is null once the block is behind the run.
+     *
+     * @return array{label: string, state: string, turns_away: int|null}|null
      */
     private function finaleContext(?TrainingRun $run): ?array
     {
