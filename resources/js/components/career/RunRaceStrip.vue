@@ -81,7 +81,7 @@ const thisTurn = computed(() => props.strip.this_turn);
             <p v-if="props.strip.empty.run" class="mt-1 text-sm text-ink">
                 {{ props.strip.empty.run }}
                 <a :href="props.strip.links.run_url" class="inline-flex min-h-11 items-center font-medium text-ink-strong underline">
-                    Go to the run record screen
+                    Go to the Cockpit
                 </a>
             </p>
 

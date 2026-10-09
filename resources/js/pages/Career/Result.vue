@@ -130,7 +130,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                 <a
                     :href="props.run.run_url"
                     class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
-                >Run record</a>
+                >Cockpit</a>
             </div>
         </section>
 
@@ -322,7 +322,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                     <template v-if="!props.finale_state.reached">: not yet reached.</template>
                     <template v-else-if="props.finale_state.outcome === null">
                         : reached, and no outcome is recorded yet. Enter it on
-                        <a :href="props.run.run_url" class="underline">the run record</a>.
+                        <a :href="props.run.run_url" class="underline">the Cockpit</a>.
                     </template>
                     <template v-else>
                         : {{ props.finale_state.outcome }}<template v-if="props.finale_state.placement !== null">, {{ props.finale_state.placement }}</template><template v-if="props.finale_state.turn !== null"> on turn {{ props.finale_state.turn }}</template>.
@@ -343,7 +343,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                     <a
                         :href="props.run.run_url"
                         class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
-                    >Run record</a>
+                    >Cockpit</a>
                 </div>
 
                 <!-- The door to `SCREEN-020`. It is a link only when the career actually finished: for an

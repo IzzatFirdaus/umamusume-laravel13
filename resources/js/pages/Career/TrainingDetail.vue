@@ -279,8 +279,8 @@ const capFor = (label: string): number =>
                 The advisor recommends
                 <span class="font-semibold text-ink-strong">{{ props.advisor.action }}</span>
                 for this turn. It is not one of the five training actions, so no card below carries the
-                marker; record it on the run screen.
-                <a :href="props.run.run_url" class="font-medium text-ink-strong underline">Run record</a>
+                marker; record it on the Cockpit.
+                <a :href="props.run.run_url" class="font-medium text-ink-strong underline">Cockpit</a>
             </p>
 
             <p v-else class="mt-1 text-sm text-ink">

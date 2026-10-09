@@ -210,7 +210,7 @@ const bonusTitle =
                     A burst on the Wit facility grants
                     {{ props.scenario.team.special_training.wit_burst_energy_bonus }} Energy recovery.
                 </p>
-                <p class="mt-2 text-xs text-ink-muted" title="No column records facility levels, per-member training state or Special Training gains; the run record screen's turns carry what the Trainer entered.">
+                <p class="mt-2 text-xs text-ink-muted" title="No column records facility levels, per-member training state or Special Training gains; the Cockpit's turns carry what the Trainer entered.">
                     Per-facility levels and per-member training state are not recorded here.
                 </p>
             </div>
