@@ -37,7 +37,7 @@ The first is not done. Phase 2 closes when D9's remaining work lands.
 | D1 inheritance HTTP 500 | **Fixed** | 1.1 | `291f6ea` | `CareerInheritanceEventTest` (14 cases) |
 | D2 blank trailing Spark row | **Fixed** | 1.2 | `a4b2b26` | `CareerLegacyDeckStepsTest` (1 new case) |
 | D3 rented/friend flag not persisted | **Fixed** | 1.3 | `fdebcc9` | `RunDeckTest`, `SupportDeckBuilderTest`, `CareerPreflightTest` |
-| D4 target validation contradicts the UI | **Fixed** | 2.1 | `be02297` | `CareerBuildTargetTest` (3 new cases) |
+| D4 target validation contradicts the UI | **Fixed** | 2.1 | `be02297` | `CareerBuildTargetTest` (3 new cases); the sibling `KI-47` named in the follow-up is already **closed** |
 | D5 trainee stored-choice readback `N/A` | **Fixed** | 2.2 | `dd6dd22` | `CareerTraineeSelectTest` (1 new case) |
 | D6 turn table hides Fans/Energy | **Fixed** (browser half unrun) | 2.3 | `89e8453` | `TurnRowActionsTest` (2 new cases) |
 | D7 wizard step numbering skips 3 | **Fixed** (browser half unrun) | 2.4 | `6d53ffc` | `GuidedTurnOnRunViewTest` (1 new case) |
@@ -90,6 +90,18 @@ whole target is now optional and all or nothing: nothing entered means no field 
 `payload()` answers null (which clears the column); any value makes every field required. The
 no-target downstream path needed no change (`TrainerAdvisor::deficits()` already answers nulls).
 
+**The sibling named in the follow-up is already closed, and that premise did not hold.** The
+instruction was to reference `KI-47` as "the still-open sibling" — the no-scenario band/form ceiling
+disagreement (`/1400` on the bar against `max=1200` on the form). It is not open. `KI-47` was ruled by
+the human owner on 2026-10-01 ("the band is wrong") and **closed the same day by `04658f2`**, four days
+before this remediation began, which is why it is absent from `KNOWN-ISSUES.md`. The lesson is already
+carried at the surface: `BuildTargetController`'s docblock names `ScenarioCaps::forRun` as the authority
+(`ADR-0015`, KI-47) and `StoreTurnEntryRequest`'s own comment states a no-scenario run "keeps 1200", so
+band and form read the same number. No open register entry covers a band/form ceiling disagreement, so
+D4 may read as fully closed. Recorded rather than silently complied with, because writing "still open"
+would put a false status in this record. The band's current rendered number was **not** re-measured in a
+browser in this session.
+
 ### D5 — trainee readback: Fixed
 
 The step's `Stored choice:` readout derived the name from `trainees.data`, the paginated and filtered
@@ -136,14 +148,49 @@ to **the same route** (`runs.turns.store`) through **the same Form Request**
 validation set and one normalization contract. `TrainingDecisionController` says so itself: "The
 write is the guided turn's, unchanged."
 
-What is left of the finding is **presentational**: the two forms render the same fields under
-different labels (`Speed` on the run record, `Speed total *` on the decision screen), so a Trainer
-meets the same form twice and has to work out which one to submit. Unifying that means one shared
-field-definition component used by both surfaces, and naming on each whether it creates or edits a
-turn. That is a real refactor and it was not started, because a half-migrated pair of forms is worse
-than the duplication it would remove.
+What is left of the finding is **presentational**. The backend diagnosis below is the artifact the
+follow-up's §6 asked for: written before any code, so the refactor is designed rather than improvised.
 
-**Remaining, explicitly.** One shared turn-entry field definition used by both surfaces; the label
+**Backend diagnosis (2026-10-09).** The persistence contract is already single, and was before this
+remediation. One route, one Form Request, one controller method, one table:
+
+| Layer           | Owner                                                                |
+| --------------- | -------------------------------------------------------------------- |
+| Route           | `POST /training-runs/{run}/turns` -> `runs.turns.store` (`routes/web.php:175`) |
+| Form Request    | `App\Http\Requests\StoreTurnEntryRequest`                            |
+| Controller      | `TrainingRunController::storeTurn()` (`:1769`)                       |
+| Stored row      | `turn_entries`                                                       |
+
+Three surfaces post to that route and are validated by that request:
+
+| Surface                  | Component                    | Field-list source                                                       | Stat label       |
+| ------------------------ | ---------------------------- | ----------------------------------------------------------------------- | ---------------- |
+| Run record, raw hatch    | `Runs/Show.vue:720-732`      | `const statWords = ['speed', …, 'wit']` (`:119`)                         | `Speed *`        |
+| Training decision        | `Career/TrainingDetail.vue:304-366` | `const statFields = [{ name: 'speed', label: 'Speed' }, …]` (`:92-98`) | `Speed total *`  |
+| Cockpit correction       | `Career/Cockpit.vue`         | `const statFields = [{ name: 'speed', label: 'Speed' }, …]` (`:189`)     | `Speed`          |
+
+So the duplication is **three-way, not two-way**: the same five-stat list is declared three times,
+twice under the identical name `statFields` with the same `{ name, label }` shape, and the labels
+drift. Each surface also declares its own extras (`Show.vue` adds `sp` and `condition`;
+`TrainingDetail.vue` adds `sp`, `energy` and `fans`), and that part genuinely differs, so it stays
+per-surface.
+
+**The shape the fix takes, and the alternative rejected.** One shared field-definition module (a plain
+exported constant read by all three surfaces), not a shared form component and not a base class. That
+is `ADR-0018`'s reasoning when it chose `App\Services\PageSize` over a base `FormRequest`: the surfaces
+agree on the field list and the labels and disagree on everything that matters — which extras they
+offer, whether they preview or write, what they call themselves. A shared form component would push a
+union of three behaviours into one place, and the drift it removed would return as a props contract
+with a flag per surface. `ADR-0018`'s rejected base-class alternative is the precedent, recorded with
+the same specificity.
+
+**What cannot be moved yet.** Of the four files the unification touches, three carry another session's
+uncommitted work: `TrainingRunController.php`, `StoreTurnEntryRequest.php`, `Runs/Show.vue` and
+`Career/Cockpit.vue` are all modified in the working tree by a concurrent session; only
+`Career/TrainingDetail.vue` is clean. `ADR-0018` left two copies of the clamp in place for exactly this
+reason, and the same rule applies: the unification waits for those files to be free.
+
+**Remaining, explicitly.** One shared turn-entry field definition read by all three surfaces; the label
 vocabulary reconciled (`Speed` on the run record against `Speed total *` on the decision screen); and
 each surface naming whether it creates or edits a turn. Until that lands, Phase 2's canonical-contract
 gate stays open. **D9 is not Fixed.**
@@ -198,6 +245,110 @@ unchanged from `HEAD`.
 
 **No browser claim in this record is a pass, and Phase 3 must not open until one is.** D6 and D7 stay
 "Fixed (browser half unrun)"; their assertions in `run-detail.spec.ts` remain written and unexecuted.
+
+### Correction to finding 2, later the same day — the addressing fix landed (Path B)
+
+The paragraph above recorded the re-addressing as "not attempted here" and the spec as "unchanged from
+`HEAD`". Both have since changed: the fix landed, and the spec file is no longer at `HEAD`.
+
+**The path was decided by a check, not by preference.** `Legacy/Builder.vue` carries an unstaged peer
+hunk in this shared worktree (a `:model-value` binding on the `AncestryNode` invocation, ~`:243`), so the
+component fix ("Path A") was not available — a file carrying another session's uncommitted work is not
+touched in this remediation. The spec-only fix ("Path B") was taken instead and touched no component.
+
+**The `name` gap is a convention gap, not a functional one (Case B).** Verified before deciding:
+`Legacy/Builder.vue` does render a real `<form>` (`:207`) but submits through Inertia's `useForm` with
+`@submit.prevent="submit"`, never native submission and never `FormData(form)`; `Career/LegacySelect.vue`
+has no `<form>` element at all; and `FormData` appears nowhere on either surface (`resources/js` carries
+it only in `GuidedStep.vue:110` and `Import.vue`'s `forceFormData`). A `name` attribute on the rank,
+ancestor, rented or Spark controls is therefore an HTML-convention improvement, not a load-bearing
+contract, and adding it would have been a production change made to accommodate a test. It is recorded
+as owed, not claimed as a defect.
+
+**Path B had to fix two independent misaddresses, not one.**
+
+1. **The field addresses.** The rank, ancestor, rented and Spark controls carry `v-model` and an `:id`
+   and no `name`; only the parent pick carries one, because `AncestryNode` is handed `controlName`
+   (plan §4.1 item 10, `KNOWN-ISSUES.md` KI-69). The fixture now addresses them by `:id`
+   (`#rank-parent_a`, `#ancestor-parent_a-0`) and by role plus the label the wrapping `<label>` gives
+   them ("Kind", "Applies to", "Stars").
+2. **The save contract.** The spec waited on a `Save Legacy` button and a `Saving the Legacy…` status
+   toast. Those belong to the **wizard** (`Career/LegacySelect.vue:451,454`); the surface this fixture
+   actually navigates to, the run-scoped builder, has `Confirm Inheritance` (`:449`) and no
+   `role="status"` element at all. The wait is now the disclosure flipping to the recorded state, which
+   is the signal a Trainer reads.
+
+The parent pick is left unchosen: this suite's scratch database holds no Veterans (`KI-69` class 3), so
+the roster renders no options, and `legacies.*.legacy_id` is nullable, so the payload is valid without
+one. The picker's own contract is covered by `ancestry-node-picker.spec.ts`, a component-level case
+mounted for exactly that reason.
+
+**A third defect in the same spec, found by reading the page rather than by the run.** The case
+`predicted section aggregates sparks across both parents and grandparents` asserts `White: 2 Sparks` and
+`Scenario: 1 Spark`, but the fixture enters only blue, pink and green Sparks, and
+`InheritanceEventController::predictedSection()` (`:195-204`) emits a kind **only when at least one Spark
+of it exists**. Those two assertions cannot pass against any fixture entering blue/pink/green only. They
+are left unchanged rather than fitted to the fixture, and are recorded here as an open defect in this
+spec.
+
+**The one authorized run (2026-10-09).** `PLAYWRIGHT_PORT=8233 npx playwright test
+tests/browser/career-inheritance-event.spec.ts`. The fixture's re-addressing **worked**: the run was
+created, twenty turns logged, and every re-addressed control was filled and persisted. The compare
+surface the write redirects to reads `Parent A rank 3`, `Parent A ancestors Symboli Rudolf, Mejiro
+McQueen`, `Parent B rank 2`, `Rented from a friend B`, `Blue Sparks 2`, `Pink Sparks 1`, `Green Sparks
+1` — the payload `StoreLegacySelectionRequest::payload()` stored. So `#rank-parent_a`,
+`#ancestor-parent_a-0`, the "Kind"/"Applies to"/"Stars" role addresses and the "Rented from a friend"
+checkbox all resolve, and the fixture's data entry is sound.
+
+The run still **failed**, on a third misaddress in the same fixture: the completion wait.
+`getByText('This run already has a Legacy selection recorded.')` never resolved, because
+`LegacyController::update()` does not return to the builder — it redirects to
+`route('legacy.compare', ['runs' => [$run->id]])` with the flash `Inheritance recorded.`
+(`LegacyController.php:248-250`). The DOM snapshot Playwright captured on failure **is** that compare
+page, carrying the flash, which is how the redirect was identified rather than guessed. The write
+succeeded; the wait looked in the wrong place.
+
+**The fix is one line and is deliberately not applied here.** The wait becomes the write's own signal:
+
+```ts
+await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
+await expect(page.getByText('Inheritance recorded.')).toBeVisible(WRITE);
+```
+
+It is left for the next slice because the follow-up's §4 is explicit that a new issue found by the run
+is recorded and fixed as a separate slice, never folded into the same commit, and a second run to
+verify it is outside this session's budget.
+
+**The run split 4/4, and the second failure was caused by a concurrent session, not by this spec.**
+Cases 1-4 reached the completion wait above. Cases 5-8 failed **earlier**, at the fixture's
+`page.waitForURL(/\/training-runs\/\d+$/)` after `Create run`, having navigated to
+`/training-runs/{N}/cockpit` instead of `/training-runs/{N}`. The cause is a peer's uncommitted edit
+landing **during** the run: `git diff -- app/Http/Controllers/TrainingRunController.php` shows that
+session's in-flight cockpit cutover, which rewrites every `runs.show` redirect to `runs.cockpit`,
+including `store()`'s:
+
+```diff
+-        return redirect()->route('runs.show', $run)->with('status', 'Run created.');
++        return redirect()->route('runs.cockpit', $run)->with('status', 'Run created.');
+```
+
+The change is uncommitted, so the running `php -S` served the old redirect for the first four cases and
+the new one for the last four once the peer saved the file. That is the KI-70/KI-74 class — two sessions
+on one checkout — and it is why one fixture produced two different failures inside one run.
+
+**The second fix, also one line, also not applied.** The address has to survive that cutover, because
+`HEAD` still redirects to `runs.show` while the peer's tree redirects to `runs.cockpit`:
+
+```ts
+await page.waitForURL(/\/training-runs\/\d+(\/cockpit)?$/, WRITE);
+```
+
+Recording it rather than hardening the fixture against a peer's uncommitted work is deliberate: the spec
+should be corrected once the cutover lands, not fitted to a working tree that is mid-flight.
+
+**Net result of the one authorized run.** 8 of 8 failed, exit 1, ~13.4 minutes of test time (about 15
+with the harness's migrate-and-seed). No case reached its own assertions. Nothing here is a browser
+pass, so D6 and D7 remain "Fixed (browser half unrun)", and Phase 3 stays closed.
 
 ## Schema
 
