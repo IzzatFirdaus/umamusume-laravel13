@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Domain\Career\CareerPosition;
+use App\Domain\Career\CareerPositionCast;
 use App\Enums\PerformanceType;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
@@ -14,6 +16,7 @@ use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\TurnEvents\RaceFatiguePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\TurnEvents\TeamRankPayload;
+use App\Services\CareerCalendar;
 use Database\Factories\TrainingRunFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
@@ -37,6 +40,8 @@ use Illuminate\Support\Carbon;
  *                                       a complete run rather than a missing field
  * @property string|null $scenario
  * @property RunStatus $status
+ * @property CareerPosition|null $career_position the run's stored position, read through its cast;
+ *                                                null on every new-career run, which derives
  * @property int|null $inheritance_parent_a_id
  * @property int|null $inheritance_parent_b_id
  * @property array<array-key, mixed>|null $legacy_selection the Legacy Select read-back as the
@@ -70,7 +75,7 @@ use Illuminate\Support\Carbon;
  *                                       run with a Legacy selection stays comparable before it is
  *                                       filed)
  */
-#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
 class TrainingRun extends Model
 {
     /** @use HasFactory<TrainingRunFactory> */
@@ -327,7 +332,7 @@ class TrainingRun extends Model
     public function stripValues(): array
     {
         // The relation is read rather than re-queried when the caller already loaded it, which both hot
-        // screens do (`DashboardController::activeCareer()` and `TrainingRunController::show()` both list
+        // screens do (`DashboardController::activeCareer()` and `CockpitController::show()` both list
         // `turnEntries` in their eager load). The two queries this used to issue unconditionally — one for
         // the count, one for the last turn — are the N+1 shape `ARCHITECTURE-ESSENTIALS.md` §6 tells the
         // codebase to load against.
@@ -595,6 +600,43 @@ class TrainingRun extends Model
             'year' => self::careerYearForTurn($next),
             'turn' => ((($next - 1) % self::TURNS_PER_YEAR) + 1),
         ];
+    }
+
+    /**
+     * Where this career stands, or null when it holds no position to claim.
+     *
+     * A stored position wins: it is what a snapshot named, and deriving over it would answer the
+     * Trainer's own record with a computation. Without one the position derives from the run's latest
+     * logged turn, which is every new-career run's answer, and a run with nothing logged and nothing
+     * stored has none - pointing at Early January would tell a Trainer who has not started that they
+     * are standing in it (D-220, the same rule `nextTurnToPlay()` states).
+     *
+     * A turn outside 1..`CareerCalendar::TURNS_PER_CAREER` claims no position either: the calendar
+     * refuses to clamp a stored fact, so the derivation declines rather than inventing one.
+     */
+    public function careerPosition(): ?CareerPosition
+    {
+        if ($this->career_position !== null) {
+            return $this->career_position;
+        }
+
+        /** @var int|string|null $latest */
+        $latest = $this->turnEntries()->max('turn');
+
+        if ($latest === null || (int) $latest < 1 || (int) $latest > CareerCalendar::TURNS_PER_CAREER) {
+            return null;
+        }
+
+        return CareerPosition::fromTurnIndex((int) $latest);
+    }
+
+    /**
+     * Whether the position was named rather than derived. A snapshot is true; a new-career run
+     * deriving from its own turn count is false, which is the distinction the review screen reads.
+     */
+    public function hasImportedPosition(): bool
+    {
+        return $this->career_position !== null;
     }
 
     /**
@@ -952,6 +994,7 @@ class TrainingRun extends Model
             'legacy_selection' => 'array',
             'build_target' => 'array',
             'imported_at' => 'datetime',
+            'career_position' => CareerPositionCast::class,
         ];
     }
 
