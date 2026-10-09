@@ -97,7 +97,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
                 <span v-if="rank !== null">Rank {{ rank }}</span>
                 <template v-else>
                     <span>Rank</span>
-                    <AbsenceValue reason="You have not recorded this Legacy’s own rank." compact />
+                    <AbsenceValue reason="You have not recorded a rank for this parent." compact />
                 </template>
             </div>
             <span v-if="isGuest">Rented from a friend</span>
