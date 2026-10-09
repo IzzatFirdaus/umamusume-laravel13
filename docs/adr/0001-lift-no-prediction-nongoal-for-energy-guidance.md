@@ -68,6 +68,18 @@ Therefore:
 - **Optional: a numeric estimate, off by default.** When enabled it must render with its formula and parameters visible on the same surface, be labelled as this tool's model rather than the game's, and be stored in config rather than hardcoded. Shipping "23% risk" as bare UI copy would be a fabricated statistic, which `AGENTS.md` forbids for the Docs Writer and the Lore Guardian alike for every other artifact.
 - The 30-Energy "highly dangerous" line quoted in the owner's brief is **not in the sources** and must not appear as game fact. If the owner wants a Danger band below 30, it is recorded here as an owner ruling and attributed as such.
 
+*Dated note 2026-10-09, appended by the provenance/absence contract pass; the bullets above stand as
+written.* The optional numeric estimate this section describes is **unbuilt**, and it is unbuilt because
+there is nothing lawful for it to model: the only figure in the corpus that wants an estimate is a race
+outcome, and `PRD.md` §6.11 with `ADR-0016` keeps that out of reach. `failure_estimate` stores and restores
+an `off`/`on` preference that gates no rendering (`tests/Feature/PreferenceControlsTest.php:24` states the
+reason: "it shows no number, because there is no number"), and `TrainerAdvisor` ships the two bands. What
+the `Estimated` badge renders today is therefore this section's neighbour, not this section: a figure whose
+source is weak (a third-party guide, or contents unread), which is the mapping
+`config/reference.php:30-33` writes down. The owner ruled on 2026-10-09 to ratify that second sense as the
+shipped meaning and to leave §3's opt-in rule intact as a requirement for any future estimate, so the
+paragraph above is not withdrawn — it is unimplemented, and now labelled as such.
+
 ### 4. Recommendation must be explainable at the row level
 
 A suggested sequence is allowed, but the UI must be able to answer "why this" from the constants above. The accepted pattern is a per-suggestion reason line naming the arithmetic: *"Wit costs 0 Energy and you are at 42."* A suggestion with no derivable reason does not ship. This is R5 carried forward in a workable form rather than deleted.
