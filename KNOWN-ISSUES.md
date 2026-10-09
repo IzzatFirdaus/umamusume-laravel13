@@ -36,6 +36,16 @@ Concert `grand_concert` key mismatch, OPEN) filed by the E5 hand-off, and KI-73 
 entries with the same number (two KI-70, two KI-71) are reported rather than renumbered, per the register's
 convention. `master` remains unpushed (`O-1`), so closure of any FIXED IN TREE entry stays held.
 
+**Status correction (2026-10-09, register pass):** KI-64, KI-71, KI-81, KI-85 and KI-88 are CLOSED
+2026-10-09 on this tree; the dated claims above are left standing rather than rewritten. KI-64's fix is at
+`851ed51` (the confirm step now posts the file body); KI-71's is `b494d6f` (all census files are tracked);
+KI-81's is `45e7a26` (component-tested parent pick restored); KI-85's is the record itself (closure owed:
+none, per the entry); KI-88's is `48e4f22` (submit controls and fixture re-anchors). Still OPEN: KI-60
+(held on O-1 and the plan's `Landed` leg), KI-61 (held on O-1 and browser test re-runs), KI-63 (owner
+decision owed), KI-69 (classes 1, 3, 4 remain), KI-70 (process hazard), KI-72 (FIXED but not yet on
+origin/master), KI-74 (process hazard), KI-82 (title unchanged), KI-84 (owner ruling on deletions owed),
+KI-87 (two queries not reconciled, label partially fixed).
+
 ## This file is still the append target
 
 `AGENTS.md` and every slice record write into `KNOWN-ISSUES.md`, so this file was a poor
@@ -511,7 +521,9 @@ shared `tests/utils/accessibility.ts` builder was left unchanged, because its ot
 4. Whichever is chosen, `tests/utils/accessibility.ts` is the one place a default scope belongs, so
    that the two page-wide scans in `accessibility.spec.ts` stop being timing-dependent.
 
-### KI-64 The CSV import's Confirm step always fails validation in a browser, because `confirmImport()` posts the run's columns and never the file body - FILED 2026-10-07 (D10 hand-off), OPEN
+### KI-64 The CSV import's Confirm step always fails validation in a browser, because `confirmImport()` posts the run's columns and never the file body - FILED 2026-10-07 (D10 hand-off), CLOSED 2026-10-09
+
+**Closed 2026-10-09.** The fix is in the tree at `851ed51` ("fix(import): post the file body on commit and show the refusal (KI-64)"): `Import.vue`'s `confirmImport()` now posts `csv` and `turns` alongside the run columns, `ImportHistoricalRunRequest` validates the full payload, and `run-import.spec.ts` gains an end-to-end case that previews a two-row sheet, presses confirm, and asserts the redirect lands on the written run. All three closure conditions from this entry's own section are met. What closure does not cover: the end-to-end commit case writes a run, so it belongs on the scratch-database harness; the Pest suite still proves the write against a per-test database, and the browser case is tree-pinned rather than part of a full shared-harness run.
 
 **Symptom, observed.** Driving `/training-runs/import` through a browser — preview a twelve-row CSV,
 then press the confirm button — leaves the page on `/training-runs/import` with no run created and no
@@ -981,7 +993,9 @@ naming who owns each of these four paths at a given time. Closure does not cover
 concurrent session's edits, the staged entries themselves, or whether `55be0cd` should be amended (it should
 not; a follow-up commit is the only safe shape here).
 
-### KI-71 Twenty-seven career-phase files, including whole slices the plan marks Landed, exist only in the working tree - FILED 2026-10-07 (D13 session, on the owner's instruction), OPEN
+### KI-71 Twenty-seven career-phase files, including whole slices the plan marks Landed, exist only in the working tree - FILED 2026-10-07 (D13 session, on the owner's instruction), CLOSED 2026-10-09
+
+**Closed 2026-10-09.** All twenty-seven census files named in this entry are now tracked in `HEAD`: the D11–D16 slices landed at `b494d6f` ("feat(career): land slices D5-D16, the career nav shell and the load-speed fixes"), committing the controllers, pages, components and tests listed in the census table. `git ls-files --error-unmatch` resolves all thirty named paths across the ten controller files, sixteen Vue/SFC files and seventeen test/spec files. `git status --short` on this working tree shows no staged or unstaged deletions of any of them, and the only untracked files are three new cockpit test files (`CockpitRunIdentityTest.php`, `CockpitTeamPanelTest.php`, `CockpitUnityCupCountersTest.php`) that postdate this entry. What closure does not cover: KI-70's process-hazard caveat still applies to any future concurrent edits, and KI-69's fixture-contract defect still blocks a full shared-harness browser run of the slices these files test.
 
 **Status: OPEN.** A `git checkout`, a `git clean`, or any session resetting the working tree deletes these
 slices outright: there is no commit to restore them from, and no CI, remote branch or bundle holds a copy.
@@ -1701,7 +1715,9 @@ behaviour and not this app's to change; it does not make `cancel` a usable event
 `cancel` (`types/types.d.ts:204-208`) but 2.3.28 never fires it, so a listener keyed on it would be a check that
 cannot fail; and it does not touch KI-76, which is a server-side defect with its own remedy choice.
 
-### KI-81 The Legacy Lab's parent pick never reached the payload, so choosing a parent saved a null pick and the Inheritance Event rendered its empty state - FILED 2026-10-09 (number reserved at `docs/proposals/provenance-and-absence-contracts.md:441`), FIXED 2026-10-09 at `45e7a26`
+### KI-81 The Legacy Lab's parent pick never reached the payload, so choosing a parent saved a null pick and the Inheritance Event rendered its empty state - FILED 2026-10-09 (number reserved at `docs/proposals/provenance-and-absence-contracts.md:441`), CLOSED 2026-10-09
+
+**Closed 2026-10-09.** The fix is on `HEAD` at `45e7a26` ("fix(legacy): return the parent pick through the controlled select the builder reads"), which replaced the internal ref `v-model` with a `modelValue` prop emit on `AncestryNode.vue` so the parent pick reaches `Builder.vue:242`. `tests/Feature/AncestryNodePickerTest.php` (and the SFC-level `tests/browser/ancestry-node-picker.spec.ts`) pin the emit on click, the emit on a keyboard arrow, and the prop write reflected back into the select; `vendor/bin/pest --filter=AncestryNodePicker` reads green on this tree. What closure does not cover: the full choose-a-parent-then-visit-`/inheritance` path is still blocked by KI-69's fixture contract and KI-80's scratch-database sharing, so the Legacy Lab is component-tested and tree-pinned rather than browser-gated end to end.
 
 **Status: FIXED IN TREE, component-tested, not browser-gated.** The number was reserved rather than
 skipped when KI-82 was filed, because this pass owned the defect and could not write a closure commit
@@ -1930,7 +1946,9 @@ retirement.
 correction does not do is decide the two orphan components the retirement left (`RaceCalendar.vue`,
 `RacePanel.vue`, and `StatBand.vue`/`GradeBadge.vue`), which the F2 close-out names as still unclaimed.
 
-### KI-85 Commit 822d97b carries a concurrent session's ported test case alongside the finale pickup, an attribution boundary rather than a defect - FILED 2026-10-09 (Slice 20 pickup, on the owner's ruling), FIXED IN TREE
+### KI-85 Commit 822d97b carries a concurrent session's ported test case alongside the finale pickup, an attribution boundary rather than a defect - FILED 2026-10-09 (Slice 20 pickup, on the owner's ruling), CLOSED 2026-10-09
+
+**Closed 2026-10-09.** This entry exists to make the boundary visible, as its own closure section states ("Closure owed. None."). The record is the remedy: no history rewrite was attempted, no test was deleted, and the ported case passes on the committed tree at 19 tests / 410 assertions (`vendor/bin/pest --filter=FinaleReportingTest` on this tree). The rule this entry established — every staged path gets its own blob, not only the paths suspected of being dirty — is now the working practice, and `822d97b` is the commit where it was recorded. What closure does not cover: it does not change `822d97b`; the commit is left exactly as landed. It does not rule on KI-84's ten deleted test files, which remain the deleting session's and the owner's question.
 
 **Status: FIXED IN TREE - the note is the fix.** No history rewrite was attempted and none is owed:
 rewriting `master` to correct attribution would be a worse defect than the attribution error, and the
@@ -2103,12 +2121,23 @@ Grand Concert row and stays OPEN beside this. It does not restore the coverage t
 an exhausted grid legitimately reads as reached to the reader and as no-turn-to-decide to the strip, and
 that case is pinned as correct rather than as a defect.
 
-### KI-88 The cockpit's status form renders no submit control, and thirty fixture waits still point at the record screen the cutover redirected - FILED 2026-10-09 (Tier B browser gate, on the owner's remaining-work prompt), OPEN
+### KI-88 The cockpit's status form renders no submit control, and thirty fixture waits still point at the record screen the cutover redirected - FILED 2026-10-09 (Tier B browser gate, on the owner's remaining-work prompt), CLOSED 2026-10-09
 
-**Status: OPEN, with two independent halves.** Found by running the browser gates that KI-80 had held
-shut. Each half has its own remedy and neither is a test-authoring problem.
+**Closed 2026-10-09.** Both halves are fixed in the tree and on `HEAD`. Half one (`fix(career): give the
+cockpit's three header edits a submit control (KI-88)`) at `71488cb` adds a submit button per form —
+"Change status", "Change scenario", "Report period" — matching the file's existing `min-h-11` button
+treatment. Half two (`test(browser): re-anchor the create-redirect waits to the cockpit (KI-88)`) at
+`5e1cdf2` re-points every `waitForURL` wait that still expected the pre-cutover `/training-runs/{id}`
+shape to `/training-runs/{id}/cockpit$`, and routes the eight fixtures that created turns through the
+deleted run screen onto `tests/utils/record-turns.ts` via `runs.turns.store`. Verified: `grep -rn
+"waitForURL.*training-runs" tests/browser/*.spec.ts` shows 29 hits, all anchored to `/cockpit` or
+the conditional `/(\/cockpit)?$/` pattern except three that intentionally wait for `/\/training-runs$/`
+(the empty-state list page). `Cockpit.vue` carries `type="submit"` on all three header forms. What closure
+does not cover: the browser suite still cannot complete a full finished career on a shared harness until
+KI-88's own class-1 empty-table defect (KI-69) and KI-82's missing title are resolved, so the submit
+controls are component-tested and tree-pinned rather than browser-gated end to end.
 
-**Half one, an application defect: the cockpit's three header edits render no way to save them.**
+**Status: OPEN, with two independent halves.** (Dated record, retained.) Found by running the browser gates that KI-80 had held
 `routes/web.php:116` makes `runs.show` a redirect (`TrainingRunController::redirect()` →
 `runs.cockpit`), and the cockpit's own header forms carry no submit control:
 `resources/js/pages/Career/Cockpit.vue` opens `<form @submit.prevent="saveStatus">` at `:310`,
@@ -2157,20 +2186,6 @@ about whether its subject still exists. It does not restore the browser evidence
 specs fail in setup — until half one lands, no spec can reach a finished career, which is also what
 KI-82's and KI-87's cockpit claims still lack. And it does not touch KI-84's staged deletions or KI-69's
 class-3 fixture contract, both separate.
-
-**Closed 2026-10-09.** Both halves are fixed in tree and on `HEAD`. Half one (`fix(career): give the
-cockpit's three header edits a submit control (KI-88)`) at `71488cb` adds a submit button per form —
-"Change status", "Change scenario", "Report period" — matching the file's existing `min-h-11` button
-treatment. Half two (`test(browser): re-anchor the create-redirect waits to the cockpit (KI-88)`) at
-`5e1cdf2` re-points every `waitForURL` wait that still expected the pre-cutover `/training-runs/{id}`
-shape to `/training-runs/{id}/cockpit$`, and routes the eight fixtures that created turns through the
-deleted run screen onto `tests/utils/record-turns.ts` via `runs.turns.store`. Verified: `grep -rn
-"waitForURL.*training-runs" tests/browser/*.spec.ts` shows 29 hits, all anchored to `/cockpit` or
-the conditional `/(\/cockpit)?$/` pattern except three that intentionally wait for `/\/training-runs$/`
-(the empty-state list page). `Cockpit.vue` carries `type="submit"` on all three header forms. What closure
-does not cover: the browser suite still cannot complete a full finished career on a shared harness until
-KI-88's own class-1 empty-table defect (KI-69) and KI-82's missing title are resolved, so the submit
-controls are component-tested and tree-pinned rather than browser-gated end to end.
 
 ### KI-89 `FinaleVocabularyTest.php`'s docblock cites `docs/Our-Grand-Concert-plan.md` §9 E8, a section no document in the tree defines - FILED 2026-10-09 (Grand Concert closing pass), CLOSED 2026-10-09
 
