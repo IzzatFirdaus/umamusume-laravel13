@@ -190,7 +190,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
                         <dd v-else class="text-ink-muted" title="No Global availability date is recorded for this scenario.">N/A</dd>
                     </div>
                     <div class="flex flex-wrap justify-between gap-x-4">
-                        <dt class="text-ink-muted">Ruleset</dt>
+                        <dt class="text-ink-muted">Ruleset version</dt>
                         <dd class="font-mono text-ink" :title="props.ruleset.title">
                             {{ props.ruleset.value ?? 'N/A' }}
                         </dd>
@@ -217,8 +217,12 @@ const optimizesText = (card: ScenarioCard): string | null => {
                 <div v-if="card.metadata !== null" class="mt-3 rounded-md border border-rule bg-raised p-3 text-sm">
                     <p v-if="card.metadata.summary" class="text-ink">{{ card.metadata.summary }}</p>
                     <dl class="mt-2 space-y-1">
+                        <!-- Not "Ruleset": the fact grid above carries the global ruleset *version*,
+                             which no source names, and this row carries the scenario's own rule family
+                             from the matrix. One label for two facts reads as a card contradicting
+                             itself, which is exactly what the second audit reported (R2-05). -->
                         <div class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Ruleset</dt>
+                            <dt class="text-ink-muted">Rule family</dt>
                             <dd class="text-ink">{{ card.metadata.ruleset ?? 'Not recorded' }}</dd>
                         </div>
                         <div class="flex flex-wrap justify-between gap-x-4">
@@ -236,7 +240,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
                 <p
                     v-else
                     class="mt-3 text-sm text-ink-muted"
-                    title="No source in this repository describes this scenario's ruleset, summary or planning focus."
+                    title="No source in this repository describes this scenario's rule family, summary or planning focus."
                 >
                     Not recorded
                 </p>
