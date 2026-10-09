@@ -27,6 +27,41 @@ test.afterEach(async ({ page }) => {
 });
 
 /**
+ * Turns recorded over `runs.turns.store` rather than through a form on a page.
+ *
+ * The shape `ura-panel.spec.ts` uses for its eleven turns, for the same reason: the write is not this
+ * spec's subject. The raw hatch this fixture used to click lives in `Runs/Show.vue`, and `runs.show` is
+ * now a redirect to the cockpit (`routes/web.php:116`) whose correction form is a PUT over an existing
+ * turn and cannot create one, so no rendered surface offers a create-turn form any more. Laravel
+ * refreshes the XSRF cookie on every response, so the header is read again for each write rather than
+ * once for the loop: one stale token and the next POST is a 419.
+ */
+async function recordTurns(page: import('@playwright/test').Page, runId: string, count: number): Promise<void> {
+    for (let turn = 1; turn <= count; turn++) {
+        const xsrf = await page
+            .context()
+            .cookies()
+            .then((all) => all.find((cookie) => cookie.name === 'XSRF-TOKEN')?.value);
+
+        expect(xsrf, `the session carries no XSRF-TOKEN cookie before turn ${turn}`).toBeDefined();
+
+        const response = await page.request.post(`/training-runs/${runId}/turns`, {
+            form: {
+                turn: String(turn),
+                speed: '600',
+                stamina: '500',
+                power: '500',
+                guts: '500',
+                wit: '500',
+            },
+            headers: { 'X-XSRF-TOKEN': decodeURIComponent(xsrf as string) },
+        });
+
+        expect(response.status(), `turn ${turn} was refused`).toBeLessThan(400);
+    }
+}
+
+/**
  * A career with legacy configuration and logged turns, then the Inheritance Event screen for it.
  *
  * The legacy configuration is entered via the run-scoped Legacy Lab builder (`legacy.builder`,
@@ -52,25 +87,11 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
     await page.waitForURL(/\/training-runs\/\d+(\/cockpit)?$/, WRITE);
     createdRunUrls.push(page.url());
 
-    // The run-scoped Legacy Lab lives at `/legacy/{run}` (route `legacy.builder`), not at
-    // `/training-runs/{run}/legacy`. Capture the id once so both the legacy builder and the
-    // inheritance page can be reached from their own roots.
-    const runId = page.url().match(/\/training-runs\/(\d+)$/)?.[1] ?? '';
+    // The id is read without an end anchor on purpose: the create redirect is `runs.show` at HEAD and
+    // `runs.cockpit` where the cockpit cutover has landed, and both carry the id mid-path.
+    const runId = page.url().match(/\/training-runs\/(\d+)/)?.[1] ?? '';
 
-    // Log some turns via the run screen's raw correction form so the inheritance form has turns to pick.
-    const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
-    await page.getByText('Correct a turn by hand').click();
-
-    for (let turn = 1; turn <= 20; turn++) {
-        await hatch.locator('input[name="turn"]').fill(String(turn));
-        await hatch.locator('input[name="speed"]').fill('600');
-        await hatch.locator('input[name="stamina"]').fill('500');
-        await hatch.locator('input[name="power"]').fill('500');
-        await hatch.locator('input[name="guts"]').fill('500');
-        await hatch.locator('input[name="wit"]').fill('500');
-        await hatch.getByRole('button', { name: 'Save correction' }).click();
-        await expect(page.getByText(`Turn ${turn} logged.`)).toBeVisible(WRITE);
-    }
+    await recordTurns(page, runId, 20);
 
     // Now set up the legacy configuration via the run-scoped Legacy Lab.
     await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
@@ -157,7 +178,9 @@ test('shows predicted and observed sections visually separated with badges', asy
     await expect(page.getByText('N/A').first()).toHaveAttribute('title', /does not derive/);
 
     // The star-roll table is present
-    await expect(page.getByRole('heading', { name: /Sourced Star-Roll Probabilities/ })).toBeVisible();
+    // The page renders this as the label above the table, not as a heading (`InheritanceEvent.vue`
+    // keeps its headings for the three sections), so the assertion reads the text, not a role.
+    await expect(page.getByText('Sourced Star-Roll Probabilities')).toBeVisible();
     await expect(page.getByText('Below 600')).toBeVisible();
     await expect(page.getByText('600–1100')).toBeVisible();
     await expect(page.getByText('Above 1100')).toBeVisible();
@@ -172,9 +195,11 @@ test('milestone timeline shows correct glyphs and labels', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Inheritance Milestones' })).toBeVisible();
 
     // Three milestones
-    await expect(page.getByText('Career Start')).toBeVisible();
-    await expect(page.getByText('Classic Early April')).toBeVisible();
-    await expect(page.getByText('Senior Early April')).toBeVisible();
+    // `exact` because the page's own intro sentence spells the three moments out in prose, and a
+    // substring match would meet both it and the milestone label and fail strict mode.
+    await expect(page.getByText('Career Start', { exact: true })).toBeVisible();
+    await expect(page.getByText('Classic Early April', { exact: true })).toBeVisible();
+    await expect(page.getByText('Senior Early April', { exact: true })).toBeVisible();
 
     // With 20 turns logged, we're in Junior Year (turns 1-24), so Career Start is completed,
     // Classic and Senior are upcoming
@@ -214,7 +239,7 @@ test('observed form records an inheritance event with keyboard entry', async ({ 
     await expect(page.getByText('Inheritance event recorded.')).toBeVisible();
 
     // The event appears in the observed list
-    await expect(page.getByText('Career Start')).toBeVisible();
+    await expect(page.getByText('Career Start', { exact: true })).toBeVisible();
     await expect(page.getByText('Blue Speed ★★★, Pink Medium ★★')).toBeVisible();
     await expect(page.getByText('Confirmed')).toBeVisible();
 });
@@ -263,20 +288,14 @@ test('empty state when no legacy configuration exists', async ({ page }) => {
     await page.waitForURL(/\/training-runs\/\d+(\/cockpit)?$/, WRITE);
     createdRunUrls.push(page.url());
 
-    // Log one turn
-    const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
-    await page.getByText('Correct a turn by hand').click();
-    await hatch.locator('input[name="turn"]').fill('1');
-    await hatch.locator('input[name="speed"]').fill('600');
-    await hatch.locator('input[name="stamina"]').fill('500');
-    await hatch.locator('input[name="power"]').fill('500');
-    await hatch.locator('input[name="guts"]').fill('500');
-    await hatch.locator('input[name="wit"]').fill('500');
-    await hatch.getByRole('button', { name: 'Save correction' }).click();
-    await expect(page.getByText('Turn 1 logged.')).toBeVisible(WRITE);
+    // The id is read without an end anchor: the create redirect lands on the cockpit where the
+    // cutover has landed, and `${page.url()}/inheritance` would then read as a cockpit sub-path.
+    const runId = page.url().match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+
+    await recordTurns(page, runId, 1);
 
     // Visit inheritance screen
-    await page.goto(`${page.url()}/inheritance`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/training-runs/${runId}/inheritance`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     // Empty state shows
