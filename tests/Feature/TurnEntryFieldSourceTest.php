@@ -6,9 +6,8 @@ declare(strict_types=1);
  * One field list for the turn-entry surfaces (D9's structural half).
  *
  * The five stat inputs were declared separately on the run record, the training decision and the cockpit
- * correction, and drifted apart (`Speed *`, `Speed total *`, `Speed`). `turnEntryFields.ts` is now the one
- * owner and `Career/TrainingDetail.vue` reads it. The other two surfaces still carry their own copy,
- * because a concurrent session has uncommitted work in those files; this test grows as each is wired.
+ * correction, and drifted apart (`Speed *`, `Speed total *`, `Speed`). `turnEntryFields.ts` is now the
+ * one owner and all three surfaces read it.
  *
  * Asserted against the source because there is no component-test harness and no rendered HTML to read:
  * Inertia answers a page request with JSON props, so the inputs only exist after the browser hydrates.
@@ -57,4 +56,16 @@ it('labels a stat field with the bare word and keeps the required marker separat
         // One spelling for the optional fields, with `sp` kept as the field name.
         ->toContain("{ name: 'sp', label: 'Skill Points', max: null }")
         ->toContain("{ name: 'energy', label: 'Energy', max: 100 }");
+});
+
+it('has the run record and the cockpit read the shared list instead of declaring their own', function (): void {
+    $runRecord = (string) file_get_contents(base_path('resources/js/pages/Runs/Show.vue'));
+    $cockpit = (string) file_get_contents(base_path('resources/js/pages/Career/Cockpit.vue'));
+
+    expect($runRecord)
+        ->toContain("import { TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';")
+        ->not->toContain('const statWords = [')
+        ->and($cockpit)
+        ->toContain("import { TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';")
+        ->not->toContain('const statFields = [');
 });

@@ -42,7 +42,7 @@ The first is not done. Phase 2 closes when D9's remaining work lands.
 | D6 turn table hides Fans/Energy | **Fixed** (browser half unrunnable, see below) | 2.3 | `89e8453` | `TurnRowActionsTest` (2 new cases) |
 | D7 wizard step numbering skips 3 | **Fixed** (browser half unrunnable, see below) | 2.4 | `6d53ffc` | `GuidedTurnOnRunViewTest` (1 new case) |
 | D8 Rice Shower aptitude mismatch | **Verified, not a tool defect** | 2.5 | `be48e60` | `CareerTraineeSelectTest` (1 new case) |
-| D9 duplicate turn-entry paths | **Partially fixed** — one shared field source landed, 1 of 3 surfaces wired; the other two await the peer | 2.6 | `8e3d33c` + this commit | `TurnEntryFieldSourceTest` (3 cases) |
+| D9 duplicate turn-entry paths | **Fixed** — one shared field source, all three surfaces wired and labelled alike (2026-10-09) | 2.6 | `8e3d33c`, `5e41137`, `7a81c7c` + this commit | `TurnEntryFieldSourceTest` (4 cases) |
 | Career position / snapshot mode | Not started (Phase 3+) | — | — | — |
 | Legacy disambiguation, ancestor rank, grandparent sparks | Not started (Phase 6) | — | — | — |
 | Scenario metadata, typed spark targets | Not started (Phase 7) | — | — | — |

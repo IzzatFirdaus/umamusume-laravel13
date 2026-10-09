@@ -31,6 +31,7 @@ import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
 import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
+import { TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 
@@ -253,14 +254,6 @@ const deleteRun = (): void => {
 
     deleteForm.delete(props.run.destroy_url);
 };
-
-const statFields = [
-    { name: 'speed', label: 'Speed' },
-    { name: 'stamina', label: 'Stamina' },
-    { name: 'power', label: 'Power' },
-    { name: 'guts', label: 'Guts' },
-    { name: 'wit', label: 'Wit' },
-] as const;
 
 // E4: the Cockpit renders a "Shop" jump only when the matrix composes one. The shape is the
 // same across scenarios (the key is always present), so a `null` check carries the whole

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
+import { TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 import ResourceStrip from '../../components/ResourceStrip.vue';
 import MoodPill from '../../components/MoodPill.vue';
 import StatBand from '../../components/StatBand.vue';
@@ -115,8 +116,6 @@ const props = defineProps<{
 
 const page = usePage();
 const errors = computed(() => (page.props.errors as Record<string, string | undefined> | undefined) ?? {});
-
-const statWords = ['speed', 'stamina', 'power', 'guts', 'wit'];
 
 /*
  * Three PUTs to one route, each carrying the fields it is not editing. `runs.update` shares
@@ -521,12 +520,12 @@ const performanceField = computed(() => props.performance as unknown as {
                                             <span>Turn *</span>
                                             <input v-model="editForm.turn" type="number" name="turn" min="1" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
                                         </label>
-                                        <label v-for="stat in statWords" :key="stat" class="flex flex-col gap-1">
-                                            <span>{{ stat.charAt(0).toUpperCase() + stat.slice(1) }} *</span>
+                                        <label v-for="field in statFields" :key="field.name" class="flex flex-col gap-1">
+                                            <span>{{ field.label }} *</span>
                                             <input
-                                                v-model="editForm[stat]"
+                                                v-model="editForm[field.name]"
                                                 type="number"
-                                                :name="stat"
+                                                :name="field.name"
                                                 min="0"
                                                 :max="caps[stat.charAt(0).toUpperCase() + stat.slice(1)]"
                                                 required
@@ -597,13 +596,13 @@ const performanceField = computed(() => props.performance as unknown as {
                             class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
                         >
                     </label>
-                    <label v-for="stat in statWords" :key="stat" class="flex flex-col gap-1">
-                        <span class="font-medium text-ink">{{ stat.charAt(0).toUpperCase() + stat.slice(1) }}</span>
+                    <label v-for="field in statFields" :key="field.name" class="flex flex-col gap-1">
+                        <span class="font-medium text-ink">{{ field.label }}</span>
                         <input
-                            :value="railStep.values[stat] ?? ''"
-                            type="number" :name="stat" min="0"
-                            :max="caps[stat.charAt(0).toUpperCase() + stat.slice(1)]" required
-                            :placeholder="railStep.previous?.[stat] ?? 'no logged turn'"
+                            :value="railStep.values[field.name] ?? ''"
+                            type="number" :name="field.name" min="0"
+                            :max="caps[field.label]" required
+                            :placeholder="railStep.previous?.[field.name] ?? 'no logged turn'"
                             class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
                         >
                     </label>
@@ -722,9 +721,9 @@ const performanceField = computed(() => props.performance as unknown as {
                     @submit.prevent="hatchForm.post(railStep.action, { preserveScroll: true })"
                 >
                     <label class="flex flex-col gap-1"><span>Turn *</span><input v-model="hatchForm.turn" type="number" name="turn" min="1" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"></label>
-                    <label v-for="stat in statWords" :key="stat" class="flex flex-col gap-1">
-                        <span>{{ stat.charAt(0).toUpperCase() + stat.slice(1) }} *</span>
-                        <input v-model="hatchForm[stat]" type="number" :name="stat" min="0" :max="caps[stat.charAt(0).toUpperCase() + stat.slice(1)]" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                    <label v-for="field in statFields" :key="field.name" class="flex flex-col gap-1">
+                        <span>{{ field.label }} *</span>
+                        <input v-model="hatchForm[field.name]" type="number" :name="field.name" min="0" :max="caps[field.label]" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
                     </label>
                     <label class="flex flex-col gap-1"><span>SP</span><input v-model="hatchForm.sp" type="number" name="sp" min="0" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"></label>
                     <label class="flex flex-col gap-1"><span>Condition</span><input v-model="hatchForm.condition" type="text" name="condition" maxlength="255" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"></label>
