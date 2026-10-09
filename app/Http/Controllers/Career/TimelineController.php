@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Career;
 
+use App\Domain\Career\CareerPosition;
+use App\Enums\CareerPhase;
 use App\Enums\TurnEventType;
 use App\Http\Controllers\Controller;
 use App\Models\RaceEntry;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
+use App\Services\CareerCalendar;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -52,13 +55,79 @@ class TimelineController extends Controller
         ]);
 
         $entries = $this->buildEntries($run);
+        $origin = $this->originSection($run);
 
         return Inertia::render('Career/Timeline', [
             'run' => $this->runSection($run),
+            'origin' => $origin,
             'entries' => $entries,
             'filters' => $this->filterSection($entries),
-            'empty' => $entries === [] ? 'No turns have been recorded for this run, so there is no timeline to read yet. The first turn on the run record screen becomes the first row here.' : null,
+            'empty' => $entries === [] ? $this->emptyMessage($run, $origin) : null,
         ]);
+    }
+
+    /**
+     * Where the rail opens: the run's own career position, never a synthesized turn 1.
+     *
+     * A snapshot's rail starts at the position it was imported at, read from the run's stored position.
+     * A new-career run starts at its first logged turn, which is the head of its own rail; the run's
+     * `careerPosition()` accessor answers with the *latest* turn, which is the wrong end for an origin,
+     * so the first turn is read directly. Rows are never renumbered: this is the head of the rail, not
+     * a row in it.
+     *
+     * @return array{year_label: string, month_label: string, turn: int, imported: bool}|null
+     */
+    private function originSection(TrainingRun $run): ?array
+    {
+        $position = $run->hasImportedPosition()
+            ? $run->careerPosition()
+            : $this->firstLoggedPosition($run);
+
+        if ($position === null) {
+            return null;
+        }
+
+        return [
+            'year_label' => $position->year->label(),
+            'month_label' => ($position->phase === CareerPhase::Early ? 'Early ' : 'Late ')
+                .CareerCalendar::monthLabel($position->month),
+            'turn' => $position->turnIndex,
+            'imported' => $run->hasImportedPosition(),
+        ];
+    }
+
+    private function firstLoggedPosition(TrainingRun $run): ?CareerPosition
+    {
+        $first = $run->turnEntries->sortBy('turn')->first();
+
+        if ($first === null) {
+            return null;
+        }
+
+        $turn = (int) $first->turn;
+
+        if ($turn < 1 || $turn > CareerCalendar::TURNS_PER_CAREER) {
+            return null;
+        }
+
+        return CareerPosition::fromTurnIndex($turn);
+    }
+
+    /**
+     * The empty rail's own sentence. A snapshot that has logged nothing opens at the position it was
+     * imported at, and says so rather than claiming there is nothing to read.
+     *
+     * @param  array{year_label: string, month_label: string, turn: int, imported: bool}|null  $origin
+     */
+    private function emptyMessage(TrainingRun $run, ?array $origin): string
+    {
+        if ($origin !== null && $run->hasImportedPosition()) {
+            return "This run was imported at {$origin['year_label']}, {$origin['month_label']}, turn "
+                ."{$origin['turn']}. No turns have been logged since, so the rail opens there.";
+        }
+
+        return 'No turns have been recorded for this run, so there is no timeline to read yet. '
+            .'The first turn on the run record screen becomes the first row here.';
     }
 
     /**

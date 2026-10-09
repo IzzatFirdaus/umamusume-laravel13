@@ -19,6 +19,7 @@ import { useVisitState } from '../../composables/useVisitState';
 
 const props = defineProps<{
     run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; cockpit_url: string };
+    origin: { year_label: string; month_label: string; turn: number; imported: boolean } | null;
     entries: {
         key: string;
         kind: string;
@@ -80,6 +81,18 @@ const visibleCount = computed(() =>
             absolute end-of-turn value, not the expected-then-actual pair. A row marked "Updated"
             was edited after its first save; the run record screen is where the edit happened.
         </p>
+
+        <section
+            v-if="props.origin !== null"
+            aria-labelledby="timeline-origin-heading"
+            class="mt-4 rounded-md border border-rule bg-panel p-4"
+        >
+            <h2 id="timeline-origin-heading" class="text-base font-semibold text-ink-strong">Timeline opens here</h2>
+            <p class="mt-1 text-sm text-ink">
+                {{ props.origin.year_label }} · {{ props.origin.month_label }} · Turn {{ props.origin.turn }}
+                <span v-if="props.origin.imported" class="ml-2 text-xs text-ink-muted">imported from a snapshot</span>
+            </p>
+        </section>
 
         <section
             v-if="props.filters.available.length > 0"
