@@ -647,9 +647,9 @@ unaffected `support-deck.spec.ts:67` before and after. What closure does not cov
 decision not to rename the prop to `isFriend`, which would have required touching the server-side payload
 shape for the `v-bind="slot"` caller on `Builder.vue:270`.
 
-### KI-67 The race catalogue's pinned GameTora document has been withdrawn, so `uma:fetch` can no longer refresh the career calendar at all - FILED 2026-10-07 (D14a hand-off), OPEN
+### KI-67 The race catalogue's pinned GameTora document has been withdrawn, so `uma:fetch` can no longer refresh the career calendar at all - FILED 2026-10-07 (D14a hand-off), CLOSED 2026-10-09
 
-**Status: OPEN.** `config/uma.php:141` pins `gametora-race-catalog` at
+**Status: CLOSED 2026-10-09.** `config/uma.php:141` pinned `gametora-race-catalog` at
 `https://gametora.com/data/umamusume/race_instances.294424fc.json`. That path now answers **HTTP 404 with a
 `text/html` body**. The publisher's live manifest names `race_instances` at `8993fc1b`. The source declares
 no `manifest` block, so `SourceFetcher::resolveUrl()` takes the `! is_array($manifest)` branch at `:151` and
@@ -690,9 +690,16 @@ Closure does not cover: the robots and rate-limit note a source change owes `AGE
 410-row figure quoted in `SCREEN_SPEC.md` and in `RaceCalendar.vue`'s comment moves with it), or any of the
 scenario-scoping work the refresh unblocks.
 
-### KI-68 D12's Inheritance write validates inline in the controller, which is a Floor breach and leaves `StoreTurnEventRequest` as a second, disagreeing owner of the same boundary - FILED 2026-10-07 (D14a session, on the owner's D12 close-out), OPEN
+**Closed 2026-10-09.** The `manifest` block is on `HEAD` at `config/uma.php:156-160`, matching the
+`ADR-0011` pattern already used for `gametora-skills`, and the fix landed at `6984b54`
+("fix(fetch): resolve the race catalog URL through the publisher manifest (KI-67)"). `SourceFetcher::resolveUrl()`
+now reads the manifest per run and only falls back to the pinned hash, so the stale-pin failure is over. What closure
+does not cover: the robots and rate-limit note, the `characters`/`character-cards` question, the 410-row figure
+that moves with a resolved hash, and the scenario-scoping work the refresh unblocks.
 
-**Status: OPEN.** Found while answering the D12 close-out review, not by this slice's own change.
+### KI-68 D12's Inheritance write validates inline in the controller, which is a Floor breach and leaves `StoreTurnEventRequest` as a second, disagreeing owner of the same boundary - FILED 2026-10-07 (D14a session, on the owner's D12 close-out), CLOSED 2026-10-09
+
+**Status: CLOSED 2026-10-09.** Found while answering the D12 close-out review, not by this slice's own change.
 
 **The defect.** `app/Http/Controllers/Career/InheritanceEventController.php:83` runs
 
@@ -733,6 +740,16 @@ precedent for the next case. `turn_events.event_type` is a plain `string(30)`
 D12's seven feature cases still pass once the boundary moves (`tests/Feature/CareerInheritanceEventTest.php`
 is untracked and was written against the inline path), the `StoreTurnEventRequest::SOURCES` vocabulary
 itself, or any of the D11 screen's behaviour.
+
+**Closed 2026-10-09.** Both halves are fixed on `HEAD`: the write was moved to
+`StoreInheritanceEventRequest` (`app/Http/Requests/StoreInheritanceEventRequest.php`), replacing the inline
+`request()->validate()` at `InheritanceEventController.php:83`, and the docblock explicitly records that
+`event_type` is set to `TurnEventType::Inheritance` by the controller itself, following `Failure`'s precedent
+as a non-choice, machine-written case. `StoreInheritanceEventRequest` is now tracked at `HEAD`
+(`git ls-files --error-unmatch` exits 0), and `grep -rn 'request()->validate(\|\$request->validate('
+app/Http/Controllers/Career/` returns zero hits. What closure does not cover: the seven D12 feature cases
+needing re-verification against the Form Request boundary, and whether `CareerInheritanceEventTest.php`
+should be committed.
 
 **Attribution note.** D12 was built by another session in this shared worktree; this entry is filed by
 the D14a session because the close-out review asked for the enum's authorization and the search turned
