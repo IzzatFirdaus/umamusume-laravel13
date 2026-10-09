@@ -29,6 +29,7 @@ import TrainingCard from '../../components/career/TrainingCard.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import { TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 
 interface Cost {
     min: number;
@@ -88,14 +89,6 @@ const chosen = computed(() => props.options.find((option) => option.choice === c
 // The advisor's answer, read back out of the five cards. `Rest` is one of the advisor's six options
 // and not one of these five, so it resolves to null and the page names the absence.
 const recommended = computed(() => props.options.find((option) => option.key === props.advisor.action) ?? null);
-
-const statFields = [
-    { name: 'speed', label: 'Speed' },
-    { name: 'stamina', label: 'Stamina' },
-    { name: 'power', label: 'Power' },
-    { name: 'guts', label: 'Guts' },
-    { name: 'wit', label: 'Wit' },
-] as const;
 
 const optionalFields = [
     { name: 'sp', label: 'Skill Points', max: null },
