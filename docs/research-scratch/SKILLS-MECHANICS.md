@@ -14,6 +14,8 @@ This master file embeds the complete text of all 7 Group B source files from `do
 
 Internal headings have been demoted by one level. Large files are split into numbered `####` subsections preserving original numbering. All tables, code blocks, blockquotes, checkboxes, checklists, and erratum notes are preserved verbatim.
 
+**Dating note (2026-10-09):** The seven source files listed above were embedded verbatim and then removed from the tree when this master was committed at `ccc864c` ("docs: consolidate scenario publisher guides into research-scratch and remove originals"). The embedded text is the only durable copy; the original `docs/design-research/` paths no longer resolve. The design rules cited from `docs/design-research/CONSTRAINTS.md` and `docs/design-research/DESIGN.md` by this audit survive in `docs/research-scratch/DESIGN-CORPUS.md` §`CONSTRAINTS.md` and §`DESIGN.md` respectively; see `tools/gate.py:6-9` for the repointing that made that master the design gate's source of truth on 2026-10-09.
+
 ---
 
 ## skill-facts-2026-10-01.md
