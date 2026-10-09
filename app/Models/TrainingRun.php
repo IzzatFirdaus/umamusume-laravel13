@@ -632,6 +632,31 @@ class TrainingRun extends Model
     }
 
     /**
+     * The turn a decision surface is about, in the `{year, turn}` shape `nextTurnToPlay()` returns.
+     *
+     * A snapshot stands at the position it was imported at, so that position is the turn the race
+     * surfaces decide about - not a turn derived from a log it may not have, which would send a Senior
+     * snapshot back to a Junior January calendar. A new-career run keeps `nextTurnToPlay()`, which
+     * points at the turn after the last one logged (the client marks the turn being played, not the
+     * one just logged).
+     *
+     * @return array{year: int, turn: int}|null
+     */
+    public function decisionTurn(): ?array
+    {
+        $position = $this->career_position;
+
+        if ($position !== null) {
+            return [
+                'year' => $position->year->value,
+                'turn' => (($position->turnIndex - 1) % self::TURNS_PER_YEAR) + 1,
+            ];
+        }
+
+        return $this->nextTurnToPlay();
+    }
+
+    /**
      * Where this career stands, or null when it holds no position to claim.
      *
      * A stored position wins: it is what a snapshot named, and deriving over it would answer the

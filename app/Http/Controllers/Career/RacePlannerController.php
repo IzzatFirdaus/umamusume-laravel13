@@ -89,7 +89,7 @@ class RacePlannerController extends Controller
         // it, and both regions below partition that same read.
         $run->load(['umamusume', 'raceEntries.raceCatalogSlot', 'turnEntries']);
 
-        $next = $run->nextTurnToPlay();
+        $next = $run->decisionTurn();
         $empty = $this->calendarAbsence($run);
 
         // One calendar read for the whole page. The groups and the deadline region partition the same

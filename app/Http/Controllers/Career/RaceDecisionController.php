@@ -51,7 +51,7 @@ class RaceDecisionController extends Controller
         // Three queries: the run with its trainee, its race entries with their slots, and its turns.
         $run->load(['umamusume', 'raceEntries.raceCatalogSlot', 'turnEntries']);
 
-        $next = $run->nextTurnToPlay();
+        $next = $run->decisionTurn();
         $races = $this->raceRows($run, $next);
 
         // F2, plan §9.6 ruling 3: manual free-race entry. The branch is server-resolved from the
@@ -100,8 +100,9 @@ class RaceDecisionController extends Controller
     /**
      * The turn being decided, in the client's own words, or null when there is none.
      *
-     * `nextTurnToPlay()` returns null for a run that has logged nothing and for one past its last
-     * turn; both are real states and neither is pointed at a default turn (D-220).
+     * `decisionTurn()` answers with the run's stored position for a snapshot and with
+     * `nextTurnToPlay()` for a new career; both are real states and neither is pointed at a default
+     * turn (D-220).
      *
      * @param  array{year: int, turn: int}|null  $next
      * @return array{year_label: string, turn: int, position_label: string}|null
