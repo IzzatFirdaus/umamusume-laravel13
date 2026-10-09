@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Advisor;
 
+use App\Enums\EnergyState;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\RaceCatalogSlot;
 use App\Models\TrainingRun;
@@ -78,7 +79,13 @@ final class TrainerAdvisor
         $energy = $latest?->energy;
         $deficits = $this->deficits($latest, $target);
 
-        [$band, $recommendedAction, $alternativeAction, $absence] = $this->rank($energy, $target, $deficits);
+        // A band is a named reading, not a number: the Trainer read a level off the client, so the
+        // advisor reasons from the band and names it rather than declining for want of a figure.
+        if ($latest?->energy_state === EnergyState::Band && $latest->energy_band !== null) {
+            return $this->bandAdvice($latest, $target, $deficits, $latest->energy_band, $run);
+        }
+
+        [$band, $recommendedAction, $alternativeAction, $absence] = $this->rank($energy, $latest?->energy_state, $target, $deficits);
 
         $options = $this->options($latest, $target, $energy, $band, $deficits, $recommendedAction);
 
@@ -88,6 +95,53 @@ final class TrainerAdvisor
             $this->byAction($options, $alternativeAction),
             $options,
             $absence,
+            $this->finaleContext($run),
+        );
+    }
+
+    /**
+     * Advice from a coarse Energy band.
+     *
+     * The client sometimes shows a level rather than a figure ("near a third"), which is recorded as
+     * `band` with its own word. A low band is treated as below the advisory line and Rest is advised; a
+     * mid or high band is at or above it, and the largest deficit is advised. The recommendation's reason
+     * names the band it came from, so the advice rests on the state the Trainer recorded rather than on a
+     * figure the tool does not hold.
+     *
+     * @param  array<string, int>  $deficits
+     */
+    private function bandAdvice(
+        ?TurnEntry $latest,
+        ?BuildTargetPayload $target,
+        array $deficits,
+        string $energyBand,
+        ?TrainingRun $run,
+    ): Advice {
+        $atOrAbove = $energyBand !== 'low';
+        $band = $atOrAbove ? self::AT_OR_ABOVE : self::BELOW;
+
+        if (! $atOrAbove) {
+            $action = self::REST;
+            $alternative = $this->witHasDeficit($deficits) ? self::WIT : null;
+            $source = "Energy is recorded as a {$energyBand} band, below the {$this->threshold()} advisory line; Rest is advised.";
+        } else {
+            $action = $target === null ? null : $this->largestDeficit($deficits);
+            $alternative = ($action === null || $action === self::WIT)
+                ? null
+                : ($this->witHasDeficit($deficits) ? self::WIT : null);
+            $source = $action === null
+                ? "Energy is recorded as a {$energyBand} band; no stat is below target, so nothing is ranked."
+                : "Energy is recorded as a {$energyBand} band; {$action} closes the largest deficit of ".($deficits[$action] ?? 0).'.';
+        }
+
+        $options = $this->options($latest, $target, null, $band, $deficits, $action, $source);
+
+        return new Advice(
+            $band,
+            $this->byAction($options, $action),
+            $this->byAction($options, $alternative),
+            $options,
+            null,
             $this->finaleContext($run),
         );
     }
@@ -154,12 +208,15 @@ final class TrainerAdvisor
      * @param  array<string, int>  $deficits
      * @return array{0: string|null, 1: string|null, 2: string|null, 3: string|null}
      */
-    private function rank(?int $energy, ?BuildTargetPayload $target, array $deficits): array
+    private function rank(?int $energy, ?EnergyState $state, ?BuildTargetPayload $target, array $deficits): array
     {
         // 1. No Energy recorded. A band off a null would be a number invented from nothing, and a
-        //    ranking against it would be worse. The absence is named instead.
+        //    ranking against it would be worse. The absence is named instead, and the state is named
+        //    with it: "not recorded" is a reading the Trainer took, not a blank the tool failed to fill.
         if ($energy === null) {
-            return [null, null, null, 'This run has recorded no Energy, so there is no band to read and nothing to rank against.'];
+            return [null, null, null, $state === EnergyState::Unknown
+                ? 'Energy is not recorded for this run, so there is no band to read. Each option below still states what it closes against your target.'
+                : 'This run has recorded no Energy, so there is no band to read and nothing to rank against.'];
         }
 
         $band = $energy >= $this->threshold() ? self::AT_OR_ABOVE : self::BELOW;
@@ -197,11 +254,18 @@ final class TrainerAdvisor
         ?string $band,
         array $deficits,
         ?string $recommendedAction,
+        ?string $recommendationSource = null,
     ): array {
         $options = [];
 
         foreach (self::ACTIONS as $action) {
             $reason = $this->reason($action, $target, $energy, $deficits, $action === $recommendedAction);
+
+            // A recommendation carries the line the caller derived it from, even when the generic
+            // reason would be null (a band has no figure to price a session against).
+            if ($action === $recommendedAction && $recommendationSource !== null) {
+                $reason = $recommendationSource;
+            }
 
             // ADR-0001 §4: a suggestion with no derivable reason does not ship. A training action on
             // a run with neither Energy nor a target has nothing behind it, so it is left out rather

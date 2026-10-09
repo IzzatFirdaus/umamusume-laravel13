@@ -33,7 +33,7 @@ import TrainingCard from '../../components/career/TrainingCard.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
-import { TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
+import { TURN_ENTRY_ENERGY_BANDS, TURN_ENTRY_ENERGY_STATES, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 
 interface Cost {
     min: number;
@@ -76,6 +76,7 @@ const props = defineProps<{
     advisor: { action: string | null; band: string | null; absence: string | null };
     careerPosition: { year: number; month: number; phase: string; turn_index: number; scenario_countdown: number | null } | null;
     currentStats: Record<string, number | null>;
+    energy: { state: string | null; band: string | null; value: number | null; label: string };
     write: {
         action: string;
         turn: number;
@@ -118,9 +119,11 @@ const recommended = computed(() => props.options.find((option) => option.key ===
 
 const optionalFields = [
     { name: 'sp', label: 'Skill Points', max: null },
-    { name: 'energy', label: 'Energy', max: 100 },
     { name: 'fans', label: 'Fans', max: null },
 ] as const;
+
+const energyStates = TURN_ENTRY_ENERGY_STATES;
+const energyBands = TURN_ENTRY_ENERGY_BANDS;
 
 const form = useForm({
     turn: String(props.write.turn),
@@ -131,11 +134,21 @@ const form = useForm({
     wit: '',
     sp: '',
     energy: '',
+    energy_state: 'exact',
+    energy_band: 'mid',
     fans: '',
     mood: '',
     outcome: '',
     penalty_kind: '',
     choice: '',
+});
+
+// A state that is not `exact` carries no figure, so the number is cleared rather than left behind a
+// hidden control and posted as though it described the band.
+watch(() => form.energy_state, (state) => {
+    if (state !== 'exact') {
+        form.energy = '';
+    }
 });
 
 const placeholder = (name: string): string | undefined =>
@@ -229,6 +242,10 @@ const capFor = (label: string): number =>
         <p v-if="positionLabel !== null" class="mb-4 text-sm text-ink-muted">
             This run stands at {{ positionLabel }}. The deficits below are against the stats recorded
             there, and the next turn the form writes is {{ props.write.turn }}.
+        </p>
+
+        <p class="mb-4 text-sm text-ink">
+            {{ props.energy.label }}
         </p>
 
         <section
@@ -374,6 +391,46 @@ const capFor = (label: string): number =>
                     >
                     <span v-if="errorOf(field.name)" :id="`turn-${field.name}-error`" class="text-xs text-risk">{{ errorOf(field.name) }}</span>
                 </label>
+
+                <!-- Energy as a state, not only a number: a figure when the Trainer read one, a band when
+                     the client showed a level, and the named absence when neither. The three stay apart on
+                     the screen the way they are kept apart in the store. -->
+                <fieldset class="flex flex-col gap-1">
+                    <legend class="text-ink-muted">Energy</legend>
+                    <div class="flex flex-wrap gap-3">
+                        <label v-for="state in energyStates" :key="state.value" class="flex min-h-11 items-center gap-1 text-sm text-ink">
+                            <input v-model="form.energy_state" type="radio" name="energy_state" :value="state.value">
+                            {{ state.label }}
+                        </label>
+                    </div>
+                    <input
+                        v-if="form.energy_state === 'exact'"
+                        id="turn-energy"
+                        v-model="form.energy"
+                        type="number"
+                        name="energy"
+                        min="0"
+                        max="100"
+                        :placeholder="placeholder('energy')"
+                        :aria-describedby="describedBy('energy')"
+                        class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                    >
+                    <select
+                        v-else-if="form.energy_state === 'band'"
+                        id="turn-energy-band"
+                        v-model="form.energy_band"
+                        name="energy_band"
+                        :aria-describedby="describedBy('energy_band')"
+                        class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                    >
+                        <option v-for="band in energyBands" :key="band.value" :value="band.value">{{ band.label }}</option>
+                    </select>
+                    <p v-else class="text-xs text-ink-muted" title="Energy is recorded as not recorded for this turn.">
+                        Not recorded
+                    </p>
+                    <span v-if="errorOf('energy')" id="turn-energy-error" class="text-xs text-risk">{{ errorOf('energy') }}</span>
+                    <span v-if="errorOf('energy_band')" id="turn-energy_band-error" class="text-xs text-risk">{{ errorOf('energy_band') }}</span>
+                </fieldset>
 
                 <label class="flex flex-col gap-1">
                     <span class="text-ink-muted">Mood</span>

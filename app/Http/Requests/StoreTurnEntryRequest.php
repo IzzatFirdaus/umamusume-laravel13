@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\EnergyState;
 use App\Enums\MoodTier;
 use App\Enums\PerformanceType;
 use App\Models\TrainingRun;
@@ -73,6 +74,15 @@ class StoreTurnEntryRequest extends FormRequest
             // ADR-0003 decision 6 replaces it with the scenario's own hard_cap,
             // which is a separate change and not folded into this one.
             'energy' => ['nullable', 'integer', 'between:0,100'],
+            // Energy's own state, kept apart from the number it may carry: `exact` with a figure, `band`
+            // with a coarse word the client shows instead of a number, or `unknown` for a reading the
+            // Trainer did not take. The band is demanded exactly when the state is `band`.
+            'energy_state' => ['nullable', Rule::enum(EnergyState::class)],
+            'energy_band' => [
+                'nullable',
+                Rule::in(['low', 'mid', 'high']),
+                Rule::requiredIf(fn (): bool => $this->input('energy_state') === EnergyState::Band->value),
+            ],
             'mood' => ['nullable', Rule::enum(MoodTier::class)],
             'fans' => ['nullable', 'integer', 'min:0'],
             // The rail's own fields. `choice` and `outcome` are only demanded on a

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\EnergyState;
 use App\Enums\MoodTier;
 use Database\Factories\TurnEntryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -30,11 +31,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $sp
  * @property string|null $condition
  * @property int|null $energy
+ * @property EnergyState|null $energy_state
+ * @property string|null $energy_band
  * @property MoodTier|null $mood
  * @property int|null $fans
  * @property-read TrainingRun $trainingRun
  */
-#[Fillable(['training_run_id', 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans'])]
+#[Fillable(['training_run_id', 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'energy_state', 'energy_band', 'mood', 'fans'])]
 class TurnEntry extends Model
 {
     /** @use HasFactory<TurnEntryFactory> */
@@ -59,6 +62,7 @@ class TurnEntry extends Model
             'wit' => 'integer',
             'sp' => 'integer',
             'energy' => 'integer',
+            'energy_state' => EnergyState::class,
             'mood' => MoodTier::class,
             'fans' => 'integer',
         ];

@@ -7,6 +7,7 @@ namespace App\Actions;
 use App\Domain\Career\CareerPosition;
 use App\Enums\CareerPhase;
 use App\Enums\CareerYear;
+use App\Enums\EnergyState;
 use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Enums\SnapshotFieldState;
@@ -100,7 +101,7 @@ final class CreateSnapshotRun
      * per-field states and values on the stored position are the record, and no turn entry is written.
      *
      * @param  array<string, int>  $values
-     * @return array<string, int>|null
+     * @return array<string, int|string>|null
      */
     private function completeEntryState(array $values): ?array
     {
@@ -119,6 +120,12 @@ final class CreateSnapshotRun
                 $state[$field === 'skill_points' ? 'sp' : $field] = $values[$field];
             }
         }
+
+        // Energy carries its own state, because a snapshot that did not read it is `unknown`, not a
+        // blank: the audit's "N/A everywhere" is exactly the absence this distinguishes from a number.
+        $state['energy_state'] = isset($values['energy'])
+            ? EnergyState::Exact->value
+            : EnergyState::Unknown->value;
 
         return $state;
     }

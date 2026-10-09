@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Career;
 
+use App\Enums\EnergyState;
 use App\Enums\MoodTier;
 use App\Http\Controllers\Controller;
 use App\Models\Advisor\BuildTargetPayload;
@@ -92,6 +93,9 @@ class TrainingDecisionController extends Controller
             // number with no calendar behind it. Null for a run that has neither logged nor imported.
             'careerPosition' => $run->careerPosition()?->toArray(),
             'currentStats' => $this->currentStats($latest),
+            // The run's own Energy reading, as a state rather than a bare number: exact, a named band,
+            // or the explicit "not recorded" the audit found the tool collapsing into N/A everywhere.
+            'energy' => $this->energySection($latest),
             'options' => array_map(
                 fn (string $stat): array => $this->optionSection(
                     $stat,
@@ -310,7 +314,7 @@ class TrainingDecisionController extends Controller
      * C2's answer, flattened to the three fields this screen renders. No score and no numeric
      * confidence, because the contract has no field for either (`ADR-0001` §3).
      *
-     * @return array{action: string|null, band: string|null, absence: string|null}
+     * @return array{action: string|null, band: string|null, absence: string|null, reason: string|null}
      */
     private function advisorSection(Advice $advice): array
     {
@@ -318,6 +322,9 @@ class TrainingDecisionController extends Controller
             'action' => $advice->recommendation?->action,
             'band' => $advice->band,
             'absence' => $advice->absence,
+            // The recommendation's own source line, exposed so the page can print why the advisor said
+            // what it said - including a line that names an Energy band rather than a figure.
+            'reason' => $advice->recommendation?->reason,
         ];
     }
 
@@ -348,6 +355,36 @@ class TrainingDecisionController extends Controller
                 'energy' => $latest->energy,
                 'fans' => $latest->fans,
             ],
+        ];
+    }
+
+    /**
+     * The run's Energy as a state, with the exact string the page prints.
+     *
+     * `Energy: 66` for an exact reading, `Energy: Low band` for a coarse one the client showed instead
+     * of a number, and `Energy: Not recorded` for the absence. The label is built here so a reader of
+     * the props sees the state the page states, not a value it has to re-render.
+     *
+     * @return array{state: string|null, band: string|null, value: int|null, label: string}
+     */
+    private function energySection(?TurnEntry $latest): array
+    {
+        $state = $latest?->energy_state;
+        $band = $latest?->energy_band;
+        $value = $latest?->energy;
+
+        $label = match (true) {
+            $state === EnergyState::Band && $band !== null => 'Energy: '.ucfirst($band).' band',
+            $state === EnergyState::Unknown => 'Energy: Not recorded',
+            $value !== null => 'Energy: '.$value,
+            default => 'Energy: Not recorded',
+        };
+
+        return [
+            'state' => $state?->value,
+            'band' => $band,
+            'value' => $value,
+            'label' => $label,
         ];
     }
 
