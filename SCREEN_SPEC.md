@@ -3173,6 +3173,83 @@ left.
    in the same change, at `career-training-detail`, `career-save-veteran`, `career-race-strip`,
    `career-race-decision`, `legacy` and `career-legacy-deck-steps`.
 
+18. **The four trust labels have no written definition, and this file contradicts itself about one of
+    them.** Investigated 2026-10-09 against every artifact in the `AGENTS.md` §2 chain, because a prior pass
+    changed `TrainingCard.vue:233` from `Confirmed` to `Calculated` and correctly reverted it on
+    insufficient evidence. **No code changed here; the contradiction is not resolvable from the
+    repository.** The authority question first: `ADR-0006` Decision 1 makes root `DESIGN.md` the single
+    source of truth for the visual contract, and `DESIGN.md` **defines none of the four labels and never
+    names `ProvenanceBadge`**. `ADR-0020` §2 and `PRD.md` FR-F-3 both mandate a set —
+    `confirmed / calculated / RNG / user input` — of which the two that would decide this question are
+    **implemented nowhere**: a scan of all 115 files under `resources/js` finds zero `RNG` and zero
+    user-input badges, against 6 `confirmed`, 6 `calculated`, 3 `estimated` and 4 `unknown`. The shipped
+    set comes from `design-2.0.md` §49, a reference target its own banner marks not authorization. So no
+    artifact defines the boundary, and the live readings conflict **inside this file**: `:2322` documents
+    the Skill Point coverage — a sum over stored rows — as `Calculated`, while `:1935` documents the deck
+    tally at `TrainingCard.vue:233` — a count over stored rows — as `Confirmed`. Four call sites state a
+    single rule in their own text and it agrees with `:2322`, not `:1935`: `InheritanceEvent.vue:346`
+    "Always Confirmed because the Trainer recorded it", `BuildTarget.vue:530` "assembled by this tool from
+    the values entered on this form, not a stored fact", `RacePlanner.vue:268` "derived from two recorded
+    values, so it is a comparison rather than a reading", `SkillsPlanner.vue:180` a sum. Read that way the
+    rule is **reading versus derivation**, and a count is a derivation. The counter-evidence is only
+    `:1935` itself. Corrected here, because the earlier draft of this entry mis-stated it: of the two
+    lookup methods `:1938` cites, `SupportCardEffects::atCap()` genuinely does not compute — it selects the
+    highest non-`-1` anchor and formats it — so its `Confirmed` is right, while
+    `ScenarioCaps::caps()`/`forRun()` computes `min($base_cap + $cap_bonus, $hard_cap)` over three declared
+    constants, so its `Confirmed` is the same open question as the deck tally, not a settled case. Two
+    siblings stay unresolved on the same evidence. `? Unknown` beside the expected-gains row states
+    application-side ignorance while its own reason sentence states a source-side gap, and neither mandated
+    set has a member for "the source universe does not publish this"; naming one would be a fifth state,
+    which is refused. And the badgeless `N/A` rows are the *conformant* shape under `DESIGN.md` §4.2's
+    absence rule — "an unrecorded value renders `N/A` with a `title` naming the kind of absence, never
+    `Unknown`" — which is flatly contradicted by `ProvenanceBadge.vue:26-27`, where `Unknown` is defined as
+    exactly "the state for 'there is no number'"; so the four `unknown` badges and the badgeless rows are
+    the same disagreement, and no badge was added or removed on this evidence. What closes it is one
+    sentence per label, written in `DESIGN.md` as `ADR-0006` directs, plus a ruling on whether an absent
+    value is a figure the badge owns or a state `AbsenceValue` owns. **Owner decision; `:1935` and `:2322`
+    are the two lines that must disagree with each other or be changed.**
+
+    *Line numbers as re-read 2026-10-09, appended by the contract-reconciliation pass; the sentences above
+    are untouched. This file moved under concurrent editing while this entry was being written, so the
+    pointers in it now read: the SCR-CAR-012 Figure/Source table is `:1957`-`:1965` — the deck tally row
+    `Confirmed` is `:1961`, "Current value, target, cap" `Confirmed` is `:1964`, `atCap()` is `:1962` and
+    the expected-gains row is `:1965` — and the Skill Point coverage `Calculated` sentence is `:2323`. In
+    `TrainingCard.vue` the Energy cost badge is `:234`, the deck tally badge is `:242` and the
+    target-deficit badge is `:251`; `:233` is the Energy cost **span** carrying `costTitle`, which is the
+    row this entry's first sentence means. The proposal-side counterpart, carrying the vocabulary table and
+    the presentation options, is `docs/proposals/provenance-and-absence-contracts.md`.*
+
+    *Ruled 2026-10-09 (owner), appended; the entry above stands as written. The axis is per surface class
+    and is now defined in `DESIGN.md` §5: reading-versus-derivation on the Trainer Advisor's numbers,
+    source strength on the Database reference views, neither reaching the other. The four chips that sat
+    beside absences were removed as **policy** — the settled absence rule fixes how an unrecorded value
+    renders and says nothing about a badge beside it, so the earlier framing of that change as enforcement
+    was too strong. `Unknown` survives only where it names how well a row is sourced, which is the single
+    reference row at `config/reference.php:105`; `state="unknown"` now appears zero times in
+    `resources/js`. `Estimated` was ratified in its shipped sense (a weakly sourced figure), and the
+    opt-in model that `ADR-0001` §3 describes is recorded there as unbuilt. What this item still owns is
+    the record of the contradiction itself, which stays because the dated text above is what a future
+    reader needs to know the disagreement was real and when it closed.*
+
+20. **A binding rule says the constants behind a number are visible; the build puts them on hover.**
+    `ADR-0001` §2's replacement for Planner Rule 4 — carried into `ADR-0020` §2's guardrail list unchanged —
+    is "every derived number is a pure function of entered `turn_entries` plus a declared, versioned
+    constant set, **and the constants used are visible wherever the number appears**." On the surfaces this
+    pass audited, they are not: the training card's Energy cost renders its source, its read date and its
+    stale flag only in a `title` (`TrainingCard.vue:93-99` composes the string, `:223` attaches it), and the
+    same shape carries the two Skill Point coverage figures (`SkillsPlanner.vue:184`, `:186`) and the ten
+    race facts (`RaceCard.vue`, whose *absent* rows were migrated to a reachable disclosure while its
+    *present* rows still hold their provenance in a `title`). The stale flag is the load-bearing one:
+    `ADR-0001` §7 names session cost 17–28 and injury −5 to −10 as the two most load-bearing constants and
+    records both as coming from a 2023-02-25 source flagged STALE, so a Trainer reading `E−28 … E−17` with a
+    `Confirmed` chip and no mouse hover is told less than the ADR requires. This is the state `DESIGN.md` §1
+    calls **Intended** — shipped, diverging from the contract, named rather than normalised — and it is
+    recorded here rather than fixed because the open question is presentation, not permission: how a source,
+    a date and a stale flag surface inside a dense evidence row without costing the row its scanability is a
+    `DESIGN.md` decision, and §5's absence rule ("a caller that already prints its reason as visible prose
+    beside the marker needs no component") speaks to absences, not to a present value's provenance. **Owner
+    decision on the presentation; the requirement itself is already binding.**
+
 ## 8. Source of Truth
 
 | Question                                                      | Authority                                                                                                                                                                                                       | Corroboration                                                                                                                             |
