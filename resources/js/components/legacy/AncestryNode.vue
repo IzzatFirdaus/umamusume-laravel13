@@ -52,6 +52,12 @@ withDefaults(defineProps<{
     probability: { value: null; title: string };
     /** The `name` attribute of the node's pick control, unique per node in the form. */
     controlName?: string;
+    /**
+     * The currently picked id, as a string because that is what a `<select>` compares. `LegacySelect.vue`
+     * §"Why the pick control now works" states the contract this satisfies: the node takes the value as a
+     * prop and emits on `change`, because a native select fires `change` and never `update:model-value`.
+     */
+    modelValue?: string;
     /** Options for the pick control. Empty on the compare surface, which never assigns. */
     options?: { id: number; name: string }[];
     /** Field errors for this node's control, keyed by the control's own name. */
@@ -59,10 +65,13 @@ withDefaults(defineProps<{
     assignable?: boolean;
 }>(), {
     controlName: undefined,
+    modelValue: '',
     options: () => [],
     error: undefined,
     assignable: false,
 });
+
+const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 </script>
 
 <template>
@@ -128,10 +137,12 @@ withDefaults(defineProps<{
             <select
                 :id="controlName"
                 :name="controlName"
+                :value="modelValue"
                 class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
                 :class="error ? 'border-risk' : ''"
                 :aria-describedby="error ? `${controlName}-error` : undefined"
                 :aria-invalid="error ? 'true' : undefined"
+                @change="emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
             >
                 <option value="">Not chosen</option>
                 <option v-for="option in options ?? []" :key="option.id" :value="option.id">

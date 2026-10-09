@@ -240,6 +240,7 @@ const hasAnyNode = computed(() =>
                                 :sparks="assignedSparks(index)"
                                 :probability="parent.probability"
                                 :control-name="`legacies.${index}.legacy_id`"
+                                :model-value="form.legacies[index].legacy_id"
                                 :options="roster"
                                 :error="errorFor(parent.slot)"
                                 assignable
