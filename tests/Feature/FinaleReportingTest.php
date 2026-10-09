@@ -55,11 +55,11 @@ it('reports the finale as not yet reached for a career that has not got there', 
     $this->get(route('runs.result', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('finale.reached', false)
-            ->where('finale.outcome', null)
-            ->where('finale.placement', null)
-            ->where('finale.turn', null)
-            ->where('finale.label', 'Grand Concert')
+            ->where('finale_state.reached', false)
+            ->where('finale_state.outcome', null)
+            ->where('finale_state.placement', null)
+            ->where('finale_state.turn', null)
+            ->where('finale_state.label', 'Grand Concert')
         );
 });
 
@@ -75,9 +75,9 @@ it('reports the finale as reached with no outcome recorded', function (): void {
     $this->get(route('runs.result', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('finale.reached', true)
-            ->where('finale.outcome', null)
-            ->where('finale.placement', null)
+            ->where('finale_state.reached', true)
+            ->where('finale_state.outcome', null)
+            ->where('finale_state.placement', null)
         );
 });
 
@@ -98,12 +98,12 @@ it('reports the recorded outcome, placement and turn', function (): void {
     $this->get(route('runs.result', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('finale.reached', true)
+            ->where('finale_state.reached', true)
             // The run's own stored word, not a finale-specific one: "Great Success" is the only
             // outcome the client was read stating and the full set is unknown (§7-22).
-            ->where('finale.outcome', RaceEntryStatus::Completed->label())
-            ->where('finale.placement', '1st')
-            ->where('finale.turn', 71)
+            ->where('finale_state.outcome', RaceEntryStatus::Completed->label())
+            ->where('finale_state.placement', '1st')
+            ->where('finale_state.turn', 71)
         );
 });
 
@@ -113,7 +113,10 @@ it('emits no finale at all for a scenario whose calendar carries none', function
     $this->get(route('runs.result', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('finale', null)
+            ->where('finale_state', null)
+            // The old key is gone rather than left standing as a null, which is how a reader of this
+            // payload tells a scenario with no finale row from a payload that never carried the key.
+            ->missing('finale')
         );
 });
 
@@ -129,8 +132,9 @@ it('emits the same finale state on the cockpit payload', function (): void {
         'placement' => 2,
     ]);
 
-    // The cockpit's key is `finale_state`, not `finale`: that word already carries what the config
-    // declares the scenario composes, which is a different question from where this run stands.
+    // `finale_state` on this payload too: Slice 23 gave the two screens one word for the reader's
+    // output, and moved the config's own declaration to `scenario.finale_structure`, because a
+    // structure and a reading are two questions and plain `finale` had been answering both.
     $this->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page

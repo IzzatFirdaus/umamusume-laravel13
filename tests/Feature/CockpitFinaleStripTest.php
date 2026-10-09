@@ -185,11 +185,13 @@ it('carries a finale state on a scenario whose matrix closes the race calendar',
             ->where('raceStrip.notice', fn (string $line): bool => str_contains($line, 'composes no race calendar'))
             ->where('scenario.finale_state.reached', false)
             ->where('scenario.finale_state.label', 'Grand Concert')
-            // The two `finale` keys on one payload are not the same question, and only one of them is
-            // answered here: `scenario.finale` is what the config declares the scenario composes, and
-            // `ura_finale` alone declares it (`config/scenarios.php:358`). The strip's absence is
-            // therefore never read as the finale's absence, because the state that does describe this
-            // run's finale is the other key. On the Career Result payload the same reader output is
-            // called `finale`, which is the collision Slice 23 renames rather than a defect to keep.
-            ->where('scenario.finale', null));
+            // The two finale keys on one payload answer different questions, and only one of them is
+            // settled here: `scenario.finale_structure` is what the config declares the scenario
+            // composes, and `ura_finale` alone declares it (`config/scenarios.php:358`), so it is null
+            // on this career. The strip's absence is therefore never read as the finale's absence,
+            // because the key that does describe this run is `finale_state`. Slice 23 named the pair
+            // apart; before it both the declaration and the Career Result's reading were called
+            // `finale`, one payload apart.
+            ->where('scenario.finale_structure', null)
+            ->missing('scenario.finale'));
 });

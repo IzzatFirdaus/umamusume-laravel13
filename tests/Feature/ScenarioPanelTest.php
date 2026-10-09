@@ -102,9 +102,12 @@ function scenarioSectionKeys(): array
         'alerts',
         'recommendations',
         'recommendations_absence',
-        'finale',
-        // This run's own position against the finale. Distinct from `finale`, which is what the
-        // config declares the scenario composes: a structure and a reading are two questions.
+        // What the scenario's config entry declares about its finale. Renamed from plain `finale` by
+        // Slice 23, because the Career Result carried the per-run reading under that word and the two
+        // are a structure and a reading, which are two questions.
+        'finale_structure',
+        // This run's own position against the finale, read server-side by `FinaleReader`. The Career
+        // Result prints the same shape under this same key.
         'finale_state',
         'finale_absence',
         // The five Trackblazer-specific sections (plan §9 E4). Null for any scenario whose matrix

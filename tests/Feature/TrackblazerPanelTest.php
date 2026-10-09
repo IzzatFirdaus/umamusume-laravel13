@@ -209,7 +209,7 @@ it('prints a points-league finale and the official-title absence with a citation
     $this->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('scenario.finale', function (Collection $finale): bool {
+            ->where('scenario.finale_structure', function (Collection $finale): bool {
                 $row = $finale->all();
 
                 // The matrix supplies `kind` and `races` verbatim (config/scenarios.php line 358).

@@ -86,7 +86,21 @@ const props = defineProps<{
         alerts: unknown[];
         recommendations: unknown[];
         recommendations_absence: string;
-        finale: unknown;
+        /** What the scenario's config entry declares about its finale, or null. Not this run's state. */
+        finale_structure: unknown;
+        /**
+         * This run's own position against its scenario's finale, read server-side by `FinaleReader`,
+         * or null when the catalogue holds no such row. The Career Result prints the same shape under
+         * the same key; the key above it, `finale_structure`, is a different question and is what the
+         * config declares rather than what the run has done.
+         */
+        finale_state: {
+            reached: boolean;
+            outcome: string | null;
+            placement: string | null;
+            turn: number | null;
+            label: string;
+        } | null;
         finale_absence: string | null;
         /**
          * The published stat caps the baseline strip draws (plan §9 E6, D-241). `base` and `bonus`
@@ -102,13 +116,6 @@ const props = defineProps<{
         };
         /** The scenario's own sentence for why its panels are off, or null where its entry has none. */
         panel_absence: string | null;
-    finale_state: {
-        reached: boolean;
-        outcome: string | null;
-        placement: string | null;
-        turn: number | null;
-        label: string;
-    } | null;
         /** Where that reason is recorded, for the `title`. */
         panel_absence_title: string | null;
     };

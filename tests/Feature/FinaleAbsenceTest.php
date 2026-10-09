@@ -54,8 +54,9 @@ it('names the finale on the calendar instead of denying one exists', function ()
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             // Nothing was invented to satisfy the sentence: the config key stays undeclared, because
-            // no component reads its contents today.
-            ->where('scenario.finale', null)
+            // no component reads its contents today. The payload key is `finale_structure` since
+            // Slice 23; `config/scenarios.php` still spells its own entry `finale`.
+            ->where('scenario.finale_structure', null)
             ->where('scenario.finale_absence', CALENDAR_SENTENCE)
         );
 });
@@ -90,7 +91,7 @@ it('says nothing where the scenario does declare a finale structure', function (
             // Asserted through the declared key rather than `is_array($finale)`: at this depth the
             // Inertia test helper hands a nested array back as a Collection, so a shape closure
             // would fail for the wrong reason.
-            ->where('scenario.finale.kind', 'points_league')
+            ->where('scenario.finale_structure.kind', 'points_league')
             ->where('scenario.finale_absence', null)
         );
 });

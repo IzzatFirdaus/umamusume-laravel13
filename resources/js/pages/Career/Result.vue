@@ -59,7 +59,7 @@ const props = defineProps<{
         rows: { id: number; title: string; tier: string | null; placement: string | null; turn: number | null }[];
         empty: string | null;
     };
-    finale: {
+    finale_state: {
         reached: boolean;
         outcome: string | null;
         placement: string | null;
@@ -314,16 +314,18 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                      stated rather than drawn as empty cells: not yet reached, and reached with nothing
                      recorded. The label travels from the controller because the catalogue row's own
                      title is a borrowed name (KI-82). No badge here: an outcome is a Trainer statement,
-                     and a badge qualifies a figure whose source is in question. -->
-                <p v-if="props.finale !== null" class="mt-3 text-sm text-ink">
-                    <span class="font-semibold text-ink-strong">{{ props.finale.label }}</span>
-                    <template v-if="!props.finale.reached">: not yet reached.</template>
-                    <template v-else-if="props.finale.outcome === null">
+                     and a badge qualifies a figure whose source is in question. The key is
+                     `finale_state`, the same word the Cockpit's baseline row uses for the same reader
+                     output; a payload key of plain `finale` now names only what the config declares. -->
+                <p v-if="props.finale_state !== null" class="mt-3 text-sm text-ink">
+                    <span class="font-semibold text-ink-strong">{{ props.finale_state.label }}</span>
+                    <template v-if="!props.finale_state.reached">: not yet reached.</template>
+                    <template v-else-if="props.finale_state.outcome === null">
                         : reached, and no outcome is recorded yet. Enter it on
                         <a :href="props.run.run_url" class="underline">the run record</a>.
                     </template>
                     <template v-else>
-                        : {{ props.finale.outcome }}<template v-if="props.finale.placement !== null">, {{ props.finale.placement }}</template><template v-if="props.finale.turn !== null"> on turn {{ props.finale.turn }}</template>.
+                        : {{ props.finale_state.outcome }}<template v-if="props.finale_state.placement !== null">, {{ props.finale_state.placement }}</template><template v-if="props.finale_state.turn !== null"> on turn {{ props.finale_state.turn }}</template>.
                     </template>
                 </p>
             </section>

@@ -116,7 +116,7 @@ const props = defineProps<{
         epithet: EpithetSection | null;
         rival: RivalSection | null;
         finale_official_title_absence: string | null;
-        finale: unknown;
+        finale_structure: unknown;
     };
     label: string;
     kind: 'widget' | 'panel';

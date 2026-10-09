@@ -85,9 +85,9 @@ export interface ScenarioPanelSection {
     recommendations: unknown[];
     /** Why no recommendation is offered, for the `title`. */
     recommendations_absence: string;
-    /** The scenario's declared finale structure, or null. */
-    finale: unknown;
-    /** Why no finale is shown, or null when one is declared. */
+    /** The scenario's declared finale structure, or null. Not this run's state, which is `finale_state`. */
+    finale_structure: unknown;
+    /** Why no finale structure is shown, or null when one is declared. */
     finale_absence: string | null;
     /**
      * The Trackblazer-specific sections (plan §9 E4). Each is null for any scenario whose

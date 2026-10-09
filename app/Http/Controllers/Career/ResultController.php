@@ -69,7 +69,7 @@ class ResultController extends Controller
             'run' => $this->runSection($run),
             'build' => $this->buildSection($run, $latest),
             'races' => $this->raceSection($run),
-            'finale' => FinaleReader::forRun($run),
+            'finale_state' => FinaleReader::forRun($run),
             'scenario' => $this->scenarioSection($run),
             'save_veteran' => $this->saveVeteranSection($run),
             'ruleset' => $this->rulesetSection(),

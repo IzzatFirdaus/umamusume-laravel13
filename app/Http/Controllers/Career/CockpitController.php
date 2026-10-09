@@ -669,11 +669,12 @@ class CockpitController extends Controller
             'alerts' => $goalSections['alerts'],
             'recommendations' => [],
             'recommendations_absence' => 'No source this tool reads states scenario advice, so none is offered here. The advisor ranks the turn you are deciding.',
-            'finale' => $def['finale'] ?? null,
-            // This run's own position against the finale, distinct from `finale` above, which is
-            // what the config declares the scenario composes. Two different questions wearing one
-            // word: the structure (a composition) and the state (a reading). Named apart here so a
-            // reader cannot take one for the other; Slice 23's consistency pass owns the collision.
+            // What the scenario's own config entry declares about its finale, and nothing about this
+            // run: `ura_finale` is the only entry that declares one (`config/scenarios.php:358`), so
+            // this is null for the other three. It used to sit under the key `finale`, which is the
+            // same word the Career Result used for the per-run reading below. Slice 23 separated them:
+            // one word, one meaning, and the reader's output is `finale_state` on both screens.
+            'finale_structure' => $def['finale'] ?? null,
             'finale_state' => FinaleReader::forRun($run),
             'finale_absence' => $this->finaleAbsence($run, $def),
             // The five Trackblazer-specific sections (plan §9 E4). Each is null for any scenario
