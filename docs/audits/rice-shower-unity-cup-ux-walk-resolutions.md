@@ -47,6 +47,23 @@ The first is not done. Phase 2 closes when D9's remaining work lands.
 | Legacy disambiguation, ancestor rank, grandparent sparks | **Landed** (Phase 6) | 6.1–6.3 | `31c9f5d`, `5876f64`, `f39ff03` | `LegacyDisambiguationTest`, `AncestorRankTest`, `GrandparentSparksTest` |
 | Scenario metadata, typed spark targets | **Landed** (Phase 7) | 7.1–7.2 | `1098546`, `6fa0d01` | `ScenarioMetadataTest`, `SparkTargetValidationTest` |
 | Energy model (exact/band/unknown) | **Landed** (Phase 8.1; §11 record added at `837d995`) | 8.1 | `1ec92ab` | `EnergyStateTest` |
+| Cockpit reads the career position and countdown (4.4 + 5.3) | **Landed** (closes the 2026-10-09 deferral) | 2A.1 | `3b6f3cc` | `SnapshotCockpitTest`, `SnapshotScenarioCountdownTest` |
+| Facility levels per turn | **Landed** | 2A.2 | `c8402ee` | `TurnFacilityLevelsTest` |
+| Per-turn failure rate and preview gains | **Landed** (stored, not computed) | 2A.3 | `3b34fb0` | `TurnFailurePreviewTest` |
+| Stat-ceiling fourth marker | **Landed-superseded** — the persistence half is the deliverable; the render target `StatBand.vue` was deleted by the cutover at `b30906a`, and `CareerStatePanel.vue:16` states it was deliberately not reused | 2A.4 | `cb42d93` (persistence half) | `RunStatCeilingsTest` |
+| Nav-rail run-record door relabelled to the Cockpit | **Landed** | 2A.5 | `d251f7f` | `NoStaleRunRecordLinksTest`; career-cockpit / career-result specs |
+| Cockpit renders the run's identity, team and Unity Cup state | **Landed** | 2A.6 | `5eba0d0` | `CockpitRunIdentityTest`, `CockpitTeamPanelTest`, `CockpitUnityCupCountersTest` — 9 focused / 70 regression passed |
+| Race payout columns | **Landed** | 2B A4 | `057db67` | `RacePayoutTest` |
+| Skill spend coverage, hint ladder removed per ADR-0001 | **Landed** | 2B A5 | `992be59` | `CareerSkillsPlannerTest`, `SkillSpendCoverageTest`, career-skills-planner.spec.ts |
+| Trainee rarity and potential level (persistence) | **Landed** | 2B A6.1 | `b896d0b` | `TraineeRarityPotentialTest` |
+| Character card reference | **Already built** — no change needed | 2B A6.2 | — | existing coverage |
+| Growth-rate row (persistence) | **Landed** | 2B A6.3 | `110ffd3` | `RunGrowthRateTest` |
+| Per-run stat ceilings (persistence) | **Landed** | 2B A6.4p | `cb42d93` | `RunStatCeilingsTest` |
+| Fan ladder service | **Landed** | 2B A6.5 | `e096137` | `FanLadderTest` |
+| Team identity (persistence) | **Landed** | 2B A6.6 | `709a233` | `RunTeamStateTest` |
+| Unity Cup progression counters (persistence) | **Landed** | 2B A6.7 | `89f3b11` | `UnityCupCountersTest` |
+| Advisor card rendered nothing when the finale context was present | **Fixed** — filed as KI-90 | Part 4 | `7a344a4` | career-cockpit.spec.ts + career-cockpit-forms.spec.ts, 18 passed (6.0m) |
+| Card levels and limit breaks (Phase 14) | **Deferred** — owner ruling on `PRD.md` §6.9 outstanding; `ADR-0014` declined `user_support_cards` | 14 | — | — |
 
 ## Per finding
 
@@ -406,6 +423,14 @@ ancestor letter ranks (B+, UG), card levels and limit breaks, team identity and 
 progression counts, the race-day card, and the mid-career position itself. Each needs the snapshot
 architecture (Phase 3 onward) or a dedicated slice; none was faked.
 
+**Erratum 2026-10-10 — five of that list have since been supported by later slices in this
+remediation** (the sentence above is kept as written; this note dates it): the per-stat caps
+(`cb42d93`), the star rating and Potential Level (`b896d0b`), team identity (`709a233`), the Unity
+Cup progression counts (`89f3b11`), and the mid-career position itself (Phases 4–5, read by the
+Cockpit at `3b6f3cc`). Still unsupported: Energy as a qualitative band, the grandparents' Spark
+sets, ancestor letter ranks, card levels and limit breaks (Phase 14, deferred), and the race-day
+card.
+
 ## Close — final status (2026-10-09)
 
 **D1–D9 final status.** D1 **Fixed** (browser half green: `career-inheritance-event.spec.ts` 8 of 8).
@@ -439,3 +464,32 @@ D6/D7 resolution: `e8a3dff`.
 (unchanged; no new hit from the close). `composer lore-code` — no hit from any file changed here.
 `career-inheritance-event.spec.ts` — 8 of 8 passed. Not run: the full suite as one command, and
 `composer audit` / `npm audit` (no dependency changed).
+
+## Close — final state (2026-10-10)
+
+**Phases 1–8 complete.** Phase 4.4 / 5.3 landed via 2A.1 (`3b6f3cc`), closing the one deferral the
+2026-10-09 close recorded. The 2A and 2B queues then landed in full (rows above): the 2A slices
+render and store what the earlier phases persisted, and the 2B slices carry the remaining
+persistence halves. Every landed commit's body carries the same note: *Phase 14 deferred; §6.9
+still rules out collection tracking.*
+
+**2A.4.** The only A-phase slice not landed as specified: its render target `StatBand.vue` was
+deleted by the cockpit cutover at `b30906a`, and the cutover's own code states the component was
+deliberately not reused (`CareerStatePanel.vue:16`). The persistence half is the deliverable
+(`cb42d93`); the render half is superseded by the cutover's removal of the visualization and no
+surface exists to render a fourth marker on. Recorded Landed-superseded in the status table.
+
+**Advisor defect.** The `finale_context` prop mismatch introduced by `ad8dc77` (snake_case prop,
+kebab-case binding, so the card threw on `undefined.label` and rendered nothing) was found during
+2A.6's browser verification and fixed at `7a344a4`. Filed as KI-90, which also records why the
+cockpit-spec failure it named is resolved by the same commit.
+
+**Deferred.** Phase 14 (card levels and limit breaks) awaits an owner ruling on `PRD.md` §6.9;
+`ADR-0014` declined `user_support_cards` and nothing else was faked to fill its place. This is the
+remediation's only outstanding work.
+
+**Gates.** State at close: `career-cockpit.spec.ts` + `career-cockpit-forms.spec.ts` 18 passed
+(6.0m, session-private port and scratch database); `composer lore` 303 hits / 77 exempt;
+`composer lore-code` 118 hits (both at baseline); `php artisan migrate:status` — all Ran, no
+Pending. Not run at close: the full suite as one command (the focused and related-regression runs
+per slice are recorded in each commit), and `composer audit` / `npm audit` (no dependency changed).
