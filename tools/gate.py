@@ -3,7 +3,10 @@
 Note for the Lore Guardian: this checker names the banned patterns in order to
 grep for them, which is the same practice the root CONSTRAINTS.md C-4 list and
 CLAUDE.md Banned Patterns already use. It adds no new vocabulary choice. Checks rendered text of the standalone prototypes against
-docs/design-research/CONSTRAINTS.md gates G-1..G-17 that are machine-checkable.
+the machine-checkable gates G-1..G-17, whose binding text now lives in
+docs/research-scratch/DESIGN-CORPUS.md (the master that absorbed
+docs/design-research/CONSTRAINTS.md when that file was folded, per AGENTS.md
+§17; the gate list itself is cross-referenced in GOVERNANCE.md).
 
 Run:  python tools/gate.py
 Exit 0 = all gates pass. Non-zero = failures listed.

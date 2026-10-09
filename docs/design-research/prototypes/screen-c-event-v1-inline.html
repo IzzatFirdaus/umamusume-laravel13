@@ -18,11 +18,11 @@ document.documentElement.dataset.theme=t;}catch(e){}})();
    except where D-101 names the exceptions. */
 :root{
   --page:#F2F1F8;--panel:#F8F8FB;--raised:#FFFFFF;--idle:#D2D2DB;--sunken:#E7E7EC;--disabled:#D0D1D0;
-  --ink:#6A5641;--ink-strong:#482720;--ink-muted:#7A7067;--ink-faint:#988F87;--rule:#E4E1EA;
+  --ink:#6A5641;--ink-strong:#482720;--ink-muted:#6E6459;--ink-faint:#988F87;--rule:#E4E1EA;
   --green:#7FCC09;--green-deep:#4E7906;--chrome:#4E7906;--on-chrome:#FFFFFF;
   --green-tint:#F0F8EC;--green-line:#C6E5B3;
   --up:#FF9A2C;--down:#0088E0;--sp:#009FE1;--pick:#EFC96A;--risk:#800014;--rank:#351F70;
-  --blue-700:#0B6FB8;--cyan-800:#106F9F;--lattice:#6ABE01;
+  --blue-700:#0B6FB8;--cyan-800:#0E7490;--lattice:#6ABE01;
   --tint-speed:#E6ECF7;--tint-stamina:#F7E6F1;--tint-power:#F7F1E6;--tint-guts:#F7E6E6;--tint-wit:#ECF7E6;--tint-sp:#E6F4F7;
   --lift:0 2px 0 rgba(53,31,112,.06),0 6px 16px -6px rgba(53,31,112,.22);
   --press:0 1px 0 rgba(53,31,112,.10),0 2px 6px -2px rgba(53,31,112,.18);
@@ -116,8 +116,8 @@ body{margin:0;background:var(--page);color:var(--ink);
 :root[data-theme="dark"] .choice .glyph{color:var(--panel)}
 .choice .glyph svg{width:18px;height:18px}
 /* Selected = gold with dark ink. Bright green with white fails at 1.99:1 (D-3). */
-.choice[aria-checked="true"]{background:var(--pick);border-color:#C5A558;color:var(--ink-strong);box-shadow:var(--glow)}
-.choice[aria-checked="true"] .cap{background:linear-gradient(180deg,#FDF7EF,var(--pick))}
+.choice[aria-checked="true"]{background:var(--pick);border-color:#7A5C10;color:var(--ink-strong);box-shadow:var(--glow)}
+.choice[aria-checked="true"] .cap{background:linear-gradient(180deg,#FFFFFF,var(--pick))}
 .choice[aria-checked="true"] .glyph{background:var(--chrome);color:var(--on-chrome)}
 .choice[aria-checked="true"]::after{content:"";position:absolute;right:13px;top:50%;width:12px;height:24px;
   transform:translateY(-50%) skewX(-14deg);
