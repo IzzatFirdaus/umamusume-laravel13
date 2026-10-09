@@ -51,6 +51,7 @@ final class CreateSnapshotRun
     {
         return DB::transaction(function () use ($data): TrainingRun {
             $states = $this->fieldStates($data);
+            $values = $this->knownValues($data, $states);
 
             $turnIndex = CareerCalendar::turnIndexFor(
                 CareerYear::from((int) $data['career_year']),
@@ -64,6 +65,7 @@ final class CreateSnapshotRun
                 'phase' => (string) $data['career_phase'],
                 'turn_index' => $turnIndex,
                 'field_states' => $states,
+                'field_values' => $values === [] ? null : $values,
             ]);
 
             $run = TrainingRun::create([
@@ -76,7 +78,7 @@ final class CreateSnapshotRun
                 'career_position_source' => 'imported',
             ]);
 
-            $state = $this->completeEntryState($data, $states);
+            $state = $this->completeEntryState($values);
 
             if ($state !== null) {
                 TurnEntry::create($state + [
@@ -95,35 +97,52 @@ final class CreateSnapshotRun
      * The five core stats are non-null in the schema, so a reading that marks any of them Unknown or
      * Not provided cannot become a turn row: filling the gap with a zero would print a number the
      * Trainer never read, which is the guess the snapshot flow exists to refuse. In that case the
-     * per-field states on the stored position are the record, and no turn entry is written.
+     * per-field states and values on the stored position are the record, and no turn entry is written.
      *
-     * @param  array<string, mixed>  $data
-     * @param  array<string, string>  $states
+     * @param  array<string, int>  $values
      * @return array<string, int>|null
      */
-    private function completeEntryState(array $data, array $states): ?array
+    private function completeEntryState(array $values): ?array
     {
         $state = [];
 
         foreach (self::CORE_STATE_FIELDS as $field) {
-            $value = $this->knownValue($data, $states, $field);
-
-            if ($value === null) {
+            if (! isset($values[$field])) {
                 return null;
             }
 
-            $state[$field] = $value;
+            $state[$field] = $values[$field];
         }
 
         foreach (self::OPTIONAL_STATE_FIELDS as $field) {
-            $value = $this->knownValue($data, $states, $field);
-
-            if ($value !== null) {
-                $state[$field === 'skill_points' ? 'sp' : $field] = $value;
+            if (isset($values[$field])) {
+                $state[$field === 'skill_points' ? 'sp' : $field] = $values[$field];
             }
         }
 
         return $state;
+    }
+
+    /**
+     * The numbers the Trainer read, keyed by state field name.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<string, string>  $states
+     * @return array<string, int>
+     */
+    private function knownValues(array $data, array $states): array
+    {
+        $values = [];
+
+        foreach (StoreSnapshotRequest::STATE_FIELDS as $field) {
+            $value = $this->knownValue($data, $states, $field);
+
+            if ($value !== null) {
+                $values[$field] = $value;
+            }
+        }
+
+        return $values;
     }
 
     /**

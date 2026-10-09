@@ -74,7 +74,7 @@ class TrainingDecisionController extends Controller
         $run->load(['umamusume', 'turnEntries', 'deckSlots.supportCard']);
 
         $advisor = app(TrainerAdvisor::class);
-        $latest = $run->turnEntries->sortByDesc('turn')->first();
+        $latest = $this->statsSource($run);
         $advice = $advisor->advise($latest, $run->buildTarget(), $run);
         $target = $run->buildTarget();
         $scenarioKey = $run->hasScenario() ? $run->scenarioKey() : null;
@@ -88,6 +88,10 @@ class TrainingDecisionController extends Controller
 
         return Inertia::render('Career/TrainingDetail', [
             'run' => $this->runSection($run),
+            // The run's own position, so the screen can name the turn it stands on rather than a
+            // number with no calendar behind it. Null for a run that has neither logged nor imported.
+            'careerPosition' => $run->careerPosition()?->toArray(),
+            'currentStats' => $this->currentStats($latest),
             'options' => array_map(
                 fn (string $stat): array => $this->optionSection(
                     $stat,
@@ -345,6 +349,70 @@ class TrainingDecisionController extends Controller
                 'fans' => $latest->fans,
             ],
         ];
+    }
+
+    /**
+     * The stats the decision plans against: the latest logged turn, or the snapshot's own imported
+     * values when it has logged none.
+     *
+     * A snapshot that could not form a complete turn entry - it marked a core stat Unknown - still
+     * carries the numbers it did read on its stored position. The advisor's contract is a `TurnEntry`,
+     * so those values are handed over as a transient, never-saved row: the deficits the screen states
+     * are then against what the Trainer read, not against nothing. A partial set returns null, because
+     * the advisor must not rank against a stat nobody entered.
+     */
+    private function statsSource(TrainingRun $run): ?TurnEntry
+    {
+        $latest = $run->turnEntries->sortByDesc('turn')->first();
+
+        if ($latest !== null) {
+            return $latest;
+        }
+
+        $position = $run->career_position;
+
+        if ($position === null || $position->fieldValues === null) {
+            return null;
+        }
+
+        $values = $position->fieldValues;
+
+        foreach (['speed', 'stamina', 'power', 'guts', 'wit'] as $stat) {
+            if (! isset($values[$stat])) {
+                return null;
+            }
+        }
+
+        return new TurnEntry([
+            'turn' => $position->turnIndex,
+            'speed' => $values['speed'],
+            'stamina' => $values['stamina'],
+            'power' => $values['power'],
+            'guts' => $values['guts'],
+            'wit' => $values['wit'],
+            'sp' => $values['skill_points'] ?? null,
+            'energy' => $values['energy'] ?? null,
+            'fans' => $values['fans'] ?? null,
+        ]);
+    }
+
+    /**
+     * The run's current stat values, keyed by matrix name, for the page's own read-back.
+     *
+     * @return array<string, int|null>
+     */
+    private function currentStats(?TurnEntry $latest): array
+    {
+        /** @var list<string> $order */
+        $order = config('scenarios.stat_order');
+
+        $stats = [];
+
+        foreach ($order as $stat) {
+            $stats[$stat] = $this->currentStat($latest, $stat);
+        }
+
+        return $stats;
     }
 
     /**

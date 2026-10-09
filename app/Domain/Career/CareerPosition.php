@@ -30,11 +30,16 @@ use InvalidArgumentException;
  * `known|unknown|not_provided` (the review screen's three states). It rides the position's own JSON
  * column rather than a new table because the snapshot has one store and this is a fact about the
  * snapshot; a position that never came from a snapshot carries null, and every other reader ignores it.
+ *
+ * `fieldValues` is the companion the review reads beside those states: the numbers the Trainer read,
+ * keyed by field name. A snapshot that could not form a complete turn entry still carries what it did
+ * read here, so a decision screen plans against the imported figures rather than against nothing.
  */
 final class CareerPosition
 {
     /**
      * @param  array<string, string>|null  $fieldStates
+     * @param  array<string, int>|null  $fieldValues
      */
     public function __construct(
         public readonly CareerYear $year,
@@ -43,6 +48,7 @@ final class CareerPosition
         public readonly int $turnIndex,
         public readonly ?int $scenarioCountdown = null,
         public readonly ?array $fieldStates = null,
+        public readonly ?array $fieldValues = null,
     ) {
         if ($month < 1 || $month > 12) {
             throw new InvalidArgumentException("A career month is 1 to 12; [{$month}] is not.");
@@ -109,6 +115,7 @@ final class CareerPosition
             // countdown, and that absence travels as null rather than as a key every writer must add.
             scenarioCountdown: $payload['scenario_countdown'] ?? null,
             fieldStates: is_array($payload['field_states'] ?? null) ? $payload['field_states'] : null,
+            fieldValues: is_array($payload['field_values'] ?? null) ? $payload['field_values'] : null,
         );
 
         $expected = CareerCalendar::positionToTurnIndex($position);
@@ -128,7 +135,7 @@ final class CareerPosition
      * The stored shape. `year` keeps the integer `race_catalog_slots.year` stores so a position and a
      * catalogue row compare without a translation; `phase` keeps the word the client spells.
      *
-     * @return array{year: int, month: int, phase: string, turn_index: int, scenario_countdown: int|null, field_states: array<string, string>|null}
+     * @return array{year: int, month: int, phase: string, turn_index: int, scenario_countdown: int|null, field_states: array<string, string>|null, field_values: array<string, int>|null}
      */
     public function toArray(): array
     {
@@ -139,6 +146,7 @@ final class CareerPosition
             'turn_index' => $this->turnIndex,
             'scenario_countdown' => $this->scenarioCountdown,
             'field_states' => $this->fieldStates,
+            'field_values' => $this->fieldValues,
         ];
     }
 }

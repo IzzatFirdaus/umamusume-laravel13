@@ -74,6 +74,8 @@ const props = defineProps<{
     options: Option[];
     deck: { recorded: boolean; slots: number };
     advisor: { action: string | null; band: string | null; absence: string | null };
+    careerPosition: { year: number; month: number; phase: string; turn_index: number; scenario_countdown: number | null } | null;
+    currentStats: Record<string, number | null>;
     write: {
         action: string;
         turn: number;
@@ -83,6 +85,26 @@ const props = defineProps<{
 }>();
 
 const { visiting, visitFailed } = useVisitState();
+
+/*
+ * The run's own position, in the client's words, when it has one. The next turn the record form
+ * writes is `write.turn` (the run's `nextTurnNumber()`, which already reads the imported position),
+ * and this line says where the run stands so that number has a calendar behind it.
+ */
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const YEAR_LABELS: Record<number, string> = { 1: 'Junior Year', 2: 'Classic Year', 3: 'Senior Year' };
+
+const positionLabel = computed<string | null>(() => {
+    const position = props.careerPosition;
+
+    if (position === null) {
+        return null;
+    }
+
+    const year = YEAR_LABELS[position.year] ?? `Year ${position.year}`;
+
+    return `${year} · ${position.phase} ${MONTHS[position.month - 1]} · Turn ${position.turn_index}`;
+});
 
 // The choice the Trainer holds for the turn, set by a card's Train button. Null until one is pressed,
 // which is the honest state: nothing here presumes which training this turn was.
@@ -202,6 +224,11 @@ const capFor = (label: string): number =>
             <a :href="props.run.cockpit_url" class="inline-flex min-h-11 items-center font-medium text-ink-strong underline">
                 Career Cockpit
             </a>
+        </p>
+
+        <p v-if="positionLabel !== null" class="mb-4 text-sm text-ink-muted">
+            This run stands at {{ positionLabel }}. The deficits below are against the stats recorded
+            there, and the next turn the form writes is {{ props.write.turn }}.
         </p>
 
         <section
