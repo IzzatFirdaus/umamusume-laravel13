@@ -8,6 +8,7 @@ use App\Domain\Career\CareerPosition;
 use App\Domain\Career\CareerPositionCast;
 use App\Enums\PerformanceType;
 use App\Enums\RaceEntryStatus;
+use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\SpiritBurstState;
@@ -42,6 +43,8 @@ use Illuminate\Support\Carbon;
  * @property RunStatus $status
  * @property CareerPosition|null $career_position the run's stored position, read through its cast;
  *                                                null on every new-career run, which derives
+ * @property RunMode|null $mode how the run came to exist, read through its cast; the model's own
+ *                              attribute default answers NewCareer for a row nobody named one for
  * @property int|null $inheritance_parent_a_id
  * @property int|null $inheritance_parent_b_id
  * @property array<array-key, mixed>|null $legacy_selection the Legacy Select read-back as the
@@ -78,6 +81,16 @@ use Illuminate\Support\Carbon;
 #[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
 class TrainingRun extends Model
 {
+    /**
+     * A run nobody named a mode for is a new career. The column stays nullable in the schema because
+     * the backfill, not a default, is what speaks for the rows that predate it; this answers the
+     * rows created after, including the ones a test factory or an import path writes without going
+     * near the create form's request.
+     */
+    protected $attributes = [
+        'mode' => 'new_career',
+    ];
+
     /** @use HasFactory<TrainingRunFactory> */
     use HasFactory;
 
@@ -640,6 +653,18 @@ class TrainingRun extends Model
     }
 
     /**
+     * Whether this run was entered mid-career rather than started at turn 1.
+     *
+     * A snapshot's turn numbers continue from the position its Trainer named, so the surfaces that
+     * count from turn 1 must not; this is the switch they read. Null answers false, because a run
+     * created before this column existed is a new career and the backfill says so in data.
+     */
+    public function isSnapshot(): bool
+    {
+        return $this->mode === RunMode::Snapshot;
+    }
+
+    /**
      * One cell: what the run did here if it did anything, and otherwise whether
      * this turn's entry is still behind a fan gate.
      *
@@ -995,6 +1020,7 @@ class TrainingRun extends Model
             'build_target' => 'array',
             'imported_at' => 'datetime',
             'career_position' => CareerPositionCast::class,
+            'mode' => RunMode::class,
         ];
     }
 

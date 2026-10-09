@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Models\RaceEntry;
 use App\Models\TrainingRun;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 /**
  * Validates run creation and updates (PRD FR-C-1, C-4).
@@ -50,6 +52,7 @@ class StoreTrainingRunRequest extends FormRequest
              */
             'scenario' => ['nullable', 'string', Rule::in(self::scenarios())],
             'status' => ['required', Rule::enum(RunStatus::class)],
+            'mode' => ['nullable', Rule::enum(RunMode::class)],
             'inheritance_parent_a_id' => ['nullable', 'integer', Rule::exists('umamusume', 'id')],
             'inheritance_parent_b_id' => ['nullable', 'integer', Rule::exists('umamusume', 'id')],
             'notes' => ['nullable', 'string', 'max:5000'],
@@ -99,6 +102,36 @@ class StoreTrainingRunRequest extends FormRequest
         if (is_string($this->input('scenario')) && trim($this->input('scenario')) === '') {
             $this->merge(['scenario' => null]);
         }
+
+        /*
+         * A run created before the mode column existed is a new career, and so is one whose form
+         * predates the snapshot entry point: the default lives here rather than in the schema so a
+         * writer that omits the field gets the same run a pre-snapshot writer got, and the schema
+         * keeps its own null for a row no request ever touched.
+         */
+        $this->merge(['mode' => $this->input('mode', RunMode::NewCareer->value)]);
+    }
+
+    /**
+     * The one cross-field rule the two modes need: a snapshot names where it stands, because a
+     * snapshot without a position is not a snapshot - it is a new career that has not admitted to
+     * being one, and every surface reading its turn numbers would then derive Junior Early January
+     * from a run the Trainer says is halfway through Senior Year.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if ($this->enum('mode', RunMode::class) !== RunMode::Snapshot) {
+                return;
+            }
+
+            if ($this->input('career_position') === null) {
+                $validator->errors()->add(
+                    'career_position',
+                    'A snapshot must name where the career stands, because a snapshot without a position is a new career that has not admitted to being one.',
+                );
+            }
+        });
     }
 
     /**
