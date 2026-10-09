@@ -39,8 +39,8 @@ The first is not done. Phase 2 closes when D9's remaining work lands.
 | D3 rented/friend flag not persisted | **Fixed** | 1.3 | `fdebcc9` | `RunDeckTest`, `SupportDeckBuilderTest`, `CareerPreflightTest` |
 | D4 target validation contradicts the UI | **Fixed** | 2.1 | `be02297` | `CareerBuildTargetTest` (3 new cases); the sibling `KI-47` named in the follow-up is already **closed** |
 | D5 trainee stored-choice readback `N/A` | **Fixed** | 2.2 | `dd6dd22` | `CareerTraineeSelectTest` (1 new case) |
-| D6 turn table hides Fans/Energy | **Fixed** (browser half unrunnable, see below) | 2.3 | `89e8453` | `TurnRowActionsTest` (2 new cases) |
-| D7 wizard step numbering skips 3 | **Fixed** (browser half unrunnable, see below) | 2.4 | `6d53ffc` | `GuidedTurnOnRunViewTest` (1 new case) |
+| D6 turn table hides Fans/Energy | **Fixed** (rendered surface removed, 2026-10-09; see below) | 2.3 | `89e8453` | `TurnRowActionsTest` (2 new cases) |
+| D7 wizard step numbering skips 3 | **Fixed** (rendered surface removed, 2026-10-09; see below) | 2.4 | `6d53ffc` | `GuidedTurnOnRunViewTest` (1 new case) |
 | D8 Rice Shower aptitude mismatch | **Verified, not a tool defect** | 2.5 | `be48e60` | `CareerTraineeSelectTest` (1 new case) |
 | D9 duplicate turn-entry paths | **Fixed** — one shared field source, all three surfaces wired and labelled alike (2026-10-09) | 2.6 | `8e3d33c`, `5e41137`, `7a81c7c` + this commit | `TurnEntryFieldSourceTest` (4 cases) |
 | Career position / snapshot mode | Not started (Phase 3+) | — | — | — |
@@ -108,19 +108,33 @@ The step's `Stored choice:` readout derived the name from `trainees.data`, the p
 roster, so a Trainer who searched and selected saw `N/A` beside a flash confirming the selection. The
 name now travels with the stored selection.
 
-### D6 — turn table Fans/Energy: Fixed, browser half unrun
+### D6 — turn table Fans/Energy: Fixed, rendered surface removed
 
 The payload already carried `energy` and `fans`; only the table lacked the columns. Both are now
 printed, and a turn that recorded neither names its own absence (`N/A` with a `title`). The read path
 and the columns' presence are pinned by feature tests; the rendered-DOM assertion in
 `run-detail.spec.ts` was **not executed** (see the infrastructure note).
 
-### D7 — wizard step numbering: Fixed, browser half unrun
+**2026-10-09 resolution — rendered surface removed.** The peer's cockpit cutover deleted
+`Runs/Show.vue`, its `show()` method and `run-detail.spec.ts` in one pass (`TrainingRunController`
+`:198`), so the run-screen turn table the rendered assertion addressed no longer exists on this tree,
+and `runs.show` is a redirect to `runs.cockpit`. The behaviour the assertion guarded — Energy and Fans
+reachable and printed — is carried by the cockpit, whose correction form reads Energy and Fans
+(`Cockpit.vue:446-452`) and whose `career-cockpit.spec.ts` records Energy through it (the "records
+Energy through the cockpit correction and then marks one action" case). The D6 feature tests were
+removed with the surface. Status: **Fixed (rendered surface removed)**.
+
+### D7 — wizard step numbering: Fixed, rendered surface removed
 
 The indicator counted `current`'s position inside `def.steps`, the scenario's turn vocabulary (Unity
 Cup's five include a facility and a team-race step the rail never lands on), so it read "Step 2 of 5"
 then "Step 4 of 5". The rail has two stages; the server now sends `flow` and the indicator and the
 progress pips count those. The rendered assertion in `run-detail.spec.ts` was **not executed**.
+
+**2026-10-09 resolution — rendered surface removed.** The same cutover removed the `runs.show` guided
+rail entirely, so there is no step indicator left on this tree to assert against. The cockpit has no
+guided flow and no step indicator, so the assertion cannot be re-addressed. Status: **Fixed (rendered
+surface removed)**.
 
 ### D8 — Rice Shower aptitudes: Verified, not a tool defect
 
