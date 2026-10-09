@@ -446,4 +446,20 @@ return [
         ],
     ],
 
+    /*
+     * The fan ladder, as the bands a run can hold: a floor, the threshold that ends the band, and the
+     * class the client shows inside it.
+     *
+     * `docs/audits/rice-shower-unity-cup-ux-walk.md:392-393` records one band and only one: a run at
+     * 209,245 fans holding the class `Star`, with the **Top Star** threshold at 240,000 and a
+     * 30,755-fan gap to it. That is the band below 240,000, and it is the only one any source this
+     * repository reads names - no tier below Star and no tier above Top Star is stated anywhere, so the
+     * ladder has one entry and `FanLadder` answers null past its top rather than inventing a tier.
+     *
+     * @var list<array{class: string, from: int, to: int}>
+     */
+    'fan_ladder' => [
+        ['class' => 'Star', 'from' => 0, 'to' => 240000],
+    ],
+
 ];
