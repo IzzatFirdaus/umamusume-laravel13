@@ -836,7 +836,7 @@ from a payload that never carried the key. The catalogue row's own title is not 
 
 ## Slice 21 — Scenario-Aware Trainer Advisor
 
-**Status: PLANNED**
+**Status: COMPLETE** (landed 2026-10-09 at `ad8dc77`; `ScenarioAdvisorFinaleTest`, cases in tests/Feature/ScenarioAdvisorFinaleTest.php)
 
 Only after underlying Grand Concert state exists.
 
@@ -860,7 +860,7 @@ and maintain provenance.
 
 ## Slice 22 — Scenario Cockpit Integration
 
-**Status: PLANNED**
+**Status: COMPLETE** (landed 2026-10-09 at `aa5d975`; `CockpitFinaleStripTest` and `CareerCockpitTest` pin the scenario-state surfaces, cases in tests/Feature/CockpitFinaleStripTest.php)
 
 Expose verified Grand Concert state through the existing Career Cockpit/turn flow.
 
@@ -1007,6 +1007,8 @@ leftovers — `career-cockpit.spec.ts`'s stale "run screen" link copy, `career-r
 `runs.show` status flow, and `run-detail.spec.ts` driving the redirected page — and the concurrent
 session was repairing them in the working tree during this pass (`career-cockpit.spec.ts:114` and
 `career-result.spec.ts:35` are already repointed, and `run-detail.spec.ts` is staged for deletion).
+
+*Corrected 2026-10-10.* The sentence above that these eight failures were "repaired by a concurrent session during the pass" is superseded. Of the eight, **six were in `StatBandTest`** and were **retired** under the owner's ruling R-A1 (the subject, `GradeBadge.vue` and `StatBand.vue`, was deleted by F2's Delta C cleanup). The remaining **two were in `TurnEntryFieldSourceTest`** and were **adapted by F2** in a later commit after `1ec92ab` changed `TrainingDetail.vue`'s import. All eight were F2's to close; F2 closed them outside the Grand Concert line. The Grand Concert acceptance did not see them repaired mid-run.
 
 ---
 
