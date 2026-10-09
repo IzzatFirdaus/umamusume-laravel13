@@ -2109,6 +2109,20 @@ specs fail in setup — until half one lands, no spec can reach a finished caree
 KI-82's and KI-87's cockpit claims still lack. And it does not touch KI-84's staged deletions or KI-69's
 class-3 fixture contract, both separate.
 
+**Closed 2026-10-09.** Both halves are fixed in tree and on `HEAD`. Half one (`fix(career): give the
+cockpit's three header edits a submit control (KI-88)`) at `71488cb` adds a submit button per form —
+"Change status", "Change scenario", "Report period" — matching the file's existing `min-h-11` button
+treatment. Half two (`test(browser): re-anchor the create-redirect waits to the cockpit (KI-88)`) at
+`5e1cdf2` re-points every `waitForURL` wait that still expected the pre-cutover `/training-runs/{id}`
+shape to `/training-runs/{id}/cockpit$`, and routes the eight fixtures that created turns through the
+deleted run screen onto `tests/utils/record-turns.ts` via `runs.turns.store`. Verified: `grep -rn
+"waitForURL.*training-runs" tests/browser/*.spec.ts` shows 29 hits, all anchored to `/cockpit` or
+the conditional `/(\/cockpit)?$/` pattern except three that intentionally wait for `/\/training-runs$/`
+(the empty-state list page). `Cockpit.vue` carries `type="submit"` on all three header forms. What closure
+does not cover: the browser suite still cannot complete a full finished career on a shared harness until
+KI-88's own class-1 empty-table defect (KI-69) and KI-82's missing title are resolved, so the submit
+controls are component-tested and tree-pinned rather than browser-gated end to end.
+
 ### KI-89 `FinaleVocabularyTest.php`'s docblock cites `docs/Our-Grand-Concert-plan.md` §9 E8, a section no document in the tree defines - FILED 2026-10-09 (Grand Concert closing pass), OPEN
 
 **Status: OPEN.** A documentation defect, small and real: a test's own docblock points a reader at a section
