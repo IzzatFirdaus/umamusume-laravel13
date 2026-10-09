@@ -94,11 +94,11 @@ it('sums entered coins and never a coin balance it cannot see', function (): voi
     // The page carries both halves of that: the entered spend as a resolved figure, and no
     // balance at all, so a coin count the server never saw cannot be printed (D-232).
     // The sentence itself is asserted in `tests/browser/run-detail.spec.ts`.
-    test()->get('/training-runs/'.$run->id)
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('shop.spendTotal', '65')
-            ->where('strip.values.shop_coins', null));
+            ->where('scenario.shop.spend_total', 65)
+            ->where('header.values.shop_coins', null));
 });
 
 it('refuses a sixth copy of the same item', function (): void {
@@ -146,10 +146,10 @@ it('marks the cost input when the catalogue price disagrees', function (): void 
     // Its own test because a second failed request in the same session ages the first
     // one's flashed bag out before the page renders, which would prove nothing about the
     // form. The referer is what a browser sends, and `back()` needs it to return here.
-    // Inertia carries the bag as the shared `errors` prop, which is what `ShopPanel.vue`
+    // Inertia carries the bag as the shared `errors` prop, which is what `TrackblazerPanel.vue`
     // binds to the cost field's `aria-invalid`; both halves are asserted, because a bag that
     // arrives with nothing bound to it renders an unmarked input and no message.
-    test()->withHeader('referer', url('/training-runs/'.$run->id))
+    test()->withHeader('referer', url('/training-runs/'.$run->id.'/cockpit'))
         ->followingRedirects()
         ->post('/training-runs/'.$run->id.'/purchases', [
             'turn' => 1, 'item' => 'Vita 40', 'cost' => 40, 'effect' => 'Energy +40',
@@ -159,9 +159,9 @@ it('marks the cost input when the catalogue price disagrees', function (): void 
             ->where('errors.cost', fn ($message): bool => is_string($message)
                 && str_contains($message, 'charges 55 coins for Vita 40')));
 
-    $panel = (string) file_get_contents(base_path('resources/js/components/ShopPanel.vue'));
+    $panel = (string) file_get_contents(base_path('resources/js/components/scenario/TrackblazerPanel.vue'));
 
-    expect($panel)->toContain(":aria-invalid=\"purchaseForm.errors.cost ? 'true' : 'false'\"")
+    expect($panel)->toContain(":aria-invalid=\"purchaseForm.errors.cost !== undefined ? 'true' : 'false'\"")
         ->and($panel)->toContain('id="purchase-cost-error"');
 });
 
@@ -172,11 +172,11 @@ it('warns about the overwrite and the cap beside the purchase control', function
     // transcribed into the assertion, so a config change cannot leave a stale 5 behind.
     // The two sentences themselves are rendered-copy evidence in
     // `tests/browser/run-detail.spec.ts`.
-    test()->get('/training-runs/'.$run->id)
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('shop.maxCopies', (int) config('scenarios.scenarios.trackblazer.shop.max_copies_per_item'))
-            ->where('shop.panelsShop', true));
+            ->where('scenario.shop.max_copies', (int) config('scenarios.scenarios.trackblazer.shop.max_copies_per_item'))
+            ->where('scenario.panels.shop.on', true));
 });
 
 it('renders a purchase recorded through the writer in the panel', function (): void {
@@ -189,13 +189,14 @@ it('renders a purchase recorded through the writer in the panel', function (): v
     // The panel prints the item, its effect, its cost and the running total, all four of
     // them number-formatted by the controller; the rendered row is browser evidence in
     // `tests/browser/run-detail.spec.ts`.
-    test()->get('/training-runs/'.$run->id)
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('shop.purchases', [[
+            ->where('scenario.shop.purchases', [[
                 'item' => 'Royal Kale Juice',
                 'effect' => 'Energy +100, Mood −1',
-                'cost' => '70',
+                'cost' => 70,
+                'turn' => 4,
             ]])
-            ->where('shop.spendTotal', '70'));
+            ->where('scenario.shop.spend_total', 70));
 });

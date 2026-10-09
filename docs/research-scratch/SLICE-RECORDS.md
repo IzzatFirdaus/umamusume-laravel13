@@ -5155,5 +5155,3 @@ The value of this gate was not the number. It was four things, in order:
 
 Related: `superpowers:verification-before-completion` (a claim is the command output), and the owner's standing
 "Built, not landed" wording rule, which is why the gate state lived in `SCREEN_SPEC.md` rather than in chat.
-
-

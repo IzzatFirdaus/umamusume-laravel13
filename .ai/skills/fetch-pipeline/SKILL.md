@@ -41,7 +41,7 @@ catalog or run table; so is `uma:fetch-art` (artwork mirroring, ADR-0021). Do no
 ## Repository Context
 
 | Piece | Where | Contract |
-|---|---|---|
+| --- | --- | --- |
 | Only outbound HTTP | `app/Services/DataPipeline/SourceFetcher.php` | hosts must be in `config('uma.sources')` |
 | Source registry | `config/uma.php` key `sources` | per entry: `url`, `parser`, `delay_ms`, `timeout_s`, `timezone`, `seed_file` |
 | Parser interface | `app/Services/DataPipeline/Contracts/SourceParser.php` (+ one interface per kind) | `parse(string $body): array`; pure; never writes the DB, never hits the network |
@@ -118,6 +118,6 @@ Schema change: migration + updated `ARCHITECTURE-ESSENTIALS.md` digest + PRD cit
 
 ## Change Log
 
-| Date | Change | Reason |
-|---|---|---|
+| Date       | Change                      | Reason                                                                                                                                                                      |
+| ---------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-10-06 | Initial skill specification | Repository baseline: the fetch pipeline is the most rule-bound recurring workflow in `AGENTS.md` §8/§11 and had no skill; `.ai/skills/` format follows the tracked siblings |

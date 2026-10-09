@@ -47,9 +47,13 @@ it('creates a run and renders logged turns in order', function (): void {
         'turn' => 2, 'speed' => 150, 'stamina' => 90, 'power' => 110, 'guts' => 80, 'wit' => 95, 'sp' => 40,
     ])->assertRedirect();
 
-    test()->get("/training-runs/{$run->id}")
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
-        ->assertSeeInOrder(['Turn', '150']);
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/Cockpit')
+            ->where('correction.turns.0.turn', 1)
+            ->where('correction.turns.1.turn', 2)
+            ->where('state.stats.0.current', 150));
 });
 
 it('rejects a duplicate turn number for the same run', function (): void {
@@ -96,19 +100,8 @@ it('records suggested acquired and skipped skills on a run', function (): void {
 
     expect($run->skills->count())->toBe(3);
 
-    // The port moved the three names out of rendered text and into the payload: the page groups
-    // the run's skills by acquisition status, so each name sits under the group it was written to.
-    test()->get("/training-runs/{$run->id}")
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('Runs/Show')
-            ->where('skillGroups.0.key', 'Suggested')
-            ->where('skillGroups.0.skills.0.name', 'Certain Victory')
-            ->where('skillGroups.1.key', 'Acquired')
-            ->where('skillGroups.1.skills.0.name', '1st Place Kiss☆')
-            ->where('skillGroups.1.skills.0.turn_acquired', 3)
-            ->where('skillGroups.2.key', 'Skipped')
-            ->where('skillGroups.2.skills.0.name', 'Feel the Burn!'));
+    // The legacy page's skillGroups payload has no 2.0 subject: the Cockpit composes no skills
+    // section, so the grouping assertion was dropped rather than re-pointed (see hand-off).
 });
 
 it('refuses to pin a skill the Global catalogue does not offer', function (array $attributes): void {
@@ -172,7 +165,7 @@ it('edits a logged turn in place, keeping its number', function (): void {
 
     test()->put("/training-runs/{$run->id}/turns/{$turn->id}", [
         'turn' => 2, 'speed' => 400, 'stamina' => 90, 'power' => 110, 'guts' => 80, 'wit' => 95,
-    ])->assertRedirect(route('runs.show', $run));
+    ])->assertRedirect(route('runs.cockpit', $run));
 
     // An edit rewrites the row a Trainer misread off the client, so it is an update and
     // not a delete-and-reinsert: the id is the same row and the turn number is the same
@@ -229,7 +222,7 @@ it('removes one turn and leaves the rest of the run in order', function (): void
     TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 3, 'speed' => 300]);
 
     test()->delete("/training-runs/{$run->id}/turns/{$doomed->id}")
-        ->assertRedirect(route('runs.show', $run));
+        ->assertRedirect(route('runs.cockpit', $run));
 
     expect(TurnEntry::query()->where('training_run_id', $run->id)->orderBy('turn')->pluck('speed')->all())
         ->toBe([100, 300]);

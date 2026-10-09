@@ -29,7 +29,7 @@ it('stores a target and reads it back through the payload', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
 
     $this->put(route('runs.build-target.update', $run), targetPayload())
-        ->assertRedirect(route('runs.show', $run));
+        ->assertRedirect(route('runs.cockpit', $run));
 
     expect($run->fresh()->buildTarget()?->toArray())->toBe(targetPayload());
 });

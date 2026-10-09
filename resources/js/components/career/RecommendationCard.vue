@@ -3,14 +3,14 @@
  * The recommendation card (SCREEN-009 §29/§30, design-2.0 §19). The screen's one accented element
  * (Selective Attention, plan §13).
  *
- * **The props are the plan's "Recommendation contract (D8)" and nothing else**: action, band, reasons,
- * alternative, risk. There is no `score` and no numeric confidence, because `ADR-0001` §3 leaves both
+ * **The props are the plan's "Recommendation contract (D8)" plus one status line**: action, band,
+ * reasons, alternative, risk, and `finale_context`. There is no `score` and no numeric confidence, because `ADR-0001` §3 leaves both
  * unsourced and C2's `Advice` has no field for them; a sixth prop here would be the second place to be
  * wrong. `risk` is null in this slice — a delay or a reachability verdict is held computation.
  *
  * **It never acts for the Trainer.** The only control is the Trainer's own button, and it is an anchor
  * to the one entry the grid marks `RECOMMENDED` — one fixed id, so this card does not need to know
- * which action it recommended and the five-prop contract stays five. The card says what the advisor
+ * which action it recommended and the contract stays the contract. The card says what the advisor
  * thinks; where the Trainer records it is a separate, deliberate press (design-2.0 §2 "the
  * application never removes player agency").
  *
@@ -35,6 +35,13 @@ const props = defineProps<{
     reasons: string[];
     alternative: string | null;
     risk: string | null;
+    /**
+     * Where the run stands against its scenario's finale, computed server-side by `FinaleReader`. It is
+     * context in the Trainer's reading order, never a sixth recommendation: the card still names one
+     * action, and no rule in the engine covers concert preparation (`ADR-0020` §3). Words only, no
+     * glyph and no colour, so it cannot be read as a second verdict beside the band mark.
+     */
+    finale_context: { label: string; state: string; turns_away: number | null } | null;
 }>();
 
 const BANDS: Record<'AtOrAboveAdvisory' | 'BelowAdvisory', { glyph: string; word: string }> = {
@@ -74,6 +81,19 @@ const band = computed(() => (props.band === null ? null : BANDS[props.band]));
                 <li v-for="(reason, index) in props.reasons" :key="index">{{ reason }}</li>
             </ul>
         </template>
+
+
+        <p v-if="props.finale_context !== null" class="mt-3 text-sm text-ink">
+            <template v-if="props.finale_context.state === 'next'">
+                The {{ props.finale_context.label }} is the next turn.
+            </template>
+            <template v-else-if="props.finale_context.state === 'passed'">
+                The {{ props.finale_context.label }} has passed; no outcome is recorded.
+            </template>
+            <template v-else>
+                The {{ props.finale_context.label }} is {{ props.finale_context.turns_away }} turns away.
+            </template>
+        </p>
 
         <p v-if="props.alternative !== null" class="mt-3 text-sm text-ink">
             Alternative: <span class="font-semibold text-ink-strong">{{ props.alternative }}</span>

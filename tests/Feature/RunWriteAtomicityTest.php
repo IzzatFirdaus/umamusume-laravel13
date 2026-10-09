@@ -113,7 +113,7 @@ it('records both rows when nothing fails, the canary for the two above', functio
         'penalty_kind' => 'energy',
         'stage' => 'confirm',
         'previewed' => '1',
-    ])->assertRedirect(route('runs.show', $run));
+    ])->assertRedirect(route('runs.cockpit', $run));
 
     // Without this, a test that only asserts zero rows would also pass on a write path that
     // never writes anything at all.
@@ -131,7 +131,7 @@ it('records both rows of a manual race when nothing fails, the canary for the sl
         'title' => 'Hand Entered Race',
         'month' => 4,
         'half' => 'Early',
-    ])->assertRedirect(route('runs.show', $run));
+    ])->assertRedirect(route('runs.cockpit', $run));
 
     // The race test above passed while validation rejected its payload and nothing was
     // written at all. This pins that the manual path does reach both inserts.

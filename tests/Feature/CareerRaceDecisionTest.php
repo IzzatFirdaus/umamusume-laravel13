@@ -6,6 +6,7 @@ use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
+use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\Umamusume;
@@ -81,7 +82,7 @@ it('renders the races at the turn being decided, with every brief field present 
             ->where('run.trainee', 'Rice Shower')
             ->where('run.trainee_ja', 'ライスシャワー')
             ->where('run.scenario_label', 'URA Finale')
-            ->where('run.run_url', route('runs.show', $run))
+            ->where('run.run_url', route('runs.cockpit', $run))
             // Turn 13 on the client's 24-turn grid: Junior Year, Early July.
             ->where('nextTurn.year_label', 'Junior Year')
             ->where('nextTurn.turn', 13)
@@ -282,4 +283,228 @@ it('renders no win figure and no percentage anywhere in the slice', function ():
                 static fn (array $fact): bool => ! str_contains((string) $fact['value'], '%')
                     && ! str_contains((string) $fact['title'], '%'),
             )));
+});
+
+/*
+ * F2, plan §9.6 ruling 3: manual free-race entry lands on the Race Decision. These port the three
+ * write behaviours the legacy run screen owned, against `runs.races.store` with `entry_mode=manual`.
+ * The form now posts from the decision screen, so each submission carries that referer and returns
+ * to it.
+ */
+
+it('leaves the turn link null on a manual race the Trainer does not tie to a turn', function (): void {
+    $run = raceRun(turns: 12);
+
+    $this->from(route('runs.races.decision', $run))
+        ->post(route('runs.races.store', $run), [
+            'entry_mode' => 'manual',
+            'title' => 'Autumn Practice Stakes',
+            'month' => 9,
+            'half' => 'Late',
+            'status' => RaceEntryStatus::Completed->value,
+        ])
+        ->assertRedirect(route('runs.races.decision', $run));
+
+    // KI-17: the link is nullable on purpose, so an entry the Trainer does not tie to a turn is a
+    // complete row rather than a refused one.
+    expect(RaceEntry::where('training_run_id', $run->id)->sole()->turn_entry_id)->toBeNull();
+});
+
+it('links a manual race to the turn the Trainer names', function (): void {
+    $run = raceRun(turns: 12);
+    $turn = TurnEntry::where('training_run_id', $run->id)->where('turn', 3)->sole();
+
+    $this->from(route('runs.races.decision', $run))
+        ->post(route('runs.races.store', $run), [
+            'entry_mode' => 'manual',
+            'title' => 'Autumn Practice Stakes',
+            'month' => 9,
+            'half' => 'Late',
+            'turn_entry_id' => $turn->id,
+            'status' => RaceEntryStatus::Completed->value,
+        ])
+        ->assertRedirect(route('runs.races.decision', $run));
+
+    $entry = RaceEntry::where('training_run_id', $run->id)->sole();
+
+    expect($entry->turn_entry_id)->toBe($turn->id)
+        ->and($entry->turnEntry)->not->toBeNull()
+        ->and($entry->turnEntry->turn)->toBe(3);
+});
+
+it('rejects a turn logged on a different run and writes no row', function (): void {
+    $run = raceRun(turns: 12);
+    $otherRun = raceRun(turns: 2);
+    $foreignTurn = TurnEntry::where('training_run_id', $otherRun->id)->where('turn', 1)->sole();
+
+    $this->from(route('runs.races.decision', $run))
+        ->post(route('runs.races.store', $run), [
+            'entry_mode' => 'manual',
+            'title' => 'Autumn Practice Stakes',
+            'month' => 9,
+            'half' => 'Late',
+            'turn_entry_id' => $foreignTurn->id,
+            'status' => RaceEntryStatus::Completed->value,
+        ])
+        ->assertRedirect(route('runs.races.decision', $run))
+        ->assertSessionHasErrors('turn_entry_id');
+
+    // The manual arm writes a slot and an entry together; a refused turn leaves neither.
+    expect(RaceEntry::where('training_run_id', $run->id)->count())->toBe(0)
+        ->and(ScenarioSlot::where('kind', 'free_race')->count())->toBe(0);
+});
+
+it('refuses circles on a manual free race, which is not a team race', function (): void {
+    $run = raceRun(turns: 12);
+
+    $this->from(route('runs.races.decision', $run))
+        ->post(route('runs.races.store', $run), [
+            'entry_mode' => 'manual',
+            'title' => 'Autumn Practice Stakes',
+            'month' => 9,
+            'half' => 'Late',
+            'circles' => 2,
+            'status' => RaceEntryStatus::Completed->value,
+        ])
+        ->assertRedirect(route('runs.races.decision', $run))
+        ->assertSessionHasErrors('circles');
+
+    expect(RaceEntry::where('training_run_id', $run->id)->count())->toBe(0);
+});
+
+it('writes a free_race slot and its race entry for a manual race', function (): void {
+    $run = raceRun(turns: 12);
+
+    $this->from(route('runs.races.decision', $run))
+        ->post(route('runs.races.store', $run), [
+            'entry_mode' => 'manual',
+            'title' => 'Autumn Practice Stakes',
+            'month' => 9,
+            'half' => 'Late',
+            'tier' => 'OP',
+            'status' => RaceEntryStatus::Completed->value,
+        ])
+        ->assertRedirect(route('runs.races.decision', $run));
+
+    $slot = ScenarioSlot::where('scenario_key', 'ura_finale')->where('kind', 'free_race')->sole();
+
+    expect($slot->title)->toBe('Autumn Practice Stakes')
+        ->and($slot->slot_label)->toBe('Autumn Practice Stakes')
+        ->and($slot->month)->toBe(9)
+        ->and($slot->half)->toBe('Late')
+        ->and($slot->tier)->toBe('OP')
+        ->and($slot->is_manual)->toBeTrue();
+
+    $entry = RaceEntry::where('training_run_id', $run->id)->sole();
+
+    expect($entry->scenario_slot_id)->toBe($slot->id)
+        ->and($entry->scenarioSlot->kind)->toBe('free_race');
+
+    // The slot the write just made reads back on the manual arm of the Race Decision.
+    $this->get(route('runs.races.decision', ['run' => $run, 'entry_mode' => 'manual']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('entry_mode', 'manual')
+            ->where('manual_slots', [['id' => $slot->id, 'title' => 'Autumn Practice Stakes']]));
+});
+
+/*
+ * R67/R71, ported from the retired `RaceEntryDisclosureTest`: the two-path race form is
+ * server-driven disclosure, exactly as guided-step does it. Which half is open is server state,
+ * resolved into `entry_mode` (the query wins over the 'calendar' default), so the reachable branch
+ * is asserted from the page payload rather than from a template's inert markup. The switch is a
+ * navigation, so the mode arrives as the query parameter a Trainer's click sends.
+ */
+
+it('renders the calendar branch reachable, with the hand-entered races out of the branch', function (): void {
+    $run = raceRun(turns: 12);
+    raceSlot(['title' => 'Japanese Oaks']);
+    ScenarioSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'kind' => 'free_race',
+        'title' => 'Autumn Practice Stakes',
+        'slot_label' => 'Autumn Practice Stakes',
+        'month' => 9,
+        'half' => 'Late',
+        'is_manual' => true,
+    ]);
+
+    $this->get(route('runs.races.decision', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/RaceDecision')
+            // The branch the page resolved, not a literal a template could leave inert.
+            ->where('entry_mode', 'calendar')
+            // The calendar branch names the catalogue race at the turn being decided...
+            ->has('races', 1)
+            ->where('races.0.title', 'Japanese Oaks')
+            // ...and a race the Trainer typed earlier keeps its own list, out of this branch.
+            ->has('manual_slots', 1)
+            ->where('manual_slots.0.title', 'Autumn Practice Stakes'));
+});
+
+it('renders the manual branch reachable when the disclosure switches the mode', function (): void {
+    $run = raceRun(turns: 12);
+
+    $this->get(route('runs.races.decision', ['run' => $run, 'entry_mode' => 'manual']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/RaceDecision')
+            ->where('entry_mode', 'manual'));
+});
+
+it('rejects a failed manual entry and stores nothing', function (): void {
+    $run = raceRun(turns: 12);
+
+    $this->from(route('runs.races.decision', $run))
+        ->post(route('runs.races.store', $run), [
+            'entry_mode' => 'manual',
+            'title' => 'Midsummer Practice Race',
+            'month' => 13,
+            'half' => 'Early',
+            'status' => RaceEntryStatus::Completed->value,
+        ])
+        ->assertRedirect(route('runs.races.decision', $run))
+        ->assertSessionHasErrors('month');
+
+    expect(RaceEntry::where('training_run_id', $run->id)->count())->toBe(0)
+        ->and(ScenarioSlot::where('kind', 'free_race')->count())->toBe(0);
+});
+
+it('writes a free race through the rendered manual form, not a direct post', function (): void {
+    $run = raceRun(turns: 12);
+
+    $page = $this->get(route('runs.races.decision', ['run' => $run, 'entry_mode' => 'manual']))->assertOk();
+
+    $page->assertInertia(fn (Assert $assert) => $assert
+        ->component('Career/RaceDecision')
+        ->where('entry_mode', 'manual')
+        // The action the form itself posts to, read out of the page payload rather than assumed.
+        ->where('entry.action', route('runs.races.store', $run)));
+
+    $this->from(route('runs.races.decision', $run))
+        ->post($page->inertiaProps('entry.action'), [
+            // The mode the page served, not a literal a template could leave inert.
+            'entry_mode' => $page->inertiaProps('entry_mode'),
+            'title' => 'Autumn Practice Stakes',
+            'month' => 9,
+            'half' => 'Late',
+            'status' => RaceEntryStatus::Completed->value,
+            'placement' => 3,
+        ])
+        ->assertRedirect(route('runs.races.decision', $run));
+
+    $slot = ScenarioSlot::where('kind', 'free_race')->where('title', 'Autumn Practice Stakes')->first();
+
+    expect($slot)->not->toBeNull()
+        ->and($slot->is_manual)->toBeTrue()
+        ->and($slot->month)->toBe(9)
+        ->and($slot->half)->toBe('Late')
+        ->and($slot->tier)->toBeNull();
+
+    // The row the form just wrote is readable back out of the manual arm's own list.
+    $this->get(route('runs.races.decision', ['run' => $run, 'entry_mode' => 'manual']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $assert) => $assert
+            ->where('manual_slots', [['id' => $slot->id, 'title' => 'Autumn Practice Stakes']]));
 });

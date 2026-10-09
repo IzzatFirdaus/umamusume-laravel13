@@ -413,9 +413,16 @@ class UraFinaleRunsSeeder extends Seeder
     }
 
     /**
+     * Writes one tracker run keyed on its import_source label, skipping a run that
+     * already carries it.
+     *
+     * Public for the same reason RUNS is: `TrackerVeteransSeeder` files the five
+     * completed careers this table defines without duplicating the write path, so
+     * one import body is maintained here.
+     *
      * @param  array{umamusume_id: int, character_card_id: int, turn: int, stats: array{speed: int, stamina: int, power: int, guts: int, wit: int}, sp: int|null, energy: int|null, condition: string|null, mood: string|null, status: RunStatus, skills: list<array{0: int, 1: SkillAcquisition}>, races: list<array{slot: int, status: RaceEntryStatus, placement: int|null}>, notes: string}  $run
      */
-    private function importRun(string $label, array $run): void
+    public function importRun(string $label, array $run): void
     {
         $source = self::SOURCE_FILE.' (Run '.$label.')';
 

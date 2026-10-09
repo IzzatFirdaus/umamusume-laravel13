@@ -83,7 +83,7 @@ it('renders the inheritance event page for a run with a legacy configuration', f
             ->where('run.trainee_ja', 'ライスシャワー')
             ->where('run.scenario_label', 'Trackblazer')
             ->where('run.status_label', 'Active')
-            ->where('run.run_url', route('runs.show', $run))
+            ->where('run.run_url', route('runs.cockpit', $run))
             ->where('run.cockpit_url', route('runs.cockpit', $run))
             ->where('empty', null)
             ->has('legacy')

@@ -2433,7 +2433,6 @@ stay untouched.
    from doc-cited to export-cited with a `source_url` and a `fetched_at`. The config's `source` block is
    where that lands. Until then the two `recheck` strings carry the 2026-10-08 read and its limits.
 
-
 ### Tree state at hand-off, 2026-10-08 (measured, so the next session does not rediscover it)
 
 - `HEAD` is `7b04b6c` and `master` is **7 ahead of `origin/master`**, unpushed (the O-1 push gate is still

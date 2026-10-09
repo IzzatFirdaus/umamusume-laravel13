@@ -8,11 +8,12 @@ use App\Models\TrainingRun;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
- * R-5: every save that lands back on the run page carries a flash status, so a
- * Trainer can tell which of the page's forms landed. One assertion per form,
- * checking the redirect lands on the run page with the value already in the
- * shared `flash` prop the shell renders the banner from. What the layout draws
- * from that prop is measured on the live page; this pins the contract.
+ * R-5: every save that lands back on the run carries a flash status, so a
+ * Trainer can tell which of the run's forms landed. One assertion per form,
+ * checking the redirect lands on the Cockpit (or the surviving legacy door the
+ * write still pins) with the value already in the shared `flash` prop the shell
+ * renders the banner from. What the layout draws from that prop is measured on
+ * the live page; this pins the contract.
  */
 
 function runForSaveConfirmation(): TrainingRun
@@ -23,13 +24,15 @@ function runForSaveConfirmation(): TrainingRun
 it('confirms a deck save', function (): void {
     $run = runForSaveConfirmation();
 
+    // `runs.deck.sync` is the one surviving write that still pins the legacy `runs.show`
+    // door rather than the Cockpit; `runs.show` then 302s on to `runs.cockpit`.
     test()->post(route('runs.deck.sync', $run), ['deck' => []])
         ->assertRedirect(route('runs.show', $run));
 
-    test()->get(route('runs.show', $run))
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Runs/Show')
+            ->component('Career/Cockpit')
             ->where('flash.status', 'Deck saved.'));
 });
 
@@ -45,12 +48,12 @@ it('confirms a skill status save', function (): void {
             ['skill_id' => $skill->id, 'status' => 'Acquired', 'turn_acquired' => null],
         ],
     ])
-        ->assertRedirect(route('runs.show', $run));
+        ->assertRedirect(route('runs.cockpit', $run));
 
-    test()->get(route('runs.show', $run))
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Runs/Show')
+            ->component('Career/Cockpit')
             ->where('flash.status', 'Skill status saved.'));
 });
 
@@ -69,12 +72,12 @@ it('confirms a guided turn commit', function (): void {
         'choice' => 'training-Speed',
         'outcome' => 'Success',
     ])
-        ->assertRedirect(route('runs.show', $run));
+        ->assertRedirect(route('runs.cockpit', $run));
 
-    test()->get(route('runs.show', $run))
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Runs/Show')
+            ->component('Career/Cockpit')
             ->where('flash.status', 'Turn 2 logged.'));
 });
 
@@ -89,12 +92,12 @@ it('confirms a manual correction', function (): void {
         'guts' => 100,
         'wit' => 100,
     ])
-        ->assertRedirect(route('runs.show', $run));
+        ->assertRedirect(route('runs.cockpit', $run));
 
-    test()->get(route('runs.show', $run))
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Runs/Show')
+            ->component('Career/Cockpit')
             ->where('flash.status', 'Turn 3 logged.'));
 });
 
@@ -108,12 +111,12 @@ it('confirms a race entry', function (): void {
         'month' => 10,
         'half' => 'Early',
     ])
-        ->assertRedirect(route('runs.show', $run));
+        ->assertRedirect(route('runs.cockpit', $run));
 
-    test()->get(route('runs.show', $run))
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Runs/Show')
+            ->component('Career/Cockpit')
             ->where('flash.status', 'Race recorded.'));
 });
 
@@ -125,11 +128,11 @@ it('confirms a run update', function (): void {
         'status' => $run->status->value,
         'scenario' => $run->scenario,
     ])
-        ->assertRedirect(route('runs.show', $run));
+        ->assertRedirect(route('runs.cockpit', $run));
 
-    test()->get(route('runs.show', $run))
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Runs/Show')
+            ->component('Career/Cockpit')
             ->where('flash.status', 'Run updated.'));
 });

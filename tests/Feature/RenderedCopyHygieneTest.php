@@ -191,9 +191,9 @@ it('renders N/A rather than a glyph when a run has recorded no value', function 
     // cannot fall back to a default.
     $run = TrainingRun::factory()->create(['scenario' => 'unity_cup']);
 
-    $this->get('/training-runs/'.$run->id)->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->component('Runs/Show')
-        ->where('strip.values', fn (Collection $values): bool => $values->get('energy') === null
+    $this->get(route('runs.cockpit', $run))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Career/Cockpit')
+        ->where('header.values', fn (Collection $values): bool => $values->get('energy') === null
             && $values->get('fans') === null
             && $values->has('team_rank')
             && $values->get('team_rank') === null

@@ -56,7 +56,7 @@ it('returns the empty state when no turns have been logged', function (): void {
             ->where('run.trainee', 'Rice Shower')
             ->where('run.trainee_ja', 'ライスシャワー')
             ->where('run.scenario_label', 'No scenario set')
-            ->where('run.run_url', route('runs.show', $run))
+            ->where('run.run_url', route('runs.cockpit', $run))
             ->where('run.cockpit_url', route('runs.cockpit', $run))
             ->has('entries', 0)
             ->has('filters.available', 0)

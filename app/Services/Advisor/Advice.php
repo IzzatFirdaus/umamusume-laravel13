@@ -25,5 +25,15 @@ final readonly class Advice
         public ?AdvisorOption $alternative,
         public array $options,
         public ?string $absence,
+        /**
+         * Where this run stands against its scenario's finale, or null when the scenario carries no
+         * finale row or the finale is not close enough to be worth a line. Shape:
+         * `array{label: string, state: string, turns_away: int|null}`.
+         *
+         * It is context, not a recommendation: the engine ranks the turn and never advises on the
+         * concert, because no rule here covers concert preparation and the gauge that would decide it
+         * is unbuilt (`ADR-0020` §3, `SCREEN_SPEC.md` §7-22).
+         */
+        public ?array $finale_context = null,
     ) {}
 }

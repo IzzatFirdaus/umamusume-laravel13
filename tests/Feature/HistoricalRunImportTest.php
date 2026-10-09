@@ -156,7 +156,7 @@ it('normalises an empty scenario so an imported run renders instead of 500ing', 
 
     expect($imported->scenario)->toBeNull();
     expect($imported->hasScenario())->toBeFalse();
-    test()->get(route('runs.show', $imported))->assertOk();
+    test()->get(route('runs.cockpit', $imported))->assertOk();
 });
 
 it('measures every imported stat against the ceiling its own scenario sets', function (): void {

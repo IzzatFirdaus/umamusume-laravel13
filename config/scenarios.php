@@ -377,6 +377,20 @@ return [
                 'epithet_routes' => false,
                 'team_rank_ladder' => false,
             ],
+            /*
+            | This scenario offers the turn rail a Performance observation field. It is deliberately NOT a
+            | `panels` key. `panels` is the list the ScenarioPanel shell renders, and this scenario composes
+            | none of them — that absence is what the baseline strip and gate G-41 assert, so switching a
+            | panel on to reveal a rail input would hand the shell an ON panel with no renderer. A turn-rail
+            | input is not a panel, so it carries its own flag and the panel map stays as the shell reads it.
+            |
+            | Only the flag lives here, never the five type names: those are the domain enum's
+            | (App\Enums\PerformanceType), read from Cygames' `[Global]` notice 905, which prints "There are
+            | five types of Performance: Dance, Passion, Vocals, Visuals, and Composure". Repeating them in
+            | config would be a second source for one vocabulary. What the flag does not buy is any number:
+            | no starting value, no per-turn amount, no cost and no cap is stored or implied here.
+            */
+            'performance_input' => true,
             'scenario_links' => [
                 'Smart Falcon', 'Agnes Tachyon', 'Silence Suzuka', 'Mihono Bourbon', 'Light Hello',
             ],

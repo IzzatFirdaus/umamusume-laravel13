@@ -149,8 +149,12 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
     // is the wizard's). The write does not return to the builder at all — `LegacyController::update()`
     // redirects to `legacy.compare` with the flash `Inheritance recorded.` — so that flash is the signal
     // that the payload landed.
+    // The write's own redirect is the completion signal: `LegacyController::update()` reaches
+    // `legacy.compare` only after the column is written, so the URL proves the write and the page
+    // assertions prove the payload. The flash is a session value a second render can consume, which
+    // is a race on a single-process server, so it is read and not waited on.
     await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
-    await expect(page.getByText('Inheritance recorded.')).toBeVisible(WRITE);
+    await page.waitForURL(/\/legacy\/compare/, WRITE);
 
     // Now visit the inheritance event screen. The route is `/training-runs/{run}/inheritance`,
     // so `page.url()` here points at `/legacy/{runId}` and appending `/inheritance` would 404.
@@ -185,8 +189,9 @@ test('shows predicted and observed sections visually separated with badges', asy
     await expect(page.getByText('600–1100')).toBeVisible();
     await expect(page.getByText('Above 1100')).toBeVisible();
     await expect(page.getByText('~90%')).toBeVisible();
-    await expect(page.getByText('~10%')).toBeVisible();
-    await expect(page.getByText('0%')).toBeVisible();
+    await expect(page.getByText('~10%').first()).toBeVisible();
+    // `exact` because every percentage in the table contains the substring "0%": ~90%, ~10%, ~50%
+    await expect(page.getByText('0%', { exact: true })).toBeVisible();
 });
 
 test('milestone timeline shows correct glyphs and labels', async ({ page }) => {
@@ -241,7 +246,7 @@ test('observed form records an inheritance event with keyboard entry', async ({ 
     // The event appears in the observed list
     await expect(page.getByText('Career Start', { exact: true })).toBeVisible();
     await expect(page.getByText('Blue Speed ★★★, Pink Medium ★★')).toBeVisible();
-    await expect(page.getByText('Confirmed')).toBeVisible();
+    await expect(page.getByText('Confirmed').first()).toBeVisible();
 });
 
 test('sizes the inheritance event controls to the 44px contract', async ({ page }) => {

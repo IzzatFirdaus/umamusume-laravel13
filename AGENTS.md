@@ -24,12 +24,12 @@ trackers plus the `uma_musume_race_planner` career-run planner (rev 0.2, repo #4
   Tailwind CSS v4, Vite), with 51 single-file components under `resources/js/`. Blade survives only
   as the `resources/views/app.blade.php` shell and `resources/views/errors/`; there are no Blade view
   components. JSON is a read-only `/api/v1` surface (P2, three controllers).
-  _Dated correction 2026-10-08 (documentation-sync pass): the "51 single-file components" figure is
+  *Dated correction 2026-10-08 (documentation-sync pass): the "51 single-file components" figure is
   superseded — the tree now carries 58 single-file components under `resources/js/components/` and 54
   page files under `resources/js/pages/`, after the Phase D–E career, Veterans and Database sets
   landed. Counts like these age the moment a slice lands, so this is a snapshot note, not a number to
   keep in step; what holds is the shape: the career set and the scenario panels are Vue, and
-  `resources/views/components/` is empty since slice B1._
+  `resources/views/components/` is empty since slice B1.*
 - **Data arrives through a stage-isolated fetch engine** that cross-references JP and
   Global catalog sources, snapshots each body, and promotes engine-owned facts with
   provenance.
@@ -266,6 +266,46 @@ Pest 4, feature-first. One global binding in `tests/Pest.php` applies `TestCase`
 - Cover the changed behavior and its important failure modes, and nothing beyond them.
 - Do not delete or skip tests without owner approval.
 
+**Cost-aware escalation: use the cheapest verification that gives sufficient confidence for
+the change, and widen only as scope and risk grow.** The full suite is a checkpoint and a
+gate; it is not the normal implementation feedback loop. The shape of this policy is
+repo-agnostic; the commands that implement it here are the table below, §10, and the
+hand-off sequence.
+
+- **Level 1, focused (during active implementation).** Run only what directly covers the
+  code being changed: one test file, class, case, filter, tag, or the equivalent for this
+  repository's runner; for UI work, the smallest relevant browser/e2e spec. Do not
+  automatically run the complete suite after every edit, and do not make a small localized
+  change wait on an expensive unrelated suite when productive work can safely continue.
+- **Level 2, related regression (at the end of a coherent slice).** Re-run the affected
+  tests, then the nearby suites that share the changed behavior: related integration tests
+  and, when the change touches those paths, the browser/e2e specs covering them.
+- **Level 3, full verification (checkpoints).** Run the complete applicable suite,
+  including browser/e2e where appropriate, at these moments: a coherent feature or slice
+  checkpoint, before declaring substantial work complete, before a release or merge
+  milestone, after a major refactor or any change that crosses layers, when explicitly
+  requested, or when the change is too broad for targeted tests to be conclusive. In this
+  repository, Level 3 is the hand-off sequence below.
+
+When the full suite is expensive, repeated broad runs are not extra diligence: a focused
+run that covers the change gives the same signal at a fraction of the cost. Agents should
+discover, before testing, the normal full command, the focused commands and filtering
+mechanisms, the browser/e2e commands and whether they can target individual specs, and any
+CI or test documentation that already says this.
+
+**Classify a failure before re-running.** When broader testing reveals failures, attribute
+each one first: a regression from the current change, a pre-existing failure, an unrelated
+failure, an infrastructure or environment failure, a flaky non-deterministic failure, or
+inconclusive. Reproduce a suspicious failure with the focused command for that single test
+rather than rerunning the whole suite repeatedly; record pre-existing and unrelated
+failures (e.g. `KNOWN-ISSUES.md`) rather than fixing or deleting them in passing. Never
+claim the full suite passed unless it was actually executed and passed: the evidence rule
+below applies at every level.
+
+This escalates verification, it does not license skipping it. No level permits weakening
+assertions, deleting or suppressing tests, or skipping a Level 3 gate that the change class
+in the table below requires.
+
 What to run, by class of change:
 
 | Change                                              | Minimum                                                                                                                                                                               |
@@ -495,3 +535,4 @@ fails if the logic breaks; a trivial one-liner needs no test.
 | 2026-10-06   | §8's Artwork bullet and §17 corrected: **the display half is built**, and the bullet now names the six surfaces, the loopback-only `src` rule, and the two OQ-6 remainders. §18 gains the empty-mirror trap.                                                                                                                                                                                                                                                                                         | The row above and §17 both asserted the display half was unbuilt. It is: `ArtworkSlot.vue` plus `CatalogController.php:121,132,299`, `SupportCardController.php:65,110` and `TrainingRunController.php:1119`, and 128 frames were verified rendering in Chromium with zero console errors after the first `uma:fetch-art` pass. An agent reading only this file would have refused to debug an image question as if nothing displayed it.   |
 | 2026-10-06   | §1, §6, §7 and §13 corrected for the frontend stack: the web surface is **Inertia + Vue 3**, `resources/views/` holds 4 Blade files and no components, `resources/js/` holds 51 SFCs, and the scenario components take a required `scenarioLabel` rather than declaring `scenario`. §7's "no Inertia/SPA" ban is withdrawn in place, §9 and §15 widen the asset and typecheck rows to Vue, and §18's Blade-manifest line is de-Bladed.                                                               | `8e58b65` folded the Trainer Desk 2.0 line into `master` and `0ea8d43` retired the Blade shell, so the file described a surface that no longer exists. Measured on this tree, not remembered. Per §2 the code wins and the rule is stale; the rule was left standing where it is still true (Livewire, Redis and Excel are absent from `composer.lock`) rather than deleted wholesale.                                                      |
 | 2026-10-06   | §9: `migrate:status` on the dev database joins the Schema row and the hand-off, with a paragraph stating that the suite cannot see that file.                                                                                                                                                                                                                                                                                                                                                        | KI-60. Four committed migrations sat Pending on `database/database.sqlite` for four days while 1,326 tests passed, because `phpunit.xml:64` forces `DB_DATABASE=:memory:` and every test builds its own schema. A green suite was reported as evidence of a working application and it was not. This tightens the bar, which §5 permits an agent to apply; relaxing it remains escalation 4.                                                |
+| 2026-10-08   | §9 gains the cost-aware escalation policy: Level 1 focused runs during implementation, Level 2 related regression at slice end, Level 3 full verification only at checkpoints; the full suite is a gate, not the feedback loop. Adds failure classification (regression, pre-existing, unrelated, infrastructure, flaky, inconclusive) with focused reproduction, the explicit rule that a full-suite pass may never be claimed unexecuted, and the statement that no level licenses weakening, deleting, or suppressing tests. Repo-agnostic in shape; the existing change-class table and hand-off stay binding as its Level 3. | Agents were burning most of their implementation time rerunning the expensive full and browser suites after small localized edits. The escalation ladder was implicit in §9 ("narrow first") but never written down, so nothing stopped the reflexive broad run or required attributing a broad-run failure before re-running. Concurrent-agent work in this tree also made unrelated failures common, which the classification step now handles explicitly. |

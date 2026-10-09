@@ -3,7 +3,7 @@
  * The advisor rail (SCREEN-009 §12, design-2.0 §23): the right column, and the only place on the
  * cockpit that makes a claim about what to do next.
  *
- * It carries the same five contract fields the card does and adds nothing to them — the column is the
+ * It carries the same contract fields the card does and adds nothing to them — the column is the
  * heading and the standing explanation, the card is the recommendation. The explanation line states
  * the boundary in words: the advisor ranks, the Trainer decides (design-2.0 §2, §36).
  */
@@ -15,6 +15,7 @@ const props = defineProps<{
     reasons: string[];
     alternative: string | null;
     risk: string | null;
+    finale_context: { label: string; state: string; turns_away: number | null } | null;
 }>();
 </script>
 
@@ -29,6 +30,7 @@ const props = defineProps<{
             :reasons="props.reasons"
             :alternative="props.alternative"
             :risk="props.risk"
+            :finale-context="props.finale_context"
         />
 
         <p class="mt-3 text-xs text-ink-muted">

@@ -49,7 +49,7 @@ it('renders the event decision page with run, state, events, advisor and write s
             ->where('run.trainee_ja', 'ライスシャワー')
             ->where('run.scenario_label', 'Trackblazer')
             ->where('run.status_label', 'Active')
-            ->where('run.run_url', route('runs.show', $run))
+            ->where('run.run_url', route('runs.cockpit', $run))
             ->where('run.cockpit_url', route('runs.cockpit', $run))
             ->has('state.stats', 5)
             ->where('state.stats.0.key', 'Speed')

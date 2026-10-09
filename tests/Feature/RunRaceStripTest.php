@@ -136,7 +136,7 @@ it('lists the races this run recorded, oldest turn first, unlinked last', functi
             ->where('raceStrip.run.2.status_label', 'Skipped')
             // The absence carries its reason, never a dash and never a zero.
             ->where('raceStrip.absences.turn_link', fn (string $line): bool => str_contains($line, 'turn'))
-            ->where('raceStrip.links.run_url', route('runs.show', $run))
+            ->where('raceStrip.links.run_url', route('runs.cockpit', $run))
             ->where('raceStrip.links.decision_url', route('runs.races.decision', $run)));
 });
 
@@ -306,6 +306,82 @@ it('never renders a race the calendar does not place at this run\'s scenario', f
         ->assertInertia(fn (Assert $page) => $page
             ->has('raceStrip.ahead', 1)
             ->where('raceStrip.ahead.0.title', 'URA Finals Final'));
+});
+
+it('derives each recorded row\'s state from the entry\'s own status, one row at a time', function (RaceEntryStatus $status): void {
+    $run = raceStripRun(turns: 12);
+    $slot = raceStripSlot(['title' => 'Oka Sho', 'turn' => 6, 'month' => 3, 'half' => 'Early']);
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'race_catalog_slot_id' => $slot->id,
+        'status' => $status,
+        'turn_entry_id' => raceStripTurn($run, 6)->id,
+    ]);
+
+    // The calendar collapses every recorded entry onto one `past` cell (`RaceCalendarTest`); the strip
+    // keeps the store's own token and its Trainer-facing word per row, so entered, completed, skipped
+    // and not-offered stay apart rather than sharing a state.
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('raceStrip.run', 1)
+            ->where('raceStrip.run.0.status', $status->value)
+            ->where('raceStrip.run.0.status_label', $status->label()));
+})->with(RaceEntryStatus::cases());
+
+it('marks a race the Trainer typed in by its missing catalogue row, as the calendar kept it manual', function (): void {
+    $run = raceStripRun(turns: 12);
+    $seeded = raceStripSlot(['title' => 'A catalogue race', 'turn' => 5, 'month' => 3, 'half' => 'Early']);
+    $typed = raceStripFreeSlot($run, 'A race the Trainer typed in');
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'race_catalog_slot_id' => $seeded->id,
+        'status' => RaceEntryStatus::Completed,
+        'turn_entry_id' => raceStripTurn($run, 5)->id,
+    ]);
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'scenario_slot_id' => $typed->id,
+        'status' => RaceEntryStatus::Entered,
+    ]);
+
+    // The catalogue row carries its own id; a typed race has no catalogue row by definition, so the
+    // strip reads the same provenance the calendar carried as its `manual` marker.
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('raceStrip.run', 2)
+            ->where('raceStrip.run.0.id', $seeded->id)
+            ->where('raceStrip.run.1.id', null)
+            ->where('raceStrip.run.1.title', 'A race the Trainer typed in'));
+});
+
+it('counts only the catalogue row in the run\'s own career year at the turn being decided', function (): void {
+    $run = raceStripRun(turns: 7);
+    // Turn 8 is Junior. A row at the same turn number in Classic is a different race, and the strip
+    // scopes the turn by its career year rather than by the number alone (`RaceCalendarYearTabsTest`).
+    raceStripSlot(['title' => 'Junior Early February', 'year' => RaceCatalogSlot::YEAR_JUNIOR, 'turn' => 8, 'month' => 2, 'half' => 'Early']);
+    raceStripSlot(['title' => 'Classic Early February', 'year' => RaceCatalogSlot::YEAR_CLASSIC, 'turn' => 8, 'month' => 2, 'half' => 'Early']);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('raceStrip.this_turn.turn', 8)
+            ->where('raceStrip.this_turn.year_label', 'Junior')
+            ->where('raceStrip.this_turn.offered', 1));
+});
+
+it('names the turn being decided in the year it falls in, which is not always the year just logged', function (): void {
+    // Junior Late December is turn 24, so the turn being decided is Classic Early January. The year
+    // travels with the position, so the strip cannot label the turn with the year the run just left.
+    $run = raceStripRun(turns: 24);
+    raceStripSlot(['title' => 'Classic Opener', 'year' => RaceCatalogSlot::YEAR_CLASSIC, 'turn' => 1, 'month' => 1, 'half' => 'Early']);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('raceStrip.this_turn.turn', 1)
+            ->where('raceStrip.this_turn.year_label', 'Classic'));
 });
 
 it('introduces no motion, no percentage and no distance band in the component itself', function (): void {

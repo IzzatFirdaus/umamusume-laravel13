@@ -21,7 +21,7 @@ names its own closure conditions. `master` remains unpushed (`O-1`), so none can
 **Status correction (2026-10-07, D14a hand-off):** the composition above is superseded again, and the dated
 claim is left standing rather than rewritten. This file now carries KI-57 through **KI-67**. KI-65 and KI-66
 were filed by the D9 hand-off; KI-67 (the withdrawn `race_instances` pin, which stops any refresh of the
-career catalogue) by this one. `KI-59` carries `## ` rather than `### `, which is why a heading count reads
+career catalogue) by this one. `KI-59` carries `##` rather than `###`, which is why a heading count reads
 ten while the numbering reads sixty-seven. Status is per entry in its own heading: KI-62, KI-65 and KI-66 are
 FIXED IN TREE, NOT CLOSED, and the rest are OPEN.
 
@@ -624,7 +624,6 @@ component, so a source edit alone does not reach the browser). `support-deck.spe
 the same chip on the run-scoped builder and was green before and after, which is what made the wizard the
 odd screen rather than the component the odd component.
 
-
 ### KI-67 The race catalogue's pinned GameTora document has been withdrawn, so `uma:fetch` can no longer refresh the career calendar at all - FILED 2026-10-07 (D14a hand-off), OPEN
 
 **Status: OPEN.** `config/uma.php:141` pins `gametora-race-catalog` at
@@ -904,7 +903,7 @@ in the D13 hand-off.
 **The sharpest instance is `routes/web.php`.** The `runs.races.decision` route — D10's Race Decision screen,
 recorded in plan §8 as `Landed` at `55be0cd` — is present in the **working copy only**:
 
-```
+```text
 55be0cd: use App\Http\Controllers\Career\RaceDecisionController;   (import, no route: 1 occurrence)
 index  : (the import deleted by a staged change from another session: 0 occurrences)
 worktree: use …; + Route::get('/training-runs/{run}/races', [RaceDecisionController::class, 'show'])  (2)
@@ -1006,7 +1005,7 @@ regression test for this defect needs first.
 `tests/browser/scenario-panel.spec.ts:153` ("keeps the 44px floor across the cockpit and reflows at 320
 px") fails on **control 11 at 32px**:
 
-```
+```text
 Error: control 11 is not sized to the 44px contract
 Expected: >= 44
 Received:    32
@@ -1103,7 +1102,7 @@ grain the unique index is built on), so changing the emitted key makes the row *
 updatable. Running `php artisan uma:reparse gametora-race-catalog` accordingly reported `409 updated, 1
 created` and left the old row in place beside the new one:
 
-```
+```text
 409 | grand_concert     | URA Finals Final (Grand Live)   <- orphan, reachable by no run
 411 | our_grand_concert | URA Finals Final (Grand Live)   <- the correct row
 ```
@@ -1300,7 +1299,7 @@ per worktree** and nothing in the file says so.
 
 Measured 2026-10-08, with the port free and no `PLAYWRIGHT_BASE_URL` set:
 
-```
+```text
 npx playwright test tests/browser/grand-concert-panel.spec.ts tests/browser/scenario-panel.spec.ts
 Error: EPERM, Permission denied: \\?\D:\Projects\umamusume-laravel13\database\browser-scratch.sqlite
    at global-setup.ts:33
@@ -1378,6 +1377,7 @@ that edit stays, and the session owning the file will carry Pint's change inside
 does not touch the condition underneath, several sessions' uncommitted work in one working tree; any
 future gate in the sequence that writes rather than reads inherits the same hazard the moment it is given a
 `--fix` mode, and `phpstan` escapes it only because it never rewrites.
+
 ### KI-76 With a Vite dev server hot, every Inertia render POSTs to the SSR endpoint with no timeout, so a page blocks 30s and answers 500 - FILED 2026-10-08 (F1 residual, on the owner's instruction), OPEN
 
 **Status: OPEN.** Not caused by F1, not fixed by it, and not fixed in the slice that filed it. The remedy is
@@ -1400,7 +1400,7 @@ target becomes the hot origin. `public/hot` on this worktree read `http://[::1]:
 
 **Measured on the live hot origin, read-only, nothing in the tree touched:**
 
-```
+```text
 curl -s -o /dev/null -w "%{http_code} %{time_total}s" --max-time 20 "http://[::1]:5174/__inertia_ssr"
 -> code=000 time=20.037s   (curl exit 28, operation timeout)
 ```
@@ -1789,6 +1789,7 @@ session's or the owner's act, not a register edit. It does not rule on the other
 relevance, only that removing them needs a stated reason. It does not touch the Slice 20 pickup,
 which landed independently of this collision, nor the KI-82 label defect on the same scenario's
 finale row.
+
 ### KI-85 Commit 822d97b carries a concurrent session's ported test case alongside the finale pickup, an attribution boundary rather than a defect - FILED 2026-10-09 (Slice 20 pickup, on the owner's ruling), FIXED IN TREE
 
 **Status: FIXED IN TREE - the note is the fix.** No history rewrite was attempted and none is owed:

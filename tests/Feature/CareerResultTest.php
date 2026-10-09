@@ -58,7 +58,7 @@ it('renders the three sections for a completed run', function (): void {
             ->where('run.status', 'Completed')
             ->where('run.status_label', 'Completed')
             ->where('run.scenario_label', 'Trackblazer')
-            ->where('run.run_url', route('runs.show', $run))
+            ->where('run.run_url', route('runs.cockpit', $run))
             ->where('run.cockpit_url', route('runs.cockpit', $run))
             ->where('run.timeline_url', route('runs.timeline', $run))
             ->has('build.stats', 5)

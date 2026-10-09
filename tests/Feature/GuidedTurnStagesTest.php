@@ -42,11 +42,12 @@ it('holds the row count at zero after stage one and at one only after stage two'
 
     expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(0);
 
-    // F-7 moved the preview to a redirect, so the status assertion moves with it. No
-    // followRedirect() here: this test reads no body, only the row count below, and
+    // The preview is a redirect (F-7) and now targets the Cockpit with the input flashed;
+    // the Cockpit does not render a preview (the two-stage preview flow is retired, R-2),
+    // so this test reads no body, only the row count below. No followRedirect() here:
     // Illuminate\Testing\TestResponse has no followRedirect() on Laravel 13.32.
     test()->post("/training-runs/{$run->id}/turns", stagedPayload())
-        ->assertRedirect(route('runs.show', $run));
+        ->assertRedirect(route('runs.cockpit', $run));
 
     expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(0);
 
@@ -78,7 +79,7 @@ it('does not let a repeated preview accumulate rows', function (): void {
 
     foreach (range(1, 3) as $ignored) {
         test()->post("/training-runs/{$run->id}/turns", stagedPayload())
-            ->assertRedirect(route('runs.show', $run));
+            ->assertRedirect(route('runs.cockpit', $run));
     }
 
     expect(TurnEntry::query()->where('training_run_id', $run->id)->count())->toBe(0);

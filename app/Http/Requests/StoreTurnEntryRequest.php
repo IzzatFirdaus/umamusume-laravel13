@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Enums\MoodTier;
+use App\Enums\PerformanceType;
 use App\Models\TrainingRun;
 use App\Services\ScenarioCaps;
 use Illuminate\Foundation\Http\FormRequest;
@@ -90,6 +91,17 @@ class StoreTurnEntryRequest extends FormRequest
             // browser cannot reach a write without the preview having been rendered, which
             // is D-51's "always" enforced server-side instead of with a script.
             'previewed' => [Rule::requiredIf(fn (): bool => $this->input('stage') === 'confirm'), 'nullable', 'in:1'],
+            // A Performance observation (Our Grand Concert). Optional even on a staged submit,
+            // unlike the rail's other keys: the escape hatch has no Performance field, and a turn
+            // the Trainer did not read the resource off has nothing to record, so `nullable` is the
+            // honest modifier rather than `requiredIf`. `array:type,delta` refuses a third key
+            // instead of dropping it, which is the strictness `PerformancePayload` applies one layer
+            // down; the pair travels together or not at all.
+            'performance' => ['nullable', 'array:type,delta'],
+            'performance.type' => ['required_with:performance', Rule::enum(PerformanceType::class)],
+            // Zero is refused here as well as in the payload, so a Trainer gets a field error
+            // rather than the exception the model raises on save.
+            'performance.delta' => ['required_with:performance', 'integer', 'not_in:0'],
         ];
     }
 
@@ -107,6 +119,7 @@ class StoreTurnEntryRequest extends FormRequest
             'choice.required' => 'Choose what this turn did.',
             'outcome.required' => 'Say whether the turn succeeded or failed.',
             'penalty_kind.required' => 'A failure needs its penalty kind: Energy, Mood, or a stat.',
+            'performance.delta.not_in' => 'A Performance change of zero is not a change.',
         ];
     }
 }

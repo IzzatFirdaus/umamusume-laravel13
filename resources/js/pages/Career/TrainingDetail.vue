@@ -13,13 +13,17 @@
  * `AbsenceValue.vue`, whose disclosure carries the exclusion; `TrainingCard.vue` and
  * `CareerTrainingDetailTest` hold that line together.
  *
- * **The write is the guided turn's.** `Train` on a card holds that card's choice for the form below —
- * carried, never re-asked (WCAG 3.3.7) — and the form posts `stage=preview` to `runs.turns.store` with
- * the `StoreTurnEntryRequest` that already validates it. No field the request refuses is offered and no
- * number is typed on the Trainer's behalf: the five stat totals are what the client shows after the
- * turn resolves, so the inputs start empty and the previous turn's readings arrive as placeholders
- * only (D-220). The preview is a screen, and the run record screen is the one that renders it and
- * gates the confirm.
+ * **The write is a direct record.** `Train` on a card holds that card's choice for the form below —
+ * carried, never re-asked (WCAG 3.3.7) — and the form posts to `runs.turns.store` with the
+ * `StoreTurnEntryRequest` that already validates it, no preview step in between. The previous flow
+ * carried a `stage=preview` intermediate that redirected to the run record screen, whose rail then
+ * gated the confirm (F2, plan §9.6; owner ruling on group R-2). That record screen is retired and the
+ * two-stage rail has no 2.0 reproduction, so this screen now writes the row itself and redirects to
+ * `runs.cockpit`, where the recorded turn appears in the correction selector.
+ *
+ * The five stat totals are what the client shows after the turn resolves, so the inputs start empty
+ * and the previous turn's readings arrive as placeholders only (D-220). A press before they are
+ * entered is answered by the field messages the existing request returns.
  *
  * The props contract is declared locally: `defineProps<Imported>()` cannot resolve an imported type,
  * because TypeScript 7 ships no `lib/typescript.js` for `@vue/compiler-sfc` to load (plan §11).
@@ -110,7 +114,6 @@ const form = useForm({
     outcome: '',
     penalty_kind: '',
     choice: '',
-    stage: 'preview',
 });
 
 const placeholder = (name: string): string | undefined =>
@@ -161,8 +164,10 @@ const train = (option: Option): void => {
 };
 
 // The five stat totals are what the client shows after the turn resolves, so the form starts empty and
-// a press before they are entered is answered by the field messages the existing request returns.
-const previewTurn = (): void => {
+// a press before they are entered is answered by the field messages the existing request returns. The
+// post writes the row directly and redirects to the Cockpit: the previous preview-and-confirm rail has
+// no 2.0 reproduction (F2, plan §9.6; owner ruling on group R-2), so there is no stage to advance.
+const recordTurn = (): void => {
     form.post(props.write.action, { preserveScroll: true, preserveState: true });
 };
 
@@ -288,13 +293,13 @@ const capFor = (label: string): number =>
                 tabindex="-1"
                 class="mt-3 rounded-md border border-risk bg-raised p-3 text-sm text-risk"
             >
-                <p class="font-semibold">The turn was not previewed.</p>
+                <p class="font-semibold">The turn was not recorded.</p>
                 <ul class="mt-1 list-disc pl-5">
                     <li v-for="(message, key) in form.errors" :key="key">{{ message }}</li>
                 </ul>
             </div>
 
-            <form class="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-3" @submit.prevent="previewTurn">
+            <form class="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-3" @submit.prevent="recordTurn">
                 <label class="flex flex-col gap-1">
                     <span class="text-ink-muted">Turn *</span>
                     <input
@@ -399,12 +404,11 @@ const capFor = (label: string): number =>
                         class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:cursor-wait disabled:bg-disabled"
                         :disabled="form.processing"
                     >
-                        {{ form.processing ? 'Sending…' : 'Preview this turn' }}
+                        {{ form.processing ? 'Sending…' : 'Record this training' }}
                     </button>
                     <p class="max-w-prose text-xs text-ink-muted">
-                        The preview renders on the run record screen, which is where the turn is confirmed
-                        ({{ props.run.trainee }}, turn {{ props.write.turn }}). Nothing is written until you
-                        confirm it there.
+                        The write lands on the Cockpit, where the recorded turn appears in the correction
+                        selector ({{ props.run.trainee }}, turn {{ props.write.turn }}).
                     </p>
                 </div>
             </form>

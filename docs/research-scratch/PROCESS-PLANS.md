@@ -2459,7 +2459,7 @@ Date: 2026-10-04
 Authorization: `ADR-0020` Decision §2 (target-based Trainer Advisor), extending `ADR-0001`; `PRD.md` US-13, US-14, FR-F.
 Approach: A (minimal honest advisor; domain-only, no UI — the SPA rewrite hosts the interface later).
 
-_Dated close-out 2026-10-08 (documentation-sync pass): the status line above is the pre-C2 read and is
+*Dated close-out 2026-10-08 (documentation-sync pass): the status line above is the pre-C2 read and is
 superseded; the spec body below it stands as the record of what C2 implemented. Phase C slice C2 landed
 the v1 engine (`app/Services/Advisor/TrainerAdvisor.php` + `config/advisor.php`, `FR-F`; plan §7's C2 row);
 the Career Cockpit (`SCR-CAR-011`, D8) then hosted the interface this spec's Approach line said the SPA
@@ -2468,7 +2468,7 @@ energy-relevant options, the two-state energy band against the sourced threshold
 reason line — is shipped. Everything the spec's "Out of scope (v1)" list names is still unbuilt and still
 banned by its evidence bar: no stat-yield projection, no numeric failure estimate (`ADR-0001` §3), no race
 advisory. This close-out is a landing note, not a re-description: the spec preserves its original status
-line as the 2026-10-04 record it is._
+line as the 2026-10-04 record it is.*
 
 ### 1. Purpose and scope
 

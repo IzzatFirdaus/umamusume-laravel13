@@ -109,6 +109,7 @@ const props = defineProps<{
     deck: Record<string, unknown>;
     racePanel: Record<string, unknown>;
     shop: Record<string, unknown>;
+    performance: Record<string, unknown>;
     rail: Record<string, unknown>;
 }>();
 
@@ -239,6 +240,15 @@ const railStep = computed(() => props.rail as unknown as {
     has_previous: boolean;
     previous: Record<string, number | null> | null;
     action: string;
+});
+
+// The rail's Performance pair, cast the way `railStep` casts the rail: the page reads a flag and a
+// type list, and holds no vocabulary of its own. `types` arrives from App\Enums\PerformanceType, so
+// the five client words live in one place and a sixth type would be one enum case, not a page edit.
+const performanceField = computed(() => props.performance as unknown as {
+    enabled: boolean;
+    types: string[];
+    entered: { type: string | null; delta: string | null };
 });
 </script>
 
@@ -647,7 +657,42 @@ const railStep = computed(() => props.rail as unknown as {
                             <option value="stat" :selected="railStep.values.penalty_kind === 'stat'">A stat</option>
                         </select>
                     </label>
+                    <!-- Performance is the one pair that appears on only some scenarios. It records a
+                         change the Trainer read off the client and never a standing value: there is no
+                         placeholder, no prefill and no upper or lower bound here, because the corpus
+                         publishes neither what a run starts with, what a turn pays, or what a Lesson
+                         costs, and a number supplied by the tool would claim one of those (D-220).
+                         The field takes a signed change precisely so it cannot be read as a balance. -->
+                    <template v-if="performanceField.enabled === true">
+                        <label class="flex flex-col gap-1">
+                            <span class="font-medium text-ink">Performance type</span>
+                            <select name="performance[type]" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                                <option value="">none, nothing to record</option>
+                                <option
+                                    v-for="type in performanceField.types"
+                                    :key="type"
+                                    :value="type"
+                                    :selected="performanceField.entered.type === type"
+                                >{{ type }}</option>
+                            </select>
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            <span class="font-medium text-ink">Performance change observed</span>
+                            <input
+                                :value="performanceField.entered.delta ?? ''"
+                                type="number" name="performance[delta]" step="1"
+                                class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                            >
+                        </label>
+                    </template>
                 </div>
+
+                <p v-if="performanceField.enabled === true" class="mt-2 text-xs text-ink-muted">
+                    Enter the change you saw, with its sign: positive for Performance gained, negative
+                    for Performance spent. This tool keeps no Performance total, because no source it
+                    holds states what a run begins with, what a training turn pays, or what a Lesson
+                    costs. One row here is one turn's observation.
+                </p>
 
                 <p v-if="railStep.preview.length === 0 && !railStep.has_previous" class="mt-3 text-xs text-ink-muted">
                     This is the run's first turn, so there is no turn to compare against and the preview

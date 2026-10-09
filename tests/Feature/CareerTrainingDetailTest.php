@@ -98,7 +98,7 @@ it('renders one card per training in the stat matrix order, with the sourced ene
             ->component('Career/TrainingDetail')
             ->where('run.id', $run->id)
             ->where('run.scenario_label', 'Unity Cup')
-            ->where('run.run_url', route('runs.show', $run))
+            ->where('run.run_url', route('runs.cockpit', $run))
             ->where('run.cockpit_url', route('runs.cockpit', $run))
             ->count('options', 5)
             ->where('options.0.key', 'Speed')
@@ -290,7 +290,7 @@ it('states the scenario effects from the matrix alone, and names the absence for
             ->where('options.0.scenario_effects', null));
 });
 
-it('posts the turn through the guided-turn write the run screen already owns', function (): void {
+it('posts the turn through the write the run screen already owns', function (): void {
     $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 3, energy: 80);
 
     $this->get(route('runs.training', $run))
@@ -304,8 +304,10 @@ it('posts the turn through the guided-turn write the run screen already owns', f
             ->where('write.previous.speed', 600)
             ->where('write.previous.energy', 80));
 
-    // The page's own payload, accepted by the Form Request that already validates a turn: a preview
-    // is a screen, so it redirects with the input held rather than writing the row.
+    // The page posts directly to the turn write the run screen already owns, with no `stage`
+    // intermediate (F2, plan §9.6; owner ruling on group R-2 retired the preview-and-confirm rail).
+    // The write lands and the response redirects to the Cockpit, where the recorded turn appears
+    // in the correction selector.
     $this->post(route('runs.turns.store', $run), [
         'turn' => 4,
         'speed' => 640,
@@ -317,19 +319,11 @@ it('posts the turn through the guided-turn write the run screen already owns', f
         'mood' => 'GOOD',
         'fans' => 4000,
         'sp' => 150,
-        'stage' => 'preview',
         'choice' => 'training-Speed',
         'outcome' => 'Success',
-    ])->assertRedirect(route('runs.show', $run));
+    ])->assertRedirect(route('runs.cockpit', $run));
 
-    expect($run->turnEntries()->where('turn', 4)->exists())->toBeFalse();
-
-    // The preview screen that holds the choice, and gates the confirm, is the run record screen's.
-    $this->get(route('runs.show', $run))
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('rail.selected', 'training-Speed')
-            ->where('rail.previewed', true)
-            ->where('rail.values.speed', 640));
+    expect($run->turnEntries()->where('turn', 4)->exists())->toBeTrue();
 });
 
 it('refuses a turn the Trainer has not finished entering, naming the fields', function (): void {
@@ -337,11 +331,12 @@ it('refuses a turn the Trainer has not finished entering, naming the fields', fu
 
     // Nothing here is a projected number: the five stat totals are what the Trainer reads off the
     // client, so an empty form is the honest state and the write refuses it rather than defaulting.
+    // Without a `stage` marker the request treats `choice` and `outcome` as nullable, so the five
+    // stats are the only fields a bare submit fails on.
     $this->post(route('runs.turns.store', $run), [
         'turn' => 2,
-        'stage' => 'preview',
         'choice' => 'training-Speed',
-    ])->assertSessionHasErrors(['speed', 'stamina', 'power', 'guts', 'wit', 'outcome']);
+    ])->assertSessionHasErrors(['speed', 'stamina', 'power', 'guts', 'wit']);
 });
 
 it('is reachable for every run status the tool holds', function (): void {

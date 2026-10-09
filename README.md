@@ -18,16 +18,16 @@ Phase 1 of `PRD.md`, substantially implemented and in active development (no rel
 
 ## Technology Stack
 
-| Area              | Technology                                                                                                                                           |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Runtime           | PHP >= 8.3 (`composer.json`; developed on 8.5.8) with `pdo_sqlite` and `intl`                                                                        |
-| Framework         | Laravel 13 (`laravel/framework` 13.32.0)                                                                                                             |
-| Database          | SQLite only, WAL mode + `busy_timeout` (`database/database.sqlite`, gitignored)                                                                      |
-| Cache / Queue     | framework `database` stores (no Redis)                                                                                                               |
-| Frontend          | Inertia + Vue 3 + TypeScript (`inertiajs/inertia-laravel`, `@inertiajs/vue3`), Tailwind CSS v4 (CSS-first `@theme` in `resources/css/app.css`, no `tailwind.config.js`), Vite 7   |
-| Testing           | Pest 4 (feature-first), `Http::fake`, in-memory SQLite for tests; Playwright for browser/E2E and accessibility                                       |
-| Static analysis   | Larastan level 6 (`phpstan.neon`), Pint (laravel preset, `pint.json`)                                                                                |
-| Type check        | `tsc --noEmit` (`npm run typecheck`)                                                                                                                 |
+| Area            | Technology                                                                                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runtime         | PHP >= 8.3 (`composer.json`; developed on 8.5.8) with `pdo_sqlite` and `intl`                                                                                                   |
+| Framework       | Laravel 13 (`laravel/framework` 13.32.0)                                                                                                                                        |
+| Database        | SQLite only, WAL mode + `busy_timeout` (`database/database.sqlite`, gitignored)                                                                                                 |
+| Cache / Queue   | framework `database` stores (no Redis)                                                                                                                                          |
+| Frontend        | Inertia + Vue 3 + TypeScript (`inertiajs/inertia-laravel`, `@inertiajs/vue3`), Tailwind CSS v4 (CSS-first `@theme` in `resources/css/app.css`, no `tailwind.config.js`), Vite 7 |
+| Testing         | Pest 4 (feature-first), `Http::fake`, in-memory SQLite for tests; Playwright for browser/E2E and accessibility                                                                  |
+| Static analysis | Larastan level 6 (`phpstan.neon`), Pint (laravel preset, `pint.json`)                                                                                                           |
+| Type check      | `tsc --noEmit` (`npm run typecheck`)                                                                                                                                            |
 
 Deliberately absent (PRD §6): auth packages, Livewire, Excel export, Redis, MySQL/PostgreSQL, deploy tooling. The web surface is Inertia + Vue 3 (`ADR-0020` §1), which superseded the pre-2.0 Blade-only surface and the older "no SPA" note this file used to carry; the 2.0 line is a client-rendered shell over the same loopback-only, single-Trainer backend. `compose.yaml` is stock Laravel Sail (MySQL/Redis) and is **not** the supported database path for this app.
 
@@ -126,7 +126,7 @@ Verified against `php artisan route:list`:
 | `/umamusume`, `/umamusume/{slug}`                     | catalog index (release-status filter, normalized search) and detail with aliases, cards, and provenance                                                                                                                  |                                      |
 | `/skills`, `/skills/{skill}`                          | skill search (Screen D) and detail; Global-filtered, paginated                                                                                                                                                           |                                      |
 | `/support-cards`, `/support-cards/{card}`             | support-card catalog (reference data only, no collection state)                                                                                                                                                          |                                      |
-| `/training-runs` (+ `/create`, `/{run}`, PUT, DELETE) | Trainer run CRUD                                                                                                                                                                                                         |                                      |
+| `/training-runs` (+ `/create`, PUT, DELETE) | Trainer run CRUD. `GET /training-runs/{run}` is a compatibility redirect to the Career Cockpit: `SCR-RUN-003` (the 0.1.0 run-detail page) is retired (F2), so it is not a normal-navigation destination. |                                      |
 | `/training-runs/{run}/turns[/{turn}]`                 | per-turn stat logging; stats validate against the run's scenario ceiling (`base_cap` + `cap_bonus`, clamped to `hard_cap`, via `App\Services\ScenarioCaps`; `ADR-0015`). A run with no scenario keeps the 1200 base cap. |                                      |
 | `/training-runs/{run}/skills`                         | skill states Suggested / Acquired / Skipped                                                                                                                                                                              |                                      |
 | `/training-runs/{run}/deck`                           | the six support cards the run was equipped with                                                                                                                                                                          |                                      |

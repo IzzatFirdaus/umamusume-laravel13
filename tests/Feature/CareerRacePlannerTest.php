@@ -313,7 +313,7 @@ it('carries the existing race write and offers no second one', function (): void
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('entry.action', route('runs.races.store', $run))
-            ->where('run.run_url', route('runs.show', $run)));
+            ->where('run.run_url', route('runs.cockpit', $run)));
 });
 
 it('caps a position group and names what it left out rather than stopping silently', function (): void {

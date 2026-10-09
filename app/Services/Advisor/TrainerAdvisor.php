@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Advisor;
 
 use App\Models\Advisor\BuildTargetPayload;
+use App\Models\RaceCatalogSlot;
+use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Services\Scenario\FinaleReader;
 use InvalidArgumentException;
 
 /**
@@ -49,6 +52,9 @@ final class TrainerAdvisor
      */
     public const REST = 'Rest';
 
+    /** Turns ahead of the finale within which the card is worth a line about it. */
+    public const FINALE_TURNS_AHEAD = 5;
+
     private const WIT = 'Wit';
 
     /**
@@ -67,7 +73,7 @@ final class TrainerAdvisor
         return $constants;
     }
 
-    public function advise(?TurnEntry $latest, ?BuildTargetPayload $target): Advice
+    public function advise(?TurnEntry $latest, ?BuildTargetPayload $target, ?TrainingRun $run = null): Advice
     {
         $energy = $latest?->energy;
         $deficits = $this->deficits($latest, $target);
@@ -82,7 +88,58 @@ final class TrainerAdvisor
             $this->byAction($options, $alternativeAction),
             $options,
             $absence,
+            $this->finaleContext($run),
         );
+    }
+
+    /**
+     * The finale line for the recommendation card, or null when there is nothing to say.
+     *
+     * N = 5 turns. That is not a rule of the game and is not presented as one: it is the span the
+     * screen needs to show a position the Trainer can still act on, counted in the turns this tool
+     * has already seen a race take (enter it, see the result). Wider and the line is wallpaper on
+     * every turn of Senior year; narrower and it arrives too late to mean anything. The number is a
+     * display choice, and `PRD.md` FR-F-3's rule that the advisor states facts rather than counsel
+     * is why it is not put in the reason list.
+     *
+     * `turns_away` counts inclusively from the turn being decided, so the turn the block arrives on
+     * reads as 1 and not 0; it is null once the block is behind the run.
+     */
+    private function finaleContext(?TrainingRun $run): ?array
+    {
+        if ($run === null) {
+            return null;
+        }
+
+        $finale = FinaleReader::forRun($run);
+
+        if ($finale === null) {
+            return null;
+        }
+
+        // The block opens at the first instant after the 72-turn grid, so the distance is counted from
+        // the grid's end rather than through a year and a turn: nextTurnToPlay() deliberately reports no
+        // position once the grid is spent, and a run past it has passed the finale rather than lost its
+        // place. One is added because the turn being decided counts as the first of the run's own.
+        $away = RaceCatalogSlot::YEAR_SENIOR * TrainingRun::TURNS_PER_YEAR
+            + 1
+            - $run->nextTurnNumber();
+
+        if ($away <= 0) {
+            return $finale['outcome'] === null
+                ? ['label' => $finale['label'], 'state' => 'passed', 'turns_away' => null]
+                : null;
+        }
+
+        if ($away > self::FINALE_TURNS_AHEAD) {
+            return null;
+        }
+
+        return [
+            'label' => $finale['label'],
+            'state' => $away === 1 ? 'next' : 'upcoming',
+            'turns_away' => $away,
+        ];
     }
 
     /**

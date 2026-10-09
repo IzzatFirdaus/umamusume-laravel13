@@ -50,7 +50,7 @@ it('prints the ordinal on the recorded race row, not a bare number with th glued
         'placement' => 1,
     ]);
 
-    $html = $this->get(route('runs.show', $run))->content();
+    $html = $this->get(route('runs.cockpit', $run))->content();
 
     expect($html)->toContain('1st')
         ->and($html)->not->toContain('1th');

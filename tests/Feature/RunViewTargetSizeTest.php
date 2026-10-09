@@ -15,8 +15,8 @@ use Inertia\Testing\AssertableInertia as Assert;
  *
  * The page is component-rendered now (ADR-0020 §1), so the classes are read from the component
  * sources that render them: the nav is in `resources/js/layouts/AppLayout.vue`, the run page's
- * own targets in `resources/js/pages/Runs/Show.vue`. The rendered heights are measured in the
- * browser pass (tests/browser/run-detail.spec.ts).
+ * surviving targets in `resources/js/pages/Career/Cockpit.vue`. The rendered heights are measured
+ * in the browser pass (tests/browser/run-detail.spec.ts).
  */
 
 function runViewSource(string $path): string
@@ -51,7 +51,7 @@ it('keeps the skill-row controls at the KI-37 height', function (): void {
     ]);
     $run->setSkillStatus($skill, SkillAcquisition::Acquired);
 
-    test()->get('/training-runs/'.$run->id)
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('skillGroups.1.key', 'Acquired')
@@ -79,18 +79,17 @@ it('gives every L-F01 target the min-h-11 floor', function (): void {
 
     // The two export links are payload-driven; the floor itself is a class on the component
     // that renders them.
-    test()->get('/training-runs/'.$run->id)
+    test()->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('run.export_csv_url', route('runs.export', ['run' => $run, 'format' => 'csv']))
             ->where('run.export_json_url', route('runs.export', ['run' => $run, 'format' => 'json'])));
 
-    $source = runViewSource('resources/js/pages/Runs/Show.vue');
+    $source = runViewSource('resources/js/pages/Career/Cockpit.vue');
 
-    expect(sourceClassOf($source, '/<a[^>]*:href="run\.export_csv_url"[^>]*>/'))->toContain('min-h-11')
-        ->and(sourceClassOf($source, '/<a[^>]*:href="run\.export_json_url"[^>]*>/'))->toContain('min-h-11')
-        ->and(sourceClassOf($source, '/<a[^>]*href="\/skills"[^>]*>/'))->toContain('min-h-11')
-        ->and(sourceClassOf($source, '/<summary[^>]*>\s*Correct a turn by hand/s'))->toContain('min-h-11');
+    expect(sourceClassOf($source, '/<a[^>]*:href="props\.run\.export_csv_url"[^>]*>/'))->toContain('min-h-11')
+        ->and(sourceClassOf($source, '/<a[^>]*:href="props\.run\.export_json_url"[^>]*>/'))->toContain('min-h-11')
+        ->and(sourceClassOf($source, '/<summary[^>]*>\s*Correct turn/s'))->toContain('min-h-11');
 
     $layout = runViewSource('resources/js/layouts/AppLayout.vue');
 

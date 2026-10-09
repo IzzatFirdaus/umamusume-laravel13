@@ -17,7 +17,7 @@ skipped, so re-running adds nothing. The seeder is intentionally **not** registe
 ## What each run contains
 
 | Tracker run | Trainee (card) | Snapshot turn | Status | Race entries with results |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | 1 | El Condor Pasa ([El☆Número 1]) | 48 (Year 1 Late Dec) | Active | Junior Make Debut 1st |
 | 2 | Tokai Teio ([Peak Joy]) | 44 (Year 2 Kikuka Sho race day) | Active | Junior Make Debut 1st |
 | 3 | Maruzensky ([Formula R]) | 75 (Year 4 URA final) | Completed | Junior 1st, URA Q 1st, URA S 1st, URA F 1st |

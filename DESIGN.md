@@ -189,10 +189,10 @@ external fonts (offline constraint + C-8 dependency gate).
   for the in-page forms and long copy blocks on the run screen, and `max-w-lg` for the
   single-column create form. Mobile must not break (R-03 floor: no overflow, tap targets
   via labeled controls) but is not a design driver (PRD §2, PRODUCT Operating Context).
-  _Dated correction 2026-10-08 (documentation-sync pass): the shell the 5xl width belongs to is no
+  *Dated correction 2026-10-08 (documentation-sync pass): the shell the 5xl width belongs to is no
   longer a Blade component. Slice B1 deleted `components/layout.blade.php`; the shipped shell is the
   Inertia `AppLayout.vue` (with `CareerLayout.vue` / `SetupLayout.vue` for the career surfaces).
-  The width value stands — only the host it is named on is stale._
+  The width value stands — only the host it is named on is stale.*
 - **Recommended:** retire the `max-w-6xl` line rather than keep a proposed token that
   no surface uses. Ratified widths, in one place: 5xl shell, 3xl form, lg narrow form.
 - **768px is the supported minimum (amended 2026-09-29, KI-25), and the floor above
@@ -394,11 +394,11 @@ written for the 0.1.0 view it describes, and the eight-section workspace below i
 **Absence has exactly two forms on this page.** A value the record does not carry renders as `N/A` with a
 `title` naming the kind of absence, per the reasoning already written into
 `resources/views/components/resource-strip.blade.php` — never `Unknown`, never a dash, never zero. A
-_Dated correction 2026-10-08 (documentation-sync pass): the Blade file this reasoning was "already
+*Dated correction 2026-10-08 (documentation-sync pass): the Blade file this reasoning was "already
 written into" was deleted in slice B1; the landed owner of the same reasoning is
 `resources/js/components/ResourceStrip.vue` (and its `ResourceMeter` / `StatBand` companions). The
 rule — an unrecorded value renders `N/A` with a `title`, never `Unknown`, never a dash, never zero —
-is unchanged._
+is unchanged.*
 section the record cannot yet supply keeps its heading and says **"not yet recorded"**, which is the
 pattern every run-screen panel already uses. The heading is the honest part: a missing section states "she
 has none" where a heading with an empty body states "this tool has not recorded it", and on sections 3, 4
@@ -768,7 +768,7 @@ the tree. Installing `pestphp/pest-plugin-browser` plus a Playwright driver and 
 the two `markTestIncomplete` calls with real assertions is the single change that would move
 the whole §2.1 table from *documented* to *enforced*.
 
-_Dated re-read 2026-10-08 (documentation-sync pass, on the Phases A–E completion brief; the table
+*Dated re-read 2026-10-08 (documentation-sync pass, on the Phases A–E completion brief; the table
 above is preserved as the 2026-10-04 read it records). The enforcement story has moved twice since
 that read, and both moves are upward. First, the two `markTestIncomplete` rows are no longer skipped
 for lack of a driver: `@axe-core/playwright@^4.13.0` is installed (`package.json:13`) and the
@@ -779,7 +779,7 @@ are the shipped surface, `DesignTokensTest` sweeps both source trees for `dark:`
 classes, and the browser specs carry the 44px floor and the reflow checks the Blade era could not run.
 What the re-read does **not** change: the ratio figures themselves stay "documented, not re-verified",
 because the evidence files the §2.1 comment cites are still absent from the tree, and the §2.3 768px
-row stays Unverified as §2.3's held proposal records._
+row stays Unverified as §2.3's held proposal records.*
 
 ## 11. Open questions for the owner
 
@@ -803,8 +803,9 @@ Not defects; decisions this file cannot make for itself.
    No pixel value is proposed here for the same reason §2.3's 768px number is question 5:
    a number this file invents is a number no measurement supports.
 
-_Dated close-outs 2026-10-08 (documentation-sync pass, on the Phases A–E completion brief; the
-question list above is preserved as written)._
+*Dated close-outs 2026-10-08 (documentation-sync pass, on the Phases A–E completion brief; the
+question list above is preserved as written).*
+
 - **Question 1 is closed by deletion.** The three unreachable components the question names were the
   zero-consumer Blade set; slice B1 (`0ea8d43`, 2026-10-05) deleted `run-header`, `deck-editor` and
   `energy-gauge` along with `resources/views/components/` itself, and the Vue ports replaced them on

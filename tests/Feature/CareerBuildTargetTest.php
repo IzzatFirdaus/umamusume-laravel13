@@ -236,7 +236,7 @@ it('leaves the run-scoped build target write exactly as it was', function (): vo
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
 
     $this->put(route('runs.build-target.update', $run), draftTargetPayload())
-        ->assertRedirect(route('runs.show', $run));
+        ->assertRedirect(route('runs.cockpit', $run));
 
     expect($run->fresh()->buildTarget()?->toArray())->toBe(draftTargetPayload());
 });

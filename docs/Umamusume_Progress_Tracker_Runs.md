@@ -5,7 +5,7 @@
 ## Run index
 
 | # | Umamusume | Tracker pages | Snapshot | Status / result visible in PDF |
-|---:|---|---:|---|---|
+| ---: | --- | ---: | --- | --- |
 | 1 | El Condor Pasa | 17–20 | Takrazuka Kinen snapshot | In progress / race planned |
 | 2 | Tokai Teio | 21–23 | Kikuka Sho snapshot | Result recorded through Japanese Derby; later goals listed |
 | 3 | Maruzensky | 24–27 | URA Finale Finals snapshot | Career/finales snapshot; selected race results recorded |
