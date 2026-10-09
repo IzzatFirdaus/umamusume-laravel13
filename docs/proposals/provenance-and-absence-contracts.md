@@ -672,3 +672,85 @@ component files uncommitted, writes nothing to `DESIGN.md`, `SCREEN_SPEC.md`, `P
 database is one shared repo path, so a second session's `globalSetup` **deletes** the first one's data
 mid-run; a peer run was live minutes before this line was written. The Vue edits therefore rest on typecheck,
 the gate pass, and reading the markup — not on Chromium, and no runtime claim is made for them.
+
+## 18. Remaining-work pass, executed 2026-10-09
+
+This pass lands `cf68a7a`, `e373588`, `0c1ec6d`, `fc5fa1a`, `4f1aae8`, `92abcca`, `9849f8c`, `b3ba5f3`,
+`59ae3e3`, `284f40d` and this file on `master`; each pathspec commit was blob-verified
+(`git rev-parse HEAD:<path>` against the rebuilt file) before the peer's lines were restored.
+
+**Tier 0, landed.** `DESIGN.md` §5 and §10 (`cf68a7a`, corrected forward by `e373588`), `SCREEN_SPEC.md`
+§7 items 18 and 20 (`0c1ec6d`), `KNOWN-ISSUES.md` KI-58 closure plus KI-83 (`fc5fa1a`). The first
+isolation splice treated a unified-diff header as a 0-based index, so a replacement hunk kept the line it
+was meant to remove and removed the next one instead; the tool now asserts that the lines it cuts are
+byte-identical to the hunk's own removed lines, and the damage was fixed by a follow-up commit rather
+than a rewrite.
+
+**Tier 1, landed.** `4f1aae8` deletes every `focus-visible:outline-green` override; `92abcca` prints the
+constants behind the coverage, caps and race-fact figures; `9849f8c` rewords the unresolvable trainee id;
+`b3ba5f3` corrects §8's site list and stops pre-deciding the motion question; `59ae3e3` files KI-81 in its
+reserved slot; `284f40d` records SCR-VET-004's correction 3.
+
+Three of the seven Tier 1 premises did not survive contact with the tree, and each is reported rather than
+built to match the brief:
+
+1. **"four `outline-green` deletions" is 22.** `DESIGN.md` §8 named two Blade templates as the call sites;
+   both were deleted in slice B1 (`0ea8d43`). The overrides were actually 22 sites across seven Vue
+   components — three in `skills/SkillCatalog.vue`, four in `support/SupportCardCatalog.vue`, two in
+   `support/SupportSlot.vue`, one in `TraineeCombobox.vue`, three in `Runs/Show.vue`, six in
+   `Support/Builder.vue`, three in `Veterans/Index.vue`. All 22 are deleted, each site keeps its outline
+   width and offset, and `grep -r outline-green resources/` returns 0.
+2. **The `veteran-compare.spec.ts` assertion was already loosened**, at `eb2d7e9` and not by this session:
+   `:98` waits on the path with any query while `:89` keeps the library door's `veterans[]=N`, which is
+   server-rendered and really does emit that spelling. So the deliverable became the status record
+   (`§4.20` correction 3), not an edit to a passing spec. Section 3's `SCR-VET-004` row still repeats the
+   stale failure cause; it lies inside a concurrent session's uncommitted hunk range, so it is named in
+   that correction instead of being edited there.
+3. **There is no unheld 768px claim to withdraw.** `DESIGN.md` §2.3's own status bullet already calls the
+   minimum "a proposal, not a ratified contract" resting "on an attribute read rather than a browser
+   measurement", §10 marks it **Unverified**, and §11 question 5 puts the choice in front of the owner.
+   Withdrawing the number would delete the measured half (the two wide tables, 476px at the narrowest
+   viewport tested, and their scrolling contract), so nothing moved. Measuring it is Tier 2's work.
+
+**Tier 1, held.** `Dashboard.vue:300-301` prints the verified date visibly already; what it lacks is the
+source, and `dataStatus` is typed `{ label, state, verified_at }` — no source string exists in the payload,
+so adding one is a `DashboardController` change, and that file carries a concurrent session's uncommitted
+lines. Left as decision (d) below rather than invented as copy.
+
+## 19. Tier 2 runbook, KI-80, not executed this pass
+
+The remaining budget did not cover writing the fix *and* running the six held specs, so this is the runbook,
+not a claim.
+
+1. `tests/browser/global-setup.ts` currently points every session at one `database/browser-scratch.sqlite`
+   and wipes it. Give it a per-session path from `process.env.PLAYWRIGHT_SCRATCH_DB`, falling back to the
+   shared path only when the variable is unset, and have the wipe touch only that path.
+2. Build each copy with `VACUUM INTO` from `database/database.sqlite` — never `cp`: a WAL database copied
+   file-by-file arrives malformed, missing tables, or silently empty. Seed a Veteran set into the copy so
+   KI-69 class 3 can stop being a fixture blocker.
+3. Serve each session's own port and kill the server inside the same command as the spec run; a backgrounded
+   `artisan serve` dies between turns, and a leaked one answers 500, which reads as a web-server timeout.
+4. Then the six held specs: `career-inheritance-event`, `grand-concert-panel`, `scenario-panel`,
+   `veteran-compare`, `ancestry-node-picker`, `career-training-detail`. Report each with its own exit code;
+   no session may claim the suite is green until `php artisan migrate:status` has been run on the dev file
+   (KI-60, owner action).
+
+## 20. Decisions owed, as at the end of this pass
+
+| # | Decision | Why it is not an agent's |
+|---|---|---|
+| a | Group C's seven sentence-objects (`RecommendationCard.vue:64`, `DeckPanel.vue:138`, `SupportCards/Show.vue:149`, `GradePointMeter.vue:54`, `TraineeSelect.vue:119`, `TeamRacePanel.vue:42`, `Runs/Show.vue:225`): `N/A` plus reason, or the sentence stays | A mechanical substitution deletes the information the sentence carries |
+| b | `Runs/Show.vue:267`, the third group A site | The file carries ~45 concurrent lines; the site is cold but the commit is not separable without a decision on who owns the file |
+| c | Whether to guard config provenance strings against `ProvenanceState` at build time | `ProvenanceBadge.vue:61` indexes `BADGES` with no fallback, so an out-of-vocabulary `state` in `config/reference.php` fails at render; the fix is a validator nobody has authorised |
+| d | Whether `dataStatus` gains a `source` field so the dashboard can print it | Server payload change in a file another session is editing |
+| e | `DESIGN.md` §11 question 3, motion: keep the tree motionless or ratify one transition token | §8 no longer pre-decides it |
+| f | `DESIGN.md` §11 question 5, the 768px minimum: ratify with the measurement or withdraw the number | Needs the browser gate Tier 2 unblocks |
+| g | KI-84: ten feature-test files staged for deletion by a concurrent session, three of them Our Grand Concert's own absence guards | The Floor requires owner approval for a deleted test |
+| h | Section 15's coordination question, still unanswered: which session owns rulings 2a/3b/5a/7a/8a/9b | Both sessions are landing them; `822d97b` and `92abcca` touched the same file within minutes of each other |
+
+**Gates for this pass.** `npm run typecheck` exit 0. `php tools/lore.php`: 303 hits, none in a line this
+pass added (proved by comparing hit line numbers against the added-line set of this pass's commits; the doc
+hits are pre-existing forbidden-list and substring-in-word classes). `composer lore-code`: 121 hits, zero
+in the four Vue files. `vendor/bin/pint --dirty` and PHPStan: not run, no PHP changed. `php artisan test`:
+not run; the change class is Vue and the Level 3 checkpoint is still owed before this slice is called done.
+`php artisan migrate:status`: not run, owner action. Browser: not run, KI-80.
