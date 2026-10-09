@@ -160,7 +160,8 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
                 <div>
                     <dt class="text-ink-muted">Voice actor</dt>
                     <dd class="text-ink">
-                        {{ trainee.profile.va_ja ?? 'Not published by the source' }}
+                        <span v-if="trainee.profile.va_ja === null" title="The source publishes no Japanese voice actor for this trainee.">N/A</span>
+                        <span v-else>{{ trainee.profile.va_ja }}</span>
                         <span v-if="trainee.profile.va_en" class="text-ink-muted">(EN: {{ trainee.profile.va_en }})</span>
                         <span
                             v-else
