@@ -2148,10 +2148,10 @@ does not cover: the browser suite still cannot complete a full finished career o
 KI-88's own class-1 empty-table defect (KI-69) and KI-82's missing title are resolved, so the submit
 controls are component-tested and tree-pinned rather than browser-gated end to end.
 
-### KI-89 `FinaleVocabularyTest.php`'s docblock cites `docs/Our-Grand-Concert-plan.md` §9 E8, a section no document in the tree defines - FILED 2026-10-09 (Grand Concert closing pass), OPEN
+### KI-89 `FinaleVocabularyTest.php`'s docblock cites `docs/Our-Grand-Concert-plan.md` §9 E8, a section no document in the tree defines - FILED 2026-10-09 (Grand Concert closing pass), CLOSED 2026-10-09
 
-**Status: OPEN.** A documentation defect, small and real: a test's own docblock points a reader at a section
-that does not exist, so the citation cannot be followed and the provenance the test states for itself cannot
+**Status: CLOSED 2026-10-09.** A documentation defect, small and real: a test's own docblock pointed a reader at a section
+that did not exist, so the citation could not be followed and the provenance the test stated for itself could not
 be checked.
 
 **What the citation says.** `tests/Feature/FinaleVocabularyTest.php:16` opens the file with *"Slice 23, the
@@ -2184,6 +2184,15 @@ the section id is absent from the repository.
 
 **Reproduce.** `grep -n "E8" tests/Feature/FinaleVocabularyTest.php` returns line 16;
 `grep -rn "\bE8\b" docs/` returns nothing; `grep -n "^## 9" docs/Our-Grand-Concert-plan.md` returns nothing.
+
+**Closed 2026-10-09.** Correction #2 from the entry is applied: the docblock at
+`tests/Feature/FinaleVocabularyTest.php:15-19` now cites `app/Services/Scenario/FinaleReader.php` (the one
+reader behind `finale_state` on the Cockpit at `CockpitController.php:678` and `finale` on the Career Result
+at `ResultController.php:72`) plus the plan's Slice 19 and Slice 20 bodies at `docs/Our-Grand-Concert-plan.md:786`
+and `:811`. `FinaleVocabularyTest` passes 5/5 with 54 assertions. What closure does not cover: the two
+`SCREEN_SPEC.md` gaps named below (`SCR-CAR-018`'s pre-rename payload keys and the missing
+`SCR-CAR-024` state entry), both routed to the author of the rename, and the question of whether this test's
+subject is a plan slice at all.
 
 **What closure would not cover.** Correcting the comment does not land the test's subject, and it does not
 touch the two `SCREEN_SPEC.md` gaps the same rename left behind: `SCR-CAR-018`'s payload list at `:2515` still
