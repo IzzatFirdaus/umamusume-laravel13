@@ -53,6 +53,9 @@ use Illuminate\Support\Carbon;
  *                                                          that screen. `legacySelection()` is the
  *                                                          typed view of this bag
  * @property string|null $notes
+ * @property int|null $trainee_rarity the trainee's rarity (1..3) as the Trainer read it; null until
+ *                                    they say, never derived from the card layer
+ * @property int|null $potential_level the trainee's potential level (1..5); null until stated
  * @property int|null $current_objective_index the Grade Point period the Trainer
  *                                             reports as live (1..4, US-10); null
  *                                             until they say, which the meter shows
@@ -78,7 +81,7 @@ use Illuminate\Support\Carbon;
  *                                       run with a Legacy selection stays comparable before it is
  *                                       filed)
  */
-#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
 class TrainingRun extends Model
 {
     /**
@@ -1055,6 +1058,8 @@ class TrainingRun extends Model
     {
         return [
             'status' => RunStatus::class,
+            'trainee_rarity' => 'integer',
+            'potential_level' => 'integer',
             'current_objective_index' => 'integer',
             'shop_resets_in' => 'integer',
             'legacy_selection' => 'array',

@@ -57,6 +57,14 @@ class StoreTrainingRunRequest extends FormRequest
             'inheritance_parent_b_id' => ['nullable', 'integer', Rule::exists('umamusume', 'id')],
             'notes' => ['nullable', 'string', 'max:5000'],
             /*
+             * The trainee's rarity (1..3) and potential level (1..5), as the Trainer reads them.
+             * Entered, never derived: a run may name only a trainee and no card, and the potential
+             * level belongs to the trainee rather than the card, so neither can be computed from
+             * the card layer. Null is the honest "not stated" (D-220).
+             */
+            'trainee_rarity' => ['nullable', 'integer', 'between:1,3'],
+            'potential_level' => ['nullable', 'integer', 'between:1,5'],
+            /*
              * The Grade Point period the Trainer reports as live (US-10, ADR-0003).
              * Entered, never derived (D-270): nothing in the corpus names a formula
              * that puts a career in a period, so "null until set" is the honest state
