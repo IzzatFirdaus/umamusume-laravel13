@@ -1767,3 +1767,37 @@ session's or the owner's act, not a register edit. It does not rule on the other
 relevance, only that removing them needs a stated reason. It does not touch the Slice 20 pickup,
 which landed independently of this collision, nor the KI-82 label defect on the same scenario's
 finale row.
+### KI-85 Commit 822d97b carries a concurrent session's ported test case alongside the finale pickup, an attribution boundary rather than a defect - FILED 2026-10-09 (Slice 20 pickup, on the owner's ruling), FIXED IN TREE
+
+**Status: FIXED IN TREE - the note is the fix.** No history rewrite was attempted and none is owed:
+rewriting `master` to correct attribution would be a worse defect than the attribution error, and the
+only clean-looking removal is a deletion of a passing test, which `AGENTS.md` §5 forbids without owner
+approval. The record is the remedy, and this entry is it.
+
+The fact: `822d97b feat(scenario): surface the finale state in the cockpit baseline strip` changed six
+paths. Five contain only the slice's own work. The sixth, `tests/Feature/ScenarioPanelTest.php`, shows
+103 added lines where the pickup's change is 3: the remaining hundred are another session's uncommitted
+test case, `it('turns on exactly the panels the matrix declares, and renders no panel data where it turns
+one off')`, ported from `GuidedStepScenarioCompositionTest`.
+
+The mechanism is named so it is not repeated. The two controllers in that commit were staged as
+`HEAD + own-hunks-only` blobs and verified with `php -l` and `vendor/bin/pint --test`. The other four
+paths were hashed from the working tree on the belief that a file last seen clean is still clean. A
+concurrent session had edited `ScenarioPanelTest.php` in the interval. The tooling was right and the
+assumption was the defect, so the rule now applied without exception is that **every** staged path gets
+its own blob, not only the paths suspected of being dirty.
+
+What is not in question: the ported case passes and the work it tests is intact. `vendor/bin/pest` over
+`FinaleReportingTest`, `ScenarioPanelTest` and `GrandConcertPanelTest` was green on the committed tree at
+19 tests / 410 assertions before and after this entry. Functionally the commit is sound; only the
+authorship line is wrong, and no credit commit is filed under this session's name, because that would
+recreate the same problem pointing the other way.
+
+**Closure owed.** None. This entry exists to make the boundary visible to the next reader of the log,
+who would otherwise attribute the ported case to the finale slice. If the owner prefers the attribution
+carried in the code's own history, the route is the deleting session restating the case in a commit of
+theirs, not an edit here.
+
+**What closure would not cover.** It does not change `822d97b`; the commit is left exactly as landed. It
+does not rule on KI-84's ten deleted test files, which remain the deleting session's and the owner's
+question. It does not cover the other four paths in that commit, which were the slice's own work.
