@@ -305,6 +305,49 @@ it('names why there is no calendar to plan against, in each of the two ways ther
             ->where('groups.optional.empty', fn (string $empty): bool => str_contains($empty, 'No turn has been logged')));
 });
 
+it('reads a scenario-less row as every scenario and scopes only the scenario finals', function (string $scenario): void {
+    // KI-45. The GameTora export publishes a scenario key on four rows only - the four finals - so
+    // 406 of the 410 catalogue rows carry `scenario_key => null` (GametoraRaceCatalogParser
+    // GLOBAL_FINALS_BY_SLOT). `forScenario()` reads a null key as "every scenario", which is what
+    // makes the shared calendar visible to every run; the finale is the one kind of row that filters,
+    // and another scenario's finale must not leak into this run's planner.
+    $other = $scenario === 'ura_finale' ? 'unity_cup' : 'ura_finale';
+    $run = plannerRun(turns: 12, scenario: $scenario);
+
+    plannerSlot(['title' => 'Chukyo Junior Stakes', 'turn' => 13, 'scenario_key' => null, 'sort_order' => 1]);
+    plannerSlot([
+        'title' => 'Own Final',
+        'scenario_key' => $scenario,
+        'year' => RaceCatalogSlot::YEAR_FINALE,
+        'month' => null,
+        'half' => null,
+        'turn' => null,
+        'is_mandatory' => true,
+        'sort_order' => 2,
+    ]);
+    plannerSlot([
+        'title' => 'Other Final',
+        'scenario_key' => $other,
+        'year' => RaceCatalogSlot::YEAR_FINALE,
+        'month' => null,
+        'half' => null,
+        'turn' => null,
+        'is_mandatory' => true,
+        'sort_order' => 3,
+    ]);
+
+    $this->get(route('runs.races.planner', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // The scenario-less row is present for this scenario...
+            ->where('groups.optional.races', fn ($races): bool => collect($races)->contains('title', 'Chukyo Junior Stakes'))
+            // ...this scenario's own finale is present...
+            ->where('groups.mandatory.races', fn ($races): bool => collect($races)->contains('title', 'Own Final'))
+            // ...and the other scenario's finale is not.
+            ->where('groups.mandatory.races', fn ($races): bool => ! collect($races)->contains('title', 'Other Final'))
+            ->has('groups.mandatory.races', 1));
+})->with(['ura_finale', 'unity_cup', 'our_grand_concert', 'trackblazer']);
+
 it('carries the existing race write and offers no second one', function (): void {
     $run = plannerRun(turns: 12);
     plannerSlot(['title' => 'Chukyo Junior Stakes', 'turn' => 13]);
