@@ -2238,3 +2238,28 @@ touch the two `SCREEN_SPEC.md` gaps the same rename left behind: `SCR-CAR-018`'s
 names the pre-rename `finale` and `finale_absence` keys, and the cockpit's `finale_state` row has no
 `SCR-CAR-024` state entry. Both are routed to the author of the rename. Nor does it settle whether this test's
 subject is a plan slice at all, which is that author's to state.
+
+### KI-90 The recommendation card rendered nothing whenever the finale context was present, because one component declared its prop snake_case and the other bound it kebab-case - FILED 2026-10-10 (2A.6 browser verification pass), CLOSED 2026-10-10
+
+**Status: CLOSED — fixed at `7a344a4`.** Found during the 2A.6 browser verification pass, counted
+pre-existing on `HEAD` (not caused by that slice), and fixed in its own dedicated commit.
+
+`resources/js/components/AdvisorRail.vue` bound `:finale-context` to `RecommendationCard.vue`, whose
+prop was declared `finale_context` (snake_case). Vue's `camelize` converts hyphens only, so the
+kebab-case attribute resolved to `finaleContext`, which never matched the declared key: the prop
+arrived undefined through `attrs`, the card's `!== null` guard passed, and its template
+dereferenced `undefined.label`, throwing during render. Both advisor states failed at once — the
+refusal line (`career-cockpit.spec.ts:119`) and the ranked deficit line (`:263`) both asserted copy
+the card drew, and the error-context DOM at failure time showed the Advisor region reduced to its
+heading and standing prose.
+
+Introduced by `ad8dc77` (2026-10-09, the cockpit cutover series), before 2A.6's commit `5eba0d0`.
+
+**Fix.** `7a344a4` — both components renamed the prop to camelCase (`finaleContext`), so the
+kebab-case binding camelizes to the declared key.
+
+**Proving command.** `PLAYWRIGHT_PORT=8177 npx playwright test tests/browser/career-cockpit.spec.ts tests/browser/career-cockpit-forms.spec.ts` → 18 passed (6.0m) at `7a344a4`, both previously failing
+cases green.
+
+**Closure coverage.** `RecommendationCard` is imported only by `AdvisorRail`, and `AdvisorRail` only
+by `Cockpit.vue`, so the browser run covers the whole blast radius.
