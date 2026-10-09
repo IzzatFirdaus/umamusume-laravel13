@@ -207,7 +207,8 @@ reason, and the same rule applies: the unification waits for those files to be f
 **Remaining, explicitly.** One shared turn-entry field definition read by all three surfaces; the label
 vocabulary reconciled (`Speed` on the run record against `Speed total *` on the decision screen); and
 each surface naming whether it creates or edits a turn. Until that lands, Phase 2's canonical-contract
-gate stays open. **D9 is not Fixed.**
+gate stays open. **D9 is Fixed** — one shared field source, all three surfaces wired and labelled alike
+(landed at `fec95cd`), recorded in the status table above.
 
 ## Infrastructure findings
 
