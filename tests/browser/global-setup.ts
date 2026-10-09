@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
 import { rmSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /**
@@ -28,7 +28,37 @@ import { fileURLToPath } from 'node:url';
  */
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-export const SCRATCH_DATABASE = join(repoRoot, 'database', 'browser-scratch.sqlite');
+/**
+ * One path per invocation (KI-80). With a fixed path, a second session's `globalSetup` deletes the data
+ * the first one has just seeded and its server still holds open, so neither run's numbers are real.
+ * `PLAYWRIGHT_SCRATCH_DB` names the path when set; the default carries the pid and the load-time
+ * millisecond, because a recycled pid alone could match a peer's stale file.
+ *
+ * ponytail: per-invocation files are never swept, so `database/` keeps one file per run under the
+ * existing `/database/*.sqlite*` ignore. Upgrade path: an `exit` hook removing only the resolved path.
+ */
+export function scratchDatabasePath(env: NodeJS.ProcessEnv = process.env): string {
+    const named = env.PLAYWRIGHT_SCRATCH_DB;
+
+    if (named !== undefined && named !== '') {
+        return isAbsolute(named) ? named : resolve(repoRoot, named);
+    }
+
+    return join(repoRoot, 'database', `browser-scratch-${process.pid}-${Date.now()}.sqlite`);
+}
+
+/** Removes exactly this path and its write-ahead siblings. Never a glob: a pattern reaches a peer's file. */
+export function removeScratchDatabase(path: string): void {
+    // The write-ahead siblings go with the main file. WAL is on for this connection, so a leftover
+    // -wal beside a deleted database reads as `file is not a database` rather than as an empty schema.
+    // `maxRetries` because Windows answers EPERM for a file a dying process still holds a handle to, and
+    // a gate that aborts on that reads as a broken harness rather than as a slow one.
+    for (const suffix of ['', '-wal', '-shm']) {
+        rmSync(`${path}${suffix}`, { force: true, maxRetries: 10, retryDelay: 500 });
+    }
+}
+
+export const SCRATCH_DATABASE = scratchDatabasePath();
 
 export default async function globalSetup(): Promise<void> {
     // Fail if a cached config would override the harness environment and point the server
@@ -42,13 +72,8 @@ export default async function globalSetup(): Promise<void> {
         // Config cache might not exist; that's fine.
     }
 
-    // The write-ahead siblings go with the main file. WAL is on for this connection, so a leftover
-    // -wal beside a deleted database reads as `file is not a database` rather than as an empty schema.
-    // `maxRetries` because Windows answers EPERM for a file a dying process still holds a handle to, and
-    // a gate that aborts on that reads as a broken harness rather than a slow one.
-    for (const suffix of ['', '-wal', '-shm']) {
-        rmSync(`${SCRATCH_DATABASE}${suffix}`, { force: true, maxRetries: 10, retryDelay: 500 });
-    }
+    // Only this invocation's path is removed. The KI-80 defect was this step reaching a shared file.
+    removeScratchDatabase(SCRATCH_DATABASE);
 
     // Laravel refuses a SQLite path that does not exist — `SQLiteDatabaseDoesNotExistException` from
     // `SQLiteConnector::parseDatabasePath()` — so the file is created empty and `migrate` fills it.
