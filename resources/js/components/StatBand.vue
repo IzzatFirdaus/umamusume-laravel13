@@ -14,6 +14,12 @@ const props = defineProps<{
     baseCap: number;
     hardCap: number;
     gradeBanding: { step: number; labels: string[] };
+    /**
+     * The ceiling a stat could still reach, per stat, when the run's breakthrough position is known.
+     * Null where it is not, and null as a whole where no caller can name one yet: an absent potential
+     * leaves the band drawing exactly what it drew before this prop existed.
+     */
+    potentialCaps?: Record<string, number | null> | null;
 }>();
 
 /*
@@ -54,16 +60,30 @@ const rows = computed(() =>
     Object.keys(props.caps).map((stat) => {
         const value = Math.trunc(props.values[stat] ?? 0);
         const cap = Math.trunc(props.caps[stat]);
+        const potential = Math.trunc(props.potentialCaps?.[stat] ?? 0);
+
+        // A known potential is the scale the bar is drawn against, so the scenario ceiling becomes
+        // an inner marker rather than the end of the ruler: the audit's finding was that the tool
+        // showed one level where the client shows three. Without one the band is unchanged.
+        const scale = potential > cap ? potential : cap;
+        const pctOf = (n: number): number => Math.min(100, scale > 0 ? (n / scale) * 100 : 0);
+
         return {
             stat,
             value,
             cap,
-            pct: Math.min(100, cap > 0 ? (value / cap) * 100 : 0),
-            softPct: Math.min(100, cap > 0 ? (props.baseCap / cap) * 100 : 100),
+            potential: potential > cap ? potential : null,
+            pct: pctOf(value),
+            softPct: pctOf(props.baseCap),
+            capPct: pctOf(cap),
             atCeiling: cap <= props.baseCap,
             grade: gradeOf(value),
         };
     }),
+);
+
+const hasPotential = computed(() =>
+    Object.values(props.potentialCaps ?? {}).some((cap) => cap !== null && cap !== undefined),
 );
 
 const bonusLine = computed(() =>
@@ -108,7 +128,7 @@ const r2 = (n: number): number => Math.round(n * 100) / 100;
 
                 <div
                     class="relative mt-2 h-1.5 overflow-hidden rounded bg-sunken"
-                    :class="row.atCeiling ? 'border-r-2 border-dashed border-r-ink-faint rounded-l' : ''"
+                    :class="row.atCeiling || row.potential !== null ? 'border-r-2 border-dashed border-r-ink-faint rounded-l' : ''"
                 >
                     <div class="absolute inset-y-0 left-0 bg-green-deep" :style="{ width: `${r2(row.pct)}%` }"></div>
                     <div
@@ -116,13 +136,21 @@ const r2 = (n: number): number => Math.round(n * 100) / 100;
                         class="absolute inset-y-0 bg-up opacity-50"
                         :style="{
                             left: `${r2(row.softPct)}%`,
-                            width: `${r2(Math.min(100 - row.softPct, ((row.value - baseCap) / row.cap) * 100))}%`,
+                            width: `${r2(Math.min(100 - row.softPct, ((row.value - baseCap) / (row.potential ?? row.cap)) * 100))}%`,
                         }"
                     ></div>
                     <div
                         v-if="!row.atCeiling"
                         class="absolute -inset-y-1 w-0 border-l-2 border-dashed border-ink-faint"
                         :style="{ left: `${r2(row.softPct)}%` }"
+                    ></div>
+                    <!-- The third level, present only when a potential is known: without one the bar
+                         ends at the scenario ceiling exactly as it always did. -->
+                    <div
+                        v-if="row.potential !== null"
+                        class="potential-cap-marker absolute -inset-y-1.5 w-0 border-l-2 border-dashed border-ink-muted"
+                        :style="{ left: `${r2(row.capPct)}%` }"
+                        :title="`Scenario ceiling ${fmt(row.cap)}; the bar ends at the potential ${fmt(row.potential)}`"
                     ></div>
                 </div>
             </div>
@@ -147,7 +175,12 @@ const r2 = (n: number): number => Math.round(n * 100) / 100;
             <span class="inline-block h-3 w-0 border-l-2 border-dashed border-ink-faint" aria-hidden="true"></span>
             <span>
                 <span class="font-semibold text-ink-strong">1,200</span> is where training gains halve.
-                The bar end is the scenario ceiling. Where the two coincide the bar end is dashed.
+                <template v-if="hasPotential">
+                    The inner dashed line is the scenario ceiling; the bar ends at the potential ceiling.
+                </template>
+                <template v-else>
+                    The bar end is the scenario ceiling. Where the two coincide the bar end is dashed.
+                </template>
             </span>
         </div>
 
@@ -156,7 +189,11 @@ const r2 = (n: number): number => Math.round(n * 100) / 100;
                 {{ baseCap }} base, no scenario set: every ceiling here is the base cap and no bonus applies.
             </template>
             <template v-else>{{ baseCap }} base + {{ bonusLine }} </template>
-            breakthrough not tracked. Hard cap {{ fmt(hardCap) }}.
+            <template v-if="hasPotential">
+                The outer dashed line is the potential ceiling, which is the hard cap the scenario's own
+                row publishes: a level the run could still earn, not one it has reached.
+            </template>
+            <template v-else>breakthrough not tracked. Hard cap {{ fmt(hardCap) }}.</template>
             <!-- The five 「限界値アップ」 effects are carried by zero of the 559 catalogue records (§1.4.8). -->
             Deck recorded under Support deck; no card in the catalogue raises these ceilings.
         </div>

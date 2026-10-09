@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Domain\Training\StatCeilings;
 use App\Models\TrainingRun;
 use InvalidArgumentException;
 
@@ -109,5 +110,25 @@ class ScenarioCaps
         }
 
         return self::caps($run->scenarioKey());
+    }
+
+    /**
+     * Both ceiling levels a run's stats are measured against, as one object.
+     *
+     * `knownCap` is the ceiling the validators clamp against and the band has always drawn: base plus
+     * that scenario's bonus, clamped to the hard cap. `potentialCap` is the level a stat could still
+     * reach, which is the scenario's hard cap, and it is named per stat so a caller that cannot yet
+     * substantiate one records the absence instead of lending the engine ceiling out. A run with no
+     * scenario gets neither a bonus nor a potential: it claims no scenario's figures at all.
+     */
+    public static function ceilingsForRun(?TrainingRun $run): StatCeilings
+    {
+        $known = self::forRun($run);
+
+        if ($run === null || ! $run->hasScenario()) {
+            return new StatCeilings($known, array_fill_keys(array_keys($known), null));
+        }
+
+        return new StatCeilings($known, array_fill_keys(array_keys($known), self::hardCap()));
     }
 }
