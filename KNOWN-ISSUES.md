@@ -1790,6 +1790,35 @@ relevance, only that removing them needs a stated reason. It does not touch the 
 which landed independently of this collision, nor the KI-82 label defect on the same scenario's
 finale row.
 
+**Landed 2026-10-09 (erratum; the text above is left exactly as filed).** A later commit by the same
+concurrent session, `91494a1 feat(career): migrate legacy run controls to 2.0 surfaces and redirect
+/training-runs/{run}`, committed the staged deletions. The set is not ten. Two instruments, both run at
+`91494a1`:
+
+```text
+git show 91494a1 --diff-filter=D --name-only --format="" -- tests | wc -l        # 24
+git show 91494a1 --numstat --format="" -- tests | grep -F -f <those 24 paths> | awk '{d+=$2} END{print d}'
+                                                                                  # 5274
+```
+
+Nine of the ten paths named above are among the 24. The tenth, `tests/Feature/RunGoalsPanelTest.php`,
+survived that commit and is still in `HEAD` (`git cat-file -e HEAD:tests/Feature/RunGoalsPanelTest.php`
+exits 0), but it is deleted in the working tree and unstaged, so `git status` reads ` D` for it and one
+blanket add makes it the 25th. None of the 24 has come back: `git ls-files --error-unmatch` over the list
+returns nothing at `HEAD`, and `tests/Feature` went from 165 files at `91494a1^` to 149. The same commit
+also removed 34 lines from `tests/Feature/FinaleReportingTest.php` and 102 from
+`tests/Feature/ScenarioPanelTest.php`; both files are still tracked.
+
+The landing does not close this entry, because what was missing was not staging but approval. `AGENTS.md`
+§5 and §14 want an owner approval and a stated reason per deletion; `91494a1`'s message describes a
+legacy-controls migration and states no reason for removing `RaceCalendarTest`, `RunDeckTest` or
+`GuidedTurnOnRunViewTest`. And the consequence named above has arrived: the three Grand Concert absence
+guards (`ResourceStripTest`, `GoalPanelsOnRunDetailTest`, `GradePointMeterTest`) are gone from the
+branch, so nothing on `master` any longer asserts that the Phase B, C and D surfaces stay unrendered
+while those gates are blocked for want of a `[Global]` capture. Restoration remains the owner's or the
+deleting session's act; this entry records the state, and KI-86 carries the code defect the same commit
+caused.
+
 ### KI-85 Commit 822d97b carries a concurrent session's ported test case alongside the finale pickup, an attribution boundary rather than a defect - FILED 2026-10-09 (Slice 20 pickup, on the owner's ruling), FIXED IN TREE
 
 **Status: FIXED IN TREE - the note is the fix.** No history rewrite was attempted and none is owed:
@@ -1824,3 +1853,78 @@ theirs, not an edit here.
 **What closure would not cover.** It does not change `822d97b`; the commit is left exactly as landed. It
 does not rule on KI-84's ten deleted test files, which remain the deleting session's and the owner's
 question. It does not cover the other four paths in that commit, which were the slice's own work.
+
+### KI-86 A blanket add deleted the finale reader that HEAD's own controllers and advisor still call, so a checkout of master fatals on the cockpit and the result screen - FILED 2026-10-09 (Slice 21 landing), FIXED IN TREE 2026-10-09 AT d7d6ed5, NOT CLOSED
+
+**Status: FIXED IN TREE at `d7d6ed5`, NOT CLOSED.** The missing class is back and `HEAD` is
+self-consistent again. The entry stays open on two counts: `master` is unpushed (O-1), so a
+`FIXED IN TREE` flag is not a release; and the index state that deleted the file is still live, so the
+next session that commits from the shared index removes the class a third time.
+
+**The defect, measured at `ad8dc77`** — three commits after `91494a1` deleted the file, and the point by
+which the concurrent commits had swept in the Slice 19, 20 and 21 code that names the class. Six
+references, no definition:
+
+```text
+$ git show ad8dc77:app/Services/Scenario/FinaleReader.php
+fatal: path 'app/Services/Scenario/FinaleReader.php' exists on disk, but not in 'ad8dc77'
+
+$ git grep -n "FinaleReader" ad8dc77 -- app
+app/Http/Controllers/Career/CockpitController.php:17:use App\Services\Scenario\FinaleReader;
+app/Http/Controllers/Career/CockpitController.php:677:            'finale_state' => FinaleReader::forRun($run),
+app/Http/Controllers/Career/ResultController.php:15:use App\Services\Scenario\FinaleReader;
+app/Http/Controllers/Career/ResultController.php:72:            'finale' => FinaleReader::forRun($run),
+app/Services/Advisor/TrainerAdvisor.php:11:use App\Services\Scenario\FinaleReader;
+app/Services/Advisor/TrainerAdvisor.php:114:        $finale = FinaleReader::forRun($run);
+
+$ git grep -n -E "class FinaleReader|function forRun" ad8dc77 -- app
+ad8dc77:app/Services/ScenarioCaps.php:94:    public static function forRun(?TrainingRun $run): array
+```
+
+The third command is what makes this a fatal and not a style complaint: nothing at `ad8dc77` defines the
+class or the `forRun` those three sites invoke. `ScenarioCaps::forRun` is another class and does not
+answer the call, so PHP resolves the name at the call site and raises
+`Error: Class "App\Services\Scenario\FinaleReader" not found`. Two of the three sites sit on a page load
+(`CockpitController.php:677` builds `scenario.finale_state`, `ResultController.php:72` builds
+`scenario.finale`); the third is on the advisor's path and is reached from `TrainerAdvisor.php:91`, where
+`$this->finaleContext($run)` sits inside the `Advice` constructor's own argument list, so it runs on
+every `advise()` call that carries a run rather than only near a finale — and both controllers carry one.
+This has not been measured by booting a second checkout; it follows from six references and no
+definition, and it is stated as that rather than as a captured stack trace.
+
+**Why it stayed invisible on this tree.** The deletion took the path out of git and left the bytes on
+disk, so the autoloader here finds the class, the routes answer, and
+`php artisan test --compact --filter "(ScenarioAdvisorFinale|FinaleReporting|TrainerAdvisor|CareerCockpit)"`
+reads 59 passed / 632 assertions, exit 0, both before and after the restore. `git status` prints two
+lines for that one path:
+
+```text
+D  app/Services/Scenario/FinaleReader.php
+?? app/Services/Scenario/FinaleReader.php
+```
+
+`D ` because the path is absent from the index while present in `HEAD`, `??` because a file the index
+does not know about is on disk. A green suite, a working page and a branch that cannot be checked out are
+all true at once, and only the last is the defect in `master`.
+
+**The repair, at `d7d6ed5`.** One path added, its blob compared to `822d97b`'s version by content before
+hashing (`BLOB-EQUALS-822d97b`, 3,183 bytes), then `php -l` and `vendor/bin/pint --test` clean,
+`npm run typecheck` exit 0. It is not a reimplementation and not a revert of the deleting session's work:
+it hands back the class their own commit left three callers pointing at. The alternatives all rewrite
+code this session does not own — moving the read into `TrainingRun`, or removing the two controller
+blocks and the advisor's `finaleContext()`. And no replacement had been landed either: `91494a1`'s
+message claims "TrainingRun exposes gradeObjectives/hasScenario/finale helpers", while
+`git grep -n -i "finale" 91494a1 -- app/Models/TrainingRun.php` returns one comment line at `:498` and
+`git grep -n -E "function [a-zA-Z]*[Ff]inale" 91494a1 -- app/Models/TrainingRun.php` returns nothing.
+
+**Closure owed.** Either the owner rules the deletion intended, in which case the six references above go
+away in a commit that says so, or the deleting session restages the path so the shared index stops
+carrying a countermanding deletion. Neither is this session's act: the first is escalation 1, the second
+is another session's index state, and `AGENTS.md` §11 forbids mutating it here.
+
+**What closure would not cover.** It does not restore the 24 feature-test files in KI-84's erratum; a
+deleted class and deleted suites are separate losses with separate owners, and this commit adds one path
+only. It does not settle what the finale row should be *titled* (KI-82, still OPEN), nor whether the
+reader belongs in `app/Services/Scenario/` at all rather than on `TrainingRun` — an Architect call, not a
+Slice 21 one. And because the blob is unchanged, nothing about the reader's *logic* was re-examined here:
+any defect inside it travelled with the restore untouched.
