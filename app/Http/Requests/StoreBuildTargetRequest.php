@@ -33,8 +33,14 @@ use Illuminate\Validation\Validator;
  * bound it enforced (D-56), so a refusal says what number was too high rather than only that
  * something was.
  *
- * `purpose` is required and is a `BuildPurpose` case: a target with no purpose is a stat list with
- * no reason behind it, which is the thing the screen exists to prevent.
+ * **The whole target is optional, and all or nothing.** A wholly unset target is a real state: the
+ * form's own message has always offered it ("or leave the whole target unset"), the wizard's model
+ * supports it (Preflight warns about a missing target rather than blocking), and `training_runs`
+ * stores null for it. Until D4 every field was `required`, so the branch the message described could
+ * not be reached and an empty save answered nine errors. Now `isEmptyTarget()` decides: when nothing
+ * carries a value, no field is required and `payload()` answers null; the moment one carries a value
+ * the target is a real one, and then every field is required, `purpose` included, because a target
+ * with no purpose is a stat list with no reason behind it.
  */
 class StoreBuildTargetRequest extends FormRequest
 {
@@ -51,14 +57,18 @@ class StoreBuildTargetRequest extends FormRequest
         /** @var list<string> $order */
         $order = config('scenarios.stat_order');
 
+        // All or nothing: a wholly unset target requires nothing, and any value makes every field
+        // required. See the class docblock.
+        $presence = $this->isEmptyTarget() ? 'nullable' : 'required';
+
         $rules = [
-            'purpose' => ['required', 'string', Rule::in(self::purposes())],
-            'distance' => ['required', 'string', Rule::in(BuildTargetPayload::DISTANCE_BANDS)],
-            'surface' => ['required', 'string', Rule::in(BuildTargetPayload::SURFACES)],
-            'style' => ['required', 'string', Rule::in(BuildTargetPayload::STYLES)],
+            'purpose' => [$presence, 'string', Rule::in(self::purposes())],
+            'distance' => [$presence, 'string', Rule::in(BuildTargetPayload::DISTANCE_BANDS)],
+            'surface' => [$presence, 'string', Rule::in(BuildTargetPayload::SURFACES)],
+            'style' => [$presence, 'string', Rule::in(BuildTargetPayload::STYLES)],
             // Key-restricted to the stat matrix, so a hand-made POST cannot store a sixth stat that
             // the advisor would then have no ceiling and no target row for.
-            'targets' => ['required', 'array:'.implode(',', $order)],
+            'targets' => [$presence, 'array:'.implode(',', $order)],
             'skill_priorities' => ['present', 'array'],
             'skill_priorities.*' => ['string', 'max:255'],
         ];
@@ -68,7 +78,7 @@ class StoreBuildTargetRequest extends FormRequest
         // four-stat target validated cleanly and then read back with a missing key. Naming them here
         // also means the refusal points at the stat that is missing instead of at the whole map.
         foreach ($order as $stat) {
-            $rules["targets.{$stat}"] = ['required', 'integer', 'min:0'];
+            $rules["targets.{$stat}"] = [$presence, 'integer', 'min:0'];
         }
 
         return $rules;
@@ -122,15 +132,44 @@ class StoreBuildTargetRequest extends FormRequest
     }
 
     /**
-     * The target as the `build_target` column stores it, in the stat matrix's own order.
+     * Whether the whole target is unset: no purpose, no band, no numbers.
+     *
+     * The state the form's own message offers, and the state the wizard's model already supports. It
+     * is read before validation, so `rules()` can require nothing from an empty target and `payload()`
+     * can answer null rather than an invented list of zeroes.
+     */
+    public function isEmptyTarget(): bool
+    {
+        foreach (['purpose', 'distance', 'surface', 'style'] as $field) {
+            if ($this->filled($field)) {
+                return false;
+            }
+        }
+
+        foreach ((array) $this->input('targets', []) as $value) {
+            if ($value !== null && $value !== '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * The target as the `build_target` column stores it, in the stat matrix's own order, or null when
+     * the whole target is unset.
      *
      * The order is rebuilt from config rather than taken from the request so a payload's key order
      * is a property of the matrix and not of whatever order the form happened to post in.
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed>|null
      */
-    public function payload(): array
+    public function payload(): ?array
     {
+        if ($this->isEmptyTarget()) {
+            return null;
+        }
+
         $validated = $this->validated();
 
         /** @var list<string> $order */

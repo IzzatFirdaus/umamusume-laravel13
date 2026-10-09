@@ -116,6 +116,64 @@ it('keeps the stored target when an earlier step writes the draft again', functi
     expect(SetupDraft::read())->toBe(['scenario' => 'trackblazer', 'umamusume_id' => null]);
 });
 
+it('accepts a wholly unset target and records no target at all (D4)', function (): void {
+    // The message under every stat has always said "Enter a target for every stat, or leave the whole
+    // target unset", but `purpose` and all five stats were `required`, so the branch it describes was
+    // unreachable: saving with nothing entered answered six errors. The wizard's own model supports a
+    // career with no target (Preflight warns about it rather than blocking), so the target is optional
+    // as a whole and an empty save stores nothing.
+    SetupDraft::write(['scenario' => 'ura_finale']);
+
+    $stats = array_values((array) config('scenarios.stat_order'));
+
+    $this->put(route('career.target.store'), [
+        'purpose' => null,
+        'distance' => null,
+        'surface' => null,
+        'style' => null,
+        'targets' => array_fill_keys($stats, null),
+        'skill_priorities' => [],
+    ])->assertRedirect(route('career.target'))->assertSessionHasNoErrors();
+
+    expect(SetupDraft::buildTarget())->toBeNull();
+});
+
+it('still refuses a target that names a purpose and leaves the numbers out', function (): void {
+    // All or nothing: the moment one field carries a value the target is a real one, and then every
+    // field is required, which is exactly what the form's own message says.
+    SetupDraft::write(['scenario' => 'ura_finale']);
+
+    $stats = array_values((array) config('scenarios.stat_order'));
+
+    $this->put(route('career.target.store'), [
+        'purpose' => 'StoryClear',
+        'distance' => 'Medium',
+        'surface' => 'Turf',
+        'style' => 'Pace Chaser',
+        'targets' => array_fill_keys($stats, null),
+        'skill_priorities' => [],
+    ])->assertSessionHasErrors(['targets.Speed', 'targets.Wit']);
+
+    expect(SetupDraft::buildTarget())->toBeNull();
+});
+
+it('clears a stored target when the whole target is unset again', function (): void {
+    SetupDraft::write(['scenario' => 'ura_finale', 'build_target' => draftTargetPayload()]);
+
+    $stats = array_values((array) config('scenarios.stat_order'));
+
+    $this->put(route('career.target.store'), [
+        'purpose' => null,
+        'distance' => null,
+        'surface' => null,
+        'style' => null,
+        'targets' => array_fill_keys($stats, null),
+        'skill_priorities' => [],
+    ])->assertRedirect(route('career.target'))->assertSessionHasNoErrors();
+
+    expect(SetupDraft::buildTarget())->toBeNull();
+});
+
 it('refuses a stat above the draft ceiling and names the bound it enforced', function (): void {
     // URA Finale's Speed ceiling is 1,400 (1,200 base + 200): the same number the run-scoped write
     // enforces, because there is one rule set. Asserted from both sides so the rule cannot pass by
