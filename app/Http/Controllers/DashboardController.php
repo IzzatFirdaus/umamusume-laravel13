@@ -238,7 +238,7 @@ class DashboardController extends Controller
      * not here: it is the shared `app.ruleset` prop and it is null, so the page prints `N/A` with a
      * reason rather than a second, emptier copy of the same absence.
      *
-     * @return array{label: string, state: string, verified_at: string|null}
+     * @return array{label: string, state: string, verified_at: string|null, source: string}
      */
     private function dataStatus(): array
     {
@@ -246,7 +246,24 @@ class DashboardController extends Controller
             'label' => 'GLOBAL DATA',
             'state' => 'Current',
             'verified_at' => config('scenarios.verified_at'),
+            'source' => $this->dataStatusSource(),
         ];
+    }
+
+    /**
+     * The source behind the matrix, composed the way `TrainingCard.vue`'s `costConstants` composes a
+     * cost's: the source name, and a stale marker when the source is marked stale. The read date is the
+     * payload's own `verified_at`, printed beside this string, so it is not repeated inside it.
+     */
+    private function dataStatusSource(): string
+    {
+        $parts = [config('scenarios.source')];
+
+        if (config('scenarios.stale', false)) {
+            $parts[] = 'source marked stale';
+        }
+
+        return implode(' · ', $parts);
     }
 
     /**

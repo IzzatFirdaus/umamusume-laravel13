@@ -40,6 +40,16 @@ return [
     */
     'verified_at' => '2026-09-27',
 
+    /*
+    | The source the matrix's numbers were read against, and whether that source is marked stale.
+    | The header above names GameTora `scenarios.json` as the caps source; this key exists so the
+    | Dashboard's data-status badge (SCREEN-001, design-2.0 §48) can print it rather than the
+    | controller carrying a literal. `stale` is off until a source is marked stale the way
+    | `config('advisor')` marks its own.
+    */
+    'source' => 'GameTora scenarios.json',
+    'stale' => false,
+
     // Display order and labels. Global client strings only.
     'stat_order' => ['Speed', 'Stamina', 'Power', 'Guts', 'Wit'],
 

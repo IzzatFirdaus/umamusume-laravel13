@@ -69,7 +69,7 @@ const props = defineProps<{
     recentVeterans: { rows: VeteranRow[]; total: number; limit: number; library_url: string };
     quickActions: { label: string; to: string }[];
     counts: { trainees: number; skills: number; supportCards: number };
-    dataStatus: { label: string; state: string; verified_at: string | null };
+    dataStatus: { label: string; state: string; verified_at: string | null; source: string };
 }>();
 
 // The ruleset is a shared prop, not a second dashboard prop: `HandleInertiaRequests` already ships it
@@ -303,7 +303,7 @@ const group = (n: number): string => n.toLocaleString('en-US');
                     <span aria-hidden="true" class="text-green-deep">●</span>
                     <span class="text-ink">{{ props.dataStatus.state }}</span>
                     <span v-if="props.dataStatus.verified_at" class="text-xs text-ink-muted">
-                        Verified {{ props.dataStatus.verified_at }}
+                        Verified {{ props.dataStatus.verified_at }} · {{ props.dataStatus.source }}
                     </span>
                     <span
                         v-else
