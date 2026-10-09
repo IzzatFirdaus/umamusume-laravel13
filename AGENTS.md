@@ -319,9 +319,25 @@ What to run, by class of change:
 | Anything crossing layers                            | the full suite, then the hand-off sequence below                                                                                                                                      |
 
 Hand-off sequence (the bar's own order): targeted tests green -> `php artisan test --compact`
--> `vendor/bin/pint --dirty --format agent` -> `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`
+-> `vendor/bin/pint --test --format agent <paths>` -> `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`
 -> `npm run typecheck` -> `composer lore` and `composer lore-code` with a ruling per hit ->
 `composer audit` and `npm audit --omit=dev` when dependencies changed.
+
+**Never `pint --dirty` in this tree (KI-75).** `--dirty` collects every file that differs from
+`HEAD`, and several sessions share one worktree (KI-70, KI-71), so the dirty set is not the slice's own
+set. Measured 2026-10-08: a slice that touched no controller ran the gate and Pint rewrote
+`app/Http/Controllers/PreferenceController.php` — another session's uncommitted file — with
+`no_unused_imports`. Run `pint --test --format agent <explicit paths>` on the files the change
+actually touches and fix only those; the worktree's other uncommitted files are not this change's to
+reformat.
+
+**The browser harness is per-session, not per-worktree (KI-73, KI-80).** `playwright.config.ts` reads
+its port from `PLAYWRIGHT_PORT` (default 8127) and `tests/browser/global-setup.ts` gives each
+invocation its own scratch database (`PLAYWRIGHT_SCRATCH_DB`, else
+`database/browser-scratch-<pid>-<ms>.sqlite`). A leaked `php artisan serve` on the default port takes
+every other session's suite down (KI-73), and one fixed scratch path let a second session delete the
+first one's database mid-run (KI-80). Run the browser suite with a session-private pair, e.g.
+`PLAYWRIGHT_PORT=8141 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-8141.sqlite npm run test:browser`.
 
 **The suite cannot see the dev database.** `phpunit.xml` forces `DB_DATABASE=:memory:`, so every test
 builds its own schema from the migration files and a green run proves nothing about
@@ -342,7 +358,7 @@ Every command below exists in `composer.json`, `package.json`, or artisan on thi
 | Dev (serve + queue + logs + Vite HMR)            | `composer dev`                                                                              |
 | Full pipeline (config:clear, typecheck, suite)   | `composer test`                                                                             |
 | Tests, narrowest first                           | `php artisan test --compact --filter=Name`, or `vendor/bin/pest tests/Feature/XTest.php`    |
-| Style fix / style check                          | `vendor/bin/pint --dirty --format agent` / `composer lint`                                  |
+| Style fix / style check                          | `vendor/bin/pint --test --format agent <paths>` / `composer lint`                           |
 | Static analysis                                  | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`                                |
 | TypeScript                                       | `npm run typecheck`                                                                         |
 | Assets                                           | `npm run build`, `npm run dev`                                                              |
@@ -443,7 +459,8 @@ A change is done when all of these hold, or when the exception is reported expli
 - [ ] A behavior change ships with a test; copy-only changes ship without one.
 - [ ] The narrow tests pass, and the broader suite plus the hand-off sequence in §9 were
       run for a cross-cutting change, with the output attached.
-- [ ] `vendor/bin/pint --dirty --format agent` was run; PHPStan level 6 is clean; `npm run
+- [ ] `vendor/bin/pint --test --format agent <paths>` was run on the changed files (never
+      `pint --dirty`, KI-75); PHPStan level 6 is clean; `npm run
       typecheck` is clean if TypeScript, Vue or Blade changed.
 - [ ] The lore gate ran, and every hit carries a context ruling.
 - [ ] No unrelated file changed; the diff was read before reporting.
@@ -503,6 +520,12 @@ Do not invent a requirement. When the repository does not settle a question:
   Check `migrate:status`-style disk state first (`uma:fetch-art --dry-run` reports the id count and how many
   are already on disk without touching the network) before reading missing images as a frontend defect.
 - PHPStan needs `--memory-limit=1G`; `composer analyse` omits it.
+- **A hot Vite dev server plus the package's default SSR settings makes every full page load 500 after
+  30s** (KI-76). `INERTIA_SSR_ENABLED` defaults to `true`, `config/inertia.php` is not published so
+  `ssr.timeout` is unset, and while `public/hot` exists Inertia skips its "no bundle" guard and POSTs
+  to the dev server's `/__inertia_ssr`, which nothing answers: the request blocks until PHP's
+  `max_execution_time` fatals it. `.env.example` sets `INERTIA_SSR_ENABLED=false` with the reason;
+  keep that set, or publish `config/inertia.php` with a short `INERTIA_SSR_TIMEOUT`.
 - The lore gate is blocking and easy to trip by accident, including inside this file: the
   banned word families are not written out in `AGENTS.md` on purpose. Read the pattern
   list in `tools/lore.php` when a ruling is needed.

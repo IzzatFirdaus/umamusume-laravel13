@@ -72,6 +72,8 @@ pre-2.0 shape._
 - Concurrency: Cache::lock("uma-fetch:{source}") in UmaFetch; web refresh runs synchronously (stale-while-revalidate)
 - Timezone: JP datetimes parsed Asia/Tokyo → stored UTC, source_timezone recorded; date-only stays date
 - Commands: uma:fetch {source}, uma:reparse {source} (from snapshots, zero network), uma:backup (WAL checkpoint + file copy)
+
+  *Erratum 2026-10-09 (KI-78).* `uma:backup` now delegates to `app/Actions/BackupDatabase.php`, which uses `VACUUM INTO` rather than a checkpoint plus `copy()`, and snapshot names are written in UTC. The mechanism named above is retired; the command's contract (one consistent single-file snapshot) is unchanged.
 - HTTP: allowlisted hosts from config('uma.sources') ONLY (SSRF), redirects followed by the fetcher with the host allowlist re-checked per hop, per-source delay_ms/timeout_s, retry max 2 at a flat 500 ms, descriptive UA
 - Artwork: `ADR-0021` (2026-10-05), fetch half **built and run 2026-10-05**, display half **built** — `uma:fetch-art` + `ArtworkMirror` + `SourceFetcher::fetchAsset()`, asset host declared in config('uma.sources'), files in gitignored `storage/app/private/artwork/` with a sibling `manifest.json`, path derived from the id, **nothing in the database**, no snapshot of a binary. First live pass: 665 ids, 665 files, 45 MB, zero unresolved, so the `ADR-0012` Erratum 4 falsifier did not fire (`ADR-0021` Erratum 1). `resources/js/components/ArtworkSlot.vue` is the one owner of the slot contract on the four ported screens; an absent file paints nothing and a row reserves a transparent cell so its label holds one x (`DESIGN.md` §4.7). `uma:fetch` steps over parser-less entries. Distinct from the cut upload surface below
 
