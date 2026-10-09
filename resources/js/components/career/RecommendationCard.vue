@@ -4,7 +4,7 @@
  * (Selective Attention, plan §13).
  *
  * **The props are the plan's "Recommendation contract (D8)" plus one status line**: action, band,
- * reasons, alternative, risk, and `finale_context`. There is no `score` and no numeric confidence, because `ADR-0001` §3 leaves both
+ * reasons, alternative, risk, and `finaleContext`. There is no `score` and no numeric confidence, because `ADR-0001` §3 leaves both
  * unsourced and C2's `Advice` has no field for them; a sixth prop here would be the second place to be
  * wrong. `risk` is null in this slice — a delay or a reachability verdict is held computation.
  *
@@ -41,7 +41,7 @@ const props = defineProps<{
      * action, and no rule in the engine covers concert preparation (`ADR-0020` §3). Words only, no
      * glyph and no colour, so it cannot be read as a second verdict beside the band mark.
      */
-    finale_context: { label: string; state: string; turns_away: number | null } | null;
+    finaleContext: { label: string; state: string; turns_away: number | null } | null;
 }>();
 
 const BANDS: Record<'AtOrAboveAdvisory' | 'BelowAdvisory', { glyph: string; word: string }> = {
@@ -83,15 +83,15 @@ const band = computed(() => (props.band === null ? null : BANDS[props.band]));
         </template>
 
 
-        <p v-if="props.finale_context !== null" class="mt-3 text-sm text-ink">
-            <template v-if="props.finale_context.state === 'next'">
-                The {{ props.finale_context.label }} is the next turn.
+        <p v-if="props.finaleContext !== null" class="mt-3 text-sm text-ink">
+            <template v-if="props.finaleContext.state === 'next'">
+                The {{ props.finaleContext.label }} is the next turn.
             </template>
-            <template v-else-if="props.finale_context.state === 'passed'">
-                The {{ props.finale_context.label }} has passed; no outcome is recorded.
+            <template v-else-if="props.finaleContext.state === 'passed'">
+                The {{ props.finaleContext.label }} has passed; no outcome is recorded.
             </template>
             <template v-else>
-                The {{ props.finale_context.label }} is {{ props.finale_context.turns_away }} turns away.
+                The {{ props.finaleContext.label }} is {{ props.finaleContext.turns_away }} turns away.
             </template>
         </p>
 

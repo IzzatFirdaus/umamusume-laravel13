@@ -15,7 +15,7 @@ const props = defineProps<{
     reasons: string[];
     alternative: string | null;
     risk: string | null;
-    finale_context: { label: string; state: string; turns_away: number | null } | null;
+    finaleContext: { label: string; state: string; turns_away: number | null } | null;
 }>();
 </script>
 
@@ -30,7 +30,7 @@ const props = defineProps<{
             :reasons="props.reasons"
             :alternative="props.alternative"
             :risk="props.risk"
-            :finale-context="props.finale_context"
+            :finale-context="props.finaleContext"
         />
 
         <p class="mt-3 text-xs text-ink-muted">
