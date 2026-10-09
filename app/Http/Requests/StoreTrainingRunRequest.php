@@ -95,6 +95,14 @@ class StoreTrainingRunRequest extends FormRequest
             // The four preseason rounds; the tally the Trainer reports, not a round modelled here.
             'team_preseason_wins' => ['nullable', 'integer', 'between:0,4'],
             /*
+             * The Unity Cup progression tallies, as the Trainer reports them off the Team Info panel.
+             * Entered, never derived: nothing here counts a training or a burst. Null is the honest
+             * "not stated" (D-220); no upper bound beyond the column's own unsigned range.
+             */
+            'unity_trainings_count' => ['nullable', 'integer', 'min:0'],
+            'spirit_bursts_count' => ['nullable', 'integer', 'min:0'],
+            'extreme_bursts_count' => ['nullable', 'integer', 'min:0'],
+            /*
              * The Grade Point period the Trainer reports as live (US-10, ADR-0003).
              * Entered, never derived (D-270): nothing in the corpus names a formula
              * that puts a career in a period, so "null until set" is the honest state
