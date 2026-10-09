@@ -134,6 +134,18 @@ function save(): void {
     form.skill_priorities = ordered.value.map((row) => row.name);
     form.put(props.target.save_url, { preserveScroll: true });
 }
+
+// ADR-0001 §2 wants the constants behind a number visible wherever the number appears, so the two
+// provenance strings these figures carry print as a line rather than only on hover. An absence's
+// reason stays in the `title`: an unlogged Skill Point total is a gap, not a sourced figure.
+const coverageConstants = computed(() =>
+    [
+        props.coverage.total !== null ? props.coverage.total_title : null,
+        props.coverage.sp !== null ? props.coverage.sp_title : null,
+    ]
+        .filter((t): t is string => t !== null)
+        .join(' · '),
+);
 </script>
 
 <template>
@@ -185,6 +197,9 @@ function save(): void {
                 SP, and the run holds
                 <span class="font-mono tabular-nums" :title="props.coverage.sp_title ?? undefined">{{ props.coverage.sp ?? 'N/A' }}</span>
                 SP.
+            </p>
+            <p v-if="coverageConstants !== ''" class="mt-1 text-xs text-ink-muted">
+                {{ coverageConstants }}
             </p>
             <p
                 v-if="props.coverage.warn"

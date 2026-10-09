@@ -133,6 +133,7 @@ const group = (n: number): string => n.toLocaleString('en-US');
                         compact
                     />
                     <span v-else :title="fact.title ?? undefined">{{ fact.value ?? 'N/A' }}</span>
+                    <span v-if="fact.value !== null && fact.title !== null" class="mt-0.5 block text-xs text-ink-muted">{{ fact.title }}</span>
                 </dd>
             </div>
         </dl>
@@ -173,6 +174,7 @@ const group = (n: number): string => n.toLocaleString('en-US');
                                 compact
                             />
                             <span v-else :title="fact.title ?? undefined">{{ fact.value ?? 'N/A' }}</span>
+                            <span v-if="fact.value !== null && fact.title !== null" class="mt-0.5 block text-xs text-ink-muted">{{ fact.title }}</span>
                         </dd>
                     </div>
                 </dl>

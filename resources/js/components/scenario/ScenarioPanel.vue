@@ -214,6 +214,9 @@ const emptyText = computed<string>(() =>
                         title="The date the scenario matrix was last checked against its sources. Nothing here was fetched on it."
                     >Verified {{ props.scenario.caps.verified_at }}</span>
                 </h3>
+                <!-- ADR-0001 §2 puts the constants behind a number wherever the number appears, so the
+                     matrix this read from is named on the row rather than only in the badge's `title`. -->
+                <p class="text-xs text-ink-muted">{{ props.scenario.caps.source_title }}</p>
 
                 <table class="w-full text-xs text-ink">
                     <caption class="sr-only">Published stat caps for this scenario</caption>
