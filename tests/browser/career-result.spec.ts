@@ -80,13 +80,15 @@ test('a Retired career is a different absence, with no Cockpit door anywhere on 
     await expect(page.getByText(/retired before it finished/)).toBeVisible();
 
     // The correction this spec exists for: a retired career has no next turn, so the page must not
-    // offer a decision screen. Both the primary door and the footer link are checked.
-    await expect(page.locator('a[href$="/cockpit"]')).toHaveCount(0);
+    // offer a decision screen. The assertion is on the decision screen's own path, because the empty
+    // state does offer the Cockpit as a read door and the career bar always does: counting cockpit
+    // hrefs would assert the opposite of what the page does.
+    await expect(page.locator('a[href$="/training"]')).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Final build' })).toHaveCount(0);
 
     // It does offer the read-only doors the empty state carries.
     await expect(page.getByRole('link', { name: 'Career Timeline' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Run record' }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Cockpit' }).first()).toBeVisible();
 });
 
 test('a Completed career renders the three sections and the Save Veteran door', async ({ page }) => {
@@ -130,13 +132,13 @@ test('keeps the 44px floor and reflows at 320 px', async ({ page }) => {
     await page.locator('#app > *').first().waitFor();
 
     // The page's own doors are 44px targets (WCAG 2.2 SC 2.5.8). The two inside the actions
-    // section are scoped to it because `CareerLayout` renders a "Run record" link of its own, and
+    // section are scoped to it because `CareerLayout` renders a "Cockpit" link of its own, and
     // the footer link is named by its label (unique on this state) for the same reason.
     const actions = page.getByRole('region', { name: 'What you can do next' });
 
     for (const target of [
         actions.getByRole('link', { name: 'View Career Timeline' }),
-        actions.getByRole('link', { name: 'Run record' }),
+        actions.getByRole('link', { name: 'Cockpit' }),
         page.getByRole('link', { name: 'Back to Cockpit' }),
     ]) {
         const box = await target.boundingBox();

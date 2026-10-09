@@ -217,8 +217,8 @@ test('sizes the cockpit controls to the 44px contract', async ({ page }) => {
         page.getByRole('link', { name: /^Event/ }),
         page.getByRole('link', { name: /^Inheritance/ }),
         // `exact`, because `getByRole`'s name match is a case-insensitive substring: the career bar's
-        // door and the race strip's own "Go to the run record screen" both contain this phrase.
-        page.getByRole('link', { name: 'Run record', exact: true }),
+        // door is `Cockpit` and the race strip's own door reads `Go to the Cockpit`.
+        page.getByRole('link', { name: 'Cockpit', exact: true }),
         page.getByRole('link', { name: 'Dashboard' }).first(),
         page.getByRole('link', { name: 'Record the first turn through Training' }),
     ];

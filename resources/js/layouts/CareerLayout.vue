@@ -6,8 +6,9 @@
  * here would be a second place for the same nine entries to drift.
  *
  * The career bar carries the one fact every career screen shares — which run this is — and the two
- * doors a Trainer wants from it: back to the run's record screen, and back to the Dashboard. D9 to
- * D13 render inside this layout and inherit both.
+ * doors a Trainer wants from it: back to the Cockpit, and back to the Dashboard. D9 to D13 render
+ * inside this layout and inherit both. The Cockpit door takes the server's own `run_url`, which is
+ * `route('runs.cockpit', $run)` on every career screen, so the label and the destination agree.
  *
  * `#title` is forwarded to `AppLayout`'s own heading rather than rendered here, so the page keeps one
  * `h1` and the document outline stays one document wide.
@@ -42,7 +43,7 @@ const doorClass =
                 <span class="text-ink-muted">{{ props.statusLabel }}</span>
             </p>
             <div class="flex flex-wrap gap-1">
-                <Link :href="props.runUrl" :class="doorClass">Run record</Link>
+                <Link :href="props.runUrl" :class="doorClass">Cockpit</Link>
                 <Link href="/" :class="doorClass">Dashboard</Link>
             </div>
         </section>

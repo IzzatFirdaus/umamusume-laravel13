@@ -18,10 +18,9 @@ use Symfony\Component\Finder\Finder;
  *    `Run record</a>`, `Run record</Link>`), so a docblock that names the retired surface for history
  *    is not caught by a copy assertion that is not about history.
  *
- * **One file is exempt, and it is named rather than hidden:** `resources/js/layouts/CareerLayout.vue`
- * carries the nav rail's own `Run record` door and a concurrent session's unstaged hunks, so it could
- * not be edited in this pass. The day it is free, delete the exemption below and the assertion starts
- * covering it.
+ * **No file is exempt.** `resources/js/layouts/CareerLayout.vue` carried the nav rail's own `Run record`
+ * door while a concurrent session held unstaged hunks in it; the door is now labelled `Cockpit` and the
+ * exemption that skipped the file is gone, so both assertions cover the whole browser surface.
  *
  * @return list<string>
  */
@@ -32,13 +31,7 @@ function browserSurfaceFiles(): array
     $files = [];
 
     foreach (Finder::create()->files()->in($root)->name(['*.vue', '*.ts']) as $file) {
-        $path = str_replace('\\', '/', $file->getRelativePathname());
-
-        if ($path === 'layouts/CareerLayout.vue') {
-            continue;
-        }
-
-        $files[] = $path;
+        $files[] = str_replace('\\', '/', $file->getRelativePathname());
     }
 
     sort($files);
