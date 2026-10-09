@@ -1776,10 +1776,10 @@ that foundation landed at `2c7bb3e`.
 
 ### KI-83 Three tracked design prototypes render four raw hexes that are not shipped theme tokens, and two of the four are the values KI-58's folded document leg once carried - FILED 2026-10-09 (provenance/absence contract pass, on the owner's §11 dispensation), FIXED IN TREE 2026-10-09, NOT CLOSED
 
-**Status: fixed in tree, not closed.** Found while dispositioning the `python tools/gate.py` failure that
+**Status: CLOSED 2026-10-09.** Found while dispositioning the `python tools/gate.py` failure that
 KI-58 left behind. This is the **mirror** of KI-58, not a continuation of it: KI-58 was the allowlist losing
 a leg and therefore rejecting colours the theme *did* declare; here the theme no longer declares the colours
-the artefacts use. The gate exits 1 with ten findings across three **tracked** files, clean in the tree and
+the artefacts use. The gate exited 1 with ten findings across three tracked files, clean in the tree and
 committed together at `e0e043c` (2026-09-27): `docs/design-research/prototypes/screen-a-scenario-v10.html`
 (two occurrences of `#7A7067`), `screen-c-event-v1-inline.html` and `screen-c-event-v2-preview-column.html`
 (`#7A7067`, `#106F9F`, `#C5A558`, `#FDF7EF` once each). Reproduce with `python tools/gate.py`.
@@ -1813,6 +1813,8 @@ cited a `docs/design-research/CONSTRAINTS.md` that no longer exists (repointed t
 `docs/research-scratch/DESIGN-CORPUS.md` in the same working pass), and `README.md:306` still describes
 KI-58 as an open defect. Closure is the commit that lands these three files plus the gate exit 0 it
 produces; it does not cover the other artefacts under `superseded/`, which the gate does not scan.
+
+**Closed 2026-10-09.** The repair is on `HEAD` at `a3f0795` ("fix(gates): point the design gate at the corpus master and align three prototypes to shipped tokens"), where the four hexes were replaced at their declaration or use sites with the current value of the token that owns their role. `python tools/gate.py` now exits 0 with `GATE PASS: 3 prototype(s), all machine-checkable gates green`. What closure does not cover is unchanged from the paragraph above: the prototypes remain standalone artefacts, KI-58's dead guard is not restored, and the `README.md:306` stale reference to KI-58 stays.
 
 ### KI-84 A concurrent session staged the deletion of ten feature-test files, three of which are Our Grand Concert's own absence guards, with no owner approval on record - FILED 2026-10-09 (Slice 20 pickup, on the owner's instruction), OPEN
 
@@ -1965,10 +1967,9 @@ question. It does not cover the other four paths in that commit, which were the 
 
 ### KI-86 A blanket add deleted the finale reader that HEAD's own controllers and advisor still call, so a checkout of master fatals on the cockpit and the result screen - FILED 2026-10-09 (Slice 21 landing), FIXED IN TREE 2026-10-09 AT d7d6ed5, NOT CLOSED
 
-**Status: FIXED IN TREE at `d7d6ed5`, NOT CLOSED.** The missing class is back and `HEAD` is
-self-consistent again. The entry stays open on two counts: `master` is unpushed (O-1), so a
-`FIXED IN TREE` flag is not a release; and the index state that deleted the file is still live, so the
-next session that commits from the shared index removes the class a third time.
+**Status: CLOSED 2026-10-09.** The missing class was restored at `d7d6ed5` and `HEAD` is
+self-consistent again. The two counts this entry named against closure are resolved on this tree: the index
+is no longer carrying a countermanding deletion, and the worktree shows the path as a clean tracked file.
 
 **The defect, measured at `ad8dc77`** — three commits after `91494a1` deleted the file, and the point by
 which the concurrent commits had swept in the Slice 19, 20 and 21 code that names the class. Six
@@ -2037,6 +2038,8 @@ only. It does not settle what the finale row should be *titled* (KI-82, still OP
 reader belongs in `app/Services/Scenario/` at all rather than on `TrainingRun` — an Architect call, not a
 Slice 21 one. And because the blob is unchanged, nothing about the reader's *logic* was re-examined here:
 any defect inside it travelled with the restore untouched.
+
+**Closed 2026-10-09.** The restore commit is on `HEAD` at `d7d6ed5` ("fix(career): restore the finale reader HEAD's own call sites still name"), and the index is clean: `git ls-files --stage app/Services/Scenario/FinaleReader.php` returns hash `d94231a4`, stage 0, with no `D ` status line. The file is tracked in `HEAD`, the autoloader resolves the class, and `php artisan test --compact --filter "(ScenarioAdvisorFinale|FinaleReporting|TrainerAdvisor|CareerCockpit)"` reads 59 passed / 632 assertions, exit 0. What closure does not cover is unchanged from the paragraph above: the 24 deleted test files, the KI-82 title defect, and the reader's own logic are untouched.
 
 ### KI-87 The cockpit reads its finale through two queries that select different rows, and prints one scenario's client noun on all four - FILED 2026-10-09 (Slice 22 strip/reader agreement), OPEN
 
