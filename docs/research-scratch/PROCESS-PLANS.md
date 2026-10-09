@@ -70,7 +70,7 @@ here raises a threshold to make a gate pass.
 
 **Architecture:** One disposable Python tool owns the whole operation: classify, prove citations, move, journal, rewrite, verify. It moves only files no tracked document cites, and it rewrites only citation lines a reader would actually follow, because the rest of them record where evidence sat at measurement time.
 
-**Tech Stack:** Python 3.12 stdlib (`python`, not `python3`, on this box), `git -c core.quotepath=false`, `make lore`, Pest via `php artisan test --compact`.
+**Tech Stack:** Python 3.12 stdlib (`python`, not `python3`, on this box), `git -c core.quotepath=false`, `composer lore`, Pest via `php artisan test --compact`.
 
 **Tool:** `research-scratch/scripts/reorg_scratch.py`, created 2026-10-01 and verified three ways: classifier self-test 7/7; `--scan` reporting 53 candidates, 44 movable, 9 held; and the rewrite path dry-run against a synthetic mapping for `research-scratch/data/json/character-cards.json`, which found 6 citing files, refused `KNOWN-ISSUES.md` at the guard, and classified the 8 hit lines in the first three files as LIVE 3 / RECORD 2 / UNKNOWN 3, editing nothing. No move has been performed.
 **Spec:** this file. The evidence it argues from is `docs/research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` §10-§11 and `docs/GATE-REGISTRY.md` G-60.
@@ -144,12 +144,12 @@ The cost of skipping this gate is not hypothetical. The authorized append to `do
 - [ ] **Step 3: Record the baseline gates.**
 
 ```bash
-make lore
+composer lore
 php artisan test --compact
 vendor/bin/pint --test --format agent
 ```text
 
-Expected: `make lore` prints only hits you have already ruled on (the deprecated-PDF review's §4.1 notes the folder is invisible to both greps); tests green; Pint passed. Paste the three outputs into the run log. If the baseline is not green, do not start Task 3: you could not tell your own damage from a pre-existing break.
+Expected: `composer lore` prints only hits you have already ruled on (the deprecated-PDF review's §4.1 notes the folder is invisible to both greps); tests green; Pint passed. Paste the three outputs into the run log. If the baseline is not green, do not start Task 3: you could not tell your own damage from a pre-existing break.
 
 - [ ] **Step 4: Verify the ignore rules are what the plan assumes.**
 
@@ -288,12 +288,12 @@ Expected: the LIVE count is now 0; remaining hits are RECORD and UNKNOWN only, a
 - [ ] **Step 4: Re-run the gates and compare to Task 1.**
 
 ```bash
-make lore
+composer lore
 php artisan test --compact
 vendor/bin/pint --test --format agent
 ```text
 
-Expected: identical to baseline. `make lore` cannot gain hits from a `docs/` path edit except through vocabulary this plan did not introduce; if it prints something new, that line is yours and you rule on it before continuing.
+Expected: identical to baseline. `composer lore` cannot gain hits from a `docs/` path edit except through vocabulary this plan did not introduce; if it prints something new, that line is yours and you rule on it before continuing.
 
 ---
 
@@ -1777,7 +1777,7 @@ recorded sha is dropped.
 
 **Every slice must satisfy all of the following before being marked complete:**
 
-1. **Gates green with pasted output** — `pest`, `pint --test`, `phpstan --no-progress`, `make lore` (manual), `make lore-code` (manual), `npx vite build`, `DesignTokensTest` all pass; outputs recorded in commit message or linked CI run. **Migration gate:** `migrate:fresh --seed` is a destructive drop and is not run here; the equivalent evidence is `php artisan migrate` plus `db:seed` applied to a **fresh empty scratch DB** (`DB_DATABASE=/tmp/…`), which proves the same thing with no blast radius on the shared dev file. **Lore baseline (R51, 2026-09-29):** `lore-docs` 98 hits / 51 exempt lines, `lore-code` 7; a rules table quoting a banned word to rule on it carries a line marker naming `lore-ignore-line` with `class=` set to one of the four allowed-hit classes and `cite=` set to the rule it answers to (the exact form, with a worked example, is in `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md"; markers are legal inside `docs/` and nowhere else), and `LoreGateParityTest` fails a marker outside `docs/`, one missing either half, or a runner that stops honouring the filter.
+1. **Gates green with pasted output** — `pest`, `pint --test`, `phpstan --no-progress`, `composer lore`, `composer lore-code`, `npx vite build`, `DesignTokensTest` all pass; outputs recorded in commit message or linked CI run. **Migration gate:** `migrate:fresh --seed` is a destructive drop and is not run here; the equivalent evidence is `php artisan migrate` plus `db:seed` applied to a **fresh empty scratch DB** (`DB_DATABASE=/tmp/…`), which proves the same thing with no blast radius on the shared dev file. **Lore baseline (R51, 2026-09-29):** `lore-docs` 98 hits / 51 exempt lines, `lore-code` 7; a rules table quoting a banned word to rule on it carries a line marker naming `lore-ignore-line` with `class=` set to one of the four allowed-hit classes and `cite=` set to the rule it answers to (the exact form, with a worked example, is in `docs/research-scratch/GOVERNANCE.md` §"GATE-REGISTRY.md"; markers are legal inside `docs/` and nowhere else), and `LoreGateParityTest` fails a marker outside `docs/`, one missing either half, or a runner that stops honouring the filter.
 2. **Every status claim cites file:line or commit sha** — no "done" without evidence.
 3. **No open D-number violation in touched files** — `git grep -n D-XXX` in changed files returns zero unresolved hits.
 4. **No false/stale status lines** — plan doc re-baselined against tree in the same commit.
@@ -1976,6 +1976,11 @@ instead (§Open Decisions).
 `pint --dirty` passed. PHPStan `[OK] No errors`. `composer lore` 133 = `make lore` verbatim 133;
 `composer lore-code` 4 = 4. `gate.py` GATE PASS. `npm run build` → 56.37 kB CSS, 55 tokens
 declared, 0 pruned. Migration gate on a fresh scratch DB: 21 migrations, 2 seeders, 24 tables.
+
+**Dating note (2026-10-09):** This line records that `composer lore` produces output verbatim
+identical to `make lore`. GNU `make` does not run on this host (KI-4), so `make lore` is non-
+functional here; the parity was measured on a machine where the Makefile target exists. The
+correct command on this host is `composer lore`.
 
 **Exit criteria, checked against the list above rather than asserted.** Gates green with pasted
 output: §1 of the record. Claims citing file:line or sha: every row in the table. No new
@@ -2333,6 +2338,8 @@ see, and the owner or that session should land these before the audit is cited a
 | lore-code          | `make lore-code` (manual)                     | PASS (1 documented hit) ✅           |
 | vite               | `npx vite build`                              | 70.18 kB CSS, 51.52 kB JS ✅         |
 | DesignTokensTest   | `vendor/bin/pest --filter=DesignTokensTest`   | 9 passed, 2 skipped (Playwright) ✅  |
+
+**Dating note (2026-10-09):** The Slice 1 Output table records the command as `make lore` / `make lore-code` because GNU `make` does not run on this host (KI-4); the Makefile targets are documentation. The actual commands to run are `composer lore` / `composer lore-code`. This table is a dated record and is left as written.
 
 ---
 
