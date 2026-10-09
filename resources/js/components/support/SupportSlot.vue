@@ -81,7 +81,7 @@ function focusRow(): void {
     <li
         :id="`deck-slot-${position}`"
         tabindex="-1"
-        class="flex flex-wrap items-start gap-x-4 gap-y-2 rounded-md border border-rule bg-raised px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+        class="flex flex-wrap items-start gap-x-4 gap-y-2 rounded-md border border-rule bg-raised px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
     >
         <ArtworkSlot
             v-if="card"
@@ -189,7 +189,7 @@ function focusRow(): void {
 
             <button
                 type="button"
-                class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2"
                 @click="emit('replace', position)"
             >
                 Replace

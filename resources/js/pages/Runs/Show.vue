@@ -728,7 +728,7 @@ const railStep = computed(() => props.rail as unknown as {
                         <div class="flex flex-col gap-1">
                             <template v-if="rowIndex === openSkillRow">
                                 <label :for="`skill-${rowIndex}-id`" class="text-ink-muted">Skill</label>
-                                <select :id="`skill-${rowIndex}-id`" v-model="row.skill_id" :name="`skills[${rowIndex}][skill_id]`" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green">
+                                <select :id="`skill-${rowIndex}-id`" v-model="row.skill_id" :name="`skills[${rowIndex}][skill_id]`" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2">
                                     <option value="">Choose a skill</option>
                                     <option v-for="skill in skillCatalog" :key="skill.id" :value="String(skill.id)">
                                         {{ skill.name }}<template v-if="skill.sp_cost !== null"> · {{ skill.sp_cost }} SP </template>
@@ -749,14 +749,14 @@ const railStep = computed(() => props.rail as unknown as {
 
                         <div class="flex flex-col gap-1">
                             <label :for="`skill-${rowIndex}-status`" class="text-ink-muted">Acquisition status</label>
-                            <select :id="`skill-${rowIndex}-status`" v-model="row.status" :name="`skills[${rowIndex}][status]`" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green">
+                            <select :id="`skill-${rowIndex}-status`" v-model="row.status" :name="`skills[${rowIndex}][status]`" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2">
                                 <option v-for="option in acquisitionOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
                             </select>
                         </div>
 
                         <div class="flex flex-col gap-1">
                             <label :for="`skill-${rowIndex}-turn`" class="text-ink-muted">Turn acquired</label>
-                            <input :id="`skill-${rowIndex}-turn`" v-model="row.turn_acquired" type="number" :name="`skills[${rowIndex}][turn_acquired]`" min="1" step="1" placeholder="Turn" class="h-11 w-20 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green">
+                            <input :id="`skill-${rowIndex}-turn`" v-model="row.turn_acquired" type="number" :name="`skills[${rowIndex}][turn_acquired]`" min="1" step="1" placeholder="Turn" class="h-11 w-20 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2">
                         </div>
                     </div>
 

@@ -98,7 +98,7 @@ function applyFilters(): void {
             <select
                 v-model="rarity"
                 name="rarity"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
             >
                 <option value="">All</option>
                 <!-- PHP keys this map on ints and JSON hands them back as text, so `value` is the
@@ -112,7 +112,7 @@ function applyFilters(): void {
             <select
                 v-model="type"
                 name="type"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
             >
                 <option value="">All</option>
                 <option v-for="(word, value) in typeWords" :key="value" :value="value">{{ word }}</option>
@@ -124,7 +124,7 @@ function applyFilters(): void {
             <select
                 v-model="status"
                 name="status"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
             >
                 <option value="">All</option>
                 <option v-for="option in availabilities" :key="option" :value="option">{{ option }}</option>
@@ -136,7 +136,7 @@ function applyFilters(): void {
             <select
                 v-model="sort"
                 name="sort"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
             >
                 <option value="">Name</option>
                 <option v-for="(label, value) in sorts" :key="value" :value="value">{{ label }}</option>

@@ -84,7 +84,7 @@ function applyFilters(): void {
                 type="text"
                 name="search"
                 placeholder="Part of a skill name"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
             >
         </label>
 
@@ -93,7 +93,7 @@ function applyFilters(): void {
             <select
                 v-model="type"
                 name="type"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
             >
                 <option value="">All</option>
                 <option v-for="option in types" :key="option" :value="option">{{ option }}</option>
@@ -107,7 +107,7 @@ function applyFilters(): void {
                 type="checkbox"
                 name="unique"
                 value="1"
-                class="size-6 rounded border-rule bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                class="size-6 rounded border-rule bg-raised focus-visible:outline-2 focus-visible:outline-offset-2"
             >
             <span>Unique only</span>
         </label>

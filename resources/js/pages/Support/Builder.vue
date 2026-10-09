@@ -309,7 +309,7 @@ function save(): void {
                         <select
                             v-model="type"
                             name="type"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
                         >
                             <option value="">All</option>
                             <option v-for="option in types" :key="option.key" :value="option.key">
@@ -323,7 +323,7 @@ function save(): void {
                         <select
                             v-model="rarity"
                             name="rarity"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
                         >
                             <option value="">All</option>
                             <option v-for="(word, value) in rarities" :key="value" :value="value">{{ word }}</option>
@@ -335,7 +335,7 @@ function save(): void {
                         <select
                             v-model="status"
                             name="status"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
                         >
                             <option value="">All</option>
                             <option v-for="option in availabilities" :key="option" :value="option">{{ option }}</option>
@@ -348,7 +348,7 @@ function save(): void {
                             v-model="search"
                             name="query"
                             type="search"
-                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                            class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
                         />
                     </label>
 
@@ -426,7 +426,7 @@ function save(): void {
                             <div class="ml-auto flex shrink-0 items-center gap-1">
                                 <button
                                     type="button"
-                                    class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                                    class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2"
                                     @click="equip(card.id)"
                                 >
                                     Equip to {{ slots.find((slot) => slot.position === picker.fillingSlot)?.label }}
@@ -435,7 +435,7 @@ function save(): void {
                                 <button
                                     v-if="slots.some((slot) => slot.selected === String(card.id))"
                                     type="button"
-                                    class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                                    class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2"
                                     @click="clearSlot(slots.find((slot) => slot.selected === String(card.id))!.position)"
                                 >
                                     Clear

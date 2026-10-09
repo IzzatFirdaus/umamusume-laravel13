@@ -456,7 +456,7 @@ if (restored !== null) {
             aria-required="true"
             autocomplete="off"
             placeholder="Trainee or card name"
-            class="h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+            class="h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
             :class="invalid ? 'border-risk' : ''"
             @focus="onFocus"
             @blur="setOpen(false)"

@@ -117,7 +117,7 @@ const filtered = computed(
                 <select
                     v-model="trainee"
                     name="trainee"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
                     <option value="">All</option>
                     <option v-for="option in traineeOptions" :key="option.id" :value="String(option.id)">
@@ -131,7 +131,7 @@ const filtered = computed(
                 <select
                     v-model="scenario"
                     name="scenario"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
                     <option value="">All</option>
                     <option v-for="(label, key) in scenarios" :key="key" :value="key">{{ label }}</option>
@@ -145,7 +145,7 @@ const filtered = computed(
                     type="text"
                     name="tag"
                     placeholder="One tag, as you typed it"
-                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+                    class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
             </label>
 
