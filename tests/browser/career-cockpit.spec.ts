@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { recordTurns } from '../utils/record-turns';
 
 /*
  * Rendered-copy, layout and accessibility evidence for SCREEN-009, the Career Cockpit
@@ -110,7 +111,7 @@ test('names every absent value and refuses to rank until Energy is entered', asy
 
     // The empty state names what is missing, why it matters and what to do.
     await expect(page.getByRole('heading', { name: 'No turn recorded yet' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Record the first turn on the run screen' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Record the first turn through Training' })).toBeVisible();
 
     // Energy absent is C2's refusal, printed as the one reason line rather than a band read off nothing.
     await expect(
@@ -219,7 +220,7 @@ test('sizes the cockpit controls to the 44px contract', async ({ page }) => {
         // door and the race strip's own "Go to the run record screen" both contain this phrase.
         page.getByRole('link', { name: 'Run record', exact: true }),
         page.getByRole('link', { name: 'Dashboard' }).first(),
-        page.getByRole('link', { name: 'Record the first turn on the run screen' }),
+        page.getByRole('link', { name: 'Record the first turn through Training' }),
     ];
 
     for (const target of targets) {
@@ -229,37 +230,22 @@ test('sizes the cockpit controls to the 44px contract', async ({ page }) => {
 });
 
 test('records Energy through the cockpit correction and then marks one action', async ({ page }) => {
-    await openCockpit(page);
-
-    // A turn has to exist before there is a state to correct, so the run screen records one through
-    // its own raw form — the surface this slice reuses rather than replaces.
-    await page.getByRole('link', { name: 'Run record', exact: true }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, { waitUntil: 'domcontentloaded' });
+    const cockpitUrl = await newCareer(page);
     await page.locator('#app > *').first().waitFor();
 
-    // The run screen carries two forms whose fields share a name (the guided rail and this raw
-    // form), so every locator is scoped to the disclosure rather than the page.
-    const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
-    await page.getByText('Correct a turn by hand').click();
-    await hatch.locator('input[name="turn"]').fill('1');
-    await hatch.locator('input[name="speed"]').fill('600');
-    await hatch.locator('input[name="stamina"]').fill('700');
-    await hatch.locator('input[name="power"]').fill('700');
-    await hatch.locator('input[name="guts"]').fill('700');
-    await hatch.locator('input[name="wit"]').fill('700');
-    await hatch.getByRole('button', { name: 'Save correction' }).click();
+    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
 
-    // The write settles before anything is read: Inertia patches the page in place, so waiting for a
-    // navigation would resolve against the response that is still in flight. The flash banner is the
-    // run screen's own proof that the turn landed.
-    await expect(page.getByText('Turn 1 logged.')).toBeVisible();
+    // A turn has to exist before the cockpit offers a correction, and no rendered surface creates one
+    // any more: the run screen is a redirect to the cockpit, and the cockpit's own correction form is
+    // a PUT over an existing turn. The write is not this spec's subject, so it goes over the route.
+    // The 700s beside Speed's 600 make Speed the largest deficit, which the ranking below asserts.
+    await recordTurns(page, runId, 1, { stamina: '700', power: '700', guts: '700', wit: '700' });
 
-    // Back on the cockpit, the correction disclosure opens on the stored turn and writes through the
-    // route that already owns a turn: no second endpoint exists for it.
-    await page.getByRole('link', { name: 'Career Cockpit' }).click();
-    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
+    // The correction disclosure opens on the stored turn and writes through the route that already
+    // owns a turn: no second endpoint exists for it.
     const correction = page.locator('details', { has: page.getByText('Correct turn 1 by hand') });
     await page.getByText('Correct turn 1 by hand').click();
     await correction.locator('input[name="energy"]').fill('60');

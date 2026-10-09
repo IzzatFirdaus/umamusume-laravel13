@@ -316,6 +316,13 @@ const jumpToShop = (): void => {
                         >
                             <option v-for="(label, value) in props.run.status_labels" :key="value" :value="value">{{ label }}</option>
                         </select>
+                        <button
+                            type="submit"
+                            class="mt-1 inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 font-bold text-ink-strong disabled:opacity-60"
+                            :disabled="statusForm.processing"
+                        >
+                            {{ statusForm.processing ? 'Saving…' : 'Change status' }}
+                        </button>
                         <p v-if="statusForm.recentlySuccessful" class="mt-1 text-xs text-ink-muted">Saved.</p>
                     </form>
                 </li>
@@ -332,6 +339,13 @@ const jumpToShop = (): void => {
                             <option value="">No scenario set</option>
                             <option v-for="(label, key) in props.run.scenarios" :key="key" :value="key">{{ label }}</option>
                         </select>
+                        <button
+                            type="submit"
+                            class="mt-1 inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 font-bold text-ink-strong disabled:opacity-60"
+                            :disabled="scenarioForm.processing"
+                        >
+                            {{ scenarioForm.processing ? 'Saving…' : 'Change scenario' }}
+                        </button>
                     </form>
                 </li>
 
@@ -356,6 +370,13 @@ const jumpToShop = (): void => {
                                 {{ objective.index }}. {{ objective.name }}
                             </option>
                         </select>
+                        <button
+                            type="submit"
+                            class="mt-1 inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 font-bold text-ink-strong disabled:opacity-60"
+                            :disabled="periodForm.processing"
+                        >
+                            {{ periodForm.processing ? 'Saving…' : 'Report period' }}
+                        </button>
                     </form>
                 </li>
 
