@@ -303,7 +303,7 @@ Evidence-backed current state, distinct from the PRD non-goals in §6:
 - Fetch scheduling is manual; the scheduler default is open (PRD OQ-3).
 - Aptitude letters and per-scenario caps are engine-owned facts (`ADR-0004`); growth rates and base stats are not implemented (PRD OQ-4 scope).
 - The framework-default `users` table and `User` model exist but are unused.
-- The live defect register is `KNOWN-ISSUES.md` -> `docs/research-scratch/AUDIT-AND-VERIFICATION.md` (KI-01..KI-58); `tools/gate.py`'s hex allowlist currently has an open defect (KI-58) affecting rendered-prototype checks.
+- The live defect register is `KNOWN-ISSUES.md` -> `docs/research-scratch/AUDIT-AND-VERIFICATION.md` (KI-01..KI-58); `tools/gate.py`'s hex allowlist defect (KI-58) closed on 2026-10-09 at `7d8b62a`, and the live item on the same gate is its mirror case, KI-83, where three tracked prototypes render four raw hexes the shipped theme no longer declares.
 
 ## License
 
