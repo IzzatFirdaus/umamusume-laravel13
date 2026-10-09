@@ -203,6 +203,11 @@ const group = (n: number): string => n.toLocaleString('en-US');
                 >
                     Start a new training run
                 </Link>
+                <p class="mt-3 text-sm text-ink-muted">
+                    Already partway through a career?
+                    <Link href="/career/snapshot" class="underline font-medium text-ink">Import an existing career</Link>
+                    instead, and this tool starts from where your client says it stands.
+                </p>
             </section>
 
             <!-- Quick actions. Every destination is a live route; a destination whose slice had not

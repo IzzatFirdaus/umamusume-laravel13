@@ -15,6 +15,7 @@ use App\Http\Controllers\Career\RacePlannerController;
 use App\Http\Controllers\Career\ResultController;
 use App\Http\Controllers\Career\SaveVeteranController;
 use App\Http\Controllers\Career\ScenarioSelectController;
+use App\Http\Controllers\Career\SnapshotController;
 use App\Http\Controllers\Career\SkillsPlannerController;
 use App\Http\Controllers\Career\TimelineController;
 use App\Http\Controllers\Career\TraineeProfileController;
@@ -90,6 +91,18 @@ Route::put('/career/setup/deck', [DeckSelectController::class, 'store'])->name('
  */
 Route::get('/career/setup/preflight', [PreflightController::class, 'show'])->name('career.preflight');
 Route::put('/career/setup/preflight', [PreflightController::class, 'store'])->name('career.preflight.store');
+
+/*
+ * The snapshot entry (the remediation's Phase 4). A second door beside the wizard's: a career that is
+ * already underway is recorded in one pass at the position the Trainer reads off their client, rather
+ * than walked through a flow that assumes turn 1. Its write is its own route rather than a post to
+ * `runs.store` for the same reason Preflight's is - `runs.store` validates the run row alone, and a
+ * snapshot's position and current state are facts about the career it is entering, not fields that
+ * request knows.
+ */
+Route::get('/career/snapshot', [SnapshotController::class, 'entry'])->name('career.snapshot');
+Route::get('/career/snapshot/setup', [SnapshotController::class, 'setup'])->name('career.snapshot.setup');
+Route::post('/career/snapshot', [SnapshotController::class, 'store'])->name('career.snapshot.store');
 
 Route::get('/umamusume', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/umamusume/{slug}', [CatalogController::class, 'show'])->name('catalog.show');
