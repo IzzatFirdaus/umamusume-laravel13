@@ -57,7 +57,7 @@ Tracked files cite `KNOWN-ISSUES.md` by name, including `PRD.md`,
 delete it, and do not renumber existing entries: the renumbering history (KI-16 left as a hole,
 KI-30 and KI-31 renumbered from KI-16 and KI-17) is what made the old numbers cheap to stop using.
 
-### KI-57 The screenshot manifest's Race result row names a frame that does not exist, because its date ellipsis is wrong - FILED 2026-10-03 (Phase A closure pass, screenshot pipeline), OPEN
+### KI-57 The screenshot manifest's Race result row names a frame that does not exist, because its date ellipsis is wrong - FILED 2026-10-03 (Phase A closure pass, screenshot pipeline), CLOSED 2026-10-08
 
 `docs/research-scratch/DESIGN-CORPUS.md` section `## SCREENSHOT-MANIFEST.md`, the Race result/live
 row of the Screen-type coverage table (line 4207 at filing time), lists its representatives as
@@ -76,6 +76,10 @@ Remedy: append a dated erratum beneath the manifest row stating the second repre
 the Phase A inventory pass on 2026-10-03, which initially propagated the phantom frame into
 `research-scratch/screenshots-inventory.csv` and corrected it there; the CSV row now cites the
 real frame.
+
+**Closed 2026-10-08.** The erratum is appended at `docs/research-scratch/DESIGN-CORPUS.md:4284-4289`
+stating the second representative is `Screenshot 2026-07-17 235511.png`, and a second correction at
+`:4291-4295` covers the Screen inventory's `S9` row. Both are dated and point at the real frame.
 
 ### KI-58 `tools/gate.py`'s hex allowlist lost its document leg silently when the design master was folded, and the guard for that condition cannot fire - FILED 2026-10-03 (Phase A closure pass, from the priors pass finding), CLOSED 2026-10-09 at `7d8b62a`, note below
 
