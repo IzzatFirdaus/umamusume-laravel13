@@ -1626,6 +1626,28 @@ behaviour and not this app's to change; it does not make `cancel` a usable event
 `cancel` (`types/types.d.ts:204-208`) but 2.3.28 never fires it, so a listener keyed on it would be a check that
 cannot fail; and it does not touch KI-76, which is a server-side defect with its own remedy choice.
 
+### KI-81 The Legacy Lab's parent pick never reached the payload, so choosing a parent saved a null pick and the Inheritance Event rendered its empty state - FILED 2026-10-09 (number reserved at `docs/proposals/provenance-and-absence-contracts.md:441`), FIXED 2026-10-09 at `45e7a26`
+
+**Status: FIXED IN TREE, component-tested, not browser-gated.** The number was reserved rather than
+skipped when KI-82 was filed, because this pass owned the defect and could not write a closure commit
+before it existed. It now has one.
+
+`AncestryNode.vue` bound a native `<select>` with `v-model` on an internal ref and emitted nothing, while
+`Builder.vue:242` read `form.legacies[index].legacy_id`. A Trainer chose a parent, the label showed the
+choice, and the save dropped it: `legacy_selection` kept a null pick, `/inheritance` rendered the empty
+state, and no line on screen said the choice had been lost. The component's own docblock already
+documented a `modelValue` prop that no call site supplied and no emit declared, so the contract existed
+in prose and not in code. Proved by `tests/browser/ancestry-node-picker.spec.ts`, which mounts the real
+SFC and pins the three things that can regress separately: the emit on click, the emit on a keyboard
+arrow, and a prop write reflected back into the select.
+
+**What closure does not cover.** The fix is a component-level proof, not an end-to-end one:
+`tests/browser/career-inheritance-event.spec.ts` still cannot pass on a shared harness, because KI-80's
+single scratch database and KI-69's missing Veterans fixture are both open, so the full
+choose-a-parent-then-visit-`/inheritance` path is asserted at the payload layer only. The `change`-event
+choice (a native `<select>` fires `change`, never `update:model-value`) is not covered by any PHP test,
+and this entry does not claim the Legacy Lab was browser-verified after the fix.
+
 ### KI-82 Our Grand Concert's finale catalogue row is titled "URA Finals Final (Grand Live)", a borrowed URA name plus GameTora's rendering, where the `[Global]` launch notice prints "Grand Concert" - FILED 2026-10-09 (Slice 19 finale state foundation), OPEN
 
 **Status: OPEN.** Found while establishing the finale's read-side foundation in Slice 19; not caused
