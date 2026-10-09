@@ -2712,6 +2712,15 @@ loosened, no case asserts the two-column table's contents in a browser, so this 
 not landed. `SCR-VET-003` is landed green on its five cases. Full log:
 `docs/research-scratch/SLICE-RECORDS.md` §`## D16-SAVE-VETERAN-2026-10-07.md`.
 
+**Dated correction 3, 2026-10-09.** The condition correction 2 names is met, and by a commit that is not
+this pass's: `veteran-compare.spec.ts:98` waits on `/\/veterans\/compare\?/` rather than on one
+serialisation, while `:89` keeps the library door's `veterans[]=N` because that href is server-rendered and
+does emit that spelling. Both are at `eb2d7e9`. The assertion half is therefore closed. The gate half is
+not: no browser re-run has been taken on this tree, and one cannot be until KI-80's single shared scratch
+database is fixed, so this row stays **built, gate 8/9** and the two-column table remains unasserted in a
+browser. `§3`'s `SCR-VET-004` row still repeats correction 2's failure cause as though it were live; that
+line sits inside a concurrent session's uncommitted hunk range, so it is named here instead of edited there.
+
 #### Gaps
 
 1. **No four-at-once browser case.** The cap is refused at the request and asserted in `VeteranCompareTest`; a DOM version would file five careers through the UI to re-check the same rule, so the disabled checkbox is the browser-side evidence.
