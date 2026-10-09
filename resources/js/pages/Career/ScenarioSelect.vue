@@ -32,6 +32,12 @@ interface ScenarioCard {
     resources: string[];
     loop: string[];
     live_on_global: string | null;
+    metadata: {
+        ruleset: string | null;
+        summary: string | null;
+        planning_focus: string | null;
+        key_mechanics: string[];
+    } | null;
     description: string | null;
     recommended_use: string | null;
 }
@@ -205,6 +211,35 @@ const optimizesText = (card: ScenarioCard): string | null => {
                         </dd>
                     </div>
                 </dl>
+
+                <!-- The scenario's recorded metadata, straight from the matrix. A scenario the matrix
+                     does not describe prints the named absence rather than a sentence invented here. -->
+                <div v-if="card.metadata !== null" class="mt-3 rounded-md border border-rule bg-raised p-3 text-sm">
+                    <p v-if="card.metadata.summary" class="text-ink">{{ card.metadata.summary }}</p>
+                    <dl class="mt-2 space-y-1">
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Ruleset</dt>
+                            <dd class="text-ink">{{ card.metadata.ruleset ?? 'Not recorded' }}</dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Planning focus</dt>
+                            <dd class="text-ink">{{ card.metadata.planning_focus ?? 'Not recorded' }}</dd>
+                        </div>
+                    </dl>
+                    <div v-if="card.metadata.key_mechanics.length > 0" class="mt-2">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Key mechanics</p>
+                        <ul class="mt-1 list-disc pl-5 text-sm text-ink">
+                            <li v-for="(line, index) in card.metadata.key_mechanics" :key="index">{{ line }}</li>
+                        </ul>
+                    </div>
+                </div>
+                <p
+                    v-else
+                    class="mt-3 text-sm text-ink-muted"
+                    title="No source in this repository describes this scenario's ruleset, summary or planning focus."
+                >
+                    Not recorded
+                </p>
 
                 <p class="mt-4 flex flex-wrap items-center gap-3">
                     <button

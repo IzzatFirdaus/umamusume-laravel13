@@ -136,6 +136,9 @@ class ScenarioSelectController extends Controller
                     (array) ($def['steps'] ?? []),
                 )),
                 'live_on_global' => isset($def['live_on_global']) ? (string) $def['live_on_global'] : null,
+                // The card's own metadata, recorded in the matrix for a scenario a source describes and
+                // null for the rest. Null is the absence the page names, never a sentence invented here.
+                'metadata' => $this->metadata($def),
                 // Config holds no player-facing blurb and no "recommended use" for any scenario, so
                 // these are named absences. The title carries the reason to the element itself.
                 'description' => null,
@@ -144,6 +147,31 @@ class ScenarioSelectController extends Controller
         }
 
         return $cards;
+    }
+
+    /**
+     * The card's metadata, read straight from the matrix, or null when the entry holds none.
+     *
+     * @param  array<string, mixed>  $def
+     * @return array{ruleset: string|null, summary: string|null, planning_focus: string|null, key_mechanics: list<string>}|null
+     */
+    private function metadata(array $def): ?array
+    {
+        $metadata = $def['metadata'] ?? null;
+
+        if (! is_array($metadata)) {
+            return null;
+        }
+
+        return [
+            'ruleset' => isset($metadata['ruleset']) ? (string) $metadata['ruleset'] : null,
+            'summary' => isset($metadata['summary']) ? (string) $metadata['summary'] : null,
+            'planning_focus' => isset($metadata['planning_focus']) ? (string) $metadata['planning_focus'] : null,
+            'key_mechanics' => array_values(array_map(
+                static fn (mixed $line): string => (string) $line,
+                (array) ($metadata['key_mechanics'] ?? []),
+            )),
+        ];
     }
 
     /**

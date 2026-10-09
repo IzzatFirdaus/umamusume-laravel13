@@ -127,6 +127,8 @@ return [
             'facility_level_source' => 'repetition',
             'notes' => 'Defined by absence: no team system, no shop, no scenario currency. '
                 .'This is the minimal strip, and adding another scenario widget here would state something false.',
+            // No source in this repository describes this scenario in the card metadata's words.
+            'metadata' => null,
         ],
 
         'unity_cup' => [
@@ -206,6 +208,23 @@ return [
             ],
             'notes' => 'Facility level is a team property, so a level chip must name its cause (D-222). '
                 .'Rank S+ sits above S and grants a second hint rather than a higher facility.',
+            /*
+            | The card's own metadata, recorded for Unity Cup alone. Every line below restates a fact
+            | this entry already holds (the team race block, the rank ladder, the burst bands); none is
+            | a new claim, and the other three scenarios carry null because no source in this repository
+            | describes them in these words. `ruleset` names the scenario's rule family, not a version:
+            | no source defines a Global ruleset version, so no version number is invented.
+            */
+            'metadata' => [
+                'ruleset' => 'Team',
+                'summary' => 'A team career: facility level follows the team rank, a team race arrives every six months, and Spirit Bursts from teammates grant exclusive skills.',
+                'planning_focus' => 'Wit carries the scenario\'s own cap bonus; team rank and Spirit Burst counts decide the exclusive-skill payout.',
+                'key_mechanics' => [
+                    'A team race every six months against one of three NPC teams, strongest to weakest; a loss lowers league rank.',
+                    'Facility level is a team property, set by the team rank from G through S (D-222).',
+                    'Spirit Bursts from teammates charge and spend, and the burst count sets the exclusive-skill reward band.',
+                ],
+            ],
         ],
 
         'trackblazer' => [
@@ -359,6 +378,8 @@ return [
             'notes' => 'No mandatory race goals, so the race calendar is absent rather than empty, and no '
                 .'Scenario Link character exists here. Racing is the strategy in this scenario and is '
                 .'discouraged in Unity Cup, so any race advisory must be scenario-gated (D-225).',
+            // No source in this repository describes this scenario in the card metadata's words.
+            'metadata' => null,
         ],
 
         'our_grand_concert' => [
@@ -462,6 +483,8 @@ return [
                 .'Mechanics sourced 2026-10-05 by a primary read; every panel stays off because the client '
                 .'strings behind them are still third-party renderings, so the strip renders baseline plus the '
                 .'published caps (D-241, gate G-41).',
+            // No source in this repository describes this scenario in the card metadata's words.
+            'metadata' => null,
         ],
 
     ],
