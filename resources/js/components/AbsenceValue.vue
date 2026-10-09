@@ -54,7 +54,9 @@ defineProps<{
         >
             N/A<span class="sr-only">, {{ reason }}</span>
         </summary>
-        <span :class="['mt-1 block max-w-sm text-ink-muted', compact === true ? 'text-xs' : 'text-sm']">
+        <!-- `font-sans` because the caller's `font-mono` lands on the root and reaches both halves: it is
+             wanted on the marker and a defect on the sentence. -->
+        <span :class="['mt-1 block max-w-sm font-sans text-ink-muted', compact === true ? 'text-xs' : 'text-sm']">
             {{ reason }}
         </span>
     </details>
