@@ -34,13 +34,13 @@ The first is not done. Phase 2 closes when D9's remaining work lands.
 
 | Finding | Status | Slice | Commit | Evidence |
 | ------- | ------ | ----- | ------ | -------- |
-| D1 inheritance HTTP 500 | **Fixed** | 1.1 | `291f6ea` | `CareerInheritanceEventTest` (14 cases) |
+| D1 inheritance HTTP 500 | **Fixed** (browser half green, 2026-10-09) | 1.1 | `291f6ea` | `CareerInheritanceEventTest` (14 cases); `career-inheritance-event.spec.ts` **8 of 8 passed**, 5.8 min |
 | D2 blank trailing Spark row | **Fixed** | 1.2 | `a4b2b26` | `CareerLegacyDeckStepsTest` (1 new case) |
 | D3 rented/friend flag not persisted | **Fixed** | 1.3 | `fdebcc9` | `RunDeckTest`, `SupportDeckBuilderTest`, `CareerPreflightTest` |
 | D4 target validation contradicts the UI | **Fixed** | 2.1 | `be02297` | `CareerBuildTargetTest` (3 new cases); the sibling `KI-47` named in the follow-up is already **closed** |
 | D5 trainee stored-choice readback `N/A` | **Fixed** | 2.2 | `dd6dd22` | `CareerTraineeSelectTest` (1 new case) |
-| D6 turn table hides Fans/Energy | **Fixed** (browser half unrun) | 2.3 | `89e8453` | `TurnRowActionsTest` (2 new cases) |
-| D7 wizard step numbering skips 3 | **Fixed** (browser half unrun) | 2.4 | `6d53ffc` | `GuidedTurnOnRunViewTest` (1 new case) |
+| D6 turn table hides Fans/Energy | **Fixed** (browser half unrunnable, see below) | 2.3 | `89e8453` | `TurnRowActionsTest` (2 new cases) |
+| D7 wizard step numbering skips 3 | **Fixed** (browser half unrunnable, see below) | 2.4 | `6d53ffc` | `GuidedTurnOnRunViewTest` (1 new case) |
 | D8 Rice Shower aptitude mismatch | **Verified, not a tool defect** | 2.5 | `be48e60` | `CareerTraineeSelectTest` (1 new case) |
 | D9 duplicate turn-entry paths | **Partially fixed** — one shared field source landed, 1 of 3 surfaces wired; the other two await the peer | 2.6 | `8e3d33c` + this commit | `TurnEntryFieldSourceTest` (3 cases) |
 | Career position / snapshot mode | Not started (Phase 3+) | — | — | — |
@@ -243,8 +243,23 @@ path the audit actually used — roughly twenty selectors, each verification cos
 host. Not attempted here. The partial edit made while diagnosing this was reverted; the spec file is
 unchanged from `HEAD`.
 
-**No browser claim in this record is a pass, and Phase 3 must not open until one is.** D6 and D7 stay
-"Fixed (browser half unrun)"; their assertions in `run-detail.spec.ts` remain written and unexecuted.
+**The D1 browser gate is green (2026-10-09), and the sentence above is superseded by it.**
+`career-inheritance-event.spec.ts` passed **8 of 8** in 5.8 minutes on the scratch harness: the
+predicted/observed separation and badges, the milestone glyphs, the keyboard entry through the observed
+form, the 44px sweep, the axe scan, the empty state, the aggregate Spark counts and the no-computed-figure
+case. Getting there took the fixture off surfaces that no longer render: the turns are recorded over
+`runs.turns.store` (the shape `ura-panel.spec.ts` already uses) because `runs.show` is now a redirect to
+the cockpit and no rendered surface offers a create-turn form, and the completion wait reads the write's
+own redirect rather than a session flash a second render can consume.
+
+**D6 and D7's rendered assertions are unrunnable on this tree, and that is a structural finding rather
+than a skipped run.** Their spec, `run-detail.spec.ts`, drives the guided rail and the turn table, both
+of which live in `Runs/Show.vue` - and `runs.show` is now a redirect to the cockpit
+(`routes/web.php:116`), with `TrainingRunController::show()` left unrouted. A one-case probe of the spec
+failed exactly there, at `page.waitForURL: Test timeout of 180000ms exceeded`, before reaching any D6 or
+D7 assertion. Both stay **Fixed (browser half unrunnable)**: their feature coverage is green, and their
+rendered half belongs to whoever lands the cockpit cutover, since the cockpit is the surface that now
+renders and it is peer-held.
 
 ### Correction to finding 2, later the same day — the addressing fix landed (Path B)
 
