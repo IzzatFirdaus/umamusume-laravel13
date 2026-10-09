@@ -69,6 +69,16 @@ class StoreTurnEntryRequest extends FormRequest
             // absence is stated here so a future 99999 report lands on a decision, not a gap.
             'sp' => ['nullable', 'integer', 'min:0'],
             'condition' => ['nullable', 'string', 'max:255'],
+            /*
+             * The facility each training ran at, as the client's own five-level ladder shows it. One
+             * to five, nullable, because a turn logged from the rail names no facility level and a
+             * zero would be a level the client does not have.
+             */
+            'facility_speed' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'facility_stamina' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'facility_power' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'facility_guts' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'facility_wit' => ['nullable', 'integer', 'min:1', 'max:5'],
             // Energy is 0..100 (ADR-0001); mood is the client's five tiers, not
             // free text. The 0..1200 stat bound above is unchanged here:
             // ADR-0003 decision 6 replaces it with the scenario's own hard_cap,
