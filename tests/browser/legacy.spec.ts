@@ -75,9 +75,11 @@ async function createActiveRun(page: import('@playwright/test').Page, traineeNam
     await combobox.press('Enter');
 
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, { waitUntil: 'domcontentloaded' });
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
-    const id = Number(page.url().match(/\/training-runs\/(\d+)$/)?.[1]);
+    // No end anchor: the create redirect lands on the Cockpit (`/training-runs/{id}/cockpit`), and the
+    // id is carried mid-path.
+    const id = Number(page.url().match(/\/training-runs\/(\d+)/)?.[1]);
     expect(id, 'the created run has no id in its URL').toBeGreaterThan(0);
 
     createdRunUrls.push(`/training-runs/${id}`);

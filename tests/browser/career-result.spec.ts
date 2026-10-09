@@ -32,16 +32,18 @@ async function createRun(page: import('@playwright/test').Page): Promise<void> {
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'trackblazer' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
-    createdRunUrls.push(page.url());
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+    // The bare record URL, not the Cockpit the create redirect lands on: the cases below address
+    // sub-screens by appending to it (`${runUrl}/result`).
+    createdRunUrls.push(page.url().replace(/\/cockpit$/, ''));
 }
 
 /**
- * Move the run to `Completed` or `Retired` through the run screen's own status form.
+ * Move the run to `Completed` or `Retired` through the Cockpit's own status form.
  *
- * The select is scoped to the form that owns the "Change status" button: `runs.show` renders more
- * than one `select[name="status"]`, and an unscoped locator drives whichever one comes first in
- * document order (the turn rows' own control), which has no `Completed` option to choose.
+ * The select is scoped to the form that owns the "Change status" button: the Cockpit's header edits and
+ * its correction panel share the page, and an unscoped locator drives whichever one comes first in
+ * document order, which may have no `Completed` option to choose.
  */
 async function setStatus(page: import('@playwright/test').Page, status: 'Completed' | 'Retired'): Promise<void> {
     await page.goto(createdRunUrls[createdRunUrls.length - 1], { waitUntil: 'domcontentloaded' });

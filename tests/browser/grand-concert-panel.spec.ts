@@ -29,10 +29,11 @@ async function openGrandConcertCockpit(page: import('@playwright/test').Page): P
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'our_grand_concert' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
-    createdRunUrls.push(page.url());
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+    const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(runUrl);
 
-    await page.goto(`${page.url()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 }
 

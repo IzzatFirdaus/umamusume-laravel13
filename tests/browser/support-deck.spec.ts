@@ -40,9 +40,11 @@ async function builderUrl(page: import('@playwright/test').Page, scenario: strin
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: scenario });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, { waitUntil: 'domcontentloaded' });
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
-    const runUrl = page.url();
+    // The bare record URL, not the Cockpit the create redirect lands on: the deck builder is addressed
+    // by appending to it (`${runUrl}/deck`).
+    const runUrl = page.url().replace(/\/cockpit$/, '');
     createdRunUrls.push(runUrl);
 
     const url = `${runUrl}/deck`;

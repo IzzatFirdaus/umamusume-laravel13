@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { recordTurns } from '../utils/record-turns';
 
 /*
  * Rendered-copy, keyboard and accessibility evidence for SCREEN-011, the Race Decision
@@ -13,8 +14,8 @@ import { deleteRun } from '../utils/delete-run';
  * for the Level 1 assertions it has to fall on a race the calendar calls mandatory. `is_mandatory` is
  * true on exactly one in-career-year row, Junior turn 12 (the rest are the finale block, which is
  * outside the 24-turn grid), so the fixture logs eleven turns and the decision lands on turn 12. The
- * turns are logged through the run screen's own raw turn form, which is the app's supported path in,
- * and the run is deleted over HTTP in `afterEach` (`tests/utils/delete-run.ts`).
+ * turns are logged over `runs.turns.store` — no rendered surface creates a turn since the run screen
+ * became a redirect — and the run is deleted over HTTP in `afterEach` (`tests/utils/delete-run.ts`).
  *
  * The CSV import would have been one write instead of ten, and it is broken: `Import.vue`'s
  * `confirmImport()` posts `preview.run`, which carries only the run's own columns, while
@@ -53,27 +54,17 @@ async function openDecision(page: import('@playwright/test').Page): Promise<void
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
     createdRunUrls.push(page.url());
 
-    // Eleven turns, through the run screen's own raw form, so the turn being decided is turn 12 —
-    // Junior Year, Late June, where the calendar carries the mandatory debut. The guided rail also
-    // carries a `turn` input, so every locator is scoped to the disclosure.
-    const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
-    await page.getByText('Correct a turn by hand').click();
+    const runId = page.url().match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    const runUrl = page.url().replace(/\/cockpit$/, '');
 
-    for (let turn = 1; turn <= 11; turn++) {
-        await hatch.locator('input[name="turn"]').fill(String(turn));
-        await hatch.locator('input[name="speed"]').fill('600');
-        await hatch.locator('input[name="stamina"]').fill('500');
-        await hatch.locator('input[name="power"]').fill('500');
-        await hatch.locator('input[name="guts"]').fill('500');
-        await hatch.locator('input[name="wit"]').fill('500');
-        await hatch.getByRole('button', { name: 'Save correction' }).click();
-        await expect(page.getByText(`Turn ${turn} logged.`)).toBeVisible(WRITE);
-    }
+    // Eleven turns, so the turn being decided is turn 12 — Junior Year, Late June, where the
+    // calendar carries the mandatory debut.
+    await recordTurns(page, runId, 11);
 
-    await page.goto(`${page.url()}/races`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${runUrl}/races`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 }
 

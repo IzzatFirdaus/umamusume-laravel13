@@ -38,8 +38,9 @@ test.beforeEach(async ({ page }) => {
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'trackblazer' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
-    runUrl = page.url();
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+    // The bare record URL, not the Cockpit the create redirect lands on: `cockpitUrl` is built from it.
+    runUrl = page.url().replace(/\/cockpit$/, '');
     cockpitUrl = `${runUrl}/cockpit`;
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();

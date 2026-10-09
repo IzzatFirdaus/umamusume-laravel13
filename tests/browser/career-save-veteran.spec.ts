@@ -51,14 +51,16 @@ async function openSaveVeteran(
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
 
-    const runUrl = page.url();
+    // The bare record URL, not the Cockpit the create redirect lands on: the cases below address
+    // sub-screens by appending to it (`${runUrl}/veteran`).
+    const runUrl = page.url().replace(/\/cockpit$/, '');
     createdRunUrls.push(runUrl);
 
     if (finished) {
-        // Scoped to its own form: `runs.show` carries two more `select[name="status"]` controls (RacePanel's
-        // entry statuses and one per skill row), so a name query is ambiguous and a label query worse.
+        // Scoped to its own form: the Cockpit's header edits and its correction panel share the page, so
+        // a name query is ambiguous and a label query worse.
         const statusForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Change status' }) });
 
         await statusForm.locator('select[name="status"]').selectOption('Completed');

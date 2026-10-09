@@ -72,12 +72,16 @@ async function openUraCockpit(
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'ura_finale' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
-    createdRunUrls.push(page.url());
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+    // The bare record URL, not the Cockpit the create redirect lands on: the turns are written against
+    // the id it carries, and the Cockpit is reached by appending to it.
+    const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(runUrl);
 
-    await recordTurns(page, page.url().split('/').pop() as string, turns);
+    const runId = runUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    await recordTurns(page, runId, turns);
 
-    await page.goto(`${page.url()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     // The region is the content-level anchor: waiting on `#app > *` alone can resolve while Inertia is
     // still swapping the page, and a control that has not been placed yet measures zero.
     await expect(page.getByRole('region', { name: 'Scenario' })).toBeVisible();
@@ -163,10 +167,11 @@ test('draws no URA module in a cockpit whose matrix leaves the flag off', async 
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
-    createdRunUrls.push(page.url());
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+    const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(runUrl);
 
-    await page.goto(`${page.url()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     const region = page.getByRole('region', { name: 'Scenario' });

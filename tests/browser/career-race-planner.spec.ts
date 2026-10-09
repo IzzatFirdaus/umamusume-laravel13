@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { recordTurns } from '../utils/record-turns';
 
 /*
  * Rendered-copy, keyboard and accessibility evidence for SCREEN-017, the Scenario Race Planner
@@ -45,24 +46,15 @@ async function openPlanner(page: import('@playwright/test').Page): Promise<void>
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
     createdRunUrls.push(page.url());
 
-    const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
-    await page.getByText('Correct a turn by hand').click();
+    const runId = page.url().match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    const runUrl = page.url().replace(/\/cockpit$/, '');
 
-    for (let turn = 1; turn <= 11; turn++) {
-        await hatch.locator('input[name="turn"]').fill(String(turn));
-        await hatch.locator('input[name="speed"]').fill('600');
-        await hatch.locator('input[name="stamina"]').fill('500');
-        await hatch.locator('input[name="power"]').fill('500');
-        await hatch.locator('input[name="guts"]').fill('500');
-        await hatch.locator('input[name="wit"]').fill('500');
-        await hatch.getByRole('button', { name: 'Save correction' }).click();
-        await expect(page.getByText(`Turn ${turn} logged.`)).toBeVisible(WRITE);
-    }
+    await recordTurns(page, runId, 11);
 
-    await page.goto(`${page.url()}/races/planner`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${runUrl}/races/planner`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 }
 

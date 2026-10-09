@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { recordTurns } from '../utils/record-turns';
 
 /*
  * Rendered-copy, keyboard and accessibility evidence for the Skills Planner (plan §8 D13,
@@ -42,9 +43,11 @@ async function openPlanner(page: import('@playwright/test').Page): Promise<void>
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
-    const runUrl = page.url();
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+    const runUrl = page.url().replace(/\/cockpit$/, '');
     createdRunUrls.push(runUrl);
+
+    const runId = runUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
 
     // The build target, straight to the run-scoped write its Form Request owns. `back()` from
     // there falls back to the run screen, so the redirect target is the run's own URL and the
@@ -82,20 +85,9 @@ async function openPlanner(page: import('@playwright/test').Page): Promise<void>
         `the fixture build-target PUT failed: ${saved.status()} ${saved.headers()['location'] ?? ''}`,
     ).toBe(302);
 
-    // One turn logged at 100 SP, through the run screen's own raw form, so the coverage warning
-    // has a recorded total to miss. The hatch also carries a `turn` input on the guided rail, so
-    // every locator is scoped to the disclosure.
-    const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
-    await page.getByText('Correct a turn by hand').click();
-    await hatch.locator('input[name="turn"]').fill('1');
-    await hatch.locator('input[name="speed"]').fill('600');
-    await hatch.locator('input[name="stamina"]').fill('500');
-    await hatch.locator('input[name="power"]').fill('500');
-    await hatch.locator('input[name="guts"]').fill('500');
-    await hatch.locator('input[name="wit"]').fill('500');
-    await hatch.locator('input[name="sp"]').fill('100');
-    await hatch.getByRole('button', { name: 'Save correction' }).click();
-    await expect(page.getByText('Turn 1 logged.')).toBeVisible(WRITE);
+    // One turn logged at 100 SP, so the coverage warning has a recorded total to miss. No rendered
+    // surface creates a turn since the run screen became a redirect, so it goes over `runs.turns.store`.
+    await recordTurns(page, runId, 1, { sp: '100' });
 
     await page.goto(`${runUrl}/skills`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();

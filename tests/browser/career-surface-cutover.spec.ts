@@ -33,7 +33,7 @@ async function createUnityCupRun(page: import('@playwright/test').Page): Promise
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
     createdRunUrls.push(page.url());
 }
 

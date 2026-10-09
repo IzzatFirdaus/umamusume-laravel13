@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { recordTurns } from '../utils/record-turns';
 
 /*
  * Rendered-copy, keyboard and accessibility evidence for SCREEN-012, the Event Decision
@@ -10,9 +11,9 @@ import { deleteRun } from '../utils/delete-run';
  * hovers, the radio picker's keyboard behaviour, the 44px sweep on the record form, the
  * incomplete-outcome warning glyph, and an axe scan.
  *
- * Fixture strategy: create a run and log two turns through the run screen's correction form
- * (the same walk the Inheritance spec uses). Writes get 60s because `php artisan serve` is a
- * single-process `php -S`.
+ * Fixture strategy: create a run and log two turns over `runs.turns.store` (no rendered surface
+ * creates a turn since the run screen became a redirect). Writes get 60s because `php artisan serve`
+ * is a single-process `php -S`.
  */
 
 const WRITE = { timeout: 60_000 } as const;
@@ -36,24 +37,15 @@ async function openEventDecision(page: import('@playwright/test').Page): Promise
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'trackblazer' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
     createdRunUrls.push(page.url());
 
-    const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
-    await page.getByText('Correct a turn by hand').click();
+    const runId = page.url().match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    const runUrl = page.url().replace(/\/cockpit$/, '');
 
-    for (let turn = 1; turn <= 2; turn++) {
-        await hatch.locator('input[name="turn"]').fill(String(turn));
-        await hatch.locator('input[name="speed"]').fill('600');
-        await hatch.locator('input[name="stamina"]').fill('500');
-        await hatch.locator('input[name="power"]').fill('500');
-        await hatch.locator('input[name="guts"]').fill('500');
-        await hatch.locator('input[name="wit"]').fill('500');
-        await hatch.getByRole('button', { name: 'Save correction' }).click();
-        await expect(page.getByText(`Turn ${turn} logged.`)).toBeVisible(WRITE);
-    }
+    await recordTurns(page, runId, 2);
 
-    await page.goto(`${page.url()}/events`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${runUrl}/events`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 }
 
@@ -179,7 +171,7 @@ test('names the missing turns instead of showing an enabled empty form', async (
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
     createdRunUrls.push(page.url());
 
     const runId = page.url().match(/training-runs\/(\d+)/)?.[1];

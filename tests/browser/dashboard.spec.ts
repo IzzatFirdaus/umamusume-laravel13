@@ -47,7 +47,7 @@ async function createActiveRun(page: import('@playwright/test').Page, scenario: 
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: scenario });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/);
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/);
 
     const url = page.url();
     createdRunUrls.push(url);

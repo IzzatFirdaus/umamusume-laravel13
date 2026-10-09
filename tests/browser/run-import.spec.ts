@@ -130,10 +130,11 @@ test('commits the previewed file: confirm writes the run and the page leaves the
 
     await page.getByRole('button', { name: 'Import 2 turns' }).click();
 
-    // The commit redirects to the run's own page, and the URL leaving the import path is exactly the
-    // step KI-64 recorded as never reached: the POST used to omit the file body, get refused, and
-    // leave the page (and its visitor) sitting on the same URL with nothing said.
-    await page.waitForURL((url) => /\/training-runs\/\d+$/.test(url.pathname));
+    // The commit redirects to the run's own page (`runs.show`, which is itself a redirect to the
+    // Cockpit), and the URL leaving the import path is exactly the step KI-64 recorded as never
+    // reached: the POST used to omit the file body, get refused, and leave the page (and its visitor)
+    // sitting on the same URL with nothing said.
+    await page.waitForURL((url) => /\/training-runs\/\d+(\/cockpit)?$/.test(url.pathname));
     await expect(page.getByRole('heading', { level: 1 })).toContainText(traineeName);
     // The run's own provenance line names the pasted body, so the page read is the run just written.
     await expect(page.getByText(/from pasted CSV \(/)).toBeVisible();

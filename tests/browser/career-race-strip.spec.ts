@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { recordTurns } from '../utils/record-turns';
 
 /*
  * Rendered-copy, region-separation and accessibility evidence for D14a, the run-scoped race strip
@@ -10,10 +11,10 @@ import { deleteRun } from '../utils/delete-run';
  * come, that the three regions carry accessible names, and that the strip renders no percentage and no
  * derived distance band.
  *
- * Fixture strategy. The run is created through `/training-runs/create` and its turns are logged through
- * the run record screen's own raw form, which is the app's supported path in, and the run is deleted
- * over HTTP in `afterEach` through the shared `tests/utils/delete-run.ts`, which is also what
- * `career-race-decision.spec.ts` uses.
+ * Fixture strategy. The run is created through `/training-runs/create` and its turns are logged over
+ * `runs.turns.store` — no rendered surface creates a turn since the run screen became a redirect — and
+ * the run is deleted over HTTP in `afterEach` through the shared `tests/utils/delete-run.ts`, which is
+ * also what `career-race-decision.spec.ts` uses.
  *
  * Eleven turns is the cheapest fixture that puts a decision on a turn the calendar carries. Year 1 of
  * the seeded catalogue begins at turn 12 (the Junior Make Debut) and holds nothing before it, so fewer
@@ -31,7 +32,7 @@ test.afterEach(async ({ page }) => {
     }
 });
 
-/** A Unity Cup career with `$turns` logged turns, ending on the run record screen. */
+/** A Unity Cup career with `$turns` logged turns, returning the run's record URL. */
 async function newRun(page: import('@playwright/test').Page, turns: number): Promise<string> {
     await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
@@ -39,25 +40,16 @@ async function newRun(page: import('@playwright/test').Page, turns: number): Pro
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
 
-    const runUrl = page.url();
+    // The bare record URL, not the Cockpit the create redirect lands on: the cases below address
+    // sub-screens by appending to it (`${runUrl}/cockpit`, `${runUrl}/races`).
+    const runUrl = page.url().replace(/\/cockpit$/, '');
     createdRunUrls.push(runUrl);
 
     if (turns > 0) {
-        const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
-        await page.getByText('Correct a turn by hand').click();
-
-        for (let turn = 1; turn <= turns; turn++) {
-            await hatch.locator('input[name="turn"]').fill(String(turn));
-            await hatch.locator('input[name="speed"]').fill('600');
-            await hatch.locator('input[name="stamina"]').fill('500');
-            await hatch.locator('input[name="power"]').fill('500');
-            await hatch.locator('input[name="guts"]').fill('500');
-            await hatch.locator('input[name="wit"]').fill('500');
-            await hatch.getByRole('button', { name: 'Save correction' }).click();
-            await expect(page.getByText(`Turn ${turn} logged.`)).toBeVisible(WRITE);
-        }
+        const runId = runUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+        await recordTurns(page, runId, turns);
     }
 
     return runUrl;

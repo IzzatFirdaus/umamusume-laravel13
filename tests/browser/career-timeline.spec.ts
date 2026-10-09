@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { recordTurns } from '../utils/record-turns';
 
 /*
  * Rendered-copy, keyboard and accessibility evidence for SCREEN-018, the Career Timeline
@@ -10,8 +11,9 @@ import { deleteRun } from '../utils/delete-run';
  * type filter's aria-pressed state, the 320px reflow and 44px sweep, reduced motion, and an
  * axe scan against `#app` (the same scope rule every career spec uses).
  *
- * Fixture strategy: create a run, log two turns on the run screen, then walk to the timeline.
- * Writes get 60s because `php artisan serve` is a single-process `php -S`.
+ * Fixture strategy: create a run, log two turns over `runs.turns.store` (no rendered surface creates
+ * a turn since the run screen became a redirect), then walk to the timeline. Writes get 60s because
+ * `php artisan serve` is a single-process `php -S`.
  */
 
 const WRITE = { timeout: 60_000 } as const;
@@ -34,24 +36,14 @@ async function openTimeline(page: import('@playwright/test').Page): Promise<void
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'trackblazer' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
-    createdRunUrls.push(page.url());
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+    const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(runUrl);
 
-    const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
-    await page.getByText('Correct a turn by hand').click();
+    const runId = runUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    await recordTurns(page, runId, 2);
 
-    for (let turn = 1; turn <= 2; turn++) {
-        await hatch.locator('input[name="turn"]').fill(String(turn));
-        await hatch.locator('input[name="speed"]').fill('600');
-        await hatch.locator('input[name="stamina"]').fill('500');
-        await hatch.locator('input[name="power"]').fill('500');
-        await hatch.locator('input[name="guts"]').fill('500');
-        await hatch.locator('input[name="wit"]').fill('500');
-        await hatch.getByRole('button', { name: 'Save correction' }).click();
-        await expect(page.getByText(`Turn ${turn} logged.`)).toBeVisible(WRITE);
-    }
-
-    await page.goto(`${page.url()}/timeline`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${runUrl}/timeline`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 }
 
@@ -62,10 +54,11 @@ test('renders the empty state when no turns have been logged', async ({ page }) 
     await page.keyboard.press('Enter');
     await page.selectOption('select[name="scenario"]', { value: 'trackblazer' });
     await page.getByRole('button', { name: 'Create run' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, WRITE);
-    createdRunUrls.push(page.url());
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+    const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(runUrl);
 
-    await page.goto(`${page.url()}/timeline`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${runUrl}/timeline`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     await expect(page.getByRole('heading', { name: 'Career timeline' })).toBeVisible();
