@@ -101,6 +101,19 @@ const costTitle = computed(() => {
     return `Declared constant: ${props.option.cost.source}, read ${props.option.cost.verified_at}.${stale}`;
 });
 
+// The same three fields the tooltip carries, printed. `ADR-0001` §2 requires the constants behind a derived
+// number to be visible wherever the number appears; a `title` is reachable by mouse only, so on a keyboard or
+// a touch screen the source, its read date and its stale flag were simply absent.
+const costConstants = computed(() => {
+    const parts = [`Declared constant: ${props.option.cost.source}`, `read ${props.option.cost.verified_at}`];
+
+    if (props.option.cost.confidence === 'stale') {
+        parts.push('source marked stale');
+    }
+
+    return parts.join(' · ');
+});
+
 const energyAfterTitle = computed(() => {
     const after = props.option.energy_after;
 
@@ -154,6 +167,15 @@ const deficitTitle = computed(() => {
 
     if (props.option.current === null) {
         return 'This run has recorded no turn yet, so the stat has no entered value to read a deficit from.';
+    }
+
+    // Both figures exist and the deficit still does not. The only way the advisor leaves an option out
+    // with a target and a reading present (`TrainerAdvisor::reason()`, and `deficit` arrives as
+    // `?->deficitClosed`) is a run with no recorded Energy, and `energy_after` is null exactly when that
+    // reading is. Without this arm the sentence below — which states a figure this row does not have —
+    // would be printed as the reason for the absence (`DESIGN.md` §5, worded by kind).
+    if (props.option.deficit === null) {
+        return 'This run has recorded no Energy, so the advisor states no deficit for this option.';
     }
 
     return `${fmt(props.option.target)} entered as the target, minus ${fmt(props.option.current)} entered on the latest turn: the advisor’s own arithmetic.`;
@@ -214,7 +236,6 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Expected gains</dt>
                 <dd class="mt-0.5">
                     <AbsenceValue class="font-mono tabular-nums" :reason="gainsTitle" compact />
-                    <ProvenanceBadge state="unknown" class="ml-1 align-middle" />
                 </dd>
             </div>
 
@@ -224,6 +245,11 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                     <span :title="costTitle" class="font-mono tabular-nums text-ink-strong">{{ costText }}</span>
                     <ProvenanceBadge state="confirmed" class="ml-1 align-middle" />
                 </dd>
+                <!-- `ADR-0001` §2 requires the constants behind a derived number to be visible wherever the
+                     number appears, and a `title` is reachable by mouse only. The owner ruled the inline form
+                     (2026-10-09); `ScenarioPanel.vue:205-208` and `Dashboard.vue:300-301` already print a
+                     visible read date, so this is the shipped idiom extended, not a new one. -->
+                <p class="mt-0.5 text-xs text-ink-muted">{{ costConstants }}</p>
             </div>
 
             <div>
@@ -310,8 +336,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Failure probability</dt>
                     <dd class="mt-0.5">
-                        <AbsenceValue class="font-mono" :reason="failureTitle" compact />
-                        <ProvenanceBadge state="unknown" class="ml-1 align-middle" />
+                        <AbsenceValue class="font-mono tabular-nums" :reason="failureTitle" compact />
                     </dd>
                 </div>
 
@@ -353,7 +378,6 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Bond gains</dt>
                     <dd class="mt-0.5">
                         <AbsenceValue class="font-mono" :reason="bondTitle" compact />
-                        <ProvenanceBadge state="unknown" class="ml-1 align-middle" />
                     </dd>
                 </div>
 
