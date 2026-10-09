@@ -267,3 +267,33 @@ it('does not hand a re-logged turn the failed chip of the turn that used the num
 
     expect(TurnEvent::query()->where('training_run_id', $run->id)->where('turn', 5)->count())->toBe(0);
 });
+
+it('reads a turn\'s Energy and Fans back, and null where a turn recorded none (D6)', function (): void {
+    // The turn form accepts Energy and Fans, so the run screen must carry them back; a turn that
+    // recorded neither is a real state and reads as null rather than as a zero.
+    $run = TrainingRun::factory()->create(['scenario' => 'ura_finale']);
+    turnFor($run, 1, ['energy' => 72, 'fans' => 209245]);
+    turnFor($run, 2, ['energy' => null, 'fans' => null]);
+
+    test()->get(route('runs.show', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Runs/Show')
+            ->where('turns.0.energy', 72)
+            ->where('turns.0.fans', 209245)
+            ->where('turns.1.energy', null)
+            ->where('turns.1.fans', null));
+});
+
+it('prints an Energy and a Fans column in the turn log, each naming its own absence (D6)', function (): void {
+    // The rendered table is what no server-side assertion can see, and the browser spec that owns
+    // that half cannot run on this host (see the hand-off), so the columns are pinned in the page
+    // source the same way `FrontendComponentLibraryTest` pins the component library's properties.
+    $source = (string) file_get_contents(base_path('resources/js/pages/Runs/Show.vue'));
+
+    expect($source)
+        ->toContain('<th class="pr-3">Energy</th>')
+        ->toContain('<th class="pr-3">Fans</th>')
+        ->toContain('No Energy was recorded for this turn.')
+        ->toContain('No Fans total was recorded for this turn.');
+});

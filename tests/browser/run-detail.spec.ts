@@ -308,3 +308,28 @@ await expect(stats).toBeVisible();
     // The band prints its own arithmetic line, so the ceiling is explained rather than implied.
     await expect(stats.getByText(/is where training gains halve/)).toBeVisible();
 });
+
+test('prints an Energy and a Fans column in the turn log, each naming its own absence', async ({ page }) => {
+    // D6: the turn form accepts Energy and Fans, so the table that reads the turns back shows them.
+    // The raw correction form records neither, which is the state the `N/A` cells describe.
+    await createRunWithScenario(page, 'trackblazer');
+
+    await page.getByText('Correct a turn by hand').click();
+    const hatch = page.locator('details', { has: page.getByText('Correct a turn by hand') });
+    await hatch.locator('input[name="turn"]').fill('1');
+    await hatch.locator('input[name="speed"]').fill('600');
+    await hatch.locator('input[name="stamina"]').fill('500');
+    await hatch.locator('input[name="power"]').fill('500');
+    await hatch.locator('input[name="guts"]').fill('500');
+    await hatch.locator('input[name="wit"]').fill('500');
+    await hatch.getByRole('button', { name: 'Save correction' }).click();
+    await expect(page.getByText('Turn 1 logged.')).toBeVisible({ timeout: 60_000 });
+
+    const log = page.getByRole('region', { name: 'Turn log' });
+    await expect(log.getByRole('columnheader', { name: 'Energy' })).toBeVisible();
+    await expect(log.getByRole('columnheader', { name: 'Fans' })).toBeVisible();
+
+    // Neither was recorded, so each cell names its own absence rather than printing a blank.
+    await expect(log.locator('span[title="No Energy was recorded for this turn."]')).toHaveCount(1);
+    await expect(log.locator('span[title="No Fans total was recorded for this turn."]')).toHaveCount(1);
+});

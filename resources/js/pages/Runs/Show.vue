@@ -441,6 +441,8 @@ const railStep = computed(() => props.rail as unknown as {
                             <th class="pr-3">Guts</th>
                             <th class="pr-3">Wit</th>
                             <th class="pr-3">SP</th>
+                            <th class="pr-3">Energy</th>
+                            <th class="pr-3">Fans</th>
                             <th class="pr-3">Condition</th>
                             <th class="pr-3">Mood</th>
                             <th class="pr-3">Turn actions</th>
@@ -464,6 +466,17 @@ const railStep = computed(() => props.rail as unknown as {
                                 <td class="pr-3">{{ turn.guts }}</td>
                                 <td class="pr-3">{{ turn.wit }}</td>
                                 <td class="pr-3">{{ turn.sp ?? '' }}</td>
+                                <!-- Energy and Fans are accepted by the turn form, so they are shown
+                                     back on the table that accepted them (D6). A turn that recorded
+                                     none says so rather than printing a blank or a zero. -->
+                                <td class="pr-3">
+                                    <span v-if="turn.energy !== null">{{ turn.energy }}</span>
+                                    <span v-else class="text-ink-muted" title="No Energy was recorded for this turn.">N/A</span>
+                                </td>
+                                <td class="pr-3">
+                                    <span v-if="turn.fans !== null">{{ turn.fans }}</span>
+                                    <span v-else class="text-ink-muted" title="No Fans total was recorded for this turn.">N/A</span>
+                                </td>
                                 <td class="pr-3">{{ turn.condition }}</td>
                                 <td class="pr-3"><MoodPill :tier="turn.mood" unrecorded="not recorded" /></td>
                                 <td class="pr-3 align-top">
