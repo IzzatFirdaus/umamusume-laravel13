@@ -9,12 +9,13 @@
 /*
  * Design tokens. Single source of truth for the app's palette, per DESIGN.md §2.1
  * and §9. Measured ramps, contrast math and the light system live in
- * docs/design-research/DESIGN.md §3; do not re-derive a colour here.
+ * docs/research-scratch/DESIGN-CORPUS.md §3 and §3.4; do not re-derive a colour here.
  *
- * Dark is the shipped default (DESIGN.md §2.1). Light is the research package's
- * measured system and is provided as a verified override rather than a half-shipped
- * theme. Components never branch on theme: there are no `dark:` utilities anywhere,
- * only these variables flip (research CONSTRAINTS.md D-101, gate G-19).
+ * Light is the shipped default (DESIGN.md §2.1, owner ruling 2026-09-27 reversing the
+ * earlier dark-first promotion). Dark is the preference-resolved override that section
+ * carries, not the base. Components never branch on theme: there are no `dark:`
+ * utilities anywhere, only these variables flip
+ * (docs/research-scratch/DESIGN-CORPUS.md D-101, gate G-19).
  *
  * No shadows and no custom radius tokens: separation comes from the hairline rule
  * and the raised/sunken step, and radius is `rounded-md` throughout (DESIGN.md §2.3).
