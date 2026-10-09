@@ -261,13 +261,13 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     until you choose one of the two.
                 </p>
 
-                <!-- Where the flag does and does not go, said next to the six toggles it describes: the
-                     draft keeps it, the deck table has no column for it, and inventing one is the owner's
-                     call (`ADR-0014`). -->
+                <!-- Where the flag goes, said next to the six toggles it describes: the draft holds it
+                     while the setup is in flight, and Preflight writes it onto the run's deck row when
+                     the career starts (`ADR-0023`, D3). -->
                 <p class="mt-3 rounded-md border border-dashed border-rule bg-raised p-3 text-xs text-ink-muted">
-                    The owned or rented flag is kept in this setup draft. The deck table has no column for it
-                    yet, so Preflight writes the six cards it can store and the flag stays here until one
-                    exists.
+                    The owned or rented flag is kept in this setup draft, and Preflight writes it onto the run
+                    as one value per slot, where it stays after a reload. A slot you have not classified reads
+                    as N/A rather than as Owned.
                 </p>
 
                 <form class="mt-4 flex flex-wrap items-center gap-3" @submit.prevent="save()">

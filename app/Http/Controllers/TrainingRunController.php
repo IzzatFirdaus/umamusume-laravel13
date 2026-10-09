@@ -971,9 +971,10 @@ class TrainingRunController extends Controller
     public function syncDeck(StoreDeckRequest $request, TrainingRun $run): RedirectResponse
     {
         DB::transaction(function () use ($request, $run): void {
-            // Read the flags before the delete. The run screen's deck panel posts six cards and no
-            // flag, and the flag belongs to the slot, so a re-save from a surface that offers no
-            // ownership control keeps what the slot already recorded rather than erasing it (ADR-0023).
+            // Read the flags before the delete. The flag belongs to the slot, not to the card, so a
+            // re-save whose payload carries no flag for a position keeps what that slot already recorded
+            // rather than erasing it, and the run screen's own panel posts one value per slot
+            // (`Support/Builder.vue`, `ADR-0023`; pinned by `SupportDeckBuilderTest`).
             /** @var array<int, string|null> $existing */
             $existing = $run->deckSlots()->pluck('ownership', 'slot_position')->all();
             $posted = $request->ownershipByPosition();

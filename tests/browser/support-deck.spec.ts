@@ -178,10 +178,10 @@ test('shows the analysis figures with their labels and no bar', async ({ page })
     await expect(page.getByText('Not built.')).toBeVisible();
 });
 
-test('keeps the ownership choice on the page and says the run record does not store it', async ({ page }) => {
+test('keeps the ownership choice on the page and says the run stores it', async ({ page }) => {
     await builderUrl(page, 'ura_finale');
 
-    // The toggle responds at once, with no round trip, because there is nowhere to persist the answer.
+    // The toggle responds at once, with no round trip, and the save then carries the value per slot.
     const rented = page.locator('#deck-slot-3').getByRole('button', { name: 'Rented', exact: true });
     await rented.click();
     await expect(rented).toHaveAttribute('aria-pressed', 'true');
@@ -190,10 +190,15 @@ test('keeps the ownership choice on the page and says the run record does not st
         'false',
     );
 
-    // The screen says the flag is not stored rather than letting the control imply a record it does not
-    // write. The ownership claim is a per-slot one either way: no slot's value is derived from its
-    // position.
-    await expect(page.getByText('The run record stores no field for the owned or rented flag yet')).toBeVisible();
+    // What the screen says about the flag it writes. This sentence is the current one: the run-scoped
+    // write put the value on `deck_slots.ownership` from `ADR-0023` (D3) onward, and the assertion here
+    // still quoted the pre-D3 wording, so it failed against a screen that was telling the truth
+    // (round-2 audit R2-06). The per-slot claim is unchanged either way: no slot's value is derived
+    // from its position, and an unclassified slot reads as N/A rather than as Owned.
+    await expect(
+        page.getByText('The owned or rented flag is saved with the deck, one value per slot'),
+    ).toBeVisible();
+    await expect(page.getByText(/stays on the\s+run after a reload/)).toBeVisible();
 });
 
 test('prints the seven types on the picker rows as a word and a glyph, never colour alone', async ({ page }) => {

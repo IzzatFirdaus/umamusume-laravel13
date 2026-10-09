@@ -35,9 +35,10 @@ use Inertia\Response;
  * a reload could lose, which is also why the step survives a visit to step 4 and back with its values
  * intact.
  *
- * **What the flag is and is not.** `deck_slots` has no ownership column and inventing one is the owner's
- * call (`ADR-0014`), so the run-scoped screen prints the one value it can read and says so in words. A
- * session key needs no migration, so this step carries OWNED and RENTED per slot, refuses a save that
+ * **What the flag is and is not.** The run records it: `deck_slots.ownership` holds one nullable value
+ * per equipped slot (`ADR-0023`, D3), and Preflight carries the draft's flag onto that row when it
+ * creates the run. This step keeps it in the session bag because the career has no row yet, so it
+ * carries OWNED and RENTED per slot, refuses a save that
  * equips a card without saying which it is, and leaves the flag absent on a slot with no card: "owned or
  * rented" describes nothing when nothing sits in the position.
  *

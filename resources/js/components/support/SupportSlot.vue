@@ -18,8 +18,10 @@ import SupportTypeMark from './SupportTypeMark.vue';
  * **The ownership flag is a two-button group, not a checkbox.** A checkbox hides its state behind a
  * filled box, which is state through a mark rather than through words; two buttons with words on them
  * state the value in text as well as position, and one of them is reachable with a single keystroke.
- * The value is client-side only: `deck_slots` has no column for it, so the page says so in words rather
- * than letting a control imply a record it does not write.
+ * The flag is stored, one value per slot (`ADR-0023`): the run-scoped write puts it on the
+ * `deck_slots.ownership` column, and the wizard carries it in the session draft until Preflight creates
+ * the row. Neither surface defaults it, so an unclassified slot says so in words rather than letting a
+ * control imply a record it does not hold.
  */
 interface Effect {
     effect_id: number;

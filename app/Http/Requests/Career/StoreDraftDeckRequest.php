@@ -16,15 +16,15 @@ use Illuminate\Validation\Rule;
  * and reject exactly the same six positions and exactly the same catalogue ids, and `DeckSlot::POSITIONS`
  * stays the one owner of what a deck is.
  *
- * **What the draft carries that the table cannot.** `deck_slots` has no ownership column (`ADR-0014`), and
- * inventing one is the owner's call, which is why the run-scoped builder prints the one value it can read
- * and says so in words. A session key needs no migration, so the wizard does carry the flag: `payload()`
- * returns six rows in position order, each with the card it holds or `null` where the Trainer left the slot
- * on "Not equipped", and the ownership the Trainer set for a card that is there. A cleared slot records no
- * flag, because "owned or rented" describes nothing when no card sits in the slot.
+ * **What the draft holds that the run cannot yet hold.** The flag has a column now (`ADR-0023`, D3) and
+ * Preflight writes it there, but a career does not exist until step 6, so this step's own record is the
+ * session: `payload()` returns six rows in position order, each with the card it holds or `null` where
+ * the Trainer left the slot on "Not equipped", and the ownership the Trainer set for a card that is
+ * there. A cleared slot records no flag, because "owned or rented" describes nothing when no card sits
+ * in the slot.
  *
- * Preflight (D7) writes the equipped rows through the same table; the flag stays in the draft until a
- * column exists for it, which `SCREEN_SPEC.md` records as this step's gap.
+ * Preflight (D7) writes the equipped rows and their flags through the same table
+ * (`PreflightController::store()`), which `CareerPreflightTest` pins.
  */
 class StoreDraftDeckRequest extends StoreDeckRequest
 {
@@ -37,8 +37,8 @@ class StoreDraftDeckRequest extends StoreDeckRequest
      * The wizard's one demand over the run-scoped write: a slot that carries a card has to say how it
      * is held.
      *
-     * `StoreDeckRequest` lets the flag be absent because `deck_slots` has no column for it and the run
-     * screen states that out loud. The draft is the opposite case: the flag is the only reason the key
+     * `StoreDeckRequest` lets the flag be absent, because a slot that keeps its card can keep the flag
+     * the run already recorded. The draft is the opposite case: the flag is the only reason the key
      * exists, so a row reaching Preflight without one would print `N/A` for something the Trainer did
      * choose. An absent flag is therefore refused here rather than defaulted, because "owned" would be
      * an invented answer and `ADR-0020` §2 does not allow one.

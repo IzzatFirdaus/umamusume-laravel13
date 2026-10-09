@@ -14,8 +14,9 @@ use Inertia\Testing\AssertableInertia as Assert;
  *
  * These assert the props the page receives. The rendered copy, the keyboard replacement path, the
  * 44px sweep and the analysis labels are asserted against the rendered DOM in
- * `tests/browser/support-deck.spec.ts`; the write itself is pinned in `RunDeckTest` and is not
- * duplicated here.
+ * `tests/browser/support-deck.spec.ts`; the write itself was cited here to `RunDeckTest`, a file `tests/`
+ * has never held, and one case now pins it for real (`it writes the flag this screen posts onto the slot
+ * row and reads it back`), with the no-flag sibling caller in `CareerLegacyDeckStepsTest`.
  *
  * The three claims the brief makes that no earlier test covers are the six slots, the ownership flag
  * and the seven types, so those carry their own cases. Everything else is about not lying: the
@@ -70,6 +71,73 @@ it('gives every slot an ownership flag a Trainer can read and change', function 
             ->component('Support/Builder')
             ->where('slots.5.ownership', 'RENTED')
             ->where('slots.0.ownership', null));
+});
+
+it('states on every deck surface that the flag is held by a column and carried onto the run', function (): void {
+    // R2-06. `ADR-0023` (D3) gave `deck_slots` its nullable `ownership` column and both writers began
+    // recording it, but three shipped sentences still said the opposite: the wizard's step 5 and the
+    // Preflight contract each printed "The deck table has no column for it yet", and the slot
+    // component's own docblock still called the value client-side. A Trainer reading step 5 is told the
+    // flag will be lost, then lands on a career whose slots hold it. Copy is the defect, so copy is
+    // what this reads, in every source that can print it (`AGENTS.md` §2: code wins, the rule is stale).
+    $surfaces = [
+        'wizard step 5' => resource_path('js/pages/Career/DeckSelect.vue'),
+        'Preflight step 6' => resource_path('js/pages/Career/Preflight.vue'),
+        'run-scoped builder' => resource_path('js/pages/Support/Builder.vue'),
+        'the slot component' => resource_path('js/components/support/SupportSlot.vue'),
+    ];
+
+    foreach ($surfaces as $name => $path) {
+        $source = (string) file_get_contents($path);
+
+        // The retired claim, in any of the shapes it was written. The sweep alone would pass on a
+        // pattern matching nothing, so the three shipped sentences below are the positive half.
+        expect($source, $name)->not->toMatch('/no column for it|has no ownership column|stores no field|client-side only/');
+    }
+
+    // And each screen says where the flag actually goes, in words the write path honours: the draft keeps
+    // it through setup, `PreflightController::store()` writes it onto the slot row, and the run screen
+    // reads it back from the same column.
+    expect((string) file_get_contents($surfaces['wizard step 5']))
+        ->toMatch('/owned or rented flag is kept in this setup draft, and Preflight writes it onto the run/s')
+        ->and((string) file_get_contents($surfaces['Preflight step 6']))
+        ->toMatch('/owned or rented flag is in this setup draft, and starting the career writes it/s')
+        ->and((string) file_get_contents($surfaces['run-scoped builder']))
+        ->toMatch('/owned or rented flag is saved with the deck/');
+});
+
+it('writes the flag this screen posts onto the slot row and reads it back', function (): void {
+    // The write half of the sentence the run screen prints: "saved with the deck, one value per slot,
+    // and stays on the run after a reload". Nothing posted a flag through `runs.deck.sync` before this
+    // case, which is how three comments in the write path still claim the run panel sends none and the
+    // table has nowhere to put it. The payload decides what a surface does, so the payload is pinned.
+    $run = builderRun();
+    $first = SupportCard::factory()->create();
+    $second = SupportCard::factory()->create();
+    DeckSlot::factory()->atPosition(1)->create([
+        'training_run_id' => $run->id,
+        'support_card_id' => $first->id,
+        'ownership' => 'OWNED',
+    ]);
+
+    test()->post(route('runs.deck.sync', $run), [
+        'deck' => [
+            1 => ['support_card_id' => (string) $first->id, 'ownership' => 'RENTED'],
+            2 => ['support_card_id' => (string) $second->id, 'ownership' => 'OWNED'],
+            3 => ['support_card_id' => '', 'ownership' => ''],
+        ],
+    ])->assertSessionHasNoErrors();
+
+    expect(DeckSlot::query()->where('training_run_id', $run->id)->orderBy('slot_position')->pluck('ownership')->all())
+        ->toBe(['RENTED', 'OWNED']);
+
+    // Read back through the screen's own reader rather than the table.
+    test()->get("/training-runs/{$run->id}/deck")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('slots.0.ownership', 'RENTED')
+            ->where('slots.1.ownership', 'OWNED')
+            ->where('slots.2.ownership', null));
 });
 
 // ── the seven types ────────────────────────────────────────────────────────

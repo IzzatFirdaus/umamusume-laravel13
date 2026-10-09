@@ -185,8 +185,10 @@ test.describe('Setup step 5 — Support deck', () => {
         const typeWords = page.locator('p').filter({ hasText: 'The seven support types' });
         await expect(typeWords).toHaveText(/The seven support typesSpeedStaminaPowerGutsWitPalGroup/);
 
-        // The flag's honest scope, stated beside the six toggles it describes (`ADR-0014`).
-        await expect(page.getByText(/The deck table has no column for it/)).toBeVisible();
+        // Where the flag goes, stated beside the six toggles it describes (`ADR-0023`: the draft keeps
+        // it, Preflight writes it onto the run's slot row, and an unclassified slot stays an absence).
+        await expect(page.getByText(/Preflight writes it onto the run\s+as one value per slot/)).toBeVisible();
+        await expect(page.getByText(/reads\s+as N\/A rather than as Owned/)).toBeVisible();
     });
 
     test('equips from the picker, marks the flag, and reads each write back from the session', async ({ page }) => {

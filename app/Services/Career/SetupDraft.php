@@ -141,9 +141,8 @@ final class SetupDraft
      *
      * Six rows in position order, each `{ position, support_card_id, ownership }`, and
      * `support_card_id` null where the Trainer left the slot on "Not equipped". It is a draft shape, not
-     * a table shape: `deck_slots` is a pivot with no ownership column and one row per equipped card
-     * (`ADR-0014`), so the empty slots and the rented flag exist only here until Preflight creates the
-     * rows it can create.
+     * a table shape: `deck_slots` holds one row per equipped card, flag included (`ADR-0023`, D3), so the
+     * empty slots exist only here, until Preflight creates the rows it can create.
      *
      * @return list<array{position: int, support_card_id: int|null, ownership: string|null}>|null
      */

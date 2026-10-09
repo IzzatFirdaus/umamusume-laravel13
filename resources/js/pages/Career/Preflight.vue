@@ -336,14 +336,14 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                     {{ props.contract.deck.equipped }} of six positions carry a card.
                 </p>
 
-                <!-- The flag is printed above, and `StartCareerRequest::deckByPosition()` writes the six
-                     positions and nothing else: there is no `deck_slots` column for it (`ADR-0014`). Said
-                     at the commitment screen because this page's own promise is "everything the six steps
-                     recorded", and the flag is the one entered fact that will not be recorded. -->
+                <!-- The flag is printed above, and `StartCareerRequest::ownershipByPosition()` carries it
+                     onto the slot row this screen creates (`ADR-0023`, D3). Said at the commitment screen
+                     because this page's own promise is "everything the six steps recorded", and a position
+                     left unclassified is the one entered fact that arrives as an absence. -->
                 <p class="mt-2 rounded-md border border-dashed border-rule bg-raised p-3 text-xs text-ink-muted">
-                    The owned or rented flag is in this setup draft. The deck table has no column for it yet,
-                    so starting the career writes the six cards it can store and the flag stays in the draft
-                    until one exists.
+                    The owned or rented flag is in this setup draft, and starting the career writes it onto
+                    each slot's deck row, one value per position. A position holding no card creates no deck
+                    row, and a card whose flag was never chosen is stored as no flag, never as Owned.
                 </p>
 
                 <DeckAnalysis class="mt-3" v-bind="props.contract.deck.analysis" />

@@ -54,10 +54,10 @@ class StoreDeckRequest extends FormRequest
             'deck' => ['present', 'array:'.implode(',', DeckSlot::POSITIONS)],
             'deck.*.support_card_id' => ['required', 'integer', 'exists:support_cards,id'],
             // The owned-or-rented flag, bounded by `DeckSlot::OWNERSHIP` rather than by a copy of the two
-            // words. The run-scoped write (`runs.deck.sync`) has no column to put it in and drops it, which
-            // is what its screen says out loud; the setup wizard's step 5 keeps it in the session draft
-            // (`StoreDraftDeckRequest::payload()`), which needs no migration. One rule for both entry
-            // points is the point: `nullable` because a slot the Trainer cleared carries no flag at all.
+            // words. Both writers record it now (`ADR-0023`, D3): the run-scoped write puts it on the
+            // slot's `deck_slots.ownership` row, and the setup wizard's step 5 keeps it in the session
+            // draft until Preflight creates that row (`StoreDraftDeckRequest::payload()`).
+            // `nullable` because a slot the Trainer cleared carries no flag at all.
             'deck.*.ownership' => ['nullable', 'string', Rule::in(DeckSlot::OWNERSHIP)],
         ];
     }
@@ -109,8 +109,8 @@ class StoreDeckRequest extends FormRequest
     /**
      * The owned-or-rented flag per position, for the slots that carried one.
      *
-     * A surface that offers no ownership control (the run screen's deck panel) sends no flag, and the
-     * write keeps whatever the slot already recorded rather than erasing it (`ADR-0023`). A slot the
+     * A posted row carrying no flag sends null, and the write keeps whatever the slot already recorded
+     * rather than erasing it (`ADR-0023`). A slot the
      * Trainer cleared carries no entry here at all, because the blank row is dropped before the rules
      * run and there is no card for the flag to describe.
      *
