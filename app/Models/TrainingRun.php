@@ -61,10 +61,6 @@ use Illuminate\Support\Carbon;
  *                                                     (`config('scenarios.stat_order')`), each a
  *                                                     percentage or null; null until stated, never
  *                                                     derived, since no catalogue holds a figure
- * @property array<string, int|null>|null $stat_ceilings the run's own ceilings as the Trainer composed
- *                                                       them, keyed by the stat matrix; null until stated.
- *                                                       Distinct from `ScenarioCaps`, which owns the
- *                                                       scenario's ceiling rather than the run's
  * @property string|null $team_name the Unity Cup team's name as the Trainer read it; null until stated
  * @property string|null $team_motto the team's motto; null until stated
  * @property int|null $team_league_placement the team's league placement (1..99); null until stated
@@ -98,7 +94,7 @@ use Illuminate\Support\Carbon;
  *                                       run with a Legacy selection stays comparable before it is
  *                                       filed)
  */
-#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'stat_ceilings', 'team_name', 'team_motto', 'team_league_placement', 'team_preseason_wins', 'unity_trainings_count', 'spirit_bursts_count', 'extreme_bursts_count', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'team_name', 'team_motto', 'team_league_placement', 'team_preseason_wins', 'unity_trainings_count', 'spirit_bursts_count', 'extreme_bursts_count', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
 class TrainingRun extends Model
 {
     /**
@@ -1082,7 +1078,6 @@ class TrainingRun extends Model
             'legacy_selection' => 'array',
             'build_target' => 'array',
             'growth_rate' => 'array',
-            'stat_ceilings' => 'array',
             'team_league_placement' => 'integer',
             'team_preseason_wins' => 'integer',
             'unity_trainings_count' => 'integer',

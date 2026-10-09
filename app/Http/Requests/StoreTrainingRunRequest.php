@@ -74,16 +74,6 @@ class StoreTrainingRunRequest extends FormRequest
             'growth_rate' => ['nullable', 'array:'.implode(',', self::stats())],
             'growth_rate.*' => ['nullable', 'integer', 'between:0,30'],
             /*
-             * The run's own ceilings as the Trainer composed them, keyed by the stat matrix so a
-             * hand-made POST cannot store a sixth stat. Entered, never derived: `ScenarioCaps` owns
-             * the scenario's ceiling, but the run's real caps sit above it once the card's sparks and
-             * any support-card Max-Stat layer are counted, and neither input lives here. Sparse, and
-             * null rather than an invented row of zeroes when the run stated none (D-220). No upper
-             * bound: the composed ceiling is the Trainer's own arithmetic, not this tool's.
-             */
-            'stat_ceilings' => ['nullable', 'array:'.implode(',', self::stats())],
-            'stat_ceilings.*' => ['nullable', 'integer', 'min:0'],
-            /*
              * The run's team identity under Unity Cup, as the Trainer reads it off the scenario panel.
              * Entered, never derived: no table here holds a team. Null is the honest "not stated"
              * (D-220). Placement is a rank, so zero is not one; the bound matches the race-entry

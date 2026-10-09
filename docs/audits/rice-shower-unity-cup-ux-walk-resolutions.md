@@ -50,7 +50,7 @@ The first is not done. Phase 2 closes when D9's remaining work lands.
 | Cockpit reads the career position and countdown (4.4 + 5.3) | **Landed** (closes the 2026-10-09 deferral) | 2A.1 | `3b6f3cc` | `SnapshotCockpitTest`, `SnapshotScenarioCountdownTest` |
 | Facility levels per turn | **Landed** | 2A.2 | `c8402ee` | `TurnFacilityLevelsTest` |
 | Per-turn failure rate and preview gains | **Landed** (stored, not computed) | 2A.3 | `3b34fb0` | `TurnFailurePreviewTest` |
-| Stat-ceiling fourth marker | **Landed-superseded** — the persistence half is the deliverable; the render target `StatBand.vue` was deleted by the cutover at `b30906a`, and `CareerStatePanel.vue:16` states it was deliberately not reused | 2A.4 | `cb42d93` (persistence half) | `RunStatCeilingsTest` |
+| Stat-ceiling fourth marker | **Landed-superseded** — the render half was superseded by the cutover at `b30906a` (`StatBand.vue` deleted, `CareerStatePanel.vue:16` states it was deliberately not reused); the persistence half was then dropped in this commit, since no reader remained. This supersedes the 2026-10-10 close's "the persistence half is the deliverable" | 2A.4 | `cb42d93`, dropped at `2026_10_10_170000_drop_stat_ceilings_from_training_runs` | `RunStatCeilingsTest` retired with the column |
 | Nav-rail run-record door relabelled to the Cockpit | **Landed** | 2A.5 | `d251f7f` | `NoStaleRunRecordLinksTest`; career-cockpit / career-result specs |
 | Cockpit renders the run's identity, team and Unity Cup state | **Landed** | 2A.6 | `5eba0d0` | `CockpitRunIdentityTest`, `CockpitTeamPanelTest`, `CockpitUnityCupCountersTest` — 9 focused / 70 regression passed |
 | Race payout columns | **Landed** | 2B A4 | `057db67` | `RacePayoutTest` |
