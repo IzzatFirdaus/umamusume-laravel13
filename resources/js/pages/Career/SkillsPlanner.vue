@@ -10,8 +10,9 @@
  * target write whose Form Request already owns `skill_priorities`.
  *
  * The page pattern is `Career/RaceDecision.vue`'s: `CareerLayout`, page-level loading and error
- * roles, and every figure composed server-side. Percentages appear here and are the client's own
- * hint-discount captions, which is a sourced display, not a prediction of anything.
+ * roles, and every figure composed server-side. No percentage appears here: the hint-discount
+ * ladder is not modelled, because no column holds a hint level, and the screen states that absence
+ * rather than printing a derived percentage.
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import SkillPlanRow from '../../components/career/SkillPlanRow.vue';
@@ -20,12 +21,6 @@ import AcquisitionStatusEditor from '../../components/career/AcquisitionStatusEd
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
-
-interface CostEntry {
-    level: string;
-    percent: number;
-    cost: number | null;
-}
 
 interface FitCell {
     key: string;
@@ -40,7 +35,6 @@ interface PlanRow {
     name_ja: string | null;
     is_unique: boolean;
     sp_cost: number | null;
-    costs: CostEntry[];
     recorded: { status: string; turn: number | null } | null;
     conditions: string | null;
     fit: FitCell[];
@@ -71,11 +65,12 @@ const props = defineProps<{
         sp_title: string | null;
         total: number | null;
         total_title: string | null;
+        remaining: number | null;
+        absent: string | null;
         warn: boolean;
         text: string;
     };
     groups: Group[];
-    ladder: { level: string; percent: number }[];
     acquisition_options: { value: string; label: string }[];
 }>();
 
@@ -193,13 +188,18 @@ const coverageConstants = computed(() =>
                 Skill Point coverage
                 <ProvenanceBadge state="calculated" title="The sum of the base prices of the skills still to learn, against the last recorded Skill Point total." />
             </h2>
-            <p class="mt-1 text-sm text-ink">
+            <!-- The computed line, or the named absence. A bare `N/A` here read as a panel that
+                 could never resolve; the total now prints whenever the catalogue prices every
+                 skill, and names the ones it cannot price when it does not. -->
+            <p v-if="props.coverage.total !== null" class="mt-1 text-sm text-ink">
                 The skills still to learn cost
-                <span class="font-mono tabular-nums" :title="props.coverage.total_title ?? undefined">{{ props.coverage.total ?? 'N/A' }}</span>
+                <span class="font-mono tabular-nums" :title="props.coverage.total_title ?? undefined">{{ props.coverage.total }}</span>
                 SP, and the run holds
                 <span class="font-mono tabular-nums" :title="props.coverage.sp_title ?? undefined">{{ props.coverage.sp ?? 'N/A' }}</span>
-                SP.
+                SP<template v-if="props.coverage.remaining !== null">, leaving
+                    <span class="font-mono tabular-nums">{{ props.coverage.remaining }}</span></template>.
             </p>
+            <p v-else class="mt-1 text-sm text-ink">{{ props.coverage.absent }}</p>
             <p v-if="coverageConstants !== ''" class="mt-1 text-xs text-ink-muted">
                 {{ coverageConstants }}
             </p>
@@ -218,19 +218,12 @@ const coverageConstants = computed(() =>
             </p>
         </section>
 
-        <!-- The ladder the per-row costs are priced from. The percentages are the client's own
-             captions (REFERENCE §1.1.4), which is why this screen can print them at all. -->
-        <section aria-labelledby="skills-ladder-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="skills-ladder-heading" class="text-base font-semibold text-ink-strong">The hint ladder</h2>
-            <p class="mt-1 flex flex-wrap items-center gap-x-3 text-sm text-ink">
-                <span v-for="level in props.ladder" :key="level.level" class="font-mono tabular-nums">
-                    {{ level.level }} {{ level.percent }}% off
-                </span>
-                <ProvenanceBadge
-                    state="confirmed"
-                    title="Read off the [Global] Learn screen on 2026-10-03: UMAMUSUME_REFERENCE.md §1.1.4, SKILLS-MECHANICS.md §2.4, run report §2.1."
-                />
-            </p>
+        <!-- The hint discounts are not modelled: no column holds a hint level, so nothing the run
+             records can price one. The screen states that absence rather than printing a derived
+             percentage (ADR-0001 §3's rule for a percentage no stored value backs). -->
+        <section aria-labelledby="skills-hints-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
+            <h2 id="skills-hints-heading" class="text-base font-semibold text-ink-strong">Hint discounts</h2>
+            <p class="mt-1 text-sm text-ink">Hint discounts are not modelled.</p>
         </section>
 
         <section

@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\Skill;
 use App\Models\TrainingRun;
+use App\Services\SkillSpendCoverage;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,8 +23,8 @@ use Inertia\Response;
  * **Nothing here recommends a skill.** OQ-5 stays open (`PRD.md`, `ADR-0020` §2), so the race-fit
  * cells say "matches", "does not match" or "not recorded" and never rank, score or prioritise; the
  * only ordering on the screen is the Trainer's own priority list. Every number is a catalogue fact,
- * a recorded value, or the one ladder the client itself prints; a figure this tree cannot source
- * renders `N/A` with the reason, never a default (D-220).
+ * a recorded value, or the run's own stored total; a figure this tree cannot source renders as the
+ * absence it is, with the reason, never a default (D-220).
  */
 final class SkillsPlannerController extends Controller
 {
@@ -43,7 +44,6 @@ final class SkillsPlannerController extends Controller
             'target' => $this->targetSection($run, $target),
             'coverage' => $this->coverageSection($run, $required),
             'groups' => $this->groupRows($run, $required, $target),
-            'ladder' => $this->ladderRows(),
             // F2, plan §9.6 ruling 5: the acquired/skipped status write now lives on the Skills
             // Planner rather than the 0.1.0 run-detail screen. The route and Form Request are the
             // same ones the record screen used; the controller repoints them to the cockpit after the
@@ -103,46 +103,62 @@ final class SkillsPlannerController extends Controller
      *
      * Both figures can be unstated: no turn logged means no SP total the run ever recorded, a
      * priority skill whose catalogue row carries no price means the sum would be a guess, and no
-     * target at all means nothing is Required. A missing price is not a zero, so the total is
-     * refused rather than silently shortened (D-220). Learned skills are excluded because their
-     * SP is spent.
+     * target at all means nothing is Required. A missing price is not a zero, so the sum is
+     * refused and the skills it could not price are named, rather than the total quietly shortened
+     * (D-220). Learned skills are excluded because their SP is spent.
      *
      * @param  list<array<string, mixed>>  $required
      * @return array<string, mixed>
      */
     private function coverageSection(TrainingRun $run, array $required): array
     {
-        $unpriced = array_filter($required, static fn (array $row): bool => $row['sp_cost'] === null);
+        $costs = [];
+        $unpriced = [];
 
-        $total = null;
-        $totalTitle = null;
+        foreach ($required as $row) {
+            $name = (string) $row['name'];
+            $cost = $row['sp_cost'] === null ? null : (int) $row['sp_cost'];
 
-        if ($required === []) {
-            $totalTitle = 'No build target is set, so no skill is Required and there is nothing to sum.';
-        } elseif ($unpriced !== []) {
-            $names = implode(', ', array_column($unpriced, 'name'));
-            $count = count($unpriced);
-            $totalTitle = "{$count} of the skills still to learn carry no SP price in the catalogue"
-                ." ({$names}), so the total cannot be stated.";
-        } else {
-            $total = array_sum(array_column($required, 'sp_cost'));
+            $costs[$name] = $cost;
+
+            if ($cost === null) {
+                $unpriced[] = $name;
+            }
         }
 
         $latest = $run->turnEntries->sortByDesc('turn')->first();
         $sp = $latest?->sp;
 
-        $warn = $total !== null && $sp !== null && $total > $sp;
+        $coverage = SkillSpendCoverage::sum($costs, $sp);
+
+        $totalTitle = null;
+        $absent = null;
+
+        if ($required === []) {
+            $totalTitle = 'No build target is set, so no skill is Required and there is nothing to sum.';
+            $absent = 'No skill is Required yet, so there is nothing to price.';
+        } elseif ($unpriced !== []) {
+            $names = implode(', ', $unpriced);
+            $count = count($unpriced);
+            $totalTitle = "{$count} of the skills still to learn carry no SP price in the catalogue"
+                ." ({$names}), so the total cannot be stated.";
+            $absent = "Cost not recorded for: {$names}.";
+        }
 
         return [
             'sp' => $sp,
             'sp_title' => $sp === null ? 'No turn has been logged, so the run has never recorded a Skill Point total.' : null,
-            'total' => $total,
+            'total' => $coverage['total_cost'] ?? null,
             'total_title' => $totalTitle,
-            'warn' => $warn,
+            'remaining' => $coverage['remaining'] ?? null,
+            // The rendered sentence when the total is refused: the named skills, or the reason
+            // there is nothing to price. Null while the figures resolve, so the page prints them.
+            'absent' => $absent,
+            'warn' => $coverage !== null && $sp !== null && $coverage['total_cost'] > $sp,
             // The total prices every skill at its base; the client pays less when a hint level is
             // on the skill, and no column holds hint levels (G-SK-3), so the sum is the honest one.
-            'text' => $total !== null && $sp !== null
-                ? "The skills still to learn cost {$total} SP and the run holds {$sp}."
+            'text' => $coverage !== null && $sp !== null
+                ? "The skills still to learn cost {$coverage['total_cost']} SP and the run holds {$sp}."
                 : '',
         ];
     }
@@ -293,8 +309,8 @@ final class SkillsPlannerController extends Controller
     }
 
     /**
-     * One row, as the props test asserts it: the state's facts, the ladder priced, the fit cells,
-     * and the raw conditions the source states.
+     * One row, as the props test asserts it: the state's facts, the base price, the fit cells, and
+     * the raw conditions the source states.
      *
      * @param  array{status: string, turn: int|null}|null  $recorded
      * @return array<string, mixed>
@@ -307,22 +323,12 @@ final class SkillsPlannerController extends Controller
     ): array {
         $name = $skill === null ? ($priorityName ?? '') : $skill->name;
 
-        $costs = array_map(
-            static fn (array $level): array => [
-                'level' => $level['level'],
-                'percent' => $level['percent'],
-                'cost' => $skill?->sp_cost === null ? null : intdiv($skill->sp_cost * (100 - $level['percent']), 100),
-            ],
-            $this->ladderRows(),
-        );
-
         return [
             'id' => $skill?->id,
             'name' => $name,
             'name_ja' => $skill?->name_ja,
             'is_unique' => $skill !== null && $skill->is_unique,
             'sp_cost' => $skill?->sp_cost,
-            'costs' => $costs,
             'recorded' => $recorded,
             'conditions' => $this->conditionsLine($skill),
             'fit' => $this->fitCells($skill, $target),
@@ -487,17 +493,6 @@ final class SkillsPlannerController extends Controller
         }
 
         return null;
-    }
-
-    /**
-     * @return list<array{level: string, percent: int}>
-     */
-    private function ladderRows(): array
-    {
-        /** @var list<array{level: string, percent: int}> $ladder */
-        $ladder = config('uma.skills.hint_discount', []);
-
-        return $ladder;
     }
 
     /**

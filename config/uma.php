@@ -379,23 +379,6 @@ return [
     'skills' => [
 
         /*
-         * The hint discount ladder, read off the [Global] Learn screen on 2026-10-03: the client
-         * prints `Hint Lvl N` above `NN% OFF`. `UMAMUSUME_REFERENCE.md` §1.1.4 carries the read,
-         * `docs/research-scratch/SKILLS-MECHANICS.md` §2.4 the caption table, and
-         * `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §2.1 the frame evidence. `Lv Max` is a
-         * caption, not a level number. Displayed cost is base x (1 - discount) floored to the
-         * integer, which the sampled bases reconcile (130 -> 104/91/84, 160 -> 144/128/112/96,
-         * 180 -> 162, 200 -> 180/140/130).
-         */
-        'hint_discount' => [
-            ['level' => 'Hint Lvl 1', 'percent' => 10],
-            ['level' => 'Hint Lvl 2', 'percent' => 20],
-            ['level' => 'Hint Lvl 3', 'percent' => 30],
-            ['level' => 'Hint Lvl 4', 'percent' => 35],
-            ['level' => 'Hint Lvl Max', 'percent' => 40],
-        ],
-
-        /*
          * The number maps the race-fit comparison is allowed to read. `distance_type` is decoded
          * 1..4 against the client's own band tags and `ground_type` 1 and 2 are pinned by the
          * client's own skill copy, both in `UMAMUSUME_REFERENCE.md` §1.2. The `running_style`

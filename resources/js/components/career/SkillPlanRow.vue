@@ -2,20 +2,14 @@
 /*
  * One skill row on the Skills Planner (plan §8 D13). Shared by the Required, Available and Learned
  * groups: the state word lives on the group's heading and its glyph, so a row never has to repeat
- * either. What a row prints is the skill's own facts, the ladder priced off the sourced percentages,
- * the raw conditions the source states, and the fit cells - matches, does not match, not recorded -
- * which compare nothing the repository cannot source (PRD OQ-5 keeps style unclaimed).
+ * either. What a row prints is the skill's own facts, its stored base price, the raw conditions the
+ * source states, and the fit cells - matches, does not match, not recorded - which compare nothing
+ * the repository cannot source (PRD OQ-5 keeps style unclaimed).
  *
  * The move buttons are the only edit; when `movable` is false they do not render, and the reorder
  * itself lives in the page that owns the list order.
  */
 import { computed, nextTick, ref } from 'vue';
-
-interface CostEntry {
-    level: string;
-    percent: number;
-    cost: number | null;
-}
 
 interface FitCell {
     key: string;
@@ -31,7 +25,6 @@ const props = defineProps<{
         name_ja: string | null;
         is_unique: boolean;
         sp_cost: number | null;
-        costs: CostEntry[];
         recorded: { status: string; turn: number | null } | null;
         conditions: string | null;
         fit: FitCell[];
@@ -96,16 +89,6 @@ async function move(delta: number): Promise<void> {
         <p v-if="props.row.recorded !== null" class="mt-1 text-xs text-ink-muted">
             Recorded: {{ props.row.recorded.status }}
             <template v-if="props.row.recorded.turn !== null"> on turn {{ props.row.recorded.turn }}</template>
-        </p>
-
-        <!-- The ladder, priced: the captions and percentages are the client's own (REFERENCE §1.1.4),
-             the arithmetic is base x (1 - discount) floored, and an unpriced skill costs N/A at
-             every level rather than 0. -->
-        <p v-if="props.row.sp_cost !== null" class="mt-1 flex flex-wrap gap-x-3 font-mono text-xs tabular-nums text-ink">
-            <span v-for="cost in props.row.costs" :key="cost.level">{{ cost.level }}: {{ cost.cost }} SP</span>
-        </p>
-        <p v-else class="mt-1 text-xs text-ink-muted" title="No base price is published, so no discounted figure can exist at any hint level.">
-            Costs at each hint level: N/A.
         </p>
 
         <p v-if="props.row.conditions !== null" class="mt-1 text-xs text-ink-muted">

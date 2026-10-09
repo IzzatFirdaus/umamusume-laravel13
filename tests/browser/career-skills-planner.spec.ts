@@ -5,10 +5,11 @@ import { recordTurns } from '../utils/record-turns';
 
 /*
  * Rendered-copy, keyboard and accessibility evidence for the Skills Planner (plan §8 D13,
- * `SCR-CAR-016`). `CareerSkillsPlannerTest` asserts the resolved props - the four states and their
- * precedence, the coverage figures, the priced ladder, the fit cells, the reorder write. These cases
- * assert what only a browser reaches: the warning block a sighted Trainer reads, the keyboard path
- * through the reorder and its live announcement, the 44px sweep, and an axe scan.
+ * `SCR-CAR-016`). `CareerSkillsPlannerTest` and `SkillSpendCoverageTest` assert the resolved props -
+ * the four states and their precedence, the coverage figures, the fit cells, the reorder write, and
+ * that no hint ladder survives. These cases assert what only a browser reaches: the warning block a
+ * sighted Trainer reads, the stated hint-discount absence, the keyboard path through the reorder and
+ * its live announcement, the 44px sweep, and an axe scan.
  *
  * Fixture strategy. The run is created through the create form (the app's supported path in) and
  * deleted over HTTP in `afterEach` (`tests/utils/delete-run.ts`).
@@ -93,7 +94,7 @@ async function openPlanner(page: import('@playwright/test').Page): Promise<void>
     await page.locator('#app > *').first().waitFor();
 }
 
-test('warns when SP cannot cover the skills still to learn, and prices the sourced ladder', async ({ page }) => {
+test('warns when SP cannot cover the skills still to learn, and states the discounts it does not model', async ({ page }) => {
     await openPlanner(page);
 
     // The warning is glyph plus text, and the text carries both numbers: the base-price sum and
@@ -102,13 +103,10 @@ test('warns when SP cannot cover the skills still to learn, and prices the sourc
     await expect(warn).toBeVisible();
     await expect(warn).toContainText('the run holds 100');
 
-    // The ladder legend, with its Confirmed badge beside it.
-    await expect(page.getByText('Hint Lvl 1 10% off')).toBeVisible();
-    await expect(page.getByText('Hint Lvl Max 40% off')).toBeVisible();
-    await expect(page.getByRole('img', { name: /Confirmed/ })).toBeVisible();
-
-    // Per-row costs are base x (1 - discount) floored: 180 x 0.9 = 162.
-    await expect(page.getByText('Hint Lvl 1: 162 SP').first()).toBeVisible();
+    // The hint-discount ladder was removed (A5): the screen states the absence rather than pricing
+    // a percentage no stored column backs, so no `Hint Lvl` string renders anywhere.
+    await expect(page.getByText('Hint discounts are not modelled.')).toBeVisible();
+    await expect(page.getByText(/Hint Lvl/)).toHaveCount(0);
 
     // The fit cells render their three states as words, not colour.
     await expect(page.getByText('Not recorded').first()).toBeVisible();

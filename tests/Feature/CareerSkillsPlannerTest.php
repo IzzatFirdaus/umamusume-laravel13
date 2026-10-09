@@ -16,9 +16,14 @@ use Tests\TestCase;
 
 /**
  * The Skills Planner's resolved props (plan §8 D13, `Career/SkillsPlanner.vue`). The four skill
- * states and their precedence, the Skill Point coverage warning, the sourced hint-discount ladder,
- * the race-fit cells and the reorder write. Rendered copy, keyboard reorder and the 44px sweep are
- * the browser spec's; the reasons a figure is absent are asserted here beside the figure.
+ * states and their precedence, the Skill Point coverage warning, the race-fit cells and the reorder
+ * write. Rendered copy, keyboard reorder and the 44px sweep are the browser spec's; the reasons a
+ * figure is absent are asserted here beside the figure.
+ *
+ * The hint-discount ladder was removed on the owner's ruling (A5): `SkillSpendCoverageTest` owns
+ * both the coverage arithmetic the ladder used to sit beside and the proof that no ladder survives
+ * on the props, so the case that priced it is gone from this file rather than kept asserting a
+ * feature that no longer ships.
  *
  * Top-level helpers carry the file's own prefix on purpose: a bare `eventRun()` in another slice's
  * untracked test file collides with the same name in `TurnEventTypePayloadsTest` and aborts the
@@ -152,33 +157,6 @@ final class CareerSkillsPlannerTest extends TestCase
                 ->where('coverage.total', null)
                 ->where('coverage.total_title', fn (?string $title): bool => (string) $title !== ''
                     && str_contains((string) $title, 'Unpriced Skill')));
-    }
-
-    public function test_prices_the_hint_ladder_off_the_sourced_percentages_floored(): void
-    {
-        $run = $this->plannerRun();
-        $run->update(['build_target' => $this->target(['skill_priorities' => ['Priced Skill']])]);
-        $this->skill('Priced Skill', 200);
-
-        $this->get(route('runs.skills.planner', $run))
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                // The ladder is the client's own caption set (REFERENCE §1.1.4); the displayed
-                // cost is base x (1 - discount) floored, which 200 reconciles at every level.
-                ->where('ladder', [
-                    ['level' => 'Hint Lvl 1', 'percent' => 10],
-                    ['level' => 'Hint Lvl 2', 'percent' => 20],
-                    ['level' => 'Hint Lvl 3', 'percent' => 30],
-                    ['level' => 'Hint Lvl 4', 'percent' => 35],
-                    ['level' => 'Hint Lvl Max', 'percent' => 40],
-                ])
-                ->where('groups.0.rows.0.costs', [
-                    ['level' => 'Hint Lvl 1', 'percent' => 10, 'cost' => 180],
-                    ['level' => 'Hint Lvl 2', 'percent' => 20, 'cost' => 160],
-                    ['level' => 'Hint Lvl 3', 'percent' => 30, 'cost' => 140],
-                    ['level' => 'Hint Lvl 4', 'percent' => 35, 'cost' => 130],
-                    ['level' => 'Hint Lvl Max', 'percent' => 40, 'cost' => 120],
-                ]));
     }
 
     public function test_compares_only_the_dimensions_a_source_lets_it_compare(): void
