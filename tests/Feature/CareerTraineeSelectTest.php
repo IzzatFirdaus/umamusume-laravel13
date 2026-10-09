@@ -40,6 +40,27 @@ function rosterTrainee(string $name, array $letters): Umamusume
     ]);
 }
 
+it('renders all ten aptitude letters the catalogue holds, index for index (D8)', function (): void {
+    // D8 was reported as a catalogue/display mismatch: the [Rosy Dreams] Rice Shower scenario document
+    // records Mile B, Front A, Late B, while the picker shows C, B, C. The picker is faithful. The
+    // committed export (`gametora-characters.e9e9ee6d.json`, card 103001) carries
+    // `["A","G","E","C","A","A","B","A","C","G"]` in the order turf, dirt, sprint, mile, medium,
+    // long, front, pace, late, end, and the seeded column holds it letter for letter. This pins all
+    // ten so a drift in the seed or in the mapping fails here rather than on a screen.
+    rosterTrainee('Rice Shower', [
+        'turf' => 'A', 'dirt' => 'G', 'sprint' => 'E', 'mile' => 'C', 'medium' => 'A',
+        'long' => 'A', 'front_runner' => 'B', 'pace_chaser' => 'A', 'late_surger' => 'C', 'end_closer' => 'G',
+    ]);
+
+    $this->get(route('career.trainee'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('trainees.data.0.aptitudes', [
+                'turf' => 'A', 'dirt' => 'G', 'sprint' => 'E', 'mile' => 'C', 'medium' => 'A',
+                'long' => 'A', 'front_runner' => 'B', 'pace_chaser' => 'A', 'late_surger' => 'C', 'end_closer' => 'G',
+            ]));
+});
+
 it('names the stored trainee even when she is not in the roster shown (D5)', function (): void {
     // The readout resolved the name from the paginated, filtered list, so a Trainer who searched,
     // selected, and came back to an unfiltered page saw `N/A` beside a flash saying the trainee was

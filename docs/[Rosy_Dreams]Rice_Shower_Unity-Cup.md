@@ -58,6 +58,18 @@ stays open, now as a measured shortfall rather than an unexamined number.
 Aptitudes (`1dde6b2f`): Turf A, Dirt G. Sprint E, Mile B, Medium A, Long A. Front A, Pace A, Late B,
 End G. A Medium/Long build with the pace half available, and Guts is the designed carry stat at +20%.
 
+*Dated erratum 2026-10-09 (D8 of the UX walk remediation). The sentence above stands as written, and
+three of its letters do not agree with the tool's committed catalogue source. The GameTora export the
+seeder reads (`database/seeders/data/gametora-characters.e9e9ee6d.json`, card `103001`, `[Rosy
+Dreams]`) carries `aptitude: ["A","G","E","C","A","A","B","A","C","G"]` in the order turf, dirt,
+sprint, mile, medium, long, front runner, pace chaser, late surger, end closer — Mile **C**, Front
+Runner **B**, Late Surger **C**, where this document records B, A and B. Measured 2026-10-09: the
+seeded column and the trainee picker both reproduce the export letter for letter, so no seed,
+transformation or display defect exists on the tool's side; the two readings disagree about the
+client. Which one the game actually prints was not settled here, and the tool was not changed: the
+picker's values are the catalogue's own (`CareerTraineeSelectTest` pins all ten). A reader comparing
+the two should treat the difference as open, not as a bug in the tool.*
+
 ### 1.3 Skills owned
 
 The trainee's own Details screen, Skills tab (`1dde6b2f`), shows ten chips and the list scrolls:
