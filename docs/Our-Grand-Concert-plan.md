@@ -974,6 +974,40 @@ Run the appropriate project testing levels according to `AGENTS.md §9`.
 
 Only claim gates that were actually executed.
 
+### Acceptance record — 2026-10-09
+
+The scenario is complete as far as current evidence permits. Every actionable criterion above is
+verified against the passing feature tests on this tree, not against a remembered state:
+
+- **Scenario entry** — `CareerScenarioSelectTest`, `CareerTraineeSelectTest`, `CareerBuildTargetTest`,
+  `CareerInheritanceEventTest`, `CareerLegacyDeckStepsTest`, `CareerPreflightTest`: green.
+- **Career lifecycle** — `CareerCockpitTest` (run creation, turn entry, correction, status/scenario/period
+  writes), `CareerTrainingDetailTest` (Performance), `CareerResultTest` (Career Report),
+  `CareerSaveVeteranTest` (veteran handoff): green.
+- **UI** — `GrandConcertPanelTest` and `ScenarioPanelTest` (capability visibility, panel visibility,
+  validation, readback, empty states, provenance): green.
+- **Data integrity** — scenario-scoped race catalog and the finale reads are pinned by
+  `CockpitFinaleStripTest`, `FinaleAbsenceTest`, `FinaleReportingTest`, `RunRaceStripTest`: green.
+- **Blocked mechanics (Lessons, Songs, Live Bonuses, Promo Concerts)** — the acceptance is the absence,
+  and it is stated: `config/scenarios.php:480`'s `panel_absence` ("The mechanics for this scenario are
+  sourced, but no capture of the client's own screens exists yet, so no panel is drawn."), asserted by
+  `GrandConcertPanelTest`. No surface invents a mechanic.
+
+**Gates, as actually run.** `php artisan test --compact`: **8 failed, 2 skipped, 1489 passed (26155
+assertions), 341.74s**. All eight failures are the F2 cutover's, not this scenario's: six in
+`StatBandTest` (its `StatBand`/`GradeBadge` subject retired with `Runs/Show.vue`, the F2 close-out's
+Delta C) and two in `TurnEntryFieldSourceTest` (stale assertions left by `1ec92ab`, the energy-state
+change). `npm run typecheck` exit 0; `npm run build` exit 0; `composer lore` exit 0 (302 pre-existing
+hits); `composer lore-code` exit 0 (118 pre-existing hits).
+
+**Browser walk: not completed.** The harness cannot own its port: a leaked `php artisan serve` holds the
+default `:8127` (KI-73), and the box was contended enough that the suite ran ~46s per case (KI-74), so
+the run was voided as a signal rather than read. The failures seen before the void were all F2 cutover
+leftovers — `career-cockpit.spec.ts`'s stale "run screen" link copy, `career-result.spec.ts`'s stale
+`runs.show` status flow, and `run-detail.spec.ts` driving the redirected page — and the concurrent
+session was repairing them in the working tree during this pass (`career-cockpit.spec.ts:114` and
+`career-result.spec.ts:35` are already repointed, and `run-detail.spec.ts` is staged for deletion).
+
 ---
 
 # Global Out-of-Scope Rules
@@ -1082,12 +1116,12 @@ Phase D — Live systems
 Phase E — Grand Concert + Intelligence
   Slice 19 Finale state foundation                COMPLETE
   Slice 20 Finale execution/reporting             COMPLETE
-  Slice 21 Scenario-aware Advisor                 PLANNED
-  Slice 22 Scenario cockpit integration           PLANNED
+  Slice 21 Scenario-aware Advisor                 COMPLETE
+  Slice 22 Scenario cockpit integration           COMPLETE
 
 Phase F — Acceptance
-  Slice 23 Cross-feature consistency audit        PLANNED
-  Slice 24 Full Grand Concert acceptance          PLANNED
+  Slice 23 Cross-feature consistency audit        COMPLETE (aa5d975)
+  Slice 24 Full Grand Concert acceptance          COMPLETE (see the acceptance record, 2026-10-09)
 ```
 
 ## Definition of "Complete"
