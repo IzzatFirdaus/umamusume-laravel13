@@ -1078,11 +1078,11 @@ also does not resolve the **numbering collision**: this KI-70 and the process ha
 renumber an existing entry, and renumbering this one would break the inbound `KI-70` anchors in the plan
 and in this file, so the collision is reported for the owner to settle rather than fixed by inference.
 
-### KI-71 The Grand Concert final is tagged with a scenario key no run carries - FILED 2026-10-07 (E5 hand-off), FIXED IN TREE 2026-10-08, NOT CLOSED
+### KI-71 The Grand Concert final is tagged with a scenario key no run carries - FILED 2026-10-07 (E5 hand-off), CLOSED 2026-10-09
 
-**Status: FIXED IN TREE, NOT CLOSED.** Not caused by E5 and not fixed by it. It is filed here because E5 reads
-the same career calendar D10 reads, and reading it whole is what made the mismatch visible. The fix below is
-uncommitted, so a checkout of `HEAD` still carries the defect.
+**Status: CLOSED 2026-10-09.** Not caused by E5 and not fixed by it. It is filed here because E5 reads
+the same career calendar D10 reads, and reading it whole is what made the mismatch visible. The fix below
+was uncommitted at filing but is now on `HEAD` at `480b711`.
 
 `app/Services/DataPipeline/Parsers/GametoraRaceCatalogParser.php` maps the export's `final_live` source key
 to `grand_concert`. `config/scenarios.php` keys the same scenario `our_grand_concert`, and that is the key
@@ -1161,6 +1161,12 @@ scenario key re-creates this exact orphan, and nothing in the pipeline removes t
 outlives this instance. Nothing here re-runs the parser against a fresh fetch either, so a later export that
 renames the slot id would need the same two steps. And the numbering collisions recorded above are still
 open.
+
+**Closed 2026-10-09.** The fix is on `HEAD` at `480b711` (parser map corrected to
+`'final_live' => 'our_grand_concert'`), the reparse ran (409 updated, 1 created), the orphan row 409 was
+dumped and deleted, and `tests/Feature/GametoraRaceCatalogParserTest.php` carries the invariant test.
+Proving commands pass on the dev file. What closure does not cover: the numbering collision (two KI-71
+entries) and the class's future re-creation on any scenario key rename.
 
 ### KI-73 A leaked `php artisan serve` holding :8127 takes the default browser entry point down for every session in the worktree - FILED 2026-10-08 (E6 follow-up 2, on the owner's instruction to diagnose rather than work around), CLOSED 2026-10-09
 
