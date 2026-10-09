@@ -44,6 +44,13 @@ final readonly class LegacySelectionPayload
 
     public const LEGACY_KEYS = ['rank', 'is_guest', 'ancestors', 'sparks'];
 
+    /**
+     * The optional companion to a legacy's `ancestors` list: one `{id, name, costume}` per ancestor, in
+     * the same order, so two ancestors the client spells the same can be told apart by id or costume.
+     * Absent on a names-only payload, which is why it is not in `LEGACY_KEYS`.
+     */
+    public const ANCESTOR_META_KEYS = ['id', 'name', 'costume'];
+
     public const SPARK_KEYS = ['kind', 'target', 'stars'];
 
     public const SPARK_KINDS = ['blue', 'pink', 'green', 'white', 'scenario'];
@@ -71,7 +78,7 @@ final readonly class LegacySelectionPayload
     }
 
     /**
-     * @param  list<array{rank: int|null, is_guest: bool, ancestors: list<string|null>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
+     * @param  list<array{rank: int|null, is_guest: bool, ancestors: list<string|null>, ancestors_meta?: list<array{id: int, name: string, costume: string|null}>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
      */
     public function __construct(
         public array $legacies,
@@ -118,7 +125,7 @@ final readonly class LegacySelectionPayload
             throw new InvalidArgumentException("Legacy #{$index} is not a record.");
         }
 
-        self::assertKeys($legacy, self::LEGACY_KEYS, "Legacy #{$index}");
+        self::assertKeysAllowing($legacy, self::LEGACY_KEYS, ['ancestors_meta'], "Legacy #{$index}");
 
         if (! is_bool($legacy['is_guest'])) {
             throw new InvalidArgumentException("Legacy #{$index} needs a bool is_guest.");
@@ -152,12 +159,85 @@ final readonly class LegacySelectionPayload
             $sparks[] = self::spark($index, $sparkIndex, $spark);
         }
 
-        return [
+        $record = [
             'rank' => self::nullableInt($legacy['rank'], "Legacy #{$index} rank"),
             'is_guest' => $legacy['is_guest'],
             'ancestors' => array_values($legacy['ancestors']),
             'sparks' => $sparks,
         ];
+
+        // Only a payload that actually carries the companion stores it: a names-only record keeps the
+        // exact shape it had before this key existed, so an exact-shape reader is not disturbed by a
+        // null it never asked for.
+        $meta = self::ancestorsMeta($index, $legacy['ancestors_meta'] ?? null, $record['ancestors']);
+
+        if ($meta !== null) {
+            $record['ancestors_meta'] = $meta;
+        }
+
+        return $record;
+    }
+
+    /**
+     * The optional id/costume companion, aligned by index with the ancestor names.
+     *
+     * Backward compatibility is the whole point: a payload written before this key existed carries names
+     * only, and reading it must not fail. When the key is present it must line up - one row per ancestor,
+     * each naming the ancestor it describes - because a misaligned companion would silently attach the
+     * wrong id to a name, which is worse than the duplicate it exists to fix.
+     *
+     * @param  list<string|null>  $ancestors
+     * @return list<array{id: int, name: string, costume: string|null}>|null
+     */
+    private static function ancestorsMeta(int|string $index, mixed $meta, array $ancestors): ?array
+    {
+        if ($meta === null) {
+            return null;
+        }
+
+        if (! is_array($meta)) {
+            throw new InvalidArgumentException("Legacy #{$index} ancestors_meta is not a list.");
+        }
+
+        if (count($meta) !== count($ancestors)) {
+            throw new InvalidArgumentException(
+                "Legacy #{$index} names ".count($ancestors).' ancestors but carries '.count($meta).' meta rows.',
+            );
+        }
+
+        $rows = [];
+
+        foreach (array_values($meta) as $metaIndex => $row) {
+            $where = "Legacy #{$index} ancestor meta #{$metaIndex}";
+
+            if (! is_array($row)) {
+                throw new InvalidArgumentException("{$where} is not a record.");
+            }
+
+            self::assertKeys($row, self::ANCESTOR_META_KEYS, $where);
+
+            if (! is_int($row['id'])) {
+                throw new InvalidArgumentException("{$where} needs an int id.");
+            }
+
+            if (! is_string($row['name'])) {
+                throw new InvalidArgumentException("{$where} needs a string name.");
+            }
+
+            if ($row['costume'] !== null && ! is_string($row['costume'])) {
+                throw new InvalidArgumentException("{$where} costume is a string or null.");
+            }
+
+            if ($ancestors[$metaIndex] !== null && $ancestors[$metaIndex] !== $row['name']) {
+                throw new InvalidArgumentException(
+                    "{$where} names [{$row['name']}] but the ancestor at that index is [{$ancestors[$metaIndex]}].",
+                );
+            }
+
+            $rows[] = ['id' => $row['id'], 'name' => $row['name'], 'costume' => $row['costume']];
+        }
+
+        return $rows;
     }
 
     /**
@@ -240,6 +320,32 @@ final readonly class LegacySelectionPayload
 
         throw new InvalidArgumentException(
             "{$what} carries exactly [".implode(', ', $expected).'] keys'
+            .($unexpected === [] ? '' : ', with unknown key '.implode(', ', $unexpected))
+            .($missing === [] ? '' : ', missing '.implode(', ', $missing)).'.'
+        );
+    }
+
+    /**
+     * The same check where some keys are optional: every required key must be present and no key may be
+     * present that is neither required nor optional. Used for a record that grew a backward-compatible
+     * companion, where the older payload legitimately lacks the new key.
+     *
+     * @param  array<array-key, mixed>  $row
+     * @param  list<string>  $required
+     * @param  list<string>  $optional
+     */
+    private static function assertKeysAllowing(array $row, array $required, array $optional, string $what): void
+    {
+        $allowed = [...$required, ...$optional];
+        $unexpected = array_diff(array_keys($row), $allowed);
+        $missing = array_diff($required, array_keys($row));
+
+        if ($unexpected === [] && $missing === []) {
+            return;
+        }
+
+        throw new InvalidArgumentException(
+            "{$what} carries [".implode(', ', $required).'] and optionally ['.implode(', ', $optional).'] keys'
             .($unexpected === [] ? '' : ', with unknown key '.implode(', ', $unexpected))
             .($missing === [] ? '' : ', missing '.implode(', ', $missing)).'.'
         );

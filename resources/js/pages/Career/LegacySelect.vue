@@ -58,7 +58,7 @@ const props = defineProps<{
     affinity: string | null;
     graph: { trainee: { name: string | null }; parents: ParentNode[] };
     parents: (number | null)[];
-    roster: { id: number; name: string }[];
+    roster: { id: number; name: string; costume: string | null; label: string }[];
     rosterTotal: number;
     knownNames: string[];
     sparkKinds: Record<string, string>;

@@ -59,7 +59,7 @@ withDefaults(defineProps<{
      */
     modelValue?: string;
     /** Options for the pick control. Empty on the compare surface, which never assigns. */
-    options?: { id: number; name: string }[];
+    options?: { id: number; name: string; label?: string }[];
     /** Field errors for this node's control, keyed by the control's own name. */
     error?: string;
     assignable?: boolean;
@@ -146,7 +146,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
             >
                 <option value="">Not chosen</option>
                 <option v-for="option in options ?? []" :key="option.id" :value="option.id">
-                    {{ option.name }}
+                    {{ option.label ?? option.name }}
                 </option>
             </select>
             <!-- The error is tied to its control with `aria-describedby` (WCAG 3.3.1) rather than

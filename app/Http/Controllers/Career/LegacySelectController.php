@@ -65,6 +65,10 @@ class LegacySelectController extends Controller
         $parents = AncestryGraph::parentNames(SetupDraft::legacyParents());
         $library = $veterans->handle([], 100);
 
+        // The costume is what tells two parents with the same trainee name apart, so it is loaded with
+        // the page rather than per row: a pick list of two `Vodka` rows is the defect this answers.
+        $library->getCollection()->loadMissing('trainingRun.characterCard');
+
         return Inertia::render('Career/LegacySelect', [
             'trainee' => $trainee === null
                 ? null
@@ -88,10 +92,21 @@ class LegacySelectController extends Controller
             // than what the client still holds. Position in the list is the slot: 0 is Parent A.
             'parents' => SetupDraft::legacyParents(),
             'roster' => $library
-                ->through(static fn (Veteran $veteran): array => [
-                    'id' => $veteran->id,
-                    'name' => $veteran->trainingRun->umamusume->name,
-                ])
+                ->through(static function (Veteran $veteran): array {
+                    $name = $veteran->trainingRun->umamusume->name;
+                    $costume = $veteran->trainingRun->characterCard?->title;
+
+                    return [
+                        'id' => $veteran->id,
+                        'name' => $name,
+                        'costume' => $costume,
+                        // The option's own label: two rows the client spells the same are told apart by
+                        // the costume and always by the library id.
+                        'label' => $costume === null
+                            ? "{$name} · {$veteran->id}"
+                            : "{$name} {$costume} · {$veteran->id}",
+                    ];
+                })
                 ->items(),
             'rosterTotal' => $library->total(),
             // The names a Trainer can type into an ancestor field. Grandparents are frequently absent from
