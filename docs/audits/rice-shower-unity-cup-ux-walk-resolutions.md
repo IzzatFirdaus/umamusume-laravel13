@@ -43,10 +43,10 @@ The first is not done. Phase 2 closes when D9's remaining work lands.
 | D7 wizard step numbering skips 3 | **Fixed** (rendered surface removed, 2026-10-09; see below) | 2.4 | `6d53ffc` | `GuidedTurnOnRunViewTest` (1 new case) |
 | D8 Rice Shower aptitude mismatch | **Verified, not a tool defect** | 2.5 | `be48e60` | `CareerTraineeSelectTest` (1 new case) |
 | D9 duplicate turn-entry paths | **Fixed** — one shared field source, all three surfaces wired and labelled alike (2026-10-09) | 2.6 | `8e3d33c`, `5e41137`, `7a81c7c` + this commit | `TurnEntryFieldSourceTest` (4 cases) |
-| Career position / snapshot mode | Not started (Phase 3+) | — | — | — |
-| Legacy disambiguation, ancestor rank, grandparent sparks | Not started (Phase 6) | — | — | — |
-| Scenario metadata, typed spark targets | Not started (Phase 7) | — | — | — |
-| Energy model (exact/band/unknown) | Not started (Phase 8) | — | — | — |
+| Career position / snapshot mode | **Landed** (Phases 4–5; 4.4 and 5.3 cockpit-read deferred, see close) | 4.1–5.4 | `0025f37`, `d0bd138`, `a31000c`, `b890cd5`, `fc66978`, `8c7628d` | `SnapshotReviewTest`, `SnapshotTimelineTest`, `SnapshotRaceCalendarTest`, `SnapshotTrainingDecisionTest` |
+| Legacy disambiguation, ancestor rank, grandparent sparks | **Landed** (Phase 6) | 6.1–6.3 | `31c9f5d`, `5876f64`, `f39ff03` | `LegacyDisambiguationTest`, `AncestorRankTest`, `GrandparentSparksTest` |
+| Scenario metadata, typed spark targets | **Landed** (Phase 7) | 7.1–7.2 | `1098546`, `6fa0d01` | `ScenarioMetadataTest`, `SparkTargetValidationTest` |
+| Energy model (exact/band/unknown) | **Landed** (Phase 8.1; §11 record added at `837d995`) | 8.1 | `1ec92ab` | `EnergyStateTest` |
 
 ## Per finding
 
@@ -404,3 +404,37 @@ nowhere to go and the run then reads `N/A` everywhere), the trainee's star ratin
 ancestor letter ranks (B+, UG), card levels and limit breaks, team identity and the Unity Cup
 progression counts, the race-day card, and the mid-career position itself. Each needs the snapshot
 architecture (Phase 3 onward) or a dedicated slice; none was faked.
+
+## Close — final status (2026-10-09)
+
+**D1–D9 final status.** D1 **Fixed** (browser half green: `career-inheritance-event.spec.ts` 8 of 8).
+D2 **Fixed**. D3 **Fixed**. D4 **Fixed**. D5 **Fixed**. D6 **Fixed (rendered surface removed)**. D7
+**Fixed (rendered surface removed)**. D8 **Verified, not a tool defect**. D9 **Fixed** — one shared
+field source, all three surfaces wired and labelled alike.
+
+**Phases and commits (flat list).** Phase 4: `0025f37`, `d0bd138` (4.1–4.2), `a31000c` (4.3). Phase 5:
+`b890cd5` (5.1), `fc66978` (5.2), `8c7628d` (5.4). Phase 6: `31c9f5d`, `5876f64`, `f39ff03`. Phase 7:
+`1098546`, `6fa0d01`. Phase 8.1: `1ec92ab`; its §11 package (ADR-0024 + digest + index) at `837d995`.
+D6/D7 resolution: `e8a3dff`.
+
+**Outstanding at close.**
+
+- **Slices 4.4 and 5.3 are deferred.** Both read `careerPosition` / `scenarioCountdown` in the cockpit.
+  `app/Http/Controllers/Career/CockpitController.php` carries an unauthored peer hunk (staged and
+  unstaged, `MM`), so the two slices could not be landed without staging another session's work.
+  `SnapshotCockpitTest` and `SnapshotScenarioCountdownTest` were not created for the same reason. The
+  cockpit's YEAR/MONTH/TURN block and its countdown still derive from the run's turn number rather than
+  the imported position.
+- **D6 and D7's rendered assertions are not run**, because the surface they addressed (`Runs/Show.vue`
+  and its `run-detail.spec.ts`) was deleted by the peer's cockpit cutover. The behaviour they guarded is
+  carried by the cockpit and its `career-cockpit.spec.ts`, which was not re-run in this close (Option B
+  in the D6/D7 resolution did not require it).
+- **Deliberately out of scope**, per the task: new audits, session reports, `ADR-0019`/`ADR-0022`/
+  `ADR-0023` edits, and any change to `resources/js/pages/Runs/Show.vue` or the `runs.show` redirect.
+
+**Verification performed at close.** Focused Pest on every landed slice's file — 47 passed. Full
+`vendor/bin/phpstan analyse` — clean. `npm run typecheck` — clean. `npm run build` — clean.
+`php artisan migrate:status` on the dev database — no pending. `composer lore` — 302 hits, 77 exempt
+(unchanged; no new hit from the close). `composer lore-code` — no hit from any file changed here.
+`career-inheritance-event.spec.ts` — 8 of 8 passed. Not run: the full suite as one command, and
+`composer audit` / `npm audit` (no dependency changed).
