@@ -74,6 +74,16 @@ class StoreTrainingRunRequest extends FormRequest
             'growth_rate' => ['nullable', 'array:'.implode(',', self::stats())],
             'growth_rate.*' => ['nullable', 'integer', 'between:0,30'],
             /*
+             * The run's own ceilings as the Trainer composed them, keyed by the stat matrix so a
+             * hand-made POST cannot store a sixth stat. Entered, never derived: `ScenarioCaps` owns
+             * the scenario's ceiling, but the run's real caps sit above it once the card's sparks and
+             * any support-card Max-Stat layer are counted, and neither input lives here. Sparse, and
+             * null rather than an invented row of zeroes when the run stated none (D-220). No upper
+             * bound: the composed ceiling is the Trainer's own arithmetic, not this tool's.
+             */
+            'stat_ceilings' => ['nullable', 'array:'.implode(',', self::stats())],
+            'stat_ceilings.*' => ['nullable', 'integer', 'min:0'],
+            /*
              * The Grade Point period the Trainer reports as live (US-10, ADR-0003).
              * Entered, never derived (D-270): nothing in the corpus names a formula
              * that puts a career in a period, so "null until set" is the honest state
