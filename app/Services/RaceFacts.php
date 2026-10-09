@@ -49,10 +49,10 @@ final class RaceFacts
             self::fact(
                 'fan_gain',
                 'Fan gain',
-                null,
-                'No column holds a fan payout. This row carries the payout curve id the export publishes'
+                $slot->fanPayout(),
+                'Payout not recorded for this race. This row carries the payout curve id the export publishes'
                     .($slot->fans_gain_curve === null ? ' (none on this row)' : " ({$slot->fans_gain_curve})")
-                    .', and no payout table for those curves is stored, so the figure cannot be read off it.',
+                    .', and no per-placement payout is stored against it.',
             ),
             self::fact('reward', 'Reward', null, 'No column holds a race reward, and no source in this repository states one per race.'),
             self::fact('skill_points', 'Skill Points', null, 'No column holds a skill-point payout. The Trainer records what the client paid, on the run screen.'),

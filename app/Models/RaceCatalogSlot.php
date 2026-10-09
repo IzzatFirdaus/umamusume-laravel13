@@ -62,6 +62,9 @@ class RaceCatalogSlot extends Model
         'race_id',
         'fans_needed',
         'fans_gain_curve',
+        'fans_first',
+        'fans_second',
+        'fans_third',
         'is_mandatory',
         'is_maiden_gated',
         'is_special_race',
@@ -85,6 +88,9 @@ class RaceCatalogSlot extends Model
         'race_id' => 'integer',
         'fans_needed' => 'integer',
         'fans_gain_curve' => 'integer',
+        'fans_first' => 'integer',
+        'fans_second' => 'integer',
+        'fans_third' => 'integer',
         'sort_order' => 'integer',
         'is_mandatory' => 'boolean',
         'is_maiden_gated' => 'boolean',
@@ -226,6 +232,27 @@ class RaceCatalogSlot extends Model
     {
         return $this->fans_gain_curve !== null
             && $this->fans_gain_curve <= self::MAX_RESOLVED_GLOBAL_PAYOUT_CURVE;
+    }
+
+    /**
+     * The per-placement fan payout, formatted, or null when the row does not carry all three.
+     *
+     * One owner because two surfaces print it: the Race Decision card's field list and the Race
+     * Planner's Fan gain row (`RaceFacts` and `RacePlannerController`). A partial set is an absence
+     * rather than a half-answer, and a null must never render as 0.
+     */
+    public function fanPayout(): ?string
+    {
+        if ($this->fans_first === null || $this->fans_second === null || $this->fans_third === null) {
+            return null;
+        }
+
+        return sprintf(
+            '1st: %s / 2nd: %s / 3rd: %s',
+            number_format($this->fans_first),
+            number_format($this->fans_second),
+            number_format($this->fans_third),
+        );
     }
 
     public function distanceLabel(): string

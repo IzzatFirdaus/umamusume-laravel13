@@ -354,8 +354,8 @@ class RacePlannerController extends Controller
                 null,
             ],
             'fan_gain' => [
-                null,
-                'No column holds a fan payout. The row carries a payout curve id and no payout table for those curves is stored, so the figure cannot be read off it.',
+                $slot->fanPayout(),
+                'Payout not recorded for this race. The row carries a payout curve id and no per-placement payout is stored against it.',
                 null,
             ],
             'reward' => [
