@@ -51,6 +51,12 @@ final readonly class LegacySelectionPayload
      */
     public const ANCESTOR_META_KEYS = ['id', 'name', 'costume'];
 
+    /**
+     * The letter ranks the client shows for a Legacy's own standing, as read off the screen. Small on
+     * purpose: this is the vocabulary the client prints, not a computed grade.
+     */
+    public const RANK_LETTERS = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'S', 'B+', 'A+', 'S+'];
+
     public const SPARK_KEYS = ['kind', 'target', 'stars'];
 
     public const SPARK_KINDS = ['blue', 'pink', 'green', 'white', 'scenario'];
@@ -78,7 +84,7 @@ final readonly class LegacySelectionPayload
     }
 
     /**
-     * @param  list<array{rank: int|null, is_guest: bool, ancestors: list<string|null>, ancestors_meta?: list<array{id: int, name: string, costume: string|null}>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
+     * @param  list<array{rank: int|null, rank_letter?: string, is_guest: bool, ancestors: list<string|null>, ancestors_meta?: list<array{id: int, name: string, costume: string|null}>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
      */
     public function __construct(
         public array $legacies,
@@ -125,7 +131,7 @@ final readonly class LegacySelectionPayload
             throw new InvalidArgumentException("Legacy #{$index} is not a record.");
         }
 
-        self::assertKeysAllowing($legacy, self::LEGACY_KEYS, ['ancestors_meta'], "Legacy #{$index}");
+        self::assertKeysAllowing($legacy, self::LEGACY_KEYS, ['ancestors_meta', 'rank_letter'], "Legacy #{$index}");
 
         if (! is_bool($legacy['is_guest'])) {
             throw new InvalidArgumentException("Legacy #{$index} needs a bool is_guest.");
@@ -175,7 +181,33 @@ final readonly class LegacySelectionPayload
             $record['ancestors_meta'] = $meta;
         }
 
+        $letter = self::rankLetter($index, $legacy['rank_letter'] ?? null);
+
+        if ($letter !== null) {
+            $record['rank_letter'] = $letter;
+        }
+
         return $record;
+    }
+
+    /**
+     * A Legacy's own letter rank, from the client's small vocabulary, or null when none was read.
+     */
+    private static function rankLetter(int|string $index, mixed $letter): ?string
+    {
+        if ($letter === null) {
+            return null;
+        }
+
+        if (! is_string($letter) || ! in_array($letter, self::RANK_LETTERS, true)) {
+            $given = is_string($letter) ? $letter : gettype($letter);
+
+            throw new InvalidArgumentException(
+                "Legacy #{$index} rank_letter is one of ".implode(', ', self::RANK_LETTERS)."; [{$given}] is not.",
+            );
+        }
+
+        return $letter;
     }
 
     /**

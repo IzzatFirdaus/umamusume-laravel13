@@ -47,6 +47,11 @@ withDefaults(defineProps<{
     label: string;
     name: string | null;
     rank: number | null;
+    /**
+     * The letter rank the client prints, already spelled as the node renders it (`Rank B+`) or as the
+     * named absence (`Rank not recorded`). The numeric `rank` stays the star count beside it.
+     */
+    rankLabel?: string;
     isGuest: boolean;
     sparks: SparkRow[];
     probability: { value: null; title: string };
@@ -69,6 +74,7 @@ withDefaults(defineProps<{
     options: () => [],
     error: undefined,
     assignable: false,
+    rankLabel: 'Rank not recorded',
 });
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
@@ -90,16 +96,11 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
         </p>
 
         <div class="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs text-ink-muted">
-            <div class="flex items-baseline gap-1">
-                <!-- The label and its value stay one text run when there is a value: `Rank 4` is the unit
-                     the node reads back as. When there is none, the disclosure is a sibling of the label
-                     rather than a child of it, because `<details>` is flow content. -->
-                <span v-if="rank !== null">Rank {{ rank }}</span>
-                <template v-else>
-                    <span>Rank</span>
-                    <AbsenceValue reason="You have not recorded a rank for this parent." compact />
-                </template>
-            </div>
+            <!-- The letter rank the Trainer read, or the named absence. The star count is the numeric
+                 `rank` beside it: two fields, because the client shows two. -->
+            <span :title="rank === null ? 'You have not recorded a star count for this parent.' : undefined">
+                {{ rankLabel }}<span v-if="rank !== null">, {{ rank }}★</span>
+            </span>
             <span v-if="isGuest">Rented from a friend</span>
         </div>
 

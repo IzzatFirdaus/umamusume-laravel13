@@ -55,6 +55,8 @@ interface Member {
     label: string;
     name: string | null;
     rank: number | null;
+    rank_letter: string | null;
+    rank_label: string;
     is_guest: boolean;
     ancestors: { slot: string; name: string | null }[];
     sparks: Spark[];
@@ -262,6 +264,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                                     <span :class="member.name === null ? 'text-ink-muted' : ''">
                                         {{ memberName(member) }}
                                     </span>
+                                    <span class="ml-2 text-ink-muted">{{ member.rank_label }}</span>
                                     <span v-if="member.is_guest" class="ml-2 text-ink-muted">
                                         Rented from a friend
                                     </span>

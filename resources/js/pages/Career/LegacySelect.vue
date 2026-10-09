@@ -37,6 +37,8 @@ interface ParentNode {
     label: string;
     name: string | null;
     rank: number | null;
+    rank_letter: string | null;
+    rank_label: string;
     is_guest: boolean;
     ancestors: { slot: string; name: string | null }[];
     sparks: SparkRow[];
@@ -63,6 +65,7 @@ const props = defineProps<{
     knownNames: string[];
     sparkKinds: Record<string, string>;
     affinityGrades: string[];
+    rankLetters: string[];
     notice: string;
 }>();
 
@@ -77,6 +80,7 @@ const form = useForm({
     legacies: props.graph.parents.map((parent, index) => ({
         legacy_id: String(props.parents[index] ?? ''),
         rank: parent.rank === null ? '' : String(parent.rank),
+        rank_letter: parent.rank_letter ?? '',
         is_guest: parent.is_guest,
         ancestors: [parent.ancestors[0]?.name ?? '', parent.ancestors[1]?.name ?? ''] as [string, string],
         sparks: parent.sparks.map((spark) => ({
@@ -98,6 +102,7 @@ const saving = (): void => {
             ...legacy,
             legacy_id: legacy.legacy_id === '' ? null : Number(legacy.legacy_id),
             rank: legacy.rank === '' ? null : Number(legacy.rank),
+            rank_letter: legacy.rank_letter === '' ? null : legacy.rank_letter,
             sparks: legacy.sparks.filter((spark) => !isBlankSpark(spark)).map((spark) => ({
                 kind: spark.kind,
                 target: spark.target === '' ? null : spark.target,
@@ -252,6 +257,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                             :label="parent.label"
                             :name="roster.find((row) => String(row.id) === form.legacies[index].legacy_id)?.name ?? parent.name"
                             :rank="parent.rank"
+                            :rank-label="parent.rank_label"
                             :is-guest="form.legacies[index].is_guest"
                             :sparks="nodeSparks(index)"
                             :probability="parent.probability"
@@ -309,8 +315,23 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                 {{ parent.label }} as you read her
                             </p>
 
-                            <label class="mt-2 block text-xs font-medium text-ink" :for="`rank-${parent.slot}`">
-                                Own rank
+                            <label class="mt-2 block text-xs font-medium text-ink" :for="`rank-letter-${parent.slot}`">
+                                Own rank (letters)
+                            </label>
+                            <input
+                                :id="`rank-letter-${parent.slot}`"
+                                v-model="form.legacies[index].rank_letter"
+                                type="text"
+                                list="known-rank-letters"
+                                autocomplete="off"
+                                class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
+                            >
+                            <p class="mt-1 text-xs text-ink-muted">
+                                The letter the client shows, from its own set. Blank stays not recorded.
+                            </p>
+
+                            <label class="mt-3 block text-xs font-medium text-ink" :for="`rank-${parent.slot}`">
+                                Own rank (stars)
                             </label>
                             <input
                                 :id="`rank-${parent.slot}`"
@@ -413,6 +434,10 @@ const ancestorError = (index: number, slot: number): string | undefined =>
 
         <datalist id="known-umamusume-names">
             <option v-for="name in props.knownNames" :key="name" :value="name" />
+        </datalist>
+
+        <datalist id="known-rank-letters">
+            <option v-for="letter in props.rankLetters" :key="letter" :value="letter" />
         </datalist>
 
         <div class="mt-4 max-w-sm">

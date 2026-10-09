@@ -158,6 +158,11 @@ final class AncestryGraph
             'label' => $parentLabel,
             'name' => $name,
             'rank' => isset($legacy['rank']) ? (int) $legacy['rank'] : null,
+            // The letter rank the Trainer read beside the star count. `rank_label` is the exact string
+            // the node prints: a recorded letter, or the named absence, so a reader of the props can
+            // tell "B+" from "not recorded" without re-deriving the sentence.
+            'rank_letter' => isset($legacy['rank_letter']) ? (string) $legacy['rank_letter'] : null,
+            'rank_label' => isset($legacy['rank_letter']) ? 'Rank '.(string) $legacy['rank_letter'] : 'Rank not recorded',
             'is_guest' => (bool) ($legacy['is_guest'] ?? false),
             'ancestors' => $ancestors,
             'sparks' => $sparks,

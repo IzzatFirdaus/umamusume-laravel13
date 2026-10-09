@@ -115,6 +115,7 @@ class LegacySelectController extends Controller
             'knownNames' => Umamusume::query()->orderBy('name')->pluck('name')->all(),
             'sparkKinds' => AncestryGraph::SPARK_KIND_LABELS,
             'affinityGrades' => LegacySelectionPayload::AFFINITY_GRADES,
+            'rankLetters' => LegacySelectionPayload::RANK_LETTERS,
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
         ]);
     }

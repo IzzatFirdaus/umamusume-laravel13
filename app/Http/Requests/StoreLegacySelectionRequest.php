@@ -98,6 +98,9 @@ class StoreLegacySelectionRequest extends FormRequest
             // character's own count, so a `max` here would be a number the sources do not carry. A
             // negative rank is the only value that cannot be what a Trainer read.
             'legacies.*.rank' => ['nullable', 'integer', 'min:0'],
+            // The letter rank the client prints, from the payload's own small vocabulary. The numeric
+            // `rank` is the star count; this is the letter beside it, and neither is computed.
+            'legacies.*.rank_letter' => ['nullable', 'string', Rule::in(LegacySelectionPayload::RANK_LETTERS)],
             'legacies.*.is_guest' => ['required', 'boolean'],
             'legacies.*.ancestors' => ['present', 'array', 'max:'.LegacySelectionPayload::MAX_ANCESTORS],
             'legacies.*.sparks' => ['present', 'array'],
@@ -187,6 +190,9 @@ class StoreLegacySelectionRequest extends FormRequest
 
             $legacies[] = [
                 'rank' => isset($legacy['rank']) ? (int) $legacy['rank'] : null,
+                'rank_letter' => isset($legacy['rank_letter']) && $legacy['rank_letter'] !== ''
+                    ? (string) $legacy['rank_letter']
+                    : null,
                 'is_guest' => (bool) $legacy['is_guest'],
                 // Ancestors are names, not ids (`ADR-0010` Consequences §2): a Trainer's grandparents
                 // are frequently absent from the local catalogue, and an id column would be a second,
