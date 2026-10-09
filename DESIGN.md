@@ -577,7 +577,6 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   `block` and `inline-block` each compute a `disclosure-closed` marker and paint none of it, which leaves
   an absence that opens with no visible hint that it opens. The open reason is width-capped, because the
   marker box is shrink-to-fit: uncapped, one sentence measured 795px on a 1200px viewport and pushed the
-  provenance badge beside it to x=824, away from the value it explains. And `<details>` is flow content,
   provenance badge beside it to x=824, away from the value it explains. Where a disclosure does carry a
   badge, the pair sits in a baseline-aligned row (`flex items-baseline`, marker `min-w-0 flex-1`, badge
   `shrink-0`), because an opened reason grows the marker's box and a badge in plain inline flow falls
@@ -585,6 +584,7 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   line, and the residual at three-column widths is a horizontal gap — the badge keeps the row's right
   edge rather than hugging the `N/A`, which is what line-one association costs without moving the reason
   outside the disclosure. And `<details>` is flow content,
+  so it belongs in a field or cell container (`dd`, `div`, `td`, `li`) and not inline in a `<p>` or a
   `<span>`; an absence inside a sentence needs the sentence restructured into a row, which is a design
   change and not a migration.
 - **Absences are worded by kind, and the component does not decide the kind.** "not recorded" is the
