@@ -770,6 +770,12 @@ disk rather than the screen; it now asserts the shape of whichever state the tre
 `support-deck.spec.ts` recorded for the picker's thumbnails" — and `support-cards.spec.ts` is the third
 instance that the per-file fix missed.
 
+**Class 2 closed in tree at `d36fd12` ("test(browser): stop asserting the artwork mirror is empty (KI-69 third instance)").**
+Following the `catalog-detail.spec.ts` ruling at plan §4.1 item 5, `support-cards.spec.ts:172` now asserts
+the shape of whichever state the tree is in: `toHaveCount(0)` on `img[src=""]` holds unconditionally (an empty
+`src` is never valid per `DESIGN.md` §4.7), and the frame-shaped assertions branch on `framed.count()`
+exactly as the sibling case does. KI-69 stays OPEN for its classes 1, 3 and 4; only this class is closed.
+
 **Class 3, the fixture needs data no code path creates (7 of the 14).**
 `tests/browser/career-inheritance-event.spec.ts` is **untracked**, as is the whole of D12:
 `git status --porcelain` reads `??` for `app/Http/Controllers/Career/InheritanceEventController.php`,
@@ -1284,9 +1290,9 @@ gate is simply **not run**, which is a reportable state under `AGENTS.md` §15 r
 does not cover KI-73, which is a different defect on the same port: a surviving listener with a dead database
 path. A quiet box with PID-style leak on :8127 still cannot start.
 
-### KI-80 The browser suite's scratch database is one shared repo path, so two sessions in a worktree cannot both run the suite and the second one's setup deletes the first one's data - FILED 2026-10-08 (E6 Grand Concert audit slice), OPEN
+### KI-80 The browser suite's scratch database is one shared repo path, so two sessions in a worktree cannot both run the suite and the second one's setup deletes the first one's data - FILED 2026-10-08 (E6 Grand Concert audit slice), FIXED IN TREE, NOT CLOSED
 
-**Status: OPEN.** Found while re-taking the Grand Concert browser evidence on a quiet box; not caused by that
+**Status: FIXED IN TREE, NOT CLOSED.** Found while re-taking the Grand Concert browser evidence on a quiet box; not caused by that
 slice and not fixed by it. Filed as KI-75 and renumbered to KI-80 within the hour: a concurrent session's
 "Database reference views hand-off" filed a different KI-75 while this entry was being written, and the
 register's rule is never to renumber an existing entry, so this one moved instead. That is the third
@@ -1338,6 +1344,14 @@ one session and names no owner for that assumption.
 Grand Concert browser evidence this slice could not re-take: with the file held, the slice's browser gate
 rests on the earlier accepted run rather than a fresh one, which is recorded in the slice report rather than
 implied away here.
+
+**Fixed in tree at `4996877` ("test(browser): give every Playwright invocation its own scratch database (KI-80)").
+`scratchDatabasePath()` now returns `database/browser-scratch-${process.pid}-${Date.now()}.sqlite` by default,
+and `PLAYWRIGHT_SCRATCH_DB` names the path when set. `removeScratchDatabase()` deletes only the resolved path
+plus its `-wal`/`-shm` siblings, never a glob. The `/database/*.sqlite*` `.gitignore` entry covers the new
+pattern. `tests/browser/scratch-isolation.spec.ts` verifies the path carries this process's pid and that the
+sweep deletes only the owned file. The register closes only when the fix is on `origin/master`, and `master`
+is unpushed (`O-1`), so the entry stays held.**
 
 ### KI-75 `pint --dirty` reformats another session's uncommitted file in the shared worktree - FILED 2026-10-08 (Database reference views hand-off, on the owner's instruction), OPEN
 
@@ -1990,3 +2004,58 @@ Grand Concert row and stays OPEN beside this. It does not restore the coverage t
 (KI-84). And closing the two questions here would not make the cockpit's two regions agree in *timing*:
 an exhausted grid legitimately reads as reached to the reader and as no-turn-to-decide to the strip, and
 that case is pinned as correct rather than as a defect.
+
+### KI-88 The cockpit's status form renders no submit control, and thirty fixture waits still point at the record screen the cutover redirected - FILED 2026-10-09 (Tier B browser gate, on the owner's remaining-work prompt), OPEN
+
+**Status: OPEN, with two independent halves.** Found by running the browser gates that KI-80 had held
+shut. Each half has its own remedy and neither is a test-authoring problem.
+
+**Half one, an application defect: the cockpit's three header edits render no way to save them.**
+`routes/web.php:116` makes `runs.show` a redirect (`TrainingRunController::redirect()` →
+`runs.cockpit`), and the cockpit's own header forms carry no submit control:
+`resources/js/pages/Career/Cockpit.vue` opens `<form @submit.prevent="saveStatus">` at `:310`,
+`saveScenario` at `:325` and `savePeriod` at `:343`, and each closes (`:320`, `:335`, `:359`) holding only
+its `<select>` and its `Saved.` confirmation line — no `button`, no `[type="submit"]`. `saveStatus` is
+defined at `:236` and reachable only through a submit event. Measured, not read: a throwaway Playwright
+probe created a run, opened `/training-runs/{id}/cockpit`, located the form by `#status`, and resolved
+`form.locator('button, [type="submit"]')` to **0 elements across 32 retries**; the log is
+`.scratch-uma/tierB-probe.log`. `resources/js/pages/Runs/Show.vue`, which owned the equivalent forms, no
+longer exists on disk, so there is no second surface holding the control. The write route is intact
+(`PUT /training-runs/{run}`, `runs.update`, `UpdateTrainingRunRequest`), and the `<p>Saved.</p>` at `:319`
+proves the authors expected the request to fire. **What is not yet measured** is whether Chromium's
+implicit submission still fires these forms from the keyboard: each form holds exactly one field that
+blocks implicit submission, so Enter-on-select may submit where a pointer has nothing to press. The probe
+stopped at the missing-control assertion, so the entry claims the rendered absence, not a proven
+can't-save-it, and the 44px and axe cases cannot answer it either because a control that is not in the
+a11y tree is not scanned as one.
+
+**Half two, suite debt: 30 fixture waits still expect the pre-cutover address.** A scan of
+`tests/browser/*.spec.ts` for `waitForURL(/…training-runs…\d+$/)` finds **30 matches across 22 files**;
+only `career-inheritance-event.spec.ts` has been adapted, at `:87` and `:291`, to
+`/\/training-runs\/\d+(\/cockpit)?$/` with its comment at `:91-92` explaining that the create redirect is
+`runs.show` at some refs and `runs.cockpit` where the cutover has landed. Every unadapted fixture fails
+inside its own setup, before any assertion of the screen it means to test:
+`career-save-veteran.spec.ts:54` (5 failed, `.scratch-uma/tierB-save-veteran.log`),
+`veteran-compare.spec.ts:53` (1 passed and 3 failed, `.scratch-uma/tierB-veteran-compare.log`),
+`career-cockpit.spec.ts:237`, `career-race-strip.spec.ts:42`, and eighteen other files.
+`career-training-detail.spec.ts` fails differently — six cases time out waiting for a
+`Record this training` button at its `:108`, a spec the concurrent session still holds open at 26 added
+and 23 deleted lines, so its result describes that session's in-flight tree rather than any commit and is
+not counted as evidence here.
+
+**Reproduce.** `PLAYWRIGHT_SCRATCH_DB=database/browser-scratch-x.sqlite PLAYWRIGHT_PORT=8181 npx
+playwright test tests/browser/career-save-veteran.spec.ts` fails at `:54`; the probe recipe is in
+`.scratch-uma/tierB-probe.log`. Half one is checkable without Playwright too: `grep -n "saveStatus" -A8
+resources/js/pages/Career/Cockpit.vue` shows the form open, the select, a `Saved.` paragraph and a close,
+with nothing that submits.
+
+**What closing this will not cover.** Adding the control is a design decision the cutover owns: a Save
+button per header form, or autosave on `change` with the `Saved.` line as the only confirmation, and the
+latter changes what the 44px sweep and the axe scan measure on a page that currently carries three such
+forms (status, scenario, grade-point period). It does not make the 30 waits safe to blanket-edit: at
+least `run-detail.spec.ts` (four of the 30) asserts the record screen's own markup, which is deleted, so
+that spec is obsolete-by-cutover rather than mis-anchored, and each of the 22 files needs a judgement
+about whether its subject still exists. It does not restore the browser evidence for the surfaces whose
+specs fail in setup — until half one lands, no spec can reach a finished career, which is also what
+KI-82's and KI-87's cockpit claims still lack. And it does not touch KI-84's staged deletions or KI-69's
+class-3 fixture contract, both separate.

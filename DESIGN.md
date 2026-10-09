@@ -170,6 +170,9 @@ external fonts (offline constraint + C-8 dependency gate).
 - `app.css`'s own header comment still says "Dark is the shipped default" twelve lines
   above a block that correctly declares light. **Intended:** that comment is stale
   against §2.1's light-first ruling and is a source-file fix, out of scope here.
+  **Closed 2026-10-09 by `554a6b4`**, which rewrote the sentence to name light as the default and
+  repointed the same block's two dead citations to `docs/research-scratch/DESIGN-CORPUS.md`; §11's
+  close-out list carries the detail. The text above stands as the record of what was stale.
 - Numerals, stats, dates, ids: `--font-mono: ui-monospace, 'Cascadia Mono',
   'Segoe UI Mono', Consolas, monospace` with
   `font-variant-numeric: tabular-nums` on every stat cell and timestamp.
@@ -822,6 +825,20 @@ question list above is preserved as written).*
   slot-bearing screens and the run-create and skill-row remainders; the question itself stays open as
   PRD OQ-6, exactly as §4.7 records.
 - **Questions 2, 3, 4 and 5 are unchanged by Phases A–E** and stay open as written.
+
+*Dated close-out 2026-10-09 (provenance/absence remaining-work pass, on the owner's instruction to
+fix the source file rather than keep naming it).*
+
+- **Question 2 is closed by `554a6b4`.** `app.css`'s header comment now states that light is the
+  shipped default, naming the owner ruling of 2026-09-27 that reversed dark-first, and describes dark
+  as the preference-resolved override §2.1's own third principle calls it. The same six lines carried
+  two dead citations, which are repointed in that commit: the measured ramps and the contrast contract
+  live in `docs/research-scratch/DESIGN-CORPUS.md` §3 and §3.4 since the design master was folded, and
+  D-101 is in that corpus rather than in a `research CONSTRAINTS.md` that no longer exists.
+- **Question 3 is narrower than it was, and still open.** §8 no longer asserts that a motionless tree
+  is "a deliberate choice to keep" (`b3ba5f3` removed a recommendation that had pre-decided this
+  question), and `4f1aae8` deleted the 22 inline `outline-green` overrides that §8 had described as
+  four call sites in two Blade files. Whether to add a transition token is still the owner's.
 
 ## 12. Accessibility conformance
 
