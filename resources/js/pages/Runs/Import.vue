@@ -100,10 +100,18 @@ const rowErrors = computed(() => {
     return lines;
 });
 
-const traineeName = computed(() => {
+// A stored id that answers no catalog row is a broken reference, not an unrecorded value, so the
+// sentence names the id it read rather than printing a value marker over a name nobody has.
+const traineeRef = computed(() => {
     const id = Number(props.preview?.run.umamusume_id);
+    const row = props.trainees.find((trainee) => trainee.id === id);
 
-    return props.trainees.find((trainee) => trainee.id === id)?.name ?? 'Unknown trainee';
+    return row !== undefined
+        ? { name: row.name, title: undefined }
+        : {
+            name: `Trainee id ${id} does not resolve`,
+            title: `The imported payload carries umamusume_id ${id} and no catalog row answers it. This is a broken reference, not a name left blank.`,
+        };
 });
 
 const scenarioName = computed(() => {
@@ -150,7 +158,7 @@ function confirmImport(): void {
             <h2 class="text-lg font-semibold text-ink-strong">Confirm the import</h2>
 
             <p class="mt-2 text-sm text-ink-muted">
-                <span class="font-semibold text-ink">{{ traineeName }}</span>
+                <span class="font-semibold text-ink" :title="traineeRef.title">{{ traineeRef.name }}</span>
                 · {{ scenarioName }}
                 · {{ preview.run.status }}
                 · {{ preview.turns.length }} turn{{ preview.turns.length === 1 ? '' : 's' }}
