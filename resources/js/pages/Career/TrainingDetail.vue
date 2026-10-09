@@ -311,7 +311,7 @@ const capFor = (label: string): number =>
                 </label>
 
                 <label v-for="field in statFields" :key="field.name" class="flex flex-col gap-1">
-                    <span class="text-ink-muted">{{ field.label }} total *</span>
+                    <span class="text-ink-muted">{{ field.label }} *</span>
                     <input
                         :id="`turn-${field.name}`"
                         v-model="form[field.name]"

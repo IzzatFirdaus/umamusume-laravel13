@@ -47,3 +47,14 @@ it('has the training decision read the shared list instead of declaring its own'
         ->toContain("import { TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';")
         ->not->toContain('const statFields = [');
 });
+
+it('labels a stat field with the bare word and keeps the required marker separate', function (): void {
+    $page = (string) file_get_contents(base_path('resources/js/pages/Career/TrainingDetail.vue'));
+
+    expect($page)
+        ->not->toContain('{{ field.label }} total')
+        ->toContain('<span class="text-ink-muted">{{ field.label }} *</span>')
+        // One spelling for the optional fields, with `sp` kept as the field name.
+        ->toContain("{ name: 'sp', label: 'Skill Points', max: null }")
+        ->toContain("{ name: 'energy', label: 'Energy', max: 100 }");
+});
