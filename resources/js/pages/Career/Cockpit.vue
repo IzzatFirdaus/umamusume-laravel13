@@ -30,7 +30,7 @@ import ActionGrid from '../../components/career/ActionGrid.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
 import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 
@@ -48,9 +48,18 @@ interface Header {
     values: Record<string, number | string | null>;
 }
 
+export interface GradeObjective {
+    index: number;
+    name: string;
+    required: number;
+}
+
 interface Correction {
     action: string;
+    destroy_action: string;
     turn: number;
+    selected_turn_id: number;
+    turns: { id: number; turn: number }[];
     values: {
         speed: number;
         stamina: number;
@@ -65,8 +74,9 @@ interface Correction {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; status: string; status_label: string; scenario_label: string; run_url: string; timeline_url: string; result_url: string };
+    run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; timeline_url: string; result_url: string; training_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null };
     header: Header;
+    gradeObjectives: GradeObjective[];
     state: {
         stats: { key: string; label: string; current: number | null; target: number | null; cap: number }[];
         meta: { key: string; label: string; value: number | string | null }[];
@@ -78,6 +88,7 @@ const props = defineProps<{
         reasons: string[];
         alternative: string | null;
         risk: string | null;
+        finale: { label: string; state: string; turns_away: number | null } | null;
     };
     // The strip's own shape is declared at `components/career/RunRaceStrip.vue`, the one place that
     // reads it. The page forwards the bundle untouched, the way it forwarded the calendar cells.
@@ -127,12 +138,120 @@ watch(
     },
 );
 
+const turnSelector = ref<HTMLSelectElement | null>(null);
+
+/*
+ * F2, plan §9.6 ruling 2: arbitrary-turn correction. `?edit_turn=<id>` names the turn the form opens
+ * on; the selector navigates that query string with `preserveState` so the disclosure stays open, and
+ * the watch below re-syncs the form to the turn the server returned.
+ */
+function switchTurn(id: string): void {
+    router.get(window.location.pathname, { edit_turn: id }, { preserveState: true, preserveScroll: true });
+}
+
+watch(
+    () => props.correction,
+    (correction) => {
+        if (correction === null) {
+            return;
+        }
+
+        correctionForm.turn = String(correction.turn);
+        correctionForm.speed = String(correction.values.speed);
+        correctionForm.stamina = String(correction.values.stamina);
+        correctionForm.power = String(correction.values.power);
+        correctionForm.guts = String(correction.values.guts);
+        correctionForm.wit = String(correction.values.wit);
+        correctionForm.sp = correction.values.sp === null ? '' : String(correction.values.sp);
+        correctionForm.energy = correction.values.energy === null ? '' : String(correction.values.energy);
+        correctionForm.fans = correction.values.fans === null ? '' : String(correction.values.fans);
+        correctionForm.mood = correction.values.mood ?? '';
+        correctionForm.clearErrors();
+    },
+);
+
 const saveCorrection = (): void => {
     if (props.correction === null) {
         return;
     }
 
-    correctionForm.put(props.correction.action, { preserveScroll: true });
+    correctionForm.put(props.correction.action, {
+        preserveScroll: true,
+        onSuccess: () => {
+            nextTick(() => turnSelector.value?.focus());
+        },
+    });
+};
+
+// Delete one turn and its failure event (the controller's own transaction). A separate form because
+// the two writes are separate routes; the disclosure gates it the way the run-delete door does.
+const turnDeleteForm = useForm({});
+
+const deleteTurn = (): void => {
+    if (props.correction === null) {
+        return;
+    }
+
+    turnDeleteForm.delete(props.correction.destroy_action, {
+        preserveScroll: true,
+        onSuccess: () => {
+            nextTick(() => turnSelector.value?.focus());
+        },
+    });
+};
+
+/*
+ * The header edit forms (F2, plan §9.6 ruling 1). All three POST through `runs.update`, which shares
+ * StoreTrainingRunRequest with create and so writes every field it is handed (the request fills the
+ * columns it does not receive). Each form therefore carries the run's current scenario, status and
+ * objective-index as hidden fields so a partial edit — status only, scenario only, period only —
+ * cannot blank the sibling fields the form did not touch.
+ *
+ * The status form re-posts umamusume_id because the request treats it as required on store; a run
+ * that already exists never changes its trainee here, so carrying the stored id is the honest value
+ * rather than inventing a default.
+ */
+const statusForm = useForm({
+    umamusume_id: String(props.run.umamusume_id ?? ''),
+    scenario: props.run.scenario ?? '',
+    current_objective_index: props.run.current_objective_index === null ? '' : String(props.run.current_objective_index),
+    status: props.run.status,
+});
+
+const scenarioForm = useForm({
+    umamusume_id: String(props.run.umamusume_id ?? ''),
+    status: props.run.status,
+    current_objective_index: props.run.current_objective_index === null ? '' : String(props.run.current_objective_index),
+    scenario: props.run.scenario ?? '',
+});
+
+const periodForm = useForm({
+    umamusume_id: String(props.run.umamusume_id ?? ''),
+    status: props.run.status,
+    scenario: props.run.scenario ?? '',
+    current_objective_index: props.run.current_objective_index === null ? '' : String(props.run.current_objective_index),
+});
+
+const saveStatus = (): void => {
+    statusForm.put(props.run.update_url, { preserveScroll: true });
+};
+
+const saveScenario = (): void => {
+    scenarioForm.put(props.run.update_url, { preserveScroll: true });
+};
+
+const savePeriod = (): void => {
+    periodForm.put(props.run.update_url, { preserveScroll: true });
+};
+
+const deleteForm = useForm({});
+
+const deleteRun = (): void => {
+    if (props.run.destroy_url === '') {
+        return;
+    }
+
+    deleteForm.delete(props.run.destroy_url);
 };
 
 const statFields = [
@@ -186,6 +305,90 @@ const jumpToShop = (): void => {
 
         <CareerHeader :trainee="props.run.trainee" :trainee-ja="props.run.trainee_ja" :header="props.header" />
 
+        <!-- The header edit forms (F2, plan §9.6 ruling 1). Status, scenario and grade-point period
+             all write through `runs.update`, the route and validator the 0.1.0 record screen used. A
+             failure comes back with `page.props.errors`, which the page-level alert names. Each form
+             carries the sibling fields the request still writes, so editing one cannot blank another. -->
+        <section aria-labelledby="cockpit-header-edit" class="mt-2">
+            <h3 id="cockpit-header-edit" class="sr-only">Edit the run's identity</h3>
+            <ul class="flex flex-wrap items-end gap-4 text-sm">
+                <li class="flex flex-col gap-1">
+                    <label for="status" class="text-ink-muted">Status</label>
+                    <form @submit.prevent="saveStatus">
+                        <select
+                            id="status"
+                            v-model="statusForm.status"
+                            name="status"
+                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                        >
+                            <option v-for="(label, value) in props.run.status_labels" :key="value" :value="value">{{ label }}</option>
+                        </select>
+                        <p v-if="statusForm.recentlySuccessful" class="mt-1 text-xs text-ink-muted">Saved.</p>
+                    </form>
+                </li>
+
+                <li class="flex flex-col gap-1">
+                    <label for="scenario" class="text-ink-muted">Scenario</label>
+                    <form @submit.prevent="saveScenario">
+                        <select
+                            id="scenario"
+                            v-model="scenarioForm.scenario"
+                            name="scenario"
+                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                        >
+                            <option value="">No scenario set</option>
+                            <option v-for="(label, key) in props.run.scenarios" :key="key" :value="key">{{ label }}</option>
+                        </select>
+                    </form>
+                </li>
+
+                <li
+                    v-if="props.gradeObjectives.length > 0"
+                    class="flex flex-col gap-1"
+                >
+                    <label for="current_objective_index" class="text-ink-muted">Grade Point period</label>
+                    <form @submit.prevent="savePeriod">
+                        <select
+                            id="current_objective_index"
+                            v-model="periodForm.current_objective_index"
+                            name="current_objective_index"
+                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                        >
+                            <option value="">Not reported</option>
+                            <option
+                                v-for="objective in props.gradeObjectives"
+                                :key="objective.index"
+                                :value="String(objective.index)"
+                            >
+                                {{ objective.index }}. {{ objective.name }}
+                            </option>
+                        </select>
+                    </form>
+                </li>
+
+                <li class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Export</span>
+                    <!-- The export door (F2, plan §9.6). Both are GET file responses, so they are
+                         plain links: routing a download through a redirect would turn it into an
+                         HTML navigation instead of a file. -->
+                    <span class="flex flex-wrap gap-2">
+                        <a
+                            :href="props.run.export_csv_url"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-semibold text-ink-strong underline"
+                        >
+                            Download CSV
+                        </a>
+                        <a
+                            :href="props.run.export_json_url"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-semibold text-ink-strong underline"
+                        >
+                            Download JSON
+                        </a>
+                    </span>
+                </li>
+            </ul>
+        </section>
+
         <!-- The spec's order, as CSS only. `order-*` drives the single mobile column; from `md` up the
              explicit row and column placement takes over, so the tablet strip and the desktop
              three-column cockpit are the same DOM. -->
@@ -194,9 +397,25 @@ const jumpToShop = (): void => {
                 <CareerStatePanel :stats="props.state.stats" :meta="props.state.meta" />
 
                 <section v-if="props.correction !== null" aria-labelledby="career-correction-heading" class="mt-3">
-                    <h3 id="career-correction-heading" class="sr-only">Correct the latest turn by hand</h3>
+                    <h3 id="career-correction-heading" class="sr-only">Correct a turn by hand</h3>
 
-                    <details class="rounded-md border border-rule bg-panel p-4">
+                    <!-- The turn selector (F2, plan §9.6 ruling 2). It sits outside the disclosure so a
+                         switch does not close the form; `?edit_turn=<id>` is the same query the run
+                         screen and the Timeline's decision link already use. -->
+                    <label class="flex items-center gap-2 text-sm" for="correction-turn-select">
+                        <span class="text-ink-muted">Correct turn</span>
+                        <select
+                            id="correction-turn-select"
+                            ref="turnSelector"
+                            :value="String(props.correction.selected_turn_id)"
+                            class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                            @change="switchTurn(($event.target as HTMLSelectElement).value)"
+                        >
+                            <option v-for="turn in props.correction.turns" :key="turn.id" :value="String(turn.id)">Turn {{ turn.turn }}</option>
+                        </select>
+                    </label>
+
+                    <details class="mt-2 rounded-md border border-rule bg-panel p-4">
                         <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
                             Correct turn {{ props.correction.turn }} by hand
                         </summary>
@@ -258,6 +477,28 @@ const jumpToShop = (): void => {
                                 {{ correctionForm.processing ? 'Saving…' : 'Save correction' }}
                             </button>
                         </form>
+
+                        <!-- Delete one turn and its failure event (F2, plan §9.6 ruling 2). A second
+                             disclosure inside the correction panel: the write is `runs.turns.destroy`,
+                             the route the record screen already used. -->
+                        <details class="mt-3 border-t border-rule pt-3">
+                            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-risk">
+                                Delete turn {{ props.correction.turn }}
+                            </summary>
+                            <p class="mt-2 text-sm text-ink-muted">
+                                Deletes turn {{ props.correction.turn }} and its recorded failure event.
+                                Other turns are unaffected. There is no undo.
+                            </p>
+                            <form class="mt-2" @submit.prevent="deleteTurn">
+                                <button
+                                    type="submit"
+                                    class="min-h-11 rounded-full border-2 border-risk px-4 font-semibold text-risk"
+                                    :disabled="turnDeleteForm.processing"
+                                >
+                                    {{ turnDeleteForm.processing ? 'Deleting…' : `Delete turn ${props.correction.turn}` }}
+                                </button>
+                            </form>
+                        </details>
                     </details>
                 </section>
             </div>
@@ -269,6 +510,7 @@ const jumpToShop = (): void => {
                     :reasons="props.advisor.reasons"
                     :alternative="props.advisor.alternative"
                     :risk="props.advisor.risk"
+                    :finale-context="props.advisor.finale"
                 />
             </div>
 
@@ -287,8 +529,8 @@ const jumpToShop = (): void => {
                         none has been entered for this run. Until one turn is recorded the advisor has
                         nothing to rank, so it declines rather than guessing.
                     </p>
-                    <a :href="props.run.run_url" class="mt-2 inline-flex min-h-11 items-center font-medium text-ink-strong underline">
-                        Record the first turn on the run screen
+                    <a :href="props.run.training_url" class="mt-2 inline-flex min-h-11 items-center font-medium text-ink-strong underline">
+                        Record the first turn through Training
                     </a>
                 </section>
 
@@ -351,10 +593,40 @@ const jumpToShop = (): void => {
                      advisor's answer about the next turn, and this is a summary of the career. -->
                 <a
                     :href="props.run.result_url"
-                    class="mt-1 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
+                    class="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
                 >
                     Career Result
                 </a>
+
+                <!-- The run-delete door (F2, plan §9.6 ruling 4). Two-step disclosure: the summary
+                     names the destructive action, the form inside submits the DELETE only after the
+                     Trainer opens it and confirms. `deleteForm` carries no fields — the route is run
+                     scoped and the controller deletes the bound row — so the only data that matters
+                     is the URL. -->
+                <details class="mt-4">
+                    <summary
+                        class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-risk"
+                    >
+                        Delete this career
+                    </summary>
+                    <p class="mt-2 text-sm text-ink-muted">
+                        Permanently removes this run and every record tied to it: turns, race entries,
+                        turn events, skills, support-deck slots, and the linked Veteran library record
+                        (if any was saved). There is no undo.
+                    </p>
+                    <form
+                        @submit.prevent="deleteRun"
+                        class="mt-2"
+                    >
+                        <button
+                            type="submit"
+                            class="min-h-11 rounded-full border-2 border-risk px-4 font-semibold text-risk"
+                            :disabled="deleteForm.processing"
+                        >
+                            {{ deleteForm.processing ? 'Deleting…' : 'Delete this career' }}
+                        </button>
+                    </form>
+                </details>
             </section>
         </div>
     </CareerLayout>

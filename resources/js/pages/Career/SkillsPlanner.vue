@@ -16,6 +16,7 @@
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import SkillPlanRow from '../../components/career/SkillPlanRow.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
+import AcquisitionStatusEditor from '../../components/career/AcquisitionStatusEditor.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -55,7 +56,7 @@ interface Group {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string };
+    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; skills_sync_url: string; status_labels: Record<string, string> };
     target: null | {
         purpose: string;
         purpose_label: string;
@@ -75,6 +76,7 @@ const props = defineProps<{
     };
     groups: Group[];
     ladder: { level: string; percent: number }[];
+    acquisition_options: { value: string; label: string }[];
 }>();
 
 const { visiting, visitFailed } = useVisitState();
@@ -290,5 +292,17 @@ const coverageConstants = computed(() =>
         <p v-else-if="props.target === null" class="mt-2 text-sm text-ink-muted" role="status">
             Nothing to save: a run with no build target has no priority list to reorder.
         </p>
+
+        <!-- The acquired/skipped status write (F2, plan §9.6 ruling 5). The build target is a plan;
+             the acquisition status is a record of what the run actually has. The two are separate
+             writes on separate routes so one cannot overwrite the other. This form POSTs through
+             `runs.skills.sync`, the same Form Request the 0.1.0 record screen used. -->
+        <AcquisitionStatusEditor
+            v-if="props.run.skills_sync_url !== ''"
+            class="mt-6"
+            :action="props.run.skills_sync_url"
+            :groups="props.groups"
+            :options="props.acquisition_options"
+        />
     </CareerLayout>
 </template>

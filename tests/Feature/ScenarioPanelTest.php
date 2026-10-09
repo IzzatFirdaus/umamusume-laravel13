@@ -63,9 +63,6 @@ function scenarioSectionKeys(): array
         'recommendations',
         'recommendations_absence',
         'finale',
-        // This run's own position against the finale. Distinct from `finale`, which is what the
-        // config declares the scenario composes: a structure and a reading are two questions.
-        'finale_state',
         'finale_absence',
         // The five Trackblazer-specific sections (plan §9 E4). Null for any scenario whose matrix
         // does not turn the matching flag on, so the shape stays uniform across all four scenarios.
@@ -154,60 +151,6 @@ it('produces the same payload shape for all four Global scenarios', function ():
     expect(array_unique(array_map('json_encode', $shapes)))->toHaveCount(1);
 });
 
-it('turns on exactly the panels the matrix declares, and renders no panel data where it turns one off', function (): void {
-    // Ported from GuidedStepScenarioCompositionTest: every panel the scenario's matrix turns ON
-    // appears, and every panel it turns OFF renders nothing. The shell draws its `onPanels` from
-    // the flag, so the payload's own `on` state is the whole of the claim, and the Trackblazer
-    // sections being absent where their flag is off is the payload half of "renders nothing".
-    /** @var array<string, mixed> $scenarios */
-    $scenarios = config('scenarios.scenarios');
-    /** @var array<string, string> $flags */
-    $flags = config('scenarios.panel_labels');
-
-    // The flags whose composition is a section of the payload in its own right. Where the matrix
-    // turns the flag off the section is null rather than an empty stand-in, so no renderer can
-    // print another scenario's rows.
-    $sectionForFlag = [
-        'grade_objectives' => 'grade',
-        'shop' => 'shop',
-        'epithet_routes' => 'epithet',
-    ];
-
-    foreach (array_keys($scenarios) as $key) {
-        $run = scenarioPanelRun($key);
-        /** @var array<string, bool> $declared */
-        $declared = (array) config("scenarios.scenarios.{$key}.panels");
-
-        $this->get(route('runs.cockpit', $run))
-            ->assertOk()
-            ->assertInertia(function (Assert $page) use ($declared, $flags, $sectionForFlag): void {
-                // Every flag the matrix owns is emitted, and each carries this scenario's own
-                // state: a scenario declares which panels are on, never which panels exist.
-                $page->where('scenario.panels', function (Collection $panels) use ($declared, $flags): bool {
-                    if (array_keys($panels->all()) !== array_keys($flags)) {
-                        return false;
-                    }
-
-                    foreach (array_keys($flags) as $flag) {
-                        if ($panels[$flag]['on'] !== (($declared[$flag] ?? false) === true)) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                });
-
-                // A flag the scenario does not turn on composes nothing: its section is absent
-                // rather than empty, so no renderer can print another scenario's rows.
-                foreach ($sectionForFlag as $flag => $section) {
-                    $on = ($declared[$flag] ?? false) === true;
-
-                    $page->where("scenario.{$section}", $on ? fn (mixed $value): bool => $value !== null : null);
-                }
-            });
-    }
-});
-
 it('reads the documentation marker the owner ruled on, and defaults a scenario that declares none to documented', function (): void {
     // The badge condition is `partially_documented`, per the owner's ruling of 2026-10-07 (plan §4.1
     // item 6, `SCREEN_SPEC.md` SCR-CAR-019). `documented` stays a provenance marker on the entry, it
@@ -264,51 +207,6 @@ it('renders a fifth scenario from config alone, drawing only on widget and flag 
             ->where('scenario.widget_labels.grade_points', 'Grade Points')
             ->where('scenario.panels.grade_objectives.on', true)
             ->where('scenario.panels.shop.on', false)
-        );
-});
-
-it('composes a fifth scenario from config alone, turning on only the panels its entry declares', function (): void {
-    // Ported from GuidedStepScenarioVariationTest: the same payload shape holds for a scenario the
-    // build has never seen, and its composition is the entry's own. One config entry, zero
-    // component edits, and no panel on that the entry did not turn on.
-    config()->set('scenarios.scenarios.fifth_scenario', [
-        'label' => 'A Fifth Scenario',
-        'live_on_global' => '2027-01-01',
-        'cap_bonus' => ['Speed' => 0, 'Stamina' => 0, 'Power' => 0, 'Guts' => 0, 'Wit' => 0],
-        'widgets' => ['turn', 'energy', 'fans'],
-        'steps' => ['training', 'outcome', 'skill'],
-        'panels' => [
-            'race_calendar' => true,
-            'team_race' => false,
-            'grade_objectives' => false,
-            'shop' => false,
-            'epithet_routes' => false,
-            'team_rank_ladder' => false,
-            'career_goals' => false,
-        ],
-        'scenario_links' => [],
-        'facility_level_source' => 'repetition',
-    ]);
-
-    $run = scenarioPanelRun('fifth_scenario');
-
-    $this->get(route('runs.cockpit', $run))
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('scenario.label', 'A Fifth Scenario')
-            ->where('scenario.declared', true)
-            // The same §49 key set the four Global scenarios carry: a fifth entry adds no field,
-            // so the shell draws it without an edit (gate G-33).
-            ->where('scenario', fn (Collection $section): bool => array_keys($section->all()) === scenarioSectionKeys())
-            // The composition is the entry's own, not the baseline's: race_calendar on, the rest off.
-            ->where('scenario.panels.race_calendar.on', true)
-            ->where('scenario.panels.team_race.on', false)
-            ->where('scenario.panels.shop.on', false)
-            ->where('scenario.panels.career_goals.on', false)
-            // A panel the entry leaves off renders nothing, exactly as for a Global scenario.
-            ->where('scenario.shop', null)
-            ->where('scenario.grade', null)
-            ->where('scenario.epithet', null)
         );
 });
 

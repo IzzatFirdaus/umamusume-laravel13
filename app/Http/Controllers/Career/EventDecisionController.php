@@ -91,7 +91,7 @@ class EventDecisionController extends Controller
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
             'status_label' => $run->status->label(),
-            'run_url' => route('runs.show', $run),
+            'run_url' => route('runs.cockpit', $run),
             'cockpit_url' => route('runs.cockpit', $run),
         ];
     }

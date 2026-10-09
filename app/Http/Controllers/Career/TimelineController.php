@@ -74,7 +74,7 @@ class TimelineController extends Controller
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
             'status_label' => $run->status->label(),
-            'run_url' => route('runs.show', $run),
+            'run_url' => route('runs.cockpit', $run),
             'cockpit_url' => route('runs.cockpit', $run),
         ];
     }
@@ -142,7 +142,7 @@ class TimelineController extends Controller
             'result' => 'Recorded as entered',
             'corrected' => $corrected,
             'correction_id' => $corrected ? 'turn-'.$turn->turn : null,
-            'decision_url' => route('runs.show', $run).'?edit_turn='.$turn->id,
+            'decision_url' => route('runs.cockpit', $run).'?edit_turn='.$turn->id,
         ];
     }
 
@@ -240,7 +240,7 @@ class TimelineController extends Controller
     {
         return match ($kind) {
             'inheritance' => route('runs.inheritance', $run),
-            'failure' => route('runs.show', $run),
+            'failure' => route('runs.cockpit', $run),
             default => route('runs.events.decision', $run),
         };
     }

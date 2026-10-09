@@ -212,7 +212,7 @@ class DashboardController extends Controller
             'run_id' => $run->id,
             // A Veteran is a completed run, and the run is where its facts live, so the row opens
             // the run rather than a second reading of the same data (`Veteran`'s docblock).
-            'run_url' => route('runs.show', $run),
+            'run_url' => route('runs.cockpit', $run),
         ];
     }
 

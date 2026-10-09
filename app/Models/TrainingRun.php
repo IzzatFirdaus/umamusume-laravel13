@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PerformanceType;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
@@ -1001,6 +1002,28 @@ class TrainingRun extends Model
     }
 
     /**
+     * Whether this run's scenario offers the guided rail a Performance observation field.
+     *
+     * A capability flag read from the matrix, the way `composesShop()` reads its own, so a fifth
+     * scenario that opens the same field is one config entry and no component edit (D-240, gate
+     * G-33). It is not a `panels` key on purpose: `panels` is the list the ScenarioPanel shell
+     * renders and Our Grand Concert composes none, which is what the baseline strip and gate G-41
+     * assert — switching a panel on to reveal a rail input would hand that shell an ON panel with no
+     * renderer. A turn-rail input is not a panel.
+     *
+     * The flag opens a place to record what the Trainer saw. It authorises no number: what a run
+     * starts with, what a turn pays and what a Lesson costs stay unpublished in this corpus.
+     */
+    public function acceptsPerformanceObservations(): bool
+    {
+        if (! $this->hasScenario()) {
+            return false;
+        }
+
+        return config('scenarios.scenarios.'.$this->scenarioKey().'.performance_input') === true;
+    }
+
+    /**
      * Whether this run's scenario opens a given panel, read from the composition
      * matrix so a fifth scenario needs a config entry and no code (D-240).
      */
@@ -1082,6 +1105,49 @@ class TrainingRun extends Model
             ->map(fn (TurnEvent $event): ?RaceFatiguePayload => $event->fatiguePayload())
             ->filter()
             ->first();
+    }
+
+    /**
+     * Every Performance observation this run has recorded, oldest turn first (Our Grand Concert).
+     *
+     * **Observations, never a balance.** Each row is one turn's entered change; there is no row
+     * that says what the resource stands at. Summing the deltas would print a "current Dance
+     * Performance" whose first term is missing, because no source in this corpus publishes what a
+     * run starts with — the same refusal `consecutiveRaceCount()` makes by returning null, and the
+     * opposite of `shopSpendTotal()`, which may add costs precisely because both sides of that
+     * subtraction are entered facts. A total becomes honest only once a starting value is verified,
+     * and that is a later slice's decision, not this method's.
+     *
+     * Two observations at different turns stay two rows rather than collapsing into one per type,
+     * the way `spiritBurstRoster()` collapses per teammate: burst states *replace* one another and
+     * Performance changes *accumulate history*, so the list keeps the turn and the event id that
+     * each one belongs to and a consumer decides what to show.
+     *
+     * Not gated on a panel flag, deliberately: `panels` is the UI-composition map and Performance
+     * opens no panel, so a gate here would have to invent one to read. The scenario decision belongs
+     * to the surface that renders it — `CockpitController` chooses which purchases to show the same
+     * way — while this method simply reports what was recorded.
+     *
+     * @return list<array{turn: int, event_id: int, type: PerformanceType, delta: int}>
+     */
+    public function performanceObservations(): array
+    {
+        $observations = [];
+
+        foreach ($this->turnEvents->sortBy([['turn', 'asc'], ['id', 'asc']]) as $event) {
+            $payload = $event->performancePayload();
+
+            if ($payload !== null) {
+                $observations[] = [
+                    'turn' => (int) $event->turn,
+                    'event_id' => (int) $event->id,
+                    'type' => $payload->type,
+                    'delta' => $payload->delta,
+                ];
+            }
+        }
+
+        return $observations;
     }
 
     /**

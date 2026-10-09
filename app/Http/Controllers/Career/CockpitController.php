@@ -115,7 +115,7 @@ class CockpitController extends Controller
         }
 
         $latest = $run->turnEntries->sortByDesc('turn')->first();
-        $advice = app(TrainerAdvisor::class)->advise($latest, $run->buildTarget());
+        $advice = app(TrainerAdvisor::class)->advise($latest, $run->buildTarget(), $run);
 
         // Built once: the header's rank and the scenario section's team panel read the same pass.
         $team = $this->teamSection($run);
@@ -123,12 +123,16 @@ class CockpitController extends Controller
         return Inertia::render('Career/Cockpit', [
             'run' => $this->runSection($run),
             'header' => $this->headerSection($run, $latest, $team),
+            'gradeObjectives' => $run->gradeObjectives(),
             'state' => $this->stateSection($run, $latest),
             'actions' => $this->actionSection($run, $advice),
             'advisor' => $this->advisorSection($advice),
             'raceStrip' => $this->raceStripSection($run),
             'scenario' => $this->scenarioSection($run, $team),
-            'correction' => $this->correctionSection($run, $latest),
+            // F2, plan §9.6 ruling 2: arbitrary-turn correction. The selected turn defaults to the
+            // latest, but `?edit_turn=<id>` names any logged turn; the form posts to the existing
+            // `runs.turns.update` / `runs.turns.destroy`, unchanged.
+            'correction' => $this->correctionSection($run, $this->resolvedCorrectionTurn($run, $latest)),
         ]);
     }
 
@@ -136,7 +140,7 @@ class CockpitController extends Controller
      * The run's own identity, flattened. `scenario_label` names the absence rather than borrowing the
      * baseline's name, which is a composition device and not a fact (D-220).
      *
-     * @return array{id: int, trainee: string, trainee_ja: string|null, status: string, status_label: string, scenario_label: string, run_url: string, timeline_url: string, result_url: string}
+     * @return array{id: int, trainee: string, trainee_ja: string|null, status: string, status_label: string, scenario_label: string, run_url: string, timeline_url: string, result_url: string, training_url: string, status_labels: array<string,string>, scenarios: array<string,string>, update_url: string, destroy_url: string, current_objective_index: int|null}
      */
     private function runSection(TrainingRun $run): array
     {
@@ -146,12 +150,18 @@ class CockpitController extends Controller
             'trainee_ja' => $run->umamusume->name_ja,
             'status' => $run->status->value,
             'status_label' => $run->status->label(),
+            // The header edit forms (ruling 1) carry these as hidden values so a partial update
+            // cannot blank a sibling: `runs.update` requires `umamusume_id` and accepts `scenario`,
+            // and the form re-posts the stored values it is not editing.
+            'umamusume_id' => $run->umamusume_id,
+            'scenario' => $run->scenario,
             'scenario_label' => $run->hasScenario()
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
-            // The cockpit descends from the run's own screen (SCREEN-009 §12), so the record screen
-            // stays one link away and every existing write route stays where it was.
-            'run_url' => route('runs.show', $run),
+            // The cockpit owns the run-identity writes (F2, plan §9.6 ruling 1): status, scenario
+            // and grade-point period all POST through `runs.update`, the same route and validator the
+            // 0.1.0 record screen used. The cockpit is the door, so the 2.0 edit URLs ride here.
+            'run_url' => route('runs.cockpit', $run),
             // The left column's own door to the Career Timeline (SCR-CAR-017): the region shows this
             // run's races, and the timeline is the screen that shows the whole recorded history.
             'timeline_url' => route('runs.timeline', $run),
@@ -160,7 +170,44 @@ class CockpitController extends Controller
             // screen URL-only, which D14 ruled a defect. The result screen answers an unfinished career
             // itself, so the door does not gate on status.
             'result_url' => route('runs.result', $run),
+            // The door to Training Decision (SCREEN-010), where a turn is recorded; the Cockpit's empty
+            // state links here rather than to the legacy run screen, which the redirect will retire.
+            'training_url' => route('runs.training', $run),
+            // The write routes and picker choices for the header edit form. Labelled
+            // `current_objective_index` mirrors `runs.update`'s form key so a partial update
+            // (status only, scenario only, period only) carries the other two fields as their current
+            // value rather than letting a PUT blank the siblings the form did not render.
+            'update_url' => route('runs.update', $run),
+            'destroy_url' => route('runs.destroy', $run),
+            // The export door (F2, plan §9.6 ruling: export is one of the nine legacy write-adjacent
+            // controls). Both are GET file responses; a download must not become an HTML redirect, so
+            // the Cockpit links straight at them rather than through the retired record screen.
+            'export_csv_url' => route('runs.export', [$run, 'csv']),
+            'export_json_url' => route('runs.export', [$run, 'json']),
+            'status_labels' => [
+                RunStatus::Active->value => RunStatus::Active->label(),
+                RunStatus::Completed->value => RunStatus::Completed->label(),
+                RunStatus::Retired->value => RunStatus::Retired->label(),
+            ],
+            'scenarios' => $this->scenarioLabels(),
+            'current_objective_index' => $run->current_objective_index,
         ];
+    }
+
+    /**
+     * Every scenario key the run may be assigned, as key => label, for the header's scenario picker.
+     * Read from `config/scenarios.php` — the only source of scenario names in the layout path.
+     *
+     * @return array<string, string>
+     */
+    private function scenarioLabels(): array
+    {
+        /** @var array<string, array<string, mixed>> $scenarios */
+        $scenarios = config('scenarios.scenarios', []);
+
+        return collect($scenarios)
+            ->mapWithKeys(fn (array $def, string $key): array => [$key => (string) ($def['label'] ?? $key)])
+            ->all();
     }
 
     /**
@@ -291,7 +338,7 @@ class CockpitController extends Controller
                     'training' => route('runs.training', $run),
                     'race' => route('runs.races.decision', $run),
                     'event' => route('runs.events.decision', $run),
-                    default => route('runs.show', $run),
+                    default => route('runs.cockpit', $run),
                 },
                 'recommended' => $action['key'] === $recommended,
             ],
@@ -306,7 +353,7 @@ class CockpitController extends Controller
      * behind, because both are fields C2 already returns. When it declines, the one reason line is
      * C2's own sentence, so a Trainer acting on the refusal knows which input is missing.
      *
-     * @return array{action: string|null, band: string|null, reasons: list<string>, alternative: string|null, risk: string|null}
+     * @return array{action: string|null, band: string|null, reasons: list<string>, alternative: string|null, risk: string|null, finale: array{label: string, state: string, turns_away: int|null}|null}
      */
     private function advisorSection(Advice $advice): array
     {
@@ -337,6 +384,10 @@ class CockpitController extends Controller
             // does not grow a second opinion beside the one engine. D9 to D12 fill this field when a
             // screen has a sourced risk to state.
             'risk' => null,
+            // The finale's proximity, read from the same reader the result screen and the strip use.
+            // It is not a sixth opinion: the advisor ranks the turn and never advises on the concert,
+            // because the gauge that would decide it is unbuilt (ADR-0020 §3, SCREEN_SPEC.md §7-22).
+            'finale' => $advice->finale_context,
         ];
     }
 
@@ -385,7 +436,7 @@ class CockpitController extends Controller
     {
         $links = [
             'decision_url' => route('runs.races.decision', $run),
-            'run_url' => route('runs.show', $run),
+            'run_url' => route('runs.cockpit', $run),
         ];
         $absences = [
             'turn_link' => 'The Trainer has not tied this race to a logged turn (KI-17), so the turn is not known rather than zero.',
@@ -620,9 +671,9 @@ class CockpitController extends Controller
             'recommendations_absence' => 'No source this tool reads states scenario advice, so none is offered here. The advisor ranks the turn you are deciding.',
             'finale' => $def['finale'] ?? null,
             // This run's own position against the finale, distinct from `finale` above, which is
-            // what the config declares the scenario composes: a structure and a reading are two
-            // questions. Named apart so a reader cannot take one for the other; Slice 23's
-            // consistency pass owns the collision and may rename either side.
+            // what the config declares the scenario composes. Two different questions wearing one
+            // word: the structure (a composition) and the state (a reading). Named apart here so a
+            // reader cannot take one for the other; Slice 23's consistency pass owns the collision.
             'finale_state' => FinaleReader::forRun($run),
             'finale_absence' => $this->finaleAbsence($run, $def),
             // The five Trackblazer-specific sections (plan §9 E4). Each is null for any scenario
@@ -1156,32 +1207,59 @@ class CockpitController extends Controller
     }
 
     /**
-     * The manual correction (`design-2.0` §38), opened on the latest logged turn and posted to the
-     * route and Form Request that already own a turn write. Null when there is no turn to correct.
+     * The manual correction (`design-2.0` §38), opened on the latest logged turn by default and on
+     * any logged turn named by `?edit_turn=<id>`. Null when there is no turn to correct.
      *
-     * @return array{action: string, turn: int, values: array<string, int|string|null>}|null
+     * F2, plan §9.6 ruling 2: the write is the route and Form Request that already own a turn write
+     * (`runs.turns.update` / `runs.turns.destroy`); this section only adds the turn list and the
+     * per-turn action URLs. No new route, and no new cascade.
+     *
+     * @return array{action: string, destroy_action: string, turn: int, selected_turn_id: int, turns: list<array{id: int, turn: int}>, values: array<string, int|string|null>}|null
      */
-    private function correctionSection(TrainingRun $run, ?TurnEntry $latest): ?array
+    private function correctionSection(TrainingRun $run, ?TurnEntry $selected): ?array
     {
-        if ($latest === null) {
+        if ($selected === null) {
             return null;
         }
 
         return [
-            'action' => route('runs.turns.update', [$run, $latest]),
-            'turn' => $latest->turn,
+            'action' => route('runs.turns.update', [$run, $selected]),
+            'destroy_action' => route('runs.turns.destroy', [$run, $selected]),
+            'turn' => $selected->turn,
+            'selected_turn_id' => $selected->id,
+            'turns' => $run->turnEntries
+                ->sortBy('turn')
+                ->map(static fn (TurnEntry $turn): array => ['id' => $turn->id, 'turn' => $turn->turn])
+                ->values()
+                ->all(),
             'values' => [
-                'speed' => $latest->speed,
-                'stamina' => $latest->stamina,
-                'power' => $latest->power,
-                'guts' => $latest->guts,
-                'wit' => $latest->wit,
-                'sp' => $latest->sp,
-                'energy' => $latest->energy,
-                'fans' => $latest->fans,
-                'mood' => $latest->mood?->value,
+                'speed' => $selected->speed,
+                'stamina' => $selected->stamina,
+                'power' => $selected->power,
+                'guts' => $selected->guts,
+                'wit' => $selected->wit,
+                'sp' => $selected->sp,
+                'energy' => $selected->energy,
+                'fans' => $selected->fans,
+                'mood' => $selected->mood?->value,
             ],
         ];
+    }
+
+    /**
+     * The turn the correction opens on: `?edit_turn=<id>` when it names one of this run's turns, the
+     * latest turn otherwise. An id from another run, or a non-numeric value, falls back to the
+     * latest rather than erroring — the selector is a convenience, not a trust boundary.
+     */
+    private function resolvedCorrectionTurn(TrainingRun $run, ?TurnEntry $latest): ?TurnEntry
+    {
+        $requested = request()->query('edit_turn');
+
+        if (! is_numeric($requested)) {
+            return $latest;
+        }
+
+        return $run->turnEntries->firstWhere('id', (int) $requested) ?? $latest;
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Enums\RaceEntryStatus;
 use App\Http\Controllers\Controller;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
+use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Services\RaceFacts;
@@ -53,6 +54,13 @@ class RaceDecisionController extends Controller
         $next = $run->nextTurnToPlay();
         $races = $this->raceRows($run, $next);
 
+        // F2, plan §9.6 ruling 3: manual free-race entry. The branch is server-resolved from the
+        // query string (the same shape `RacePanel` reads), so a mode switch is a navigation and a
+        // surviving component instance can never submit the branch it no longer shows.
+        $entryMode = in_array(request()->query('entry_mode'), ['calendar', 'manual'], true)
+            ? (string) request()->query('entry_mode')
+            : 'calendar';
+
         return Inertia::render('Career/RaceDecision', [
             'run' => $this->runSection($run),
             'nextTurn' => $this->nextTurnSection($next),
@@ -65,6 +73,10 @@ class RaceDecisionController extends Controller
             // action grid entry the planner extends, so the link belongs here.
             'planner_url' => route('runs.races.planner', $run),
             'empty' => $this->emptyState($run, $next, count($races)),
+            'entry_mode' => $entryMode,
+            'manual_slots' => $this->manualSlotRows($run),
+            'manual_defaults' => $this->manualDefaults($run, $next),
+            'race_statuses' => array_map(static fn (RaceEntryStatus $status): string => $status->value, RaceEntryStatus::cases()),
         ]);
     }
 
@@ -81,7 +93,7 @@ class RaceDecisionController extends Controller
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
             'status_label' => $run->status->label(),
-            'run_url' => route('runs.show', $run),
+            'run_url' => route('runs.cockpit', $run),
         ];
     }
 
@@ -254,12 +266,64 @@ class RaceDecisionController extends Controller
     private function entrySection(TrainingRun $run): array
     {
         return [
+            // F2, plan §9.6 ruling 3: manual free-race entry lands on Race Decision, posting
+            // `entry_mode=manual` to `runs.races.store`. The same action URL handles both the
+            // calendar and the manual branch; the form selects which.
             'action' => route('runs.races.store', $run),
             'turns' => $run->turnEntries
                 ->sortBy('turn')
                 ->map(static fn (TurnEntry $turn): array => ['id' => $turn->id, 'turn' => $turn->turn])
                 ->values()
                 ->all(),
+        ];
+    }
+
+    /**
+     * The run's own hand-entered races, as the manual branch's "already entered" list.
+     *
+     * `scenario_slots` of kind `free_race` are the rows the manual path writes; the calendar path
+     * reads `race_catalog_slots`. The two lists are disjoint, and this one is what the manual arm
+     * shows so a Trainer can see what they have already recorded by hand.
+     *
+     * @return list<array{id: int, title: string}>
+     */
+    private function manualSlotRows(TrainingRun $run): array
+    {
+        if (! $run->hasScenario()) {
+            return [];
+        }
+
+        return ScenarioSlot::query()
+            ->where('scenario_key', $run->scenarioKey())
+            ->where('kind', 'free_race')
+            ->orderBy('sort_order')
+            ->get()
+            ->map(static fn (ScenarioSlot $slot): array => ['id' => $slot->id, 'title' => $slot->title])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * What a blank manual form pre-fills: the month and half of the turn being decided, so a Trainer
+     * entering a free race at turn N gets turn N's month and half. The values are what
+     * `StoreRaceEntryRequest` requires (`month` 1-12, `half` Early/Late); `tier` is nullable and
+     * starts empty. With no turn to read, both are blank and the Trainer picks.
+     *
+     * @param  array{year: int, turn: int}|null  $next
+     * @return array{month: string, half: string, tier: string}
+     */
+    private function manualDefaults(TrainingRun $run, ?array $next): array
+    {
+        $turn = $next['turn'] ?? $run->turnEntries->sortByDesc('turn')->first()?->turn;
+
+        if ($turn === null) {
+            return ['month' => '', 'half' => '', 'tier' => ''];
+        }
+
+        return [
+            'month' => (string) (intdiv($turn - 1, 2) + 1),
+            'half' => $turn % 2 === 1 ? 'Early' : 'Late',
+            'tier' => '',
         ];
     }
 
@@ -275,16 +339,16 @@ class RaceDecisionController extends Controller
         }
 
         if (! $run->hasScenario()) {
-            return 'This run names no scenario, so it has no race calendar and no races to decide between. Choose a scenario on the run screen and the calendar appears.';
+            return 'This run names no scenario, so it has no race calendar and no races to decide between. Choose a scenario on the Cockpit header and the calendar appears.';
         }
 
         if ($next === null) {
             return $run->turnEntries->isEmpty()
-                ? 'No turn has been logged yet, so there is no turn to decide about. Record the first turn on the run screen and this screen will open on the next one.'
-                : 'Every turn of this career has been played, so there is no next race to decide about. The run record screen has the full history.';
+                ? 'No turn has been logged yet, so there is no turn to decide about. Record the first turn through Training, then this screen opens on the next one.'
+                : 'Every turn of this career has been played, so there is no next race to decide about. The Career Timeline at the bottom of the Cockpit has the full history.';
         }
 
-        return 'No race on this scenario\'s calendar falls at this turn. The race calendar on the run screen shows which turns carry one.';
+        return 'No race on this scenario\'s calendar falls at this turn. The race calendar on the Cockpit header shows which turns carry one.';
     }
 
     /** The twelve month names, as the client's own Early/Late halves divide them. */

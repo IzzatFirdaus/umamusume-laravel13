@@ -128,7 +128,7 @@ class SaveVeteranController extends Controller
             'blocked' => $recordable ? null : 'This career is '.$run->status->label().', not Completed, so there is nothing to file yet. The run record is where the status changes, and the Career Result is what a finished career adds up to.',
             'save_url' => route('runs.veteran.store', $run),
             'result_url' => route('runs.result', $run),
-            'run_url' => route('runs.show', $run),
+            'run_url' => route('runs.cockpit', $run),
             'library_url' => route('veterans.index'),
         ]);
     }

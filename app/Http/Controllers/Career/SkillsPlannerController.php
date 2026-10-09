@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Career;
 
+use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Http\Controllers\Controller;
 use App\Models\Advisor\BuildTargetPayload;
@@ -43,11 +44,18 @@ final class SkillsPlannerController extends Controller
             'coverage' => $this->coverageSection($run, $required),
             'groups' => $this->groupRows($run, $required, $target),
             'ladder' => $this->ladderRows(),
+            // F2, plan §9.6 ruling 5: the acquired/skipped status write now lives on the Skills
+            // Planner rather than the 0.1.0 run-detail screen. The route and Form Request are the
+            // same ones the record screen used; the controller repoints them to the cockpit after the
+            // flip, so a POST from here lands the write and returns the Trainer to where the run's
+            // skills are read.
+            'skills_sync_url' => route('runs.skills.sync', $run),
+            'acquisition_options' => $this->acquisitionOptions(),
         ]);
     }
 
     /**
-     * @return array{id: int, trainee: string, trainee_ja: string|null, scenario_label: string, status_label: string, run_url: string}
+     * @return array{id: int, trainee: string, trainee_ja: string|null, scenario_label: string, status_label: string, run_url: string, skills_sync_url: string, status_labels: array<string,string>}
      */
     private function runSection(TrainingRun $run): array
     {
@@ -59,7 +67,9 @@ final class SkillsPlannerController extends Controller
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
             'status_label' => $run->status->label(),
-            'run_url' => route('runs.show', $run),
+            'run_url' => route('runs.cockpit', $run),
+            'skills_sync_url' => route('runs.skills.sync', $run),
+            'status_labels' => collect(RunStatus::cases())->mapWithKeys(fn (RunStatus $s): array => [$s->value => $s->label()])->toArray(),
         ];
     }
 
@@ -488,5 +498,19 @@ final class SkillsPlannerController extends Controller
         $ladder = config('uma.skills.hint_discount', []);
 
         return $ladder;
+    }
+
+    /**
+     * The acquisition-status options F2 (plan §9.6 ruling 5) renders alongside the run's existing
+     * skill states, so the picker mirrors the record screen's vocabulary rather than inventing one.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    private function acquisitionOptions(): array
+    {
+        return array_map(
+            static fn (SkillAcquisition $acquisition): array => ['value' => $acquisition->value, 'label' => $acquisition->label()],
+            SkillAcquisition::cases(),
+        );
     }
 }

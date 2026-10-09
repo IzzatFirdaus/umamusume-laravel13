@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\ImportHistoricalRun;
 use App\Enums\CardRarity;
 use App\Enums\MoodTier;
+use App\Enums\PerformanceType;
 use App\Enums\RaceEntryStatus;
 use App\Enums\ReleaseStatus;
 use App\Enums\RunStatus;
@@ -32,6 +33,7 @@ use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
+use App\Models\TurnEvents\PerformancePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\Umamusume;
 use App\Services\DataPipeline\ArtworkMirror;
@@ -62,11 +64,16 @@ class TrainingRunController extends Controller
      * should hand back to it. `condition` is absent because the rail has no field for it
      * and rehydrating a key nothing reads would be a claim that the rail collects it.
      *
+     * `performance` is the one nested entry: the rail's two Performance fields post as a pair, so a
+     * refused submit has to hand the pair back or it throws away half of what the Trainer typed
+     * (D-56). It is not a `turn_entries` column and `turnAttributes()` still copies only the columns
+     * that table owns.
+     *
      * @var list<string>
      */
     private const STAGED_TURN_FIELDS = [
         'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp',
-        'energy', 'fans', 'mood', 'choice', 'outcome', 'penalty_kind',
+        'energy', 'fans', 'mood', 'choice', 'outcome', 'penalty_kind', 'performance',
     ];
 
     public function index(): InertiaResponse
@@ -162,7 +169,7 @@ class TrainingRunController extends Controller
             return $run;
         });
 
-        return redirect()->route('runs.show', $run)->with('status', 'Run created.');
+        return redirect()->route('runs.cockpit', $run)->with('status', 'Run created.');
     }
 
     /**
@@ -213,6 +220,18 @@ class TrainingRunController extends Controller
         $run->load(['umamusume', 'turnEntries', 'skills', 'turnEvents', 'deckSlots.supportCard', 'raceEntries.scenarioSlot', 'raceEntries.raceCatalogSlot', 'raceEntries.turnEntry']);
 
         return Inertia::render('Runs/Show', $this->showData($run));
+    }
+
+    /**
+     * The retired record screen's doorway (F2, plan §9.6). `GET /training-runs/{run}` no longer
+     * renders a page: every write the 0.1.0 screen owned now has a 2.0 owner reachable from the
+     * Cockpit, so the route redirects there. `{run}` still binds, so a missing id 404s before this
+     * method runs. `show()` stays in the tree, unrouted, until `Runs/Show.vue` is deleted in a
+     * follow-up; it is deliberately not part of the flip.
+     */
+    public function redirect(TrainingRun $run): RedirectResponse
+    {
+        return redirect()->route('runs.cockpit', $run);
     }
 
     /**
@@ -332,6 +351,7 @@ class TrainingRunController extends Controller
             'deck' => $this->deckPayload($run),
             'racePanel' => $this->racePanelPayload($run, $entryMode, $calendarYear),
             'shop' => $this->shopPayload($run),
+            'performance' => $this->performancePayload($run, $staged),
             'rail' => $this->railPayload($run, $staged, $preview, $previewed, $latest),
         ];
     }
@@ -714,6 +734,44 @@ class TrainingRunController extends Controller
                 'level' => $run->facilityLevel($reported->rank),
             ],
             'ladder' => $ladder,
+        ];
+    }
+
+    /**
+     * The rail's Performance pair (Our Grand Concert).
+     *
+     * `enabled` is the scenario's own capability flag, so the page tests a flag and never names a
+     * scenario (D-240, gate G-33). `types` is read from the domain enum the way the mood select reads
+     * `MoodTier::cases()`, which keeps the five client words in one place and off the wire twice, and
+     * it is sent only for a scenario that opens the field: a page for URA Finale carries no words it
+     * has no control for.
+     *
+     * `entered` is what a refused submit hands back, and nothing else. Neither field is prefilled and
+     * no reading of a previous turn is offered, because an input arriving with a number asserts a
+     * change the Trainer did not report (D-220), and unlike Energy or Fans there is no stored
+     * Performance column to show a last-known value from.
+     *
+     * **No figure this tool does not have is computed here.** There is no starting value, no running
+     * total, no cap and no per-turn amount in this payload, because `docs/scenarios/07` marks every
+     * one of those unverified; the read side of the same facts is `TrainingRun::performanceObservations()`,
+     * which likewise reports observations rather than a balance.
+     *
+     * @param  array<string, mixed>  $staged
+     * @return array{enabled: bool, types: list<string>, entered: array{type: string|null, delta: string|null}}
+     */
+    private function performancePayload(TrainingRun $run, array $staged): array
+    {
+        $enabled = $run->acceptsPerformanceObservations();
+
+        return [
+            'enabled' => $enabled,
+            'types' => $enabled
+                ? array_map(static fn (PerformanceType $type): string => $type->value, PerformanceType::cases())
+                : [],
+            'entered' => [
+                'type' => isset($staged['performance']['type']) ? (string) $staged['performance']['type'] : null,
+                'delta' => isset($staged['performance']['delta']) ? (string) $staged['performance']['delta'] : null,
+            ],
         ];
     }
 
@@ -1589,7 +1647,7 @@ class TrainingRunController extends Controller
     {
         $run->update($request->validated());
 
-        return redirect()->route('runs.show', $run)->with('status', 'Run updated.');
+        return redirect()->route('runs.cockpit', $run)->with('status', 'Run updated.');
     }
 
     /**
@@ -1609,7 +1667,7 @@ class TrainingRunController extends Controller
         $run->update(['build_target' => $request->payload()]);
 
         return redirect()
-            ->back(fallback: route('runs.show', $run))
+            ->back(fallback: route('runs.cockpit', $run))
             ->with('status', 'Build target saved.');
     }
 
@@ -1668,7 +1726,7 @@ class TrainingRunController extends Controller
         });
 
         return redirect()
-            ->back(fallback: route('runs.show', $run))
+            ->back(fallback: route('runs.cockpit', $run))
             ->with('status', 'Race recorded.');
     }
 
@@ -1697,7 +1755,7 @@ class TrainingRunController extends Controller
         ]);
 
         return redirect()
-            ->route('runs.show', $run)
+            ->route('runs.cockpit', $run)
             ->with('status', 'Purchase recorded.');
     }
 
@@ -1732,7 +1790,7 @@ class TrainingRunController extends Controller
             // The input travels in the session and `showData()` rebuilds the identical
             // screen on the GET, so preview and plain show still share one assembly and
             // cannot drift into two versions of the same page.
-            return redirect()->route('runs.show', $run)
+            return redirect()->route('runs.cockpit', $run)
                 ->withInput($validated + ['previewed' => '1']);
         }
 
@@ -1779,9 +1837,36 @@ class TrainingRunController extends Controller
                         .'no source in this repository publishes a failure chance.',
                 ]);
             }
+
+            // A Performance observation is the Trainer's own reading of the turn (Our Grand
+            // Concert, `docs/scenarios/07-grand-concert.md`). Nothing here derives what the turn
+            // should have paid: the amount is the one that was entered, stored as a signed delta,
+            // and no running total is kept -- `turn_entries` stays the record of absolute values
+            // and `PerformancePayload` carries only the change. A negative delta is Performance
+            // spent, which is the same kind of fact as a positive one and not a second shape.
+            //
+            // Stored as a `Scenario` event, so `destroyTurn` leaves it alone when a turn is removed:
+            // that method already rules on this key for `storePurchase`, and deleting a turn is not a
+            // ruling on a record the turn made. The scenario gate lives on the reader, the way
+            // `latestTeamRank()` gates on its panel, because this table is an observation log and no
+            // payload has ever been gated on the way in.
+            if (isset($validated['performance'])) {
+                $run->turnEvents()->create([
+                    'turn' => $entry->turn,
+                    'event_type' => TurnEventType::Scenario,
+                    'source_name' => $this->choiceLabel((string) ($validated['choice'] ?? '')),
+                    'deltas' => PerformancePayload::make(
+                        PerformanceType::from((string) $validated['performance']['type']),
+                        (int) $validated['performance']['delta'],
+                    )->toArray(),
+                    'origin_note' => 'The Trainer recorded this turn\'s Performance change. Observed, '
+                        .'not modelled: no source in this repository publishes what a training turn '
+                        .'pays or what a Lesson costs.',
+                ]);
+            }
         });
 
-        return redirect()->route('runs.show', $run)
+        return redirect()->route('runs.cockpit', $run)
             ->with('status', 'Turn '.$validated['turn'].' logged.');
     }
 
@@ -1816,7 +1901,7 @@ class TrainingRunController extends Controller
 
         $turn->update($request->validated());
 
-        return redirect()->back(fallback: route('runs.show', $run))->with('status', 'Turn '.$turn->turn.' updated.');
+        return redirect()->back(fallback: route('runs.cockpit', $run))->with('status', 'Turn '.$turn->turn.' updated.');
     }
 
     public function destroyTurn(TrainingRun $run, TurnEntry $turn): RedirectResponse
@@ -1837,7 +1922,7 @@ class TrainingRunController extends Controller
             $turn->delete();
         });
 
-        return redirect()->route('runs.show', $run)->with('status', 'Turn '.$turn->turn.' removed.');
+        return redirect()->route('runs.cockpit', $run)->with('status', 'Turn '.$turn->turn.' removed.');
     }
 
     /**
@@ -1857,7 +1942,7 @@ class TrainingRunController extends Controller
             }
         }
 
-        return redirect()->route('runs.show', $run)->with('status', 'Skill status saved.');
+        return redirect()->route('runs.cockpit', $run)->with('status', 'Skill status saved.');
     }
 
     /**

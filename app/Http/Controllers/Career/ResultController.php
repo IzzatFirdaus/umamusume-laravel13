@@ -91,7 +91,7 @@ class ResultController extends Controller
             'scenario_label' => $run->hasScenario()
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
-            'run_url' => route('runs.show', $run),
+            'run_url' => route('runs.cockpit', $run),
             'cockpit_url' => route('runs.cockpit', $run),
             'timeline_url' => route('runs.timeline', $run),
         ];

@@ -75,7 +75,7 @@ class TrainingDecisionController extends Controller
 
         $advisor = app(TrainerAdvisor::class);
         $latest = $run->turnEntries->sortByDesc('turn')->first();
-        $advice = $advisor->advise($latest, $run->buildTarget());
+        $advice = $advisor->advise($latest, $run->buildTarget(), $run);
         $target = $run->buildTarget();
         $scenarioKey = $run->hasScenario() ? $run->scenarioKey() : null;
 
@@ -129,7 +129,7 @@ class TrainingDecisionController extends Controller
             'scenario_label' => $run->hasScenario()
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
-            'run_url' => route('runs.show', $run),
+            'run_url' => route('runs.cockpit', $run),
             'cockpit_url' => route('runs.cockpit', $run),
         ];
     }

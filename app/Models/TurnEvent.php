@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\TurnEventType;
 use App\Models\TurnEvents\NpcFriendshipPayload;
+use App\Models\TurnEvents\PerformancePayload;
 use App\Models\TurnEvents\RaceFatiguePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\TurnEvents\SpiritBurstPayload;
@@ -130,6 +131,20 @@ class TurnEvent extends Model
     }
 
     /**
+     * The Performance change this event recorded, when it recorded one (Our Grand Concert).
+     */
+    public function performancePayload(): ?PerformancePayload
+    {
+        $deltas = $this->deltas;
+
+        if (! is_array($deltas) || ! PerformancePayload::matches($deltas)) {
+            return null;
+        }
+
+        return PerformancePayload::fromArray($deltas);
+    }
+
+    /**
      * Validate a payload on the way in, not on the way out.
      *
      * `deltas` is a json column, so any key set can be written to it and a typo becomes
@@ -172,6 +187,12 @@ class TurnEvent extends Model
 
             if (RaceFatiguePayload::matches($deltas)) {
                 $event->deltas = RaceFatiguePayload::fromArray($deltas)->toArray();
+
+                return;
+            }
+
+            if (PerformancePayload::matches($deltas)) {
+                $event->deltas = PerformancePayload::fromArray($deltas)->toArray();
             }
         });
     }

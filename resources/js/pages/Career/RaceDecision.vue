@@ -19,8 +19,8 @@
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import RaceCard from '../../components/career/RaceCard.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 
 interface Fact {
@@ -56,12 +56,62 @@ const props = defineProps<{
     entry: { action: string; turns: { id: number; turn: number }[] };
     planner_url: string;
     empty: string | null;
+    entry_mode: 'calendar' | 'manual';
+    manual_slots: { id: number; title: string }[];
+    manual_defaults: { month: string; half: string; tier: string };
+    race_statuses: string[];
 }>();
 
 const { visiting, visitFailed } = useVisitState();
 
 // The next obligation is the Level 1 item; the rest are context, so only one row is emphasised.
 const nextDeadline = computed(() => props.deadlines.find((row) => row.is_next) ?? null);
+
+// F2, plan §9.6 ruling 3: manual free-race entry. The branch is server-resolved (a query-string
+// read, the same shape `RacePanel` uses), so switching is a navigation and this form can never
+// submit the branch the page no longer shows. The form posts `entry_mode=manual` to
+// `runs.races.store`, the route the calendar cards already use.
+const modes = [
+    { key: 'calendar', label: 'Calendar race' },
+    { key: 'manual', label: 'Race not on the calendar' },
+];
+
+function switchMode(key: string): void {
+    router.get(window.location.pathname, { entry_mode: key }, { preserveState: true, preserveScroll: true });
+}
+
+const manualForm = useForm({
+    title: '',
+    month: props.manual_defaults.month,
+    half: props.manual_defaults.half,
+    tier: props.manual_defaults.tier,
+    status: props.race_statuses[0] ?? '',
+    placement: '',
+    fans_gain: '',
+    turn_entry_id: '',
+    objective_index: '',
+});
+
+// Post only what the manual branch renders, the way only rendered inputs submitted: the manual path
+// prohibits `scenario_slot_id` and the Form Request refuses circles without a team-race slot.
+manualForm.transform((data) => ({
+    entry_mode: 'manual',
+    title: data.title,
+    month: data.month,
+    half: data.half,
+    tier: data.tier,
+    status: data.status,
+    placement: data.placement,
+    fans_gain: data.fans_gain,
+    turn_entry_id: data.turn_entry_id,
+    objective_index: data.objective_index,
+}));
+
+const monthOptions = Array.from({ length: 12 }, (_, i) => String(i + 1));
+
+function submitManual(): void {
+    manualForm.post(props.entry.action, { preserveScroll: true });
+}
 </script>
 
 <template>
@@ -143,30 +193,136 @@ const nextDeadline = computed(() => props.deadlines.find((row) => row.is_next) ?
 
         <section aria-labelledby="race-list-heading" class="mt-4">
             <h2 id="race-list-heading" class="text-base font-semibold text-ink-strong">Races to decide between</h2>
-            <!-- The door to the Scenario Race Planner, which draws the whole calendar rather than this
-                 turn. A screen reachable only by URL is a defect (D14). -->
-            <p class="mt-1 text-sm">
-                <Link :href="props.planner_url" class="inline-flex min-h-11 items-center rounded-md px-3 font-semibold text-ink underline">
-                    Plan the whole calendar
-                </Link>
-            </p>
 
-            <p
-                v-if="props.empty !== null"
-                class="mt-2 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
-            >
-                {{ props.empty }}
-            </p>
-            <ul v-else class="mt-3 flex flex-col gap-3">
-                <RaceCard
-                    v-for="race in props.races"
-                    :key="race.id"
-                    :race="race"
-                    :readiness="props.readiness"
-                    :entry="props.entry"
-                    :skip-url="props.run.run_url"
-                />
-            </ul>
+            <!-- The branch switch. Two buttons that navigate the query string, the pattern
+                 `RacePanel` uses; the branch is server-resolved so this form never submits the
+                 branch the page no longer shows. -->
+            <div class="mt-2 flex flex-wrap gap-2" aria-label="Race entry mode">
+                <button
+                    v-for="mode in modes"
+                    :key="mode.key"
+                    type="button"
+                    :aria-pressed="props.entry_mode === mode.key ? 'true' : 'false'"
+                    class="inline-flex min-h-11 items-center rounded-md border px-3 text-sm font-medium"
+                    :class="props.entry_mode === mode.key ? 'border-pick-line bg-pick/10 text-ink-strong' : 'border-rule text-ink-muted'"
+                    @click="switchMode(mode.key)"
+                >
+                    {{ mode.label }}
+                </button>
+            </div>
+
+            <template v-if="props.entry_mode === 'calendar'">
+                <!-- The door to the Scenario Race Planner, which draws the whole calendar rather than
+                     this turn. A screen reachable only by URL is a defect (D14). -->
+                <p class="mt-2 text-sm">
+                    <Link :href="props.planner_url" class="inline-flex min-h-11 items-center rounded-md px-3 font-semibold text-ink underline">
+                        Plan the whole calendar
+                    </Link>
+                </p>
+
+                <p
+                    v-if="props.empty !== null"
+                    class="mt-2 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
+                >
+                    {{ props.empty }}
+                </p>
+                <ul v-else class="mt-3 flex flex-col gap-3">
+                    <RaceCard
+                        v-for="race in props.races"
+                        :key="race.id"
+                        :race="race"
+                        :readiness="props.readiness"
+                        :entry="props.entry"
+                        :skip-url="props.run.run_url"
+                    />
+                </ul>
+            </template>
+
+            <!-- The manual free-race arm (F2, plan §9.6 ruling 3). Posts `entry_mode=manual` to
+                 `runs.races.store`, which also creates the `scenario_slots` row of kind
+                 `free_race`. -->
+            <template v-else>
+                <p class="mt-2 text-sm text-ink">
+                    Some races are not on the career calendar: a rival's event, a scenario-only race.
+                    Record one here and it appears in the run's race log the same way a calendar race does.
+                </p>
+
+                <form
+                    class="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-3"
+                    :aria-busy="manualForm.processing"
+                    @submit.prevent="submitManual"
+                >
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Race title *</span>
+                        <input v-model="manualForm.title" type="text" name="title" required maxlength="255" placeholder="e.g. Practice Race" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Month *</span>
+                        <select v-model="manualForm.month" name="month" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                            <option value="">select</option>
+                            <option v-for="month in monthOptions" :key="month" :value="month">{{ month }}</option>
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Half *</span>
+                        <select v-model="manualForm.half" name="half" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                            <option value="">select</option>
+                            <option value="Early">Early</option>
+                            <option value="Late">Late</option>
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Tier (optional)</span>
+                        <input v-model="manualForm.tier" type="text" name="tier" maxlength="10" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Outcome</span>
+                        <select v-model="manualForm.status" name="status" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                            <option v-for="status in props.race_statuses" :key="status" :value="status">{{ status }}</option>
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Placement</span>
+                        <input v-model="manualForm.placement" type="number" name="placement" min="1" max="99" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Fans gained</span>
+                        <input v-model="manualForm.fans_gain" type="number" name="fans_gain" min="0" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Logged turn</span>
+                        <select v-model="manualForm.turn_entry_id" name="turn_entry_id" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                            <option value="">not named</option>
+                            <option v-for="turn in props.entry.turns" :key="turn.id" :value="String(turn.id)">Turn {{ turn.turn }}</option>
+                        </select>
+                    </label>
+                    <div class="flex items-end">
+                        <button
+                            type="submit"
+                            :disabled="manualForm.processing"
+                            class="enamel inline-flex min-h-11 items-center justify-center rounded-full bg-chrome px-4 font-semibold text-on-chrome disabled:opacity-60"
+                        >
+                            {{ manualForm.processing ? 'Saving…' : 'Record race' }}
+                        </button>
+                    </div>
+                    <p v-if="manualForm.hasErrors" role="alert" class="md:col-span-3 text-sm text-risk">
+                        <span v-for="(message, key) in manualForm.errors" :key="key" class="block">{{ message }}</span>
+                    </p>
+                </form>
+
+                <div v-if="props.manual_slots.length > 0" class="mt-4">
+                    <h3 class="text-sm font-semibold text-ink-strong">Races entered by hand</h3>
+                    <ul class="mt-2 flex flex-col gap-1.5" aria-label="Hand-entered races">
+                        <li
+                            v-for="slot in props.manual_slots"
+                            :key="slot.id"
+                            class="rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink"
+                        >
+                            {{ slot.title }}
+                        </li>
+                    </ul>
+                </div>
+            </template>
         </section>
     </CareerLayout>
 </template>
