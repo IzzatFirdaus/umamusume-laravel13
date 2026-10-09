@@ -578,7 +578,13 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   an absence that opens with no visible hint that it opens. The open reason is width-capped, because the
   marker box is shrink-to-fit: uncapped, one sentence measured 795px on a 1200px viewport and pushed the
   provenance badge beside it to x=824, away from the value it explains. And `<details>` is flow content,
-  so it belongs in a field or cell container (`dd`, `div`, `td`, `li`) and not inline in a `<p>` or a
+  provenance badge beside it to x=824, away from the value it explains. Where a disclosure does carry a
+  badge, the pair sits in a baseline-aligned row (`flex items-baseline`, marker `min-w-0 flex-1`, badge
+  `shrink-0`), because an opened reason grows the marker's box and a badge in plain inline flow falls
+  below the paragraph; measured at 1280px all three badge-bearing rows hold the badge on the marker's
+  line, and the residual at three-column widths is a horizontal gap — the badge keeps the row's right
+  edge rather than hugging the `N/A`, which is what line-one association costs without moving the reason
+  outside the disclosure. And `<details>` is flow content,
   `<span>`; an absence inside a sentence needs the sentence restructured into a row, which is a design
   change and not a migration.
 - **Absences are worded by kind, and the component does not decide the kind.** "not recorded" is the
@@ -586,6 +592,25 @@ What this file owns is the behaviour once a surface is chosen, and five rules bi
   caller owns its sentence and passes it through. This is deliberately not the unresolved provenance
   vocabulary question — that one is recorded in `PRODUCT.md` under "Open" and stays the owner's, and
   nothing here re-badges a figure.
+
+- **The four trust labels carry two axes, and the axis is set by surface class** (owner ruling 2026-10-09,
+  recorded in `docs/proposals/provenance-and-absence-contracts.md` §9). On the Trainer Advisor's surfaces the
+  state describes how a figure relates to its inputs: `Confirmed` is a reading taken as-is from a named
+  owner — a source-published value, a declared constant, or a value the Trainer entered — and `Calculated`
+  is this tool's own arithmetic over readings, deterministic, with the arithmetic stated beside it. On the
+  Database reference views the state describes how well the row is sourced, exactly as
+  `config/reference.php:30-33` defines it, and `calculated` stays reserved there because no reference row
+  is derived by this app. Neither reading governs the other's surfaces, and no surface sits under both.
+  Two consequences recorded so a later pass does not re-derive them. **The type is shared where the meaning
+  is not:** `ProvenanceState` is one union in `ProvenanceBadge.vue:12`, re-declared locally in
+  `resources/js/pages/Database/{Events,ShopItems,Sparks}.vue` because a consuming SFC cannot name an imported
+  type inside `defineProps<>`, so a fifth label is a four-file change even when it applies to one surface
+  class. **And nothing validates a config string against that union:** `ProvenanceBadge.vue:61` indexes
+  `BADGES[props.state]` with no fallback, so an out-of-vocabulary `state` in `config/reference.php` is a
+  render-time failure on a Database page rather than a build failure. What the ruling settled against what
+  it left open: `Unknown` survives only as the reference views' source-strength mark, and the four chips
+  that sat beside absences were removed as **policy**, not as enforcement of this file's absence rule —
+  the rule fixes how an absence renders and is silent on whether a badge may accompany it.
 
 ## 6. Lore-sensitive design rules (hard gate)
 
@@ -724,6 +749,15 @@ repo, and it is the finding most worth carrying out of this audit.
 | Flash banners use tokens                                                         | `FlashBannerTokensTest`                        | **passing**                                                 |
 | 768px minimum width is safe                                                      | nothing                                        | **Unverified** — see §2.3's held proposal                   |
 | Every ratio quoted in this file                                                  | research-phase measurement, files absent       | **documented, not reproducible here**                       |
+
+_Dated correction 2026-10-09: the "no `Unknown`" clause of the rendered-copy row above is not enforced by
+`RenderedCopyHygieneTest`. Read on this tree, that file checks em and en dashes, the `N/A`-instead-of-a-
+glyph rule, and its own scan coverage, and contains no occurrence of the word `Unknown` at all — so the
+row's **passing** status is evidence about dashes, not about the label. The clause is not therefore
+unenforced by anything else either: `ProvenanceBadge.vue:26-27` defines `Unknown` as "the state for 'there
+is no number'" and renders that word at four call sites, three of them beside an `N/A`. The conflict
+between §4.2's absence rule and the shipped badge is recorded as an open owner decision at
+`SCREEN_SPEC.md` §7 item 18; this row is corrected to stop citing a test that does not speak to it._
 
 The two skipped rows are why this file's contrast numbers cannot be treated as verified on
 this host: they were transcribed from research captures whose evidence files are not in
