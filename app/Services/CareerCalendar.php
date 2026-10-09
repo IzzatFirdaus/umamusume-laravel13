@@ -58,9 +58,18 @@ final class CareerCalendar
 
     public static function positionToTurnIndex(CareerPosition $position): int
     {
-        return (($position->year->value - 1) * TrainingRun::TURNS_PER_YEAR)
-            + (($position->month - 1) * 2)
-            + ($position->phase === CareerPhase::Early ? 1 : 2);
+        return self::turnIndexFor($position->year, $position->month, $position->phase);
+    }
+
+    /**
+     * The turn index a year, month and half name, before any position object exists - the shape a
+     * snapshot form collects, which has no reason to ask a Trainer to count turns first.
+     */
+    public static function turnIndexFor(CareerYear $year, int $month, CareerPhase $phase): int
+    {
+        return (($year->value - 1) * TrainingRun::TURNS_PER_YEAR)
+            + (($month - 1) * 2)
+            + ($phase === CareerPhase::Early ? 1 : 2);
     }
 
     /**

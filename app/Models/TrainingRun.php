@@ -572,11 +572,27 @@ class TrainingRun extends Model
     }
 
     /**
-     * The career turn number the next log lands on: one past the highest logged.
+     * The career turn number the next log lands on: one past the highest logged, or one past the
+     * stored position for a snapshot that has logged nothing yet.
+     *
+     * The second half is what keeps a snapshot from pretending it is turn 1: a run entered at Senior
+     * Early October with no state recorded has no `max(turn)` to add to, and answering 1 would put
+     * its first log in Junior January, which is the exact defect the snapshot flow exists to close.
      */
     public function nextTurnNumber(): int
     {
-        return (int) $this->turnEntries()->max('turn') + 1;
+        /** @var int|string|null $max */
+        $max = $this->turnEntries()->max('turn');
+
+        if ($max !== null && (int) $max >= 1) {
+            return (int) $max + 1;
+        }
+
+        if ($this->career_position !== null) {
+            return $this->career_position->turnIndex + 1;
+        }
+
+        return 1;
     }
 
     /**
