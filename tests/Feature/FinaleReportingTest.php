@@ -116,3 +116,37 @@ it('emits no finale at all for a scenario whose calendar carries none', function
             ->where('finale', null)
         );
 });
+
+it('emits the same finale state on the cockpit payload', function (): void {
+    $run = finaleReportingRun();
+    $slot = finaleReportingSlot('our_grand_concert');
+
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 71]);
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'race_catalog_slot_id' => $slot->id,
+        'status' => RaceEntryStatus::Completed,
+        'placement' => 2,
+    ]);
+
+    // The cockpit's key is `finale_state`, not `finale`: that word already carries what the config
+    // declares the scenario composes, which is a different question from where this run stands.
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scenario.finale_state.reached', true)
+            ->where('scenario.finale_state.outcome', RaceEntryStatus::Completed->label())
+            ->where('scenario.finale_state.placement', '2nd')
+            ->where('scenario.finale_state.label', 'Grand Concert')
+        );
+});
+
+it('emits no cockpit finale state for a scenario whose calendar carries none', function (): void {
+    $run = finaleReportingRun('ura_finale');
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scenario.finale_state', null)
+        );
+});

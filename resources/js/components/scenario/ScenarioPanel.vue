@@ -102,6 +102,13 @@ const props = defineProps<{
         };
         /** The scenario's own sentence for why its panels are off, or null where its entry has none. */
         panel_absence: string | null;
+    finale_state: {
+        reached: boolean;
+        outcome: string | null;
+        placement: string | null;
+        turn: number | null;
+        label: string;
+    } | null;
         /** Where that reason is recorded, for the `title`. */
         panel_absence_title: string | null;
     };
@@ -245,6 +252,21 @@ const emptyText = computed<string>(() =>
                     tone="note"
                 />
             </div>
+
+            <!-- The finale, where the scenario's calendar carries one. A position, not a decision:
+                 no link and no action, because the action grid is where decisions live. Three states,
+                 the same three the Career Result prints, read from one server-side reader (the
+                 `FinaleReader`) so no two screens can disagree. The label is notice 905's noun; the
+                 catalogue row's own title is KI-82, which is why it does not travel here. -->
+            <p v-if="props.scenario.finale_state !== null" class="mt-2 text-sm text-ink">
+                <span class="font-semibold text-ink-strong">Finale</span>:
+                {{ props.scenario.finale_state.label }}.
+                <template v-if="!props.scenario.finale_state.reached">Not yet reached.</template>
+                <template v-else-if="props.scenario.finale_state.outcome === null">Reached; outcome not recorded.</template>
+                <template v-else>
+                    Completed: {{ props.scenario.finale_state.outcome }}<template v-if="props.scenario.finale_state.placement !== null">, {{ props.scenario.finale_state.placement }}</template><template v-if="props.scenario.finale_state.turn !== null"> on turn {{ props.scenario.finale_state.turn }}</template>.
+                </template>
+            </p>
 
             <!-- What the advisor does and does not do here, so the Trainer is not left guessing. -->
             <AlertRow glyph="○" :text="props.scenario.recommendations_absence" tone="note" />

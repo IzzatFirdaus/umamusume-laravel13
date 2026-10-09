@@ -14,6 +14,7 @@ use App\Models\TurnEntry;
 use App\Models\TurnEvent;
 use App\Services\Advisor\Advice;
 use App\Services\Advisor\TrainerAdvisor;
+use App\Services\Scenario\FinaleReader;
 use App\Services\ScenarioCaps;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -618,6 +619,11 @@ class CockpitController extends Controller
             'recommendations' => [],
             'recommendations_absence' => 'No source this tool reads states scenario advice, so none is offered here. The advisor ranks the turn you are deciding.',
             'finale' => $def['finale'] ?? null,
+            // This run's own position against the finale, distinct from `finale` above, which is
+            // what the config declares the scenario composes: a structure and a reading are two
+            // questions. Named apart so a reader cannot take one for the other; Slice 23's
+            // consistency pass owns the collision and may rename either side.
+            'finale_state' => FinaleReader::forRun($run),
             'finale_absence' => $this->finaleAbsence($run, $def),
             // The five Trackblazer-specific sections (plan §9 E4). Each is null for any scenario
             // whose matrix does not turn the matching flag on, so the section's key set stays
