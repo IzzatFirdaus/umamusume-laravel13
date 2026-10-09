@@ -40,7 +40,7 @@ interface ParentNode {
     rank_letter: string | null;
     rank_label: string;
     is_guest: boolean;
-    ancestors: { slot: string; name: string | null }[];
+    ancestors: { slot: string; name: string | null; sparks: SparkRow[]; sparks_label: string }[];
     sparks: SparkRow[];
     spark_counts: { kind: string; kind_label: string; count: number }[];
     probability: { value: null; title: string };
@@ -83,6 +83,13 @@ const form = useForm({
         rank_letter: parent.rank_letter ?? '',
         is_guest: parent.is_guest,
         ancestors: [parent.ancestors[0]?.name ?? '', parent.ancestors[1]?.name ?? ''] as [string, string],
+        // Each grandparent's own Sparks, seeded the way a parent's are: a stored row reads back, a
+        // blank one is a draft the write discards.
+        ancestors_sparks: parent.ancestors.map((ancestor) => ancestor.sparks.map((spark) => ({
+            kind: spark.kind,
+            target: spark.target ?? '',
+            stars: spark.stars === null ? '' : spark.stars,
+        }))),
         sparks: parent.sparks.map((spark) => ({
             kind: spark.kind,
             target: spark.target ?? '',
@@ -103,6 +110,13 @@ const saving = (): void => {
             legacy_id: legacy.legacy_id === '' ? null : Number(legacy.legacy_id),
             rank: legacy.rank === '' ? null : Number(legacy.rank),
             rank_letter: legacy.rank_letter === '' ? null : legacy.rank_letter,
+            ancestors_sparks: legacy.ancestors_sparks.map((list) => list
+                .filter((spark) => !isBlankSpark(spark))
+                .map((spark) => ({
+                    kind: spark.kind,
+                    target: spark.target === '' ? null : spark.target,
+                    stars: spark.stars === '' ? null : Number(spark.stars),
+                }))),
             sparks: legacy.sparks.filter((spark) => !isBlankSpark(spark)).map((spark) => ({
                 kind: spark.kind,
                 target: spark.target === '' ? null : spark.target,
@@ -136,6 +150,14 @@ function addSpark(index: number): void {
 
 function removeSpark(index: number, sparkIndex: number): void {
     form.legacies[index].sparks.splice(sparkIndex, 1);
+}
+
+function addAncestorSpark(index: number, ancestorIndex: number): void {
+    form.legacies[index].ancestors_sparks[ancestorIndex].push({ kind: 'blue', target: '', stars: '' } as SparkDraft);
+}
+
+function removeAncestorSpark(index: number, ancestorIndex: number, sparkIndex: number): void {
+    form.legacies[index].ancestors_sparks[ancestorIndex].splice(sparkIndex, 1);
 }
 
 /**
@@ -307,6 +329,59 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                 >
                                     Enter the name as you read it. Blank stays N/A.
                                 </p>
+
+                                <details class="mt-2 rounded-md border border-rule bg-panel p-2">
+                                    <summary class="flex min-h-11 cursor-pointer items-center text-xs font-medium text-ink">
+                                        Add spark to grandparent
+                                        <span class="sr-only"> {{ ancestor.slot }}</span>
+                                    </summary>
+
+                                    <ul
+                                        v-if="form.legacies[index].ancestors_sparks[ancestorIndex].length > 0"
+                                        class="mt-2 space-y-2"
+                                    >
+                                        <li
+                                            v-for="(spark, sparkIndex) in form.legacies[index].ancestors_sparks[ancestorIndex]"
+                                            :key="sparkIndex"
+                                            class="flex flex-wrap items-end gap-2 rounded-md border border-rule bg-raised p-2"
+                                        >
+                                            <label class="flex flex-col gap-1 text-xs text-ink">
+                                                <span>Kind</span>
+                                                <select v-model="spark.kind" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm">
+                                                    <option v-for="(label, kind) in props.sparkKinds" :key="kind" :value="kind">{{ label }}</option>
+                                                </select>
+                                            </label>
+                                            <label class="flex flex-col gap-1 text-xs text-ink">
+                                                <span>Applies to</span>
+                                                <input v-model="spark.target" type="text" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm">
+                                            </label>
+                                            <label class="flex flex-col gap-1 text-xs text-ink">
+                                                <span>Stars</span>
+                                                <input v-model="spark.stars" type="number" min="1" max="3" class="min-h-11 w-20 rounded-md border border-rule bg-raised px-2 text-sm">
+                                            </label>
+                                            <button
+                                                type="button"
+                                                class="enamel min-h-11 rounded-full bg-chrome px-3 text-sm font-semibold text-on-chrome"
+                                                @click="removeAncestorSpark(index, ancestorIndex, sparkIndex)"
+                                            >
+                                                Remove Spark
+                                                <span class="sr-only"> from {{ ancestor.slot }}</span>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                    <p v-else class="mt-1 text-xs text-ink-muted">
+                                        {{ ancestor.sparks_label }}
+                                    </p>
+
+                                    <button
+                                        type="button"
+                                        class="mt-2 min-h-11 rounded-md border border-rule px-3 text-sm font-medium text-ink"
+                                        @click="addAncestorSpark(index, ancestorIndex)"
+                                    >
+                                        Add spark to grandparent
+                                        <span class="sr-only"> {{ ancestor.slot }}</span>
+                                    </button>
+                                </details>
                             </li>
                         </ol>
 

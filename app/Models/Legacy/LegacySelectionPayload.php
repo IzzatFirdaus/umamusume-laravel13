@@ -84,7 +84,7 @@ final readonly class LegacySelectionPayload
     }
 
     /**
-     * @param  list<array{rank: int|null, rank_letter?: string, is_guest: bool, ancestors: list<string|null>, ancestors_meta?: list<array{id: int, name: string, costume: string|null}>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
+     * @param  list<array{rank: int|null, rank_letter?: string, is_guest: bool, ancestors: list<string|null>, ancestors_meta?: list<array{id: int, name: string, costume: string|null}>, ancestors_sparks?: list<list<array{kind: string, target: mixed, stars: int|null}>>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
      */
     public function __construct(
         public array $legacies,
@@ -131,7 +131,7 @@ final readonly class LegacySelectionPayload
             throw new InvalidArgumentException("Legacy #{$index} is not a record.");
         }
 
-        self::assertKeysAllowing($legacy, self::LEGACY_KEYS, ['ancestors_meta', 'rank_letter'], "Legacy #{$index}");
+        self::assertKeysAllowing($legacy, self::LEGACY_KEYS, ['ancestors_meta', 'rank_letter', 'ancestors_sparks'], "Legacy #{$index}");
 
         if (! is_bool($legacy['is_guest'])) {
             throw new InvalidArgumentException("Legacy #{$index} needs a bool is_guest.");
@@ -187,7 +187,58 @@ final readonly class LegacySelectionPayload
             $record['rank_letter'] = $letter;
         }
 
+        // The grandparents' own Sparks, aligned by index with `ancestors`: the two rows the client
+        // shows under each parent are ancestors, and a Spark can be read off any of them.
+        $ancestorSparks = self::ancestorsSparks($index, $legacy['ancestors_sparks'] ?? null, $record['ancestors']);
+
+        if ($ancestorSparks !== null) {
+            $record['ancestors_sparks'] = $ancestorSparks;
+        }
+
         return $record;
+    }
+
+    /**
+     * The optional per-ancestor Spark lists, aligned by index with the ancestor names.
+     *
+     * Null (the key absent) and an all-empty list both mean no grandparent Spark was recorded, and the
+     * record omits the key either way so a names-only payload keeps its old exact shape. A present key
+     * must line up one list per ancestor.
+     *
+     * @param  list<string|null>  $ancestors
+     * @return list<list<array{kind: string, target: mixed, stars: int|null}>>|null
+     */
+    private static function ancestorsSparks(int|string $index, mixed $value, array $ancestors): ?array
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (! is_array($value)) {
+            throw new InvalidArgumentException("Legacy #{$index} ancestors_sparks is not a list.");
+        }
+
+        if (count($value) !== count($ancestors)) {
+            throw new InvalidArgumentException(
+                "Legacy #{$index} names ".count($ancestors).' ancestors but carries '.count($value).' spark lists.',
+            );
+        }
+
+        $rows = [];
+        $any = false;
+
+        foreach (array_values($value) as $ancestorIndex => $sparks) {
+            $list = [];
+
+            foreach (is_array($sparks) ? array_values($sparks) : [] as $sparkIndex => $spark) {
+                $list[] = self::spark($index, "{$ancestorIndex}.{$sparkIndex}", $spark);
+            }
+
+            $any = $any || $list !== [];
+            $rows[] = $list;
+        }
+
+        return $any ? $rows : null;
     }
 
     /**

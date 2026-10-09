@@ -138,6 +138,8 @@ final class AncestryGraph
 
         /** @var list<mixed> $ancestorNames */
         $ancestorNames = $legacy['ancestors'] ?? [];
+        /** @var list<mixed> $ancestorSparkLists */
+        $ancestorSparkLists = $legacy['ancestors_sparks'] ?? [];
 
         // `$ancestorName`, not `$name`: the loop variable must not shadow the parent node's own name
         // parameter, or the last ancestor read wins and Parent A renders as her own grandparent. That
@@ -147,9 +149,29 @@ final class AncestryGraph
         foreach ([[$a1, 0], [$a2, 1]] as [$label, $index]) {
             $ancestorName = $ancestorNames[$index] ?? null;
 
+            $ancestorSparks = [];
+
+            /** @var list<mixed> $recorded */
+            $recorded = (array) ($ancestorSparkLists[$index] ?? []);
+
+            foreach ($recorded as $spark) {
+                $ancestorSparks[] = [
+                    'kind' => (string) $spark['kind'],
+                    'kind_label' => self::SPARK_KIND_LABELS[(string) $spark['kind']] ?? ucfirst((string) $spark['kind']),
+                    'target' => $spark['target'] === null ? null : (string) $spark['target'],
+                    'stars' => $spark['stars'],
+                ];
+            }
+
             $ancestors[] = [
                 'slot' => $label,
                 'name' => $ancestorName === null ? null : (string) $ancestorName,
+                // A grandparent's own Sparks, and the exact sentence the read-back prints when there are
+                // none, so a reader of the props can tell an absent list from an empty one.
+                'sparks' => $ancestorSparks,
+                'sparks_label' => $ancestorSparks === []
+                    ? 'No sparks recorded'
+                    : count($ancestorSparks).' Spark'.(count($ancestorSparks) === 1 ? '' : 's'),
             ];
         }
 

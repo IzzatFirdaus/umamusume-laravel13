@@ -103,6 +103,14 @@ class StoreLegacySelectionRequest extends FormRequest
             'legacies.*.rank_letter' => ['nullable', 'string', Rule::in(LegacySelectionPayload::RANK_LETTERS)],
             'legacies.*.is_guest' => ['required', 'boolean'],
             'legacies.*.ancestors' => ['present', 'array', 'max:'.LegacySelectionPayload::MAX_ANCESTORS],
+            // The grandparents' own Sparks, one list per ancestor. Optional and nullable: a names-only
+            // ancestor is a real state, and a blank trailing row is discarded in `payload()` the same
+            // way a parent's blank Spark is.
+            'legacies.*.ancestors_sparks' => ['nullable', 'array'],
+            'legacies.*.ancestors_sparks.*' => ['nullable', 'array'],
+            'legacies.*.ancestors_sparks.*.*.kind' => ['required', 'string', Rule::in(LegacySelectionPayload::SPARK_KINDS)],
+            'legacies.*.ancestors_sparks.*.*.target' => ['present', 'nullable', 'string', 'max:255'],
+            'legacies.*.ancestors_sparks.*.*.stars' => ['nullable', 'integer', 'min:1', 'max:'.LegacySelectionPayload::MAX_SPARK_STARS],
             'legacies.*.sparks' => ['present', 'array'],
             'legacies.*.sparks.*.kind' => ['required', 'string', Rule::in(LegacySelectionPayload::SPARK_KINDS)],
             // `target` is the Spark's own subject as the client renders it: a stat name, an aptitude,
@@ -188,19 +196,46 @@ class StoreLegacySelectionRequest extends FormRequest
                 $sparks[] = ['kind' => (string) $spark['kind'], 'target' => $target, 'stars' => $stars];
             }
 
+            // Ancestors are names, not ids (`ADR-0010` Consequences §2): a Trainer's grandparents
+            // are frequently absent from the local catalogue, and an id column would be a second,
+            // emptier version of the same fact.
+            $ancestors = array_values(array_map(
+                static fn (mixed $name): mixed => $name === null || $name === '' ? null : (string) $name,
+                (array) ($legacy['ancestors'] ?? []),
+            ));
+
+            // The grandparents' Sparks, aligned one list per ancestor. A blank trailing row is
+            // discarded here exactly as a parent's is, so an empty list is the same absence.
+            /** @var list<mixed> $postedAncestorSparks */
+            $postedAncestorSparks = array_values((array) ($legacy['ancestors_sparks'] ?? []));
+
+            $ancestorSparks = [];
+
+            foreach (array_keys($ancestors) as $ancestorIndex) {
+                $list = [];
+
+                foreach ((array) ($postedAncestorSparks[$ancestorIndex] ?? []) as $spark) {
+                    $target = $spark['target'] === null || $spark['target'] === '' ? null : (string) $spark['target'];
+                    $stars = isset($spark['stars']) ? (int) $spark['stars'] : null;
+
+                    if ($target === null && $stars === null) {
+                        continue;
+                    }
+
+                    $list[] = ['kind' => (string) $spark['kind'], 'target' => $target, 'stars' => $stars];
+                }
+
+                $ancestorSparks[] = $list;
+            }
+
             $legacies[] = [
                 'rank' => isset($legacy['rank']) ? (int) $legacy['rank'] : null,
                 'rank_letter' => isset($legacy['rank_letter']) && $legacy['rank_letter'] !== ''
                     ? (string) $legacy['rank_letter']
                     : null,
                 'is_guest' => (bool) $legacy['is_guest'],
-                // Ancestors are names, not ids (`ADR-0010` Consequences §2): a Trainer's grandparents
-                // are frequently absent from the local catalogue, and an id column would be a second,
-                // emptier version of the same fact.
-                'ancestors' => array_values(array_map(
-                    static fn (mixed $name): mixed => $name === null || $name === '' ? null : (string) $name,
-                    (array) ($legacy['ancestors'] ?? []),
-                )),
+                'ancestors' => $ancestors,
+                'ancestors_sparks' => $ancestorSparks,
                 'sparks' => $sparks,
             ];
         }

@@ -58,7 +58,7 @@ interface Member {
     rank_letter: string | null;
     rank_label: string;
     is_guest: boolean;
-    ancestors: { slot: string; name: string | null }[];
+    ancestors: { slot: string; name: string | null; sparks: Spark[]; sparks_label: string }[];
     sparks: Spark[];
     probability: { value: null; title: string };
 }
@@ -269,14 +269,22 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                                         Rented from a friend
                                     </span>
                                 </p>
-                                <p class="text-xs text-ink-muted">
-                                    <span v-for="(ancestor, index) in member.ancestors" :key="ancestor.slot">
-                                        {{ index > 0 ? ' · ' : '' }}{{ ancestor.slot }}:
+                                <ul class="mt-1 space-y-0.5 text-xs text-ink-muted">
+                                    <li v-for="ancestor in member.ancestors" :key="ancestor.slot">
+                                        {{ ancestor.slot }}:
                                         <span :title="ancestor.name === null ? 'No name was recorded for this ancestor.' : undefined">
                                             {{ ancestor.name ?? 'N/A' }}
                                         </span>
-                                    </span>
-                                </p>
+                                        <span v-if="ancestor.sparks.length > 0" class="ml-1">
+                                            <span v-for="spark in ancestor.sparks" :key="`${spark.kind}-${spark.target}`" class="mr-1">
+                                                {{ spark.kind_label ?? spark.kind }}
+                                                <span v-if="spark.target">on {{ spark.target }}</span>
+                                                <span v-if="spark.stars !== null">★{{ spark.stars }}</span>
+                                            </span>
+                                        </span>
+                                        <span v-else class="ml-1">{{ ancestor.sparks_label }}</span>
+                                    </li>
+                                </ul>
                                 <p class="text-xs text-ink-muted">
                                     <template v-if="member.sparks.length > 0">
                                         <span v-for="spark in member.sparks" :key="`${spark.kind}-${spark.target}`" class="mr-2">

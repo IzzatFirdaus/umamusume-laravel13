@@ -486,8 +486,8 @@ it('shapes the six nodes the same way for the draft and for a run', function ():
 
     expect($fromDraft)->toBe($fromRun)
         ->and($fromDraft['parents'][0]['ancestors'])->toBe([
-            ['slot' => 'Grandparent A1', 'name' => 'Grass Wonder'],
-            ['slot' => 'Grandparent A2', 'name' => 'Mill Raptor'],
+            ['slot' => 'Grandparent A1', 'name' => 'Grass Wonder', 'sparks' => [], 'sparks_label' => 'No sparks recorded'],
+            ['slot' => 'Grandparent A2', 'name' => 'Mill Raptor', 'sparks' => [], 'sparks_label' => 'No sparks recorded'],
         ])
         ->and($fromDraft['parents'][1]['name'])->toBeNull()
         ->and($fromDraft['parents'][0]['probability']['value'])->toBeNull();
