@@ -69,6 +69,13 @@ class TraineeSelectController extends Controller
         return Inertia::render('Career/TraineeSelect', [
             'trainees' => $trainees,
             'selected' => $draft['umamusume_id'],
+            // The stored trainee's name, sent with the selection rather than looked up in the roster.
+            // The list is paginated and filtered, so the chosen trainee is frequently not on the page
+            // shown, and reading her name from that list answered `N/A` beside a flash that said she
+            // was set (D5).
+            'selectedName' => $draft['umamusume_id'] === null
+                ? null
+                : Umamusume::query()->whereKey($draft['umamusume_id'])->value('name'),
             // The wizard carries the scenario forward instead of asking again, so the step names it. The
             // label comes from `SetupDraft`, which reads `config/scenarios.php`, so no scenario name is
             // written into this page or this controller (D-240, gate G-33).

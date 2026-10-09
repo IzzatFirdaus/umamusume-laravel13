@@ -74,6 +74,12 @@ interface SkillOption {
 const props = defineProps<{
     trainees: Paginator<TraineeRow>;
     selected: number | null;
+    /**
+     * The stored trainee's name, sent with the selection. The readout must not derive it from
+     * `trainees.data`: the roster is paginated and filtered, so the chosen trainee is often not on the
+     * page shown, and a lookup there answered `N/A` beside a flash saying she was set (D5).
+     */
+    selectedName: string | null;
     scenarioLabel: string | null;
     scenarioPending: boolean;
     filters: {
@@ -144,9 +150,6 @@ const aptitudeCells: { label: string; key: string }[] = [
     { label: 'End closer', key: 'end_closer' },
 ];
 
-const selectedName = computed(
-    () => props.trainees.data.find((row) => row.id === props.selected)?.name ?? null,
-);
 
 function applyFilters(): void {
     router.get(
@@ -231,7 +234,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
 
         <p class="mt-1 text-sm text-ink">
             Stored choice:
-            <strong v-if="selectedName" class="text-ink-strong">{{ selectedName }}</strong>
+            <strong v-if="props.selectedName" class="text-ink-strong">{{ props.selectedName }}</strong>
             <span v-else class="text-ink-muted" title="No trainee has been chosen in this setup draft yet.">N/A</span>
         </p>
 

@@ -40,6 +40,24 @@ function rosterTrainee(string $name, array $letters): Umamusume
     ]);
 }
 
+it('names the stored trainee even when she is not in the roster shown (D5)', function (): void {
+    // The readout resolved the name from the paginated, filtered list, so a Trainer who searched,
+    // selected, and came back to an unfiltered page saw `N/A` beside a flash saying the trainee was
+    // set. The name now travels with the stored selection, so no page and no filter can hide it.
+    $chosen = rosterTrainee('Rice Shower', ['turf' => 'A', 'mile' => 'B', 'long' => 'A']);
+    rosterTrainee('Special Week', ['turf' => 'A', 'long' => 'B', 'pace_chaser' => 'A']);
+    SetupDraft::write(['umamusume_id' => $chosen->id]);
+
+    $this->get(route('career.trainee', ['search' => 'Special Week']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('selected', $chosen->id)
+            ->where('selectedName', 'Rice Shower')
+            // The filter excludes her, which is exactly the state the old readout answered `N/A` in.
+            ->has('trainees.data', 1)
+            ->where('trainees.data.0.name', 'Special Week'));
+});
+
 it('renders the roster paginated, with no stored choice and no draft write', function (): void {
     rosterTrainee('Special Week', ['turf' => 'A', 'long' => 'B', 'pace_chaser' => 'A']);
     rosterTrainee('Silence Suzuka', ['turf' => 'A', 'long' => 'A', 'pace_chaser' => 'C']);
