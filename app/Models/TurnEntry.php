@@ -35,6 +35,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $energy_band
  * @property MoodTier|null $mood
  * @property int|null $fans
+ * @property int|null $facility_speed
+ * @property int|null $facility_stamina
+ * @property int|null $facility_power
+ * @property int|null $facility_guts
+ * @property int|null $facility_wit
  * @property-read TrainingRun $trainingRun
  */
 #[Fillable(['training_run_id', 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'energy_state', 'energy_band', 'mood', 'fans', 'facility_speed', 'facility_stamina', 'facility_power', 'facility_guts', 'facility_wit'])]

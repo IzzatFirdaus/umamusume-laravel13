@@ -208,6 +208,7 @@ class TimelineController extends Controller
             'expected' => $this->stats($turn),
             'actual' => $this->stats($turn),
             'mood' => $turn->mood?->value,
+            'facilities' => $this->facilities($turn),
             'result' => 'Recorded as entered',
             'corrected' => $corrected,
             'correction_id' => $corrected ? 'turn-'.$turn->turn : null,
@@ -329,6 +330,36 @@ class TimelineController extends Controller
             'energy' => $turn->energy,
             'fans' => $turn->fans,
         ];
+    }
+
+    /**
+     * The facility levels this turn recorded, labelled for display, or null when it recorded none.
+     *
+     * Only the levels that were read are returned: a Trainer who checked the Speed ladder and nothing
+     * else leaves the other four absent, and a zero would claim a facility at its floor. Null rather
+     * than an empty list so the renderer prints one named absence instead of five.
+     *
+     * @return list<array{label: string, level: int}>|null
+     */
+    private function facilities(TurnEntry $turn): ?array
+    {
+        $levels = [
+            'Speed' => $turn->facility_speed,
+            'Stamina' => $turn->facility_stamina,
+            'Power' => $turn->facility_power,
+            'Guts' => $turn->facility_guts,
+            'Wit' => $turn->facility_wit,
+        ];
+
+        $rows = [];
+
+        foreach ($levels as $label => $level) {
+            if ($level !== null) {
+                $rows[] = ['label' => $label, 'level' => (int) $level];
+            }
+        }
+
+        return $rows === [] ? null : $rows;
     }
 
     /**

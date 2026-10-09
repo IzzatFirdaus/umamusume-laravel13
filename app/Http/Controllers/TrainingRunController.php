@@ -635,6 +635,10 @@ class TrainingRunController extends Controller
      * must not ride into the create call: Laravel 13 discards non-fillable keys silently,
      * so a typo here would lose a value without a word of complaint.
      *
+     * `updateTurn` writes `$request->validated()` whole, so the two turn writes must agree on the key
+     * set or a level entered on the decision screen would survive an edit and not a create. The five
+     * facility keys are here for that reason; they are the request's own, not a second list.
+     *
      * @param  array<string, mixed>  $validated
      * @return array<string, mixed>
      */
@@ -642,7 +646,10 @@ class TrainingRunController extends Controller
     {
         return array_intersect_key(
             $validated,
-            array_flip(['turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans']),
+            array_flip([
+                'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans',
+                'facility_speed', 'facility_stamina', 'facility_power', 'facility_guts', 'facility_wit',
+            ]),
         );
     }
 

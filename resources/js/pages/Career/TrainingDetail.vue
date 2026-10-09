@@ -33,7 +33,7 @@ import TrainingCard from '../../components/career/TrainingCard.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
-import { TURN_ENTRY_ENERGY_BANDS, TURN_ENTRY_ENERGY_STATES, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
+import { TURN_ENTRY_ENERGY_BANDS, TURN_ENTRY_ENERGY_STATES, TURN_ENTRY_FACILITY_FIELDS, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 
 interface Cost {
     min: number;
@@ -125,6 +125,10 @@ const optionalFields = [
 const energyStates = TURN_ENTRY_ENERGY_STATES;
 const energyBands = TURN_ENTRY_ENERGY_BANDS;
 
+// The five facility inputs, from the shared source. The names are listed on the form below rather than
+// spread in, so TypeScript checks each `form[field.name]` binding against a key the form actually has.
+const facilityFields = TURN_ENTRY_FACILITY_FIELDS;
+
 const form = useForm({
     turn: String(props.write.turn),
     speed: '',
@@ -141,6 +145,11 @@ const form = useForm({
     outcome: '',
     penalty_kind: '',
     choice: '',
+    facility_speed: '',
+    facility_stamina: '',
+    facility_power: '',
+    facility_guts: '',
+    facility_wit: '',
 });
 
 // A state that is not `exact` carries no figure, so the number is cleared rather than left behind a
@@ -481,6 +490,36 @@ const capFor = (label: string): number =>
                     </select>
                     <span v-if="errorOf('penalty_kind')" id="turn-penalty_kind-error" class="text-xs text-risk">{{ errorOf('penalty_kind') }}</span>
                 </label>
+
+                <!-- The five facility levels the client's ladder shows beside each training. Optional by
+                     design: a turn logged without reading the ladder records no level, and a zero would
+                     claim a facility at its floor. Behind a disclosure because it is five inputs most
+                     turns do not need, and a collapsed `details` keeps them out of the tab order. -->
+                <details class="rounded-md border border-rule bg-raised p-3 md:col-span-3">
+                    <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                        Facility levels this turn
+                    </summary>
+                    <div class="mt-2 grid grid-cols-2 gap-3 md:grid-cols-5">
+                        <label v-for="field in facilityFields" :key="field.name" class="flex flex-col gap-1">
+                            <span class="text-ink-muted">{{ field.label }}</span>
+                            <input
+                                :id="`turn-${field.name}`"
+                                v-model="form[field.name]"
+                                type="number"
+                                :name="field.name"
+                                min="1"
+                                max="5"
+                                :aria-describedby="describedBy(field.name)"
+                                class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                            >
+                            <span v-if="errorOf(field.name)" :id="`turn-${field.name}-error`" class="text-xs text-risk">{{ errorOf(field.name) }}</span>
+                        </label>
+                    </div>
+                    <p class="mt-2 text-xs text-ink-muted">
+                        One to five, the ladder's own range. Leave a facility blank when this turn did
+                        not read it.
+                    </p>
+                </details>
 
                 <div class="flex flex-wrap items-end gap-3 md:col-span-3">
                     <button

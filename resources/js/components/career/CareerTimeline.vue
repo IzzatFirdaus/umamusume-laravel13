@@ -32,6 +32,8 @@ interface Entry {
     expected: Stats | null;
     actual: Stats | null;
     mood: string | null;
+    /** The facility levels a turn row recorded, or null when it recorded none. */
+    facilities?: { label: string; level: number }[] | null;
     result: string;
     corrected: boolean;
     correction_id: string | null;
@@ -124,6 +126,22 @@ const kindVisible = (entry: Entry): boolean =>
                             <p v-if="entry.mood !== null" class="mt-1 text-xs text-ink-muted">
                                 Mood: <span :title="moodTitle(entry.mood)">{{ entry.mood }}</span>
                             </p>
+                        </div>
+
+                        <!-- The facility levels the ladder showed this turn, when the Trainer read them.
+                             One named absence for the whole block rather than five rows of `N/A`: a turn
+                             logged without the ladder is the ordinary case, not five missing readings. -->
+                        <div v-if="entry.kind === 'turn'">
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">FACILITIES</dt>
+                            <dd class="mt-1 font-mono tabular-nums">
+                                <ul v-if="entry.facilities !== null && entry.facilities !== undefined" class="space-y-0.5">
+                                    <li v-for="facility in entry.facilities" :key="facility.label">
+                                        <span class="pr-3 text-xs text-ink-muted">{{ facility.label }}</span>
+                                        <span>{{ facility.level }}</span>
+                                    </li>
+                                </ul>
+                                <span v-else class="text-xs text-ink-muted">Facilities not recorded</span>
+                            </dd>
                         </div>
 
                         <div v-if="entry.kind === 'turn'">
