@@ -2093,3 +2093,46 @@ about whether its subject still exists. It does not restore the browser evidence
 specs fail in setup — until half one lands, no spec can reach a finished career, which is also what
 KI-82's and KI-87's cockpit claims still lack. And it does not touch KI-84's staged deletions or KI-69's
 class-3 fixture contract, both separate.
+
+### KI-89 `FinaleVocabularyTest.php`'s docblock cites `docs/Our-Grand-Concert-plan.md` §9 E8, a section no document in the tree defines - FILED 2026-10-09 (Grand Concert closing pass), OPEN
+
+**Status: OPEN.** A documentation defect, small and real: a test's own docblock points a reader at a section
+that does not exist, so the citation cannot be followed and the provenance the test states for itself cannot
+be checked.
+
+**What the citation says.** `tests/Feature/FinaleVocabularyTest.php:16` opens the file with *"Slice 23, the
+finale's payload vocabulary (`docs/Our-Grand-Concert-plan.md` §9 E8)."*
+
+**Why it cannot resolve, in two independent directions.**
+
+- **The named file carries no §9.** `docs/Our-Grand-Concert-plan.md`, landed at `5f3f6e0`, is structured as
+  `# Phase A` through `# Phase F` with `## Slice 1` through `## Slice 24` beneath them, plus four unnumbered
+  top-level sections (`# Global Out-of-Scope Rules`, `# Repository Safety Constraints`, `# Slice Completion
+  Contract`, `# Current Status`). There is no `## 9`, so there is no §9 for an E8 to sit in.
+- **No document under `docs/` defines an `E8` at all.** The E-numbered slice ids live in
+  `docs/proposals/frontend-development-plan.md` and run **E1 through E6**; `SCREEN_SPEC.md` cites them in that
+  same form (`plan §9 E4` at `:2827`). A grep for the word `E8` across `docs/` returns zero hits.
+
+So the reference is not imprecise, it is dangling twice over: the section is absent from the file named, and
+the section id is absent from the repository.
+
+**The two corrections, neither taken here.**
+
+1. **Point at a section that exists.** If the intended subject is the slice plan governing this work, the
+   pointer belongs in `docs/proposals/frontend-development-plan.md`'s own §9 slice table — but that table has
+   no E8 row either, so this correction cannot be written until its author names which slice the test actually
+   belongs to.
+2. **Rewrite the comment to name the shipped source.** The test's real provenance is the code it exercises:
+   `app/Services/Scenario/FinaleReader.php`, the one reader behind `finale_state` on both the Cockpit
+   (`CockpitController.php:678`) and the Career Result (`ResultController.php:72`), together with the plan's
+   Slice 19 and Slice 20 bodies at `docs/Our-Grand-Concert-plan.md:786` and `:811`, which record the
+   determination those slices reached. This correction is available today and needs no ruling.
+
+**Reproduce.** `grep -n "E8" tests/Feature/FinaleVocabularyTest.php` returns line 16;
+`grep -rn "\bE8\b" docs/` returns nothing; `grep -n "^## 9" docs/Our-Grand-Concert-plan.md` returns nothing.
+
+**What closure would not cover.** Correcting the comment does not land the test's subject, and it does not
+touch the two `SCREEN_SPEC.md` gaps the same rename left behind: `SCR-CAR-018`'s payload list at `:2515` still
+names the pre-rename `finale` and `finale_absence` keys, and the cockpit's `finale_state` row has no
+`SCR-CAR-024` state entry. Both are routed to the author of the rename. Nor does it settle whether this test's
+subject is a plan slice at all, which is that author's to state.
