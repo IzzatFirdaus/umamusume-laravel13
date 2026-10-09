@@ -124,3 +124,18 @@ test('passes the axe A + AA scan on the timeline page', async ({ page }) => {
     await openTimeline(page);
     await buildAxe(page).analyze();
 });
+
+test('renders no write control, so the timeline is read-only', async ({ page }) => {
+    await openTimeline(page);
+
+    // `SCREEN_SPEC.md` states the Timeline is read-only (SCR-CAR-017): it renders the run's recorded
+    // turns, races and events, and its one write is a link to the Cockpit's correction rather than a
+    // form here. A submit control, a form, or a link into a turn write on this page would break that
+    // contract, so all three are asserted absent. The Cockpit door is a `GET` and is not a write.
+    await expect(page.locator('form')).toHaveCount(0);
+    await expect(page.locator('button[type="submit"]')).toHaveCount(0);
+    await expect(page.locator('a[href*="runs.turns"]')).toHaveCount(0);
+
+    // Positive control: the read-only screen rendered rather than an empty document.
+    await expect(page.getByRole('heading', { name: 'Career timeline' })).toBeVisible();
+});
