@@ -74,3 +74,28 @@ queue noise for a human to dismiss.
 `php artisan test --compact` covers the derivation for all four Global scenarios, the rework-date rule,
 malformed dataset handling for both parsers, aptitude persistence through the pipeline with provenance,
 and the rule that a body without aptitudes never blanks stored grades.
+
+## Erratum — 2026-10-09 (D8, Rice Shower / Unity Cup UX walk remediation)
+
+The Decision above names the export as the source and the columns as "the export's element order", and
+it was never wrong. What it did not state — and what a UX walk found it needed to state — is which
+reading wins when a scenario document and the stored catalogue disagree. Recorded here so the answer is
+a standing ruling rather than a judgement made per incident:
+
+- **The GameTora export is the authoritative catalogue source for a trainee's ten aptitude letters.**
+  They arrive through `uma:fetch` carrying a `DataSource` provenance row and stand under the `is_manual`
+  immutability rule — precisely the machinery this ADR chose over hand-written values.
+- **A scenario document is a secondary reference.** Where the two disagree, the catalogue holds and the
+  document is corrected by its own dated erratum. A document transcribes one client frame at one date;
+  it carries no provenance row and nothing re-runs it when a publisher changes content, which is the
+  reason it was rejected as a seeding route above.
+- **A disagreement is recorded as open, not resolved in the display path.** No per-trainee UI exception,
+  and no edit of stored data to match a document: `AGENTS.md` §5 gates the display path and forbids
+  renaming or rewriting dataset values to satisfy a reading.
+
+Applied once so far: D8 of `docs/audits/rice-shower-unity-cup-ux-walk.md` reported the picker showing
+Mile C / Front B / Late C against the `[Rosy Dreams]` document's B / A / B. The committed export
+(card `103001`) carries `["A","G","E","C","A","A","B","A","C","G"]`, the seed and the mapping reproduce
+it letter for letter, and `TraineeSelectController::aptitudes()` is faithful — so the catalogue stands,
+the document carries the erratum, and the disagreement is open rather than corrected. All ten letters
+are pinned by `CareerTraineeSelectTest` (commit `be48e60`).
