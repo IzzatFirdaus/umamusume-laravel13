@@ -6,6 +6,8 @@
 
 Embedded verbatim from `docs/scenarios/04-trackblazer-umaguide.md`, `docs/scenarios/05-trackblazer-gametora.md`, and `docs/scenarios/06-unity-cup-gametora.md`. Each original heading is demoted by one level under its source section. No content was summarised, deduplicated, or resolved; the three sources keep their own server/date qualifiers and any contradiction is recorded in the Disagreements section.
 
+**Dating note (2026-10-09):** The three source files named above were embedded verbatim and then removed from the tree when this consolidation landed at `ccc864c` ("docs: consolidate scenario publisher guides into research-scratch and remove originals"). The embedded text is the only durable copy; the original `docs/scenarios/04-`, `05-`, `06-` paths no longer resolve on disk. `docs/scenarios/07-grand-concert.md` (cited below at line 22) remains tracked.
+
 Two publisher extractions were added on 2026-10-03 (Round 7), promoted out of the gitignored root
 `research-scratch/` and previously kept as standalone masters:
 
