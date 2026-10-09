@@ -84,6 +84,17 @@ class StoreTrainingRunRequest extends FormRequest
             'stat_ceilings' => ['nullable', 'array:'.implode(',', self::stats())],
             'stat_ceilings.*' => ['nullable', 'integer', 'min:0'],
             /*
+             * The run's team identity under Unity Cup, as the Trainer reads it off the scenario panel.
+             * Entered, never derived: no table here holds a team. Null is the honest "not stated"
+             * (D-220). Placement is a rank, so zero is not one; the bound matches the race-entry
+             * placement rule rather than inventing a second one.
+             */
+            'team_name' => ['nullable', 'string', 'max:255'],
+            'team_motto' => ['nullable', 'string', 'max:255'],
+            'team_league_placement' => ['nullable', 'integer', 'min:1', 'max:99'],
+            // The four preseason rounds; the tally the Trainer reports, not a round modelled here.
+            'team_preseason_wins' => ['nullable', 'integer', 'between:0,4'],
+            /*
              * The Grade Point period the Trainer reports as live (US-10, ADR-0003).
              * Entered, never derived (D-270): nothing in the corpus names a formula
              * that puts a career in a period, so "null until set" is the honest state

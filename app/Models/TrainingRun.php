@@ -65,6 +65,10 @@ use Illuminate\Support\Carbon;
  *                                                       them, keyed by the stat matrix; null until stated.
  *                                                       Distinct from `ScenarioCaps`, which owns the
  *                                                       scenario's ceiling rather than the run's
+ * @property string|null $team_name the Unity Cup team's name as the Trainer read it; null until stated
+ * @property string|null $team_motto the team's motto; null until stated
+ * @property int|null $team_league_placement the team's league placement (1..99); null until stated
+ * @property int|null $team_preseason_wins preseason rounds won (0..4); null until stated
  * @property int|null $current_objective_index the Grade Point period the Trainer
  *                                             reports as live (1..4, US-10); null
  *                                             until they say, which the meter shows
@@ -90,7 +94,7 @@ use Illuminate\Support\Carbon;
  *                                       run with a Legacy selection stays comparable before it is
  *                                       filed)
  */
-#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'stat_ceilings', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'stat_ceilings', 'team_name', 'team_motto', 'team_league_placement', 'team_preseason_wins', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
 class TrainingRun extends Model
 {
     /**
@@ -1075,6 +1079,8 @@ class TrainingRun extends Model
             'build_target' => 'array',
             'growth_rate' => 'array',
             'stat_ceilings' => 'array',
+            'team_league_placement' => 'integer',
+            'team_preseason_wins' => 'integer',
             'imported_at' => 'datetime',
             'career_position' => CareerPositionCast::class,
             'mode' => RunMode::class,
