@@ -29,9 +29,18 @@ test.afterEach(async ({ page }) => {
 /**
  * A career with legacy configuration and logged turns, then the Inheritance Event screen for it.
  *
- * The legacy configuration is entered via the run-scoped Legacy Lab builder (which landed before
- * this slice). We create the run, log a few turns, then use the Legacy Lab to set the
+ * The legacy configuration is entered via the run-scoped Legacy Lab builder (`legacy.builder`,
+ * `/legacy/{run}`). We create the run, log a few turns, then use the Legacy Lab to set the
  * legacy_selection, then visit /inheritance.
+ *
+ * **Addressing contract.** The rank, ancestor, rented and Spark controls carry `v-model` and an `:id`
+ * and no `name` at all; only the parent pick carries a `name`, because `AncestryNode` is handed
+ * `controlName`. So this fixture addresses them by `:id` (`#rank-parent_a`) and by role plus the
+ * label the wrapping `<label>` gives them ("Kind", "Applies to", "Stars"), never by a `name` that does
+ * not exist on either surface (`KNOWN-ISSUES.md` KI-69, plan §4.1 item 10). The parent pick is left
+ * unchosen: this suite's scratch database holds no Veterans (KI-69 class 3), so the roster renders no
+ * options, and `legacy_id` is nullable so the payload is valid without one. The picker's own contract
+ * is covered by `ancestry-node-picker.spec.ts`, a component-level case mounted for exactly that reason.
  */
 async function openInheritanceEvent(page: import('@playwright/test').Page): Promise<void> {
     await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
@@ -67,39 +76,43 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
     await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // Fill in Parent A
-    await page.locator('select[name="legacies.0.legacy_id"]').selectOption({ label: 'Symboli Rudolf' });
-    await page.locator('input[name="legacies.0.rank"]').fill('3');
-    await page.locator('input[name="legacies.0.ancestors.0"]').fill('Symboli Rudolf');
-    await page.locator('input[name="legacies.0.ancestors.1"]').fill('Mejiro McQueen');
-    await page.getByRole('button', { name: 'Add Spark' }).first().click();
-    await page.locator('select[name="legacies.0.sparks.0.kind"]').selectOption('blue');
-    await page.locator('input[name="legacies.0.sparks.0.target"]').fill('Speed');
-    await page.locator('input[name="legacies.0.sparks.0.stars"]').fill('3');
-    await page.getByRole('button', { name: 'Add Spark' }).first().click();
-    await page.locator('select[name="legacies.0.sparks.1.kind"]').selectOption('pink');
-    await page.locator('input[name="legacies.0.sparks.1.target"]').fill('Medium');
-    await page.locator('input[name="legacies.0.sparks.1.stars"]').fill('2');
+    // Each parent's `Add Spark` is scoped by its own index: the button carries an `sr-only`
+    // " to {{ parent.label }}" suffix, so its accessible name is per-parent and DOM order is A then B.
+    const addSpark = (parent: number) => page.getByRole('button', { name: 'Add Spark' }).nth(parent);
 
-    // Fill in Parent B (guest)
-    await page.locator('select[name="legacies.1.legacy_id"]').selectOption({ label: 'Special Week' });
-    await page.locator('input[name="legacies.1.rank"]').fill('2');
-    await page.locator('input[name="legacies.1.is_guest"]').check();
-    await page.locator('input[name="legacies.1.ancestors.0"]').fill('Special Week');
-    await page.locator('input[name="legacies.1.ancestors.1"]').fill('Grass Wonder');
-    await page.getByRole('button', { name: 'Add Spark' }).nth(1).click();
-    await page.locator('select[name="legacies.1.sparks.0.kind"]').selectOption('blue');
-    await page.locator('input[name="legacies.1.sparks.0.target"]').fill('Stamina');
-    await page.locator('input[name="legacies.1.sparks.0.stars"]').fill('2');
-    await page.getByRole('button', { name: 'Add Spark' }).nth(1).click();
-    await page.locator('select[name="legacies.1.sparks.1.kind"]').selectOption('green');
-    await page.locator('input[name="legacies.1.sparks.1.target"]').fill('Endless Bloom');
-    await page.locator('input[name="legacies.1.sparks.1.stars"]').fill('3');
+    // Parent A: rank, both ancestors, and two Sparks. The Spark rows land in DOM order across both
+    // parents (A0, A1, B0, B1), which is what the nth() indexes below count on.
+    await page.locator('#rank-parent_a').fill('3');
+    await page.locator('#ancestor-parent_a-0').fill('Symboli Rudolf');
+    await page.locator('#ancestor-parent_a-1').fill('Mejiro McQueen');
+    await addSpark(0).click();
+    await addSpark(0).click();
+    await page.getByRole('combobox', { name: 'Kind' }).nth(0).selectOption('blue');
+    await page.getByRole('textbox', { name: 'Applies to' }).nth(0).fill('Speed');
+    await page.getByRole('spinbutton', { name: 'Stars' }).nth(0).fill('3');
+    await page.getByRole('combobox', { name: 'Kind' }).nth(1).selectOption('pink');
+    await page.getByRole('textbox', { name: 'Applies to' }).nth(1).fill('Medium');
+    await page.getByRole('spinbutton', { name: 'Stars' }).nth(1).fill('2');
 
-    // Save the legacy
-    await page.getByRole('button', { name: 'Save Legacy' }).click();
-    await expect(page.getByText('Saving the Legacy…')).toBeVisible(WRITE);
-    await expect(page.getByText('Saving the Legacy…')).toBeHidden();
+    // Parent B: rank, the rented flag, both ancestors, and two Sparks.
+    await page.locator('#rank-parent_b').fill('2');
+    await page.getByRole('checkbox', { name: 'Rented from a friend' }).nth(1).check();
+    await page.locator('#ancestor-parent_b-0').fill('Special Week');
+    await page.locator('#ancestor-parent_b-1').fill('Grass Wonder');
+    await addSpark(1).click();
+    await addSpark(1).click();
+    await page.getByRole('combobox', { name: 'Kind' }).nth(2).selectOption('blue');
+    await page.getByRole('textbox', { name: 'Applies to' }).nth(2).fill('Stamina');
+    await page.getByRole('spinbutton', { name: 'Stars' }).nth(2).fill('2');
+    await page.getByRole('combobox', { name: 'Kind' }).nth(3).selectOption('green');
+    await page.getByRole('textbox', { name: 'Applies to' }).nth(3).fill('Endless Bloom');
+    await page.getByRole('spinbutton', { name: 'Stars' }).nth(3).fill('3');
+
+    // Save the legacy on the builder's own contract: the button is `Confirm Inheritance` (`Save Legacy`
+    // is the wizard's), and the builder carries no `role="status"` toast, so the wait is the disclosure
+    // flipping to the recorded state, which is the same signal a Trainer reads.
+    await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
+    await expect(page.getByText('This run already has a Legacy selection recorded.')).toBeVisible(WRITE);
 
     // Now visit the inheritance event screen. The route is `/training-runs/{run}/inheritance`,
     // so `page.url()` here points at `/legacy/{runId}` and appending `/inheritance` would 404.
