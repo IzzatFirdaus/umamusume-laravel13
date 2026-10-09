@@ -18,11 +18,12 @@ use App\Models\TurnEntry;
  * would put a query and a config walk inside a template.
  *
  * Since the Inertia port (ADR-0020 §1) this file asserts the shaped state on the
- * model and the client treatment on the component's own source: `stateClass`,
- * `stateWord`, and the pennant and marker spans are the whole treatment, and the
- * page is what feeds the component now. The cases that used to hand a hand-built
- * cell array to a Blade tag are the ones the component's source answers instead;
- * each says why the model cannot produce that cell.
+ * model. It used to read the client treatment off `RaceCalendar.vue`'s own source
+ * (`stateClass`, `stateWord`, the pennant and marker spans) as well; owner ruling
+ * R-B1 retired that component with `Runs/Show.vue`, and `RunRaceStrip.vue` — the
+ * Cockpit's calendar — carries none of the cell treatment, so those source reads
+ * went with it. What is left is the model's own contract: each case says why the
+ * model cannot produce a cell a goals source would need.
  */
 
 function runWithFans(int $fans): TrainingRun
@@ -31,24 +32,6 @@ function runWithFans(int $fans): TrainingRun
     TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 1, 'fans' => $fans]);
 
     return $run->fresh();
-}
-
-/**
- * The calendar component's source, which owns the cell treatment.
- */
-function composerSource(): string
-{
-    return (string) file_get_contents(base_path('resources/js/components/RaceCalendar.vue'));
-}
-
-/**
- * One entry out of the `stateClass` map, so a treatment is read rather than retyped.
- */
-function composerStateClass(string $state): string
-{
-    preg_match('/'.preg_quote($state, '/').": '([^']*)',/", composerSource(), $match);
-
-    return $match[1] ?? '';
 }
 
 it('renders a mandatory career race as an open cell, not as a Goal pennant', function (): void {
@@ -86,12 +69,10 @@ it('keeps the debut pennant-free while it is mandatory but unGoal-ed', function 
     RaceCatalogSlot::factory()->debut()->create();
 
     // The model decides the cell state, and a mandatory career race is an open cell.
+    // No trainee_goals table exists, so no cell the model can emit today is a goal, and
+    // the pennant is gated on that state alone.
     expect($run->fresh()->calendarCells(1)[5]['halves']['Late']['slots'][0])
         ->toMatchArray(['state' => 'open', 'label' => 'Junior Make Debut']);
-
-    // The pennant is then gated on that state alone, so no cell the model can emit today can draw one.
-    expect(composerSource())->toContain('v-if="cell.state === \'goal\'"')
-        ->toContain("goal: 'border-2 border-goal-line");
 });
 
 it('locks a fan-gated race until this run has the fans it asks for', function (): void {
@@ -234,22 +215,15 @@ it('shows a catalogue race and a free race together in the same half-month', fun
     expect($labels)->toBe(['Phoenix Sho', 'Trainer Pick']);
 });
 
-it('keeps the goal treatment ready on the component while the model withholds it', function (): void {
-    // State two. There is no trainee_goals table yet, so the model cannot know a
-    // character's objective — but the treatment must not be deleted on the way
-    // past that, or the fix becomes a rewrite. A cell carrying the goal state
-    // still draws the pennant, which is exactly what a goals source will emit.
-    //
-    // The cell is read from the component rather than handed to it: no run can
-    // produce a goal cell today, so the assertion is on the treatment the
-    // component still holds and on the one gate that decides it.
-    expect(composerStateClass('goal'))->toContain('border-goal-line')
-        ->and(composerStateClass('goal'))->not->toContain('border-dashed')
-        ->and(composerSource())
-        ->toContain('goal: \'Mandatory goal\',')
-        ->toContain('v-if="cell.state === \'goal\'"')
-        ->toContain('border-l-goal');
-});
+/*
+ * A retired case. This one read the goal treatment off `RaceCalendar.vue`'s `stateClass`
+ * map (`border-goal-line`, the `goal: 'Mandatory goal'` label, the
+ * `v-if="cell.state === 'goal'"` gate) to prove the pennant survived the model's
+ * inability to emit a goal cell. Owner ruling R-B1 retired that component with
+ * `Runs/Show.vue`, and `RunRaceStrip.vue` carries none of the cell treatment, so the
+ * source it read is gone. The model half stands in the other cases: no run can produce
+ * a goal cell today, which is why the pennant gate is safe.
+ */
 
 it('keeps the Trainer-entered marker on a free race after it has been run', function (): void {
     // Slice 13 measured this and deliberately did not assert it, routing the
@@ -277,13 +251,6 @@ it('keeps the Trainer-entered marker on a free race after it has been run', func
     $cell = $run->fresh()->calendarCells()[8]['halves']['Late']['slots'][0];
 
     expect($cell)->toMatchArray(['state' => 'past', 'label' => 'Autumn Practice Stakes', 'manual' => true]);
-
-    // The marker is drawn from the cell's own `manual` flag and from nothing else, so a past free race
-    // keeps it while a past catalogue race does not — see the case below.
-    expect(composerSource())
-        ->toContain('manual: slots.some((slotItem) => slotItem.manual === true)')
-        ->toContain('v-if="cell.manual"')
-        ->toContain('Trainer-entered');
 });
 
 it('does not give a calendar race the Trainer-entered marker once run', function (): void {

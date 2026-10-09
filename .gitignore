@@ -112,3 +112,11 @@ Homestead.yaml
 /docs/game-screenshots/
 /docs/design-research/**/*.png
 docs/vibe_images/
+
+# Scratch & temporary development scripts
+tools/tmp_*
+tools/rebuild-db.*
+tools/force-db-rebuild.py
+
+# Python cache for tools
+tools/__pycache__/

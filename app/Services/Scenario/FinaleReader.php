@@ -24,10 +24,15 @@ use App\Models\TrainingRun;
  * turn to compare from, and answering that as "not yet reached" would tell a finished career its
  * finale never came.
  *
- * The label is the `[S]` noun Cygames prints in notice 905, "Four Promo Concerts and one Grand
- * Concert", not the catalogue row's title, which reads "URA Finals Final (Grand Live)" and is filed
- * as KI-82. ponytail: hardcoded until KI-82 closes; the upgrade path is `$slot->title` on the day
- * that row carries a `[Global]` name, and nothing else here changes.
+ * The block is read shared-inclusive through `forScenario`, the same scope the race strip uses, so
+ * the two surfaces cannot disagree about what the finale block is. The finale race is the
+ * scenario-specific row within that block: the shared Qualifier and Semifinal are preliminary rounds
+ * every URA career runs, and the scenario's own Final is the decisive one.
+ *
+ * The label is the scenario's own client noun, read from `config/scenarios.php` (`D-240`: the config
+ * is the only place scenario names enter the layout path), not a hardcoded string and not the
+ * catalogue row's title, which reads "URA Finals Final (Grand Live)" and is filed as KI-82. A
+ * scenario that declares no label emits `null`, which the screen renders as an absence.
  *
  * Static because it holds no state and needs no binding: the only input is the run. A value object
  * can replace the array later without moving a call site.
@@ -41,9 +46,10 @@ final class FinaleReader
     {
         $slot = $run->hasScenario()
             ? RaceCatalogSlot::query()
-                ->where('scenario_key', $run->scenarioKey())
+                ->forScenario($run->scenarioKey())
                 ->where('is_mandatory', true)
                 ->where('year', RaceCatalogSlot::YEAR_FINALE)
+                ->where('scenario_key', $run->scenarioKey())
                 ->first()
             : null;
 
@@ -66,7 +72,7 @@ final class FinaleReader
             'outcome' => $entry?->status->label(),
             'placement' => $entry?->placementOrdinal(),
             'turn' => $entry?->turnEntry?->turn,
-            'label' => 'Grand Concert',
+            'label' => config("scenarios.scenarios.{$run->scenarioKey()}.label"),
         ];
     }
 }

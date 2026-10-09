@@ -56,17 +56,6 @@
 
     /* Semantic roles. Green is action and affordability only, never "good". */
     --color-green: #7FCC09;
-    /*
-     * The ink that goes on the bright lime fill, named for the fill it is measured against.
-     * It existed as a borrow first: the low-Energy advisory put `text-on-pick` on `bg-green`
-     * and passed, because the gold fill's ink happens to be a dark warm brown in the light
-     * theme and a near-black in the dark one. Passing by borrowing is how a token earns a
-     * dependency nobody documented, so the pair is named here instead. `--color-green` is the
-     * same #7FCC09 in both themes, so one value serves both: 9.02:1 measured on the rendered
-     * badge in each (slice-6 verification §3), where white on the same fill is 1.99:1 and is
-     * the failure D-3 records.
-     */
-    --color-on-green: #1F1508;
     --color-green-deep: #4E7906;
     --color-green-tint: #F0F8EC;
     --color-green-line: #C6E5B3;

@@ -196,6 +196,73 @@ The application never removes player agency.
 
 ---
 
+## Scenario-Aware Decision Hierarchy
+
+The Career Cockpit follows a consistent five-tier information hierarchy. The active scenario changes which tier is visually prominent, not the overall layout:
+
+1. **Current turn and trainee condition** — energy, mood, facility levels.
+2. **Next mandatory objective or important deadline** — fan gate, checkpoint, tournament, or goal race.
+3. **Primary recommendation and why** — the single best action, with explanation.
+4. **Relevant scenario state** — team ranks (Unity Cup), fan gates (URA), GP runway (Trackblazer).
+5. **Alternative actions and trade-offs** — secondary options with opportunity costs.
+
+| Scenario       | Tier that rises to the top                                           |
+| -------------- | -------------------------------------------------------------------- |
+| Unity Cup      | Tier 4 (team progression and tournament readiness become primary)    |
+| URA Finale     | Tier 2 (next career objective and race preparation take precedence)    |
+| Trackblazer    | Tier 2 + Tier 4 (upcoming schedule and resource constraints prominent) |
+
+### Forecast, Commit, Reconcile
+
+A shared three-stage interaction pattern:
+
+1. **Forecast** — display the current state and supported consequences of a proposed action. Clearly label hypothetical effects and unknown outcomes (Confirmed / Calculated / Estimated / Unknown).
+2. **Commit** — the player confirms the chosen action and enters actual results where needed. The application records what was selected, not merely what it recommended.
+3. **Reconcile** — show the updated state, any difference between expectation and observation, and the newly calculated next decision. Preserve the previous record for audit and correction.
+
+### Decision Explanation and Uncertainty
+
+Each recommendation must answer:
+
+- What is the immediate goal and why it matters now?
+- Which constraints influence this choice?
+- Why is this action preferred over the alternatives?
+- What costs or risks are known?
+- Which information is missing or unverified?
+- What would cause the recommendation to change?
+
+Two states must not share the same generic empty message:
+
+- **No suitable action found** — the engine could evaluate candidates but found none worth recommending.
+- **Not enough information** — the rules or data to rank actions are incomplete.
+
+The trust vocabulary (`ADR-0020` §2) must render consistently: a recommendation's explanation must not imply a more precise calculation than the underlying evidence supports.
+
+### Evidence Hierarchy Applied to Design
+
+The Grand Concert plan's evidence hierarchy (`docs/Our-Grand-Concert-plan.md`) governs what the UI must and must not depict:
+
+1. **Authoritative and verified** — safe to render with a Confirmed badge.
+2. **Observed but undocumented** — may appear only where the observation itself is trustworthy, labelled Calculated.
+3. **Documented as unverified** — must not be rendered as fact; show `N/A` or a placeholder with a `title`.
+4. **Inferred/community/external** — must not be promoted to project truth in the UI.
+
+A screen that invents a visual treatment for an unverified mechanic violates the same boundary a calculation would. Do not design interfaces for mechanics the evidence hierarchy marks as level 3 or 4.
+
+### Additional Design Details
+
+**Shared comparison pattern.** Action alternatives present explicit trade-offs — never a single unexplained score. Each alternative states what it supports and what it costs (opportunity cost, risk, resource).
+
+**Treatment of unavailable, stale, and unverified data.** Unavailable renders `N/A` with a `title`. Stale data carries a provenance label and a "last updated" timestamp. Unverified mechanics show a documented placeholder, not an invented value.
+
+**Responsive layout.** The primary recommendation must remain visible above secondary charts and logs at 320px width. Progressive disclosure: show the recommended action first, then the reasoning and detailed state.
+
+**Non-colour-only warnings.** Every warning uses text, icon, and accessible status semantics together (`role`/`aria-*` per `ADR-0020` §5). Colour never carries meaning alone.
+
+**Actual vs. hypothetical balances.** Resource ledgers distinguish actual balances from planned spending and hypothetical post-action balances. The distinction is visual (label, not just colour) and survives 320px reflow.
+
+---
+
 # 3. Visual Personality
 
 Keywords:

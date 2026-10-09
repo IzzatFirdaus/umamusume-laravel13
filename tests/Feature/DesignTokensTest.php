@@ -258,11 +258,14 @@ it('counts every colour token the static theme declares', function (): void {
 
     preg_match_all('/(--color-[a-z0-9-]+)\s*:/', $block, $matches);
 
-    // 53 through Slice 5, plus the five mood fills, `--color-on-mood` and
-    // `--color-on-green` from Slice 6. The count is a tripwire for an undeclared
-    // token, not a budget: a new colour role is added here and in DESIGN.md §3.1
-    // together, and this row moves with it.
-    expect(array_unique($matches[1]))->toHaveCount(60)
+    // 53 through Slice 5, plus the five mood fills and `--color-on-mood` from
+    // Slice 6. The count is a tripwire for an undeclared token, not a budget: a
+    // new colour role is added here and in DESIGN.md §3.1 together, and this row
+    // moves with it. `--color-on-green` was retired 2026-10-09 with the last
+    // consumer of its `text-on-green` utility, the low-Energy advisory badge on
+    // the guided rail that owner ruling R-2 retired; a declaration cites a use,
+    // and no plan or design document names one for it.
+    expect(array_unique($matches[1]))->toHaveCount(59)
         ->and($matches[1])->toContain('--color-goal')
         ->and($matches[1])->toContain('--color-goal-line');
 });

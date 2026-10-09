@@ -102,7 +102,7 @@ class CockpitController extends Controller
     {
         // The run with its trainee, its turns, and its race log with the slots and the turn link each
         // entry points at, so the strip costs no N+1. The latest turn is read off the loaded
-        // collection rather than re-queried, which is `showData()`'s own reading of the same rows.
+        // collection rather than re-queried.
         // `turnEvents` joins only when the scenario's team system has a payload reader at all: a
         // URA or Grand Concert cockpit must not hydrate every event row to discard it.
         $needsEvents = $run->composesPanel('team_rank_ladder')

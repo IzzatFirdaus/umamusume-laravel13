@@ -770,6 +770,40 @@ Show:
 - skill points
 - scenario resources
 
+## Next Decision Component (new spec)
+
+The Advisor column is a shared component, not a screen variant. It receives scenario-specific objectives, constraints, and rules via props — never by branching on scenario name.
+
+**Required behavior:**
+
+- Display the current objective and the reason it matters now.
+- Present a recommended action only when sufficient verified rules and state support it.
+- Explain the decisive factors and relevant trade-offs (constraints, opportunity cost, missing information).
+- Show viable alternatives where the available data permits a meaningful comparison.
+- Distinguish recorded facts, calculated results, estimates, and unknown values using the trust vocabulary (Confirmed / Calculated / Estimated / Unknown, per `ADR-0020` §2).
+- Let the user choose another action without being blocked by the recommendation.
+- Record the action, expected consequences where supportable, and actual result when entered.
+- Re-evaluate the next decision after the run state changes.
+
+**Explicit states:**
+
+```
+No action selected yet
+  → "No recommendation — insufficient verified rules or state to rank actions"
+
+Action under review
+  → show forecasted consequences with provenance labels
+
+Action recorded, actual result pending
+  → grey out, show "ENTER ACTUAL RESULT"
+
+Action recorded, actual result entered
+  → show reconciliation (expectation vs. observation)
+
+No eligible action
+  → "No viable action available — all options violate a constraint"
+```
+
 ---
 
 # 13. Career State Panel
@@ -804,22 +838,19 @@ Compare available training actions.
 ```text
 SPEED
 
-+62 Speed
-+25 Power
-+8 SP
+Facility level: 3 (repetition: 12/16)
+Energy cost: 19
 
-Support:
-3
-
-Bond:
-+7 / +7 / +5
-
-Failure:
-2%
+Support: 3 flames
+Bond gains: +7 / +7 / +5
 
 Target impact:
-Speed target +8%
-```text
+Speed: 742 / 800 (93%)
+
+Missing data: exact stat yield (+X Speed), failure probability
+```
+
+**No per-training stat yields.** Numeric training gains are unsourced (`ADR-0020` §3, deferral table line 13-14). The card explains the factors used to compare actions without showing unsupported yield or failure numbers.
 
 ## Actions
 
@@ -830,13 +861,12 @@ Speed target +8%
 
 Display:
 
-- expected gains
+- facility level and progress to next
 - energy cost
-- failure probability
-- support effects
-- bond gains
-- scenario effects
-- target impact
+- support flame count
+- bond gains (per support card, where recorded)
+- scenario effects (where verified, e.g. Happy Meek duel on Stamina)
+- target impact (distance to goal, with provenance label)
 
 ---
 
@@ -855,21 +885,33 @@ Display:
 - distance
 - surface
 - running style
-- expected reward
+- expected reward (Confirmed / Calculated / Estimated)
 - fan gain
 - skill point gain
-- scenario reward
-- estimated win probability
+- scenario reward (if sourced)
+
+**No numeric win probability.** Race prediction is deferred on the `ADR-0016` data blocker (`ADR-0020` §4). Instead, show readiness bands using verified stat comparisons:
+
+```
+READINESS BANDS
+
+EXCELLENT  Your stat profile matches the race requirements
+GOOD       Minor deficits, win is plausible with skill support
+BORDERLINE Key stat below the distance-appropriate floor
+POOR       Stamina or Speed well below the distance floor
+
+Missing data: opponent strength, exact placement modifiers
+```
 
 ## Risk indicator
 
 ```text
-LOW       < 10%
-MEDIUM    10–30%
-HIGH      > 30%
-```text
+LOW       No fatigue chain, full energy
+MEDIUM    2-consecutive race chain (see §10 Race Fatigue)
+HIGH      3+ consecutive races (fatigue event likely)
+```
 
-The exact thresholds should be configurable.
+The exact thresholds come from the race-fatigue table (`SCENARIO-PUBLISHER-REFERENCES.md §7`); they are Trackblazer-specific and must not be hardcoded in the component.
 
 ---
 
@@ -956,10 +998,68 @@ Expose URA-specific information.
 
 Show:
 
-- current level
-- duel availability
-- potential reward
-- final-race contribution
+- current level (wins / 6)
+- duel availability (next training turn)
+- potential reward (stat, cap bump, Racing Spirit hint, SP)
+- final-race contribution (powered-up state at 6 wins → Past My Limits)
+
+## Career Milestone Tracker (new)
+
+A milestone strip showing the current career objective, deadline, completion state, and next required step:
+
+```
+MILESTONES
+
+[ ✓ ] Valentine's gate (60k fans)    completed, turn 8
+[ • ] Fan Fest gate (70k fans)       32k / 70k, 18 turns left
+[ ○ ] Holiday gate (120k fans)       upcoming, 42 turns left
+[ • ] URA Qualifier                scheduled, turn 36
+[ ○ ] URA Semifinals               lock after Qualifier win
+[ ○ ] URA Finals                   lock after Semifinals win
+```
+
+Source: `docs/scenarios/01-ura-finale.md:77-84`, `UMAMUSUME_REFERENCE.md §2.2.1`.
+
+## Readiness Summary (new)
+
+Assess race preparation using verified data only:
+
+```
+READINESS FOR URA QUALIFIER (Scheduled: turn 36)
+
+Distance    Medium    ✓ Stamina 610 ≥ 600 floor
+Surface     Turf      ✓ aptitude B
+Stat target Speed 800  ⚠ 742 / 800
+Skills      Last spurt  ✓ owned
+            Power surge  ⚠ hint unlocked, not purchased
+
+Missing data: exact qualifier distance (determined by most-raced type)
+```
+
+## Training-vs-Recovery Decision Area (new)
+
+Explain the current priority and known trade-offs: train, rest, or race. Each option shows its primary constraint and what it preserves for later:
+
+```
+RECOMMENDED: TRAIN STAMINA
+  Supports: Medium-distance floor ahead of Qualifier
+  Constraint: facility at Lv 2, 1 block from Lv 3
+  Trade-off: -40 energy; Summer camp in 6 turns
+
+[ Train Stamina ]   [ Race a Tier 2 (SP: +40) ]   [ Rest ]
+```
+
+## Pre-Final Review (new)
+
+Before the three finale races, identify recorded strengths, known deficits, and unresolved requirements:
+
+```
+PRE-FINALE READINESS
+
+Strengths:   Speed 920+, Stamina 650+, Guts 700+
+Deficits:    Power 580 (below 600 Medium floor)
+Unresolved:  Qualifier distance (tied to most-raced type)
+```
 
 ---
 
@@ -980,26 +1080,55 @@ Manage scenario-specific team progression.
 - Spirit Burst
 - Extreme Spirit Burst
 
-## Team panel
+## Team management view (enhanced)
 
-```text
-Team Rank: A+
+A team roster dashboard that tracks members, their relevant strengths, development needs, and contribution to upcoming competitions. Show each member's aptitude and available skills, and distinguish individual trainee development from team-level progression:
 
-Speed     A
-Stamina   B
-Power     A
-Guts      B
-Wit       A
-```text
+```
+TEAM ROSTER                                Next Cup: 4 turns
+
+Member          Stat focus   Rank  Needs before Cup        Contribution
+Rice Shower      Stamina     B     +30 Sta for race 2     Burst: Stamina tile
+Fine Motion      Speed       A     —                      Burst: Speed tile (Lv 2)
+Biwa Hayahide    Power       C     +50 Power, +2 wins     Epithet: Goddess route
+Silence Suzuka†   Guts       D     Bond 2 bars            Burst: Guts tile
+Mejiro Ryan†      Wit        C     +30 Wit                Burst: Wit tile
+
+† Story characters (no bond gauge, no Friendship training)
+```
+
+Source: `docs/scenarios/02-unity-cup.md`, `SCENARIO-PUBLISHER-REFERENCES.md §7`.
+
+## Tournament preparation (new)
+
+Show known requirements, relevant rival information, and unresolved readiness concerns. Explicit missing-data states when the opponent, matchup, or team calculation is unavailable:
+
+```
+TOURNAMENT READINESS              Classic late June • Next Cup in 4 turns
+
+OPPONENT PROJECTIONS
+  ○ Strong     rank if won: A+         ⚠ Rice Shower needs +30 Stamina
+  ○ Medium     rank if won: B          ✓ Biwa's Power is borderline
+  ○ Weak       rank if won: C
+
+RACE PREVIEW
+  Sprint     ✓ covered (Fine Motion +20 from burst)
+  Mile       ⚠ borderline (Fine Motion +30 needed)
+  Medium     ✓ covered
+  Long       ✓ covered
+  Dirt       ⚠ Mejiro Ryan bond not ready
+
+Status: Insufficient data for opponent strength projection
+```
 
 ## Spirit panel
 
 Display:
 
 - current Spirit
-- burst readiness
-- recommended timing
-- projected benefit
+- burst readiness (gauge vs. configured threshold)
+- recommended timing (held advice — see `ADR-0020` §3)
+- projected benefit (held advice — see `ADR-0020` §3)
 
 ---
 
@@ -1019,6 +1148,93 @@ Manage Trackblazer-specific resources.
 - race schedule
 - Twinkle Star Climax
 
+## Race calendar (new)
+
+Visualize upcoming races, known objectives, and the current preparation window. Chronological view with distance, surface, grade, and consequence of selection:
+
+```
+RACE CALENDAR                    Classic • Turn 31
+
+UPCOMING (next 6 turns)
+  Turn 34  G2 Mile (Turf)        +80 GP, +100 coins  ✓ in plan
+  Turn 35  G3 Sprint (Turf)      +60 GP, +80 coins    ✓ in plan
+  Turn 36  G1 Long (Turf)        +100 GP, +150 coins  ⚠ tight spacing
+
+CONSEQUENCES OF SKIPPING
+  G2 Mile: -80 GP from runway, -2 route progress
+  G3 Sprint: no objective impact
+  G1 Long: -100 GP, epithet route at risk
+
+Status: 128 GP needed, 220 projected (with wins)
+```
+
+Source: `SCENARIO-PUBLISHER-REFERENCES.md §7`, `docs/Trackblazer-plan.md §6`.
+
+## Resource ledger (new)
+
+Track Grade Points, purchased items, and remaining balances. Distinguish actual balances from planned spending and hypothetical spending:
+
+```
+RESOURCE LEDGER
+
+GRADE POINTS
+  Current:        172 / 300 (Classic period)
+  Projected:      392 (2 G2 wins + 1 G3 win)
+  Shortfall:      none
+
+COINS
+  Current:        210
+  Planned spend:  100 (Summer items)
+  Reserve:        150 (final shop)
+
+ITEMS
+  Good-Luck Charm  1/5   ✓ held
+  Master Cleat     1/5   ⚠ use before G1 Long
+  Empowering Meg.  2/5   ✓ Summer stock
+```
+
+## Race-versus-training comparison (new)
+
+Make the opportunity cost of each option explicit — not just GP vs. stats, but fatigue, recovery, and epithet progress:
+
+```
+RACE VS. TRAINING
+
+Race G2 Mile:        +80 GP, +100 coins, 1 fatigue, -2 route progress if skipped
+Train Speed:         +6 Speed, +3 Power, +5 SP, facility +0.25 progression
+Rest:                clears fatigue chain, -1 turn of GP
+
+ADVISOR: Race G2 Mile — you are 128 GP short with 9 turns left.
+         Training Speed gains less than the checkpoint risk costs.
+```
+
+## Schedule risk warnings (new)
+
+Flag potentially unsustainable race sequences, inadequate recovery, and missed objective opportunities, using only supported data:
+
+```
+SCHEDULE RISKS
+
+⚠ 5 consecutive races planned in Classic spring (fatigue risk)
+⚠ Year-end gate: 60k fans + Akikawa bond 31 needed
+○ Rival races are random; cannot be scheduled
+```
+
+Source: fatigue table `SCENARIO-PUBLISHER-REFERENCES.md §7 lines 229-242`, year-end gate §13.
+
+## Late-career resource planning (new)
+
+Review remaining objectives and available resources before the finale:
+
+```
+LATE-CAREER REVIEW
+
+Remaining GP:     190 (Senior period)
+Coins:            150 (no income after finale races)
+Hammers held:     3/5  ✓ recommended
+Megaphones:       2/5  ✓ Summer stock sufficient
+```
+
 ## Shop
 
 Display:
@@ -1027,21 +1243,54 @@ Display:
 - cost
 - effect
 - duration
-- recommendation
+- eligibility (locked until Debut, per `SCENARIO-PUBLISHER-REFERENCES.md` line 374)
+
+**No recommendation field.** The shop rotation is not modelled (`config/scenarios.php` `trackblazer.shop`); displaying a "recommended purchase" would fabricate data. Community opinions are shown as separate, labelled tags only.
 
 Example:
 
 ```text
-Recommended Purchase
+Pro Shop                                coins 210   refresh in 3 turns
 
-Speed Scroll
-Cost: 30 Coins
+Master Cleat Hammer    40   +35% race bonus, 1 turn     held 1/5
+Empowering Megaphone   70   +60% training, 2 turns      held 2/5
+Reset Whistle          20   shuffle support cards       held 0/5
+Good-Luck Charm        40   0% failure, 1 turn          held 1/5
+Vita 65                75   +65 energy                  held 0/5
 
-Reason:
-Current Speed deficit is high and the next
-shop refresh is unlikely to provide a better
-stat conversion.
-```text
+Community tags (uma.guide): Must Buy / Skip
+```
+
+---
+
+# 20b. SCREEN-016b — Scenario Panel: Grand Concert (our_grand_concert)
+
+## Purpose
+
+Surface verified Grand Concert state. The evidence hierarchy (`docs/Our-Grand-Concert-plan.md`) determines what is renderable:
+
+- **Available (Confirmed):** Performance type (Dance, Passion, Vocals, Visuals, Composure) and signed delta as turn observations.
+- **Observed but undocumented:** nothing beyond the above.
+- **Documented as unverified:** starting values, caps, Lesson costs, Song titles, Live Bonus percentages, Hype, Promo Concert timing, outcome words beyond "Great Success".
+- **Inferred/community:** none rendered.
+
+## Components
+
+- Performance strip (type selector + signed delta input)
+- Finale presence indicator (catalogue row-driven, not config-key-driven)
+- Blocked-mechanic placeholders (Lessons, Songs, Live Bonuses, Promo Concerts) with the evidence gate and reopen condition
+
+## States
+
+- **Pre-debut:** Performance input disabled; "Waiting for career start."
+- **Active:** Performance type selector (5 options, no default) + signed delta field.
+- **Recording error:** zero, decimal, or invalid terminology rejected (`GrandConcertPanelTest.php:93,103`).
+
+## What is explicitly not built
+
+- Starting values, current totals, caps, acquisition formulas, Lesson costs, Song titles, Hype, Live Bonus percentages, Promo Concert scheduling, or any recommendation logic. The panel states the evidence boundary and links to `SCREEN_SPEC.md` §7-19 through §7-23 for the reopen conditions.
+
+Source: `docs/Our-Grand-Concert-plan.md` Slices 1–18, `docs/UMAMUSUME_REFERENCE.md §2.9`.
 
 ---
 
@@ -1064,19 +1313,25 @@ Provide scenario-aware race planning.
 ## Recommendation
 
 ```text
-Recommended
+RECOMMENDED
 
-RACE — Kyoto 1600m
+Race — Kyoto 1600m (G2 Mile, Turf)
 
-Win probability: 84%
+READINESS: GOOD (Speed meets target, Stamina at floor)
 
 Benefits:
-+ Grade Points
-+ Shop Coins
-+ Skill Hint
+  + 80 Grade Points
+  + 100 Shop Coins
+  + Route progress (2 of 3 on Spring Champion line)
 
-No critical training deadline will be missed.
-```text
+Trade-off:
+  -2 fatigue risk on this chain
+  Training Speed now would gain less than the checkpoint risk
+
+Missing data: opponent strength, exact placement modifiers
+```
+
+**No numeric win probability.** Race prediction is deferred on the `ADR-0016` data blocker. The recommendation shows readiness bands, known benefits, and the opportunity cost — never a fabricated percentage.
 
 ---
 
@@ -1100,7 +1355,10 @@ Each event records:
 
 - before state
 - action
+- expected consequence (where supportable, with provenance label)
+- actual result (when entered by the user)
 - after state
+- advisor confidence at time of decision
 
 Example:
 
@@ -1113,13 +1371,23 @@ Before:
 Speed 842
 Energy 72
 
-After:
+Expected (Calculated):
++6 Speed, +2 Power, +5 SP
+Facility: 8/12 to Lv 3
+
+Action: Train Speed  ✓
+
+Actual:
 Speed 904
 Energy 51
 
-Support Bond:
-Kitasan +7
-```text
+After:
+Speed 904
+Energy 51
+Facility: 9/12 to Lv 3
+
+Advisor at turn 37: recommended Speed training (verified, repetition level)
+```
 
 ---
 
@@ -1495,3 +1763,25 @@ Example:
 > Recommendation unavailable because Energy and Mood have not been entered.
 
 Do not silently guess.
+
+---
+
+# 37. Screen States for Changed Screens
+
+For each screen that changed in this pass, the following states must be defined and handled:
+
+- **Initial / empty** — no run data loaded.
+- **Normal populated** — full run state with verified data.
+- **Partial or unknown data** — some fields missing, stale, or `N/A`.
+- **Validation or recording error** — user entry fails validation or save fails.
+- **Completed or no-longer-applicable** — objective achieved or superseded.
+- **Recommendation unavailable** — insufficient rules or state to rank actions.
+
+| Screen        | States asserted in browser tests                                                                 |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| SCREEN-009    | Empty run (no state), populated run with recommendation, recommendation unsupported, action recorded but result pending, action recorded with reconciliation |
+| SCREEN-014    | Pre-debut (no fan gates active), gates active with partial progress, qualifier passed, pre-finale review, all gates completed |
+| SCREEN-015    | No team data, partial roster, full roster with mixed ranks, tournament locked, team rank `N/A` (no recorded letter) |
+| SCREEN-016    | Pre-debut (shop locked), shop open with partial coin balance, GP period completed, finale reached (coin income ends), schedule risk flagged |
+
+**Keyboard and narrow-screen behavior:** the primary recommendation must remain visible above secondary charts and logs at 320px width. The Next Decision component must be reachable via keyboard in a single `Tab` from the stat bands. Colour is never the sole status indicator — text and icon must carry the same meaning.

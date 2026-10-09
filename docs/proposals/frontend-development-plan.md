@@ -2076,6 +2076,262 @@ R-2 move assertions and retire the flow-only remainder; R-3 split per assertion)
 - **Shared-tree blocker.** The working tree carries a peer session's in-flight `Performance*` work and
   seeder/doc changes in the same paths F2 touches, so F2 is left uncommitted (see the F2 hand-off).
 
+**Close-out follow-up, 2026-10-09 (F2 sweep-miss cleanup).** The assertions this close-out's Delta C left
+behind are resolved across six files. Every failure the sweep caused is gone; one file stays red and its
+premise is corrected below. F2 is still uncommitted, because the blocker in the bullet above has not
+cleared.
+
+**Group A, the deleted `GuidedStep.vue` (retired).** `KeyboardPathTest` retired the four cases that read
+it: the shortcut advertisement, the document-listener registration, the radio-group roving, and the digit
+guard. Its four `AppLayout`/`SetupLayout`/`NavGlyph` cases stand. Moving the retired four into
+`CareerCockpitTest` was ruled out rather than attempted: the Cockpit's correction form is a turn `select`
+and a Save button with no digit, arrow or Escape path, so the interaction R-2 retired has no successor to
+inherit them. `TokenPairHygieneTest` retired its one case, because `AcquisitionStatusEditor.vue` carries
+neither token (it renders `bg-chrome`/`text-on-chrome`) and no surviving component holds both halves of the
+pair in one file, so there was no subject to repoint at. The rule's two live halves are intact and
+unorphaned: `--color-on-green` stays declared at `resources/css/app.css:69` with its `DesignTokensTest`
+pin, and that file's sweep still refuses the borrow onto a bare `bg-green`.
+
+**Group B, the deleted `Runs/Show.vue` (one repointed, four retired).** `SkillSearchScreenTest` repointed
+at the shell nav item `resources/js/layouts/AppLayout.vue:112`, now the only `/skills` door. The repoint
+this section proposed, at the Cockpit's skill surface, does not exist: `Career/Cockpit.vue` carries no
+skills link and `Career/CockpitController.php` ships no skills prop. `TurnEntryFieldSourceTest` dropped its
+run-record half and kept the cockpit half, which holds at `Career/Cockpit.vue:34`.
+`TurnLogScrollRegionTest` retired both cases and stays in the tree as a retirement record rather than being
+deleted, since deleting a test is the owner's call; both subjects are gone, the turn-log wrapper with the
+page and `RaceCalendar.vue` unmounted with it. The KI-25 convention is unchanged, its two live instances
+are named in that file and in the dated note now carried by `SCREEN_SPEC.md` SCR-RUN-003 against the
+accessibility line that named the region.
+
+**Group C, `StatBandTest` (red, premise corrected).** This file was handed over as peer-owned, blocked on
+a `StatBand.vue` mid-migration into `CareerStatePanel.vue` and `TrainingCard.vue`. The tree disagrees.
+`resources/js/components/StatBand.vue` carries no working-copy change and its last commit is `7a81c7c`
+(2026-10-09); `resources/js/components/career/TrainingCard.vue` is the path with the peer hunk, at one line;
+and `CareerStatePanel.vue:16-18` states "StatBand was deliberately not reused here". So its four failures
+are the same class as groups A and B, `test()->get('/training-runs/'.$run->id)` answering the new 302, and
+no repoint exists because the Cockpit ships none of the props they read (`gradeBanding`, `baseCap`,
+`hardCap`, `band.*`, `caps`). The file is untouched and red, which is the retirement ruling Delta C asked
+for and did not deliver; those four need the owner's word, not a repoint. Its three green cases read live
+subjects (`GradeBadge.vue`'s fill map and `ScenarioCaps::caps`' unknown-scenario refusal). Its docblock
+still describes the retired page, and the ruling should carry that too.
+
+**Gate results.** `php artisan test --compact`: **4 failed, 2 skipped, 1463 passed (25905 assertions),
+418s**, the four being `StatBandTest` and nothing else. Scoped to the five files this pass
+touched: **24 passed (314 assertions)**. `vendor/bin/pint --test --format agent` on those five: passed, after
+one `single_blank_line_at_eof` in `TokenPairHygieneTest` was fixed. `vendor/bin/phpstan analyse` was not run
+in its configured scope, and none of this pass's files would be seen if it were: `phpstan.neon:5-6` restricts
+`paths` to `app`. `composer lore`, `composer lore-code`, `npm run typecheck` and `npm run build` were not run,
+because no shipped string, no TypeScript and no Vue file changed. `npm run test:browser` was not run, and
+`tests/browser/run-detail.spec.ts:331` asserts `getByRole('region', { name: 'Turn log' })` against the page
+that now redirects, so that spec is expected to fail and is outside the six files this pass was scoped to.
+`migrate:status` was not run: no migration is in this pass and no table is read differently.
+
+**Two findings outside this pass's scope, neither acted on.** `RaceCalendar.vue` and `RacePanel.vue` are
+orphaned by the deletion above: nothing under `resources/js` imports either, and `RacePanel.vue:49` takes a
+`composesRaceCalendar` flag it never renders, joining `StatBand.vue` and `GradeBadge.vue` as four components
+the retirement ruling has not yet claimed. And `tests/browser/run-detail.spec.ts` still drives the redirected
+page. Both warrant `KI-nn` entries; neither was filed here because `KNOWN-ISSUES.md` carries a peer session's
+staged hunks on this tree.
+
+**Blocker, restated.** Option A has not cleared. A peer hunk now sits inside an F2 path:
+`app/Http/Controllers/Career/CockpitController.php` carries the Slice 23 `finale` to `finale_structure`
+rename beside F2's own edit, so that file cannot be committed for F2 alone. Peer paths holding hunks:
+`app/Domain/Career/CareerPosition.php`, `app/Actions/CreateSnapshotRun.php`,
+`app/Http/Controllers/Career/SnapshotController.php`, `app/Http/Requests/StoreSnapshotRequest.php`,
+`resources/js/components/career/TrainingCard.vue`, `resources/js/pages/Career/Snapshot/{Entry,Setup}.vue`,
+`KNOWN-ISSUES.md`; untracked peer work at `resources/js/pages/Career/Snapshot/Review.vue`,
+`app/Enums/{SnapshotFieldState,PerformanceType}.php` and `app/Models/TurnEvents/PerformancePayload.php`.
+The tree moved three times during this pass, and a peer unstaged `app/Services/Scenario/FinaleReader.php`
+and recreated `tests/Feature/CockpitFinaleStripTest.php` mid-flight.
+
+**Addendum, 2026-10-09 (F2 residuals, rulings, and peer drift).** The passes below ran after the
+close-out above, and one sentence in it is now superseded.
+
+- **Part 1.6.1 retired `tests/browser/run-detail.spec.ts`.** The whole file was evidence for
+  SCR-RUN-003, which the flip retired, and every case's subject was either gone or already covered
+  elsewhere: the `Turn log` region, the guided rail's keyboard path and the 44px sweep of the legacy
+  controls died with `Runs/Show.vue`; the Unity Cup prose is asserted in `unity-cup-panel.spec.ts`;
+  the Trackblazer prose and the shop purchase flow, including the price-refusal case, are asserted in
+  `trackblazer-panel.spec.ts`. Deleting the file is Fix A applied to all eight of its cases.
+- **Part 1.6.2 retired `--color-on-green`.** The Group A paragraph above says the token "stays
+  declared at `resources/css/app.css:69` with its `DesignTokensTest` pin"; that sentence is
+  superseded. The token's only consumer was the low-Energy advisory badge on the guided rail, no
+  plan or design document names another, and a declaration cites a use, so it was removed with the
+  declaration. `DesignTokensTest` counts 59 tokens now, and `TokenPairHygieneTest`'s declaration pin
+  retired with it. The sweep that refuses the borrow onto a bare `bg-green` remains.
+- **Ruling R-A1 retired `tests/Feature/StatBandTest.php`.** The correction above stands: the file was
+  not peer-owned, `StatBand.vue` was clean at `7a81c7c`, and `CareerStatePanel.vue:16-18` refuses the
+  reuse, so there was no 2.0 subject for its four 302 failures.
+- **Ruling R-B1 retired four orphaned components**: `StatBand.vue`, `GradeBadge.vue`,
+  `RacePanel.vue` and `RaceCalendar.vue`, all zero-importer after `Runs/Show.vue` was deleted.
+  `RacePanel.vue:49` kept a `composesRaceCalendar` flag it never rendered. The delta: retiring
+  `RaceCalendar.vue` broke `RaceSlotPanelComposerTest`, which read its `stateClass` map as the
+  reference for the model's cell states. That file keeps its model-behaviour cases and a
+  retired-case comment; only the three source reads went, because `RunRaceStrip.vue`, the Cockpit's
+  calendar, carries none of the cell treatment.
+- **Peer drift, resolved in F2's own file.** `1ec92ab feat(turn): energy state as exact/band/unknown`
+  changed `TrainingDetail.vue`'s import and replaced its inline `energy` field with a three-state
+  control, leaving HEAD red on `TurnEntryFieldSourceTest`. That file is F2-touched, so its two stale
+  assertions were adapted to the tree rather than left: the import check is now a substring on the
+  shared list plus its domain path, and the `energy` row check asserts the shared
+  `TURN_ENTRY_ENERGY_STATES` / `TURN_ENTRY_ENERGY_BANDS` constants it reads now. The peer-owned
+  paths themselves were not touched.
+- **The commit (Part 1.7) stays blocked.** Option A has not cleared: the peer paths are still dirty
+  in the working tree. The Slice 23 rename landed as `aa5d975 refactor(career): give the finale one
+  word per question on both screens`, but `app/Http/Controllers/Career/CockpitController.php` and
+  `Career/ResultController.php` still carry staged and unstaged changes, and the tree is 22 commits
+  ahead of `origin/master` with newer peer work (`SnapshotController` at `a31000c`,
+  `config/scenarios.php` at `1098546`, `composer.json` newly dirty). F2's changes stay uncommitted;
+  the commit needs the peer working-tree hunks to land first, or an isolated worktree (Part 1.7.3 B1).
+- **Parts 2 and 4 were already delivered by peer commits, and Part 3 closed eight register entries.**
+  The KI-45/KI-71 scenario-key backfill is in the tree (`GametoraRaceCatalogParser.php:163` publishes
+  `scenario_key`; `RaceCatalogSlot::scopeForScenario` includes the null-scenario rows; `480b711`
+  corrected the Grand Concert key), so Part 2.2 had nothing left to change and Part 2.3's slices stay
+  evidence-blocked. The two Part 4 browser suites exist: `tests/browser/career-cockpit-forms.spec.ts`
+  carries all eleven cases, and the Timeline read-only case is at `tests/browser/career-timeline.spec.ts:128`.
+  Part 3 closed KI-72, KI-73, KI-75, KI-76, KI-77, KI-78, KI-79 and KI-80 in `KNOWN-ISSUES.md`, each
+  because its fix was already in the tree and only the register entry was stale; KI-69 stays open and
+  peer-owned, because the two named commits do not evidence ruling 6a's halves.
+
+---
+
+## 9a. Scenario Decision Support — Shared Contract and Scenario-Specific Slices
+
+**Authority:** this section refines Phase E's panel contracts with a shared decision-support layer. It does not override `config/scenarios.php`, `ADR-0020` §3 (held advice), or the Global Constraints above. Every proposed calculation must be sourced; every panel must use the shared contract without importing another scenario's rules.
+
+### FD-1 — Audit current scenario capability contracts
+
+Inventory the actual scenario configuration, available state, existing components, controller props, and write paths. Mark each capability as shipped, partial, missing, blocked, or not applicable.
+
+Exit condition: no task duplicates existing functionality or assumes a backend field that does not exist.
+
+### FD-2 — Define the Next Decision contract
+
+Define the input state, candidate actions, eligibility checks, objective priorities, explanation shape, provenance label, and output contract. The decision logic must live in a backend service or a dedicated composable, never inside a presentation component.
+
+Exit condition: unit tests demonstrate deterministic behavior for equivalent inputs and explicit handling of insufficient information.
+
+Required shape of the Next Decision component:
+
+```
+CURRENT PRIORITY
+  Prepare for the next mandatory objective
+
+RECOMMENDED ACTION
+  [ Train Stamina ]     primary, supports the upcoming race
+
+ALTERNATIVES
+  [ Race a G3 (Mile) ]  +GP, -energy, delays Stamina block
+  [ Rest ]              clears fatigue, loses a training turn
+
+WHY THIS RECOMMENDATION
+  - Objective: Valentine's gate in 14 turns (60k fans / 40k dirt)
+  - Constraint: Stamina floor for Medium = 600–700; current = 520
+  - Trade-off: +6 Sta this turn vs. +GP from a race you do not strictly need yet
+  - Confidence: Calculated (facility level by repetition, config `facility_level_source`)
+  - Switch if: Summer camp starts in 4 turns, or Happy Meek appears on a Stamina tile
+```
+
+### FD-3 — Add objective and deadline context
+
+Reuse existing race, goal, and scenario state where possible. Implement the shared presentation for the next objective, due date/turn, completion status, and consequences of missing it — using only verified or explicitly estimated data.
+
+Exit condition: correct display and state transitions for upcoming, completed, missed, and unknown deadlines.
+
+### FD-4 — Close the action reconciliation loop
+
+Ensure the user can record the selected action and actual outcome, inspect the previous state, and see the updated run state and next recommendation. Undo, if implemented, must go through a defined, tested state-restoration contract.
+
+Exit condition: a recorded action persists correctly, the history remains consistent, and recalculation uses the updated state.
+
+### FD-5 — Strengthen scenario-specific panels
+
+Add only the missing Unity Cup team-decision, URA milestone/readiness, and Trackblazer schedule/resource behaviors identified by FD-1. Each slice specifies its own state dependencies and acceptance tests.
+
+Exit condition: the panels remain distinct in behavior while using the same shared UI and provenance contracts.
+
+### Shared testing matrix
+
+| Test dimension     | Required coverage                                                                       |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| State              | Empty, complete, partial, stale, invalid                                                |
+| Objective          | Upcoming, completed, missed, deadline unknown                                           |
+| Recommendation     | Supported, tied alternatives, insufficient evidence, no eligible action                 |
+| Action recording   | Valid submission, validation failure, persisted result, corrected result                |
+| Scenario isolation | Each panel receives the right scenario state and no other scenario's rules              |
+| Accessibility      | Keyboard-only operation, focus visibility, screen-reader labels, non-colour status cues |
+| Regression         | Existing career, deck, skills, race, purchase, and veteran workflows remain intact      |
+
+### Implementation guardrails
+
+- Never implement a new calculation in Vue solely because it is convenient to display.
+- Do not treat a scenario configuration flag as proof that its mechanics are fully modeled.
+- Do not invent numeric training gains, failure percentages, race win probabilities, or shop recommendations.
+- Do not claim a recommendation is optimal when the engine can only establish that it is feasible or preferable under incomplete criteria.
+- Keep the existing test, accessibility, linting, type-checking, and build gates required by the plan.
+
+These constraints matter because the design and screen specifications already defer unsupported calculations (`ADR-0020` §3, Phase E "Not built, and why"). New scenario UX must not accidentally authorize them.
+
+---
+
+## 9b. Grand Concert Implementation Principle (from `docs/Our-Grand-Concert-plan.md`)
+
+Our Grand Concert is implemented as a sequence of narrow, independently verifiable slices. This principle extends to all scenario work:
+
+> **Evidence → smallest truthful representation → canonical lifecycle → UI → tests → stop**
+
+A roadmap item is not permission to implement every mechanic implied by its name. Every slice must read the authoritative project documentation first, search the existing codebase before creating new architecture, prefer existing models/controllers/UI surfaces, and stop when the assigned slice is complete.
+
+### Evidence hierarchy
+
+When implementing scenario mechanics, distinguish:
+
+1. **Authoritative and verified** — safe to implement/render.
+2. **Observed in the application but not formally documented** — may be represented only where the observation itself is trustworthy.
+3. **Documented as unverified** — do not render or calculate as fact.
+4. **Inferred/community/external mechanics** — do not silently promote to project truth.
+
+This hierarchy is binding for all three scenarios. Grand Concert's blocked slices (Lessons, Songs, Live Bonuses, Promo Concerts) demonstrate it in practice: when evidence does not support a truthful representation, the slice documents the exclusion and adds a regression test rather than inventing mechanics.
+
+### Grand Concert slice status (reference)
+
+| Phase | Slices | Status summary | Reference |
+|-------|--------|----------------|-----------|
+| A — Performance | 1–7 | COMPLETE (observations recorded, no totals derived) | `docs/Our-Grand-Concert-plan.md` |
+| B — Lessons | 8–10 | Slices 9–10 BLOCKED BY EVIDENCE | §§494–575, 783–808 |
+| C — Songs | 11–13 | All BLOCKED BY EVIDENCE (23 Song titles unverified) | §§494–575, 783–808 |
+| D — Live systems | 14–18 | Live Bonuses & Promo Concerts BLOCKED BY EVIDENCE | §§577–781 |
+| E — Grand Concert + Intelligence | 19–22 | Slices 19–20 COMPLETE, 21–22 PLANNED | §§784–878 |
+| F — Acceptance | 23–24 | COMPLETE (acceptance record 2026-10-09) | §§881–1011 |
+
+### Global out-of-scope rules (from Grand Concert plan)
+
+These rules apply to every remaining slice unless a future slice establishes verified evidence:
+
+- Do not invent game mechanics, numeric costs, starting values, caps, Hype formulas, Live Bonus percentages, Song effects, Lesson effects, or unsupported Performance conversions.
+- Do not create speculative recommendation logic or duplicate models/tables/endpoints.
+- Do not introduce a new frontend framework, perform broad refactors, or redesign unrelated screens.
+
+### Repository safety constraints
+
+Protected areas — must not be modified unless explicitly authorized by a separate task:
+
+```
+config/database-safety.php
+app/Services/DatabaseSafety/
+tests/browser/global-setup.ts
+playwright.config.ts
+.scratch-uma/incident-2026-10-08-devdb/
+.scratch-uma/db-recovery-2026-10-08/
+composer.json
+composer.lock
+D:/Projects/uma_musume_race_planner/
+```
+
+### Slice completion contract
+
+Every slice ends with a report containing: Determination, Evidence, Files changed, Architecture decision, UI behavior, Mechanics explicitly not implemented, Tests and gates actually run, Safety/concurrency confirmation, Git/commit status, and Explicit stop.
+
 ---
 
 ## 10. Verification and definition of done

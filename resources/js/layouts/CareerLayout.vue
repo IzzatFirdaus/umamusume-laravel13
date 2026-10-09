@@ -10,7 +10,7 @@
  * D13 render inside this layout and inherit both.
  *
  * `#title` is forwarded to `AppLayout`'s own heading rather than rendered here, so the page keeps one
- * `h1` and the document outline stays one document wide (the rule `Runs/Show.vue` states).
+ * `h1` and the document outline stays one document wide.
  */
 import AppLayout from './AppLayout.vue';
 import { Link } from '@inertiajs/vue3';

@@ -308,7 +308,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
 
         <p v-if="props.chosen" role="status" class="mt-2 text-xs text-ink-muted">
             {{ props.option.key }} is the choice held for turn {{ props.turn }}. Enter what the client
-            showed and preview it below.
+            showed and record it below.
         </p>
 
         <div :id="detailsId" :hidden="!open" class="mt-3 border-t border-rule pt-3">

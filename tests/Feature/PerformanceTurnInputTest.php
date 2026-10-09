@@ -26,16 +26,13 @@ use Inertia\Testing\AssertableInertia as Assert;
  * retired, so the GETs below target the 2.0 turn-entry surface (`Career/TrainingDetail`) instead.
  * Neither 2.0 surface carries a `performance` payload, so the payload assertions that the pair is
  * offered have no 2.0 equivalent and are reported rather than forced; the write-side cases below are
- * unchanged and still prove the pair is recorded and a bad type refused.
+ * unchanged and still prove the pair is recorded and a bad type refused. The rail's own rendering test
+ * has no 2.0 equivalent either (the rail and its gated field list are retired with the record screen),
+ * so that assertion retired with it.
  */
 function performanceInputRun(string $scenario = 'our_grand_concert'): TrainingRun
 {
     return TrainingRun::factory()->create(['scenario' => $scenario]);
-}
-
-function showSource(): string
-{
-    return (string) file_get_contents(base_path('resources/js/pages/Runs/Show.vue'));
 }
 
 function performanceTurnEntrySource(): string
@@ -106,28 +103,6 @@ it('keeps the pair free of any total, cap or reading the tool does not have', fu
     $this->get(route('runs.training', $run))->assertInertia(fn (Assert $page) => $page
         ->component('Career/TrainingDetail')
         ->missing('performance'));
-});
-
-it('renders the pair inside the rail it posts with, gated on the flag', function (): void {
-    $source = showSource();
-
-    expect($source)->toContain('v-if="performanceField.enabled === true"')
-        ->and($source)->toContain('name="performance[type]"')
-        ->and($source)->toContain('name="performance[delta]"')
-        // The pair sits in the guided rail's own form: the page posts one submission, not two.
-        ->and($source)->toContain('<GuidedStep')
-        // The copy says what it is and refuses to claim the rest.
-        ->and($source)->toContain('Performance change observed')
-        ->and($source)->toContain('This tool keeps no Performance total')
-        // GameTora's rendering of the fifth type must not appear in the page at all.
-        ->and($source)->not->toContain('Mental');
-
-    // No bound on the delta: `min` or `max` there would be an invented rule. Read as a slice of the
-    // tag rather than a regex over the whole file, so the assertion is about this field's attributes.
-    $deltaField = substr($source, (int) strpos($source, 'name="performance[delta]"'), 200);
-
-    expect($deltaField)->not->toContain('min=')
-        ->and($deltaField)->not->toContain('max=');
 });
 
 it('leaves every turn-entry control that was already there in place', function (): void {

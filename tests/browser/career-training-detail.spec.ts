@@ -15,7 +15,7 @@ import { deleteRun } from '../utils/delete-run';
  * (`AbsenceValue.vue`); the strings they pin are unchanged.
  *
  * Fixture strategy, and why it is the wizard walk: the run is built by pressing the app's own steps
- * and `Start Career`, then the first turn is recorded through the run screen's guided rail, so every
+ * and `Start Career`, then the first turn is recorded through Training Detail's own form, so every
  * figure this screen shows was entered rather than seeded. The row is deleted over HTTP in
  * `afterEach` (`tests/utils/delete-run.ts`), which keeps the shared
  * database clean for `runs.spec.ts`'s empty-state assertions. The wizard walk is copied rather than
@@ -88,24 +88,25 @@ async function newCareerWithTurn(page: import('@playwright/test').Page): Promise
     const runUrl = page.url().replace(/\/cockpit$/, '');
     createdRunUrls.push(runUrl);
 
-    // Turn 1, logged through the run screen's guided rail: the numbers a Trainer reads off the client.
-    // The rail is the form that carries the choice radios — the run screen also holds a raw entry form
-    // with the same field names, so an unscoped `input[name="speed"]` is two elements.
-    await page.goto(runUrl, { waitUntil: 'domcontentloaded' });
+    // Turn 1, logged through Training Detail (Fix A): the numbers a Trainer reads off the client.
+    // The retired run record screen's guided rail has no 2.0 reproduction (F2, plan §9.6; owner
+    // ruling on group R-2), so Training Detail posts directly to `runs.turns.store` and the
+    // response redirects to the Cockpit where the recorded turn appears in the correction selector.
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    const rail = page.locator('form').filter({ has: page.locator('input[name="choice"]') });
-    await rail.locator('input[name="choice"][value="training-Speed"]').check();
-    await rail.locator('input[name="speed"]').fill('650');
-    await rail.locator('input[name="stamina"]').fill('600');
-    await rail.locator('input[name="power"]').fill('600');
-    await rail.locator('input[name="guts"]').fill('600');
-    await rail.locator('input[name="wit"]').fill('600');
-    await rail.locator('input[name="energy"]').fill('62');
-    await rail.locator('input[name="fans"]').fill('120');
-    await rail.locator('input[name="sp"]').fill('100');
-    await rail.locator('select[name="outcome"]').selectOption('Success');
-    await rail.getByRole('button', { name: 'Preview this turn' }).click();
-    await page.getByRole('button', { name: 'Confirm turn' }).click();
+    const speedCard = page.getByRole('article').filter({ hasText: /^Speed/ });
+    await speedCard.getByRole('button', { name: 'Train' }).click();
+    await page.locator('input[name="speed"]').fill('650');
+    await page.locator('input[name="stamina"]').fill('600');
+    await page.locator('input[name="power"]').fill('600');
+    await page.locator('input[name="guts"]').fill('600');
+    await page.locator('input[name="wit"]').fill('600');
+    await page.locator('input[name="energy"]').fill('62');
+    await page.locator('input[name="fans"]').fill('120');
+    await page.locator('input[name="sp"]').fill('100');
+    await page.locator('select[name="outcome"]').selectOption('Success');
+    await page.getByRole('button', { name: 'Record this training' }).click();
+    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('Turn 1 logged.')).toBeVisible();
 
     return runUrl;
@@ -275,8 +276,10 @@ test('reaches the screen from the Cockpit and records the choice it carries', as
     await expect(speedInput).toHaveAttribute('placeholder', '650');
     await expect(page.locator('input[name="turn"]')).toHaveValue('2');
 
-    // Previewing posts through the route and Form Request the run screen already owns, and the
-    // preview screen is the run record screen's, which is where the turn is confirmed.
+    // The page posts directly to the turn write the run screen already owns, with no `stage`
+    // intermediate (F2, plan §9.6; owner ruling on group R-2 retired the preview-and-confirm rail).
+    // The response redirects to the Cockpit, where the recorded turn appears in the correction
+    // selector.
     await page.locator('input[name="speed"]').fill('700');
     await page.locator('input[name="stamina"]').fill('600');
     await page.locator('input[name="power"]').fill('600');
@@ -284,9 +287,9 @@ test('reaches the screen from the Cockpit and records the choice it carries', as
     await page.locator('input[name="wit"]').fill('640');
     await page.locator('input[name="energy"]').fill('40');
     await page.locator('select[name="outcome"]').selectOption('Success');
-    await page.getByRole('button', { name: 'Preview this turn' }).click();
-    await page.waitForURL(/\/training-runs\/\d+$/, { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText('Preview', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Record this training' }).click();
+    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByText('Turn 2 logged.')).toBeVisible();
 
     expect(problems, problems.join('\n')).toEqual([]);
 });

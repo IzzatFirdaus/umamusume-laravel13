@@ -11,21 +11,16 @@ use Inertia\Testing\AssertableInertia as Assert;
  *
  * Slice 6 left this open on purpose rather than assume it: `Career/TrainingDetail.vue` posts to the
  * same `runs.turns.store` as the guided rail, so it could have been read as a second turn-entry surface
- * missing a control. It is not one. It posts `stage=preview` and nothing else, and `storeTurn()`'s
- * preview branch writes no row — the commit, and therefore the turn-entry surface, is `runs.show`.
+ * missing a control. It is not one. Under F2, plan §9.6 ruling 2 and Fix A (owner default), the
+ * screen writes the turn directly — no preview step — and the response redirects to `runs.cockpit`.
+ * Neither `Career/TrainingDetail` nor `Career/Cockpit` carries a `performance` payload, so the pair
+ * cannot be posted from either surface and cannot be rehydrated on either after a write.
  *
  * So the question was not "does it need the field" but "does a Trainer who arrives through it lose the
- * capability". The second test below answers that: the pair survives the preview hand-off intact and
- * waits on the screen that actually commits the turn. If that ever stops being true, this file fails and
- * the exclusion stops being defensible — which is the point of writing the boundary down as a test
- * instead of leaving it as a comment.
- *
- * F2 correction (2026-10-09). `GET /training-runs/{run}` now 302s to the Cockpit and `Runs/Show.vue`
- * is retired, so the commit screen the pair was said to wait on no longer renders. The preview and the
- * commit both redirect to `runs.cockpit` now. Neither `Career/TrainingDetail` nor `Career/Cockpit`
- * carries a `performance` payload, so the pair is not rehydrated on any 2.0 surface: the hand-off
- * assertions below are reported, not forced, while the write boundary (a preview writes nothing) still
- * holds and is asserted here.
+ * capability". Under Fix A the exclusion is total: the write happens here and no other 2.0 surface
+ * rehydrates the pair, so a Trainer who omits the pair at this screen records the turn without it. If
+ * that ever stops being true, this file fails and the exclusion stops being defensible — which is the
+ * point of writing the boundary down as a test rather than leaving it as a comment.
  */
 function trainingDetailRun(string $scenario = 'our_grand_concert'): TrainingRun
 {
@@ -38,12 +33,12 @@ function trainingDetailSource(): string
 }
 
 /**
- * Exactly what that screen posts: the turn record, `stage=preview`, and the optional pair.
+ * Exactly what that screen posts: the turn record and the optional pair, with no `stage` marker.
  *
  * @param  array<string, mixed>  $performance
  * @return array<string, mixed>
  */
-function previewSubmit(array $performance = []): array
+function recordSubmit(array $performance = []): array
 {
     $payload = [
         'turn' => 1,
@@ -52,7 +47,6 @@ function previewSubmit(array $performance = []): array
         'power' => 600,
         'guts' => 600,
         'wit' => 600,
-        'stage' => 'preview',
         'choice' => 'training-Speed',
         'outcome' => 'Success',
     ];
@@ -60,7 +54,7 @@ function previewSubmit(array $performance = []): array
     return $performance === [] ? $payload : [...$payload, 'performance' => $performance];
 }
 
-it('shares the endpoint with the turn write but cannot commit a turn', function (): void {
+it('shares the endpoint with the turn write and commits the turn it posts', function (): void {
     $run = trainingDetailRun();
 
     // The surface is real and its action is the canonical one — that much is equivalence.
@@ -70,40 +64,44 @@ it('shares the endpoint with the turn write but cannot commit a turn', function 
             ->component('Career/TrainingDetail')
             ->where('write.action', route('runs.turns.store', $run)));
 
-    // What it posts is a preview, and a preview writes nothing: no turn row and no event, with or
-    // without a Performance pair attached. The preview now lands on the 2.0 commit surface, the Cockpit.
-    $this->post(route('runs.turns.store', $run), previewSubmit(['type' => 'Dance', 'delta' => '12']))
+    // Under Fix A the write lands on the Cockpit redirect: no preview step in between, so a Training
+    // Detail submit writes the row and the associated failure or Performance event. Without a pair the
+    // write is a bare turn row; the exclusion of the field is not a refusal of the write.
+    $this->post(route('runs.turns.store', $run), recordSubmit())
         ->assertRedirect(route('runs.cockpit', $run));
 
-    expect($run->turnEntries()->count())->toBe(0)
+    expect($run->turnEntries()->count())->toBe(1)
         ->and(TurnEvent::query()->where('training_run_id', $run->id)->count())->toBe(0);
 });
 
-it('hands the entered observation to the screen that commits it, so nothing is lost by omitting the field', function (): void {
+it('writes the pair when it is posted, but no 2.0 surface rehydrates it after the write', function (): void {
     $run = trainingDetailRun();
 
-    $this->post(route('runs.turns.store', $run), previewSubmit(['type' => 'Dance', 'delta' => '12']))
+    $this->post(route('runs.turns.store', $run), recordSubmit(['type' => 'Dance', 'delta' => '12']))
         ->assertRedirect(route('runs.cockpit', $run));
 
-    // `storeTurn()` flashes the validated input on a preview, but the 2.0 commit surface is the
-    // Cockpit and it carries no `performance` payload, so the pair is not rehydrated there (reported).
-    // What this case still holds is that the preview handed off to the committing surface.
+    // The pair is stored as a `Scenario` event keyed on the turn, and it is the write's only home:
+    // neither this screen nor the Cockpit carries a `performance` payload, so it is not rehydrated on
+    // either after the redirect. The pair is not lost by omitting the field at submit time — the
+    // write is one shot.
+    expect(TurnEvent::query()->where('training_run_id', $run->id)->where('event_type', 'Scenario')->count())->toBe(1);
+
     $this->get(route('runs.cockpit', $run))->assertInertia(fn (Assert $page) => $page
         ->component('Career/Cockpit')
         ->where('run.scenario_label', 'Our Grand Concert')
         ->missing('performance'));
 });
 
-it('keeps the pair through a refused preview as well, rather than discarding half the submission', function (): void {
+it('refuses a turn the pair fails on, rather than discarding half the submission', function (): void {
     $run = trainingDetailRun();
 
-    $this->post(route('runs.turns.store', $run), previewSubmit(['type' => 'Mental', 'delta' => '12']))
+    $this->post(route('runs.turns.store', $run), recordSubmit(['type' => 'Mental', 'delta' => '12']))
         ->assertSessionHasErrors(['performance.type']);
 
     expect($run->turnEntries()->count())->toBe(0);
 
-    // D-56's hand-back has no 2.0 home: neither surface carries a `performance` payload, so the refused
-    // pair is not rehydrated on the commit screen (reported). The refusal itself still writes nothing.
+    // The refusal writes nothing, and neither surface carries a `performance` payload to rehydrate the
+    // refused pair (reported). A subsequent GET of the Cockpit therefore shows no partial state.
     $this->get(route('runs.cockpit', $run))->assertInertia(fn (Assert $page) => $page
         ->component('Career/Cockpit')
         ->missing('performance'));
@@ -112,14 +110,12 @@ it('keeps the pair through a refused preview as well, rather than discarding hal
 it('states its own boundary in its own copy, and holds no Performance vocabulary of its own', function (): void {
     $source = trainingDetailSource();
 
-    expect($source)->toContain("stage: 'preview'")
-        ->and($source)->toContain('where the turn is confirmed')
-        ->and($source)->toContain('Nothing is written until you')
-        // It never posts the marker only a preview response renders, so it cannot reach the confirm.
-        // The *word* does appear in its own prose ("The turn was not previewed"), which is why this
-        // checks the form key rather than the string.
-        ->and($source)->not->toContain('previewed:')
+    // Under Fix A the form posts no `stage` at all: the previous preview-and-confirm rail has no 2.0
+    // reproduction, so there is no stage to advance and no marker to gate. The word "preview" does
+    // not appear in the form's field list, only in the surrounding prose (a comment naming R-2).
+    expect($source)->not->toContain("stage: 'preview'")
         ->and($source)->not->toContain("stage: 'confirm'")
+        ->and($source)->not->toContain('previewed:')
         // And the exclusion is total rather than half-finished: no field names, no type list, and no
         // GameTora rendering anywhere in the file.
         ->and($source)->not->toContain('performance[type]')
@@ -138,7 +134,7 @@ it('leaves that screen every turn field it already had', function (): void {
 it('keeps the capability flag off every other scenario on the screen that does carry the pair', function (string $scenario): void {
     $run = trainingDetailRun($scenario);
 
-    // No 2.0 surface carries the pair, so the capability flag has no 2.0 home; the commit surface is
+    // No 2.0 surface carries the pair, so the capability flag has no 2.0 home; the Cockpit is
     // asserted to carry no Performance payload for a non-composing scenario either (reported).
     $this->get(route('runs.cockpit', $run))->assertInertia(fn (Assert $page) => $page
         ->component('Career/Cockpit')

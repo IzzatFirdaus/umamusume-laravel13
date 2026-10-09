@@ -59,7 +59,7 @@ it('reports the finale as not yet reached for a career that has not got there', 
             ->where('finale_state.outcome', null)
             ->where('finale_state.placement', null)
             ->where('finale_state.turn', null)
-            ->where('finale_state.label', 'Grand Concert')
+             ->where('finale_state.label', 'Our Grand Concert')
         );
 });
 
@@ -141,7 +141,7 @@ it('emits the same finale state on the cockpit payload', function (): void {
             ->where('scenario.finale_state.reached', true)
             ->where('scenario.finale_state.outcome', RaceEntryStatus::Completed->label())
             ->where('scenario.finale_state.placement', '2nd')
-            ->where('scenario.finale_state.label', 'Grand Concert')
+             ->where('scenario.finale_state.label', 'Our Grand Concert')
         );
 });
 

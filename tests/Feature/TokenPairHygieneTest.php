@@ -6,7 +6,8 @@ declare(strict_types=1);
  * An ink token borrowed across roles passes the contrast gate and fails the design system:
  * `text-on-pick` on `bg-green` measured fine, and it meant "the dark ink that happens to stay
  * dark in both themes" rather than "the ink for this fill". Slice 5 recorded the borrow as an
- * open design-system call; Slice 6 settles it by naming the pair.
+ * open design-system call; Slice 6 settled it by naming the pair, and the sweep below is what
+ * holds the settlement.
  *
  * This test pins the naming, not the ratio. The ratios are measured from the rendered element
  * in `docs/design-research/verification/slice-6-2026-09-28.md` §3, per D-288: a hex in a
@@ -14,12 +15,15 @@ declare(strict_types=1);
  *
  * The sweep covers both source trees. The components it guards are Vue now (ADR-0020 §1, B1),
  * so a Blade-only walk would go quiet the moment the last component moved.
+ *
+ * Two cases retired 2026-10-09 with owner ruling R-2 (`docs/proposals/frontend-development-plan.md`
+ * §9.6 close-out). The declaration pin for `--color-on-green` went with the token itself: the
+ * low-Energy advisory badge was the only consumer of its `text-on-green` utility, the badge
+ * lived on the guided rail, and no plan or design document names a surface that would re-use
+ * the pair, so `DesignTokensTest` now counts 59 tokens rather than 60. The gold-ink-on-gold-fill
+ * case went with `GuidedStep.vue`, which was that pair's home. The sweep below is the part of
+ * the rule that outlives both: no component may borrow the gold ink onto a bare `bg-green`.
  */
-it('declares an ink for the bright lime fill instead of borrowing the gold one', function (): void {
-    $css = (string) file_get_contents(base_path('resources/css/app.css'));
-
-    expect($css)->toContain('--color-on-green');
-});
 
 /**
  * Every source that can put a class on an element a Trainer sees, keyed by its path.
@@ -96,15 +100,20 @@ it('leaves no component wearing the gold ink on the green fill', function (): vo
         }
     }
 
-    expect($offenders)->toBe([], 'green fill must take --color-on-green, not --color-on-pick');
+    expect($offenders)->toBe([], 'a bare bg-green must not borrow text-on-pick');
 });
 
-it('keeps the gold ink on the gold fill, where it belongs', function (): void {
-    // The port moved this pair from `x-guided-step` to `GuidedStep.vue`. The Caution band
-    // still uses `bg-pick text-on-pick`; if that pair had been renamed away rather than the
-    // borrow removed, this test is how it would show up.
-    $step = (string) file_get_contents(base_path('resources/js/components/GuidedStep.vue'));
-
-    expect($step)->toContain('bg-pick text-on-pick')
-        ->and($step)->toContain('bg-green px-1.5 font-bold text-on-green');
-});
+/*
+ * A retired case. This file once pinned the pair `bg-pick text-on-pick` beside
+ * `bg-green px-1.5 font-bold text-on-green` in `resources/js/components/GuidedStep.vue`, so that
+ * the advisory badge's green fill took the new ink and the Caution band kept the gold pair. The
+ * component was the last consumer of `text-on-green`; owner ruling R-2
+ * (`docs/proposals/frontend-development-plan.md` §9.6 close-out, 2026-10-09) retires it with
+ * `Runs/Show.vue`, and no surviving component carries both halves of the pair in one file, so the
+ * assertion had no subject to point at.
+ *
+ * The sweep below is the part of the rule that outlives the case. The token it was written to
+ * name, `--color-on-green`, was itself retired 2026-10-09: the badge was its only consumer and
+ * no plan or design document names a surface that would re-use the pair, so `DesignTokensTest`
+ * counts 59 tokens now. What the sweep still refuses is the borrow, not the token.
+ */

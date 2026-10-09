@@ -69,7 +69,7 @@ it('names the finale and counts the turns while it is close', function (): void 
     $this->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('advisor.finale.label', 'Grand Concert')
+            ->where('advisor.finale.label', 'Our Grand Concert')
             ->where('advisor.finale.state', 'upcoming')
             ->where('advisor.finale.turns_away', 4)
             // The recommendation itself is untouched by the status line: this run sets no build

@@ -96,7 +96,20 @@ it('carries no invented mechanic: no song, lesson or token string reaches the pa
     // A floor, not a proof. The scenario's mechanics are sourced (docs/scenarios/07-grand-concert.md,
     // refilled 2026-10-05), so the risk this guards is not "the guide is empty" but "someone rendered
     // the guide": these are the words a panel would need, and no measured client string supplies them.
-    $unmeasured = ['song', 'lesson', 'performance token', 'promotional live', 'hype'];
+    // The three bonus-layer names joined on 2026-10-09 with the Live Bonus gate (SCREEN_SPEC.md §7-22).
+    // Cygames' notice 905 names neither layer, GameTora and Game8 disagree on all of them, and the app
+    // already prints "Friendship Bonus" for a different domain, a support-card effect id from the
+    // GameTora dictionary, so nothing here may let that word read as scenario copy.
+    $unmeasured = [
+        'song',
+        'lesson',
+        'performance token',
+        'promotional live',
+        'hype',
+        'live bonus',
+        'practice bonus',
+        'mastery bonus',
+    ];
 
     $this->get(route('runs.cockpit', $run))
         ->assertOk()

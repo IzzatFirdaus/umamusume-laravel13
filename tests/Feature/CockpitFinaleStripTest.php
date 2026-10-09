@@ -116,11 +116,10 @@ it('holds the reader to the scenario\'s own finale row while the strip carries t
     $shared = finaleStripSlot(null, 'URA Finals Qualifier');
     $finale = finaleStripSlot('unity_cup', 'URA Finals Final (Aoharu)');
 
-    // The shared row is a real obligation and the strip is right to list it: `forScenario` reads
-    // `scenario_key IS NULL OR scenario_key = ?`. The reader asks `scenario_key = ?` alone, so this
-    // run can finish the shared race and still be told its finale has no outcome. Pinned as it stands,
-    // because the two readings are a scope decision (`ADR-0015`) and not this slice's to make; KI-87
-    // carries the question of which one the finale is.
+    // The block is read shared-inclusive (`forScenario`), the same scope the strip uses, so the two
+    // surfaces agree about what the finale block is. The shared row is a preliminary round every URA
+    // career runs; the scenario's own Final is the decisive one the reader reports on. KI-87's scope
+    // half is closed by that agreement.
     RaceEntry::factory()->create([
         'training_run_id' => $run->id,
         'race_catalog_slot_id' => $shared->id,
@@ -159,11 +158,10 @@ it('reaches the finale on an exhausted grid while the strip reports no turn bein
             ->where('raceStrip.empty.ahead', fn (string $line): bool => str_contains($line, 'no turn being decided'))
             ->where('scenario.finale_state.reached', true)
             ->where('scenario.finale_state.outcome', null)
-            // Pinned as a defect, not as a target: this is a Unity Cup career and the word the three
-            // finale surfaces print is Our Grand Concert's noun, because `FinaleReader` returns one
-            // label for every scenario (`FinaleReader.php:69`, its own `ponytail:` note). The day
-            // KI-87 closes this line moves to the row's own title and nothing else here changes.
-            ->where('scenario.finale_state.label', 'Grand Concert')
+            // The label is the scenario's own client noun from `config/scenarios.php`, not a
+            // hardcoded string. This is a Unity Cup career and the word the three finale surfaces
+            // print is Unity Cup's own noun. KI-87's label half is closed by that read.
+            ->where('scenario.finale_state.label', 'Unity Cup')
             // The row the reader is describing is still the scenario's own, and it is not in Run: a
             // reached finale with nothing recorded is the middle answer, not a completed one.
             ->has('raceStrip.run', 0));
@@ -184,7 +182,7 @@ it('carries a finale state on a scenario whose matrix closes the race calendar',
             ->has('raceStrip.ahead', 0)
             ->where('raceStrip.notice', fn (string $line): bool => str_contains($line, 'composes no race calendar'))
             ->where('scenario.finale_state.reached', false)
-            ->where('scenario.finale_state.label', 'Grand Concert')
+            ->where('scenario.finale_state.label', 'Our Grand Concert')
             // The two finale keys on one payload answer different questions, and only one of them is
             // settled here: `scenario.finale_structure` is what the config declares the scenario
             // composes, and `ura_finale` alone declares it (`config/scenarios.php:358`), so it is null
@@ -194,4 +192,43 @@ it('carries a finale state on a scenario whose matrix closes the race calendar',
             // `finale`, one payload apart.
             ->where('scenario.finale_structure', null)
             ->missing('scenario.finale'));
+});
+
+it('reads the finale block shared-inclusive and reports on the scenario\'s own Final', function (): void {
+    $run = finaleStripRun();
+    $shared = finaleStripSlot(null, 'URA Finals Qualifier');
+    $finale = finaleStripSlot('unity_cup', 'URA Finals Final (Aoharu)');
+
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'race_catalog_slot_id' => $finale->id,
+        'status' => RaceEntryStatus::Completed,
+        'placement' => 1,
+        'turn_entry_id' => $run->turnEntries()->where('turn', 12)->firstOrFail()->id,
+    ]);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // The shared row stays a strip obligation and never becomes the reader's subject: the
+            // reader names the scenario's own Final and reports its recorded outcome.
+            ->has('raceStrip.ahead', 1)
+            ->where('raceStrip.ahead.0.id', $shared->id)
+            ->has('raceStrip.run', 1)
+            ->where('raceStrip.run.0.id', $finale->id)
+            // The reader names the scenario's own Final and reports its recorded outcome, not the
+            // shared row's (which has none). That is the scope agreement: one block, one subject.
+            ->where('scenario.finale_state.outcome', RaceEntryStatus::Completed->label())
+            ->where('scenario.finale_state.placement', '1st')
+            ->where('scenario.finale_state.turn', 12));
+});
+
+it('prints each scenario\'s own client noun from config', function (): void {
+    $run = finaleStripRun(scenario: 'trackblazer');
+    finaleStripSlot('trackblazer', 'Twinkle Star Climax');
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scenario.finale_state.label', 'Trackblazer'));
 });

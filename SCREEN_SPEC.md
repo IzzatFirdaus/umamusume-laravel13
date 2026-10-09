@@ -477,6 +477,20 @@ preserved as written and re-read against the tree).*
   page A4b replaced; the audit's dated re-read records the per-item verdict and this section's §7-12 note
   carries the summary._
 
+- **2026-10-09, owner ruling R-1/R-2 (F2, `docs/proposals/frontend-development-plan.md` §9.6 close-out):
+  this screen is retired and the KI-25 scroll-region contract on it has no owner.** `Runs/Show.vue` is
+  deleted and `GET /training-runs/{run}` 302s to `runs.cockpit`, so the two instances this section's
+  Accessibility line names - the turn table inside `role=region tabindex=0 aria-label="Turn log"`, and the
+  race calendar region beside it - render on no page. The Cockpit's correction owns the same
+  `runs.turns.update` / `runs.turns.destroy` writes but renders them as a turn `select` plus a Save
+  button, not as a scrolling table, so it has no clipping region to keep. `RaceCalendar.vue` is likewise
+  unmounted after the deletion: nothing under `resources/js` imports it. The convention itself - a scroll
+  container that clips must be focusable - is unchanged and still applies to any region that clips; its
+  live instances are the import comparison table (`tests/browser/legacy.spec.ts`) and the race-slots region
+  (`tests/browser/database.spec.ts`). `tests/Feature/TurnLogScrollRegionTest.php` is left as a retirement
+  record rather than deleted, so the KI-25 census is findable when the retirement ruling takes
+  `RaceCalendar.vue` and `RacePanel.vue` with it._
+
 ---
 
 ### SCR-RUN-004 — Import a historical run (form)
@@ -2498,7 +2512,7 @@ Implemented 2026-10-07 (slice D15).
 
 #### The contract E2 to E4 consume
 
-`{ label, declared, documented, version, version_title, widgets, widget_labels, widget_values, widgets_absence, panels, objectives, actions, alerts, recommendations, recommendations_absence, finale, finale_absence }` — the brief's §49 shape with the run's own facts folded in. `version` is `null` with a `title` because `app.ruleset` is null and no source defines a Global ruleset version.
+`{ label, declared, documented, version, version_title, widgets, widget_labels, widget_values, widgets_absence, panels, objectives, actions, alerts, recommendations, recommendations_absence, finale_state, finale_structure, finale_absence }` — the brief's §49 shape with the run's own facts folded in. `version` is `null` with a `title` because `app.ruleset` is null and no source defines a Global ruleset version. The three finale keys answer three different questions: `finale_structure` is what `config/scenarios.php` declares the scenario composes (null for `our_grand_concert`), `finale_state` is this run's own reading of the finale block through `FinaleReader`, and `finale_absence` is the sentence that names the calendar where the catalogue holds a row or denies one where it holds none. Slice 23 named the pair apart; before it both the declaration and the reading were called `finale`, one payload apart.
 
 **There is no scenario identity field.** No `key`, `id`, `scenario_key` or `config_key` crosses the wire; `label` is display text and nothing compares it. `ScenarioPanelTest` pins the section's key list, so an identity field cannot arrive without a test naming it, and the branch-free property of the shell itself is verified by reading it rather than by a grep.
 
@@ -2985,6 +2999,7 @@ three, subtracted), and the run's tracked values are the header's figures above.
 | State | Behavior |
 | --- | --- |
 | Rendered | Every panel flag off, the run declared: the label, the partial badge, the caps table, the scenario's own reason and the advisor-scope line. |
+| Finale state | `FinaleReader::forRun()`'s three answers, printed as one line beside the advisor-scope line: `not yet reached`, `reached; no outcome recorded`, or `completed — <outcome>` with the placement and turn where recorded. Renders only where the scenario's calendar carries a finale; a scenario with none emits no key rather than a null. |
 | No panel of its own | The generic sentence renders only when the entry declares no `panel_absence`; the specific reason replaces it rather than joining it. |
 | Run declared no scenario | The caps table and the absence line do not render. The strip keeps E1's wording for an undeclared run, because lending it the baseline entry's caps would state a composition nobody chose. |
 | Caps unrecorded | Not reachable: `config/scenarios.php` is the source and it carries a `cap_bonus` for every entry. A missing row is a config failure, not an empty state. |

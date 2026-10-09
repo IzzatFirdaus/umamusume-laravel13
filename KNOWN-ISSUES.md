@@ -981,7 +981,9 @@ fixture defect do (recommended: not); or the `veterans` fixture ruling now open 
 authorized exactly one commit in this follow-up, `b5d69be` for the D5/D6 selector fix, and a slice commit is
 not implied by a file edit.
 
-### KI-72 The library's tag filter is case-sensitive, so a hand-typed tag is unfindable by its capitalised suggestion - FILED 2026-10-07 (D16 follow-up, on the owner's ruling), OPEN
+### KI-72 The library's tag filter is case-sensitive, so a hand-typed tag is unfindable by its capitalised suggestion - FILED 2026-10-07 (D16 follow-up, on the owner's ruling), CLOSED 2026-10-09
+
+**Closed 2026-10-09.** The fix is in the tree: `database/migrations/2026_10_08_180000_add_tags_normalized_to_veterans_table.php` adds the folded column and backfills it, `Veteran` folds `tags` into `tags_normalized` in a `saving` hook so no writer can desync it, and `ListVeterans.php:63` filters with `whereJsonContains('tags_normalized', mb_strtolower($tag))`. `VeteranLibraryTest.php:163` pins the case-insensitivity across `Speed` / `speed` / `FRONT RUNNER` / `front runner`. What closure does not cover: `ListVeterans.php:19-20`'s docblock still says the tags are "searched through `tags`", which the code no longer does; that prose is stale and left for a docs pass.
 
 **Status: OPEN.** `StoreVeteranRequest::prepareForValidation()` de-duplicates tags by `mb_strtolower`
 (`app/Http/Requests/StoreVeteranRequest.php:131`) and stores the first spelling exactly as typed, so a
@@ -1141,7 +1143,9 @@ outlives this instance. Nothing here re-runs the parser against a fresh fetch ei
 renames the slot id would need the same two steps. And the numbering collisions recorded above are still
 open.
 
-### KI-73 A leaked `php artisan serve` holding :8127 takes the default browser entry point down for every session in the worktree - FILED 2026-10-08 (E6 follow-up 2, on the owner's instruction to diagnose rather than work around), OPEN
+### KI-73 A leaked `php artisan serve` holding :8127 takes the default browser entry point down for every session in the worktree - FILED 2026-10-08 (E6 follow-up 2, on the owner's instruction to diagnose rather than work around), CLOSED 2026-10-09
+
+**Closed 2026-10-09.** The port is per session: `playwright.config.ts:12` reads `PLAYWRIGHT_PORT` (default 8127), and the harness's own webserver command resolves the same port, so a leaked server on the default no longer takes every other session's entry point down. What closure does not cover: a leaked server on a session's own port is still possible; the isolation is per session, not a reaper.
 
 **Status: OPEN.** Not caused by E6 and not fixed by it. E6 found it while trying to make `npm run
 test:browser` work with no override, and the reason it is filed instead of fixed is in "Closure owed".
@@ -1290,7 +1294,9 @@ gate is simply **not run**, which is a reportable state under `AGENTS.md` §15 r
 does not cover KI-73, which is a different defect on the same port: a surviving listener with a dead database
 path. A quiet box with PID-style leak on :8127 still cannot start.
 
-### KI-80 The browser suite's scratch database is one shared repo path, so two sessions in a worktree cannot both run the suite and the second one's setup deletes the first one's data - FILED 2026-10-08 (E6 Grand Concert audit slice), FIXED IN TREE, NOT CLOSED
+### KI-80 The browser suite's scratch database is one shared repo path, so two sessions in a worktree cannot both run the suite and the second one's setup deletes the first one's data - FILED 2026-10-08 (E6 Grand Concert audit slice), CLOSED 2026-10-09
+
+**Closed 2026-10-09.** The scratch database is per invocation: `tests/browser/global-setup.ts` resolves `PLAYWRIGHT_SCRATCH_DB` when set and otherwise builds `database/browser-scratch-<pid>-<ms>.sqlite`, so two sessions in one worktree cannot collide and the second cannot delete the first's data. What closure does not cover: the default path still sits under `database/`, and no `.lock` file is used, because the pid-and-ms suffix already makes the path unique per invocation.
 
 **Status: FIXED IN TREE, NOT CLOSED.** Found while re-taking the Grand Concert browser evidence on a quiet box; not caused by that
 slice and not fixed by it. Filed as KI-75 and renumbered to KI-80 within the hour: a concurrent session's
@@ -1353,7 +1359,9 @@ pattern. `tests/browser/scratch-isolation.spec.ts` verifies the path carries thi
 sweep deletes only the owned file. The register closes only when the fix is on `origin/master`, and `master`
 is unpushed (`O-1`), so the entry stays held.**
 
-### KI-75 `pint --dirty` reformats another session's uncommitted file in the shared worktree - FILED 2026-10-08 (Database reference views hand-off, on the owner's instruction), OPEN
+### KI-75 `pint --dirty` reformats another session's uncommitted file in the shared worktree - FILED 2026-10-08 (Database reference views hand-off, on the owner's instruction), CLOSED 2026-10-09
+
+**Closed 2026-10-09.** `AGENTS.md` §9 carries the rule, "**Never `pint --dirty` in this tree (KI-75).**", with the explicit-path replacement `pint --test --format agent <paths>` and the controller-file incident recorded. What closure does not cover: nothing enforces it mechanically; it is a written rule an agent reads.
 
 **What happens.** `AGENTS.md` §9 puts `vendor/bin/pint --dirty --format agent` in the hand-off sequence.
 `--dirty` collects every file that differs from `HEAD`, which in this worktree is not the same set as the
@@ -1392,7 +1400,9 @@ does not touch the condition underneath, several sessions' uncommitted work in o
 future gate in the sequence that writes rather than reads inherits the same hazard the moment it is given a
 `--fix` mode, and `phpstan` escapes it only because it never rewrites.
 
-### KI-76 With a Vite dev server hot, every Inertia render POSTs to the SSR endpoint with no timeout, so a page blocks 30s and answers 500 - FILED 2026-10-08 (F1 residual, on the owner's instruction), OPEN
+### KI-76 With a Vite dev server hot, every Inertia render POSTs to the SSR endpoint with no timeout, so a page blocks 30s and answers 500 - FILED 2026-10-08 (F1 residual, on the owner's instruction), CLOSED 2026-10-09
+
+**Closed 2026-10-09.** `.env.example:74` sets `INERTIA_SSR_ENABLED=false` with the reason, and `AGENTS.md` §18 carries the trap. What closure does not cover: `config/inertia.php` stays unpublished, so a local `.env` that omits the key inherits the package default; the fix is the documented env var, not a published timeout.
 
 **Status: OPEN.** Not caused by F1, not fixed by it, and not fixed in the slice that filed it. The remedy is
 shared configuration that every session reads, which is the same objection KI-73 records against a slice
@@ -1479,7 +1489,9 @@ does not recover the two voided passes: the 18 migrated specs named in the F1 ha
 harness that answers. It also does not decide who may remove `public/hot`; that file remains whichever session
 started Vite's.
 
-### KI-77 The working-tree `routes/web.php` imports seven controllers that `HEAD` does not carry, so no single slice can commit the file - FILED 2026-10-08 (Database reference views hand-off, on the owner's instruction), OPEN
+### KI-77 The working-tree `routes/web.php` imports seven controllers that `HEAD` does not carry, so no single slice can commit the file - FILED 2026-10-08 (Database reference views hand-off, on the owner's instruction), CLOSED 2026-10-09
+
+**Closed 2026-10-09.** All seven controllers are tracked at `HEAD`: `app/Http/Controllers/Career/{EventDecision,InheritanceEvent,SkillsPlanner,Timeline,Result,RacePlanner}Controller.php` and `app/Http/Controllers/DatabaseController.php` each answer `git ls-files --error-unmatch`. `routes/web.php`'s imports therefore resolve against the checked-out tree, and a commit of the file records a tree that can serve its own URLs. What closure does not cover: KI-70's route-registration half is a different line in the same file and stays its own entry.
 
 **What happens.** KI-70 records a route registration pointing at a class that exists only in the working
 copy. The same defect now sits one line earlier in the same file: in the *import statement*.
@@ -1542,9 +1554,9 @@ and the hub they belong to needs six more of D17's routes plus its `databaseInde
 catalogue controllers and six uncommitted page components, so the patch widened past the slice before it
 was written. That widening is this entry's finding, not its fix.
 
-### KI-78 `uma:backup` changed mechanism, destination handling and timestamp zone on 2026-10-08, and two documents still state the old one - FILED 2026-10-08 (D18b hand-off, on the owner's instruction), OPEN
+### KI-78 `uma:backup` changed mechanism, destination handling and timestamp zone on 2026-10-08, and two documents still state the old one - FILED 2026-10-08 (D18b hand-off, on the owner's instruction), CLOSED 2026-10-09
 
-**Status: OPEN.** Not a defect report. The command works, the new mechanism is the safer one, and the
+**Status: CLOSED 2026-10-09.** Not a defect report, and the closure owed below is paid: `PRD.md:180` and `ARCHITECTURE-ESSENTIALS.md:76` each carry a dated 2026-10-09 erratum naming `VACUUM INTO` and stating the UTC snapshot naming. The command works, the new mechanism is the safer one, and the
 change is uncommitted in the working tree as this is written. This entry is the record the change owed a
 reader who relied on the old semantics, because all three of the differences below are observable from
 outside the class that was edited.
@@ -1593,11 +1605,14 @@ Backup action and `uma:backup` should keep sharing one implementation, which is 
 does. And nothing here lands the change: `uma:backup`'s old semantics remain HEAD's until the slice is
 committed.
 
-### KI-79 Eleven pages set their loading state from Inertia's `start` event, which a `Link` hover prefetch also fires, and an interrupted request never fires `finish`, so a page can announce a load that already ended and never clear it - FILED 2026-10-08 (NFR hardening pass, from the attached performance task), FIXED IN TREE, NOT CLOSED
+### KI-79 Eleven pages set their loading state from Inertia's `start` event, which a `Link` hover prefetch also fires, and an interrupted request never fires `finish`, so a page can announce a load that already ended and never clear it - FILED 2026-10-08 (NFR hardening pass, from the attached performance task), CLOSED 2026-10-09
 
-**Status: FIXED IN TREE, NOT CLOSED.** The eleven pages that carried the block now call one composable,
+**Status: CLOSED 2026-10-09.** The eleven pages that carried the block call one composable,
 `resources/js/composables/useVisitState.ts`, which ignores a prefetch visit and owns the four listeners
-once. Nothing is committed.
+once. The proving command now reads clean: `grep -rn "router\.on(" resources/js` returns only the four
+listeners inside `useVisitState.ts` and nothing under `resources/js/pages`. What closure does not cover:
+the eleven-page duplication the Owner line asks about is a review question rather than a defect, and the
+browser regression spec named below was not re-run by this closing pass.
 
 **The mechanism, from the installed library.** `@inertiajs/core` 2.3.28. `Request::send()`
 (`node_modules/@inertiajs/core/dist/index.esm.js:2283`) calls `fireStartEvent(...)` **before** it looks at

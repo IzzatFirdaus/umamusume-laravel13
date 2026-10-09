@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\ReleaseStatus;
 use App\Models\MatchCandidate;
 use App\Models\Skill;
-use App\Models\TrainingRun;
 use App\Services\DataPipeline\PipelineRunner;
 use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -381,18 +380,18 @@ it('refuses a facet value the data has no such column for rather than ignoring i
     expect($derived)->toBe(['Recovery', 'Speed']);
 });
 
-it('is reachable from the run screen it exists to relieve', function (): void {
+it('is reachable from the shell nav rather than a run-screen door', function (): void {
     skillScreenImport();
-    $run = TrainingRun::factory()->create();
 
-    // G-SK-13: the run screen's picker lists every Global row in one select, and Screen D is the designed
-    // answer. A route nobody can reach is a defect, so the picker points at it. The link is read from the
-    // component that renders it (the page is client-rendered, ADR-0020 §1) and resolved against the
-    // route table, so a renamed route fails here rather than shipping a dead `/skills`. The rendered
-    // link is asserted in the browser pass; the shell's own nav link lives in `AppLayout.vue` and is
-    // asserted against the rendered DOM in `tests/browser/skills.spec.ts`.
-    $source = (string) file_get_contents(base_path('resources/js/pages/Runs/Show.vue'));
+    // G-SK-13: Screen D exists to relieve the catalogue the 0.1.0 run record listed in one select.
+    // Owner ruling R-2 (`docs/proposals/frontend-development-plan.md` §9.6 close-out, 2026-10-09)
+    // retired that page with `Runs/Show.vue`, and the Cockpit holds no `/skills` door of its own, so
+    // the run-scoped half of this assertion is gone. What remains is the shell's own nav item - the one
+    // door every screen carries - read from the layout that renders it (the page is client-rendered,
+    // ADR-0020 §1) and resolved against the route table, so a renamed route fails here rather than
+    // shipping a dead `/skills`. The rendered link is asserted in `tests/browser/skills.spec.ts`.
+    $layout = (string) file_get_contents(base_path('resources/js/layouts/AppLayout.vue'));
     $skillsPath = parse_url(route('skills.index'), PHP_URL_PATH);
 
-    expect($source)->toContain('href="'.$skillsPath.'"');
+    expect($layout)->toContain("to: '".$skillsPath."'");
 });
