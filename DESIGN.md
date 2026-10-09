@@ -693,16 +693,19 @@ previously name:**
 | `::selection`                            | `--color-pick` fill with `--color-on-pick` ink   | the amber selection, never white on amber (G-47)                                                          |
 | `caret-color` on input/textarea/select   | `var(--color-chrome)`                            | the caret was a browser default belonging to no system, which is the cheapest tell of an assembled page   |
 
-**Intended: two controls specify `focus-visible:outline-green` inline, bypassing
-`--color-ring`.** `resources/views/vendor/pagination/tailwind.blade.php` and the skill
-rows on `runs/show.blade.php` both do it. `green` is `#7FCC09`, which measures 1.88 on the
-light panel against WCAG 1.4.11's 3:1 for a non-text boundary — the exact failure
-`--color-ring` exists to prevent. The base-layer rule is correct and is being overridden by
-hand at four call sites.
+**Fixed in tree 2026-10-09: controls specified `focus-visible:outline-green` inline, bypassing
+`--color-ring`.** Twenty-two of them, in seven Vue components — `skills/SkillCatalog.vue`,
+`support/SupportCardCatalog.vue`, `support/SupportSlot.vue`, `TraineeCombobox.vue`,
+`Runs/Show.vue`, `Support/Builder.vue`, `Veterans/Index.vue` — not the two Blade files this
+paragraph used to name: the Blade shell went in slice B1 (`0ea8d43`), so `runs/show.blade.php`
+and `resources/views/vendor/pagination/tailwind.blade.php` are not in the tree. `green` is
+`#7FCC09`, which measures 1.88 on the light panel against WCAG 1.4.11's 3:1 for a non-text
+boundary — the exact failure `--color-ring` exists to prevent. All 22 overrides are deleted and
+each site keeps its outline width and offset, so the base-layer rule supplies the colour. The
+contrast is not browser-measured: the shared harness is blocked by KI-80.
 
-**Recommended:** delete the four inline `outline-green` declarations and let the base layer
-win. No `transition-colors` is a deliberate choice to keep; adding one needs an owner
-ruling, because it would be the first easing in the app.
+**Unverified, and deliberately not recommended here:** whether the tree stays motionless is
+section 11 question 3. Nothing eases today, so any `transition-colors` would be the app's first.
 
 **Corrected 2026-10-05.** The sentence that stood here read: "Also absent: any
 `prefers-reduced-motion` block. With zero motion that block is currently unnecessary, and it
