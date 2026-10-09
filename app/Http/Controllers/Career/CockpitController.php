@@ -16,6 +16,7 @@ use App\Models\TurnEvent;
 use App\Services\Advisor\Advice;
 use App\Services\Advisor\TrainerAdvisor;
 use App\Services\CareerCalendar;
+use App\Services\FanLadder;
 use App\Services\Scenario\FinaleReader;
 use App\Services\ScenarioCaps;
 use Illuminate\Support\Collection;
@@ -52,6 +53,14 @@ use Inertia\Response;
  * The full calendar stays on the run record screen (`SCR-RUN-001`), where seeing every race is the
  * question being asked. `SCREEN_SPEC.md` SCR-CAR-011 gap 2 carries the history.
  *
+ * **The run's own identity is one prop, read per block.** `identity` carries the facts the Trainer
+ * entered about the trainee itself (rarity, potential, the card form, the growth-rate row) and the fan
+ * ladder the latest reading sits in; each is null until a writer records it, so a block with nothing to
+ * say renders the absence rather than a zero (D-220). The team's identity and the Unity Cup counters
+ * ride the scenario's own `team` payload instead, because that is where the matrix already gates the
+ * system to the scenarios that compose it. The fan ladder is read through `FanLadder::fromValue`, the
+ * one reader of `config('uma.fan_ladder')`, so the class and the gap cannot come from different bands.
+ *
  * @phpstan-type TeamSectionShape array{
  *     rank: string|null,
  *     facility_level: int|null,
@@ -62,7 +71,16 @@ use Inertia\Response;
  *     race_entries: list<array{title: string|null, tier: string|null, circles: int|null, placement: int|null}>,
  *     bands: list<array{total: string, reward: string}>,
  *     payout_timing: string|null,
- *     special_training: array{energy_penalty_removed: bool|null, wit_burst_energy_bonus: int|null}
+ *     special_training: array{energy_penalty_removed: bool|null, wit_burst_energy_bonus: int|null},
+ *     team_name: string|null,
+ *     team_motto: string|null,
+ *     team_league_placement: int|null,
+ *     team_preseason_wins: int|null,
+ *     unity_trainings_count: int|null,
+ *     spirit_bursts_count: int|null,
+ *     extreme_bursts_count: int|null,
+ *     combined_bursts: int|null,
+ *     burst_band: string|null
  * }
  */
 class CockpitController extends Controller
@@ -110,7 +128,7 @@ class CockpitController extends Controller
         $needsEvents = $run->composesPanel('team_rank_ladder')
             || in_array('spirit_bursts', (array) config('scenarios.scenarios.'.$run->scenarioKey().'.widgets', []), true);
 
-        $run->load(['umamusume', 'turnEntries', 'raceEntries.raceCatalogSlot', 'raceEntries.scenarioSlot', 'raceEntries.turnEntry']);
+        $run->load(['umamusume', 'characterCard', 'turnEntries', 'raceEntries.raceCatalogSlot', 'raceEntries.scenarioSlot', 'raceEntries.turnEntry']);
 
         if ($needsEvents) {
             $run->load('turnEvents');
@@ -137,6 +155,11 @@ class CockpitController extends Controller
             'hasImportedPosition' => $run->hasImportedPosition(),
             'scenarioCountdown' => $position?->scenarioCountdown,
             'gradeObjectives' => $run->gradeObjectives(),
+            // The run's own identity as the Trainer entered it (A6.1, A6.2, A6.3): the trainee's
+            // rarity and potential, the card form it started on, and the fan ladder its latest
+            // reading sits in. Read per block on the page; the team identity rides the scenario's
+            // own panel payload, where the matrix already gates it to Unity Cup.
+            'identity' => $this->identitySection($run, $latest),
             'state' => $this->stateSection($run, $latest),
             'actions' => $this->actionSection($run, $advice),
             'advisor' => $this->advisorSection($advice),
@@ -287,6 +310,34 @@ class CockpitController extends Controller
                 'grade_points' => null,
                 'shop_coins' => null,
             ],
+        ];
+    }
+
+    /**
+     * The run's own identity, as the Trainer entered it: the trainee's rarity and potential (A6.1),
+     * the card form it started on (A6.2), the growth-rate row it read off that card (A6.3), and the
+     * fan ladder the latest reading sits in.
+     *
+     * Each field is null until a writer records it, so a block with nothing renders the absence rather
+     * than a zero (D-220). The card title is the verbatim Global client string (`[Rosy Dreams]`),
+     * brackets included. The ladder is read through `FanLadder::fromValue` so the class and the gap are
+     * one band's answer; a count no documented band contains yields a null class and a bare number,
+     * never a class nobody sourced.
+     *
+     * @return array{trainee_rarity: int|null, potential_level: int|null, card_title: string|null, growth_rate: array<string, int|null>|null, stat_order: list<string>, fans: int|null, fan_ladder: array{class: string|null, nextThreshold: int|null, gap: int|null}|null}
+     */
+    private function identitySection(TrainingRun $run, ?TurnEntry $latest): array
+    {
+        $fans = $latest?->fans;
+
+        return [
+            'trainee_rarity' => $run->trainee_rarity,
+            'potential_level' => $run->potential_level,
+            'card_title' => $run->characterCard?->title,
+            'growth_rate' => $run->growth_rate,
+            'stat_order' => array_values((array) config('scenarios.stat_order')),
+            'fans' => $fans,
+            'fan_ladder' => $fans === null ? null : FanLadder::fromValue((int) $fans),
         ];
     }
 
@@ -1208,6 +1259,13 @@ class CockpitController extends Controller
             ? config('scenarios.scenarios.'.$run->scenarioKey().'.team_race.circles_guidance')
             : null;
 
+        // The combined Spirit + Extreme total the band table reads, only when both tallies are
+        // recorded: an unrecorded one is not a zero (D-220), so a run that stated one of the two
+        // gets no combined figure and the panel keeps its honest absence rather than half a count.
+        $combined = ($run->spirit_bursts_count !== null && $run->extreme_bursts_count !== null)
+            ? $run->spirit_bursts_count + $run->extreme_bursts_count
+            : null;
+
         return [
             'rank' => $rank,
             'facility_level' => $run->facilityLevel($rank),
@@ -1235,7 +1293,53 @@ class CockpitController extends Controller
                     ? (int) $def['wit_burst_energy_bonus']
                     : null,
             ],
+            // The team's own identity and the Unity Cup counters (A6.6, A6.7), as the Trainer
+            // entered them. Null until stated, so the panel names the absence rather than a zero.
+            'team_name' => $run->team_name,
+            'team_motto' => $run->team_motto,
+            'team_league_placement' => $run->team_league_placement,
+            'team_preseason_wins' => $run->team_preseason_wins,
+            'unity_trainings_count' => $run->unity_trainings_count,
+            'spirit_bursts_count' => $run->spirit_bursts_count,
+            'extreme_bursts_count' => $run->extreme_bursts_count,
+            'combined_bursts' => $combined,
+            // The band's own `total` label, so the panel marks the row it already renders rather
+            // than carrying a second copy of the bounds.
+            'burst_band' => $this->burstBandFor($combined, $run->scenarioKey()),
         ];
+    }
+
+    /**
+     * The burst-count band a combined Spirit + Extreme total falls in, as the band's own `total`
+     * label (`4–6`, `13+`), or null when the total is unknown or no band contains it.
+     *
+     * The band labels are display strings from `config('scenarios.scenarios.*.spirit_burst_bands')`,
+     * and they are the only bound the matrix carries, so they are parsed here rather than duplicated
+     * in config. A label this parse does not recognise matches nothing, which keeps the panel's
+     * absence rather than inventing a placement.
+     */
+    private function burstBandFor(?int $combined, string $scenarioKey): ?string
+    {
+        if ($combined === null) {
+            return null;
+        }
+
+        foreach ((array) config('scenarios.scenarios.'.$scenarioKey.'.spirit_burst_bands', []) as $band) {
+            $total = (string) ($band['total'] ?? '');
+
+            if (preg_match('/^(\d+)(?:–(\d+))?\+?$/u', $total, $matches) === 1) {
+                $low = (int) $matches[1];
+                // The upper bound's group is optional and absent from `$matches` when the label is
+                // open-ended (`13+`), which is what makes the band unbounded rather than empty.
+                $high = isset($matches[2]) ? (int) $matches[2] : null;
+
+                if ($combined >= $low && ($high === null || $combined <= $high)) {
+                    return $total;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

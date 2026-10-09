@@ -16,6 +16,7 @@
  * entry, server-side, and arrive as a list: nothing here branches on a scenario name (D-240, G-33),
  * and a fifth scenario names its resource in one config line.
  */
+import { computed } from 'vue';
 import AbsenceValue from '../AbsenceValue.vue';
 import ResourceStrip from '../../components/ResourceStrip.vue';
 
@@ -44,11 +45,27 @@ const props = defineProps<{
      * an absence on every career that never had one.
      */
     countdown?: number | null;
+    /**
+     * The card form's own title, verbatim from the Global client (`[Rosy Dreams]`), or null. A run
+     * that named only the trainee stores no card, which is a complete run rather than a missing field
+     * (`TrainingRun::$character_card_id`), so an absent title renders nothing rather than an absence.
+     */
+    cardTitle?: string | null;
+    /** The trainee's star rarity (1..3) and potential level (1..5), each null until the Trainer states it. */
+    traineeRarity?: number | null;
+    potentialLevel?: number | null;
 }>();
 
 const group = (n: number): string => n.toLocaleString('en-US');
 
 const absent = (what: string): string => `${what} has not been recorded for this run.`;
+
+// Both halves or neither: `★3 · Potential 2` is one statement about the trainee, and printing half of
+// it (a star with no level, or a level with no star) would state a combination nobody entered. `typeof`
+// covers null and undefined in one test.
+const hasTraineeIdentity = computed(
+    (): boolean => typeof props.traineeRarity === 'number' && typeof props.potentialLevel === 'number',
+);
 </script>
 
 <template>
@@ -58,7 +75,18 @@ const absent = (what: string): string => `${what} has not been recorded for this
             <span v-if="props.traineeJa" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
                 {{ props.traineeJa }}
             </span>
+            <!-- The card form beside the trainee's name, where the Trainer named one. -->
+            <span v-if="props.cardTitle" class="ml-2 text-sm font-normal text-ink-muted">{{ props.cardTitle }}</span>
         </h2>
+
+        <p class="mt-1 text-sm text-ink-muted">
+            <span v-if="hasTraineeIdentity">★{{ props.traineeRarity }} · Potential {{ props.potentialLevel }}</span>
+            <AbsenceValue
+                v-else
+                compact
+                :reason="absent('The trainee\'s rarity and potential level')"
+            />
+        </p>
 
         <dl class="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm">
             <div class="flex flex-col">

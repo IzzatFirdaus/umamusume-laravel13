@@ -95,6 +95,21 @@ const props = defineProps<{
     hasImportedPosition: boolean;
     scenarioCountdown: number | null;
     gradeObjectives: GradeObjective[];
+    /*
+     * The run's own identity, as the Trainer entered it (A6.1 to A6.3). Each field is null until a
+     * writer records it, so a block with nothing to say renders the absence rather than a zero. The
+     * fan ladder is read server-side through `FanLadder`, so the class and the gap are one band's
+     * answer; `growth_rate` is keyed by the stat matrix, the same keys `state.stats` carries.
+     */
+    identity: {
+        trainee_rarity: number | null;
+        potential_level: number | null;
+        card_title: string | null;
+        growth_rate: Record<string, number | null> | null;
+        stat_order: string[];
+        fans: number | null;
+        fan_ladder: { class: string | null; nextThreshold: number | null; gap: number | null } | null;
+    };
     state: {
         stats: { key: string; label: string; current: number | null; target: number | null; cap: number }[];
         meta: { key: string; label: string; value: number | string | null }[];
@@ -313,7 +328,15 @@ const jumpToShop = (): void => {
             That screen did not load. Nothing was saved; try again.
         </p>
 
-        <CareerHeader :trainee="props.run.trainee" :trainee-ja="props.run.trainee_ja" :header="props.header" :countdown="props.scenarioCountdown" />
+        <CareerHeader
+            :trainee="props.run.trainee"
+            :trainee-ja="props.run.trainee_ja"
+            :header="props.header"
+            :countdown="props.scenarioCountdown"
+            :card-title="props.identity.card_title"
+            :trainee-rarity="props.identity.trainee_rarity"
+            :potential-level="props.identity.potential_level"
+        />
 
         <!-- The header edit forms (F2, plan §9.6 ruling 1). Status, scenario and grade-point period
              all write through `runs.update`, the route and validator the 0.1.0 record screen used. A
@@ -425,7 +448,12 @@ const jumpToShop = (): void => {
              three-column cockpit are the same DOM. -->
         <div class="mt-4 grid grid-cols-1 gap-4 md:items-start md:grid-cols-[2fr_1fr] lg:items-start lg:grid-cols-[1fr_2.5fr_1.5fr]">
             <div class="order-1 min-w-0 md:order-none md:col-start-1 md:row-start-2 lg:col-start-2 lg:row-start-1">
-                <CareerStatePanel :stats="props.state.stats" :meta="props.state.meta" />
+                <CareerStatePanel
+                    :stats="props.state.stats"
+                    :meta="props.state.meta"
+                    :growth-rate="props.identity.growth_rate"
+                    :fan-ladder="props.identity.fan_ladder"
+                />
 
                 <section v-if="props.correction !== null" aria-labelledby="career-correction-heading" class="mt-3">
                     <h3 id="career-correction-heading" class="sr-only">Correct a turn by hand</h3>

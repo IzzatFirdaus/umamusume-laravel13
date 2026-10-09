@@ -17,6 +17,7 @@
  * halved-gains marker, which is the run record screen's question; giving it a second, target-shaped
  * meaning would change a landed component's contract for one caller.
  */
+import { computed } from 'vue';
 import AbsenceValue from '../AbsenceValue.vue';
 import EnergyGauge from '../../components/EnergyGauge.vue';
 import MoodPill from '../../components/MoodPill.vue';
@@ -35,9 +36,42 @@ interface Meta {
     value: number | string | null;
 }
 
-const props = defineProps<{ stats: Stat[]; meta: Meta[] }>();
+const props = defineProps<{
+    stats: Stat[];
+    meta: Meta[];
+    /**
+     * The trainee's growth-rate row, keyed by the stat matrix (the same keys `stats` carries). Null
+     * until the Trainer reads it off the card, so a stat with no entry shows no percentage rather than
+     * a `+0%` nobody entered.
+     */
+    growthRate?: Record<string, number | null> | null;
+    /**
+     * The fan ladder the latest reading sits in, read server-side through `FanLadder`. Null when no
+     * fan count is recorded; its `class` is null when no documented band contains the count, in which
+     * case the row prints the bare number.
+     */
+    fanLadder?: { class: string | null; nextThreshold: number | null; gap: number | null } | null;
+}>();
 
 const group = (n: number): string => n.toLocaleString('en-US');
+
+const growthFor = (stat: Stat): number | null => {
+    const value = props.growthRate?.[stat.key];
+
+    return typeof value === 'number' ? value : null;
+};
+
+// `Star · 30,755 to next`, the ladder's own two facts in one suffix; null when the ladder does not
+// resolve, so the row prints the bare count rather than a class nobody sourced (D-220).
+const fanSuffix = computed((): string | null => {
+    const ladder = props.fanLadder;
+
+    if (ladder === null || ladder === undefined || ladder.class === null || ladder.gap === null) {
+        return null;
+    }
+
+    return `${ladder.class} · ${group(ladder.gap)} to next`;
+});
 
 const targetHint = (stat: Stat): string =>
     stat.target === null ? 'No target was entered for this stat.' : `Your target: ${group(stat.target)} of a possible ${group(stat.cap)}.`;
@@ -71,7 +105,12 @@ function percent(stat: Stat): number {
         <ul class="mt-3 space-y-2">
             <li v-for="stat in props.stats" :key="stat.key" class="rounded-md border border-rule bg-raised p-2">
                 <div class="flex items-baseline justify-between gap-3">
-                    <span class="text-sm font-semibold text-ink-strong">{{ stat.label }}</span>
+                    <span class="text-sm font-semibold text-ink-strong">
+                        {{ stat.label }}
+                        <!-- The card's growth rate for this stat, beside its label, where the Trainer
+                             read it. Rendered only when recorded, never as a default +0%. -->
+                        <span v-if="growthFor(stat) !== null" class="ml-1 text-xs font-normal text-ink-muted">+{{ growthFor(stat) }}%</span>
+                    </span>
                     <div class="flex items-baseline gap-1 font-mono text-sm tabular-nums text-ink-strong">
                         <span v-if="stat.current === null">N/A</span>
                         <span v-else>{{ group(stat.current) }}</span>
@@ -100,6 +139,13 @@ function percent(stat: Stat): number {
                         :reason="`${row.label} has not been recorded for this run.`"
                         compact
                     />
+                    <!-- The fan count with its ladder class and gap when the ladder resolves, and the
+                         bare number otherwise (D-220: a count above every documented band has no class
+                         this tool can claim). -->
+                    <template v-else-if="row.key === 'fans'">
+                        <span class="font-mono tabular-nums">{{ group(row.value as number) }}</span>
+                        <span v-if="fanSuffix !== null" class="text-ink-muted"> · {{ fanSuffix }}</span>
+                    </template>
                     <span v-else class="font-mono tabular-nums">{{ group(row.value as number) }}</span>
                 </dd>
             </div>

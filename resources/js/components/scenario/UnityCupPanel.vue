@@ -51,6 +51,18 @@ interface TeamSection {
     bands: { total: string; reward: string }[];
     payout_timing: string | null;
     special_training: { energy_penalty_removed: boolean | null; wit_burst_energy_bonus: number | null };
+    /** The team's own identity (A6.6), as the Trainer entered it; null until stated. */
+    team_name: string | null;
+    team_motto: string | null;
+    team_league_placement: number | null;
+    team_preseason_wins: number | null;
+    /** The Unity Cup progression counters (A6.7); null until stated. */
+    unity_trainings_count: number | null;
+    spirit_bursts_count: number | null;
+    extreme_bursts_count: number | null;
+    /** The combined Spirit + Extreme total, and the band it falls in, or null when not both recorded. */
+    combined_bursts: number | null;
+    burst_band: string | null;
 }
 
 const props = defineProps<{
@@ -77,6 +89,39 @@ const bonusTitle =
     'Seen beside the Rank S emblem in the recorded run (client tooltip). That the bonus binds to the rank ' +
     'rather than the league standing is inferred from screen position, so it is Estimated, not Confirmed ' +
     '(run report §1.8, §7.5).';
+
+/** The team's own identity renders when the Trainer entered any of the four (A6.6). */
+const hasTeamIdentity = computed(
+    (): boolean =>
+        props.scenario.team.team_name !== null
+        || props.scenario.team.team_motto !== null
+        || props.scenario.team.team_league_placement !== null
+        || props.scenario.team.team_preseason_wins !== null,
+);
+
+/**
+ * The Unity Cup counters, as the brief's own line: `Unity Trainings 55 · Spirit Bursts 6 / 5 Extreme`.
+ * The burst half pairs the two tallies, so it is drawn whole when both are recorded and named alone
+ * when only one is, never as `6 / N/A` (an unrecorded tally is not a zero, D-220).
+ */
+const counterSegments = computed((): string[] => {
+    const team = props.scenario.team;
+    const segments: string[] = [];
+
+    if (team.unity_trainings_count !== null) {
+        segments.push(`Unity Trainings ${team.unity_trainings_count}`);
+    }
+
+    if (team.spirit_bursts_count !== null && team.extreme_bursts_count !== null) {
+        segments.push(`Spirit Bursts ${team.spirit_bursts_count} / ${team.extreme_bursts_count} Extreme`);
+    } else if (team.spirit_bursts_count !== null) {
+        segments.push(`Spirit Bursts ${team.spirit_bursts_count}`);
+    } else if (team.extreme_bursts_count !== null) {
+        segments.push(`${team.extreme_bursts_count} Extreme`);
+    }
+
+    return segments;
+});
 </script>
 
 <template>
@@ -100,6 +145,30 @@ const bonusTitle =
          on desktop and stack above them on mobile, with no horizontal scroll at any width. -->
     <div v-else-if="isTeamPanel" class="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <div class="flex flex-col gap-3">
+            <!-- The team's own identity (A6.6), drawn only when the Trainer entered one of the four:
+                 a run that named no team gets no card rather than four empty rows. -->
+            <div v-if="hasTeamIdentity" class="rounded-md border border-rule bg-panel p-3">
+                <CapsuleHeader title="Team" class="mb-2" />
+                <dl class="flex flex-col gap-1 text-sm">
+                    <div v-if="props.scenario.team.team_name !== null" class="flex items-baseline justify-between gap-3">
+                        <dt class="text-ink-muted">Name</dt>
+                        <dd class="text-ink-strong">{{ props.scenario.team.team_name }}</dd>
+                    </div>
+                    <div v-if="props.scenario.team.team_motto !== null" class="flex items-baseline justify-between gap-3">
+                        <dt class="text-ink-muted">Motto</dt>
+                        <dd class="text-ink">{{ props.scenario.team.team_motto }}</dd>
+                    </div>
+                    <div v-if="props.scenario.team.team_league_placement !== null" class="flex items-baseline justify-between gap-3">
+                        <dt class="text-ink-muted">League placement</dt>
+                        <dd class="font-mono tabular-nums text-ink-strong">{{ props.scenario.team.team_league_placement }}</dd>
+                    </div>
+                    <div v-if="props.scenario.team.team_preseason_wins !== null" class="flex items-baseline justify-between gap-3">
+                        <dt class="text-ink-muted">Preseason rounds won</dt>
+                        <dd class="font-mono tabular-nums text-ink-strong">{{ props.scenario.team.team_preseason_wins }}</dd>
+                    </div>
+                </dl>
+            </div>
+
             <TeamRankGauge :enabled="true" :current="current" :ladder="props.scenario.team.ladder" />
 
             <!-- The +30 is the figure the recorded client shows, and it was read beside the S
@@ -158,6 +227,13 @@ const bonusTitle =
                 />
             </div>
 
+            <!-- The Unity Cup progression counters (A6.7). Drawn only when the Trainer stated one; the
+                 combined total below reads these two tallies. -->
+            <div v-if="counterSegments.length > 0" class="rounded-md border border-rule bg-panel p-3">
+                <CapsuleHeader title="Unity Cup progress" class="mb-2" />
+                <p class="text-sm text-ink">{{ counterSegments.join(' · ') }}</p>
+            </div>
+
             <div v-if="composesBursts && props.scenario.team.bands.length > 0" class="rounded-md border border-rule bg-panel p-3">
                 <div class="mb-2 flex flex-wrap items-baseline gap-2">
                     <CapsuleHeader title="Burst count bands" />
@@ -177,8 +253,18 @@ const bonusTitle =
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="band in props.scenario.team.bands" :key="band.total" class="border-b border-rule last:border-b-0">
-                            <th scope="row" class="py-1.5 pr-2 text-left font-mono font-normal tabular-nums text-ink">{{ band.total }}</th>
+                        <!-- The band the run's combined total falls in is marked, so the table reads
+                             the run's own position rather than only the reward reference. -->
+                        <tr
+                            v-for="band in props.scenario.team.bands"
+                            :key="band.total"
+                            class="border-b border-rule last:border-b-0"
+                            :class="band.total === props.scenario.team.burst_band ? 'bg-raised' : ''"
+                        >
+                            <th scope="row" class="py-1.5 pr-2 text-left font-mono font-normal tabular-nums text-ink">
+                                {{ band.total }}
+                                <span v-if="band.total === props.scenario.team.burst_band" class="ml-1 text-xs font-semibold text-ink-strong">(this run)</span>
+                            </th>
                             <td class="py-1.5 text-ink">{{ band.reward }}</td>
                         </tr>
                     </tbody>
@@ -190,10 +276,19 @@ const bonusTitle =
                     detail="gametora counts the bursts combined and pays 10/20/30/40 SP; umamusu.wiki's criteria never say whether Extremes increment, and two other publishers report 15/15/20/20 with no stat component; the payout is dated late November where those publishers print the first half. The client's own Team Info count is the tiebreaker (run report §7.4, §8.2)."
                     tone="note"
                 />
-                <p v-if="props.scenario.team.payout_timing !== null" class="mt-2 text-xs text-ink-muted">
-                    The gold versions arrive from the scripted event in {{ props.scenario.team.payout_timing }}.
-                    Where this run sits in the bands is not shown: the count the bands read is not recorded,
-                    and bursts are recorded as states, not counters (D-223).
+                <p class="mt-2 text-xs text-ink-muted">
+                    <template v-if="props.scenario.team.payout_timing !== null">
+                        The gold versions arrive from the scripted event in {{ props.scenario.team.payout_timing }}.
+                    </template>
+                    <!-- The run's own position, read off the combined Spirit + Extreme total the
+                         counters above carry. Until both tallies are recorded there is no combined
+                         count to place, so the absence is stated rather than a band guessed. -->
+                    <template v-if="props.scenario.team.combined_bursts !== null">
+                        This run: {{ props.scenario.team.combined_bursts }} bursts combined<template v-if="props.scenario.team.burst_band !== null">, inside the {{ props.scenario.team.burst_band }} band</template>.
+                    </template>
+                    <template v-else>
+                        Where this run sits in the bands is not shown: both burst tallies have not been recorded.
+                    </template>
                 </p>
             </div>
 
