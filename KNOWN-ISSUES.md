@@ -1665,3 +1665,54 @@ not touch the other three scenario finals, whose `name_en` values may carry the 
 were not read for this entry. It does not reopen the Songs, Lessons, Live Bonus or Promo Concert gates,
 which §7-19, §7-21, §7-22 and §7-23 leave blocked. And it does not make the finale *state* uncertain:
 that foundation landed at `2c7bb3e`.
+
+### KI-84 A concurrent session staged the deletion of ten feature-test files, three of which are Our Grand Concert's own absence guards, with no owner approval on record - FILED 2026-10-09 (Slice 20 pickup, on the owner's instruction), OPEN
+
+**Status: OPEN.** Found while staging the cockpit baseline-strip pickup, which could not be
+committed without either sweeping these entries under an unrelated message or mutating another
+session's staged state. The owner ruled the index entries unstaged on 2026-10-09 so the pickup could
+land; **ruling the index entries unstaged is not a ruling on the deletions**, and no session owns a
+decision here until the owner gives one.
+
+Ten paths, all present in `HEAD` at filing time and therefore recoverable with `git restore --
+<path>`:
+
+```text
+tests/Feature/FlashBannerTokensTest.php          tests/Feature/RaceCatalogPickerTest.php
+tests/Feature/FrontendComponentLibraryTest.php   tests/Feature/ResourceStripOnRunDetailTest.php
+tests/Feature/GoalPanelsOnRunDetailTest.php      tests/Feature/ResourceStripTest.php
+tests/Feature/GradePointMeterTest.php            tests/Feature/RunDeckTest.php
+tests/Feature/MoodPillTest.php                   tests/Feature/RunGoalsPanelTest.php
+```
+
+Two facts make this more than a housekeeping collision.
+
+**Three of the ten are this scenario's guards, not dead weight.**
+`docs/scenarios/07-grand-concert.md` ("Matrix mapping") names `ResourceStripTest`,
+`RaceCalendarTest`, `GradePointMeterTest`, `GuidedStepScenarioVariationTest` and
+`GoalPanelsOnRunDetailTest` as the tests that *assert the absence* of a resource chip, a Hype gauge
+and a live marker for Our Grand Concert, and `AGENTS.md` §18 repeats the same sentence. Deleting
+`ResourceStripTest`, `GoalPanelsOnRunDetailTest` and `GradePointMeterTest` removes the assertion that
+Phase B, C and D surfaces are unrendered, which is the only thing keeping the blocked gates honest
+while no `[Global]` capture exists.
+
+**The deletions are in the working tree, not only the index.** Measured at filing: all ten are gone
+from disk, so `git reset HEAD -- <paths>` leaves them as unstaged worktree deletions rather than
+restoring the files. Any later blanket add (`git add -A`, `git commit -a`) by any session commits
+their loss. That is why this entry names all ten paths instead of describing them.
+
+The bar's clause is explicit: `AGENTS.md` §5, "no deleted or skipped test without owner approval and
+a stated reason", and §14, "Deleting or skipping a test needs owner approval and a stated reason in
+the commit." No such reason is recorded anywhere in the tree for these ten.
+
+**Closure owed.** An owner ruling on the deletions themselves, filed by the session that made them
+or superseded by a commit that states the reason per file. Closure of this entry is not closure of
+the question of whether the three Grand Concert guards have a replacement; if they were folded into
+another suite, that suite must be named, and until then the absence of a chip, a gauge and a live
+marker is asserted by nothing.
+
+**What closure would not cover.** It does not restore any file: restoration is the deleting
+session's or the owner's act, not a register edit. It does not rule on the other seven files'
+relevance, only that removing them needs a stated reason. It does not touch the Slice 20 pickup,
+which landed independently of this collision, nor the KI-82 label defect on the same scenario's
+finale row.
