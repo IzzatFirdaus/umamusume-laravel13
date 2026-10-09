@@ -1614,3 +1614,54 @@ duplication should have been collapsed in the same change.
 behaviour and not this app's to change; it does not make `cancel` a usable event — the type map declares
 `cancel` (`types/types.d.ts:204-208`) but 2.3.28 never fires it, so a listener keyed on it would be a check that
 cannot fail; and it does not touch KI-76, which is a server-side defect with its own remedy choice.
+
+### KI-82 Our Grand Concert's finale catalogue row is titled "URA Finals Final (Grand Live)", a borrowed URA name plus GameTora's rendering, where the `[Global]` launch notice prints "Grand Concert" - FILED 2026-10-09 (Slice 19 finale state foundation), OPEN
+
+**Status: OPEN.** Found while establishing the finale's read-side foundation in Slice 19; not caused
+by that slice and not fixed by it. It is a second, independent defect on the **same row** that KI-71
+addressed: KI-71 corrected that row's `scenario_key` from `grand_concert` to `our_grand_concert` at
+`480b711`, which made the row belong to the scenario, and this entry records that the row's **title**
+still does not. Filed as KI-82 rather than KI-81 because KI-81 is already reserved in
+`docs/proposals/provenance-and-absence-contracts.md:441` for the Legacy Lab picker defect, which that
+package owns; the gap is deliberate and this entry does not claim 81.
+
+The row's `title` is the dataset's `name_en`, mapped verbatim by
+`app/Services/DataPipeline/Parsers/GametoraRaceCatalogParser.php:173`
+(`'title' => (string) ($details['name_en'] ?? '')`). For the slot id `final_live` that value is
+`"URA Finals Final (Grand Live)"`, read from the committed body:
+
+```text
+grep -o '"id": *"final_live".\{0,400\}' database/seeders/data/race_instances.json
+  ... "name_en": "URA Finals Final (Grand Live)",
+      "name_jp": "URAファイナルズ決勝 (グランドライブ)", ...
+```
+
+Two claims in that string are wrong for `[Global]`. **"URA Finals"** is the first scenario's finale
+name, pasted onto the fourth; the four finals share slot-shape, not name. **"Grand Live"** is
+GameTora's rendering of the JP word グランドライブ, and `docs/UMAMUSUME_REFERENCE.md` §7 row 52 records
+that the `[Global]` event is printed by Cygames' notice 905 as **Grand Concert** — the same class of
+divergence row 48 caught on "Mental" against **Composure**. Neither half of the title is a measured
+`[Global]` client string, and `docs/scenarios/07-grand-concert.md:34-36` already warns that three
+labels circulate for this scenario and to join on the dataset order, never on a name string.
+
+**Severity is latent, and that is stated rather than smoothed over.** Nothing renders this title
+today: the row reaches a Trainer only through `CockpitController::careerGoalSections()`, which is
+gated by `$panels['career_goals']['on']` (gate G-33), and Our Grand Concert composes no panel. Fixing
+the key in KI-71 without fixing the title, or switching the panel on later, makes the defect visible
+without any further code change.
+
+**Closure owed.** A parser-or-catalogue decision at the owner level, not a slice fix: either the
+dataset's `name_en` is accepted as this tool's race label and the divergence is documented beside it,
+or the scenario-scoped finals get their `[Global]` names from a source this repository treats as
+authoritative. Because `config/scenarios.php` is the only place a scenario name may enter the layout
+path (D-240), a display override cannot live in a component, and because `race_catalog_slots` is
+engine-owned with a promotion path that skips `is_manual` rows, a hand edit is not a fix. Closure
+therefore names a commit plus the decision it records.
+
+**What closure would not cover.** It does not settle whether "Grand Concert" is the *client's* race-card
+string rather than the notice's sentence — no `[Global]` capture of the finale screen exists, and the
+corpus still records 0 frames for this scenario (`docs/research-scratch/DESIGN-CORPUS.md:4261`). It does
+not touch the other three scenario finals, whose `name_en` values may carry the same class of borrow and
+were not read for this entry. It does not reopen the Songs, Lessons, Live Bonus or Promo Concert gates,
+which §7-19, §7-21, §7-22 and §7-23 leave blocked. And it does not make the finale *state* uncertain:
+that foundation landed at `2c7bb3e`.
