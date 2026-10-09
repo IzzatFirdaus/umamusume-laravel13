@@ -392,7 +392,7 @@ Once (1) through (4) are done and the work passes a fresh hand-off run of
 additionally held on **O-1**: register discipline closes an entry only when the fix is on
 `origin/master`, and `master` is unpushed.
 
-### KI-62 `ProvenanceBadge.vue` derived its glyph and word once at setup, so a prop that changed in place would print the previous state's word beside the new figure - FILED 2026-10-07 (D8 hand-off), FIXED IN TREE, NOT CLOSED
+### KI-62 `ProvenanceBadge.vue` derived its glyph and word once at setup, so a prop that changed in place would print the previous state's word beside the new figure - FILED 2026-10-07 (D8 hand-off), CLOSED 2026-10-09
 
 **Symptom, latent.** `resources/js/components/ProvenanceBadge.vue` read its two render values into
 plain consts:
@@ -440,8 +440,14 @@ regression proof.
    run's history; that slice owes the case. Until then this entry's own evidence is inspection plus
    the sibling reproduction, and the entry says so rather than claiming a green test it does not have.
 3. `npm run typecheck` and `npm run build` on the final tree, since the component's props contract is
-   unchanged but its two bindings are now refs (both were re-run green on 2026-10-07 with the fix in
-   tree; they are listed here as the gate the closing commit re-runs).
+    unchanged but its two bindings are now refs (both were re-run green on 2026-10-07 with the fix in
+    tree; they are listed here as the gate the closing commit re-runs).
+
+**Closed 2026-10-09.** All three conditions are on `HEAD`. The two `computed` derivations are committed
+in the tree (parent of `da7df2b`); the badge's own regression test — `tests/browser/provenance-badge.spec.ts`
+— landed at `da7df2b` ("test(a11y): pin the ProvenanceBadge in-place update (KI-62 item 2)"); and
+typecheck + build were green at filing time. What closure does not cover: the Career Timeline (SCREEN-018,
+D14) remains the likely first live caller, and whether D14 adds further coverage is that slice's question.
 
 ### KI-63 Inertia's bundled NProgress bar carries `role="bar"`, an invalid ARIA role, so a page-wide axe scan fails at WCAG 2.2 A 4.1.2 whenever a visit is in flight - FILED 2026-10-07 (D8 hand-off), OPEN
 
@@ -565,7 +571,7 @@ browser spec that reaches a write and never posts it may continue to be counted 
 Today `SCR-RUN-004/005` is recorded as implemented on the strength of a spec that does not exercise the
 step this defect lives in, and that is the part a reader should not infer.
 
-### KI-65 The D5/D6 wizard halves landed red at `0006b17` and carried a private copy of the parent-name resolution - FILED 2026-10-07 (D9 hand-off, from the plan's §4.1 queue), FIXED IN TREE, NOT CLOSED
+### KI-65 The D5/D6 wizard halves landed red at `0006b17` and carried a private copy of the parent-name resolution - FILED 2026-10-07 (D9 hand-off, from the plan's §4.1 queue), CLOSED 2026-10-09
 
 **Symptom, as recorded.** `frontend-development-plan.md` §4.1 item 1 and the §15 changelog row for
 2026-10-06 record that the step-4 and step-5 wizard halves landed at `0006b17` with three failing tests
@@ -599,7 +605,14 @@ its own `vendor/`, and the fix has since replaced the code they pointed at. The 
 gap the plan names (a red landing with no register entry), not a live defect: no failing test or
 analysis error attributable to D5/D6 remains on this tree as of 2026-10-07.
 
-### KI-66 The wizard's deck step bound `:is-friend` against a snake_case prop, so the "Friend slot" chip never rendered on step 5 - FILED 2026-10-07 (D9 hand-off, browser pass), FIXED IN TREE, NOT CLOSED
+**Closed 2026-10-09.** All four closure conditions are on `HEAD`:
+`CareerLegacyDeckStepsTest.php` exists and is green, `career-legacy-deck-steps.spec.ts` exists (9 passed
+on the scratch harness), `SCREEN_SPEC.md` §2 holds `SCR-CAR-008` and `SCR-CAR-009` both marked
+`Implemented 2026-10-06`, and PHPStan level 6 reads `[OK] No errors`. What closure does not cover: the
+process gap itself (a red landing with no register entry) is closed by this entry's existence, not by
+D5/D6's own record, and the four failing tests at `0006b17` were never reproduced in a separate checkout.
+
+### KI-66 The wizard's deck step bound `:is-friend` against a snake_case prop, so the "Friend slot" chip never rendered on step 5 - FILED 2026-10-07 (D9 hand-off, browser pass), CLOSED 2026-10-09
 
 **Symptom, observed.** `tests/browser/career-legacy-deck-steps.spec.ts:174` failed: `#deck-slot-6`
 carried `Slot 6 · Friends` and no `Friend slot` chip, while the run-scoped deck builder rendered the chip
@@ -623,6 +636,12 @@ shares with its own payload contract.
 component, so a source edit alone does not reach the browser). `support-deck.spec.ts:67` already asserted
 the same chip on the run-scoped builder and was green before and after, which is what made the wizard the
 odd screen rather than the component the odd component.
+
+**Closed 2026-10-09.** The one-line fix `:is_friend="slot.is_friend"` is on `HEAD` at
+`resources/js/pages/Career/DeckSelect.vue:247`, verified by the 9 passing browser cases and the
+unaffected `support-deck.spec.ts:67` before and after. What closure does not cover: the deliberate
+decision not to rename the prop to `isFriend`, which would have required touching the server-side payload
+shape for the `v-bind="slot"` caller on `Builder.vue:270`.
 
 ### KI-67 The race catalogue's pinned GameTora document has been withdrawn, so `uma:fetch` can no longer refresh the career calendar at all - FILED 2026-10-07 (D14a hand-off), OPEN
 
