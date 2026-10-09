@@ -77,7 +77,7 @@ the Phase A inventory pass on 2026-10-03, which initially propagated the phantom
 `research-scratch/screenshots-inventory.csv` and corrected it there; the CSV row now cites the
 real frame.
 
-### KI-58 `tools/gate.py`'s hex allowlist lost its document leg silently when the design master was folded, and the guard for that condition cannot fire - FILED 2026-10-03 (Phase A closure pass, from the priors pass finding), OPEN
+### KI-58 `tools/gate.py`'s hex allowlist lost its document leg silently when the design master was folded, and the guard for that condition cannot fire - FILED 2026-10-03 (Phase A closure pass, from the priors pass finding), CLOSED 2026-10-09 at `7d8b62a`, note below
 
 `tools/gate.py:94` reads `docs/design-research/DESIGN.md` as leg one of `load_token_hexes()`. The
 re-baseline folded that document into `docs/research-scratch/DESIGN-CORPUS.md` and deleted it, and
@@ -102,6 +102,17 @@ the shipped theme; or regenerate `tokens.json` with `tokens.py` against the curr
 the anchor is refreshed. Not fixed here; this entry files the finding. First recorded in
 `docs/research-scratch/DESIGN-CORPUS.md` section "scratch-priors.md" §2.1 (2026-10-03, priors pass;
 the priors file moved there on 2026-10-03 when root `research-scratch/` was emptied).
+
+*Closed 2026-10-09, on the owner's instruction, by `7d8b62a` (2026-10-08, "read the design gate token map
+from the shipped theme"), which is fix option 1 above implemented as written: `load_token_hexes()` now
+reads `resources/css/app.css` and both theme blocks, so the allowlist cannot go stale against the theme and
+the document leg it lost is gone. Proven on this tree: the entry's three reproducer hexes — `#B45309`,
+`#0667B0` and `#6E6459`, each a current `app.css` token value — are legal now, where this entry filed them
+as failing. The text above is preserved as written. **What closure does not cover:** the gate still exits
+1, now for the mirror reason, and that is a separate defect filed as KI-83 rather than a continuation of
+this one. The 40-value threshold the entry's second paragraph says cannot fire is still unable to fire, for
+a better reason than before — the shipped theme yields 92 hexes — so a future theme with fewer tokens would
+still pass the guard silently.*
 
 ## KI-59 The catalog detail browser case asserts a portrait absence a populated mirror cannot produce, and its sibling guard makes the pair mutually exclusive - FILED 2026-10-05 (Task B1 closure pass, from the Playwright run), CORRECTED 2026-10-05, OPEN
 
@@ -1665,6 +1676,46 @@ not touch the other three scenario finals, whose `name_en` values may carry the 
 were not read for this entry. It does not reopen the Songs, Lessons, Live Bonus or Promo Concert gates,
 which §7-19, §7-21, §7-22 and §7-23 leave blocked. And it does not make the finale *state* uncertain:
 that foundation landed at `2c7bb3e`.
+
+### KI-83 Three tracked design prototypes render four raw hexes that are not shipped theme tokens, and two of the four are the values KI-58's folded document leg once carried - FILED 2026-10-09 (provenance/absence contract pass, on the owner's §11 dispensation), FIXED IN TREE 2026-10-09, NOT CLOSED
+
+**Status: fixed in tree, not closed.** Found while dispositioning the `python tools/gate.py` failure that
+KI-58 left behind. This is the **mirror** of KI-58, not a continuation of it: KI-58 was the allowlist losing
+a leg and therefore rejecting colours the theme *did* declare; here the theme no longer declares the colours
+the artefacts use. The gate exits 1 with ten findings across three **tracked** files, clean in the tree and
+committed together at `e0e043c` (2026-09-27): `docs/design-research/prototypes/screen-a-scenario-v10.html`
+(two occurrences of `#7A7067`), `screen-c-event-v1-inline.html` and `screen-c-event-v2-preview-column.html`
+(`#7A7067`, `#106F9F`, `#C5A558`, `#FDF7EF` once each). Reproduce with `python tools/gate.py`.
+
+Provenance of each value, because it decides the repair. `#7A7067` was `--color-ink-muted` **before** the
+re-baseline and is the same token's prior value, recoverable at
+`git show e0e043c:docs/design-research/DESIGN.md`; `#106F9F` is the light half of the artefacts' own
+`--cyan-800`, and their dark half is `#4FC3F7`, which is exactly the shipped dark `--color-sp-ink` — so both
+are stale readings of tokens that still exist. `#C5A558` (the checked-choice border beside `--pick`) and
+`#FDF7EF` (the highlight end of that choice's gradient) have **no** antecedent in any theme block: they
+appear only in the gitignored `docs/design-research/_scratch/analysis/tokens/tokens.json`, and neither is a
+shipped token at any date.
+
+**The repair, applied in tree.** Each hex was replaced at its declaration or use site with the current
+value of the token that owns its role: `#7A7067`→`#6E6459` (`--color-ink-muted`, light),
+`#106F9F`→`#0E7490` (`--color-sp-ink`, light), `#C5A558`→`#7A5C10` (`--color-pick-line`, light),
+`#FDF7EF`→`#FFFFFF` (`--color-raised`). Replacement counts were verified per file and sum to the ten
+findings exactly (2 + 4 + 4). **Two of the four are judgement, not mapping, and the owner should see them
+before this closes:** the pick's border moves from a mid gold to the token's dark amber `#7A5C10`, and the
+gradient's cream highlight becomes a cool white. Both are legible in a research artefact that never ships,
+which is why they were resolved rather than left failing; the alternative is `10b`, re-scoping the gate,
+which the owner refused on 2026-10-09 because the gate was correctly reporting.
+
+**What closing this will not cover.** It does not make the prototypes consistent with the shipped theme in
+any deeper sense — they remain standalone research artefacts with their own `:root` blocks, and per
+`AGENTS.md` §11 they are protected from hand edits, so this repair stands only because the owner dispensed
+with that fence in writing on 2026-10-09. It does not restore KI-58's dead guard: `gate.py` still warns
+only below 40 allowlisted hexes and the shipped theme yields 92, so a thin future theme still passes
+silently. It does not touch the two other register items this pass found in the same file set: `gate.py:6`
+cited a `docs/design-research/CONSTRAINTS.md` that no longer exists (repointed to
+`docs/research-scratch/DESIGN-CORPUS.md` in the same working pass), and `README.md:306` still describes
+KI-58 as an open defect. Closure is the commit that lands these three files plus the gate exit 0 it
+produces; it does not cover the other artefacts under `superseded/`, which the gate does not scan.
 
 ### KI-84 A concurrent session staged the deletion of ten feature-test files, three of which are Our Grand Concert's own absence guards, with no owner approval on record - FILED 2026-10-09 (Slice 20 pickup, on the owner's instruction), OPEN
 
