@@ -29,7 +29,10 @@ test.describe('Screen load speed', () => {
         const frames = await page.evaluate(
             () => performance
                 .getEntriesByType('resource')
-                .filter((entry) => entry.name.includes('/artwork/'))
+                // The predicate is what makes the byte counts legal: `getEntriesByType` answers
+                // `PerformanceEntry[]`, and `transferSize`/`decodedBodySize` are declared on
+                // `PerformanceResourceTiming`.
+                .filter((entry): entry is PerformanceResourceTiming => entry.name.includes('/artwork/'))
                 .map((entry) => ({
                     url: entry.name,
                     bytes: entry.transferSize,
