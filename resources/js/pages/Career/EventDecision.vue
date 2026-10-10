@@ -217,7 +217,7 @@ const statTitle = (stat: { current: number | null; target: number | null; cap: n
                     <dt class="text-xs text-ink-muted">{{ stat.label }}</dt>
                     <dd class="mt-0.5 font-mono text-sm tabular-nums text-ink-strong">
                         <span :title="statTitle(stat)">{{ statValue(stat) }}</span>
-                        <span class="text-xs font-normal text-ink-muted">/{{ stat.cap }}</span>
+                        <span class="text-xs font-normal text-ink-muted">/{{ stat.cap }} cap</span>
                     </dd>
                 </div>
             </dl>

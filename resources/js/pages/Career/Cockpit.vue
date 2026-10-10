@@ -486,6 +486,7 @@ const jumpToShop = (): void => {
                     :meta="props.state.meta"
                     :growth-rate="props.identity.growth_rate"
                     :fan-ladder="props.identity.fan_ladder"
+                    denominator-label="target"
                 />
 
                 <section v-if="props.correction !== null" aria-labelledby="career-correction-heading" class="mt-3">

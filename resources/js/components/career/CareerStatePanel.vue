@@ -51,6 +51,12 @@ const props = defineProps<{
      * case the row prints the bare number.
      */
     fanLadder?: { class: string | null; nextThreshold: number | null; gap: number | null } | null;
+    /**
+     * The word for the second number's own denominator. The Cockpit's second number is the Trainer's
+     * target and the event screen's is the run's ceiling, so the word is a required prop rather than a
+     * guess: one screen's denominator printed under the other's name is the defect this closes (R2-09).
+     */
+    denominatorLabel: 'target' | 'cap';
 }>();
 
 const group = (n: number): string => n.toLocaleString('en-US');
@@ -96,6 +102,12 @@ function percent(stat: Stat): number {
 
     return Math.min(100, (stat.current / stat.target) * 100);
 }
+
+// The second number's own denominator: the scenario ceiling when the label says `cap`, the Trainer's own
+// target otherwise. `cap` is always a number; `target` is null until one is entered, and the row says so
+// in words rather than printing the cap under the target's name (R2-09).
+const denominator = (stat: Stat): number | null =>
+    props.denominatorLabel === 'cap' ? stat.cap : stat.target;
 </script>
 
 <template>
@@ -115,8 +127,14 @@ function percent(stat: Stat): number {
                         <span v-if="stat.current === null">N/A</span>
                         <span v-else>{{ group(stat.current) }}</span>
                         <span class="text-ink-muted">/</span>
-                        <span v-if="stat.target === null">N/A</span>
-                        <span v-else>{{ group(stat.target) }}</span>
+                        <!-- The second number's own word (R2-09): `target` on this screen, `cap` where the
+                             ceiling is the question. A null target says so in words rather than lending the
+                             slot the cap, which would answer a different question under the wrong name. -->
+                        <span v-if="denominator(stat) === null" class="text-xs font-normal text-ink-muted">no {{ props.denominatorLabel }} set</span>
+                        <span v-else>
+                            {{ group(denominator(stat) as number) }}
+                            <span class="text-xs font-normal text-ink-muted">{{ props.denominatorLabel }}</span>
+                        </span>
                     </div>
                 </div>
 
