@@ -2360,10 +2360,10 @@ disclosure before measuring, which is what `career-training-detail.spec.ts:326` 
 page-wide sweeps skip instead, and the opened-disclosure coverage lives in the one positive case rather than in
 every sweep.
 
-### KI-93 No npm script type-checks `tests/`, so every browser-spec commit has reported a typecheck gate that could not see its own change - FILED 2026-10-10 (slice 14), OPEN
+### KI-93 No npm script type-checks `tests/`, so every browser-spec commit has reported a typecheck gate that could not see its own change - FILED 2026-10-10 (slice 14), CLOSED 2026-10-10 (slice 15, `b558a97`)
 
-**Status: OPEN.** Found while landing KI-92's fix, whose own typecheck gate had to be run by hand for exactly this
-reason.
+**Status: CLOSED.** Filed OPEN from slice 14, whose own typecheck had to be run by hand for exactly this
+reason; closed by widening the config in `b558a97`. The finding below stands as it was filed.
 
 `tsconfig.json:15` reads `"include": ["resources/js/**/*.ts"]`, and `npm run typecheck` is `tsc --noEmit` against
 that config (`package.json`). Everything under `tests/` is therefore outside the gate: the 48 spec files in
@@ -2387,3 +2387,44 @@ or add a second script (`typecheck:tests`) so the two scopes stay legible. Not f
 off-limits for this session by the brief's own do-not-touch list, and changing what `npm run typecheck` covers
 changes the meaning of a gate every future change reports against, which is the owner's call rather than a
 side effect of a test fix.
+
+**Closure.** `b558a97` (2026-10-10, slice 15), owner-authorised. `tsconfig.json`'s `include` gained
+`tests/browser/**/*.ts` and `tests/utils/**/*.ts`, and `types` gained `"node"`. That needed `@types/node`
+installed as a dev dependency: the specs and `global-setup.ts` use `child_process`, `fs`, `path`, `url` and
+`process`, and the package was absent from both `node_modules/@types` and the lockfile, so it was not available
+transitively. Widening surfaced **25 errors across 8 files**, all fixed in the same commit: 16 were the missing
+Node types (15 TS2591 + 1 TS2503 `NodeJS`); 5 were `window.__setModel` / `window.__setBadgeState`, now declared
+once on `Window` by `tests/browser/fixtures/fixture-globals.d.ts`; 2 were the two fixture modules importing `.vue`
+files, now covered by `tests/browser/fixtures/shims-vue.d.ts`; 2 were
+`PerformanceEntry.transferSize` / `decodedBodySize` in `screen-speed.spec.ts`, narrowed by an
+`entry is PerformanceResourceTiming` predicate. `npm run typecheck` then reports exit 0 with zero errors, and the
+`"node"` types did not disturb `resources/js` — the risk of widening one config rather than adding a second.
+
+**What closure does not cover.** The `.vue` shim is deliberately loose, because a `.d.ts` cannot know a
+component's real prop signature without `vue-tsc`; a prop typo inside a fixture is caught by the browser run and
+not by the typecheck. Closing that would mean `vue-tsc`, a dependency decision of its own. The gate now covers
+`tests/browser/**/*.ts` and `tests/utils/**/*.ts` only, and it is a TypeScript gate: `tests/Feature/**` is PHP and
+is outside PHPStan as well, whose `phpstan.neon` analyses `app` alone, so any TypeScript added elsewhere under
+`tests/` would be outside every static gate.
+
+### KI-94 `npm audit --omit=dev` reports one high in source-map-js, which predates this session - FILED 2026-10-10 (slice 15 dependency change), OPEN
+
+**Status: OPEN.** Noticed while running the audit that AGENTS.md §5 requires after a dependency change. Pre-existing
+and unrelated to the change that surfaced it.
+
+`npm audit --omit=dev` exits 1 with one high: `source-map-js` 1.0.0–1.2.1,
+GHSA-68fv-2mgg-jv7q, "allows event-loop denial of service through indexed source-map section offsets". It is a
+production-tree entry pulled by `@tailwindcss/vite` → `@tailwindcss/node`, by `vite` → `postcss`, and by Vue's
+`@vue/compiler-dom`/`@vue/compiler-sfc`. Assessment: build-time only — this application never parses a source map
+at runtime, and the input would be a dependency's own map rather than anything a Trainer supplies, so it is not
+reachable from the app's surface. The `--omit=dev` reading is red because Vite and Tailwind are production
+dependencies here (the assets are built in the same tree), not because the vulnerability is in shipped runtime code.
+
+**Proving command.** `npm audit --omit=dev` → exit 1, 1 high. `git show HEAD:package-lock.json | grep -c
+source-map-js` → 6, the same 6 the working lockfile carries, so slice 15's `@types/node` install did not introduce
+or move it.
+
+**What closure needs.** `npm audit fix` (which advances `source-map-js` inside the lockfile) as a dependency change
+with its own approval, plus a judgement on whether any production dependency consumes untrusted source maps at
+build time. Not fixed in slice 15: the authorised change was `@types/node`, and moving a transitive dependency
+because an audit happened to be run is a different decision.
