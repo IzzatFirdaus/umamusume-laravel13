@@ -177,7 +177,7 @@ class CockpitController extends Controller
      * The run's own identity, flattened. `scenario_label` names the absence rather than borrowing the
      * baseline's name, which is a composition device and not a fact (D-220).
      *
-     * @return array{id: int, trainee: string, trainee_ja: string|null, status: string, status_label: string, scenario_label: string, run_url: string, timeline_url: string, result_url: string, training_url: string, status_labels: array<string,string>, scenarios: array<string,string>, update_url: string, destroy_url: string, current_objective_index: int|null}
+     * @return array{id: int, trainee: string, trainee_ja: string|null, status: string, status_label: string, scenario_label: string, run_url: string, timeline_url: string, result_url: string, training_url: string, deck_url: string, status_labels: array<string,string>, scenarios: array<string,string>, update_url: string, destroy_url: string, current_objective_index: int|null}
      */
     private function runSection(TrainingRun $run): array
     {
@@ -210,6 +210,11 @@ class CockpitController extends Controller
             // The door to Training Decision (SCREEN-010), where a turn is recorded; the Cockpit's empty
             // state links here rather than to the legacy run screen, which the redirect will retire.
             'training_url' => route('runs.training', $run),
+            // The run's own Support deck builder (R2-17). It answers and writes this run's six slots,
+            // and until now no 2.0 screen linked it: the Training screen's door arrived in `e2889ff`,
+            // and the Cockpit, which is where a Trainer mid-career stands, offered none at all, so the
+            // screen was reachable only by typing its URL.
+            'deck_url' => route('runs.deck', $run),
             // The write routes and picker choices for the header edit form. Labelled
             // `current_objective_index` mirrors `runs.update`'s form key so a partial update
             // (status only, scenario only, period only) carries the other two fields as their current

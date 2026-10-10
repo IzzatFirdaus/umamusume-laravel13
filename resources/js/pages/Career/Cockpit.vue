@@ -83,7 +83,7 @@ interface Correction {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; timeline_url: string; result_url: string; training_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null };
+    run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null };
     header: Header;
     /**
      * Where the career stands, as `CareerPosition::toArray()` carries it. The header's Year, Month and
@@ -606,6 +606,19 @@ const jumpToShop = (): void => {
                             Download JSON
                         </a>
                     </span>
+                </li>
+
+                <li class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Support deck</span>
+                    <!-- R2-17: `/training-runs/{run}/deck` answers and writes this run's six slots, and
+                         the Cockpit offered no door to it, so a Trainer mid-career could reach the
+                         builder only by typing its URL. A GET, so it is a plain link, like the exports. -->
+                    <a
+                        :href="props.run.deck_url"
+                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-semibold text-ink-strong underline"
+                    >
+                        Edit this run's deck
+                    </a>
                 </li>
             </ul>
         </section>

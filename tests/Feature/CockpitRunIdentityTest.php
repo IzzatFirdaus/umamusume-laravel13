@@ -194,4 +194,21 @@ final class CockpitRunIdentityTest extends TestCase
             'Speed' => 0, 'Stamina' => null, 'Power' => 0, 'Guts' => null, 'Wit' => 0,
         ]);
     }
+
+    /**
+     * R2-17: the Cockpit is where a Trainer mid-career stands, and the run-scoped deck builder had no
+     * door on any 2.0 screen, so it was reachable only by typing its URL.
+     */
+    public function test_offers_the_run_scoped_deck_builder_from_the_cockpit(): void
+    {
+        $run = TrainingRun::factory()->create([
+            'status' => RunStatus::Active,
+            'umamusume_id' => Umamusume::factory()->create()->id,
+        ]);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('run.deck_url', route('runs.deck', $run)));
+    }
 }

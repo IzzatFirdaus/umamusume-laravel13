@@ -175,6 +175,16 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     await expect(page.getByText('Dreaming Big')).toBeVisible();
 });
 
+test('links the run-scoped deck builder from the Cockpit', async ({ page }) => {
+    const cockpitUrl = await openCockpit(page);
+    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+
+    // The door is a plain GET, so it is an anchor rather than a form; its href is the run's own deck.
+    const door = page.getByRole('link', { name: "Edit this run's deck" });
+    await expect(door).toBeVisible();
+    await expect(door).toHaveAttribute('href', new RegExp(`/training-runs/${runId}/deck$`));
+});
+
 test('switches the correction to another turn through the selector', async ({ page }) => {
     const cockpitUrl = await openCockpit(page);
     const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
