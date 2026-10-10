@@ -44,6 +44,28 @@ export interface Objective {
     title: string;
 }
 
+/**
+ * G4's dual-value readout: one figure for what the advised session is worth to the trainee, one for
+ * what it is worth to the team.
+ *
+ * `value` is pre-formatted server-side and null when the run records nothing to print; an empty row
+ * carries no badge, because a badge qualifies a displayed value (`AGENTS.md` §5, owner ruling 2a and
+ * the note on `why` below). `badge` is restricted to the two states this axis allows — `estimated`
+ * would claim a model nothing builds, and `unknown` beside an absence was retired here — so a value of
+ * `'confirmed' | 'calculated' | null` is the whole contract, not a subset of the four-state union.
+ *
+ * Declared here as the wire contract; the consumer declares it locally as well, because
+ * `defineProps<Imported>()` cannot resolve an imported type in this build (plan §11).
+ */
+export interface DecisionValue {
+    /** 'Trainee value' | 'Team value', composed server-side. */
+    label: string;
+    value: string | null;
+    badge: 'confirmed' | 'calculated' | null;
+    /** Where the figure comes from, and the reason printed beside an empty value. */
+    title: string;
+}
+
 export interface NextDecision {
     /** One sentence naming which priority fired. Not a ranking of the seven §29 tiers. */
     priority: string;
@@ -52,6 +74,11 @@ export interface NextDecision {
         action_url: string;
         /** What the action does for the run, in the engine's own words. Never a predicted yield. */
         benefit: string[];
+        /**
+         * G4's pair, present on every decision and null when the scenario composes no team ladder or
+         * the advised action raises no stat. One shape rather than a key that sometimes is not there.
+         */
+        team_value: DecisionValue[] | null;
     } | null;
     alternatives: { action: string; action_url: string; tradeoff: string }[];
     /**

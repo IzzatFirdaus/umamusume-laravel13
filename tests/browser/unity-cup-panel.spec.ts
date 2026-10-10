@@ -212,3 +212,98 @@ test('passes the axe A + AA scan with the Team Cockpit mounted', async ({ page }
 
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
+
+/*
+ * G4: the team race's published shape. `UnityCupSurfacesTest` pins the payload and the dual readout's
+ * firing rule; these cases assert what only a browser reaches — the five categories as a real table with
+ * Dirt among them, the reason printed under it rather than behind it, the refusal sentence, and the
+ * owner's 2026-10-11 ruling that this region stays free of focusable controls.
+ *
+ * **The board has no keyboard row stop, on purpose.** The brief asked for row-level keyboard reach; the
+ * ruling that nothing in this panel may be clicked open or tab-stopped outranks it, and every row is
+ * already in the document order the case above traces with Tab. The case that counts `details` elements
+ * is the guard: `AbsenceValue` is a native disclosure, so one tab stop per empty cell would land focus
+ * inside a region whose committed keyboard case says it must not.
+ */
+
+test('draws the five team race categories as a table with the published ask and one named absence', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    const board = page.getByRole('region', { name: 'Team race coverage' });
+    await expect(board).toBeVisible();
+
+    // Header plus five category rows. Dirt is a category of the team race and not a distance band, so
+    // its presence is the assertion that the board is not the four-band list the target form uses.
+    await expect(board.getByRole('row')).toHaveCount(6);
+    await expect(board.getByRole('rowheader', { name: 'Dirt' })).toBeVisible();
+    await expect(board.getByRole('rowheader', { name: 'Sprint' })).toBeVisible();
+
+    // The ask once, the blank per row, and the reason on the page rather than in a tooltip.
+    await expect(board.getByText('3 fielded in each')).toBeVisible();
+    await expect(board.getByRole('cell', { name: 'N/A' })).toHaveCount(5);
+    await expect(board.getByText(/No column records who this run fields/i)).toBeVisible();
+
+    // The ruling, measured: no disclosure and no focus stop anywhere in the Scenario region.
+    const region = page.getByRole('region', { name: 'Scenario' });
+    await expect(region.locator('details')).toHaveCount(0);
+    await expect(region.locator('a, button, input, select, textarea, [tabindex]')).toHaveCount(0);
+});
+
+test('stacks the coverage table at 320 px without a sideways scroll', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    await page.setViewportSize({ width: 320, height: 900 });
+
+    const board = page.getByRole('region', { name: 'Team race coverage' });
+    await expect(board.getByRole('rowheader', { name: 'Long' })).toBeVisible();
+
+    const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, 'the coverage table scrolls the page sideways at 320px').toBeLessThanOrEqual(1);
+});
+
+test('states the team race shape and prints no opponent projection, no chance and no percentage', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    const shape = page.getByRole('region', { name: 'Team race shape' });
+    await expect(shape).toBeVisible();
+    await expect(shape.getByText(/Arrives every 6 months, at Late June and Late December/)).toBeVisible();
+    await expect(shape.getByText(/5 races, one per category/)).toBeVisible();
+    await expect(shape.getByText(/Clearing the set pays an increase to all stats, sized by performance/)).toBeVisible();
+
+    // The one answer the corpus supports, stated as an absence with its reason beside it. The pairs are
+    // addressed as elements, not by role name: `term` and `definition` are not name-from-content roles, so
+    // Chromium computes no accessible name for a `dt` and `getByRole('term', { name })` can never match.
+    // Measured in this region: `getByRole('term')` resolves 2 elements, each with an empty name.
+    const terms = shape.locator('dt');
+    await expect(terms).toHaveCount(2);
+    await expect(terms.nth(0)).toHaveText('Opponent projection');
+    await expect(terms.nth(1)).toHaveText('Next team race');
+    await expect(shape.locator('dd').first().getByText(/No source says how strong each opponent team is/)).toBeVisible();
+    await expect(shape.getByText(/no source publishes the career turn/)).toBeVisible();
+
+    const text = await shape.innerText();
+    expect(text).not.toContain('%');
+    expect(text.toLowerCase()).not.toContain('probability');
+});
+
+test('shows no dual-value readout while the rail has nothing to rank', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    // A fresh run records no Energy and no target, so the rail refuses and the readout that hangs off a
+    // ranked action is absent rather than empty. The ranked case is `career-cockpit.spec.ts`'s subject;
+    // the firing rule itself is pinned at props level in `UnityCupSurfacesTest`.
+    await expect(page.getByRole('region', { name: 'Advisor' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'What this session pays' })).toHaveCount(0);
+});
+
+test('passes the axe A + AA scan with the G4 blocks mounted', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    await expect(page.getByRole('region', { name: 'Team race coverage' })).toBeVisible();
+
+    const results = await buildAxe(page).analyze();
+
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});

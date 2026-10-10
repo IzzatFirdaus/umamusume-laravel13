@@ -292,11 +292,38 @@ return [
             */
             'team_race' => [
                 'occurs_every_months' => 6,
+                // docs/scenarios/02-unity-cup.md:153 and SCENARIO-PUBLISHER-REFERENCES.md:658, :1028 —
+                // the client shows a countdown under the objective timer, and the two anchors are the
+                // ends of the six-month gap. No source publishes the career turn a round falls on
+                // (SCENARIO-PUBLISHER-REFERENCES.md:1186 records that as UNVERIFIED), so the panel
+                // prints the months and no turn.
+                'month_anchors' => ['Late June', 'Late December'],
+                /*
+                | One race per category, and the category list includes Dirt, which is a surface rather
+                | than a distance band: `docs/scenarios/02-unity-cup.md:149` states the five and corrects
+                | an earlier "5-person sub-team" line in the same file, and
+                | SCENARIO-PUBLISHER-REFERENCES.md:1028 repeats it. This is deliberately NOT
+                | `BuildTargetPayload::DISTANCE_BANDS` (four, no Dirt): keying a team race off that list
+                | would drop a category the guides name.
+                */
+                'categories' => ['Sprint', 'Mile', 'Medium', 'Long', 'Dirt'],
+                'field_per_category' => 3,
+                // 02-unity-cup.md:149 with references:1028 — clearing the set pays a rise on every stat
+                // sized by performance. The size itself is published nowhere, so no figure rides here.
+                'clear_all_reward' => 'an increase to all stats, sized by performance',
                 'opponent_count' => 3,
                 'opponents' => [
                     // Keyed `tier`, not by the attribute the JP wikis rank characters
                     // by: the lore gate bans that word, and "which of three teams is
                     // hardest to beat" is not that attribute.
+                    //
+                    // Uncorroborated as measured 2026-10-11, and left in place rather than deleted: the
+                    // corpus names only "Turf Queens" (docs/scenarios/02-unity-cup.md:163,
+                    // SCENARIO-PUBLISHER-REFERENCES.md:1324), and neither "Elite Team Ares" nor "Novice
+                    // Squad" appears in any document this repository holds. Nothing renders these three
+                    // names. The Cockpit's tournament block prints the published shape and the strength
+                    // absence instead, so an untraced name cannot reach a Trainer. Clearing or sourcing
+                    // this row is the owner's call, not a slice's.
                     ['name' => 'Elite Team Ares', 'tier' => 'strongest'],
                     ['name' => 'The Turf Queens', 'tier' => 'middle'],
                     ['name' => 'Novice Squad', 'tier' => 'weakest'],

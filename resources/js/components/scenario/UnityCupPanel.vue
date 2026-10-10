@@ -31,6 +31,8 @@ import TeamRacePanel from '../TeamRacePanel.vue';
 import TeamRankGauge from '../TeamRankGauge.vue';
 import AlertRow from './AlertRow.vue';
 import ResourceMeter from './ResourceMeter.vue';
+import UnityCupTeamBoard from './UnityCupTeamBoard.vue';
+import UnityCupTournamentReadiness from './UnityCupTournamentReadiness.vue';
 
 type BurstState =
     | 'Chargeable'
@@ -51,6 +53,29 @@ interface TeamSection {
     bands: { total: string; reward: string }[];
     payout_timing: string | null;
     special_training: { energy_penalty_removed: boolean | null; wit_burst_energy_bonus: number | null };
+    /**
+     * G4's two team surfaces. Null for a scenario whose matrix declares no team race, so the key set
+     * stays one shape across the four scenarios and neither sub-component carries a scenario test.
+     */
+    coverage: {
+        rows: { category: string; asks: string; fielded: string | null }[];
+        badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        source_title: string;
+        absence_title: string;
+    } | null;
+    tournament: {
+        cadence_months: number | null;
+        month_anchors: string[];
+        category_count: number;
+        clear_all_reward: string | null;
+        badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        source_title: string;
+        projection: string | null;
+        projection_title: string;
+        next: string | null;
+        next_title: string;
+        risks: string[];
+    } | null;
     /** The team's own identity (A6.6), as the Trainer entered it; null until stated. */
     team_name: string | null;
     team_motto: string | null;
@@ -309,6 +334,17 @@ const counterSegments = computed((): string[] => {
                     Per-facility levels and per-member training state are not recorded here.
                 </p>
             </div>
+
+            <!-- G4's surfaces, mounted beside the blocks that already exist rather than folding into
+                 them: the board draws the team race's five categories, which appear nowhere else on the
+                 screen, and the shape block states the cadence and the published reward. Neither adds
+                 a focusable control, which is what the panel's own keyboard case pins. -->
+            <UnityCupTeamBoard v-if="props.scenario.team.coverage !== null" :coverage="props.scenario.team.coverage" />
+
+            <UnityCupTournamentReadiness
+                v-if="props.scenario.team.tournament !== null"
+                :tournament="props.scenario.team.tournament"
+            />
         </div>
     </div>
 </template>

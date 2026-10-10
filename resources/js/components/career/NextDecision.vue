@@ -28,6 +28,7 @@
 import { computed } from 'vue';
 
 import AlertRow from '../scenario/AlertRow.vue';
+import AbsenceValue from '../AbsenceValue.vue';
 import ObjectiveRow from './ObjectiveRow.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import RecordedActionCard from './RecordedActionCard.vue';
@@ -51,7 +52,22 @@ interface RecordedRow {
 
 interface Decision {
     priority: string;
-    recommended: { action: string; action_url: string; benefit: string[] } | null;
+    /**
+     * `team_value` is G4's dual readout: two figures, or null when the scenario composes no team ladder
+     * or the advised action raises no stat. An empty row carries no badge, because a badge qualifies a
+     * displayed value (owner ruling 2a retires `unknown` beside an absence on this axis).
+     */
+    recommended: {
+        action: string;
+        action_url: string;
+        benefit: string[];
+        team_value: {
+            label: string;
+            value: string | null;
+            badge: 'confirmed' | 'calculated' | null;
+            title: string;
+        }[] | null;
+    } | null;
     alternatives: { action: string; action_url: string; tradeoff: string }[];
     why: { text: string; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string }[];
     switch_if: string[];
@@ -92,6 +108,8 @@ const props = withDefaults(
 
 const refusal = computed(() => props.decision.refusal);
 const recommended = computed(() => props.decision.recommended);
+/** Empty rather than null, so the template asks one question of a list it always has. */
+const teamValues = computed(() => props.decision.recommended?.team_value ?? []);
 const objectives = computed(() => props.decision.objectives);
 const recordedAction = computed(() => props.decision.recorded_action);
 
@@ -174,6 +192,29 @@ const incompleteData = computed(
             <ul class="mt-1 list-disc space-y-1 pl-5 text-sm text-ink">
                 <li v-for="(line, index) in recommended?.benefit ?? []" :key="index">{{ line }}</li>
             </ul>
+
+            <!-- G4's dual readout. Two labelled figures, each traced, and neither a promise: the trainee
+                 side is room under a published cap and the team side is the rank this run reported. A
+                 row with no reading prints its reason rather than a zero. -->
+            <div v-if="teamValues.length > 0" class="mt-2">
+                <h4 class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                    What this session pays
+                </h4>
+                <!-- `dt`/`dd` pairs as direct children of the `dl`, laid out by a grid. The reason lives in
+                     the `dd` with the figure: `term` and `definition` are not name-from-content roles, so
+                     Chromium gives a `dt` no accessible name and a reader gets nothing from the term alone. -->
+                <dl class="mt-1 grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] items-baseline gap-x-3 gap-y-1">
+                    <template v-for="row in teamValues" :key="row.label">
+                        <dt class="text-xs text-ink-muted">{{ row.label }}</dt>
+                        <dd class="flex flex-wrap items-baseline gap-x-2">
+                            <ProvenanceBadge v-if="row.badge !== null" :state="row.badge" :title="row.title" />
+                            <span v-if="row.value !== null" class="text-sm text-ink">{{ row.value }}</span>
+                            <AbsenceValue v-else :reason="row.title" compact />
+                        </dd>
+                    </template>
+                </dl>
+            </div>
+
             <a
                 :href="recommended?.action_url"
                 class="mt-2 inline-flex min-h-11 items-center rounded-full bg-chrome px-5 text-sm font-bold text-on-chrome"

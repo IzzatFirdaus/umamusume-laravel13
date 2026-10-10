@@ -7,6 +7,7 @@ namespace App\Services\Advisor;
 use App\Enums\TurnChoice;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Services\ScenarioCaps;
 
 /**
  * FD-2, the shared Next Decision contract (plan §9a, `screen-spec-2.0.md` §12 and §30).
@@ -272,7 +273,7 @@ final class NextDecision
     }
 
     /**
-     * @return array{action: string, action_url: string, benefit: list<string>}
+     * @return array{action: string, action_url: string, benefit: list<string>, team_value: list<array<string, mixed>>|null}
      */
     private function recommended(Advice $advice, TrainingRun $run): array
     {
@@ -286,7 +287,107 @@ final class NextDecision
                 $option->reason,
                 $this->energyAfterLine($option->energyAfter),
             ])),
+            // Always carried, null when it does not fire: one shape for every scenario rather than a
+            // consumer that has to test for the key's existence.
+            'team_value' => $this->teamValue($advice, $run),
         ];
+    }
+
+    /**
+     * G4's dual-value readout: what the advised session is worth to the trainee, and to the team.
+     *
+     * Unity Cup's training turn pays twice — it raises a stat and it counts as a Unity Training toward
+     * the team rank — and the rail printed only the first half. Two figures, each traced, and no
+     * prediction: the trainee side is the room left under the cap `ScenarioCaps` owns, read through the
+     * same call the stat bars make so the rail and the strip cannot disagree (`ADR-0015`); the team side
+     * is the rank letter this run last reported, mapped by `TrainingRun::facilityLevel()`, which is the
+     * existing owner of that lookup. Neither is a forecast of what the session will gain.
+     *
+     * **The firing predicate is the composition matrix, not a capability object.** No capability object
+     * exists in this namespace, and `latestTeamRank()` already refuses to answer unless
+     * `team_rank_ladder` is on (`TrainingRun.php:1176-1180`), so the rail opens on the same gate the
+     * model uses and a fifth scenario needs a config entry rather than a branch here (gate G-33). A
+     * non-training action raises no stat and has no trainee side to pair with, so Rest and Recreation
+     * read null rather than half a pair.
+     *
+     * **Badges are the two states this axis allows, and an empty row carries none.**
+     * `resources/js/types.ts:60-66` records the ruling: `estimated` would claim a model nothing builds,
+     * and `unknown` beside an absence was retired here by owner ruling 2a. A badge qualifies a displayed
+     * value, so with nothing displayed the row states its reason alone.
+     *
+     * @return list<array{label: string, value: string|null, badge: string|null, title: string}>|null
+     */
+    private function teamValue(Advice $advice, TrainingRun $run): ?array
+    {
+        $option = $advice->recommendation;
+
+        if (! $option instanceof AdvisorOption || ! $run->composesPanel('team_rank_ladder')) {
+            return null;
+        }
+
+        /** @var list<string> $stats */
+        $stats = (array) config('scenarios.stat_order');
+
+        if (! in_array($option->action, $stats, true)) {
+            return null;
+        }
+
+        /** @var TurnEntry|null $latest */
+        $latest = $run->turnEntries->sortByDesc('turn')->first();
+        /** @var array<string, int> $caps */
+        $caps = ScenarioCaps::forRun($run);
+        $cap = $caps[$option->action] ?? null;
+        $stat = strtolower($option->action);
+        $reading = $latest instanceof TurnEntry ? $latest->getAttribute($stat) : null;
+
+        $trainee = [
+            'label' => 'Trainee value',
+            'value' => null,
+            'badge' => null,
+            'title' => 'No turn entry for this run records a '.$option->action.' reading, or no cap is '
+                .'published for it, so there is no headroom to state.',
+        ];
+
+        if (is_numeric($reading) && $cap !== null) {
+            $trainee = [
+                'label' => 'Trainee value',
+                'value' => number_format(max(0, (int) $cap - (int) $reading))
+                    .' below the '.$option->action.' cap of '.number_format($cap),
+                'badge' => 'calculated',
+                'title' => 'The cap is read through ScenarioCaps::forRun(), the same call the header\'s '
+                    .'stat bars make (ADR-0015), less the '.$option->action.' figure of this run\'s latest '
+                    .'turn entry. Both inputs are recorded or published figures; this is room under a cap, '
+                    .'not a gain the session is promised.',
+            ];
+        }
+
+        $rank = $run->latestTeamRank()?->rank;
+        $level = $run->facilityLevel($rank);
+
+        $team = [
+            'label' => 'Team value',
+            'value' => null,
+            'badge' => null,
+            'title' => 'This run has no rank reported, so the team side of the session has no figure to '
+                .'print. A rank arrives on a turn event payload, entered by the Trainer.',
+        ];
+
+        if ($rank !== null) {
+            // `S+` sits above the top rung and grants no higher facility, which is what the config notes
+            // say, so it is named without a level rather than handed one it does not have.
+            $team = [
+                'label' => 'Team value',
+                'value' => $level === null
+                    ? 'Team rank '.$rank.', above the top rung of the ladder'
+                    : 'Team rank '.$rank.', facility level '.$level,
+                'badge' => 'calculated',
+                'title' => 'The letter is the one this run last reported. The level maps it through '
+                    .'config/scenarios.php team_rank_ladder by TrainingRun::facilityLevel(), which does the '
+                    .'lookup rather than storing a second copy of it.',
+            ];
+        }
+
+        return [$trainee, $team];
     }
 
     /**

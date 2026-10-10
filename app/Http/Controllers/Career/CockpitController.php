@@ -1680,6 +1680,117 @@ class CockpitController extends Controller
             // The band's own `total` label, so the panel marks the row it already renders rather
             // than carrying a second copy of the bounds.
             'burst_band' => $this->burstBandFor($combined, $run->scenarioKey()),
+            // G4's two team surfaces. Both are null unless the matrix turns `team_race` on, so the
+            // three scenarios without a team layer draw neither and the section keeps one key set
+            // across all four (gate G-33).
+            'coverage' => $this->teamCoverageSection($run),
+            'tournament' => $this->teamTournamentSection($run, $def),
+        ];
+    }
+
+    /**
+     * The team race's published shape, one row per category, and the reading this run does not have.
+     *
+     * Five categories, Dirt among them: `docs/scenarios/02-unity-cup.md:149` states the set and corrects
+     * an earlier line in the same file, and `SCENARIO-PUBLISHER-REFERENCES.md:1028` repeats it. That is
+     * why the rows are not `BuildTargetPayload::DISTANCE_BANDS` — four bands and no Dirt would drop a
+     * category of the race it describes, and a board missing a fifth of the thing is worse than no board.
+     *
+     * The ask is published; who this run fields in a category is not stored anywhere. No column carries a
+     * distance for a team race row (`scenario_slots` has none), and the run's individual `race_entries`
+     * are a different fact, so they are not counted here as an answer to this question. Each row states
+     * the ask with no value beside it and no coverage state is claimed.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function teamCoverageSection(TrainingRun $run): ?array
+    {
+        /** @var array<string, mixed> $race */
+        $race = (array) config('scenarios.scenarios.'.$run->scenarioKey().'.team_race', []);
+
+        if (! $run->composesPanel('team_race') || $race === []) {
+            return null;
+        }
+
+        /** @var list<string> $categories */
+        $categories = (array) ($race['categories'] ?? []);
+        $asks = number_format((int) ($race['field_per_category'] ?? 0)).' fielded';
+
+        $rows = [];
+
+        foreach ($categories as $category) {
+            $rows[] = [
+                'category' => $category,
+                'asks' => $asks,
+                'fielded' => null,
+            ];
+        }
+
+        return [
+            'rows' => $rows,
+            'badge' => 'confirmed',
+            'source_title' => 'The five categories and the number fielded in each come from '
+                .'config/scenarios.php, transcribed from docs/scenarios/02-unity-cup.md:149 and '
+                .'SCENARIO-PUBLISHER-REFERENCES.md:1028.',
+            'absence_title' => 'No column records who this run fields in any category, so every row '
+                .'states the ask with no reading beside it and no coverage state is claimed.',
+        ];
+    }
+
+    /**
+     * What a team race is made of, as far as the sources carry it, and the one question they do not.
+     *
+     * Cadence and anchors are published (`docs/scenarios/02-unity-cup.md:153`, references `:658` and
+     * `:1028`). The turn a round falls on is not: references `:1186` records the per-round turn count as
+     * unverified, so the block names the months and leaves `next` empty rather than deriving a turn from
+     * a calendar the run does not hold.
+     *
+     * **The matrix's three opponent names are not read, and none reaches the page.** Measured 2026-10-11:
+     * the corpus holds "Turf Queens" and "The Apex" (`02-unity-cup.md:163`, references `:1324`) and
+     * nothing for the other two names the config carries. A row rendered from that list would be a client
+     * fact with no client source behind it (`AGENTS.md` §5), so the block states the published shape and
+     * the absence of a projection, and the names stay in config. Clearing that row is the owner's call,
+     * not a slice's.
+     *
+     * The displayed label avoids the wiki-side gloss for a stat that the ban governs; the key that
+     * carries the absence is named for the question it answers.
+     *
+     * @param  array<string, mixed>  $def
+     * @return array<string, mixed>|null
+     */
+    private function teamTournamentSection(TrainingRun $run, array $def): ?array
+    {
+        /** @var array<string, mixed> $race */
+        $race = (array) ($def['team_race'] ?? []);
+
+        if (! $run->composesPanel('team_race') || $race === []) {
+            return null;
+        }
+
+        /** @var list<string> $anchors */
+        $anchors = (array) ($race['month_anchors'] ?? []);
+        $months = isset($race['occurs_every_months']) ? (int) $race['occurs_every_months'] : null;
+
+        return [
+            'cadence_months' => $months,
+            'month_anchors' => array_map(static fn ($month): string => (string) $month, $anchors),
+            'category_count' => count((array) ($race['categories'] ?? [])),
+            'clear_all_reward' => isset($race['clear_all_reward']) ? (string) $race['clear_all_reward'] : null,
+            'badge' => 'confirmed',
+            'source_title' => 'config/scenarios.php, from docs/scenarios/02-unity-cup.md:149-153 and '
+                .'SCENARIO-PUBLISHER-REFERENCES.md:658, :1028.',
+            'projection' => null,
+            'projection_title' => 'No source says how strong each opponent team is. The guides name which '
+                .'teams to avoid before a rank is high enough and stop there, so no side of any team race '
+                .'can be called favoured and no chance is printed.',
+            'next' => null,
+            'next_title' => 'A team race arrives every '.$months.' months, at '
+                .implode(' and ', $anchors).', and no source publishes the career turn a round falls on, '
+                .'so no turn is printed here.',
+            'risks' => [
+                'No published source ranks the three teams, so the screen calls no side of a team race easier.',
+                'No column records who this run fields in each category, so the board states the ask and not the run.',
+            ],
         ];
     }
 
