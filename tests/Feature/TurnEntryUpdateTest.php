@@ -97,7 +97,7 @@ it('stores the band the guided form posts when the turn is first recorded', func
 
     expect($fresh->energy_state)->toBe(EnergyState::Band)
         ->and($fresh->energy_band)->toBe('low');
-})->skip('pending the peer create-path half (TrainingRunController::turnAttributes is uncommitted on this tree, so this case is red on a clean checkout of the commit)');
+});
 
 it('sends the band for prefill and changes it through the Cockpit correction', function (): void {
     $run = energyCorrectionRun(EnergyState::Band, 'low');
