@@ -31,7 +31,7 @@ import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
 import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
+import { TURN_ENTRY_ENERGY_BANDS as energyBands, TURN_ENTRY_ENERGY_STATES as energyStates, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 
@@ -69,6 +69,13 @@ interface Correction {
         wit: number;
         sp: number | null;
         energy: number | null;
+        /**
+         * Energy's own state and, when the state is `band`, the coarse word the client showed. They
+         * arrive separately because a correction must be able to say "not recorded" and have the
+         * previous band cleared, which a single number cannot express (R2-16).
+         */
+        energy_state: string | null;
+        energy_band: string | null;
         fans: number | null;
         mood: string | null;
     };
@@ -154,9 +161,30 @@ const correctionForm = useForm({
     wit: props.correction === null ? '' : String(props.correction.values.wit),
     sp: props.correction?.values.sp === null || props.correction === null ? '' : String(props.correction.values.sp),
     energy: props.correction?.values.energy === null || props.correction === null ? '' : String(props.correction.values.energy),
+    energy_state: props.correction?.values.energy_state ?? 'unknown',
+    energy_band: props.correction?.values.energy_band ?? '',
     fans: props.correction?.values.fans === null || props.correction === null ? '' : String(props.correction.values.fans),
     mood: props.correction?.values.mood ?? '',
 });
+
+/*
+ * The band travels with the state that names it, the rule `TrainingDetail` already applies on the
+ * guided form: a state of `exact` keeps no band, and any state but `band` clears it. Without this a
+ * correction that switches the state to `not recorded` would leave the old band on the row and the
+ * next reader would take a word for a reading nobody made (R2-16).
+ */
+watch(
+    () => correctionForm.energy_state,
+    (state: string) => {
+        if (state !== 'exact') {
+            correctionForm.energy = '';
+        }
+
+        if (state !== 'band') {
+            correctionForm.energy_band = '';
+        }
+    },
+);
 
 const alert = ref<HTMLElement | null>(null);
 
@@ -200,6 +228,8 @@ watch(
         correctionForm.wit = String(correction.values.wit);
         correctionForm.sp = correction.values.sp === null ? '' : String(correction.values.sp);
         correctionForm.energy = correction.values.energy === null ? '' : String(correction.values.energy);
+        correctionForm.energy_state = correction.values.energy_state ?? 'unknown';
+        correctionForm.energy_band = correction.values.energy_band ?? '';
         correctionForm.fans = correction.values.fans === null ? '' : String(correction.values.fans);
         correctionForm.mood = correction.values.mood ?? '';
         correctionForm.clearErrors();
@@ -512,10 +542,32 @@ const jumpToShop = (): void => {
                                 <span class="text-ink-muted">Skill Points</span>
                                 <input v-model="correctionForm.sp" type="number" name="sp" min="0" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
                             </label>
-                            <label class="flex flex-col gap-1">
-                                <span class="text-ink-muted">Energy</span>
-                                <input v-model="correctionForm.energy" type="number" name="energy" min="0" max="100" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
-                            </label>
+                            <fieldset class="col-span-2 flex flex-col gap-1 md:col-span-3">
+                                <legend class="text-ink-muted">Energy</legend>
+                                <div class="flex flex-wrap items-center gap-x-4">
+                                    <label v-for="state in energyStates" :key="state.value" class="flex min-h-11 items-center gap-1 text-sm text-ink">
+                                        <input v-model="correctionForm.energy_state" type="radio" name="energy_state" :value="state.value">
+                                        <span>{{ state.label }}</span>
+                                    </label>
+                                </div>
+                                <input
+                                    v-if="correctionForm.energy_state === 'exact'"
+                                    v-model="correctionForm.energy"
+                                    type="number"
+                                    name="energy"
+                                    min="0"
+                                    max="100"
+                                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                                >
+                                <select
+                                    v-else-if="correctionForm.energy_state === 'band'"
+                                    v-model="correctionForm.energy_band"
+                                    name="energy_band"
+                                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                                >
+                                    <option v-for="band in energyBands" :key="band.value" :value="band.value">{{ band.label }}</option>
+                                </select>
+                            </fieldset>
                             <label class="flex flex-col gap-1">
                                 <span class="text-ink-muted">Fans</span>
                                 <input v-model="correctionForm.fans" type="number" name="fans" min="0" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">

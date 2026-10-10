@@ -1465,6 +1465,11 @@ class CockpitController extends Controller
                 'wit' => $selected->wit,
                 'sp' => $selected->sp,
                 'energy' => $selected->energy,
+                // R2-16: the state and the band ride with the number so the correction form can prefill
+                // them and a Trainer can clear a band the state no longer names. `energy_state` is cast to
+                // `EnergyState` on the model, so the wire carries the backed word.
+                'energy_state' => $selected->energy_state?->value,
+                'energy_band' => $selected->energy_band,
                 'fans' => $selected->fans,
                 'mood' => $selected->mood?->value,
             ],
