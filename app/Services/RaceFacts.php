@@ -67,6 +67,28 @@ final class RaceFacts
     }
 
     /**
+     * Whether this row's own columns describe the race, as opposed to naming it.
+     *
+     * R2-12. The seeded calendar carries placeholder rows — the debut, the Junior maidens, the finals
+     * qualifiers — whose distance, band and surface are null, and every card they appear on then prints
+     * ten labelled refusals. Five of those ten are refused by design for every race (running style is
+     * the trainee's, three payouts have no column, and the win figure is held on `ADR-0016`), so a row
+     * with none of the four course figures has nothing the catalogue said about it. The caller folds
+     * those cards to one line; this is the test for that, kept beside the fields it reads.
+     *
+     * A tier is deliberately not a course figure: `Junior Make Debut` carries the tier word `Debut` and
+     * is exactly the row the audit called a wall.
+     */
+    public static function describesRace(RaceCatalogSlot $slot): bool
+    {
+        return $slot->distance !== null
+            || $slot->distance_band !== null
+            || $slot->surface !== null
+            || $slot->hasFanGate()
+            || $slot->fanPayout() !== null;
+    }
+
+    /**
      * @return array{key: string, label: string, value: string|null, title: string|null}
      */
     private static function fact(string $key, string $label, ?string $value, string $absentTitle, ?string $presentTitle = null): array

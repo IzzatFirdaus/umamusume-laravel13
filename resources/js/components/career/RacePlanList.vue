@@ -32,6 +32,7 @@ interface Race {
     is_mandatory: boolean;
     is_special: boolean;
     facts: Fact[];
+    detail_recorded: boolean;
     status: string | null;
     placement: string | null;
     fans_gain: number | null;
@@ -81,6 +82,7 @@ function atLimit(id: number): boolean {
                 :readiness="props.readiness"
                 :entry="props.entry"
                 :skip-url="props.skipUrl"
+                fold-undescribed
             >
                 <template #select>
                     <!-- A pressed toggle rather than a checkbox: it is a 44px control with a glyph

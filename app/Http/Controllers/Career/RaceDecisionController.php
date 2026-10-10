@@ -167,6 +167,9 @@ class RaceDecisionController extends Controller
             'is_mandatory' => $slot->is_mandatory,
             'is_special' => $slot->is_special_race,
             'facts' => RaceFacts::forSlot($slot),
+            // Whether the row's own columns describe the race at all, so the shared card can fold a
+            // placeholder to one line rather than ten refusals (R2-12, `RaceFacts::describesRace()`).
+            'detail_recorded' => RaceFacts::describesRace($slot),
             // What the Trainer has already recorded for this slot, or null when they have not
             // reached it. The status is the enum's own value; the word is the enum's, not a label
             // this screen invents.

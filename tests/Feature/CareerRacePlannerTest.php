@@ -467,6 +467,44 @@ it('renders no win figure and no percentage anywhere in the slice', function ():
             ->where('groups.optional.races.0.comparison', fn ($cells): bool => ! str_contains(json_encode($cells) ?: '', '%')));
 });
 
+it('tells a race the catalogue describes from one it only places', function (): void {
+    // R2-12. The card folds a race whose own columns say nothing about the course into one line, so the
+    // fold's input is pinned here: the debut row carries a tier word and no distance, band, surface or
+    // fan figure, which is exactly the row the audit called a wall of refusals, and the described row is
+    // not folded. The drawer keeps every fact either way, so this is density, not hiding.
+    $run = plannerRun(turns: 12, target: plannerTarget());
+
+    $described = plannerSlot(['title' => 'Described Race', 'turn' => 14, 'month' => 8, 'sort_order' => 3]);
+
+    $placed = plannerSlot([
+        'title' => 'Junior Make Debut Clone',
+        'turn' => 15,
+        'month' => 8,
+        'half' => 'Late',
+        'tier' => 'Debut',
+        'distance' => null,
+        'distance_band' => null,
+        'surface' => null,
+        'fans_needed' => null,
+        'fans_gain_curve' => null,
+        'sort_order' => 4,
+    ]);
+
+    $this->get(route('runs.races.planner', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('groups', function ($groups) use ($described, $placed): bool {
+                $rows = collect($groups)
+                    ->flatMap(static fn ($group): array => collect($group['races'])
+                        ->mapWithKeys(static fn (array $race): array => [$race['title'] => $race])
+                        ->all())
+                    ->all();
+
+                return ($rows[$described->title]['detail_recorded'] ?? null) === true
+                    && ($rows[$placed->title]['detail_recorded'] ?? null) === false;
+            }));
+});
+
 it('points the no-position absence at the screen that can record the turn', function (): void {
     // R2-07. This sentence used to send the Trainer to the retired run screen. The sweep in
     // `NoStaleRunRecordLinksTest` proves the old name is gone; this proves the replacement points

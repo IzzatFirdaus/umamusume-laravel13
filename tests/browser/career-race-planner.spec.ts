@@ -100,6 +100,35 @@ test('lists the four groups, each with the rule it was built by, and the rival a
     await expect(page.getByText('whose turn has not arrived yet', { exact: false })).toBeVisible();
 });
 
+test('folds a race the catalogue only places, and keeps the grid for one it describes', async ({ page }) => {
+    // R2-12. The audit measured 17,409 characters on this page, most of them empty panels: the seeded
+    // debut row carries the tier word `Debut` and no distance, band, surface or fan figure, so its card
+    // printed ten labelled refusals. The fold is the card's own; the fact list survives in the drawer,
+    // which is the disclosure this component already had.
+    await openPlanner(page);
+
+    const debut = page.locator('li').filter({
+        has: page.getByRole('heading', { name: 'Junior Make Debut' }),
+    });
+
+    await expect(debut.getByText('Details not recorded for this race.')).toBeVisible();
+
+    // The two statements that are not refused figures still print: the obligation marker and the year.
+    await expect(debut.getByText('Mandatory', { exact: false }).first()).toBeVisible();
+    await expect(debut.getByText('Junior').first()).toBeVisible();
+
+    // A race the catalogue does describe keeps its course facts on the card.
+    const described = page.locator('li').filter({ has: page.getByText('Distance band', { exact: true }) }).first();
+    await expect(described).toBeVisible();
+
+    // Nothing was hidden by the fold: the debut's own drawer lists every fact, refusal included.
+    await debut.getByRole('button', { name: 'Details and actions for Junior Make Debut' }).click();
+    const drawer = page.getByRole('dialog');
+    await expect(drawer.getByText('Distance band', { exact: true }).first()).toBeVisible();
+    await expect(drawer.getByText('Estimated win probability', { exact: false }).first()).toBeVisible();
+    await drawer.getByRole('button', { name: 'Close' }).click();
+});
+
 test('compares the selected races side by side, one property per row, by keyboard', async ({ page }) => {
     await openPlanner(page);
 

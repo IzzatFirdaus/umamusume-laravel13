@@ -41,6 +41,7 @@ interface Race {
     is_mandatory: boolean;
     is_special: boolean;
     facts: Fact[];
+    detail_recorded: boolean;
     status: string | null;
     placement: string | null;
     fans_gain: number | null;

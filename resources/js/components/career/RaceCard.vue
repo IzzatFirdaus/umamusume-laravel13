@@ -21,7 +21,7 @@
  */
 import AbsenceValue from '../AbsenceValue.vue';
 import { useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Fact {
     key: string;
@@ -41,6 +41,7 @@ interface Race {
     is_mandatory: boolean;
     is_special: boolean;
     facts: Fact[];
+    detail_recorded: boolean;
     status: string | null;
     placement: string | null;
     fans_gain: number | null;
@@ -52,6 +53,17 @@ const props = defineProps<{
     readiness: { label: string; title: string };
     entry: { action: string; turns: { id: number; turn: number }[] };
     skipUrl: string;
+    /**
+     * Fold an undescribed race to one line. Only the planner asks for it.
+     *
+     * R2-12 is a planner-density finding: the calendar it prints is a whole career long, so a placeholder
+     * row is one of twenty. The Race decision screen prints the one or two races at the turn being decided,
+     * and `career-race-decision.spec.ts` holds that every refused field is on the page and reachable, not
+     * behind a disclosure; folding there would trade a finding that was never made for a regression that
+     * was tested against. So the shared card takes the instruction from its caller rather than deciding
+     * for both screens, and this prop defaults to off.
+     */
+    foldUndescribed?: boolean;
 }>();
 
 const dialog = ref<HTMLDialogElement | null>(null);
@@ -83,6 +95,23 @@ function enter(): void {
 }
 
 const group = (n: number): string => n.toLocaleString('en-US');
+
+/**
+ * Whether this card shows the ten-row fact grid or folds to one line (R2-12).
+ *
+ * The seeded calendar carries placeholder rows — Junior Make Debut, the URA Finals qualifiers — whose
+ * distance, band and surface are null, and each of them printed ten labelled refusals. Five of the ten
+ * are refused for every race, so a card with nothing else has said nothing about its race. The fold keeps
+ * the gates, which are statements rather than refused figures, and the drawer still lists every fact: the
+ * planner's wall became density, not a hidden field.
+ *
+ * `RaceFacts::describesRace()` owns the test for what the row's own columns say, and only the planner asks
+ * for the fold; the Race decision screen prints one or two cards and its own spec holds that every refusal
+ * is on the page.
+ */
+const folds = computed<boolean>(
+    () => props.foldUndescribed === true && props.race.detail_recorded === false,
+);
 </script>
 
 <template>
@@ -123,7 +152,7 @@ const group = (n: number): string => n.toLocaleString('en-US');
             <template v-if="props.race.grade_points !== null"> · {{ group(props.race.grade_points) }} Grade Points</template>
         </p>
 
-        <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-3">
+        <dl v-if="!folds" class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-3">
             <div v-for="fact in props.race.facts" :key="fact.key" class="flex flex-col">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ fact.label }}</dt>
                 <dd class="text-ink-strong">
@@ -137,6 +166,13 @@ const group = (n: number): string => n.toLocaleString('en-US');
                 </dd>
             </div>
         </dl>
+        <p
+            v-else
+            class="mt-3 rounded-md border border-dashed border-rule bg-raised p-3 text-sm text-ink-muted"
+            title="This catalogue row carries no distance, distance band, surface, fan gate or fan payout, so the grid below it would hold nothing but refusals. The facts that are refused for every race stay in the details."
+        >
+            Details not recorded for this race.
+        </p>
 
         <button
             ref="opener"
