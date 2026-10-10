@@ -50,6 +50,18 @@ function scenarioCardTemplate(): string
     return (string) preg_replace(['/\{\{--.*?--\}\}/s', '/<!--.*?-->/s'], '', $source);
 }
 
+it('heads the ruleset version the same way on the wizard card and the Cockpit strip', function (): void {
+    // The scenario card splits the tool-wide *version* from the scenario's rule *family* (R2-05); the
+    // Cockpit's scenario strip carries only the version, so its heading has to say so in the same words
+    // rather than the bare `Ruleset` the card had to abandon. A Trainer moving between the two should not
+    // meet the same label meaning a different thing. The card's own heading is pinned by the case below,
+    // which reads its whole `<dt>` set.
+    $strip = (string) file_get_contents(resource_path('js/components/scenario/ScenarioPanel.vue'));
+
+    expect($strip)->toMatch('/^\s*Ruleset version:$/m')
+        ->and($strip)->not->toMatch('/^\s*Ruleset:$/m');
+});
+
 it('prints each fact on a scenario card under one label, and never one label twice', function (): void {
     $source = scenarioCardTemplate();
 

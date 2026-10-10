@@ -116,6 +116,16 @@ test('states the scenario, its documentation and the ruleset absence in the base
     await expect(section.getByText('Unity Cup', { exact: true })).toBeVisible();
     await expect(section.getByText('Documented', { exact: true })).toBeVisible();
     await expect(section.getByText(/No source defines a Global ruleset version/).first()).toBeVisible();
+
+    // R2-05's residual: the strip is the Cockpit's only ruleset fact, and it was headed plain
+    // `Ruleset` while the setup wizard's card had split into `Ruleset version` and `Rule family`. One
+    // heading on one surface is fine, but it has to say which fact it is. Anchored, not `exact: true`:
+    // the heading is a bare text node inside the paragraph that carries the refusal, so no element's
+    // whole text is the heading alone, and a regex matcher is not whitespace-normalised, hence `\s*`
+    // for the template's own indentation. The second line is the red-before-green half — the paragraph
+    // opened with `Ruleset:` until the rename, so it cannot pass by matching nothing.
+    await expect(section.getByText(/^\s*Ruleset version:/)).toBeVisible();
+    await expect(section.getByText(/^\s*Ruleset:/)).toHaveCount(0);
 });
 
 test('renders only the baseline strip for a scenario that composes no panel', async ({ page }) => {

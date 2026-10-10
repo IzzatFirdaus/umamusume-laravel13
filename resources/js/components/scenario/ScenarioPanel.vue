@@ -149,15 +149,17 @@ const emptyText = computed<string>(() =>
 <template>
     <div class="flex flex-col gap-3">
         <!-- The baseline strip: the scenario's own name, whether a guide is held for it, and the
-             ruleset absence. Every scenario carries these three, which is what makes the strip the
-             floor a fifth scenario gets for one config entry. -->
+             ruleset version absence. Every scenario carries these three, which is what makes the strip
+             the floor a fifth scenario gets for one config entry. The heading says "version" because the
+             scenario's own rule family is a different fact, printed under that name on the setup
+             wizard's card (R2-05); this strip holds only the version, which no source defines. -->
         <div class="flex flex-wrap items-baseline gap-2">
             <p class="text-sm font-medium text-ink-strong">{{ props.scenario.label }}</p>
             <ScenarioStatusBadge :documented="props.scenario.documented" />
         </div>
 
         <p class="text-xs text-ink-muted">
-            Ruleset:
+            Ruleset version:
             <span :title="props.scenario.version_title">N/A</span>.
             {{ props.scenario.version_title }}
         </p>
