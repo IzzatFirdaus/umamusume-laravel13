@@ -245,7 +245,15 @@ it('lists the deck cards entered for that training with their stated anchors, an
         ->assertInertia(fn (Assert $page) => $page
             ->where('deck.recorded', false)
             ->where('deck.slots', 0)
-            ->where('options.0.supports', []));
+            ->where('options.0.supports', [])
+            // R2-18: the screen's "record a deck" door belongs to this run. It pointed at
+            // `/career/setup/deck`, which is step 5 of a new wizard rather than this career's deck, so
+            // following it abandoned the run being trained and started an unrelated setup draft.
+            ->where('run.deck_url', route('runs.deck', $noDeck)));
+
+    // And the wizard's step is not printed as a path on this screen any more, in markup or in script.
+    expect(file_get_contents(resource_path('js/pages/Career/TrainingDetail.vue')))
+        ->not->toContain('/career/setup/deck');
 });
 
 it('carries a Wit deck card onto the Wit card under the client word, not the export key', function (): void {

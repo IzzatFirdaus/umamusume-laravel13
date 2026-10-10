@@ -139,6 +139,9 @@ class TrainingDecisionController extends Controller
                 : 'No scenario set',
             'run_url' => route('runs.cockpit', $run),
             'cockpit_url' => route('runs.cockpit', $run),
+            // The deck this screen counts is the run's own, so the link that offers to fill it goes to
+            // the run-scoped builder rather than the wizard's step (R2-18).
+            'deck_url' => route('runs.deck', $run),
         ];
     }
 

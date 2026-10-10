@@ -70,6 +70,7 @@ const props = defineProps<{
         scenario_label: string;
         run_url: string;
         cockpit_url: string;
+        deck_url: string;
     };
     options: Option[];
     deck: { recorded: boolean; slots: number };
@@ -600,8 +601,8 @@ const capFor = (label: string): number =>
             </template>
             <template v-else>
                 No Support Cards are recorded for this run, so no card above can count a support.
-                <a href="/career/setup/deck" class="inline-flex min-h-11 items-center font-medium text-ink-strong underline">
-                    Deck step
+                <a :href="props.run.deck_url" class="inline-flex min-h-11 items-center font-medium text-ink-strong underline">
+                    Record this run&apos;s deck
                 </a>
             </template>
         </p>
