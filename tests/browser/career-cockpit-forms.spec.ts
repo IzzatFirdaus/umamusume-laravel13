@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
+import { expectTapTargets } from '../utils/tap-targets';
 
 /*
  * The Cockpit's write controls (F2, plan §9.6 rulings 1, 2 and 4): the three header edit forms (status,
@@ -211,6 +212,19 @@ test('deletes the career through the two-step disclosure', async ({ page }) => {
     if (index >= 0) {
         createdRunUrls.splice(index, 1);
     }
+});
+
+test('sizes the controls a two-step disclosure reveals once it is open', async ({ page }) => {
+    await openCockpit(page);
+
+    // The page-wide sweeps skip a control inside a collapsed `<details>`: the browser does not lay it
+    // out, so it has no box and is not a target anyone can hit (KI-92). That skip is only honest if the
+    // control is measured where it does become a target, which is what this case does — it opens the
+    // run-delete door and asserts the floor on what the disclosure reveals.
+    const deleteDoor = page.locator('details', { has: page.getByText('Delete this career') });
+    await deleteDoor.locator('summary').click();
+
+    await expectTapTargets(deleteDoor.locator('a, button'));
 });
 
 test('links both exports as file downloads', async ({ page }) => {

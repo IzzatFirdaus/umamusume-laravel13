@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { expectTapTargets } from '../utils/tap-targets';
 
 /*
  * SCREEN-014, the URA panel (plan §9 E2, `SCR-CAR-020`).
@@ -199,28 +200,10 @@ test('reaches the race door from the keyboard without losing focus', async ({ pa
 test('keeps the 44px floor and reflows at 320 px with the panel drawn', async ({ page }) => {
     await openUraCockpit(page, DEBUT_TURN - 1);
 
-    const targets = page.locator('main a, main button');
-    const count = await targets.count();
-    expect(count, 'the cockpit renders no control at all').toBeGreaterThan(0);
-
-    let measured = 0;
-
-    for (let i = 0; i < count; i++) {
-        const target = targets.nth(i);
-
-        // A control inside a collapsed `<details>` has no box to size: it is not a target anyone can
-        // reach, by pointer or by keyboard. The floor is asserted on every control that is placed.
-        if (!(await target.isVisible())) {
-            continue;
-        }
-
-        measured++;
-        const box = await target.boundingBox();
-        expect(box?.height ?? 0, `visible control ${i} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
-    }
-
-    // The guard that keeps the skip above from becoming a way to pass on nothing.
-    expect(measured, 'no control was visible to measure').toBeGreaterThan(8);
+    // The page-wide sweep through the shared helper, which is where the collapsed-disclosure rule now
+    // lives (KI-92). 9 is the `> 8` this spec already held: enough to prove the sweep measured a page,
+    // and it is what keeps the helper's skip from becoming a way to pass on nothing.
+    await expectTapTargets(page.locator('main a, main button'), 9);
 
     await page.setViewportSize({ width: 320, height: 700 });
     await expect(page.getByRole('region', { name: 'Scenario' })).toBeVisible();

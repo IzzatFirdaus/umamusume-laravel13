@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { expectTapTargets } from '../utils/tap-targets';
 
 /*
  * The Unity Cup Team Cockpit (SCREEN-015, plan §9.1). `UnityCupPanelTest` asserts the `team`
@@ -188,15 +189,10 @@ test('reaches the panel by keyboard without adding a control or trapping focus',
 test('sizes the panel controls to the 44px contract and reflows at 320 px', async ({ page }) => {
     await openUnityCupCockpit(page);
 
-    // The same page-wide sweep E1 runs: the panel's own regions add no smaller target.
-    const targets = page.locator('main a, main button');
-    const count = await targets.count();
-    expect(count, 'the cockpit renders no control at all').toBeGreaterThan(0);
-
-    for (let i = 0; i < count; i++) {
-        const box = await targets.nth(i).boundingBox();
-        expect(box?.height ?? 0, `control ${i} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
-    }
+    // The same page-wide sweep E1 runs, now through the shared helper: it skips what a collapsed
+    // disclosure hides and asserts it measured something. 10 is well under the ~17 controls this page
+    // carries.
+    await expectTapTargets(page.locator('main a, main button'), 10);
 
     // WCAG 1.4.10: both columns stack at 320 and nothing scrolls sideways.
     await page.setViewportSize({ width: 320, height: 900 });

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { expectTapTargets } from '../utils/tap-targets';
 
 /*
  * The scenario panel shell, `SCR-CAR-019` (SCREEN-014 / 015 / 016, plan §9 E1). `ScenarioPanelTest`
@@ -164,15 +165,10 @@ test('keeps the 44px floor across the cockpit and reflows at 320 px', async ({ p
     // The panel adds no control of its own in E1 — every resource it draws is a reading, and its
     // panels arrive with E2 to E4 — so a sweep of the panel alone would be a check that cannot
     // fail. The sweep runs over the page with the panel mounted instead, which is where a target
-    // the panel displaced would show up.
-    const targets = page.locator('main a, main button');
-    const count = await targets.count();
-    expect(count, 'the cockpit renders no control at all').toBeGreaterThan(0);
-
-    for (let i = 0; i < count; i++) {
-        const box = await targets.nth(i).boundingBox();
-        expect(box?.height ?? 0, `control ${i} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
-    }
+    // the panel displaced would show up. `expectTapTargets` skips what a collapsed disclosure hides
+    // and asserts it measured something; 10 is well under the ~17 controls this page carries, so a
+    // selector that stopped matching still fails.
+    await expectTapTargets(page.locator('main a, main button'), 10);
 
     await page.setViewportSize({ width: 320, height: 700 });
     await expect(page.getByRole('region', { name: 'Scenario' })).toBeVisible();

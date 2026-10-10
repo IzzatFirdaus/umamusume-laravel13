@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { expectTapTargets } from '../utils/tap-targets';
 
 /*
  * The Trackblazer scenario panel (SCREEN-016, plan §9 E4, `SCR-CAR-022`). `TrackblazerPanelTest`
@@ -223,14 +224,10 @@ test('lands the Shop jump from the Cockpit action area with focus on the heading
 });
 
 test('sizes every control to the 44px contract and reflows at 320 px', async ({ page }) => {
-    const targets = page.locator('main a, main button');
-    const count = await targets.count();
-    expect(count, 'the cockpit renders no control at all').toBeGreaterThan(0);
-
-    for (let i = 0; i < count; i++) {
-        const box = await targets.nth(i).boundingBox();
-        expect(box?.height ?? 0, `control ${i} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
-    }
+    // The page-wide sweep the other panel specs run, now through the shared helper: it skips what a
+    // collapsed disclosure hides and asserts it measured something. 10 is well under the ~17 controls
+    // this page carries.
+    await expectTapTargets(page.locator('main a, main button'), 10);
 
     // WCAG 1.4.10: at 320 the page reflows; nothing scrolls sideways. The rival list caps at
     // eight rows so the Junior-Year seed's 50+ entries do not push the page over the width;

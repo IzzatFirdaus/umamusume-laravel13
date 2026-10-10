@@ -167,6 +167,9 @@ test.describe('Build Target and the provenance badge', () => {
         await page.goto('/career/setup/target');
         await page.locator('#app > *').first().waitFor();
 
+        // This sweep has the collapsed-disclosure hole KI-92 fixed: a control inside a closed
+        // `<details>` has no box and reads as 0. The target step holds no `<details>` today; when one
+        // lands, move the sweep to `expectTapTargets` in `tests/utils/tap-targets.ts`.
         const controls = await page.locator('main a, main button, main input, main select').all();
 
         expect(controls.length).toBeGreaterThan(10);

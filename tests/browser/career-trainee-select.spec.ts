@@ -171,6 +171,9 @@ test.describe('Trainee Selection and Profile', () => {
 
         // Every control the roster body renders: both actions on each card, the filter form, the step
         // link and every pagination link.
+        // This sweep has the collapsed-disclosure hole KI-92 fixed: a control inside a closed
+        // `<details>` has no box and reads as 0. The trainee step holds no `<details>` today; when one
+        // lands, move the sweep to `expectTapTargets` in `tests/utils/tap-targets.ts`.
         const controls = await page.locator('main a, main button, main input, main select').all();
 
         for (const control of controls) {

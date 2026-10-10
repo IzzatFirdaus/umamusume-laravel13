@@ -270,6 +270,9 @@ test('the three reference views keep every control at the 44px floor', async ({ 
         await page.goto(url, { waitUntil: 'domcontentloaded' });
         await page.locator('#app > *').first().waitFor();
 
+        // This sweep has the collapsed-disclosure hole KI-92 fixed: a control inside a closed
+        // `<details>` has no box and reads as 0. No `<details>` sits on these three views today; when one
+        // lands, move the sweep to `expectTapTargets` in `tests/utils/tap-targets.ts`.
         const targets = page.locator('main a, main button');
         const count = await targets.count();
         expect(count, `${url} renders no control at all`).toBeGreaterThan(0);
