@@ -12,28 +12,28 @@ use App\Models\Umamusume;
 use App\Services\Advisor\TrainerAdvisor;
 use Inertia\Testing\AssertableInertia as Assert;
 
- /*
- * The finale's payload vocabulary, sourced from `app/Services/Scenario/FinaleReader.php` (the one
- * reader behind `finale_state` on the Cockpit at `CockpitController.php:678` and `finale` on the
- * Career Result at `ResultController.php:72`), and the determinations recorded in the plan's
- * Slice 19 and Slice 20 bodies at `docs/Our-Grand-Concert-plan.md:786` and `:811`.
- *
- * Before this commit one word answered two questions on two screens. `scenario.finale` on the Cockpit
- * was what `config/scenarios.php` declares a scenario composes, and it is null for three of the four
- * `[Global]` scenarios; `finale` on the Career Result was this run's own position, read from the
- * catalogue by `FinaleReader`. Two readers of one payload family could take a null structure for "this
- * career has no finale", which is the false absence `CockpitController::finaleAbsence()` exists to
- * refuse, and the Result screen's `finale` was silently a different object from the Cockpit's.
- *
- * Now: the reading is `finale_state` everywhere, the declaration is `scenario.finale_structure` on the
- * surface that carries it, and the config's own spelling stays `finale` because that key is a layout
- * input, not a payload (`AGENTS.md` §7). The advisor's proximity line keeps the short word: it lives
- * under `advisor`, beside action, band, reasons, alternative and risk, and it is a shape of its own
- * (label, state, turns_away), so the collision it could not cause is the one it is not named for.
- *
- * These cases pin the naming and the agreement, which is what a rename is worth when it is worth
- * anything: not that the keys changed, but that one run now reads the same words on both screens.
- */
+/*
+* The finale's payload vocabulary, sourced from `app/Services/Scenario/FinaleReader.php` (the one
+* reader behind `finale_state` on the Cockpit at `CockpitController.php:678` and `finale` on the
+* Career Result at `ResultController.php:72`), and the determinations recorded in the plan's
+* Slice 19 and Slice 20 bodies at `docs/Our-Grand-Concert-plan.md:786` and `:811`.
+*
+* Before this commit one word answered two questions on two screens. `scenario.finale` on the Cockpit
+* was what `config/scenarios.php` declares a scenario composes, and it is null for three of the four
+* `[Global]` scenarios; `finale` on the Career Result was this run's own position, read from the
+* catalogue by `FinaleReader`. Two readers of one payload family could take a null structure for "this
+* career has no finale", which is the false absence `CockpitController::finaleAbsence()` exists to
+* refuse, and the Result screen's `finale` was silently a different object from the Cockpit's.
+*
+* Now: the reading is `finale_state` everywhere, the declaration is `scenario.finale_structure` on the
+* surface that carries it, and the config's own spelling stays `finale` because that key is a layout
+* input, not a payload (`AGENTS.md` §7). The advisor's proximity line keeps the short word: it lives
+* under `advisor`, beside action, band, reasons, alternative and risk, and it is a shape of its own
+* (label, state, turns_away), so the collision it could not cause is the one it is not named for.
+*
+* These cases pin the naming and the agreement, which is what a rename is worth when it is worth
+* anything: not that the keys changed, but that one run now reads the same words on both screens.
+*/
 
 function finaleVocabularyRun(string $scenario = 'our_grand_concert'): TrainingRun
 {
@@ -158,5 +158,5 @@ it('leaves the advisor proximity line under `advisor` and apart from the state',
         // word for one turn out is `next` rather than a count.
         ->and($advisor['finale']['turns_away'])->toBeBetween(1, TrainerAdvisor::FINALE_TURNS_AHEAD)
         ->and($advisor['finale']['state'])
-            ->toBe($advisor['finale']['turns_away'] === 1 ? 'next' : 'upcoming');
+        ->toBe($advisor['finale']['turns_away'] === 1 ? 'next' : 'upcoming');
 });
