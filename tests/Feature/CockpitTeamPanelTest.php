@@ -74,6 +74,56 @@ final class CockpitTeamPanelTest extends TestCase
     }
 
     /**
+     * R2-14: the Cockpit's team editor writes what the panel already printed.
+     *
+     * The read half is pinned above; these two pin the write half, through the same `runs.update` route
+     * and `StoreTrainingRunRequest` the header forms use.
+     */
+    public function test_records_the_team_identity_through_the_cockpit_and_reads_it_back(): void
+    {
+        $run = $this->unityCupRun();
+
+        $this->put(route('runs.update', $run), [
+            'umamusume_id' => $run->umamusume_id,
+            'status' => RunStatus::Active->value,
+            'team_name' => 'Blue Bloom',
+            'team_motto' => 'Dreaming Big',
+            'team_league_placement' => 8,
+            'team_preseason_wins' => 4,
+        ])->assertRedirect(route('runs.cockpit', $run));
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.team_name', 'Blue Bloom')
+                ->where('scenario.team.team_motto', 'Dreaming Big')
+                ->where('scenario.team.team_league_placement', 8)
+                ->where('scenario.team.team_preseason_wins', 4));
+    }
+
+    public function test_clearing_a_team_field_records_it_as_unstated_rather_than_zero(): void
+    {
+        $run = $this->unityCupRun([
+            'team_name' => 'Blue Bloom',
+            'team_league_placement' => 8,
+        ]);
+
+        // The editor posts `null` for a field the Trainer cleared. Zero is not a league placement the
+        // client shows, so the absence has to survive as an absence (D-220).
+        $this->put(route('runs.update', $run), [
+            'umamusume_id' => $run->umamusume_id,
+            'status' => RunStatus::Active->value,
+            'team_name' => null,
+            'team_league_placement' => null,
+        ])->assertSessionHasNoErrors();
+
+        $fresh = $run->fresh();
+
+        expect($fresh->team_name)->toBeNull()
+            ->and($fresh->team_league_placement)->toBeNull();
+    }
+
+    /**
      * @param  array<string, mixed>  $state
      */
     private function unityCupRun(array $state = []): TrainingRun

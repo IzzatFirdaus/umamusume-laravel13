@@ -142,10 +142,37 @@ test('records the trainee rarity, potential and growth rate through the identity
 
     await page.getByRole('button', { name: 'Save identity' }).click();
 
-    // The career bar is the read-back: it prints `★3 · Potential 2` once both halves are stated, and
-    // the growth row it prints beside them comes from the same write (R2-13).
+    // The header is the read-back: it prints `★3 · Potential 2` once both halves are stated, and the
+    // growth row it prints beside them comes from the same write (R2-13).
     await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
     await expect(page.locator('section[aria-labelledby="career-header-heading"]').getByText('★3 · Potential 2')).toBeVisible();
+});
+
+test('records the Unity Cup team state through the team editor', async ({ page }) => {
+    await openCockpit(page);
+
+    // The editor is a disclosure, so its controls have no box until it opens: the sweep runs after the
+    // click, which is the KI-92 lesson.
+    const editor = page.locator('details', { has: page.getByText('Edit team state') });
+    await editor.locator('summary').click();
+
+    await expectTapTargets(editor.locator('input, button'), 8);
+
+    await editor.locator('input[name="team_name"]').fill('Blue Bloom');
+    await editor.locator('input[name="team_motto"]').fill('Dreaming Big');
+    await editor.locator('input[name="team_league_placement"]').fill('8');
+    await editor.locator('input[name="team_preseason_wins"]').fill('4');
+    await editor.locator('input[name="unity_trainings_count"]').fill('55');
+    await editor.locator('input[name="spirit_bursts_count"]').fill('6');
+    await editor.locator('input[name="extreme_bursts_count"]').fill('5');
+
+    await editor.getByRole('button', { name: 'Save team state' }).click();
+
+    // The write redirects back to the Cockpit, where the Team panel prints the team it was told about.
+    // The editor's own inputs hold the same words, but `getByText` reads text nodes, not field values.
+    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
+    await expect(page.getByText('Blue Bloom')).toBeVisible();
+    await expect(page.getByText('Dreaming Big')).toBeVisible();
 });
 
 test('switches the correction to another turn through the selector', async ({ page }) => {

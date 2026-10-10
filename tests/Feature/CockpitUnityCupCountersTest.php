@@ -82,6 +82,61 @@ final class CockpitUnityCupCountersTest extends TestCase
     }
 
     /**
+     * R2-14: the Cockpit's team editor writes the counters the panel already printed.
+     *
+     * The read half is pinned above; these two pin the write half, through the same `runs.update` route
+     * and `StoreTrainingRunRequest` the header forms use.
+     */
+    public function test_records_the_counters_through_the_cockpit_and_reads_them_back(): void
+    {
+        $run = $this->unityCupRun();
+
+        $this->put(route('runs.update', $run), [
+            'umamusume_id' => $run->umamusume_id,
+            'status' => RunStatus::Active->value,
+            'unity_trainings_count' => 55,
+            'spirit_bursts_count' => 6,
+            'extreme_bursts_count' => 5,
+        ])->assertRedirect(route('runs.cockpit', $run));
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.unity_trainings_count', 55)
+                ->where('scenario.team.spirit_bursts_count', 6)
+                ->where('scenario.team.extreme_bursts_count', 5)
+                ->where('scenario.team.combined_bursts', 11)
+                ->where('scenario.team.burst_band', '10–12'));
+    }
+
+    public function test_keeps_a_zero_counter_apart_from_an_unstated_one(): void
+    {
+        $run = $this->unityCupRun();
+
+        // `0` is a tally the Trainer read and a blank was never stated, so the two must not collapse:
+        // the combined band is drawn from the two burst tallies, and a stored zero would place the run.
+        $this->put(route('runs.update', $run), [
+            'umamusume_id' => $run->umamusume_id,
+            'status' => RunStatus::Active->value,
+            'unity_trainings_count' => 0,
+            'spirit_bursts_count' => 0,
+            'extreme_bursts_count' => null,
+        ])->assertSessionHasNoErrors();
+
+        $fresh = $run->fresh();
+
+        expect($fresh->unity_trainings_count)->toBe(0)
+            ->and($fresh->spirit_bursts_count)->toBe(0)
+            ->and($fresh->extreme_bursts_count)->toBeNull();
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.combined_bursts', null)
+                ->where('scenario.team.burst_band', null));
+    }
+
+    /**
      * @param  array<string, mixed>  $state
      */
     private function unityCupRun(array $state = []): TrainingRun

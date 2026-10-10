@@ -1,0 +1,175 @@
+<script setup lang="ts">
+/*
+ * The Unity Cup team state, editable (R2-14).
+ *
+ * A sibling of `components/scenario/UnityCupPanel.vue` rather than an extension of it. That component
+ * is a panel-registry member: the shell mounts it to *read* the §49 section, its props come from the
+ * registry bundle, and it owns no write surface. Giving it one would thread edit state through the
+ * registry for a single caller. This one is run-scoped, is rendered by the Cockpit alone, and posts
+ * the same `runs.update` route the header forms use.
+ *
+ * Every field is null until a Trainer states it, so an empty input posts `null` and never `0`: zero is
+ * not a league placement, and a zero burst count is a real reading rather than an unstated one (D-220).
+ * The labels are `UnityCupPanel.vue`'s own words, so the editor and the panel it edits name one fact
+ * once.
+ */
+import { useForm } from '@inertiajs/vue3';
+
+const props = defineProps<{
+    /** `route('runs.update', $run)`, supplied by the server like the header forms' own action. */
+    action: string;
+    /** Carried because `StoreTrainingRunRequest` requires both on every write to that route. */
+    umamusumeId: number;
+    status: string;
+    /** The run's team payload as `CockpitController` sends it, every field nullable. */
+    team: {
+        team_name: string | null;
+        team_motto: string | null;
+        team_league_placement: number | null;
+        team_preseason_wins: number | null;
+        unity_trainings_count: number | null;
+        spirit_bursts_count: number | null;
+        extreme_bursts_count: number | null;
+    };
+}>();
+
+const text = (value: string | null): string => value ?? '';
+const numeric = (value: number | null): string => (value === null ? '' : String(value));
+
+const form = useForm({
+    umamusume_id: String(props.umamusumeId),
+    status: props.status,
+    team_name: text(props.team.team_name),
+    team_motto: text(props.team.team_motto),
+    team_league_placement: numeric(props.team.team_league_placement),
+    team_preseason_wins: numeric(props.team.team_preseason_wins),
+    unity_trainings_count: numeric(props.team.unity_trainings_count),
+    spirit_bursts_count: numeric(props.team.spirit_bursts_count),
+    extreme_bursts_count: numeric(props.team.extreme_bursts_count),
+});
+
+const save = (): void => {
+    form
+        // A blank field is "not stated" and `0` is a figure the Trainer read, so the two are kept
+        // apart here rather than collapsed by a `Number('')` on the way out (D-220).
+        .transform((data) => {
+            // `v-model` on a number input hands back a number once one is typed and `''` when the
+            // field is cleared, so the blank test is an identity check and never a `.trim()`: a
+            // number has no `trim`, which is how the first cut of this threw at submit.
+            const figure = (value: string): number | null => (value === '' ? null : Number(value));
+
+            return {
+                ...data,
+                team_name: data.team_name.trim() === '' ? null : data.team_name,
+                team_motto: data.team_motto.trim() === '' ? null : data.team_motto,
+                team_league_placement: figure(data.team_league_placement),
+                team_preseason_wins: figure(data.team_preseason_wins),
+                unity_trainings_count: figure(data.unity_trainings_count),
+                spirit_bursts_count: figure(data.spirit_bursts_count),
+                extreme_bursts_count: figure(data.extreme_bursts_count),
+            };
+        })
+        .put(props.action, { preserveScroll: true });
+};
+</script>
+
+<template>
+    <details class="mt-3 rounded-md border border-rule bg-panel p-4">
+        <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+            Edit team state
+        </summary>
+
+        <form class="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2" @submit.prevent="save">
+            <label for="team_name" class="flex flex-col gap-1">
+                <span class="text-ink-muted">Team name</span>
+                <input
+                    id="team_name"
+                    v-model="form.team_name"
+                    type="text"
+                    name="team_name"
+                    maxlength="255"
+                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                >
+            </label>
+            <label for="team_motto" class="flex flex-col gap-1">
+                <span class="text-ink-muted">Team motto</span>
+                <input
+                    id="team_motto"
+                    v-model="form.team_motto"
+                    type="text"
+                    name="team_motto"
+                    maxlength="255"
+                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                >
+            </label>
+            <label for="team_league_placement" class="flex flex-col gap-1">
+                <span class="text-ink-muted">League placement</span>
+                <input
+                    id="team_league_placement"
+                    v-model="form.team_league_placement"
+                    type="number"
+                    name="team_league_placement"
+                    min="1"
+                    max="99"
+                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                >
+            </label>
+            <label for="team_preseason_wins" class="flex flex-col gap-1">
+                <span class="text-ink-muted">Preseason wins</span>
+                <input
+                    id="team_preseason_wins"
+                    v-model="form.team_preseason_wins"
+                    type="number"
+                    name="team_preseason_wins"
+                    min="0"
+                    max="4"
+                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                >
+            </label>
+            <label for="unity_trainings_count" class="flex flex-col gap-1">
+                <span class="text-ink-muted">Unity Trainings</span>
+                <input
+                    id="unity_trainings_count"
+                    v-model="form.unity_trainings_count"
+                    type="number"
+                    name="unity_trainings_count"
+                    min="0"
+                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                >
+            </label>
+            <label for="spirit_bursts_count" class="flex flex-col gap-1">
+                <span class="text-ink-muted">Spirit Bursts</span>
+                <input
+                    id="spirit_bursts_count"
+                    v-model="form.spirit_bursts_count"
+                    type="number"
+                    name="spirit_bursts_count"
+                    min="0"
+                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                >
+            </label>
+            <label for="extreme_bursts_count" class="flex flex-col gap-1">
+                <span class="text-ink-muted">Extreme Bursts</span>
+                <input
+                    id="extreme_bursts_count"
+                    v-model="form.extreme_bursts_count"
+                    type="number"
+                    name="extreme_bursts_count"
+                    min="0"
+                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                >
+            </label>
+
+            <div class="flex flex-col gap-1">
+                <button
+                    type="submit"
+                    class="mt-1 inline-flex min-h-11 w-fit items-center rounded-full border-2 border-rule px-4 font-bold text-ink-strong disabled:opacity-60"
+                    :disabled="form.processing"
+                >
+                    {{ form.processing ? 'Saving…' : 'Save team state' }}
+                </button>
+                <p v-if="form.recentlySuccessful" class="text-xs text-ink-muted">Saved.</p>
+            </div>
+        </form>
+    </details>
+</template>

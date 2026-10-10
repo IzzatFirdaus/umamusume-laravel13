@@ -30,6 +30,7 @@ import ActionGrid from '../../components/career/ActionGrid.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
 import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
+import UnityCupEditor from '../../components/career/UnityCupEditor.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { TURN_ENTRY_ENERGY_BANDS as energyBands, TURN_ENTRY_ENERGY_STATES as energyStates, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 import { computed, nextTick, ref, watch } from 'vue';
@@ -145,6 +146,32 @@ const empty = computed(() => props.header.turn === 0);
 // The door an objective can be settled at, read off the grid's own entries rather than from a second
 // route table. The grid already owns the href, and a due obligation with no door renders none.
 const raceDoor = computed(() => props.actions.find((action) => action.key === 'race')?.href ?? null);
+
+/*
+ * The Unity Cup team editor (R2-14). The team system is the scenario's own, so the matrix's
+ * `team_rank_ladder` panel flag decides whether the editor renders: a scenario name written into this
+ * page would be the defect AGENTS.md §7 forbids. The payload's key set is uniform across scenarios, so
+ * the flag and not the payload's presence is what gates the control.
+ *
+ * The shape is declared here rather than imported from the editor, because a `.vue` file's prop type
+ * cannot be imported; the two are structurally identical by construction.
+ */
+interface TeamState {
+    team_name: string | null;
+    team_motto: string | null;
+    team_league_placement: number | null;
+    team_preseason_wins: number | null;
+    unity_trainings_count: number | null;
+    spirit_bursts_count: number | null;
+    extreme_bursts_count: number | null;
+}
+
+const teamState = computed((): TeamState | null => (props.scenario as { team?: TeamState }).team ?? null);
+
+const composesTeamPanel = computed(
+    (): boolean =>
+        (props.scenario as { panels?: Record<string, { on?: boolean }> }).panels?.team_rank_ladder?.on === true,
+);
 
 /*
  * The manual correction (design-2.0 §38). One disclosure holding every field of the latest turn, put
@@ -582,6 +609,14 @@ const jumpToShop = (): void => {
                 </li>
             </ul>
         </section>
+
+        <UnityCupEditor
+            v-if="composesTeamPanel && teamState !== null"
+            :action="props.run.update_url"
+            :umamusume-id="props.run.umamusume_id"
+            :status="props.run.status"
+            :team="teamState"
+        />
 
         <!-- The spec's order, as CSS only. `order-*` drives the single mobile column; from `md` up the
              explicit row and column placement takes over, so the tablet strip and the desktop
