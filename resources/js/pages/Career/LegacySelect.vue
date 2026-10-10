@@ -212,8 +212,8 @@ const nodeSparks = (index: number): SparkRow[] =>
         stars: spark.stars === '' ? null : Number(spark.stars),
     }));
 
-const errorFor = (index: number): string | undefined =>
-    (form.errors as Record<string, string | undefined>)[`legacies.${index}.legacy_id`];
+const errorFor = (index: number, field = 'legacy_id'): string | undefined =>
+    (form.errors as Record<string, string | undefined>)[`legacies.${index}.${field}`];
 
 const ancestorError = (index: number, slot: number): string | undefined =>
     (form.errors as Record<string, string | undefined>)[`legacies.${index}.ancestors.${slot}`];
@@ -436,8 +436,21 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                 type="text"
                                 list="known-rank-letters"
                                 autocomplete="off"
+                                :aria-describedby="
+                                    errorFor(index, 'rank_letter') ? `rank-letter-${parent.slot}-error` : undefined
+                                "
                                 class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
                             >
+                            <!-- A refused letter is a fact about this field, and the save that carried it
+                                 was dropped whole. The refusal prints beside the control that caused it,
+                                 in words, and names itself to the field (`ancestor-*` errors do the same). -->
+                            <p
+                                v-if="errorFor(index, 'rank_letter')"
+                                :id="`rank-letter-${parent.slot}-error`"
+                                class="mt-1 text-xs text-risk"
+                            >
+                                {{ errorFor(index, 'rank_letter') }}
+                            </p>
                             <p class="mt-1 text-xs text-ink-muted">
                                 The letter the client shows, from its own set. Blank stays not recorded.
                             </p>

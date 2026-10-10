@@ -60,3 +60,32 @@ it('renders the letter rank on the setup ancestry step', function (): void {
             ->where('graph.parents.0.rank_letter', 'B+')
             ->has('rankLetters'));
 });
+
+it('accepts the UG letter rank the client shows for a Legacy', function (): void {
+    // The canonical Rice Shower ancestry reads Legacy 2 at rank UG, and both of her grandparents too
+    // (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:153-155`), so the write boundary must accept the
+    // letter the client prints. It did not: `Rule::in(RANK_LETTERS)` stopped at `S+` and the refusal
+    // never reached the screen (the Phase 1 walk of 2026-10-11), so one unlisted letter silently
+    // discarded the whole Legacy save.
+    $this->put(route('career.legacy.store'), [
+        'affinity' => null,
+        'legacies' => [
+            [
+                'legacy_id' => null,
+                'rank' => null,
+                'rank_letter' => 'UG',
+                'is_guest' => false,
+                'ancestors' => [null, null],
+                'sparks' => [],
+            ],
+            [
+                'legacy_id' => null,
+                'rank' => null,
+                'rank_letter' => null,
+                'is_guest' => false,
+                'ancestors' => [null, null],
+                'sparks' => [],
+            ],
+        ],
+    ])->assertSessionHasNoErrors();
+});

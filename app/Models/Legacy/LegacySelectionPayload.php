@@ -53,9 +53,12 @@ final readonly class LegacySelectionPayload
 
     /**
      * The letter ranks the client shows for a Legacy's own standing, as read off the screen. Small on
-     * purpose: this is the vocabulary the client prints, not a computed grade.
+     * purpose: this is the vocabulary the client prints, not a computed grade. `UG` is the letter the
+     * canonical Rice Shower ancestry prints for Legacy 2 and both of her grandparents
+     * (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:153-155`); it was missing until the Phase 1 walk of
+     * 2026-10-11, and its absence discarded the whole Legacy save rather than the one field.
      */
-    public const RANK_LETTERS = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'S', 'B+', 'A+', 'S+'];
+    public const RANK_LETTERS = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'S', 'B+', 'A+', 'S+', 'UG'];
 
     public const SPARK_KEYS = ['kind', 'target', 'stars'];
 

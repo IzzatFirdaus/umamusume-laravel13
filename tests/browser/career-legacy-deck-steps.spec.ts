@@ -150,6 +150,24 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.locator('input[type="checkbox"]').first()).not.toBeChecked();
         await expect(page.getByText('Rented from a friend')).toBeVisible();
     });
+
+    test('names the refusal where the rank letter was typed, and does not report a save', async ({ page }) => {
+        await hydrate(page, '/career/setup/legacy');
+
+        // A letter outside the client's set. The request refuses it and drops the whole Legacy write,
+        // so the Trainer needs to see which field the refusal is about: before this case the screen
+        // printed nothing at all and the presses looked like they had done nothing (Phase 1 walk,
+        // 2026-10-11).
+        await page.locator('#rank-letter-parent_a').fill('SS');
+        await page.getByRole('button', { name: 'Save Legacy' }).click();
+
+        await expect(page.getByText(/rank_letter is invalid/)).toBeVisible();
+        await expect(page.locator('#rank-letter-parent_a')).toHaveAttribute(
+            'aria-describedby',
+            'rank-letter-parent_a-error',
+        );
+        await expect(page.getByText('Legacy recorded.')).toHaveCount(0);
+    });
 });
 
 test.describe('Setup step 5 — Support deck', () => {
