@@ -130,6 +130,24 @@ test('reports the grade-point period on a scenario that composes one', async ({ 
     await expect(period).toHaveValue('1');
 });
 
+test('records the trainee rarity, potential and growth rate through the identity editor', async ({ page }) => {
+    await openCockpit(page);
+
+    await page.selectOption('#trainee_rarity', '3');
+    await page.locator('#potential_level').fill('2');
+
+    for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
+        await page.locator(`input[name="growth_rate[${stat}]"]`).fill(stat === 'Stamina' ? '10' : '0');
+    }
+
+    await page.getByRole('button', { name: 'Save identity' }).click();
+
+    // The career bar is the read-back: it prints `★3 · Potential 2` once both halves are stated, and
+    // the growth row it prints beside them comes from the same write (R2-13).
+    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
+    await expect(page.locator('section[aria-labelledby="career-header-heading"]').getByText('★3 · Potential 2')).toBeVisible();
+});
+
 test('switches the correction to another turn through the selector', async ({ page }) => {
     const cockpitUrl = await openCockpit(page);
     const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
@@ -165,6 +183,8 @@ test('saves a correction and returns to the cockpit with the new value', async (
     const correction = page.locator('details', { has: page.getByText('Correct turn 1 by hand') });
     // `.first()`: the delete disclosure nests inside the correction one, so both carry a `summary`.
     await correction.locator('summary').first().click();
+    // R2-16: the state radio governs whether the number input renders, so pick `Exact` before the figure.
+    await correction.getByRole('radio', { name: 'Exact' }).check();
     await correction.locator('input[name="energy"]').fill('60');
     await correction.getByRole('button', { name: 'Save correction' }).click();
 

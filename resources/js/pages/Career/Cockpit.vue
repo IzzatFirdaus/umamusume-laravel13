@@ -310,6 +310,47 @@ const savePeriod = (): void => {
     periodForm.put(props.run.update_url, { preserveScroll: true });
 };
 
+/*
+ * The identity write (R2-13). The three forms above each carry the whole key set the request demands,
+ * because `umamusume_id` and `status` are required; this one does the same and adds the three facts the
+ * header already printed but nothing could enter. `growth_rate` is keyed by the stat matrix, so the
+ * request refuses a sixth stat rather than storing one (`StoreTrainingRunRequest`).
+ */
+const identityForm = useForm({
+    umamusume_id: String(props.run.umamusume_id ?? ''),
+    status: props.run.status,
+    trainee_rarity: props.identity.trainee_rarity === null ? '' : String(props.identity.trainee_rarity),
+    potential_level: props.identity.potential_level === null ? '' : String(props.identity.potential_level),
+    growth_rate: Object.fromEntries(
+        props.identity.stat_order.map((stat) => {
+            const value = props.identity.growth_rate?.[stat];
+
+            return [stat, value === null || value === undefined ? '' : String(value)];
+        }),
+    ) as Record<string, string>,
+});
+
+const saveIdentity = (): void => {
+    identityForm
+        // An empty field is "not stated" and `0` is a real figure, so the two are kept apart here
+        // rather than collapsed by a `Number('')` on the way out (D-220). A growth row with nothing
+        // stated is `null` rather than five nulls: the request's own contract is that a run which
+        // stated no growth stores no row.
+        .transform((data) => {
+            const growth = Object.fromEntries(
+                Object.entries(data.growth_rate).map(([stat, value]) => [stat, value === '' ? null : Number(value)]),
+            );
+
+            return {
+                ...data,
+                trainee_rarity: data.trainee_rarity === '' ? null : Number(data.trainee_rarity),
+                potential_level: data.potential_level === '' ? null : Number(data.potential_level),
+                growth_rate: Object.values(growth).every((value) => value === null) ? null : growth,
+            };
+        })
+        .put(props.run.update_url, { preserveScroll: true });
+};
+
 const deleteForm = useForm({});
 
 const deleteRun = (): void => {
@@ -454,6 +495,72 @@ const jumpToShop = (): void => {
                 </li>
 
                 <li class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Trainee rarity and potential</span>
+                    <!-- R2-13: the header printed `★3 · Potential 2` and the growth row, and nothing
+                         could enter either. The same write as the three forms above, with the three
+                         facts added; empty stays "not stated" and `0` stays a real growth figure. -->
+                    <form @submit.prevent="saveIdentity" class="flex flex-col gap-2">
+                        <span class="flex flex-wrap items-end gap-3">
+                            <label for="trainee_rarity" class="flex flex-col gap-1">
+                                <span class="text-xs text-ink-muted">Rarity</span>
+                                <select
+                                    id="trainee_rarity"
+                                    v-model="identityForm.trainee_rarity"
+                                    name="trainee_rarity"
+                                    class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                                >
+                                    <option value="">Not stated</option>
+                                    <option v-for="rarity in [1, 2, 3]" :key="rarity" :value="String(rarity)">★{{ rarity }}</option>
+                                </select>
+                            </label>
+                            <label for="potential_level" class="flex flex-col gap-1">
+                                <span class="text-xs text-ink-muted">Potential Level</span>
+                                <input
+                                    id="potential_level"
+                                    v-model="identityForm.potential_level"
+                                    type="number"
+                                    name="potential_level"
+                                    min="1"
+                                    max="5"
+                                    class="min-h-11 w-24 rounded-md border border-rule bg-raised px-2 text-ink"
+                                >
+                            </label>
+                        </span>
+                        <fieldset class="flex flex-wrap items-end gap-3">
+                            <legend class="text-xs text-ink-muted">Growth rate</legend>
+                            <label
+                                v-for="stat in props.identity.stat_order"
+                                :key="stat"
+                                :for="`growth_rate_${stat}`"
+                                class="flex flex-col gap-1"
+                            >
+                                <span class="text-xs text-ink-muted">{{ stat }}</span>
+                                <span class="flex items-center gap-1">
+                                    <input
+                                        :id="`growth_rate_${stat}`"
+                                        v-model="identityForm.growth_rate[stat]"
+                                        type="number"
+                                        :name="`growth_rate[${stat}]`"
+                                        min="0"
+                                        max="30"
+                                        class="min-h-11 w-20 rounded-md border border-rule bg-raised px-2 text-ink"
+                                    >
+                                    <span class="text-ink-muted">%</span>
+                                </span>
+                            </label>
+                        </fieldset>
+                        <button
+                            type="submit"
+                            class="mt-1 inline-flex min-h-11 w-fit items-center rounded-full border-2 border-rule px-4 font-bold text-ink-strong disabled:opacity-60"
+                            :disabled="identityForm.processing"
+                        >
+                            {{ identityForm.processing ? 'Saving…' : 'Save identity' }}
+                        </button>
+                        <p v-if="identityForm.recentlySuccessful" class="text-xs text-ink-muted">Saved.</p>
+                    </form>
+                </li>
+
+                <li class="flex flex-col gap-1">
                     <span class="text-ink-muted">Export</span>
                     <!-- The export door (F2, plan §9.6). Both are GET file responses, so they are
                          plain links: routing a download through a redirect would turn it into an
@@ -556,6 +663,7 @@ const jumpToShop = (): void => {
                                     v-model="correctionForm.energy"
                                     type="number"
                                     name="energy"
+                                    aria-label="Energy figure"
                                     min="0"
                                     max="100"
                                     class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
@@ -564,6 +672,7 @@ const jumpToShop = (): void => {
                                     v-else-if="correctionForm.energy_state === 'band'"
                                     v-model="correctionForm.energy_band"
                                     name="energy_band"
+                                    aria-label="Energy band"
                                     class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
                                 >
                                     <option v-for="band in energyBands" :key="band.value" :value="band.value">{{ band.label }}</option>
