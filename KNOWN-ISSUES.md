@@ -2289,3 +2289,47 @@ as a prop either.
 **What remains open.** A one-link affordance, whose owner is the Architect: the natural door is the
 Cockpit's build-target region or the career bar, not the action grid, and the decision belongs with
 `ADR-0020` §1 rather than with a copy pass. Until then the route is reachable only by URL.
+
+### KI-92 Three Cockpit 44px sweeps size every control the DOM holds, so a collapsed disclosure's button fails them as a zero-height target - FILED 2026-10-10 (slice 11 browser verification), OPEN
+
+**Status: OPEN.** Found while verifying the scenario strip's heading rename in `tests/browser/scenario-panel.spec.ts`.
+Not caused by that rename, and not fixed by it: the change adds no interactive element, so the sweep's target list
+is the same list it had before.
+
+The case `keeps the 44px floor across the cockpit and reflows at 320 px` sizes `page.locator('main a, main button')`
+by index and requires each box to reach 44px (`scenario-panel.spec.ts:168-174`). The run-delete door is a
+two-step disclosure: its `<summary>` reads "Delete this career" and its `<button type="submit">` sits inside the
+`<details>` that opens it (`resources/js/pages/Career/Cockpit.vue:661-684`, the button carrying `min-h-11`). While
+the disclosure is closed that button is in the DOM with no box, so `boundingBox()` answers null, the sweep reads
+height 0, and the case fails on `control 17`. The failing index is not a guess: the accessibility listing captured
+at the failure names 17 interactive controls inside `main` before the door (the career bar's two, the header's
+status and scenario pickers, the two download links, the first-turn link, the seven action-grid links, the race
+strip's Cockpit door, then the Timeline and Result doors), and the door's own summary is listed as a generic
+disclosure rather than a button.
+
+The dates say which change broke it. The sweep was written by `6a74f85` (2026-10-08). The delete door arrived with
+the surface cutover in `91494a1` (2026-10-09, "migrate legacy run controls to 2.0 surfaces"), which put a
+`<details>`-held submit button on the page the sweep reads. Nothing has re-run this file's sweep between then and
+now, so the failure surfaced a day late rather than at landing.
+
+The application is not the defect and must not be changed for it: the confirm button is a 44px target as soon as a
+Trainer can see it, and hiding a destructive confirmation behind a disclosure is the behavior `F2` ruled. The
+instrument is the defect, and this repository already settled the shape of the fix. `ura-panel.spec.ts:206-223`
+walks the same selector, `continue`s on a control that `isVisible()` rejects, says why in the comment above the
+skip, and then guards the skip so it cannot become a way to pass on nothing
+(`expect(measured, 'no control was visible to measure').toBeGreaterThan(8)`). Two other specs already filter the
+same way for the same reason: `career-race-planner.spec.ts:197` keeps `control.placed`, `preferences.spec.ts:241`
+keeps `height > 0`.
+
+**Proving command.** `PLAYWRIGHT_PORT=8255 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-8255.sqlite npx playwright test
+scenario-panel.spec.ts` -> 7 passed, 1 failed, the failure reading `control 17 is not sized to the 44px contract`,
+expected `>= 44`, received `0`. Reproduced three times in one session, at two different line numbers of the same
+file, which rules out a host-load flake.
+
+**What closure does not cover.** The same unfiltered shape is in three more Cockpit sweeps:
+`grand-concert-panel.spec.ts:112`, `trackblazer-panel.spec.ts:226` and `unity-cup-panel.spec.ts:192`. Only
+`scenario-panel.spec.ts` was run here, so those three are listed by the shape of their code, not by a measured
+failure; a closure that edits one file leaves the other three. `database.spec.ts:273` shares the selector and was
+not run either: its three views hold no `<details>` of their own (`resources/js/pages/Database/` answers none), but
+whether a component they mount carries one is unverified. Whichever remedy is taken, the `ura-panel` guard belongs
+with it: a sweep that skips unplaced controls has to keep asserting that it measured something.
