@@ -122,6 +122,12 @@ function scenarioSectionKeys(): array
         'caps',
         'panel_absence',
         'panel_absence_title',
+        // Phase G's decision surfaces (G3). Named here because the pin exists to make a contract
+        // change a test-visible event: a scenario whose entry declares none of these keys gets `[]`
+        // or `null`, which is why the three travel with the section rather than with one renderer.
+        'milestones',
+        'duel',
+        'pre_final',
     ];
 }
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /*
  * SCREEN-014's panel: career goals, the mandatory race record, and Happy Meek
- * (plan §9 E2, `SCR-CAR-020`).
+ * (plan §9 E2, `SCR-CAR-020`), with G3's three decision surfaces mounted beside those groups.
  *
  * Registered against the `career_goals` flag, so it draws for any scenario whose matrix turns that
  * flag on and for none that leaves it off. It never reads `scenario.label` and never compares a
@@ -19,6 +19,9 @@
  */
 
 import AlertRow from './AlertRow.vue';
+import UraDuelPanel from './UraDuelPanel.vue';
+import UraMilestoneTracker from './UraMilestoneTracker.vue';
+import UraPreFinalReview from './UraPreFinalReview.vue';
 
 interface GoalRow {
     label: string;
@@ -44,6 +47,35 @@ const props = defineProps<{
     scenario: {
         objectives: GoalGroup[];
         alerts: GoalAlert[];
+        // Declared locally for the same reason the rest of this contract is: `defineProps<Imported>()`
+        // cannot resolve an imported type (plan §11). The server composes each of the three; the
+        // component that draws them owns the wording, and this block only carries them through.
+        milestones: {
+            label: string;
+            state: string;
+            title: string;
+            figures: string;
+            figures_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+            figures_title: string;
+            due_turn: number | null;
+            due_label: string;
+            due_title: string;
+            consequence: string;
+            condition: string | null;
+            decision_url: string;
+        }[];
+        duel: {
+            rules: { label: string; value: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string }[];
+            hints: { stat: string; name: string; sp_cost: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string }[];
+            run: { label: string; value: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string }[];
+        } | null;
+        pre_final: {
+            window: { state: string; label: string; turns_away: number | null; turns_ahead: number; title: string };
+            recorded: { label: string; value: string | null; cap: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string }[];
+            speed_target: { phrasing: string; value: string | null; short_by: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string };
+            stamina_floors: { rows: { distance: string; floor: string }[]; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string };
+            distance: { value: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string };
+        } | null;
     };
     label: string;
     kind: 'widget' | 'panel';
@@ -149,5 +181,14 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
                 </li>
             </ul>
         </section>
+
+        <!-- G3's three surfaces, mounted beside the groups rather than in place of them: the milestone
+             list draws the gates the groups do not carry, the duel panel opens over the published
+             rules, and the pre-final review is absent outside its window. -->
+        <UraMilestoneTracker :milestones="props.scenario.milestones" />
+
+        <UraDuelPanel v-if="props.scenario.duel !== null" :duel="props.scenario.duel" />
+
+        <UraPreFinalReview v-if="props.scenario.pre_final !== null" :pre-final="props.scenario.pre_final" />
     </div>
 </template>

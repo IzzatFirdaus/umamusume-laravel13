@@ -158,6 +158,103 @@ return [
             'facility_level_source' => 'repetition',
             'notes' => 'Defined by absence: no team system, no shop, no scenario currency. '
                 .'This is the minimal strip, and adding another scenario widget here would state something false.',
+
+            /*
+            | The three Unique Skill fan gates, in the order the Senior year meets them. Sourced in
+            | `docs/scenarios/01-ura-finale.md:80-83` and its Senior Year event table, and again in
+            | `docs/UMAMUSUME_REFERENCE.md` §2.2.1. They were placed here rather than in a component
+            | because a figure a component owns is a second owner of a scenario fact (`AGENTS.md` §7),
+            | and the catalogue cannot hold them: `race_catalog_slots.fans_needed` peaks at 25,000
+            | (measured on the dev file), and these three are career events rather than races.
+            |
+            | Both figures travel because the guides print both and name neither as this trainee's:
+            | no column records a turf or dirt preference, so a single threshold would be a guess. The
+            | two `N/A` states that follow from that are the read path's, not a key here.
+            |
+            | No `turn` key exists, and that is sourced too: the guides date these by month and
+            | `docs/URA-Finale-plan.md:251` records that no turn offset per event is published.
+            */
+            'fan_gates' => [
+                [
+                    'label' => 'Valentine\'s Day',
+                    'year_label' => 'Senior',
+                    'timing' => 'early February',
+                    'turf' => 60000,
+                    'dirt' => 40000,
+                    'condition' => null,
+                    'effect' => 'Unique Skill level up',
+                ],
+                [
+                    'label' => 'Fan Fest',
+                    'year_label' => 'Senior',
+                    'timing' => 'early April',
+                    'turf' => 70000,
+                    'dirt' => 60000,
+                    'condition' => 'a three-bar friendship with Director Akikawa',
+                    'effect' => 'Unique Skill level up, and a mood rise',
+                ],
+                [
+                    'label' => 'Holiday Season',
+                    'year_label' => 'Senior',
+                    'timing' => 'late December',
+                    'turf' => 120000,
+                    'dirt' => 80000,
+                    'condition' => null,
+                    'effect' => 'Unique Skill level up',
+                ],
+            ],
+
+            /*
+            | The duel with Happy Meek, as one run experiences it. `docs/UMAMUSUME_REFERENCE.md` §2.2.1
+            | is the source for every figure; `docs/URA-Finale-plan.md:243-259` is the list of what no
+            | source answers, and the three nulls below are three items off that list. They stay null
+            | rather than holding a placeholder a later slice fills in with an estimate.
+            |
+            | `hints` keys each stat to the client name of the skill a hint points at. `Racing Spirit:
+            | Mood` exists in the catalogue and is deliberately absent here: a duel is fought on a stat,
+            | and the sixth skill belongs to no stat the Trainer can pick.
+            */
+            'duel' => [
+                'options_rule' => 'three options: two random stats and the stat the duel was fought on',
+                'win' => [
+                    'gains' => 'stat gains, and one tier on the cap of the stat dueled',
+                    'sp' => 30,
+                    'hint' => true,
+                ],
+                'lose' => [
+                    'gains' => 'minor stat gains',
+                    'sp' => 15,
+                    'hint' => false,
+                ],
+                'escalation_wins' => 6,
+                'escalation_reward' => [
+                    'skill' => 'Past My Limits',
+                    'sp_minimum' => 200,
+                    'spark' => 'a chance at an enhanced spark, which carries a stat bonus and a skill hint into inheritance',
+                ],
+                'stat_gain_values' => null,
+                'win_chance' => null,
+                'spark_rate' => null,
+                'hints' => [
+                    'Speed' => 'Racing Spirit: Speed',
+                    'Stamina' => 'Racing Spirit: Stamina',
+                    'Power' => 'Racing Spirit: Power',
+                    'Guts' => 'Racing Spirit: Guts',
+                    'Wit' => 'Racing Spirit: Wit',
+                ],
+            ],
+
+            /*
+            | The published targets a finale-ready trainee is measured against, from
+            | `docs/UMAMUSUME_REFERENCE.md` §2.2.1's beginner line. `speed_to_win` keeps the source's
+            | own hedge in words: the guide says "around 800", so the value travels with the qualifier
+            | rather than being rounded into a requirement it was never stated as.
+            */
+            'finale_targets' => [
+                'speed_to_win' => ['approx' => 800, 'phrasing' => 'around 800 Speed, or an A rank'],
+                'stamina_by_distance' => ['Sprint' => 400, 'Mile' => 500, 'Medium' => 600, 'Long' => 700],
+            ],
+
             // No source in this repository describes this scenario in the card metadata's words.
             'metadata' => null,
         ],

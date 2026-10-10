@@ -10,6 +10,7 @@ use App\Enums\TurnEventType;
 use App\Http\Controllers\Controller;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
+use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
@@ -165,7 +166,7 @@ class CockpitController extends Controller
             'actions' => $this->actionSection($run, $advice),
             'advisor' => $this->advisorSection($advice, $run),
             'raceStrip' => $this->raceStripSection($run),
-            'scenario' => $this->scenarioSection($run, $team),
+            'scenario' => $this->scenarioSection($run, $team, $latest, $advice),
             // F2, plan §9.6 ruling 2: arbitrary-turn correction. The selected turn defaults to the
             // latest, but `?edit_turn=<id>` names any logged turn; the form posts to the existing
             // `runs.turns.update` / `runs.turns.destroy`, unchanged.
@@ -766,7 +767,7 @@ class CockpitController extends Controller
      * @param  TeamSectionShape  $team  built once by `show()`, the same array the header's rank reads
      * @return array<string, mixed>
      */
-    private function scenarioSection(TrainingRun $run, array $team): array
+    private function scenarioSection(TrainingRun $run, array $team, ?TurnEntry $latest, Advice $advice): array
     {
         $declared = $run->hasScenario();
         $def = $declared ? (array) config('scenarios.scenarios.'.$run->scenarioKey(), []) : [];
@@ -846,10 +847,12 @@ class CockpitController extends Controller
             'recommendations' => [],
             'recommendations_absence' => 'No source this tool reads states scenario advice, so none is offered here. The advisor ranks the turn you are deciding.',
             // What the scenario's own config entry declares about its finale, and nothing about this
-            // run: `ura_finale` is the only entry that declares one (`config/scenarios.php:358`), so
-            // this is null for the other three. It used to sit under the key `finale`, which is the
-            // same word the Career Result used for the per-run reading below. Slice 23 separated them:
-            // one word, one meaning, and the reader's output is `finale_state` on both screens.
+            // run. Corrected 2026-10-11: this comment used to name `ura_finale` as the only entry that
+            // declares a `finale` key, and the matrix says otherwise — the single declaring entry is
+            // `trackblazer` (`config/scenarios.php`, 'finale' => points_league over three races), so
+            // URA, Unity Cup and Our Grand Concert answer null here. `finale_structure` is the declared
+            // shape and `finale_state` below is the run's own standing: the key used to sit under the
+            // single word `finale`, and Slice 23 separated the two so one word carries one meaning.
             'finale_structure' => $def['finale'] ?? null,
             'finale_state' => FinaleReader::forRun($run),
             'finale_absence' => $this->finaleAbsence($run, $def),
@@ -869,6 +872,12 @@ class CockpitController extends Controller
             'caps' => $this->capsSection($run),
             'panel_absence' => isset($def['panel_absence']) ? (string) $def['panel_absence'] : null,
             'panel_absence_title' => isset($def['panel_absence_title']) ? (string) $def['panel_absence_title'] : null,
+            // Phase G's three decision surfaces. Each reads the scenario's own config entry, so a
+            // scenario that declares none of these keys gets `[]` or `null` and draws nothing: the
+            // empties are the matrix's shape, not a branch on a scenario name (gate G-33).
+            'milestones' => $this->milestoneSection($run, $latest),
+            'duel' => $this->duelSection($run),
+            'pre_final' => $this->preFinalSection($run, $latest, $advice),
         ];
     }
 
@@ -1234,7 +1243,8 @@ class CockpitController extends Controller
      *
      * Nothing stores a level, so there is nothing to badge as Confirmed and no write route to record
      * one through; the brief forbids a migration, so the module is read-only and says why. The last
-     * two fields are not merely unrecorded but unsourced, which is a different sentence and gets one.
+     * field is not merely unrecorded but unsourced, which is a different sentence and gets one: the
+     * rewards themselves are published, and the duel panel is where they read.
      *
      * @return list<array<string, mixed>>
      */
@@ -1265,8 +1275,11 @@ class CockpitController extends Controller
                 'year_label' => null,
                 'turn' => null,
                 'race_url' => null,
-                'absence' => 'No source this tool reads publishes a reward table for Happy Meek, so no'
-                    .' figure is shown. An estimate would be an invented number.',
+                // Corrected 2026-10-11: this row used to say no source publishes a Happy Meek reward
+                // table. One does, and the duel panel now prints it. What stays unrecorded is this
+                // run's own reward, and that is a different sentence.
+                'absence' => 'No column stores a reward for this run, so nothing is owed to it. The published '
+                    .'duel rewards are a scenario rule, and they read on the duel panel rather than here.',
             ],
             [
                 'label' => 'Final-race contribution',
@@ -1276,6 +1289,273 @@ class CockpitController extends Controller
                 'race_url' => null,
                 'absence' => 'No source states how a Happy Meek level changes the finale, so nothing is'
                     .' computed here. This is held computation, not a missing reading.',
+            ],
+        ];
+    }
+
+    /**
+     * The fan-gate timeline a scenario's own config entry names.
+     *
+     * Only the gates the matrix declares travel here, which is why Unity Cup, Trackblazer and Our
+     * Grand Concert answer `[]` rather than a list of zeroes: they declare no `fan_gates` key, and an
+     * invented empty gate would be the false claim `AGENTS.md` §7 treats a hardcoded scenario name as.
+     *
+     * The recorded calendar's obligations are deliberately NOT re-listed. `careerGoalSections()` draws
+     * them in the same panel as `Mandatory races`, and the finale block is `ScenarioPanel`'s strip
+     * reading `FinaleReader`; a third surface for either fact is the second representation Phase G's
+     * acceptance forbids. The calendar does contribute one thing: whether the Senior year is behind
+     * the run, which is what turns a short gate into a missed one.
+     *
+     * A gate publishes two figures and the tool cannot tell which one binds. No column records a turf
+     * or dirt preference (`character_cards` carries none), so the state is decided on the two bounds:
+     * at or above both clears it whichever track applies, below both misses it, and between them the
+     * answer is `unknown` and renders as `N/A` naming the missing column. Picking a track would be
+     * the guess, not the bound.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function milestoneSection(TrainingRun $run, ?TurnEntry $latest): array
+    {
+        /** @var list<array<string, mixed>> $gates */
+        $gates = (array) config('scenarios.scenarios.'.$run->scenarioKey().'.fan_gates', []);
+
+        if ($gates === []) {
+            return [];
+        }
+
+        // The same reading the header and the fan ladder use, so the tracker cannot disagree with the
+        // strip about how many fans this run holds.
+        $fans = $latest?->fans;
+        $finale = FinaleReader::forRun($run);
+        $seniorBehind = $finale !== null && $finale['reached'];
+
+        $rows = [];
+
+        foreach ($gates as $gate) {
+            $turf = (int) $gate['turf'];
+            $dirt = (int) $gate['dirt'];
+            $both = max($turf, $dirt);
+            $either = min($turf, $dirt);
+
+            [$state, $title] = match (true) {
+                $fans === null => [
+                    'upcoming',
+                    'No turn entry for this run records a fan count, so nothing has cleared the gate yet.',
+                ],
+                $fans >= $both => [
+                    'completed',
+                    'The recorded reading is at or above both published figures, so the gate is cleared on '
+                        .'either track. Compared against '.number_format($both).' fans.',
+                ],
+                $fans < $either && $seniorBehind => [
+                    'missed',
+                    'The finale block has arrived and the recorded reading stands below both figures, so '
+                        .'neither gate could have been cleared. Compared against '.number_format($either).' fans.',
+                ],
+                $fans < $either => [
+                    'upcoming',
+                    'The recorded reading is below both published figures and the Senior year is still '
+                        .'open, so the gate is ahead of the run. Compared against '.number_format($either).' fans.',
+                ],
+                default => [
+                    'unknown',
+                    'The recorded reading sits between the two figures this event publishes. No column says '
+                        .'whether this trainee races on turf or dirt, so neither number is the gate, and the '
+                        .'state that follows from it is not this tool\'s to pick.',
+                ],
+            };
+
+            $rows[] = [
+                'label' => (string) $gate['label'],
+                'kind' => 'fan_gate',
+                'state' => $state,
+                'title' => $title,
+                'figures' => number_format($turf).' Turf / '.number_format($dirt).' Dirt',
+                'figures_badge' => 'confirmed',
+                'figures_title' => 'config/scenarios.php, from docs/scenarios/01-ura-finale.md:80-83 and its '
+                    .'Senior Year event table, corroborated by docs/UMAMUSUME_REFERENCE.md §2.2.1.',
+                // Dated by month and never by turn: `docs/URA-Finale-plan.md:251` records that no source
+                // publishes the turn offset, so the row states the month and prints no turn.
+                'due_turn' => null,
+                'due_label' => (string) $gate['year_label'].' Year · '.(string) $gate['timing'],
+                'due_title' => 'The guides date this event by month within the career year and no source '
+                    .'publishes the career turn it falls on, so no turn is printed.',
+                'consequence' => (string) $gate['effect'],
+                'condition' => $gate['condition'] === null ? null : (string) $gate['condition'],
+                // The one action a fan gate answers to is racing, and the Race Decision screen is where
+                // this run's options live. Same door `careerGoalSections()` gives a mandatory race row.
+                'decision_url' => route('runs.races.decision', $run),
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * What the duel with Happy Meek is, as one row per published rule, and what this run records about it.
+     *
+     * Display-only, and that is a ruling rather than a shortfall: `TurnChoice` states that the URA
+     * finale's duels are display-only in this build (D-5, `app/Enums/TurnChoice.php:20`), no column
+     * stores a duel, and the panel adds no column to the question. Everything on the rules side reads
+     * off `config/scenarios.php`; everything on the run side is `N/A` with the reason it is empty.
+     *
+     * No percentage appears. The client shows an icon per option and prints no figure, which
+     * `docs/URA-Finale-plan.md:245` records as unconfirmed, so a chance row carries the rule and an
+     * empty value rather than a number.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function duelSection(TrainingRun $run): ?array
+    {
+        /** @var array<string, mixed> $duel */
+        $duel = (array) config('scenarios.scenarios.'.$run->scenarioKey().'.duel', []);
+
+        if ($duel === []) {
+            return null;
+        }
+
+        $cite = 'config/scenarios.php, from docs/UMAMUSUME_REFERENCE.md §2.2.1.';
+
+        /** @var list<array{label: string, value: string|null, badge: string, title: string}> $rules */
+        $rules = [
+            ['label' => 'The prompt', 'value' => (string) $duel['options_rule'], 'badge' => 'confirmed', 'title' => 'The options a duel puts in front of the Trainer, from docs/URA-Finale-plan.md:182.'],
+            ['label' => 'Win', 'value' => (string) $duel['win']['gains'], 'badge' => 'confirmed', 'title' => 'What a win grants. '.$cite],
+            ['label' => 'Win Skill Points', 'value' => number_format((int) $duel['win']['sp']), 'badge' => 'confirmed', 'title' => 'The published win reward. '.$cite],
+            ['label' => 'Win hint', 'value' => 'a Racing Spirit hint for the stat dueled', 'badge' => 'confirmed', 'title' => 'The hint is keyed to the stat the duel was fought on. '.$cite],
+            ['label' => 'Lose', 'value' => (string) $duel['lose']['gains'], 'badge' => 'confirmed', 'title' => 'What a loss still grants. '.$cite],
+            ['label' => 'Lose Skill Points', 'value' => number_format((int) $duel['lose']['sp']), 'badge' => 'confirmed', 'title' => 'The published loss reward. '.$cite],
+            ['label' => 'Escalation', 'value' => 'after '.number_format((int) $duel['escalation_wins']).' wins', 'badge' => 'confirmed', 'title' => 'Wins that carry her to the powered-up state at the finals. '.$cite],
+            ['label' => 'Powered-up reward', 'value' => (string) $duel['escalation_reward']['skill']
+                .', '.number_format((int) $duel['escalation_reward']['sp_minimum']).' or more Skill Points',
+                'badge' => 'confirmed', 'title' => 'Beating the powered-up state at the finals. '.$cite],
+            ['label' => 'Enhanced spark', 'value' => (string) $duel['escalation_reward']['spark'], 'badge' => 'confirmed', 'title' => 'The chance is published; its rate is not. '.$cite],
+            ['label' => 'Enhanced spark rate', 'value' => null, 'badge' => 'unknown', 'title' => 'No source this tool reads publishes the trigger rate, so none is shown.'],
+            ['label' => 'Per-stat gain of a win', 'value' => null, 'badge' => 'unknown', 'title' => 'The sources say a win grants stat gains and raise the cap of the stat dueled, and quantify neither.'],
+            ['label' => 'Win chance per option', 'value' => null, 'badge' => 'unknown', 'title' => 'The client shows an icon beside each option and prints no percentage, and no source publishes one.'],
+        ];
+
+        /** @var array<string, string> $hintNames */
+        $hintNames = (array) ($duel['hints'] ?? []);
+        // The names live in the catalogue, so the panel prints what was fetched with a client flag on
+        // it rather than a copy pasted out of a plan document (`AGENTS.md` §13).
+        $catalogue = Skill::query()
+            ->whereIn('name', array_values($hintNames))
+            ->where('name_is_client', true)
+            ->get()
+            ->keyBy('name');
+
+        $hints = [];
+
+        foreach ($hintNames as $stat => $name) {
+            $row = $catalogue->get($name);
+
+            $hints[] = [
+                'stat' => (string) $stat,
+                'name' => $name,
+                'sp_cost' => $row === null ? null : number_format((int) $row->sp_cost),
+                'badge' => $row === null ? 'unknown' : 'confirmed',
+                'title' => $row === null
+                    ? 'The skills catalogue holds no client-named row for '.$name.', so no figure travels with it.'
+                    : 'Read from the skills table, which carries this name as a client noun (name_is_client).',
+            ];
+        }
+
+        /** @var list<array{label: string, value: string|null, badge: string, title: string}> $runRows */
+        $runRows = [
+            ['label' => 'Duels this run has fought', 'value' => null, 'badge' => 'unknown', 'title' => 'No table stores a duel. A race is a race_entries row and an event a turn_events row, and neither posts a choice.'],
+            ['label' => 'Wins toward escalation', 'value' => null, 'badge' => 'unknown', 'title' => 'Counting wins needs a stored duel outcome, which this build has none of.'],
+            ['label' => 'Happy Meek level', 'value' => null, 'badge' => 'unknown', 'title' => 'No column stores a Happy Meek level and no route writes one, so this run records none.'],
+            ['label' => 'The options offered', 'value' => null, 'badge' => 'unknown', 'title' => 'A duel puts two random stats and the stat dueled in front of the Trainer, and nothing this run records names them.'],
+        ];
+
+        return ['rules' => $rules, 'hints' => $hints, 'run' => $runRows];
+    }
+
+    /**
+     * The check a career makes against its own finale, inside the window the advisor already owns.
+     *
+     * The window is `TrainerAdvisor::FINALE_TURNS_AHEAD` and nothing else: the section reads the
+     * proximity the advisor computed for this turn (`Advice::$finale_context`) rather than re-running
+     * the arithmetic, so the rail and this panel cannot disagree about how close the block is. Outside
+     * the window the section is null and the panel draws nothing at all, which is the honest shape for
+     * a career three turns old.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function preFinalSection(TrainingRun $run, ?TurnEntry $latest, Advice $advice): ?array
+    {
+        /** @var array<string, mixed> $targets */
+        $targets = (array) config('scenarios.scenarios.'.$run->scenarioKey().'.finale_targets', []);
+        $context = $advice->finale_context;
+
+        if ($targets === [] || $context === null) {
+            return null;
+        }
+
+        /** @var list<string> $order */
+        $order = (array) config('scenarios.stat_order');
+        $caps = ScenarioCaps::forRun($run);
+        $cite = 'docs/UMAMUSUME_REFERENCE.md §2.2.1.';
+
+        $recorded = [];
+
+        foreach ($order as $stat) {
+            $value = $this->currentStat($latest, $stat);
+            $cap = $caps[$stat] ?? null;
+
+            $recorded[] = [
+                'label' => $stat,
+                'value' => $value === null ? null : number_format($value),
+                'cap' => $cap === null ? null : number_format((int) $cap),
+                'badge' => $value === null ? 'unknown' : 'confirmed',
+                'title' => $value === null
+                    ? 'No turn entry for this run records a '.$stat.' reading, so nothing is shown.'
+                    : 'The latest turn entry of this run, read the same way the header bars read it.',
+            ];
+        }
+
+        $speed = $this->currentStat($latest, 'Speed');
+        $approx = (int) $targets['speed_to_win']['approx'];
+
+        return [
+            'window' => [
+                'state' => (string) $context['state'],
+                'label' => (string) $context['label'],
+                'turns_away' => $context['turns_away'] === null ? null : (int) $context['turns_away'],
+                'turns_ahead' => TrainerAdvisor::FINALE_TURNS_AHEAD,
+                'title' => 'Counted from the advisor\'s own proximity for this turn, over the '
+                    .TrainerAdvisor::FINALE_TURNS_AHEAD.' turns it looks ahead '
+                    .'(App\Services\Advisor\TrainerAdvisor::FINALE_TURNS_AHEAD).',
+            ],
+            'recorded' => $recorded,
+            // Carries the source's own hedge: the guide says "around 800", and an unqualified 800 would
+            // state a requirement nobody published.
+            'speed_target' => [
+                'phrasing' => (string) $targets['speed_to_win']['phrasing'],
+                'value' => $speed === null ? null : number_format($speed),
+                'short_by' => $speed === null || $speed >= $approx
+                    ? null
+                    : number_format($approx - $speed),
+                'badge' => $speed === null ? 'unknown' : 'calculated',
+                'title' => 'The recorded Speed against the published target, which '.$cite.' states as an approximation.',
+            ],
+            'stamina_floors' => [
+                'rows' => array_map(
+                    static fn (string $distance, string $floor): array => ['distance' => $distance, 'floor' => number_format((int) $floor)],
+                    array_keys((array) $targets['stamina_by_distance']),
+                    array_values((array) $targets['stamina_by_distance']),
+                ),
+                'badge' => 'confirmed',
+                'title' => 'The stamina figure each distance asks for, published by '.$cite,
+            ],
+            // The rule that names a URA finale distance is the career's most-raced distance type
+            // (`docs/URA-Finale-plan.md:64`), and no code in this tree computes it, so the row states
+            // the absence and the four floors stay a table rather than collapsing to one verdict.
+            'distance' => [
+                'value' => null,
+                'badge' => 'unknown',
+                'title' => 'The finale distance is the distance this career raced most, and no column or reader in '
+                    .'this tool computes it, so no single floor applies.',
             ],
         ];
     }
