@@ -14,7 +14,6 @@ use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
 use App\Services\Advisor\Advice;
-use App\Services\Advisor\NextDecision;
 use App\Services\Advisor\TrainerAdvisor;
 use App\Services\CareerCalendar;
 use App\Services\FanLadder;
@@ -163,7 +162,7 @@ class CockpitController extends Controller
             'identity' => $this->identitySection($run, $latest),
             'state' => $this->stateSection($run, $latest),
             'actions' => $this->actionSection($run, $advice),
-            'advisor' => $this->advisorSection($advice, $run),
+            'advisor' => $this->advisorSection($advice),
             'raceStrip' => $this->raceStripSection($run),
             'scenario' => $this->scenarioSection($run, $team),
             // F2, plan §9.6 ruling 2: arbitrary-turn correction. The selected turn defaults to the
@@ -430,23 +429,62 @@ class CockpitController extends Controller
     }
 
     /**
-     * The shared Next Decision contract (FD-2), plus the finale position the engine already returns.
+     * C2's answer, flattened to the five contract fields (plan §8 "Recommendation contract (D8)").
      *
-     * `decision` is the frozen six-key payload and nothing else; the flattening, the provenance rows and
-     * the two refusal copies all belong to `NextDecision`, not to this controller (§7, thin controllers).
+     * `reasons` carries the recommendation's own reason line plus the Energy the action leaves
+     * behind, because both are fields C2 already returns. When it declines, the one reason line is
+     * C2's own sentence, so a Trainer acting on the refusal knows which input is missing.
      *
-     * `finale` stays a sibling rather than folding into the contract: the frozen shape has exactly six
-     * keys, and it is a position read off the career calendar rather than a judgement about the next turn
-     * (`ADR-0020` §3, `SCREEN_SPEC.md` §7-22).
-     *
-     * @return array{decision: array<string, mixed>, finale: array{label: string, state: string, turns_away: int|null}|null}
+     * @return array{action: string|null, band: string|null, reasons: list<string>, alternative: string|null, risk: string|null, finale: array{label: string, state: string, turns_away: int|null}|null}
      */
-    private function advisorSection(Advice $advice, TrainingRun $run): array
+    private function advisorSection(Advice $advice): array
     {
+        $recommendation = $advice->recommendation;
+
+        $reasons = [];
+
+        if ($recommendation !== null) {
+            $reasons[] = $recommendation->reason;
+
+            $after = $this->energyAfterLine($recommendation->energyAfter);
+
+            if ($after !== null) {
+                $reasons[] = $after;
+            }
+        } elseif ($advice->absence !== null) {
+            $reasons[] = $advice->absence;
+        }
+
         return [
-            'decision' => app(NextDecision::class)->build($advice, $run),
+            'action' => $recommendation?->action,
+            'band' => $advice->band,
+            'reasons' => $reasons,
+            'alternative' => $advice->alternative?->action,
+            // Null by choice, not by absence of data: `energyAfter` is in hand and a line could be
+            // derived from it, but every derivation of "is this risky" is a judgement the engine owns
+            // and C2 does not make (a delay, a reachability verdict — `ADR-0020` §3). The controller
+            // does not grow a second opinion beside the one engine. D9 to D12 fill this field when a
+            // screen has a sourced risk to state.
+            'risk' => null,
+            // The finale's proximity, read from the same reader the result screen and the strip use.
+            // It is not a sixth opinion: the advisor ranks the turn and never advises on the concert,
+            // because the gauge that would decide it is unbuilt (ADR-0020 §3, SCREEN_SPEC.md §7-22).
             'finale' => $advice->finale_context,
         ];
+    }
+
+    /**
+     * @param  array{min: int, max: int}|null  $energyAfter
+     */
+    private function energyAfterLine(?array $energyAfter): ?string
+    {
+        if ($energyAfter === null) {
+            return null;
+        }
+
+        return $energyAfter['min'] === $energyAfter['max']
+            ? "Energy after this action: {$energyAfter['min']}."
+            : "Energy after this action: {$energyAfter['min']} to {$energyAfter['max']}.";
     }
 
     /**
