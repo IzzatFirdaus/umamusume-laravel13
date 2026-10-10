@@ -212,7 +212,7 @@ const group = (n: number): string => n.toLocaleString('en-US');
                     </div>
 
                     <p class="text-xs text-ink-muted">
-                        Skip records nothing and returns to the run screen. A finish, a fan gain and a
+                        Skip records nothing and returns to the Cockpit. A finish, a fan gain and a
                         placement are outcomes rather than decisions, so they are recorded there.
                     </p>
                 </form>

@@ -466,3 +466,17 @@ it('renders no win figure and no percentage anywhere in the slice', function ():
             ->where('comparison.rows', fn ($rows): bool => ! str_contains(json_encode($rows) ?: '', '%'))
             ->where('groups.optional.races.0.comparison', fn ($cells): bool => ! str_contains(json_encode($cells) ?: '', '%')));
 });
+
+it('points the no-position absence at the screen that can record the turn', function (): void {
+    // R2-07. This sentence used to send the Trainer to the retired run screen. The sweep in
+    // `NoStaleRunRecordLinksTest` proves the old name is gone; this proves the replacement points
+    // somewhere real: a run with no logged turn is told to record it from the Cockpit, which is the
+    // screen whose action grid leads to the turn write.
+    $run = plannerRun(turns: 0);
+
+    $this->get(route('runs.races.planner', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('groups.upcoming.empty', fn (string $line): bool => str_contains($line, 'Record the first turn from the Cockpit'))
+            ->where('groups.optional.empty', fn (string $line): bool => str_contains($line, 'Record the first turn from the Cockpit')));
+});

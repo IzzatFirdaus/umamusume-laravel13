@@ -76,7 +76,7 @@ test('replaces the catalogue grid with three run-scoped regions', async ({ page 
 
     // Nothing recorded yet, and the region says what is missing, why, and where to go.
     await expect(page.getByText('No race is recorded for this run yet')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Go to the run record screen' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Go to the Cockpit' })).toBeVisible();
 
     // Turn 12 is the one the debut sits on, so the count reads one rather than the year's whole list.
     const turn = page.getByRole('region', { name: 'This turn' });
@@ -178,7 +178,7 @@ test('walks the strip links from the keyboard with a visible focus ring', async 
     // Every strip link is a 44px target (WCAG 2.2 SC 2.5.8).
     for (const target of [
         decision,
-        page.getByRole('link', { name: 'Go to the run record screen' }),
+        page.getByRole('link', { name: 'Go to the Cockpit' }),
     ]) {
         const box = await target.boundingBox();
         expect(box?.height ?? 0, 'a strip link is not sized to the 44px contract').toBeGreaterThanOrEqual(44);

@@ -173,7 +173,7 @@ class ResultController extends Controller
                 'learned' => $learned,
                 'not_learned' => $notLearned,
                 'empty' => $learned === []
-                    ? 'No skill is recorded as learned on this run. Skills are marked on the run record screen as the career passes them.'
+                    ? 'No skill is recorded as learned on this run. Skills are marked on the Skills planner as the career passes them.'
                     : null,
             ],
             'aptitudes' => $this->aptitudes($run),
@@ -262,7 +262,7 @@ class ResultController extends Controller
             ],
             'rows' => $rows,
             'empty' => $completed->isEmpty()
-                ? 'No completed race is recorded for this run, so there is no race history to read. Races are entered on the Race decision screen or the run record screen.'
+                ? 'No completed race is recorded for this run, so there is no race history to read. Races are entered on the Race decision screen.'
                 : null,
         ];
     }
@@ -319,7 +319,7 @@ class ResultController extends Controller
             'unassigned' => $run->gradeUnassignedCount(),
             // No column holds a race reward on any table this tool reads, so the section names the
             // absence once instead of printing a row of dashes (the same ruling SCR-CAR-013 made).
-            'rewards' => 'No source this tool reads records a race reward or a Skill Point payout, so none is shown here. What the client paid can be recorded on the run screen.',
+            'rewards' => 'No source this tool reads records a race reward or a Skill Point payout, so none is shown here. What the client paid is recorded with the turn, on Training.',
         ];
     }
 
@@ -376,11 +376,11 @@ class ResultController extends Controller
             RunStatus::Completed => null,
             RunStatus::Active => [
                 'reason' => 'active',
-                'message' => 'This career is still running, so there is no result to read yet. The result screen reads a run whose status is Completed; until then the Cockpit is where the next turn is decided, and the run record screen is where the status changes.',
+                'message' => 'This career is still running, so there is no result to read yet. The result screen reads a run whose status is Completed; until then the Cockpit is where the next turn is decided and where the status changes.',
             ],
             RunStatus::Retired => [
                 'reason' => 'retired',
-                'message' => 'This career was retired before it finished, so no result exists to read. The turns and races it did record stay readable on the Career Timeline and the run record screen.',
+                'message' => 'This career was retired before it finished, so no result exists to read. The turns and races it did record stay readable on the Career Timeline and the Cockpit.',
             ],
         };
     }

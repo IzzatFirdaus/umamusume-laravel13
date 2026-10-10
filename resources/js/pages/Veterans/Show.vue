@@ -167,7 +167,7 @@ const doorClass =
 
         <div class="mt-4 flex flex-wrap gap-2">
             <a :href="props.runUrl" :class="`enamel ${doorClass} bg-chrome font-semibold text-on-chrome`">
-                Open the career record
+                Open the Cockpit
             </a>
             <a v-if="props.veteran.builder_url" :href="props.veteran.builder_url" :class="doorClass">
                 Legacy Lab

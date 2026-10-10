@@ -55,7 +55,7 @@ final class RaceFacts
                     .', and no per-placement payout is stored against it.',
             ),
             self::fact('reward', 'Reward', null, 'No column holds a race reward, and no source in this repository states one per race.'),
-            self::fact('skill_points', 'Skill Points', null, 'No column holds a skill-point payout. The Trainer records what the client paid, on the run screen.'),
+            self::fact('skill_points', 'Skill Points', null, 'No column holds a skill-point payout. The Trainer records what the client paid with the turn, on Training.'),
             self::fact('scenario_reward', 'Scenario reward', null, 'No column holds a scenario reward, and the scenario panels that would state one are not built.'),
             self::fact(
                 'win_probability',

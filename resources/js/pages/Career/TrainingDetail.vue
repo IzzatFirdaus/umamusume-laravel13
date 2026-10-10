@@ -282,7 +282,7 @@ const capFor = (label: string): number =>
                 assuming a starting state. Record the first turn and this screen fills in beside it.
             </p>
             <a :href="props.run.run_url" class="mt-2 inline-flex min-h-11 items-center font-medium text-ink-strong underline">
-                Record the first turn on the run screen
+                Record the first turn on the Cockpit
             </a>
         </section>
 

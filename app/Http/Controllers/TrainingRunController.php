@@ -230,7 +230,7 @@ class TrainingRunController extends Controller
                 // The label is config's, never the stored slug, and null when the Trainer has not
                 // chosen one, which is also when the Scenario Link derivation has nothing to run on.
                 'scenario_label' => $run->hasScenario() ? config('scenarios.scenarios.'.$run->scenarioKey().'.label') : null,
-                'run_url' => route('runs.show', $run),
+                'run_url' => route('runs.cockpit', $run),
             ],
             'slots' => $this->builderSlots($request, $run, $dictionary),
             'picker' => $this->builderPicker($request, $run, $dictionary),

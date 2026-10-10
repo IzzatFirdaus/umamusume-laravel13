@@ -165,7 +165,7 @@ class RacePlannerController extends Controller
             return null;
         }
 
-        return 'This run names no scenario, so it has no race calendar to plan against. Choose a scenario on the run screen and the calendar appears.';
+        return 'This run names no scenario, so it has no race calendar to plan against. Choose a scenario on the Cockpit and the calendar appears.';
     }
 
     /**
@@ -215,7 +215,7 @@ class RacePlannerController extends Controller
             }
         }
 
-        $positionAbsence = 'No turn has been logged yet, so the planner cannot say which races are ahead of this run. Record the first turn on the run screen and the groups fill in.';
+        $positionAbsence = 'No turn has been logged yet, so the planner cannot say which races are ahead of this run. Record the first turn from the Cockpit and the groups fill in.';
 
         return [
             'mandatory' => $this->group(
@@ -237,7 +237,7 @@ class RacePlannerController extends Controller
                 'Optional races',
                 'Races this scenario does not oblige whose turn has arrived, with nothing recorded against them.',
                 $optional,
-                $next === null ? $positionAbsence : 'Every race whose turn has arrived has been recorded. The run screen\'s race panel holds the history.',
+                $next === null ? $positionAbsence : 'Every race whose turn has arrived has been recorded. The Cockpit race strip lists what this run recorded.',
             ),
             /*
              * No column marks a rival race. The corpus says rival appearance is random and gated on the
@@ -365,7 +365,7 @@ class RacePlannerController extends Controller
             ],
             'skill_points' => [
                 null,
-                'No column holds a skill-point payout. The Trainer records what the client paid, on the run screen.',
+                'No column holds a skill-point payout. The Trainer records what the client paid with the turn, on Training.',
                 null,
             ],
             'grade_points' => [

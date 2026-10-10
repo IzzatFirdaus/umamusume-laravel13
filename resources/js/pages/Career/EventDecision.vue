@@ -467,7 +467,7 @@ const statTitle = (stat: { current: number | null; target: number | null; cap: n
             </div>
         </form>
         <p v-else class="mt-4 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink">
-            No turns logged yet. Record at least one turn on the run screen before recording an
+            No turns logged yet. Record at least one turn on the Cockpit before recording an
             event choice.
         </p>
 

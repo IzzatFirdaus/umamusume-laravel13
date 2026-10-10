@@ -14,6 +14,7 @@ use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
 use App\Services\Advisor\Advice;
+use App\Services\Advisor\NextDecision;
 use App\Services\Advisor\TrainerAdvisor;
 use App\Services\CareerCalendar;
 use App\Services\FanLadder;
@@ -94,8 +95,8 @@ class CockpitController extends Controller
     private const ACTIONS = [
         ['key' => 'training', 'label' => 'Training', 'note' => 'The five training options, and the turn record.'],
         ['key' => 'race', 'label' => 'Race', 'note' => 'Entering a race arrives with the Race decision screen.'],
-        ['key' => 'rest', 'label' => 'Rest', 'note' => 'Rest is a turn choice on the run screen, not one of the five training options.'],
-        ['key' => 'recreation', 'label' => 'Recreation', 'note' => 'A Recreation screen of its own is not built yet; the run screen records it as a turn choice.'],
+        ['key' => 'rest', 'label' => 'Rest', 'note' => 'Rest is a turn choice no 2.0 screen offers yet, and it is not one of the five training options.'],
+        ['key' => 'recreation', 'label' => 'Recreation', 'note' => 'A Recreation screen of its own is not built yet, and no 2.0 screen records the turn it would stand for.'],
         ['key' => 'scenario', 'label' => 'Scenario action', 'note' => 'Scenario actions arrive with the scenario panels.'],
         ['key' => 'event', 'label' => 'Event', 'note' => 'Event choices are recorded at the Event decision screen.'],
         ['key' => 'inheritance', 'label' => 'Inheritance', 'note' => 'Inheritance is recorded at the Inheritance event screen.'],
@@ -162,7 +163,7 @@ class CockpitController extends Controller
             'identity' => $this->identitySection($run, $latest),
             'state' => $this->stateSection($run, $latest),
             'actions' => $this->actionSection($run, $advice),
-            'advisor' => $this->advisorSection($advice),
+            'advisor' => $this->advisorSection($advice, $run),
             'raceStrip' => $this->raceStripSection($run),
             'scenario' => $this->scenarioSection($run, $team),
             // F2, plan §9.6 ruling 2: arbitrary-turn correction. The selected turn defaults to the
@@ -429,62 +430,23 @@ class CockpitController extends Controller
     }
 
     /**
-     * C2's answer, flattened to the five contract fields (plan §8 "Recommendation contract (D8)").
+     * The shared Next Decision contract (FD-2), plus the finale position the engine already returns.
      *
-     * `reasons` carries the recommendation's own reason line plus the Energy the action leaves
-     * behind, because both are fields C2 already returns. When it declines, the one reason line is
-     * C2's own sentence, so a Trainer acting on the refusal knows which input is missing.
+     * `decision` is the frozen six-key payload and nothing else; the flattening, the provenance rows and
+     * the two refusal copies all belong to `NextDecision`, not to this controller (§7, thin controllers).
      *
-     * @return array{action: string|null, band: string|null, reasons: list<string>, alternative: string|null, risk: string|null, finale: array{label: string, state: string, turns_away: int|null}|null}
+     * `finale` stays a sibling rather than folding into the contract: the frozen shape has exactly six
+     * keys, and it is a position read off the career calendar rather than a judgement about the next turn
+     * (`ADR-0020` §3, `SCREEN_SPEC.md` §7-22).
+     *
+     * @return array{decision: array<string, mixed>, finale: array{label: string, state: string, turns_away: int|null}|null}
      */
-    private function advisorSection(Advice $advice): array
+    private function advisorSection(Advice $advice, TrainingRun $run): array
     {
-        $recommendation = $advice->recommendation;
-
-        $reasons = [];
-
-        if ($recommendation !== null) {
-            $reasons[] = $recommendation->reason;
-
-            $after = $this->energyAfterLine($recommendation->energyAfter);
-
-            if ($after !== null) {
-                $reasons[] = $after;
-            }
-        } elseif ($advice->absence !== null) {
-            $reasons[] = $advice->absence;
-        }
-
         return [
-            'action' => $recommendation?->action,
-            'band' => $advice->band,
-            'reasons' => $reasons,
-            'alternative' => $advice->alternative?->action,
-            // Null by choice, not by absence of data: `energyAfter` is in hand and a line could be
-            // derived from it, but every derivation of "is this risky" is a judgement the engine owns
-            // and C2 does not make (a delay, a reachability verdict — `ADR-0020` §3). The controller
-            // does not grow a second opinion beside the one engine. D9 to D12 fill this field when a
-            // screen has a sourced risk to state.
-            'risk' => null,
-            // The finale's proximity, read from the same reader the result screen and the strip use.
-            // It is not a sixth opinion: the advisor ranks the turn and never advises on the concert,
-            // because the gauge that would decide it is unbuilt (ADR-0020 §3, SCREEN_SPEC.md §7-22).
+            'decision' => app(NextDecision::class)->build($advice, $run),
             'finale' => $advice->finale_context,
         ];
-    }
-
-    /**
-     * @param  array{min: int, max: int}|null  $energyAfter
-     */
-    private function energyAfterLine(?array $energyAfter): ?string
-    {
-        if ($energyAfter === null) {
-            return null;
-        }
-
-        return $energyAfter['min'] === $energyAfter['max']
-            ? "Energy after this action: {$energyAfter['min']}."
-            : "Energy after this action: {$energyAfter['min']} to {$energyAfter['max']}.";
     }
 
     /**
@@ -607,10 +569,10 @@ class CockpitController extends Controller
             'absences' => $absences,
             'empty' => [
                 'run' => $recorded === []
-                    ? 'No race is recorded for this run yet, so there is no history to read here. Log a turn on the run record screen, or open Race Decision to enter one at the turn you are in.'
+                    ? 'No race is recorded for this run yet, so there is no history to read here. Record the turn from the action grid, or open Race Decision to enter one at the turn you are in.'
                     : null,
                 'this_turn' => match (true) {
-                    $next === null => 'This run has no turn being decided, so there is no turn to read a race against. The run record screen holds the full history.',
+                    $next === null => 'This run has no turn being decided, so there is no turn to read a race against. The Race planner draws the whole calendar.',
                     $offered->isEmpty() => 'No race on this scenario\'s calendar falls at turn '.$next['turn'].'. Open Race Decision to see the turns that do carry one.',
                     default => null,
                 },

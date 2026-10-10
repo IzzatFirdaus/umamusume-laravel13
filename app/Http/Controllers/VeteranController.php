@@ -122,7 +122,7 @@ final class VeteranController extends Controller
                 'a' => $run->inheritanceParentA?->name,
                 'b' => $run->inheritanceParentB?->name,
             ],
-            'runUrl' => route('runs.show', $run),
+            'runUrl' => route('runs.cockpit', $run),
             'traineeUrl' => route('catalog.show', $run->umamusume->slug),
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
             'absences' => self::absences(),

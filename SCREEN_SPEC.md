@@ -1806,7 +1806,7 @@ Implemented 2026-10-06 (slice D7).
 
 `GET /training-runs/{run}/cockpit` name `runs.cockpit`, `App\Http\Controllers\Career\CockpitController`. SCREEN-009, plan §8 D8. The screen a Trainer reads on every turn. It descends from the run's own URL, as the brief says it does, and it is **read-only except one write it does not own**: the manual correction posts to the existing `runs.turns.update` and its `StoreTurnEntryRequest` (design-2.0 §38). No new route for a turn, no new column, no migration.
 
-Reached three ways: the run record screen's own "Career Cockpit" link (`runs.show` carries `cockpit_url`), the redirect after `Start Career` (`SCR-CAR-010`), and the Dashboard's active-career "Resume Career" action (`SCR-CAR-001`) — a career that has just started, or is being resumed, opens the screen it is read from every turn. The record screen keeps every route it had and stays one link away in the career bar.
+Reached three ways: the redirect after `Start Career` (`SCR-CAR-010`), the Dashboard's active-career "Resume Career" action (`SCR-CAR-001`), and the career bar's own `Cockpit` door that every 2.0 career screen carries (`run_url`, `CareerLayout.vue`) — a career that has just started, or is being resumed, opens the screen it is read from every turn. The record screen keeps every route it had and stays one link away in the career bar.
 
 #### Layout
 
@@ -1846,7 +1846,7 @@ the screen's one accented border.*
 
 | State                                      | Behavior                                                                                                                                                                                                                                                                       |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Empty (no turn logged)                     | A `role`-less panel headed "No turn recorded yet" says what is missing (Energy, Mood, Fans, Skill Points and the five stats), why it matters (the advisor has nothing to rank), and what to do (a link to the run record screen). The grid still renders; nothing is a zero.   |
+| Empty (no turn logged)                     | A `role`-less panel headed "No turn recorded yet" says what is missing (Energy, Mood, Fans, Skill Points and the five stats), why it matters (the advisor has nothing to rank), and what to do (a link labelled "Record the first turn through Training", `Cockpit.vue:583`). The grid still renders; nothing is a zero.   |
 | Energy absent                              | C2 declines to rank, and the page carries the refusal across: `band` and `action` are null and the one reason line is C2's own sentence. The card prints "Recommendation unavailable because Energy has not been entered." No band, no ranking, no marker.                     |
 | Energy present, no target                  | `band` is set, `action` is null, and the reason line says no build target is set. No marker.                                                                                                                                                                                   |
 | Energy present, target met                 | `band` is set, `action` is null, and the reason line says every stat is at or above its target. No marker.                                                                                                                                                                     |
@@ -1895,7 +1895,7 @@ motion stays the global block's, and `RunRaceStripTest` greps the component for 
 | State | Behavior |
 | --- | --- |
 | Scenario composes no `race_calendar` | One sentence says the matrix closes the calendar, and the three regions are absent rather than drawn empty. No catalogue rows are printed for such a run. |
-| No race recorded | The Recorded region names the absence, why it matters, and links to the run record screen. |
+| No race recorded | The Recorded region names the absence, why it matters, tells the Trainer to record the turn from the action grid, and links to the Cockpit. |
 | No turn being decided | This Turn and Still to come both say the run has no turn to measure against, rather than listing every obligation as future. |
 | Turn carries no race | "No race on this scenario's calendar falls at turn N", with the door to Race Decision. Never a race borrowed from another turn. |
 | Race entered but not tied to a turn | The row prints `Turn N/A` with the KI-17 reason on the element, not `0` and not a dash. |
@@ -1960,7 +1960,7 @@ Reached from the Cockpit's action grid (`SCR-CAR-011`, the `training` entry) and
 
 #### Layout
 
-One column of five cards in `config/scenarios.php`'s `stat_order` — Speed, Stamina, Power, Guts, Wit — in a responsive grid (one column at 320px, two from `md`, three from `xl`), then the advisor line, the record form and the deck reading. No element is hidden at a breakpoint. Rest and Recreation stay on the run record screen: they are turn choices, not training options, and the brief's five cards are the five (`SCREEN-010` §Training card).
+One column of five cards in `config/scenarios.php`'s `stat_order` — Speed, Stamina, Power, Guts, Wit — in a responsive grid (one column at 320px, two from `md`, three from `xl`), then the advisor line, the record form and the deck reading. No element is hidden at a breakpoint. Rest and Recreation have no 2.0 surface of their own: they are turn choices, not training options, and the brief's five cards are the five (`SCREEN-010` §Training card).
 
 Each card is a `design-2.0` §24 decision card with §35's progressive disclosure: three sourced facts and the advisor's reason line collapsed, the modifiers in an `aria-expanded` region that stays in the document with `hidden`, so the tab order is the same whether or not the card is open. Exactly one card may carry the `RECOMMENDED` marker, and none does when the advisor recommends `Rest` or declines.
 
@@ -1993,11 +1993,11 @@ What the cards do state, and where each figure comes from:
 
 | State                      | Behavior                                                                                                                                                                                                                                                                                                          |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Empty (no turn logged)     | A panel headed "No turn recorded yet" names what is missing (the five stats, Energy, Mood, Fans, Skill Points), why it matters (the advisor has nothing to read a deficit from and nothing to rank), and what to do (a link to the run record screen). The five cards still render, with `N/A` rather than zeros. |
+| Empty (no turn logged)     | A panel headed "No turn recorded yet" names what is missing (the five stats, Energy, Mood, Fans, Skill Points), why it matters (the advisor has nothing to read a deficit from and nothing to rank), and what to do (a link labelled "Record the first turn on the Cockpit", `TrainingDetail.vue:285`). The five cards still render, with `N/A` rather than zeros. |
 | No build target            | The deficit is `N/A` with "No build target was entered for this stat" in the `title`, and the advisor's own absence sentence is printed in the Advisor region. No marker.                                                                                                                                         |
 | Energy absent              | C2 declines; `band`, `deficit` and `energy_after` are null on every card and the refusal sentence is the advisor line. Wit still prints its sourced zero cost, because its cost does not read Energy.                                                                                                             |
 | Energy present             | The Advisor region names the turn's band in the words `SCR-CAR-011` uses ("At or above the advisory line" / "Below the advisory line"), because a Trainer who arrives here by URL is making the same decision against the same sourced 50 line (SC 3.2.4). It is a word, never a colour.                          |
-| Advisor recommends `Rest`  | No card carries the marker — `Rest` is not one of the five — and the Advisor region says so in words with a link to the run record screen.                                                                                                                                                                        |
+| Advisor recommends `Rest`  | No card carries the marker — `Rest` is not one of the five — and the Advisor region says so in words with a link to the Cockpit (`TrainingDetail.vue:305`).                                                                                                                                                                        |
 | No deck recorded           | "No Support Cards are recorded for this run, so no card above can count a support" with a link to the deck step. A deck with no card of this training's type counts zero, which is a real entered answer.                                                                                                         |
 | No scenario declared       | `cap_bonus` and the scenario effect lines are `N/A` with "This run declares no scenario, so no scenario effect is claimed."                                                                                                                                                                                       |
 | Loading                    | Page-level (ADR-0007): `role="status"` "Loading…" while a visit is in flight. The only user-initiated async action is the preview POST; no cold-load skeleton.                                                                                                                                                    |
@@ -2269,7 +2269,7 @@ AppLayout shell → record-only notice → filter row (Trainee, Scenario, Tag, F
 | Order                           | `Newest first` / `Oldest first`, a button pair rather than a fourth select, with `aria-current="true"` on the live one. It orders by the row's own id, and the `title` on Oldest first says so: no column holds the date a career finished, so this is not a completion-date sort.                                                                                                                          |
 | Loading                         | `role="status"` "Loading results…" while a filter visit is in flight (ADR-0007: user-initiated). No cold-load skeleton.                                                                                                                                                                                                                                                                                     |
 | Error                           | Each refusal renders `role="alert"` under its own control (Trainee, Scenario, Tag, Order). An unknown scenario is refused, not ignored (`ADR-0018` precedent).                                                                                                                                                                                                                                              |
-| Absences                        | Four labelled lines with reasons: favorite/archive/delete (no column holds any), the Spark/aptitude/skill-coverage/race-history/usefulness sorts (no sourced table prices a Spark or scores a build), the Factors view (the same unsourced set), comparison and "find parents for this build" (comparison lives in the Legacy Lab; scored parent choice is what `ADR-0020` §3 keeps out of record screens). |
+| Absences                        | Four labelled lines with reasons: favorite/archive/delete (no column holds any), the Spark/aptitude/skill-coverage/race-history/usefulness sorts (no sourced table prices a Spark or scores a build), the Factors view (the same unsourced set), comparison and "find parents for this build" (comparison lives in the Legacy Lab; scored parent choice is what `ADR-0020` §3 keeps out of every career screen). |
 
 #### Persistence
 
@@ -2299,7 +2299,7 @@ Implemented 2026-10-06 (D16 read half).
 
 #### Layout / Structure
 
-AppLayout shell → record-only notice → THE RECORD (`dl` of trainee, scenario, status, turns, Energy and Fans at the last logged turn, skills learned, races entered, tags, notes) → BUILT FROM (Parent A, Parent B) → action doors (Open the career record; Legacy Lab when a read-back exists, otherwise Back to the library with the reason on the `title`) → the same four labelled absences.
+AppLayout shell → record-only notice → THE RECORD (`dl` of trainee, scenario, status, turns, Energy and Fans at the last logged turn, skills learned, races entered, tags, notes) → BUILT FROM (Parent A, Parent B) → action doors (Open the Cockpit, which is where the career is read now; Legacy Lab when a read-back exists, otherwise Back to the library with the reason on the `title`) → the same four labelled absences.
 
 #### States
 
@@ -2325,7 +2325,7 @@ Implemented 2026-10-06 (D16 read half).
 
 ### SCR-CAR-016 — Skills Planner
 
-`GET /training-runs/{run}/skills` name `runs.skills.planner`, `App\Http\Controllers\Career\SkillsPlannerController`. Plan §8 D13; the plan ids it `SCR-013` because it is design-2.0-only, so nothing in `screen-spec-2.0.md` describes it. Whether and what to learn, against the build target. Reached from the run record screen's header (`runs.skills_planner_url`), and by URL. The Cockpit's action grid does not grow an entry for it: that grid is the turn's decisions, and skills are build-level.
+`GET /training-runs/{run}/skills` name `runs.skills.planner`, `App\Http\Controllers\Career\SkillsPlannerController`. Plan §8 D13; the plan ids it `SCR-013` because it is design-2.0-only, so nothing in `screen-spec-2.0.md` describes it. Whether and what to learn, against the build target. Reached by URL only: the header link the plan named lived on the retired record screen, and no 2.0 surface carries `runs.skills.planner`, which R2-07 files as a reachability gap (a route with no link into it). The Cockpit's action grid does not grow an entry for it: that grid is the turn's decisions, and skills are build-level.
 
 Read-only except one write it does not own: the reorder posts to the existing `runs.build-target.update` and its `StoreBuildTargetRequest`, because `skill_priorities` lives in `build_target` and that write owns the field. `runs.skills.sync` validates acquisition statuses only and the `run_skills` pivot carries no order column, so the plan's wording that the reorder saves through it cannot hold; the deviation is recorded in the D13 hand-off.
 
@@ -2681,7 +2681,7 @@ CareerLayout shell → record-only notice → **What this career recorded** (tra
 
 | State | Behavior |
 | --- | --- |
-| Run not Completed | The form is absent. "Nothing to file yet" names the status the run actually holds and links to the run list and the career record, because a save button that can only refuse is a worse answer than a sentence. |
+| Run not Completed | The form is absent. "Nothing to file yet" names the status the run actually holds and links to the run list and the career's Cockpit, because a save button that can only refuse is a worse answer than a sentence. |
 | Already filed | The same screen prefills from the existing row and the button reads `Update Veteran`; one run is one Veteran, so a second save rewrites rather than duplicating. |
 | No logged turn | Every stat is `N/A` with the reason, never `0` (AGENTS.md §5). Turns, skills and races are real zeros because the counts are counted, not inferred. |
 | No parents recorded | "This career records no parents, so it carries no Sparks", beside the Legacy Lab where a parent is chosen. |

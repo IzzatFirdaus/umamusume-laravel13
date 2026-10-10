@@ -212,7 +212,7 @@ final class SkillsPlannerController extends Controller
                 'label' => 'Available',
                 'glyph' => '+',
                 'rows' => $available,
-                'absent' => 'No skill is marked for this run yet. The run screen\'s skill panel marks one.',
+                'absent' => 'No skill is marked for this run yet. This planner is where a skill state is marked.',
             ],
             [
                 'key' => 'learned',

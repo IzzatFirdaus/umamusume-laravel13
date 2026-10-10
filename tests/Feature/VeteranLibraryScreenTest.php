@@ -126,7 +126,11 @@ it('opens one Veteran with the career facts it was built from', function (): voi
             // No parents recorded: the page prints its named absence rather than a blank slot.
             ->where('parents.a', null)
             ->where('parents.b', null)
-            ->where('runUrl', route('runs.show', $run))
+            // R2-07: the Veteran's run door goes to the Cockpit. It pinned `runs.show` (the retired
+            // record screen's compatibility doorway) while the label beside it read "career record";
+            // both moved together, and the redirects the ruling holds are pinned elsewhere, in
+            // `RunSaveConfirmationTest`, `FreeRaceWriterTest` and `GradePointsEarnedTest`.
+            ->where('runUrl', route('runs.cockpit', $run))
             ->where('traineeUrl', route('catalog.show', $trainee->slug))
             // Three, not the four this case pinned on 2026-10-06. The fourth said comparison and
             // "find parents for this build" were absent; D16's write half built both, one as

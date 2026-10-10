@@ -490,7 +490,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                 </div>
             </form>
             <p v-else class="mt-3 text-sm text-ink-muted">
-                No turns logged yet. Record at least one turn on the run screen before adding an
+                No turns logged yet. Record at least one turn on the Cockpit before adding an
                 inheritance event.
             </p>
         </section>

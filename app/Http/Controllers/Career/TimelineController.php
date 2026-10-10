@@ -127,7 +127,7 @@ class TimelineController extends Controller
         }
 
         return 'No turns have been recorded for this run, so there is no timeline to read yet. '
-            .'The first turn on the run record screen becomes the first row here.';
+            .'The first turn you record from the action grid becomes the first row here.';
     }
 
     /**
