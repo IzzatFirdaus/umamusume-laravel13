@@ -37,7 +37,10 @@ test.afterEach(async ({ page }) => {
     }
 });
 
-async function openPlanner(page: import('@playwright/test').Page): Promise<void> {
+async function openPlanner(
+    page: import('@playwright/test').Page,
+    priorities: string[] = PRIORITIES,
+): Promise<void> {
     await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.locator('#trainee-combobox').fill('Agnes Digital');
@@ -53,6 +56,17 @@ async function openPlanner(page: import('@playwright/test').Page): Promise<void>
     // The build target, straight to the run-scoped write its Form Request owns. `back()` from
     // there falls back to the run screen, so the redirect target is the run's own URL and the
     // response that matters is the props the planner renders next.
+    // A target cannot be written with an empty priority list (`StoreBuildTargetRequest:72` demands
+    // `present, array`, and form encoding has no way to send an empty one), so the no-priorities
+    // fixture is the other half of the same state: a run with no build target at all. `requiredRows()`
+    // reads the priorities off that target either way, and both paths reach `no_priorities`.
+    if (priorities.length === 0) {
+        await page.goto(`${runUrl}/skills`, { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        return;
+    }
+
     const cookie = (await page.context().cookies()).find((c) => c.name === 'XSRF-TOKEN');
     const body = new URLSearchParams({
         purpose: 'StoryClear',
@@ -65,7 +79,7 @@ async function openPlanner(page: import('@playwright/test').Page): Promise<void>
         'targets[Guts]': '600',
         'targets[Wit]': '500',
     });
-    for (const name of PRIORITIES) {
+    for (const name of priorities) {
         body.append('skill_priorities[]', name);
     }
 
@@ -111,6 +125,25 @@ test('warns when SP cannot cover the skills still to learn, and states the disco
     // The fit cells render their three states as words, not colour.
     await expect(page.getByText('Not recorded').first()).toBeVisible();
     await expect(page.getByRole('heading', { name: /Required/ })).toBeVisible();
+});
+
+test('states that nothing is prioritized instead of pricing an empty list', async ({ page }) => {
+    // R2-10. With no priorities the panel used to print the zero an empty sum happens to add up to,
+    // "The skills still to learn cost 0 SP, and the run holds 173, leaving 173", which a Trainer could
+    // only read as a finished plan. The target is written with an empty priority list, so the run has
+    // a target and no priorities: the honest state names the absence and shows no figure.
+    await openPlanner(page, []);
+
+    await expect(
+        page.getByText('This run has no build target, so no skill is Required and there is nothing to sum.'),
+    ).toBeVisible();
+
+    // No number of this shape renders at all, in either of its two sentences.
+    await expect(page.getByText(/still to learn cost 0 SP/)).toHaveCount(0);
+    await expect(page.getByRole('status').filter({ hasText: 'still to learn cost' })).toHaveCount(0);
+
+    // The run's recorded Skill Point total is a reading, not a coverage result, so it still prints.
+    await expect(page.getByText('Skill Point coverage')).toBeVisible();
 });
 
 test('reorders the priority list from the keyboard, announces the new position, and saves it', async ({ page }) => {

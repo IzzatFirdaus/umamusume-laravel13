@@ -63,6 +63,7 @@ const props = defineProps<{
     coverage: {
         sp: number | null;
         sp_title: string | null;
+        state: 'no_priorities' | 'covered' | 'cost' | 'unpriced';
         total: number | null;
         total_title: string | null;
         remaining: number | null;
@@ -190,8 +191,13 @@ const coverageConstants = computed(() =>
             </h2>
             <!-- The computed line, or the named absence. A bare `N/A` here read as a panel that
                  could never resolve; the total now prints whenever the catalogue prices every
-                 skill, and names the ones it cannot price when it does not. -->
-            <p v-if="props.coverage.total !== null" class="mt-1 text-sm text-ink">
+                 skill, and names the ones it cannot price when it does not. The fourth case is the
+                 one R2-10 added: with no priorities there is no sum to report, so the screen says
+                 that instead of printing the zero an empty list happens to add up to. -->
+            <p v-if="props.coverage.state === 'no_priorities'" class="mt-1 text-sm text-ink">
+                {{ props.coverage.absent }}
+            </p>
+            <p v-else-if="props.coverage.total !== null" class="mt-1 text-sm text-ink">
                 The skills still to learn cost
                 <span class="font-mono tabular-nums" :title="props.coverage.total_title ?? undefined">{{ props.coverage.total }}</span>
                 SP, and the run holds

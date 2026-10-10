@@ -101,11 +101,19 @@ final class SkillsPlannerController extends Controller
     /**
      * The skills still to learn, priced at their base, against the run's recorded Skill Points.
      *
-     * Both figures can be unstated: no turn logged means no SP total the run ever recorded, a
-     * priority skill whose catalogue row carries no price means the sum would be a guess, and no
-     * target at all means nothing is Required. A missing price is not a zero, so the sum is
-     * refused and the skills it could not price are named, rather than the total quietly shortened
-     * (D-220). Learned skills are excluded because their SP is spent.
+     * Four states, and the difference between the two empty ones is the whole point. An **empty
+     * priority list** is not a calculation: nothing was ever asked for, so no figure is printed and
+     * `state` is `no_priorities` (R2-10; the screen used to read "The skills still to learn cost 0 SP,
+     * and the run holds 173, leaving 173" over a sum of nothing, which a Trainer could only read as a
+     * completed plan). **Everything prioritized and already learned** is the opposite case: the list
+     * was filled, the outcomes are recorded, and what remains to buy is genuinely zero, so `state` is
+     * `covered` and the zero prints with the reason beside it. `cost` is an outstanding sum, and
+     * `unpriced` refuses the sum when a catalogue row carries no price, because a missing price is not
+     * a zero (D-220). Learned skills leave the Required list in `requiredRows()`, which is what makes
+     * the second state reachable at all.
+     *
+     * No turn logged still means no Skill Point total the run ever recorded: `sp` stays null and says
+     * so, in every state.
      *
      * @param  list<array<string, mixed>>  $required
      * @return array<string, mixed>
@@ -129,37 +137,57 @@ final class SkillsPlannerController extends Controller
         $latest = $run->turnEntries->sortByDesc('turn')->first();
         $sp = $latest?->sp;
 
-        $coverage = SkillSpendCoverage::sum($costs, $sp);
+        $state = match (true) {
+            $this->priorityNames($run) === [] => 'no_priorities',
+            $required === [] => 'covered',
+            $unpriced !== [] => 'unpriced',
+            default => 'cost',
+        };
+
+        // Nothing is added up when nothing was asked for, so the empty sum is not computed and then
+        // discarded; the state decides that before the arithmetic runs.
+        $coverage = $state === 'no_priorities' ? null : SkillSpendCoverage::sum($costs, $sp);
 
         $totalTitle = null;
         $absent = null;
+        $text = '';
 
-        if ($required === []) {
-            $totalTitle = 'No build target is set, so no skill is Required and there is nothing to sum.';
-            $absent = 'No skill is Required yet, so there is nothing to price.';
-        } elseif ($unpriced !== []) {
+        if ($state === 'no_priorities') {
+            // The two reasons nothing is Required are already said apart in the Required group, so this
+            // sentence states only the arithmetic consequence.
+            $absent = $run->buildTarget() === null
+                ? 'This run has no build target, so no skill is Required and there is nothing to sum.'
+                : 'The build target names no skill priorities, so there is nothing to sum.';
+        } elseif ($state === 'covered') {
+            // The reason rides in the provenance line the page prints beside a resolved figure, so the
+            // zero and its explanation are read together rather than as two sentences.
+            $totalTitle = 'Every prioritized skill is already learned, so nothing is left to buy.';
+        } elseif ($state === 'unpriced') {
             $names = implode(', ', $unpriced);
             $count = count($unpriced);
             $totalTitle = "{$count} of the skills still to learn carry no SP price in the catalogue"
                 ." ({$names}), so the total cannot be stated.";
             $absent = "Cost not recorded for: {$names}.";
+        } elseif ($coverage !== null && $sp !== null) {
+            $text = "The skills still to learn cost {$coverage['total_cost']} SP and the run holds {$sp}.";
         }
 
         return [
             'sp' => $sp,
             'sp_title' => $sp === null ? 'No turn has been logged, so the run has never recorded a Skill Point total.' : null,
+            // Which of the four states the figures are in, so the page never has to infer it from a
+            // number that means the opposite in two of them.
+            'state' => $state,
             'total' => $coverage['total_cost'] ?? null,
             'total_title' => $totalTitle,
             'remaining' => $coverage['remaining'] ?? null,
             // The rendered sentence when the total is refused: the named skills, or the reason
             // there is nothing to price. Null while the figures resolve, so the page prints them.
             'absent' => $absent,
-            'warn' => $coverage !== null && $sp !== null && $coverage['total_cost'] > $sp,
+            'warn' => $state === 'cost' && $coverage !== null && $sp !== null && $coverage['total_cost'] > $sp,
             // The total prices every skill at its base; the client pays less when a hint level is
             // on the skill, and no column holds hint levels (G-SK-3), so the sum is the honest one.
-            'text' => $coverage !== null && $sp !== null
-                ? "The skills still to learn cost {$coverage['total_cost']} SP and the run holds {$sp}."
-                : '',
+            'text' => $text,
         ];
     }
 

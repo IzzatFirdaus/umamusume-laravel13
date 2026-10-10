@@ -159,6 +159,56 @@ final class CareerSkillsPlannerTest extends TestCase
                     && str_contains((string) $title, 'Unpriced Skill')));
     }
 
+    public function test_states_no_cost_at_all_when_no_skill_is_prioritized(): void
+    {
+        // R2-10. A sum over an empty set is arithmetically zero, and the screen printed that zero as
+        // though it had priced something: with no priorities at all the page read "The skills still to
+        // learn cost 0 SP, and the run holds 173, leaving 173", which is the audit's misleading
+        // completed-plan. Nothing was configured, so no figure is a result of a calculation.
+        $run = $this->plannerRun();
+        $run->update(['build_target' => $this->target(['skill_priorities' => []])]);
+        TurnEntry::factory()->for($run)->create(['turn' => 12, 'sp' => 173]);
+
+        $this->get(route('runs.skills.planner', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('coverage.state', 'no_priorities')
+                ->where('coverage.total', null)
+                ->where('coverage.remaining', null)
+                ->where('coverage.warn', false)
+                ->where('coverage.text', '')
+                ->where('coverage.absent', fn (?string $absent): bool => (string) $absent !== ''
+                    && ! str_contains((string) $absent, '0')));
+    }
+
+    public function test_states_a_real_zero_when_every_prioritized_skill_is_already_learned(): void
+    {
+        // The other empty case, and it means the opposite: the Trainer did prioritize, the outcome is
+        // recorded, and what still has to be bought is genuinely nothing. The zero here is an answer,
+        // so it prints with the sentence that says why, and the run's SP stands unbilled beside it.
+        $run = $this->plannerRun();
+        $first = $this->skill('Priced High', 200);
+        $second = $this->skill('Priced Higher', 160);
+
+        $run->update(['build_target' => $this->target([
+            'skill_priorities' => ['Priced High', 'Priced Higher'],
+        ])]);
+        $run->setSkillStatus($first, SkillAcquisition::Acquired, 9);
+        $run->setSkillStatus($second, SkillAcquisition::Acquired, 11);
+        TurnEntry::factory()->for($run)->create(['turn' => 12, 'sp' => 173]);
+
+        $this->get(route('runs.skills.planner', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('coverage.state', 'covered')
+                ->where('coverage.total', 0)
+                ->where('coverage.remaining', 173)
+                ->where('coverage.warn', false)
+                ->where('coverage.absent', null)
+                ->where('coverage.total_title', fn (?string $title): bool => (string) $title !== ''
+                    && str_contains((string) $title, 'learned')));
+    }
+
     public function test_compares_only_the_dimensions_a_source_lets_it_compare(): void
     {
         $run = $this->plannerRun();
