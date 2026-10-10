@@ -380,6 +380,10 @@ test('records Energy through the cockpit correction and then marks one action', 
     // owns a turn: no second endpoint exists for it.
     const correction = page.locator('details', { has: page.getByText('Correct turn 1 by hand') });
     await page.getByText('Correct turn 1 by hand').click();
+    // R2-16 gave the correction form the same Energy control the guided form has: the state is a radio
+    // group and the number input renders only while the state is `exact`, so recording a figure names
+    // its state first. The stored turn carries no state, which is why the input is not there yet.
+    await correction.getByRole('radio', { name: 'Exact' }).check();
     await correction.locator('input[name="energy"]').fill('60');
     await correction.getByRole('button', { name: 'Save correction' }).click();
 
