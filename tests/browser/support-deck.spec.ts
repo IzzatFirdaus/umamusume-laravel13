@@ -73,7 +73,14 @@ test('renders six slots, each with a labelled ownership toggle, and the seventh-
     const rented = page.getByRole('button', { name: 'Rented', exact: true });
     await expect(owned).toHaveCount(6);
     await expect(rented).toHaveCount(6);
-    await expect(owned.first()).toHaveAttribute('aria-pressed', 'true');
+    // Neither toggle is pressed on a slot nobody has flagged, because the run was created with an empty
+    // deck and `SupportSlot.vue` names that state as an absence rather than defaulting it to Owned:
+    // "Neither button pressed and the value named as absent". A fresh deck therefore shows the marker,
+    // and a press is what records a flag. This asserted `Owned` pressed until the three-state rule landed,
+    // which is why the case was red on an empty run rather than red on a broken screen.
+    await expect(owned.first()).toHaveAttribute('aria-pressed', 'false');
+    await expect(rented.first()).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('#deck-slot-1').getByText('N/A').first()).toBeVisible();
 
     // The seven types are offered as words. `Wit` and `Pal` are the Global client's words for the
     // export's `intelligence` and `friend` keys.
