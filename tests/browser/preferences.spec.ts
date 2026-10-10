@@ -114,9 +114,12 @@ test('the Data and Game version categories render what they can and name what th
     await expect(page.getByTitle('Destructive: restoring replaces the database file, which AGENTS.md §5 scopes to the owner. Absent rather than a button without a backend.')).toBeVisible();
     await expect(page.getByTitle('Destructive; requires owner approval for a route (AGENTS §5)')).toBeVisible();
 
-    // Game version: ruleset is N/A, verified date is sourced from config.
+    // Game version: ruleset is N/A, verified date is sourced from config. R2-19 makes the heading name
+    // the fact it prints, and the match is `exact` because the retired wording is a prefix of the new
+    // one: a substring match here would pass on either wording and assert nothing.
     await page.getByRole('tab', { name: 'Game version' }).click();
-    await expect(page.getByText('Global Ruleset')).toBeVisible();
+    await expect(page.getByText('Global Ruleset Version', { exact: true })).toBeVisible();
+    await expect(page.getByText('Global Ruleset', { exact: true })).toHaveCount(0);
     await expect(page.getByTitle('No source defines a Global ruleset version (design-2.0 §48)')).toBeVisible();
     await expect(page.getByText('Verified')).toBeVisible();
     await expect(page.getByText('2026-09-27')).toBeVisible();

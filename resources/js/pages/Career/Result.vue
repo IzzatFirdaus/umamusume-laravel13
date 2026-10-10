@@ -363,7 +363,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
             </section>
 
             <p class="mt-4 text-xs text-ink-muted">
-                Ruleset:
+                Ruleset version:
                 <span :title="props.ruleset.title">N/A</span>.
                 {{ props.ruleset.title }}
             </p>

@@ -93,8 +93,11 @@ test('reads the data-status badge, its verification date and the named ruleset',
     await expect(status.getByText('Verified 2026-09-27')).toBeVisible();
 
     // `app.ruleset` is null, so the row is N/A with its reason on the element rather than a version
-    // this tool does not hold (design-2.0 §48).
-    await expect(status.getByText('Ruleset:')).toBeVisible();
+    // this tool does not hold (design-2.0 §48). R2-19 heads the row for the fact it prints: the word
+    // the refusal title beside it already uses is `version`, and the heading now agrees with it. The
+    // second line is the retired wording, anchored to the paragraph's leading indentation.
+    await expect(status.getByText(/^\s*Ruleset version:/)).toBeVisible();
+    await expect(status.getByText(/^\s*Ruleset:/)).toHaveCount(0);
     await expect(status.locator('[title*="No source defines a Global ruleset version"]')).toHaveText('N/A');
 });
 

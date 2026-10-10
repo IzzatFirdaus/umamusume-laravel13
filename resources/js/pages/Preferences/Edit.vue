@@ -442,7 +442,7 @@ function runBackup(): void {
             >
                 <dl class="border-t border-rule pt-3 space-y-2">
                     <div class="flex justify-between">
-                        <dt class="text-ink">Global Ruleset</dt>
+                        <dt class="text-ink">Global Ruleset Version</dt>
                         <dd
                             :class="
                                 rulesetVersion

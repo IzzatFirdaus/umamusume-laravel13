@@ -319,7 +319,7 @@ const group = (n: number): string => n.toLocaleString('en-US');
                 </p>
 
                 <p class="mt-2 text-xs text-ink-muted">
-                    Ruleset:
+                    Ruleset version:
                     <span
                         v-if="ruleset"
                         class="font-mono text-ink"

@@ -389,7 +389,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
             </p>
 
             <p class="mt-3 text-sm text-ink-muted">
-                Ruleset snapshot:
+                Ruleset version:
                 <span class="text-ink" :title="props.contract.ruleset.title">{{ props.contract.ruleset.label }}</span>
             </p>
         </section>
