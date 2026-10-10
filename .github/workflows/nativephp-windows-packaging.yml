@@ -6,6 +6,9 @@ on:
     branches:
       - worktree/cherry-pick
 
+permissions:
+  contents: read
+
 jobs:
   package-windows:
     runs-on: windows-latest
