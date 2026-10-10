@@ -203,12 +203,18 @@ const group = (n: number): string => n.toLocaleString('en-US');
                 >
                     Start a new training run
                 </Link>
-                <p class="mt-3 text-sm text-ink-muted">
-                    Already partway through a career?
-                    <Link href="/career/snapshot" class="underline font-medium text-ink">Import an existing career</Link>
-                    instead, and this tool starts from where your client says it stands.
-                </p>
             </section>
+
+            <!-- Outside both career branches on purpose (R2-04). The Trainer who needs the snapshot
+                 door is the one who is already partway through a career in the client, and that is
+                 exactly the state in which this screen has an active career to resume. Held inside the
+                 empty branch, the door only appeared when there was no career at all, so the audience
+                 it exists for never saw it. -->
+            <p class="text-sm text-ink-muted">
+                Already partway through a career?
+                <Link href="/career/snapshot" class="underline font-medium text-ink">Import an existing career</Link>
+                instead, and this tool starts from where your client says it stands.
+            </p>
 
             <!-- Quick actions. Every destination is a live route; a destination whose slice had not
                  landed would be a named absence here rather than a dead link. -->

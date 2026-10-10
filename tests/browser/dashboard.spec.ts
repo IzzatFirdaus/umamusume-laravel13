@@ -65,6 +65,9 @@ test('states the empty career in words a Trainer can act on', async ({ page }) =
     await expect(page.getByText(/A career keeps your turns, Energy and race record/)).toBeVisible();
     await expect(page.getByRole('link', { name: 'Start a new training run' })).toBeVisible();
 
+    // The snapshot door is the other way in, and it now sits outside both career states (R2-04).
+    await expect(page.getByRole('link', { name: 'Import an existing career' })).toBeVisible();
+
     // Paradox of the Active User (plan §13): no onboarding wall. The rest of the page is usable on
     // first load, so the quick actions and the data panels are present with no career at all.
     const quickActions = page.getByRole('navigation', { name: 'Quick actions' });
@@ -140,6 +143,14 @@ test('names the active career and resumes it from the keyboard', async ({ page }
     // widget list. No column records it yet, so it is N/A with that reason attached.
     await expect(card.getByText('Team Rank')).toBeVisible();
     await expect(card.getByTitle(/No column records this scenario resource yet/)).toHaveText('N/A');
+
+    // R2-04: this is the state the snapshot door exists for. A Trainer already partway through a
+    // career in the client is the one who has a career to resume here, so the door has to be on the
+    // screen they land on rather than only on the empty one. It is not one of the resume card's own
+    // controls, so it is read from the page.
+    const door = page.getByRole('link', { name: 'Import an existing career' });
+    await expect(door).toBeVisible();
+    await expect(door).toHaveAttribute('href', '/career/snapshot');
 
     // The primary action, reached and taken by keyboard alone.
     const resume = card.getByRole('link', { name: 'Resume Career' });
