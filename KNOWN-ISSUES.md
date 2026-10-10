@@ -2290,9 +2290,12 @@ as a prop either.
 Cockpit's build-target region or the career bar, not the action grid, and the decision belongs with
 `ADR-0020` §1 rather than with a copy pass. Until then the route is reachable only by URL.
 
-### KI-92 Three Cockpit 44px sweeps size every control the DOM holds, so a collapsed disclosure's button fails them as a zero-height target - FILED 2026-10-10 (slice 11 browser verification), OPEN
+### KI-92 Three Cockpit 44px sweeps size every control the DOM holds, so a collapsed disclosure's button fails them as a zero-height target - FILED 2026-10-10 (slice 11 browser verification), CLOSED 2026-10-10 (slice 14, `dc8ad7b`)
 
-**Status: OPEN.** Found while verifying the scenario strip's heading rename in `tests/browser/scenario-panel.spec.ts`.
+**Status: CLOSED.** Filed OPEN from the slice-11 browser run; closed by the sweep fix in `dc8ad7b`, which the
+**Closure** section at the end of this entry records. The finding below stands as it was filed.
+
+Found while verifying the scenario strip's heading rename in `tests/browser/scenario-panel.spec.ts`.
 Not caused by that rename, and not fixed by it: the change adds no interactive element, so the sweep's target list
 is the same list it had before.
 
@@ -2333,3 +2336,54 @@ failure; a closure that edits one file leaves the other three. `database.spec.ts
 not run either: its three views hold no `<details>` of their own (`resources/js/pages/Database/` answers none), but
 whether a component they mount carries one is unverified. Whichever remedy is taken, the `ura-panel` guard belongs
 with it: a sweep that skips unplaced controls has to keep asserting that it measured something.
+
+**Closure.** `dc8ad7b` (2026-10-10, slice 14). The rule moved to `tests/utils/tap-targets.ts`, next to `buildAxe`,
+exporting `expectTapTargets(targets, minimumMeasured)`: it measures every control `isVisible()` accepts, skips the
+rest with the reason in the module's own docblock, and asserts how many it measured so the skip cannot become a way
+to pass on nothing. Five specs now call it and lost their own copy of the loop — the three named above plus
+`ura-panel.spec.ts`, which had already hand-rolled the same skip and keeps its `> 8` guard as `minimumMeasured = 9`.
+`career-cockpit-forms.spec.ts` gained the case that keeps the skip honest: it opens the run-delete door and asserts
+the floor on what the disclosure reveals, so a control the page-wide sweep now skips is still measured where it
+becomes a target. No floor was removed or lowered; a visible control under 44px still fails.
+
+Evidence: the six affected specs together 53 passed (25.9m) on `:8262` with its own scratch database, including
+every case this entry predicted would fail (`scenario-panel.spec.ts:162`, `grand-concert-panel.spec.ts:107`,
+`trackblazer-panel.spec.ts:226`, `unity-cup-panel.spec.ts:189`) and the converted `ura-panel.spec.ts:200`. Ad-hoc
+`tsc --noEmit` over the helper and all nine specs: exit 0, because `npm run typecheck` cannot see `tests/` at all
+(see the coverage gap below).
+
+**What closure does not cover.** Three sweeps keep the latent shape and are only signposted, not converted, because
+their pages hold no `<details>` today: `database.spec.ts:273`, `career-build-target.spec.ts:170` and
+`career-trainee-select.spec.ts:174`. Each now carries a one-line comment naming the helper, so the next author to
+put a disclosure on one of those pages is told what to do. The second remedy this entry listed — opening every
+disclosure before measuring, which is what `career-training-detail.spec.ts:326` does — is not what was chosen: the
+page-wide sweeps skip instead, and the opened-disclosure coverage lives in the one positive case rather than in
+every sweep.
+
+### KI-93 No npm script type-checks `tests/`, so every browser-spec commit has reported a typecheck gate that could not see its own change - FILED 2026-10-10 (slice 14), OPEN
+
+**Status: OPEN.** Found while landing KI-92's fix, whose own typecheck gate had to be run by hand for exactly this
+reason.
+
+`tsconfig.json:15` reads `"include": ["resources/js/**/*.ts"]`, and `npm run typecheck` is `tsc --noEmit` against
+that config (`package.json`). Everything under `tests/` is therefore outside the gate: the 48 spec files in
+`tests/browser/` (counted at this writing) and four shared modules in `tests/utils/` (`accessibility.ts`,
+`delete-run.ts`, `record-turns.ts`, `tap-targets.ts`). Playwright transpiles those files at run time, so a type
+error there surfaces as a failing spec
+or not at all if the file is never exercised — and a commit that only changes a spec reports a green `typecheck`
+gate that never read the file it changed. That is every browser-spec commit in this repository's history, including
+the ones this register lists as verified.
+
+**Proving command.** `npm run typecheck` exits 0 while its config excludes `tests/`; the same compiler run against
+one of those files with the config set aside is the instrument that actually reads them:
+`npx tsc --noEmit --ignoreConfig --strict --target es2022 --module esnext --moduleResolution bundler --skipLibCheck
+--lib es2022,dom,dom.iterable tests/utils/tap-targets.ts tests/browser/scenario-panel.spec.ts` — exit 0, and the
+`--ignoreConfig` flag is required because the root config is present. Note `--types node` fails here
+(`Cannot find type definition file for 'node'`), so a checked-in tests config would have to settle how the specs'
+`process` usage resolves.
+
+**What closure needs.** Either widen the root `include` to `tests/**/*.ts` with the libs and types those files need,
+or add a second script (`typecheck:tests`) so the two scopes stay legible. Not fixed in slice 14: `tsconfig.json` is
+off-limits for this session by the brief's own do-not-touch list, and changing what `npm run typecheck` covers
+changes the meaning of a gate every future change reports against, which is the owner's call rather than a
+side effect of a test fix.
