@@ -2263,3 +2263,29 @@ cases green.
 
 **Closure coverage.** `RecommendationCard` is imported only by `AdvisorRail`, and `AdvisorRail` only
 by `Cockpit.vue`, so the browser run covers the whole blast radius.
+
+### KI-91 The Skills planner has no link into it: the surface that carried the only entry point was retired and nothing replaced it - FILED 2026-10-10 (R2-07 copy sweep), OPEN
+
+**Status: OPEN.** Found while retargeting the instructions that named the retired run record screen. Not
+caused by that sweep, and not fixed by it.
+
+`routes/web.php:158` declares `runs.skills.planner` and `SkillsPlannerController::show()` renders it, and
+the screen works: `CareerSkillsPlannerTest` (19 cases) and `SkillSpendCoverageTest` (4 cases) exercise its
+props, its write and its refusal states. Nothing in `app/` or `resources/` generates a link to it. The one
+entry point the shipped tool had was the 0.1.0 record screen's header (`SCREEN_SPEC.md` SCR-CAR-016 still
+carried that sentence until `380350e`), and `F2` retired that screen behind a redirect while giving the
+Skills planner no successor door: the Cockpit's action grid is documented as deliberately not growing an
+entry for it (`SCREEN_SPEC.md`, SCR-CAR-016: "that grid is the turn's decisions, and skills are
+build-level").
+
+A Trainer who is told "skills are marked on the Skills planner" — which `ResultController.php:176` now
+says, accurately — has no way to get there from inside the application.
+
+**Proving command.** `git grep -n "runs\.skills\.planner" -- app resources routes` → one hit, the route
+declaration itself; no `route('runs.skills.planner')` call exists in any controller, component or layout.
+Cross-check: `git grep -ln "skills_planner_url" -- app resources` → no output, so no screen carries the URL
+as a prop either.
+
+**What remains open.** A one-link affordance, whose owner is the Architect: the natural door is the
+Cockpit's build-target region or the career bar, not the action grid, and the decision belongs with
+`ADR-0020` §1 rather than with a copy pass. Until then the route is reachable only by URL.
