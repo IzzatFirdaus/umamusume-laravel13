@@ -13,7 +13,8 @@
         "inertiajs/inertia-laravel": "*",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
-        "nativephp/desktop": "^2.3"
+        "nativephp/desktop": "^2.3",
+        "nativephp/php-bin": "^1.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
