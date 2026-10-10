@@ -645,6 +645,11 @@ class TrainingRunController extends Controller
      * set or a level entered on the decision screen would survive an edit and not a create. The five
      * facility keys are here for that reason; they are the request's own, not a second list.
      *
+     * `energy_state`/`energy_band` were that rule's own omission until R2-16: the guided form posts both,
+     * the request validates both, and this list dropped both, so a band picked on the guided screen never
+     * reached the row while the same band saved correctly through a correction. `TurnEntryUpdateTest` pins
+     * the create path so the list cannot fall behind the request again without a red test.
+     *
      * @param  array<string, mixed>  $validated
      * @return array<string, mixed>
      */
@@ -654,6 +659,7 @@ class TrainingRunController extends Controller
             $validated,
             array_flip([
                 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans',
+                'energy_state', 'energy_band',
                 'facility_speed', 'facility_stamina', 'facility_power', 'facility_guts', 'facility_wit',
                 'failure_rate', 'preview_gains', 'choice',
             ]),
