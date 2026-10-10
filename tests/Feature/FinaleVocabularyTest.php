@@ -148,7 +148,7 @@ it('leaves the advisor proximity line under `advisor` and apart from the state',
 
     $advisor = $this->get(route('runs.cockpit', $run))->assertOk()->viewData('page')['props']['advisor'];
 
-    expect(array_keys($advisor))->toBe(['action', 'band', 'reasons', 'alternative', 'risk', 'finale'])
+    expect(array_keys($advisor))->toBe(['decision', 'finale'])
         ->and($advisor['finale'])->not->toBeNull()
         ->and($advisor['finale'])->toHaveKeys(['label', 'state', 'turns_away'])
         ->and($advisor['finale'])->not->toHaveKey('outcome')

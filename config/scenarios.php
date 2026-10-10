@@ -86,6 +86,27 @@ return [
         'career_goals' => 'Career goals',
     ],
 
+    /*
+    | The order objective classes outrank one another on the Cockpit's decision rail (plan §9a FD-3).
+    |
+    | Read at the top level and not per scenario, so a fifth scenario inherits the same order and names no
+    | class of its own (gate G-33, D-240). A class a scenario's matrix does not compose simply produces no
+    | row, which is why this list is one flat order rather than four.
+    |
+    | Ratified by the owner on 2026-10-10 (ruling D-3): `mandatory_race > grade_checkpoint > fan_gate >
+    | scenario_milestone > finale`. `screen-spec-2.0.md:1574-1582` ranks survival above mandatory objectives
+    | above scenario objectives above build targets, and the two tiers above this list — the advisory Energy
+    | line and the run's own obligations — are computed by `NextDecision`, not ordered here. Nothing here is
+    | a game rule and no surface presents it as one.
+    */
+    'objective_priority' => [
+        'mandatory_race',
+        'grade_checkpoint',
+        'fan_gate',
+        'scenario_milestone',
+        'finale',
+    ],
+
     // The 1200 line is a game mechanic where training gains halve, not an
     // application limit. It is drawn as its own marker on every bar.
     'base_cap' => 1200,

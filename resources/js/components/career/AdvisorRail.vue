@@ -1,36 +1,39 @@
 <script setup lang="ts">
 /*
- * The advisor rail (SCREEN-009 §12, design-2.0 §23): the right column, and the only place on the
+ * The advisor rail (screen-spec-2.0 §12, design-2.0 §23): the right column, and the only place on the
  * cockpit that makes a claim about what to do next.
  *
- * It carries the same contract fields the card does and adds nothing to them — the column is the
- * heading and the standing explanation, the card is the recommendation. The explanation line states
- * the boundary in words: the advisor ranks, the Trainer decides (design-2.0 §2, §36).
+ * From FD-2 it is the rail, not the recommendation: `NextDecision.vue` renders the five-element answer
+ * and this component supplies the heading, the region name, and the standing explanation that the
+ * advisor ranks while the Trainer decides. The decision object is forwarded untouched.
+ *
+ * `Record<string, unknown>` with an `as never` on the child is the repo's own workaround, not slop:
+ * TypeScript 7 ships no `lib/typescript.js`, so `@vue/compiler-sfc` cannot resolve an imported type
+ * inside `defineProps<>` (see `resources/js/types.ts` and `Cockpit.vue`'s scenario forward).
  */
-import RecommendationCard from './RecommendationCard.vue';
+import NextDecision from './NextDecision.vue';
 
-const props = defineProps<{
-    action: string | null;
-    band: 'AtOrAboveAdvisory' | 'BelowAdvisory' | null;
-    reasons: string[];
-    alternative: string | null;
-    risk: string | null;
-    finaleContext: { label: string; state: string; turns_away: number | null } | null;
-}>();
+const props = withDefaults(
+    defineProps<{
+        decision: Record<string, unknown>;
+        /** Forwarded to the decision's objectives; see `NextDecision.vue`'s `raceUrl`. */
+        raceUrl?: string | null;
+        /** Forwarded to FD-4's recorded-action card: the full action history is the Timeline's. */
+        timelineUrl?: string | null;
+    }>(),
+    { raceUrl: null, timelineUrl: null },
+);
 </script>
 
 <template>
     <section aria-labelledby="career-advisor-heading" class="rounded-md border border-rule bg-panel p-4">
         <h2 id="career-advisor-heading" class="text-base font-semibold text-ink-strong">Advisor</h2>
 
-        <RecommendationCard
+        <NextDecision
             class="mt-3"
-            :action="props.action"
-            :band="props.band"
-            :reasons="props.reasons"
-            :alternative="props.alternative"
-            :risk="props.risk"
-            :finale-context="props.finaleContext"
+            :decision="props.decision as never"
+            :race-url="props.raceUrl"
+            :timeline-url="props.timelineUrl"
         />
 
         <p class="mt-3 text-xs text-ink-muted">

@@ -7,6 +7,7 @@ namespace App\Http\Requests;
 use App\Enums\EnergyState;
 use App\Enums\MoodTier;
 use App\Enums\PerformanceType;
+use App\Enums\TurnChoice;
 use App\Models\TrainingRun;
 use App\Services\ScenarioCaps;
 use Illuminate\Foundation\Http\FormRequest;
@@ -137,7 +138,7 @@ class StoreTurnEntryRequest extends FormRequest
             // staged submit, because the escape hatch has no step to choose and no
             // outcome to declare: it writes the row the Trainer typed.
             'stage' => ['nullable', Rule::in(['preview', 'confirm'])],
-            'choice' => [Rule::requiredIf(fn (): bool => $staged), 'nullable', 'string', 'max:60'],
+            'choice' => [Rule::requiredIf(fn (): bool => $staged), 'nullable', Rule::enum(TurnChoice::class)],
             'outcome' => [Rule::requiredIf(fn (): bool => $staged), 'nullable', Rule::in(['Success', 'Failure'])],
             'penalty_kind' => [
                 Rule::requiredIf(fn (): bool => $this->input('outcome') === 'Failure'),

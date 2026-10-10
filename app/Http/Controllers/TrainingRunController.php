@@ -33,6 +33,7 @@ use App\Models\TurnEntry;
 use App\Models\TurnEvents\PerformancePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\Umamusume;
+use App\Services\Advisor\NextDecision;
 use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\DeckAnalysis;
 use App\Services\PageSize;
@@ -635,6 +636,11 @@ class TrainingRunController extends Controller
      * must not ride into the create call: Laravel 13 discards non-fillable keys silently,
      * so a typo here would lose a value without a word of complaint.
      *
+     * `choice` is the exception FD-4 adds (ruling D-1a): the action the Trainer took is a column the row
+     * owns, and a turn that stores its gains but not its action leaves reconciliation with nothing to
+     * reconcile against. `decision_snapshot` is deliberately absent: the request has no rule for it, so
+     * `validated()` cannot carry one, and the snapshot the row shows is the one this server wrote.
+     *
      * `updateTurn` writes `$request->validated()` whole, so the two turn writes must agree on the key
      * set or a level entered on the decision screen would survive an edit and not a create. The five
      * facility keys are here for that reason; they are the request's own, not a second list.
@@ -649,7 +655,7 @@ class TrainingRunController extends Controller
             array_flip([
                 'turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans',
                 'facility_speed', 'facility_stamina', 'facility_power', 'facility_guts', 'facility_wit',
-                'failure_rate', 'preview_gains',
+                'failure_rate', 'preview_gains', 'choice',
             ]),
         );
     }
@@ -810,7 +816,17 @@ class TrainingRunController extends Controller
         // event behind it is the half state, and nothing later reconciles it. A success writes the one
         // row it needs, inside the same transaction.
         DB::transaction(function () use ($run, $validated): void {
-            $entry = $run->turnEntries()->create($this->turnAttributes($validated));
+            // The snapshot is taken while the row does not exist yet. It is what the rail was showing when
+            // the Trainer pressed the card, read off the same previous row the write compares against;
+            // built after the create it would record the state this turn produced and call it advice.
+            $snapshot = app(NextDecision::class)->snapshotFor(
+                $this->previousTurn($run, (int) $validated['turn']),
+                $run,
+            );
+
+            $entry = $run->turnEntries()->create(
+                $this->turnAttributes($validated) + ['decision_snapshot' => $snapshot],
+            );
 
             // An event is keyed on `(training_run_id, turn)` with no `turn_entry_id`, so a row at a
             // number a deleted turn used inherits that turn's event, and the page's Failed chip is

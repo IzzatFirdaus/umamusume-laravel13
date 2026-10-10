@@ -14,6 +14,115 @@ declare module '@inertiajs/core' {
 }
 
 /*
+ * The shared Next Decision contract (plan §9a FD-2, PROMPT G1). Fixed here once because G2 to G6 all
+ * consume it: FD-3 adds `objectives[]` and FD-4 adds `recorded_action` to this same shape, and the two
+ * refusal classes, the provenance rows and the absence of any score are part of what they must not
+ * redefine. Producer: `app/Services/Advisor/NextDecision.php`; consumer:
+ * `resources/js/components/career/NextDecision.vue`, which re-declares the shape locally because
+ * TypeScript 7 cannot resolve an imported type inside `defineProps<>` (see `ProvenanceBadge.vue:6-10`).
+ *
+ * **There is no score, no confidence and no band field, and that absence is the contract.** A score and
+ * a numeric confidence are unsourced (`ADR-0001` §3) and `ADR-0020` §2 says no figure may read as more
+ * certain than its provenance. `recommended` and `refusal` are mutually exclusive: when the engine
+ * cannot rank, `recommended` is null and `refusal` names the inputs it had to work from.
+ */
+export interface Objective {
+    label: string;
+    /**
+     * The four states FD-3 can reach from recorded data. `missed` is in the vocabulary the milestone
+     * tracker will need (FD-5, G3) and is produced by nothing here: a slot behind the run with no entry is
+     * the same stored fact as a slot not entered yet, and no source says it became unattainable.
+     */
+    state: 'upcoming' | 'current' | 'completed' | 'unknown';
+    due_turn: number | null;
+    due_label: string | null;
+    /** Null because no source states what changes when an obligation is missed. Never an invented sentence. */
+    consequence: string | null;
+    /** Which read produced the row: `race_catalog_slots` today, so no row can name a scenario. */
+    source: string;
+    badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    title: string;
+}
+
+export interface NextDecision {
+    /** One sentence naming which priority fired. Not a ranking of the seven §29 tiers. */
+    priority: string;
+    recommended: {
+        action: string;
+        action_url: string;
+        /** What the action does for the run, in the engine's own words. Never a predicted yield. */
+        benefit: string[];
+    } | null;
+    alternatives: { action: string; action_url: string; tradeoff: string }[];
+    /**
+     * The provenance ledger, one row per figure the payload prints. Only `confirmed` (a declared
+     * constant or a stored reading printed as read) and `calculated` (this tool's arithmetic over
+     * readings) are legal on the advisor's axis — `estimated` would claim a model nothing builds, and
+     * `unknown` beside an absence was retired by owner ruling 2a. The four-value union is declared
+     * inline because `ProvenanceBadge.vue:12` owns it and no `.ts` in this build may import a type
+     * from a `.vue` (there is no shim, and `npm run typecheck` fails on one).
+     */
+    why: {
+        text: string;
+        badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        title: string;
+    }[];
+    switch_if: string[];
+    refusal: { reason: string; missing: string[] } | null;
+    /**
+     * FD-3's obligations, already ordered by `config('scenarios.objective_priority')`. The order is the
+     * server's, and a consumer that re-sorted them would be ranking twice (ADR-0015).
+     */
+    objectives: Objective[];
+    /**
+     * FD-4's eighth key: the action last recorded, quoted from the snapshot stored when it was taken.
+     *
+     * Null for a run with no recorded action, and for every row written before the action noun existed.
+     * Those rows hold no forecast, and a card that quoted a recomputed one would be printing advice no
+     * screen ever showed the Trainer.
+     */
+    recorded_action: RecordedAction | null;
+}
+
+/**
+ * The action vocabulary, mirroring `App\Enums\TurnChoice`.
+ *
+ * PHP owns the list; this is the client's copy of it, and `TurnChoiceTest`'s mirror case reads this file
+ * and refuses the suite when the two disagree, which is the same pin `TurnEntryFieldSourceTest` puts on the
+ * turn-entry field lists. A mirror nobody checks is a mirror that rots.
+ */
+export type TurnChoice =
+    | 'training-Speed'
+    | 'training-Stamina'
+    | 'training-Power'
+    | 'training-Guts'
+    | 'training-Wit'
+    | 'rest'
+    | 'mood';
+
+/**
+ * One recorded action and its reconciliation (`plan §9a FD-4`).
+ *
+ * `decision` is the payload as it stood at the moment of the action and is never recomputed when the run
+ * changes. `actual` is null until the Trainer enters the result, which is the difference between the
+ * card's two shapes; `reconciliation` compares the action taken to the action recommended and never
+ * compares gains, because the forecast names a deficit rather than a figure to hit.
+ */
+export interface RecordedAction {
+    id: number;
+    decision: Record<string, unknown>;
+    /** The client's word for the action, printed from `App\Enums\TurnChoice::label()`. */
+    action: string;
+    /** The stored value, kept beside the word so a reader can trace it back to the enum. */
+    choice: TurnChoice;
+    expected: { text: string; badge: 'confirmed' | 'calculated'; title: string }[];
+    actual: { text: string; badge: 'confirmed' | 'calculated'; title: string }[] | null;
+    reconciliation: { match: boolean; note: string } | null;
+    recorded_at: string | null;
+    corrected_from: number | null;
+}
+
+/*
  * The scenario panel contract (plan §9 E1). Fixed once here because E2, E3, E4 and E6 all consume
  * it: each registers a renderer against a widget or flag key and reads this shape.
  *

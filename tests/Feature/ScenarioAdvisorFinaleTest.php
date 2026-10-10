@@ -74,9 +74,13 @@ it('names the finale and counts the turns while it is close', function (): void 
             ->where('advisor.finale.turns_away', 4)
             // The recommendation itself is untouched by the status line: this run sets no build
             // target, so the engine still declines to name an action and says why, exactly as it did
-            // before the finale existed here.
-            ->where('advisor.action', null)
-            ->has('advisor.reasons', 1)
+            // before the finale existed here. FD-2 carries that decline as a refusal rather than as
+            // an empty reason list, and the finale rides along in `why` beside it.
+            ->where('advisor.decision.recommended', null)
+            ->where('advisor.decision.refusal.missing', ['build target'])
+            ->where('advisor.decision.refusal.reason', fn (string $reason): bool => str_contains(
+                $reason, 'No build target is set for this run',
+            ))
         );
 });
 

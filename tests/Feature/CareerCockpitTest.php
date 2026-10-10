@@ -100,7 +100,7 @@ it('renders the cockpit for a run with no logged turn, and names what is missing
             ->where('correction', null));
 });
 
-it('carries the advisor contract with Energy present and no score or numeric confidence', function (): void {
+it('carries the decision contract with Energy present and no score or numeric confidence', function (): void {
     $run = cockpitRun([
         'scenario' => 'unity_cup',
         'status' => RunStatus::Active,
@@ -117,23 +117,29 @@ it('carries the advisor contract with Energy present and no score or numeric con
         'skill_priorities' => [],
     ])->toArray()]);
 
-    $this->get(route('runs.cockpit', $run))
+    /** @var array{decision: array<string, mixed>, finale: array{label: string, state: string, turns_away: int|null}|null} $advisor */
+    $advisor = $this->get(route('runs.cockpit', $run))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('advisor.band', 'AtOrAboveAdvisory')
-            // Speed is 300 below its target, the largest deficit, so it is the recommendation.
-            ->where('advisor.action', 'Speed')
-            ->where('advisor.alternative', 'Wit')
-            // The reason lines restate the deficit and the Energy the action leaves behind.
-            ->has('advisor.reasons', 2)
-            ->where('advisor.reasons.0', 'Speed is 300 below target (the largest deficit).')
-            ->has('advisor.risk')
-            // The five contract fields plus one status line, and still no score and no numeric
-            // confidence: those would be unsourced figures (plan §8 "Recommendation contract (D8)",
-            // ADR-0001 §3). `finale` is a position read off the career calendar, not a judgement, and
-            // the engine gives no counsel on the concert itself (ADR-0020 §3, SCREEN_SPEC.md §7-22).
-            ->has('advisor', fn (Assert $advisor) => $advisor
-                ->hasAll(['action', 'band', 'reasons', 'alternative', 'risk', 'finale'])));
+        ->inertiaProps('advisor');
+
+    $decision = $advisor['decision'];
+
+    // The page carries C2's answer across the wire without adding a field C2 does not have: no score,
+    // no numeric confidence (plan §8 "Recommendation contract (D8)" as FD-2 froze it, ADR-0001 §3). The
+    // eight keys are G1's seven plus FD-4's `recorded_action` (ruling D-1a).
+    expect(array_keys($decision))
+        ->toBe(['priority', 'recommended', 'alternatives', 'why', 'switch_if', 'refusal', 'objectives', 'recorded_action'])
+        ->and($decision['recommended']['action'])->toBe('Speed')
+        ->and($decision['alternatives'][0]['action'])->toBe('Wit')
+        // The reason lines restate the deficit and the Energy the action leaves behind.
+        ->and($decision['recommended']['benefit'])->toBe([
+            'Speed is 300 below target (the largest deficit).',
+            'Energy after this action: 52 to 63.',
+        ])
+        ->and(json_encode($decision))->not->toMatch('/"(score|confidence|band|risk)"/')
+        // `finale` is a position read off the career calendar, not a judgement, and the engine gives no
+        // counsel on the concert itself (ADR-0020 §3, SCREEN_SPEC.md §7-22).
+        ->and(array_keys($advisor))->toBe(['decision', 'finale']);
 });
 
 it('refuses to rank when Energy has not been entered', function (): void {
@@ -142,16 +148,19 @@ it('refuses to rank when Energy has not been entered', function (): void {
         'status' => RunStatus::Active,
     ], turns: 3, energy: null);
 
-    $this->get(route('runs.cockpit', $run))
+    /** @var array{recommended: mixed, refusal: array{reason: string, missing: list<string>}} $decision */
+    $decision = $this->get(route('runs.cockpit', $run))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            // No band, no ranking: C2's own refusal state, carried across rather than papered over.
-            ->where('advisor.band', null)
-            ->where('advisor.action', null)
-            ->where('advisor.alternative', null)
-            // The absence is the one reason line, and it names Energy as the missing input.
-            ->has('advisor.reasons', 1)
-            ->where('advisor.reasons.0', 'This run has recorded no Energy, so there is no band to read and nothing to rank against.'));
+        ->inertiaProps('advisor.decision');
+
+    // C2's own refusal state, carried across rather than papered over by a band read off nothing.
+    expect($decision['recommended'])->toBeNull()
+        // The absence names Energy as the missing input, and the engine's own sentence is printed in
+        // full so a Trainer acting on the refusal knows which input they hit.
+        ->and($decision['refusal']['missing'])->toBe(['Energy'])
+        ->and($decision['refusal']['reason'])->toContain(
+            'This run has recorded no Energy, so there is no band to read and nothing to rank against.',
+        );
 });
 
 it('marks exactly one action as recommended, and none when the advisor declines', function (): void {
@@ -189,14 +198,15 @@ it('marks exactly one action as recommended, and none when the advisor declines'
             ->where('actions.5.recommended', false)
             ->where('actions.6.recommended', false));
 
-    // Below the advisory line the advisor recommends Rest, and the marker moves with it.
+    // Below the advisory line the advisor recommends Rest, and the marker moves with it. The band word
+    // itself no longer crosses the wire (FD-2 retires it); the priority line says why instead.
     $run->turnEntries()->reorder('turn', 'desc')->first()->update(['energy' => 20]);
 
     $this->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('advisor.band', 'BelowAdvisory')
-            ->where('advisor.action', 'Rest')
+            ->where('advisor.decision.recommended.action', 'Rest')
+            ->where('advisor.decision.priority', 'Recover Energy before the next session.')
             ->where('actions.2.recommended', true)
             ->where('actions.0.recommended', false));
 
@@ -206,7 +216,7 @@ it('marks exactly one action as recommended, and none when the advisor declines'
     $this->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('advisor.action', null)
+            ->where('advisor.decision.recommended', null)
             ->where('actions', fn (Collection $actions): bool => $actions->every(
                 static fn (array $action): bool => $action['recommended'] === false,
             )));

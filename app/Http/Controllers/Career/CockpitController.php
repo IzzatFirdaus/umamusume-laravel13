@@ -14,6 +14,7 @@ use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
 use App\Services\Advisor\Advice;
+use App\Services\Advisor\NextDecision;
 use App\Services\Advisor\TrainerAdvisor;
 use App\Services\CareerCalendar;
 use App\Services\FanLadder;
@@ -162,7 +163,7 @@ class CockpitController extends Controller
             'identity' => $this->identitySection($run, $latest),
             'state' => $this->stateSection($run, $latest),
             'actions' => $this->actionSection($run, $advice),
-            'advisor' => $this->advisorSection($advice),
+            'advisor' => $this->advisorSection($advice, $run),
             'raceStrip' => $this->raceStripSection($run),
             'scenario' => $this->scenarioSection($run, $team),
             // F2, plan §9.6 ruling 2: arbitrary-turn correction. The selected turn defaults to the
@@ -429,62 +430,155 @@ class CockpitController extends Controller
     }
 
     /**
-     * C2's answer, flattened to the five contract fields (plan §8 "Recommendation contract (D8)").
+     * The shared Next Decision contract (FD-2), plus the finale position the engine already returns.
      *
-     * `reasons` carries the recommendation's own reason line plus the Energy the action leaves
-     * behind, because both are fields C2 already returns. When it declines, the one reason line is
-     * C2's own sentence, so a Trainer acting on the refusal knows which input is missing.
+     * `decision` is the frozen six-key payload and nothing else; the flattening, the provenance rows and
+     * the two refusal copies all belong to `NextDecision`, not to this controller (§7, thin controllers).
      *
-     * @return array{action: string|null, band: string|null, reasons: list<string>, alternative: string|null, risk: string|null, finale: array{label: string, state: string, turns_away: int|null}|null}
+     * `finale` stays a sibling rather than folding into the contract: the frozen shape has exactly six
+     * keys, and it is a position read off the career calendar rather than a judgement about the next turn
+     * (`ADR-0020` §3, `SCREEN_SPEC.md` §7-22).
+     *
+     * @return array{decision: array<string, mixed>, finale: array{label: string, state: string, turns_away: int|null}|null}
      */
-    private function advisorSection(Advice $advice): array
+    private function advisorSection(Advice $advice, TrainingRun $run): array
     {
-        $recommendation = $advice->recommendation;
-
-        $reasons = [];
-
-        if ($recommendation !== null) {
-            $reasons[] = $recommendation->reason;
-
-            $after = $this->energyAfterLine($recommendation->energyAfter);
-
-            if ($after !== null) {
-                $reasons[] = $after;
-            }
-        } elseif ($advice->absence !== null) {
-            $reasons[] = $advice->absence;
-        }
-
         return [
-            'action' => $recommendation?->action,
-            'band' => $advice->band,
-            'reasons' => $reasons,
-            'alternative' => $advice->alternative?->action,
-            // Null by choice, not by absence of data: `energyAfter` is in hand and a line could be
-            // derived from it, but every derivation of "is this risky" is a judgement the engine owns
-            // and C2 does not make (a delay, a reachability verdict — `ADR-0020` §3). The controller
-            // does not grow a second opinion beside the one engine. D9 to D12 fill this field when a
-            // screen has a sourced risk to state.
-            'risk' => null,
-            // The finale's proximity, read from the same reader the result screen and the strip use.
-            // It is not a sixth opinion: the advisor ranks the turn and never advises on the concert,
-            // because the gauge that would decide it is unbuilt (ADR-0020 §3, SCREEN_SPEC.md §7-22).
+            'decision' => app(NextDecision::class)->build($advice, $run, $this->objectiveSection($run)),
             'finale' => $advice->finale_context,
         ];
     }
 
     /**
-     * @param  array{min: int, max: int}|null  $energyAfter
+     * The scenario's own obligations, as FD-3 states them (plan §9a, continuation prompt §4.2).
+     *
+     * **One query, two readers.** `obligationSlots()` is the only place this screen reads
+     * `race_catalog_slots` for the mandatory rows, and the run race strip filters its result rather than
+     * asking again — `ADR-0015`'s point that unifying the function is not unifying the call, so both
+     * readers must pass the same career position.
+     *
+     * **`grade_checkpoint` is declared in `objective_priority` and produces no row here on purpose.**
+     * Trackblazer's grade ladder already renders on its own panel from `TrackblazerGradeSection.periods`,
+     * with the required figure, the earned figure and the unpriced count per period. Lending those same
+     * numbers to the rail would be a second representation of one fact, which Phase G's acceptance forbids
+     * more loudly than FD-3 asks for another surface. `scenario_milestone` produces no row because nothing
+     * in the tree names a milestone; both classes stay in the order so a scenario that does have a source
+     * for one can supply rows without a component changing.
+     *
+     * @return list<array{label: string, state: string, due_turn: int|null, due_label: string|null, consequence: string|null, source: string, badge: string, title: string}>
      */
-    private function energyAfterLine(?array $energyAfter): ?string
+    private function objectiveSection(TrainingRun $run): array
     {
-        if ($energyAfter === null) {
-            return null;
+        // A class the scenario's matrix does not compose produces no row. `race_calendar` is off for
+        // Trackblazer (whose own note says no mandatory race goals exist) and for Our Grand Concert, so
+        // neither is lent an obligation its composition denies (G-33, D-240, D-225).
+        if (! (config("scenarios.scenarios.{$run->scenarioKey()}.panels.race_calendar") ?? false)) {
+            return [];
         }
 
-        return $energyAfter['min'] === $energyAfter['max']
-            ? "Energy after this action: {$energyAfter['min']}."
-            : "Energy after this action: {$energyAfter['min']} to {$energyAfter['max']}.";
+        $rows = [];
+        $next = $run->nextTurnToPlay();
+        $entered = $run->raceEntries->pluck('race_catalog_slot_id')->filter()->all();
+
+        foreach ($this->obligationSlots($run) as $slot) {
+            $class = $this->obligationClass($slot);
+            $recorded = in_array($slot->id, $entered, true);
+            $state = match (true) {
+                $recorded => 'completed',
+                $slot->turn === null => 'unknown',
+                $slot->isAtOrBeforeTurn($next) => 'current',
+                default => 'upcoming',
+            };
+
+            $rows[] = [
+                'label' => $slot->hasFanGate()
+                    ? $slot->title.' · '.number_format((int) $slot->fans_needed).' fans'
+                    : $slot->title,
+                'state' => $state,
+                'due_turn' => $slot->turnNumber(),
+                'due_label' => $slot->turnNumber() === null
+                    ? null
+                    : $slot->yearLabel().' Year · Turn '.$slot->turnNumber(),
+                // No source in this repository states what changes when an obligation is not met, so the
+                // field stays null rather than carrying an invented consequence.
+                'consequence' => null,
+                'source' => 'race_catalog_slots',
+                'badge' => 'calculated',
+                'title' => match ($state) {
+                    'completed' => 'Compared race_entries.race_catalog_slot_id against this '
+                        .'race_catalog_slots row: an entered race points at it.',
+                    'current' => 'Compared race_catalog_slots.year and .turn against the turn this run is '
+                        .'deciding: the slot has arrived and no race_entries row points at it.',
+                    'upcoming' => 'Compared race_catalog_slots.year and .turn against the turn this run is '
+                        .'deciding: the slot falls later, and no race_entries row points at it.',
+                    default => 'The source states no turn for this slot (race_catalog_slots.turn is null), '
+                        .'so it cannot be placed in the grid. It is an obligation the calendar names and '
+                        .'the tool cannot date.',
+                },
+                'class' => $class,
+            ];
+        }
+
+        /** @var list<string> $order */
+        $order = config('scenarios.objective_priority');
+
+        $rows = collect($rows)
+            // One composite key: the declared class order first, then the turn the calendar states, and a
+            // slot with no turn last within its class rather than at turn zero.
+            ->sortBy(fn (array $row): string => sprintf(
+                '%03d-%020d',
+                ($rank = array_search($this->obligationClassFromRow($row), $order, true)) === false
+                    ? count($order)
+                    : $rank,
+                $row['due_turn'] ?? PHP_INT_MAX,
+            ))
+            ->map(static fn (array $row): array => array_slice($row, 0, 8, true))
+            ->values()
+            ->all();
+
+        return $rows;
+    }
+
+    /**
+     * The class a built row belongs to, recovered from the row itself.
+     *
+     * The eight FD-3 fields are the contract and a class name is not one of them, so the class is carried
+     * while sorting and dropped before the row crosses the wire rather than added as a ninth key a
+     * consumer could branch on.
+     *
+     * @param  array<string, mixed>  $row
+     */
+    private function obligationClassFromRow(array $row): string
+    {
+        return (string) $row['class'];
+    }
+
+    /**
+     * Which objective class a slot belongs to, read from the row's own columns.
+     */
+    private function obligationClass(RaceCatalogSlot $slot): string
+    {
+        return match (true) {
+            $slot->year === RaceCatalogSlot::YEAR_FINALE => 'finale',
+            $slot->hasFanGate() => 'fan_gate',
+            default => 'mandatory_race',
+        };
+    }
+
+    /**
+     * The mandatory slots this scenario's calendar records, in grid order: the one reader of that table
+     * for this screen, shared by the rail and by the run race strip.
+     *
+     * @return Collection<int, RaceCatalogSlot>
+     */
+    private function obligationSlots(TrainingRun $run): Collection
+    {
+        return RaceCatalogSlot::query()
+            ->forScenario($run->scenarioKey())
+            ->where('is_mandatory', true)
+            ->orderBy('year')
+            ->orderBy('turn')
+            ->get();
     }
 
     /**
@@ -580,12 +674,7 @@ class CockpitController extends Controller
         $enteredIds = $run->raceEntries->pluck('race_catalog_slot_id')->filter();
 
         /** @var list<array<string, mixed>> $ahead */
-        $ahead = $next === null ? [] : RaceCatalogSlot::query()
-            ->forScenario($run->scenarioKey())
-            ->where('is_mandatory', true)
-            ->orderBy('year')
-            ->orderBy('turn')
-            ->get()
+        $ahead = $next === null ? [] : $this->obligationSlots($run)
             ->reject(fn (RaceCatalogSlot $slot): bool => $slot->isAtOrBeforeTurn($next)
                 || $enteredIds->contains($slot->id))
             ->map(fn (RaceCatalogSlot $slot): array => [

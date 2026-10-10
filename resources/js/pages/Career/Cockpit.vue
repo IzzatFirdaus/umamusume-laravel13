@@ -115,12 +115,11 @@ const props = defineProps<{
         meta: { key: string; label: string; value: number | string | null }[];
     };
     actions: { key: string; label: string; href: string; recommended: boolean; note: string }[];
+    // The decision's own shape is declared at `components/career/NextDecision.vue`, the one place that
+    // reads it, and forwarded untouched the way the scenario section is (FD-2, plan §9a). `finale` stays
+    // a sibling of the contract rather than a seventh key inside it.
     advisor: {
-        action: string | null;
-        band: 'AtOrAboveAdvisory' | 'BelowAdvisory' | null;
-        reasons: string[];
-        alternative: string | null;
-        risk: string | null;
+        decision: Record<string, unknown>;
         finale: { label: string; state: string; turns_away: number | null } | null;
     };
     // The strip's own shape is declared at `components/career/RunRaceStrip.vue`, the one place that
@@ -135,6 +134,10 @@ const props = defineProps<{
 const { visiting, visitFailed } = useVisitState();
 
 const empty = computed(() => props.header.turn === 0);
+
+// The door an objective can be settled at, read off the grid's own entries rather than from a second
+// route table. The grid already owns the href, and a due obligation with no door renders none.
+const raceDoor = computed(() => props.actions.find((action) => action.key === 'race')?.href ?? null);
 
 /*
  * The manual correction (design-2.0 §38). One disclosure holding every field of the latest turn, put
@@ -563,14 +566,7 @@ const jumpToShop = (): void => {
             </div>
 
             <div class="order-2 min-w-0 md:order-none md:col-start-2 md:row-span-2 md:row-start-2 lg:col-start-3 lg:row-start-1">
-                <AdvisorRail
-                    :action="props.advisor.action"
-                    :band="props.advisor.band"
-                    :reasons="props.advisor.reasons"
-                    :alternative="props.advisor.alternative"
-                    :risk="props.advisor.risk"
-                    :finale-context="props.advisor.finale"
-                />
+                <AdvisorRail :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
             </div>
 
             <div class="order-3 min-w-0 md:order-none md:col-start-1 md:row-start-3 lg:col-start-2 lg:row-start-2">

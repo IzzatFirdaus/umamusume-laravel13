@@ -43,7 +43,7 @@ function recordObservation(TrainingRun $run, int $turn, string $type, int $delta
         'wit' => 600,
         'stage' => 'confirm',
         'previewed' => '1',
-        'choice' => 'training-'.$type,
+        'choice' => 'training-Speed',
         'outcome' => 'Success',
         'performance' => ['type' => $type, 'delta' => $delta],
     ])->assertRedirect();

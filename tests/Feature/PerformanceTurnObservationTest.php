@@ -43,7 +43,10 @@ function performanceTurnPayload(array $overrides = []): array
         'wit' => 600,
         'stage' => 'confirm',
         'previewed' => '1',
-        'choice' => 'training-Dance',
+        // A choice the application can actually produce: the rail's five trainings are
+        // `config('scenarios.stat_order')`, and FD-4 validates `choice` against `App\Enums\TurnChoice`.
+        // This fixture's own subject is `performance.type`, which travels separately.
+        'choice' => 'training-Speed',
         'outcome' => 'Success',
     ], $overrides);
 }
@@ -61,7 +64,7 @@ it('persists a positive Performance observation through the canonical turn write
     // on the way in and one dropped on the way out are the same failure here.
     expect($event->getRawOriginal('deltas'))->toBe('{"type":"Dance","delta":12}')
         ->and($event->event_type->value)->toBe('Scenario')
-        ->and($event->source_name)->toBe('training-Dance')
+        ->and($event->source_name)->toBe('Speed')
         ->and($event->performancePayload())->toBeInstanceOf(PerformancePayload::class)
         ->and($event->performancePayload()?->type)->toBe(PerformanceType::Dance)
         ->and($event->performancePayload()?->delta)->toBe(12);
