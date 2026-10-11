@@ -1448,6 +1448,44 @@ all ran on the dev file in one continuous session. The anchor's *position* (Seni
 unreachable by the wizard - that is a property of the setup path, not a gap in this walk, and the snapshot import
 remains the only door to it.
 
+## Program close-out, 2026-10-11
+
+**The line above the gate sweep that reads "Owner-only and unchanged: Phase B ... the F.1-F.6 rulings, and this
+register's disposition" is superseded by this block.** All three decisions landed in one session and were
+executed:
+
+- **B executed.** `2026_10_10_200000_add_choice_and_corrections_to_turn_entries_table` applied to
+  `database/database.sqlite` as batch 15, exit 0; the four columns `choice`, `decision_snapshot`,
+  `corrected_from`, `superseded_by` all verified present; `migrate:status` clean. A peer's `:8000` server was
+  left running throughout.
+- **F ruled-no.** Six dated lines, one per slice, no code opened.
+- **G executed as g1.** The register landed whole as **`b180df6`**, one file, 1454 insertions, committed blob
+  `40b48c9`, by pathspec so the peer's unstaged work stayed unstaged. A second small commit carries this
+  close-out block, because leaving the sweep section's "still owner-only" line standing would have been a stale
+  claim rather than history.
+- **C.3 walked clean** on the dev file, and the KI-97 rail printed `11` there.
+
+**Commits this program landed, in order:** `29f5fc1` (W2 spec repair), `0d2d85b` (R2-02 regression test),
+`689267f` (KI-97 filed), `5244f4c` (KI-97 fixed and closed), `b180df6` (register), plus the close-out commit.
+Every one is an ancestor of HEAD, and `git diff --cached HEAD` is empty.
+
+**Gates at HEAD, each status a command's own exit code:** `npm run typecheck` 0; `pint --test` on the changed
+paths passed; `phpstan analyse --memory-limit=1G` `[OK] No errors`; `composer lore` 0; `composer lore-code` 0;
+`pest` on the touched feature files 20 passed (372 assertions); `playwright` on the touched specs 25 passed;
+`php artisan migrate:status` no Pending. **Not run: `php artisan test --compact`**, refused twice by the
+session's safety layer - the single unexecuted gate in this program, named here rather than implied away.
+`npm run build` was deferred for the same reason it always was: peer Vue was mid-write, and the build writes the
+manifest every session's browser reads.
+
+**Tree at close:** no file this program authored is dirty. What remains uncommitted belongs to another session -
+the retired `RecommendationCard.vue` (a working-tree deletion, nothing imports it; the only reference left is a
+comment in `TrainingDetail.vue`, the file that session is editing), `TrainingDetail.vue` itself, and an untracked
+`walkthrough-scratch.spec.ts`.
+
+**The program is complete.** Every Round 2 finding has a disposition, every Trainer Desk 2.0 slice A1-E6 is
+landed, the four round-2 phases that could produce code produced it, and the one phase that could not (C against
+the canonical file) ran once Phase B cleared its gate.
+
 
 
 
