@@ -1129,6 +1129,14 @@ class TrainingRun extends Model
      * been raced would be guessing from absence (D-270). So the count stays entered on the turn it
      * applies to, as `RaceFatiguePayload {consecutive_races}`, and the chip renders the reason
      * (D-220) rather than a number this tool has not been told.
+     *
+     * Corrected 2026-10-11 (G5): no chip reads this method, and none ever did — the sentence above
+     * stated a rendering that no screen carried. The surface that renders the refusal is
+     * `resources/js/components/scenario/TrackblazerFatiguePanel.vue`, fed by
+     * `Career\CockpitController::fatigueSection()`, which reads `latestFatigue()` and prints this
+     * method's null as the visible reason. No writer for the payload exists yet: `runs.events.store`
+     * validates choice events and carries no `consecutive_races` key, so an entered chain is reached
+     * in tests through the payload itself rather than through a screen.
      */
     public function consecutiveRaceCount(): ?int
     {

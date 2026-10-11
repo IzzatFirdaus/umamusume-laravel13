@@ -27,8 +27,20 @@
  *
  * **Three epithet states.** `earned`, `open`, `unverifiable`. The third is the load-bearing
  * one: a route this surface cannot see is not a route the Trainer has not earned (D-220, D-256).
+ *
+ * **G5 mounts the three planning surfaces into the grade arm**, and the prop contracts they need are
+ * declared here as well as in each child: `defineProps` cannot resolve an imported type (TS7), so a
+ * shared file would fail the build, and the duplication is the price of that platform rule. Two
+ * fields were dropped before they were built, because they already render on this screen (owner
+ * ruling of 2026-10-11, "do not build a component that restates what already renders"): the Route
+ * Planner's epithet-route progress line (the arm below, from `epithetProgress()`) and the per-period
+ * earned totals (the objective ladder above). What the Planner prints instead is the runway the
+ * ladder does not carry: what each period asks, what the entered races would pay, and their floor.
  */
 
+import TrackblazerFatiguePanel from './TrackblazerFatiguePanel.vue';
+import TrackblazerRaceCalendar from './TrackblazerRaceCalendar.vue';
+import TrackblazerRoutePlanner from './TrackblazerRoutePlanner.vue';
 import AlertRow from './AlertRow.vue';
 import { useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -57,6 +69,100 @@ interface GradeSection {
     ladder_source: 'standard';
     rotation_turns: number | null;
     rotation_resets_in: number | null;
+    planning: PlanningSection;
+    calendar: CalendarSection;
+    fatigue: FatigueSection;
+}
+
+/**
+ * The three G5 surfaces' prop contracts, repeated here exactly as each component declares them.
+ * `defineProps` resolves types with no filesystem access, so an imported shape fails the build (TS7)
+ * and the parent that hands the value over has to name the same shape locally.
+ */
+interface PlanningPeriod {
+    index: number;
+    name: string;
+    needed: string;
+    needed_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    needed_title: string;
+    is_current: boolean;
+    plan: string | null;
+    plan_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    plan_title: string;
+    uncounted: number;
+    uncounted_reason: string | null;
+    uncounted_title: string;
+    floor_second: string | null;
+    floor_third: string | null;
+    floor_label: string;
+    floor_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    floor_title: string;
+}
+
+interface PlanningSection {
+    periods: PlanningPeriod[];
+    collapses_after_period: number;
+    flags: { kind: string; label: string; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null; title: string }[];
+    year_end: {
+        gate_label: string;
+        timing: string;
+        fans_needed: string;
+        fans_needed_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        fans_needed_title: string;
+        fans_recorded: string | null;
+        fans_recorded_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+        fans_recorded_title: string;
+        fans_shortfall: string | null;
+        fans_shortfall_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+        fans_shortfall_title: string;
+        bond_figures: string;
+        bond_recorded: string | null;
+        bond_title: string;
+    } | null;
+    unattributed: number;
+    unattributed_title: string;
+    routes_pointer: string;
+}
+
+interface CalendarRow {
+    title: string;
+    tier: string | null;
+    year_label: string;
+    turn: number | null;
+    turns_away: string | null;
+    distance: string;
+    surface: string | null;
+    surface_title: string | null;
+    grade_points_win: string | null;
+    grade_points_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    grade_points_title: string;
+    coins_win: string | null;
+    coins_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    coins_title: string;
+    skip_consequence: string;
+    skip_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    skip_title: string;
+}
+
+interface CalendarSection {
+    window: number;
+    turns: { year: number; year_label: string; turn: number } | null;
+    rows: CalendarRow[];
+    absence: string | null;
+}
+
+interface FatigueSection {
+    chain: number | null;
+    chain_label: string | null;
+    chain_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    chain_title: string;
+    row: Record<string, string> | null;
+    row_title: string;
+    table: Record<string, Record<string, string>>;
+    caveats: string[];
+    recovery: { when: string; effect: string }[];
+    recovery_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    recovery_title: string;
 }
 
 interface ShopCatalogueRow {
@@ -396,6 +502,19 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                     <span class="font-mono text-ink">KI-15</span>
                     carries the disagreement.
                 </p>
+
+                <!--
+                    G5's three planning surfaces, mounted in the grade arm because each is a reading
+                    of the grade ladder: the runway to the checkpoints, the races that pay them, and
+                    the cost of racing so often they blur. Each section is composed server-side and
+                    opens only for a scenario whose matrix turns the flag on (gate G-33), so nothing
+                    here branches on a scenario name.
+                -->
+                <TrackblazerRoutePlanner :planning="props.scenario.grade.planning" />
+
+                <TrackblazerRaceCalendar :calendar="props.scenario.grade.calendar" />
+
+                <TrackblazerFatiguePanel :fatigue="props.scenario.grade.fatigue" />
             </template>
         </section>
 

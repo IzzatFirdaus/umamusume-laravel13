@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { expectTapTargets } from '../utils/tap-targets';
+import { recordTurns } from '../utils/record-turns';
 
 /*
  * The Trackblazer scenario panel (SCREEN-016, plan §9 E4, `SCR-CAR-022`). `TrackblazerPanelTest`
@@ -204,6 +205,119 @@ test('prints the points-league finale and the named absence for the unofficial n
     expect(visibleText ?? '').not.toMatch(/Twinkle Star Climax/);
 });
 
+test('the race plan prints three periods, their published figures and the gap the plan has not filled', async ({ page }) => {
+    const plan = page.getByRole('region', { name: 'Race plan' });
+    await expect(plan).toBeVisible();
+
+    const periods = plan.getByRole('list', { name: 'Checkpoint periods' });
+    await expect(periods.getByRole('listitem')).toHaveCount(3);
+
+    // 60 / 300 / 300, the standard track only, each with the KI-15 sentence on its badge. The counts
+    // are the assertion: one Junior period at 60 and two periods at 300, which is also the proof that
+    // no other track leaked in.
+    await expect(periods.getByText('60', { exact: true })).toHaveCount(1);
+    await expect(periods.getByText('300', { exact: true })).toHaveCount(2);
+
+    // Nothing is entered against any period on a fresh run, so the plan column is N/A and the floor
+    // that depends on it is N/A too: three periods, six absences, each with its reason printed.
+    await expect(plan.getByText('Entered races')).toHaveCount(3);
+    await expect(plan.getByText('N/A', { exact: true })).toHaveCount(6);
+    await expect(plan.getByText(/No race is entered against this period/)).toHaveCount(3);
+
+    // The first checkpoint is ahead of the run, so the list is unfolded.
+    await expect(plan.getByText(/periods behind it are folded/)).toHaveCount(0);
+
+    // The pointer, not a second route list: progress renders in the Epithet routes arm.
+    await expect(plan.getByText(/Route progress is the Epithet routes surface/)).toBeVisible();
+
+    // The flag the scenario's own rule makes true whatever this run has entered.
+    await expect(plan.getByText('Rival races cannot be scheduled')).toBeVisible();
+});
+
+test('the plan folds and the year-end gate appears once a period is reported', async ({ page }) => {
+    await page.selectOption('#current_objective_index', '3');
+    await page.getByRole('button', { name: 'Report period' }).click();
+
+    const plan = page.getByRole('region', { name: 'Race plan' });
+    await expect(plan.getByText(/periods behind it are folded/)).toBeVisible();
+    await expect(plan.getByRole('list', { name: 'Checkpoint periods' }).getByRole('listitem')).toHaveCount(2);
+
+    // The gate the run is working toward. It is a labelled group of its own because the flag row
+    // above names the same event: inside this region the fan figure appears once, and the `dt`/`dd`
+    // pairs are asserted element-and-text because Chromium computes no accessible name for the term
+    // role. The fan figure is published by two sources that agree, the bond figure by two that
+    // disagree, and the run's own bond reading has no column to come from.
+    const gate = plan.getByRole('group', { name: 'Year-end gate' });
+    await expect(gate.getByText('Assessment')).toBeVisible();
+    await expect(gate.getByText('60,000', { exact: true })).toBeVisible();
+    await expect(gate.getByText(/19 \/ 31 \/ 51 \(uma.guide\) · 15 \/ 30 \/ 50 \(GameWith\)/)).toBeVisible();
+    await expect(gate.getByText(/no column/)).toBeVisible();
+
+    // The reported period is emphasised by mark and word, never by colour alone (WCAG 1.4.1).
+    await expect(plan.getByText('the period this run reports')).toBeVisible();
+});
+
+test('races ahead prints the window with each row its published win value', async ({ page }) => {
+    const runId = (runUrl.match(/\/training-runs\/(\d+)$/) as RegExpMatchArray)[1];
+
+    // Eleven logged turns put the decision on Junior turn 12, the first turn the seeded calendar
+    // carries. Fewer writes leave the window with nothing to be ahead of.
+    await recordTurns(page, runId, 11);
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+
+    const calendar = page.getByRole('region', { name: 'Races ahead' });
+    await expect(calendar).toBeVisible();
+
+    const rows = calendar.getByRole('list', { name: 'Races still to come' });
+    // The group is labelled by `RaceCatalogSlot::yearLabel()`, which says "Junior"; the strip's
+    // "Junior Year" comes from `CareerYear::label()`, a different vocabulary. Match the prefix rather
+    // than spell one year into the spec.
+    const grouped = calendar.getByRole('list', { name: /^Races ahead in/ });
+
+    // The window is three rows, all inside one career period, and every row carries both figures and
+    // one consequence line, so the counts are the assertion. A `.first()` here would pass on a single
+    // rendered row.
+    await expect(rows.getByRole('list')).toHaveCount(1);
+    await expect(grouped.getByRole('listitem')).toHaveCount(3);
+    await expect(grouped.getByText(/A win pays/)).toHaveCount(3);
+    await expect(grouped.getByText(/Skipping this race forgoes/)).toHaveCount(3);
+
+    // An entered race leaves the window: the strip's rule that one race holds one region.
+    await expect(calendar.getByText(/has not entered/)).toBeVisible();
+});
+
+test('race fatigue states that no chain is entered and keeps both caveats on the page', async ({ page }) => {
+    const fatigue = page.getByRole('region', { name: 'Race fatigue' });
+    await expect(fatigue).toBeVisible();
+
+    await expect(fatigue.getByText('Chain so far:')).toBeVisible();
+    await expect(fatigue.getByText('N/A', { exact: true })).toBeVisible();
+
+    // The count is entered, never derived from the turns with no race logged.
+    await expect(fatigue.getByText(/has not entered a consecutive-race count/)).toBeVisible();
+
+    // Both caveats are visible copy. A caveat behind a hover is a caveat nobody reads.
+    await expect(fatigue.getByRole('list', { name: 'What this table does not settle' }).getByRole('listitem'))
+        .toHaveCount(2);
+    await expect(fatigue.getByText(/whether "3 races" counts the race about to run/)).toBeVisible();
+    await expect(fatigue.getByText(/no source says which year/)).toBeVisible();
+
+    // The reference table folds behind a native disclosure, closed while no chain is live.
+    const summary = fatigue.locator('summary');
+    await expect(summary).toContainText('Every row the publisher prints');
+
+    const table = fatigue.getByRole('table');
+    await expect(table).toBeHidden();
+
+    await summary.click();
+    await expect(table).toBeVisible();
+
+    // One header row plus the five measures the publisher prints, against the four chain lengths.
+    await expect(table.getByRole('row')).toHaveCount(6);
+    await expect(table.getByRole('cell').filter({ hasText: '90%+' })).toHaveCount(1);
+    await expect(fatigue.getByText('Guaranteed recovery events')).toBeVisible();
+});
+
 test('lands the Shop jump from the Cockpit action area with focus on the heading', async ({ page }) => {
     // Trackblazer is the only scenario with the action-area Shop button (matrix-gated on `shop`).
     const jump = page.getByRole('button', { name: 'Shop', exact: true });
@@ -234,9 +348,18 @@ test('sizes every control to the 44px contract and reflows at 320 px', async ({ 
     // the Race Database screen shows the full set.
     await page.setViewportSize({ width: 320, height: 900 });
 
-    for (const heading of ['Grade Point', 'Pro Shop', 'Epithet routes']) {
+    for (const heading of [
+        'Grade Point', 'Pro Shop', 'Epithet routes',
+        // G5's three surfaces ride in the grade arm, so the narrow screen has to hold them too.
+        'Race plan', 'Races ahead', 'Race fatigue',
+    ]) {
         await expect(page.getByRole('region', { name: heading })).toBeVisible();
     }
+
+    // The odds table is the widest thing the panel draws, and it folds behind a disclosure that is
+    // closed with no chain recorded. Open it before measuring overflow, or the 320px check proves
+    // nothing about the markup a Trainer can actually reach.
+    await page.getByRole('region', { name: 'Race fatigue' }).locator('summary').click();
 
     const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -245,6 +368,11 @@ test('sizes every control to the 44px contract and reflows at 320 px', async ({ 
 });
 
 test('passes the axe A + AA scan with the Trackblazer panel mounted', async ({ page }) => {
+    // axe only reports on rendered content, and the odds table starts folded. Open it so the scan
+    // covers the caption, the scoped headers and the row cells rather than the summary alone.
+    await page.getByRole('region', { name: 'Race fatigue' }).locator('summary').click();
+    await expect(page.getByRole('region', { name: 'Race fatigue' }).getByRole('table')).toBeVisible();
+
     const results = await buildAxe(page).analyze();
 
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);

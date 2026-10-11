@@ -321,7 +321,7 @@ return [
                     // corpus names only "Turf Queens" (docs/scenarios/02-unity-cup.md:163,
                     // SCENARIO-PUBLISHER-REFERENCES.md:1324), and neither "Elite Team Ares" nor "Novice
                     // Squad" appears in any document this repository holds. Nothing renders these three
-                    // names. The Cockpit's tournament block prints the published shape and the strength
+                    // names. The Cockpit's tournament block prints the published shape and the projection
                     // absence instead, so an untraced name cannot reach a Trainer. Clearing or sourcing
                     // this row is the owner's call, not a slice's.
                     ['name' => 'Elite Team Ares', 'tier' => 'strongest'],
@@ -427,6 +427,63 @@ return [
             ],
             'grade_point_by_grade' => ['G1' => 100, 'G2' => 80, 'G3' => 60, 'OP' => 40, 'Pre-OP' => 20],
             'shop_coins_by_placement' => ['1st' => 100, '2nd' => 60, '3rd' => 60, '4th' => 30, '5th' => 30, '6th' => 0],
+            /*
+            | The placement modifiers that scale a grade's first-place figure down. Transcribed
+            | from docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 104-112 (uma.guide,
+            | page last updated 2026-04-29, so that master's line 50): 1st 100%, 2nd 60%, 3rd 40%,
+            | 4th-5th 20%, 6th and lower 10%.
+            |
+            | It is one publisher's table. The other Trackblazer section in the same master names no
+            | ratio at all: line 355 says lower placements "scale down proportionally" and stops
+            | there, which is the gap `RaceEntry::gradePointsFor()` refuses to price (its comment at
+            | lines 156-166, and the withholding rule in `TrainingRun::gradeEarnedFor()`).
+            |
+            | So these figures answer one question only: what a race that has not been run yet would
+            | still pay at a stated placement. No earned total in this tool reads them, and closing
+            | that half is an owner decision about the read path, not a config edit.
+            */
+            'grade_point_placement_modifiers' => ['1st' => 100, '2nd' => 60, '3rd' => 40, '4th' => 20, '5th' => 20, '6th' => 10],
+            /*
+            | The two bounds the route planner prints its floor against. The plan names the pair
+            | ("floor (2nd-3rd)") at docs/Trackblazer-plan.md:536, and a band reads as two figures
+            | rather than as one number pretending to be certain.
+            */
+            'planning' => [
+                'floor_placements' => ['2nd', '3rd'],
+                'density_threshold' => 3,
+                'calendar_window' => 3,
+                /*
+                | The runway is the screen's main occupant while the plan is still ahead of the Trainer,
+                | and folds back once the first checkpoint is behind them: the periods already judged have
+                | no plan left to make. Compared against the period the Trainer reports as live, so this
+                | is the number that decides the fold and not a turn count inferred from a date (D-270).
+                */
+                'collapses_after_period' => 2,
+            ],
+            /*
+            | The year-end gates: the Late December assessment that levels up the Unique Skill.
+            | Fans are published by two sources in the same master and they agree exactly —
+            | docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 306-310 (uma.guide) and the
+            | GameWith row at line 1235 both print 5,000 / 60,000 / 120,000.
+            |
+            | The Director's bond does not agree with itself: line 310 says 19 / 31 / 51 while the
+            | GameWith row at line 1235 says 15 / 30 / 50, and docs/Trackblazer-plan.md:361 rules only
+            | that the uma.guide figures are single-source. Both pairs are therefore printed and
+            | neither is settled here, the way KI-15 keeps two published tracks unchosen rather than
+            | picking a denominator. No column stores this run's bond reading either way.
+            */
+            'year_end_gates' => [
+                ['label' => 'Junior', 'timing' => 'Late December, Junior Year', 'fans' => 5000, 'bond_uma_guide' => 19, 'bond_game_with' => 15],
+                ['label' => 'Classic', 'timing' => 'Late December, Classic Year', 'fans' => 60000, 'bond_uma_guide' => 31, 'bond_game_with' => 30],
+                ['label' => 'Senior', 'timing' => 'Late December, Senior Year', 'fans' => 120000, 'bond_uma_guide' => 51, 'bond_game_with' => 50],
+            ],
+            /*
+            | Rival races appear on their own schedule, which is the whole reason a plan cannot hold
+            | one: docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md line 194 says they "Appear
+            | randomly starting Early August, Junior Year". `ADR-0016` keeps the rows as facts, so the
+            | surface says the sentence and lists nothing.
+            */
+            'rival_races' => ['first_offered' => 'Early August, Junior Year', 'scheduling' => 'random'],
             'shop' => ['rotation_turns' => 6, 'max_copies_per_item' => 5, 'locked_until_debut' => true],
             /*
             | The static catalogue behind the shop step.
@@ -477,7 +534,68 @@ return [
                 ['name' => 'Speed Training Application', 'cost' => 150, 'effect' => 'Speed facility level +1 for the run'],
                 ['name' => 'Miracle Cure', 'cost' => 40, 'effect' => 'Heals all negative conditions'],
             ],
-            'race_fatigue' => ['hide_after' => 'late_december', 'final_races_pay_coins' => false],
+            /*
+            | Race Fatigue keys on the length of the race chain and on nothing else. The odds table is
+            | transcribed from docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 231-236
+            | (uma.guide), which is the only publisher in this corpus that prints figures at all; the
+            | row is grouped under the chain length the publisher labels it with, so the surface reads a
+            | row rather than choosing a column.
+            |
+            | `caveats` are the two questions that table leaves open, worded at
+            | docs/Trackblazer-plan.md:283-284. They travel as display copy because a tooltip is not a
+            | caveat: a Trainer who never hovers never reads them.
+            |
+            | `hide_after` is the publisher's own limit at line 238 and it names no year, which is
+            | caveat two. `final_races_pay_coins` is line 299 (the Climax races pay no coins).
+            */
+            'race_fatigue' => [
+                'hide_after' => 'late_december',
+                'final_races_pay_coins' => false,
+                'chain_labels' => ['1 race', '2 races', '3 races', '4+ races'],
+                'odds' => [
+                    '1 race' => [
+                        'Mood Down (1+ Energy)' => '0%',
+                        'Mood Down (0 Energy)' => '15%',
+                        'Skin Outbreak (1+ Energy)' => '0%',
+                        'Skin Outbreak (0 Energy)' => '4%',
+                        '3 random stats −10' => '0%',
+                    ],
+                    '2 races' => [
+                        'Mood Down (1+ Energy)' => '0%',
+                        'Mood Down (0 Energy)' => '33%',
+                        'Skin Outbreak (1+ Energy)' => '0%',
+                        'Skin Outbreak (0 Energy)' => '8%',
+                        '3 random stats −10' => '0%',
+                    ],
+                    '3 races' => [
+                        'Mood Down (1+ Energy)' => '60%',
+                        'Mood Down (0 Energy)' => '90%+',
+                        'Skin Outbreak (1+ Energy)' => '15%',
+                        'Skin Outbreak (0 Energy)' => '25%',
+                        '3 random stats −10' => '0%',
+                    ],
+                    '4+ races' => [
+                        'Mood Down (1+ Energy)' => '100%',
+                        'Mood Down (0 Energy)' => '100%',
+                        'Skin Outbreak (1+ Energy)' => '33%',
+                        'Skin Outbreak (0 Energy)' => '33%',
+                        '3 random stats −10' => '40%',
+                    ],
+                ],
+                'caveats' => [
+                    'The publisher does not say whether "3 races" counts the race about to run or only the races already run, so this surface prints the row its own label names and settles nothing.',
+                    'Race fatigue cannot occur after Late December, and no source says which year\'s Late December closes it.',
+                ],
+                'recovery_source' => 'docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 242-244 (uma.guide).',
+                'recovery_events' => [
+                    ['when' => 'Classic, Early February', 'effect' => 'Mood +1'],
+                    ['when' => 'Classic, Early March', 'effect' => 'Energy +20'],
+                    ['when' => 'Classic, Late September', 'effect' => 'Mood +1'],
+                    ['when' => 'Senior, Late June', 'effect' => 'Energy +20'],
+                    ['when' => 'Senior, Late October', 'effect' => 'Mood +1'],
+                    ['when' => 'Senior, Late December', 'effect' => 'Energy +30'],
+                ],
+            ],
             /*
             | Epithet routes, transcribed from
             | docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md section "Epithets (Race Route Bonuses)" (
