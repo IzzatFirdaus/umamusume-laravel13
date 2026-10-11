@@ -40,6 +40,7 @@
 
 import TrackblazerFatiguePanel from './TrackblazerFatiguePanel.vue';
 import TrackblazerRaceCalendar from './TrackblazerRaceCalendar.vue';
+import TrackblazerResourceLedger from './TrackblazerResourceLedger.vue';
 import TrackblazerRoutePlanner from './TrackblazerRoutePlanner.vue';
 import AlertRow from './AlertRow.vue';
 import { useForm } from '@inertiajs/vue3';
@@ -187,6 +188,37 @@ interface ShopSection {
     spend_total: number;
     fill: string;
     select_action: string;
+    ledger: LedgerSection;
+}
+
+/**
+ * The G6 ledger's contract, declared here as well as in the component for the same platform reason the
+ * G5 shapes are: `defineProps` cannot resolve an imported type (TS7).
+ */
+interface LedgerItem {
+    name: string;
+    held: number;
+    cap: number;
+    worth: string | null;
+    worth_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    worth_title: string;
+}
+
+interface LedgerSection {
+    items: LedgerItem[];
+    items_absence: string | null;
+    cap: number;
+    inflow: string | null;
+    inflow_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    inflow_title: string;
+    reserve: {
+        label: string;
+        value: string;
+        badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        title: string;
+    } | null;
+    rated_count: number;
+    rated_title: string;
 }
 
 interface EpithetRow {
@@ -612,6 +644,11 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                     <span>Spent: <span class="font-mono tabular-nums text-ink">{{ spendTotal }}</span> coins</span>
                     <span>{{ shopCoinsCopy }}</span>
                 </div>
+
+                <!-- G6's ledger: what this run holds and what one publisher says about it. It sits
+                     beside the purchases it counts, and it deliberately repeats none of the arm's own
+                     rows (no catalogue, no purchases list, no form, no balance absence). -->
+                <TrackblazerResourceLedger :ledger="props.scenario.shop.ledger" />
 
                 <!--
                     The Vue form is one form per panel region; it posts to the existing boundary

@@ -1454,15 +1454,121 @@ class CockpitController extends Controller
             ->values()
             ->all();
 
+        $purchases = $this->trackblazerPurchases($run);
+
         return [
             'catalogue' => $catalogue,
-            'purchases' => $this->trackblazerPurchases($run),
+            'purchases' => $purchases,
             'rotation_turns' => (int) ($def['rotation_turns'] ?? 0) ?: null,
             'rotation_resets_in' => $run->shop_resets_in,
             'max_copies' => (int) ($def['max_copies_per_item'] ?? 0),
             'spend_total' => $run->composesShop() ? $run->shopSpendTotal() : 0,
             'fill' => route('runs.purchases.store', $run),
             'select_action' => route('runs.update', $run),
+            // G6's ledger. It nests under `shop` because these are shop facts, and the exhaustive key
+            // assertion in `TrackblazerPanelTest` is updated in the same change so the contract move is
+            // test-visible rather than silent.
+            'ledger' => $this->ledgerSection($run, $purchases),
+        ];
+    }
+
+    /**
+     * The shop ledger (G6): what this run holds, the cap each holding sits against, the one publisher's
+     * worth ratings, and its Summer reserve.
+     *
+     * **What it does not print, on purpose.** The catalogue, the purchases list, the purchase form and
+     * the spend total all render in this arm already, and so does the coin balance's absence ("Shop
+     * Coins: not yet recorded"). A ledger that repeated any of them would be the second surface for one
+     * fact that correction 27 exists to prevent, so it carries only what the arm lacks: a held count per
+     * item, the cap, the publisher's ratings, and an inflow projection.
+     *
+     * **Nothing here is this tool's advice.** The ratings and the reserve are uma.guide's own words
+     * (config `shop_worth`, `shop_reserve`, each citing the master), they travel as `estimated`, and the
+     * arm's sentence "no row is recommended" stays true: the tool recommends nothing and reports what one
+     * publisher said.
+     *
+     * **No projected cost.** Nothing writes a planned purchase, so a cost projection would be invented;
+     * it is reported as an owed writer and the row is absent.
+     *
+     * @param  list<array{item: string, cost: int, effect: string, turn: int}>  $purchases
+     * @return array<string, mixed>
+     */
+    private function ledgerSection(TrainingRun $run, array $purchases): array
+    {
+        /** @var array<string, mixed> $def */
+        $def = (array) (config('scenarios.scenarios.trackblazer') ?? []);
+        /** @var array<string, mixed> $shop */
+        $shop = (array) ($def['shop'] ?? []);
+        /** @var array<string, string> $worth */
+        $worth = (array) ($def['shop_worth'] ?? []);
+        /** @var array<string, mixed> $reserve */
+        $reserve = (array) ($def['shop_reserve'] ?? []);
+        /** @var array<string, int> $coinTable */
+        $coinTable = (array) ($def['shop_coins_by_placement'] ?? []);
+
+        $cap = (int) ($shop['max_copies_per_item'] ?? 0);
+        $coinWin = (int) ($coinTable['1st'] ?? 0);
+
+        /** @var array<string, int> $held */
+        $held = [];
+
+        foreach ($purchases as $purchase) {
+            $held[$purchase['item']] = ($held[$purchase['item']] ?? 0) + 1;
+        }
+
+        // Catalogue order, so the list does not reshuffle as purchases land.
+        $items = [];
+
+        foreach ((array) config('scenarios.scenarios.trackblazer.shop_items') as $row) {
+            $name = (string) $row['name'];
+
+            if (! isset($held[$name])) {
+                continue;
+            }
+
+            $items[] = [
+                'name' => $name,
+                'held' => $held[$name],
+                'cap' => $cap,
+                'worth' => $worth[$name] ?? null,
+                'worth_badge' => isset($worth[$name]) ? 'estimated' : null,
+                'worth_title' => isset($worth[$name])
+                    ? 'One publisher\'s rating rather than a game rule: '.(string) ($def['shop_worth_source'] ?? '')
+                    : 'The publisher does not rate this item, so no rating is printed rather than one inferred '
+                        .'from a nearby row.',
+            ];
+        }
+
+        $planned = $run->raceEntries
+            ->filter(fn (RaceEntry $entry): bool => $entry->status === RaceEntryStatus::Entered)
+            ->count();
+
+        return [
+            'items' => $items,
+            'items_absence' => $items === []
+                ? 'No purchase is recorded for this run yet, so nothing is held. Record one from the form above.'
+                : null,
+            'cap' => $cap,
+            'inflow' => $planned === 0 ? null : number_format($planned * $coinWin),
+            'inflow_badge' => $planned === 0 ? null : 'calculated',
+            'inflow_title' => $planned === 0
+                ? 'No race is entered for this run yet, so there is nothing to project an inflow from. The '
+                    .'plan above shows the races the Trainer has entered.'
+                : 'The races this run has entered, each at the published 1st-place payout of '
+                    .number_format($coinWin).' coins from config(\'scenarios.scenarios.trackblazer.'
+                    .'shop_coins_by_placement\'), which the master says does not move with race grade '
+                    .'(docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md line 372). A projection from '
+                    .'the entered plan, not a promise: it assumes every one of them is won.',
+            'reserve' => $reserve === [] ? null : [
+                'label' => (string) ($reserve['label'] ?? ''),
+                'value' => number_format((int) ($reserve['coins'] ?? 0)),
+                'badge' => 'estimated',
+                'title' => 'The publisher\'s own tip rather than a rule this tool derives: '
+                    .(string) ($def['shop_reserve_source'] ?? ''),
+            ],
+            'rated_count' => count($worth),
+            'rated_title' => 'How many catalogue items carry a rating from the publisher. An item with no '
+                .'rating prints none, and an item this run does not hold is not listed here at all.',
         ];
     }
 

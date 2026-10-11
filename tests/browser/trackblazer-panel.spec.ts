@@ -318,6 +318,64 @@ test('race fatigue states that no chain is entered and keeps both caveats on the
     await expect(fatigue.getByText('Guaranteed recovery events')).toBeVisible();
 });
 
+test('the ledger names what this run holds, against the cap, with the publisher rating beside it', async ({ page }) => {
+    const shop = page.getByRole('region', { name: 'Pro Shop' });
+
+    // Record one purchase through the arm's own form, then read the ledger that counts it.
+    await shop.locator('#purchase-turn').fill('7');
+    await shop.locator('#purchase-item').fill('Speed Scroll');
+    await shop.locator('#purchase-cost').fill('30');
+    await shop.locator('#purchase-effect').fill('+15 Speed');
+
+    await Promise.all([
+        page.waitForResponse(
+            (response) => response.url().includes('/purchases') && response.request().method() === 'POST',
+        ),
+        shop.getByRole('button', { name: 'Record purchase' }).click(),
+    ]);
+
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+
+    const ledger = page.getByRole('region', { name: 'Shop ledger' });
+    await expect(ledger).toBeVisible();
+
+    const held = ledger.getByRole('list', { name: 'Items held' });
+    await expect(held.getByRole('listitem')).toHaveCount(1);
+
+    // The count is the assertion, and it names the cap it sits against. A `.first()` would pass on a
+    // single rendered row and prove nothing about the number.
+    await expect(held.getByText('Speed Scroll')).toBeVisible();
+    await expect(held.getByText(/1 of 5/)).toBeVisible();
+
+    // The publisher's rating is a separate line from the count, and its state is the word Estimated:
+    // ProvenanceBadge carries the state as its accessible name, so the name is what is asserted. One
+    // badge per held item, plus the reserve's own Estimated badge, which lives in the ledger's grid
+    // rather than in this list.
+    await expect(held.getByText('Must Buy')).toBeVisible();
+    await expect(held.getByRole('img', { name: /^Estimated/ })).toHaveCount(1);
+    await expect(held.getByRole('img', { name: /^Confirmed/ })).toHaveCount(1);
+    await expect(ledger.getByRole('img', { name: /^Estimated/ })).toHaveCount(2);
+});
+
+test('the ledger prints the reserve as a tip and leaves the inflow absent until a race is entered', async ({ page }) => {
+    const ledger = page.getByRole('region', { name: 'Shop ledger' });
+    await expect(ledger).toBeVisible();
+
+    // A fresh run holds nothing, so the absence is what renders rather than an empty list.
+    await expect(ledger.getByText(/No purchase is recorded for this run yet/)).toBeVisible();
+
+    // The reserve is one publisher's tip, so it carries Estimated and never a rule's Confirmed.
+    await expect(ledger.getByText(/Keep at least 100 coins banked heading into Summer/)).toBeVisible();
+    await expect(ledger.getByRole('img', { name: /^Estimated/ })).toHaveCount(1);
+
+    // No race entered, so no projection is printed and the row says why.
+    await expect(ledger.getByText(/No race is entered for this run yet/)).toBeVisible();
+
+    // The arm keeps its own balance absence; the ledger deliberately does not repeat it.
+    const shop = page.getByRole('region', { name: 'Pro Shop' });
+    await expect(shop.getByText('Shop Coins: not yet recorded')).toHaveCount(1);
+});
+
 test('lands the Shop jump from the Cockpit action area with focus on the heading', async ({ page }) => {
     // Trackblazer is the only scenario with the action-area Shop button (matrix-gated on `shop`).
     const jump = page.getByRole('button', { name: 'Shop', exact: true });
@@ -352,6 +410,8 @@ test('sizes every control to the 44px contract and reflows at 320 px', async ({ 
         'Grade Point', 'Pro Shop', 'Epithet routes',
         // G5's three surfaces ride in the grade arm, so the narrow screen has to hold them too.
         'Race plan', 'Races ahead', 'Race fatigue',
+        // G6's ledger rides in the shop arm, beside the purchases it counts.
+        'Shop ledger',
     ]) {
         await expect(page.getByRole('region', { name: heading })).toBeVisible();
     }

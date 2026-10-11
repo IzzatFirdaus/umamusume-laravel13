@@ -535,6 +535,51 @@ return [
                 ['name' => 'Miracle Cure', 'cost' => 40, 'effect' => 'Heals all negative conditions'],
             ],
             /*
+            | The publisher's own "Worth" ratings, keyed by the catalogue item they belong to.
+            |
+            | Transcribed from docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 199-222
+            | (uma.guide's "Shop Item Priorities"), whose table names items by cost and effect rather
+            | than by client name. A key exists here only where a config row's cost and effect both
+            | match a publisher row exactly, so the pairing is forced rather than inferred: a rating
+            | beside the wrong item is worse than no rating. Items the publisher names that this
+            | catalogue does not carry (the +65 Energy item, both bond items, the shuffle reset, the
+            | Skin Outbreak heal, Fast Learner, Charming) get no key, and the row prints no rating.
+            |
+            | These are one guide's opinions, not game rules, which is why every one of them travels
+            | as `estimated` with the source in its title. They are not this tool's recommendation:
+            | the shop arm's own sentence, "no row is recommended", stays true because the tool
+            | recommends nothing and reports what one publisher said.
+            */
+            'shop_worth' => [
+                'Speed Notepad' => 'Low priority filler only',
+                'Speed Manual' => 'Must Buy',
+                'Speed Scroll' => 'Must Buy',
+                'Vita 20' => 'Must Buy',
+                'Vita 40' => 'Must Buy',
+                'Royal Kale Juice' => 'Must Buy, paired with a Mood item to offset the downside',
+                'Energy Drink MAX EX' => 'Generally Skip',
+                'Plain Cupcake' => 'Must Buy, and the +1 has priority',
+                'Berry Sweet Cupcake' => 'Must Buy',
+                'Coaching Megaphone' => 'Skip',
+                'Motivating Megaphone' => 'Only if the 60% ones are lacking',
+                'Empowering Megaphone' => 'Must Buy',
+                'Ankle Weights' => 'Must Buy for your priority stat',
+                'Good-Luck Charm' => 'Must Buy',
+                'Artisan Cleat Hammer' => 'Must Buy',
+                'Master Cleat Hammer' => 'Must Buy',
+                'Glow Sticks' => 'Situational',
+                'Speed Training Application' => 'Only with coin surplus',
+                'Miracle Cure' => 'Optional, worth holding one',
+            ],
+            'shop_worth_source' => 'docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 199-222 (uma.guide\'s own "Worth" ratings; the master dates the page 2026-04-29).',
+            /*
+            | The Summer reserve is the publisher's Tip at line 273, in its own words. The tool
+            | derives no reserve figure of its own and prints none beside it: a number this build
+            | invented would read as a game rule.
+            */
+            'shop_reserve' => ['label' => 'Keep at least 100 coins banked heading into Summer', 'coins' => 100],
+            'shop_reserve_source' => 'docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md line 273 (uma.guide\'s Tip), which also warns the shop resets on Summer\'s first turn.',
+            /*
             | Race Fatigue keys on the length of the race chain and on nothing else. The odds table is
             | transcribed from docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md lines 231-236
             | (uma.guide), which is the only publisher in this corpus that prints figures at all; the

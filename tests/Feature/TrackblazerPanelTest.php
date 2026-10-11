@@ -97,6 +97,10 @@ it('prints the catalogue in config order with name, cost and effect, no recommen
             ->where('scenario.shop', fn (Collection $shop): bool => array_keys($shop->all()) === [
                 'catalogue', 'purchases', 'rotation_turns', 'rotation_resets_in',
                 'max_copies', 'spend_total', 'fill', 'select_action',
+                // G6's ledger. Named here so the contract change is a test-visible event rather than a
+                // silent append: the ledger carries only what the shop arm lacks (held counts, the cap,
+                // the publisher's ratings and the reserve), never a second catalogue or form.
+                'ledger',
             ])
         );
 });
