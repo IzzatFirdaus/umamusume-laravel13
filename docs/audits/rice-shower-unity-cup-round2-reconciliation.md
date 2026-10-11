@@ -1486,6 +1486,40 @@ comment in `TrainingDetail.vue`, the file that session is editing), `TrainingDet
 landed, the four round-2 phases that could produce code produced it, and the one phase that could not (C against
 the canonical file) ran once Phase B cleared its gate.
 
+## Documentation landed, 2026-10-11
+
+**Documentation landed, 2026-10-11.** Second audit committed as **`4d062ce`** (941 insertions); resolution-record
+errata not needed (the file is clean, so that slice was skipped rather than staged for its own sake); research as
+**`53e6992`** (543 insertions). Every UX-reconciliation artifact is now on `master`: the first audit, the second
+audit, the resolution record, and this register are all tracked under `docs/audits/`, and the context brief is
+tracked under `docs/research/`.
+
+Both commits were hash-verified the way the standing rules require: `git hash-object` taken before `git add`,
+`git rev-parse HEAD:<path>` after the commit, equal in both cases, one path staged per commit, and the
+worktree delta against HEAD empty afterwards.
+
+**Two things deliberately not committed, with the reason named rather than left silent.**
+
+- `docs/audits/rice-shower-unity-cup-ux-walk.md` carries an uncommitted **one-line edit to a historical audit's
+  header**: `Date/time of walk` changed from `2026-10-09` to `2026-10-10`. This program did not make that edit
+  and does not land it. The rule this program has followed throughout is that a historical audit is evidence and
+  later status changes are appended as dated notes, and the second audit it sits beside says plainly that the
+  first pass "ran against an earlier working state whose peer commits had not yet landed" while its own header
+  calls itself "a second continuous session on the same day as the first pass". That is exactly the kind of
+  disagreement the register exists to hold, so it is recorded here and left for its author or the owner to
+  resolve, not smoothed over in a docs commit.
+- `docs/proposals/provenance-and-absence-contracts.md` carries an uncommitted **48-line §22, "Phase G preflight,
+  executed 2026-10-11, measured at `5d26b49`"**. It was already dirty when this session opened, its subject is
+  the G prompt set and §20(h) ownership rather than the UX reconciliation, and its authorship cannot be settled
+  from inside this session. The task's own stop condition applies: where a file cannot be shown to belong to this
+  reconciliation, report it rather than commit it. The peer-held code and scratch files named earlier
+  (`RecommendationCard.vue` deletion, `TrainingDetail.vue`, `walkthrough-scratch.spec.ts`, `crush.json`) stayed
+  untouched, as did the other dirty masters under `docs/research-scratch/`, `SCREEN_SPEC.md`,
+  `ARCHITECTURE-ESSENTIALS.md`, `SKILL.md`, `KNOWN-ISSUES.md` and the untracked plans and prompt sets.
+
+**Register line itself:** this section is the delta, committed as the fifth and final slice. The register's own
+history is now `b180df6` (whole file), `25526f1` (close-out block) and the commit carrying this block.
+
 
 
 
