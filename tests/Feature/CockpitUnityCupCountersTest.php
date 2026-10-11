@@ -48,6 +48,29 @@ final class CockpitUnityCupCountersTest extends TestCase
                 ->where('scenario.team.burst_band', '10–12'));
     }
 
+    public function test_puts_the_combined_bursts_on_the_header_strip_when_both_tallies_are_recorded(): void
+    {
+        // KI-97: `ResourceStrip` maps the spirit_bursts widget to the `bursts` header value and captions it
+        // "normal plus Extreme", so the combined total has to ride the header payload and not only the panel.
+        $run = $this->unityCupRun([
+            'spirit_bursts_count' => 6,
+            'extreme_bursts_count' => 5,
+        ]);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('header.values.bursts', 11));
+
+        // Half a count is still not a count: with one tally unstated the strip keeps its absence.
+        $partial = $this->unityCupRun(['spirit_bursts_count' => 6]);
+
+        $this->get(route('runs.cockpit', $partial))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('header.values.bursts', null));
+    }
+
     public function test_reads_the_counters_as_absent_when_not_recorded(): void
     {
         $run = $this->unityCupRun();

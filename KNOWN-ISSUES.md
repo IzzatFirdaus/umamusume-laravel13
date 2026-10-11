@@ -2429,6 +2429,7 @@ with its own approval, plus a judgement on whether any production dependency con
 build time. Not fixed in slice 15: the authorised change was `@types/node`, and moving a transitive dependency
 because an audit happened to be run is a different decision.
 
+
 ### KI-96 The wizard's ancestry case filled a `<select>` and read the rank as one field, so `career-legacy-deck-steps.spec.ts` was red for two days with nobody re-running it - FILED 2026-10-11 (Round 2 walk, W2), CLOSED 2026-10-11
 
 **Status: CLOSED.** Filed and closed by one change, so this entry quotes no closure hash: the commit that adds
@@ -2479,7 +2480,7 @@ same screen stayed green across both commits, so only a deliberate browser pass 
 day. Third, the shared worktree still carries this file's peer edit (KI-95) uncommitted, so the working tree and
 this entry's commit differ by that one block by design.
 
-### KI-97 The Cockpit's Spirit Bursts rail is hard-wired to null, so a recorded counter pair prints as an absence on every Unity Cup run - FILED 2026-10-11 (Phase C.1 investigation), OPEN
+### KI-97 The Cockpit's Spirit Bursts rail is hard-wired to null, so a recorded counter pair prints as an absence on every Unity Cup run - FILED 2026-10-11 (Phase C.1 investigation), CLOSED 2026-10-11
 
 **Status: OPEN.** The root cause is proven by reading the display path end to end. It is not fixed here for one
 reason named below, and the reason is the file's ownership, not the diagnosis.
@@ -2531,3 +2532,33 @@ together. What closure does not cover: it does not decide whether `TEAM RANK` on
 reads `$team['rank']` and was observed as `N/A` on a run that never reported a rank, which looks right and was
 not tested here); it does not add `combined_bursts` to any other surface; and it does not revisit the two sibling
 nulls, which this entry records as correct.
+
+**Closure, 2026-10-11. CLOSED by the change that adds this block, so no closure hash is quoted inside its own
+commit.** The gate this entry named opened when the peer landed `820a61e`; `CockpitController.php` was clean, and
+the two hunks in the fix's diff stayed separate from the shop work that arrived behind it.
+
+The fix reuses the panel's own figure rather than recomputing it, which keeps one owner for one number and is
+what the entry's own reasoning pointed at: `'bursts' => $team['combined_bursts'] ?? null`. `null` survives on the
+end of the expression for the case the counters test already pins - a run that stated one tally and not the
+other gets no combined total, and the rail must keep printing the named absence there rather than inventing a
+half count.
+
+**Evidence.** RED first: the new feature case failed at its own assertion with `Tests: 1 failed, 5 passed`, the
+failure line being `->where('header.values.bursts', 11)`. After the one-line change, the file reads
+`6 passed (103 assertions)`, exit 0, and the neighbouring `CareerCockpitTest` reads `36 passed (427 assertions)`,
+exit 0. Rendered evidence, because the defect was a rendered thing: `tests/browser/career-cockpit-forms.spec.ts`
+already writes 6 and 5 through the team editor, so the assertion went there - the box that owns the label must
+contain `11`, and it passed (`1 passed`, exit 0, on a session-private port and scratch database). The check was
+then proved to be a check: restoring `'bursts' => null` made `toContainText('11')` fail at that line while
+`toHaveCount(1)` still passed, so the locator is right and the assertion is not vacuous. The defect was put back
+and taken out again; the final diff carries the fix.
+
+**Gates run for the closure:** `pint --test` on both explicit paths -> passed; `phpstan analyse
+--no-progress --memory-limit=1G` -> `[OK] No errors`, exit 0; `composer lore` and `composer lore-code` -> exit 0,
+with no hit attributable to these lines. **Not run, and not claimed:** the full suite. `php artisan test
+--compact` was refused twice by the session's safety layer, so the broad run is unexecuted and the change rests
+on the two feature files and the browser case above. Nothing was weakened, skipped or deleted to get here.
+
+**What closure does not cover** stands as filed, plus one addition: it does not re-verify the sibling
+`grade_points` and `shop_coins` boxes against any column that may be added later, and it does not prove the rail
+renders correctly for a run whose counters were written through paths other than the Cockpit team editor.

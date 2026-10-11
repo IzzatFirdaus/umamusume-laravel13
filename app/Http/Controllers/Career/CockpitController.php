@@ -314,7 +314,10 @@ class CockpitController extends Controller
                 // payload holds them (D-220). The Team panel reads the same payload, so the header
                 // strip and the panel cannot disagree about one rank.
                 'team_rank' => $team['rank'],
-                'bursts' => null,
+                // KI-97: the strip captions this box "normal plus Extreme", and the panel already owns
+                // that combined figure, so the rail reads the same value instead of recomputing it or
+                // printing an absence over a recorded pair.
+                'bursts' => $team['combined_bursts'] ?? null,
                 'grade_points' => null,
                 'shop_coins' => null,
             ],

@@ -173,6 +173,13 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
     await expect(page.getByText('Blue Bloom')).toBeVisible();
     await expect(page.getByText('Dreaming Big')).toBeVisible();
+
+    // KI-97: the same write has to reach the header strip, whose own caption reads "normal plus
+    // Extreme". Before the fix the rail printed N/A over a recorded 6 and 5, so the assertion is on
+    // the box that owns both the label and the value rather than on a bare figure.
+    const burstsBox = page.locator('div.min-w-36').filter({ hasText: 'Spirit Bursts' });
+    await expect(burstsBox).toHaveCount(1);
+    await expect(burstsBox).toContainText('11');
 });
 
 test('links the run-scoped deck builder from the Cockpit', async ({ page }) => {
