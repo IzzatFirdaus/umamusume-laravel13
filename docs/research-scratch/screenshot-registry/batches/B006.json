@@ -1,0 +1,38 @@
+{
+ "id": "B006",
+ "question": "Do members of clusters 725, 80, 66, 707, 708 show meaningful within-cluster variation?",
+ "ids": [
+  "2026-07-14 124528",
+  "2026-07-14 190253",
+  "2026-07-14 191821",
+  "2026-07-14 124521",
+  "2026-07-14 191814",
+  "2026-07-14 224622",
+  "2026-07-17 230856",
+  "2026-07-17 235722",
+  "2026-07-17 235820",
+  "2026-07-17 221610",
+  "2026-07-17 230802",
+  "2026-07-17 230907",
+  "2026-07-17 232313",
+  "2026-07-18 001833",
+  "2026-07-18 140004"
+ ],
+ "why": "Characterize within-cluster variation for high-value clusters 725, 80, 66, 707, 708; cluster similarity is not a substitute for visual comparison.",
+ "output_schema": "review + evidence per confirmed frame with within-cluster variation notes",
+ "verify": "screenshots.py validate stays clean; each verified id has review_history + observations",
+ "next": null,
+ "created": "2026-10-11",
+ "results": [],
+ "summary": {
+  "batch": "B006",
+  "frame_count": 15,
+  "unique_frame_count": 15,
+  "duplicate_ids": [],
+  "log_entries": 15,
+  "states": {
+   "verified": 15
+  },
+  "unresolved_ids": []
+ }
+}

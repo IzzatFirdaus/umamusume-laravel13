@@ -1,0 +1,361 @@
+{
+ "counts": {
+  "distinct_clusters": 24,
+  "documented_unverified": 25,
+  "total": 25
+ },
+ "per_cluster_cap": 2,
+ "selected": [
+  {
+   "captured": "2026-07-14 025344",
+   "cluster_rep": "Screenshot 2026-07-14 025344.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "00-race-entry-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-14 025344",
+   "sid": "d26bc6b58356",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 221504",
+   "cluster_rep": "Screenshot 2026-07-17 221504.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "05-menu-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 221504",
+   "sid": "ed1047fe2e38",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 232527",
+   "cluster_rep": "Screenshot 2026-07-17 232527.png",
+   "cluster_size": 2,
+   "height": 1080,
+   "note_files": [
+    "00-race-entry-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 232527",
+   "sid": "ba845a70427f",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 233057",
+   "cluster_rep": "Screenshot 2026-07-17 233057.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "06-other-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 233057",
+   "sid": "5d670f41fff2",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 233332",
+   "cluster_rep": "Screenshot 2026-07-18 001811.png",
+   "cluster_size": 58,
+   "height": 1080,
+   "note_files": [
+    "03-skill-selection-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 233332",
+   "sid": "bd09274bfb0f",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 233339",
+   "cluster_rep": "Screenshot 2026-07-18 001811.png",
+   "cluster_size": 58,
+   "height": 1080,
+   "note_files": [
+    "03-skill-selection-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 233339",
+   "sid": "d59ae471c145",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 234444",
+   "cluster_rep": "Screenshot 2026-07-17 234444.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "00-race-entry-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 234444",
+   "sid": "2192cf8b1996",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 234453",
+   "cluster_rep": "Screenshot 2026-07-17 234453.png",
+   "cluster_size": 2,
+   "height": 1080,
+   "note_files": [
+    "03-skill-selection-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 234453",
+   "sid": "a2e7133d48f6",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 234615",
+   "cluster_rep": "Screenshot 2026-07-17 234615.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "00-race-entry-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 234615",
+   "sid": "fa284e7531b9",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 234912",
+   "cluster_rep": "Screenshot 2026-07-17 234912.png",
+   "cluster_size": 2,
+   "height": 1080,
+   "note_files": [
+    "00-race-entry-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 234912",
+   "sid": "7240f4f3840e",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 234918",
+   "cluster_rep": "Screenshot 2026-07-17 234918.png",
+   "cluster_size": 2,
+   "height": 1080,
+   "note_files": [
+    "00-race-entry-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 234918",
+   "sid": "1d66b437f663",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 235111",
+   "cluster_rep": "Screenshot 2026-07-17 235111.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "06-other-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 235111",
+   "sid": "94db353b9c04",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 235229",
+   "cluster_rep": "Screenshot 2026-07-17 235229.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "02-career-progression-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 235229",
+   "sid": "03bc3c16ffca",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 235511",
+   "cluster_rep": "Screenshot 2026-07-17 235511.png",
+   "cluster_size": 6,
+   "height": 1080,
+   "note_files": [
+    "00-race-entry-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 235511",
+   "sid": "b0e3d0982b23",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 235529",
+   "cluster_rep": "Screenshot 2026-07-17 235529.png",
+   "cluster_size": 2,
+   "height": 1080,
+   "note_files": [
+    "02-career-progression-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 235529",
+   "sid": "3fc54ac4ea0a",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-17 235902",
+   "cluster_rep": "Screenshot 2026-07-17 235902.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "02-career-progression-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-17 235902",
+   "sid": "93ce0d3aeae4",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-18 000919",
+   "cluster_rep": "Screenshot 2026-07-18 000919.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "00-race-entry-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-18 000919",
+   "sid": "369adfce03f9",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-18 001651",
+   "cluster_rep": "Screenshot 2026-07-18 001651.png",
+   "cluster_size": 2,
+   "height": 1080,
+   "note_files": [
+    "06-other-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-18 001651",
+   "sid": "eb79fc86b2a5",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-18 001817",
+   "cluster_rep": "Screenshot 2026-07-18 001817.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "01-training-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-18 001817",
+   "sid": "906b40a9c496",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-18 001823",
+   "cluster_rep": "Screenshot 2026-07-18 001823.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "01-training-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-18 001823",
+   "sid": "37106b339201",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-18 002421",
+   "cluster_rep": "Screenshot 2026-07-18 002421.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "02-career-progression-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-18 002421",
+   "sid": "32fef796c343",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-18 002432",
+   "cluster_rep": "Screenshot 2026-07-18 002432.png",
+   "cluster_size": 10,
+   "height": 1080,
+   "note_files": [
+    "02-career-progression-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-18 002432",
+   "sid": "1f8a09219341",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-18 002632",
+   "cluster_rep": "Screenshot 2026-07-18 002632.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "05-menu-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-18 002632",
+   "sid": "d220620aeb2d",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-18 002830",
+   "cluster_rep": "Screenshot 2026-07-18 160543.png",
+   "cluster_size": 11,
+   "height": 1080,
+   "note_files": [
+    "Screenshot 2026-07-18 002830.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-18 002830",
+   "sid": "d5cb256b7520",
+   "state": "documented_unverified",
+   "width": 1920
+  },
+  {
+   "captured": "2026-07-18 002941",
+   "cluster_rep": "Screenshot 2026-07-18 002941.png",
+   "cluster_size": 1,
+   "height": 1080,
+   "note_files": [
+    "02-career-progression-screenshots.md"
+   ],
+   "reason": "documented_unverified: validate the legacy note",
+   "ref": "2026-07-18 002941",
+   "sid": "82c8b18e4718",
+   "state": "documented_unverified",
+   "width": 1920
+  }
+ ],
+ "target": 25
+}

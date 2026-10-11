@@ -1,0 +1,60 @@
+{
+ "id": "B002",
+ "question": "Which not_reviewed no-note frames recover previously undocumented UI structure and mechanics?",
+ "ids": [
+  "2026-07-14 025400",
+  "2026-07-14 121123",
+  "2026-07-14 122314",
+  "2026-07-14 124209",
+  "2026-07-14 124219",
+  "2026-07-14 124413",
+  "2026-07-14 124516",
+  "2026-07-14 124534",
+  "2026-07-14 130856",
+  "2026-07-14 190453",
+  "2026-07-14 194317",
+  "2026-07-14 203400",
+  "2026-07-14 223933",
+  "2026-07-14 225944",
+  "2026-07-14 235300",
+  "2026-07-15 012321",
+  "2026-07-15 024104",
+  "2026-07-15 032215",
+  "2026-07-15 040332",
+  "2026-07-15 044428",
+  "2026-07-15 052723",
+  "2026-07-15 061006",
+  "2026-07-15 161624",
+  "2026-07-15 194245",
+  "2026-07-17 221551",
+  "2026-07-17 232251",
+  "2026-07-17 232828",
+  "2026-07-17 235210"
+ ],
+ "why": "one rep per distinct cluster size (58, 38, 23, 17, 14, 13, 11, 10, 9, 7, 6, 5, 4, 3, 2, 1) plus a 12-frame singleton spread across the capture span; 18 cluster reps + 10 singletons",
+ "output_schema": "review + evidence per confirmed frame",
+ "verify": "screenshots.py validate clean; each reviewed frame carries an observation and a state transition",
+ "next": "next batch: the 58-frame cluster's remaining 52 members, then the 14-cluster's 25 remaining",
+ "created": "2026-10-10",
+ "results": [
+  {
+   "date": "2026-10-11",
+   "by": "b003-prep",
+   "state": "verified",
+   "confidence": "high",
+   "note": "Roll-up reconciled from batches/B002.jsonl: 28 verified, 0 partial, 0 unverified, 0 skipped. Every manifest id carries a verified review_history entry and an observation.",
+   "reason": null
+  }
+ ],
+ "summary": {
+  "batch": "B002",
+  "frame_count": 28,
+  "unique_frame_count": 28,
+  "duplicate_ids": [],
+  "log_entries": 29,
+  "states": {
+   "verified": 28
+  },
+  "unresolved_ids": []
+ }
+}

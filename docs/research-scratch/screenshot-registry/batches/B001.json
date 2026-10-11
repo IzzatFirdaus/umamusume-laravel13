@@ -1,0 +1,49 @@
+{
+ "id": "B001",
+ "question": null,
+ "ids": [
+  "2026-07-15 012428",
+  "2026-07-15 014154",
+  "2026-07-18 001957",
+  "2026-07-18 135801",
+  "2026-07-17 234521",
+  "2026-07-17 232345",
+  "2026-07-18 133731",
+  "2026-07-18 160438",
+  "2026-07-17 233324"
+ ],
+ "why": null,
+ "output_schema": "review + evidence per confirmed frame",
+ "verify": "screenshots.py validate stays clean; each verified id has review_history + observations",
+ "next": null,
+ "created": "2026-10-10",
+ "results": [
+  {
+   "date": "2026-10-10",
+   "by": "phase-E-sample",
+   "state": "verified",
+   "note": "6 of 9 verified, 2 partial, 0 unverified. Three observed evidence seeds written.",
+   "confidence": "high",
+   "reason": null
+  },
+  {
+   "date": "2026-10-11",
+   "by": "b003-prep",
+   "state": "verified",
+   "confidence": "high",
+   "note": "Roll-up reconciled from batches/B001.jsonl: 8 verified, 1 partial, 0 unverified, 0 skipped (9 frames). Supersedes the earlier summary, which read '6 of 9 verified, 2 partial' and did not sum to the frame count. Final partial: 2026-07-17 234521 (discount chips not legible at review resolution).",
+   "reason": null
+  }
+ ],
+ "summary": {
+  "batch": "B001",
+  "frame_count": 9,
+  "unique_frame_count": 9,
+  "duplicate_ids": [],
+  "log_entries": 11,
+  "states": {
+   "verified": 9
+  },
+  "unresolved_ids": []
+ }
+}

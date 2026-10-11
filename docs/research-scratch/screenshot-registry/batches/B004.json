@@ -1,0 +1,49 @@
+{
+ "id": "B004",
+ "question": "Do the 40 documented_unverified frames match their legacy notes?",
+ "ids": [
+  "2026-07-14 025344",
+  "2026-07-17 221504",
+  "2026-07-17 232527",
+  "2026-07-17 233057",
+  "2026-07-17 233332",
+  "2026-07-17 233339",
+  "2026-07-17 234444",
+  "2026-07-17 234453",
+  "2026-07-17 234615",
+  "2026-07-17 234912",
+  "2026-07-17 234918",
+  "2026-07-17 235111",
+  "2026-07-17 235229",
+  "2026-07-17 235511",
+  "2026-07-17 235529",
+  "2026-07-17 235902",
+  "2026-07-18 000919",
+  "2026-07-18 001651",
+  "2026-07-18 001817",
+  "2026-07-18 001823",
+  "2026-07-18 002421",
+  "2026-07-18 002432",
+  "2026-07-18 002632",
+  "2026-07-18 002830",
+  "2026-07-18 002941"
+ ],
+ "why": "Validate the legacy note text against the original images before the notes are trusted.",
+ "output_schema": "review + evidence per confirmed frame",
+ "verify": "screenshots.py validate stays clean; each verified id has review_history + observations",
+ "next": null,
+ "created": "2026-10-11",
+ "results": [],
+ "summary": {
+  "batch": "B004",
+  "frame_count": 25,
+  "unique_frame_count": 25,
+  "duplicate_ids": [],
+  "log_entries": 22,
+  "states": {
+   "verified": 22,
+   "partial": 3
+  },
+  "unresolved_ids": []
+ }
+}

@@ -1,0 +1,42 @@
+{
+ "id": "B007",
+ "question": "Do no-note screenshots reveal new UI structures not yet documented in the registry?",
+ "ids": [
+  "2026-07-17 232319",
+  "2026-07-17 230424",
+  "2026-07-17 235217",
+  "2026-07-17 233917",
+  "2026-07-17 230734",
+  "2026-07-17 234458",
+  "2026-07-17 234401",
+  "2026-07-18 003313",
+  "2026-07-18 133317",
+  "2026-07-17 233159",
+  "2026-07-17 233658",
+  "2026-07-17 233705",
+  "2026-07-17 234529",
+  "2026-07-17 235625",
+  "2026-07-18 001636",
+  "2026-07-18 132722",
+  "2026-07-18 134905",
+  "2026-07-18 134912",
+  "2026-07-18 161325"
+ ],
+ "why": "Review no-note screenshots by underrepresented screen type and time coverage; favor full-desktop captures and screens that expose previously unseen modals, menus, results, training panels, or navigation.",
+ "output_schema": "review + evidence per confirmed frame with UI structure observations",
+ "verify": "screenshots.py validate stays clean; each verified id has review_history + observations",
+ "next": null,
+ "created": "2026-10-11",
+ "results": [],
+ "summary": {
+  "batch": "B007",
+  "frame_count": 19,
+  "unique_frame_count": 19,
+  "duplicate_ids": [],
+  "log_entries": 19,
+  "states": {
+   "verified": 19
+  },
+  "unresolved_ids": []
+ }
+}
