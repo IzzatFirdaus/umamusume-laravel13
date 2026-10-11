@@ -180,10 +180,12 @@ const placeholder = (name: string): string | undefined =>
         : String(props.write.previous[name]);
 
 /*
- * The turn's Energy band, in the same words the Cockpit's recommendation card prints
- * (`components/career/RecommendationCard.vue`), because a Trainer who arrives here by URL is making
- * the same decision and SC 3.2.4 forbids two vocabularies for one state. `RecommendationCard.vue`
- * holds its own copy of this pair today; a third screen reading the band extracts it.
+ * The turn's Energy band, in this page's own words. Corrected 2026-10-11 (G7): this comment used to say
+ * the pair matched "the Cockpit's recommendation card" and that `components/career/RecommendationCard.vue`
+ * held a second copy of it. Both claims were stale. That component was imported by nothing and is deleted,
+ * and the Cockpit's advisor rail deliberately prints no band at all (`NextDecision.vue`: "Nothing here is
+ * a score, a band or a percentage"), so there is no second vocabulary for SC 3.2.4 to keep in step and
+ * nothing to extract on a third reader.
  */
 const BANDS: Record<'AtOrAboveAdvisory' | 'BelowAdvisory', string> = {
     AtOrAboveAdvisory: 'At or above the advisory line',
