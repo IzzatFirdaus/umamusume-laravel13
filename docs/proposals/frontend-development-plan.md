@@ -2388,6 +2388,31 @@ plans are filed.
    inferred state); an endgame accent mode driven by turns-remaining. None has a task in this plan;
    the run report is the only grounding any of them has.
 
+9. **G3's Duel Panel has no recorded source and no authorized write path (measured 2026-10-11 at
+   `5d26b49`).** G3 asks which recorded field establishes a Happy Meek duel appearance. None does.
+   `app/Enums/TurnChoice.php:18-20` says no case exists for a duel, a race, an event or a shop trip because no
+   write path produces one, and that the URA finale's duels are display-only in this build under ruling D-5.
+   `CockpitController.php:1254-1260` already prints `Duel availability` as a named absence — "Nothing stored or
+   configured says whether a duel is open for this run, so the screen does not claim one way or the other" —
+   and the row above it names the second half: "No column stores a Happy Meek level and no route writes one… A
+   Trainer-entered level needs a schema proposal first." G3's own fallback is a Trainer-entered flag with "do
+   not add a database column", so the decision is the owner's: authorize a `TurnEntry` flag with its Form
+   Request and schema proposal, or keep the panel display-only over the three fields a turn does record
+   (`choice`, the selected stat, the outcome) and render the rest as `N/A`.
+
+10. **The three URA fan gates are in neither config nor the recorded catalogue (same measurement).**
+    `docs/URA-Finale-plan.md:61` sources them with dates and surfaces (Valentine's Day 60,000 Turf / 40,000
+    Dirt, Fan Fest 70,000 / 60,000, Holiday Season 120,000 / 80,000, citing `docs/scenarios/01-ura-finale.md:80-83`,
+    Game8 and `UMAMUSUME_REFERENCE.md` §2.2.1), and G3's milestone tracker is specified to read them "from
+    config or a recorded entry". Neither holds them: `config/` answers zero hits for 60000 / 70000 / 120000;
+    `race_catalog_slots` has 402 non-null `fans_needed` values whose maximum is **25,000**, and the four rows
+    that carry a `scenario_key` (`ura_finale`, `unity_cup`, `trackblazer`, `our_grand_concert`) carry none;
+    `scenario_slots` (296 rows) has the same 25,000 ceiling. Hard-coding the six numbers is what G3 forbids, so
+    the owner chooses: place the gates under `config/scenarios.php`'s `ura_finale` entry, or source them into
+    the catalogue so the tracker reads `fans_needed` the way it was built to. The tracker's other gap is
+    recorded at `CockpitController.php:469-470`: `scenario_milestone` produces no row because nothing in the
+    tree names a milestone.
+
 ---
 
 ## 12. Accessibility conformance: WCAG 2.2 level AA

@@ -837,3 +837,51 @@ at HEAD.
 rows. Two are added by this pass and are not in §20's table: **KI-88's remedy** (a Save control per header
 form versus autosave on change, which changes what the 44px sweep and the axe scan measure) and **KI-84's
 13-file deletion split**, which needs the owner's approval under the Floor before any session commits it.
+
+## 22. Phase G preflight, executed 2026-10-11 (Part 1 §2.1 to §2.4, measured at `5d26b49`)
+
+The G prompt set forbids taking a previous agent's word for §20(h) and requires the current state instead
+(`docs/Trainer-Desk-2.0-G-Prompts.md:60`). This pass measured it rather than reasoning from §16.
+
+**§20(h), measured.** The question asks which session owns rulings 2a/3b/5a/7a/8a/9b. All six are committed,
+and each ruling's content reads off HEAD:
+
+| Ruling | File §16 listed as held | Committed in | Proof read this pass |
+|---|---|---|---|
+| 2a, 3b | `career/TrainingCard.vue`, `scenario/ScenarioPanel.vue` | `b30906a`, `aa5d975` | `state="unknown"` appears **zero** times under `resources/js` |
+| 5a | `career/TrainingCard.vue`, `costConstants` | `b30906a` | defined at `:107`, printed at `:252` |
+| 7a | `career/CareerStatePanel.vue`, `statAbsence` | `5eba0d0` | defined at `:90`, printed at `:144`; the `:50`/`:87` figures moved when R2-09 added `denominatorLabel` |
+| 8a, 9b | `pages/Career/SaveVeteran.vue` | `d00f965` | `:254` renders `Rank: {{ parent.rank ?? 'N/A' }}`, the ruling carried by the `title` |
+| 8a siblings | `TeamRacePanel.vue`, `Catalog/Show.vue` | already on HEAD before this pass | tier `N/A` with its own `title` at `TeamRacePanel.vue:44`; `va_ja` at `Catalog/Show.vue:163` |
+
+The four files §16 lists as held are not held any more, so the state §15 and §16 describe has no
+referent left. What this table does **not** do is rule on §20(h): which session stands down remains the
+owner's row to close, and no line here is evidence that a standing-down happened. The distinction matters
+because §15's consequences were a set of abstentions (no doc writes, no browser run, neither 6a nor 10a), and
+an abstention lifted by inference is a guardrail quietly lowered.
+
+**§20(b) has no site either.** That row held group A's third edit because `Runs/Show.vue` carried roughly 45
+concurrent lines. `b30906a` deleted the file, 831 lines, so the decision now concerns a surface nothing
+renders; KI-95 records what the deletion cost rather than what it gained.
+
+**§2.2, KI-88.** Closed by the owner at `48e4f22`, on the save-control branch of the two candidates:
+`Cockpit.vue` carries seven `type="submit"` controls and the fixture re-anchors travelled with the commit.
+What §2.2 still asks for is its item 4 — the post-fix baseline browser numbers, including the 44px sweep and
+the axe scan. That is a run, not a ruling, and the last paragraph says why a run today proves nothing about
+the tree it ran on.
+
+**§2.4, dependencies.** G1 and G2 are on HEAD rather than merely authorized: `app/Services/Advisor/NextDecision.php`
+sits beside `TrainerAdvisor.php`, `career/NextDecision.vue` and `career/ObjectiveRow.vue` sit in the cockpit
+set, and the G-33 property is asserted at `tests/Feature/CareerScenarioSelectTest.php:152` and in seven other
+files. G3 through G7 were not audited by this pass; nothing here states what they still owe.
+
+**Phase 1 is closed.** Its last producing item, R2-17, landed at `5d26b49` — four files, 47 insertions, the
+`deck_url` prop plus one header anchor plus the feature and browser assertions that pin it. The working tree
+carried thirteen modified tracked files when this pass measured it, before §22 was itself written: twelve docs
+and `tests/Feature/CareerLegacyDeckStepsTest.php`, which is a peer's R2-02 file and not this pass's to touch.
+
+**The hazard §20(h) never named.** A peer session is in this tree while this section is written:
+`.scratch-uma/browser-8173.sqlite` through `browser-8177.sqlite` were written between 02:02 and 02:51, and
+`5d26b49` landed at 02:55. KI-80's fix gave every run its own database, so the collision that broke Tier B is
+gone, but the source is shared, which is the limit §21 already recorded. A browser gate run inside that window
+is attributable to neither session. It is stated here rather than assumed resolved.
