@@ -972,7 +972,11 @@ class TrainingRunController extends Controller
             $skill = Skill::availableOnGlobal()->find((int) $entry['skill_id']);
 
             if ($skill !== null) {
-                $run->setSkillStatus($skill, $request->acquisitionFor($entry), $entry['turn_acquired'] ?? null);
+                // Form data arrives as strings, and the model's `?int` parameter is strict: the
+                // validated `integer` rule checks but does not cast, so the cast happens here at
+                // the boundary the write crosses.
+                $turn = $entry['turn_acquired'] ?? null;
+                $run->setSkillStatus($skill, $request->acquisitionFor($entry), $turn === null ? null : (int) $turn);
             }
         }
 

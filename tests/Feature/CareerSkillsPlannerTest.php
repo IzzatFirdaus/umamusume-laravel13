@@ -443,6 +443,28 @@ final class CareerSkillsPlannerTest extends TestCase
             ->and($run->skills->firstWhere('id', $first->id)->pivot->turn_acquired)->toBe(2);
     }
 
+    public function test_accepts_a_turn_acquired_that_arrived_as_a_form_string(): void
+    {
+        // An HTML form posts every field as a string, and `setSkillStatus()` takes `?int` under
+        // `strict_types`. The validator's `integer` rule checks but never casts, so the boundary
+        // cast belongs to the controller; this posts the string the browser sends and expects the
+        // write to land rather than a 500 (found by the Rice Shower browser regression suite,
+        // 2026-10-11).
+        $run = $this->plannerRun();
+        $first = $this->skill('Row Skill First', 100);
+
+        $this->post(route('runs.skills.sync', $run), [
+            'skills' => [
+                0 => ['skill_id' => (string) $first->id, 'status' => 'Acquired', 'turn_acquired' => '67'],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $run->refresh();
+
+        expect($run->skills->firstWhere('id', $first->id)->pivot->status)->toBe('Acquired')
+            ->and($run->skills->firstWhere('id', $first->id)->pivot->turn_acquired)->toBe(67);
+    }
+
     public function test_adds_a_skill_through_the_spare_row_without_disturbing_the_rows_above(): void
     {
         $run = $this->plannerRun();
