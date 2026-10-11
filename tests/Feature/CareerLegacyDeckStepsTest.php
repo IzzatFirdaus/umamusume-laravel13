@@ -398,6 +398,37 @@ it('refuses a card outside the catalogue, a flag outside the dictionary and a sl
     expect(SetupDraft::deck())->toBeNull();
 });
 
+it('shows a confirmation flash and persists legacy data through navigation to Preflight (R2-02)', function (): void {
+    $fixture = wizardFixture();
+    SetupDraft::write(['scenario' => 'ura_finale', 'umamusume_id' => $fixture['trainee']->id]);
+
+    // Save legacy with valid data
+    $response = $this->put(route('career.legacy.store'), draftLegacyPayload([
+        'legacies' => [
+            array_merge(draftLegacyPayload()['legacies'][0], ['legacy_id' => $fixture['parents'][0]]),
+            draftLegacyPayload()['legacies'][1],
+        ],
+    ]));
+
+    // Verify redirect and flash message
+    $response->assertRedirect(route('career.legacy'))
+        ->assertSessionHas('status', 'Legacy recorded.');
+
+    // Verify the session actually stored the data
+    expect(SetupDraft::legacySelection())->not->toBeNull()
+        ->and(SetupDraft::legacyParents())->toBe([$fixture['parents'][0], null]);
+
+    // Navigate to Preflight and verify it can read the legacy data
+    $preflightResponse = $this->get(route('career.preflight'));
+    $preflightResponse->assertOk();
+
+    // The contract should include legacy data, not show ANCESTRY · N/A
+    $preflightResponse->assertInertia(fn (Assert $page) => $page
+        ->component('Career/Preflight')
+        ->has('contract.build.legacy')
+        ->where('contract.build.legacy.affinity', '◎'));
+});
+
 it('keeps the ancestry and the deck through a visit to another step and back', function (): void {
     $fixture = wizardFixture();
     SetupDraft::write(['scenario' => 'ura_finale', 'umamusume_id' => $fixture['trainee']->id]);
