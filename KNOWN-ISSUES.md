@@ -2478,3 +2478,56 @@ browser spec when a page changes a control's type: there is no CI (`AGENTS.md` �
 same screen stayed green across both commits, so only a deliberate browser pass could have caught this on the
 day. Third, the shared worktree still carries this file's peer edit (KI-95) uncommitted, so the working tree and
 this entry's commit differ by that one block by design.
+
+### KI-97 The Cockpit's Spirit Bursts rail is hard-wired to null, so a recorded counter pair prints as an absence on every Unity Cup run - FILED 2026-10-11 (Phase C.1 investigation), OPEN
+
+**Status: OPEN.** The root cause is proven by reading the display path end to end. It is not fixed here for one
+reason named below, and the reason is the file's ownership, not the diagnosis.
+
+Found while chasing a contradiction on the run the Phase C walk created. Run 10 holds `spirit_bursts_count = 6`
+and `extreme_bursts_count = 5`: the team editor re-reads both after a reload, the scenario panel prints `Spirit
+Bursts 6 / 5 Extreme`, and `CockpitUnityCupCountersTest.php:47` pins `combined_bursts` at `11`. On the same page
+the header rail prints `SPIRIT BURSTS` with the value `N/A` and the caption `not yet recorded`. A value the
+Trainer entered is rendered as an absence, which is the direction `AGENTS.md` §5 and `DESIGN.md` §4.2 forbid:
+`N/A` belongs to what was never recorded.
+
+The cause is one line. `ResourceStrip.vue:43` maps the `spirit_bursts` widget to the value key `bursts`, and
+`CockpitController.php:316` (at `29f5fc1`) sets `'bursts' => null` inside the header's `values` array
+unconditionally. The widget is composed for Unity Cup, so the box always renders.
+
+**Why this is a defect and not a ruled absence**, three independent ways:
+
+1. The rail's own caption names the quantity it wants. `ResourceStrip.vue:75` sets `sub = 'normal plus Extreme'`
+   when a value is present, and `combined_bursts` is the already-tested producer of exactly that figure. The
+   design question the Phase C register flagged (6 or 11) is answered by the shipped copy, not by a ruling.
+2. The comment licensing the null states its own release condition: the values "stay absent until a column or a
+   payload holds them (D-220)". Both halves are now satisfied. `2026_10_10_160000_add_unity_cup_counters_to_training_runs`
+   created `spirit_bursts_count` and `extreme_bursts_count`, and the team payload carries the combined figure. The
+   condition was met and the line was never revisited.
+3. Nothing pins the null. `CareerCockpitTest.php:233` asserts only that Unity Cup composes
+   `['team_rank', 'spirit_bursts']` - membership, not value. No test reads `header.values.bursts` at any commit.
+
+**Scoped narrowly, because the two sibling nulls are correct.** `pragma_table_info('training_runs')` has no
+`grade` and no `coin` column, so `grade_points => null` and `shop_coins => null` satisfy the comment honestly.
+Only `bursts` has backing storage. This entry is about that one line, not about the whole array.
+
+**The fix, and why it was not landed here.** `'bursts' => $team['combined_bursts'] ?? null` in the same `values`
+array, where `$team` is already in scope two lines above (the adjacent `team_rank` reads `$team['rank']`), plus
+one assertion in `CockpitUnityCupCountersTest` that `header.values.bursts` is `11` for the recorded pair and
+still null when either counter is absent. Blocked by the repository's standing rule that a file carrying another
+session's uncommitted edits is not this change's to splice: `CockpitController.php` holds a peer's +467 lines in
+this worktree, and that working copy still reads `'bursts' => null` at `:317`, so the in-flight Trackblazer slice
+is not fixing it either. The test was not landed alone, because a paired fix is one commit or nothing.
+
+**Proving commands.** `git show 29f5fc1:app/Http/Controllers/Career/CockpitController.php | grep -n "'bursts' =>"`
+-> `316: 'bursts' => null`, and the same grep against the working file -> `317: 'bursts' => null`.
+`git show 29f5fc1:resources/js/components/ResourceStrip.vue | sed -n '43,44p;72,76p'` -> the `bursts` key mapping
+and the `normal plus Extreme` caption. `git grep -n "bursts" 29f5fc1 -- tests` -> the panel assertions and
+nothing for the header. Live: run 10 on the Phase C snapshot printed `SPIRIT BURSTS N/A` while
+`select spirit_bursts_count, extreme_bursts_count from training_runs where id=10` returned `6, 5`.
+
+**Closure owed.** Whoever owns `CockpitController.php` next lands the one-line value and the header assertion
+together. What closure does not cover: it does not decide whether `TEAM RANK` on the same rail is correct (that
+reads `$team['rank']` and was observed as `N/A` on a run that never reported a rank, which looks right and was
+not tested here); it does not add `combined_bursts` to any other surface; and it does not revisit the two sibling
+nulls, which this entry records as correct.
