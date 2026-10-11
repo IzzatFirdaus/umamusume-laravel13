@@ -114,8 +114,12 @@ test.describe('Setup step 4 — Legacy', () => {
         await page.locator('#ancestor-parent_a-1').fill('Mill Raptor');
         await page.locator('#rank-parent_a').fill('4');
         await page.getByRole('button', { name: /^Add Spark/ }).first().click();
-        await page.getByLabel('Applies to').fill('Speed');
-        await page.getByLabel('Stars').fill('2');
+        // `6fa0d01` split the old free-text "Applies to" into a category select and a Target select, so
+        // the value is picked from each list rather than typed. `Stars` needs `exact` because the label
+        // is a case-insensitive substring of each parent's own "Own rank (stars)".
+        await page.getByLabel('Applies to').selectOption('Stat');
+        await page.getByLabel('Target').selectOption('Speed');
+        await page.getByLabel('Stars', { exact: true }).fill('2');
         await page.locator('#affinity').selectOption('◎');
         await page.getByRole('button', { name: 'Save Legacy' }).click();
         await expect(page.getByText('Legacy recorded.')).toBeVisible();
@@ -127,7 +131,9 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.locator('#ancestor-parent_a-1')).toHaveValue('Mill Raptor');
         await expect(page.locator('#rank-parent_a')).toHaveValue('4');
         await expect(page.locator('#affinity')).toHaveValue('◎');
-        await expect(page.getByText('Rank 4').first()).toBeVisible();
+        // `5876f64` made the node's rank two fields, the letter the Trainer read and the star count beside
+        // it, so the read-back prints the named letter absence with the entered star count.
+        await expect(page.getByText('Rank not recorded, 4★').first()).toBeVisible();
 
         // The Spark reads back as one chip whose accessible name carries kind, target and count in
         // words, never colour alone (WCAG 1.4.1).

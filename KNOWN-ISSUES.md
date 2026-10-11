@@ -2428,3 +2428,53 @@ or move it.
 with its own approval, plus a judgement on whether any production dependency consumes untrusted source maps at
 build time. Not fixed in slice 15: the authorised change was `@types/node`, and moving a transitive dependency
 because an audit happened to be run is a different decision.
+
+### KI-96 The wizard's ancestry case filled a `<select>` and read the rank as one field, so `career-legacy-deck-steps.spec.ts` was red for two days with nobody re-running it - FILED 2026-10-11 (Round 2 walk, W2), CLOSED 2026-10-11
+
+**Status: CLOSED.** Filed and closed by one change, so this entry quotes no closure hash: the commit that adds
+this line is the commit that lands the repair, and a commit cannot carry its own hash. The finding stands as it
+was filed.
+
+Two of the case's locators went stale on 2026-10-09, eighteen minutes apart, and only the first was ever seen.
+
+- `5876f64` (17:54, "ancestor letter rank alongside star count") split the node's rank into the letter the
+  Trainer read and the star count beside it, so `AncestryNode.vue:101-103` prints `Rank not recorded, 4★`. The
+  case asserted `getByText('Rank 4')`.
+- `6fa0d01` (18:12, "typed spark targets with category-conditional validation") replaced the free-text
+  `Applies to` input in `Career/LegacySelect.vue` with a category `<select>` and a separate `Target`
+  `<select>`, and `Speed` moved from a typed value to an option of the second. The case still called
+  `getByLabel('Applies to').fill('Speed')`.
+
+The second break hides the first because it happens earlier in the same test, which is why the Round 2 register
+attributed the whole red to `6fa0d01` and stopped there. The application is not the defect: `AncestorRankTest`
+pins `rank_label` to the string the node prints, and `StoreLegacySelectionRequest::assertTargetMatchesCategory()`
+accepts `Stat` with `Speed`, so both halves of the write the case drives are intended behavior. The instrument
+was stale, and the file went unre-run for two days.
+
+The repair took a second sitting because the label `Stars` is not unique on this screen. `getByLabel` matches a
+case-insensitive substring, so it also resolves inside each parent's `Own rank (stars)` label: two parents plus
+the one Spark row is three elements. The ARIA snapshot Playwright writes at the failure
+(`test-results/*/error-context.md`) settled it against the live DOM rather than against a guess, and records that
+`Applies to` and `Target` each resolve to one control while `Stars` resolves to one only with `{ exact: true }`.
+
+**Proving command.** Before: `PLAYWRIGHT_PORT=8241 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/phaseA.sqlite npx
+playwright test tests/browser/career-legacy-deck-steps.spec.ts --grep "records the entered ancestry"` -> 1
+failed, `locator.fill: Error: Element is not an <input>, <textarea> or [contenteditable] element` at `:117`.
+After the first repair the same case failed onward at `:134` with `getByText('Rank 4')` finding no element, then
+the whole file read `10 passed` at `PLAYWRIGHT_PORT=8243 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/phaseA3.sqlite npx
+playwright test tests/browser/career-legacy-deck-steps.spec.ts`. `npm run typecheck` exits 0. The two sibling
+specs were run to measure the divergence claim instead of inferring it from the code shape: `PLAYWRIGHT_PORT=8244
+PLAYWRIGHT_SCRATCH_DB=.scratch-uma/phaseA4.sqlite npx playwright test tests/browser/legacy.spec.ts
+tests/browser/career-inheritance-event.spec.ts` -> 16 passed (7.8 m), including the builder case that types
+`Speed` into a free-text `Applies to` and the seven inheritance-event cases that read it as a `textbox`.
+
+**What closure does not cover.** Three things. The two Legacy editors now diverge, and this entry did not
+reconcile them: the wizard's step 4 offers category and target selects, while `Legacy/Builder.vue:363-366` and
+the Inheritance Event screen still take a free-text target, so `legacy.spec.ts:234` and
+`career-inheritance-event.spec.ts:118` keep their `fill()` and are correct rather than merely unfailing. Because
+`category` is `nullable` in the rules and the payload stores the target string verbatim (`ADR-0010`), the
+divergence is a product observation and not a defect this closure owns. Second, nothing in the tree re-runs a
+browser spec when a page changes a control's type: there is no CI (`AGENTS.md` §1), and the feature tests for the
+same screen stayed green across both commits, so only a deliberate browser pass could have caught this on the
+day. Third, the shared worktree still carries this file's peer edit (KI-95) uncommitted, so the working tree and
+this entry's commit differ by that one block by design.
