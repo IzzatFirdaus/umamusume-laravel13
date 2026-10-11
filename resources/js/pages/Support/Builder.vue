@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import AppLayout from '../../layouts/AppLayout.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
@@ -129,6 +129,24 @@ const form = useForm({
     ) as Record<number, { support_card_id: string; ownership: 'OWNED' | 'RENTED' | null }>,
 });
 
+/*
+ * The picker writes its picks into the URL and the server answers with re-rendered slots, but every
+ * `go()` navigation runs with `preserveState: true`, so this component never remounts and the form
+ * above keeps its mount-time values. Without this sync, "Confirm deck" posted the deck as it stood
+ * when the page was first opened — an empty one for any Trainer who equipped through the picker —
+ * and `syncDeck`'s delete-then-insert would then wipe the six slots they had just built. Only the
+ * card id is mirrored: the ownership flag is mutated on the form directly, so copying the prop here
+ * would clobber a toggle the Trainer made since the last server round trip.
+ */
+watch(
+    () => props.slots,
+    (slots) => {
+        for (const slot of slots) {
+            form.deck[slot.position].support_card_id = slot.selected;
+        }
+    },
+);
+
 /**
  * The current deck as the query string carries it, so a picker action can change one entry and keep the
  * other five. Read from the slots rather than from `form` because the form's state is the *submitted*
@@ -191,6 +209,10 @@ function applyFilters(): void {
             rarity: rarity.value || undefined,
             status: status.value || undefined,
             query: search.value || undefined,
+            // The picker's target slot rides the query string (startReplace put it there), and a
+            // filter change must keep it: dropping it would reset the target to Slot 1 and the
+            // next Equip press would write into a slot the Trainer did not choose.
+            slot: pickerSlot(),
         },
         deckQuery(),
         pickerSlot(),
