@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { SCRATCH_DATABASE } from './tests/browser/global-setup';
+import { SCRATCH_DATABASE, DEVTOOLS_ENV } from './tests/browser/global-setup';
 
 // Rendered-copy evidence for the ported Vue screens (ADR-0020 §1): once a screen renders
 // client-side, the server response no longer carries its markup, so the copy and
@@ -13,6 +13,7 @@ const port = Number(process.env.PLAYWRIGHT_PORT ?? 8127);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
 
 const webServerEnv = {
+    ...DEVTOOLS_ENV,
     DB_DATABASE: SCRATCH_DATABASE,
     UMA_DATABASE_ROLE: 'browser',
     UMA_EXPECTED_DATABASE: SCRATCH_DATABASE,

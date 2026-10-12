@@ -60,6 +60,21 @@ export function removeScratchDatabase(path: string): void {
 
 export const SCRATCH_DATABASE = scratchDatabasePath();
 
+/**
+ * The browser role runs with Inertia DevTools switched off (R3-32).
+ *
+ * `DevToolsServiceProvider::register()` flushes and then prunes its entry cache inside the handled
+ * request, walking `storage/inertia-devtools` and unlinking expired entries synchronously. Past roughly
+ * 28k files that loop outlives `max_execution_time`, `/up` never answers clean, and a browser run aborts
+ * with zero tests — which does not fail loudly, it silently stops being evidence.
+ *
+ * The flag lives here rather than in `playwright.config.ts` so the assertion below and the server the
+ * harness starts cannot drift apart: both read this one constant. `DevTools::enabled()` falls back to
+ * `environment('local')` when the config value is null, and the harness server boots as local, so an
+ * unset flag means recording is on.
+ */
+export const DEVTOOLS_ENV = { INERTIA_DEVTOOLS_ENABLED: 'false' } as const;
+
 export default async function globalSetup(): Promise<void> {
     // Fail if a cached config would override the harness environment and point the server
     // at the canonical development database instead of the scratch file.
@@ -72,6 +87,26 @@ export default async function globalSetup(): Promise<void> {
         // Config cache might not exist; that's fine.
     }
 
+    // Prove the application honours the flag the harness is about to hand the server, rather than
+    // trusting that a name typed into an env block reaches `config()`.
+    //
+    // Deliberately not an assertion that `storage/inertia-devtools` is absent: that directory belongs to
+    // the dev role as well, and a peer's `composer dev` in this shared worktree populates it. Failing on
+    // its existence would block every browser run for a condition the browser role did not cause.
+    const devtoolsState = execSync('php artisan config:show inertia.devtools.enabled', {
+        cwd: repoRoot,
+        env: { ...process.env, ...DEVTOOLS_ENV },
+        encoding: 'utf8',
+    });
+
+    if (!devtoolsState.includes('false')) {
+        throw new Error(
+            'R3-32: the browser role would boot with Inertia DevTools recording on. '
+            + `Expected \`inertia.devtools.enabled\` to resolve to false under ${JSON.stringify(DEVTOOLS_ENV)}, `
+            + `got: ${devtoolsState.trim()}`,
+        );
+    }
+
     // Only this invocation's path is removed. The KI-80 defect was this step reaching a shared file.
     removeScratchDatabase(SCRATCH_DATABASE);
 
@@ -81,6 +116,7 @@ export default async function globalSetup(): Promise<void> {
 
     const harnessEnv = {
         ...process.env,
+        ...DEVTOOLS_ENV,
         DB_DATABASE: SCRATCH_DATABASE,
         UMA_DATABASE_ROLE: 'browser',
         UMA_EXPECTED_DATABASE: SCRATCH_DATABASE,
