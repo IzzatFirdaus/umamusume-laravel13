@@ -57,9 +57,9 @@ codes and their meanings are read off the export's own English descriptions, and
 rule, not a detail:** one code carries both `Right-Handed ◎` (+600000, "increase performance on
 right-handed tracks") and `G1 Averseness` (−400000, "decrease performance in G1 or otherwise important
 races"), so a code alone would have labelled an averseness `Passive`. A non-positive value voids the claim.
-`type` therefore holds a derived label where code and sign agree and null elsewhere. No screen presents the
-value as client copy (D-20), and the parser's table names each code and its citation rather than leaving the
-mapping in prose.
+`type` holds a derived label where code and sign agree and null elsewhere, no screen presents the value as
+client copy (D-20), and the parser's table names each code and its citation rather than leaving the mapping
+in prose.
 
 **5. `is_unique` is answered by the code set, with the card join as its corroboration — and the two differ
 by a few rows, which is stated rather than smoothed.** Every id reachable from a card's `skills_unique` has
@@ -71,7 +71,7 @@ trainee, and no card names a skill outside the set.
 **6. `gene_version` and the evolution pair are stored raw or not stored.** `gene_version` is the
 `[Global]`-relevant **inherited form** of a unique skill, and its nested id is **not a top-level row**, so it
 cannot be a foreign key to self. `evo`/`pre_evo` is the JP-only system and imports no column. Both stay out
-of the schema until a screen needs them; an unreadable relationship column is worse than no column.
+of the schema until a screen needs them.
 
 ## Consequences
 
