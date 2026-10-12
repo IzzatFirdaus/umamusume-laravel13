@@ -32,7 +32,7 @@ option.
 | `ScenarioCaps` is the single ceiling owner | every validator, band and advisor calls `forRun($run)` | 0015 | `StoreTurnEntryRequest:70`, `NextDecision:338`, `CockpitController:386` | 0015 §Decision |
 | A no-scenario run is held to `base_cap`, no bonus | five stats validate at 0..1200 | 0015 | `ScenarioCaps::scenarioCaps()`; KI-47 closed by `04658f2` | 0015 §Decision |
 | Skill points are uncapped | `sp` stays `nullable\|integer\|min:0` | 0015 | `StoreTurnEntryRequest` | 0015 §Skill points |
-| A run may record entered per-stat ceilings | four nullable `cap_speed`/`cap_stamina`/`cap_power`/`cap_guts` override the scenario figure | 0025 | migration `2026_10_12_140000_add_entered_caps_to_training_runs_table` (**Pending on `database/database.sqlite`**), `ScenarioCaps::ENTERED_CAPS` | 0025 §Decision |
+| A run may record entered per-stat ceilings | four nullable `cap_speed`/`cap_stamina`/`cap_power`/`cap_guts` override the scenario figure | 0025 | migration `2026_10_12_140000_add_entered_caps_to_training_runs_table` (untracked; **Ran on `database/database.sqlite` as batch 16, 2026-10-12**), `ScenarioCaps::ENTERED_CAPS` | 0025 §Decision |
 | Entered caps are Trainer data, never engine-owned | no `data_sources` row, fetch engine never writes them | 0025 | `AGENTS.md` §8 | 0025 §Decision |
 | Wit has no entered cap | `cap_wit` is not a column; scenario bound is 1800 | 0025 | `ScenarioCaps::ENTERED_CAPS` (four entries) | 0025 §Decision |
 | **Do not** widen validation to a flat `0..2000` | 0015 superseded 0002 option B; a flat constant is wrong in principle | 0002 (superseded by 0015) | `ScenarioCaps` | 0015 §Why this is the shape |
@@ -76,6 +76,13 @@ option.
 
 ## 6. Character cards and the profile block
 
+The `feat/catalog-detail-page` branch record (`SUPERSEDED-feat-catalog-detail-page.md`) moved to
+`archive/adr/` on 2026-10-12. Its "canonical branch / canonical schema is ADR-0013" claim described a
+merge-time state the 2026-09-30 port reversed: master's `ADR-0012` Decision 4 and migration
+`2026_09_29_182820` are what shipped. Its table-hazard warning (two migrations creating one table under
+different filenames, so git reports a clean merge and the second migrate throws) is still worth reading
+before any merge of that branch.
+
 | Fact | Value | decision | code | owner |
 |---|---|---|---|---|
 | `character_cards` is the costume-card catalog layer | keyed by the source's `card_id` | 0008 | migration `2026_09_29_120100_create_character_cards_table` | 0008 §Decision |
@@ -102,7 +109,7 @@ option.
 |---|---|---|---|---|
 | Root `DESIGN.md` is the single source of truth for the visual contract | research `DESIGN.md` is the measured-anchor artifact | 0006 | root `DESIGN.md` §2.1 | 0006 §Decision |
 | Theme default is Light base + preference resolution, dark opt-in | stored preference → `prefers-color-scheme` → light | 0006 | preference resolver | 0006 §Decision |
-| C-7 loading obligation: browser-native loading satisfies initial render | custom indicator required only for user-initiated async | 0007 | `CONSTRAINTS.md` C-7 interpretation | 0007 §Decision |
+| C-7 loading obligation: browser-native loading satisfies initial render | custom indicator required only for user-initiated async | 0007 | `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar)" C-7 row + interpretation blockquote | 0007 §Decision |
 | One facet contract for the three filter surfaces | unknown facet refused, `pageSize` honoured and clamped | 0018 | `PageSize`, `FilterContractTest` | 0018 §Decision |
 | The label is `0.1.0` and the release is a pre-release | release must not target `master` | 0019 | — | 0019 §Decision |
 | **Owed**: `AGENTS.md` §14/§3 correction from 0019 | the "no changelog or version file" line and the doc table | 0019 | not landed | 0019 §Status |
