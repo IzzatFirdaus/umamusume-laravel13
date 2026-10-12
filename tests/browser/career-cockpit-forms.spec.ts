@@ -182,6 +182,23 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     await expect(burstsBox).toContainText('11');
 });
 
+test('closing the team editor without saving records nothing', async ({ page }) => {
+    await openCockpit(page);
+
+    const editor = page.locator('details', { has: page.getByText('Edit team state') });
+    await editor.locator('summary').click();
+    await editor.locator('input[name="team_name"]').fill('Blue Bloom');
+
+    // Cancel is the disclosure itself: the form submits only from its own button, so closing it
+    // abandons the edit. The reload reads the stored run, and a fresh career has no team identity
+    // to print — the same absent card `CockpitTeamPanelTest` pins on the wire.
+    await editor.locator('summary').click();
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByText('Blue Bloom', { exact: true })).toHaveCount(0);
+});
+
 test('links the run-scoped deck builder from the Cockpit', async ({ page }) => {
     const cockpitUrl = await openCockpit(page);
     const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
