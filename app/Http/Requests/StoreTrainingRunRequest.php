@@ -6,6 +6,7 @@ namespace App\Http\Requests;
 
 use App\Enums\RunMode;
 use App\Enums\RunStatus;
+use App\Http\Requests\Concerns\ValidatesEnteredCaps;
 use App\Models\RaceEntry;
 use App\Models\TrainingRun;
 use Closure;
@@ -18,6 +19,8 @@ use Illuminate\Validation\Validator;
  */
 class StoreTrainingRunRequest extends FormRequest
 {
+    use ValidatesEnteredCaps;
+
     public function authorize(): bool
     {
         return true; // local-only tool; no auth surface (ARCHITECTURE §8)
@@ -124,6 +127,11 @@ class StoreTrainingRunRequest extends FormRequest
             // because the bound lives in config and a static rule here would duplicate
             // it with a number that can drift.
             'shop_resets_in' => ['nullable', 'integer', 'min:0'],
+            // The four ceilings the Trainer read off the client for this run (`ADR-0025`). This is the
+            // identity form's write, so it is where a cap corrected mid-run is stored; the same rule set
+            // guards the build target step, which is where a target above the scenario bound is entered
+            // beside the cap that makes it legal.
+            ...$this->enteredCapRules(),
         ];
     }
 
@@ -157,6 +165,15 @@ class StoreTrainingRunRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
+            // A ceiling the run already recorded outranks the request. The entry surfaces read the client,
+            // so a figure below a stored stat would leave a row above its own ceiling; the refusal names
+            // the recorded number rather than asking the Trainer to remember it (`ADR-0025`).
+            $run = $this->route('run');
+
+            if ($run instanceof TrainingRun) {
+                $this->assertCapsCoverTheRecordedStats($validator, $run);
+            }
+
             if ($this->enum('mode', RunMode::class) !== RunMode::Snapshot) {
                 return;
             }

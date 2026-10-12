@@ -61,6 +61,14 @@ use Illuminate\Support\Carbon;
  *                                                     (`config('scenarios.stat_order')`), each a
  *                                                     percentage or null; null until stated, never
  *                                                     derived, since no catalogue holds a figure
+ * @property int|null $cap_speed the Speed ceiling as the Trainer read it off the client (`ADR-0025`);
+ *                               null keeps the scenario's own bound. Entered, never derived: nothing in
+ *                               this repository holds the composition that puts a real cap above
+ *                               `ADR-0015`'s arithmetic
+ * @property int|null $cap_stamina the Stamina ceiling as entered
+ * @property int|null $cap_power the Power ceiling as entered
+ * @property int|null $cap_guts the Guts ceiling as entered. There is no `cap_wit`: no ruled surface
+ *                              writes one, so Wit stays on its scenario bound
  * @property string|null $team_name the Unity Cup team's name as the Trainer read it; null until stated
  * @property string|null $team_motto the team's motto; null until stated
  * @property int|null $team_league_placement the team's league placement (1..99); null until stated
@@ -94,7 +102,7 @@ use Illuminate\Support\Carbon;
  *                                       run with a Legacy selection stays comparable before it is
  *                                       filed)
  */
-#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'team_name', 'team_motto', 'team_league_placement', 'team_preseason_wins', 'unity_trainings_count', 'spirit_bursts_count', 'extreme_bursts_count', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'cap_speed', 'cap_stamina', 'cap_power', 'cap_guts', 'team_name', 'team_motto', 'team_league_placement', 'team_preseason_wins', 'unity_trainings_count', 'spirit_bursts_count', 'extreme_bursts_count', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
 class TrainingRun extends Model
 {
     /**
@@ -1078,6 +1086,10 @@ class TrainingRun extends Model
             'legacy_selection' => 'array',
             'build_target' => 'array',
             'growth_rate' => 'array',
+            'cap_speed' => 'integer',
+            'cap_stamina' => 'integer',
+            'cap_power' => 'integer',
+            'cap_guts' => 'integer',
             'team_league_placement' => 'integer',
             'team_preseason_wins' => 'integer',
             'unity_trainings_count' => 'integer',

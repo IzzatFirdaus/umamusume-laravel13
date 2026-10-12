@@ -49,6 +49,8 @@ class BuildTargetController extends Controller
 {
     public function show(): Response
     {
+        $planning = SetupDraft::planningRun();
+
         return Inertia::render('Career/BuildTarget', [
             // The stored payload as entered, or null before one exists: the page names the absence
             // rather than inventing a target. _Dated note 2026-10-08 (D18b): the page now pre-fills
@@ -60,7 +62,20 @@ class BuildTargetController extends Controller
             // only where no stored target exists, so a career's own target is never overwritten
             // by a preference.
             'statDefaults' => $this->statDefaults(),
-            'caps' => ScenarioCaps::forRun(SetupDraft::planningRun()),
+            // The bound each stat is clamped against right now: an entered ceiling where the draft carries
+            // one, the scenario's own figure where it does not. This is what the validator refuses a
+            // target above, so the page's `max` and the server's clamp are the same number.
+            'caps' => ScenarioCaps::forRun($planning),
+            // The published arithmetic beside it, so an entered ceiling is visibly the Trainer's own
+            // reading rather than a figure the matrix states (`ADR-0025`, D-220).
+            'scenarioCaps' => ScenarioCaps::scenarioCaps($planning),
+            'enteredCaps' => SetupDraft::caps(),
+            // The stats that may carry an entered ceiling, in the matrix's own order. The page iterates
+            // this rather than naming a stat, so a fifth entered ceiling shows up without an edit here.
+            'capStats' => array_keys(ScenarioCaps::ENTERED_CAPS),
+            // The engine ceiling an entered figure may not pass. The page states it as an input's `max`;
+            // the request enforces it, because the page's own bound is never the trust boundary.
+            'hardCap' => ScenarioCaps::hardCap(),
             'statOrder' => array_values((array) config('scenarios.stat_order')),
             'purposeOptions' => $this->purposeOptions(),
             'distanceBands' => BuildTargetPayload::DISTANCE_BANDS,
@@ -78,7 +93,13 @@ class BuildTargetController extends Controller
      */
     public function store(StoreDraftBuildTargetRequest $request): RedirectResponse
     {
-        SetupDraft::write(['build_target' => $request->payload()]);
+        // The target whole, the ceilings beside it whole. A ceiling is a run column, not a payload key
+        // (`BuildTargetPayload::assertKeys()` refuses a seventh), so it goes under its own draft key and
+        // Preflight writes it onto the run it creates (`ADR-0025`).
+        SetupDraft::write([
+            'build_target' => $request->payload(),
+            'caps' => $request->postedCaps(),
+        ]);
 
         return redirect()->route('career.target')->with('status', 'Build target saved.');
     }

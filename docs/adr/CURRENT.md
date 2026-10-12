@@ -32,7 +32,7 @@ option.
 | `ScenarioCaps` is the single ceiling owner | every validator, band and advisor calls `forRun($run)` | 0015 | `StoreTurnEntryRequest:70`, `NextDecision:338`, `CockpitController:386` | 0015 §Decision |
 | A no-scenario run is held to `base_cap`, no bonus | five stats validate at 0..1200 | 0015 | `ScenarioCaps::scenarioCaps()`; KI-47 closed by `04658f2` | 0015 §Decision |
 | Skill points are uncapped | `sp` stays `nullable\|integer\|min:0` | 0015 | `StoreTurnEntryRequest` | 0015 §Skill points |
-| A run may record entered per-stat ceilings | four nullable `cap_speed`/`cap_stamina`/`cap_power`/`cap_guts` override the scenario figure | 0025 | migration `2026_10_12_140000_add_entered_caps_to_training_runs_table` (untracked; **Ran on `database/database.sqlite` as batch 16, 2026-10-12**), `ScenarioCaps::ENTERED_CAPS` | 0025 §Decision |
+| A run may record entered per-stat ceilings | four nullable `cap_speed`/`cap_stamina`/`cap_power`/`cap_guts` override the scenario figure | 0025 | migration `2026_10_12_140000_add_entered_caps_to_training_runs_table` (Ran on `database/database.sqlite` as batch 16, 2026-10-12), `ScenarioCaps::ENTERED_CAPS` | 0025 §Decision |
 | Entered caps are Trainer data, never engine-owned | no `data_sources` row, fetch engine never writes them | 0025 | `AGENTS.md` §8 | 0025 §Decision |
 | Wit has no entered cap | `cap_wit` is not a column; scenario bound is 1800 | 0025 | `ScenarioCaps::ENTERED_CAPS` (four entries) | 0025 §Decision |
 | **Do not** widen validation to a flat `0..2000` | 0015 superseded 0002 option B; a flat constant is wrong in principle | 0002 (superseded by 0015) | `ScenarioCaps` | 0015 §Why this is the shape |

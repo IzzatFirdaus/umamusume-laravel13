@@ -116,6 +116,16 @@ const props = defineProps<{
         card_title: string | null;
         growth_rate: Record<string, number | null> | null;
         stat_order: string[];
+        /**
+         * The four stats whose ceiling a Trainer may enter, each with what the run holds and what the
+         * scenario publishes (`ADR-0025`). Wit is absent: no column holds it, so no field may write one.
+         */
+        caps: Record<string, { entered: number | null; scenario: number }>;
+        /**
+         * The four stats a ceiling may be entered for, each with what the run holds and what the scenario
+         * publishes (`ADR-0025`). Wit is absent because no column holds it.
+         */
+        caps: Record<string, { entered: number | null; scenario: number }>;
         fans: number | null;
         fan_ladder: { class: string | null; nextThreshold: number | null; gap: number | null } | null;
     };
@@ -344,11 +354,23 @@ const savePeriod = (): void => {
  * header already printed but nothing could enter. `growth_rate` is keyed by the stat matrix, so the
  * request refuses a sixth stat rather than storing one (`StoreTrainingRunRequest`).
  */
+/** The request key that holds one stat's entered ceiling. The stats themselves come from `identity.caps`. */
+const capColumn = (stat: string): string => `cap_${stat.toLowerCase()}`;
+
 const identityForm = useForm({
     umamusume_id: String(props.run.umamusume_id ?? ''),
     status: props.run.status,
     trainee_rarity: props.identity.trainee_rarity === null ? '' : String(props.identity.trainee_rarity),
     potential_level: props.identity.potential_level === null ? '' : String(props.identity.potential_level),
+    // The four entered ceilings, prefilled with what the run holds. An empty field is a clear rather than
+    // a no-op, which is why they ride this form's key set at all (`ADR-0025`). The stats come from the
+    // server's map, so this page names none of them.
+    ...Object.fromEntries(
+        Object.entries(props.identity.caps).map(([stat, ceiling]) => [
+            capColumn(stat),
+            ceiling.entered === null ? '' : String(ceiling.entered),
+        ]),
+    ) as Record<string, string>,
     growth_rate: Object.fromEntries(
         props.identity.stat_order.map((stat) => {
             const value = props.identity.growth_rate?.[stat];
@@ -369,8 +391,21 @@ const saveIdentity = (): void => {
                 Object.entries(data.growth_rate).map(([stat, value]) => [stat, value === '' ? null : Number(value)]),
             );
 
+            // A ceiling field with nothing in it is a clear, which is the statement "use the scenario's
+            // own bound" — never a zero the client never showed. The four keys are the request's column
+            // names, so they post flat beside the identity fields.
+            const ceilings = Object.fromEntries(
+                Object.keys(props.identity.caps).map((stat) => {
+                    const column = capColumn(stat);
+                    const value = data[column];
+
+                    return [column, value === '' || value === undefined ? null : Number(value)];
+                }),
+            );
+
             return {
                 ...data,
+                ...ceilings,
                 trainee_rarity: data.trainee_rarity === '' ? null : Number(data.trainee_rarity),
                 potential_level: data.potential_level === '' ? null : Number(data.potential_level),
                 growth_rate: Object.values(growth).every((value) => value === null) ? null : growth,
@@ -574,6 +609,35 @@ const jumpToShop = (): void => {
                                         class="min-h-11 w-20 rounded-md border border-rule bg-raised px-2 text-ink"
                                     >
                                     <span class="text-ink-muted">%</span>
+                                </span>
+                            </label>
+                        </fieldset>
+                        <fieldset class="flex flex-wrap items-end gap-3">
+                            <legend class="text-xs text-ink-muted">Stat ceilings</legend>
+                            <!-- The ceiling the client shows for this run, entered rather than computed
+                                 (`ADR-0025`): nothing here derives it from sparks or card effects. The
+                                 published figure stays printed beside the field, so an entered ceiling is
+                                 never read as the scenario's own arithmetic. -->
+                            <label
+                                v-for="(ceiling, stat) in props.identity.caps"
+                                :key="stat"
+                                class="flex flex-col gap-1"
+                            >
+                                <span class="text-xs text-ink-muted">{{ stat }}</span>
+                                <span class="flex items-center gap-1">
+                                    <input
+                                        :id="`ceiling_${stat}`"
+                                        v-model="identityForm[capColumn(String(stat))]"
+                                        type="number"
+                                        :name="capColumn(String(stat))"
+                                        :aria-label="`${stat} ceiling`"
+                                        min="1"
+                                        class="min-h-11 w-24 rounded-md border border-rule bg-raised px-2 font-mono text-ink tabular-nums"
+                                    >
+                                    <span
+                                        class="text-xs text-ink-muted"
+                                        title="The figure this scenario publishes in its own cap table. An entered ceiling replaces it for this run; leaving the field empty restores it."
+                                    >Scenario {{ ceiling.scenario }}</span>
                                 </span>
                             </label>
                         </fieldset>

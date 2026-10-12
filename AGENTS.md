@@ -21,16 +21,14 @@ trackers plus the `uma_musume_race_planner` career-run planner (rev 0.2, repo #4
 - **SQLite only** (`database/database.sqlite`, WAL + `busy_timeout`). The framework
   `users` table and `User` model are unused defaults.
 - **Web surface is Inertia + Vue 3** (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, TypeScript,
-  Tailwind CSS v4, Vite), with the career set and the scenario panels as Vue components under
-  `resources/js/`. Blade survives only as the `resources/views/app.blade.php` shell and
-  `resources/views/errors/`; there are no Blade view components. JSON is a read-only `/api/v1`
-  surface (P2, three controllers).
+  Tailwind CSS v4, Vite), with 51 single-file components under `resources/js/`. Blade survives only
+  as the `resources/views/app.blade.php` shell and `resources/views/errors/`; there are no Blade view
+  components. JSON is a read-only `/api/v1` surface (P2, three controllers).
   *Dated correction 2026-10-08 (documentation-sync pass): the "51 single-file components" figure is
-  superseded — the tree then carried 58 single-file components under `resources/js/components/` and 54
+  superseded — the tree now carries 58 single-file components under `resources/js/components/` and 54
   page files under `resources/js/pages/`, after the Phase D–E career, Veterans and Database sets
-  landed. *Dated correction 2026-10-12: the tree now carries 63 components and 48 pages. Counts like
-  these age the moment a slice lands, so this is a snapshot note, not a number to keep in step; what
-  holds is the shape: the career set and the scenario panels are Vue, and
+  landed. Counts like these age the moment a slice lands, so this is a snapshot note, not a number to
+  keep in step; what holds is the shape: the career set and the scenario panels are Vue, and
   `resources/views/components/` is empty since slice B1.*
 - **Data arrives through a stage-isolated fetch engine** that cross-references JP and
   Global catalog sources, snapshots each body, and promotes engine-owned facts with
@@ -48,7 +46,7 @@ disagrees, the higher one wins and the lower one is stale.
 | Human owner instruction     | the task itself                                                                                     | Highest, but it cannot relax the quality bar without a written owner ruling (escalation 4)   |
 | Quality bar                 | `CONSTRAINTS.md` -> `GOVERNANCE.md` §CONSTRAINTS.md                                                 | Never weakened to pass a check                                                               |
 | Gate registry               | `GOVERNANCE.md` §GATE-REGISTRY.md                                                                   | How each gate runs, its evidence, its allowed exceptions                                     |
-| Binding decisions           | `docs/adr/0001`-`0025`, `SUPERSEDED-*`                                                              | Accepted ADRs bind; `Proposed` ones do not                                                   |
+| Binding decisions           | `docs/adr/0001`-`0024`, `SUPERSEDED-*`                                                              | Accepted ADRs bind; `Proposed` ones do not                                                   |
 | Product truth               | `PRD.md`                                                                                            | Users, requirements, §6 non-goals                                                            |
 | System design               | `ARCHITECTURE.md` over `ARCHITECTURE-ESSENTIALS.md`                                                 | The digest loses to the full text                                                            |
 | Screen behavior             | `SCREEN_SPEC.md` §8 authority table                                                                 | Per-screen states and workflows                                                              |
@@ -406,7 +404,6 @@ Every command below exists in `composer.json`, `package.json`, or artisan on thi
 | Mirror catalog artwork (manual only)             | `php artisan uma:fetch-art` (`--kind`, `--dry-run`, `--refetch`)                            |
 | Routes / commands / config                       | `php artisan route:list`, `php artisan list`, `php artisan config:show uma.sources`         |
 | Documentation census                             | `composer docs` (python)                                                                    |
-| Markdown fence check                             | `python tools/md_fence_check.py [paths]` (+ `md_fence_check_selftest.py`)                   |
 
 **Destructive:** `php artisan migrate:fresh --seed` drops every table in
 `database/database.sqlite` and destroys local Trainer data; back up with

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Career;
 
 use App\Enums\RunStatus;
+use App\Http\Requests\Concerns\ValidatesEnteredCaps;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\DeckSlot;
 use App\Models\Legacy\LegacySelectionPayload;
@@ -40,6 +41,8 @@ use InvalidArgumentException;
  */
 class StartCareerRequest extends FormRequest
 {
+    use ValidatesEnteredCaps;
+
     public function authorize(): bool
     {
         return true; // local-only tool; no auth surface (ARCHITECTURE §8)
@@ -56,6 +59,9 @@ class StartCareerRequest extends FormRequest
             'scenario' => SetupDraft::read()['scenario'],
             'status' => RunStatus::Active->value,
             'build_target' => SetupDraft::buildTarget(),
+            // The ceilings step 3 entered beside that target, spread into the four columns the run holds
+            // them in. A draft that named none merges nothing, so the run starts with no ceiling stated.
+            ...SetupDraft::caps(),
             'legacy_selection' => SetupDraft::legacySelection(),
             'legacy_parents' => SetupDraft::legacyParents(),
             'deck' => SetupDraft::deck(),
@@ -91,6 +97,11 @@ class StartCareerRequest extends FormRequest
             'deck.*.position' => ['required', 'integer', Rule::in(DeckSlot::POSITIONS)],
             'deck.*.support_card_id' => ['nullable', 'integer', Rule::exists('support_cards', 'id')],
             'deck.*.ownership' => ['nullable', 'string', Rule::in(DeckSlot::OWNERSHIP)],
+            // The ceilings the target step entered, checked against the engine hard cap again rather than
+            // trusted from the draft: a cap that left the matrix since it was typed is refused here, and
+            // the warning names the step that owns it. There is nothing recorded to sit above them,
+            // because this career has no turns yet, so the recorded-stat guard has no row to read.
+            ...$this->enteredCapRules(),
         ];
     }
 
@@ -125,6 +136,10 @@ class StartCareerRequest extends FormRequest
             // column back through `LegacySelectionPayload::fromArray()`, which refuses an empty payload,
             // so an empty array here would be a run whose own page throws.
             'build_target' => is_array($this->input('build_target')) ? $this->input('build_target') : null,
+            // The four ceilings as the draft holds them, or absent when it named none. Keys rather than a
+            // bag because they are four columns; a career that stated no ceiling starts with the
+            // scenario's own bounds, which is what `ScenarioCaps::forRun()` answers for null columns.
+            ...$this->postedCaps(),
             'legacy_selection' => is_array($this->input('legacy_selection')) ? $this->input('legacy_selection') : null,
             'inheritance_parent_a_id' => Veteran::traineeId($parents[0] ?? null),
             'inheritance_parent_b_id' => Veteran::traineeId($parents[1] ?? null),

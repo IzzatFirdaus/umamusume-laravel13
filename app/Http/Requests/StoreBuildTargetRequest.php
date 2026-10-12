@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Enums\BuildPurpose;
+use App\Http\Requests\Concerns\ValidatesEnteredCaps;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\TrainingRun;
 use App\Services\Career\SetupDraft;
@@ -33,6 +34,12 @@ use Illuminate\Validation\Validator;
  * bound it enforced (D-56), so a refusal says what number was too high rather than only that
  * something was.
  *
+ * **A target may be entered with the ceilings that make it legal** (`ADR-0025`). The four `cap_*` keys
+ * ride this same save, validated by `ValidatesEnteredCaps` (the rule set the identity form shares) and
+ * clamped against the ceilings as posted rather than as stored, so one save of a 1325 ceiling and a 1325
+ * Speed target is accepted instead of answering its own bound. A target remains all or nothing; ceilings
+ * are its own optional fields, and an unset ceiling keeps the scenario's answer.
+ *
  * **The whole target is optional, and all or nothing.** A wholly unset target is a real state: the
  * form's own message has always offered it ("or leave the whole target unset"), the wizard's model
  * supports it (Preflight warns about a missing target rather than blocking), and `training_runs`
@@ -44,6 +51,8 @@ use Illuminate\Validation\Validator;
  */
 class StoreBuildTargetRequest extends FormRequest
 {
+    use ValidatesEnteredCaps;
+
     public function authorize(): bool
     {
         return true; // local-only tool; no auth surface (ARCHITECTURE §8)
@@ -81,7 +90,10 @@ class StoreBuildTargetRequest extends FormRequest
             $rules["targets.{$stat}"] = [$presence, 'integer', 'min:0'];
         }
 
-        return $rules;
+        // The four entered ceilings ride the same save as the target that needs them (`ADR-0025`), so a
+        // Trainer who reads 1325 off the client can state it in the same breath as a 1325 target. They
+        // are not part of the all-or-nothing target above: a run may hold ceilings and no target.
+        return array_merge($rules, $this->enteredCapRules());
     }
 
     /**
@@ -113,9 +125,14 @@ class StoreBuildTargetRequest extends FormRequest
                 $run = SetupDraft::planningRun();
             }
 
+            // Ceilings entered in this same save bound the targets entered with them. Reading the stored
+            // run instead would refuse a 1325 target beside the 1325 ceiling that makes it legal, because
+            // the ceiling on screen has not been written yet (`ADR-0025`).
+            $bound = ScenarioCaps::forRun($this->ceilingView($run));
+
             $targets = (array) $this->input('targets');
 
-            foreach (ScenarioCaps::forRun($run) as $stat => $cap) {
+            foreach ($bound as $stat => $cap) {
                 $value = $targets[$stat] ?? null;
 
                 if (! is_numeric($value)) {
@@ -123,11 +140,13 @@ class StoreBuildTargetRequest extends FormRequest
                 }
 
                 if ((int) $value > $cap) {
-                    // D-56: a range error cites the bound. The bound is the run's own scenario
-                    // ceiling, which is why it is named here rather than left to the form's markup.
+                    // D-56: a range error cites the bound. The bound is the run's own ceiling, which is
+                    // why it is named here rather than left to the form's markup.
                     $validator->errors()->add("targets.{$stat}", "{$stat} must be between 0 and {$cap}.");
                 }
             }
+
+            $this->assertCapsCoverTheRecordedStats($validator, $run);
         });
     }
 

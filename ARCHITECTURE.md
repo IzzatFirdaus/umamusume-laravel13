@@ -61,7 +61,7 @@ flowchart LR
     WORKER --> Engine
     PROMOTE --> DB
     REVIEW --> DB
-```
+```text
 
 Trust boundaries (security-and-hardening §threat model): (1) fetched web content, untrusted, enters only through `SourceFetcher` + parser; (2) Trainer's browser input, validated by Form Requests; (3) everything inside `app/` after those boundaries is trusted. There is no authentication boundary because there is no auth surface (§8).
 
@@ -154,16 +154,7 @@ training_runs
   inheritance_parent_a_id FK->umamusume nullable, inheritance_parent_b_id FK->umamusume nullable,
   legacy_selection json nullable (ADR-0010: the Legacy Select read-back as the Trainer recorded it;
     see App\Models\Legacy\LegacySelectionPayload for the shape and what it deliberately omits),
-  build_target json nullable (ADR-0020 §2 / PRD FR-F-1: the Trainer-entered build target, read back as
-    App\Models\Advisor\BuildTargetPayload — purpose, distance, surface, style, five per-stat targets
-    validated against ScenarioCaps::forRun, ordered skill_priorities. Migrated as
-    2026_10_05_180000. Nullable with no default: "no target entered" and "an empty target" are different
-    states, and a {} default would erase that difference),
   notes text nullable, timestamps
-  -- OPEN GOVERNANCE GAP 2026-10-12: ADR-0025 (per-run entered ceilings cap_speed/cap_stamina/
-  -- cap_power/cap_guts) is **Proposed**, and the migration that implements it
-  -- (2026_10_12_140000_add_entered_caps_to_training_runs_table.php) is untracked. The columns are not
-  -- recorded here as schema until the ADR is Accepted, per AGENTS.md §2: a Proposed ADR does not bind.
 
 veterans
   id, training_run_id FK->training_runs unique cascade,
@@ -183,29 +174,8 @@ turn_entries
   id, training_run_id FK->training_runs cascade, turn unsigned int,
   speed, stamina, power, guts, wit unsigned smallint,
   sp unsigned smallint nullable, condition string nullable
-  energy unsigned smallint nullable,
-  energy_state string nullable, energy_band string nullable
-  -- energy_state: exact|band|unknown; energy_band: low|mid|high (used only when state=band)
-  -- ADR-0024 (Accepted 2026-10-09); migrated 2026_10_09_170000
-  mood string(20) nullable, fans unsigned int nullable
-  facility_speed unsigned tinyint nullable,
-  facility_stamina unsigned tinyint nullable,
-  facility_power unsigned tinyint nullable,
-  facility_guts unsigned tinyint nullable,
-  facility_wit unsigned tinyint nullable
-  -- UX walk Phase 12; write path not yet wired; no ADR
-  failure_rate unsigned tinyint nullable,
-  preview_gains json nullable
-  -- UX walk Phase 12; readings the Trainer transcribes; ADR-0016, ADR-0020 §3; no ADR
-  choice string(32) nullable,
-  decision_snapshot json nullable,
-  corrected_from unsigned bigint nullable FK->turn_entries set-null,
-  superseded_by unsigned bigint nullable FK->turn_entries set-null
-  -- Phase G ruling D-1a–D-1d; not yet filed as ADR (governance gap)
-  -- unique(training_run_id, turn) replaced by partial unique index
-  -- CREATE UNIQUE INDEX turn_entries_run_turn_original_unique
-  --   ON turn_entries (training_run_id, turn) WHERE corrected_from IS NULL
-  -- plus a lookup index: CREATE INDEX turn_entries_run_turn_lookup ON turn_entries (training_run_id, turn)
+  energy unsigned smallint nullable, mood string(20) nullable, fans unsigned int nullable
+  unique(training_run_id, turn)
   -- stats validated 0..1200, turn >= 1 (StoreTurnEntryRequest) [rev 0.2 — repo #4]
   -- BOUND CORRECTED 2026-10-01, dated erratum; the line above stands as the state as written.
   -- ADR-0015 (owner decision 5, 2026-09-30, landed in 8bda7db) replaced the flat 0..1200 with the run's
@@ -278,9 +248,9 @@ GET /api/v1/training-runs/{id}                          -> { data: TrainingRun }
 
 Error shape (every non-2xx):
 
-```
+```json
 { "error": { "code": "NOT_FOUND", "message": "No umamusume with slug 'x'." } }
-```
+```text
 
 Status mapping: 400 bad input, 404 missing, 422 validation, 500 internal (generic message, details to log only). Type contracts are expressed as API Resource classes (`app/Http/Resources/`) with PHPDoc array-shapes; no schema-generation tooling (cut in Pre-Mortem §1).
 
@@ -290,7 +260,7 @@ Deliberately absent: auth endpoints, write endpoints, idempotency keys (single l
 
 ### Pipeline stages
 
-```
+```mermaid
 sequenceDiagram
     participant C as uma:fetch (console/queue job)
     participant F as SourceFetcher
@@ -314,7 +284,7 @@ sequenceDiagram
         M->>D: insert match_candidates (review queue)
     end
     C->>C: release lock, log summary (promoted/reviewed/skipped/failed)
-```
+```text
 
 ### Design decisions
 

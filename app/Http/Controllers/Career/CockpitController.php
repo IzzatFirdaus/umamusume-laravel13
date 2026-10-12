@@ -341,11 +341,21 @@ class CockpitController extends Controller
      * one band's answer; a count no documented band contains yields a null class and a bare number,
      * never a class nobody sourced.
      *
-     * @return array{trainee_rarity: int|null, potential_level: int|null, card_title: string|null, growth_rate: array<string, int|null>|null, stat_order: list<string>, fans: int|null, fan_ladder: array{class: string|null, nextThreshold: int|null, gap: int|null}|null}
+     * @return array{trainee_rarity: int|null, potential_level: int|null, card_title: string|null, growth_rate: array<string, int|null>|null, stat_order: list<string>, caps: array<string, array{entered: int|null, scenario: int}>, fans: int|null, fan_ladder: array{class: string|null, nextThreshold: int|null, gap: int|null}|null}
      */
     private function identitySection(TrainingRun $run, ?TurnEntry $latest): array
     {
         $fans = $latest?->fans;
+
+        // The four ceilings the Trainer may enter (`ADR-0025`), each beside the figure the scenario itself
+        // states, so the identity form prefills what was read and still shows what the matrix publishes.
+        // Which stats may carry one is `ScenarioCaps`' answer, not a list written out here.
+        $published = ScenarioCaps::scenarioCaps($run);
+        $caps = [];
+
+        foreach (ScenarioCaps::enteredCaps($run) as $stat => $entered) {
+            $caps[$stat] = ['entered' => $entered, 'scenario' => $published[$stat]];
+        }
 
         return [
             'trainee_rarity' => $run->trainee_rarity,
@@ -353,6 +363,7 @@ class CockpitController extends Controller
             'card_title' => $run->characterCard?->title,
             'growth_rate' => $run->growth_rate,
             'stat_order' => array_values((array) config('scenarios.stat_order')),
+            'caps' => $caps,
             'fans' => $fans,
             'fan_ladder' => $fans === null ? null : FanLadder::fromValue((int) $fans),
         ];
@@ -918,7 +929,11 @@ class CockpitController extends Controller
         /** @var list<string> $order */
         $order = config('scenarios.stat_order');
         $base = (int) config('scenarios.base_cap');
-        $caps = ScenarioCaps::forRun($run);
+        // The scenario's own arithmetic, deliberately not `forRun()`: this table's own source line names
+        // `config/scenarios.php`, and a ceiling the Trainer read off the client is not in that file. The
+        // run's effective bound is what the header's stat bars carry (`stateSection`), so the two surfaces
+        // state two different things and stay readable as such (`ADR-0025`).
+        $caps = ScenarioCaps::scenarioCaps($run);
         /** @var array<string, mixed> $bonus */
         $bonus = (array) config('scenarios.scenarios.'.$run->scenarioKey().'.cap_bonus', []);
         $verifiedAt = (string) config('scenarios.verified_at');

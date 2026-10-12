@@ -300,7 +300,7 @@ section written through a UTF-8 no-BOM read-modify-write so the append did not a
 
 ### Deliberate exceptions, outside the masters
 
-Three entries stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass
+Two files stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass
 does not "consolidate" them and destroy the reason they exist.
 
 | File                                                                | Why it stays                                                                                                                                                                                                                     |
@@ -317,25 +317,24 @@ Future agents must update these master files instead of creating new top-level m
 
 Content that does not fit any existing master should be proposed to the owner with a recommendation for which master to extend, rather than creating a new file. The Provenance section of each master should be updated whenever new content is appended to record the addition.
 
-### Root directory (owner instruction 2026-10-02; corrected 2026-10-12)
+### Root directory (owner instruction 2026-10-02)
 
-No new documentation file is created in the repository root, and no new documentation content is added
-there either: it goes into the relevant master above. The root markdown files form a standing set
-classified below. A root markdown file not in this table is unconsolidated by definition.
+No new documentation file is created in the repository root, and no new documentation content is added there either: it goes into the relevant master above. The root files the repo's documentation precedence and role ownership already name form a standing set and stay put: `AGENTS.md`, `CLAUDE.md`, `PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `CONSTRAINTS.md`, `DESIGN.md`, `KNOWN-ISSUES.md`, `PLAN.md`, `README.md`. That list is exhaustive; a root markdown file not in it is unconsolidated by definition.
 
-| Category | Files | Notes |
-| --- | --- | --- |
-| **Authority documents** (full content at root) | `AGENTS.md`, `CLAUDE.md`, `README.md`, `PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `DESIGN.md` | Governance, coding rules, onboarding, product truth, system design, visual system |
-| **Pointer stubs** (binding content in masters) | `CONSTRAINTS.md` → `GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)"; `PLAN.md` → `PROCESS-PLANS.md`; `KNOWN-ISSUES.md` → `AUDIT-AND-VERIFICATION.md` §"KNOWN-ISSUES.md (defect register)" | Root register still the live append target for new KI entries |
-| **Screen behavior** | `SCREEN_SPEC.md` | Per-screen states, workflows, §8 authority table |
-| **Generated tooling artifacts** (do not hand-edit) | `PRODUCT.md` (impeccable plugin), `SKILL.md` (skill registry refresh) | Generator-owned; hand edits lose to regeneration |
-| **Change/version/setup docs** | `CHANGELOG.md`, `VERSION.md`, `MCP_SETUP.md` | Historical record, version metadata, MCP setup notes |
+> **Corrected forward 2026-10-03 (Round 8, owner-authorized).** The standing set still holds: no file
+> was deleted from the root, and the ten names above all still exist and still resolve. What changed is
+> that three of them are now pointer stubs whose binding content lives in a master: `CONSTRAINTS.md`
+> → `GOVERNANCE.md` section "CONSTRAINTS.md (root quality bar, C-1 to C-9)"; `PLAN.md` →
+> `PROCESS-PLANS.md` section "PLAN.md (root frontend slice plan and owner rulings)"; and
+> `KNOWN-ISSUES.md` → `AUDIT-AND-VERIFICATION.md` section "KNOWN-ISSUES.md (defect register)", with the
+> root register **still the live append target** for new KI entries. "Stay put" keeps its meaning: the
+> names do not move, citations resolve, and the gate precedence chain is unchanged. The rest of the set
+> (`AGENTS.md`, `CLAUDE.md`, `README.md`, `PRD.md`, both `ARCHITECTURE` files, root `DESIGN.md`) holds
+> its full content at the root as before.
 
-> **Corrected 2026-10-12.** The prior version of this table listed only ten files and claimed the set was
-> exhaustive. The actual root directory carries 17 markdown files. The four added categories above
-> (screen behavior, generated artifacts, change/version/setup docs) were omitted. The three pointer
-> stubs (`CONSTRAINTS.md`, `PLAN.md`, `KNOWN-ISSUES.md`) still resolve through their masters; the
-> gate precedence chain is unchanged.
+The standing set is documentation. Two root files are generated tooling artifacts and are exempt from this clause by type, not by name: `PRODUCT.md`, owned by the `impeccable` plugin, which carries `<!-- impeccable:product-schema 1 -->` and rewrites the file on its next pass, and `SKILL.md`, the human-readable half of the skill registry pair recorded in `GOVERNANCE.md` ("`.agents/skills/skills.json` (machine), `SKILL.md` (human)"). Neither is documentation to consolidate, and hand-editing either one loses to the generator. `PRODUCT.md` is refreshed by the plugin; `SKILL.md` is rebuilt by `refresh-skill-registry`, which scans every skill scope from disk, because the file's own description claims a complete roster while its content omits `~/.qoder/skills` and every plugin skill.
+
+`source.md` (171 lines, a pasted Laravel bootstrap prompt) was deleted on 2026-10-02. It was neither documentation nor a tooling artifact, and the only substantive sentence about it, `docs/UMAMUSUME_REFERENCE.md:2135`, is a ruling that it never was a source registry. That ruling stays verbatim with the deletion recorded beside it. Other apparent citations were substring noise inside `ADR-0013-character-profile-source.md`.
 
 ### Disposition of the strays (executed 2026-10-02)
 
@@ -350,4 +349,4 @@ Four files were unclassified. They are resolved, not merely recorded, and the re
 | `docs/SKILL_AUTOMATION.md`                               | **Deliberate exception, left in place.** 90 lines, cited by `KNOWN-ISSUES.md`. It documents automation for the skill layer that lives in `.ai/skills/`, so it belongs with the code-side tooling tree, not in a research master. Registered in the Routing Table below.                                                                                                                                               |
 | `docs/design-research/prototypes/superseded/README.md`   | **Deliberate exception, left in place.** 16 lines whose entire function is to stand in a directory of four retired prototypes and say they are not the current design. Moving it destroys the warning it exists to give. Registered in the Routing Table below.                                                                                                                                                       |
 
-No repo-level protected-file registry exists to check future strays against: the pre-consolidation inventory that carried one is, per `CONSOLIDATION-LOG.md`, **no longer on disk but its census survives in the log**. The reproducible census in `CONSOLIDATION-LOG.md` §Census is the substitute.
+No repo-level protected-file registry exists to check future strays against: the pre-consolidation inventory that carried one is, per `CONSOLIDATION-LOG.md`, absent from disk and from all git history. The reproducible census in `CONSOLIDATION-LOG.md` §Census is the substitute.

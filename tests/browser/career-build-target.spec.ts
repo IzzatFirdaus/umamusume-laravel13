@@ -39,8 +39,11 @@ test.describe('Build Target and the provenance badge', () => {
 
         // No stored target: the absence is stated and no stat input carries a pre-filled zero.
         await expect(page.getByText('No target is recorded yet.')).toBeVisible();
+        // `exact` because the ceiling field added beside each stat is named "Speed ceiling", and
+        // `getByLabel` matches a substring by default: without it every one of these five locators
+        // would resolve to two controls (`preferences.spec.ts` states the same rule).
         for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
-            await expect(page.getByLabel(stat)).toHaveValue('');
+            await expect(page.getByLabel(stat, { exact: true })).toHaveValue('');
         }
 
         // The four stored purposes, and the fifth the tool does not record stated in one line.
@@ -72,11 +75,11 @@ test.describe('Build Target and the provenance badge', () => {
         await page.getByLabel('Surface').selectOption({ label: 'Turf' });
         await page.getByLabel('Style').selectOption({ label: 'Front Runner' });
 
-        await page.getByLabel('Speed').fill('1200');
-        await page.getByLabel('Stamina').fill('800');
-        await page.getByLabel('Power').fill('700');
-        await page.getByLabel('Guts').fill('600');
-        await page.getByLabel('Wit').fill('500');
+        await page.getByLabel('Speed', { exact: true }).fill('1200');
+        await page.getByLabel('Stamina', { exact: true }).fill('800');
+        await page.getByLabel('Power', { exact: true }).fill('700');
+        await page.getByLabel('Guts', { exact: true }).fill('600');
+        await page.getByLabel('Wit', { exact: true }).fill('500');
 
         // The bar is the entered number against the cap, with the number printed beside it.
         await expect(page.locator('[data-stat="Speed"] [data-fill]')).toHaveAttribute('data-fill', '100');
@@ -93,7 +96,7 @@ test.describe('Build Target and the provenance badge', () => {
         // The PUT redirects back to this step and the stored state is read from the draft.
         await expect(page.getByText('Build target saved.')).toBeVisible();
         await expect(page.getByLabel('Purpose')).toHaveValue('StoryClear');
-        await expect(page.getByLabel('Speed')).toHaveValue('1200');
+        await expect(page.getByLabel('Speed', { exact: true })).toHaveValue('1200');
         await expect(page.locator('[data-skill-row]').nth(0)).toContainText('Silent Hunter');
 
         const summary = page.getByRole('region', { name: 'Summary' });
@@ -112,22 +115,54 @@ test.describe('Build Target and the provenance badge', () => {
         await page.getByLabel('Distance').selectOption({ label: 'Medium' });
         await page.getByLabel('Surface').selectOption({ label: 'Turf' });
         await page.getByLabel('Style').selectOption({ label: 'Front Runner' });
-        await page.getByLabel('Speed').fill('1201');
-        await page.getByLabel('Stamina').fill('800');
-        await page.getByLabel('Power').fill('700');
-        await page.getByLabel('Guts').fill('600');
-        await page.getByLabel('Wit').fill('500');
+        await page.getByLabel('Speed', { exact: true }).fill('1201');
+        await page.getByLabel('Stamina', { exact: true }).fill('800');
+        await page.getByLabel('Power', { exact: true }).fill('700');
+        await page.getByLabel('Guts', { exact: true }).fill('600');
+        await page.getByLabel('Wit', { exact: true }).fill('500');
 
         await page.getByRole('button', { name: 'Save target' }).click();
 
         // The server is the authority on the clamp: the message names the bound it enforced and is
         // referenced from the input that caused it.
         await expect(page.getByText('Speed must be between 0 and 1200.')).toBeVisible();
-        await expect(page.getByLabel('Speed')).toHaveAttribute('aria-describedby', 'error-targets_Speed');
-        await expect(page.getByLabel('Speed')).toBeFocused();
+        await expect(page.getByLabel('Speed', { exact: true })).toHaveAttribute('aria-describedby', 'error-targets_Speed');
+        await expect(page.getByLabel('Speed', { exact: true })).toBeFocused();
 
         // Nothing was stored, so the page still states the absence.
         await expect(page.getByText('No target is recorded yet.')).toBeVisible();
+    });
+
+    test('accepts a target beside the ceiling entered with it, and reads that ceiling back', async ({ page }) => {
+        await page.goto('/career/setup/target');
+        await page.locator('#app > *').first().waitFor();
+
+        // No scenario in this draft, so every published cap is the base 1200: the Speed target below is
+        // one the step refuses on its own (`ADR-0025` is the ruling that lets the Trainer state the
+        // client's ceiling instead of the matrix's).
+        await page.getByLabel('Purpose').selectOption({ label: 'Story Clear' });
+        await page.getByLabel('Distance').selectOption({ label: 'Medium' });
+        await page.getByLabel('Surface').selectOption({ label: 'Turf' });
+        await page.getByLabel('Style').selectOption({ label: 'Front Runner' });
+        await page.getByLabel('Speed ceiling').fill('1250');
+        await page.getByLabel('Speed', { exact: true }).fill('1250');
+        await page.getByLabel('Stamina', { exact: true }).fill('800');
+        await page.getByLabel('Power', { exact: true }).fill('700');
+        await page.getByLabel('Guts', { exact: true }).fill('600');
+        await page.getByLabel('Wit', { exact: true }).fill('500');
+
+        await page.getByRole('button', { name: 'Save target' }).click();
+
+        await expect(page.getByText('Build target saved.')).toBeVisible();
+
+        // Both halves of the save read back: the ceiling as a stored field, and the bound the page draws
+        // for the target that needed it.
+        await expect(page.getByLabel('Speed ceiling')).toHaveValue('1250');
+        await expect(page.getByLabel('Speed', { exact: true })).toHaveValue('1250');
+        await expect(page.getByText('Cap 1250')).toHaveCount(1);
+
+        // The published figure stays named beside the entered one, so the two are never confused.
+        await expect(page.getByText('Scenario publishes 1200')).toHaveCount(4);
     });
 
     test('reorders the skill priorities by keyboard and never requires a drag', async ({ page }) => {

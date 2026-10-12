@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Career;
 
 use App\Models\TrainingRun;
+use App\Services\ScenarioCaps;
 
 /**
  * The career setup wizard's draft (SCREEN-002 to SCREEN-008, `docs/proposals/frontend-development-plan.md` §8).
@@ -234,7 +235,39 @@ final class SetupDraft
             return null;
         }
 
-        return new TrainingRun(['scenario' => $draft['scenario']]);
+        return new TrainingRun(array_merge(
+            ['scenario' => $draft['scenario']],
+            self::caps(),
+        ));
+    }
+
+    /**
+     * The ceilings step 3 stored, keyed by the columns the run will hold them in, or `[]` before any.
+     *
+     * A draft key of its own rather than a field inside `build_target`, for the reason `legacyParents()`
+     * states: `BuildTargetPayload::assertKeys()` refuses a seventh key, and a ceiling is a column on the
+     * run (`ADR-0025`), not part of the target the advisor reads. A stored figure that is not an integer
+     * is dropped rather than cast, so a hand-edited bag cannot reach a page as a half-number.
+     *
+     * @return array<string, int|null>
+     */
+    public static function caps(): array
+    {
+        /** @var array<string, mixed> $raw */
+        $raw = (array) (self::bag()['caps'] ?? []);
+
+        $caps = [];
+
+        foreach (ScenarioCaps::ENTERED_CAPS as $column) {
+            if (! array_key_exists($column, $raw)) {
+                continue;
+            }
+
+            $value = $raw[$column];
+            $caps[$column] = is_int($value) ? $value : null;
+        }
+
+        return $caps;
     }
 
     /**

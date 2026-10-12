@@ -46,8 +46,19 @@ const props = defineProps<{
     target: StoredTarget | null;
     /** The Trainer's stored stat-target defaults (SCREEN-024), applied only where no target is stored. */
     statDefaults: Record<string, number> | null;
-    /** One ceiling per stat, from `ScenarioCaps::forRun` — base cap only when no scenario yet. */
+    /**
+     * One ceiling per stat, from `ScenarioCaps::forRun` — the entered ceiling where the draft carries
+     * one, the base cap alone when no scenario is chosen yet. This is the bound the write enforces.
+     */
     caps: Record<string, number>;
+    /** The same stats' published ceiling from the matrix, entered figures aside (`ADR-0025`). */
+    scenarioCaps: Record<string, number>;
+    /** The ceilings already entered, keyed by the columns the run holds them in; absent where none was. */
+    enteredCaps: Record<string, number | null>;
+    /** The stats that may carry an entered ceiling. Four, and the server's list decides which. */
+    capStats: string[];
+    /** The engine ceiling no entered figure may pass; the request enforces it, not this attribute. */
+    hardCap: number;
     statOrder: string[];
     purposeOptions: SelectOption[];
     distanceBands: string[];
@@ -57,6 +68,27 @@ const props = defineProps<{
     scenarioPending: boolean;
 }>();
 
+/**
+ * One stored ceiling as a field value. Nothing stated is an empty field rather than a zero: the request
+ * reads an empty field as "no ceiling stated, keep the scenario's own" (`ADR-0025`, D-220).
+ */
+const ceilingField = (column: string): string => {
+    const value = props.enteredCaps[column];
+
+    return value === null || value === undefined ? '' : String(value);
+};
+
+/**
+ * The four `training_runs` columns that hold an entered ceiling. These are the request's own keys, not
+ * displayed vocabulary: every stat *label* on this page still arrives through `statOrder` or `capStats`,
+ * which is the claim the header above makes and `CareerBuildTargetTest` greps for.
+ */
+const capColumns = ['cap_speed', 'cap_stamina', 'cap_power', 'cap_guts'] as const;
+type CapColumn = (typeof capColumns)[number];
+
+/** The column that holds one stat's entered ceiling. `capStats` carries exactly these four stats. */
+const capColumn = (stat: string): CapColumn => `cap_${stat.toLowerCase()}` as CapColumn;
+
 const form = useForm<{
     purpose: string;
     distance: string;
@@ -64,6 +96,10 @@ const form = useForm<{
     style: string;
     targets: Record<string, number | string>;
     skill_priorities: string[];
+    cap_speed: string;
+    cap_stamina: string;
+    cap_power: string;
+    cap_guts: string;
 }>({
     purpose: props.target?.purpose ?? '',
     distance: props.target?.distance ?? '',
@@ -80,6 +116,12 @@ const form = useForm<{
         ]),
     ),
     skill_priorities: props.target?.skill_priorities ? [...props.target.skill_priorities] : [],
+    // An unset ceiling is an empty field rather than a number: the request reads an absent value as "no
+    // ceiling stated, keep the scenario's", and a zero here would be a reading nobody took (D-220).
+    cap_speed: ceilingField('cap_speed'),
+    cap_stamina: ceilingField('cap_stamina'),
+    cap_power: ceilingField('cap_power'),
+    cap_guts: ceilingField('cap_guts'),
 });
 
 const newSkill = ref('');
@@ -96,6 +138,7 @@ const fieldOrder = computed<string[]>(() => [
     'surface',
     'style',
     ...props.statOrder.map((stat) => `targets.${stat}`),
+    ...capColumns,
     'skill_priorities',
 ]);
 
@@ -170,14 +213,30 @@ const enteredLabel = (stat: string): string => {
     return value === null ? 'N/A' : `${value} of ${cap(stat)}`;
 };
 
-const capTitle = computed((): string =>
-    props.scenarioPending
-        ? 'No scenario is chosen yet, so this is the base cap with no scenario bonus.'
-        : 'The chosen scenario’s ceiling for this stat, the same number the write enforces.',
-);
+const capTitle = (stat: string): string => {
+    if (props.scenarioPending) {
+        return 'No scenario is chosen yet, so this is the base cap with no scenario bonus.';
+    }
+
+    // An entered ceiling outranks the matrix, and the two figures are different claims: one is what the
+    // Trainer read off the client, the other what the scenario publishes (`ADR-0025`).
+    return props.enteredCaps[capColumn(stat)] === undefined || props.enteredCaps[capColumn(stat)] === null
+        ? 'The chosen scenario’s ceiling for this stat, the same number the write enforces.'
+        : `The ceiling entered for this run, the same number the write enforces. The scenario itself publishes ${props.scenarioCaps[stat]}.`;
+};
 
 const optionLabel = (options: SelectOption[], value: string): string | null =>
     options.find((option) => option.value === value)?.label ?? null;
+
+/**
+ * The published figure under each ceiling field. A ceiling the Trainer enters replaces it for this run
+ * and nothing here recomputes it (`ADR-0025`).
+ */
+const scenarioTitle = computed((): string =>
+    props.scenarioPending
+        ? 'The base cap with no scenario bonus, because no scenario is chosen yet. `config/scenarios.php` is the source.'
+        : 'What this scenario publishes in `config/scenarios.php`. An entered ceiling replaces it for this run.',
+);
 
 /** One sentence from the entered values alone; an empty field is named, never omitted. */
 const summary = computed((): string => {
@@ -399,7 +458,7 @@ function removeAt(index: number): void {
                                     class="h-11 w-32 rounded-md border border-rule bg-raised px-2 font-mono text-ink tabular-nums"
                                     :aria-describedby="describedBy(`targets.${stat}`)"
                                 >
-                                <span class="text-xs text-ink-muted" :title="capTitle">Cap {{ cap(stat) }}</span>
+                                <span class="text-xs text-ink-muted" :title="capTitle(stat)">Cap {{ cap(stat) }}</span>
                             </span>
                         </label>
 
@@ -434,6 +493,46 @@ function removeAt(index: number): void {
                     role="alert"
                     class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
                 >{{ errors.targets }}</p>
+            </fieldset>
+
+            <fieldset class="rounded-md border border-rule bg-panel p-4">
+                <legend class="px-1 text-sm font-semibold text-ink-strong">Stat ceilings</legend>
+
+                <p class="text-sm text-ink-muted">
+                    The highest each stat can reach in this run, as the client shows it. Leave a field
+                    empty to keep the figure the scenario publishes: this tool records what is read and
+                    never computes a ceiling from sparks or card effects.
+                </p>
+
+                <div class="mt-4 space-y-3">
+                    <div v-for="stat in props.capStats" :key="stat" class="flex flex-wrap items-end gap-3">
+                        <label class="flex flex-col gap-1">
+                            <span class="text-sm text-ink-muted">{{ stat }}</span>
+                            <input
+                                :id="controlId(capColumn(stat))"
+                                v-model="form[capColumn(stat)]"
+                                type="number"
+                                :name="capColumn(stat)"
+                                :aria-label="`${stat} ceiling`"
+                                min="1"
+                                :max="props.hardCap"
+                                inputmode="numeric"
+                                class="h-11 w-32 rounded-md border border-rule bg-raised px-2 font-mono text-ink tabular-nums"
+                                :aria-describedby="describedBy(capColumn(stat))"
+                            >
+                        </label>
+                        <span class="text-xs text-ink-muted" :title="scenarioTitle">
+                            Scenario publishes {{ props.scenarioCaps[stat] }}
+                        </span>
+
+                        <p
+                            v-if="errorOf(capColumn(stat))"
+                            :id="errorId(capColumn(stat))"
+                            role="alert"
+                            class="w-full rounded-md border border-risk bg-raised px-3 py-2 text-sm text-ink"
+                        >{{ errorOf(capColumn(stat)) }}</p>
+                    </div>
+                </div>
             </fieldset>
 
             <fieldset class="rounded-md border border-rule bg-panel p-4">

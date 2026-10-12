@@ -140,14 +140,6 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
   arithmetic in `ScenarioCaps::forRun()`, so a stat is accepted to the figure the client showed; the entered
   figure stays bounded by the engine `hard_cap` and may not sit below the highest value the run already
   recorded for that stat. `ADR-0015` stands unchanged as the fallback a run gets when it states no ceiling.
-  *Erratum 2026-10-12 (schema reconciliation).* The implemented `turn_entries` schema carries additional columns not listed above:
-  `energy_state`/`energy_band` (**ADR-0024**, Accepted 2026-10-09, migrated `2026_10_09_170000`),
-  `facility_speed`/`stamina`/`power`/`guts`/`wit` (UX walk Phase 12, write path unwired, no ADR),
-  `failure_rate`/`preview_gains` (UX walk Phase 12, transcribed readings, ADR-0016/ADR-0020 §3, no ADR),
-  `choice`/`decision_snapshot`/`corrected_from`/`superseded_by` (Phase G ruling D-1a–D-1d, not yet filed as ADR — governance gap).
-  The unique constraint on `(training_run_id, turn)` was replaced by a partial unique index
-  `WHERE corrected_from IS NULL` plus a plain lookup index (migrated `2026_10_10_200000`).
-  *Separate open item, not a requirement.* `ADR-0025` (per-run entered ceilings `cap_speed`/`cap_stamina`/`cap_power`/`cap_guts`) is **Proposed**: the owner's ruling is recorded ("store entered caps, derive nothing") but the wording awaits approval, and the migration that implements it (`2026_10_12_140000_add_entered_caps_to_training_runs_table.php`) is untracked. Until it is Accepted this is a governance gap, not scope; nothing above is amended by it.
 - C-3: Skill acquisition: run × skill with status (`Suggested`, `Acquired`, `Skipped`) and optional turn acquired [rev 0.2 — repo #4]. `Suggested` = planned before the run; `Acquired`/`Skipped` = outcome.
 - C-4: Runs and turns are creatable, editable, and deletable through the web UI; all writes validated by Form Requests.
 - C-5: CSV and JSON export per run.

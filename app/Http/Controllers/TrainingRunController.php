@@ -687,7 +687,12 @@ class TrainingRunController extends Controller
      */
     public function updateBuildTarget(StoreBuildTargetRequest $request, TrainingRun $run): RedirectResponse
     {
-        $run->update(['build_target' => $request->payload()]);
+        // The target is written whole, the ceilings are written alongside it, and a save that names no
+        // ceiling leaves the stored ones alone (`postedCaps()` only answers the keys it was given).
+        $run->update(array_merge(
+            ['build_target' => $request->payload()],
+            $request->postedCaps(),
+        ));
 
         return redirect()
             ->back(fallback: route('runs.cockpit', $run))

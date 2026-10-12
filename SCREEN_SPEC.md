@@ -1599,6 +1599,22 @@ Any; no auth concept applies (PRD NFR-1).
 2. **Stat targets** — five numeric inputs, one per `config('scenarios.stat_order')` entry, each with its cap printed beside it (`ScenarioCaps::forRun`, the same call the turn validator makes, `ADR-0015`) and a labelled bar showing the entered value against that cap. The bar never renders without its number beside it, and it is not a readiness verdict: whether a target is reachable in the turns left is held computation in this repository.
 3. **Skill priorities** — free-text entry plus an ordered list with "Move up", "Move down" and "Remove" buttons, each at least 44px; no drag path is required (WCAG 2.5.7). One line states that a risk tolerance and per-skill marks (Required, High, Optional, Ignore) are not recorded.
 4. **Summary** — one sentence assembled by the page from the entered values alone (`ProvenanceBadge` state `calculated`), with an empty field named in the sentence rather than omitted.
+> _Dated amendment, 2026-10-12 (`ADR-0025`)._ The form is now four groups plus a summary: under the stat
+> targets sits **Stat ceilings**, four numeric inputs (the list arrives as `capStats`, so the page still
+> names no stat), each prefilled with the ceiling entered for that run and printing the scenario's
+> published figure beside it, so a Trainer's reading is never mistaken for the matrix's arithmetic. An
+> empty field is a clear, not a zero, and reverting to the published figure is what it means. The write
+> (`StoreBuildTargetRequest`, shared with `career.target.store` through `StoreDraftBuildTargetRequest`)
+> validates the four `cap_*` keys as `nullable|integer|min:1|max:<hard_cap>` through
+> `App\Http\Requests\Concerns\ValidatesEnteredCaps` — the same rule set the Cockpit's identity form uses,
+> which is the second surface for the same four facts — and refuses a ceiling below the highest value this
+> run's `turn_entries` already hold for that stat, naming both figures. A target is then clamped against
+> the ceilings entered in the same save, so stating 1325 beside a 1325 Speed target is accepted while a
+> 1326 target against that ceiling is refused. Persistence: the ceilings go to
+> `session('career.setup')` under their own `caps` key, not inside `build_target`
+> (`BuildTargetPayload::KEYS` is still exactly six keys), and `StartCareerRequest` carries them onto the
+> row Preflight creates. The paragraph above keeps its original wording.
+
 
 `ProvenanceBadge.vue` is the single owner of the four provenance states from `design-2.0` §49: ✓ Confirmed, ∑ Calculated, ~ Estimated, ? Unknown, each a distinct glyph and a distinct word held in one map, and no other source repeats either. The accessible name is the state word plus the caller's `title` when one was given; the glyph is `aria-hidden="true"`; and the badge sits beside the figure it labels, never in a page-level legend (Law of Proximity).
 
@@ -3062,7 +3078,7 @@ flowchart LR
     L --> I[SCR-RUN-004/005 import] -->|commit| D
     D -->|export csv/json| X[download]
     D -->|delete confirm| L
-```
+```text
 
 Failure paths: create/validation back to create with `old()`; import rows fail validation on either POST → form re-renders, nothing written. Authorization boundary: none (local tool); run ownership is enforced only for nested turn routes (404).
 
@@ -3070,7 +3086,7 @@ Failure paths: create/validation back to create with `old()`; import rows fail v
 
 Start/Completion: SCR-RUN-003. Two stages on one endpoint; the split exists so a commit is always a second, deliberate action (D-51), enforced server-side by the `previewed` marker that only a preview response renders.
 
-```
+```mermaid
 flowchart LR
     A[choice step: activity radio] --> B[enter totals]
     B -->|stage=preview POST → PRG GET| P[preview bubbles = entered − stored previous]
@@ -3078,7 +3094,7 @@ flowchart LR
     P -->|invalid| B
     B -->|first turn: empty preview, still committable| W
     A -.raw escape hatch.-> H[details form writes on submit] --> W
-```
+```text
 
 Alternative path: hatch (D-53 reachable, not default) skips preview. Failure path: any rejection rehydrates the rail (and only the rail, keyed on its `stage` marker) — the two entry paths never fill each other. Notes: preview is arithmetic on two Trainer rows, never a projection; no odds shown (Planner Rule 5).
 

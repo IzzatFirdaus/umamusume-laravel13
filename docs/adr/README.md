@@ -44,7 +44,7 @@ Derived, not hand-maintained. Regenerate with:
 for f in docs/adr/00*.md; do printf '%s\t%s\t%s\n' \
   "$(basename "$f" .md)" "$(head -1 "$f" | sed 's/^# //')" \
   "$(awk '/^Status:/{print substr($0,9,120); exit}' "$f")"; done
-```
+```text
 
 | ADR    | Subject                                                                                                                       | Status as decided                                                                                                                                                                        |
 | ------ | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -71,6 +71,7 @@ for f in docs/adr/00*.md; do printf '%s\t%s\t%s\n' \
 | 0021   | Sourced character and support-card artwork, mirrored locally and derived from ids                                             | **Accepted (owner ruling 2026-10-05)**; supersedes `ADR-0012` Decision 2 for sourced artwork, preserves `PRD.md` §6.13; fetch half built 2026-10-05, display half open (`PRD.md` OQ-6)   |
 | 0023   | Record the deck slot's owned-or-rented state on the slot                                                                       | **Proposed** — drafted 2026-10-09 for the owner's ruling (D3 remediation of the Rice Shower / Unity Cup walk); amends `ADR-0014` by dated erratum                                            |
 | 0024   | Energy is recorded as exact, band or unknown beside its numeric column                                                         | **Accepted** (owner ruling 2026-10-09) — closes the §11 gap on the Phase 8.1 Energy migration; extends `ADR-0003`, does not reopen `ADR-0001`                                             |
+| 0025   | A run's per-stat ceilings are entered facts, not a composition                                                                  | **Accepted** (owner ruling "store entered caps, derive nothing", 2026-10-12; the close-out brief's four-condition check is the acceptance of this text) — amends `ADR-0015`'s read path   |
 
 The table is stale the moment a status line changes and no test guards it, so the command above is the
 authoritative form and this prose is a snapshot. This table was stale when `ADR-0019` was written: it ended
