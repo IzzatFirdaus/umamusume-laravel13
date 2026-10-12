@@ -244,12 +244,14 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
                 <dd class="mt-0.5">
                     <span :title="costTitle" class="font-mono tabular-nums text-ink-strong">{{ costText }}</span>
                     <ProvenanceBadge state="confirmed" class="ml-1 align-middle" />
+                    <!-- `ADR-0001` §2 requires the constants behind a derived number to be visible wherever the
+                         number appears, and a `title` is reachable by mouse only. The owner ruled the inline form
+                         (2026-10-09); `ScenarioPanel.vue:205-208` and `Dashboard.vue:300-301` already print a
+                         visible read date, so this is the shipped idiom extended, not a new one. It stays inside
+                         the `dd`: as a sibling of `dt`/`dd` it broke the definition list's content model and axe
+                         failed the page on `definition-list` (WCAG 1.3.1). -->
+                    <p class="mt-0.5 text-xs text-ink-muted">{{ costConstants }}</p>
                 </dd>
-                <!-- `ADR-0001` §2 requires the constants behind a derived number to be visible wherever the
-                     number appears, and a `title` is reachable by mouse only. The owner ruled the inline form
-                     (2026-10-09); `ScenarioPanel.vue:205-208` and `Dashboard.vue:300-301` already print a
-                     visible read date, so this is the shipped idiom extended, not a new one. -->
-                <p class="mt-0.5 text-xs text-ink-muted">{{ costConstants }}</p>
             </div>
 
             <div>
