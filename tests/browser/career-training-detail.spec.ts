@@ -48,11 +48,11 @@ test.afterEach(async ({ page }) => {
  */
 const WRITE = { timeout: 60_000 } as const;
 
-async function newCareerWithTurn(page: import('@playwright/test').Page): Promise<string> {
+async function newCareerWithTurn(page: import('@playwright/test').Page, scenarioId = 'unity_cup'): Promise<string> {
     await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.locator('#scenario-unity_cup').click();
-    await expect(page.locator('#scenario-unity_cup')).toHaveAttribute('aria-pressed', 'true', WRITE);
+    await page.locator(`#scenario-${scenarioId}`).click();
+    await expect(page.locator(`#scenario-${scenarioId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
 
     await page.goto('/career/setup/trainee', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
@@ -361,4 +361,57 @@ test('the Energy band select carries an accessible name (R3-16)', async ({ page 
     const results = await buildAxe(page).analyze();
     const unnamed = results.violations.filter((violation) => violation.id === 'label');
     expect(unnamed, JSON.stringify(unnamed, null, 2)).toEqual([]);
+});
+
+/*
+ * The Performance observation pair (Our Grand Concert, the 2026-10-13 overturn of Fix A). The pair's
+ * write path and the capability flag's shape are pinned by `PerformanceTurnInputTest` and
+ * `TrainingDetailPerformanceBoundaryTest`; these two cases assert what only a browser reaches: the
+ * controls draw behind the flag, the delta carries no invented bound, and a turn recorded with the
+ * pair rides it through the write instead of being refused by it.
+ */
+
+test('draws the Performance pair on a Grand Concert turn and records a turn with it', async ({ page }) => {
+    const runUrl = await newCareerWithTurn(page, 'our_grand_concert');
+
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const type = page.locator('select[name="performance[type]"]');
+    const delta = page.locator('input[name="performance[delta]"]');
+
+    // The pair, with the spec row's own empty option and no invented bound on the change.
+    await expect(type).toBeVisible();
+    await expect(type.locator('option')).toHaveCount(6);
+    await expect(type.locator('option').first()).toHaveText('none, nothing to record');
+    await expect(delta).toBeVisible();
+    await expect(delta).not.toHaveAttribute('min');
+    await expect(delta).not.toHaveAttribute('max');
+    await expect(delta).toHaveValue('');
+
+    // The empty type is the honest first state; its copy is the option's own text, asserted above.
+
+    await page.getByRole('article').filter({ hasText: /^Speed/ }).getByRole('button', { name: 'Train' }).click();
+    await page.locator('input[name="speed"]').fill('650');
+    await page.locator('input[name="stamina"]').fill('600');
+    await page.locator('input[name="power"]').fill('600');
+    await page.locator('input[name="guts"]').fill('600');
+    await page.locator('input[name="wit"]').fill('600');
+    await page.locator('input[name="energy"]').fill('62');
+    await page.locator('select[name="outcome"]').selectOption('Success');
+    await type.selectOption('Vocals');
+    await delta.fill('12');
+    await page.getByRole('button', { name: 'Record this training' }).click();
+
+    // The write carried the pair to the endpoint that records it: the turn landed, which is the
+    // refusal path's own failure mode not having fired.
+    await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByText('Turn 2 logged.')).toBeVisible();
+});
+
+test('draws no Performance pair on a scenario that does not compose it', async ({ page }) => {
+    await openTrainingDetail(page);
+
+    await expect(page.locator('select[name="performance[type]"]')).toHaveCount(0);
+    await expect(page.locator('input[name="performance[delta]"]')).toHaveCount(0);
 });

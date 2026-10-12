@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Career;
 
 use App\Enums\MoodTier;
+use App\Enums\PerformanceType;
 use App\Http\Controllers\Controller;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\DeckSlot;
@@ -339,10 +340,17 @@ class TrainingDecisionController extends Controller
      * arriving pre-filled would assert the stat did not change, which is `D-220`'s rule and the reason
      * the run screen's rail passes it the same way.
      *
-     * @return array{action: string, turn: int, moods: list<string>, previous: array<string, int|null>|null}
+     * @return array{action: string, turn: int, moods: list<string>, previous: array<string, int|null>|null, performance: array{enabled: bool, types: list<string>}}
      */
     private function writeSection(TrainingRun $run, ?TurnEntry $latest): array
     {
+        // The Performance observation pair (Our Grand Concert; the dated rail row in
+        // `SCREEN_SPEC.md`). The five client words ride only behind the capability flag, so a
+        // career whose scenario does not compose it gets no vocabulary for a control the page does
+        // not draw. No starting value, total or cap travels with it: the pair records a change and
+        // the corpus publishes none of the rest.
+        $acceptsPerformance = $run->acceptsPerformanceObservations();
+
         return [
             'action' => route('runs.turns.store', $run),
             'turn' => $run->nextTurnNumber(),
@@ -356,6 +364,12 @@ class TrainingDecisionController extends Controller
                 'sp' => $latest->sp,
                 'energy' => $latest->energy,
                 'fans' => $latest->fans,
+            ],
+            'performance' => [
+                'enabled' => $acceptsPerformance,
+                'types' => $acceptsPerformance
+                    ? array_map(static fn (PerformanceType $type): string => $type->label(), PerformanceType::cases())
+                    : [],
             ],
         ];
     }

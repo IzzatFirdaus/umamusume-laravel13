@@ -388,6 +388,18 @@ career gets `enabled: false` and an empty type list, so the page carries no voca
 not draw. The pair is optional even where it is shown: a Grand Concert turn that enters nothing writes no
 event, rather than a row claiming a zero change.*
 
+*Dated erratum 2026-10-13 (owner ruling on the remaining-implementation brief, overturning Fix A): the
+surface above was the retired record screen's guided rail, which F2 retired, and Fix A (Grand Concert
+Slice 7) then kept the pair off every 2.0 surface as a tested default. The owner has now lifted that
+exclusion for the screen that records the turn: the pair draws on `SCR-CAR-012`'s record form
+(`Career/TrainingDetail.vue`) behind the same flag and with the same contract — the empty "none, nothing
+to record" option, the five client words, a signed integer delta with no bound and no placeholder, and
+the pair optional even where it is drawn. The flag and the type list ride the page as `write.performance`;
+the table row above keeps the posted keys `performance[type]`/`performance[delta]`. Nothing else moved:
+the Cockpit's correction form gains no pair (`updateTurn` writes the entry row only), and no surface
+renders the observation history yet — `TrainingRun::performanceObservations()` remains the reader, and a
+display surface for it is a separately-specified decision.*
+
 #### User Actions
 
 | Action                     | Trigger                       | Preconditions                                                                                                                                | Result                                                                                                                                                                                                                 | Feedback                                              |

@@ -24,11 +24,13 @@ use Inertia\Testing\AssertableInertia as Assert;
  *
  * F2 note (2026-10-09): `GET /training-runs/{run}` now 302s to the Cockpit and `Runs/Show.vue` is
  * retired, so the GETs below target the 2.0 turn-entry surface (`Career/TrainingDetail`) instead.
- * Neither 2.0 surface carries a `performance` payload, so the payload assertions that the pair is
- * offered have no 2.0 equivalent and are reported rather than forced; the write-side cases below are
- * unchanged and still prove the pair is recorded and a bad type refused. The rail's own rendering test
- * has no 2.0 equivalent either (the rail and its gated field list are retired with the record screen),
- * so that assertion retired with it.
+ *
+ * Overturn note (2026-10-13, owner ruling on the remaining-implementation brief): Fix A's exclusion
+ * of the pair from every 2.0 surface is lifted for the screen that records the turn. `Career/TrainingDetail`
+ * now carries `write.performance` — `enabled` plus the five client words — and draws the pair behind
+ * it, exactly as `SCREEN_SPEC.md`'s dated rail row specifies. The write-side cases are unchanged and
+ * still prove the pair is recorded and a bad type refused; the Cockpit stays payload-free, which is
+ * why the rehydration assertions in `TrainingDetailPerformanceBoundaryTest` keep their Cockpit half.
  */
 function performanceInputRun(string $scenario = 'our_grand_concert'): TrainingRun
 {
@@ -68,22 +70,22 @@ function performanceInputSubmit(array $performance = [], array $overrides = []):
     return array_merge($payload, $overrides);
 }
 
-it('offers the turn write on a Grand Concert turn entry, with no Performance reading on the wire', function (): void {
+it('offers the Performance pair behind its capability flag on a Grand Concert turn entry', function (): void {
     $run = performanceInputRun();
 
-    // The pair's own controls have no 2.0 GET surface: `Runs/Show` is retired and neither
-    // `Career/TrainingDetail` nor `Career/Cockpit` carries a `performance` payload. What the turn
-    // entry offers is the canonical turn write the pair is entered through.
+    // The flag and the vocabulary it gates, exactly as the spec row names them: enabled true on the
+    // composing scenario, and the five words the enum holds as the client prints them.
     $this->get(route('runs.training', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/TrainingDetail')
             ->where('run.scenario_label', 'Our Grand Concert')
             ->where('write.action', route('runs.turns.store', $run))
-            ->missing('performance'));
+            ->where('write.performance.enabled', true)
+            ->where('write.performance.types', ['Dance', 'Passion', 'Vocals', 'Visuals', 'Composure']));
 });
 
-it('offers the same turn write to a scenario that composes no Performance, with no type list', function (string $scenario): void {
+it('offers no Performance vocabulary on a turn entry whose scenario does not compose it', function (string $scenario): void {
     $run = performanceInputRun($scenario);
 
     $this->get(route('runs.training', $run))
@@ -91,18 +93,25 @@ it('offers the same turn write to a scenario that composes no Performance, with 
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/TrainingDetail')
             ->where('write.action', route('runs.turns.store', $run))
-            // The 2.0 surface carries no Performance vocabulary at all, so no type list is offered.
-            ->missing('performance'));
+            // Disabled, and no type list rides with it: the page carries no vocabulary for a
+            // control it does not draw.
+            ->where('write.performance.enabled', false)
+            ->where('write.performance.types', []));
 })->with(['ura_finale', 'unity_cup', 'trackblazer', '']);
 
 it('keeps the pair free of any total, cap or reading the tool does not have', function (): void {
     $run = performanceInputRun();
 
-    // The 2.0 turn-entry surface carries no `performance` prop at all, so no total, cap, balance,
-    // remaining or reading can appear on it: the retired rail's three-key payload is not replaced.
+    // The payload carries the flag and the five words and nothing else: no starting value, no
+    // balance, no cap and no previous reading rides with it, because the corpus publishes none
+    // and `performanceObservations()` sums nothing.
     $this->get(route('runs.training', $run))->assertInertia(fn (Assert $page) => $page
         ->component('Career/TrainingDetail')
-        ->missing('performance'));
+        ->where('write.performance.enabled', true)
+        ->missing('write.performance.total')
+        ->missing('write.performance.cap')
+        ->missing('write.performance.balance')
+        ->missing('write.performance.reading'));
 });
 
 it('leaves every turn-entry control that was already there in place', function (): void {
@@ -178,9 +187,10 @@ it('refuses a type the client does not print, and hands the typed pair back', fu
     expect($run->turnEntries()->count())->toBe(0)
         ->and(TurnEvent::query()->where('training_run_id', $run->id)->count())->toBe(0);
 
-    // D-56: the refused pair is not handed back by any 2.0 surface — neither `Career/TrainingDetail`
-    // nor `Career/Cockpit` carries a `performance` payload (reported). What still holds is that the
-    // refusal wrote nothing and the turn-entry surface is reachable for a corrected submit.
+    // D-56: the server does not echo the refused pair back as a payload; the capability flag and
+    // the type list ride on `write.performance`, and the refused values survive only in the
+    // client's own form state, the way every other refused field's values do. What still holds is
+    // that the refusal wrote nothing and the turn-entry surface is reachable for a corrected submit.
     $this->get(route('runs.training', $run))->assertInertia(fn (Assert $page) => $page
         ->component('Career/TrainingDetail')
         ->where('write.action', route('runs.turns.store', $run)));

@@ -7,20 +7,19 @@ use App\Models\TurnEvent;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
- * Why the Training Decision screen has no Performance field (Grand Concert Slice 7).
+ * The Training Decision screen's Performance boundary (Grand Concert Slice 7).
  *
- * Slice 6 left this open on purpose rather than assume it: `Career/TrainingDetail.vue` posts to the
- * same `runs.turns.store` as the guided rail, so it could have been read as a second turn-entry surface
- * missing a control. It is not one. Under F2, plan §9.6 ruling 2 and Fix A (owner default), the
- * screen writes the turn directly — no preview step — and the response redirects to `runs.cockpit`.
- * Neither `Career/TrainingDetail` nor `Career/Cockpit` carries a `performance` payload, so the pair
- * cannot be posted from either surface and cannot be rehydrated on either after a write.
+ * Slice 6 left the field off this screen on purpose rather than assume it, and Slice 7 wrote that
+ * exclusion down as Fix A (owner default): under F2, plan §9.6 ruling 2, the screen writes the turn
+ * directly — no preview step — and the response redirects to `runs.cockpit`.
  *
- * So the question was not "does it need the field" but "does a Trainer who arrives through it lose the
- * capability". Under Fix A the exclusion is total: the write happens here and no other 2.0 surface
- * rehydrates the pair, so a Trainer who omits the pair at this screen records the turn without it. If
- * that ever stops being true, this file fails and the exclusion stops being defensible — which is the
- * point of writing the boundary down as a test rather than leaving it as a comment.
+ * **Overturned 2026-10-13, owner ruling on the remaining-implementation brief (D1):** the pair is
+ * offered here after all. `SCREEN_SPEC.md`'s dated rail row already specified the field in full —
+ * the `performance.enabled` flag, the five client words, the signed delta with no bound and no
+ * placeholder — so this file's job flips from guarding the absence to pinning the shape that row
+ * names. The Cockpit half of Fix A stands untouched: the correction form gains no pair and the
+ * Cockpit carries no `performance` payload, because `updateTurn` writes the entry row only and a
+ * correction is not a second observation.
  */
 function trainingDetailRun(string $scenario = 'our_grand_concert'): TrainingRun
 {
@@ -80,10 +79,12 @@ it('writes the pair when it is posted, but no 2.0 surface rehydrates it after th
     $this->post(route('runs.turns.store', $run), recordSubmit(['type' => 'Dance', 'delta' => '12']))
         ->assertRedirect(route('runs.cockpit', $run));
 
-    // The pair is stored as a `Scenario` event keyed on the turn, and it is the write's only home:
-    // neither this screen nor the Cockpit carries a `performance` payload, so it is not rehydrated on
-    // either after the redirect. The pair is not lost by omitting the field at submit time — the
-    // write is one shot.
+    // The pair is stored as a `Scenario` event keyed on the turn, and the write's redirect target
+    // rehydrates nothing: the Cockpit carries no `performance` payload, so the pair is not read back
+    // there after the redirect. The capability now rides on this screen's own write payload, but a
+    // stored observation has no renderer yet — reading history back is the model's
+    // (`PerformanceReadPathTest`), and a display surface for it is a later, separately-specified
+    // decision rather than something this overturn invents.
     expect(TurnEvent::query()->where('training_run_id', $run->id)->where('event_type', 'Scenario')->count())->toBe(1);
 
     $this->get(route('runs.cockpit', $run))->assertInertia(fn (Assert $page) => $page
@@ -107,7 +108,7 @@ it('refuses a turn the pair fails on, rather than discarding half the submission
         ->missing('performance'));
 });
 
-it('states its own boundary in its own copy, and holds no Performance vocabulary of its own', function (): void {
+it('carries the pair behind the capability flag in its own copy, and no borrowed word', function (): void {
     $source = trainingDetailSource();
 
     // Under Fix A the form posts no `stage` at all: the previous preview-and-confirm rail has no 2.0
@@ -116,10 +117,11 @@ it('states its own boundary in its own copy, and holds no Performance vocabulary
     expect($source)->not->toContain("stage: 'preview'")
         ->and($source)->not->toContain("stage: 'confirm'")
         ->and($source)->not->toContain('previewed:')
-        // And the exclusion is total rather than half-finished: no field names, no type list, and no
-        // GameTora rendering anywhere in the file.
-        ->and($source)->not->toContain('performance[type]')
-        ->and($source)->not->toContain('performance[delta]')
+        // The pair is drawn exactly as the spec row names it, and the GameTora rendering stays out:
+        // the five words come from the enum through the controller, never as literals in this file.
+        ->and($source)->toContain('performance[type]')
+        ->and($source)->toContain('performance[delta]')
+        ->and($source)->toContain('none, nothing to record')
         ->and($source)->not->toContain('Mental');
 });
 
@@ -131,12 +133,14 @@ it('leaves that screen every turn field it already had', function (): void {
     }
 });
 
-it('keeps the capability flag off every other scenario on the screen that does carry the pair', function (string $scenario): void {
+it('keeps the capability flag off every other scenario on the screen that carries the pair', function (string $scenario): void {
     $run = trainingDetailRun($scenario);
 
-    // No 2.0 surface carries the pair, so the capability flag has no 2.0 home; the Cockpit is
-    // asserted to carry no Performance payload for a non-composing scenario either (reported).
-    $this->get(route('runs.cockpit', $run))->assertInertia(fn (Assert $page) => $page
-        ->component('Career/Cockpit')
-        ->missing('performance'));
+    // The screen carries the pair now, so the gate is asserted where it lives: a non-composing
+    // career gets `enabled: false` and an empty type list, so the page holds no vocabulary for a
+    // control it does not draw.
+    $this->get(route('runs.training', $run))->assertInertia(fn (Assert $page) => $page
+        ->component('Career/TrainingDetail')
+        ->where('write.performance.enabled', false)
+        ->where('write.performance.types', []));
 })->with(['ura_finale', 'unity_cup', 'trackblazer']);

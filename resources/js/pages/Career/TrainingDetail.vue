@@ -83,6 +83,7 @@ const props = defineProps<{
         turn: number;
         moods: string[];
         previous: Record<string, number | null> | null;
+        performance: { enabled: boolean; types: string[] };
     };
 }>();
 
@@ -223,12 +224,26 @@ const train = (option: Option): void => {
     recordHeading.value?.focus();
 };
 
+// The Performance observation pair, held outside the form so the posted payload carries the key
+// only when a reading was entered: a turn that observed nothing must not post an empty pair, whose
+// halves the request refuses to split.
+const performanceType = ref('');
+const performanceDelta = ref('');
+
 // The five stat totals are what the client shows after the turn resolves, so the form starts empty and
 // a press before they are entered is answered by the field messages the existing request returns. The
 // post writes the row directly and redirects to the Cockpit: the previous preview-and-confirm rail has
 // no 2.0 reproduction (F2, plan §9.6; owner ruling on group R-2), so there is no stage to advance.
 const recordTurn = (): void => {
-    form.post(props.write.action, { preserveScroll: true, preserveState: true });
+    form
+        .transform((data) => {
+            const pair = performanceType.value === '' && performanceDelta.value === ''
+                ? {}
+                : { performance: { type: performanceType.value, delta: performanceDelta.value } };
+
+            return { ...data, ...pair };
+        })
+        .post(props.write.action, { preserveScroll: true, preserveState: true });
 };
 
 const errorOf = (field: string): string | undefined =>
@@ -507,6 +522,40 @@ const capFor = (label: string): number =>
                     </select>
                     <span v-if="errorOf('penalty_kind')" id="turn-penalty_kind-error" class="text-xs text-risk">{{ errorOf('penalty_kind') }}</span>
                 </label>
+
+                <!-- The Performance observation pair (Our Grand Concert only, the dated rail row in
+                     SCREEN_SPEC.md). A change, never a level: the corpus publishes no starting value,
+                     so the delta is a signed integer with no min, no max and no placeholder, and the
+                     empty type records nothing for the turn. -->
+                <template v-if="props.write.performance.enabled">
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Performance type</span>
+                        <select
+                            id="turn-performance-type"
+                            v-model="performanceType"
+                            name="performance[type]"
+                            :aria-describedby="errorOf('performance.type') === undefined ? undefined : 'turn-performance-type-error'"
+                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                        >
+                            <option value="">none, nothing to record</option>
+                            <option v-for="word in props.write.performance.types" :key="word" :value="word">{{ word }}</option>
+                        </select>
+                        <span v-if="errorOf('performance.type')" id="turn-performance-type-error" class="text-xs text-risk">{{ errorOf('performance.type') }}</span>
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-ink-muted">Performance change</span>
+                        <input
+                            id="turn-performance-delta"
+                            v-model="performanceDelta"
+                            type="number"
+                            name="performance[delta]"
+                            step="1"
+                            :aria-describedby="errorOf('performance.delta') === undefined ? undefined : 'turn-performance-delta-error'"
+                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                        >
+                        <span v-if="errorOf('performance.delta')" id="turn-performance-delta-error" class="text-xs text-risk">{{ errorOf('performance.delta') }}</span>
+                    </label>
+                </template>
 
                 <!-- The five facility levels the client's ladder shows beside each training. Optional by
                      design: a turn logged without reading the ladder records no level, and a zero would
