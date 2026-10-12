@@ -34,7 +34,8 @@ applies: migration with a working `down()`, the digest updated, a PRD citation, 
 2. **The `Veteran` model's own `saving` guard folds the twin from `tags` on every save.** `RecordVeteran`
    keeps writing tags and notes, and the request keeps its verbatim storage; neither carries the twin.
 3. **`ListVeterans` matches `mb_strtolower($tag)` against the twin**, one clause per named tag, keeping the
-   all-of narrowing the `ADR-0018` facet contract already defines.4. **The migration backfills existing rows** over `DB::table`, never the model, so a schema step does not
+   all-of semantics the `ADR-0018` facet contract already defines.
+4. **The migration backfills existing rows** over `DB::table`, never the model, so a schema step does not
    depend on a model shape a later commit can move.
 
 ## Why the guard, not the write site — the reproduction that decided it
