@@ -144,6 +144,21 @@ test.describe('Trainee Selection and Profile', () => {
             .toHaveAttribute('aria-pressed', 'true');
     });
 
+    test('renders the same success flash when the card is clicked (R3-31)', async ({ page }) => {
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        // R3-31 was filed as a keyboard-only defect and it was not one. The confirmation is a session
+        // flash, and the artwork route ran inside the `web` group until this slice, so a portrait request
+        // landing between the redirect and this render aged the flash away; the roster carries twelve
+        // portraits, which is why the race was lost reliably on both input paths. The keyboard case above
+        // was the only case asserting the flash, so this pins the pointer path it never covered.
+        await card(page, 'Admire Vega').getByRole('button', { name: 'Select Trainee', exact: true }).click();
+
+        await expect(page.getByText('Trainee set: Admire Vega.')).toBeVisible();
+        await expect(page.getByText('Stored choice:')).toContainText('Admire Vega');
+    });
+
     test('renders the profile with basic facts, one aptitude grid and skills at card grain', async ({ page }) => {
         await page.goto('/career/setup/trainee/33');
         await page.locator('#app > *').first().waitFor();

@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -15,6 +17,17 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        // Registered outside the `web` group deliberately, and that group is why this route is not in
+        // `routes/web.php` with the rest of the browser routes. `web` runs `StartSession`, so every
+        // artwork request saves the session and Laravel's `ageFlashData()` forgets `_flash.old` on that
+        // save; a screen carrying twelve portraits therefore loses a redirect's flash whenever one of
+        // those requests lands between the redirect and the next page (R3-31, where the trainee
+        // selection's confirmation never rendered). A static asset endpoint has no business in a session.
+        then: function (): void {
+            Route::get('/artwork/{kind}/{id}', [ArtworkAssetController::class, 'show'])
+                ->whereNumber('id')
+                ->name('artwork.show');
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Inertia needs its middleware on the web group to serve the SPA shell and

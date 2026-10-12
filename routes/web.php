@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Controllers\Career\BuildTargetController;
 use App\Http\Controllers\Career\CockpitController;
 use App\Http\Controllers\Career\DeckSelectController;
@@ -15,8 +14,8 @@ use App\Http\Controllers\Career\RacePlannerController;
 use App\Http\Controllers\Career\ResultController;
 use App\Http\Controllers\Career\SaveVeteranController;
 use App\Http\Controllers\Career\ScenarioSelectController;
-use App\Http\Controllers\Career\SnapshotController;
 use App\Http\Controllers\Career\SkillsPlannerController;
+use App\Http\Controllers\Career\SnapshotController;
 use App\Http\Controllers\Career\TimelineController;
 use App\Http\Controllers\Career\TraineeProfileController;
 use App\Http\Controllers\Career\TraineeSelectController;
@@ -269,12 +268,8 @@ Route::put('/preferences', [PreferenceController::class, 'update'])->name('prefe
 Route::get('/preferences/export', [PreferenceController::class, 'export'])->name('preferences.export');
 Route::post('/preferences/backup', [PreferenceController::class, 'backup'])->name('preferences.backup');
 
-// Streams a mirrored artwork file to an <img src> (ADR-0021 read half). A web route, not /api/v1:
-// it serves a browser asset, reads a Storage path, and opens no second outbound surface. `id` is
-// constrained to a number so a path-traversal value cannot reach the controller.
-Route::get('/artwork/{kind}/{id}', [ArtworkAssetController::class, 'show'])
-    ->whereNumber('id')
-    ->name('artwork.show');
+// The artwork route is not here: it is registered in `bootstrap/app.php` outside the `web` group, because
+// that group's session ages a redirect's flash on every asset request (R3-31).
 
 /*
  * The Database hub (SCREEN-023, plan §8 D17). Five reference-data areas, all read-only.
