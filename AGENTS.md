@@ -46,7 +46,7 @@ disagrees, the higher one wins and the lower one is stale.
 | Human owner instruction     | the task itself                                                                                     | Highest, but it cannot relax the quality bar without a written owner ruling (escalation 4)   |
 | Quality bar                 | `CONSTRAINTS.md` -> `GOVERNANCE.md` §CONSTRAINTS.md                                                 | Never weakened to pass a check                                                               |
 | Gate registry               | `GOVERNANCE.md` §GATE-REGISTRY.md                                                                   | How each gate runs, its evidence, its allowed exceptions                                     |
-| Binding decisions           | `docs/adr/0001`-`0018`, `SUPERSEDED-*`                                                              | Accepted ADRs bind; `Proposed` ones do not                                                   |
+| Binding decisions           | `docs/adr/0001`-`0024`, `SUPERSEDED-*`                                                              | Accepted ADRs bind; `Proposed` ones do not                                                   |
 | Product truth               | `PRD.md`                                                                                            | Users, requirements, §6 non-goals                                                            |
 | System design               | `ARCHITECTURE.md` over `ARCHITECTURE-ESSENTIALS.md`                                                 | The digest loses to the full text                                                            |
 | Screen behavior             | `SCREEN_SPEC.md` §8 authority table                                                                 | Per-screen states and workflows                                                              |
@@ -171,8 +171,8 @@ config/uma.php               fetch allowlist, politeness, thresholds, cache TTL,
 config/scenarios.php         the ONLY place scenario names enter the layout path
 database/                    migrations, a factory per model, seeders, seeders/data (committed bodies)
 resources/views/             4 Blade files only: app.blade.php (the Inertia shell) + errors/
-resources/js/                TypeScript + Vue 3: spa.ts, bootstrap.ts, types.ts, pages/ (18),
-                             components/ (31, incl. catalog, legacy, review, support), layouts/ (2)
+resources/js/                TypeScript + Vue 3: spa.ts, bootstrap.ts, types.ts, pages/ (48),
+                             components/ (63, incl. catalog, legacy, review, support), layouts/ (2)
 lang/en/uma.php              displayed vocabulary and the Global terms map
 routes/                      web.php (browser), api.php (JSON)
 tests/                       Feature/ (the bulk), Unit/ (no database), Fixtures/ (stored bodies)
@@ -301,6 +301,42 @@ rather than rerunning the whole suite repeatedly; record pre-existing and unrela
 failures (e.g. `KNOWN-ISSUES.md`) rather than fixing or deleting them in passing. Never
 claim the full suite passed unless it was actually executed and passed: the evidence rule
 below applies at every level.
+
+**Background and parallel test execution.** A Level 1 or Level 2 run is
+read-only: `phpunit.xml:64` forces `DB_DATABASE=:memory:`, so Pest never touches
+a file on disk, and `pint --test`, PHPStan, `npm run typecheck` and the lore
+gates only read. Such a run may be launched in the background while
+implementation continues:
+
+    php artisan test --compact --filter=Name > .scratch-uma/<session>/test-<slice>.log 2>&1 &
+
+Three rules make a background run admissible evidence. **The log is
+session-private**: it lives under a session-named directory in gitignored
+`.scratch-uma/` (KI-70: a shared-worktree file is a collision surface), and it is
+quoted in the hand-off exactly like attached output — a backgrounded gate that
+is never read back is a gate not run, per the evidence rule below. **Nothing
+that writes is backgrounded** while any peer session works: no `pint` without
+`--test`, no `migrate` in any form, no `npm run build` (Vite rewrites
+`public/build`, whose manifest every session's browser gate reads; one session's
+unbuildable file blocked every peer's browser gate for a day, KI-70). **A red
+background run is classified before anything re-runs**: the
+failure-attribution step applies verbatim, and a sweep that came back red under
+load is reported void with its counts and the contention readings attached,
+never as a defect list (KI-74).
+
+**A broad sweep is pre-flighted, not launched.** Before any Level 3 run or the
+browser suite, time one trivial SQLite read (`php -r` on `select id from
+training_runs limit 1` against the dev file, per KI-74). If it takes more than
+a few seconds the box is contended and the sweep is void before it starts:
+wait for a quiet box, or drop to the slice's own specs on a session-private
+harness, and say which of the two the evidence is. Do not re-run a void sweep
+hoping for a different result.
+
+**The browser suite is always session-private.** `PLAYWRIGHT_PORT=<session port>
+PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-<port>.sqlite npm run test:browser`
+(KI-73, KI-80). An unqualified `npm run test:browser` in a shared worktree
+either polls a leaked server serving a deleted database, or deletes a peer's
+scratch database mid-run — and both failures read as product regressions.
 
 This escalates verification, it does not license skipping it. No level permits weakening
 assertions, deleting or suppressing tests, or skipping a Level 3 gate that the change class
@@ -559,3 +595,4 @@ fails if the logic breaks; a trivial one-liner needs no test.
 | 2026-10-06   | §1, §6, §7 and §13 corrected for the frontend stack: the web surface is **Inertia + Vue 3**, `resources/views/` holds 4 Blade files and no components, `resources/js/` holds 51 SFCs, and the scenario components take a required `scenarioLabel` rather than declaring `scenario`. §7's "no Inertia/SPA" ban is withdrawn in place, §9 and §15 widen the asset and typecheck rows to Vue, and §18's Blade-manifest line is de-Bladed.                                                               | `8e58b65` folded the Trainer Desk 2.0 line into `master` and `0ea8d43` retired the Blade shell, so the file described a surface that no longer exists. Measured on this tree, not remembered. Per §2 the code wins and the rule is stale; the rule was left standing where it is still true (Livewire, Redis and Excel are absent from `composer.lock`) rather than deleted wholesale.                                                      |
 | 2026-10-06   | §9: `migrate:status` on the dev database joins the Schema row and the hand-off, with a paragraph stating that the suite cannot see that file.                                                                                                                                                                                                                                                                                                                                                        | KI-60. Four committed migrations sat Pending on `database/database.sqlite` for four days while 1,326 tests passed, because `phpunit.xml:64` forces `DB_DATABASE=:memory:` and every test builds its own schema. A green suite was reported as evidence of a working application and it was not. This tightens the bar, which §5 permits an agent to apply; relaxing it remains escalation 4.                                                |
 | 2026-10-08   | §9 gains the cost-aware escalation policy: Level 1 focused runs during implementation, Level 2 related regression at slice end, Level 3 full verification only at checkpoints; the full suite is a gate, not the feedback loop. Adds failure classification (regression, pre-existing, unrelated, infrastructure, flaky, inconclusive) with focused reproduction, the explicit rule that a full-suite pass may never be claimed unexecuted, and the statement that no level licenses weakening, deleting, or suppressing tests. Repo-agnostic in shape; the existing change-class table and hand-off stay binding as its Level 3. | Agents were burning most of their implementation time rerunning the expensive full and browser suites after small localized edits. The escalation ladder was implicit in §9 ("narrow first") but never written down, so nothing stopped the reflexive broad run or required attributing a broad-run failure before re-running. Concurrent-agent work in this tree also made unrelated failures common, which the classification step now handles explicitly. |
+| 2026-10-12   | §9 gains the background/parallel test-execution rule: a Level 1/Level 2 run may be backgrounded to a session-private `.scratch-uma/<session>/` log, nothing that writes (`pint` without `--test`, `migrate`, `npm run build`) is backgrounded while a peer session works, a red background run is classified before anything re-runs, a broad sweep is pre-flighted with a timed SQLite read, and the browser suite is always session-private. §2's binding-decisions row is corrected to `docs/adr/0001`-`0024`; §6's `resources/js/` counts are corrected to the measured 48 pages and 63 components (2026-10-12). | KI-70 (a shared-worktree file is a collision surface; one session's unbuildable file blocked every peer's browser gate for a day), KI-73 and KI-80 (a leaked `:8127` server and a shared scratch database each take a peer's suite down), KI-74 (a gate run on a contended worktree is void, and a red sweep under load reads as a product regression), KI-75 (`pint --dirty` reformatted another session's uncommitted file). The §2 row still ended at 0018 while 0024 is on disk, and §6's counts were a 2026-10-06 snapshot. |
