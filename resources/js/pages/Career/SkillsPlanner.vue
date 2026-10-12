@@ -73,6 +73,8 @@ const props = defineProps<{
     };
     groups: Group[];
     acquisition_options: { value: string; label: string }[];
+    /** Slice 10: the Global catalogue skills this run does not hold yet, `{id, name}` each. */
+    picker_skills: { id: number; name: string }[];
 }>();
 
 const { visiting, visitFailed } = useVisitState();
@@ -131,6 +133,46 @@ function save(): void {
     form.targets = props.target.targets;
     form.skill_priorities = ordered.value.map((row) => row.name);
     form.put(props.target.save_url, { preserveScroll: true });
+}
+
+/*
+ * Slice 10, the add affordance. The editor below changes the status of a row that already exists in
+ * one of the four groups, so a run with no build target and no rows had no way to gain its first
+ * skill. This posts the same payload shape the editor's rows use, to the same run-scoped endpoint,
+ * so there is one write path and one vocabulary.
+ */
+const pickedSkill = ref<number | string>('');
+
+const pickerForm = useForm<{ skills: { skill_id: number | string; status: string; turn_acquired: number | null }[] }>({
+    skills: [],
+});
+
+// The enum's default, read the way the editor reads it: the first acquisition option, which is
+// `Suggested`. `StoreRunSkillRequest` requires a status on every row, so the client sends it.
+const pickerStatus = computed(() => props.acquisition_options[0]?.value ?? 'Suggested');
+
+// A refusal is keyed by the row that failed (`skills.0.skill_id`), so the flat map is scanned for the
+// first key under `skills` rather than read as `errors.skills`. Silent failure would be worse than the
+// refusal: the picker offers only ids the server just sent, so a rejection means a stale render.
+const pickerError = computed(() => {
+    const key = Object.keys(pickerForm.errors).find((name) => name.startsWith('skills'));
+
+    return key === undefined ? null : pickerForm.errors[key];
+});
+
+function addPickedSkill(): void {
+    if (pickedSkill.value === '') {
+        return;
+    }
+
+    pickerForm.skills = [{ skill_id: pickedSkill.value, status: pickerStatus.value, turn_acquired: null }];
+
+    pickerForm.post(props.run.skills_sync_url, {
+        preserveScroll: true,
+        onSuccess: () => {
+            pickedSkill.value = '';
+        },
+    });
 }
 
 // ADR-0001 §2 wants the constants behind a number visible wherever the number appears, so the two
@@ -296,6 +338,34 @@ const coverageConstants = computed(() =>
              the acquisition status is a record of what the run actually has. The two are separate
              writes on separate routes so one cannot overwrite the other. This form POSTs through
              `runs.skills.sync`, the same Form Request the 0.1.0 record screen used. -->
+        <!-- Slice 10: the add affordance. The editor below edits rows that already exist; this is
+             where a run gains one it has never held, so the write path and the vocabulary stay the
+             endpoint's own. -->
+        <section aria-labelledby="add-skill-heading" class="mt-6 rounded-md border border-rule bg-panel p-4">
+            <h2 id="add-skill-heading" class="text-base font-semibold text-ink-strong">Add a skill</h2>
+            <p v-if="props.picker_skills.length === 0" class="mt-1 text-sm text-ink-muted">
+                Nothing left to add: the catalogue offers no Global skill this run does not already hold.
+            </p>
+            <form v-else class="mt-3 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="addPickedSkill">
+                <label class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Skill to add</span>
+                    <select v-model="pickedSkill" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink">
+                        <option value="">Choose a skill</option>
+                        <option v-for="skill in props.picker_skills" :key="skill.id" :value="skill.id">{{ skill.name }}</option>
+                    </select>
+                </label>
+                <button
+                    type="submit"
+                    class="enamel inline-flex h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:cursor-wait disabled:bg-disabled"
+                    :disabled="pickerForm.processing"
+                >
+                    Add skill
+                </button>
+            </form>
+            <p v-if="pickerForm.processing" role="status" class="mt-2 text-sm text-ink-muted">Adding the skill…</p>
+            <p v-if="pickerError" role="alert" class="mt-2 text-sm text-risk">{{ pickerError }}</p>
+        </section>
+
         <AcquisitionStatusEditor
             v-if="props.run.skills_sync_url !== ''"
             class="mt-6"

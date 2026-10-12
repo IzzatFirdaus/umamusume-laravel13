@@ -177,6 +177,8 @@ test('sizes the skills planner controls to the 44px contract', async ({ page }) 
     for (const control of [
         page.getByRole('button', { name: `Move ${PRIORITIES[0]} down, position 1 of 2` }),
         page.getByRole('button', { name: 'Save order' }),
+        page.getByRole('combobox', { name: 'Skill to add' }),
+        page.getByRole('button', { name: 'Add skill' }),
     ]) {
         const box = await control.boundingBox();
         expect(box?.height ?? 0, 'a skills planner control is not sized to the 44px contract')
@@ -191,4 +193,40 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     const results = await buildAxe(page).analyze();
 
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('adds a catalogue skill to a run that holds none (Slice 10)', async ({ page }) => {
+    await openPlanner(page);
+
+    const runUrl = page.url().replace(/\/skills$/, '');
+
+    // The picker is the run's way in: `openPlanner` writes a build target but no skill rows, so the
+    // four groups are empty and this control is the only way the run can gain its first skill.
+    const picker = page.getByRole('combobox', { name: 'Skill to add' });
+    await expect(picker).toBeVisible();
+
+    const options = await picker.locator('option').allTextContents();
+    const name = (options.find((text) => text.trim() !== 'Choose a skill') ?? '').trim();
+    expect(name, 'the picker offers at least one catalogue skill').not.toBe('');
+
+    // The editor's own accessible name per row, so this asserts the row exists as an editable thing
+    // rather than that the string appears somewhere on the page.
+    await expect(page.getByLabel(`Change status for ${name}`)).toHaveCount(0);
+
+    await picker.selectOption({ label: name });
+    await page.getByRole('button', { name: 'Add skill' }).click();
+
+    // `TrainingRunController::syncSkills` ends at `runs.cockpit` unconditionally (`:983`), because it
+    // is the record screen's endpoint that the planner borrowed. So the write is confirmed where the
+    // endpoint sends the Trainer, and the inventory is read back on the surface that owns it.
+    await page.waitForURL(/\/cockpit$/, WRITE);
+    await expect(page.getByText('Skill status saved.')).toBeVisible(WRITE);
+
+    await page.goto(`${runUrl}/skills`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByLabel(`Change status for ${name}`)).toHaveCount(1, WRITE);
+    // The offer is server-side filtered on the re-render, so a skill the run now holds is not offered.
+    await expect(page.getByRole('combobox', { name: 'Skill to add' }).locator('option', { hasText: name }))
+        .toHaveCount(0);
 });

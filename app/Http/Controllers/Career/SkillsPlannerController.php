@@ -51,6 +51,11 @@ final class SkillsPlannerController extends Controller
             // skills are read.
             'skills_sync_url' => route('runs.skills.sync', $run),
             'acquisition_options' => $this->acquisitionOptions(),
+            // Slice 10, the add affordance. The editor below can only edit the status of rows already
+            // in a group, so a run with no build target and no rows had no way to gain its first
+            // skill; this is the catalogue it may draw from, filtered server-side so the page never
+            // ships a skill the run already holds or the Global scope cannot offer.
+            'picker_skills' => $this->pickerSkills($run),
         ]);
     }
 
@@ -521,6 +526,29 @@ final class SkillsPlannerController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * The catalogue skills a Trainer can still add to this run: the Global scope every read path
+     * starts from (`ADR-0011` §2), less the rows the run already holds. The filter is one query here
+     * rather than a page-side subtraction, so the roster the picker offers and the rows the sync
+     * endpoint will accept cannot disagree about what is addable.
+     *
+     * `{id, name}` is the whole shape. The picker posts an id and prints a name; no surface reads a
+     * cost, a condition or a fit cell for a skill that is not on the run yet.
+     *
+     * @return list<array{id: int, name: string}>
+     */
+    private function pickerSkills(TrainingRun $run): array
+    {
+        return Skill::query()
+            ->availableOnGlobal()
+            ->whereNotIn('id', $run->skills->pluck('id'))
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(static fn (Skill $skill): array => ['id' => (int) $skill->id, 'name' => (string) $skill->name])
+            ->values()
+            ->all();
     }
 
     /**
