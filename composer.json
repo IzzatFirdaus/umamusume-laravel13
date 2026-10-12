@@ -63,6 +63,7 @@
         "lore": "@php tools/lore.php",
         "lore-code": "@php tools/lore.php code",
         "docs": "python tools/doc_census.py",
+        "docs-adr": "python tools/adr-check.py docs/adr",
         "lint": "pint --test",
         "fix": "pint",
         "typecheck": "npm run typecheck",
