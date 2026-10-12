@@ -30,7 +30,7 @@ uses(TestCase::class, RefreshDatabase::class)
 
 - The binding is scoped to `Feature`; `tests/Unit` runs without a database.
 - `withoutVite()` is applied globally to feature tests — do not repeat it per file.
-- Authenticate a feature test with the `actingAsAdmin()` helper from `tests/Pest.php`.
+- This repository has **no authorization layer by design** (PRD NFR-1): the framework `users` table and `User` model are unused defaults, and feature tests run **unauthenticated**. Do not add a `actingAsAdmin()`/`actingAs()` helper or a policy to a test. For anything auth-shaped, `AGENTS.md` §5 and §12 are the authority.
 - The test environment uses an in-memory SQLite database (see `phpunit.xml`).
 - Always create models via **factories** rather than direct `new` instantiation.
 - Use `$this->faker` or `fake()` for test data generation.
