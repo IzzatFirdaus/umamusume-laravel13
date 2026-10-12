@@ -72,8 +72,8 @@ Navigation shell: `resources/js/layouts/AppLayout.vue`, the Inertia SPA shell (`
 | SCR-CAR-008 | Legacy Select (wizard step 4)                   | Career        | Trainer | none required              | `GET /career/setup/legacy` (`career.legacy`), written by `PUT` (`career.legacy.store`)                                                                                                                                 | Implemented 2026-10-06 (D5-wizard); the six-node graph as nested list items, record-only, and the two library picks carried in the draft's `legacy_parents` key                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | SCR-CAR-009 | Support Deck Select (wizard step 5)             | Career        | Trainer | none required              | `GET /career/setup/deck` (`career.deck`), written by `PUT` (`career.deck.store`)                                                                                                                                       | Implemented 2026-10-06 (D6-wizard); six slots with OWNED/RENTED in the draft, seven types, the D6 analysis beside them. *Dated note 2026-10-10 (R2-06): the draft's flag is not the end of its road, it is Preflight's input. The step kept printing "The deck table has no column for it yet" after `fdebcc9` gave the table one; the sentence now says what the writers do, and `career-legacy-deck-steps.spec.ts` asserts it rendered*                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | SCR-CAR-010 | Career contract, "Preflight" (wizard step 6)    | Career        | Trainer | none required              | `GET /career/setup/preflight` (`career.preflight`), written by `PUT` (`career.preflight.store`)                                                                                                                        | Implemented 2026-10-06 (D7); the wizard's one write, composing the five entered steps and creating the run                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| SCR-CAR-011 | Career Cockpit (the run-scoped primary screen)  | Career        | Trainer | none required              | `GET /training-runs/{run}/cockpit` (`runs.cockpit`), the one write posting to `PUT /training-runs/{run}/turns/{turn}` (`runs.turns.update`)                                                                            | Implemented 2026-10-06 (D8); read-only, the action grid's seven entries each link to the screen that owns the action today, and the milestone timeline and the scenario panel are named absences. *Dated note 2026-10-07 (E1): the second absence is closed. The scenario region mounts `ScenarioPanel.vue` (`SCR-CAR-019`); the milestone timeline stays an absence in this region, where the left column renders the run race strip.* *Dated note 2026-10-09 (F2): the Cockpit owns the run-identity writes. Header edits (status, scenario, grade-point period) post through `runs.update`; the correction section selects any recorded turn via `?edit_turn=` and posts `runs.turns.update` / `runs.turns.destroy`; the delete door's second step names the run's cascading children (turns, race entries, turn events, skills, deck slots, and the linked Veteran).* |
-| SCR-CAR-012 | Training Decision detail                        | Career        | Trainer | none required              | `GET /training-runs/{run}/training` (`runs.training`), the one write posting to `POST /training-runs/{run}/turns` (`runs.turns.store`)                                                                                 | Implemented 2026-10-07 (D9); five option cards, the per-training yield and the failure rate held unsourced and rendered `N/A` with the exclusion in the `title`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| SCR-CAR-011 | Career Cockpit (the run-scoped primary screen)  | Career        | Trainer | none required              | `GET /training-runs/{run}/cockpit` (`runs.cockpit`), the one write posting to `PUT /training-runs/{run}/turns/{turn}` (`runs.turns.update`)                                                                            | Implemented 2026-10-06 (D8); read-only, the action grid's seven entries each link to the screen that owns the action today, and the milestone timeline and the scenario panel are named absences. *Dated note 2026-10-07 (E1): the second absence is closed. The scenario region mounts `ScenarioPanel.vue` (`SCR-CAR-019`); the milestone timeline stays an absence in this region, where the left column renders the run race strip.* *Dated note 2026-10-09 (F2): the Cockpit owns the run-identity writes. Header edits (status, scenario, grade-point period) post through `runs.update`; the correction section selects any recorded turn via `?edit_turn=` and posts `runs.turns.update` / `runs.turns.destroy`; the delete door's second step names the run's cascading children (turns, race entries, turn events, skills, deck slots, and the linked Veteran).* *Dated note 2026-10-10 (FD-4, phase G): the advisor rail gained a recorded-action slot, `components/career/RecordedActionCard.vue`, mounted through `NextDecision.vue` and fed by `advisor.decision.recorded_action`. It quotes the decision snapshot stored on the row when the action was taken, so it never re-advises an old turn, and it is empty for every run whose turns predate the snapshot column.* |
+| SCR-CAR-012 | Training Decision detail                        | Career        | Trainer | none required              | `GET /training-runs/{run}/training` (`runs.training`), the one write posting to `POST /training-runs/{run}/turns` (`runs.turns.store`)                                                                                 | Implemented 2026-10-07 (D9); five option cards, the per-training yield and the failure rate held unsourced and rendered `N/A` with the exclusion in the `title`. *Dated note 2026-10-10 (FD-4, phase G): the write now carries the action noun. `Train` posts `choice` as `training-<Stat>` for the card pressed, and `StoreTurnEntryRequest` refuses a value `App\Enums\TurnChoice` does not declare; the turn row stores it and `NextDecision::snapshotFor()` stores the advisor's payload beside it as it stood before the turn. The card's own readings are unchanged.*                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | SCR-CAR-013 | Race Decision                                   | Career        | Trainer | none required              | `GET /training-runs/{run}/races` (`runs.races.decision`), the one write posting to `POST /training-runs/{run}/races` (`runs.races.store`)                                                                              | Implemented 2026-10-07 (D10); the races at the turn being decided, the win figure held on `ADR-0016` and the readiness band pending the owner's ruling, both rendered `N/A`, and four of the brief's ten fields named absent with their reason                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | SCR-CAR-014 | Event Decision                                  | Career        | Trainer | none required              | `GET /training-runs/{run}/events` (`runs.events.decision`), the one write posting to `POST /training-runs/{run}/events` (`runs.events.store`)                                                                          | Implemented 2026-10-07 (D11); record-only: known outcomes are derived from this run's own recorded choices, the advisor refuses with its reason, and a choice without a recorded outcome carries the incomplete warning; no score or probability is computed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | SCR-CAR-015 | Inheritance Event                               | Career        | Trainer | none required              | `GET /training-runs/{run}/inheritance` (`runs.inheritance`), written by `POST` (`runs.inheritance.store`)                                                                                                              | Implemented 2026-10-07 (D12); record-only: predicted section shows sourced Spark probabilities and star-roll odds, observed section records the Trainer's entered inspiration outcomes via TurnEvent, milestone timeline with three fixed events                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -1599,6 +1599,7 @@ Any; no auth concept applies (PRD NFR-1).
 2. **Stat targets** — five numeric inputs, one per `config('scenarios.stat_order')` entry, each with its cap printed beside it (`ScenarioCaps::forRun`, the same call the turn validator makes, `ADR-0015`) and a labelled bar showing the entered value against that cap. The bar never renders without its number beside it, and it is not a readiness verdict: whether a target is reachable in the turns left is held computation in this repository.
 3. **Skill priorities** — free-text entry plus an ordered list with "Move up", "Move down" and "Remove" buttons, each at least 44px; no drag path is required (WCAG 2.5.7). One line states that a risk tolerance and per-skill marks (Required, High, Optional, Ignore) are not recorded.
 4. **Summary** — one sentence assembled by the page from the entered values alone (`ProvenanceBadge` state `calculated`), with an empty field named in the sentence rather than omitted.
+
 > _Dated amendment, 2026-10-12 (`ADR-0025`)._ The form is now four groups plus a summary: under the stat
 > targets sits **Stat ceilings**, four numeric inputs (the list arrives as `capStats`, so the page still
 > names no stat), each prefilled with the ceiling entered for that run and printing the scenario's
@@ -1614,7 +1615,6 @@ Any; no auth concept applies (PRD NFR-1).
 > `session('career.setup')` under their own `caps` key, not inside `build_target`
 > (`BuildTargetPayload::KEYS` is still exactly six keys), and `StartCareerRequest` carries them onto the
 > row Preflight creates. The paragraph above keeps its original wording.
-
 
 `ProvenanceBadge.vue` is the single owner of the four provenance states from `design-2.0` §49: ✓ Confirmed, ∑ Calculated, ~ Estimated, ? Unknown, each a distinct glyph and a distinct word held in one map, and no other source repeats either. The accessible name is the state word plus the caller's `title` when one was given; the glyph is `aria-hidden="true"`; and the badge sits beside the figure it labels, never in a page-level legend (Law of Proximity).
 
@@ -1838,6 +1838,11 @@ The recommendation stays above the actions on mobile (design-2.0 §40), and the 
 takes the left column, and `RaceCalendar.vue` is unchanged and stays the run record screen's component
 (`SCR-RUN-001`). Gap 2 below carries the reason and the original sentence.*
 
+*Dated note 2026-10-10 (FD-2, phase G): `components/career/NextDecision.vue` is now the recommendation
+surface on this screen, and `AdvisorRail.vue` is the rail that hosts it. `RecommendationCard.vue` is
+mounted here no longer — it is unchanged and stays the Training decision screen's card (`SCR-CAR-012`).
+The wire shape and the state table below move with it; the sentences above are kept as written.*
+
 *Dated note 2026-10-08: Energy, Mood, Fans and Skill Points are now printed once, by
 `CareerStatePanel.vue`, beside the five stats the advisor ranks. `CareerHeader.vue` rendered the same four
 values as well, in the same components, on the same screen — a reading shown twice is a reading that can
@@ -1851,6 +1856,116 @@ keeps trainee, scenario, year, month, turn and the scenario's own resources. **N
 
 `advisor` is exactly `{ action, band, reasons, alternative, risk }` (plan §8, "Recommendation contract (D8)"). There is **no score and no numeric confidence**: both are unsourced (`ADR-0001` §3) and C2's `Advice` has no field for either. `band` is `AtOrAboveAdvisory` / `BelowAdvisory` / null, printed as a word plus a glyph so the state is never colour-only. `risk` is null in this slice: a delay or a reachability verdict is held computation (`ADR-0020` §3).
 
+*Dated note 2026-10-10 (FD-2, phase G): that sentence describes the D8 contract and is kept as written.
+`advisor` is now `{ decision, finale }`, where `decision` is the frozen six-key `NextDecision` shape
+`{ priority, recommended, alternatives, why, switch_if, refusal }` and `finale` stays a sibling rather
+than a seventh key. Four changes travel with it, and the absences are the design:*
+
+- ***`band` is retired from the wire.** Energy is either recorded — as a figure or as the Trainer's own
+  band word — and the engine ranks, or it is absent and the engine refuses. `TrainerAdvisor` keeps its
+  band internally; the page no longer prints a band sentence, and `SCR-CAR-012` still does, which is a
+  cross-screen wording divergence for the phase-G consistency pass to settle.*
+- ***`risk` is retired too**, and its honest home is `alternatives[].tradeoff`: the engine's own line for
+  the alternative, not a second opinion. Nothing is predicted in either place.*
+- ***`reasons` becomes `why`, and every row carries a provenance state and a `title`.** Only `confirmed`
+  (a declared constant or a stored reading printed as read) and `calculated` (this tool's arithmetic over
+  readings) appear: `estimated` would claim the opt-in modelled figure `ADR-0001` §3 leaves unbuilt, and
+  `unknown` beside an absence was retired by owner ruling 2a. Where a figure rests on a constant, the
+  source and the read date print in the visible text, not only in the tooltip (ruling 5a, `ADR-0001` §2
+  and §7).*
+- ***Refusal is one field with two classes, printed as two copies** (design-2.0 §2):
+  "Not enough information" when an input is absent, with `refusal.missing` naming it, and "No suitable
+  action found" when the ranking ran and found nothing short, with `refusal.missing` empty.*
+
+*`NextDecision` wraps `TrainerAdvisor`; the ranking rules, the deficits and every reason sentence are
+still the engine's, unchanged. `resources/js/types.ts` carries the contract and
+`app/Services/Advisor/NextDecision.php` produces it.*
+
+*Dated note 2026-10-10 (FD-3, phase G): `decision` gains a seventh key, `objectives`, and a second
+component, `components/career/ObjectiveRow.vue`. One query feeds both readers —
+`CockpitController::obligationSlots()` is the only place this screen reads the mandatory rows of
+`race_catalog_slots`, and the run race strip filters its result instead of asking again (`ADR-0015`).*
+
+- ***A row's eight fields are the contract**: `label`, `state`, `due_turn`, `due_label`, `consequence`,
+  `source`, `badge`, `title`. There is no url field, so the strip's door to the Race decision screen is the
+  page's own grid href passed down, not a payload key.*
+- ***Four states are reachable; `missed` is not.** `upcoming`, `current`, `completed` and `unknown` each
+  compare a stored reading. A slot behind the run with no entry is the same stored fact as a slot not
+  entered yet, and no source in this repository says a mandatory race becomes unattainable once its turn has
+  passed — so `missed` is produced by no code path here and the rail prints it as `Due` / "due and not
+  recorded" instead. G3's milestone tracker carries the same gap.*
+- ***`unknown` is the undated obligation, not a missing one.** `race_catalog_slots.turn` is null for the
+  post-December block, which sits outside the 24-turn grid. Ranking it would mean reading a null turn as
+  zero, so the row prints `N/A` with the reason in its `title` and sorts last within its class.*
+- ***A fan gate is a column, never a literal.** The threshold prints from `race_catalog_slots.fans_needed`
+  as stored per slot; no 60,000 / 70,000 / 120,000 appears in a component, a controller or a config entry.
+  `tests/Feature/CockpitObjectivesTest.php` proves it by writing a different value to the row and asserting
+  the printed figure moves.*
+- ***The badge is `calculated` on every row**, because a state is a comparison and the provenance table bars
+  `confirmed` from anything the tool compared (`docs/proposals/provenance-and-absence-contracts.md` §1). The `title` names
+  both operands.*
+- ***`consequence` is always null today** — no source states what changes when an obligation is missed — and
+  the row renders nothing for it rather than inventing a sentence.*
+- ***Priority precedence changed.** A `current` obligation now owns the one-line `priority` ahead of the
+  advisor's own refusal, because the obligation is actionable whatever the ranking is missing:
+  `screen-spec-2.0.md:1574-1582` puts mandatory objectives at tier 2 and build targets at tier 4. The
+  refusal still ships in `refusal`, so the rail still says what it cannot rank.*
+- ***Ordering is config, at the top level.** `config/scenarios.php`'s `objective_priority` decides which
+  class ranks first, so a fifth scenario inherits it with no component edit (G-33). The list is this tool's
+  proposal beyond tier 4 and no source weights it — recorded as an owner question in
+  `docs/research-scratch/SLICE-RECORDS.md` G2 §5.3.*
+- ***`grade_checkpoint` is declared and produces no row on purpose.** Trackblazer's grade ladder already
+  renders from `TrackblazerGradeSection.periods` on its own panel, and duplicating those figures onto the
+  rail would be a second representation of one fact.*
+- ***FD-4 did not land.** The reconciliation loop needs a stored snapshot of the decision at the moment of
+  the action, and the action noun is not persisted when a turn succeeds (`TrainingRunController::turnAttributes()`
+  drops `choice`; only a failure event carries `choice_label`). A landed test also pins that a correction
+  does **not** append (`CareerTimelineTest.php:118-123` asserts one entry after a correction). `SCR-CAR-017`
+  is therefore unchanged, and `recorded_action` is absent from the contract. Owner decision, with the three
+  costed shapes, in the same record at G2 §4.*
+
+*Dated note 2026-10-10 (FD-4, phase G): the bullet above is kept as written and is now superseded on every
+point. Rulings D-1a to D-1d resolved the persistence question, and FD-4 landed:*
+
+- ***`decision` has an eighth key, `recorded_action`**, `null` for a run that has recorded no action and for
+  every row written before this slice (those rows hold no forecast to quote). `NextDecision::snapshotFor()`
+  writes the payload the server computed at the moment of the action, and `recorded_action.decision` reads
+  that stored copy rather than recomputing one, so a card three turns on still shows what was advised then.
+  A snapshot embeds no previous snapshot (`build()`'s fourth argument), which is what stops the JSON column
+  growing with every turn.*
+- ***`choice` is persisted.** `TrainingRunController::turnAttributes()` now whitelists it and
+  `StoreTurnEntryRequest` validates it against `App\Enums\TurnChoice`, whose seven values are the literals
+  this application already produces: `training-<Stat>` per entry of `config('scenarios.stat_order')`, and
+  the two keys `TrainingRunController::turnChoices()` declares. No `Duel*`, `Race`, `Event` or `Shop` case
+  exists, because no write path can produce one (ruling D-5 keeps the finale's duels display-only).
+  A browser-posted `decision_snapshot` is ignored: the request has no rule for it, so `validated()` cannot
+  carry one and the snapshot on the row is the engine's own.*
+- ***The correction test pinned a shape, not a ban.** `CareerTimelineTest.php:118-123` edits a row at the
+  model layer rather than through the correction write, so correction-by-append cannot reach it, and it
+  ships unedited and green. What the schema guarantees is now one **original** row per turn
+  (`turn_entries_run_turn_original_unique`, `WHERE corrected_from IS NULL`), and the predicate is that and
+  not `superseded_by IS NULL` because a correction is inserted while the row it replaces is still current.
+  Measured on a scratch database, where the `superseded_by` predicate rejected every append.*
+- ***The append is storage-level only in this slice.** `runs.turns.update` still writes in place, so
+  `SCR-CAR-017` continues to render one row per turn and `corrected_from` prints as absent. Switching that
+  write is a read-path change across 58 turn-entry call sites in 23 files, recorded as an owner decision in
+  `docs/research-scratch/SLICE-RECORDS.md` G2-FD4.*
+- ***The card is `components/career/RecordedActionCard.vue`**, mounted in `NextDecision.vue`'s rail slot
+  rather than as a ninth key or a separate region. It prints three states: no card when nothing is recorded,
+  a greyed card with a polite `role="status"` asking for the result, and forecast beside actual closed by
+  the word `Agreed` or `Different` in bold — no mark, because `CareerBuildTargetTest` keeps `✓` and `∑` inside
+  `ProvenanceBadge.vue` alone. The reconciliation compares the action recorded to the action
+  recommended; it never compares gains, and `expected` quotes the stored `recommended.benefit`.*
+
+| Objective state                   | Behavior                                                                                                                                                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| No obligation                     | The strip renders nothing at all. A scenario whose matrix turns `race_calendar` off composes no obligations, and an empty box would claim a calendar it does not have.                                                          |
+| One, ahead                        | `○ Ahead`, the label with its fan gate where the slot carries one, the turn and year the calendar states, a `Calculated` badge, and no door.                                                                                     |
+| One, due and not recorded          | `◉ Due` plus a `▲` critical `AlertRow` reading "… is due and not recorded.", and the priority line above names the same obligation. This is the only state that links to the Race decision screen.                              |
+| One, recorded                     | `● Met`. The entry that points at the slot is what makes it met; `placement` is never read for the state.                                                                                                                       |
+| One with no turn in the source     | `○ Undated`, `N/A` with the reason as its `title`, sorted last in its class. Never ranked against a turn it does not have.                                                                                                       |
+| Loading, error                    | Page-level, unchanged: `ADR-0007` reserves a custom loading state for user-initiated async actions, and a failed visit is the screen's existing `role="alert"` line.                                                             |
+
 *Dated note 2026-10-08: the card's block title is the word **Recommendation** on an `h3`, not the brief's
 "★ Best action" eyebrow (`screen-spec-2.0.md:1321`, reference only). Two reasons travel together. The
 advisor's verdict is the largest deficit against the Trainer's own target (`TrainerAdvisor` rule 4), which
@@ -1863,10 +1978,10 @@ the screen's one accented border.*
 | State                                      | Behavior                                                                                                                                                                                                                                                                       |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Empty (no turn logged)                     | A `role`-less panel headed "No turn recorded yet" says what is missing (Energy, Mood, Fans, Skill Points and the five stats), why it matters (the advisor has nothing to rank), and what to do (a link labelled "Record the first turn through Training", `Cockpit.vue:583`). The grid still renders; nothing is a zero.   |
-| Energy absent                              | C2 declines to rank, and the page carries the refusal across: `band` and `action` are null and the one reason line is C2's own sentence. The card prints "Recommendation unavailable because Energy has not been entered." No band, no ranking, no marker.                     |
-| Energy present, no target                  | `band` is set, `action` is null, and the reason line says no build target is set. No marker.                                                                                                                                                                                   |
-| Energy present, target met                 | `band` is set, `action` is null, and the reason line says every stat is at or above its target. No marker.                                                                                                                                                                     |
-| Energy present, deficit                    | `action` is the largest-deficit stat (or `Rest` below the advisory line), `reasons` carries C2's own reason plus the Energy the action leaves behind, and exactly one grid entry carries `RECOMMENDED`.                                                                        |
+| Energy absent                              | The engine declines to rank and `decision.recommended` is null while `decision.refusal` carries the class, the reason and `missing: [Energy]`. The rail prints "Not enough information to recommend an action.", the engine's own sentence, and the missing input. No recommendation block, no marker.                     |
+| Energy present, no target                  | `recommended` is null, `refusal.missing` is `[build target]`, and the refusal names the absent input rather than a deficit. No marker.                                                                                                                                                                                   |
+| Energy present, target met                 | The ranking ran and found nothing short: `refusal.missing` is empty and the rail prints "No suitable action found." with the sentence that says every stat reaches its target. No marker.                                                                                                                              |
+| Energy present, deficit                    | `recommended` names the largest-deficit stat (or `Rest` below the advisory line) with its door and its benefit lines — the engine's own reason plus the Energy the action leaves behind — `alternatives` carries the next option and what it costs, `why` is the provenance list, and `switch_if` the conditions that would change the answer. Exactly one grid entry carries `RECOMMENDED`. |
 | Missing value in the header or the panel   | `N/A` with a `title` naming which half of the fact is missing. Never a default, never a dash (`AGENTS.md` §5, D-220).                                                                                                                                                          |
 | Loading                                    | Page-level (ADR-0007): `role="status"` "Loading…" while a visit is in flight, because the only user-initiated async actions are the calendar's year tabs and the correction. No cold-load skeleton.                                                                            |
 | Error (a visit failed)                     | `role="alert"`: "That screen did not load. Nothing was saved; try again." Inertia's `invalid` and `exception` are both cancelable and return `false`, so this is the single surface.                                                                                           |
@@ -3078,7 +3193,7 @@ flowchart LR
     L --> I[SCR-RUN-004/005 import] -->|commit| D
     D -->|export csv/json| X[download]
     D -->|delete confirm| L
-```text
+```
 
 Failure paths: create/validation back to create with `old()`; import rows fail validation on either POST → form re-renders, nothing written. Authorization boundary: none (local tool); run ownership is enforced only for nested turn routes (404).
 
@@ -3086,7 +3201,7 @@ Failure paths: create/validation back to create with `old()`; import rows fail v
 
 Start/Completion: SCR-RUN-003. Two stages on one endpoint; the split exists so a commit is always a second, deliberate action (D-51), enforced server-side by the `previewed` marker that only a preview response renders.
 
-```mermaid
+```
 flowchart LR
     A[choice step: activity radio] --> B[enter totals]
     B -->|stage=preview POST → PRG GET| P[preview bubbles = entered − stored previous]
@@ -3094,7 +3209,7 @@ flowchart LR
     P -->|invalid| B
     B -->|first turn: empty preview, still committable| W
     A -.raw escape hatch.-> H[details form writes on submit] --> W
-```text
+```
 
 Alternative path: hatch (D-53 reachable, not default) skips preview. Failure path: any rejection rehydrates the rail (and only the rail, keyed on its `stage` marker) — the two entry paths never fill each other. Notes: preview is arithmetic on two Trainer rows, never a projection; no odds shown (Planner Rule 5).
 

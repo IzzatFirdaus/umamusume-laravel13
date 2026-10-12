@@ -282,6 +282,16 @@ moved, 13 buckets, the two executor defects fixed first) is the dated status not
 | The D4 Build Target and ProvenanceBadge slice plan: the four-state badge contract, the two challenged conflicts, four open questions                                                              | `docs/proposals/frontend-development-plan.md` §8.5                                                                                                                                                                                                                                                                                              |
 | The E2 URA panel slice plan (SCREEN-014, goals + Happy Meek, the first `register()` call)                                                                                                         | `docs/proposals/frontend-development-plan.md` §9.2                                                                                                                                                                                                                                                                                              |
 | The D16 save-and-compare veteran library slice: the two-column comparison table, the four-at-once cap, and the `veterans[]=N` serialisation mismatch that keeps its gate at 8/9                   | `docs/research-scratch/SLICE-RECORDS.md` §`## D16-SAVE-VETERAN-2026-10-07.md`                                                                                                                                                                                                                                                                   |
+| The four scenario implementation plans (Our Grand Concert, Trackblazer, Unity Cup, URA Finale): screen deltas, caps, panels, MVP sets, acceptance criteria                                                                   | `PROCESS-PLANS.md`, sections `## Our-Grand-Concert-plan.md`, `## Trackblazer-plan.md`, `## Unity-Cup-plan.md`, `## URA-Finale-plan.md` (Round 14, augment-only)                                                                                                                   |
+| The Trainer Desk 2.0 G/D/E prompt sets (program prompts that opened the G and D/E slices)                                                                                                                                  | `PROCESS-PLANS.md`, sections `## Trainer-Desk-2.0-G-Prompts.md`, `## Trainer-Docs-2.0-D-Prompts.md`, `## Trainer-Docs-2.0-E-Prompts.md` (Round 14, augment-only)                                                   |
+| The legacy Umamusume Progress Tracker run records and the URA Finale import record that reads them                                                                                                                           | `TRAINING-RUN-IMPORTS.md` (the Round 14 master), sections `## Umamusume_Progress_Tracker_Runs.md` and `## ura-finale-runs.md`                                                                                       |
+| The Trainer Desk 2.0 design target (visual/interaction spec for the Inertia + Vue rewrite; reference only, not authorization)                                                                                                | `DESIGN-CORPUS.md`, section `## design-2.0.md` (Round 14, augment-only)                                                                                                                                             |
+| The provenance-and-absence contracts proposal (rendered provenance badges, the three axes, the ten owner rulings) and the 2.0 screen-set target (SCREEN-001..024, governance holds)                                          | `PLANS-AND-BRIEFS.md`, sections `## provenance-and-absence-contracts.md` and `## screen-spec-2.0.md` (Round 14, augment-only)                                                                                       |
+| The external reviewer's repository-grounded UI/UX brief (CONFIRMED/DOCUMENTED/HISTORICAL/INFERRED/PROPOSED labelling, dashboard + cockpit homes, the stat-denominator defect)                                                | `UX-DELIVERABLES.md`, section `## ui-ux-application-context-brief.md` (Round 14, augment-only)                                                                                                                       |
+| The Rice Shower / Unity Cup UX walks: first pass, second pass, resolutions, and the R2-01..R2-20 reconciliation against code                                                                                                 | `AUDIT-AND-VERIFICATION.md`, sections `## rice-shower-unity-cup-ux-walk.md`, `## rice-shower-unity-cup-ux-walk-2.md`, `## rice-shower-unity-cup-ux-walk-resolutions.md`, `## rice-shower-unity-cup-round2-reconciliation.md` (Round 14, augment-only) |
+| The 68-frame `[Global]` client capture note behind the Rice Shower walk: cap readings, run-surface evidence, and the hint-ladder provenance                                                                                 | `RACE-AND-SLICE-RESEARCH.md`, section `## [Rosy_Dreams]Rice_Shower_Unity-Cup.md` (Round 14, augment-only)                                                                                                            |
+| The G1/G2 capability-audit, reconciliation and FD-4 slice records (slice verification class)                                                                                                                                | `SLICE-RECORDS.md`, sections `## G1-DECISION-CONTRACT-2026-10-10.md`, `## G2-RECONCILIATION-2026-10-10.md`, `## G2-FD4-PLAN-2026-10-10.md`, `## G2-FD4-RULINGS-2026-10-10.md`, `## G2-FD4-SLICEPLAN-2026-10-10.md` (Round 14) |
+| The 2026-10-12 Gemini Deep Research reconciliation: the claim ledger (A–F), the 12 peer-check resolutions, and the corrected Max-Stat cap layer | `AUDIT-AND-VERIFICATION.md`, section `## Gemini Deep Research reconciliation, 2026-10-12` |
 
 ### Round 13 (2026-10-07, owner-named) — two scratch files into the files that owned their subject
 
@@ -298,9 +308,50 @@ repaints were made before the delete so no live pointer names a removed file. `S
 pre-existing mangled UTF-8 sequences (double-encoded em dashes `â€"`); it was restored from git and the new
 section written through a UTF-8 no-BOM read-modify-write so the append did not add further corruption.
 
+### Round 14 (2026-10-10) — the live source files moved under the masters that own their subject, augment-only
+
+A set of live repository files — scenario implementation plans, the Trainer Desk 2.0 prompt sets, the
+legacy run records, the 2.0 design targets, an external reviewer brief, and the Rice Shower / Unity Cup
+audit set — was embedded into the masters that own their subject. Unlike the earlier rounds, this was an
+**augment pass, not a consolidation**: every source file remains at its own path, nothing was deleted, and
+no citation was repointed, because each source is a live document (an open plan, a prompt set still
+dispatching slices, or an audit record still being appended to). One new master was created, the first
+since Round 16's `UX-DELIVERABLES.md`: `TRAINING-RUN-IMPORTS.md`, which owns the legacy tracker run records
+and the URA Finale import record that reads them.
+
+| Source file (all live, all still in place)                        | Lines | New home                                                                                         |
+| ----------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------ |
+| `docs/Our-Grand-Concert-plan.md`                                  | 1,145 | `PROCESS-PLANS.md`, section `## Our-Grand-Concert-plan.md`                                       |
+| `docs/Trackblazer-plan.md`                                        | 583   | `PROCESS-PLANS.md`, section `## Trackblazer-plan.md`                                             |
+| `docs/Unity-Cup-plan.md`                                          | 561   | `PROCESS-PLANS.md`, section `## Unity-Cup-plan.md`                                               |
+| `docs/URA-Finale-plan.md`                                         | 381   | `PROCESS-PLANS.md`, section `## URA-Finale-plan.md`                                              |
+| `docs/Trainer-Desk-2.0-G-Prompts.md`                              | 1,046 | `PROCESS-PLANS.md`, section `## Trainer-Desk-2.0-G-Prompts.md`                                   |
+| `docs/Trainer-Docs-2.0-D-Prompts.md`                              | 542   | `PROCESS-PLANS.md`, section `## Trainer-Docs-2.0-D-Prompts.md`                                   |
+| `docs/Trainer-Docs-2.0-E-Prompts.md`                              | 230   | `PROCESS-PLANS.md`, section `## Trainer-Docs-2.0-E-Prompts.md`                                   |
+| `docs/Umamusume_Progress_Tracker_Runs.md`                         | 2,521 | `TRAINING-RUN-IMPORTS.md`, section `## Umamusume_Progress_Tracker_Runs.md`                       |
+| `docs/imports/ura-finale-runs.md`                                 | 66    | `TRAINING-RUN-IMPORTS.md`, section `## ura-finale-runs.md`                                       |
+| `docs/proposals/design-2.0.md`                                    | 1,652 | `DESIGN-CORPUS.md`, section `## design-2.0.md`                                                   |
+| `docs/proposals/provenance-and-absence-contracts.md`              | 839   | `PLANS-AND-BRIEFS.md`, section `## provenance-and-absence-contracts.md`                          |
+| `docs/proposals/screen-spec-2.0.md`                               | 1,787 | `PLANS-AND-BRIEFS.md`, section `## screen-spec-2.0.md`                                           |
+| `docs/research/ui-ux-application-context-brief.md`                | 543   | `UX-DELIVERABLES.md`, section `## ui-ux-application-context-brief.md`                            |
+| `docs/audits/rice-shower-unity-cup-ux-walk.md`                    | 957   | `AUDIT-AND-VERIFICATION.md`, section `## rice-shower-unity-cup-ux-walk.md`                       |
+| `docs/audits/rice-shower-unity-cup-ux-walk-2.md`                  | 941   | `AUDIT-AND-VERIFICATION.md`, section `## rice-shower-unity-cup-ux-walk-2.md`                     |
+| `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md`        | 495   | `AUDIT-AND-VERIFICATION.md`, section `## rice-shower-unity-cup-ux-walk-resolutions.md`           |
+| `docs/audits/rice-shower-unity-cup-round2-reconciliation.md`      | 169→272 | `AUDIT-AND-VERIFICATION.md`, section `## rice-shower-unity-cup-round2-reconciliation.md`       |
+| `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md`                      | 776   | `RACE-AND-SLICE-RESEARCH.md`, section `## [Rosy_Dreams]Rice_Shower_Unity-Cup.md`                 |
+
+Verification, per the discipline's line-by-line rule: every non-blank line of each source was found in its
+destination, allowing the one-level heading demotion, before this round was registered (0 missing in each).
+Three defects were caught and fixed in the same pass: two prose lines that begin with `#7` (a numbered
+cross-reference, not a heading) had been given a second `#` by the demotion pass in the Trackblazer and
+Unity Cup plan sections, and the round2-reconciliation section had gone stale the same day because its
+source is a live record still being appended to; both were corrected and the round2 section was regenerated
+from the current source. The `TRAINING-RUN-IMPORTS.md` master is untracked and carries the new-run
+documentation for the `UraFinaleRunsSeeder`.
+
 ### Deliberate exceptions, outside the masters
 
-Two files stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass
+Three entries stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass
 does not "consolidate" them and destroy the reason they exist.
 
 | File                                                                | Why it stays                                                                                                                                                                                                                     |
@@ -317,24 +368,25 @@ Future agents must update these master files instead of creating new top-level m
 
 Content that does not fit any existing master should be proposed to the owner with a recommendation for which master to extend, rather than creating a new file. The Provenance section of each master should be updated whenever new content is appended to record the addition.
 
-### Root directory (owner instruction 2026-10-02)
+### Root directory (owner instruction 2026-10-02; corrected 2026-10-12)
 
-No new documentation file is created in the repository root, and no new documentation content is added there either: it goes into the relevant master above. The root files the repo's documentation precedence and role ownership already name form a standing set and stay put: `AGENTS.md`, `CLAUDE.md`, `PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `CONSTRAINTS.md`, `DESIGN.md`, `KNOWN-ISSUES.md`, `PLAN.md`, `README.md`. That list is exhaustive; a root markdown file not in it is unconsolidated by definition.
+No new documentation file is created in the repository root, and no new documentation content is added
+there either: it goes into the relevant master above. The root markdown files form a standing set
+classified below. A root markdown file not in this table is unconsolidated by definition.
 
-> **Corrected forward 2026-10-03 (Round 8, owner-authorized).** The standing set still holds: no file
-> was deleted from the root, and the ten names above all still exist and still resolve. What changed is
-> that three of them are now pointer stubs whose binding content lives in a master: `CONSTRAINTS.md`
-> → `GOVERNANCE.md` section "CONSTRAINTS.md (root quality bar, C-1 to C-9)"; `PLAN.md` →
-> `PROCESS-PLANS.md` section "PLAN.md (root frontend slice plan and owner rulings)"; and
-> `KNOWN-ISSUES.md` → `AUDIT-AND-VERIFICATION.md` section "KNOWN-ISSUES.md (defect register)", with the
-> root register **still the live append target** for new KI entries. "Stay put" keeps its meaning: the
-> names do not move, citations resolve, and the gate precedence chain is unchanged. The rest of the set
-> (`AGENTS.md`, `CLAUDE.md`, `README.md`, `PRD.md`, both `ARCHITECTURE` files, root `DESIGN.md`) holds
-> its full content at the root as before.
+| Category | Files | Notes |
+| --- | --- | --- |
+| **Authority documents** (full content at root) | `AGENTS.md`, `CLAUDE.md`, `README.md`, `PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `DESIGN.md` | Governance, coding rules, onboarding, product truth, system design, visual system |
+| **Pointer stubs** (binding content in masters) | `CONSTRAINTS.md` → `GOVERNANCE.md` §"CONSTRAINTS.md (root quality bar, C-1 to C-9)"; `PLAN.md` → `PROCESS-PLANS.md`; `KNOWN-ISSUES.md` → `AUDIT-AND-VERIFICATION.md` §"KNOWN-ISSUES.md (defect register)" | Root register still the live append target for new KI entries |
+| **Screen behavior** | `SCREEN_SPEC.md` | Per-screen states, workflows, §8 authority table |
+| **Generated tooling artifacts** (do not hand-edit) | `PRODUCT.md` (impeccable plugin), `SKILL.md` (skill registry refresh) | Generator-owned; hand edits lose to regeneration |
+| **Change/version/setup docs** | `CHANGELOG.md`, `VERSION.md`, `MCP_SETUP.md` | Historical record, version metadata, MCP setup notes |
 
-The standing set is documentation. Two root files are generated tooling artifacts and are exempt from this clause by type, not by name: `PRODUCT.md`, owned by the `impeccable` plugin, which carries `<!-- impeccable:product-schema 1 -->` and rewrites the file on its next pass, and `SKILL.md`, the human-readable half of the skill registry pair recorded in `GOVERNANCE.md` ("`.agents/skills/skills.json` (machine), `SKILL.md` (human)"). Neither is documentation to consolidate, and hand-editing either one loses to the generator. `PRODUCT.md` is refreshed by the plugin; `SKILL.md` is rebuilt by `refresh-skill-registry`, which scans every skill scope from disk, because the file's own description claims a complete roster while its content omits `~/.qoder/skills` and every plugin skill.
-
-`source.md` (171 lines, a pasted Laravel bootstrap prompt) was deleted on 2026-10-02. It was neither documentation nor a tooling artifact, and the only substantive sentence about it, `docs/UMAMUSUME_REFERENCE.md:2135`, is a ruling that it never was a source registry. That ruling stays verbatim with the deletion recorded beside it. Other apparent citations were substring noise inside `ADR-0013-character-profile-source.md`.
+> **Corrected 2026-10-12.** The prior version of this table listed only ten files and claimed the set was
+> exhaustive. The actual root directory carries 17 markdown files. The four added categories above
+> (screen behavior, generated artifacts, change/version/setup docs) were omitted. The three pointer
+> stubs (`CONSTRAINTS.md`, `PLAN.md`, `KNOWN-ISSUES.md`) still resolve through their masters; the
+> gate precedence chain is unchanged.
 
 ### Disposition of the strays (executed 2026-10-02)
 
@@ -349,4 +401,7 @@ Four files were unclassified. They are resolved, not merely recorded, and the re
 | `docs/SKILL_AUTOMATION.md`                               | **Deliberate exception, left in place.** 90 lines, cited by `KNOWN-ISSUES.md`. It documents automation for the skill layer that lives in `.ai/skills/`, so it belongs with the code-side tooling tree, not in a research master. Registered in the Routing Table below.                                                                                                                                               |
 | `docs/design-research/prototypes/superseded/README.md`   | **Deliberate exception, left in place.** 16 lines whose entire function is to stand in a directory of four retired prototypes and say they are not the current design. Moving it destroys the warning it exists to give. Registered in the Routing Table below.                                                                                                                                                       |
 
-No repo-level protected-file registry exists to check future strays against: the pre-consolidation inventory that carried one is, per `CONSOLIDATION-LOG.md`, absent from disk and from all git history. The reproducible census in `CONSOLIDATION-LOG.md` §Census is the substitute.
+No repo-level protected-file registry exists to check future strays against: the pre-consolidation
+inventory that carried one is, per `CONSOLIDATION-LOG.md`, **no longer on disk but its census
+survives in the log**. The reproducible census in `CONSOLIDATION-LOG.md` §Census is the
+substitute.
