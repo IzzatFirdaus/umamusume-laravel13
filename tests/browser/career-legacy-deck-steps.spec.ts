@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { buildAxe } from '../utils/accessibility';
 
 /*
  * Rendered-copy and behaviour evidence for the career setup wizard's steps 4 and 5 (`SCR-CAR-008`
@@ -173,6 +174,44 @@ test.describe('Setup step 4 — Legacy', () => {
             'rank-letter-parent_a-error',
         );
         await expect(page.getByText('Legacy recorded.')).toHaveCount(0);
+    });
+
+    test('every Spark control carries an accessible name, on a parent and on a grandparent alike (R3-16)', async ({ page }) => {
+        await hydrate(page, '/career/setup/legacy');
+
+        // The walk reached these rows by DOM reads because it could not name them. A Spark row renders
+        // only after it is added, so the screen's other cases never put one in the tree.
+        await page.getByRole('button', { name: 'Add Spark' }).first().click();
+
+        // The disclosure's `<summary>` is exposed as a named generic, not a button, so the row is addressed
+        // by its text. The `Add spark to grandparent …` control inside it is a real button.
+        const grandparent = page.locator('details').filter({ hasText: 'Add spark to grandparent Grandparent A1' });
+        await grandparent.locator('summary').click();
+        await grandparent.getByRole('button', { name: 'Add spark to grandparent Grandparent A1' }).click();
+
+        // The direct form of the finding: both `Target` selects answer to the name their label states.
+        // An unnamed control is not matched here, so this count is the assertion and not a precondition.
+        await expect(page.getByRole('combobox', { name: 'Target' })).toHaveCount(2);
+        await expect(page.getByRole('combobox', { name: 'Applies to' })).toHaveCount(2);
+
+        const results = await buildAxe(page).analyze();
+        const unnamed = results.violations.filter((violation) => violation.id === 'label');
+        expect(unnamed, JSON.stringify(unnamed, null, 2)).toEqual([]);
+    });
+
+    test('a grandparent rank read off the client reaches the contract (R3-09)', async ({ page }) => {
+        await hydrate(page, '/career/setup/legacy');
+
+        // The rank fields on a grandparent, entered in the parents' own words. Walk 3 read four of the six
+        // ranks in the tree off the grandparents and the step had nowhere to put any of them.
+        await page.locator('#ancestor-parent_a-0').fill('Daiwa Scarlet');
+        await page.locator('#ancestor-rank-letter-parent_a-0').fill('UG');
+        await page.getByRole('button', { name: 'Save Legacy' }).click();
+        await expect(page.getByText('Legacy recorded.')).toBeVisible();
+
+        await hydrate(page, '/career/setup/preflight');
+
+        await expect(page.getByText(/Grandparent A1:\s*Daiwa Scarlet\s*Rank UG/)).toBeVisible();
     });
 });
 

@@ -340,3 +340,25 @@ test('meets the 44px target floor and the axe A plus AA bar', async ({ page }) =
     const results = await buildAxe(page).analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
+
+/**
+ * R3-16. The band select renders only under the `Band` radio, so the scan above never puts it in the tree,
+ * and the third walk found it with no accessible name. It is named the way the Cockpit's own correction
+ * form names its band control.
+ *
+ * A separate case because the screen's whole-page scan is red on a pre-existing `definition-list`
+ * violation in `TrainingCard.vue` (a provenance paragraph sits as a direct `dl` child); that defect is not
+ * this control's, and the `label` rule is asserted on its own here.
+ */
+test('the Energy band select carries an accessible name (R3-16)', async ({ page }) => {
+    await openTrainingDetail(page);
+
+    await page.getByRole('radio', { name: 'Band' }).check();
+
+    await expect(page.locator('#turn-energy-band')).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Energy band' })).toBeVisible();
+
+    const results = await buildAxe(page).analyze();
+    const unnamed = results.violations.filter((violation) => violation.id === 'label');
+    expect(unnamed, JSON.stringify(unnamed, null, 2)).toEqual([]);
+});

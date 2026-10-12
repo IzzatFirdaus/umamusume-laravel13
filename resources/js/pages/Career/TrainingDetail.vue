@@ -445,6 +445,7 @@ const capFor = (label: string): number =>
                         id="turn-energy-band"
                         v-model="form.energy_band"
                         name="energy_band"
+                        aria-label="Energy band"
                         :aria-describedby="describedBy('energy_band')"
                         class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
                     >
