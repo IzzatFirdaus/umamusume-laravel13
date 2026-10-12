@@ -43,14 +43,13 @@ why a pinned hash is the wrong mechanism — a stale hash answers `200` with sta
 **2. Global filtering happens at read, not at write.** Every row imports, carrying the server flag the
 source states; the `[Global]` subset is what every Trainer-facing surface selects. Deleting JP-only rows at
 import would destroy the audit trail, and `SOURCE-OF-TRUTH.md` §4.1's import filter is about *surfaces*, not
-about storage. Cross-checked against the card document: evolved skills are absent from `[Global]` even for
+storage. Cross-checked against the card document: evolved skills are absent from `[Global]` even for
 characters who are on it, which is a conflict row reproduced mechanically from two documents.
 
 **3. `rarity` stores the export's integer, unchanged, and renders nothing.** The column is authorized; the
 *word* is not evidenced. This follows the `race_catalog_slots` split exactly — the export's number stays
-auditable and a label is carried only where a source pins it, and a tier whose label has no per-row source
-is nulled rather than generalised. A `rarity` column that displayed "Rare" would be the tier-label defect
-repeated one table over.
+auditable and a label is carried only where a source pins it, and a tier whose label has no per-row source is
+nulled rather than generalised.
 
 **4. `skills.type` is filled by derivation and marked as derived.** Owner chose derivation over NULL. The
 codes and their meanings are read off the export's own English descriptions, and **the sign is part of the
