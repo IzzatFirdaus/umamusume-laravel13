@@ -85,8 +85,8 @@ a Legacy Select that offers aptitude *context* does.
 ## Links
 
 - `PRD.md` §6 non-goal 3, §6.11, §6.12, FR-C-1, OQ-4; `CONSTRAINTS.md` D-260, D-268, D-270
-- `ADR-0003` (the Phase 1 schema this adds one column to), `ADR-0001` (the precedent for narrowing a
-  non-goal in part and saying what stays banned), `ADR-0004` (reference data), `ADR-0020` (the Veteran
-  library, which builds on this allowance)
+- `ADR-0003` (the Phase 1 schema this adds one column to), `ADR-0001` (the precedent for a partial non-goal
+  carve-out that says what stays banned), `ADR-0004` (reference data), `ADR-0020` (the Veteran library,
+  which builds on this allowance)
 - `App\Models\Legacy\LegacySelectionPayload`; `tests/Feature/LegacySelectionSchemaTest.php`
 - `docs/UMAMUSUME_REFERENCE.md` §1.5, §1.5.1, §1.5.2, §1.5.3, §1.5.4
