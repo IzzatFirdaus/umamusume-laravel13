@@ -59,7 +59,7 @@ composer setup
 
 # 4. Populate the catalog offline from the committed source bodies.
 php artisan migrate:fresh --seed
-```text
+```
 
 Seeding reads `database/seeders/data/` (the committed copies of each source document) and fills the reference tables with no network: the roster, cards, 1,910 skills (623 `[Global]`, as of the `609afe88` snapshot), 559 support cards, scenario slots. Trainer-facing surfaces only show rows passing `Skill::availableOnGlobal()` (release status `GlobalReleased` **and** `name_is_client`), per `ADR-0011`.
 
@@ -73,9 +73,9 @@ Seeding reads `database/seeders/data/` (the committed copies of each source docu
 
 ## Running Locally
 
-```bash
+```
 composer dev          # artisan serve + queue listener + pail logs + Vite HMR, concurrently
-```text
+```
 
 Keep the app on loopback; it has no auth surface and must not be exposed (`ARCHITECTURE.md` §8).
 
@@ -88,10 +88,10 @@ load writes session and cache rows into `database/database.sqlite`. That file is
 against the default server mutates state other sessions hold open and moves the domain fingerprint that
 exists to detect exactly that. Serve with both stores on files instead:
 
-```bash
+```
 composer serve:browser                                # or, in a POSIX shell:
 SESSION_DRIVER=file CACHE_STORE=file php artisan serve
-```text
+```
 
 Use `file`, not `array`: the array driver does not carry the CSRF token between the GET that renders a
 form and the POST that submits it, so every form in the pass comes back a 419. `phpunit.xml` forces
@@ -106,13 +106,13 @@ Four of the seven resolve the document URL through the publisher's manifest firs
 
 Pipeline stages are isolated: `fetch -> snapshot -> parse -> normalize -> match -> promote | review`. `SourceFetcher` is the only outbound HTTP path and only ever visits hosts in the config allowlist (SSRF floor). Unchanged snapshot hashes short-circuit a run; promotion upserts engine-owned columns inside a transaction and skips `is_manual` rows.
 
-```bash
+```
 php artisan uma:fetch [source]            # omit source to fetch all declared sources
 php artisan uma:reparse <source>          # replay parse->match->promote from stored snapshots, zero network
 php artisan uma:fetch-art [--kind=…]      # mirror id-addressable artwork into storage/app/private/artwork (ADR-0021); manual only
 php artisan uma:import:support-cards      # import the two support datasets from committed bodies, zero network
 php artisan uma:backup [path]             # WAL checkpoint + consistent single-file copy (NFR-5)
-```text
+```
 
 Adding a source requires owner approval plus a robots/rate-limit review and one parser class (`AGENTS.md`, Data Engineer). The robots/live-availability check on the GameTora host remains formally outstanding (PRD OQ-2).
 
@@ -147,12 +147,12 @@ The former `/design-preview` route has been deleted; component review now happen
 
 ## Local API (read-only)
 
-```bash
+```
 GET /api/v1/umamusume?status=GlobalReleased&search=special%20week&page=1&pageSize=25
 GET /api/v1/umamusume/{slug}
 GET /api/v1/training-runs[/{id}]
 GET /api/v1/support-cards[/{supportCard}]
-```text
+```
 
 List shape: `{ "data": [...], "pagination": { "page", "pageSize", "totalItems", "totalPages" } }`. Every non-2xx: `{ "error": { "code", "message" } }`, rendered centrally in `bootstrap/app.php`. Contract: `ARCHITECTURE.md` §4.
 
@@ -246,8 +246,8 @@ tools/                    lore.php (lore gate), gate.py (design-artifact gate), 
 | `docs/research-scratch/GOVERNANCE.md`   | Gate registry, pre-mortem risk record, consolidated design/governance masters                                                         |
 | `AGENTS.md`                             | Agent roles, escalation paths, practical build notes                                                                                  |
 | `CLAUDE.md`                             | Coding rules for assistants                                                                                                           |
-| `KNOWN-ISSUES.md`                       | Pointer; defect register KI-01..KI-58 under `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. New entries append to the root file.   |
-| `docs/adr/README.md`                    | ADR index (`ADR-0001` to `ADR-0021`) with the errata convention                                                                       |
+| `KNOWN-ISSUES.md`                       | Pointer; defect register KI-01..KI-98 under `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. New entries append to the root file.   |
+| `docs/adr/README.md`                    | ADR index (`ADR-0001` to `ADR-0025`; 0025 is Proposed) with the errata convention                                                                       |
 | `docs/UMAMUSUME_REFERENCE.md`           | Source-cited mechanics reference; live-ops claims are dated snapshots                                                                 |
 | `docs/scenarios/`                       | Per-scenario playing guides                                                                                                           |
 | `.ai/rules/index.md`                    | Path-scoped repo rules (style, Eloquent, testing)                                                                                     |
@@ -303,7 +303,7 @@ Evidence-backed current state, distinct from the PRD non-goals in §6:
 - Fetch scheduling is manual; the scheduler default is open (PRD OQ-3).
 - Aptitude letters and per-scenario caps are engine-owned facts (`ADR-0004`); growth rates and base stats are not implemented (PRD OQ-4 scope).
 - The framework-default `users` table and `User` model exist but are unused.
-- The live defect register is `KNOWN-ISSUES.md` -> `docs/research-scratch/AUDIT-AND-VERIFICATION.md` (KI-01..KI-58); `tools/gate.py`'s hex allowlist defect (KI-58) closed on 2026-10-09 at `7d8b62a`, and the live item on the same gate is its mirror case, KI-83, where three tracked prototypes render four raw hexes the shipped theme no longer declares.
+- The live defect register is `KNOWN-ISSUES.md` -> `docs/research-scratch/AUDIT-AND-VERIFICATION.md` (KI-01..KI-98); `tools/gate.py`'s hex allowlist defect (KI-58) closed on 2026-10-09 at `7d8b62a`, and the live item on the same gate is its mirror case, KI-83, where three tracked prototypes render four raw hexes the shipped theme no longer declares.
 
 ## License
 

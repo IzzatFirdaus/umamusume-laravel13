@@ -3062,7 +3062,7 @@ flowchart LR
     L --> I[SCR-RUN-004/005 import] -->|commit| D
     D -->|export csv/json| X[download]
     D -->|delete confirm| L
-```text
+```
 
 Failure paths: create/validation back to create with `old()`; import rows fail validation on either POST → form re-renders, nothing written. Authorization boundary: none (local tool); run ownership is enforced only for nested turn routes (404).
 
@@ -3070,7 +3070,7 @@ Failure paths: create/validation back to create with `old()`; import rows fail v
 
 Start/Completion: SCR-RUN-003. Two stages on one endpoint; the split exists so a commit is always a second, deliberate action (D-51), enforced server-side by the `previewed` marker that only a preview response renders.
 
-```mermaid
+```
 flowchart LR
     A[choice step: activity radio] --> B[enter totals]
     B -->|stage=preview POST → PRG GET| P[preview bubbles = entered − stored previous]
@@ -3078,7 +3078,7 @@ flowchart LR
     P -->|invalid| B
     B -->|first turn: empty preview, still committable| W
     A -.raw escape hatch.-> H[details form writes on submit] --> W
-```text
+```
 
 Alternative path: hatch (D-53 reachable, not default) skips preview. Failure path: any rejection rehydrates the rail (and only the rail, keyed on its `stage` marker) — the two entry paths never fill each other. Notes: preview is arithmetic on two Trainer rows, never a projection; no odds shown (Planner Rule 5).
 

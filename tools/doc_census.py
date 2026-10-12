@@ -202,7 +202,44 @@ def main():
     print("most-cited dead targets:")
     for ref, c in sorted(top.items(), key=lambda kv: -kv[1])[:8]:
         print(f"  {c:4}  {ref}")
+
+    print(fence_report(files))
     return 0
+
+
+def fence_report(files):
+    """Invalid closing fences per file, from `md_fence_check.py`'s classifier.
+
+    A closing fence carries no info string under CommonMark, so a block written
+    ```bash ... ```text does not close where its author meant it to and the prose
+    after it renders as code. Reported here because the census is what an agent runs
+    first, and a count of 0 is the only state that needs no explanation.
+
+    Run `python tools/md_fence_check.py <file>` for the line numbers.
+    """
+    import importlib.util
+
+    path = os.path.join(REPO, "tools", "md_fence_check.py")
+    spec = importlib.util.spec_from_file_location("md_fence_check", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    offenders = []
+    for f in files:
+        try:
+            invalid, _ = mod.classify(f)
+        except OSError:
+            continue
+        if invalid:
+            offenders.append((len(invalid), f))
+
+    total = sum(n for n, _ in offenders)
+    lines = [f"\ninvalid closing fences: {total} across {len(offenders)} file(s)"]
+    for n, f in sorted(offenders, key=lambda t: -t[0]):
+        lines.append(f"  {n:4}  {f}")
+    if total:
+        lines.append("  Fix with `python tools/md_fence_check.py <file>`, which names each line.")
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
