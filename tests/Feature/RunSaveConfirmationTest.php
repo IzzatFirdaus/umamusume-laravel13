@@ -10,10 +10,11 @@ use Inertia\Testing\AssertableInertia as Assert;
 /*
  * R-5: every save that lands back on the run carries a flash status, so a
  * Trainer can tell which of the run's forms landed. One assertion per form,
- * checking the redirect lands on the Cockpit (or the surviving legacy door the
- * write still pins) with the value already in the shared `flash` prop the shell
- * renders the banner from. What the layout draws from that prop is measured on
- * the live page; this pins the contract.
+ * checking the redirect lands on the surface that write returns to — the Cockpit,
+ * the Skills Planner, or the surviving legacy door the write still pins — with the
+ * value already in the shared `flash` prop the shell renders the banner from. What
+ * the layout draws from that prop is measured on the live page; this pins the
+ * contract.
  */
 
 function runForSaveConfirmation(): TrainingRun
@@ -48,12 +49,12 @@ it('confirms a skill status save', function (): void {
             ['skill_id' => $skill->id, 'status' => 'Acquired', 'turn_acquired' => null],
         ],
     ])
-        ->assertRedirect(route('runs.cockpit', $run));
+        ->assertRedirect(route('runs.skills.planner', $run));
 
-    test()->get(route('runs.cockpit', $run))
+    test()->get(route('runs.skills.planner', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Career/Cockpit')
+            ->component('Career/SkillsPlanner')
             ->where('flash.status', 'Skill status saved.'));
 });
 

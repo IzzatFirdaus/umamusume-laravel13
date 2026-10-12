@@ -46,9 +46,8 @@ final class SkillsPlannerController extends Controller
             'groups' => $this->groupRows($run, $required, $target),
             // F2, plan §9.6 ruling 5: the acquired/skipped status write now lives on the Skills
             // Planner rather than the 0.1.0 run-detail screen. The route and Form Request are the
-            // same ones the record screen used; the controller repoints them to the cockpit after the
-            // flip, so a POST from here lands the write and returns the Trainer to where the run's
-            // skills are read.
+            // same ones the record screen used, and the endpoint returns to this planner, so a POST
+            // from here lands the write and keeps the Trainer where the run's skills are read.
             'skills_sync_url' => route('runs.skills.sync', $run),
             'acquisition_options' => $this->acquisitionOptions(),
             // Slice 10, the add affordance. The editor below can only edit the status of rows already

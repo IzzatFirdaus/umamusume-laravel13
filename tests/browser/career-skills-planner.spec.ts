@@ -198,8 +198,6 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
 test('adds a catalogue skill to a run that holds none (Slice 10)', async ({ page }) => {
     await openPlanner(page);
 
-    const runUrl = page.url().replace(/\/skills$/, '');
-
     // The picker is the run's way in: `openPlanner` writes a build target but no skill rows, so the
     // four groups are empty and this control is the only way the run can gain its first skill.
     const picker = page.getByRole('combobox', { name: 'Skill to add' });
@@ -216,17 +214,25 @@ test('adds a catalogue skill to a run that holds none (Slice 10)', async ({ page
     await picker.selectOption({ label: name });
     await page.getByRole('button', { name: 'Add skill' }).click();
 
-    // `TrainingRunController::syncSkills` ends at `runs.cockpit` unconditionally (`:983`), because it
-    // is the record screen's endpoint that the planner borrowed. So the write is confirmed where the
-    // endpoint sends the Trainer, and the inventory is read back on the surface that owns it.
-    await page.waitForURL(/\/cockpit$/, WRITE);
+    // The write returns to the planner, so the Trainer keeps working the inventory rather than being
+    // bounced to the Cockpit once per skill. The confirmation is the shared flash banner every other
+    // surface prints, read here on the page that owns the list.
     await expect(page.getByText('Skill status saved.')).toBeVisible(WRITE);
-
-    await page.goto(`${runUrl}/skills`, { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-
     await expect(page.getByLabel(`Change status for ${name}`)).toHaveCount(1, WRITE);
     // The offer is server-side filtered on the re-render, so a skill the run now holds is not offered.
-    await expect(page.getByRole('combobox', { name: 'Skill to add' }).locator('option', { hasText: name }))
-        .toHaveCount(0);
+    await expect(picker.locator('option', { hasText: name })).toHaveCount(0);
+    await expect(page).toHaveURL(/\/skills$/, WRITE);
+
+    // The reason the redirect moved: a second add needs no navigation back first.
+    const second = (await picker.locator('option').allTextContents())
+        .map((text) => text.trim())
+        .find((text) => text !== '' && text !== 'Choose a skill') ?? '';
+    expect(second, 'a second skill is still offered after the first add').not.toBe('');
+
+    await picker.selectOption({ label: second });
+    await page.getByRole('button', { name: 'Add skill' }).click();
+
+    await expect(page.getByLabel(`Change status for ${second}`)).toHaveCount(1, WRITE);
+    await expect(page.getByLabel(`Change status for ${name}`)).toHaveCount(1);
+    await expect(page).toHaveURL(/\/skills$/);
 });

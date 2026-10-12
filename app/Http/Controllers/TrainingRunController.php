@@ -962,6 +962,10 @@ class TrainingRunController extends Controller
     /**
      * Upsert the given skill statuses on the run; skills not listed keep their
      * current status (syncWithoutDetaching, TrainingRun::setSkillStatus).
+     *
+     * Returns to the Skills Planner rather than the Cockpit. The planner has been this endpoint's
+     * only caller since the record screen retired, and a Trainer posting from it is mid-inventory:
+     * landing on the Cockpit ends the session on another surface and costs a round trip per skill.
      */
     public function syncSkills(StoreRunSkillRequest $request, TrainingRun $run): RedirectResponse
     {
@@ -980,7 +984,7 @@ class TrainingRunController extends Controller
             }
         }
 
-        return redirect()->route('runs.cockpit', $run)->with('status', 'Skill status saved.');
+        return redirect()->route('runs.skills.planner', $run)->with('status', 'Skill status saved.');
     }
 
     /**

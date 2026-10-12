@@ -443,6 +443,20 @@ final class CareerSkillsPlannerTest extends TestCase
             ->and($run->skills->firstWhere('id', $first->id)->pivot->turn_acquired)->toBe(2);
     }
 
+    public function test_returns_the_trainer_to_the_planner_from_a_skill_write(): void
+    {
+        // The planner is this endpoint's only caller — `AcquisitionStatusEditor` is imported and
+        // rendered nowhere else since the record screen retired — and the Trainer is mid-inventory
+        // when they post. A write that landed on the Cockpit ended the session on a different
+        // surface than the one being worked, which is one round trip per skill added.
+        $run = $this->plannerRun();
+        $skill = $this->skill('Return Target Skill', 100);
+
+        $this->post(route('runs.skills.sync', $run), [
+            'skills' => [['skill_id' => $skill->id, 'status' => 'Suggested', 'turn_acquired' => null]],
+        ])->assertRedirect(route('runs.skills.planner', $run));
+    }
+
     public function test_accepts_a_turn_acquired_that_arrived_as_a_form_string(): void
     {
         // An HTML form posts every field as a string, and `setSkillStatus()` takes `?int` under
