@@ -1,5 +1,6 @@
 import { createApp, h, type DefineComponent } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
+import VisitProgressBar from './components/VisitProgressBar.vue';
 
 // Glob over nested page dirs, resolved lazily. The reason this is a glob and not a dynamic
 // `import(\`./pages/${name}.vue\`)` is unchanged: a template import matches only a single path segment in
@@ -13,10 +14,20 @@ import { createInertiaApp } from '@inertiajs/vue3';
 const pages = import.meta.glob<{ default: DefineComponent }>('./pages/**/*.vue');
 
 createInertiaApp({
+    // Inertia's bundled NProgress draws `role="bar"`, an invalid ARIA role that fails a page-wide
+    // axe scan whenever a visit is in flight (KI-63). The default is off; the replacement is the
+    // native `progress` indicator the second app below mounts.
+    progress: false,
     resolve: async (name) => (await pages[`./pages/${name}.vue`]()).default,
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .mount(el);
+
+        // The indicator lives outside #app on purpose: a wrapper inside the mount element would
+        // become `#app > *`'s first child and let every spec's app-mounted wait pass before the
+        // page chunk resolves. A second, minimal app owns a body-level element instead, so every
+        // layout inherits it without importing it.
+        createApp(VisitProgressBar).mount(document.body.appendChild(document.createElement('div')));
     },
 });
