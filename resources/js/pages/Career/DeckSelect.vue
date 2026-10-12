@@ -142,11 +142,12 @@ function errorLabel(field: string): string {
 }
 
 /**
- * The one navigation that is not a save: narrowing the picker. The draft already holds every pick, so a
+ * The one navigation that is not a save: aiming the picker. The draft already holds every pick, so a
  * filter change has nothing to carry and a GET cannot lose one — which is the whole reason this step can
- * keep its slots out of the URL.
+ * keep its slots out of the URL. It carries the current filter too, because retargeting the picker is not
+ * a reason to drop a Type or a name the Trainer just narrowed the list with.
  */
-function filter(): void {
+function filter(retarget = false): void {
     router.get(
         '/career/setup/deck',
         {
@@ -156,6 +157,9 @@ function filter(): void {
         },
         {
             preserveScroll: true,
+            // One entry per retarget would bury the step in history; the URL is stating which slot the
+            // picker aims at, not recording a new place.
+            replace: retarget,
             onFinish: () => {
                 void nextTick(() => document.getElementById('deck-pick')?.focus());
             },
@@ -196,10 +200,15 @@ function clearSlot(): void {
     save();
 }
 
+/**
+ * Retarget the picker. The query has to say the same slot the picker aims at: a Trainer who copies the
+ * address bar between a Replace and the next equip was copying the slot the last server round trip wrote,
+ * one behind the screen (R3-03). One navigation serves both, so the focus move the filter does is shared.
+ */
 function replace(position: number): void {
     filling.value = position;
     form.deck_slot = position;
-    void nextTick(() => document.getElementById('deck-pick')?.focus());
+    filter(true);
 }
 
 function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
@@ -297,7 +306,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     </span>
                 </p>
 
-                <form class="mt-3 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="filter">
+                <form class="mt-3 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="filter()">
                     <label class="flex flex-col gap-1">
                         <span class="text-ink">Type</span>
                         <select
