@@ -172,3 +172,23 @@ it('shares the app props every page reads, with the ruleset as a named absence',
             // with a reason rather than a version it does not hold.
             ->where('app.ruleset', null));
 });
+
+it('counts the active careers so a second one can be named, with the list link', function (): void {
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('activeCareerCount', 0)
+            ->where('careersUrl', route('runs.index')));
+
+    TrainingRun::factory()->create(['status' => RunStatus::Active]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('activeCareerCount', 1));
+
+    TrainingRun::factory()->create(['status' => RunStatus::Active]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('activeCareerCount', 2));
+});

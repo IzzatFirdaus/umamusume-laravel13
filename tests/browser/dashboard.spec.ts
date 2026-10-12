@@ -167,6 +167,31 @@ test('names the active career and resumes it from the keyboard', async ({ page }
     await page.waitForURL(/\/cockpit$/);
 });
 
+test('names the multi-career count only when a second career is live', async ({ page }) => {
+    // Zero runs: the spec's own precondition, and the notice renders nothing.
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByText(/careers are active/)).toHaveCount(0);
+
+    // One active career: still nothing new on the page.
+    await createActiveRun(page, 'unity_cup');
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByText(/careers are active/)).toHaveCount(0);
+
+    // Two live careers: the count names itself and hands over the full list. The featured pick
+    // stays the newest run, so the card still shows the second run's trainee.
+    await createActiveRun(page, 'ura_finale');
+    await page.goto('/');
+    await page.locator('#app > *').first().waitFor();
+
+    const notice = page.getByRole('region', { name: 'ACTIVE CAREER' }).getByText(/careers are active/);
+    await expect(notice).toBeVisible();
+    // `route()` hands the page an absolute URL, so the assertion is the destination, not the origin.
+    await expect(notice.getByRole('link', { name: 'Open Careers' })).toHaveAttribute('href', /\/training-runs$/);
+    await expect(page.getByRole('region', { name: 'ACTIVE CAREER' }).getByText(TRAINEE)).toBeVisible();
+});
+
 test('reflows at 320px, logs no console error, and renders under reduced motion', async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on('console', (message) => {

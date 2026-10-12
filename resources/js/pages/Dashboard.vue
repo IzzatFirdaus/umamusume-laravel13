@@ -66,6 +66,9 @@ interface VeteranRow {
 
 const props = defineProps<{
     activeCareer: ActiveCareer | null;
+    /** Live Active runs. More than one is reachable; the card above features only the newest. */
+    activeCareerCount: number;
+    careersUrl: string;
     recentVeterans: { rows: VeteranRow[]; total: number; limit: number; library_url: string };
     quickActions: { label: string; to: string }[];
     counts: { trainees: number; skills: number; supportCards: number };
@@ -180,6 +183,13 @@ const group = (n: number): string => n.toLocaleString('en-US');
                 >
                     Resume Career
                 </Link>
+
+                <!-- One career is the ordinary case and renders nothing here: the count speaks only
+                     when a second is live, so the single-run layout is unchanged. -->
+                <p v-if="props.activeCareerCount > 1" class="mt-3 text-sm text-ink">
+                    {{ props.activeCareerCount }} careers are active; this screen features the newest.
+                    <Link :href="props.careersUrl" class="underline font-medium text-ink-strong hover:text-ink">Open Careers</Link>
+                </p>
             </section>
 
             <!-- The empty state design-2.0 §29 requires: what is missing, why it matters, what to do. -->

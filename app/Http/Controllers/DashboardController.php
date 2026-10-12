@@ -59,6 +59,11 @@ class DashboardController extends Controller
     {
         return Inertia::render('Dashboard', [
             'activeCareer' => $this->activeCareer(),
+            // More than one Active run is reachable and this screen resumes only the newest, so the
+            // page says how many are live and hands over the full list. Count-only: no models load,
+            // and the newest-run pick above is unchanged.
+            'activeCareerCount' => TrainingRun::query()->where('status', RunStatus::Active)->count(),
+            'careersUrl' => route('runs.index'),
             'recentVeterans' => $this->recentVeterans($veterans),
             'quickActions' => $this->quickActions(),
             'counts' => [
