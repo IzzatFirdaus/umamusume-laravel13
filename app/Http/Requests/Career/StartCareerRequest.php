@@ -52,6 +52,7 @@ class StartCareerRequest extends FormRequest
     {
         $this->merge([
             'umamusume_id' => SetupDraft::read()['umamusume_id'],
+            'character_card_id' => SetupDraft::characterCardId(),
             'scenario' => SetupDraft::read()['scenario'],
             'status' => RunStatus::Active->value,
             'build_target' => SetupDraft::buildTarget(),
@@ -72,6 +73,12 @@ class StartCareerRequest extends FormRequest
             // Trainer who recorded no ancestors and equipped no cards can still start, and the columns
             // store null rather than an empty payload that its own reader would refuse.
             'umamusume_id' => ['required', 'integer', Rule::exists('umamusume', 'id')],
+            // The costume form the trainee step recorded. Checked again here rather than trusted, because a
+            // draft can go stale between step 2 and `Start Career`: a card withdrawn from the catalog, or a
+            // form that belongs to a different trainee, is refused at this boundary and the warning names the
+            // step that owns it (the same rule `StoreTraineeRequest` applies on the way in).
+            'character_card_id' => ['nullable', 'integer', Rule::exists('character_cards', 'id')
+                ->where('umamusume_id', $this->input('umamusume_id'))],
             'scenario' => ['required', 'string', Rule::in(array_keys((array) config('scenarios.scenarios')))],
             'status' => ['required', Rule::enum(RunStatus::class)],
             // The three payload sections are shape-checked here and rule-checked by their own requests in
@@ -107,6 +114,11 @@ class StartCareerRequest extends FormRequest
 
         return [
             'umamusume_id' => (int) $this->input('umamusume_id'),
+            // The form the trainee step chose. Null is a complete answer: a trainee with one form, or a
+            // Trainer who named none, starts a career with no form stated and the header prints no title.
+            'character_card_id' => $this->input('character_card_id') === null
+                ? null
+                : (int) $this->input('character_card_id'),
             'scenario' => (string) $this->input('scenario'),
             'status' => RunStatus::from((string) $this->input('status')),
             // A section nobody entered writes null, never `[]`: `TrainingRun::legacySelection()` runs the

@@ -45,9 +45,10 @@ use InvalidArgumentException;
  *
  * **`Start Career` creates the run once.** The write is one transaction and the draft is reset after it
  * commits, so a double submit cannot mint a second career from the same setup. The run is created
- * `Active` because that is what a career is, and the wizard collects no costume card, so no start skills
- * are seeded (the same shape `runs.import` has, and for the same reason: the Trainer's sheet names a
- * trainee, not which of her forms was equipped).
+ * `Active` because that is what a career is, on the costume form step 2 recorded when there is one
+ * (`R3-06`, `character_card_id`; a step that named no form leaves the column null, and the Cockpit header
+ * then prints no title). No start skills are seeded (the same shape `runs.import` has, and for the same
+ * reason: the Trainer's sheet names a trainee, and only a form she chose says which one was equipped).
  */
 class PreflightController extends Controller
 {

@@ -95,6 +95,21 @@ final class SetupDraft
     }
 
     /**
+     * The costume form step 2 stored, or null when the Trainer chose none.
+     *
+     * Read raw like the later steps' keys rather than through `read()`, whose two-key shape SCREEN-002 and
+     * SCREEN-003's tests pin. A form is a fact the run carries (`training_runs.character_card_id`), so a
+     * draft naming one has to survive every later step's write, which is why `write()` merges rather than
+     * replaces.
+     */
+    public static function characterCardId(): ?int
+    {
+        $id = self::bag()['character_card_id'] ?? null;
+
+        return is_int($id) ? $id : null;
+    }
+
+    /**
      * The ancestry step 4 stored, or null before one is entered.
      *
      * The same raw-read style as `buildTarget()`, and the same reason. The shape is

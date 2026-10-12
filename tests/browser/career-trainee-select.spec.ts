@@ -55,6 +55,27 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByText('67 trainees match.')).toBeVisible();
     });
 
+    test('a trainee who holds more than one costume form is asked which one the career starts on (R3-06)', async ({ page }) => {
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        await page.getByLabel('Search').fill('Rice Shower');
+        await page.getByRole('button', { name: 'Filter', exact: true }).click();
+
+        const riceShower = card(page, 'Rice Shower');
+        await expect(riceShower).toBeVisible();
+
+        // The step asks only where there is a choice, exactly once per card, and the options are the
+        // catalog's own form titles plus the stated absence: "Not stated" is a real answer, not a default
+        // that would name a form nobody picked (R3-06, walk 3's `[Rosy Dreams]` gap).
+        const picker = riceShower.getByLabel('Costume form for this career');
+        await expect(picker).toBeVisible();
+        await expect(picker.locator('option', { hasText: 'Not stated' })).toHaveCount(1);
+        expect(await picker.locator('option').count(), 'a multi-form trainee offers her own forms')
+            .toBeGreaterThanOrEqual(3);
+        await expect(page.getByLabel('Costume form for this career')).toHaveCount(1);
+    });
+
     test('narrows the roster with the search and facet filters, states the empty match, then clears back', async ({ page }) => {
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();

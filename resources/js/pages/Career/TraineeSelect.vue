@@ -74,6 +74,8 @@ interface SkillOption {
 const props = defineProps<{
     trainees: Paginator<TraineeRow>;
     selected: number | null;
+    /** The costume form the draft already names, so a return to this step re-seeds the picker (R3-06). */
+    selectedCard: number | null;
     /**
      * The stored trainee's name, sent with the selection. The readout must not derive it from
      * `trainees.data`: the roster is paginated and filtered, so the chosen trainee is often not on the
@@ -135,7 +137,15 @@ const direction = ref(props.direction);
 const loading = ref(false);
 
 const chosen = ref<number | null>(null);
-const selectForm = useForm<{ umamusume_id: number }>({ umamusume_id: 0 });
+const selectForm = useForm<{ umamusume_id: number; character_card_id: number | null }>({
+    umamusume_id: 0,
+    character_card_id: null,
+});
+// Which form the Trainer means for each trainee row, kept per row so browsing the roster does not carry
+// one trainee's pick onto another. Null is "no form stated", which is what a single-form trainee is.
+const pickedForm = ref<Record<number, number | null>>(
+    props.selected === null || props.selectedCard === null ? {} : { [props.selected]: props.selectedCard },
+);
 
 const aptitudeCells: { label: string; key: string }[] = [
     { label: 'Turf', key: 'turf' },
@@ -187,6 +197,7 @@ function clearFilters(): void {
 function choose(trainee: TraineeRow): void {
     chosen.value = trainee.id;
     selectForm.umamusume_id = trainee.id;
+    selectForm.character_card_id = pickedForm.value[trainee.id] ?? null;
 
     // Literal URL, as every page here states it: there is no Ziggy in this app, so `router.route()` would
     // throw at click time rather than at build time. Focus is restored in `onSuccess` after the new props
@@ -387,6 +398,27 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                         </span>
                     </template>
                 </p>
+
+                <!-- R3-06: a trainee who holds more than one costume form is asked which one the career
+                     starts on. A single-form trainee is not asked: one row states a fact rather than
+                     offering a choice, and "Not stated" stays a real answer rather than a default. -->
+                <label
+                    v-if="trainee.forms.length > 1"
+                    class="mt-3 flex flex-col gap-1 text-sm"
+                    :for="`trainee-form-${trainee.id}`"
+                >
+                    <span class="text-ink-muted">Costume form for this career</span>
+                    <select
+                        :id="`trainee-form-${trainee.id}`"
+                        v-model="pickedForm[trainee.id]"
+                        class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink"
+                    >
+                        <option :value="null">Not stated</option>
+                        <option v-for="card in trainee.forms" :key="card.id" :value="card.id">
+                            {{ card.title }}{{ card.is_debut_form ? ' (debut form)' : '' }}
+                        </option>
+                    </select>
+                </label>
 
                 <p class="mt-4 flex flex-wrap items-center gap-3">
                     <button

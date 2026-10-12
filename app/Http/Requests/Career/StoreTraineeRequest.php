@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Career;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * The trainee choice of the career setup wizard (`SCREEN-003`, PRD FR-A-1, `ADR-0020` §1).
@@ -34,6 +35,15 @@ class StoreTraineeRequest extends FormRequest
     {
         return [
             'umamusume_id' => ['required', 'integer', 'exists:umamusume,id'],
+            /*
+             * R3-06: which costume form the career starts on is a choice the Trainer makes at this step, and
+             * a form is valid only among the submitted trainee's own. The join is carried in the exists rule
+             * for the same reason `StoreTrainingRunRequest` carries it: a mismatched pair becomes a refusal at
+             * the boundary rather than a run row that contradicts itself. Optional, because a single-form
+             * trainee has nothing to choose and a null here is a complete answer, not a missing field.
+             */
+            'character_card_id' => ['nullable', 'integer', Rule::exists('character_cards', 'id')
+                ->where('umamusume_id', $this->input('umamusume_id'))],
         ];
     }
 
@@ -45,6 +55,7 @@ class StoreTraineeRequest extends FormRequest
         return [
             'umamusume_id.required' => 'Choose a trainee to continue.',
             'umamusume_id.exists' => 'That trainee is not in this catalog, so the career could not be built on her.',
+            'character_card_id.exists' => 'That costume form does not belong to the chosen trainee, so it cannot start her career.',
         ];
     }
 }

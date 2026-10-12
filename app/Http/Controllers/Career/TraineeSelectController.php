@@ -69,6 +69,9 @@ class TraineeSelectController extends Controller
         return Inertia::render('Career/TraineeSelect', [
             'trainees' => $trainees,
             'selected' => $draft['umamusume_id'],
+            // The form the draft already names, so a Trainer who returns to this step sees the choice they
+            // made rather than a picker reset to the debut form (the same read-back rule as `selected`).
+            'selectedCard' => SetupDraft::characterCardId(),
             // The stored trainee's name, sent with the selection rather than looked up in the roster.
             // The list is paginated and filtered, so the chosen trainee is frequently not on the page
             // shown, and reading her name from that list answered `N/A` beside a flash that said she
@@ -120,7 +123,14 @@ class TraineeSelectController extends Controller
      */
     public function store(StoreTraineeRequest $request): RedirectResponse
     {
-        SetupDraft::write(['umamusume_id' => (int) $request->validated('umamusume_id')]);
+        // The form travels with the trainee it belongs to, so re-picking a trainee without naming a form
+        // clears the previous choice rather than leaving a card from the old one on the draft (R3-06).
+        $cardId = $request->validated('character_card_id');
+
+        SetupDraft::write([
+            'umamusume_id' => (int) $request->validated('umamusume_id'),
+            'character_card_id' => $cardId === null ? null : (int) $cardId,
+        ]);
 
         // "Chosen", not "Selected", because the state word on the card is the one the wizard's own
         // vocabulary uses, and the message names the trainee rather than an id.
