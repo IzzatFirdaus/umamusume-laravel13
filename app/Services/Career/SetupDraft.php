@@ -217,27 +217,33 @@ final class SetupDraft
     }
 
     /**
-     * The draft scenario as an unsaved model, so a step can ask the ceiling owner about a career that
-     * does not exist in the database yet.
+     * The draft scenario, and any ceilings the target step stored, as an unsaved model, so a step can
+     * ask the ceiling owner about a career that does not exist in the database yet.
      *
-     * `ScenarioCaps::forRun()` reads only `hasScenario()` and `scenarioKey()`
-     * (`app/Services/ScenarioCaps.php:81-100`), so it needs no persisted row. That is what lets the
-     * Build Target step clamp its inputs against the chosen scenario before Preflight creates the run,
-     * without either weakening the clamp or inventing a draft row. Null when no scenario is chosen:
-     * `forRun(null)` then refuses to lend any scenario's cap bonus, which is the correct answer for a
-     * career with no scenario.
+     * `ScenarioCaps::forRun()` reads `hasScenario()` and `scenarioKey()` for the scenario's own
+     * arithmetic and the four `cap_*` columns for anything entered (`ADR-0025`), so it needs no
+     * persisted row. That is what lets the Build Target step clamp its inputs against the chosen
+     * scenario and against the ceilings entered beside it before Preflight creates the run, without
+     * either weakening the clamp or inventing a draft row.
+     *
+     * Null only when the draft carries neither a scenario nor a ceiling. A scenario-less draft that
+     * holds ceilings returns the model anyway, because an entered ceiling applies to a run that names
+     * no scenario: `forRun()` answers the base cap for it (no bonus is lent to a choice nobody made)
+     * and then overlays the entered figure. Returning null there would drop the Trainer's own reading
+     * from the page's bound and from the clamp — the defect the browser verification caught.
      */
     public static function planningRun(): ?TrainingRun
     {
         $draft = self::read();
+        $caps = self::caps();
 
-        if ($draft['scenario'] === null) {
+        if ($draft['scenario'] === null && $caps === []) {
             return null;
         }
 
         return new TrainingRun(array_merge(
-            ['scenario' => $draft['scenario']],
-            self::caps(),
+            $draft['scenario'] === null ? [] : ['scenario' => $draft['scenario']],
+            $caps,
         ));
     }
 

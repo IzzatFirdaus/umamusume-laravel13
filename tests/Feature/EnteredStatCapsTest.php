@@ -189,6 +189,30 @@ it('carries the wizard\'s entered ceilings onto the run it starts', function ():
         ->and(ScenarioCaps::forRun($run)['Speed'])->toBe(1325);
 });
 
+it('applies an entered ceiling on the target step before any scenario is chosen', function (): void {
+    session([SetupDraft::SESSION_KEY => []]);
+
+    // The ruling's shape with no scenario in the draft: the published figure stays the base
+    // cap, and the entered ceiling is the bound beside it (`ADR-0025` — a ceiling applies to a
+    // run that names no scenario). This is the path the browser case caught: the saved draft
+    // carried the ceiling while the page's caps prop kept answering the bare base.
+    $this->put(route('career.target.store'), array_merge(enteredCapsTarget(['targets' => [
+        'Speed' => 1250,
+        'Stamina' => 800,
+        'Power' => 700,
+        'Guts' => 600,
+        'Wit' => 500,
+    ]]), ['cap_speed' => 1250]))->assertRedirect(route('career.target'));
+
+    $this->get(route('career.target'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/BuildTarget')
+            ->where('caps.Speed', 1250)
+            ->where('scenarioCaps.Speed', 1200)
+            ->where('enteredCaps.cap_speed', 1250)
+        );
+});
+
 it('keeps Wit on its scenario bound whatever a client posts', function (): void {
     $run = enteredCapsRun();
 
