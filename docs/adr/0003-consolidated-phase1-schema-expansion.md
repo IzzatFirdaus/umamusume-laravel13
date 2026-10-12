@@ -31,7 +31,8 @@ mandatory Grade Point thresholds.
 
 **The stat bound moves to 0..2000** (decision 6), read from the run's own scenario rather than as a flat
 constant, with 2000 as the value that applies to all four Global scenarios today. `ADR-0015` implemented
-this by reading the per-stat cap.
+this by reading the per-stat cap, and the agreement between `config/scenarios.php` and the `scenarios`
+table's cap columns is asserted by `tests/Feature/ScenarioCapParityTest.php`.
 
 ## What this does not license
 
