@@ -1,6 +1,5 @@
 import { createApp, h, type DefineComponent } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
-import VisitProgressBar from './components/VisitProgressBar.vue';
 
 // Glob over nested page dirs, resolved lazily. The reason this is a glob and not a dynamic
 // `import(\`./pages/${name}.vue\`)` is unchanged: a template import matches only a single path segment in
@@ -23,11 +22,5 @@ createInertiaApp({
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .mount(el);
-
-        // The indicator lives outside #app on purpose: a wrapper inside the mount element would
-        // become `#app > *`'s first child and let every spec's app-mounted wait pass before the
-        // page chunk resolves. A second, minimal app owns a body-level element instead, so every
-        // layout inherits it without importing it.
-        createApp(VisitProgressBar).mount(document.body.appendChild(document.createElement('div')));
     },
 });

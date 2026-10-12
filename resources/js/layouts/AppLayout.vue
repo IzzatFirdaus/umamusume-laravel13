@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import NavGlyph from '../components/NavGlyph.vue';
+import VisitProgressBar from '../components/VisitProgressBar.vue';
 
 const page = usePage();
 const appVersion = computed(() => page.props.app?.version ?? null);
@@ -188,6 +189,9 @@ const mobileMoreClass =
 
 <template>
     <div class="flex min-h-screen bg-page text-ink">
+        <!-- The visit progress indicator (KI-63's replacement) teleports its element to <body>, so
+             every shell that renders through this layout carries it and no page imports it. -->
+        <VisitProgressBar />
         <a
             href="#main"
             class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:border-2 focus:border-rule focus:bg-raised focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-ink-strong"

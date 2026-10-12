@@ -14,18 +14,20 @@ import { useVisitState } from '../composables/useVisitState';
  * carries no animation of its own, so the document's reduced-motion answer (`resources/css/app.css`'s
  * kill-switch, which the browser specs assert) has nothing to quiet here.
  *
- * It is mounted from `spa.ts` onto a body-level element rather than imported by the layouts: one
- * place covers all three shells, and staying outside `#app` keeps the mount element from becoming
- * `#app > *`'s first child, which would let every spec's app-mounted wait pass before the page
- * chunk resolves.
+ * It is rendered by the shared shells (`AppLayout`, which `CareerLayout` and `SetupLayout` both
+ * wrap) and teleports its element to `<body>`, so every page inherits it without importing it and
+ * the indicator exists outside `#app`. The idle Teleport leaves only a comment anchor behind, no
+ * element, so the app-mounted waits the browser specs rely on are unaffected.
  */
 const { visiting } = useVisitState();
 </script>
 
 <template>
-    <progress
-        v-if="visiting"
-        aria-label="Page load progress"
-        class="visit-progress fixed inset-x-0 top-0 z-50 h-1 w-full appearance-none border-0 bg-chrome"
-    />
+    <Teleport to="body">
+        <progress
+            v-if="visiting"
+            aria-label="Page load progress"
+            class="visit-progress fixed inset-x-0 top-0 z-50 h-1 w-full appearance-none border-0 bg-chrome"
+        />
+    </Teleport>
 </template>
