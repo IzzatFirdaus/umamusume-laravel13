@@ -4,7 +4,7 @@
   decision: accepted (owner ruling 2026-10-09) — energy_state (exact/band/unknown) and energy_band (low/mid/high) sit beside turn_entries.energy
   code: built — migration 2026_10_09_170000_add_energy_state_to_turn_entries (ran, batch 5); App\Enums\EnergyState; TurnEntry casts
   superseded-by: —
-  amended-by: 0003 (extends the turn_entries.energy column it added), 0001 (does not reopen its Energy lift)
+  amended-by: 0003 (extends the turn_entries.energy column it added), 0001 (leaves its Energy lift as it was), 0020 (the 2.0 program, untouched by this column)
   open: whether a band ever earns arithmetic of its own — no midpoint is derived from a band and none is authorised
 -->
 
@@ -47,7 +47,7 @@ read must not be invented.
 - **No arithmetic on the band.** No midpoint, no interpolation, no derived Energy figure from a band word.
 - **No reopening of `ADR-0001`.** The Energy non-goal lift and its bounds are untouched by this column.
 - **No widening of the guidance scope.** `ADR-0001` lifted §6.11 for Energy guidance only, and this changes
-  what is *recorded*, not what may be derived from it.
+  what is *recorded*, not what may be derived from it. `ADR-0020`'s program is untouched by it.
 
 ## Links
 
