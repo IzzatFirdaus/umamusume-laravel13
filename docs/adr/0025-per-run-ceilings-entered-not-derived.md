@@ -35,26 +35,39 @@ tool records it rather than deriving it.** No magnitude table is asserted, so no
 
 ## Decision
 
-`training_runs` gains four nullable integer columns: **`cap_speed`, `cap_stamina`, `cap_power`, `cap_guts`**.
-Each holds the ceiling the Trainer read off the client for that run, or null when they read none.
+`training_runs` gains four nullable **`unsignedSmallInteger`** columns — `cap_speed`, `cap_stamina`,
+`cap_power`, `cap_guts` — each holding the ceiling the Trainer read off the client for that run, or null when
+they read none. The type matches `turn_entries`' own stat columns. The migration backfills nothing, and its
+`down()` drops exactly those four. **These are entered facts, not a composition**: the per-star breakthrough
+table the run report first reached for is not adopted here, and the decision supersedes that attribution by
+pointing at the report's own §1.5 falsification rather than re-arguing it.
 
-- **`ScenarioCaps` stays the single ceiling owner.** Its read becomes: a non-null entered cap for that stat
-  wins; otherwise the `ADR-0015` scenario computation runs unchanged. Every validator and renderer keeps calling
-  it; no second site computes a ceiling.
-- **An entered cap is bounded only by what is known.** Validation accepts an integer from 1 to the engine
-  `hard_cap`. No floor at the scenario base is imposed, because the tool holds no source claiming a client
-  ceiling can never sit below it, and inventing such a claim is the error this decision exists to avoid.
-- **It is Trainer data, so it is never engine-owned.** No `data_sources` row is written for a cap and the fetch
-  engine never touches the columns, the same rule `is_manual` rows carry (`AGENTS.md` §8).
-- **Wit is excluded.** Its scenario base is 1800 and no entered `cap_wit` column is added. The owner's ruling
-  named the entry surfaces; it did not extend to Wit, and a column with no ruled writer would be a schema for a
-  fact nobody may enter.
-- **Entered on two surfaces.** The build target step, because that is where a target is refused today and the
-  wizard must carry the values into the run at Start Career; and the Cockpit identity form, so a cap corrected
-  mid-run feeds the turn form's bound without recreating the run.
-- **Null reverts, it does not zero.** Clearing an entered cap returns the ceiling to the scenario base,
-  byte-identical to the behaviour before this decision. `ADR-0002`'s UI condition still holds: the 1,200
-  halved-gains marker and the run's ceiling stay two separate visible markers.
+- **A ceiling the run recorded outranks the ceiling the scenario publishes.** `forRun()` answers the effective
+  bound — an entered figure where one exists, `ADR-0015`'s arithmetic otherwise — and `scenarioCaps()` answers
+  the published arithmetic alone. `ENTERED_CAPS` is the one stat-to-column map and no site outside
+  `ScenarioCaps` reads the columns. Every validator, band and advisor keeps calling `forRun()`, so a form bound
+  and a drawn ceiling cannot disagree; the single surface whose own source line names `config/scenarios.php`
+  (the cockpit's *Published stat caps* table) calls `scenarioCaps()`, because a Trainer's reading is not in
+  that file.
+- **The floor is the run's own recorded stat; the ceiling is the engine's.** A ceiling may not sit below the
+  highest value this run's turn entries already hold for that stat, and clearing one is refused on the same
+  ground when the reverted bound would fall under a stored row: a recorded stat above its own ceiling is the
+  state this rule exists to prevent. Nothing floors it further — no source claims a client ceiling can never
+  sit below the scenario figure, and inventing that claim is the error this decision avoids. The engine hard
+  cap stays the upper bound.
+- **It is Trainer data, so it is never engine-owned.** No `data_sources` row is written for a ceiling and the
+  fetch engine never touches the columns, the rule `is_manual` rows already carry (`AGENTS.md` §8).
+- **Four stats, not five.** Wit gets no entered column: the ruling named the entry surfaces and did not extend
+  to Wit, and a column with no ruled writer would be schema for a fact nobody may enter.
+- **Entered on two surfaces.** The build target step, where a target above the scenario figure is refused today
+  and where the wizard must carry the values into the run at Start Career; and the Cockpit identity form, so a
+  reading corrected mid-run moves the turn form's bound without recreating the run. A ceiling entered in the
+  same save as the target that needs it is the bound that target is measured against.
+- **Null reverts, it does not zero, and an absent key is not a clear.** An empty field returns the ceiling to
+  the scenario's figure, exactly the behaviour before this decision; a write naming no ceiling key leaves the
+  stored ones alone, which is what lets the status, scenario and period forms save without touching them.
+  `ADR-0002`'s UI condition holds: the halved-gains marker and the run's ceiling stay two separate visible
+  markers.
 
 ## Explicitly unchanged
 
@@ -75,9 +88,9 @@ so a value above the scenario base is refused no matter what the client shows.
 
 ### 2. The ceiling's authority moves to the observation
 
-When a cap is entered, the number the Trainer read outranks the arithmetic. `ScenarioCaps` reports which of the
-two answered, so a surface that explains a bound can name the entered cap rather than implying the scenario
-produced it.
+When a cap is entered, the number the Trainer read outranks the arithmetic. Two figures stay visible beside the
+field that holds it: the form's bound follows the entered number, and the published scenario figure is printed
+next to it, so an entered ceiling reads as a reading rather than as something the matrix states.
 
 ### 3. What this does not close
 
