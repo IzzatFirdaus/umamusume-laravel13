@@ -3,7 +3,7 @@
 <!-- ADR-CONTRACT
   decision: accepted in part (owner ruling 2026-09-27) — §6.11 is lifted for Energy guidance only; §5 (schema) is superseded by ADR-0003
   code: built — config/advisor.php constants; TrainerAdvisor; tests/Feature/TrainerAdvisorTest.php
-  superseded-by: — (§5 schema only, by ADR-0003)
+  superseded-by: —
   amended-by: 0003 (§5 schema), 0020 (widens the §6.11 lift to target-based recommendation), 0024 (extends the turn_entries.energy column)
   open: owner edits to PRD.md and CLAUDE.md were never landed; the optional numeric failure estimate is unbuilt by design
 -->

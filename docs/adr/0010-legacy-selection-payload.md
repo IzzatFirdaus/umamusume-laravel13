@@ -15,15 +15,17 @@ keys stay.
 ## Context
 
 `PRD.md` §6 non-goal 3 reads: *"**No breeding/pairing engine** … Inheritance is recorded as two optional
-parent references on a run, nothing more."* The second sentence was written to cap the **engine** — the
-legacy app computed a descendant from two parent references, and that system was cut — and it puts the
-ceiling on the stored record instead.
+parent references on a run, nothing more."* <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 --> The
+second sentence was written to cap the **engine** — the legacy app computed a descendant from two parent
+references, and that system was cut — and it puts the ceiling on the stored record instead.
 
 The design corpus then produced a screen. `CONSTRAINTS.md` D-268 measures what that screen shows against
-what `training_runs` can hold: per Legacy, the chosen Umamusume, its rank, whether it is a Guest, its own
-two ancestors, and a Spark list with per-Spark kind, target and star rank, plus an affinity value for the
-pairing. The record holds two character ids, so Phase 4's provenance requirement is **not met by the
-existing columns**.
+what `training_runs` can hold:
+
+> per Legacy: the chosen Umamusume, its rank, whether it is a Guest, its own two ancestors, and a Spark list with per-Spark kind, target and star rank, plus an affinity value for the pairing. The `training_runs` record holds two character ids. Phase 4's provenance requirement is therefore **not met by the existing columns**, and closing it is a schema proposal on the `ADR-0003` pattern, most likely a typed json payload keyed to the run rather than a wide table of nullable columns. <!-- lore-ignore-line class=1 cite=CONSTRAINTS.md#3.1 -->
+
+So the repository holds two statements that cannot both be followed: D-268 says the record is short of what
+the screen produces and names the fix, and §6.3 says the record stops at two references.
 
 Two facts were checked before this was written down, because both argue against the column: **no user story
 asks for it** (`AGENTS.md` requires a new column to cite a PRD requirement, and the only citation available
