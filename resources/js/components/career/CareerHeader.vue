@@ -2,10 +2,13 @@
 /*
  * The career header (SCREEN-009 §12): who the run belongs to, and where in it the Trainer stands.
  *
- * Energy, Mood, Fans and Skill Points are deliberately not printed here. They are the state panel's, in
- * the column beside the advisor: a reading is only useful next to the numbers it conditions, and one
- * screen printing the same figure twice is one more place for the two copies to disagree. What is here
- * stays identity and position — trainee, scenario, year, month, turn, and the scenario's own resources.
+ * Mood, Fans and Skill Points are not printed here. They are the state panel's, in the column beside the
+ * advisor: a reading is only useful next to the numbers it conditions. Energy is the exception the owner
+ * ruled on 2026-10-12 for R3-01, because a band reading belongs with the position this header states and
+ * the `energy` prop here was otherwise unread. Printing a figure on two parts of one screen is the risk
+ * that ruling took on, and `EnergyReadingConsistencyTest` is what closes it: the header row, the state
+ * strip and the event screen are pinned to one reading of the same turn. Everything else stays identity
+ * and position — trainee, scenario, year, month, turn, Energy, and the scenario's own resources.
  *
  * Every figure is stored or entered, and an unrecorded one is `AbsenceValue`'s: the marker with its
  * reason, reachable by keyboard and screen reader rather than by a `title` that answers a mouse only
@@ -27,6 +30,12 @@ interface Header {
     month_label: string | null;
     turn: number;
     energy: number | null;
+    /**
+     * Energy as the header prints it: the figure for an exact reading, `Low band` for one the client
+     * showed as a level, null when neither was recorded. The number alone is a half answer, and the
+     * resolution is the model's (`TurnEntry::energyReading()`), not a second one built here (R3-01).
+     */
+    energy_text: string | null;
     mood: string | null;
     fans: number | null;
     skill_points: number | null;
@@ -114,6 +123,13 @@ const hasTraineeIdentity = computed(
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Turn</dt>
                 <dd class="font-mono tabular-nums text-ink-strong">{{ group(props.header.turn) }}</dd>
             </div>
+            <div class="flex flex-col">
+                <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Energy</dt>
+                <dd class="font-mono tabular-nums text-ink-strong">
+                    <AbsenceValue v-if="props.header.energy_text === null" :reason="absent('Energy')" compact />
+                    <span v-else>{{ props.header.energy_text }}</span>
+                </dd>
+            </div>
             <div v-if="props.countdown !== null && props.countdown !== undefined" class="flex flex-col">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Scenario countdown</dt>
                 <dd class="font-mono tabular-nums text-ink-strong">
@@ -133,8 +149,8 @@ const hasTraineeIdentity = computed(
             />
         </div>
         <p v-else class="mt-3 text-xs text-ink-muted">
-            This scenario composes no resource of its own. Turn, Energy and Fans are what every scenario
-            carries; the readings are on Stats and state, beside the advisor.
+            This scenario composes no resource of its own. Mood, Fans and Skill Points are what every
+            scenario carries; their readings are on Stats and state, beside the advisor.
         </p>
     </section>
 </template>

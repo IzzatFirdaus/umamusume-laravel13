@@ -4,7 +4,10 @@ import { computed } from 'vue';
 // The hue sweep makes green read as "good" and risk as "low", reversing two settled rules
 // (DESIGN.md §2.1 reserves green for action; --color-risk is for failure). The brief's shape
 // ships anyway; the semantic conflict is recorded here, not repaired.
-const props = defineProps<{ energy: number | null }>();
+const props = withDefaults(
+    defineProps<{ energy: number | null; bandText?: string | null }>(),
+    { bandText: null },
+);
 
 const sweep = [
     'bg-sp', 'bg-sp', 'bg-green', 'bg-green', 'bg-lattice',
@@ -32,9 +35,19 @@ const stateClass = computed(() => {
 
 <template>
     <div class="flex flex-col gap-1">
+        <!-- A band is a reading the Trainer did make: the client showed a level instead of a number, and
+             printing `Energy N/A` over it claimed an absence (R3-01). No gauge is drawn, because a bar
+             would state a figure nobody read. -->
+        <span
+            v-if="!recorded && bandText !== null"
+            class="font-mono text-sm text-ink-muted"
+            title="Recorded as the level the client showed, not as a number."
+        >
+            Energy {{ bandText }}
+        </span>
         <!-- Absent, not zero: an empty gauge would say the trainee is exhausted on a run
              that has not logged a turn (D-220). -->
-        <span v-if="!recorded" class="font-mono text-sm text-ink-muted" title="No Energy value recorded for this run">
+        <span v-else-if="!recorded" class="font-mono text-sm text-ink-muted" title="No Energy value recorded for this run">
             Energy N/A
         </span>
         <template v-else>

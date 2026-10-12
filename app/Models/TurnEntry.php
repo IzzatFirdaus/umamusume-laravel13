@@ -132,4 +132,36 @@ class TurnEntry extends Model
             'superseded_by' => 'integer',
         ];
     }
+
+    /**
+     * The turn's Energy as one reading, resolved from the number and the band pair together.
+     *
+     * `energy` holds a figure the Trainer read; `energy_state` plus `energy_band` hold the coarse level
+     * the client showed instead of a number. They are separate columns, so a reader that looks at only
+     * one of them prints a recorded band as an absence (R3-01). The state wins over the number because a
+     * band is what the client actually showed, and `Unknown` outranks both: a turn explicitly marked not
+     * recorded has no reading even if a stale figure is still on the row.
+     *
+     * `text` is what a screen prints; it stays null when there is nothing to print, so no surface has to
+     * re-decide what an absence looks like.
+     *
+     * @return array{kind: 'exact'|'band'|'none', value: int|null, band: string|null, text: string|null}
+     */
+    public function energyReading(): array
+    {
+        if ($this->energy_state === EnergyState::Band && $this->energy_band !== null) {
+            return [
+                'kind' => 'band',
+                'value' => null,
+                'band' => $this->energy_band,
+                'text' => ucfirst($this->energy_band).' band',
+            ];
+        }
+
+        if ($this->energy_state !== EnergyState::Unknown && $this->energy !== null) {
+            return ['kind' => 'exact', 'value' => $this->energy, 'band' => null, 'text' => (string) $this->energy];
+        }
+
+        return ['kind' => 'none', 'value' => null, 'band' => null, 'text' => null];
+    }
 }

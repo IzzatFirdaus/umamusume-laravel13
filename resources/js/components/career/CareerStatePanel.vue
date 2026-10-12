@@ -34,6 +34,11 @@ interface Meta {
     key: string;
     label: string;
     value: number | string | null;
+    /**
+     * The words of a band reading, present only on the Energy row and only when the turn recorded a band
+     * rather than a number. A band is not an absence, so the gauge prints it instead of `N/A` (R3-01).
+     */
+    band_text?: string | null;
 }
 
 const props = defineProps<{
@@ -149,7 +154,7 @@ const denominator = (stat: Stat): number | null =>
             <div v-for="row in props.meta" :key="row.key" class="rounded-md border border-rule bg-raised p-2">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ row.label }}</dt>
                 <dd class="mt-1 text-sm text-ink-strong">
-                    <EnergyGauge v-if="row.key === 'energy'" :energy="row.value as number | null" />
+                    <EnergyGauge v-if="row.key === 'energy'" :energy="row.value as number | null" :band-text="row.band_text ?? null" />
                     <MoodPill v-else-if="row.key === 'mood'" :tier="row.value as string | null" unrecorded="N/A, not recorded" />
                     <AbsenceValue
                         v-else-if="row.value === null"

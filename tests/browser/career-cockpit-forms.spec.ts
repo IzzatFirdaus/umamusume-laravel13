@@ -236,6 +236,19 @@ test('saves a correction and returns to the cockpit with the new value', async (
     // the proof the write landed, read beside the stats the advisor ranks against.
     const state = page.locator('section[aria-labelledby="career-state-heading"]');
     await expect(state.getByText('60/100')).toBeVisible(WRITE);
+
+    // R3-04: the write also reports itself. The two header forms said `Saved.` and this one said
+    // nothing, so a Trainer could not tell a saved correction from a button that did nothing.
+    await expect(correction.getByText('Correction saved.')).toBeVisible();
+
+    // R3-01: a band is a reading, not an absence. Record one on the same turn and every surface that
+    // states Energy has to name the band instead of printing `Energy N/A`.
+    await correction.getByRole('radio', { name: 'Band' }).check();
+    await correction.locator('select[name="energy_band"]').selectOption('low');
+    await correction.getByRole('button', { name: 'Save correction' }).click();
+
+    await expect(state.getByText('Energy Low band')).toBeVisible(WRITE);
+    await expect(page.locator('section[aria-labelledby="career-header-heading"]').getByText('Low band')).toBeVisible();
 });
 
 test('deletes a turn through the two-step disclosure', async ({ page }) => {

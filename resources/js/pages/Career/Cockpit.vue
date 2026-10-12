@@ -43,6 +43,7 @@ interface Header {
     month_label: string | null;
     turn: number;
     energy: number | null;
+    energy_text: string | null;
     mood: string | null;
     fans: number | null;
     skill_points: number | null;
@@ -748,6 +749,13 @@ const jumpToShop = (): void => {
                             >
                                 {{ correctionForm.processing ? 'Saving…' : 'Save correction' }}
                             </button>
+                            <!-- The two header forms on this screen already report their own write; this
+                                 one said nothing, so a Trainer could not tell a saved correction from a
+                                 dead button (R3-04). `Correction saved.` names which of the three forms
+                                 is speaking. -->
+                            <p v-if="correctionForm.recentlySuccessful" class="text-xs text-ink-muted md:col-span-3">
+                                Correction saved.
+                            </p>
                         </form>
 
                         <!-- Delete one turn and its failure event (F2, plan §9.6 ruling 2). A second

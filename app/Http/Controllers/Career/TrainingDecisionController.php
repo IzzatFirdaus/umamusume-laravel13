@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Career;
 
-use App\Enums\EnergyState;
 use App\Enums\MoodTier;
 use App\Http\Controllers\Controller;
 use App\Models\Advisor\BuildTargetPayload;
@@ -376,12 +375,11 @@ class TrainingDecisionController extends Controller
         $band = $latest?->energy_band;
         $value = $latest?->energy;
 
-        $label = match (true) {
-            $state === EnergyState::Band && $band !== null => 'Energy: '.ucfirst($band).' band',
-            $state === EnergyState::Unknown => 'Energy: Not recorded',
-            $value !== null => 'Energy: '.$value,
-            default => 'Energy: Not recorded',
-        };
+        // The three-way resolution lives on the entry (`TurnEntry::energyReading()`) so this page and the
+        // Cockpit and the event screen cannot state different readings of one turn (R3-01). The raw state,
+        // band and number ride on unchanged: this screen's form prefills from them.
+        $reading = $latest === null ? ['text' => null] : $latest->energyReading();
+        $label = 'Energy: '.($reading['text'] ?? 'Not recorded');
 
         return [
             'state' => $state?->value,

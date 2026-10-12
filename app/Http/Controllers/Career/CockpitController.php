@@ -290,6 +290,8 @@ class CockpitController extends Controller
             $monthLabel = $named->phase->value.' '.CareerCalendar::monthLabel($named->month);
         }
 
+        $energy = $latest === null ? ['value' => null, 'text' => null] : $latest->energyReading();
+
         return [
             'scenario_label' => $run->hasScenario()
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
@@ -298,7 +300,11 @@ class CockpitController extends Controller
             'year_label' => $yearLabel,
             'month_label' => $monthLabel,
             'turn' => $turn,
-            'energy' => $latest?->energy,
+            'energy' => $energy['value'],
+            // The reading as the header prints it: a recorded band reads `Low band`, not `N/A`. The
+            // number alone was a half answer, because a turn recorded without one is still recorded
+            // (R3-01) and `TurnEntry::energyReading()` is the one owner of that resolution.
+            'energy_text' => $energy['text'],
             'mood' => $latest?->mood?->value,
             'fans' => $latest?->fans,
             'skill_points' => $latest?->sp,
@@ -360,7 +366,7 @@ class CockpitController extends Controller
      * show a number the form would refuse (KI-47, `ADR-0015`). Absent values are null rather than
      * zero: a run that logged nothing has no stats, and a run with no target has no target.
      *
-     * @return array{stats: list<array{key: string, label: string, current: int|null, target: int|null, cap: int}>, meta: list<array{key: string, label: string, value: int|string|null}>}
+     * @return array{stats: list<array{key: string, label: string, current: int|null, target: int|null, cap: int}>, meta: list<array{key: string, label: string, value: int|string|null, band_text: string|null}>}
      */
     private function stateSection(TrainingRun $run, ?TurnEntry $latest): array
     {
@@ -381,8 +387,14 @@ class CockpitController extends Controller
             ];
         }
 
+        // The gauge needs the number; a turn recorded as a band has none, and the words the client showed
+        // travel beside it so the strip prints the reading rather than an absence (R3-01).
+        $energy = $latest === null
+            ? ['kind' => 'none', 'value' => null, 'text' => null]
+            : $latest->energyReading();
+
         $values = [
-            'energy' => $latest?->energy,
+            'energy' => $energy['value'],
             'mood' => $latest?->mood?->value,
             'fans' => $latest?->fans,
             'skill_points' => $latest?->sp,
@@ -391,7 +403,11 @@ class CockpitController extends Controller
         $meta = [];
 
         foreach (self::META as $row) {
-            $meta[] = [...$row, 'value' => $values[$row['key']]];
+            $meta[] = [
+                ...$row,
+                'value' => $values[$row['key']],
+                'band_text' => $row['key'] === 'energy' && $energy['kind'] === 'band' ? $energy['text'] : null,
+            ];
         }
 
         return ['stats' => $stats, 'meta' => $meta];

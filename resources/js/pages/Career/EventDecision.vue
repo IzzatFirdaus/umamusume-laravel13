@@ -35,7 +35,7 @@ interface RunSection {
 
 interface StateSection {
     stats: { key: string; label: string; current: number | null; target: number | null; cap: number }[];
-    meta: { key: string; label: string; value: number | string | null }[];
+    meta: { key: string; label: string; value: number | string | null; band_text?: string | null }[];
 }
 
 interface EventRow {
@@ -154,14 +154,23 @@ const statValue = (stat: { current: number | null; target: number | null; cap: n
     return String(stat.current);
 };
 
-const statTitle = (stat: { current: number | null; target: number | null; cap: number }): string => {
-    if (stat.current === null) {
+const statTitle = (stat: { current: number | null; target: number | null; cap: number }): string => {    if (stat.current === null) {
         return 'No turn has been recorded on this run yet.';
     }
     if (stat.target === null) {
         return `Target not recorded for this trainee. Scenario cap ${stat.cap}.`;
     }
     return `Target ${stat.target}. Scenario cap ${stat.cap}.`;
+};
+
+// The reason a meta value is not printed: a band is a recorded reading with no number, and only the
+// absence of both is an absence (R3-01).
+const metaTitle = (item: { value: number | string | null; band_text?: string | null }): string | null => {
+    if (item.value !== null) {
+        return null;
+    }
+
+    return item.band_text ? 'Recorded as the level the client showed, not as a number.' : 'No turn has been recorded on this run yet.';
 };
 </script>
 
@@ -229,9 +238,9 @@ const statTitle = (stat: { current: number | null; target: number | null; cap: n
                 >
                     <dt class="text-xs text-ink-muted">{{ item.label }}</dt>
                     <dd class="mt-0.5 font-mono text-sm tabular-nums text-ink-strong">
-                        <span
-                            :title="item.value === null ? 'No turn has been recorded on this run yet.' : null"
-                        >{{ item.value === null ? 'N/A' : item.value }}</span>
+                        <!-- A band reading rides on `band_text` (R3-01): the number is genuinely absent and
+                             the level is not, so `N/A` would state an absence the Trainer already filled. -->
+                        <span :title="metaTitle(item)">{{ item.value ?? item.band_text ?? 'N/A' }}</span>
                     </dd>
                 </div>
             </dl>

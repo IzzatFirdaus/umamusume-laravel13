@@ -100,7 +100,7 @@ class EventDecisionController extends Controller
      * The five stats and the four meta values, the same shape `CockpitController` prints
      * (D8): entered current, entered target, and the scenario ceiling from the one owner.
      *
-     * @return array{stats: list<array{key: string, label: string, current: int|null, target: int|null, cap: int}>, meta: list<array{key: string, label: string, value: int|string|null}>}
+     * @return array{stats: list<array{key: string, label: string, current: int|null, target: int|null, cap: int}>, meta: list<array{key: string, label: string, value: int|string|null, band_text: string|null}>}
      */
     private function stateSection(TrainingRun $run, ?TurnEntry $latest): array
     {
@@ -121,8 +121,14 @@ class EventDecisionController extends Controller
             ];
         }
 
+        // The same resolution the Cockpit reads, so the two surfaces cannot disagree about one turn and a
+        // recorded band is not printed as an absence here either (R3-01).
+        $energy = $latest === null
+            ? ['kind' => 'none', 'value' => null, 'text' => null]
+            : $latest->energyReading();
+
         $values = [
-            'energy' => $latest?->energy,
+            'energy' => $energy['value'],
             'mood' => $latest?->mood?->value,
             'fans' => $latest?->fans,
             'skill_points' => $latest?->sp,
@@ -131,7 +137,11 @@ class EventDecisionController extends Controller
         $meta = [];
 
         foreach ([['key' => 'energy', 'label' => 'Energy'], ['key' => 'mood', 'label' => 'Mood'], ['key' => 'fans', 'label' => 'Fans'], ['key' => 'skill_points', 'label' => 'Skill Points']] as $row) {
-            $meta[] = [...$row, 'value' => $values[$row['key']]];
+            $meta[] = [
+                ...$row,
+                'value' => $values[$row['key']],
+                'band_text' => $row['key'] === 'energy' && $energy['kind'] === 'band' ? $energy['text'] : null,
+            ];
         }
 
         return ['stats' => $stats, 'meta' => $meta];
