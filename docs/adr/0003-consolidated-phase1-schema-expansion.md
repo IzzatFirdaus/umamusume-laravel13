@@ -105,8 +105,8 @@ Trainer-chosen races have no slot in any future, sourced version of this table e
 
 ## Links
 
-- `ADR-0001` (§5 superseded here), `ADR-0002` (bound), `ADR-0004` (aptitudes and the `scenarios` table),
-  `ADR-0009` (slot seeding, which narrowed R3), `ADR-0015` (decision 6)
+- `ADR-0004` (aptitudes and the `scenarios` table), `ADR-0001` (its §5 schema lives here), `ADR-0002`
+  (bound), `ADR-0009` (slot seeding, which narrowed R3), `ADR-0015` (decision 6)
 - `PRD.md` US-3, US-4, US-10, FR-C, OQ-4, §6.11; `docs/UMAMUSUME_REFERENCE.md` §1.3.4
 - `tests/Feature/Adr0003SchemaTest.php`, `tests/Feature/Schema/RaceEntrySlotLinkTest.php`
 - `config/scenarios.php` (`grade_objectives` carries all three Grade Point tracks)
