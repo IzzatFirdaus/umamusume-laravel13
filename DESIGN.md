@@ -38,6 +38,14 @@ the reason is recorded in §2.1, and the two themes are now both verified
 surface-down rather than one being a derivative of the other. Where a value is
 genuinely new here, it is marked `Proposed`.
 
+**Authority split (ADR-0006).** This file is the single source of truth for the app's visual
+contract — what ships. `docs/research-scratch/DESIGN-CORPUS.md` section "DESIGN.md" is the
+research artifact: measured anchors, ramps and contrast math that this file cites. Neither
+rewrites the other's body. A superseded claim is annotated with a `> [!SUPERSEDED]` blockquote
+naming the overriding document, never edited in place, so the research history stays intact
+(D5). The annotation is the whole reconciliation mechanism: there is no silent winner, and a
+later reader can see that a claim was overridden rather than never having existed.
+
 ## 1. Design principles
 
 1. Data first, chrome last. Every pixel around a number earns its space by
