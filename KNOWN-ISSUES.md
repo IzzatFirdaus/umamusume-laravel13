@@ -46,6 +46,27 @@ decision owed), KI-69 (classes 1, 3, 4 remain), KI-70 (process hazard), KI-72 (F
 origin/master), KI-74 (process hazard), KI-82 (title unchanged), KI-84 (owner ruling on deletions owed),
 KI-87 (two queries not reconciled, label partially fixed).
 
+**Status correction (2026-10-12, register pass):** the composition above is superseded again, and every
+dated claim above is left standing rather than rewritten. This file now carries **KI-57 through KI-98**
+(read from each entry's own heading and status line, not from the chain above; the two duplicate numbers
+KI-70 and KI-71 are counted as the register reports them). Per each entry's own text:
+
+- **CLOSED:** KI-57, KI-58, KI-62, KI-64, KI-65, KI-66, KI-67, KI-68, KI-71 (both the census entry and the
+  Grand Concert scenario-key entry), KI-72, KI-73, KI-75, KI-76, KI-77, KI-78, KI-79, KI-80, KI-81, KI-83,
+  KI-85, KI-86, KI-88, KI-89, KI-90, KI-92, KI-93, KI-96, KI-97. Two of these (KI-83, KI-86) carry a
+  heading that still reads "NOT CLOSED" while their own body records the closure with a commit
+  (`a3f0795` and `d7d6ed5` respectively); the body is later and dated, so the entry is classified CLOSED
+  here and the heading/body divergence is named rather than silently resolved.
+- **FIXED IN TREE / NOT CLOSED:** KI-98 (the `doc_census.py` resolver, fixed in the working tree, not
+  landed). It is held on **O-1** like the other unlanded fixes: register discipline closes an entry only
+  when the fix is on `origin/master`, and `master` is unpushed.
+- **OPEN:** KI-59, KI-60, KI-61, KI-63, KI-69, KI-70 (the first of the two — the shared-files process
+  hazard; the second KI-70, E1's 44px sweep, is CLOSED above), KI-74, KI-82, KI-84, KI-87, KI-91, KI-94,
+  KI-95. Each names its own closure condition; none is closed here.
+
+No entry is renumbered. KI-59 is OPEN and is named here although it is absent from the earlier chain: its
+own heading reads "CORRECTED 2026-10-05, OPEN" and it is not in any closure list above.
+
 ## This file is still the append target
 
 `AGENTS.md` and every slice record write into `KNOWN-ISSUES.md`, so this file was a poor
@@ -2429,6 +2450,39 @@ with its own approval, plus a judgement on whether any production dependency con
 build time. Not fixed in slice 15: the authorised change was `@types/node`, and moving a transitive dependency
 because an audit happened to be run is a different decision.
 
+### KI-95 The cockpit cutover deleted the record screen's import provenance line, so an imported run's header no longer names the pasted body - FILED 2026-10-10 (G2-FD4 close-out browser gate), OPEN
+
+**Status: OPEN.** Pre-existing, introduced by `b30906a` (2026-10-09, "chore: land peer's cockpit cutover as one
+coherent unit"), not by the slice whose gate surfaced it. Found while classifying the ten failures of a full
+browser run; `run-import.spec.ts:124` is the one case that fails on it.
+
+`SCREEN_SPEC.md:331` lists the run header's parts, including "import provenance line when `imported_at` is set", and
+`:347` fixes its wording, `Imported {date} from {import_source}`. The value is still stored:
+`ImportHistoricalRunRequest.php:221` returns `'pasted CSV ('.substr(md5($csv), 0, 8).')'`. What is gone is the
+renderer. That line lived in `resources/js/pages/Runs/Show.vue`, and `b30906a` deleted the file.
+`resources/js/components/career/CareerHeader.vue`, which is the run header on the Cockpit that replaced it, renders
+the trainee, the scenario, year, month, turn and the resource strip, and no provenance line. Grepping the front end
+for the value it would print returns nothing: `imported_display` appears nowhere under `resources/js`, and
+`import_source` appears in no `.vue` file. `SCREEN_SPEC.md:324-347` still describes the record screen as a live
+screen, though `routes/web.php:132` now makes `runs.show` a redirect to the Cockpit.
+
+The consequence is narrow and real: an imported run opens on a header that does not say where it came from, and
+`run-import.spec.ts:140` (added with KI-64's closure at `851ed51`, 2026-10-08) fails on the assertion. KI-64's own
+closure condition, "the run's own provenance line names the pasted body", no longer holds on this tree. KI-88
+recorded the cutover's other fallout (the status form's missing submit control, and thirty fixture waits pointing at
+the pre-cutover address) and closed on the waits; it did not name this line.
+
+**Proving commands.** `grep -rn "imported_display\|import_source" resources/js` returns no matches. `git log
+--oneline --diff-filter=D -- resources/js/pages/Runs/Show.vue` reads `b30906a`. `PLAYWRIGHT_PORT=8231
+PLAYWRIGHT_SCRATCH_DB=.scratch-uma/ki95.sqlite npx playwright test tests/browser/run-import.spec.ts --grep "commits
+the previewed file"` reads 1 failed, at `:140`, while `:137`'s redirect wait and `:138`'s heading both pass, so the
+write lands and only the provenance line is missing.
+
+**Closure owed.** A commit, by whoever owns the run surface (F1/F2's redirect and write-owner work, or the owner of
+the Cockpit header). Either the live header renders `Imported {date} from {import_source}` again when `imported_at`
+is set, or `SCREEN_SPEC.md`'s record-screen section is retired with the line and `run-import.spec.ts:140` is
+corrected to what the screen prints. What closure would not cover: it does not audit the record-screen section's
+other requirements for the same loss; it does not touch KI-88's half two; and it does not change `b30906a`.
 
 ### KI-96 The wizard's ancestry case filled a `<select>` and read the rank as one field, so `career-legacy-deck-steps.spec.ts` was red for two days with nobody re-running it - FILED 2026-10-11 (Round 2 walk, W2), CLOSED 2026-10-11
 
@@ -2562,3 +2616,55 @@ on the two feature files and the browser case above. Nothing was weakened, skipp
 **What closure does not cover** stands as filed, plus one addition: it does not re-verify the sibling
 `grade_points` and `shop_coins` boxes against any column that may be added later, and it does not prove the rail
 renders correctly for a run whose counters were written through paths other than the Cockpit team editor.
+
+### KI-98 `doc_census.py`'s resolver counted live citations as dead, so `DocCitationParityTest` was red at HEAD on a tree that had no citation rot - FILED 2026-10-12 (Round 3 final regression sweep), FIXED IN TREE, NOT LANDED
+
+**Status: FIXED IN TREE, NOT LANDED.** Found while classifying the two failures of the Level 3 sweep that followed
+the Round 3 slice; neither was a regression from that slice. The ratchet bar is untouched: `DOC_CITATION_BASELINE`
+still reads 708 and its pinning case still asserts 708.
+
+The sweep ran `php artisan test --compact` at `f6f393f` and `DocCitationParityTest` failed with `784 is equal to 708
+or is less than 708`. Per `AGENTS.md` §9 the failure was attributed before anything was re-run, per file and per
+target, and the rise was not in the corpus's prose. Two resolver gaps in `tools/doc_census.py` counted citations to
+tracked, present files as dead:
+
+1. A ref containing a slash was tried only as written and under `docs/`, never beside the citing file. So
+   `docs/DESIGN.md` inside `jev-inspect/CHANGELOG.md` counted dead while the tracked `jev-inspect/docs/DESIGN.md`
+   sat next to it - Markdown's own relative-link rule, unimplemented.
+2. A bare name was tried in three directories (`docs/`, `docs/research-scratch/`, beside the citing file), so the
+   corpus's shorthand broke for every docs area added after those three were chosen. `AGENTS.md:54` telling a
+   reader to open `code-style.md` counted dead, and so did `frontend-development-plan.md`, `design-2.0.md`,
+   `screen-spec-2.0.md`, the `docs/scenarios/` guides, the `docs/audits/` rounds and the `screenshot-notes/` files -
+   all tracked, all present. Gap 2 was already acknowledged once in the function's own docstring for
+   `GOVERNANCE.md`; the same class had simply grown past the three directories.
+
+**Evidence that this is a false positive and not a re-ruled record.** Every one of the 127 hits the two rules
+remove names a tracked markdown file that exists at the natural relative path, and all 27 distinct bare names the
+widened rule resolves match exactly one tracked file, so nothing resolved by accident. The genuinely absent targets
+stay dead where they must: `docs/design-research/CONSTRAINTS.md` is still counted 61 times, `RAW-FINDINGS.md`,
+`SKILLS-GAPS.md`, `docs/GATE-REGISTRY.md` and `docs/PRE-MORTEM.md` all still count, because no tracked markdown
+carries those names. Measured with the corrected resolver: 556 at `ee93b38` (the commit that set the bar, whose own
+measurement therefore carried ~152 false positives), 642 at `f6f393f`, 657 in this worktree before this entry was
+written. This entry's own lines name 8 absent targets as evidence, records the gate tolerates by design, so the
+register now reads 665. On the pre-fix
+resolver the same `f6f393f` tree reads 735. The gate was never over the bar for a real reason; the crossing commit
+was not pinned, the per-commit sweep did not complete before this diagnosis made it moot.
+
+**The fix.** Both rules in `dead_links()`: a slash-bearing ref is tried beside its citing file, and a bare name
+resolves when a tracked markdown file of that name exists anywhere. `ponytail:` the bare-name rule keys on the
+name, not the path, so a deleted docs/foo/README.md would read live via root README.md; upgrade path is to
+apply the fallback only where the basename is unique in the tracked set.
+
+**Proving commands.** `python tools/doc_census_selftest.py` -> exit 0, and the same against `git show
+HEAD:tools/doc_census.py` copied to `tools/.doc_census_head.py` -> `AssertionError: a live bare-name citation counts
+dead`, so the check fails when the resolver regresses rather than passing by not looking. `python
+tools/doc_census.py` -> `dead markdown links: 665 (642 GONE, 23 UNTRACKED)`, and
+`vendor/bin/pest tests/Feature/DocCitationParityTest.php` -> 2 passed, exit 0.
+
+**What closure does not cover.** It does not lower or raise the 708 bar, and it does not make the remaining 636
+GONE lines correct - most are dated provenance inside masters naming sources they absorbed, tolerated by the gate's
+own header, and repointing them is still Task 5 of the `PROCESS-PLANS.md` section named PLAN-DOC-SYNC-2026-10-02. It does not resolve the
+21 UNTRACKED lines, whose remedy is committing the masters they name (`docs/Trainer-Desk-2.0-G-Prompts.md`,
+`docs/research-scratch/TRAINING-RUN-IMPORTS.md`), and those files are another session's in-flight work in this
+shared worktree. It does not re-measure `AGENTS.md`'s §3 documentation map against the new resolver, and it leaves
+`composer docs`' other sections (master line counts, inbound citation counts) exactly as they were.
