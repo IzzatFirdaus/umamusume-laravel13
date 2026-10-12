@@ -86,6 +86,28 @@ def dead_links():
     shorthand. Bare master names such as `GOVERNANCE.md` resolve under the masters directory, so
     counting them as dead was a resolver gap rather than citation rot.
 
+    Two further resolver gaps of exactly that kind were measured and closed on 2026-10-12, when the
+    ratchet read 784 against a 708 baseline and none of the rise was citation rot in the sense the
+    gate polices:
+
+    * A slash-bearing ref was never tried beside the citing file, only as written and under `docs/`.
+      So `docs/DESIGN.md` inside `jev-inspect/CHANGELOG.md` counted dead while the tracked
+      `jev-inspect/docs/DESIGN.md` sat next to it. A relative ref is now tried beside its file too.
+    * A bare name was tried in three directories only, so the shorthand broke for every corpus area
+      added after those three. `AGENTS.md:54` telling a reader to open `code-style.md` counted as a
+      dead link when `.ai/rules/code-style.md` is tracked and present; so did `02-unity-cup.md` for
+      `docs/scenarios/`, `frontend-development-plan.md` for `docs/proposals/`, and the audit and
+      screenshot-note names. A bare name now resolves when a tracked markdown file of that name
+      exists anywhere, which is what the shorthand means.
+
+    127 of the 784 were these two false positives, and all 27 distinct bare names the widened rule
+    resolves match exactly one tracked file today, so nothing was read as live by accident.
+
+    ponytail: the bare-name rule keys on the name, not the path, so a deleted `docs/foo/README.md`
+    would read as live via root `README.md`. Ceiling: a false negative only where a basename is not
+    unique. Upgrade path: fall back to the basename rule only when that basename has one match in the
+    tracked set, and require a path when it has several.
+
     Files listed by `catalogues()` are skipped whole: their backticked paths are content, not
     citations. The exclusion is printed by `main()` so it cannot silently shrink the ratchet.
 
@@ -102,6 +124,7 @@ def dead_links():
     unreadable = []
     skip = set(catalogues())
     listing = set(git("ls-files").splitlines())
+    tracked_md_names = {os.path.basename(p) for p in listing if p.endswith(".md")}
     for f in md_files():
         if f in skip:
             continue
@@ -119,10 +142,13 @@ def dead_links():
                     tries += [f"docs/{cand}", f"{MASTERS_DIR}/{cand}",
                               f"{near}/{cand}" if near else cand]
                 else:
-                    tries += [f"docs/{cand}"]
-                if not any(t in listing for t in tries):
-                    target = next((t for t in tries if os.path.exists(os.path.join(REPO, t))), None)
-                    bad.append((f, n, ref, "UNTRACKED" if target else "GONE"))
+                    tries += [f"docs/{cand}", f"{near}/{cand}" if near else cand]
+                if any(t in listing for t in tries):
+                    continue
+                if "/" not in cand and cand in tracked_md_names:
+                    continue
+                target = next((t for t in tries if os.path.exists(os.path.join(REPO, t))), None)
+                bad.append((f, n, ref, "UNTRACKED" if target else "GONE"))
     return bad, unreadable
 
 

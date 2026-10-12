@@ -25,6 +25,17 @@ declare(strict_types=1);
  *    repository's dated records carry. Lower it when a citation is repointed. Never raise it to make a
  *    failing gate pass: that is `CONSTRAINTS.md`'s "no task may weaken a threshold" applied to a number.
  *
+ * Dated note 2026-10-12 (`KNOWN-ISSUES.md` KI-98): this gate failed at `f6f393f` with the census reading 784, and
+ * the rise was not prose rot. Two resolver gaps in `tools/doc_census.py` counted citations to tracked, present
+ * files as dead - a slash-bearing ref was never tried beside its own file, and a bare name was tried in only three
+ * directories, so `code-style.md` (tracked at `.ai/rules/`) and the `docs/proposals/`, `docs/scenarios/`,
+ * `docs/audits/` and `screenshot-notes/` names all read dead. Closing both gaps removes 127 of the 784, each one a
+ * tracked file that exists, and every genuinely absent target stays counted. Measured with the corrected resolver:
+ * 556 at `ee93b38` (the commit that set this bar, so the bar itself was measured ~152 false positives too high),
+ * 642 at `f6f393f`, 665 in the tree this note was written in - 657 at the measurement plus the 8 absent targets
+ * `KNOWN-ISSUES.md` KI-98 names as its own evidence, a record the ratchet tolerates. 708 is unchanged, and `python
+ * tools/doc_census_selftest.py` is the check that the resolver still fails on real absence.
+ *
  * Deliberately NOT mirrored into the Makefile. GNU make cannot run on this host (KI-4); the Makefile's
  * targets are documentation, and `LoreGateParityTest`'s make/composer parity assertion is left unextended
  * for `docs` so nobody "fixes" the asymmetry by adding a target that cannot execute here.
