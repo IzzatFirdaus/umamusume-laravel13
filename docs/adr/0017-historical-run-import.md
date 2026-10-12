@@ -9,7 +9,7 @@
 -->
 
 Status: **Accepted** (Slice 4, built 2026-10-01). Realises the import half of `PRD.md` US-12's neighbouring
-concern without amending any non-goal. Depends on `ADR-0015` for the ceilings it validates against and
+concern and touches no non-goal. Reads `ADR-0015`'s ceiling owner for the bounds it validates against, and
 `ADR-0014` for the deck it deliberately does **not** fill.
 
 ## Decision
@@ -55,7 +55,7 @@ established by `ADR-0015` — against a transient run carrying only the submitte
 therefore refused for the same number the turn form and the stat band would refuse it for, and a run naming
 no scenario is measured at the base cap with no bonus. Nothing in the import re-derives a ceiling.
 
-### Two normalisations the file forces, and one limit it accepts
+## The two normalisations the file forces, and the one limit it accepts
 
 - **UTF-8 BOM and CRLF.** Excel writes both. Stripping the BOM is load-bearing: an unstripped one makes the
   first header cell read as a BOM-prefixed `turn`, which rejects a file this application itself produced.
