@@ -37,7 +37,8 @@ option.
 | Wit has no entered cap | `cap_wit` is not a column; scenario bound is 1800 | 0025 | `ScenarioCaps::ENTERED_CAPS` (four entries) | 0025 §Decision |
 | **Do not** widen validation to a flat `0..2000` | 0015 superseded 0002 option B; a flat constant is wrong in principle | 0002 (superseded by 0015) | `ScenarioCaps` | 0015 §Why this is the shape |
 | **Do not** read `hard_cap` as the target | it is the clamp, not the ceiling a Trainer can reach | 0015 | `ScenarioCaps::caps()` `min()` | 0015 §Why this is the shape |
-| **Open**: `config/scenarios.php` and the `scenarios` table caps have no parity test | two homes for one number; nothing checks they agree | 0015 | `tests/Feature/ScenarioCapParityTest.php` (added 2026-10-12) | 0015 §Deviation |
+| **Settled 2026-10-12**: `config/scenarios.php` and the `scenarios` table caps have one parity test | ADR-0015 recorded two homes for one number with nothing checking they agreed; `ScenarioCapParityTest` now spans both, and a further drift in either fails it | 0015 | `tests/Feature/ScenarioCapParityTest.php` | 0015 §Deviation |
+| **Open**: nothing else checks a config value against a fetched row | the parity test spans config and the table; a third home for a cap figure would still go unnoticed | 0015 | — | 0015 §Deviation |
 
 ## 3. Scenario composition and the calendar
 
