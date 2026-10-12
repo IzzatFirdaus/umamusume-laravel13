@@ -5,7 +5,6 @@ use App\Providers\DatabaseGuardServiceProvider;
 use App\Services\DatabaseSafety\DatabaseGuard;
 use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Support\Facades\Config;
-use Mockery;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
