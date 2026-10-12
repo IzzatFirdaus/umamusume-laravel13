@@ -5,7 +5,7 @@ import SkillRow from '../../components/SkillRow.vue';
 import FormDetail from '../../components/catalog/FormDetail.vue';
 import FormTabs from '../../components/catalog/FormTabs.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 interface Alias {
     alias: string;
@@ -90,6 +90,8 @@ const props = defineProps<{
     skillLists: SkillList[];
     provenance: Source[];
     showUnconfirmed: boolean;
+    /** The carry endpoint: writes this trainee into the setup draft and opens the wizard (Slice 4.3). */
+    carry_url: string;
 }>();
 
 const activeCard = (): Card | null => props.cards.find((card) => card.id === props.activeCardId) ?? null;
@@ -342,14 +344,19 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
         <section class="mt-8" aria-labelledby="her-runs">
             <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
                 <h2 id="her-runs" class="text-lg font-semibold text-ink-strong">Her runs</h2>
-                <a
-                    href="/training-runs/create"
+                <!-- A write, so a button that posts the carry route rather than a link to the
+                     transitional create form: the wizard's own hand-off, no run before Preflight.
+                     A double click rewrites the same two draft keys, so the write is idempotent
+                     and needs no pending guard. -->
+                <button
+                    type="button"
                     class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome"
+                    @click="router.post(props.carry_url)"
                 >
                     New run
-                </a>
+                </button>
             </div>
-            <p class="mt-1 text-xs text-ink-muted">Opens run setup; the trainee is chosen there.</p>
+            <p class="mt-1 text-xs text-ink-muted">Starts the setup wizard with her already chosen.</p>
 
             <p v-if="runs.length === 0" class="mt-2 text-sm text-ink-muted">No runs recorded for her yet.</p>
             <ul v-else class="mt-2 divide-y divide-rule rounded-md border border-rule">

@@ -57,6 +57,11 @@ Route::put('/career/setup/scenario', [ScenarioSelectController::class, 'store'])
 Route::get('/career/setup/trainee', [TraineeSelectController::class, 'show'])->name('career.trainee');
 Route::put('/career/setup/trainee', [TraineeSelectController::class, 'store'])->name('career.trainee.store');
 Route::get('/career/setup/trainee/{umamusume}', [TraineeProfileController::class, 'show'])->name('career.trainee.profile');
+// The catalog detail's "New run" action (plan Slice 4.3): the trainee the Trainer was reading enters
+// the setup draft and the wizard opens at its first step. The binding is the whole validation — the
+// carry's only input is the trainee, resolved or 404ed — and the write is the one the trainee step's
+// own form makes, so the two doors cannot disagree about what a carried choice is.
+Route::post('/career/setup/trainee/{umamusume}/carry', [TraineeSelectController::class, 'carry'])->name('career.trainee.carry');
 
 /*
  * Step 3 (SCREEN-005, SCR-CAR-005). The target is entered before the run exists and written to the

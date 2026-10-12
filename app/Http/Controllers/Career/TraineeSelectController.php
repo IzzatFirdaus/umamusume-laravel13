@@ -142,6 +142,27 @@ class TraineeSelectController extends Controller
     }
 
     /**
+     * The catalog detail's "New run" action (plan Slice 4.3): the trainee the Trainer was reading
+     * enters the draft and the wizard opens at its first step, so the flow stays scenario first. The
+     * route's own binding is the whole validation — the carry's only input is the trainee, resolved
+     * or 404ed — and the write is the one `store()` makes, creating nothing: the run is born at
+     * Preflight (`SetupDraft`'s contract).
+     */
+    public function carry(Umamusume $umamusume): RedirectResponse
+    {
+        SetupDraft::write([
+            'umamusume_id' => $umamusume->id,
+            // A carry names no costume form, so a previous pick's card is cleared with it (the same
+            // R3-06 rule `store()` applies: the form travels with the trainee it belongs to).
+            'character_card_id' => null,
+        ]);
+
+        return redirect()
+            ->route('career.scenario')
+            ->with('status', "Trainee set: {$umamusume->name}.");
+    }
+
+    /**
      * One row of the roster list. Every value is read off a column; nothing here is inferred.
      *
      * Rarity is printed **per costume form** and never as one trainee fact, because there is no

@@ -305,6 +305,9 @@ class CatalogController extends Controller
         $scenarioLabels = array_map(static fn (array $def): string => $def['label'], config('scenarios.scenarios'));
 
         return Inertia::render('Catalog/Show', [
+            // The "New run" action's destination: the carry endpoint writes this trainee into the
+            // setup draft and opens the wizard at its first step (plan Slice 4.3).
+            'carry_url' => route('career.trainee.carry', $umamusume),
             'trainee' => [
                 'id' => $umamusume->id,
                 'slug' => $umamusume->slug,
