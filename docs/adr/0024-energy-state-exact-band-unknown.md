@@ -4,7 +4,7 @@
   decision: accepted (owner ruling 2026-10-09) — energy_state (exact/band/unknown) and energy_band (low/mid/high) sit beside turn_entries.energy
   code: built — migration 2026_10_09_170000_add_energy_state_to_turn_entries (ran, batch 5); App\Enums\EnergyState; TurnEntry casts
   superseded-by: —
-  amended-by: 0003 (extends the turn_entries.energy column it added), 0001 (leaves its Energy lift as it was), 0020 (the 2.0 program, untouched by this column)
+  amended-by: 0003 (extends the turn_entries.energy column it added), 0020 (the 2.0 program, untouched by this column), 0001 (leaves its Energy lift as it was)
   open: whether a band ever earns arithmetic of its own — no midpoint is derived from a band and none is authorised
 -->
 
@@ -51,7 +51,7 @@ read must not be invented.
 
 ## Links
 
-- `ADR-0001` (§2 R4, §3 band vs numeric; not reopened), `ADR-0003` (the `turn_entries.energy` column this
-  extends), `ADR-0020` (the 2.0 program)
+- `ADR-0020` (the 2.0 program), `ADR-0001` (§2 R4, §3 band vs numeric; its carve-out is left as it was),
+  `ADR-0003` (the `turn_entries.energy` column this extends)
 - migration `2026_10_09_170000_add_energy_state_to_turn_entries`; `App\Enums\EnergyState`; `TurnEntry` casts
 - `docs/audits/rice-shower-unity-cup-ux-walk.md` (the D6 row); `AGENTS.md` §5, §11
