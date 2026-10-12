@@ -48,6 +48,14 @@ function inheritanceLegacyPayload(): array
                 // Names, not slot records: the wizard writes `ancestors` as a list of names
                 // (ADR-0010 §2, `StoreLegacySelectionRequest::payload()`), and the position is the slot.
                 'ancestors' => ['Symboli Rudolf', 'Mejiro McQueen'],
+                // One Spark on the second grandparent, mirroring the row walk 3 read off the client
+                // (`Grandparent A2: Seiun Sky Blue on Stamina★3`). The browser fixture enters the same
+                // row, so both fixtures hold eight Sparks: three Blue, one Pink, one Green, two White,
+                // one Scenario.
+                'ancestors_sparks' => [
+                    [],
+                    [['kind' => 'blue', 'target' => 'Stamina', 'stars' => 3]],
+                ],
                 'sparks' => [
                     ['kind' => 'blue', 'target' => 'Speed', 'stars' => 3],
                     ['kind' => 'pink', 'target' => 'Medium', 'stars' => 2],
@@ -180,10 +188,10 @@ it('renders the predicted sparks aggregated across both parents and grandparents
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->has('predicted.predicted_sparks', 5)
-            // Blue: 2 total (one from each parent)
+            // Blue: 3 total (one from each parent, one from Grandparent A2)
             ->where('predicted.predicted_sparks.0.kind', 'blue')
             ->where('predicted.predicted_sparks.0.kind_label', 'Blue')
-            ->where('predicted.predicted_sparks.0.total_count', 2)
+            ->where('predicted.predicted_sparks.0.total_count', 3)
             // Pink: 1 total
             ->where('predicted.predicted_sparks.1.kind', 'pink')
             ->where('predicted.predicted_sparks.1.total_count', 1)
@@ -196,6 +204,41 @@ it('renders the predicted sparks aggregated across both parents and grandparents
             // Scenario: 1 total
             ->where('predicted.predicted_sparks.4.kind', 'scenario')
             ->where('predicted.predicted_sparks.4.total_count', 1));
+});
+
+it('counts grandparent Sparks in the predicted total (R3-02)', function (): void {
+    $run = inheritanceRun(['scenario' => 'unity_cup'], turns: 18);
+    $run->update(['legacy_selection' => [
+        'legacies' => [[
+            'rank' => 3,
+            'is_guest' => false,
+            'ancestors' => ['Daiwa Scarlet', 'Seiun Sky'],
+            // A Spark on each ancestor slot, so a sum that reads only the first or only the last fails.
+            'ancestors_sparks' => [
+                [['kind' => 'white', 'target' => 'Arc Maestro', 'stars' => 1]],
+                [['kind' => 'blue', 'target' => 'Stamina', 'stars' => 3]],
+            ],
+            'sparks' => [
+                ['kind' => 'blue', 'target' => 'Power', 'stars' => 1],
+                ['kind' => 'pink', 'target' => 'Medium', 'stars' => 2],
+            ],
+        ]],
+        'affinity' => null,
+    ]]);
+
+    // Counted by hand from the payload above: Blue is the parent's Power Spark plus the grandparent's
+    // Stamina Spark, Pink is the parent's alone, White is the grandparent's alone. The count the page
+    // labels "Total across both parents and grandparents" has to hold all three.
+    $this->get(route('runs.inheritance', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('predicted.predicted_sparks', 3)
+            ->where('predicted.predicted_sparks.0.kind', 'blue')
+            ->where('predicted.predicted_sparks.0.total_count', 2)
+            ->where('predicted.predicted_sparks.1.kind', 'pink')
+            ->where('predicted.predicted_sparks.1.total_count', 1)
+            ->where('predicted.predicted_sparks.2.kind', 'white')
+            ->where('predicted.predicted_sparks.2.total_count', 1));
 });
 
 it('states the expected inheritance as N/A with the ADR-0020 §3 citation', function (): void {

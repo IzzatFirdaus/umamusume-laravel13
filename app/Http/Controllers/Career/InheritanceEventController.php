@@ -190,6 +190,14 @@ class InheritanceEventController extends Controller
                 foreach ($legacyData['sparks'] as $spark) {
                     $allSparks[] = $spark;
                 }
+
+                // Grandparent Sparks are a separate key aligned by index with `ancestors`, and the
+                // payload normalises every slot to a list, so an unfilled ancestor walks as empty.
+                foreach ($legacyData['ancestors_sparks'] ?? [] as $ancestorSparks) {
+                    foreach ($ancestorSparks as $spark) {
+                        $allSparks[] = $spark;
+                    }
+                }
             }
 
             foreach (['blue', 'pink', 'green', 'white', 'scenario'] as $kind) {
