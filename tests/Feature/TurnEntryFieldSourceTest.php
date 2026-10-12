@@ -71,8 +71,13 @@ it('labels a stat field with the bare word and keeps the required marker separat
 it('has the cockpit read the shared list instead of declaring its own', function (): void {
     $cockpit = (string) file_get_contents(base_path('resources/js/pages/Career/Cockpit.vue'));
 
+    // `c3583f0` merged the energy constants into this same import statement, so pinning the whole
+    // line proved the spelling of an unrelated row rather than the ownership of the field list.
+    // Same shape as the training-decision case above: imported from the domain file, under
+    // `statFields`, with no local list shadowing it.
     expect($cockpit)
-        ->toContain("import { TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';")
+        ->toContain('TURN_ENTRY_STAT_FIELDS as statFields')
+        ->toContain("from '../../domain/turnEntryFields'")
         ->not->toContain('const statFields = [');
 });
 
