@@ -72,7 +72,9 @@ test.describe('Setup step 4 — Legacy', () => {
 
         // Six nodes: the trainee, two parents, four ancestor entry slots. The structure is list
         // markup, so the entry slots are countable inputs rather than drawn boxes (`AncestryNode`).
-        await expect(page.locator('input[id^="ancestor-"]')).toHaveCount(4);
+        // Scoped to the name fields: a grandparent now carries her own rank inputs too, and those ids
+        // start with `ancestor-` as well (R3-09).
+        await expect(page.locator('input[id^="ancestor-parent_"]')).toHaveCount(4);
         await expect(page.getByText('N/A, not chosen')).toHaveCount(3);
         await expect(page.getByText('No Sparks recorded.')).toHaveCount(4);
 
