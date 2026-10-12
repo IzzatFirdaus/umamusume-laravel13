@@ -111,6 +111,12 @@ class StoreLegacySelectionRequest extends FormRequest
             'legacies.*.ancestors_sparks.*.*.kind' => ['required', 'string', Rule::in(LegacySelectionPayload::SPARK_KINDS)],
             'legacies.*.ancestors_sparks.*.*.target' => ['present', 'nullable', 'string', 'max:255'],
             'legacies.*.ancestors_sparks.*.*.stars' => ['nullable', 'integer', 'min:1', 'max:'.LegacySelectionPayload::MAX_SPARK_STARS],
+            // The grandparents' own ranks: one letter and one star count per ancestor, both optional and
+            // each nullable, from the same small vocabulary the parent fields use (`UG` included).
+            'legacies.*.ancestors_rank_letters' => ['nullable', 'array'],
+            'legacies.*.ancestors_rank_letters.*' => ['nullable', 'string', Rule::in(LegacySelectionPayload::RANK_LETTERS)],
+            'legacies.*.ancestors_rank' => ['nullable', 'array'],
+            'legacies.*.ancestors_rank.*' => ['nullable', 'integer', 'min:0'],
             'legacies.*.sparks' => ['present', 'array'],
             'legacies.*.sparks.*.kind' => ['required', 'string', Rule::in(LegacySelectionPayload::SPARK_KINDS)],
             // The Spark's target category, a transient form field: it is validated here and never stored,
@@ -281,6 +287,25 @@ class StoreLegacySelectionRequest extends FormRequest
                 $ancestorSparks[] = $list;
             }
 
+            // The grandparents' own ranks, aligned one value per ancestor the same way their Sparks are.
+            // A blank slot is the absence the payload already holds, and an all-blank list is dropped by
+            // `LegacySelectionPayload` so a names-only record keeps its old shape (R3-09).
+            /** @var list<mixed> $postedAncestorLetters */
+            $postedAncestorLetters = array_values((array) ($legacy['ancestors_rank_letters'] ?? []));
+            /** @var list<mixed> $postedAncestorRanks */
+            $postedAncestorRanks = array_values((array) ($legacy['ancestors_rank'] ?? []));
+
+            $ancestorLetters = [];
+            $ancestorRanks = [];
+
+            foreach (array_keys($ancestors) as $ancestorIndex) {
+                $letter = $postedAncestorLetters[$ancestorIndex] ?? null;
+                $rank = $postedAncestorRanks[$ancestorIndex] ?? null;
+
+                $ancestorLetters[] = $letter === null || $letter === '' ? null : (string) $letter;
+                $ancestorRanks[] = $rank === null || $rank === '' ? null : (int) $rank;
+            }
+
             $legacies[] = [
                 'rank' => isset($legacy['rank']) ? (int) $legacy['rank'] : null,
                 'rank_letter' => isset($legacy['rank_letter']) && $legacy['rank_letter'] !== ''
@@ -289,6 +314,8 @@ class StoreLegacySelectionRequest extends FormRequest
                 'is_guest' => (bool) $legacy['is_guest'],
                 'ancestors' => $ancestors,
                 'ancestors_sparks' => $ancestorSparks,
+                'ancestors_rank_letters' => $ancestorLetters,
+                'ancestors_rank' => $ancestorRanks,
                 'sparks' => $sparks,
             ];
         }

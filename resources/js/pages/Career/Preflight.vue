@@ -58,7 +58,7 @@ interface Member {
     rank_letter: string | null;
     rank_label: string;
     is_guest: boolean;
-    ancestors: { slot: string; name: string | null; sparks: Spark[]; sparks_label: string }[];
+    ancestors: { slot: string; name: string | null; rank: number | null; rank_letter: string | null; rank_label: string; sparks: Spark[]; sparks_label: string }[];
     sparks: Spark[];
     probability: { value: null; title: string };
 }
@@ -275,6 +275,10 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                                         <span :title="ancestor.name === null ? 'No name was recorded for this ancestor.' : undefined">
                                             {{ ancestor.name ?? 'N/A' }}
                                         </span>
+                                        <!-- The grandparent's own rank, in the parents' words, printed only
+                                             where one was read: four of the six ranks in the source's tree
+                                             sit on these nodes (R3-09). -->
+                                        <span v-if="ancestor.rank_letter" class="ml-1">{{ ancestor.rank_label }}</span>
                                         <span v-if="ancestor.sparks.length > 0" class="ml-1">
                                             <span v-for="spark in ancestor.sparks" :key="`${spark.kind}-${spark.target}`" class="mr-1">
                                                 {{ spark.kind_label ?? spark.kind }}

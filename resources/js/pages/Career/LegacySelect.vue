@@ -40,7 +40,7 @@ interface ParentNode {
     rank_letter: string | null;
     rank_label: string;
     is_guest: boolean;
-    ancestors: { slot: string; name: string | null; sparks: SparkRow[]; sparks_label: string }[];
+    ancestors: { slot: string; name: string | null; rank: number | null; rank_letter: string | null; sparks: SparkRow[]; sparks_label: string }[];
     sparks: SparkRow[];
     spark_counts: { kind: string; kind_label: string; count: number }[];
     probability: { value: null; title: string };
@@ -107,6 +107,12 @@ const form = useForm({
         rank_letter: parent.rank_letter ?? '',
         is_guest: parent.is_guest,
         ancestors: [parent.ancestors[0]?.name ?? '', parent.ancestors[1]?.name ?? ''] as [string, string],
+        // The grandparents' own ranks, seeded the way a parent's are: a recorded letter reads back, a
+        // blank one posts as the absence rather than as a zero (R3-09).
+        ancestors_rank_letters: parent.ancestors.map((ancestor) => ancestor.rank_letter ?? ''),
+        ancestors_rank: parent.ancestors.map((ancestor) =>
+            ancestor.rank === null || ancestor.rank === undefined ? '' : String(ancestor.rank),
+        ),
         // Each grandparent's own Sparks, seeded the way a parent's are: a stored row reads back, a
         // blank one is a draft the write discards.
         ancestors_sparks: parent.ancestors.map((ancestor) => ancestor.sparks.map((spark) => ({
@@ -136,6 +142,8 @@ const saving = (): void => {
             legacy_id: legacy.legacy_id === '' ? null : Number(legacy.legacy_id),
             rank: legacy.rank === '' ? null : Number(legacy.rank),
             rank_letter: legacy.rank_letter === '' ? null : legacy.rank_letter,
+            ancestors_rank_letters: legacy.ancestors_rank_letters.map((letter: string) => (letter === '' ? null : letter)),
+            ancestors_rank: legacy.ancestors_rank.map((rank: string) => (rank === '' ? null : Number(rank))),
             ancestors_sparks: legacy.ancestors_sparks.map((list) => list
                 .filter((spark) => !isBlankSpark(spark))
                 .map((spark) => ({
@@ -357,6 +365,39 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                 >
                                     Enter the name as you read it. Blank stays N/A.
                                 </p>
+
+                                <!-- The two rank fields the parents already carry, per grandparent. Four
+                                     of the six ranks in the source's tree sit on these nodes (R3-09), and
+                                     the labels are the parents' words so one screen states one kind of
+                                     fact in one way. -->
+                                <label
+                                    class="mt-2 block text-xs font-medium text-ink"
+                                    :for="`ancestor-rank-letter-${parent.slot}-${ancestorIndex}`"
+                                >
+                                    Own rank (letters)
+                                </label>
+                                <input
+                                    :id="`ancestor-rank-letter-${parent.slot}-${ancestorIndex}`"
+                                    v-model="form.legacies[index].ancestors_rank_letters[ancestorIndex]"
+                                    type="text"
+                                    list="known-rank-letters"
+                                    autocomplete="off"
+                                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
+                                >
+
+                                <label
+                                    class="mt-2 block text-xs font-medium text-ink"
+                                    :for="`ancestor-rank-${parent.slot}-${ancestorIndex}`"
+                                >
+                                    Own rank (stars)
+                                </label>
+                                <input
+                                    :id="`ancestor-rank-${parent.slot}-${ancestorIndex}`"
+                                    v-model="form.legacies[index].ancestors_rank[ancestorIndex]"
+                                    type="number"
+                                    min="0"
+                                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-sm text-ink"
+                                >
 
                                 <details class="mt-2 rounded-md border border-rule bg-panel p-2">
                                     <summary class="flex min-h-11 cursor-pointer items-center text-xs font-medium text-ink">

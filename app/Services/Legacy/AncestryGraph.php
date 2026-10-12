@@ -140,6 +140,10 @@ final class AncestryGraph
         $ancestorNames = $legacy['ancestors'] ?? [];
         /** @var list<mixed> $ancestorSparkLists */
         $ancestorSparkLists = $legacy['ancestors_sparks'] ?? [];
+        /** @var list<mixed> $ancestorRankLetters */
+        $ancestorRankLetters = $legacy['ancestors_rank_letters'] ?? [];
+        /** @var list<mixed> $ancestorRanks */
+        $ancestorRanks = $legacy['ancestors_rank'] ?? [];
 
         // `$ancestorName`, not `$name`: the loop variable must not shadow the parent node's own name
         // parameter, or the last ancestor read wins and Parent A renders as her own grandparent. That
@@ -166,6 +170,13 @@ final class AncestryGraph
             $ancestors[] = [
                 'slot' => $label,
                 'name' => $ancestorName === null ? null : (string) $ancestorName,
+                // The grandparent's own rank, stated the way a parent's is: the letter, the star count the
+                // Trainer read, and the sentence the read-back prints when no letter was recorded (R3-09).
+                'rank' => $ancestorRanks[$index] ?? null,
+                'rank_letter' => $ancestorRankLetters[$index] ?? null,
+                'rank_label' => isset($ancestorRankLetters[$index])
+                    ? 'Rank '.(string) $ancestorRankLetters[$index]
+                    : 'Rank not recorded',
                 // A grandparent's own Sparks, and the exact sentence the read-back prints when there are
                 // none, so a reader of the props can tell an absent list from an empty one.
                 'sparks' => $ancestorSparks,

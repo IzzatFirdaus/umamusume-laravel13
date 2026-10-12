@@ -106,7 +106,7 @@ final readonly class LegacySelectionPayload
     }
 
     /**
-     * @param  list<array{rank: int|null, rank_letter?: string, is_guest: bool, ancestors: list<string|null>, ancestors_meta?: list<array{id: int, name: string, costume: string|null}>, ancestors_sparks?: list<list<array{kind: string, target: mixed, stars: int|null}>>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
+     * @param  list<array{rank: int|null, rank_letter?: string, is_guest: bool, ancestors: list<string|null>, ancestors_meta?: list<array{id: int, name: string, costume: string|null}>, ancestors_sparks?: list<list<array{kind: string, target: mixed, stars: int|null}>>, ancestors_rank_letters?: list<string|null>, ancestors_rank?: list<int|null>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
      */
     public function __construct(
         public array $legacies,
@@ -153,7 +153,12 @@ final readonly class LegacySelectionPayload
             throw new InvalidArgumentException("Legacy #{$index} is not a record.");
         }
 
-        self::assertKeysAllowing($legacy, self::LEGACY_KEYS, ['ancestors_meta', 'rank_letter', 'ancestors_sparks'], "Legacy #{$index}");
+        self::assertKeysAllowing(
+            $legacy,
+            self::LEGACY_KEYS,
+            ['ancestors_meta', 'rank_letter', 'ancestors_sparks', 'ancestors_rank_letters', 'ancestors_rank'],
+            "Legacy #{$index}",
+        );
 
         if (! is_bool($legacy['is_guest'])) {
             throw new InvalidArgumentException("Legacy #{$index} needs a bool is_guest.");
@@ -217,6 +222,21 @@ final readonly class LegacySelectionPayload
             $record['ancestors_sparks'] = $ancestorSparks;
         }
 
+        // The grandparents' own ranks, each aligned by index with `ancestors` the way their Sparks are.
+        // Four of the six nodes in the source's tree carry a letter (R3-09), and a grandparent the
+        // Trainer read no rank for stores nothing rather than a zero.
+        $ancestorLetters = self::ancestorsRankLetters($index, $legacy['ancestors_rank_letters'] ?? null, $record['ancestors']);
+
+        if ($ancestorLetters !== null) {
+            $record['ancestors_rank_letters'] = $ancestorLetters;
+        }
+
+        $ancestorRanks = self::ancestorsRanks($index, $legacy['ancestors_rank'] ?? null, $record['ancestors']);
+
+        if ($ancestorRanks !== null) {
+            $record['ancestors_rank'] = $ancestorRanks;
+        }
+
         return $record;
     }
 
@@ -261,6 +281,71 @@ final readonly class LegacySelectionPayload
         }
 
         return $any ? $rows : null;
+    }
+
+    /**
+     * The optional per-ancestor letter rank, aligned by index with the ancestor names.
+     *
+     * Null (the key absent) and an all-null list both mean no grandparent rank was recorded, and the
+     * record omits the key either way so a names-only payload keeps its old exact shape.
+     *
+     * @param  list<string|null>  $ancestors
+     * @return list<string|null>|null
+     */
+    private static function ancestorsRankLetters(int|string $index, mixed $value, array $ancestors): ?array
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (! is_array($value)) {
+            throw new InvalidArgumentException("Legacy #{$index} ancestors_rank_letters is not a list.");
+        }
+
+        if (count($value) !== count($ancestors)) {
+            throw new InvalidArgumentException(
+                "Legacy #{$index} names ".count($ancestors).' ancestors but carries '.count($value).' rank letters.',
+            );
+        }
+
+        $rows = [];
+
+        foreach (array_values($value) as $letter) {
+            $rows[] = $letter === '' ? null : self::rankLetter($index, $letter);
+        }
+
+        return array_filter($rows) === [] ? null : $rows;
+    }
+
+    /**
+     * The optional per-ancestor star rank, aligned by index with the ancestor names.
+     *
+     * @param  list<string|null>  $ancestors
+     * @return list<int|null>|null
+     */
+    private static function ancestorsRanks(int|string $index, mixed $value, array $ancestors): ?array
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (! is_array($value)) {
+            throw new InvalidArgumentException("Legacy #{$index} ancestors_rank is not a list.");
+        }
+
+        if (count($value) !== count($ancestors)) {
+            throw new InvalidArgumentException(
+                "Legacy #{$index} names ".count($ancestors).' ancestors but carries '.count($value).' ranks.',
+            );
+        }
+
+        $rows = [];
+
+        foreach (array_values($value) as $ancestorIndex => $rank) {
+            $rows[] = self::nullableInt($rank, "Legacy #{$index} ancestors_rank #{$ancestorIndex}");
+        }
+
+        return array_filter($rows) === [] ? null : $rows;
     }
 
     /**
