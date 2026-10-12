@@ -4,7 +4,7 @@
   decision: accepted (owner ruling 2026-09-27) — aptitudes and scenario caps arrive as engine-owned reference data through the fetch pipeline
   code: built — migrations 2026_09_27_090100 (scenarios), 2026_09_27_090000 (aptitudes); GametoraScenarioParserTest; CareerTraineeSelectTest
   superseded-by: —
-  amended-by: 0015 (the scenarios cap row's read path, per-stat), 0012 (the profile table, same provenance pattern), 0025 (does not reopen the cap reference data); settled ADR-0002's withdrawn base/bonus bullet by shipping absolute caps
+  amended-by: 0015 (the scenarios cap row's read path, per-stat), 0012 (the profile table, same provenance pattern), 0025 (does not reopen the cap reference data); settled ADR-0002's withdrawn base/bonus bullet by shipping absolute caps; ADR-0008's provenance erratum corrected its own misreading of this rule
   open: the scenarios table has no FK from training_runs yet; repointing the free-text scenario name is a separate migration
 -->
 
