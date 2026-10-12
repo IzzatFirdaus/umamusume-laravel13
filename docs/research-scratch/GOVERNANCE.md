@@ -77,6 +77,12 @@ code" reaches the rules one hop later than before and reaches all of them.
 | **Architecture**      | Local-only Laravel 13 tool, SQLite (WAL + busy_timeout), no auth, no SPA, no multi-user                        |
 | **Phase 1 exit**      | US-1..US-3 work end-to-end; migrations/factories/seeders clean; zero lore hits; PHPStan L6 clean; Pint clean   |
 
+> **Correction 2026-10-12 (dated, correction forward).** The Architecture row's original sentence
+> "no auth, no SPA, no multi-user" stands above rather than being rewritten. The **SPA clause is
+> withdrawn for the shipped web surface**: `ADR-0020` (Accepted 2026-10-04) made Inertia + Vue 3 the web
+> surface, as `AGENTS.md` §1 and §7 already record (the "No Inertia/SPA" ban is withdrawn in §7). "no auth"
+> and "no multi-user" stand unchanged.
+
 **Non-goals (PRD §6 + Pre-Mortem §4 — do not build):**
 
 1. Auth/multi-user (replaces Breeze/Sanctum)
@@ -92,6 +98,16 @@ code" reaches the rules one hop later than before and reaches all of them.
 11. **Race simulation, prediction engine, race-day snapshots** [rev 0.2 — repo #4]
 12. **Dual storage modes, browser-side authoritative data** [rev 0.2 — repo #4]
 13. **Trainee image uploads** [rev 0.2 — repo #4]
+
+> **Correction 2026-10-12 (dated, correction forward).** Two rows above are withdrawn; the list stands
+> rather than being rewritten.
+>
+> - **Non-goal 2 ("SPA frontend (replaces Vue 3 + Pinia)") is withdrawn by `ADR-0020`** (Accepted
+>   2026-10-04), which made Inertia + Vue 3 the shipped web surface. The standing ban is Livewire, Redis,
+>   and Excel only (`AGENTS.md` §7; all three remain absent from `composer.lock`).
+> - **Non-goal 9 ("Support-card database") is withdrawn.** Support-card entities were authorized by
+>   `ADR-0014` (Accepted, Slice 2, superseding `ADR-0005`), and the catalog ships them (`support_cards`,
+>   `SupportCardController`, the support-card index and detail surfaces).
 
 ---
 
@@ -331,6 +347,43 @@ The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
 | 0005    | Support card entities                              | Proposed, not built       | Schema shapes specified; not part of design until owner settles scope (PRD §6.9)                                                                                                                        |
 | 0006    | Design authority & theme default                   | Accepted                  | Dark-first tactical-athletic system; theme preference in SQLite not localStorage                                                                                                                        |
 
+> **Correction 2026-10-12 (dated, correction forward; the table above stands as written).** The table
+> above lists 0001–0006 only and is stale. Regenerated against the live tree with the section's own
+> derivation checks (`git ls-files docs/adr/ | wc -l` = 26 tracked files, i.e. 24 numbered ADRs 0001–0024
+> plus `README.md` and `SUPERSEDED-feat-catalog-detail-page.md`; `grep -m1 "^Status" docs/adr/*.md`), the
+> corrected status of each numbered ADR is:
+>
+> | ADR  | Status (derived)                                                              |
+> | ---- | ---------------------------------------------------------------------------- |
+> | 0001 | Accepted **in part**; §5 superseded by `ADR-0003`                             |
+> | 0002 | Accepted, amended twice; validation bound superseded by `ADR-0015`            |
+> | 0003 | Accepted by owner 2026-09-27                                                  |
+> | 0004 | Accepted by owner 2026-09-27                                                  |
+> | 0005 | **Declined** for Phase 1 (R37); superseded by `ADR-0014`                      |
+> | 0006 | Accepted — Option 2, Light base with preference resolution                    |
+> | 0007 | Accepted (owner ruling 2026-09-28)                                            |
+> | 0008 | Accepted 2026-09-29; carries a same-day erratum                               |
+> | 0009 | **Ruled in part** (Option A, URA Finale)                                      |
+> | 0010 | Accepted (Slice 15)                                                           |
+> | 0011 | Accepted **in part**                                                          |
+> | 0012 | Accepted 2026-09-29; numbered errata                                          |
+> | 0013 | **Withdrawn**, superseded by `ADR-0012` Decision 4                            |
+> | 0014 | Accepted (Slice 2); supersedes `ADR-0005`                                     |
+> | 0015 | Accepted (owner decision 5); 2026-10-01 erratum                               |
+> | 0016 | **OPEN QUESTION** — no decision taken or implied; Slice 3 held                |
+> | 0017 | Accepted (Slice 4, built 2026-10-01)                                          |
+> | 0018 | Accepted (owner dispatch 2026-10-04)                                          |
+> | 0019 | **Proposed** — version and non-`master` target set by owner                    |
+> | 0020 | Accepted (owner ruling 2026-10-04)                                            |
+> | 0021 | **Accepted (owner ruling 2026-10-05)**; fetch half built, display half open    |
+> | 0022 | **Proposed — reserved, not indexed** in `docs/adr/README.md`                   |
+> | 0023 | **Proposed** — drafted 2026-10-09 for the owner's ruling                       |
+> | 0024 | **Accepted** (owner ruling 2026-10-09)                                        |
+>
+> `docs/adr/README.md`'s table is the derived authority; the corrected rows above agree with it, including
+> `ADR-0019` (Proposed), `ADR-0016` (open question), `ADR-0022` (reserved, not indexed), `ADR-0023`
+> (Proposed) and `ADR-0024` (Accepted). Re-derive with the command in `docs/adr/README.md`.
+
 ---
 
 ### 11. Open Questions (PRD §7)
@@ -361,6 +414,21 @@ The skill registry lives at **`.agents/skills/skills.json`** (not `SKILL.md`).
 | Fetch pipeline         | `app/Services/DataPipeline/` (Contracts, Parsers, PipelineRunner, SourceFetcher, CrossReferenceMatcher, NameNormalizer)                                       |
 | Models                 | `app/Models/{Umamusume,UmamusumeAlias,Skill,TrainingRun,TurnEntry,Scenario,DataSource,MatchCandidate,RunSkill,ScenarioRace,RaceEntry,TurnEvent,Preference}`   |
 | Migrations             | `database/migrations/2026_09_26_162814`–`2026_09_27_121500`                                                                                                   |
+
+> **Correction 2026-10-12 (dated, correction forward; the rows above stand as written).** Four rows above
+> are stale; regenerated against the live tree with the section's own derivation checks:
+>
+> - **Scenario guides** read `docs/scenarios/01`–`08`; `ls docs/scenarios/ | wc -l` = **6** tracked guides:
+>   `01-ura-finale`, `02-unity-cup`, `03-trackblazer`, `07-grand-concert`, `08-grand-masters-jp-only`,
+>   `09-global-race-calendar` (`07` is no longer a stub; `08` is `[JP-Only]`).
+> - **ADRs** read `docs/adr/0001`–`0006`; the tree carries **0001–0024** (see the §10 correction above).
+> - **Migrations** read the range ending `2026_09_27_121500`; `git ls-files database/migrations | wc -l` =
+>   **60** tracked migration files.
+> - **Lore rules** read "`CLAUDE.md` (top section), `CONSTRAINTS.md` C-4". Verified on this tree
+>   2026-10-12: `CLAUDE.md` **is tracked** (`git ls-files --error-unmatch CLAUDE.md` exits 0) and is **not
+>   gitignored** (`git check-ignore CLAUDE.md` exits 1), so the row stands as written and no
+>   "not present in a fresh clone" note applies. `AGENTS.md` §5 and `GOVERNANCE.md` §2 remain the live
+>   lore authority; the row's citation to `CLAUDE.md` and to `CONSTRAINTS.md` C-4 resolves.
 
 ---
 
@@ -409,7 +477,7 @@ Evidence | Exceptions | Owner | Status
 | ---- | ------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------ | --------------- | ------------------------- | ------------ | -- | ------ |
 | C-1  | Tests                                       | Automated               | `vendor/bin/pest --compact`                                                                                                                                                                      | zero failures                                                     | any failure                                              | command output in hand-off                    | reasoned skips only (`markTestSkipped` with text)                       | QA                                                                        | active                                                 |                 |                           |              |    |        |
 | C-2  | Static analysis                             | Automated               | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`                                                                                                                                     | `[OK] No errors` at level 6                                       | any error                                                | command output                                | none; `@phpstan-ignore` is a Floor violation                            | Laravel Dev                                                               | active                                                 |                 |                           |              |    |        |
-| C-3  | Style                                       | Automated               | `vendor/bin/pint --test --format agent`                                                                                                                                                          | `"result":"passed"`                                               | any drift                                                | command output                                | none                                                                    | Laravel Dev                                                               | active                                                 |                 |                           |              |    |        |
+| C-3  | Style                                       | Automated               | `vendor/bin/pint --test --format agent <paths>` (the slice's own explicit paths; never `--dirty`)                                                                                                | `"result":"passed"`                                               | any drift                                                | command output                                | none                                                                    | Laravel Dev                                                               | active                                                 |                 |                           |              |    |        |
 | C-4  | Lore                                        | Automated + Review      | `composer lore` and `composer lore-code` (git grep passes) + context ruling — GNU `make` cannot run on this host (KI-4)                                                                                                                                                       | zero *unexplained* hits                                           | violation without an allowed classification (below)      | hit list + one-line ruling per hit            | four allowed hit classes (below)                                        | Lore Guardian                                                             | active; blind spots below                              |                 |                           |              |    |        |
 | C-5  | Migrations                                  | Manual/Approval         | `php artisan migrate` + `db:seed` on a fresh scratch DB (`DB_DATABASE=` pointed at an empty file); `migrate:fresh --seed` against the shared dev file is destructive and needs explicit approval | clean up+down, seed idempotent                                    | any error                                                | command output                                | destructive variant by approval only                                    | Laravel Dev                                                               | active                                                 |                 |                           |              |    |        |
 | C-6  | Floor (no suppressions/stubs/deleted tests) | Review + grep           | `git grep -nE "@phpstan-ignore                                                                                                                                                                   | eslint-disable                                                    | @ts-ignore                                               | not implemented                               | catch \{\}                                                              | TODO" app resources tests config` + diff review for deleted/skipped tests | zero hits or an approved, commit-noted reason          | unexplained hit | grep output + commit note | none (floor) | QA | active |
@@ -539,6 +607,17 @@ Makefile gate targets: lore, lore-code (git grep); tests/lint/stan as before
 - 2026-09-28: registry created (T4). C-7 note added to `CONSTRAINTS.md`
   referencing ADR-0007. gate.py relocated. G-60 scoping codified from the owner
   ruling + D-286. Disclosure pattern codified from the settled `N/A` ruling.
+
+- 2026-10-12: C-3's Command cell replaced `vendor/bin/pint --dirty --format agent`
+  then `vendor/bin/pint --test --format agent` with
+  `vendor/bin/pint --test --format agent <paths>` (the slice's own explicit paths;
+  never `--dirty`). Measured incident (KI-75): `--dirty` rewrote
+  `app/Http/Controllers/PreferenceController.php` — 138 lines of another session's
+  uncommitted work — from a slice that never opened the file. This is a correction
+  forward; the superseded command is preserved here rather than silently rewritten.
+  The same replacement is made in the `CONSTRAINTS.md` section below (the C-3 row
+  and verification-sequence step 3), and step 6 there now names `composer lore`
+  and `composer lore-code` (KI-4: GNU make does not run on this host).
 
 ---
 
@@ -1371,7 +1450,7 @@ The quality bar for this repository, written as a contract. Agents: read this be
 | ----- | ---------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | C-1   | Tests                        | All Pest tests pass; every behavior change ships a test                                                   | `php artisan test --compact`                                                                         |
 | C-2   | Static analysis              | PHPStan level 6 (Larastan), zero errors                                                                   | `vendor/bin/phpstan analyse --no-progress`                                                           |
-| C-3   | Formatting                   | Pint clean                                                                                                | `vendor/bin/pint --dirty --format agent` then `vendor/bin/pint --test --format agent`                |
+| C-3   | Formatting                   | Pint clean                                                                                                | `vendor/bin/pint --test --format agent <paths>` (the slice's own explicit paths; never `--dirty`)    |
 | C-4   | Lore                         | Zero unexplained hits of banned patterns (below) in tracked text                                          | `composer lore` (and `composer lore-code`) — not `make lore`, which cannot run on this host (KI-4)   |
 | C-5   | Migrations                   | Fresh migrate + seed succeeds; every migration has a working `down()`                                     | `php artisan migrate:fresh --seed`                                                                   |
 | C-6   | Performance (local budget)   | Catalog index under 200 ms at ~1,000 Umamusume / ~2,000 skills (NFR-3)                                    | manual benchmark per PRD §8; re-check when schema or query shape changes                             |
@@ -1406,6 +1485,6 @@ Grep, case-insensitive: `horse`, `horses`, `sire`, `dam`, `mare`, `foal`, `🏇`
 
 1. `php artisan migrate:fresh --seed`
 2. `php artisan test --compact` (narrow first, full at hand-off)
-3. `vendor/bin/pint --dirty --format agent`
+3. `vendor/bin/pint --test --format agent <paths>` (the slice's own explicit paths; never `--dirty`)
 4. `vendor/bin/phpstan analyse --no-progress`
-5. `make lore` (`composer lore` and `composer lore-code` run the same greps on a host without GNU make; `tools/lore.php` is the runner and `LoreGateParityTest` keeps its list equal to the Makefile's)
+5. `composer lore` and `composer lore-code` (GNU `make` cannot run on this host; KI-4; `make lore` and `make lore-code` run the same greps where GNU make is available — `tools/lore.php` is the runner and `LoreGateParityTest` keeps its list equal to the Makefile's)
