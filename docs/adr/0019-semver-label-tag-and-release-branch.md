@@ -18,8 +18,8 @@ Nothing was tagged and nothing was published while this was written.
 The repository had no version of its own. Under Semantic Versioning 2.0.0, item 5 reserves `0.y.z` for initial
 development where anything may change and the public API should not be considered stable, and item 6 makes
 `1.0.0` the release that *defines* the public API. This codebase has not defined one in a single place, and
-its own decision record is still moving: `ADR-0001` is accepted in part with its §5 superseded by
-`ADR-0003`, `PRD.md` carries open questions, and `KNOWN-ISSUES.md` carries open entries. `0.y.z` is therefore
+its own decision record is still moving: `ADR-0001` is accepted in part, with its schema section replaced by
+`ADR-0003`; `PRD.md` carries open questions, and `KNOWN-ISSUES.md` carries open entries. `0.y.z` is therefore
 the correct band, and the first release in it is `0.1.0`.
 
 **The surfaces a version number promises, and only these:** the JSON contract at `/api/v1`, the SQLite schema
