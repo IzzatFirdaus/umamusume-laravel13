@@ -169,7 +169,7 @@ it('counts each card once per category even when it carries three effects in it'
 
     $analysis = DeckAnalysis::build($cards);
 
-    expect($analysis['strengths'])->toBe(['Training power: 1 of the 1 cards carry an effect here.'])
+    expect($analysis['strengths'])->toBe(['Training power: 1 of the 1 cards carries an effect here.'])
         ->and($analysis['weaknesses'])->toHaveCount(5);
 });
 
@@ -182,8 +182,8 @@ it('writes the strengths and weaknesses as counts over the cards equipped', func
     $analysis = DeckAnalysis::build($cards);
 
     expect($analysis['strengths'])->toBe([
-        'Training power: 1 of the 2 cards carry an effect here.',
-        'Race bonus: 1 of the 2 cards carry an effect here.',
+        'Training power: 1 of the 2 cards carries an effect here.',
+        'Race bonus: 1 of the 2 cards carries an effect here.',
     ])
         ->and($analysis['weaknesses'])->toBe([
             'Early run: no card in the deck carries an effect here.',

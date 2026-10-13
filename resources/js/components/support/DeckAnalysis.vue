@@ -8,11 +8,9 @@
  * index, and `ADR-0001` §3 rules both out as unsourced. So every line here is either a figure the
  * source states or an integer this screen added to those figures, and the two are labelled apart.
  *
- * **The provenance label is a word, not a glyph.** `ADR-0020` §2 makes `ProvenanceBadge.vue` the only
- * place the four trust glyphs live, and the plan builds that component in D4. Printing glyphs here
- * would put a second set on the page and take the single-owner decision away from the slice that owns
- * it, so this renders the word in a text chip and D4 replaces it with the badge. The claim is the same
- * one the badge would carry: a stated anchor is Confirmed, and the total under it is Calculated.
+ * **The provenance label is the shared badge.** `ADR-0020` §2 makes `ProvenanceBadge.vue` the only
+ * place the four trust glyphs live, so this renders that component rather than a local text chip: a
+ * stated anchor is Confirmed, and the total under it is Calculated.
  *
  * **A multiplicative effect is never totalled.** The export marks four effects as combining in a
  * stated mode, and adding three cards' Friendship Bonuses into one percentage would be a figure the
@@ -22,6 +20,8 @@
  * A category the deck carries nothing in says so in a sentence naming the group, which is what lets a
  * Trainer tell "no card has this" from "I have not looked yet".
  */
+import ProvenanceBadge from '../ProvenanceBadge.vue';
+
 interface EffectLine {
     effect_id: number;
     name: string | null;
@@ -43,12 +43,6 @@ defineProps<{
     strengths: string[];
     weaknesses: string[];
 }>();
-
-/**
- * The word the arithmetic is, beside a total. `Confirmed` is the word for the card's own anchor and
- * `Calculated` for the sum, so a reader can tell which of the two figures the tool did arithmetic on.
- */
-const trustLabel = { total: 'Calculated' } as const;
 </script>
 
 <template>
@@ -85,6 +79,10 @@ const trustLabel = { total: 'Calculated' } as const;
                         <li v-for="effect in category.effects" :key="effect.effect_id">
                             <p class="text-sm font-semibold text-ink">
                                 {{ effect.name ?? `[Unverified] effect ${effect.effect_id}` }}
+                                <ProvenanceBadge
+                                    state="confirmed"
+                                    title="Each figure below is one card's own highest stated anchor, as the source publishes it."
+                                />
                             </p>
 
                             <!-- Each card's own figure, with the card it came from. The value is printed
@@ -103,12 +101,11 @@ const trustLabel = { total: 'Calculated' } as const;
                                         effect.cards.length === 1 ? '' : 's'
                                     }} carrying it
                                 </span>
-                                <span
-                                    class="ml-1 rounded-full bg-sunken px-2 py-0.5 text-xs font-semibold text-ink-strong"
-                                    :title="`${trustLabel.total}: an integer this screen added to the stated anchors above.`"
-                                >
-                                    {{ trustLabel.total }}
-                                </span>
+                                <ProvenanceBadge
+                                    class="ml-1"
+                                    state="calculated"
+                                    title="An integer this screen added to the stated anchors above."
+                                />
                             </p>
 
                             <p v-else class="mt-1 text-xs text-ink-muted">
@@ -135,7 +132,7 @@ const trustLabel = { total: 'Calculated' } as const;
 
             <div class="mt-5 grid gap-4 md:grid-cols-2">
                 <section class="rounded-md border border-rule bg-raised p-3" aria-labelledby="deck-strengths">
-                    <h4 id="deck-strengths" class="font-semibold text-ink-strong">Strengths</h4>
+                    <h4 id="deck-strengths" class="font-semibold text-ink-strong">What the deck covers</h4>
                     <ul v-if="strengths.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-muted">
                         <li v-for="line in strengths" :key="line">{{ line }}</li>
                     </ul>
@@ -145,7 +142,7 @@ const trustLabel = { total: 'Calculated' } as const;
                 </section>
 
                 <section class="rounded-md border border-rule bg-raised p-3" aria-labelledby="deck-weaknesses">
-                    <h4 id="deck-weaknesses" class="font-semibold text-ink-strong">Weaknesses</h4>
+                    <h4 id="deck-weaknesses" class="font-semibold text-ink-strong">What the deck carries nothing in</h4>
                     <ul v-if="weaknesses.length > 0" class="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-muted">
                         <li v-for="line in weaknesses" :key="line">{{ line }}</li>
                     </ul>

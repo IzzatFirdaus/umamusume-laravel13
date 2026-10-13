@@ -274,7 +274,15 @@ class DeckAnalysis
                 }
             }
 
-            $lines[] = sprintf('%s: %d of the %d cards carry an effect here.', $category['label'], count($carriers), $covered);
+            $carrying = count($carriers);
+
+            $lines[] = sprintf(
+                '%s: %d of the %d cards %s an effect here.',
+                $category['label'],
+                $carrying,
+                $covered,
+                $carrying === 1 ? 'carries' : 'carry',
+            );
         }
 
         return $lines;
