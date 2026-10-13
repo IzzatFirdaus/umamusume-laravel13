@@ -44,6 +44,8 @@ interface Paginator<T> {
 
 const props = defineProps<{
     umamusumes: Paginator<Trainee>;
+    totalCount: number;
+    askedFor: string;
     statuses: { value: string; label: string }[];
     currentStatus: string | null;
     search: string | null;
@@ -116,15 +118,30 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
 
     <p v-if="loading" role="status" class="mt-4 text-sm text-ink-muted">Loading results…</p>
 
-    <p
-        v-if="umamusumes.data.length === 0"
-        class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
-    >
-        No Umamusume match. The catalog is filled by seed data or <code>php artisan uma:fetch</code>.
-    </p>
+    <!-- Two different absences, in the two shapes the skill and support siblings already use: an empty
+         catalog is a mirror nobody has fetched, an empty result is a question the data cannot answer. -->
+    <template v-if="umamusumes.data.length === 0">
+        <p
+            v-if="totalCount === 0"
+            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+        >
+            The trainee catalog holds no rows yet. Run <code>php artisan uma:fetch</code> to fill it, or
+            <code>php artisan uma:reparse gametora-character-cards</code> if a fetch says the document is
+            unchanged.
+        </p>
+        <p
+            v-else
+            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+        >
+            No Umamusume match. Nothing matches {{ askedFor }}. If a trainee you expect is not in the
+            catalog, that is a gap in the fetched data rather than a mistake in the query.
+        </p>
+    </template>
 
     <template v-else>
-        <ul class="mt-6 space-y-4">
+        <p class="mt-6 text-sm text-ink-muted">{{ umamusumes.total }} of {{ totalCount }} trainees</p>
+
+        <ul class="mt-2 space-y-4">
             <li v-for="trainee in umamusumes.data" :key="trainee.id" class="rounded-md border border-rule bg-raised">
                 <h3 class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-3">
                     <!-- Frame and name are one group, not two siblings of a `justify-between` row.

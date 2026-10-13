@@ -170,6 +170,15 @@ class CatalogController extends Controller
 
         return [
             'umamusumes' => $umamusumes,
+            // The screen's own scope rather than the filtered answer. With no search term the list's total
+            // already is that scope, so the ordinary load costs no extra read; only a searched page pays
+            // one query for the number the count line prints, and `CatalogRosterTreeTest` holds that the
+            // tree never grows a query per row.
+            'totalCount' => $searchKey === null ? $total : Umamusume::query()
+                ->when(! $showAllStatus && $statusEnum === null, fn (Builder $q): Builder => $q->where('release_status', ReleaseStatus::GlobalReleased->value))
+                ->when($statusEnum !== null, fn (Builder $q): Builder => $q->where('release_status', $statusEnum->value))
+                ->count(),
+            'askedFor' => $search !== null && $search !== '' ? '"'.$search.'"' : 'these filters',
             'statuses' => collect(ReleaseStatus::cases())
                 ->map(static fn (ReleaseStatus $status): array => ['value' => $status->value, 'label' => $status->label()])
                 ->all(),
