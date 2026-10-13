@@ -16,8 +16,9 @@
  * are what the server decides on.
  */
 import ProvenanceBadge from '../ProvenanceBadge.vue';
+import type { ProvenanceState } from '../../types';
 
-type Badge = 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+type Badge = Badge;
 
 interface MilestoneRow {
     label: string;

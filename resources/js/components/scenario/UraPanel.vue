@@ -22,6 +22,9 @@ import AlertRow from './AlertRow.vue';
 import UraDuelPanel from './UraDuelPanel.vue';
 import UraMilestoneTracker from './UraMilestoneTracker.vue';
 import UraPreFinalReview from './UraPreFinalReview.vue';
+import type { ProvenanceState } from '../../types';
+
+type Badge = ProvenanceState;
 
 interface GoalRow {
     label: string;
@@ -35,6 +38,19 @@ interface GoalRow {
 interface GoalGroup {
     group: string;
     rows: GoalRow[];
+    /**
+     * The group's own achieved count, in the client's shape ("Goals Achieved 5 of 8"), or null.
+     *
+     * An integer pair and nothing else: `ux-laws-audit-plan-2026-10-13.md` §9 item 6 and
+     * `frontend-fidelity-2026-10-13.md` §8 item 3 forbid a score, a percentage or a progress bar on this
+     * surface, and a later pass reading a barless count must not "improve" it into one.
+     */
+    summary: string | null;
+    /**
+     * What an empty group means, in the server's own words. The generic line below speaks of mandatory
+     * races, so a goals group that holds nothing has to say so itself rather than borrow it.
+     */
+    empty_note: string | null;
 }
 
 interface GoalAlert {
@@ -55,7 +71,7 @@ const props = defineProps<{
             state: string;
             title: string;
             figures: string;
-            figures_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+            figures_badge: Badge;
             figures_title: string;
             due_turn: number | null;
             due_label: string;
@@ -65,16 +81,16 @@ const props = defineProps<{
             decision_url: string;
         }[];
         duel: {
-            rules: { label: string; value: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string }[];
-            hints: { stat: string; name: string; sp_cost: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string }[];
-            run: { label: string; value: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string }[];
+            rules: { label: string; value: string | null; badge: Badge; title: string }[];
+            hints: { stat: string; name: string; sp_cost: string | null; badge: Badge; title: string }[];
+            run: { label: string; value: string | null; badge: Badge; title: string }[];
         } | null;
         pre_final: {
             window: { state: string; label: string; turns_away: number | null; turns_ahead: number; title: string };
-            recorded: { label: string; value: string | null; cap: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string }[];
-            speed_target: { phrasing: string; value: string | null; short_by: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string };
-            stamina_floors: { rows: { distance: string; floor: string }[]; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string };
-            distance: { value: string | null; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string };
+            recorded: { label: string; value: string | null; cap: string | null; badge: Badge; title: string }[];
+            speed_target: { phrasing: string; value: string | null; short_by: string | null; badge: Badge; title: string };
+            stamina_floors: { rows: { distance: string; floor: string }[]; badge: Badge; title: string };
+            distance: { value: string | null; badge: Badge; title: string };
         } | null;
     };
     label: string;
@@ -142,7 +158,7 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
             </h3>
 
             <p v-if="group.rows.length === 0" class="text-sm text-ink-muted">
-                The calendar records no mandatory race for this scenario yet.
+                {{ group.empty_note ?? 'The calendar records no mandatory race for this scenario yet.' }}
             </p>
 
             <ul v-else class="flex flex-col gap-2">
@@ -180,6 +196,12 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
                     </a>
                 </li>
             </ul>
+
+            <!-- The client's own ladder footer (screenshot-notes/02:165, "Goals Achieved 5/8"), placed
+                 after the rows so the last thing a Trainer reads is how far the ladder goes. -->
+            <p v-if="group.summary !== null" class="text-xs font-semibold text-ink-strong">
+                {{ group.summary }}
+            </p>
         </section>
 
         <!-- G3's three surfaces, mounted beside the groups rather than in place of them: the milestone

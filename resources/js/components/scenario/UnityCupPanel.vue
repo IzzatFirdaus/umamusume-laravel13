@@ -33,6 +33,9 @@ import AlertRow from './AlertRow.vue';
 import ResourceMeter from './ResourceMeter.vue';
 import UnityCupTeamBoard from './UnityCupTeamBoard.vue';
 import UnityCupTournamentReadiness from './UnityCupTournamentReadiness.vue';
+import type { ProvenanceState } from '../../types';
+
+type Badge = ProvenanceState;
 
 type BurstState =
     | 'Chargeable'
@@ -59,7 +62,7 @@ interface TeamSection {
      */
     coverage: {
         rows: { category: string; asks: string; fielded: string | null }[];
-        badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        badge: Badge;
         source_title: string;
         absence_title: string;
     } | null;
@@ -68,7 +71,7 @@ interface TeamSection {
         month_anchors: string[];
         category_count: number;
         clear_all_reward: string | null;
-        badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        badge: Badge;
         source_title: string;
         projection: string | null;
         projection_title: string;

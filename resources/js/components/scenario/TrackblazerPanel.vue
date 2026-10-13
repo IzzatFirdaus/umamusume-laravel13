@@ -45,6 +45,9 @@ import TrackblazerRoutePlanner from './TrackblazerRoutePlanner.vue';
 import AlertRow from './AlertRow.vue';
 import { useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import type { ProvenanceState } from '../../types';
+
+type Badge = ProvenanceState;
 
 interface GradeObjective {
     index: number;
@@ -84,11 +87,11 @@ interface PlanningPeriod {
     index: number;
     name: string;
     needed: string;
-    needed_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    needed_badge: Badge | null;
     needed_title: string;
     is_current: boolean;
     plan: string | null;
-    plan_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    plan_badge: Badge | null;
     plan_title: string;
     uncounted: number;
     uncounted_reason: string | null;
@@ -96,25 +99,25 @@ interface PlanningPeriod {
     floor_second: string | null;
     floor_third: string | null;
     floor_label: string;
-    floor_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    floor_badge: Badge | null;
     floor_title: string;
 }
 
 interface PlanningSection {
     periods: PlanningPeriod[];
     collapses_after_period: number;
-    flags: { kind: string; label: string; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null; title: string }[];
+    flags: { kind: string; label: string; badge: Badge | null; title: string }[];
     year_end: {
         gate_label: string;
         timing: string;
         fans_needed: string;
-        fans_needed_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        fans_needed_badge: Badge;
         fans_needed_title: string;
         fans_recorded: string | null;
-        fans_recorded_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+        fans_recorded_badge: Badge | null;
         fans_recorded_title: string;
         fans_shortfall: string | null;
-        fans_shortfall_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+        fans_shortfall_badge: Badge | null;
         fans_shortfall_title: string;
         bond_figures: string;
         bond_recorded: string | null;
@@ -135,13 +138,13 @@ interface CalendarRow {
     surface: string | null;
     surface_title: string | null;
     grade_points_win: string | null;
-    grade_points_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    grade_points_badge: Badge | null;
     grade_points_title: string;
     coins_win: string | null;
-    coins_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    coins_badge: Badge | null;
     coins_title: string;
     skip_consequence: string;
-    skip_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    skip_badge: Badge;
     skip_title: string;
 }
 
@@ -155,14 +158,14 @@ interface CalendarSection {
 interface FatigueSection {
     chain: number | null;
     chain_label: string | null;
-    chain_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    chain_badge: Badge | null;
     chain_title: string;
     row: Record<string, string> | null;
     row_title: string;
     table: Record<string, Record<string, string>>;
     caveats: string[];
     recovery: { when: string; effect: string }[];
-    recovery_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    recovery_badge: Badge;
     recovery_title: string;
 }
 
@@ -200,7 +203,7 @@ interface LedgerItem {
     held: number;
     cap: number;
     worth: string | null;
-    worth_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    worth_badge: Badge | null;
     worth_title: string;
 }
 
@@ -209,12 +212,12 @@ interface LedgerSection {
     items_absence: string | null;
     cap: number;
     inflow: string | null;
-    inflow_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    inflow_badge: Badge | null;
     inflow_title: string;
     reserve: {
         label: string;
         value: string;
-        badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        badge: Badge;
         title: string;
     } | null;
     rated_count: number;

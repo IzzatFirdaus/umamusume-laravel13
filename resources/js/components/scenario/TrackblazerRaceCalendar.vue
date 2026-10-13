@@ -22,8 +22,9 @@
  */
 import { computed } from 'vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
+import type { ProvenanceState } from '../../types';
 
-type Badge = 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+type Badge = Badge | null;
 
 interface CalendarRow {
     title: string;
@@ -41,7 +42,7 @@ interface CalendarRow {
     coins_badge: Badge;
     coins_title: string;
     skip_consequence: string;
-    skip_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    skip_badge: Badge;
     skip_title: string;
 }
 

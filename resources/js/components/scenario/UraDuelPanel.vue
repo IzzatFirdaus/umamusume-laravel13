@@ -19,8 +19,9 @@
 import { ref } from 'vue';
 import AbsenceValue from '../AbsenceValue.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
+import type { ProvenanceState } from '../../types';
 
-type Badge = 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+type Badge = Badge;
 
 /**
  * A badge qualifies a displayed value (owner ruling 2a): the rows this panel draws an `N/A` on carry

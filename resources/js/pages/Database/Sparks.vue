@@ -24,6 +24,9 @@ import ReferenceDrawer from '../../components/database/ReferenceDrawer.vue';
 import SourceNote from '../../components/database/SourceNote.vue';
 import { Head } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
+import type { ProvenanceState } from '../../types';
+
+type Badge = ProvenanceState;
 
 interface Category {
     category: string;
@@ -31,7 +34,7 @@ interface Category {
     global_name: string;
     effect: string;
     records: number;
-    state: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    state: Badge;
     source_title: string;
 }
 

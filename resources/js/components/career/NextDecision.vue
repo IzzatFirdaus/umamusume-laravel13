@@ -32,6 +32,9 @@ import AbsenceValue from '../AbsenceValue.vue';
 import ObjectiveRow from './ObjectiveRow.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import RecordedActionCard from './RecordedActionCard.vue';
+import type { ProvenanceState } from '../../types';
+
+type Badge = ProvenanceState;
 
 interface Objective {
     label: string;
@@ -40,7 +43,7 @@ interface Objective {
     due_label: string | null;
     consequence: string | null;
     source: string;
-    badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    badge: Badge;
     title: string;
 }
 
@@ -69,7 +72,7 @@ interface Decision {
         }[] | null;
     } | null;
     alternatives: { action: string; action_url: string; tradeoff: string }[];
-    why: { text: string; badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown'; title: string }[];
+    why: { text: string; badge: Badge; title: string }[];
     switch_if: string[];
     refusal: { reason: string; missing: string[] } | null;
     objectives: Objective[];

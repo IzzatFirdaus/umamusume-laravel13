@@ -21,6 +21,9 @@
 import { computed } from 'vue';
 
 import ProvenanceBadge from '../ProvenanceBadge.vue';
+import type { ProvenanceState } from '../../types';
+
+type Badge = ProvenanceState;
 
 const props = defineProps<{
     label: string;
@@ -29,7 +32,7 @@ const props = defineProps<{
     due_label: string | null;
     consequence: string | null;
     source: string;
-    badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    badge: Badge;
     title: string;
     /** The screen that can settle this obligation. Null when the page has no such door: no dead link. */
     url: string | null;

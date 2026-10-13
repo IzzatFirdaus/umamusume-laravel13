@@ -24,8 +24,9 @@
  * accessible name for the term role.
  */
 import ProvenanceBadge from '../ProvenanceBadge.vue';
+import type { ProvenanceState } from '../../types';
 
-type Badge = 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+type Badge = Badge | null;
 
 interface LedgerItem {
     name: string;
@@ -46,7 +47,7 @@ interface LedgerSection {
     reserve: {
         label: string;
         value: string;
-        badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        badge: Badge;
         title: string;
     } | null;
     rated_count: number;

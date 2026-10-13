@@ -14,6 +14,15 @@ declare module '@inertiajs/core' {
 }
 
 /*
+ * The four provenance states, canonical here so a module TypeScript itself resolves can alias them:
+ * `ProvenanceBadge.vue` re-exports the name, and an SFC aliases this type for every use that is not
+ * inside its own `defineProps<>` (the compiler limit the badge's header documents). ProvenanceBadge.vue
+ * remains the only owner of the glyphs and words the four states render.
+ */
+export type ProvenanceState = 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+
+
+/*
  * The shared Next Decision contract (plan §9a FD-2, PROMPT G1). Fixed here once because G2 to G6 all
  * consume it: FD-3 adds `objectives[]` and FD-4 adds `recorded_action` to this same shape, and the two
  * refusal classes, the provenance rows and the absence of any score are part of what they must not
@@ -40,7 +49,7 @@ export interface Objective {
     consequence: string | null;
     /** Which read produced the row: `race_catalog_slots` today, so no row can name a scenario. */
     source: string;
-    badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    badge: ProvenanceState;
     title: string;
 }
 
@@ -91,7 +100,7 @@ export interface NextDecision {
      */
     why: {
         text: string;
-        badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+        badge: ProvenanceState;
         title: string;
     }[];
     switch_if: string[];

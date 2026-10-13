@@ -2,14 +2,17 @@
 /**
  * The four provenance states (design-2.0 §49, verbatim).
  *
- * Exported from the plain script block so other modules can type a `ref<ProvenanceState>()` or a
- * helper signature with it. One caveat, stated once here so no later slice re-learns it the hard way:
- * a consuming SFC **cannot** put this imported type inside its own `defineProps<>` — `@vue/compiler-sfc`
- * resolves prop types with no filesystem access, so an imported type fails the build ("No fs option
- * provided to compileScript in non-Node environment"). Pages declare their props contract locally;
- * this export is for everything around props.
+ * The canonical union lives in `resources/js/types.ts`, the one module both TypeScript and the SFC
+ * compiler resolve natively, and this file re-exports it so the name's public home is unchanged. One
+ * caveat, stated once here so no later slice re-learns it the hard way: a consuming SFC **cannot** put
+ * an imported type inside its own `defineProps<>` — `@vue/compiler-sfc` resolves prop types with no
+ * filesystem access, so an imported type fails the build ("No fs option provided to compileScript in
+ * non-Node environment"). Pages declare their props contract locally; this re-export is for everything
+ * around props, which is what the 18 files that used to hand-write the union now alias instead.
  */
-export type ProvenanceState = 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+import type { ProvenanceState } from '../types';
+
+export type { ProvenanceState };
 </script>
 
 <script setup lang="ts">
@@ -44,6 +47,7 @@ export type ProvenanceState = 'confirmed' | 'calculated' | 'estimated' | 'unknow
  * is pinned by `tests/browser/provenance-badge.spec.ts`; reverting these two lines to consts fails it.
  */
 import { computed } from 'vue';
+import type { ProvenanceState } from '../types';
 
 const props = defineProps<{
     state: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
@@ -51,7 +55,7 @@ const props = defineProps<{
     title?: string;
 }>();
 
-const BADGES: Record<'confirmed' | 'calculated' | 'estimated' | 'unknown', { glyph: string; word: string }> = {
+const BADGES: Record<ProvenanceState, { glyph: string; word: string }> = {
     confirmed: { glyph: '✓', word: 'Confirmed' },
     calculated: { glyph: '∑', word: 'Calculated' },
     estimated: { glyph: '~', word: 'Estimated' },

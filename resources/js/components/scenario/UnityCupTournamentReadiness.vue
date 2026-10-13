@@ -22,8 +22,9 @@
  * disclosure: a `<summary>` is a tab stop, and this region's keyboard case counts them.
  */
 import ProvenanceBadge from '../ProvenanceBadge.vue';
+import type { ProvenanceState } from '../../types';
 
-type Badge = 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+type Badge = Badge;
 
 const props = defineProps<{
     tournament: {

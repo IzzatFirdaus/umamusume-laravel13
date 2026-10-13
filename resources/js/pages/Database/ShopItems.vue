@@ -20,13 +20,16 @@ import ReferenceDrawer from '../../components/database/ReferenceDrawer.vue';
 import SourceNote from '../../components/database/SourceNote.vue';
 import { Head } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
+import type { ProvenanceState } from '../../types';
+
+type Badge = ProvenanceState;
 
 interface ShopRow {
     name: string;
     effect: string;
     spend_site: string;
     kind: 'consumable' | 'currency';
-    state: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    state: Badge;
     source_title: string;
     detail: string;
 }

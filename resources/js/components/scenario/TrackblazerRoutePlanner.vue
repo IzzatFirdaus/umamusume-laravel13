@@ -30,8 +30,9 @@
  */
 import { computed } from 'vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
+import type { ProvenanceState } from '../../types';
 
-type Badge = 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+type Badge = Badge | null;
 
 interface PlanningPeriod {
     index: number;
@@ -64,7 +65,7 @@ interface YearEndGate {
     gate_label: string;
     timing: string;
     fans_needed: string;
-    fans_needed_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    fans_needed_badge: Badge;
     fans_needed_title: string;
     fans_recorded: string | null;
     fans_recorded_badge: Badge;

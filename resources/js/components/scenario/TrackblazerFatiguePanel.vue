@@ -25,18 +25,21 @@
  */
 import { computed } from 'vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
+import type { ProvenanceState } from '../../types';
+
+type Badge = ProvenanceState;
 
 interface FatigueSection {
     chain: number | null;
     chain_label: string | null;
-    chain_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown' | null;
+    chain_badge: Badge | null;
     chain_title: string;
     row: Record<string, string> | null;
     row_title: string;
     table: Record<string, Record<string, string>>;
     caveats: string[];
     recovery: { when: string; effect: string }[];
-    recovery_badge: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+    recovery_badge: Badge;
     recovery_title: string;
 }
 

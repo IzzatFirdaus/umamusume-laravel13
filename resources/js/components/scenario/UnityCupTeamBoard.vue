@@ -23,8 +23,9 @@
  * `unity-cup-panel.spec.ts` counts the disclosures in the region to keep the claim honest.
  */
 import ProvenanceBadge from '../ProvenanceBadge.vue';
+import type { ProvenanceState } from '../../types';
 
-type Badge = 'confirmed' | 'calculated' | 'estimated' | 'unknown';
+type Badge = Badge;
 
 interface CoverageRow {
     category: string;
