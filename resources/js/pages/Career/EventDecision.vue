@@ -201,7 +201,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
             aria-labelledby="event-advisor-heading"
             class="mt-4 rounded-md border border-rule bg-panel p-4"
         >
-            <h2 id="event-advisor-heading" class="text-base font-semibold text-ink-strong">Coach recommendation</h2>
+            <h2 id="event-advisor-heading" class="text-lg font-semibold text-ink-strong">Coach recommendation</h2>
             <p class="mt-1 text-sm text-ink-strong">
                 <span v-if="props.advisor.recommendation !== null">{{ props.advisor.recommendation }}</span>
                 <span v-else title="TrainerAdvisor holds advice for training actions only.">
@@ -216,7 +216,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
         <!-- Current career state, the same shape the Cockpit prints: five stats against targets
              and the ScenarioCaps ceiling, plus Energy, Mood, Fans and Skill Points. -->
         <section aria-labelledby="event-state-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="event-state-heading" class="text-base font-semibold text-ink-strong">Current career state</h2>
+            <h2 id="event-state-heading" class="text-lg font-semibold text-ink-strong">Current career state</h2>
             <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                 <div
                     v-for="stat in props.state.stats"
@@ -248,7 +248,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
 
         <!-- Known outcomes: derived from this run's recorded choices, grouped by event name. -->
         <section aria-labelledby="event-known-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="event-known-heading" class="text-base font-semibold text-ink-strong">Known outcomes on this run</h2>
+            <h2 id="event-known-heading" class="text-lg font-semibold text-ink-strong">Known outcomes on this run</h2>
             <p class="mt-1 text-sm text-ink-muted">
                 Choices you recorded before, grouped by event. An outcome marked incomplete means
                 no result was entered when the choice fired.
@@ -294,7 +294,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
 
         <!-- Recorded history, newest first. -->
         <section aria-labelledby="event-history-heading" class="mt-4">
-            <h2 id="event-history-heading" class="text-base font-semibold text-ink-strong">Recorded events</h2>
+            <h2 id="event-history-heading" class="text-lg font-semibold text-ink-strong">Recorded events</h2>
 
             <p
                 v-if="props.empty !== null"
@@ -317,7 +317,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
             class="mt-4 rounded-md border border-rule bg-panel p-4"
             @submit.prevent="submitChoice"
         >
-            <h2 id="event-form-heading" class="text-base font-semibold text-ink-strong">Record an event choice</h2>
+            <h2 id="event-form-heading" class="text-lg font-semibold text-ink-strong">Record an event choice</h2>
             <p class="mt-1 text-sm text-ink-muted">
                 Store what fired and what you chose. This creates a TurnEvent on the selected turn.
             </p>

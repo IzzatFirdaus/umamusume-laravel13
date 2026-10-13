@@ -293,7 +293,7 @@ const capFor = (label: string): number =>
             aria-labelledby="training-empty-heading"
             class="mb-4 rounded-md border border-dashed border-rule bg-raised p-4"
         >
-            <h2 id="training-empty-heading" class="text-base font-semibold text-ink-strong">No turn recorded yet</h2>
+            <h2 id="training-empty-heading" class="text-lg font-semibold text-ink-strong">No turn recorded yet</h2>
             <p class="mt-1 text-sm text-ink">
                 This run has logged no turn, so the cards have no entered stat to read a deficit from and
                 no Energy to subtract a cost from. The advisor ranks nothing and says why, rather than
@@ -305,7 +305,7 @@ const capFor = (label: string): number =>
         </section>
 
         <section aria-labelledby="training-advisor-heading" class="mb-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="training-advisor-heading" class="text-base font-semibold text-ink-strong">Advisor</h2>
+            <h2 id="training-advisor-heading" class="text-lg font-semibold text-ink-strong">Advisor</h2>
 
             <p v-if="props.advisor.absence !== null" class="mt-1 text-sm text-ink">
                 {{ props.advisor.absence }}
@@ -338,7 +338,7 @@ const capFor = (label: string): number =>
         </section>
 
         <section aria-labelledby="training-options-heading">
-            <h2 id="training-options-heading" class="text-base font-semibold text-ink-strong">Training options</h2>
+            <h2 id="training-options-heading" class="text-lg font-semibold text-ink-strong">Training options</h2>
 
             <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <TrainingCard
@@ -355,7 +355,7 @@ const capFor = (label: string): number =>
         </section>
 
         <section aria-labelledby="training-record-heading" class="mt-6 rounded-md border border-rule bg-panel p-4">
-            <h2 id="training-record-heading" ref="recordHeading" tabindex="-1" class="text-base font-semibold text-ink-strong">Record the turn</h2>
+            <h2 id="training-record-heading" ref="recordHeading" tabindex="-1" class="text-lg font-semibold text-ink-strong">Record the turn</h2>
 
             <p class="mt-1 text-sm text-ink">
                 <template v-if="chosen !== null">

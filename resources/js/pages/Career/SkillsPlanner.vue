@@ -221,7 +221,7 @@ const coverageConstants = computed(() =>
 
         <!-- The target the fit cells compare against, or the named absence. -->
         <section aria-labelledby="skills-target-heading" class="rounded-md border border-rule bg-panel p-4">
-            <h2 id="skills-target-heading" class="text-base font-semibold text-ink-strong">Your target</h2>
+            <h2 id="skills-target-heading" class="text-lg font-semibold text-ink-strong">Your target</h2>
             <p v-if="props.target !== null" class="mt-1 flex flex-wrap gap-x-3 text-sm text-ink">
                 <span>{{ props.target.purpose_label }}</span>
                 <span aria-hidden="true">·</span>
@@ -243,7 +243,7 @@ const coverageConstants = computed(() =>
         </section>
 
         <section aria-labelledby="skills-coverage-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="skills-coverage-heading" class="flex items-center gap-2 text-base font-semibold text-ink-strong">
+            <h2 id="skills-coverage-heading" class="flex items-center gap-2 text-lg font-semibold text-ink-strong">
                 Skill Point coverage
                 <ProvenanceBadge state="calculated" title="The sum of the base prices of the skills still to learn, against the last recorded Skill Point total." />
             </h2>
@@ -286,7 +286,7 @@ const coverageConstants = computed(() =>
              records can price one. The screen states that absence rather than printing a derived
              percentage (ADR-0001 §3's rule for a percentage no stored value backs). -->
         <section aria-labelledby="skills-hints-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="skills-hints-heading" class="text-base font-semibold text-ink-strong">Hint discounts</h2>
+            <h2 id="skills-hints-heading" class="text-lg font-semibold text-ink-strong">Hint discounts</h2>
             <p class="mt-1 text-sm text-ink">Hint discounts are not modelled.</p>
         </section>
 
@@ -296,7 +296,7 @@ const coverageConstants = computed(() =>
             :aria-labelledby="`skills-${group.key}-heading`"
             class="mt-4"
         >
-            <h2 :id="`skills-${group.key}-heading`" class="text-base font-semibold text-ink-strong">
+            <h2 :id="`skills-${group.key}-heading`" class="text-lg font-semibold text-ink-strong">
                 <span aria-hidden="true" class="font-mono font-bold text-goal-line">{{ group.glyph }}</span>
                 {{ group.label }}
             </h2>
@@ -365,7 +365,7 @@ const coverageConstants = computed(() =>
              where a run gains one it has never held, so the write path and the vocabulary stay the
              endpoint's own. -->
         <section aria-labelledby="add-skill-heading" class="mt-6 rounded-md border border-rule bg-panel p-4">
-            <h2 id="add-skill-heading" class="text-base font-semibold text-ink-strong">Add a skill</h2>
+            <h2 id="add-skill-heading" class="text-lg font-semibold text-ink-strong">Add a skill</h2>
             <p v-if="props.picker_skills.length === 0" class="mt-1 text-sm text-ink-muted">
                 Nothing left to add: the catalogue offers no Global skill this run does not already hold.
             </p>

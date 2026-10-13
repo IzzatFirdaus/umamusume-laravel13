@@ -65,7 +65,7 @@ function atLimit(id: number): boolean {
 
 <template>
     <section :aria-labelledby="headingId" class="mt-4">
-        <h2 :id="headingId" class="text-base font-semibold text-ink-strong">{{ props.group.label }}</h2>
+        <h2 :id="headingId" class="text-lg font-semibold text-ink-strong">{{ props.group.label }}</h2>
         <p class="mt-1 text-sm text-ink-muted">{{ props.group.definition }}</p>
 
         <p

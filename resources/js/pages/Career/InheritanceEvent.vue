@@ -189,7 +189,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
             aria-labelledby="inheritance-empty-heading"
             class="mt-4 rounded-md border border-dashed border-rule bg-raised p-4"
         >
-            <h2 id="inheritance-empty-heading" class="text-base font-semibold text-ink-strong">
+            <h2 id="inheritance-empty-heading" class="text-lg font-semibold text-ink-strong">
                 No Legacy configuration yet
             </h2>
             <p class="mt-2 text-sm text-ink">{{ props.empty }}</p>
@@ -210,7 +210,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                 aria-labelledby="inheritance-milestones-heading"
                 class="mt-4 rounded-md border border-rule bg-panel p-4"
             >
-                <h2 id="inheritance-milestones-heading" class="text-base font-semibold text-ink-strong">
+                <h2 id="inheritance-milestones-heading" class="text-lg font-semibold text-ink-strong">
                     Inheritance Milestones
                 </h2>
                 <p class="mt-1 text-sm text-ink-muted">
@@ -243,7 +243,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                 class="mt-4 rounded-md border border-rule bg-panel p-4"
             >
             <header class="flex flex-wrap items-center justify-between gap-2">
-                <h2 id="inheritance-predicted-heading" class="text-base font-semibold text-ink-strong">
+                <h2 id="inheritance-predicted-heading" class="text-lg font-semibold text-ink-strong">
                     Predicted Sparks
                 </h2>
                 <ProvenanceBadge
@@ -340,7 +340,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
             class="mt-4 rounded-md border border-rule bg-panel p-4"
         >
             <header class="flex flex-wrap items-center justify-between gap-2">
-                <h2 id="inheritance-observed-heading" class="text-base font-semibold text-ink-strong">
+                <h2 id="inheritance-observed-heading" class="text-lg font-semibold text-ink-strong">
                     Observed Outcomes
                 </h2>
                 <ProvenanceBadge

@@ -97,7 +97,7 @@ function save(): void {
 
 <template>
     <section aria-labelledby="acquisition-status-heading" class="rounded-md border border-rule bg-panel p-4">
-        <h2 id="acquisition-status-heading" class="text-base font-semibold text-ink-strong">Acquired / skipped</h2>
+        <h2 id="acquisition-status-heading" class="text-lg font-semibold text-ink-strong">Acquired / skipped</h2>
         <p class="mt-1 text-sm text-ink-muted">
             Mark whether this run learned each skill, skipped it, or is still suggesting it.
             This is separate from the priority order above; it records what the run has, not what

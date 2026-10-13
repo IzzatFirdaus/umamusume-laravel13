@@ -147,7 +147,7 @@ function submitManual(): void {
         </p>
 
         <section aria-labelledby="race-turn-heading" class="rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-turn-heading" class="text-base font-semibold text-ink-strong">The turn being decided</h2>
+            <h2 id="race-turn-heading" class="text-lg font-semibold text-ink-strong">The turn being decided</h2>
             <p v-if="props.nextTurn !== null" class="mt-1 text-sm text-ink">
                 {{ props.nextTurn.year_label }} ·
                 {{ props.nextTurn.position_label }} ·
@@ -164,7 +164,7 @@ function submitManual(): void {
             aria-labelledby="race-deadlines-heading"
             class="mt-4 rounded-md border-2 border-goal-line bg-raised p-4"
         >
-            <h2 id="race-deadlines-heading" class="text-base font-semibold text-ink-strong">
+            <h2 id="race-deadlines-heading" class="text-lg font-semibold text-ink-strong">
                 <span aria-hidden="true" class="font-mono font-bold text-goal-line">!</span>
                 Mandatory races
             </h2>
@@ -205,7 +205,7 @@ function submitManual(): void {
         </p>
 
         <section aria-labelledby="race-readiness-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-readiness-heading" class="text-base font-semibold text-ink-strong">Readiness</h2>
+            <h2 id="race-readiness-heading" class="text-lg font-semibold text-ink-strong">Readiness</h2>
             <p class="mt-1 text-sm text-ink">
                 <span class="font-semibold text-ink-strong" :title="props.readiness.title">{{ props.readiness.label }}</span>
                 <span class="ml-2 text-ink-muted">No readiness band is computed for this race.</span>
@@ -213,7 +213,7 @@ function submitManual(): void {
         </section>
 
         <section aria-labelledby="race-list-heading" class="mt-4">
-            <h2 id="race-list-heading" class="text-base font-semibold text-ink-strong">Races to decide between</h2>
+            <h2 id="race-list-heading" class="text-lg font-semibold text-ink-strong">Races to decide between</h2>
 
             <!-- The branch switch. Two buttons that navigate the query string, the pattern
                  `RacePanel` uses; the branch is server-resolved so this form never submits the

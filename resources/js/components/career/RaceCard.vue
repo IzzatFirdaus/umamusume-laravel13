@@ -138,7 +138,7 @@ const folds = computed<boolean>(
         <slot name="select" />
 
         <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <h3 class="text-base font-semibold text-ink-strong">{{ props.race.title }}</h3>
+            <h3 class="text-lg font-semibold text-ink-strong">{{ props.race.title }}</h3>
             <p class="flex flex-wrap items-baseline gap-x-2 text-xs text-ink-muted">
                 <span v-if="props.race.is_mandatory" class="font-bold text-ink-strong">
                     <span aria-hidden="true">!</span> Mandatory
@@ -206,7 +206,7 @@ const folds = computed<boolean>(
         >
             <div class="flex h-full flex-col gap-4 overflow-y-auto p-4">
                 <div class="flex items-baseline justify-between gap-3">
-                    <h3 class="text-base font-semibold text-ink-strong">{{ props.race.title }}</h3>
+                    <h3 class="text-lg font-semibold text-ink-strong">{{ props.race.title }}</h3>
                     <button
                         type="button"
                         class="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-ink underline"

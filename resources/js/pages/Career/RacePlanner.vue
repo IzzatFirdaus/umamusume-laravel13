@@ -133,7 +133,7 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
              and the region otherwise states only the next obligation and its turn. First on the screen
              because it is the only block here that reports something the Trainer has not yet answered. -->
         <section v-if="props.deadline.next !== null" aria-labelledby="race-planner-deadline-heading" class="rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-planner-deadline-heading" class="text-base font-semibold text-ink-strong">Deadlines</h2>
+            <h2 id="race-planner-deadline-heading" class="text-lg font-semibold text-ink-strong">Deadlines</h2>
             <AlertRow
                 v-if="props.deadline.alert !== null"
                 glyph="▲"
@@ -156,7 +156,7 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
         </section>
 
         <section aria-labelledby="race-planner-position-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-planner-position-heading" class="text-base font-semibold text-ink-strong">Planning from</h2>
+            <h2 id="race-planner-position-heading" class="text-lg font-semibold text-ink-strong">Planning from</h2>
             <p v-if="props.nextTurn !== null" class="mt-1 text-sm text-ink">
                 {{ props.nextTurn.year_label }} ·
                 <span class="font-mono tabular-nums">Turn {{ props.nextTurn.turn }}</span>
@@ -169,7 +169,7 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
         <!-- The two figures the brief asks for that this tool must not state. Each carries the reason
              in its `title`, and neither is a band, a percentage or a number. -->
         <section aria-labelledby="race-planner-held-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-planner-held-heading" class="text-base font-semibold text-ink-strong">Held figures</h2>
+            <h2 id="race-planner-held-heading" class="text-lg font-semibold text-ink-strong">Held figures</h2>
             <dl class="mt-2 flex flex-col gap-1 text-sm">
                 <div class="flex flex-wrap items-baseline gap-x-2">
                     <dt class="text-ink">Win probability</dt>
@@ -207,7 +207,7 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
             />
 
             <section aria-labelledby="race-planner-comparison-heading" class="mt-6">
-                <h2 id="race-planner-comparison-heading" class="text-base font-semibold text-ink-strong">
+                <h2 id="race-planner-comparison-heading" class="text-lg font-semibold text-ink-strong">
                     Reward comparison
                 </h2>
 
@@ -265,7 +265,7 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
                         </table>
                     </div>
 
-                    <h3 class="mt-6 flex flex-wrap items-center gap-x-2 text-base font-semibold text-ink-strong">
+                    <h3 class="mt-6 flex flex-wrap items-center gap-x-2 text-lg font-semibold text-ink-strong">
                         Target alignment
                         <!-- Calculated: the cell is derived from two recorded values, so it is a
                              comparison rather than a reading. Never a score and never a percentage. -->
