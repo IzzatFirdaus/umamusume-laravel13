@@ -5777,8 +5777,11 @@ KI-74 pre-flight: the trivial `training_runs` read returned single-digit millise
 - `python tools/md_fence_check.py` - the pass's draft read 0 invalid, and the landed file reads
   **8 invalid closing fences, all pre-existing** (lines 39, 720, 728, 736, 739, 4079, 4083, 5020:
   mislabelled json/text/php/bash closers inside earlier slices' sections, every one of them before
-  this file's pass-6 section). The tool exits 0 either way, so the gate cannot stop a commit on its
-  own - the check ran before this record landed and its non-zero finding was noticed only after.
+  this file's pass-6 section). **Correction, measured the next pass: the tool does fail - it exits 1**
+  (`p8-fence.log`). The commit still went through because the check was piped into `tail`, so the shell
+  reported the last command of the pipeline instead of the checker - the trap `AGENTS.md` §9 records and
+  this tree has now hit twice. The finding was real when it ran; only the reason it went unheeded was
+  mis-stated, and the eight lines stay other slices' prose.
   Not fixed in passing: the eight lines are other slices' prose, and the file's worktree copy
   carries peer content. A fence-repair slice is owed to whoever owns those sections.
 - The browser sweep (Phase 2) - **held on the peer's staging alone** now that the bundle
