@@ -10,8 +10,9 @@
  * and no primary decision needs a horizontal scroll.
  *
  * **The page pattern is `Catalog/Index.vue`'s**: the layout, `<Head title>` and the `#title` slot. The
- * calendar's year tabs left the page with D14a, so the only query-string state here is none at all. There is one form,
- * the manual correction, and it posts to the route that already owns a turn write.
+ * calendar's year tabs left the page with D14a. The one query-string state is `?edit_turn=<id>`, which
+ * names the turn the correction disclosure opens on (plan §9.6 ruling 2); the selector navigates it.
+ * There is one form, the manual correction, and it posts to the route that already owns a turn write.
  *
  * **Loading and error are page-level** (ADR-0007): the only user-initiated async action here is the
  * correction, and Inertia keeps the current page on screen during a visit, so the state is announced
@@ -119,11 +120,6 @@ const props = defineProps<{
         /**
          * The four stats whose ceiling a Trainer may enter, each with what the run holds and what the
          * scenario publishes (`ADR-0025`). Wit is absent: no column holds it, so no field may write one.
-         */
-        caps: Record<string, { entered: number | null; scenario: number }>;
-        /**
-         * The four stats a ceiling may be entered for, each with what the run holds and what the scenario
-         * publishes (`ADR-0025`). Wit is absent because no column holds it.
          */
         caps: Record<string, { entered: number | null; scenario: number }>;
         fans: number | null;
