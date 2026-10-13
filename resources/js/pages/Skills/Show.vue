@@ -105,7 +105,7 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
 
             <template v-if="conditions.length > 0">
                 <div v-for="(group, index) in conditions" :key="index" class="mt-3 rounded-md border border-rule bg-raised p-3 text-sm">
-                    <h3 v-if="conditions.length > 1" class="text-xs font-bold uppercase tracking-widest text-ink-muted">
+                    <h3 v-if="conditions.length > 1" class="text-lg font-semibold text-ink-strong">
                         Activation {{ index + 1 }}
                     </h3>
 
@@ -158,7 +158,7 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
             <template v-else>
                 <template v-for="group in holderGroups" :key="group.heading">
                     <template v-if="group.holders.length > 0">
-                        <h3 class="mt-4 text-xs font-bold uppercase tracking-widest text-ink-muted">{{ group.heading }}</h3>
+                        <h3 class="mt-4 text-lg font-semibold text-ink-strong">{{ group.heading }}</h3>
                         <ul class="mt-1">
                             <li v-for="holder in group.holders" :key="holder.slug" class="py-1 text-sm">
                                 <a :href="holder.url" class="text-ink-strong underline">{{ holder.name }}</a>

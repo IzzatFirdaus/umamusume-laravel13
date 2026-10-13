@@ -23,7 +23,7 @@ defineProps<{
 <template>
     <div class="rounded-md border border-rule bg-raised p-4">
         <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <h3 class="text-base font-semibold text-ink-strong">{{ card.title }}</h3>
+            <h3 class="text-lg font-semibold text-ink-strong">{{ card.title }}</h3>
             <span class="flex flex-wrap items-baseline gap-3 text-xs text-ink-muted">
                 <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
                 <span v-if="card.is_debut_form">debut form</span>

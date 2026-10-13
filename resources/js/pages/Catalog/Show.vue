@@ -311,7 +311,7 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
             </p>
             <template v-else>
                 <template v-for="list in skillLists" :key="list.label">
-                    <h3 class="mt-4 text-xs font-bold uppercase tracking-widest text-ink-muted">{{ list.label }}</h3>
+                    <h3 class="mt-4 text-lg font-semibold text-ink-strong">{{ list.label }}</h3>
                     <ul class="mt-1">
                         <SkillRow v-for="skill in list.skills" :key="skill.id" :skill="skill" />
                         <li v-if="list.skills.length === 0 && !list.has_ids" class="py-1.5 text-sm text-ink-muted">
