@@ -26,7 +26,16 @@ const props = withDefaults(
 </script>
 
 <template>
-    <section aria-labelledby="career-advisor-heading" class="rounded-md border border-rule bg-panel p-4">
+    <!-- This section is the rail's own named region, and from `lg` it is also the scroll container
+         the sticky column needs: a rail taller than the viewport scrolls inside itself instead of
+         clipping, and the focusable-container treatment (DESIGN.md §2.3) keeps it keyboard-reachable
+         rather than trackpad-only. The tab stop exists at every width, the way the race calendar's
+         region already does. -->
+    <section
+        aria-labelledby="career-advisor-heading"
+        class="rounded-md border border-rule bg-panel p-4 lg:max-h-[calc(100svh-1rem)] lg:overflow-y-auto"
+        tabindex="0"
+    >
         <h2 id="career-advisor-heading" class="text-lg font-semibold text-ink-strong">Advisor</h2>
 
         <NextDecision
