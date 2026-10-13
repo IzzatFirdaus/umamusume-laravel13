@@ -360,6 +360,24 @@ html[data-theme='dark'] {
     }
 
     /*
+     * Fragment targets clear the pinned on-page section nav (audit 2026-10-12 §3.6). The nav
+     * pins from md up only, so below it the offset is owed by nothing; `#action-recommended`
+     * rides the same rule because the advisor rail's door jumps to it while the nav is pinned.
+     */
+    @media (min-width: 768px) {
+        #career-header-heading,
+        #cockpit-header-edit,
+        #career-state-heading,
+        #career-actions-heading,
+        #career-scenario-heading,
+        #career-timeline-heading,
+        #career-advisor-heading,
+        #action-recommended {
+            scroll-margin-top: 4.5rem;
+        }
+    }
+
+    /*
      * WCAG 2.2 AA reduced-motion path (design-2.0 §43). The MOTION dial is 1, so
      * there is little to quiet today; this is the escape hatch for the OS setting
      * and the guard for any transition a later slice adds.

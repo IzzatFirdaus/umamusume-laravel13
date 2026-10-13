@@ -154,6 +154,18 @@ const empty = computed(() => props.header.turn === 0);
 // route table. The grid already owns the href, and a due obligation with no door renders none.
 const raceDoor = computed(() => props.actions.find((action) => action.key === 'race')?.href ?? null);
 
+// The section nav's targets are the headings the screen already carries (audit 2026-10-12 §3.6).
+// The hrefs are fragment ids, which Inertia leaves to the browser, so these are plain anchors.
+const sectionLinks = [
+    { href: '#career-header-heading', label: 'Position' },
+    { href: '#cockpit-header-edit', label: 'Run identity' },
+    { href: '#career-state-heading', label: 'Stats and state' },
+    { href: '#career-actions-heading', label: 'Actions' },
+    { href: '#career-scenario-heading', label: 'Scenario' },
+    { href: '#career-timeline-heading', label: 'Races in this run' },
+    { href: '#career-advisor-heading', label: 'Advisor' },
+];
+
 /*
  * The Unity Cup team editor (R2-14). The team system is the scenario's own, so the matrix's
  * `team_rank_ladder` panel flag decides whether the editor renders: a scenario name written into this
@@ -460,6 +472,19 @@ const jumpToShop = (): void => {
         <p v-if="visitFailed" role="alert" class="mb-4 rounded border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That screen did not load. Nothing was saved; try again.
         </p>
+
+        <!-- The page's own wayfinder (audit 2026-10-12 §3.6): anchors into the regions the screen
+             already names, never tabs - SCREEN_SPEC.md §SCR-CAR-011 forbids hiding a region at a
+             breakpoint, and tabs hide panels by definition. Sticky from md up, the same widths the
+             wizard's step bar ruling chose; below md it scrolls with the page and nothing leaves
+             the accessibility tree. -->
+        <nav aria-label="On this page" class="mb-4 border-b border-rule bg-page py-1 md:sticky md:top-0 md:z-10 md:-mx-6 md:px-6">
+            <ul class="flex flex-wrap gap-1 text-sm">
+                <li v-for="link in sectionLinks" :key="link.href">
+                    <a :href="link.href" class="inline-flex min-h-11 items-center rounded-md px-3 text-ink hover:bg-raised hover:text-ink-strong">{{ link.label }}</a>
+                </li>
+            </ul>
+        </nav>
 
         <CareerHeader
             :trainee="props.run.trainee"
@@ -856,7 +881,7 @@ const jumpToShop = (): void => {
                 </section>
             </div>
 
-            <div class="order-2 min-w-0 md:order-none md:col-start-2 md:row-span-2 md:row-start-2 lg:col-start-3 lg:row-start-1 lg:sticky lg:top-4">
+            <div class="order-2 min-w-0 md:order-none md:col-start-2 md:row-span-2 md:row-start-2 lg:col-start-3 lg:row-start-1 lg:sticky lg:top-16">
                 <AdvisorRail :decision="props.advisor.decision" :race-url="raceDoor" :timeline-url="props.run.timeline_url" />
             </div>
 
