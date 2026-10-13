@@ -5513,3 +5513,159 @@ them across three attempts, so the read is **captured, not visually judged** - t
 the owner, and the Cockpit capture was skipped as a run-scoped surface the peer session is actively
 reworking.
 
+## Pass 6 (2026-10-14): premise verification, the enamel budget, and the `defineProps` boundary
+
+Session scratch: `.scratch-uma/ui-continuation-20261013/` (this session's private directory; the
+citation-pinned evidence from earlier passes stays under `.scratch-uma/cited/`, four files deep in
+that bucket as of this pass). Instruments written here: `enamel-clash.mjs`, `enamel-census.mjs`,
+`density-census.mjs`, `capture-source-read.mjs`, the `dp/` `defineProps` probe, and the premise
+report `premises-2026-10-14.md`. Per the owner's standing lesson from the last two passes, no
+inline bash grep fed a claim: every search ran through the Grep tool or a script whose output was
+read before the sentence was written.
+
+### Phase 0 - premises, verified read-only
+
+- **0.1 `DesignTokensTest`: the rewrite is still uncommitted.** Last commit to the file is
+  `b30906a`; `git status --porcelain` reads ` M` and `git diff --stat HEAD` reads 333 insertions
+  over 55 deletions. **Slice 1.1 (the dark `--color-rule` ramp) stays held**, on that gate rather
+  than on the measurement: the candidate `#60606A` and pass 5's measured 1.03:1 fill step against
+  1.42:1 boundary are unchanged and stand in the premise report.
+- **0.2 the shared index, classified by instrument rather than assumed.** 15 paths hold
+  `index != HEAD` with `worktree == HEAD`, 4 hold both, 35 hold worktree-only changes. Fourteen of
+  the fifteen are peer paths whose staged blob is a snapshot of work that has since landed. The
+  fifteenth is `docs/research-scratch/SLICE-RECORDS.md`, and it is **not** HEAD-stale: the index
+  blob is this file's HEAD content **plus** the 17 citation repoints to `.scratch-uma/cited/` the
+  owner's 2026-10-13 sweep made. `git grep -c '\.scratch-uma/cited/' HEAD` finds none anywhere in
+  the tree, `git grep -c --cached` finds the 17 here, and 13 worktree files carry theirs unstaged.
+  So the repair the pass-5 hand-off proposed (restage my paths to HEAD parity) is refused: `git
+  add` on this path would delete the owner's staged lines.
+- **0.2 carries a correction against my own prior pass.** `2d0b11a` is titled "restore the
+  repointed citations the stale worktree copy reverted". It did not restore them: it restored
+  `5586312~1`'s blob, and that blob never held them - `4e55a26` has zero `cited/` occurrences. The
+  claim in that subject is withdrawn here. What is true is that the worktree file is back to HEAD
+  and the repoints survive only in the index and in 13 unstaged files.
+- **0.3 the two FYI findings both stand, one refined.** The absolute-href split is real but
+  repo-wide and harmless: `=> route(` appears 107 times across 22 controllers, a client-composed
+  `href` path in 19 files, `route()` is request-scoped so every href is same-origin, and the
+  browser case `a row click on /support-cards is an Inertia visit, not a document load` passes
+  (`link-instrument4.log:109`). The `defineProps` caveat was over-broad; Phase 3 narrowed it.
+- **0.4 the four suite failures do not reproduce solo.** Re-run against the current tree,
+  `--filter='EmptyStateCommandNamesTest|LessonEvidenceBoundaryTest|CareerScenarioSelectTest'` reads
+  **24 passed (211 assertions)** in 30.87s. The 00:50 sweep read them against the peer's
+  mid-flight files: `career_goals => true` in the Grand Concert panel map and a ninth declared
+  source are both visible in that log, and the source count has since been dealt with by `1fdb1ca`.
+- **0.5 six pixel captures exist; the Cockpit one does not.** `pixel-catalog-detail`,
+  `pixel-catalog-index`, `pixel-dashboard`, `pixel-database-hub`, `pixel-wizard-preflight`,
+  `pixel-wizard-scenario`. This environment still renders no image content, so Phase 2.3 reads the
+  six against source and claims nothing visual.
+
+### Phase 2 - the enamel budget to one control per screen (`acff64d`)
+
+`DESIGN.md:254` gives the sheen one home: the primary action button, the one confirm control per
+screen. The first instrument (`enamel-census.mjs`) counted 51 `enamel` elements in 37 component
+templates (the 52nd grep hit is the `@utility enamel` definition in `resources/css/app.css`) but
+read guards only on the element itself, which made Dashboard's two-state pair look like a clash.
+Two instrument bugs were found and fixed before any edit landed: template AST line numbers are
+relative to the `<template>` block, and a `<template v-for>` compiles to a FOR node (type 11) the
+first descent never flagged as a loop. The replacement instrument (`enamel-clash.mjs`) tracks
+v-if/v-else **branch identity**, so two hits clash only when no common if-group put them in
+different branches. That reading: **nine screens rendered two or three sheens at once** -
+`LegacySelect` 3, `SaveVeteran` 3, `DeckSelect` 2, `Result` 2, `SkillsPlanner` 2, `TraineeSelect` 2,
+`Legacy/Builder` 2, `Support/Builder` 2, `Veterans/Index` 2 - while `Dashboard` and `Runs/Import`
+were already inside the budget, their pairs sitting in opposite branches.
+
+Eleven sites demoted, always the control that is not the confirm action: four `Filter` submits,
+`Add tag`, `Add skill`, three ancestry chips, the `SaveVeteran` tag toggle, and `Result`'s
+`View Career Timeline` door. Each takes the secondary pill its own file already uses on the controls
+beside it (`border border-rule`, `text-ink`, `hover:bg-sunken`), so no new recipe entered the tree
+and no height moved: every demoted control keeps its `h-11` or `min-h-11`. Re-run reads **screens
+over budget 0** and the nine SFCs compile. `tests/browser/catalog-detail.spec.ts:88` already pins
+the same rule on one screen (`page.locator('.enamel')` to have count 1); there is still no
+tree-wide pin, because a source-scan test for it would need the branch-identity logic this pass
+only has in scratch.
+
+**Open, recorded not fixed:** the argyle lattice bleed (`DESIGN.md` research section 6.3) has no
+per-screen ceiling to measure against. Its named home is capsule headers and nothing says how many a
+screen may carry, so no count for it is claimed here.
+
+### Phase 2.1 and 2.3 - the source reads the images cannot give
+
+The dispatch named four wizard steps; the setup flow is **six** (`ScenarioSelect`, `TraineeSelect`,
+`BuildTarget`, `LegacySelect`, `DeckSelect`, `Preflight`), so all six were measured rather than four
+guessed at. Static versus list-rendered controls: `LegacySelect` 1 + 18, `TraineeSelect` 7 + 5,
+`BuildTarget` 7 + 5, `DeckSelect` 10 + 0, `Preflight` 1 + 6, `ScenarioSelect` 1 + 5. The density is
+carried by the two pickers with server-driven lists, not by the review step.
+
+The composition-aware source read (`capture-source-read.mjs`, one level of child components) over
+the six captured screens: every screen has exactly one `h1`, and it is the shell's
+(`AppLayout.vue:290`), reached by the wizard through `SetupLayout.vue:57-58` forwarding the `#title`
+slot, so the one-h1 rule holds on all six. Widths: the captured pages carry only `max-w-3xl`, but
+tree-wide **26 of 68 `max-w-*` uses sit off the ratified trio** (`DESIGN.md:221`: 5xl shell, 3xl
+form, lg narrow) - `max-w-2xl` 14, `max-w-sm` 8, `max-w-md` 2, `max-w-full` 1, `max-w-prose` 1 -
+and the wizard steps are among the `max-w-2xl` users. Off-scale headings live in shared components:
+`DeckAnalysis.vue` has 5 of 6 headings with no `text-*` class, `catalog/TraineeCatalog.vue:195` an
+`h4` the same way. No `overflow-x-auto` region appears on any of the six, so the scrolling-region
+contract is not exercised by this set. Controls with no 44px class are mostly inline prose links
+(`Dashboard.vue:191` "Open Careers" inside a `<p>`), which the house bar does not govern: that is a
+read needing adjudication, not a defect list. None of it was edited. A width or heading-size change
+is a visual change, and this pass can neither build (Phase 5) nor see the captures.
+
+### Phase 3 - one closure, one narrowing
+
+**3.1 verified, no code.** The href-form split has no user-visible consequence (0.3), the server
+form is the repo's majority form, and unifying 26-plus sites across controllers and pages would be a
+repo-wide refactor for zero measured gain.
+
+**3.2 landed (`5a32663`).** The measured boundary, on this tree's own `@vue/compiler-sfc` 3.5.43 in
+both its node and its esm-browser build: an imported union as a *member* compiles, and
+`scenario/UraPanel.vue:27` already does it behind a local alias; `defineProps<>` handed a whole
+imported contract does not, because `@vitejs/plugin-vue` 6.0.9 passes no `fs` option to
+`compileScript` (`node_modules/@vitejs/plugin-vue/dist/index.mjs:302-313`) and the compiler must
+open the file to expand the members. What the accepted form costs instead is the runtime
+constructor: `type: null` rather than `type: String`. That is the real reason `ProvenanceBadge.vue`
+keeps its literal, and the comment now says so. Comment-only edits, three files; the sweep after the
+correction found the same over-broad sentence in `resources/js/types.ts:30-32` and
+`career/RecordedActionCard.vue:23-25` (whose `Row` is declared in that file and was never in the
+failing case), and both were narrowed. Nine other sites already name the failing form and were left
+alone.
+
+### Phase 4 - Track 2, named only
+
+Owner-gated and untouched, exactly as briefed: Fid-2, Fid-3, Fid-4, Fid-5, Fid-8 and Fid-9 remain
+open. No clause was implemented by inference and no colour token was moved to answer a contrast
+question.
+
+### Phase 5 - the matrix, and the one gate held
+
+The box was pre-flighted before the sweep, per KI-74: a trivial read of `training_runs` against the
+dev file returned in **9 ms**, so the run was admissible. Gates, each quoted from its own log in
+this session's scratch directory:
+
+- `npm run typecheck` - **exit 0** (`p6-typecheck.log`).
+- `php artisan test --compact` - **1814 passed, 0 failed (30,095 assertions, 630.61s, exit 0)**
+  (`p6-full-suite.log`). The four failures the 00:50 sweep carried are gone, which is 0.4's
+  classification confirmed rather than argued: the peer's own work landed, `1fdb1ca` among it. The
+  count rose 1804 to 1814 on tests this pass did not write.
+- SFC compile checks - **9 ok** on the demoted pages, **2 ok** on the two edited components.
+- `enamel-clash.mjs` re-run - **screens over budget 0** (from nine).
+- `python tools/md_fence_check.py` on this record - **0 invalid closing fences**.
+- `composer lore` **320 hit(s), 75 exempt line(s)**, exit 0, and `composer lore-code` **141 hits**,
+  exit 0 (`p6-lore.log`, `p6-lore-code.log`): both unchanged from the ruled pass-5 baseline, so the
+  delta this pass owes a ruling for is zero. Eight hits fall inside files this pass touched and
+  every one of them sits on a line this pass did not write: `friend` as the display and dataset key
+  AGENTS.md section 5 exempts, `mount` inside `mount-time` describing the Vue lifecycle, and
+  `Factor analysis` as a named absence. This record's own lines were swept again after it landed.
+- `vendor/bin/pint --test` - **not run: no PHP file changed.** Twelve paths moved: nine Vue pages,
+  three Vue/TypeScript comment blocks, this file.
+- `npm run build` and with it the browser suite (the four per-screen specs and `accessibility.spec`)
+  - **not run, and this is the held gate.** The build would rewrite `public/build`, whose manifest
+  every session in this worktree reads, and peer staging is live in the same tree: four staged
+  deletions plus fourteen index entries that differ from HEAD. `public/build` therefore still
+  post-dates pass 5, so a browser run now would exercise bundles that do not contain the eleven
+  demotions - a green result would be evidence about the wrong tree. Unblock: the peer's staging
+  lands, then `npm run build` and `PLAYWRIGHT_PORT=<session port> PLAYWRIGHT_SCRATCH_DB=<session
+  path> npm run test:browser`.
+
+Nothing in this pass changed a migration, a route, a config value, a controller or a test.
+
+
