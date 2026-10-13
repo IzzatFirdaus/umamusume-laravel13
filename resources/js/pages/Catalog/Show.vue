@@ -191,7 +191,7 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
                     <dd class="text-ink">
                         <span v-if="trainee.profile.va_ja === null" title="The source publishes no Japanese voice actor for this trainee.">N/A</span>
                         <span v-else>{{ trainee.profile.va_ja }}</span>
-                        <span v-if="trainee.profile.va_en" class="text-ink-muted">(EN: {{ trainee.profile.va_en }})</span>
+                        <span v-if="trainee.profile.va_en" class="text-ink-muted">{' '}(EN: {{ trainee.profile.va_en }})</span>
                         <span
                             v-else
                             class="block text-xs text-ink-muted"
@@ -305,7 +305,7 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
 
         <template v-else>
             <p class="mt-2 text-xs text-ink-muted">
-                Objectives and card images are not recorded for this form; `ADR-0012` records why.
+                Objectives and card images are not recorded for this form; ADR-0012 records why.
             </p>
 
             <FormTabs
