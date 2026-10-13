@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Career;
 
-use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Http\Controllers\Controller;
 use App\Models\Advisor\BuildTargetPayload;
@@ -59,7 +58,7 @@ final class SkillsPlannerController extends Controller
     }
 
     /**
-     * @return array{id: int, trainee: string, trainee_ja: string|null, scenario_label: string, status_label: string, run_url: string, skills_sync_url: string, status_labels: array<string,string>}
+     * @return array{id: int, trainee: string, trainee_ja: string|null, scenario_label: string, status_label: string, run_url: string, skills_sync_url: string}
      */
     private function runSection(TrainingRun $run): array
     {
@@ -73,7 +72,6 @@ final class SkillsPlannerController extends Controller
             'status_label' => $run->status->label(),
             'run_url' => route('runs.cockpit', $run),
             'skills_sync_url' => route('runs.skills.sync', $run),
-            'status_labels' => collect(RunStatus::cases())->mapWithKeys(fn (RunStatus $s): array => [$s->value => $s->label()])->toArray(),
         ];
     }
 

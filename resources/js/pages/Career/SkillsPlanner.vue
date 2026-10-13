@@ -50,7 +50,7 @@ interface Group {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; skills_sync_url: string; status_labels: Record<string, string> };
+    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; skills_sync_url: string };
     target: null | {
         purpose: string;
         purpose_label: string;

@@ -82,6 +82,12 @@ class RacePlannerController extends Controller
         ['key' => 'style', 'label' => 'Running style'],
     ];
 
+    /**
+     * The reason every figure this screen must not state carries, in one place, so the three refusals
+     * on the page cannot drift apart.
+     */
+    private const HELD_BLOCKER = 'Held. Race prediction is blocked on the requirement data `ADR-0016` measures, and that decision is an open question rather than a permission: `PRD.md` §6.11 stands unamended.';
+
     public function show(TrainingRun $run): Response
     {
         // The run with its trainee, its race entries with their slots, and its turns; then one read of
@@ -106,6 +112,7 @@ class RacePlannerController extends Controller
             'comparison' => ['rows' => self::COMPARISON_ROWS],
             'alignment' => $this->alignment($run),
             'held' => $this->held(),
+            'readiness' => $this->readiness(),
             'deadline' => $this->deadline($run, $slots, $next),
             'entry' => $this->entrySection($run),
             'empty' => $empty,
@@ -468,17 +475,30 @@ class RacePlannerController extends Controller
      */
     private function held(): array
     {
-        $blocker = 'Held. Race prediction is blocked on the requirement data `ADR-0016` measures, and that decision is an open question rather than a permission: `PRD.md` §6.11 stands unamended.';
-
         return [
             'win_probability' => [
                 'label' => 'N/A',
-                'title' => $blocker.' No win figure is computed here.',
+                'title' => self::HELD_BLOCKER.' No win figure is computed here.',
             ],
             'expected_risk' => [
                 'label' => 'N/A',
-                'title' => $blocker.' No expected risk is computed here, and no risk band is printed either.',
+                'title' => self::HELD_BLOCKER.' No expected risk is computed here, and no risk band is printed either.',
             ],
+        ];
+    }
+
+    /**
+     * The drawer's Readiness row. It is the same refusal the Race decision screen prints for the same
+     * figure, so a card opened from either screen answers with the same sentence; the held-figures
+     * block above is a different row and keeps its own two.
+     *
+     * @return array{label: string, title: string}
+     */
+    private function readiness(): array
+    {
+        return [
+            'label' => 'N/A',
+            'title' => self::HELD_BLOCKER.' No readiness band is computed here.',
         ];
     }
 

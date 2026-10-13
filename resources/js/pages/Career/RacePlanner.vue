@@ -43,6 +43,7 @@ interface Race {
     is_mandatory: boolean;
     is_special: boolean;
     facts: Cell[];
+    detail_recorded: boolean;
     status: string | null;
     placement: string | null;
     fans_gain: number | null;
@@ -55,6 +56,8 @@ interface Group {
     key: string;
     label: string;
     definition: string;
+    total: number;
+    truncated: string | null;
     empty: string | null;
     races: Race[];
 }
@@ -66,6 +69,7 @@ const props = defineProps<{
     comparison: { rows: { key: string; label: string }[] };
     alignment: { recorded: boolean; absence: string | null; rows: { key: string; label: string }[] };
     held: { win_probability: { label: string; title: string }; expected_risk: { label: string; title: string } };
+    readiness: { label: string; title: string };
     deadline: {
         next: { id: number; title: string; year_label: string; turn: number | null; state: string } | null;
         alert: { text: string; detail: string } | null;
@@ -193,7 +197,7 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
                 v-for="group in orderedGroups"
                 :key="group.key"
                 :group="group"
-                :readiness="props.held.win_probability"
+                :readiness="props.readiness"
                 :entry="props.entry"
                 :skip-url="props.run.run_url"
                 :selected="selected"
