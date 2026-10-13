@@ -5833,3 +5833,48 @@ detail in `premises-2026-10-14-pass8.md`; instruments `premise-02-03.mjs` and
   peers' tree, not this pass. `public/build` is the peer's bundle, untouched here.
 
 
+## Pass 8 (cont.) — the browser sweep unblocked mid-pass and ran
+
+The premise moved while the pass was open: the shared index dropped from 24 divergent paths to 4,
+and **all four are docs** (`ARCHITECTURE-ESSENTIALS.md`, `KNOWN-ISSUES.md`, `SCREEN_SPEC.md`,
+`SLICE-RECORDS.md`). No `resources/js`, no `app/`, no config path diverges, and the 02:57 bundle
+already post-dates every landed Vue commit including `a1365fc` and `806372f`. So Slice 2.1's rebuild
+was unnecessary - and correctly skipped, since the rule behind it is about not rewriting
+`public/build` while a peer's frontend file is mid-flight - and the sweep could run against the
+existing bundle without writing it. KI-74 pre-flight first, then
+`PLAYWRIGHT_PORT=8191 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/ui-continuation-20261013/browser-8191.sqlite
+npm run test:browser` -> **311 passed, 21 failed, 41.1 minutes, exit 1** (`p8-browser.log`).
+
+**Pass-7's two slices came back clean from it.** `career-race-planner.spec.ts:204` "reflows at 320px
+without pushing the page sideways" and `:219` "passes an axe scan at WCAG A and AA" both pass on the
+widened prose, as do `dashboard.spec.ts:197` (320px reflow, no console error, reduced motion),
+`trackblazer-panel.spec.ts:398` "sizes every control to the 44px contract and reflows at 320 px" and
+`:430` (axe A + AA), and `career-cockpit.spec.ts:264` "lays out at 1280, 768 and 320 without a
+horizontal scroll". `trackblazer-panel.spec.ts:287`, the test that renders the fatigue panel
+`806372f` gave the region contract, **passes**.
+
+**One failure was reproduced solo and is real.** `trackblazer-panel.spec.ts:88` "posts a valid
+purchase and reads the recorded row on the next cockpit visit" fails in isolation on a fresh port
+and scratch DB (`p8-solo-trackblazer.log`, exit 1), at spec line 97: the four `#purchase-*` fields
+fill, the `Record purchase` click resolves, and no response matching `POST */purchases` ever
+arrives, so the `waitForResponse` burns the 3.0m budget. Four sibling tests in the same spec fail
+the same way (`:115`, `:138`, `:237`, `:321`) - every one that writes. The shop's own read-only
+tests pass, so the panel renders; the write path is what does not answer.
+
+**Not this session's, and not fixed here.** `806372f` touched only
+`TrackblazerFatiguePanel.vue` (verified with `git show --name-only`); the shop form lives in
+`TrackblazerPanel.vue`, whose last commits are `3ae564b`, `209e05e` and `7fd49b6`, and the career
+write path has been under active peer rework through this arc. Diagnosing it is a
+systematic-debugging slice for whoever owns the Trackblazer shop, not a report-and-move-on.
+
+**The other 16 failures are unclassified, and the run is void as a defect list.** They spread across
+ten unrelated spec files, several at the full 3.0m timeout, and at least three share one mechanism
+that is not a product break: `career-trainee-select.spec.ts:60` and `:123` both fail on
+`getByTitle('No trainee has been chosen in this setup draft yet.')` reading something other than
+`N/A`, which is the session-draft state leaking across concurrent workers - the same family the
+peer session was fixing in `5811630` for Pest. `runs.spec.ts:41` is KI-69's empty-table contract and
+the three `flash-name-*` files are 30s-budget probe specs. Per `AGENTS.md` §9 a broad run that comes
+back red under concurrent load is reported with its counts and not converted into sixteen defects;
+only the solo-reproduced purchase failure is claimed as real.
+
+
