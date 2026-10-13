@@ -184,7 +184,7 @@ function letterFor(column: Column, key: string): string | null {
             aria-labelledby="compare-empty"
             class="mt-4 rounded-md border border-rule bg-panel p-4"
         >
-            <h2 id="compare-empty" class="text-base font-semibold text-ink-strong">Nothing selected</h2>
+            <h2 id="compare-empty" class="text-lg font-semibold text-ink-strong">Nothing selected</h2>
             <p class="mt-1 text-sm text-ink">{{ props.empty.message }}</p>
             <a
                 :href="props.empty.library_url"
@@ -195,7 +195,7 @@ function letterFor(column: Column, key: string): string | null {
         </section>
 
         <section v-else aria-labelledby="compare-table" class="mt-4">
-            <h2 id="compare-table" class="text-base font-semibold text-ink-strong">
+            <h2 id="compare-table" class="text-lg font-semibold text-ink-strong">
                 {{ props.columns.length }} career{{ props.columns.length === 1 ? '' : 's' }} side by side
             </h2>
 
@@ -301,7 +301,7 @@ function letterFor(column: Column, key: string): string | null {
         </section>
 
         <section aria-labelledby="compare-absences" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="compare-absences" class="text-base font-semibold text-ink-strong">NOT IN THIS BUILD</h2>
+            <h2 id="compare-absences" class="text-lg font-semibold text-ink-strong">NOT IN THIS BUILD</h2>
             <ul class="mt-2 space-y-2 text-sm">
                 <li v-for="absence in props.absences" :key="absence.label">
                     <span class="text-ink">{{ absence.label }}</span>: {{ absence.reason }}
