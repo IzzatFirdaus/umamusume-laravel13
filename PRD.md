@@ -118,6 +118,25 @@ P0 = Phase 1 ships without it = failure. P1 = Phase 1 target. P2 = later phase, 
   held in `config('scenarios.php')` keyed by character name. Known and accepted gap: a `group` card
   represents several characters but carries one, so a group card badged on a member who is not its
   representative would be missed; no captured frame yet shows one badged.
+- A-10 [US-10; **ADR-0026**]: Each trainee's own career objectives are engine-owned reference data on
+  `trainee_goals`, one row per objective: the race it names (or no race, for a fan-count objective), the
+  requirement the client states, the career year and the deadline turn, and the source's own condition
+  figures kept raw. **Two kinds are stored and they are genuinely different** — a race objective names a race
+  and a placing, a fan objective names a threshold and occupies no race. Objectives are **per trainee**, not
+  per costume card and not per scenario: one ladder serves URA Finale, Unity Cup and Our Grand Concert, and
+  `trackblazer` composes none because that scenario replaces race goals with Grade Point deadlines. A run's
+  progress against an objective is **derived** from the race entries and turn readings the Trainer already
+  records, never re-entered, so no second owner for the same fact exists and no write path is added here.
+  Availability follows **A-8**'s rule: every objective the source publishes is stored, and a Global-facing
+  surface prints a race only where `race_catalog_slots` carries it, so an objective on a race Global has not
+  shipped stays stored and renders as the source naming it, not as a Global obligation. Provenance is inline
+  per **A-4**, with its own `is_manual` per **B-4**, and the fetch half is ordinary **B-1** (one declared
+  source, one parser class), which is why this line sits in FR-A rather than FR-B.
+  *Scope note for US-10.* US-10's acceptance test named `scenario_slots` seeding, which is the
+  **scenario-wide** half of "race goals" and is what the mandatory-race module renders. This line is the
+  **per-character** half that test never reached: the two are separate facts and neither substitutes for the
+  other. Nothing here computes whether an objective *can* be met — §6.11 stands, and no surface prints a
+  probability, a score or a suggested entry.
 
 ### FR-B: Data-fetching & cross-reference engine
 

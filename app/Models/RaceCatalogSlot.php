@@ -181,19 +181,50 @@ class RaceCatalogSlot extends Model
      */
     public function isAtOrBeforeTurn(?array $next): bool
     {
+        return self::reachedBy($this->turnIndex(), $next);
+    }
+
+    /**
+     * This row's place in the single career ordering `reachedBy()` compares on.
+     */
+    public function turnIndex(): int
+    {
+        return (int) $this->year * TrainingRun::TURNS_PER_YEAR + (int) ($this->turn ?? 0);
+    }
+
+    /**
+     * The one comparison the career's turn ordering allows.
+     *
+     * Exposed so a `trainee_goals` row can ask the same question of the same number without writing a
+     * second copy of the arithmetic; `ADR-0015`'s rule is that a validator and a renderer reading one
+     * number call the same owner.
+     *
+     * @param  array{year: int, turn: int}|null  $next
+     */
+    public static function reachedBy(int $index, ?array $next): bool
+    {
         if ($next === null) {
             return false;
         }
 
-        $at = (int) $this->year * TrainingRun::TURNS_PER_YEAR + (int) ($this->turn ?? 0);
-        $now = (int) $next['year'] * TrainingRun::TURNS_PER_YEAR + (int) $next['turn'];
-
-        return $at <= $now;
+        return $index <= (int) $next['year'] * TrainingRun::TURNS_PER_YEAR + (int) $next['turn'];
     }
 
     public function yearLabel(): string
     {
-        return self::YEARS[$this->year] ?? (string) $this->year;
+        return self::labelForYear($this->year);
+    }
+
+    /**
+     * The short career-year word, read from the same list the calendar tabs use.
+     *
+     * Static because `trainee_goals` carries a `career_year` with no calendar row of its own — a fan
+     * objective occupies no grid cell — and a second copy of this word list is exactly the drift
+     * `ADR-0015` exists to prevent.
+     */
+    public static function labelForYear(int|string|null $year): string
+    {
+        return self::YEARS[$year] ?? (string) $year;
     }
 
     public function hasFanGate(): bool
