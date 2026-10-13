@@ -103,16 +103,10 @@ function present(widget: Widget): Box {
 <template>
     <div class="flex flex-wrap gap-2">
         <template v-for="box in widgets.map(present)" :key="box.widget">
-            <!-- The turn widget is the torn-page calendar card: a tab strip with two punch
-                 holes over a bordered body, drawn as an object not as another number box. -->
-            <div
-                v-if="box.widget === 'turn'"
-                class="relative min-w-36 flex-1 overflow-hidden rounded-md border-2 border-anchor bg-raised px-3 pt-6 pb-2"
-            >
-                <span class="absolute inset-x-0 top-0 flex h-5 items-center gap-1.5 bg-anchor px-2" aria-hidden="true">
-                    <span class="size-2 rounded-full bg-raised"></span>
-                    <span class="size-2 rounded-full bg-raised"></span>
-                </span>
+            <!-- The turn widget is the torn-page calendar card: body, tab strip and two punch holes,
+                 all drawn by the `turn-chip` utility in `app.css` rather than composed here, so the
+                 motif has one home and this markup carries content. -->
+            <div v-if="box.widget === 'turn'" class="turn-chip min-w-36 flex-1">
                 <span class="block font-mono text-xl leading-none font-extrabold tabular-nums text-anchor">{{ box.value }}</span>
                 <span class="mt-1 block text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ box.label }}</span>
                 <span v-if="box.sub !== null" class="block text-xs text-ink-muted">{{ box.sub }}</span>

@@ -322,6 +322,31 @@ html[data-theme='dark'] {
     }
 }
 
+/* The torn-page calendar card, the turn widget's own shape: a bordered body, the tab strip across its
+   top edge, and two holes punched through the strip so the body shows. One home for the motif
+   (DESIGN.md §2.3) rather than six class lists and two decorative spans in the component. */
+@utility turn-chip {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--color-anchor);
+    border-radius: var(--radius-md);
+    background-color: var(--color-raised);
+    padding: 1.5rem 0.75rem 0.5rem;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 1.25rem;
+        background-color: var(--color-anchor);
+        background-image:
+            radial-gradient(circle 0.25rem at 0.75rem 0.625rem, var(--color-raised) 100%, transparent 100%),
+            radial-gradient(circle 0.25rem at 1.625rem 0.625rem, var(--color-raised) 100%, transparent 100%);
+    }
+}
+
 /*
  * The surfaces nobody drew. Before this block, focus rings, selection, and the text caret
  * all shipped as browser defaults belonging to no design system, which is the cheapest
