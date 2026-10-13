@@ -374,6 +374,23 @@ html[data-theme='dark'] {
     }
 
     /*
+     * The visit indicator's colour has to be set on the pseudo-element, not on the element.
+     * Measured 2026-10-14 (B-1, remedy D): a `progress` carrying `appearance-none` plus
+     * `bg-chrome` renders rgb(128,128,128) in Chromium, because the UA's
+     * `::-webkit-progress-bar` paints over the element's own background — so the token never
+     * reached the screen and `visit-progress` was an inert class. On the pseudo-element the
+     * strip measures 4.61:1 against the light page field and 9.79:1 in dark, both from the
+     * theme's own `--color-chrome`. Chromium only: this repo's browser harness is Chromium
+     * (`playwright.config.ts:49`) and no Firefox binary is installed for this Playwright
+     * build, so nothing is claimed about Firefox here. The element stays indeterminate, so the
+     * strip does not move — no percentage source exists (Inertia reports one only for FormData
+     * uploads and PRD §6 has none), and a synthetic sweep would be invented progress.
+     */
+    progress.visit-progress::-webkit-progress-bar {
+        background-color: var(--color-chrome);
+    }
+
+    /*
      * WCAG 2.2 AA 2.4.11 Focus Not Obscured. Below md the shell pins a nav bar to
      * the viewport bottom; without scroll padding a keyboard-focused control or a
      * #fragment jump lands underneath it. 4rem clears the 44px bar.
