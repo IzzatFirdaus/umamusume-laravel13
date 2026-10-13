@@ -12,6 +12,11 @@
 > verdict below cites a `file:line`, a measured number from the harness runs named, or a committed
 > test. Where a verdict depends on a render that no current bundle can show, it is marked
 > **needs measurement** and names the run that will settle it.
+>
+> **Provenance check (continuation pass, 2026-10-13 late).** The peer's later landings `35a1c68`
+> (catalog rows and pagers onto Inertia `Link`, with a shared `Pagination.vue`) and `28a2718` (the
+> review merge target's id beside its suggestion) touch none of the files this report cites and
+> neither surface; the report's citations stand as written.
 
 # UX Audit Summary
 
@@ -169,13 +174,22 @@
 - **P1.** None on these two surfaces. The preflight duplication (the audits' P1) landed at `3f9618c`
   and verified this pass.
 - **P2.**
-  1. **Goal ladder on the cockpit (Law 18).** Acceptance: the goals region reads one "next" plus an
-     integer `Goals Achieved {cleared} of {total}` footer, no bar, no percentage, the eight-field row
-     contract intact (`CockpitObjectivesTest.php:127`). Blocked on Agent 1's module (Slice 0.3).
-  2. **Bundle-lagged renders.** Every verdict above that rests on DOM/copy shipped this pass
-     (`4a5ff88`, `0a58c88`, `84f9353`, `ebcbbac`) is **needs measurement**: the run that settles them
-     is the next `npm run build` followed by the cockpit, accessibility and six wizard specs on a
-     session-private harness, on a quiet box (KI-74 pre-flight first).
+  1. **Goal ladder on the cockpit (Law 18) — blocked on A-1.** Acceptance: the goals region reads one
+     "next" plus an integer `Goals Achieved {cleared} of {total}` footer, no bar, no percentage, the
+     eight-field row contract intact (`CockpitObjectivesTest.php:127`). **Unblock condition:** a commit
+     lands the composer half of the goals work on
+     `app/Http/Controllers/Career/CockpitController.php` — the data half is in (`24ab0eb`: the
+     `TraineeGoal` model, `StoreTraineeGoals`, the `trainee_goals` migration) and the composer's goals
+     group is that file's uncommitted edit as of this pass. Note: the brief's composer path
+     (`app/Http/Controllers/CockpitController.php`) and its `careerGoalSections()` name are stale; the
+     composer composes `$goalSections`.
+  2. **Bundle-lagged renders — blocked on B-1.** Every verdict above that rests on DOM/copy shipped
+     this pass (`4a5ff88`, `0a58c88`, `84f9353`, `ebcbbac`) is **needs measurement**: the run that
+     settles them is the next `npm run build` followed by the cockpit, accessibility and six wizard
+     specs on a session-private harness, on a quiet box (KI-74 pre-flight first). **Unblock condition:**
+     `git diff --cached --name-only` returns no staged file and `git status --porcelain` shows no
+     modified `.vue` outside one session's own work; at this pass's start the shared index held 60
+     staged files, two of them wizard screens.
 - **P3.**
   1. **Continuity's column-order tension (cockpit, tablet).** The brief's CSS-only order is a ruling;
      if it ever changes, re-test the DOM sequence against the new columns. No change now.
