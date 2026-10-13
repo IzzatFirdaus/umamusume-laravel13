@@ -1,0 +1,105 @@
+{
+ "claims": [
+  {
+   "confidence": "high",
+   "eid": "hint-discount-0003",
+   "status": "inferred"
+  },
+  {
+   "confidence": "high",
+   "eid": "hint-discount-0009",
+   "status": "observed"
+  },
+  {
+   "confidence": "high",
+   "eid": "hint-discount-confirmed-0007",
+   "status": "inferred"
+  },
+  {
+   "confidence": "medium",
+   "eid": "skill-allocation-0017",
+   "status": "observed"
+  }
+ ],
+ "contracts": [],
+ "evidence_strength": {
+  "cluster_members": 4,
+  "independent_frames": 8,
+  "note": "frames counted by perceptual cluster; near-duplicate cluster members are not independent support"
+ },
+ "supporting_frames": [
+  {
+   "cluster_id": 75,
+   "independent_context": true,
+   "ref": "2026-07-14 130856",
+   "sid": "db49bde2c227"
+  },
+  {
+   "cluster_id": 644,
+   "independent_context": true,
+   "ref": "2026-07-15 161624",
+   "sid": "092c196777d5"
+  },
+  {
+   "cluster_id": 751,
+   "independent_context": false,
+   "ref": "2026-07-17 232251",
+   "sid": "90f96258fbd9"
+  },
+  {
+   "cluster_id": 751,
+   "independent_context": false,
+   "ref": "2026-07-17 233324",
+   "sid": "1f1c5aa6cee0"
+  },
+  {
+   "cluster_id": 752,
+   "independent_context": false,
+   "ref": "2026-07-17 233332",
+   "sid": "bd09274bfb0f"
+  },
+  {
+   "cluster_id": 752,
+   "independent_context": false,
+   "ref": "2026-07-17 233339",
+   "sid": "d59ae471c145"
+  },
+  {
+   "cluster_id": 725,
+   "independent_context": true,
+   "ref": "2026-07-17 233344",
+   "sid": "8d903e485ae4"
+  },
+  {
+   "cluster_id": 713,
+   "independent_context": true,
+   "ref": "2026-07-17 234453",
+   "sid": "a2e7133d48f6"
+  },
+  {
+   "cluster_id": 714,
+   "independent_context": true,
+   "ref": "2026-07-17 234521",
+   "sid": "277695b56029"
+  },
+  {
+   "cluster_id": 733,
+   "independent_context": true,
+   "ref": "2026-07-18 003303",
+   "sid": "4d4e40208971"
+  },
+  {
+   "cluster_id": 735,
+   "independent_context": true,
+   "ref": "2026-07-18 133128",
+   "sid": "a4d0d62c1c69"
+  },
+  {
+   "cluster_id": 737,
+   "independent_context": true,
+   "ref": "2026-07-18 133312",
+   "sid": "3524125e9360"
+  }
+ ],
+ "topic": "hint-discount"
+}

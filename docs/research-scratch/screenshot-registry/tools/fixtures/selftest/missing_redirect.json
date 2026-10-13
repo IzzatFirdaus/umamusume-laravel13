@@ -1,0 +1,23 @@
+{
+  "description": "A KEYS entry with no redirect silently keeps pointing at the live registry, so a test that writes it mutates real research data. This fixture models that omission.",
+  "cases": [
+    {
+      "name": "complete",
+      "keys": ["REG", "INV", "EVIDENCE", "CAPTURE_MANIFEST"],
+      "redirects": ["REG", "INV", "EVIDENCE", "CAPTURE_MANIFEST"],
+      "expect_missing": []
+    },
+    {
+      "name": "missing_capture_manifest",
+      "keys": ["REG", "INV", "EVIDENCE", "CAPTURE_MANIFEST"],
+      "redirects": ["REG", "INV", "EVIDENCE"],
+      "expect_missing": ["CAPTURE_MANIFEST"]
+    },
+    {
+      "name": "missing_two",
+      "keys": ["REG", "INV", "EVIDENCE", "CAPTURE_MANIFEST", "DISPOSITIONS"],
+      "redirects": ["REG", "INV"],
+      "expect_missing": ["CAPTURE_MANIFEST", "DISPOSITIONS", "EVIDENCE"]
+    }
+  ]
+}

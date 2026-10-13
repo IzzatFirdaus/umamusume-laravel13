@@ -1,0 +1,40 @@
+{
+ "screen_types": {
+  "required": ["training", "skill-selection", "race-result", "career", "menu",
+               "team-showdown-confirm", "unity-cup-progression", "photo-album",
+               "race-entry", "trainee-event", "character-detail", "race-finished"],
+  "additional": ["predictions-modal", "shop-popup", "mood-effect-modal"],
+  "in_use": ["career-goals", "career-home", "career-profile", "learn",
+             "legacy-selection", "live-race-board", "race-results",
+             "race-schedule", "results-summary", "spark-resolution", "team-edit",
+             "team-showdown", "trainee-select"],
+  "min_verified_per_type": 2
+ },
+  "clusters": {
+   "min_representatives_for_clusters_over_size": 4,
+   "min_representatives": 1,
+   "split": [
+    {
+     "cluster_id": 725,
+     "inspected": "2026-10-13",
+     "outcome": "resolved",
+     "reason": "over-collapsed: direct inspection of the five unclassified members shows four Learn screens and one Training screen, and the typed members already span skill-selection, learn and training; reassigned by screen type via cluster-split (skill-selection, learn, training); the residual holds the 44 unreviewed frames plus one composite note-matched record"
+    }
+   ]
+  },
+ "time_spread": {
+  "min_distinct_capture_dates": 8
+ },
+ "scenarios": {
+  "required": ["ura_finale", "trackblazer", "our_grand_concert"],
+  "min_verified_per_scenario": 3
+ },
+ "scenario_aliases": {
+  "ura_finale": ["URA Finale", "ura finale", "URAFinale", "Ura Finale"],
+  "unity_cup": ["Unity-Cup", "Unity Cup", "UnityCup"]
+ },
+ "evidence": {
+  "min_observed_claims": 12,
+  "min_independent_support_frames_per_observed": 2
+ }
+}

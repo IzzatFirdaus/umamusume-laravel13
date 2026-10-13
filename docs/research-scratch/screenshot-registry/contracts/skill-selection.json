@@ -1,0 +1,72 @@
+{
+ "screen_type": "skill-selection",
+ "components": [
+  {
+   "name": "skill_points_total",
+   "label": "Skill Points",
+   "states": ["integer"],
+   "values": ["308", "169", "133"],
+   "units": "points"
+  },
+  {
+   "name": "candidate_row",
+   "label": "candidate skill",
+   "states": ["Learnable", "Obtained"],
+   "values": ["Plan X", "Countermeasure", "Soft Step", "Red Shift"],
+   "units": "skill name + description"
+  },
+  {
+   "name": "hint_discount",
+   "label": "Hint Lvl",
+   "states": ["Hint Lvl 1 10% OFF!", "Hint Lvl 2 20% OFF!", "Hint Lvl 3 30% OFF!"],
+   "values": ["10%", "20%", "30%"],
+   "units": "percent"
+  },
+  {
+   "name": "cost",
+   "label": "cost",
+   "states": ["integer"],
+   "values": ["272", "128", "112"],
+   "units": "Skill Points"
+  },
+  {
+   "name": "stepper",
+   "label": "minus stepper",
+   "states": ["present", "absent"],
+   "values": ["present on learnable rows", "absent on Obtained rows"],
+   "units": "control"
+  },
+  {
+   "name": "acquire_button",
+   "label": "green plus button",
+   "states": ["present"],
+   "values": ["present on learnable rows"],
+   "units": "control"
+  },
+  {
+   "name": "full_stats_toggle",
+   "label": "Full Stats toggle",
+   "states": ["on", "off"],
+   "values": ["present"],
+   "units": "toggle"
+  }
+ ],
+ "observed_interactions": [
+  "Each learnable row renders a minus stepper, the cost, and a green plus button.",
+  "Obtained skills render as an inverted row with no stepper.",
+  "All three hint tiers (Lv1 10% OFF, Lv2 20% OFF, Lv3 30% OFF) render as chips on one Learn frame."
+ ],
+ "unresolved_questions": [
+  "Confirm whether the hint discount applies to the base Skill Point cost or a rounded value.",
+  "Confirm whether the minus stepper changes the level of the skill being learned or the count."
+ ],
+ "evidence": [
+  {"field": "skill_points_total", "ref": "2026-07-17 234521", "sid": "277695b56029"},
+  {"field": "candidate_row", "ref": "2026-07-17 232251", "sid": "90f96258fbd9"},
+  {"field": "hint_discount", "ref": "2026-07-17 234521", "sid": "277695b56029"},
+  {"field": "cost", "ref": "2026-07-17 234521", "sid": "277695b56029"},
+  {"field": "stepper", "ref": "2026-07-17 233324", "sid": "1f1c5aa6cee0"},
+  {"field": "acquire_button", "ref": "2026-07-17 234521", "sid": "277695b56029"},
+  {"field": "full_stats_toggle", "ref": "2026-07-17 233324", "sid": "1f1c5aa6cee0"}
+ ]
+}

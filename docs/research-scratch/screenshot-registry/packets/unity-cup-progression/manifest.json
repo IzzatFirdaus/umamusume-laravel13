@@ -1,0 +1,32 @@
+{
+ "claims": [
+  {
+   "confidence": "high",
+   "eid": "unity-cup-progression-0014",
+   "status": "observed"
+  }
+ ],
+ "contracts": [
+  "unity-cup-progression.json"
+ ],
+ "evidence_strength": {
+  "cluster_members": 0,
+  "independent_frames": 2,
+  "note": "frames counted by perceptual cluster; near-duplicate cluster members are not independent support"
+ },
+ "supporting_frames": [
+  {
+   "cluster_id": 721,
+   "independent_context": true,
+   "ref": "2026-07-17 235625",
+   "sid": "afaa80efea07"
+  },
+  {
+   "cluster_id": 750,
+   "independent_context": true,
+   "ref": "2026-07-18 161325",
+   "sid": "7390567f942b"
+  }
+ ],
+ "topic": "unity-cup-progression"
+}

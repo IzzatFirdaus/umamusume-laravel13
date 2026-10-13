@@ -1,0 +1,21 @@
+{
+  "invariant": "packet_evidence_is_verified_and_typed",
+  "description": "A packet manifest may only cite verified frames that carry a screen_type. This fixture points a packet at a verified frame with no observation screen_type.",
+  "topic": "training",
+  "manifest": {
+    "topic": "training",
+    "claims": [],
+    "supporting_frames": [
+      {"ref": "2026-01-01 900000", "sid": "s-900000", "cluster_id": 1,
+       "independent_context": true}
+    ],
+    "contracts": [],
+    "evidence_strength": {"independent_frames": 1, "cluster_members": 0}
+  },
+  "frames": [
+    {"ref": "2026-01-01 900000", "sid": "s-900000", "state": "verified",
+     "observations": []}
+  ],
+  "expect_fail": true,
+  "expect_message": "with no screen_type"
+}

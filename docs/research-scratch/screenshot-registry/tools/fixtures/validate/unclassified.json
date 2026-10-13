@@ -1,0 +1,41 @@
+{
+  "description": "unclassified is a terminal state only when the ambiguity is written down. A frame typed unclassified with no follow_up question is silently unqueryable.",
+  "cases": [
+    {
+      "name": "unclassified_without_follow_up",
+      "ref": "2026-01-01 800000",
+      "sid": "s-800000",
+      "state": "verified",
+      "screen_type": "unclassified",
+      "follow_up_question": null,
+      "expect_fail": true
+    },
+    {
+      "name": "unclassified_with_empty_follow_up",
+      "ref": "2026-01-01 800001",
+      "sid": "s-800001",
+      "state": "verified",
+      "screen_type": "unclassified",
+      "follow_up_question": "",
+      "expect_fail": true
+    },
+    {
+      "name": "unclassified_with_follow_up",
+      "ref": "2026-01-01 800002",
+      "sid": "s-800002",
+      "state": "verified",
+      "screen_type": "unclassified",
+      "follow_up_question": "no shop type exists in the vocabulary",
+      "expect_fail": false
+    },
+    {
+      "name": "typed_frame_needs_no_follow_up",
+      "ref": "2026-01-01 800003",
+      "sid": "s-800003",
+      "state": "verified",
+      "screen_type": "training",
+      "follow_up_question": null,
+      "expect_fail": false
+    }
+  ]
+}

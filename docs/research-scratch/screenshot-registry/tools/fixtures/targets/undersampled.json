@@ -1,0 +1,22 @@
+{
+ "screen_types": {
+  "required": ["training"],
+  "additional": ["skill-selection"],
+  "min_verified_per_type": 2
+ },
+ "clusters": {
+  "min_representatives_for_clusters_over_size": 4,
+  "min_representatives": 1
+ },
+ "time_spread": {
+  "min_distinct_capture_dates": 8
+ },
+ "scenarios": {
+  "required": [],
+  "min_verified_per_scenario": 3
+ },
+ "evidence": {
+  "min_observed_claims": 0,
+  "min_independent_support_frames_per_observed": 2
+ }
+}

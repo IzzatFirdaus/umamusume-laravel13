@@ -1,0 +1,27 @@
+{
+ "id": "B008",
+ "question": "Fill screen-type coverage gaps: team-showdown-confirm, character-detail, race-finished.",
+ "ids": [
+  "2026-07-18 002837",
+  "2026-07-18 160438",
+  "2026-07-18 160611",
+  "2026-07-15 194245"
+ ],
+ "why": "coverage-gap reported these required screen types below min_verified_per_type=2; each reviewed frame adds a genuine second (or third) verified frame.",
+ "output_schema": "review + evidence per confirmed frame with structured screen_type",
+ "verify": "screenshots.py validate stays clean; coverage-gap reports fewer screen_types_missing",
+ "next": null,
+ "created": "2026-10-12",
+ "results": [],
+ "summary": {
+  "batch": "B008",
+  "frame_count": 4,
+  "unique_frame_count": 4,
+  "duplicate_ids": [],
+  "log_entries": 4,
+  "states": {
+   "verified": 4
+  },
+  "unresolved_ids": []
+ }
+}

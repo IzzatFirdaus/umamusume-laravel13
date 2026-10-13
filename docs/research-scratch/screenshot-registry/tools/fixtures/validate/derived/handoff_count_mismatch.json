@@ -1,0 +1,25 @@
+{
+  "invariant": "handoff_counts_match_registry",
+  "description": "HANDOFF.md counts must equal the live registry counts. This fixture records a stale verified count.",
+  "handoff": {
+    "registry_head_commit": "0000000000000000000000000000000000000000",
+    "counts": {
+      "total": 1,
+      "verified": 99,
+      "partial": 0,
+      "documented_unverified": 0,
+      "not_reviewed": 0
+    },
+    "next_batch": "B011",
+    "capture_blockers_active": [],
+    "capture_blockers_resolved": [],
+    "open_gates": [],
+    "last_validate": "2026-10-12T00:00:00Z"
+  },
+  "frames": [
+    {"ref": "2026-01-01 900001", "sid": "s-900001", "state": "verified",
+     "observations": [{"screen_type": "training", "text": "t", "by": "x"}]}
+  ],
+  "expect_fail": true,
+  "expect_message": "HANDOFF.md counts.verified"
+}

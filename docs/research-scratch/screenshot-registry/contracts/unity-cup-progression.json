@@ -1,0 +1,62 @@
+{
+ "screen_type": "unity-cup-progression",
+ "components": [
+  {
+   "name": "round_list",
+   "label": "Rounds",
+   "states": ["Held", "WIN"],
+   "values": [
+    "Unity Cup Preseason Round 1 (After Junior Year Late Dec)",
+    "Unity Cup Preseason Round 2 (After Classic Year Late Jun)",
+    "Unity Cup Preseason Round 3 (After Classic Year Late Dec)",
+    "Unity Cup Preseason Round 4 (After Senior Year Late Jun)",
+    "Unity Cup Finals (After Senior Year Late Dec)"
+   ],
+   "units": "round label"
+  },
+  {
+   "name": "timing_label",
+   "label": "After",
+   "states": ["After <year> <season>"],
+   "values": [
+    "After Junior Year Late Dec",
+    "After Classic Year Late Jun",
+    "After Classic Year Late Dec",
+    "After Senior Year Late Jun",
+    "After Senior Year Late Dec"
+   ],
+   "units": "schedule label"
+  },
+  {
+   "name": "turn_countdown",
+   "label": "turn(s)",
+   "states": ["integer"],
+   "values": ["12 turn(s)", "11 turn(s)"],
+   "units": "turns"
+  },
+  {
+   "name": "next_label",
+   "label": "NEXT",
+   "states": ["present"],
+   "values": ["NEXT"],
+   "units": "marker"
+  }
+ ],
+ "observed_interactions": [
+  "The progression screen lists five rounds in order, each with an 'After <year> <season>' timing label.",
+  "Each round row carries a 'Held' status marker; rounds already won show a WIN marker (Rounds 1-2 on 2026-07-17 235625).",
+  "A NEXT label and a decreasing turn countdown render on the screen (12 turn(s) on 2026-07-17 235625, 11 turn(s) on 2026-07-18 161325)."
+ ],
+ "unresolved_questions": [
+  "Confirm whether the five Unity Cup round timings are fixed per run or vary by run.",
+  "Confirm whether the WIN marker replaces the Held marker or renders alongside it on a completed round."
+ ],
+ "evidence": [
+  {"field": "round_list", "ref": "2026-07-17 235625", "sid": "afaa80efea07"},
+  {"field": "round_list", "ref": "2026-07-18 161325", "sid": "7390567f942b"},
+  {"field": "timing_label", "ref": "2026-07-18 161325", "sid": "7390567f942b"},
+  {"field": "turn_countdown", "ref": "2026-07-17 235625", "sid": "afaa80efea07"},
+  {"field": "turn_countdown", "ref": "2026-07-18 161325", "sid": "7390567f942b"},
+  {"field": "next_label", "ref": "2026-07-18 161325", "sid": "7390567f942b"}
+ ]
+}

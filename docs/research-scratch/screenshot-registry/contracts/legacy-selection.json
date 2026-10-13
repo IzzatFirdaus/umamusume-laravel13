@@ -1,0 +1,56 @@
+{
+ "screen_type": "legacy-selection",
+ "components": [
+  {
+   "name": "legacy_slots",
+   "label": "Legacy",
+   "states": ["Legacy 1", "Legacy 2"],
+   "values": ["Legacy 1 B+ rank", "Legacy 2 A+ rank"],
+   "units": "rank"
+  },
+  {
+   "name": "legacy_stats",
+   "label": "Stats",
+   "states": ["F", "G"],
+   "values": ["Speed 125/1318 F", "Stamina 87/1316 G", "Power 111/1304 F", "Guts 94/1308 G", "Wit 93/1800 G"],
+   "units": "current/ceiling grade"
+  },
+  {
+   "name": "sparks_panel",
+   "label": "Sparks",
+   "states": ["skill star rating"],
+   "values": ["Cut and Drive! 2stars", "Soft Step 2stars", "Resplendent Red Ace 1star"],
+   "units": "stars"
+  },
+  {
+   "name": "aptitude_grid",
+   "label": "Track/Distance/Style",
+   "states": ["A", "B", "C", "D", "E"],
+   "values": ["Turf A / Dirt B", "Sprint E / Mile A / Medium A / Long B", "Front E / Pace A / Late A / End C"],
+   "units": "aptitude grade"
+  },
+  {
+   "name": "resource_bar",
+   "label": "TP/RP/Gold/Gems",
+   "states": ["integer"],
+   "values": ["TP 02:02/100", "RP 1:41:34/5", "Gold 1,754,090", "Gems 1,378"],
+   "units": "resource"
+  }
+ ],
+ "observed_interactions": [
+  "The Legacy Select screen shows two legacy slots with rank badges and a right-hand Sparks panel of skill star ratings.",
+  "The pre-run Trainer Select screen shows a support-card grid labelled Potential Lvl 1/2 with filters (OFF, Date Obtained, Desc).",
+  "Bottom navigation: Enhance, Story, Home, Race, Scout."
+ ],
+ "unresolved_questions": [
+  "Confirm whether Sparks star ratings are per-skill and capped at 3.",
+  "Confirm whether Legacy 2 can be a Guest (non-owned) umamusume on every run."
+ ],
+ "evidence": [
+  {"field": "legacy_slots", "ref": "2026-07-14 122314", "sid": "9e359a4a075f"},
+  {"field": "legacy_stats", "ref": "2026-07-14 122314", "sid": "9e359a4a075f"},
+  {"field": "sparks_panel", "ref": "2026-07-14 122314", "sid": "9e359a4a075f"},
+  {"field": "aptitude_grid", "ref": "2026-07-14 122314", "sid": "9e359a4a075f"},
+  {"field": "resource_bar", "ref": "2026-07-14 121123", "sid": "01ff0688dcbf"}
+ ]
+}

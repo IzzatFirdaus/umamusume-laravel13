@@ -77,6 +77,7 @@ def main():
     S.EVIDENCE = os.path.join(tmp, "evidence.jsonl")
     S.BATCHES = os.path.join(tmp, "batches")
     S.CLUSTERS = os.path.join(tmp, "nonexistent-clusters.json")
+    S.CAPTURE_MANIFEST = os.path.join(tmp, "capture", "manifest.jsonl")
     os.makedirs(S.BATCHES, exist_ok=True)
 
     # ----------------------------------------------------------------
@@ -196,7 +197,7 @@ def main():
         try:
             args = S.argparse.Namespace(
                 id="claim-%d" % i, claim="claim %d" % i,
-                supports="2026-01-01 10000%d" % i, kind="observed",
+                supports="2026-01-01 10000%d" % i, status="observed",
                 scenario=None, topic=None, confidence="high",
                 observer="ev-%d" % i, batch="CTEST", limits=None,
                 contradicts=None, open=None,

@@ -1,0 +1,58 @@
+{
+ "claims": [
+  {
+   "confidence": "high",
+   "eid": "growth-rate-0002",
+   "status": "observed"
+  },
+  {
+   "confidence": "high",
+   "eid": "growth-rate-confirmed-0005",
+   "status": "observed"
+  },
+  {
+   "confidence": "high",
+   "eid": "ura-finale-confirmed-0006",
+   "status": "observed"
+  }
+ ],
+ "contracts": [],
+ "evidence_strength": {
+  "cluster_members": 0,
+  "independent_frames": 5,
+  "note": "frames counted by perceptual cluster; near-duplicate cluster members are not independent support"
+ },
+ "supporting_frames": [
+  {
+   "cluster_id": 243,
+   "independent_context": true,
+   "ref": "2026-07-15 012428",
+   "sid": "519bfda3ad32"
+  },
+  {
+   "cluster_id": 237,
+   "independent_context": true,
+   "ref": "2026-07-15 014154",
+   "sid": "7f68482f4886"
+  },
+  {
+   "cluster_id": 709,
+   "independent_context": true,
+   "ref": "2026-07-17 232345",
+   "sid": "68e4cb52530d"
+  },
+  {
+   "cluster_id": 739,
+   "independent_context": true,
+   "ref": "2026-07-18 133731",
+   "sid": "f11431fc3ae7"
+  },
+  {
+   "cluster_id": 748,
+   "independent_context": true,
+   "ref": "2026-07-18 160438",
+   "sid": "5b373f0db445"
+  }
+ ],
+ "topic": "growth-rate"
+}
