@@ -61,9 +61,14 @@ test.describe('Setup step 4 — Legacy', () => {
         // `toHaveText`: the banner's `textContent` includes the `aria-hidden` glyph.
         await expect(page.getByRole('note')).toContainText(RECORD_ONLY_NOTICE);
 
-        // Every absence is a named one with its reason, never a dash or a default.
-        await expect(page.getByText('N/A, no trainee chosen')).toBeVisible();
-        await expect(page.getByText('Scenario: N/A')).toBeVisible();
+        // Every absence is a named one with its reason, never a dash or a default. The identity
+        // line's two moved into AbsenceValue disclosures (DESIGN.md §5.6): the marker is the
+        // summary, the reason is its accessible name, and both are in the document.
+        const identityLine = page.getByText('Trainee:');
+        await expect(identityLine.getByText('N/A')).toHaveCount(2);
+        await expect(identityLine.getByText('Scenario:')).toBeVisible();
+        await expect(identityLine).toContainText(/so the graph has no first node/);
+        await expect(identityLine).toContainText(/No scenario has been chosen in this setup draft yet/);
         await expect(page.getByText(/No Legacy is recorded for this setup yet/)).toBeVisible();
 
         // The library the pick controls would select from is empty on a fresh install, and the
@@ -75,7 +80,7 @@ test.describe('Setup step 4 — Legacy', () => {
         // Scoped to the name fields: a grandparent now carries her own rank inputs too, and those ids
         // start with `ancestor-` as well (R3-09).
         await expect(page.locator('input[id^="ancestor-parent_"]')).toHaveCount(4);
-        await expect(page.getByText('N/A, not chosen')).toHaveCount(3);
+        await expect(page.getByText('N/A, not chosen')).toHaveCount(2);
         await expect(page.getByText('No Sparks recorded.')).toHaveCount(4);
 
         // The chance a Spark rolls is a named absence on each parent node, and the reason is on the

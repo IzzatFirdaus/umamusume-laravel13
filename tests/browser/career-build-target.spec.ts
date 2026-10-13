@@ -32,9 +32,13 @@ test.describe('Build Target and the provenance badge', () => {
         // next slice that lands a step ahead of its screen, but it renders nothing today.
         await expect(page.getByRole('navigation', { name: 'Setup steps' }).getByText('not built')).toHaveCount(0);
 
-        // No scenario yet: the page names it and every cap is the base cap with no bonus.
-        await expect(page.getByTitle('No scenario has been chosen in this setup draft yet, so every cap below is the base cap with no scenario bonus.'))
-            .toHaveText('N/A');
+        // No scenario yet: the page names it and every cap is the base cap with no bonus. The
+        // absence is an AbsenceValue disclosure now (DESIGN.md §5.6) - the summary is the marker
+        // and carries the reason as its accessible name, so the old title-attribute probe is
+        // replaced by the disclosure located by its own reason.
+        const scenarioAbsence = page.locator('details').filter({ hasText: /so every cap below is the base cap/ });
+        await expect(scenarioAbsence).toBeVisible();
+        await expect(scenarioAbsence).toContainText('N/A');
         await expect(page.getByText('Cap 1200')).toHaveCount(5);
 
         // No stored target: the absence is stated and no stat input carries a pre-filled zero.

@@ -56,10 +56,12 @@ test.describe('Scenario Selection', () => {
         // Caps are sourced even where mechanics are not, so the card still states what it optimizes.
         await expect(card(page, 'Our Grand Concert').getByText('Speed (+400)')).toBeVisible();
 
-        // The ruleset version is a named absence on every card, with the reason on the element.
-        const ruleset = card(page, 'URA Finale').getByText('Ruleset version', { exact: true }).locator('..').getByText('N/A', { exact: true });
+        // The ruleset version is a named absence on every card, and its reason is one statement in
+        // two media (DESIGN.md §5.6): the summary announces it and the document carries it, so the
+        // two title-attribute probes are replaced by the disclosure they annotated.
+        const ruleset = card(page, 'URA Finale').locator('details').filter({ hasText: /No source defines a Global ruleset version/ });
         await expect(ruleset).toBeVisible();
-        await expect(page.locator('[title*="No source defines a Global ruleset version"]').first()).toBeVisible();
+        await expect(ruleset).toContainText('N/A');
 
         // And the two brief fields nobody can source say so instead of carrying invented prose.
         await expect(card(page, 'URA Finale').getByText('Recommended use').locator('..').getByText('N/A')).toBeVisible();
@@ -73,7 +75,9 @@ test.describe('Scenario Selection', () => {
 
         const unity = card(page, 'Unity Cup');
 
-        await expect(unity.getByText('Ruleset version', { exact: true }).locator('..').getByText('N/A', { exact: true })).toBeVisible();
+        const unityRuleset = unity.locator('details').filter({ hasText: /No source defines a Global ruleset version/ });
+        await expect(unityRuleset).toBeVisible();
+        await expect(unityRuleset).toContainText('N/A');
         await expect(unity.getByText('Rule family', { exact: true }).locator('..').getByText('Team', { exact: true })).toBeVisible();
 
         // Neither heading is bare `Ruleset` any more, on any card, and no heading repeats.
@@ -101,9 +105,11 @@ test.describe('Scenario Selection', () => {
 
         // Nothing is pre-pressed on a fresh draft, so the stored state is visible rather than implied.
         await expect(trackblazer).toHaveAttribute('aria-pressed', 'false');
-        // Addressed by its own title, because `N/A` appears once per absent field on every card and a
-        // text search for it is ambiguous by construction.
-        await expect(page.getByTitle('No scenario has been chosen in this setup draft yet.')).toHaveText('N/A');
+        // Addressed by its reason: `N/A` appears once per absent field on every card and a text
+        // search for it is ambiguous by construction, but the AbsenceValue disclosure is the one
+        // element whose accessible name is the reason (DESIGN.md §5.6). The stored-choice absence
+        // lives in the page header, not in any card.
+        await expect(page.locator('details').filter({ hasText: 'No scenario has been chosen in this setup draft yet.' })).toContainText('N/A');
 
         await trackblazer.focus();
         await expect(trackblazer).toBeFocused();
