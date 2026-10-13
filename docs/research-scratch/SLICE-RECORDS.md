@@ -5669,3 +5669,116 @@ this session's scratch directory:
 Nothing in this pass changed a migration, a route, a config value, a controller or a test.
 
 
+## Pass 7 (2026-10-14): the width contract, the one bare scroll region, and the Cockpit capture
+
+Continuation of the same session as pass 6. Instruments: `width-sites.mjs` (per-site off-ratified
+width list), `width-move.mjs` / `width-commit.mjs` (count-guarded substitution, then a HEAD-blob
+commit), `cockpit-capture.cjs` (Playwright against a session-private server), and the premise
+report `premises-2026-10-14-pass7.md`. Two more inline node -e scripts were mangled by the tooling
+hook before this pass learned to write every script to a file first; both failures were syntax
+errors, caught before either could feed a claim.
+
+### Phase 0 - premises
+
+- **0.1** `DesignTokensTest` is still uncommitted (last commit `b30906a`; worktree ` M`, 333
+  insertions over 55 deletions). **Slice 1.1 stays held** on that gate, not on the measurement.
+  HEAD's 331-line copy is dumped to `design-tokens-at-head-2026-10-14b.php` for the attempt that
+  finally runs against a committed rewrite.
+- **0.2** The build half of the browser hold **lifted**: `public/build/manifest.json` measures
+  2026-10-14 02:22:12 +0800 (32,352 bytes), post-dating `acff64d` (01:48) - a peer rebuilt after
+  the enamel landing, retiring pass 6's 00:36 reading. The staging half was still live through
+  this pass (peer paths in the shared index, including four staged deletions), so the sweep stays
+  held on that alone.
+- **0.3** The three source slices, resolved in the slices below.
+- **0.4** The pass-6 "zero overflow regions" claim was **an instrument-scope artifact**, exactly
+  what the dispatch suspected: the tree holds **eleven `overflow-x-auto` regions across nine
+  files**, ten already carrying the four-attribute contract. Reconciliation detail in the premise
+  file.
+
+### Slice 1.2 - the widths (`a1365fc`)
+
+`DESIGN.md:221` ratifies three page widths (5xl shell, 3xl form and long copy, lg narrow form);
+the census read 26 utilities off it across 16 files. **Fifteen moved to `max-w-3xl`**: the 14
+`max-w-2xl` prose halves, form cards and definition grids plus the one `max-w-prose`, per audit
+F-D6's own fix ("apply `max-w-3xl` to the prose halves; leave the table region as a scroll
+contract") and F-G12's ("normalise the two widths"). `SCREEN_SPEC.md:576` recorded `max-w-2xl` as
+the shipped import form card, so its one line moves with the view: per `AGENTS.md` §2 the visual
+contract outranks the screen doc on a width question, and the audit's own reading was that the
+spec line made the DESIGN list the stale side.
+
+**Eleven sites stay, ruled component idioms rather than page widths**: eight `max-w-sm` side
+blocks plus the `AbsenceValue` annotation (whose own comment pins the 384px arithmetic - changing
+the shared absence component's measure would move every screen that renders one), two `max-w-md`
+drawer panels (`RaceCard.vue:220` and `UraDuelPanel.vue:82`; the former is also in the peer's
+staged set), and one `max-w-full` control constraint on a `select`. The audit's two Snapshot
+`max-w-2xl` sites already read `max-w-3xl`, landed by a prior pass, so F-G12's snapshot half
+closes as already-landed.
+
+The commit was **composed from HEAD blobs, not `git add`**: a peer's ADR-0026 docblock correction
+arrived in `TraineeProfile.vue` mid-pass, and the diff first read 13/7 for a six-site change. The
+landed diff is 16 insertions / 16 deletions - 15 width tokens and one spec line - and the peer's
+docblock stays theirs in the worktree. No test pins any `max-w-*` value, so no spec moved.
+
+### Slice 1.3 - DeckAnalysis headings (verified, no code)
+
+The finding dissolves on read. Six headings: the `h3` at `:50` already carries the shell section
+step (`text-lg font-semibold text-ink-strong`); the five `h4`s carry `font-semibold
+text-ink-strong` and no size, which under Tailwind's preflight renders them at the **inherited
+body tier** - the size the surrounding content already sets, and the same shape the recorded
+type-scale ruling kept deliberately for the scenario-panel h4s ("so h3 to h4 keeps a step").
+Promoting them to `text-lg` erases the step; an explicit body size changes no rendered pixel.
+
+### Slice 1.4 - the fatigue table's scroll region (`806372f`)
+
+The audit's F-G11 named the star-roll table's bare scroll region and it was fixed;
+`TrackblazerFatiguePanel.vue:106` is the same defect shape on a surface the audit missed - the
+fallback table (`min-w-[26rem]` plus a column per chain) clipped in a bare `overflow-x-auto` div
+no keyboard could reach. It now carries the four-attribute contract (`role="region"`,
+`tabindex="0"`, `aria-label`), the wrapper `Result.vue:251` and `InheritanceEvent.vue:310` already
+use. `TurnLogScrollRegionTest.php` is a retired file with no live assertions; the convention's
+live pins (`legacy.spec.ts`, `database.spec.ts`) do not touch this panel and no spec pins the
+region's absence. Attribute-only change; SFC compile check passes.
+
+### Slice 1.5 - the Cockpit capture, produced
+
+`VACUUM INTO` a scratch copy of the dev database (`browser-cockpit.sqlite`, 102 ms; the dev file
+holds runs 12/13/14, all Active unity_cup), served on session port 8183, captured at 1280x900 to
+`pixel-cockpit-2026-10-14.png` (66,767 bytes), server reaped by PID. The served payload names
+`Career\/Cockpit` (HTTP 200, no error markers); the first payload check read `Career/Cockpit` as
+absent because the slashes are JSON-escaped, and the browser side mounted its `h1` before the
+shot. Disposition: **captured, not visually judged** - this environment still renders no image
+content, so the judgement is the owner's, same as the other six.
+
+### Phase 3 - Track 2, named only
+
+T2-A radius, T2-B elevation, T2-C display type, T2-D colour vocabulary, T2-E motion, T2-F
+hierarchy: all owner-gated on their `DESIGN.md` amendments, none started.
+
+### Phase 4 - the matrix
+
+KI-74 pre-flight: the trivial `training_runs` read returned single-digit milliseconds, twice
+(pass 6's 9 ms and this pass's read before the sweep). Gates, each from its own log:
+
+- `npm run typecheck` - **exit 0** twice (`p7-typecheck.log`, after `a1365fc`).
+- `php artisan test --compact` - **1817 passed, 0 failed (30,117 assertions, 456.39s, exit 0)**
+  (`p7-full-suite.log`), up three tests on pass 6's 1,814 with nothing to classify.
+- SFC compile checks - the fatigue panel and the eight width files all compile.
+- `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` - **No errors**, exit 0
+  (`p7-phpstan.log`), though no PHP path moved this pass.
+- `vendor/bin/pint --test` - not run: no PHP file changed.
+- `composer lore` - **443 hit(s), 75 exempt line(s)**, exit 0 (`p7-lore.log`). The count moved
+  320 to 443 and the delta is **attributed, not absorbed**: 114 of the 443 fall in
+  `docs/research-scratch-source/` (35 files), an untracked corpus of verbatim game-data dumps a
+  peer session is importing - the allowed source-data class, whose dataset keys must not be
+  renamed - and the remaining standing hits sit in the same research masters, tool sources and
+  quoted corpora as the ruled baseline. Nothing in a file this pass touched carries a hit; the
+  corpus's owner owes the formal ruling when they land it. `composer lore-code` - **141 hit(s)**,
+  exit 0, unchanged (`p7-lore-code.log`).
+- `python tools/md_fence_check.py` on this record - 0 invalid.
+- The browser sweep (Phase 2) - **held on the peer's staging alone** now that the bundle
+  post-dates `a1365fc`'s prerequisites; unblocks to a session-private port and scratch DB.
+
+No migration, route, network or `config/scenarios.php` change; no control height moved; nothing
+pushed (O-1).
+
+
