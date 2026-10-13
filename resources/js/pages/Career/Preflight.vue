@@ -203,7 +203,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         <section class="mt-6" aria-labelledby="build-heading">
             <h2 id="build-heading" class="text-base font-semibold text-ink-strong">Build</h2>
 
-            <dl class="mt-2 grid gap-2 sm:grid-cols-2">
+            <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
                 <div class="rounded-md border border-rule bg-panel p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</dt>
                     <dd class="mt-1 text-sm text-ink-strong">
@@ -315,7 +315,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
             </p>
 
             <template v-else>
-                <ol class="mt-2 grid gap-2 sm:grid-cols-2">
+                <ol class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
                     <li
                         v-for="slot in props.contract.deck.slots"
                         :key="slot.position"
@@ -357,7 +357,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         <section class="mt-6" aria-labelledby="target-heading">
             <h2 id="target-heading" class="text-base font-semibold text-ink-strong">Target</h2>
 
-            <dl class="mt-2 grid gap-2 sm:grid-cols-3">
+            <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-3">
                 <div v-for="stat in props.contract.target.stats" :key="stat.key" class="rounded-md border border-rule bg-panel p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ stat.label }}</dt>
                     <dd

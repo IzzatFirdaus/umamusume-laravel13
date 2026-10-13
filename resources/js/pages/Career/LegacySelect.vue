@@ -293,7 +293,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             {{ props.roster.length }}. The rest are on the Legacy Lab browse screen.
         </p>
 
-        <ol class="mt-4 space-y-2">
+        <ol class="mt-4 max-w-3xl space-y-2">
             <li class="rounded-md border-2 border-rule bg-panel p-3">
                 <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</p>
                 <p class="mt-1 text-sm font-semibold text-ink-strong">

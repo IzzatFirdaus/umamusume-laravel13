@@ -350,7 +350,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
             clearing the filters shows every row the catalog holds.
         </p>
 
-        <ul v-else class="mt-6 space-y-4">
+        <ul v-else class="mt-6 max-w-3xl space-y-4">
             <li
                 v-for="trainee in props.trainees.data"
                 :key="trainee.id"

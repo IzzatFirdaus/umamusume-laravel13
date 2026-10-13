@@ -138,7 +138,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
             and no career can be started until one is added.
         </p>
 
-        <ul v-else class="mt-6 grid list-none grid-cols-1 gap-4 xl:grid-cols-2">
+        <ul v-else class="mt-6 grid list-none max-w-3xl grid-cols-1 gap-4 xl:grid-cols-2">
             <li
                 v-for="card in props.scenarios"
                 :key="card.key"

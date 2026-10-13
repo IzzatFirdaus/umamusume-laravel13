@@ -243,7 +243,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             {{ form.errors.deck }}
         </p>
 
-        <div class="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div class="mt-5 grid max-w-5xl grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <section aria-labelledby="draft-slots-heading">
                 <h2 id="draft-slots-heading" class="text-lg font-semibold text-ink-strong">The six slots</h2>
 
