@@ -265,8 +265,14 @@ class StoreLegacySelectionRequest extends FormRequest
 
             // The grandparents' Sparks, aligned one list per ancestor. A blank trailing row is
             // discarded here exactly as a parent's is, so an empty list is the same absence.
+            //
+            // Paired by key, not by iteration order: `validated()` assembles nested wildcard arrays
+            // leaf by leaf, and when one inner list is empty (a grandparent with no Sparks read) the
+            // empty list can come back first in iteration order while its key still points at the
+            // right ancestor. `array_values` here would re-index that order and store grandparent A2's
+            // absence against grandparent A1's Sparks.
             /** @var list<mixed> $postedAncestorSparks */
-            $postedAncestorSparks = array_values((array) ($legacy['ancestors_sparks'] ?? []));
+            $postedAncestorSparks = (array) ($legacy['ancestors_sparks'] ?? []);
 
             $ancestorSparks = [];
 
@@ -287,13 +293,14 @@ class StoreLegacySelectionRequest extends FormRequest
                 $ancestorSparks[] = $list;
             }
 
-            // The grandparents' own ranks, aligned one value per ancestor the same way their Sparks are.
-            // A blank slot is the absence the payload already holds, and an all-blank list is dropped by
-            // `LegacySelectionPayload` so a names-only record keeps its old shape (R3-09).
+            // The grandparents' own ranks, aligned one value per ancestor the same way their Sparks are:
+            // by key, for the same reason. A blank slot is the absence the payload already holds, and an
+            // all-blank list is dropped by `LegacySelectionPayload` so a names-only record keeps its old
+            // shape (R3-09).
             /** @var list<mixed> $postedAncestorLetters */
-            $postedAncestorLetters = array_values((array) ($legacy['ancestors_rank_letters'] ?? []));
+            $postedAncestorLetters = (array) ($legacy['ancestors_rank_letters'] ?? []);
             /** @var list<mixed> $postedAncestorRanks */
-            $postedAncestorRanks = array_values((array) ($legacy['ancestors_rank'] ?? []));
+            $postedAncestorRanks = (array) ($legacy['ancestors_rank'] ?? []);
 
             $ancestorLetters = [];
             $ancestorRanks = [];

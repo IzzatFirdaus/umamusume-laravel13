@@ -10,6 +10,7 @@ use App\Http\Requests\LegacyCompareRequest;
 use App\Http\Requests\LegacySearchRequest;
 use App\Http\Requests\StoreLegacySelectionRequest;
 use App\Models\Legacy\LegacySelectionPayload;
+use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\Veteran;
@@ -165,6 +166,15 @@ class LegacyController extends Controller
             'knownNames' => Umamusume::query()->orderBy('name')->pluck('name')->all(),
             'sparkKinds' => AncestryGraph::SPARK_KIND_LABELS,
             'affinityGrades' => LegacySelectionPayload::AFFINITY_GRADES,
+            'rankLetters' => LegacySelectionPayload::RANK_LETTERS,
+            // The target options per category, the same assembly the wizard's ancestry step sends
+            // (`LegacySelectController::show()`), because both screens post against the one request and
+            // the category boundary check needs the same option lists to filter from.
+            'sparkTargets' => [
+                'Stat' => array_values((array) config('scenarios.stat_order')),
+                'Aptitude' => LegacySelectionPayload::SPARK_APTITUDES,
+                'Skill' => Skill::query()->orderBy('name')->pluck('name')->all(),
+            ],
             'notice' => self::RECORD_ONLY_NOTICE,
         ]);
     }

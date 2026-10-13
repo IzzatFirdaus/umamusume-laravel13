@@ -327,6 +327,71 @@ it('records a half-read selection rather than refusing it', function (): void {
     ])->and($run->fresh()->inheritance_parent_a_id)->toBeNull();
 });
 
+it('keeps the letter ranks and grandparent details a builder-shaped save carries', function (): void {
+    // The builder posts every key the request validates, so a routine confirm can no longer drop a
+    // recorded rank letter, a grandparent's rank or a grandparent's Sparks on the way through
+    // `payload()`. Explicit nulls for the blanks must store exactly what an omitted key stores: the
+    // reader drops an absent figure, it does not widen the record with one.
+    $run = activeRun();
+    $parentA = legacyVeteran('Special Week');
+    $parentB = legacyVeteran('Tokai Teio');
+
+    test()->put("/legacy/{$run->id}", [
+        'affinity' => null,
+        'legacies' => [
+            [
+                'legacy_id' => $parentA->id,
+                'rank' => 3,
+                'rank_letter' => 'B+',
+                'is_guest' => false,
+                'ancestors' => ['Grass Wonder', 'El Condor Pasa'],
+                'ancestors_rank_letters' => ['A', null],
+                'ancestors_rank' => [2, null],
+                'ancestors_sparks' => [
+                    [['kind' => 'blue', 'category' => 'Stat', 'target' => 'Speed', 'stars' => 1]],
+                    [],
+                ],
+                'sparks' => [
+                    ['kind' => 'blue', 'category' => 'Stat', 'target' => 'Speed', 'stars' => 2],
+                ],
+            ],
+            [
+                'legacy_id' => $parentB->id,
+                'rank' => null,
+                'rank_letter' => null,
+                'is_guest' => true,
+                'ancestors' => [null, null],
+                'ancestors_rank_letters' => [null, null],
+                'ancestors_rank' => [null, null],
+                'ancestors_sparks' => [[], []],
+                'sparks' => [],
+            ],
+        ],
+    ])->assertSessionHasNoErrors();
+
+    expect($run->fresh()->legacySelection()?->legacies)->toBe([
+        [
+            'rank' => 3,
+            'is_guest' => false,
+            'ancestors' => ['Grass Wonder', 'El Condor Pasa'],
+            'sparks' => [['kind' => 'blue', 'target' => 'Speed', 'stars' => 2]],
+            'rank_letter' => 'B+',
+            'ancestors_sparks' => [
+                [['kind' => 'blue', 'target' => 'Speed', 'stars' => 1]],
+                [],
+            ],
+            'ancestors_rank_letters' => ['A', null],
+            'ancestors_rank' => [2, null],
+        ],
+        [
+            'rank' => null,
+            'is_guest' => true,
+            'ancestors' => [null, null],
+            'sparks' => [],
+        ],
+    ]);
+});
+
 it('refuses a selection the client would refuse', function (): void {
     // Both rules are `REFERENCE` §1.5.4, enforced at the boundary rather than stored as a
     // configuration the game rejects: a run may not name its own trainee as a parent, and the two
