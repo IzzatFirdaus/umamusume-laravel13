@@ -13,8 +13,9 @@
 > test. **Measured 2026-10-14:** a peer session rebuilt `public/build` twice (22:54, then 00:10 with
 > the goals ladder in it) and committed both builds, so the bundle post-dates every landed slice; the
 > five surface specs and the ladder's rendered read ran against it and the marks below carry their
-> numbers. The one red anywhere is the peer session's own uncommitted `config/scenarios.php` (the
-> browser-visible form of the two attributed Pest failures).
+> numbers. The sweep's one red (the scenario card's Systems absence, whose flag landed at
+> `8668d9d`) had its pins moved forward at `0bc9fa2`; the five surface specs then read **43 passed /
+> 0 failed**.
 >
 > **Provenance check (continuation pass, 2026-10-13 late).** The peer's later landings `35a1c68`
 > (catalog rows and pagers onto Inertia `Link`, with a shared `Pagination.vue`) and `28a2718` (the
@@ -51,7 +52,8 @@
   both click-through verified (0 of 7 anchors obscured; the 9.1 keyboard pass). Reduced motion is
   inherited from the platform; the tree carries one `animate-pulse` (F-G10). The 2026-10-14 sweep put
   numbers on every mark this report had left open: the five surface specs read **36 passed / 1
-  failed**, the failure the peer session's uncommitted `config/scenarios.php` (classified at the P2
+  failed** at the sweep's first pass, the failure the career-goals flag `8668d9d` landed with its
+  pins unmoved (moved forward at `0bc9fa2`; classified at the P2
   row below); the one risk that remains open is that config landing itself, not a measurement.
 
 # Route-by-route findings
@@ -186,18 +188,24 @@
      `TraineeGoalsPanelTest` (+225) pins the composer. The rendered read (2026-10-14, a URA run on
      the 00:10 bundle): the Trainee goals group renders with **one** footer line in the client's own
      shape ("Goals Achieved {cleared} of {total}"), **zero** percentage forms, **zero** bar/progress
-     elements, **at most one** Due-now mark (zero on a fresh run — no goal is due at turn 1, the
-     honest state), 21 goal rows, axe A+AA clean. Alternates-counted-once is carried by the
-     composer's own tests, not re-asserted in a browser.
-  2. **The one open red — the peer's uncommitted config.** `career-scenario-select.spec.ts` reads
-     6 passed / 1 failed: the failure is the peer session's uncommitted `config/scenarios.php`
-     giving Our Grand Concert a system, so `No scenario system` no longer renders — the same two
-     `CareerScenarioSelectTest` failures in their browser-visible form. Theirs to land with the
-     config; this report does not edit either side. The original "bundle-lagged renders" item is
-     closed by the same sweep: the peer's rebuilds (22:54, 00:10) put every landed slice's render
-     behind a committed bundle, and the specs ran against it — **36 passed / 1 failed** across the
-     five surface specs, with two transient webServer start-up timeouts retried green (infrastructure,
-     not product).
+     elements, **zero** Due-now marks on a fresh run — the honest state, because a run that has
+     recorded no turn has no `nextTurnToPlay()` to be current against (`TrainingRun.php:640-644`),
+     so every unmet goal is `upcoming` and the Due-now state only attaches once a turn is recorded
+     (`CockpitController.php:1948-1950`); the panel-wide count read 21 rows (all three groups plus
+     the milestone list items, not the goals group alone), axe A+AA clean. Alternates-counted-once
+     is carried by the composer's own tests, not re-asserted in a browser.
+  2. **The config reconciliation — LANDED, then its pins moved.** The career-goals flag is committed
+     at `8668d9d`, not uncommitted as an earlier revision of this note said (the working tree's `MM`
+     was a staged revert and re-add netting zero). The sweep's one browser failure (`No scenario
+     system` no longer rendering for Our Grand Concert) and the two `CareerScenarioSelectTest`
+     systems-array pins were that landing's missed companions; they moved forward at `0bc9fa2`
+     (the two arrays, the capability map in `LessonEvidenceBoundaryTest`, the README's source count
+     now reading Nine for the `gametora-ura-objectives` source), and the scenario spec reads **7
+     passed**. The original "bundle-lagged renders" item is closed by the same sweep: the peer's
+     rebuilds (22:54, 00:10) put every landed slice's render behind a committed bundle, and the
+     specs ran against it — with the last count **43 passed / 0 failed** across the five surface
+     specs after the reconciliation, with two transient webServer start-up timeouts retried green
+     (infrastructure, not product).
 - **P3.**
   1. **Continuity's column-order tension (cockpit, tablet).** The brief's CSS-only order is a ruling;
      if it ever changes, re-test the DOM sequence against the new columns. No change now.
