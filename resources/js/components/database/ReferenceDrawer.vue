@@ -37,7 +37,7 @@ onMounted(async () => {
         @keydown.esc="emit('close')"
     >
         <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-            <h3 id="reference-drawer-title" class="text-base font-semibold text-ink-strong">
+            <h3 id="reference-drawer-title" class="text-lg font-semibold text-ink-strong">
                 {{ title }}
             </h3>
 

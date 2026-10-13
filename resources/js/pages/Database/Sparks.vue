@@ -98,7 +98,7 @@ const close = async (): Promise<void> => {
             aria-labelledby="sparks-empty"
             class="mt-4 rounded-md border border-dashed border-rule bg-raised p-6"
         >
-            <h3 id="sparks-empty" class="text-base font-semibold text-ink-strong">
+            <h3 id="sparks-empty" class="text-lg font-semibold text-ink-strong">
                 No Spark categories are sourced
             </h3>
             <p class="mt-2 text-sm text-ink-muted">

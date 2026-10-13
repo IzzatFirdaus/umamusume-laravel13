@@ -66,7 +66,7 @@ const gates = (slot: Slot): string[] =>
             aria-labelledby="races-offline"
             class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6"
         >
-            <h3 id="races-offline" class="text-base font-semibold text-ink-strong">
+            <h3 id="races-offline" class="text-lg font-semibold text-ink-strong">
                 The race database is offline
             </h3>
 

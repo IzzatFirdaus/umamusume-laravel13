@@ -90,7 +90,7 @@ const close = async (): Promise<void> => {
             aria-labelledby="shop-empty"
             class="mt-4 rounded-md border border-dashed border-rule bg-raised p-6"
         >
-            <h3 id="shop-empty" class="text-base font-semibold text-ink-strong">
+            <h3 id="shop-empty" class="text-lg font-semibold text-ink-strong">
                 Item catalogue not loaded in this build
             </h3>
             <p class="mt-2 text-sm text-ink-muted">
