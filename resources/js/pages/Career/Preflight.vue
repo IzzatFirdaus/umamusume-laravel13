@@ -364,7 +364,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         <section class="mt-6" aria-labelledby="target-heading">
             <h2 id="target-heading" class="text-base font-semibold text-ink-strong">Target</h2>
 
-            <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-3">
+            <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
                 <div v-for="stat in props.contract.target.stats" :key="stat.key" class="rounded-md border border-rule bg-panel p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ stat.label }}</dt>
                     <dd
@@ -406,11 +406,28 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         </section>
 
         <div class="mt-6 flex flex-wrap items-center gap-3">
+            <!-- One door per earlier step, in step order, and no two doors to the same place: the
+                 old row's "Back" and "Edit Deck" both bound the deck route, so the duplicated link
+                 is dropped in favour of the name that says what the door does (audit 2026-10-12
+                 §3.8). Every step writes its own draft, so each door opens on the stored values
+                 and the round trip is lossless by construction. -->
             <Link
-                :href="props.edit.deck"
+                :href="props.edit.scenario"
                 class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
             >
-                Back
+                Edit Scenario
+            </Link>
+            <Link
+                :href="props.edit.trainee"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
+            >
+                Edit Trainee
+            </Link>
+            <Link
+                :href="props.edit.target"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
+            >
+                Edit Target
             </Link>
             <Link
                 :href="props.edit.legacy"
@@ -423,12 +440,6 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                 class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
             >
                 Edit Deck
-            </Link>
-            <Link
-                :href="props.edit.target"
-                class="inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-medium text-ink hover:bg-raised"
-            >
-                Edit Target
             </Link>
 
             <button

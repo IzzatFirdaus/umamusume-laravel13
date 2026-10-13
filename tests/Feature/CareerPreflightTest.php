@@ -90,6 +90,23 @@ function preflightFixture(string $distanceAptitude = 'A'): array
     ];
 }
 
+it('offers one edit door per earlier step, and no two doors share a destination', function (): void {
+    // The old row carried a "Back" and an "Edit Deck" that both bound the deck route - two of four
+    // links to one place - and no door at all for the two choices a Trainer most often wants to
+    // change (wizard audit 2026-10-12 §2.3, §3.8). The five routes are distinct by construction;
+    // the final assertion reads the prop the five links bind, so a regression that repoints two
+    // doors to one route fails here rather than on a rendered page.
+    $this->get('/career/setup/preflight')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('edit.scenario', route('career.scenario'))
+            ->where('edit.trainee', route('career.trainee'))
+            ->where('edit.target', route('career.target'))
+            ->where('edit.legacy', route('career.legacy'))
+            ->where('edit.deck', route('career.deck'))
+            ->where('edit', fn ($edit): bool => $edit->unique()->count() === $edit->count()));
+});
+
 it('composes every entered step into one contract', function (): void {
     $fixture = preflightFixture();
     session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'])]);
