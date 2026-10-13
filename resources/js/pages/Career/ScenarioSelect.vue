@@ -171,8 +171,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
                 <p v-if="card.metadata?.summary" class="mt-2 text-sm text-ink-muted">{{ card.metadata.summary }}</p>
                 <AbsenceValue
                     v-else
-                    compact
-                    reason="No source in this repository describes this scenario's summary, rule family or planning focus."
+                    reason="No sourced summary line exists for this scenario in this repository."
                 />
 
                 <details class="mt-3 rounded-md border border-rule bg-raised p-3">

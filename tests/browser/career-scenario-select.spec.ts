@@ -37,8 +37,11 @@ async function openFacts(page: import('@playwright/test').Page, label: string) {
 
     await expect(facts, `${label} renders exactly one facts disclosure`).toHaveCount(1);
 
+    // The summary is addressed by its own words, not by `locator('summary')`: the open disclosure
+    // holds every nested summary on the card (the absences, the key mechanics), and a descendant
+    // query resolves to all of them at once.
     if (!(await facts.evaluate((el) => (el as HTMLDetailsElement).open))) {
-        await facts.locator('summary').click();
+        await facts.locator('summary').filter({ hasText: 'Facts and mechanics' }).click();
     }
 
     return facts;

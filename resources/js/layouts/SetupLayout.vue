@@ -37,7 +37,7 @@ const steps = [
 const stepLink =
     'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 const stepCurrent = 'bg-raised text-ink-strong font-bold';
-const stepDone = 'text-ink-strong';
+const stepVisited = 'text-ink-strong';
 // A visited step is one whose screen this session has opened (owner ruling 2026-10-13: visited,
 // not written to the draft). The word is the state's carrier, the same one-statement rule the
 // absent step's "not built" suffix follows - and no check glyph, because the check mark is one of
@@ -76,7 +76,7 @@ const leaveLink =
                     <Link
                         v-if="item.to"
                         :href="item.to"
-                        :class="[stepLink, index + 1 === props.step ? stepCurrent : isVisited(index) ? stepDone : '']"
+                        :class="[stepLink, index + 1 === props.step ? stepCurrent : isVisited(index) ? stepVisited : '']"
                         :aria-current="index + 1 === props.step ? 'step' : undefined"
                     >
                         <span class="mr-2 font-mono text-xs" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}

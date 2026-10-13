@@ -19,7 +19,9 @@
   the app's own spine (`design-2.0.md` §2: State → Options → Recommendation → Explanation → Decision)
   structurally, not decoratively: `NextDecision.vue`'s five-element order is its declared contract and
   every branch prints one element. The wizard's one real law failure of the day — the stepper marking
-  visited-not-saved steps "done" — was fixed at `4a5ff88` under owner ruling C-1 ("keep visited"), and
+  visited-not-saved steps "done" — was fixed at `4a5ff88` under owner ruling C-1 ("keep visited", answered
+  by the owner 2026-10-13 late, through this pass's blocking questions; the plan's §10.3 row and
+  `4a5ff88`'s own body, written before the answer, call it open), and
   the scenario screen now opens on an option-card grammar rather than forty facts (`84f9353`).
 - **Strongest patterns.** 44px floors hold everywhere they were measured (7/7 anchor targets at 768 and
   1280; the per-screen sweeps); every absence is a named absence (`AbsenceValue`) rather than a blank
@@ -78,8 +80,8 @@
 | Law or principle | Status | Evidence | User impact | Recommendation | Severity | Issue type | Existing ID |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 4 Hick's Law | PASS | `84f9353`: the eight-row fact grid and the metadata block sit behind one "Facts and mechanics" disclosure per card; the card opens on name, badge, subtitle, status, action | the choice is readable before the facts are | none | — | interaction | wizard audit §3.2 |
-| 21 Occam's Razor | PASS | one Select per card (`:256-266`); the page-level ruleset fact stayed per-card but named (R2-05's two-`Ruleset` fix preserved, `:70-86` re-aimed) | no duplicate doors | none | — | — | wizard audit §2.2 |
-| 3 Fitts / 19 Zeigarnik / 23 Doherty / 15 Von Restorff | PASS | 44px sweeps (`:136-150`); `aria-pressed` carries the stored state; `role="status"` "Saving your choice…"; one enamel per card | — | none | — | — | — |
+| 21 Occam's Razor | PASS | one Select per card (`:271-281`); the page-level ruleset fact stayed per-card but named (R2-05's two-`Ruleset` fix preserved, `:100-116` re-aimed) | no duplicate doors | none | — | — | wizard audit §2.2 |
+| 3 Fitts / 19 Zeigarnik / 23 Doherty / 15 Von Restorff | PASS | 44px sweeps (`career-scenario-select.spec.ts:168-182`); `aria-pressed` carries the stored state; `role="status"` "Saving your choice…"; one enamel per card | — | none | — | — | — |
 | 12 Closure | PASS | the subtitle's absence is named (`AbsenceValue`, `84f9353`), never left to guesswork | — | none | — | — | X-1 |
 | G-33 (gate, not a law) | PASS | no scenario key or name literal in the component (`ScenarioSelect.vue:5-8` docblock; the gate) | a fifth scenario needs no edit here | none | — | — | — |
 
