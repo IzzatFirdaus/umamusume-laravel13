@@ -7,7 +7,7 @@
 | Audit name           | Rice Shower Unity Cup mid-career UX walk                                                                            |
 | Source document      | `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` (67 `[Global]` client frames, 2026-10-03; a mid-career snapshot)        |
 | Starting URL         | `http://127.0.0.1:8000/`                                                                                            |
-| Date/time of walk    | 2026-10-09, single continuous session                                                                               |
+| Date/time of walk    | 2026-10-10, single continuous session                                                                               |
 | Environment          | Laravel 13.32.0, PHP 8.5.8, SQLite (`database/database.sqlite`), `php artisan serve` on `127.0.0.1:8000`, Chromium 150 via the browser-use tool |
 | Run created          | `training_runs` id **8** (`/training-runs/8`), status Active, scenario Unity Cup                                      |
 | Screens visited      | 18 (listed in visit order below)                                                                                    |
