@@ -1074,6 +1074,10 @@ class TrainingRunController extends Controller
                 'csv' => (string) $validated['csv'],
                 'turns' => $validated['turns'],
                 'run' => $request->only(['umamusume_id', 'scenario', 'status', 'notes']),
+                // Shown before the write so the Trainer sees the provenance string the run will carry.
+                // It sits beside `run` rather than inside it: `run` is the body the confirm step posts
+                // back, and a display-only label is not one of its columns.
+                'source' => $request->sourceLabel((string) $validated['csv']),
             ],
         ]);
     }

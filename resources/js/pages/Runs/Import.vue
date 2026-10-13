@@ -27,6 +27,7 @@ interface Preview {
     csv: string;
     turns: PreviewRow[];
     run: Record<string, unknown>;
+    source: string;
 }
 
 const props = defineProps<{
@@ -182,6 +183,7 @@ function confirmImport(): void {
                 <span class="font-semibold text-ink" :title="traineeRef.title">{{ traineeRef.name }}</span>
                 · {{ scenarioName }}
                 · {{ preview.run.status }}
+                · from {{ preview.source }}
                 · {{ preview.turns.length }} turn{{ preview.turns.length === 1 ? '' : 's' }}
             </p>
 
