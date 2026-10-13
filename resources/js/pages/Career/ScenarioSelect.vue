@@ -162,95 +162,109 @@ const optimizesText = (card: ScenarioCard): string | null => {
                     </span>
                 </h2>
 
-                <dl class="mt-3 space-y-2 text-sm">
-                    <div class="flex flex-wrap justify-between gap-x-4">
-                        <dt class="text-ink-muted">Optimizes</dt>
-                        <dd v-if="optimizesText(card)" class="text-ink">{{ optimizesText(card) }}</dd>
-                        <dd v-else class="text-ink-muted"><AbsenceValue compact reason="This scenario publishes no stat cap bonus." /></dd>
-                    </div>
-                    <div class="flex flex-wrap justify-between gap-x-4">
-                        <dt class="text-ink-muted">Systems</dt>
-                        <dd v-if="card.systems.length > 0" class="text-ink">{{ card.systems.join(', ') }}</dd>
-                        <dd v-else class="text-ink-muted" title="Every panel in the matrix is off for this scenario.">
-                            No scenario system
-                        </dd>
-                    </div>
-                    <div class="flex flex-wrap justify-between gap-x-4">
-                        <dt class="text-ink-muted">Tracked resources</dt>
-                        <dd v-if="card.resources.length > 0" class="text-ink">{{ card.resources.join(', ') }}</dd>
-                        <dd v-else class="text-ink-muted" title="It composes only the widgets every scenario carries.">
-                            None beyond the generic strip
-                        </dd>
-                    </div>
-                    <div class="flex flex-wrap justify-between gap-x-4">
-                        <dt class="text-ink-muted">Turn loop</dt>
-                        <dd v-if="card.loop.length > 0" class="text-ink">{{ card.loop.join(' → ') }}</dd>
-                        <dd v-else class="text-ink-muted"><AbsenceValue compact reason="No turn loop steps are recorded for this scenario." /></dd>
-                    </div>
-                    <div class="flex flex-wrap justify-between gap-x-4">
-                        <dt class="text-ink-muted">Live on Global</dt>
-                        <dd v-if="card.live_on_global" class="font-mono text-ink">{{ card.live_on_global }}</dd>
-                        <dd v-else class="text-ink-muted"><AbsenceValue compact reason="No Global availability date is recorded for this scenario." /></dd>
-                    </div>
-                    <div class="flex flex-wrap justify-between gap-x-4">
-                        <dt class="text-ink-muted">Ruleset version</dt>
-                        <dd v-if="props.ruleset.value === null" class="font-mono text-ink">
-                            <AbsenceValue compact :reason="props.ruleset.title" />
-                        </dd>
-                        <dd v-else class="font-mono text-ink" :title="props.ruleset.title">
-                            {{ props.ruleset.value }}
-                        </dd>
-                    </div>
-                    <!-- The brief asks for a short description and a recommended use. Neither the
-                         corpus nor `config/scenarios.php` holds either, so they are named absences:
-                         a sentence written here would be an invented fact (AGENTS.md §5). -->
-                    <div class="flex flex-wrap justify-between gap-x-4">
-                        <dt class="text-ink-muted">Description</dt>
-                        <dd v-if="card.description === null" class="text-ink-muted">
-                            <AbsenceValue compact reason="No sourced one-line description exists for any scenario in this repository." />
-                        </dd>
-                        <dd v-else class="text-ink-muted">{{ card.description }}</dd>
-                    </div>
-                    <div class="flex flex-wrap justify-between gap-x-4">
-                        <dt class="text-ink-muted">Recommended use</dt>
-                        <dd v-if="card.recommended_use === null" class="text-ink-muted">
-                            <AbsenceValue compact reason="Recommending a use would be a judgement this tool holds no source for." />
-                        </dd>
-                        <dd v-else class="text-ink-muted">{{ card.recommended_use }}</dd>
-                    </div>
-                </dl>
-
-                <!-- The scenario's recorded metadata, straight from the matrix. A scenario the matrix
-                     does not describe prints the named absence rather than a sentence invented here. -->
-                <div v-if="card.metadata !== null" class="mt-3 rounded-md border border-rule bg-raised p-3 text-sm">
-                    <p v-if="card.metadata.summary" class="text-ink">{{ card.metadata.summary }}</p>
-                    <dl class="mt-2 space-y-1">
-                        <!-- Not "Ruleset": the fact grid above carries the global ruleset *version*,
-                             which no source names, and this row carries the scenario's own rule family
-                             from the matrix. One label for two facts reads as a card contradicting
-                             itself, which is exactly what the second audit reported (R2-05). -->
-                        <div class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Rule family</dt>
-                            <dd class="text-ink">{{ card.metadata.ruleset ?? 'Not recorded' }}</dd>
-                        </div>
-                        <div class="flex flex-wrap justify-between gap-x-4">
-                            <dt class="text-ink-muted">Planning focus</dt>
-                            <dd class="text-ink">{{ card.metadata.planning_focus ?? 'Not recorded' }}</dd>
-                        </div>
-                    </dl>
-                    <details v-if="card.metadata.key_mechanics.length > 0" class="mt-2">
-                        <summary class="flex min-h-11 cursor-pointer items-center text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                            Key mechanics ({{ card.metadata.key_mechanics.length }})
-                        </summary>
-                        <ul class="mt-1 list-disc pl-5 text-sm text-ink">
-                            <li v-for="(line, index) in card.metadata.key_mechanics" :key="index">{{ line }}</li>
-                        </ul>
-                    </details>
-                </div>
+                <!-- The option-card grammar (Hick's Law, ux-laws §3.2 row 4): the choice reads from a
+                     name, a status word and one subtitle, and the eight-row fact grid with the matrix's
+                     own metadata sits behind the card's one disclosure - the same pattern the key
+                     mechanics collapse already uses. The subtitle is the matrix's summary where the
+                     matrix has one, and the named absence where it does not; writing a sentence here
+                     would be an invented fact (AGENTS.md §5). -->
+                <p v-if="card.metadata?.summary" class="mt-2 text-sm text-ink-muted">{{ card.metadata.summary }}</p>
                 <AbsenceValue
                     v-else
-                    reason="No source in this repository describes this scenario's rule family, summary or planning focus."
+                    compact
+                    reason="No source in this repository describes this scenario's summary, rule family or planning focus."
                 />
+
+                <details class="mt-3 rounded-md border border-rule bg-raised p-3">
+                    <summary class="flex min-h-11 cursor-pointer items-center text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                        Facts and mechanics
+                    </summary>
+
+                    <dl class="mt-3 space-y-2 text-sm">
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Optimizes</dt>
+                            <dd v-if="optimizesText(card)" class="text-ink">{{ optimizesText(card) }}</dd>
+                            <dd v-else class="text-ink-muted"><AbsenceValue compact reason="This scenario publishes no stat cap bonus." /></dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Systems</dt>
+                            <dd v-if="card.systems.length > 0" class="text-ink">{{ card.systems.join(', ') }}</dd>
+                            <dd v-else class="text-ink-muted" title="Every panel in the matrix is off for this scenario.">
+                                No scenario system
+                            </dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Tracked resources</dt>
+                            <dd v-if="card.resources.length > 0" class="text-ink">{{ card.resources.join(', ') }}</dd>
+                            <dd v-else class="text-ink-muted" title="It composes only the widgets every scenario carries.">
+                                None beyond the generic strip
+                            </dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Turn loop</dt>
+                            <dd v-if="card.loop.length > 0" class="text-ink">{{ card.loop.join(' → ') }}</dd>
+                            <dd v-else class="text-ink-muted"><AbsenceValue compact reason="No turn loop steps are recorded for this scenario." /></dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Live on Global</dt>
+                            <dd v-if="card.live_on_global" class="font-mono text-ink">{{ card.live_on_global }}</dd>
+                            <dd v-else class="text-ink-muted"><AbsenceValue compact reason="No Global availability date is recorded for this scenario." /></dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Ruleset version</dt>
+                            <dd v-if="props.ruleset.value === null" class="font-mono text-ink">
+                                <AbsenceValue compact :reason="props.ruleset.title" />
+                            </dd>
+                            <dd v-else class="font-mono text-ink" :title="props.ruleset.title">
+                                {{ props.ruleset.value }}
+                            </dd>
+                        </div>
+                        <!-- The brief asks for a short description and a recommended use. Neither the
+                             corpus nor `config/scenarios.php` holds either, so they are named absences:
+                             a sentence written here would be an invented fact (AGENTS.md §5). -->
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Description</dt>
+                            <dd v-if="card.description === null" class="text-ink-muted">
+                                <AbsenceValue compact reason="No sourced one-line description exists for any scenario in this repository." />
+                            </dd>
+                            <dd v-else class="text-ink-muted">{{ card.description }}</dd>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-x-4">
+                            <dt class="text-ink-muted">Recommended use</dt>
+                            <dd v-if="card.recommended_use === null" class="text-ink-muted">
+                                <AbsenceValue compact reason="Recommending a use would be a judgement this tool holds no source for." />
+                            </dd>
+                            <dd v-else class="text-ink-muted">{{ card.recommended_use }}</dd>
+                        </div>
+                    </dl>
+
+                    <!-- The scenario's recorded metadata, straight from the matrix. A scenario the matrix
+                         does not describe prints the named absence rather than a sentence invented here. -->
+                    <div v-if="card.metadata !== null" class="mt-3 rounded-md border border-rule bg-panel p-3 text-sm">
+                        <dl class="space-y-1">
+                            <!-- Not "Ruleset": the fact grid above carries the global ruleset *version*,
+                                 which no source names, and this row carries the scenario's own rule family
+                                 from the matrix. One label for two facts reads as a card contradicting
+                                 itself, which is exactly what the second audit reported (R2-05). -->
+                            <div class="flex flex-wrap justify-between gap-x-4">
+                                <dt class="text-ink-muted">Rule family</dt>
+                                <dd class="text-ink">{{ card.metadata.ruleset ?? 'Not recorded' }}</dd>
+                            </div>
+                            <div class="flex flex-wrap justify-between gap-x-4">
+                                <dt class="text-ink-muted">Planning focus</dt>
+                                <dd class="text-ink">{{ card.metadata.planning_focus ?? 'Not recorded' }}</dd>
+                            </div>
+                        </dl>
+                        <details v-if="card.metadata.key_mechanics.length > 0" class="mt-2">
+                            <summary class="flex min-h-11 cursor-pointer items-center text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                                Key mechanics ({{ card.metadata.key_mechanics.length }})
+                            </summary>
+                            <ul class="mt-1 list-disc pl-5 text-sm text-ink">
+                                <li v-for="(line, index) in card.metadata.key_mechanics" :key="index">{{ line }}</li>
+                            </ul>
+                        </details>
+                    </div>
+                </details>
 
                 <p class="mt-4 flex flex-wrap items-center gap-3">
                     <button

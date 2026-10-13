@@ -23,6 +23,27 @@ function card(page: import('@playwright/test').Page, label: string) {
     return page.getByRole('listitem').filter({ has: page.getByRole('heading', { name: label, exact: true }) });
 }
 
+/**
+ * Opens the card's one facts disclosure and returns it.
+ *
+ * The option-card grammar (Hick's Law, ux-laws §3.2 row 4) keeps the eight-row fact grid and the
+ * matrix's metadata behind a card-level collapse, so every assertion that reads a fact opens it first.
+ * The filter survives the two nested `<details>` inside it (the ruleset absence and the key-mechanics
+ * collapse) because neither contains the summary's own words, and the count guard is what turns a
+ * structural mistake into a loud failure instead of a strict-mode collision.
+ */
+async function openFacts(page: import('@playwright/test').Page, label: string) {
+    const facts = card(page, label).locator('details').filter({ hasText: 'Facts and mechanics' });
+
+    await expect(facts, `${label} renders exactly one facts disclosure`).toHaveCount(1);
+
+    if (!(await facts.evaluate((el) => (el as HTMLDetailsElement).open))) {
+        await facts.locator('summary').click();
+    }
+
+    return facts;
+}
+
 test.describe('Scenario Selection', () => {
     test('renders one card per scenario the matrix composes', async ({ page }) => {
         await page.goto('/career/setup/scenario');
@@ -48,8 +69,17 @@ test.describe('Scenario Selection', () => {
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
 
+        // The option-card grammar: every card carries its facts collapsed, so the choice reads as a
+        // name, a subtitle and one action before anything expands.
+        for (const label of CARDS) {
+            await expect(card(page, label).locator('details').filter({ hasText: 'Facts and mechanics' })).not.toHaveAttribute('open');
+        }
+
         // Every panel is off and its widgets are the baseline three, so the derivation produces these
         // two statements with no branch naming the scenario.
+        await openFacts(page, 'Our Grand Concert');
+        await openFacts(page, 'URA Finale');
+
         await expect(card(page, 'Our Grand Concert').getByText('No scenario system')).toBeVisible();
         await expect(card(page, 'Our Grand Concert').getByText('None beyond the generic strip')).toBeVisible();
 
@@ -72,6 +102,8 @@ test.describe('Scenario Selection', () => {
         // reads as the card contradicting itself. Each fact keeps its own heading and its own value.
         await page.goto('/career/setup/scenario');
         await page.locator('#app > *').first().waitFor();
+
+        await openFacts(page, 'Unity Cup');
 
         const unity = card(page, 'Unity Cup');
 
