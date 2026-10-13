@@ -102,7 +102,7 @@ shared database stays untouched, so the before-and-after fingerprint comparison 
 
 Nine sources are declared in `config/uma.php`: `gametora-characters`, `gametora-character-cards`, `gametora-race-catalog`, `gametora-skills`, `gametora-character-profiles`, `gametora-support-cards`, `gametora-support-effects`, `gametora-ura-objectives`, `gametora-artwork`. Eight have a parser and a document to parse. The ninth is an **asset host** (`ADR-0021`): it declares directory shapes rather than a document, has no parser and no seed file, `uma:fetch` steps over it, and `uma:fetch-art` is its only reader. It lives in this array so the SSRF allowlist covers the host every request goes to, rather than leaving a second place a URL could hide.
 
-Four of the seven resolve the document URL through the publisher's manifest first (two requests per fetch), keeping the pinned URL as an offline fallback; KI-24 measured that a stale pinned hash answers `200` with the superseded document, so manifest resolution is the freshness defense.
+Six of the eight resolve the document URL through the publisher's manifest first (two requests per fetch), keeping the pinned URL as an offline fallback; KI-24 measured that a stale pinned hash answers `200` with the superseded document, so manifest resolution is the freshness defense.
 
 Pipeline stages are isolated: `fetch -> snapshot -> parse -> normalize -> match -> promote | review`. `SourceFetcher` is the only outbound HTTP path and only ever visits hosts in the config allowlist (SSRF floor). Unchanged snapshot hashes short-circuit a run; promotion upserts engine-owned columns inside a transaction and skips `is_manual` rows.
 

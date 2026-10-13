@@ -71,7 +71,7 @@ it('names each scenario systems and resources from the matrix rather than from a
             ->where('scenarios.0.systems', ['Race calendar', 'Career goals'])
             // URA composes exactly the baseline widget set, so it claims no scenario resource.
             ->where('scenarios.0.resources', [])
-            // The goals flag turned on for Unity Cup too (8668d9d), so the matrix names three systems.
+            // The goals flag turned on for Unity Cup too (8668d9d), so the matrix names four systems.
             ->where('scenarios.1.systems', ['Race calendar', 'Team races', 'Team Rank ladder', 'Career goals'])
             ->where('scenarios.1.resources', ['Team Rank', 'Spirit Bursts'])
             ->where('scenarios.2.systems', ['Grade Point objectives', 'Pro Shop', 'Epithet routes'])
