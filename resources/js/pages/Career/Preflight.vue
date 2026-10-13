@@ -90,6 +90,8 @@ interface Warning {
 
 const props = defineProps<{
     step: number;
+    /** The steps this session has opened, the step bar's completed marking reads them. */
+    visited: number[];
     contract: {
         complete: boolean;
         build: {
@@ -148,7 +150,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
 </script>
 
 <template>
-    <SetupLayout :step="props.step">
+    <SetupLayout :step="props.step" :visited="props.visited">
         <Head title="Career contract" />
         <template #title>Career contract</template>
 

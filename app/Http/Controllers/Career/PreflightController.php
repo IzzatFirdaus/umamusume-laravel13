@@ -57,6 +57,7 @@ class PreflightController extends Controller
      */
     public function show(): Response
     {
+        SetupDraft::markVisited(6);
         $draft = SetupDraft::read();
         $trainee = $draft['umamusume_id'] === null
             ? null
@@ -91,6 +92,7 @@ class PreflightController extends Controller
 
         return Inertia::render('Career/Preflight', [
             'step' => 6,
+            'visited' => SetupDraft::visited(),
             'contract' => [
                 'complete' => $complete,
                 'build' => $build,

@@ -57,6 +57,7 @@ class LegacySelectController extends Controller
      */
     public function show(ListVeterans $veterans): Response
     {
+        SetupDraft::markVisited(4);
         $draft = SetupDraft::read();
         $trainee = $draft['umamusume_id'] === null
             ? null
@@ -71,6 +72,7 @@ class LegacySelectController extends Controller
         $library->getCollection()->loadMissing('trainingRun.characterCard');
 
         return Inertia::render('Career/LegacySelect', [
+            'visited' => SetupDraft::visited(),
             'trainee' => $trainee === null
                 ? null
                 : ['id' => $trainee->id, 'name' => $trainee->name, 'name_ja' => $trainee->name_ja],

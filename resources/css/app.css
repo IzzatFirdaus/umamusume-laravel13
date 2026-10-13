@@ -378,6 +378,19 @@ html[data-theme='dark'] {
     }
 
     /*
+     * The setup wizard's step bar pins from md up (audit 2026-10-12 §3.2; owner ruling 2026-10-13:
+     * md and up only, the shell's own bottom bar keeps mobile). A keyboard-focused control scrolled
+     * to the top edge must clear it, the way the mobile bar's scroll-padding-bottom does below.
+     * :has() scopes the padding to the screens that actually pin the bar, so no other screen's
+     * fragment or focus landing pays for it.
+     */
+    @media (min-width: 768px) {
+        html:has(nav[aria-label="Setup steps"]) {
+            scroll-padding-top: 6.5rem;
+        }
+    }
+
+    /*
      * WCAG 2.2 AA reduced-motion path (design-2.0 §43). The MOTION dial is 1, so
      * there is little to quiet today; this is the escape hatch for the OS setting
      * and the guard for any transition a later slice adds.

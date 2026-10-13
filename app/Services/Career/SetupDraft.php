@@ -187,6 +187,38 @@ final class SetupDraft
     }
 
     /**
+     * The steps whose screens this session has opened, as the step bar's completed marking reads
+     * them (owner ruling 2026-10-13: "completed" means visited, not written to the draft - a
+     * Trainer who opens a step and leaves without saving still made the visit, and the bar should
+     * say so). It rides the raw bag like `caps` and `deck` do, so `read()`'s two-key shape stays
+     * pinned and `reset()` clears it with the draft.
+     *
+     * @return list<int>
+     */
+    public static function visited(): array
+    {
+        /** @var list<mixed> $raw */
+        $raw = (array) (self::bag()['visited'] ?? []);
+
+        return array_values(array_filter($raw, is_int(...)));
+    }
+
+    /**
+     * Record that a step's screen was opened. Idempotent per step; a non-integer already in the
+     * bag is dropped on the way out rather than cast, the same rule `caps()` applies.
+     */
+    public static function markVisited(int $step): void
+    {
+        $visited = self::visited();
+
+        if (in_array($step, $visited, true)) {
+            return;
+        }
+
+        session([self::SESSION_KEY => array_merge(self::bag(), ['visited' => [...$visited, $step]])]);
+    }
+
+    /**
      * The raw session bag, unnormalised.
      *
      * @return array<string, mixed>

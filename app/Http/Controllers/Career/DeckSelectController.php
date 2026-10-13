@@ -59,6 +59,7 @@ class DeckSelectController extends Controller
      */
     public function show(Request $request): Response
     {
+        SetupDraft::markVisited(5);
         $dictionary = SupportCardEffects::dictionary();
         $scenarioKey = $this->scenarioKey();
 
@@ -71,6 +72,7 @@ class DeckSelectController extends Controller
             ->keyBy('id');
 
         return Inertia::render('Career/DeckSelect', [
+            'visited' => SetupDraft::visited(),
             'slots' => array_map(
                 fn (array $slot): array => [
                     'position' => $slot['position'],

@@ -31,6 +31,18 @@ it('renders one card per scenario the matrix composes, each derived from config'
             ->where('scenarios.0.recommended_use', null));
 });
 
+it('marks the steps a session has opened as visited, including one left unsaved', function (): void {
+    // The owner ruled 2026-10-13 that "completed" means visited: opening a step's screen and
+    // leaving without saving is still the visit the step bar marks. Step 1's screen carries no
+    // save at all, so its visit is the plain GET below.
+    $this->get('/career/setup/scenario')->assertOk();
+
+    $this->get('/career/setup/trainee')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('visited', [1, 2]));
+});
+
 it('reads the optimization focus off cap_bonus and calls a tie a tie', function (): void {
     // URA Finale is +200 across all five stats. Naming one "primary" among five equal bonuses would
     // be inventing a preference the matrix does not express, so the derivation says "uniform".

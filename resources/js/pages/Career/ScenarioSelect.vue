@@ -44,6 +44,8 @@ interface ScenarioCard {
 
 const props = defineProps<{
     scenarios: ScenarioCard[];
+    /** The steps this session has opened, the step bar's completed marking reads them. */
+    visited: number[];
     selected: string | null;
     ruleset: { value: string | null; title: string };
 }>();
@@ -96,7 +98,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
 </script>
 
 <template>
-    <SetupLayout :step="1">
+    <SetupLayout :step="1" :visited="props.visited">
         <Head title="Choose a scenario" />
         <template #title>Choose a scenario</template>
 

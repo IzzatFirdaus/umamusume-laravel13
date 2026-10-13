@@ -73,6 +73,8 @@ interface SkillOption {
 
 const props = defineProps<{
     trainees: Paginator<TraineeRow>;
+    /** The steps this session has opened, the step bar's completed marking reads them. */
+    visited: number[];
     selected: number | null;
     /** The costume form the draft already names, so a return to this step re-seeds the picker (R3-06). */
     selectedCard: number | null;
@@ -220,7 +222,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
 </script>
 
 <template>
-    <SetupLayout :step="2">
+    <SetupLayout :step="2" :visited="props.visited">
         <Head title="Choose a trainee" />
         <template #title>Choose a trainee</template>
 

@@ -42,6 +42,8 @@ interface StoredTarget {
 }
 
 const props = defineProps<{
+    /** The steps this session has opened, the step bar's completed marking reads them. */
+    visited: number[];
     /** The stored payload as entered, or null before one exists. */
     target: StoredTarget | null;
     /** The Trainer's stored stat-target defaults (SCREEN-024), applied only where no target is stored. */
@@ -296,7 +298,7 @@ function removeAt(index: number): void {
 </script>
 
 <template>
-    <SetupLayout :step="3">
+    <SetupLayout :step="3" :visited="props.visited">
         <Head title="Your target" />
         <template #title>Your target</template>
 
@@ -313,6 +315,12 @@ function removeAt(index: number): void {
                 class="text-ink-muted"
                 title="No scenario has been chosen in this setup draft yet, so every cap below is the base cap with no scenario bonus."
             >N/A</span>
+            <Link
+                href="/career/setup/trainee"
+                class="ml-3 inline-flex min-h-11 items-center rounded-md px-2 text-sm text-ink underline"
+            >
+                Back: Trainee
+            </Link>
             <Link
                 href="/career/setup/scenario"
                 class="ml-3 inline-flex min-h-11 items-center rounded-md px-2 text-sm text-ink underline"

@@ -76,6 +76,8 @@ interface EffectLine {
 }
 
 const props = defineProps<{
+    /** The steps this session has opened, the step bar's completed marking reads them. */
+    visited: number[];
     slots: Slot[];
     types: { key: string; label: string }[];
     picker: {
@@ -218,7 +220,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
 </script>
 
 <template>
-    <SetupLayout :step="5">
+    <SetupLayout :step="5" :visited="props.visited">
         <Head title="Support deck" />
         <template #title>Support deck</template>
 

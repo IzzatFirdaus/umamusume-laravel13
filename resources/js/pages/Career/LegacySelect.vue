@@ -54,6 +54,8 @@ interface SparkDraft {
 }
 
 const props = defineProps<{
+    /** The steps this session has opened, the step bar's completed marking reads them. */
+    visited: number[];
     trainee: { id: number; name: string; name_ja: string | null } | null;
     scenarioLabel: string | null;
     hasSelection: boolean;
@@ -228,7 +230,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
 </script>
 
 <template>
-    <SetupLayout :step="4">
+    <SetupLayout :step="4" :visited="props.visited">
         <Head title="Legacy" />
         <template #title>Legacy</template>
 
@@ -650,6 +652,12 @@ const ancestorError = (index: number, slot: number): string | undefined =>
 
             <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the Legacy…</p>
 
+            <a
+                href="/career/setup/target"
+                class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"
+            >
+                Back: Target
+            </a>
             <a
                 href="/career/setup/deck"
                 class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised"

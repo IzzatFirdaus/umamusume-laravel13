@@ -53,6 +53,7 @@ class TraineeSelectController extends Controller
 {
     public function show(TraineeSearchRequest $request, ArtworkMirror $mirror): Response
     {
+        SetupDraft::markVisited(2);
         $draft = SetupDraft::read();
 
         $query = Umamusume::query()->with(['cards' => $this->cardScope()]);
@@ -67,6 +68,7 @@ class TraineeSelectController extends Controller
             ->through(fn (Umamusume $umamusume): array => $this->row($umamusume, $mirror));
 
         return Inertia::render('Career/TraineeSelect', [
+            'visited' => SetupDraft::visited(),
             'trainees' => $trainees,
             'selected' => $draft['umamusume_id'],
             // The form the draft already names, so a Trainer who returns to this step sees the choice they

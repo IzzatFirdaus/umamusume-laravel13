@@ -23,7 +23,7 @@
 import AppLayout from './AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
 
-const props = defineProps<{ step: number }>();
+const props = defineProps<{ step: number; visited?: number[] }>();
 
 const steps = [
     { label: 'Scenario', to: '/career/setup/scenario' },
@@ -37,6 +37,13 @@ const steps = [
 const stepLink =
     'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 const stepCurrent = 'bg-raised text-ink-strong font-bold';
+const stepDone = 'text-ink-strong';
+// A completed step is one whose screen this session has opened (owner ruling 2026-10-13: visited,
+// not written to the draft). The word is the state's carrier, the same one-statement rule the
+// absent step's "not built" suffix follows - and no check glyph, because the check mark is one of
+// the four trust glyphs `ProvenanceBadge` alone may carry (CareerBuildTargetTest's sweep).
+const isDone = (index: number): boolean =>
+    props.visited?.includes(index + 1) === true && index + 1 !== props.step;
 const stepAbsent =
     'flex min-h-11 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium text-ink-muted';
 const leaveLink =
@@ -51,7 +58,7 @@ const leaveLink =
              the position is announced rather than carried by the accent alone (WCAG 1.4.1). The visible
              count and the `sr-only` line are the same fact in two media: the number is a position, and
              a screen reader should hear it before the list rather than after the sixth item. -->
-        <nav aria-label="Setup steps" class="mb-4 border-b border-rule pb-2">
+        <nav aria-label="Setup steps" class="mb-4 border-b border-rule pb-2 md:sticky md:top-0 md:z-10 md:-mx-6 md:bg-page md:px-6">
             <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                 <p class="text-xs text-ink-muted">
                     Step {{ props.step }} of {{ steps.length }}
@@ -66,10 +73,11 @@ const leaveLink =
                     <Link
                         v-if="item.to"
                         :href="item.to"
-                        :class="[stepLink, index + 1 === props.step ? stepCurrent : '']"
+                        :class="[stepLink, index + 1 === props.step ? stepCurrent : isDone(index) ? stepDone : '']"
                         :aria-current="index + 1 === props.step ? 'step' : undefined"
                     >
                         <span class="mr-2 font-mono text-xs" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
+                        <span v-if="isDone(index)" class="ml-2 text-xs text-ink-muted">done</span>
                     </Link>
                     <span v-else :class="stepAbsent" title="This step arrives with its own slice.">
                         <span class="mr-2 font-mono text-xs" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
