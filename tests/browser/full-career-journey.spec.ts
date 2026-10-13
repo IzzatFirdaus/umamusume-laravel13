@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import { deleteRun } from '../utils/delete-run';
+import { openIdentityDisclosure } from '../utils/identity-disclosure';
 
 /*
  * The complete new-career journey (Slice 6.1): one deterministic walk from the wizard's first step
@@ -129,6 +130,7 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     createdRunUrls.push(runUrl);
 
     // --- Identity and Unity Cup state, through the Cockpit's own editors (Slices 1.5 and 1.6) ---
+    await openIdentityDisclosure(page);
     await page.selectOption('#trainee_rarity', '3');
     await page.locator('#potential_level').fill('2');
     // One growth figure is a legal sparse row: a stat with no growth is simply absent.
@@ -203,6 +205,7 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     // The status form is the Cockpit's; the walk is on the Skills Planner after the planners' visit.
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+    await openIdentityDisclosure(page);
     const statusForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Change status' }) });
     await statusForm.locator('select[name="status"]').selectOption('Completed');
     await statusForm.getByRole('button', { name: 'Change status' }).click();

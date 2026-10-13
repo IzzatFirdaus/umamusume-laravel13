@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { openIdentityDisclosure } from '../utils/identity-disclosure';
 
 /*
  * Rendered-copy, keyboard and accessibility evidence for the Veteran comparison (`SCR-VET-004`, plan §8
@@ -59,6 +60,7 @@ async function fileCareer(
 
     // Scoped to its own form: the Cockpit's header edits and its correction panel share the page, so a
     // name query is ambiguous and a label query worse.
+    await openIdentityDisclosure(page);
     const statusForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Change status' }) });
 
     await statusForm.locator('select[name="status"]').selectOption('Completed');

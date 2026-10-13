@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
+import { openIdentityDisclosure } from '../utils/identity-disclosure';
 import { buildAxe } from '../utils/accessibility';
 import { SnapshotSetupPage } from './pages/SnapshotSetupPage';
 import { CockpitPage } from './pages/CockpitPage';
@@ -151,7 +152,7 @@ test.describe('Skills planner', () => {
         }
         await planner.saveAcquisitionStatus();
 
-        // The save redirects to the Cockpit; navigate back and assert they moved into the Learned group.
+        // The save returns to the planner with a flash; reload and assert they moved into the Learned group.
         await cockpit.openSkills(runUrl);
 
         const learned = planner.learnedGroup();
@@ -211,6 +212,7 @@ test.describe('Veteran lifecycle', () => {
         // Mark run completed through the Cockpit status form.
         const cockpit = new CockpitPage(page);
         await cockpit.goto(runUrl);
+        await openIdentityDisclosure(page);
         const statusForm = page.locator('form').filter({ has: page.getByRole('button', { name: 'Change status' }) });
         await statusForm.locator('select[name="status"]').selectOption('Completed');
         await statusForm.getByRole('button', { name: 'Change status' }).click();

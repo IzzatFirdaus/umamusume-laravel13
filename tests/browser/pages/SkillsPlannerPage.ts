@@ -38,7 +38,9 @@ export class SkillsPlannerPage {
         const button = this.page.getByRole('button', { name: 'Save acquisition status' });
         await expect(button).toBeEnabled();
         await button.click();
-        // The controller redirects to the Cockpit after a successful save.
-        await this.page.waitForURL(/\/cockpit$/, WRITE);
+        // The write ends where it started: `63d5d4e` (2026-10-12) returned the skill-status save to the
+        // planner that owns it, so there is no navigation to wait on and the flash is the completion
+        // signal. Waiting on `/cockpit` here timed out on a save that had already succeeded.
+        await expect(this.page.getByText('Skill status saved.')).toBeVisible(WRITE);
     }
 }

@@ -3,6 +3,7 @@ import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
 import { expectTapTargets } from '../utils/tap-targets';
+import { openIdentityDisclosure } from '../utils/identity-disclosure';
 
 /*
  * The Cockpit's write controls (F2, plan §9.6 rulings 1, 2 and 4): the three header edit forms (status,
@@ -89,6 +90,7 @@ const careerBar = (page: import('@playwright/test').Page) => page.locator('secti
 
 test('changes the run status through the header form and prints the new label', async ({ page }) => {
     await openCockpit(page);
+    await openIdentityDisclosure(page);
 
     await expect(careerBar(page).getByText('Active')).toBeVisible();
 
@@ -104,6 +106,7 @@ test('changes the run status through the header form and prints the new label', 
 
 test('changes the run scenario through the header form and prints the new label', async ({ page }) => {
     await openCockpit(page);
+    await openIdentityDisclosure(page);
 
     const scenario = page.locator('select#scenario');
     await expect(scenario).toHaveValue('unity_cup');
@@ -117,6 +120,7 @@ test('changes the run scenario through the header form and prints the new label'
 test('reports the grade-point period on a scenario that composes one', async ({ page }) => {
     // The period form renders only when the scenario defines grade objectives (trackblazer).
     await openCockpit(page, 'trackblazer');
+    await openIdentityDisclosure(page);
 
     const period = page.locator('select#current_objective_index');
     await expect(period).toBeVisible();
@@ -132,6 +136,7 @@ test('reports the grade-point period on a scenario that composes one', async ({ 
 
 test('records the trainee rarity, potential and growth rate through the identity editor', async ({ page }) => {
     await openCockpit(page);
+    await openIdentityDisclosure(page);
 
     await page.selectOption('#trainee_rarity', '3');
     await page.locator('#potential_level').fill('2');
@@ -330,6 +335,7 @@ test('links both exports as file downloads', async ({ page }) => {
 
 test('sizes the header controls to the 44px contract', async ({ page }) => {
     await openCockpit(page);
+    await openIdentityDisclosure(page);
 
     // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). The same sweep `career-cockpit.spec.ts` runs.
     const targets = [
@@ -349,6 +355,7 @@ test('sizes the header controls to the 44px contract', async ({ page }) => {
 
 test('walks the header form from the keyboard', async ({ page }) => {
     await openCockpit(page);
+    await openIdentityDisclosure(page);
 
     // The status select is a native control reached by Tab, and the submit is the next stop.
     const status = page.locator('select#status');
