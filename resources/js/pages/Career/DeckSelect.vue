@@ -335,7 +335,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
 
                     <button
                         type="submit"
-                        class="enamel h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome"
+                        class="h-11 rounded-full border border-rule px-3 py-1.5 font-semibold text-ink hover:bg-sunken"
                     >
                         Filter
                     </button>

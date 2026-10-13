@@ -620,7 +620,7 @@ const hasAnyNode = computed(() =>
 
                                             <button
                                                 type="button"
-                                                class="enamel min-h-11 rounded-full bg-chrome px-3 text-sm font-semibold text-on-chrome"
+                                                class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken"
                                                 @click="removeSpark(index, sparkIndex)"
                                             >
                                                 Remove Spark

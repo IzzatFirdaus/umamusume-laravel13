@@ -379,7 +379,7 @@ const coverageConstants = computed(() =>
                 </label>
                 <button
                     type="submit"
-                    class="enamel inline-flex h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:cursor-wait disabled:bg-disabled"
+                    class="inline-flex h-11 items-center rounded-full border border-rule px-4 text-sm font-bold text-ink hover:bg-sunken disabled:cursor-wait disabled:bg-disabled"
                     :disabled="pickerForm.processing"
                 >
                     Add skill

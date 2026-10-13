@@ -312,7 +312,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
 
             <button
                 type="submit"
-                class="enamel inline-flex h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome"
+                class="inline-flex h-11 items-center rounded-full border border-rule bg-raised px-4 text-sm font-medium text-ink hover:bg-sunken"
             >
                 Filter
             </button>

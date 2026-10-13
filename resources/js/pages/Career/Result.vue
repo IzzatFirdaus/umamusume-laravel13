@@ -338,7 +338,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                 <div class="mt-3 flex flex-wrap gap-2">
                     <a
                         :href="props.run.timeline_url"
-                        class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-semibold text-on-chrome"
+                        class="inline-flex min-h-11 items-center rounded-full border border-rule px-4 font-semibold text-ink hover:bg-sunken"
                     >View Career Timeline</a>
                     <a
                         :href="props.run.run_url"
