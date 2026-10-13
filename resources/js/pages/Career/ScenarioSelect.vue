@@ -238,20 +238,19 @@ const optimizesText = (card: ScenarioCard): string | null => {
                             <dd class="text-ink">{{ card.metadata.planning_focus ?? 'Not recorded' }}</dd>
                         </div>
                     </dl>
-                    <div v-if="card.metadata.key_mechanics.length > 0" class="mt-2">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Key mechanics</p>
+                    <details v-if="card.metadata.key_mechanics.length > 0" class="mt-2">
+                        <summary class="flex min-h-11 cursor-pointer items-center text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                            Key mechanics ({{ card.metadata.key_mechanics.length }})
+                        </summary>
                         <ul class="mt-1 list-disc pl-5 text-sm text-ink">
                             <li v-for="(line, index) in card.metadata.key_mechanics" :key="index">{{ line }}</li>
                         </ul>
-                    </div>
+                    </details>
                 </div>
-                <p
+                <AbsenceValue
                     v-else
-                    class="mt-3 text-sm text-ink-muted"
-                    title="No source in this repository describes this scenario's rule family, summary or planning focus."
-                >
-                    Not recorded
-                </p>
+                    reason="No source in this repository describes this scenario's rule family, summary or planning focus."
+                />
 
                 <p class="mt-4 flex flex-wrap items-center gap-3">
                     <button
