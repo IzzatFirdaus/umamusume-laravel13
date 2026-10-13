@@ -121,5 +121,10 @@ it('collapses the rail to marks without removing any destination name', function
 
     preg_match_all('/^    [a-z]+: \[/m', $glyph, $marks);
 
-    expect($marks[0] ?? [])->toHaveCount(11);
+    // 11 through the cockpit cutover: one mark per rail destination, plus the collapse control.
+    // 2026-10-13: the Cockpit action grid's seven doors joined the same registry (audit
+    // 2026-10-12 §3.4, owner ruling to build the marks as their own slice), and the count is the
+    // registry tripwire, so this row moves with it - six new path sets, `network` reused for
+    // Inheritance.
+    expect($marks[0] ?? [])->toHaveCount(17);
 });
