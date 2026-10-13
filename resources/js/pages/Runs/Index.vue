@@ -64,14 +64,20 @@ defineProps<{
                     :key="run.id"
                     class="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 text-sm"
                 >
-                    <a :href="run.url" class="font-semibold text-ink hover:underline">
+                    <a
+                        :href="run.url"
+                        class="font-semibold text-ink hover:underline"
+                        :aria-label="`${run.name} · ${run.scenario_label ?? 'no scenario'} · ${run.status_label} · ${run.created_date}`"
+                    >
                         {{ run.name }}
                         <span v-if="run.scenario_label !== null" class="font-normal text-ink-muted">
                             · {{ run.scenario_label }}
                         </span>
                     </a>
-                    <span class="font-mono text-xs tabular-nums text-ink-muted">
-                        {{ run.status_label }} · {{ run.created_date }}
+                    <!-- The status is a word and the date is a figure, so only the figure takes the
+                         mono/tabular pair (the same split the import preview's rows make). -->
+                    <span class="text-sm text-ink-muted">
+                        {{ run.status_label }} · <span class="font-mono tabular-nums">{{ run.created_date }}</span>
                     </span>
                 </li>
             </ul>
