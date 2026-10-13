@@ -84,7 +84,7 @@ function applyFilters(): void {
                 type="text"
                 name="search"
                 placeholder="Part of a skill name"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
+                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
             >
         </label>
 
@@ -93,7 +93,7 @@ function applyFilters(): void {
             <select
                 v-model="type"
                 name="type"
-                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2"
+                class="h-11 rounded-md border border-rule bg-raised px-2 text-ink"
             >
                 <option value="">All</option>
                 <option v-for="option in types" :key="option" :value="option">{{ option }}</option>
@@ -107,7 +107,7 @@ function applyFilters(): void {
                 type="checkbox"
                 name="unique"
                 value="1"
-                class="size-6 rounded border-rule bg-raised focus-visible:outline-2 focus-visible:outline-offset-2"
+                class="size-6 rounded border-rule bg-raised"
             >
             <span>Unique only</span>
         </label>
@@ -169,7 +169,7 @@ function applyFilters(): void {
                     v-if="skill.is_unique"
                     class="rounded-full bg-sunken px-2 py-0.5 text-xs text-ink-strong"
                     title="Marked from the source's skill class code, not from a card's own skill list."
-                >◆ Unique</span>
+                >✦ Unique</span>
 
                 <span class="ml-auto text-xs text-ink-muted">
                     <template v-if="skill.type"> · {{ skill.type }}</template>
