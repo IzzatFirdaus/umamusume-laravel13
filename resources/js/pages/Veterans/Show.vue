@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
+import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import { Head } from '@inertiajs/vue3';
 
 interface Veteran {
@@ -28,6 +29,7 @@ const props = defineProps<{
     parents: { a: string | null; b: string | null };
     runUrl: string;
     traineeUrl: string;
+    artworkURL: string | null;
     notice: string;
     absences: Absence[];
 }>();
@@ -58,16 +60,21 @@ const doorClass =
                 <div>
                     <dt class="text-xs text-ink-muted">Trainee</dt>
                     <dd class="text-ink-strong">
-                        <a :href="props.traineeUrl" class="font-semibold hover:underline">
-                            {{ props.veteran.trainee }}
-                        </a>
-                        <span
-                            v-if="props.veteran.trainee_ja !== null && props.veteran.trainee_ja !== props.veteran.trainee"
-                            lang="ja"
-                            class="ml-2 text-ink-muted"
-                        >
-                            {{ props.veteran.trainee_ja }}
-                        </span>
+                        <div class="flex items-center gap-3">
+                            <ArtworkSlot :url="props.artworkURL" alt="" size="size-12" reserve />
+                            <span>
+                                <a :href="props.traineeUrl" class="font-semibold hover:underline">
+                                    {{ props.veteran.trainee }}
+                                </a>
+                                <span
+                                    v-if="props.veteran.trainee_ja !== null && props.veteran.trainee_ja !== props.veteran.trainee"
+                                    lang="ja"
+                                    class="ml-2 text-ink-muted"
+                                >
+                                    {{ props.veteran.trainee_ja }}
+                                </span>
+                            </span>
+                        </div>
                     </dd>
                 </div>
 

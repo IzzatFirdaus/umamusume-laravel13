@@ -10,6 +10,7 @@ use App\Http\Requests\VeteranCompareRequest;
 use App\Http\Requests\VeteranSearchRequest;
 use App\Models\Umamusume;
 use App\Models\Veteran;
+use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\Legacy\VeteranRow;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -124,6 +125,10 @@ final class VeteranController extends Controller
             ],
             'runUrl' => route('runs.cockpit', $run),
             'traineeUrl' => route('catalog.show', $run->umamusume->slug),
+            // The trainee's own frame, the identity read the catalog detail page uses: the debut form's
+            // portrait when the mirror holds it, no frame at all when it does not (`ADR-0021`, the
+            // `DESIGN.md` §4.7 absence rule - a reserved cell, never a grey box).
+            'artworkURL' => self::artworkUrl($run->umamusume),
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
             'absences' => self::absences(),
         ]);
@@ -233,6 +238,20 @@ final class VeteranController extends Controller
                 'reason' => 'A career records the scenario it ran in, which is a stored fact and is printed. Whether it suits another scenario is a judgement no column holds.',
             ],
         ];
+    }
+
+    /**
+     * The trainee's own frame for the detail screen's identity read, by the idiom `CatalogController`
+     * uses: the debut form's portrait, falling back to the first card, and null when the mirror holds
+     * no file - which the page renders as a reserved cell, never a grey box (`ADR-0021`).
+     */
+    private static function artworkUrl(Umamusume $trainee): ?string
+    {
+        $trainee->loadMissing('cards');
+        $headerCard = $trainee->cards->first(static fn ($card): bool => $card->is_debut_form)
+            ?? $trainee->cards->first();
+
+        return $headerCard === null ? null : app(ArtworkMirror::class)->url('card_portrait', (int) $headerCard->card_id);
     }
 
     /**
