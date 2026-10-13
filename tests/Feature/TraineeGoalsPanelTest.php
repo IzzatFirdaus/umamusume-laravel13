@@ -228,6 +228,23 @@ it('draws the ladder for the three scenarios that keep race goals and not for Tr
     ['trackblazer', false],
 ]);
 
+it('keeps Happy Meek in the scenario whose mechanic it is', function (string $scenario, bool $expected): void {
+    // The defect this pins: `career_goals` is one switch, and the group list it gates was composed as
+    // three groups for every scenario that turns it on. Unity Cup and the Grand Concert therefore gained
+    // a URA module whose rows are all named absences of a mechanic their scenario does not have, which
+    // the browser suite caught at `tests/browser/ura-panel.spec.ts:202` once the flag was on.
+    $run = goalsRun($scenario);
+
+    /** @var list<array<string, mixed>> $objectives */
+    $objectives = test()->get(route('runs.cockpit', $run))->assertOk()->inertiaProps('scenario.objectives');
+
+    expect(in_array('Happy Meek', array_column($objectives, 'group'), true))->toBe($expected);
+})->with([
+    ['ura_finale', true],
+    ['unity_cup', false],
+    ['our_grand_concert', false],
+]);
+
 it('leaves the group out entirely for a trainee whose ladder was never fetched', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'ura_finale', 'status' => 'Active']);
     TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 1, 'fans' => 0]);

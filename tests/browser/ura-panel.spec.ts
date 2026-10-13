@@ -111,25 +111,47 @@ async function openUraCockpit(
 test('draws the three modules with the recorded mandatory races as text', async ({ page }) => {
     const region = await openUraCockpit(page, 0);
 
-    await expect(region.getByRole('heading', { name: 'Career goals' })).toBeVisible();
+    await expect(region.getByRole('heading', { name: 'Trainee goals' })).toBeVisible();
     await expect(region.getByRole('heading', { name: 'Mandatory races' })).toBeVisible();
     await expect(region.getByRole('heading', { name: 'Happy Meek' })).toBeVisible();
 
-    // The calendar's own rows, each with the word rather than the glyph.
-    await expect(region.getByText('Junior Make Debut')).toBeVisible();
-    await expect(region.getByText(/^URA Finals Final/)).toBeVisible();
-    await expect(region.getByText('Upcoming').first()).toBeVisible();
+    // The calendar's own rows, each with the word rather than the glyph. Scoped to the group they
+    // belong to since the ladder prints the debut's name too, as one of her own objectives: the two
+    // lists are different facts about the same race, and a region-wide word match cannot tell them.
+    const races = region.getByRole('region', { name: 'Mandatory races' });
+    await expect(races.getByText('Junior Make Debut')).toBeVisible();
+    await expect(races.getByText(/^URA Finals Final/)).toBeVisible();
+    await expect(races.getByText('Upcoming').first()).toBeVisible();
 });
 
-test('states the career goals absence, what it costs and what unblocks it', async ({ page }) => {
-    const region = await openUraCockpit(page, 0);
+// ADR-0026 replaced this case's subject. What it used to prove, that the panel named the missing
+// per-character objective table and said what would unblock it, is retired: the table is fetched, and
+// `TraineeGoalsPanelTest` pins the payload. What only a browser shows is the ladder grammar the client
+// itself prints, the one due-now rung and the footer count, rendered rather than composed.
+test('prints her own ladder with one rung due and the client footer', async ({ page }) => {
+    // Eleven logged turns makes turn 12 the next one to play, which is where her debut sits.
+    const region = await openUraCockpit(page, DEBUT_TURN - 1);
 
-    const statement = region.getByText(/trainee_goals/);
-    await expect(statement).toBeVisible();
-    await expect(statement).toContainText('PRD');
+    // Scoped to the group that owns the marker. A region-wide word match reads the Mandatory races
+    // group's identical word too, and the two lists are different facts about the same race; this is
+    // the collision class that bit the E3 and E4 panel specs.
+    const goals = region.getByRole('region', { name: 'Trainee goals' });
 
-    // The reading itself is N/A with the same sentence as its title, never a blank or a dash.
-    await expect(region.getByTitle(/trainee_goals/).first()).toHaveText('N/A');
+    const rows = goals.getByRole('listitem');
+    // Rice Shower's eleven stored objectives, three of them the post-December rounds the Mandatory
+    // races group renders, leave eight rungs.
+    await expect(rows).toHaveCount(8);
+
+    await expect(rows.first()).toContainText('Participate in Junior Make Debut');
+    await expect(rows.last()).toContainText('Place 1st in Arima Kinen');
+
+    // One rung due, and only one, whatever the count (plan §5.3), and it is the earliest unmet goal.
+    await expect(goals.getByText('Due now')).toHaveCount(1);
+    await expect(rows.first()).toContainText('Due now');
+
+    // The client's own footer shape, both integers: no bar, no percentage, no score (fidelity §2.4,
+    // ux-laws §9 item 6, PRD §6.11).
+    await expect(goals.getByText('Goals Achieved 0 of 8')).toBeVisible();
 });
 
 test('renders each Happy Meek field as an unrecorded reading with its own reason', async ({ page }) => {
@@ -149,7 +171,7 @@ test('raises the Critical alert as rendered copy when the debut turn has arrived
     const region = await openUraCockpit(page, DEBUT_TURN - 1);
 
     await expect(region.getByText('Critical: Junior Make Debut is due and not recorded')).toBeVisible();
-    await expect(region.getByText('Due now')).toBeVisible();
+    await expect(region.getByRole('region', { name: 'Mandatory races' }).getByText('Due now')).toBeVisible();
 
     // The alert is a note, not only a colour: the level word is in the rendered text.
     await expect(region.getByRole('link', { name: 'Record this race' }).first()).toBeVisible();
@@ -161,7 +183,11 @@ test('marks the debut missed once its turn has passed with no race recorded', as
     // the props test covers that arm, and this one covers the three states the turn writes reach.
     const region = await openUraCockpit(page, DEBUT_TURN);
 
-    await expect(region.getByText('Missed')).toBeVisible();
+    // Both groups read the debut as missed, and each says it in its own list: the calendar's
+    // obligation and one of her own rungs are two facts about one race, so the assertion is scoped
+    // twice rather than counted once across the region.
+    await expect(region.getByRole('region', { name: 'Trainee goals' }).getByText('Missed')).toBeVisible();
+    await expect(region.getByRole('region', { name: 'Mandatory races' }).getByText('Missed')).toBeVisible();
     await expect(region.getByText('Critical: Junior Make Debut is due and not recorded')).toBeVisible();
 });
 
@@ -185,11 +211,15 @@ test('gives the finale block an N/A deadline instead of an invented turn', async
 });
 
 test('draws no URA module in a cockpit whose matrix leaves the flag off', async ({ page }) => {
+    // Trackblazer, not Unity Cup: `career_goals` is on for Unity Cup and the Grand Concert by owner
+    // ruling (ADR-0026), so this case's own premise, a matrix that says off, only holds for the
+    // scenario whose objectives are Grade Point deadlines. `UraPanelTest:80` pins the same three
+    // readings of the switch on the payload side.
     await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.locator('#trainee-combobox').fill('Rice Shower');
     await page.keyboard.press('Enter');
-    await page.selectOption('select[name="scenario"]', { value: 'unity_cup' });
+    await page.selectOption('select[name="scenario"]', { value: 'trackblazer' });
     await page.getByRole('button', { name: 'Create run' }).click();
     await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
     const runUrl = page.url().replace(/\/cockpit$/, '');
@@ -201,7 +231,9 @@ test('draws no URA module in a cockpit whose matrix leaves the flag off', async 
     const region = page.getByRole('region', { name: 'Scenario' });
     await expect(region.getByRole('heading', { name: 'Happy Meek' })).toHaveCount(0);
     await expect(region.getByRole('heading', { name: 'Mandatory races' })).toHaveCount(0);
-    await expect(region.getByText(/trainee_goals/)).toHaveCount(0);
+    // The ladder is a group of this module, so a matrix that says off draws none of it: the absent
+    // region is the live contract, where the retired case asserted an absence sentence instead.
+    await expect(region.getByRole('region', { name: 'Trainee goals' })).toHaveCount(0);
 });
 
 test('reaches the race door from the keyboard without losing focus', async ({ page }) => {

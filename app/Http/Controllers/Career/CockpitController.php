@@ -666,7 +666,7 @@ class CockpitController extends Controller
             // Retired by ADR-0026: the trainee's own goal ladder is fetched per character. The strip marks
             // an obligation on the row it belongs to and says where the whole ladder reads.
             'goal' => 'A race marked Goal here is one this trainee\'s own ladder asks of her; the full ladder,'
-                .' including the objectives that name no race on this calendar, reads under Career goals in'
+                .' including the objectives that name no race on this calendar, reads under Trainee goals in'
                 .' the Scenario panel (ADR-0026). A race missing the mark is not a race nobody asked of her.',
         ];
 
@@ -689,7 +689,7 @@ class CockpitController extends Controller
         // ADR-0026). One query for the whole region, not one per row: this strip prints three regions and
         // a hundred races, and an N+1 here is a defect rather than a trade-off. Objectives with no slot
         // (a fan gate, an unread one, a race Global has not shipped) carry no key, because there is no
-        // calendar row to mark; they still read in the Career goals panel. That panel runs its own query
+        // calendar row to mark; they still read in the Trainee goals group. That group runs its own query
         // in the same request and both are indexed on (umamusume_id, career_year, turn) - two bounded
         // reads, not one per row.
         /** @var array<int, string> $obligations */
@@ -1850,27 +1850,37 @@ class CockpitController extends Controller
         /** @var array{rows: list<array<string, mixed>>, alerts: list<array<string, mixed>>, summary: string|null, empty_note: string|null} $trainee */
         $trainee = $this->traineeGoalRows($run, $next, $slots);
 
-        return [
-            'objectives' => [
-                [
-                    'group' => 'Trainee goals',
-                    'rows' => $trainee['rows'],
-                    'summary' => $trainee['summary'],
-                    'empty_note' => $trainee['empty_note'],
-                ],
-                [
-                    'group' => 'Mandatory races',
-                    'rows' => $rows,
-                    'summary' => null,
-                    'empty_note' => null,
-                ],
-                [
-                    'group' => 'Happy Meek',
-                    'rows' => $this->happyMeekRows(),
-                    'summary' => null,
-                    'empty_note' => null,
-                ],
+        $objectives = [
+            [
+                'group' => 'Trainee goals',
+                'rows' => $trainee['rows'],
+                'summary' => $trainee['summary'],
+                'empty_note' => $trainee['empty_note'],
             ],
+            [
+                'group' => 'Mandatory races',
+                'rows' => $rows,
+                'summary' => null,
+                'empty_note' => null,
+            ],
+        ];
+
+        // Happy Meek is URA's own mechanic, so it composes for URA alone. The switch that turned
+        // `career_goals` on for Unity Cup and the Grand Concert must not hand those cockpits a module
+        // whose rows are all named absences of a mechanic their scenario does not have. Same guard
+        // shape the `trackblazer` composers use, and the panel reads the group list as data, so no
+        // scenario name reaches a component (gate G-33).
+        if ($run->scenarioKey() === 'ura_finale') {
+            $objectives[] = [
+                'group' => 'Happy Meek',
+                'rows' => $this->happyMeekRows(),
+                'summary' => null,
+                'empty_note' => null,
+            ];
+        }
+
+        return [
+            'objectives' => $objectives,
             // The trainee's own overdue objectives lead, the way every alert here leads the groups.
             'alerts' => [...$trainee['alerts'], ...$alerts],
         ];
