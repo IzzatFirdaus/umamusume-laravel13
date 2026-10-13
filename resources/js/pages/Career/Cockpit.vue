@@ -476,8 +476,51 @@ const jumpToShop = (): void => {
              failure comes back with `page.props.errors`, which the page-level alert names. Each form
              carries the sibling fields the request still writes, so editing one cannot blank another. -->
         <section aria-labelledby="cockpit-header-edit" class="mt-2">
-            <h3 id="cockpit-header-edit" class="sr-only">Edit the run's identity</h3>
-            <ul class="flex flex-wrap items-end gap-4 text-sm">
+            <h3 id="cockpit-header-edit" class="text-lg font-semibold text-ink-strong">Run identity</h3>
+
+            <!-- The export and deck doors are reads, not writes, so they stay outside the disclosure
+                 a Trainer must open to change a value (audit 2026-10-12 §3.3). -->
+            <ul class="mt-2 flex flex-wrap items-end gap-4 text-sm">
+                <li class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Export</span>
+                    <!-- The export door (F2, plan §9.6). Both are GET file responses, so they are
+                         plain links: routing a download through a redirect would turn it into an
+                         HTML navigation instead of a file. -->
+                    <span class="flex flex-wrap gap-2">
+                        <a
+                            :href="props.run.export_csv_url"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-semibold text-ink-strong underline"
+                        >
+                            Download CSV
+                        </a>
+                        <a
+                            :href="props.run.export_json_url"
+                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-semibold text-ink-strong underline"
+                        >
+                            Download JSON
+                        </a>
+                    </span>
+                </li>
+
+                <li class="flex flex-col gap-1">
+                    <span class="text-ink-muted">Support deck</span>
+                    <!-- R2-17: `/training-runs/{run}/deck` answers and writes this run's six slots, and
+                         the Cockpit offered no door to it, so a Trainer mid-career could reach the
+                         builder only by typing its URL. A GET, so it is a plain link, like the exports. -->
+                    <a
+                        :href="props.run.deck_url"
+                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-semibold text-ink-strong underline"
+                    >
+                        Edit this run's deck
+                    </a>
+                </li>
+            </ul>
+
+            <details class="mt-2 rounded-md border border-rule bg-panel p-4">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                    Edit identity
+                </summary>
+                <ul class="mt-3 flex flex-wrap items-end gap-4 text-sm">
                 <li class="flex flex-col gap-1">
                     <label for="status" class="text-ink-muted">Status</label>
                     <form @submit.prevent="saveStatus">
@@ -519,6 +562,7 @@ const jumpToShop = (): void => {
                         >
                             {{ scenarioForm.processing ? 'Saving…' : 'Change scenario' }}
                         </button>
+                        <p v-if="scenarioForm.recentlySuccessful" role="status" class="mt-1 text-xs text-ink-muted">Saved.</p>
                     </form>
                 </li>
 
@@ -550,6 +594,7 @@ const jumpToShop = (): void => {
                         >
                             {{ periodForm.processing ? 'Saving…' : 'Report period' }}
                         </button>
+                        <p v-if="periodForm.recentlySuccessful" role="status" class="mt-1 text-xs text-ink-muted">Saved.</p>
                     </form>
                 </li>
 
@@ -637,6 +682,7 @@ const jumpToShop = (): void => {
                                 </span>
                             </label>
                         </fieldset>
+                        <p v-if="identityForm.isDirty" class="text-xs text-ink-muted">Unsaved changes.</p>
                         <button
                             type="submit"
                             class="mt-1 inline-flex min-h-11 w-fit items-center rounded-full border-2 border-rule px-4 font-bold text-ink-strong disabled:opacity-60"
@@ -647,41 +693,8 @@ const jumpToShop = (): void => {
                         <p v-if="identityForm.recentlySuccessful" class="text-xs text-ink-muted">Saved.</p>
                     </form>
                 </li>
-
-                <li class="flex flex-col gap-1">
-                    <span class="text-ink-muted">Export</span>
-                    <!-- The export door (F2, plan §9.6). Both are GET file responses, so they are
-                         plain links: routing a download through a redirect would turn it into an
-                         HTML navigation instead of a file. -->
-                    <span class="flex flex-wrap gap-2">
-                        <a
-                            :href="props.run.export_csv_url"
-                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-semibold text-ink-strong underline"
-                        >
-                            Download CSV
-                        </a>
-                        <a
-                            :href="props.run.export_json_url"
-                            class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-semibold text-ink-strong underline"
-                        >
-                            Download JSON
-                        </a>
-                    </span>
-                </li>
-
-                <li class="flex flex-col gap-1">
-                    <span class="text-ink-muted">Support deck</span>
-                    <!-- R2-17: `/training-runs/{run}/deck` answers and writes this run's six slots, and
-                         the Cockpit offered no door to it, so a Trainer mid-career could reach the
-                         builder only by typing its URL. A GET, so it is a plain link, like the exports. -->
-                    <a
-                        :href="props.run.deck_url"
-                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-semibold text-ink-strong underline"
-                    >
-                        Edit this run's deck
-                    </a>
-                </li>
-            </ul>
+                </ul>
+            </details>
         </section>
 
         <UnityCupEditor
@@ -889,7 +902,7 @@ const jumpToShop = (): void => {
                 class="order-4 min-w-0 rounded-md border border-rule bg-panel p-4 md:order-none md:col-span-2 md:row-start-4 lg:col-span-3 lg:row-start-3"
                 aria-labelledby="career-scenario-heading"
             >
-                <h2 id="career-scenario-heading" class="text-base font-semibold text-ink-strong">Scenario</h2>
+                <h2 id="career-scenario-heading" class="text-lg font-semibold text-ink-strong">Scenario</h2>
 
                 <!-- The shell switches on the matrix's own flags and widget keys and knows no
                      scenario name (plan §9 E1, gate G-33). The prop's own shape is declared at
@@ -903,7 +916,7 @@ const jumpToShop = (): void => {
                 class="order-5 min-w-0 rounded-md border border-rule bg-panel p-4 md:order-none md:col-span-2 md:row-start-1 lg:col-span-1 lg:col-start-1 lg:row-span-2 lg:row-start-1"
                 aria-labelledby="career-timeline-heading"
             >
-                <h2 id="career-timeline-heading" class="text-base font-semibold text-ink-strong">
+                <h2 id="career-timeline-heading" class="text-lg font-semibold text-ink-strong">
                     Races in this run
                 </h2>
 
