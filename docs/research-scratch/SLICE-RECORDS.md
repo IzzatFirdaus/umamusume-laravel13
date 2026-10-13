@@ -5774,7 +5774,13 @@ KI-74 pre-flight: the trivial `training_runs` read returned single-digit millise
   quoted corpora as the ruled baseline. Nothing in a file this pass touched carries a hit; the
   corpus's owner owes the formal ruling when they land it. `composer lore-code` - **141 hit(s)**,
   exit 0, unchanged (`p7-lore-code.log`).
-- `python tools/md_fence_check.py` on this record - 0 invalid.
+- `python tools/md_fence_check.py` - the pass's draft read 0 invalid, and the landed file reads
+  **8 invalid closing fences, all pre-existing** (lines 39, 720, 728, 736, 739, 4079, 4083, 5020:
+  mislabelled json/text/php/bash closers inside earlier slices' sections, every one of them before
+  this file's pass-6 section). The tool exits 0 either way, so the gate cannot stop a commit on its
+  own - the check ran before this record landed and its non-zero finding was noticed only after.
+  Not fixed in passing: the eight lines are other slices' prose, and the file's worktree copy
+  carries peer content. A fence-repair slice is owed to whoever owns those sections.
 - The browser sweep (Phase 2) - **held on the peer's staging alone** now that the bundle
   post-dates `a1365fc`'s prerequisites; unblocks to a session-private port and scratch DB.
 
