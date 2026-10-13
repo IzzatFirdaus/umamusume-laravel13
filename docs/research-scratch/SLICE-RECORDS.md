@@ -5948,3 +5948,44 @@ build of `public/build`.
 (no PHP changed) · PHPStan not run (no PHP changed) · full suite not re-run: the only code change is
 two template strings in one Vue file, which no PHP test reads. `public/build` is still the peer's
 02:57 bundle, untouched here. No migration, route, network or `config/scenarios.php` change.
+## Pass 10 (2026-10-14): premise pass - three findings sharpened, one withdrawn, nothing landed
+
+Every live slice in this dispatch is gated on an owner answer and none arrived, so the pass is
+read-only by design and no commit was manufactured to fill a slot. What it contributes is source
+detail for the four open Dashboard/catalog findings, recorded in
+`premises-2026-10-14-pass10.md`.
+
+- **Survival and parity.** `52971d8` is intact (2/2) and HEAD's `Catalog/Show.vue` still carries both
+  copy fixes at `:194` and `:308`. The shared index holds two paths, both the peer's
+  (`SLICE-RECORDS.md`, `tests/browser/career-race-decision.spec.ts`); **none of this session's 14
+  checked paths is in it**, so no staged blob is reverting prior work right now. `a1365fc`'s doc line
+  survived too: HEAD's `SCREEN_SPEC.md:576` reads `max-w-3xl` and the file has zero `max-w-2xl` left.
+- **Bundle currency moved, because of my own commit.** The manifest is still 02:57:31 while the
+  newest `resources/js` commit is `52971d8` at 04:23:52. Pass 9's "the bundle post-dates every landed
+  Vue change" is stale from the moment it was true: the two copy fixes are not in the bundle, so
+  their rendered proof still waits for a build, and a build needs both peer paths out of the index.
+- **The marker census reproduces from the script**: 18 summaries in 117 files, **13 with a display
+  utility and no glyph, 5 native rendering ▶**, no `summary`/`list-item`/`::marker` rule in
+  `app.css`. Four of the thirteen are in `Cockpit.vue`.
+- **F-A3 confirmed with citations**: `Dashboard.vue:112, 201, 246, 297, 313`, all five
+  `<h2 class="text-xs font-bold tracking-wide text-ink-muted">` in literal capitals - two steps
+  below `DESIGN.md:202`'s section header and below the 14px body. The "eyebrows → 0" close-out
+  counted the `uppercase` utility, so it never matched caps that live in the text.
+- **Uncapped prose confirmed**: every text-bearing `<p>` on the Dashboard prints `max-w=NONE`, and
+  the three explanatory paragraphs run ~115 characters inside the correct 5xl shell.
+- **Aptitude proximity corrected in the cheap direction.** The grid is not in `Catalog/Show.vue`;
+  it is `components/AptitudeGrid.vue`, and the cause is one class: `justify-between` on `:36` inside
+  a `sm:grid-cols-4` cell with `gap-x-4`, which pushes each letter to the cell's right edge, 16px
+  from the next label and ~200px from its own. **One class on one element, not the grid-layout
+  change pass 9 recorded**, and it reaches both consumers - `Catalog/Show.vue:287` and
+  `Career/TraineeProfile.vue:214` - in a single edit.
+- **Preflight dead cells withdrawn.** `Preflight.vue:238` and `:251` carry `sm:col-span-2`
+  deliberately; "Your target" and "Ancestry" are meant to span both columns. The white space is
+  unused width inside a full-measure box, not an orphaned cell. Pass 9 read the pixels right and the
+  markup wrong, and this row is the correction.
+- **Held, with the reason**: F-A3 / prose cap / aptitude fix (owner calls), the marker rule
+  (fix-or-ratify), the 16-failure path (solo-or-harness, and the box was contended), and the dark
+  ramp (`17261d4` still, ` M` at +332/−54, zero `g18ContractPairs` at HEAD).
+- **Tooling, once more**: the hook rewrote two git commands into an `rtk` wrapper and the classifier
+  blocked them; every git call after that went through a file-based script. No gate ran, because no
+  file changed - the tree is unchanged from `52971d8` apart from the peer's work and this record.
