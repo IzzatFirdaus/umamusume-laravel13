@@ -38,11 +38,14 @@ const stepLink =
     'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
 const stepCurrent = 'bg-raised text-ink-strong font-bold';
 const stepDone = 'text-ink-strong';
-// A completed step is one whose screen this session has opened (owner ruling 2026-10-13: visited,
+// A visited step is one whose screen this session has opened (owner ruling 2026-10-13: visited,
 // not written to the draft). The word is the state's carrier, the same one-statement rule the
 // absent step's "not built" suffix follows - and no check glyph, because the check mark is one of
 // the four trust glyphs `ProvenanceBadge` alone may carry (CareerBuildTargetTest's sweep).
-const isDone = (index: number): boolean =>
+// The word says "visited", never "done": the session only proves the screen was opened, and a
+// completion word over an unentered step is the misleading indicator the wizard audit's §2.2
+// records (ux-laws plan §10.3 keeps the state model open; this is the interim honest phrasing).
+const isVisited = (index: number): boolean =>
     props.visited?.includes(index + 1) === true && index + 1 !== props.step;
 const stepAbsent =
     'flex min-h-11 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium text-ink-muted';
@@ -73,11 +76,15 @@ const leaveLink =
                     <Link
                         v-if="item.to"
                         :href="item.to"
-                        :class="[stepLink, index + 1 === props.step ? stepCurrent : isDone(index) ? stepDone : '']"
+                        :class="[stepLink, index + 1 === props.step ? stepCurrent : isVisited(index) ? stepDone : '']"
                         :aria-current="index + 1 === props.step ? 'step' : undefined"
                     >
                         <span class="mr-2 font-mono text-xs" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
-                        <span v-if="isDone(index)" class="ml-2 text-xs text-ink-muted">done</span>
+                        <!-- The current step is named by the count line above and `aria-current`, so it
+                             takes no third word; the other two states each carry theirs. -->
+                        <span v-if="index + 1 !== props.step" class="ml-2 text-xs text-ink-muted">
+                            {{ isVisited(index) ? 'visited' : 'not started' }}
+                        </span>
                     </Link>
                     <span v-else :class="stepAbsent" title="This step arrives with its own slice.">
                         <span class="mr-2 font-mono text-xs" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
