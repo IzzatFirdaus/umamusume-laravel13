@@ -132,8 +132,8 @@ test('commits the previewed file: confirm writes the run and the page leaves the
 
     // The preview prints the provenance string the run will carry, which is the one moment a Trainer can
     // read it before anything is written. `HistoricalRunImportTest` pins what the row stores; the Cockpit
-    // the commit lands on prints no provenance line at all, and KI-100 records that gap rather than
-    // pretending this step reads it back.
+    // the commit lands on prints no provenance line at all, and KI-95 records that gap rather than this
+    // step pretending to read it back.
     await expect(page.getByText(/from pasted CSV \(/)).toBeVisible();
 
     await page.getByRole('button', { name: 'Import 2 turns' }).click();

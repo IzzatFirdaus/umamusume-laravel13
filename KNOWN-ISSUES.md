@@ -2486,6 +2486,12 @@ is set, or `SCREEN_SPEC.md`'s record-screen section is retired with the line and
 corrected to what the screen prints. What closure would not cover: it does not audit the record-screen section's
 other requirements for the same loss; it does not touch KI-88's half two; and it does not change `b30906a`.
 
+**Dated note 2026-10-13 (continuation pass, Slice B.3).** `b910c2d` prints the same `sourceLabel()` string on the
+import preview, so the value the run will store is checkable *before* the write, and the browser case now reads it
+there (the relocation is the second arm the closure paragraph above names). The entry stays OPEN: the written run's
+header still prints no provenance line, which is what this entry is about, and no migration, route or write path
+moved.
+
 ### KI-96 The wizard's ancestry case filled a `<select>` and read the rank as one field, so `career-legacy-deck-steps.spec.ts` was red for two days with nobody re-running it - FILED 2026-10-11 (Round 2 walk, W2), CLOSED 2026-10-11
 
 **Status: CLOSED.** Filed and closed by one change, so this entry quotes no closure hash: the commit that adds
