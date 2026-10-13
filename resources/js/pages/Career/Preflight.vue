@@ -176,7 +176,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
 
         <!-- Warnings: glyph plus text, never colour alone, and each one links to the step it came from. -->
         <section v-if="props.contract.warnings.length > 0" class="mt-6" aria-labelledby="warnings-heading">
-            <h2 id="warnings-heading" class="text-base font-semibold text-ink-strong">
+            <h2 id="warnings-heading" class="text-lg font-semibold text-ink-strong">
                 Warnings
             </h2>
             <ul class="mt-2 space-y-2">
@@ -204,7 +204,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         </p>
 
         <section class="mt-6" aria-labelledby="build-heading">
-            <h2 id="build-heading" class="text-base font-semibold text-ink-strong">Build</h2>
+            <h2 id="build-heading" class="text-lg font-semibold text-ink-strong">Build</h2>
 
             <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
                 <div class="rounded-md border border-rule bg-panel p-3">
@@ -314,7 +314,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         </section>
 
         <section class="mt-6" aria-labelledby="deck-heading">
-            <h2 id="deck-heading" class="text-base font-semibold text-ink-strong">Support deck</h2>
+            <h2 id="deck-heading" class="text-lg font-semibold text-ink-strong">Support deck</h2>
 
             <div v-if="props.contract.deck === null" class="mt-2 rounded-md border border-rule bg-panel p-3 text-sm text-ink">
                 <AbsenceValue compact reason="No six-slot deck is recorded in this setup yet." />
@@ -362,7 +362,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         </section>
 
         <section class="mt-6" aria-labelledby="target-heading">
-            <h2 id="target-heading" class="text-base font-semibold text-ink-strong">Target</h2>
+            <h2 id="target-heading" class="text-lg font-semibold text-ink-strong">Target</h2>
 
             <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
                 <div v-for="stat in props.contract.target.stats" :key="stat.key" class="rounded-md border border-rule bg-panel p-3">

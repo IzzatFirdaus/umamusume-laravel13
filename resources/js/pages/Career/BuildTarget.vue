@@ -309,7 +309,7 @@ function removeAt(index: number): void {
         </p>
 
         <section aria-labelledby="target-summary-heading" class="mt-3 rounded-md border border-rule bg-panel p-4">
-            <h2 id="target-summary-heading" class="text-base font-semibold text-ink-strong">Summary</h2>
+            <h2 id="target-summary-heading" class="text-lg font-semibold text-ink-strong">Summary</h2>
             <p class="mt-2 text-sm text-ink">
                 {{ summary }}
                 <ProvenanceBadge
