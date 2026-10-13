@@ -90,9 +90,10 @@ test.describe('Scenario Selection', () => {
         await expect(card(page, 'Our Grand Concert').getByText('Speed (+400)')).toBeVisible();
 
         // The ruleset version is a named absence on every card, and its reason is one statement in
-        // two media (DESIGN.md §5.6): the summary announces it and the document carries it, so the
-        // two title-attribute probes are replaced by the disclosure they annotated.
-        const ruleset = card(page, 'URA Finale').locator('details').filter({ hasText: /No source defines a Global ruleset version/ });
+        // two media (DESIGN.md §5.6). Scoped to the `dd` that owns the reason: once the facts
+        // disclosure is open, a card-level `details` filter matches the outer collapse too, because
+        // the outer's text now contains the reason.
+        const ruleset = card(page, 'URA Finale').locator('dd').filter({ hasText: /No source defines a Global ruleset version/ }).locator('details');
         await expect(ruleset).toBeVisible();
         await expect(ruleset).toContainText('N/A');
 
@@ -110,7 +111,7 @@ test.describe('Scenario Selection', () => {
 
         const unity = card(page, 'Unity Cup');
 
-        const unityRuleset = unity.locator('details').filter({ hasText: /No source defines a Global ruleset version/ });
+        const unityRuleset = unity.locator('dd').filter({ hasText: /No source defines a Global ruleset version/ }).locator('details');
         await expect(unityRuleset).toBeVisible();
         await expect(unityRuleset).toContainText('N/A');
         await expect(unity.getByText('Rule family', { exact: true }).locator('..').getByText('Team', { exact: true })).toBeVisible();
