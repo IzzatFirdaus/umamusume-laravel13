@@ -11,6 +11,7 @@ use App\Actions\StoreRaceCatalogSlots;
 use App\Actions\StoreSkills;
 use App\Actions\StoreSupportCards;
 use App\Actions\StoreSupportEffects;
+use App\Actions\StoreTraineeGoals;
 use App\Enums\CandidateStatus;
 use App\Enums\MatchTier;
 use App\Models\MatchCandidate;
@@ -21,6 +22,7 @@ use App\Services\DataPipeline\Contracts\SkillSourceParser;
 use App\Services\DataPipeline\Contracts\SourceParser;
 use App\Services\DataPipeline\Contracts\SupportCardSourceParser;
 use App\Services\DataPipeline\Contracts\SupportEffectSourceParser;
+use App\Services\DataPipeline\Contracts\TraineeGoalSourceParser;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -28,8 +30,8 @@ use Illuminate\Support\Facades\Cache;
  * Shared by uma:fetch (network) and uma:reparse (snapshots only).
  *
  * Reference rows that carry their own identity route past the match stage instead, on their parser's
- * contract: a race catalogue, a skill, a card, a trainee profile, a support card, a support effect.
- * See `run()`'s six `is_a()` branches.
+ * contract: a race catalogue, a skill, a card, a trainee profile, a support card, a support effect, a
+ * trainee objective. See `run()`'s seven `is_a()` branches.
  */
 final class PipelineRunner
 {
@@ -42,6 +44,7 @@ final class PipelineRunner
         private readonly StoreCharacterProfiles $storeCharacterProfiles,
         private readonly StoreSupportCards $storeSupportCards,
         private readonly StoreSupportEffects $storeSupportEffects,
+        private readonly StoreTraineeGoals $storeTraineeGoals,
     ) {}
 
     /**
@@ -74,6 +77,38 @@ final class PipelineRunner
                 $snapshotPath,
                 $sourceConfig['timezone'] ?? null,
             );
+
+            return [...$stored, 'review' => 0];
+        }
+
+        /*
+         * A trainee's objective ladder is the seventh routed kind (PRD US-10, ADR-0026), and it leaves the
+         * match stage for the same reason as the six above: a condition id is not a display name. Read as
+         * ordinary `SourceParser` records, every one of the 1,701 objectives would fail to match an
+         * Umamusume and be filed as an unidentifiable character. Identity is the source's own `char_id`,
+         * resolved through `umamusume.external_ref`, and a row collapses on
+         * (trainee, condition id, deadline turn, branch index).
+         *
+         * `catalog:version` moves on a write, the way the card branch below does it, and not the way the
+         * profile branch deliberately does not: the ladder is about to be rendered on the catalog detail
+         * page, which caches behind that counter, so a promotion that left the counter alone would serve
+         * a stale ladder until the TTL expired.
+         */
+        if (is_a($parserClass, TraineeGoalSourceParser::class, true)) {
+            /** @var TraineeGoalSourceParser $parser */
+            $parser = app($parserClass);
+            $stored = $this->storeTraineeGoals->handle(
+                $parser->parse($body),
+                $sourceConfig['url'],
+                $snapshotPath,
+                $sourceConfig['timezone'] ?? null,
+            );
+
+            if ($stored['created'] > 0 || $stored['updated'] > 0) {
+                if (! Cache::add('catalog:version', 0)) {
+                    Cache::increment('catalog:version');
+                }
+            }
 
             return [...$stored, 'review' => 0];
         }

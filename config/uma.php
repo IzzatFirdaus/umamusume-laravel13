@@ -8,6 +8,7 @@ use App\Services\DataPipeline\Parsers\GametoraRaceCatalogParser;
 use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
 use App\Services\DataPipeline\Parsers\GametoraSupportCardParser;
 use App\Services\DataPipeline\Parsers\GametoraSupportEffectParser;
+use App\Services\DataPipeline\Parsers\GametoraUraObjectivesParser;
 
 return [
 
@@ -368,6 +369,53 @@ return [
                 'card_portrait' => 'characters/portrait/trainee/256/{id}.png',
                 'support_thumb' => 'supports/full/small/{id}.png',
             ],
+        ],
+
+        /*
+         * Each trainee's own career objectives: one ladder per character, one row per objective,
+         * feeding `trainee_goals` (PRD US-10, ADR-0026).
+         *
+         * Listed LAST on purpose. The ladder joins onto `race_catalog_slots` on
+         * (year, month, half, title), so the calendar has to exist before this body is stored;
+         * `SourceDocumentSeeder` walks `config('uma.sources')` in order, and a goal row inserted
+         * before the race rows would resolve every race to null and silently store a ladder with
+         * no calendar behind it.
+         *
+         * Robots and rate limit, the §11 package this entry needs. Read against
+         * https://gametora.com/robots.txt on 2026-10-13: it disallows /404, /500, /patron-zone,
+         * /loc/, /cdn-cgi/ and two event paths, publishes no crawl-delay, and does not disallow
+         * /data/. So the bound this tool obeys is its own: one request per fetch, `delay_ms` in
+         * front of it, the per-source lock and `uma.fetch.retry_times` ceiling already in place.
+         *
+         * The approval it inherits is stated rather than assumed, the way `gametora-character-cards`
+         * states it: same host, same publisher, same static-JSON response class as the entry the
+         * owner approved on 2026-09-27. That approval was given without a live robots check
+         * (see the note at `gametora-characters`), and today's read above is the first one made —
+         * it permits the path, and it is reported as a reading of the file, not as publisher consent.
+         *
+         * `manifest` is the KI-67 route, not a new idea: the hash is re-read from the publisher's
+         * manifest each run, and the pinned `url` stays as the fallback because `uma:reparse` runs
+         * with zero network. KI-24 is the reason both are here — a withdrawn hash answers 200 with
+         * the superseded document, so a pin alone serves stale data quietly.
+         *
+         * Server qualifier, which D-227 demands of every stored game value: this is the publisher's
+         * **Japan-side** document, and it is the only objectives export that exists. Rows the source
+         * itself marks `unreleased_servers: ["en"]` are stored flagged and never rendered as a Global
+         * obligation; the race names a Trainer reads come from `race_catalog_slots.title`, which is
+         * already the Global-vetted client string, and not from this file. True as of 2026-10-13.
+         */
+        'gametora-ura-objectives' => [
+            'url' => 'https://gametora.com/data/umamusume/ura-objectives.ead4bbfe.json',
+            'manifest' => [
+                'url' => 'https://gametora.com/data/manifests/umamusume.json',
+                'base' => 'https://gametora.com/data/umamusume/',
+                'key' => 'ura-objectives',
+            ],
+            'parser' => GametoraUraObjectivesParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'ura-objectives.ead4bbfe.json',
         ],
     ],
 
