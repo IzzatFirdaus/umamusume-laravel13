@@ -291,14 +291,17 @@ test('lays out at 1280, 768 and 320 without a horizontal scroll', async ({ page 
 test('walks the action grid from the keyboard with a visible focus ring', async ({ page }) => {
     await openCockpit(page);
 
-    const training = page.getByRole('link', { name: /^Training/ });
+    // Scoped to the Actions region: the section nav (audit 2026-10-12 §3.6) adds a "Races in this
+    // run" link whose name also starts with "Race", and the grid's own entry is the one meant here.
+    const actions = page.getByRole('region', { name: 'Actions' });
+    const training = actions.getByRole('link', { name: /^Training/ });
     await training.focus();
     await expect(training).toBeFocused();
 
     // Tab moves through the grid in reading order; the next entry takes focus, and it carries the
     // global `:focus-visible` ring rather than relying on a hover state (WCAG 2.4.7).
     await page.keyboard.press('Tab');
-    const race = page.getByRole('link', { name: /^Race/ });
+    const race = actions.getByRole('link', { name: /^Race/ });
     await expect(race).toBeFocused();
     await expect(race).toBeInViewport();
 
@@ -340,9 +343,12 @@ test('sizes the cockpit controls to the 44px contract', async ({ page }) => {
     await openCockpit(page);
 
     // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). The same sweep `dashboard.spec.ts` runs.
+    // The grid entries are scoped to the Actions region: the section nav (audit 2026-10-12 §3.6)
+    // adds a "Races in this run" link whose name also starts with "Race".
+    const actions = page.getByRole('region', { name: 'Actions' });
     const targets = [
-        page.getByRole('link', { name: /^Training/ }),
-        page.getByRole('link', { name: /^Race/ }),
+        actions.getByRole('link', { name: /^Training/ }),
+        actions.getByRole('link', { name: /^Race/ }),
         page.getByRole('link', { name: /^Rest/ }),
         page.getByRole('link', { name: /^Recreation/ }),
         page.getByRole('link', { name: /^Scenario action/ }),

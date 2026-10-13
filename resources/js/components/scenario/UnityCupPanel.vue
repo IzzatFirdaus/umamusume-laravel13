@@ -298,19 +298,9 @@ const counterSegments = computed((): string[] => {
                     class="mt-2"
                     glyph="⚠"
                     text="Three parts of this table are publisher conflicts, not settled facts: whether Extreme Bursts count toward the total, the Skill Point figures, and the month of the payout event."
+                    detail="gametora counts the bursts combined and pays 10/20/30/40 SP; umamusu.wiki's criteria never say whether Extremes increment, and two other publishers report 15/15/20/20 with no stat component; the payout is dated late November where those publishers print the first half. The client's own Team Info count is the tiebreaker (run report §7.4, §8.2)."
                     tone="note"
                 />
-                <!-- The methodology the caveat's `title` used to carry is in the DOM now, one statement
-                     in two media instead of a mouse-only attribute (DESIGN.md §5.6's own rule). The
-                     claim above stays open; this is the collapse target, not the warning. -->
-                <details class="mt-1">
-                    <summary class="flex min-h-11 cursor-pointer items-center text-xs text-ink-muted">
-                        The three conflicts, publisher by publisher.
-                    </summary>
-                    <p class="mt-1 text-xs text-ink-muted">
-                        gametora counts the bursts combined and pays 10/20/30/40 SP; umamusu.wiki's criteria never say whether Extremes increment, and two other publishers report 15/15/20/20 with no stat component; the payout is dated late November where those publishers print the first half. The client's own Team Info count is the tiebreaker (run report §7.4, §8.2).
-                    </p>
-                </details>
                 <p class="mt-2 text-xs text-ink-muted">
                     <template v-if="props.scenario.team.payout_timing !== null">
                         The gold versions arrive from the scripted event in {{ props.scenario.team.payout_timing }}.
@@ -340,17 +330,9 @@ const counterSegments = computed((): string[] => {
                     A burst on the Wit facility grants
                     {{ props.scenario.team.special_training.wit_burst_energy_bonus }} Energy recovery.
                 </p>
-                <!-- The absence claim is the summary and the reason is the body: one statement in two
-                     media, reachable by keyboard and screen reader rather than by a `title` that
-                     answers a mouse only (DESIGN.md §5.6). -->
-                <details class="mt-2">
-                    <summary class="flex min-h-11 cursor-pointer items-center text-xs text-ink-muted">
-                        Per-facility levels and per-member training state are not recorded here.
-                    </summary>
-                    <p class="mt-1 text-xs text-ink-muted">
-                        No column records facility levels, per-member training state or Special Training gains; the Cockpit's turns carry what the Trainer entered.
-                    </p>
-                </details>
+                <p class="mt-2 text-xs text-ink-muted" title="No column records facility levels, per-member training state or Special Training gains; the Cockpit's turns carry what the Trainer entered.">
+                    Per-facility levels and per-member training state are not recorded here.
+                </p>
             </div>
 
             <!-- G4's surfaces, mounted beside the blocks that already exist rather than folding into
