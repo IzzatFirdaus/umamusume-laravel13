@@ -191,7 +191,9 @@
      elements, **zero** Due-now marks on a fresh run — the honest state, because a run that has
      recorded no turn has no `nextTurnToPlay()` to be current against (`TrainingRun.php:640-644`),
      so every unmet goal is `upcoming` and the Due-now state only attaches once a turn is recorded
-     (`CockpitController.php:1948-1950`); the panel-wide count read 21 rows (all three groups plus
+     (`CockpitController.php:1958-1960`, the `$state` match inside `traineeGoalRows()`; repointed
+     2026-10-14 from `:1948-1950`, which the peers' career commits shifted by ten lines); the
+     panel-wide count read 21 rows (all three groups plus
      the milestone list items, not the goals group alone), axe A+AA clean. Alternates-counted-once
      is carried by the composer's own tests, not re-asserted in a browser.
   2. **The config reconciliation — LANDED, then its pins moved.** The career-goals flag is committed
