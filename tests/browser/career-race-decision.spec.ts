@@ -96,12 +96,16 @@ test('names each absent race field with its reason, and refuses a readiness band
     // the list, and the card itself. The `!` is aria-hidden, so the heading matched by accessible name
     // is the word alone while a sighted Trainer reads glyph and word together — the state never rests
     // on colour or on the glyph. Exact text is what these three assert: the marker element's own text
-    // is "! NEXT" and "! Mandatory", so `exact: true` on the bare word matches nothing. And the screen
-    // says "Mandatory", never "Goal" (`79ffad5`).
+    // is "! NEXT" and "! Mandatory", so `exact: true` on the bare word matches nothing. `79ffad5`'s
+    // ruling holds for the calendar's obligation — the screen says "Mandatory", never "Goal" for it.
+    // What ADR-0026 added is a second fact about the same race: the trainee's own objective prints the
+    // Goal mark beside the gate lines, and the debut is that objective for every trainee, so the card
+    // for it carries exactly one mark with the requirement in the source's own words.
     await expect(page.getByRole('heading', { name: 'Mandatory races' })).toBeVisible();
     await expect(page.getByText('! NEXT', { exact: true })).toBeVisible();
     await expect(page.getByText('! Mandatory', { exact: true })).toBeVisible();
-    await expect(page.getByText('Goal', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Goal', { exact: true })).toHaveCount(1);
+    await expect(page.getByText('· Participate in Junior Make Debut')).toBeVisible();
 
     // The screen carries no percentage anywhere: a win estimate and the brief's risk thresholds are
     // both percentages, and neither is built.
