@@ -146,8 +146,17 @@ action green is hue ~87°, and six degrees of drift breaks the resemblance
 carries **60** `--color-*` properties plus 2 font stacks, and
 `tests/Feature/DesignTokensTest.php` pins that 60 as a tripwire ("counts every colour
 token the static theme declares") — adding a role moves the number in the test and in
-this file together. The 40 roles with no row above are not undocumented decisions, they
-are token families whose contract lives in their own `app.css` comment block:
+this file together. **(2026-10-14 erratum: the tripwire pins 59, not 60.** It reads the
+stylesheet rather than a hand count — `tests/Feature/DesignTokensTest.php:237` names the
+test, `:268` asserts `toHaveCount(59)` over `array_unique` of the matched names — and a
+direct scan of `resources/css/app.css` on 2026-10-14 measures 110 `--color-*` declarations
+resolving to **59** unique names. The cause is recorded in
+`docs/proposals/frontend-development-plan.md`, Part 1.6.2, landed at `b30906a`
+(2026-10-09): `--color-on-green` lost its only consumer and went with the declaration. The
+figures in the sentence above count rows, not declarations: its 20 rows name 21 distinct
+tokens, all of them still declared, so 38 declared tokens have no row above and "the 40
+roles" is a row subtraction.)** The 40 roles with no row above are not undocumented
+decisions, they are token families whose contract lives in their own `app.css` comment block:
 
 | Family         | Roles                                                  | Why it is not in the table above                                                                                                        |
 | -------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
