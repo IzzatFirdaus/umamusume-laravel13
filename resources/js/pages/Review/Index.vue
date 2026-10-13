@@ -75,7 +75,11 @@ defineProps<{
                         {{ candidate.proposed_name_ja }}
                     </p>
                     <p v-if="candidate.suggestion" class="text-ink-muted">
+                        <!-- The merge target field starts prefilled with this row's id, so the id prints
+                             beside the name: a prefilled value a Trainer cannot check is a value they can
+                             only trust. The form is what writes the id; nothing here reads it back. -->
                         Suggestion: {{ candidate.suggestion }}
+                        <span v-if="candidate.suggested_umamusume_id !== null" class="font-mono text-xs tabular-nums">id {{ candidate.suggested_umamusume_id }}</span>
                     </p>
 
                     <CandidateForm :candidate="candidate" :alias-languages="aliasLanguages" />
