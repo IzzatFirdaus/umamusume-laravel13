@@ -1967,16 +1967,8 @@ class CockpitController extends Controller
                 'race_url' => $slot !== null && ! $met && $state !== null
                     ? route('runs.races.decision', $run)
                     : null,
-                'absence' => match (true) {
-                    $goal->global_unreleased => 'The source marks '.$race.' as not released on [Global], so this'
-                        .' calendar holds no row to record it against.',
-                    $phrase === null => 'The source states a requirement for this objective that this tool has not'
-                        .' decoded. Its own figures are condition type '.$goal->source_cond_type
-                        .', value '.$goal->source_cond_value
-                        .($goal->source_cond_value_2 > 0 ? ' and second value '.$goal->source_cond_value_2 : '')
-                        .', kept raw on the row.',
-                    default => null,
-                },
+                // One owner for the sentence, shared with the catalog detail ladder (`TraineeGoal::absenceReason()`).
+                'absence' => $goal->absenceReason(),
             ];
 
             if ($state !== null && $reached && ! $met && $run->status === RunStatus::Active

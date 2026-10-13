@@ -5,6 +5,7 @@ import SkillRow from '../../components/SkillRow.vue';
 import FormDetail from '../../components/catalog/FormDetail.vue';
 import FormTabs from '../../components/catalog/FormTabs.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 
 interface Alias {
@@ -62,6 +63,31 @@ interface Profile {
     three_sizes: { b: number | null; h: number | null; w: number | null } | null;
 }
 
+/**
+ * One rung of the trainee's own ladder (`ADR-0026`). The keys are the Cockpit's goals rows verbatim
+ * (`CockpitController::traineeGoalRows()`), composed by the same model readers, so the two surfaces
+ * cannot drift into two vocabularies for one objective.
+ *
+ * `state`, `race_url` and the group's `summary` are the run-scoped half of that contract and are null
+ * on this page because no run is in progress to read them from. This block therefore prints no due-now
+ * mark and no cleared count rather than deriving either from nothing.
+ */
+interface GoalRow {
+    label: string;
+    state: string | null;
+    year_label: string;
+    turn: number;
+    race_url: string | null;
+    absence: string | null;
+}
+
+interface TraineeGoals {
+    rows: GoalRow[];
+    note: string;
+    summary: string | null;
+    empty_note: string | null;
+}
+
 interface Trainee {
     id: number;
     slug: string;
@@ -88,6 +114,7 @@ const props = defineProps<{
     hiddenFormCount: number;
     runs: Run[];
     skillLists: SkillList[];
+    traineeGoals: TraineeGoals;
     provenance: Source[];
     showUnconfirmed: boolean;
     /** The carry endpoint: writes this trainee into the setup draft and opens the wizard (Slice 4.3). */
@@ -333,12 +360,40 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
             </p>
         </section>
 
-        <section class="mt-8" aria-labelledby="goal-races">
-            <h2 id="goal-races" class="text-lg font-semibold text-ink-strong">Goal races</h2>
-            <p class="mt-2 text-sm text-ink-muted">
-                Goal races are not recorded. The source publishes per-trainee goal races; this tool
-                does not record them.
+        <section class="mt-8" aria-labelledby="trainee-goals">
+            <!-- `ADR-0026`'s widest-reach half (owner decision 3). This block printed "Goal races are
+                 not recorded" until the per-character objectives landed; the rows and both sentences
+                 come from the server, and the requirement phrase is the same reader the Cockpit's
+                 Career goals group uses (`TraineeGoal::obligationLine()`), so one objective cannot
+                 have two wordings on two screens.
+
+                 No `GoalMark.vue` here, deliberately: that mark picks out one objective among the
+                 races a Trainer is choosing between, and on this screen every row is an objective, so
+                 the word would repeat without distinguishing anything. The run-scoped fields are null
+                 on this page's payload, so no due-now mark and no cleared count is rendered here
+                 either; both print in the Cockpit while a career is in progress. -->
+            <h2 id="trainee-goals" class="text-lg font-semibold text-ink-strong">Trainee goals</h2>
+
+            <p v-if="props.traineeGoals.rows.length === 0" class="mt-2 text-sm text-ink-muted">
+                {{ props.traineeGoals.empty_note }}
             </p>
+
+            <ul v-else class="mt-2 divide-y divide-rule rounded-md border border-rule">
+                <li
+                    v-for="row in props.traineeGoals.rows"
+                    :key="row.label"
+                    class="flex flex-wrap items-baseline gap-x-3 px-3 py-2 text-sm"
+                >
+                    <span class="font-medium text-ink">{{ row.label }}</span>
+                    <span class="text-xs text-ink-muted">{{ row.year_label }} year, turn {{ row.turn }}</span>
+
+                    <!-- The reason is rendered, not parked in a `title`: an unmarked gap reads as a
+                         value the Trainer could have entered. -->
+                    <AbsenceValue v-if="row.absence !== null" :reason="row.absence" compact />
+                </li>
+            </ul>
+
+            <p class="mt-2 text-xs text-ink-muted">{{ props.traineeGoals.note }}</p>
         </section>
 
         <section class="mt-8" aria-labelledby="her-runs">

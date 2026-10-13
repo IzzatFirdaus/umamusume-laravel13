@@ -141,6 +141,29 @@ class TraineeGoal extends Model
     }
 
     /**
+     * Why this row prints no readable requirement, in the sentence both ladder surfaces use.
+     *
+     * One owner for the wording because the Cockpit's Career goals group and the catalog detail page print
+     * the same rows: two copies of a sentence is how two vocabularies for one absence start, the same reason
+     * `obligationLine()` is the single reader for the requirement itself.
+     */
+    public function absenceReason(): ?string
+    {
+        $phrase = $this->requirementPhrase();
+
+        return match (true) {
+            $this->global_unreleased => 'The source marks '.$this->raceName().' as not released on [Global],'
+                .' so this calendar holds no row to record it against.',
+            $phrase === null => 'The source states a requirement for this objective that this tool has not'
+                .' decoded. Its own figures are condition type '.$this->source_cond_type
+                .', value '.$this->source_cond_value
+                .($this->source_cond_value_2 > 0 ? ' and second value '.$this->source_cond_value_2 : '')
+                .', kept raw on the row.',
+            default => null,
+        };
+    }
+
+    /**
      * Whether this row states a requirement the Trainer can read.
      */
     public function isDecoded(): bool

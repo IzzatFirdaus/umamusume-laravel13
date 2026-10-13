@@ -5,11 +5,18 @@ declare(strict_types=1);
 use App\Enums\CardRarity;
 use App\Enums\ReleaseStatus;
 use App\Enums\RunStatus;
+use App\Enums\TraineeGoalType;
 use App\Models\CharacterCard;
+use App\Models\RaceCatalogSlot;
 use App\Models\Skill;
+use App\Models\TraineeGoal;
 use App\Models\TrainingRun;
+use App\Models\TurnEntry;
 use App\Models\Umamusume;
 use App\Models\UmamusumeProfile;
+use App\Services\DataPipeline\PipelineRunner;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
@@ -346,4 +353,186 @@ it('prefers the profile document and falls back to the trainee column for the Ja
     $profile->update(['name_ja' => null]);
 
     expect($umamusume->fresh()->japaneseName())->toBe('スペシャルウィーク');
+});
+
+/*
+ * ADR-0026's widest-reach half (owner decision 3): the trainee's own objectives, read on the catalog
+ * detail page, where no run is in progress to derive anything from. `CockpitController::traineeGoalRows()`
+ * composes the same rows for a career that is running; the pair of tests below pins that the two agree
+ * row-for-row and that this page claims nothing it cannot source.
+ */
+
+/**
+ * A trainee with a three-rung ladder spanning two career years.
+ */
+function ladderTrainee(): Umamusume
+{
+    $umamusume = detailTrainee(1);
+
+    $debut = RaceCatalogSlot::factory()->create([
+        'scenario_key' => null, 'year' => 1, 'month' => 1, 'half' => 'Late', 'title' => 'Make Debut',
+    ]);
+    $derby = RaceCatalogSlot::factory()->create([
+        'scenario_key' => null, 'year' => 2, 'month' => 4, 'half' => 'Late', 'title' => 'Tokyo Yushun (Japanese Derby)',
+    ]);
+
+    TraineeGoal::factory()->participate()->create([
+        'umamusume_id' => $umamusume->id,
+        'race_catalog_slot_id' => $debut->id,
+        'career_year' => 1, 'turn' => 12, 'source_order' => 1,
+    ]);
+    TraineeGoal::factory()->fan(5000, 37)->create([
+        'umamusume_id' => $umamusume->id,
+        'source_order' => 2,
+    ]);
+    TraineeGoal::factory()->create([
+        'umamusume_id' => $umamusume->id,
+        'race_catalog_slot_id' => $derby->id,
+        'goal_type' => TraineeGoalType::Placement,
+        'required_placement' => 5,
+        'career_year' => 2, 'turn' => 34, 'source_order' => 3,
+    ]);
+
+    return $umamusume;
+}
+
+it('lists her own ladder in the order the source publishes it', function (): void {
+    $umamusume = ladderTrainee();
+
+    $rows = $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->inertiaProps('traineeGoals.rows');
+
+    // Ordered by the career and then by the deadline turn, not by insertion: Junior first, then the
+    // turn-34 Derby ahead of the turn-37 fan gate even though the source orders them the other way.
+    expect($rows)->toHaveCount(3)
+        ->and($rows[0]['label'])->toBe('Participate in Make Debut')
+        ->and($rows[0]['year_label'])->toBe('Junior')
+        ->and($rows[0]['turn'])->toBe(12)
+        ->and($rows[1]['label'])->toBe('Place top 5 in Tokyo Yushun (Japanese Derby)')
+        ->and($rows[1]['year_label'])->toBe('Classic')
+        ->and($rows[1]['turn'])->toBe(10)
+        ->and($rows[2]['label'])->toBe('Earn 5000 fans')
+        // 37 counted from the start of the career is turn 13 of its own year, which is the clock every
+        // other turn on this page prints.
+        ->and($rows[2]['year_label'])->toBe('Classic')
+        ->and($rows[2]['turn'])->toBe(13);
+});
+
+it('claims no progress it has no run to read', function (): void {
+    $umamusume = ladderTrainee();
+
+    $ladder = $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->inertiaProps('traineeGoals');
+
+    // `state`, `race_url` and the cleared count are the run-scoped half of the Cockpit's row contract.
+    // They are null here because this screen has no run, and a due-now mark or a `Goals Achieved` figure
+    // without one would be an invented reading (PRD §6.11, and the same rule plan §5.5 sets for
+    // provenance: a badge qualifies a value that exists).
+    expect($ladder['rows'])->toHaveCount(3)
+        ->and(array_column($ladder['rows'], 'state'))->toBe([null, null, null])
+        ->and(array_column($ladder['rows'], 'race_url'))->toBe([null, null, null])
+        ->and(array_column($ladder['rows'], 'absence'))->toBe([null, null, null])
+        ->and($ladder['summary'])->toBeNull()
+        ->and($ladder['empty_note'])->toBeNull();
+});
+
+it('prints the same rows the Cockpit prints for the same trainee', function (): void {
+    $umamusume = ladderTrainee();
+    $run = TrainingRun::factory()->create([
+        'umamusume_id' => $umamusume->id,
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Active,
+    ]);
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 12, 'fans' => 100]);
+
+    $catalog = $this->get(route('catalog.show', $umamusume->slug))->assertOk()->inertiaProps('traineeGoals.rows');
+
+    /** @var list<array<string, mixed>> $cockpit */
+    $cockpit = $this->get(route('runs.cockpit', $run))->assertOk()->inertiaProps('scenario.objectives')[0]['rows'];
+
+    // The two surfaces read the same model methods, so a drift between them is a bug in one of the
+    // readers rather than a difference the page is allowed to have.
+    expect(array_column($catalog, 'label'))->toBe(array_column($cockpit, 'label'))
+        ->and(array_column($catalog, 'year_label'))->toBe(array_column($cockpit, 'year_label'))
+        ->and(array_column($catalog, 'turn'))->toBe(array_column($cockpit, 'turn'))
+        ->and(array_column($catalog, 'absence'))->toBe(array_column($cockpit, 'absence'));
+});
+
+it('names the unread requirement in the same sentence the Cockpit uses', function (): void {
+    $umamusume = detailTrainee(1);
+    TraineeGoal::factory()->undecoded()->create([
+        'umamusume_id' => $umamusume->id,
+        'source_cond_type' => 2,
+        'source_cond_value' => 7,
+        'source_cond_value_2' => 0,
+    ]);
+
+    $rows = $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->inertiaProps('traineeGoals.rows');
+
+    expect($rows[0]['absence'])->toBe('The source states a requirement for this objective that this tool'
+        .' has not decoded. Its own figures are condition type 2, value 7, kept raw on the row.');
+});
+
+it('says so when the fetched ladder states nothing for her', function (): void {
+    // The empty branch. Measured on a seeded scratch database on 2026-10-14: all 67 promoted trainees
+    // carry rows, so no seeded database reaches this branch, exactly like the "Not yet released on
+    // Global" notice `tests/browser/catalog-detail.spec.ts:9-16` records. The prop is proven here and
+    // the reachable populated state in the browser spec.
+    $umamusume = detailTrainee(1);
+
+    $ladder = $this->get(route('catalog.show', $umamusume->slug))
+        ->assertOk()
+        ->inertiaProps('traineeGoals');
+
+    expect($ladder['rows'])->toBe([])
+        ->and($ladder['empty_note'])->toBe('The fetched ladder states no objective for this trainee,'
+            .' so nothing is listed here.');
+});
+
+it('composes the ladder fresh after a promotion, in two queries whatever its length', function (): void {
+    $umamusume = Umamusume::factory()->create([
+        'name' => 'Rice Shower',
+        'slug' => 'rice-shower',
+        'release_status' => ReleaseStatus::GlobalReleased,
+        'external_ref' => 'gametora:char:1030',
+    ]);
+
+    Cache::forget('catalog:version');
+    $this->get(route('catalog.show', $umamusume->slug))->assertOk();
+
+    // The real promotion path rather than a factory row, because the store action is what writes a
+    // ladder. `show()` holds no copy of it, so the next read composes the stored rows; a later change
+    // that caches this page without keying on `catalog:version` fails here (`CatalogController::show()`).
+    app(PipelineRunner::class)->run(
+        'gametora-ura-objectives',
+        config('uma.sources.gametora-ura-objectives'),
+        (string) file_get_contents(database_path('seeders/data/ura-objectives.ead4bbfe.json')),
+        'snapshots/ura-objectives.ead4bbfe.json',
+    );
+
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+
+    $props = $this->get(route('catalog.show', $umamusume->slug))->assertOk()->inertiaProps('traineeGoals');
+
+    $expected = TraineeGoal::query()
+        ->where('umamusume_id', $umamusume->id)
+        ->where('goal_type', '!=', TraineeGoalType::FinalRound->value)
+        ->count();
+
+    // One query for the ladder and one batched for the calendar titles it names, for a 1,701-objective
+    // document: a per-row lookup would show up as a count well above two.
+    $ladderQueries = array_filter(
+        array_column(DB::getQueryLog(), 'query'),
+        static fn (string $sql): bool => str_contains($sql, 'trainee_goals'),
+    );
+
+    expect($props['rows'])->toHaveCount($expected)
+        ->and($props['rows'])->not->toBe([])
+        ->and($expected)->toBe(8)
+        ->and($ladderQueries)->toHaveCount(2);
 });

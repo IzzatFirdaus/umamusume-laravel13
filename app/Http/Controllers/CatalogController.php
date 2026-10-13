@@ -6,10 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Enums\CardRarity;
 use App\Enums\ReleaseStatus;
+use App\Enums\TraineeGoalType;
 use App\Http\Requests\CatalogSearchRequest;
 use App\Models\CharacterCard;
 use App\Models\DataSource;
 use App\Models\Skill;
+use App\Models\TraineeGoal;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\UmamusumeAlias;
@@ -255,6 +257,13 @@ class CatalogController extends Controller
      * Leaving it out is the fix; see `cached()` for the same reason stated with the evidence
      * (KI-2).
      *
+     * The trainee ladder (`traineeGoalLadder()`) is composed on that same uncached read, which is also
+     * why a promotion cannot serve a stale one here: `catalog:version` is bumped by the store action
+     * (`StoreTraineeGoals` through `PipelineRunner`) and this page never holds a copy of either answer.
+     * Anyone adding a `Cache::remember` to `show()` later must key it on that version or the ladder goes
+     * stale by construction. `CatalogDetailPageTest` proves the freshness by promoting a row and reading
+     * the page twice.
+     *
      * @throws NotFoundHttpException when the slug is unknown
      */
     public function show(Request $request, string $slug): Response
@@ -391,6 +400,9 @@ class CatalogController extends Controller
                     ->values()
                     ->all(),
             ])->values()->all(),
+            // ADR-0026's widest-reach ruling (owner decision 3): the trainee's own career ladder, read
+            // before any run exists for it.
+            'traineeGoals' => $this->traineeGoalLadder($umamusume),
             'provenance' => $umamusume->dataSources->map(static fn (DataSource $source): array => [
                 'url' => $source->url,
                 'source_key' => $source->source_key,
@@ -401,6 +413,65 @@ class CatalogController extends Controller
             // in this controller that did.
             'showUnconfirmed' => $showUnconfirmed,
         ]);
+    }
+
+    /**
+     * The trainee's own ladder as the source states it, with no run to read progress from.
+     *
+     * `ADR-0026`'s widest-reach ruling (owner decision 3): the ladder a career asks of a trainee is
+     * readable before one is started. The row keys are `CockpitController::traineeGoalRows()`'s keys and
+     * every string comes from the same readers (`TraineeGoal::obligationLine()`, `yearLabel()`,
+     * `turnWithinYear()`, `absenceReason()`), so the two surfaces cannot drift into two vocabularies for
+     * one objective, which is the same reason the calendar turn arithmetic has one owner (`ADR-0015`).
+     *
+     * Three run-scoped fields are null here and each null is a statement about this page rather than a
+     * missing value: `state`, `race_url` and the group's `summary` count are read from a run's records
+     * (which entries finished, which fans were logged, which turn is next to play), and this screen has
+     * no run. Printing a due-now mark or a cleared count without one would be an invented reading, and
+     * PRD §6.11 keeps the block an integer pair or nothing at all.
+     *
+     * Two queries whatever the ladder's length: one for the rows, one batched for the calendar titles
+     * `raceName()` prefers. The `FinalRound` filter is the plan §2 ruling, not a display choice: those
+     * rows are the scenario's obligation and the Cockpit's Mandatory races group renders them.
+     *
+     * @return array{rows: list<array<string, mixed>>, note: string, summary: null, empty_note: string|null}
+     */
+    private function traineeGoalLadder(Umamusume $umamusume): array
+    {
+        /** @var Collection<int, TraineeGoal> $goals */
+        $goals = TraineeGoal::query()
+            ->where('umamusume_id', $umamusume->id)
+            ->where('goal_type', '!=', TraineeGoalType::FinalRound->value)
+            ->with('raceCatalogSlot')
+            ->orderBy('career_year')
+            ->orderBy('turn')
+            ->orderBy('source_order')
+            ->orderBy('source_race_choice')
+            ->get();
+
+        $rows = $goals->map(static fn (TraineeGoal $goal): array => [
+            'label' => $goal->obligationLine(),
+            'state' => null,
+            'year_label' => $goal->yearLabel(),
+            'turn' => $goal->turnWithinYear(),
+            'race_url' => null,
+            'absence' => $goal->absenceReason(),
+        ])->all();
+
+        return [
+            'rows' => $rows,
+            'note' => 'Read from the objectives document this tool fetches for this character.'
+                .' Whether a goal is met, which one is due now, and how many are cleared are read from'
+                .' a run, so they print in the Cockpit while a career is in progress.',
+            // The key the Cockpit's group carries, held null because this page has no run to count with.
+            // A shape difference here would be a second contract for one ladder.
+            'summary' => null,
+            // The empty array is the branch the page takes; a second boolean for the same fact would be
+            // a second source of truth for it.
+            'empty_note' => $rows === []
+                ? 'The fetched ladder states no objective for this trainee, so nothing is listed here.'
+                : null,
+        ];
     }
 
     /**

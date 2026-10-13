@@ -20,7 +20,7 @@ const EIGHT_SECTIONS = [
     'Aptitude',
     'Costume forms',
     'Skills',
-    'Goal races',
+    'Trainee goals',
     'Her runs',
     'Aliases',
     'Provenance',
@@ -36,6 +36,56 @@ test('renders the eight sections in the binding order', async ({ page }) => {
     // checklist uses to sweep them.
     const headings = await page.getByRole('heading', { level: 2 }).allTextContents();
     expect(headings).toEqual(EIGHT_SECTIONS);
+});
+
+// ADR-0026's widest-reach half (owner decision 3): the trainee's own objectives, readable before a run
+// exists. The composition is proven server-side by `CatalogDetailPageTest` (order, the two-query read,
+// the row-for-row match with the Cockpit, the promotion freshness); what only a browser can see is that
+// the page renders the ladder rather than the retired absence sentence, and that the gap on an unread
+// requirement is a disclosure a Trainer can open.
+//
+// The empty branch is not coverable here, and the reason is the same one recorded above for the "Not
+// yet released on Global" notice: the suite's scratch database is built by `migrate --seed`, which
+// promotes 67 trainees and gives every one of them a ladder (measured 2026-10-14: 829 rows, 67
+// distinct trainees, zero promoted trainees with none). The empty prop is proven in the feature test.
+test('prints her own ladder, the source wording, and the reason a rung is unread', async ({ page }) => {
+    await page.goto('/umamusume/special-week');
+    await page.locator('#app > *').first().waitFor();
+
+    // Scoped to the block that owns the rows. A page-wide `getByText` that matches a race name printed
+    // in another section is the false pass that bit the scenario panel specs.
+    const goals = page.locator('section[aria-labelledby="trainee-goals"]');
+
+    const rows = goals.getByRole('listitem');
+    // Special Week's ladder on the seeded document: 10 stored rows, 3 of them the post-December rounds
+    // the Mandatory races group renders, so 7 rungs print here.
+    await expect(rows).toHaveCount(7);
+
+    await expect(rows.first()).toContainText('Participate in Junior Make Debut');
+    // The clock the whole page shares: the turn counted within its own career year, not the source's
+    // absolute turn 12-within-78.
+    await expect(rows.first()).toContainText('Junior year, turn 12');
+    await expect(rows.last()).toContainText('Place 1st in Arima Kinen');
+
+    // One rung this tool has not decoded (KI-100): the row keeps the race the calendar names, and the
+    // gap is an N/A whose disclosure states the source's own condition codes rather than a guess.
+    const unread = goals.locator('summary', { hasText: 'has not decoded' });
+    await expect(unread).toHaveCount(1);
+    await expect(unread).toContainText('N/A');
+
+    // No progress readout where there is no run to read one from, and the block says where it lives.
+    await expect(goals.getByText('Goals Achieved')).toHaveCount(0);
+    await expect(goals).toContainText('they print in the Cockpit while a career is in progress');
+
+    // The sentence this block replaced is gone, not merely behind a different heading.
+    await expect(goals).not.toContainText('not recorded');
+
+    // No em dash in shipped copy (AGENTS.md §5).
+    await expect(goals).not.toContainText('—');
+
+    // X-3, one accented primary per screen: the ladder adds no control, so the "New run" button stays
+    // the only enamel element on the page, as it was before this block rendered rows.
+    await expect(page.locator('.enamel')).toHaveCount(1);
 });
 
 test('prints the Japanese name in its own language and links the provenance source', async ({ page }) => {
