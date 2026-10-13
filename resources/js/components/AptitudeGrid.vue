@@ -16,10 +16,13 @@ const rows: { label: string; key: string }[][] = [
         { label: 'Long', key: 'long' },
     ],
     [
-        { label: 'Front runner', key: 'front_runner' },
-        { label: 'Pace chaser', key: 'pace_chaser' },
-        { label: 'Late surger', key: 'late_surger' },
-        { label: 'End closer', key: 'end_closer' },
+        // The running styles are the Global client's words, and the case is the client's too
+        // (`lang/en/uma.php:109-112` owns the vocabulary): these were hand-typed lowercase and read
+        // as a second spelling of the four terms every other surface prints.
+        { label: 'Front Runner', key: 'front_runner' },
+        { label: 'Pace Chaser', key: 'pace_chaser' },
+        { label: 'Late Surger', key: 'late_surger' },
+        { label: 'End Closer', key: 'end_closer' },
     ],
 ];
 </script>

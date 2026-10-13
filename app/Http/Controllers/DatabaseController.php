@@ -185,7 +185,7 @@ class DatabaseController extends Controller
                 'servers' => array_values((array) $row['servers']),
                 'cadence' => (string) $row['cadence'],
                 'mechanics' => (string) $row['mechanics'],
-                'state' => (string) $row['state'],
+                'state' => self::referenceState($row['state'] ?? null),
                 'source_title' => (string) $row['source_title'],
             ];
         }
@@ -227,7 +227,7 @@ class DatabaseController extends Controller
                 'effect' => (string) $row['effect'],
                 'spend_site' => (string) $row['spend_site'],
                 'kind' => (string) $row['kind'],
-                'state' => (string) $row['state'],
+                'state' => self::referenceState($row['state'] ?? null),
                 'source_title' => (string) $row['source_title'],
                 'detail' => (string) $row['detail'],
             ];
@@ -289,7 +289,7 @@ class DatabaseController extends Controller
                 'global_name' => (string) $row['global_name'],
                 'effect' => (string) $row['effect'],
                 'records' => (int) $row['records'],
-                'state' => (string) $row['state'],
+                'state' => self::referenceState($row['state'] ?? null),
                 'source_title' => (string) $row['source_title'],
             ];
         }
@@ -320,5 +320,22 @@ class DatabaseController extends Controller
             ],
             'totalCount' => count($categories),
         ]);
+    }
+
+    /**
+     * The row's source-strength state, or the unknown fallback.
+     *
+     * The badge indexes its map with the state and has no fallback, so an out-of-vocabulary config
+     * string was a render-time failure on the whole reference view; the four states the config's own
+     * comment defines are the only values this passes, and `calculated` stays reserved there because
+     * no reference row is derived by this app (DESIGN.md §5's ruling on the two axes).
+     *
+     * @param  mixed  $state  the config row's own `state` string
+     */
+    private static function referenceState(mixed $state): string
+    {
+        return in_array($state, ['confirmed', 'calculated', 'estimated', 'unknown'], true)
+            ? (string) $state
+            : 'unknown';
     }
 }
