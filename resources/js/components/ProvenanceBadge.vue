@@ -3,12 +3,23 @@
  * The four provenance states (design-2.0 §49, verbatim).
  *
  * The canonical union lives in `resources/js/types.ts`, the one module both TypeScript and the SFC
- * compiler resolve natively, and this file re-exports it so the name's public home is unchanged. One
- * caveat, stated once here so no later slice re-learns it the hard way: a consuming SFC **cannot** put
- * an imported type inside its own `defineProps<>` — `@vue/compiler-sfc` resolves prop types with no
- * filesystem access, so an imported type fails the build ("No fs option provided to compileScript in
- * non-Node environment"). Pages declare their props contract locally; this re-export is for everything
- * around props, which is what the 18 files that used to hand-write the union now alias instead.
+ * compiler resolve natively, and this file re-exports it so the name's public home is unchanged. That
+ * is what the 18 files that used to hand-write the union now alias instead.
+ *
+ * Two limits used to be described as one, and they are not. Measured on this tree's own
+ * `@vue/compiler-sfc` 3.5.43, in both its node and its esm-browser build:
+ *
+ * - What fails is handing the compiler a whole imported contract, `defineProps<Imported>()`. It has to
+ *   open the file to expand the members, and `@vitejs/plugin-vue` 6.0.9 passes no `fs` option to
+ *   `compileScript` (`node_modules/@vitejs/plugin-vue/dist/index.mjs:302-313`), so the build stops at
+ *   "No fs option provided to compileScript in non-Node environment". An imported type used as a
+ *   *member* of a locally-declared contract compiles, whether written directly or behind a local alias
+ *   (`type Badge = ProvenanceState`, which `scenario/UraPanel.vue:27` does inside its own props block).
+ * - What costs something is the accepted form. With no `fs` the compiler cannot expand an imported
+ *   union, so the prop is emitted as `type: null` and Vue stops checking it; the same union written
+ *   inline, as below, emits `type: String`. That, not a compile error, is why `state` keeps its
+ *   literal: every provenance figure on every screen routes through this component, and a state string
+ *   the server got wrong should fail at the prop boundary instead of drawing a blank glyph.
  */
 import type { ProvenanceState } from '../types';
 

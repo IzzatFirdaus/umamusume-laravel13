@@ -20,8 +20,10 @@
  * glyphs inside `ProvenanceBadge.vue` alone, so a second component printing one would split a vocabulary
  * across two owners and read as a provenance statement where there is none.
  *
- * Props are declared locally: `@vue/compiler-sfc` cannot resolve an imported type inside `defineProps`
- * (gate TS7), so the shape is written here and the page forwards its own typed object into it.
+ * Props are declared locally, and stay that way: handing `defineProps<>` a whole imported contract is
+ * what this build refuses, because the compiler cannot expand imported members without an `fs` option
+ * (gate TS7; `ProvenanceBadge.vue` carries the measured boundary). A type declared in this file, like
+ * `Row` below, is not in that case at all.
  */
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 

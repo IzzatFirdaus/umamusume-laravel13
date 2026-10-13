@@ -28,7 +28,8 @@ export type ProvenanceState = 'confirmed' | 'calculated' | 'estimated' | 'unknow
  * refusal classes, the provenance rows and the absence of any score are part of what they must not
  * redefine. Producer: `app/Services/Advisor/NextDecision.php`; consumer:
  * `resources/js/components/career/NextDecision.vue`, which re-declares the shape locally because
- * TypeScript 7 cannot resolve an imported type inside `defineProps<>` (see `ProvenanceBadge.vue:6-10`).
+ * `defineProps<Imported>()` cannot expand an imported interface in this build (the header of
+ * `ProvenanceBadge.vue` carries the measured boundary).
  *
  * **There is no score, no confidence and no band field, and that absence is the contract.** A score and
  * a numeric confidence are unsourced (`ADR-0001` §3) and `ADR-0020` §2 says no figure may read as more
