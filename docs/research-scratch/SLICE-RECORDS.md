@@ -5222,3 +5222,87 @@ commit, and `ff7332c` is the orphaned twin named in KI-99. Every commit after th
 private `GIT_INDEX_FILE` with `git update-ref` compare-and-set against the observed HEAD, and the paths were
 re-staged afterwards so a later peer commit could not stage their pre-fix blobs; at the end of this pass the
 shared index equals HEAD for all of them.
+## UI-AUDIT-FIX-EXECUTION-2026-10-13 (pass 3: the continuation plan, Phases A-F)
+
+**What this pass was.** The continuation plan (Phases A-F) covering the unblocked work pass 2 did not reach:
+the two owed verifications, the rest of Phase 7 (props and contracts), the rest of Phase 6 (error pages and
+the motif), the rest of Phase 8 (width), and ten of Phase 10's sixteen slices. Pass 2's record is the section
+above. Nothing here touches a migration, a route, the fetch pipeline, or `config/scenarios.php`.
+
+**Phase A — both owed verifications green, neither producing a fix.**
+
+- **A.1, the import double-press.** Instrument: a scratch spec (kept at
+  `.scratch-uma/ui-continuation-20261013/phase-a-instrument.spec.ts`, removed from `tests/browser/` after the
+  run) that posts a five-turn sheet, then calls `form.requestSubmit()` twice 20 ms apart. Chosen over two real
+  clicks because the browser suppresses a click on the `disabled` button, which would have proved the
+  attribute rather than the `submitting` ref the slice names. Three counts, so the check cannot pass for the
+  wrong reason: submit events the page received (**2**), POSTs that reached `/training-runs/import` (**1**),
+  rows in the scratch database (**`training_runs=1`, `turn_entries=5`**). The guard at `Runs/Import.vue:137-160`
+  is proved rather than assumed. `PLAYWRIGHT_PORT=8161 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/dbl-press.sqlite`
+  -> 2 passed (18.9s).
+- **A.2, the snapshot setup axe scan.** Same run. `buildAxe(page).analyze()` scoped to `#app` -> **zero
+  violations**; each of the eight number inputs answers to its own field name under
+  `getByRole('spinbutton', { name, exact: true })`, so a wrapper-label regression that reintroduced
+  "Speed I don't know this value" fails; the eight checkboxes answer to "I don't know this value" alone; and
+  Tab from `#snapshot-speed` lands on `#snapshot-unknown-speed`. Slice 4.2's split is correct.
+
+**Commit ledger (all on `master`, unpushed; `O-1` holds every push).**
+
+| Commit | Slice | Content |
+| ------ | ----- | ------- |
+| `1713670` | B.1 | `RacePlanner`'s `Group` gains the `total`/`truncated` its child requires and its `Race` the `detail_recorded` the controller already sends; the drawer's Readiness row takes the planner's own refusal (one `HELD_BLOCKER` const behind three refusals) instead of the win-probability string; `SkillsPlanner`'s dead `status_labels` leaves the page and the controller. |
+| `1fbc449` | B.2 | The Legacy Lab names its trainee with the `veteran_url` it always received; neither list prints `status_label`, because `RecordVeteran` refuses anything but Completed and the column was one word on every row. `VeteranRow`'s docblock corrected forward. |
+| `b910c2d` | B.3 | The import preview prints `sourceLabel()` in the identity line before the write. Sent as `preview.source`, not inside `preview.run`: `run` is the body the confirm step posts back, and a display-only label is not one of its columns. |
+| `db9a1d5` | B.4 | One END OF TURN block where EXPECTED and ACTUAL printed the same five numbers; `after` and `expected` leave the payload (`ADR-0003` stores one absolute reading, and the pair claimed an expectation the tool refuses); a non-turn row prints its outcome under RESULT once. Feature assertions re-aimed from `after.*`/`expected.*` to `actual.*`; `career-timeline.spec.ts` re-aimed at the merged block, which the plan authorises. |
+| `248e51b` | C.1 | The error pages' four secondary anchors take the shell's secondary utility (`rounded-md border border-rule bg-raised`); the enamel primaries keep `rounded-full`. The plan's "six" was four: three views, two secondaries on 404 and one each on 419 and 500. |
+| `53f439e` | C.2 | `@utility turn-chip` in `app.css` beside `enamel` and `lattice-bleed`, drawing the body, the tab strip and the two punch holes; `ResourceStrip` loses six class lists and two decorative spans. No new custom property, so D-288 is not engaged and `--color-anchor` stays the token. |
+| `cb2e1a6` | D.1 | Seven prose and form blocks across the four career decision screens move onto the ratified `max-w-3xl`; the wide tables keep the focusable-scroll contract and stay unconstrained. |
+| `8d9f276` | pass-2 repair | `legacy.spec.ts` fills the Spark's Stars with `exact: true`. Its substring label match had been answering to the builder's own "Grandparent rank (stars)" first, so the walk wrote 2 into the rank and the Spark kept its default star - red since pass 1's builder slice, now proven green. |
+| `af25a58` | B.3 follow-up | `run-import.spec.ts` reads the count line as a line (the confirm button's label ends the same way once the button names the count, which is a strict-mode collision, not a product defect) and reads the provenance on the preview, the screen that prints it. |
+| `de7ac5a` | register | KI-95's dated note: what B.3 moved, what it did not. The citation in the spec names KI-95, the entry filed 2026-10-10, rather than inventing a new number for a gap already registered. |
+| `4747b67` | E.9 | The review queue separates "cleared" from "never fetched" (`MatchCandidate::count() === 0`; a verdict updates the row rather than deleting it), keeps `Nothing pending.` in both branches, and points the cleared branch at the Database screens. |
+| `4dfad9f` | E.13 | The three Veteran screens render the record-only notice as the bordered banner with its mark that the four Legacy screens already use; `Legacy/Compare.vue`'s footer keeps only the affinity sentence, which is the one claim the caption above it does not make. |
+| `c849b12` | E.2 | The trainee list gets the two-state empty split and the `X of Y` count line its siblings ship, naming `gametora-character-cards` and the `uma:reparse` escape. `totalCount` reuses the list's own total when no search term was asked, so the ordinary load adds no query - `CatalogRosterTreeTest`'s fixed budget is the reason, and it caught the first version. |
+| `c5ca01c` | E.3 + E.4 | The skill list's unique mark becomes the four-point star its own detail page pins; seven controls stop re-declaring the focus outline the `app.css` base layer already paints. Two slices share this commit because both touch `SkillCatalog.vue`. |
+| `1494694` | E.5 | The Database hub's area links hover to `bg-panel` instead of the `bg-raised` they already wear, which is the pair `Events.vue` and `Sparks.vue` use. |
+| `bfdbec3` | E.12 | `DeckAnalysis` prints `ProvenanceBadge` for both states - `confirmed` beside the stated anchors, `calculated` beside the total - instead of a local chip on one and nothing on the other; `1 of the 1 cards carry` becomes `carries`; the headings name what their lines support. |
+| `661dc93` | E.15 | A deadline with no turn says "the post-December block", the words the planner already uses, rather than printing a bare year that reads as a missing value. |
+| `b5cdbbb` | E.14 | Deadlines moves to the top of the Race planner, ahead of Planning from and Held figures: it is the only block on that screen reporting something the Trainer has not yet answered. Every panel kept. |
+| `ddee787` | E.11 | The mobile bar's "More" takes the active styling and the accessible name "More, current section" when the page being read is one of the destinations it discloses, so a Trainer in the overflow is not left with a bar marking nothing. The visible word stays exactly "More", which `veterans.spec.ts` pins. |
+
+**Not delivered from Phase E, with the reason.** E.1 (`Link` for catalog rows and pagers), E.6 (pager
+consolidation), E.7 (the provenance union alias across 19 files), E.8 (Runs Index accessible link names),
+E.10 (merge-target combobox or printed id) and E.16 (the visit progress bar measurement) stay open rather than
+implied away. E.1 and E.6 rewrite the same four pager blocks, so landing one without the other moves the
+markup twice; E.16 and E.1 each demand a measurement (a two-frame screenshot comparison, a Performance trace)
+that is its own piece of work; E.7 is a 19-file sweep with no gate able to see it, because `npm run typecheck`
+does not read `.vue` files (this audit's §4.1) and Slice 0.2, which would install the reader that does, stays
+owner-gated on §6.6. E.8 and E.10 are small and unblocked; they were not reached.
+
+**Two plan premises proven wrong on the tree, and what was done instead.** B.1 asks for `truncated: boolean`;
+`RacePlanList.vue:43` declares `truncated: string | null` and prints it, and the controller sends a sentence,
+so the interface took the type the code already uses. B.4 says the duplicate ACTUAL block is what a non-turn
+row prints twice; the copy it duplicates is RESULT, so the block went and RESULT stayed. C.1 counts six
+secondary anchors; three error views carry four. Per `AGENTS.md` §2 the code wins and the rule is reported
+stale rather than edited to match.
+
+**Shared-index discipline.** Every commit went through a private `GIT_INDEX_FILE` read from `HEAD`, then
+`git write-tree`, `git commit-tree` and `git update-ref refs/heads/master <new> <old>`, so a peer's staged blob
+cannot ride under this pass's message and a peer commit landing first fails the CAS rather than silently
+reordering history. The check was not theoretical: after the first six commits the shared index still carried
+pre-commit blobs for twelve of this pass's paths, staged by a peer's broader `git add`, which would have
+reverted them under any plain `git commit` in this worktree. Those paths were re-staged against the moved
+`HEAD` until `git diff --cached` was empty, and the peer's own paths were left alone.
+
+**Peer work this pass touched and did not own.** `e6e58d7` moved the NavGlyph mark-count tripwire to 17, which
+is pass 2's first red gate cleared by its owner. `tests/browser/career-cockpit-forms.spec.ts` carries an
+uncommitted peer change (`openIdentityDisclosure`) that hangs its two header-form cases; the full browser
+sweep launched for F.1 was stopped at test 12 with that case red, because a broad run whose failures come from
+another session's in-flight work is void evidence rather than a defect list (`AGENTS.md` §9, KI-74). The
+targeted sweep of this pass's own eighteen specs is the browser record below.
+
+**Verification.** Focused Level 1 runs per slice, logged under this session's scratch directory: Phase B's five feature files 47 passed; the B/C/D batch 143 passed (2,025 assertions) with pint clean on the changed PHP paths and typecheck exit 0; the E batches 33 and 89 passed, the second catching one real regression this pass made and fixed: E.2's first `totalCount` added a fifth query to the catalog read path, `CatalogRosterTreeTest` held the budget at four, and the landed fix reuses the list's own total when no search term was asked.
+
+Level 3. The full browser sweep launched for F.1 was stopped at test 12 with a peer's in-flight cockpit change red (`career-cockpit-forms.spec.ts:90`, hung 3m on an uncommitted `openIdentityDisclosure` helper); a broad run whose failures come from another session's unfinished work is void evidence, not a defect list, so the record is the targeted sweep of this pass's eighteen specs: **115 passed, 2 failed**, both attributed pre-existing. `navigation-determinism.spec.ts:89` is red since pass 2 and probe-verified there (a load fires a document commit and Inertia's `replaceState`, and the spec's counter counts both). `runs.spec.ts:41` passes 13/13 solo on a fresh scratch DB (port 8167) and fails only when `run-import.spec.ts`'s commit case precedes it in the same invocation: an empty-state precondition versus another spec's write, an ordering fragility, not a product defect and not caused by anything this pass changed.
+
+The full Pest suite read **1,790 passed, 1 failed (29,818 assertions, 351.8s)**; the one failure is attributed unrelated: `EmptyStateCommandNamesTest.php:135` reads "the README states Eight declared sources; config/uma.php declares 9", the doc/config drift left by the session that added the ninth fetch source, touching no file this pass changed. `composer lore` exit 0 on the unchanged 319-hit doc baseline; `composer lore-code` exit 0 (140, the allowed hit classes); `vendor/bin/pint --test --format agent` passed on every changed PHP path; `npm run typecheck` exit 0 (with its §4.1 limit unchanged: it reads no SFC); `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` reported "No errors". Pass 2's carried record landed as `ae2ae6c`, and the SFC compile check with a working negative control covered all 22 Vue files this pass touched.
