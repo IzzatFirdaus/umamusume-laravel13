@@ -1,0 +1,17 @@
+Trainer Desk — remaining implementation baseline
+
+Recorded: 2026-10-13
+HEAD at baseline: 67085eba6a096fd9bb3a06c5d4cf3615cb7f8fd6
+(plan file landed as the pre-flight's only docs commit, immediately before the run)
+
+Full suite (php artisan test --compact):
+  Tests: 2 incomplete, 1737 passed (29307 assertions)
+  Duration: 272.24s — log: .scratch-uma/remaining-impl-20261013/test-baseline.log
+
+Phase 5 comparison rule: the passed count must not fall below 1737.
+The 2 incomplete are pre-existing (exit 0) and are named in the session hand-off.
+
+Pre-flight checks at the same HEAD:
+  - php artisan migrate:status: 55 migrations, all Ran, 0 Pending.
+  - Completed-slice five-file run: 66 passed (846 assertions).
+  - KI-74 pre-flight read: 0.93s (box quiet).

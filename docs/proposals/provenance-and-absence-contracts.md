@@ -841,7 +841,9 @@ form versus autosave on change, which changes what the 44px sweep and the axe sc
 ## 22. Phase G preflight, executed 2026-10-11 (Part 1 §2.1 to §2.4, measured at `5d26b49`)
 
 The G prompt set forbids taking a previous agent's word for §20(h) and requires the current state instead
-(`docs/Trainer-Desk-2.0-G-Prompts.md:60`). This pass measured it rather than reasoning from §16.
+(`docs/research-scratch/PROCESS-PLANS.md`, section `## Trainer-Desk-2.0-G-Prompts.md`, source line 60;
+repointed 2026-10-12 when the original `docs/Trainer-Desk-2.0-G-Prompts.md` was consolidated and
+deleted). This pass measured it rather than reasoning from §16.
 
 **§20(h), measured.** The question asks which session owns rulings 2a/3b/5a/7a/8a/9b. All six are committed,
 and each ruling's content reads off HEAD:
