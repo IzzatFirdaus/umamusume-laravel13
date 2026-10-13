@@ -103,7 +103,13 @@ const chains = computed((): string[] => Object.keys(props.fatigue.table));
                 </template>
             </dl>
 
-            <div v-else class="overflow-x-auto rounded-md border border-rule bg-raised p-3">
+            <div
+                v-else
+                class="overflow-x-auto rounded-md border border-rule bg-raised p-3"
+                role="region"
+                tabindex="0"
+                aria-label="Fatigue measures by chain"
+            >
                 <table class="w-full min-w-[26rem] border-collapse text-xs">
                     <caption class="mb-2 text-left text-xs text-ink-muted">
                         No chain is entered for this run yet, so every row the publisher prints is shown.
