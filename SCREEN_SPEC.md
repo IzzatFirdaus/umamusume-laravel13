@@ -573,7 +573,7 @@ Labels on every control; the preview table (on SCR-RUN-005) is the scrollable re
 
 #### Responsive Behavior
 
-`max-w-2xl` form card; stacked field list.
+`max-w-3xl` form card; stacked field list.
 
 #### Localization / Content
 

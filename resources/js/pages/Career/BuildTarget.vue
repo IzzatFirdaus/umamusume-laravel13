@@ -303,7 +303,7 @@ function removeAt(index: number): void {
         <Head title="Your target" />
         <template #title>Your target</template>
 
-        <p class="max-w-2xl text-sm text-ink-muted">
+        <p class="max-w-3xl text-sm text-ink-muted">
             The target is what this career is built to reach. It is entered as one object and replaced
             as one object, and it lives in this setup draft until Preflight creates the run.
         </p>

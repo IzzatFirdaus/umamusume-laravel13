@@ -166,7 +166,7 @@ function confirmImport(): void {
         <Head title="Import a historical run" />
         <template #title>Import a historical run</template>
 
-        <p class="mt-2 max-w-2xl text-sm text-ink-muted">
+        <p class="mt-2 max-w-3xl text-sm text-ink-muted">
             For a run you already finished. Paste or choose the CSV this app exports, and the turns come in
             as the record of a past career. The preview shows every row before anything is written, and the
             file has to be correct before the run exists: nothing is created until you confirm.
@@ -189,7 +189,7 @@ function confirmImport(): void {
 
             <p
                 role="note"
-                class="mt-3 max-w-2xl rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted"
+                class="mt-3 max-w-3xl rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink-muted"
             >
                 This imports turns only. Skills, the support deck and race entries are not part of the file
                 format, so they stay empty and you add them per-turn on the run page afterwards. A sheet that
@@ -256,7 +256,7 @@ function confirmImport(): void {
         <form
             v-else
             enctype="multipart/form-data"
-            class="mt-6 max-w-2xl space-y-4 rounded-md border border-rule bg-raised p-4 text-sm"
+            class="mt-6 max-w-3xl space-y-4 rounded-md border border-rule bg-raised p-4 text-sm"
             :aria-busy="form.processing"
             @submit.prevent="form.post('/training-runs/import/preview', { forceFormData: true })"
         >

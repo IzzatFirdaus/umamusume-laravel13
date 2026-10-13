@@ -154,7 +154,7 @@ const profile = computed(() => props.trainee.profile);
                 </p>
             </div>
 
-            <dl class="mt-4 grid max-w-2xl grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+            <dl class="mt-4 grid max-w-3xl grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
                 <div class="flex flex-wrap justify-between gap-x-4">
                     <dt class="text-ink-muted">Availability</dt>
                     <dd class="text-ink">{{ props.trainee.release_status_label }}</dd>
@@ -198,13 +198,13 @@ const profile = computed(() => props.trainee.profile);
         <section class="mt-8" aria-labelledby="aptitudes">
             <h2 id="aptitudes" class="text-lg font-semibold text-ink-strong">Aptitude</h2>
 
-            <p class="mt-1 max-w-2xl text-sm text-ink-muted">
+            <p class="mt-1 max-w-3xl text-sm text-ink-muted">
                 The trainee's own ten letters, once for the whole roster entry rather than once per costume
                 form. These are aptitudes as the source states them, not a judgement about which distance
                 or style is ideal for a career.
             </p>
 
-            <div class="mt-4 max-w-2xl">
+            <div class="mt-4 max-w-3xl">
                 <AptitudeGrid v-if="props.trainee.aptitudes" :aptitudes="props.trainee.aptitudes" />
                 <p v-else class="text-sm text-ink-muted" title="The character document published no aptitude letters for this trainee.">
                     Aptitude: N/A
@@ -215,7 +215,7 @@ const profile = computed(() => props.trainee.profile);
         <section class="mt-8" aria-labelledby="costume-forms">
             <h2 id="costume-forms" class="text-lg font-semibold text-ink-strong">Costume forms</h2>
 
-            <p class="mt-1 max-w-2xl text-sm text-ink-muted">
+            <p class="mt-1 max-w-3xl text-sm text-ink-muted">
                 Rarity is a fact about a costume form, so it is printed here and nowhere else; this catalog
                 has no trainee-level rarity column to read.
             </p>
@@ -280,7 +280,7 @@ const profile = computed(() => props.trainee.profile);
         <section class="mt-8" aria-labelledby="build-analysis">
             <h2 id="build-analysis" class="text-lg font-semibold text-ink-strong">Build analysis</h2>
 
-            <p class="mt-1 max-w-2xl text-sm text-ink-muted">
+            <p class="mt-1 max-w-3xl text-sm text-ink-muted">
                 The brief's four remaining figures are not stored anywhere in this catalog. They are printed
                 as absences with their reasons rather than filled by a guess. This page carries no career-goal
                 section by design: the trainee's own objectives are fetched per character (`ADR-0026`) and
@@ -288,7 +288,7 @@ const profile = computed(() => props.trainee.profile);
                 whether each one is met.
             </p>
 
-            <dl class="mt-4 grid max-w-2xl grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+            <dl class="mt-4 grid max-w-3xl grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
                 <div class="flex flex-wrap justify-between gap-x-4">
                     <dt class="text-ink-muted">Recommended stat distribution</dt>
                     <dd class="text-ink-muted" :title="props.absences.stat_distribution.title">

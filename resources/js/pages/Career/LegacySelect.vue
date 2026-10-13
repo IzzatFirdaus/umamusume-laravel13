@@ -235,7 +235,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
         <Head title="Legacy" />
         <template #title>Legacy</template>
 
-        <p class="max-w-2xl text-sm text-ink-muted">
+        <p class="max-w-3xl text-sm text-ink-muted">
             The two parents this career will be bred from are entered here as you read them in the client,
             before any run exists. Their own two ancestors each are part of the record, so the diagram holds
             six nodes.

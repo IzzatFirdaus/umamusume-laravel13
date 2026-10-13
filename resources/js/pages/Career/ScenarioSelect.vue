@@ -103,7 +103,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
         <Head title="Choose a scenario" />
         <template #title>Choose a scenario</template>
 
-        <p class="max-w-2xl text-sm text-ink-muted">
+        <p class="max-w-3xl text-sm text-ink-muted">
             The scenario decides which resources this tool tracks, which systems it can show, and which
             stat ceilings apply. It is the first choice of six, and the wizard carries it forward instead
             of asking again.

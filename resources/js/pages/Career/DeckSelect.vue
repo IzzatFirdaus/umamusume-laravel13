@@ -224,7 +224,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         <Head title="Support deck" />
         <template #title>Support deck</template>
 
-        <p class="max-w-2xl text-sm text-ink-muted">
+        <p class="max-w-3xl text-sm text-ink-muted">
             A deck is the six cards equipped before the career starts. Position six is the friend slot, and
             that role belongs to the position: any card may sit in it.
         </p>

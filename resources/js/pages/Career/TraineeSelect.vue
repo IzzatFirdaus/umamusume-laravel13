@@ -222,7 +222,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
         <Head title="Choose a trainee" />
         <template #title>Choose a trainee</template>
 
-        <p class="max-w-2xl text-sm text-ink-muted">
+        <p class="max-w-3xl text-sm text-ink-muted">
             The roster is the catalog this tool has fetched. Pick the trainee the career is built on; the
             profile screen behind each row states what is known about her before committing.
         </p>
