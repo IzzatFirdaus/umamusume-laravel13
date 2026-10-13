@@ -22,10 +22,15 @@ import ProvenanceBadge from '../ProvenanceBadge.vue';
 
 type Badge = 'confirmed' | 'calculated' | 'estimated' | 'unknown';
 
+/**
+ * A badge qualifies a displayed value (owner ruling 2a): the rows this panel draws an `N/A` on carry
+ * `null`, and the panel renders no chip beside the absence. `unknown` survives only on the Database
+ * reference views' citation-strength axis, which is not this surface.
+ */
 interface FactRow {
     label: string;
     value: string | null;
-    badge: Badge;
+    badge: Badge | null;
     title: string;
 }
 
@@ -33,7 +38,7 @@ interface HintRow {
     stat: string;
     name: string;
     sp_cost: string | null;
-    badge: Badge;
+    badge: Badge | null;
     title: string;
 }
 
@@ -108,7 +113,7 @@ const headingId = 'ura-duel-panel';
                             class="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-b border-rule pb-2 last:border-b-0"
                         >
                             <dt class="text-xs text-ink-muted">{{ row.label }}</dt>
-                            <ProvenanceBadge :state="row.badge" :title="row.title" />
+                            <ProvenanceBadge v-if="row.badge !== null" :state="row.badge" :title="row.title" />
                             <dd v-if="row.value !== null" class="text-sm text-ink">{{ row.value }}</dd>
                             <dd v-else class="text-sm">
                                 <AbsenceValue :reason="row.title" compact />
@@ -136,7 +141,7 @@ const headingId = 'ura-duel-panel';
                         >
                             <span class="text-xs font-medium text-ink-strong">{{ row.stat }}</span>
                             <span class="text-sm text-ink">{{ row.name }}</span>
-                            <ProvenanceBadge :state="row.badge" :title="row.title" />
+                            <ProvenanceBadge v-if="row.badge !== null" :state="row.badge" :title="row.title" />
                             <span v-if="row.sp_cost !== null" class="font-mono text-xs text-ink">
                                 {{ row.sp_cost }} SP
                             </span>
@@ -150,16 +155,15 @@ const headingId = 'ura-duel-panel';
                         This run
                     </h4>
 
+                    <!-- Every row here states an absence, so none carries a badge (ruling 2a): the
+                         label, the `N/A` marker and the sentence are the whole statement. -->
                     <dl class="flex flex-col gap-2">
                         <div
                             v-for="row in props.duel.run"
                             :key="row.label"
                             class="flex flex-col gap-1 border-b border-rule pb-2 last:border-b-0"
                         >
-                            <div class="flex flex-wrap items-baseline gap-x-2">
-                                <dt class="text-xs text-ink-muted">{{ row.label }}</dt>
-                                <ProvenanceBadge :state="row.badge" :title="row.title" />
-                            </div>
+                            <dt class="text-xs text-ink-muted">{{ row.label }}</dt>
                             <AbsenceValue :reason="row.title" />
                         </div>
                     </dl>

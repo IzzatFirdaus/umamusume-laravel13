@@ -283,6 +283,11 @@ test('states the team race shape and prints no opponent projection, no chance an
     await expect(shape.locator('dd').first().getByText(/No source says how strong each opponent team is/)).toBeVisible();
     await expect(shape.getByText(/no source publishes the career turn/)).toBeVisible();
 
+    // Ruling 2a: both answers are absences, so no provenance badge accompanies either `N/A` —
+    // a badge qualifies a displayed value, and `unknown` beside an absence was retired.
+    await expect(shape.getByRole('img', { name: /^Unknown/ })).toHaveCount(0);
+    await expect(shape.locator('dd').first().getByText('N/A')).toBeVisible();
+
     const text = await shape.innerText();
     expect(text).not.toContain('%');
     expect(text.toLowerCase()).not.toContain('probability');

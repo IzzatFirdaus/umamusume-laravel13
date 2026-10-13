@@ -75,17 +75,17 @@ function anchorLine(): string {
              left the `dd` outside it, which made the `dl`'s child list a `div` followed by a bare `dd`:
              axe's `definition-list` rule (wcag2a, SC 1.3.1) reads that as an improperly-ordered list and
              failed the committed scan. The badge, the marker and the reason all ride inside the `dd`. -->
+        <!-- Both answers below are absences, so neither row carries a provenance badge (owner ruling
+             2a): the `N/A` marker and the reason sentence are the whole statement. -->
         <dl class="mt-2 grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] items-baseline gap-x-3 gap-y-2">
             <dt class="text-xs text-ink-muted">Opponent projection</dt>
             <dd class="flex flex-wrap items-baseline gap-x-2">
-                <ProvenanceBadge state="unknown" :title="props.tournament.projection_title" />
                 <span class="font-mono text-sm text-ink-muted">N/A</span>
                 <span class="w-full text-xs text-ink-muted">{{ props.tournament.projection_title }}</span>
             </dd>
 
             <dt class="text-xs text-ink-muted">Next team race</dt>
             <dd class="flex flex-wrap items-baseline gap-x-2">
-                <ProvenanceBadge state="unknown" :title="props.tournament.next_title" />
                 <span class="font-mono text-sm text-ink-muted">N/A</span>
                 <span class="w-full text-xs text-ink-muted">{{ props.tournament.next_title }}</span>
             </dd>

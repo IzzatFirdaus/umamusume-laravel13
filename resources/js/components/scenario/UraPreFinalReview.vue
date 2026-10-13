@@ -19,11 +19,16 @@ import ProvenanceBadge from '../ProvenanceBadge.vue';
 
 type Badge = 'confirmed' | 'calculated' | 'estimated' | 'unknown';
 
+/**
+ * A badge qualifies a displayed value (owner ruling 2a): the rows this panel draws an `N/A` on carry
+ * `null`, and no chip accompanies the absence. `unknown` survives only on the Database reference
+ * views' citation-strength axis, which is not this surface.
+ */
 interface StatRow {
     label: string;
     value: string | null;
     cap: string | null;
-    badge: Badge;
+    badge: Badge | null;
     title: string;
 }
 
@@ -40,7 +45,7 @@ const props = defineProps<{
             phrasing: string;
             value: string | null;
             short_by: string | null;
-            badge: Badge;
+            badge: Badge | null;
             title: string;
         };
         stamina_floors: {
@@ -48,7 +53,7 @@ const props = defineProps<{
             badge: Badge;
             title: string;
         };
-        distance: { value: string | null; badge: Badge; title: string };
+        distance: { value: string | null; title: string };
     };
 }>();
 
@@ -94,7 +99,7 @@ const headingId = 'ura-pre-final-review';
                     class="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-b border-rule pb-2 last:border-b-0"
                 >
                     <dt class="text-xs text-ink-muted">{{ row.label }}</dt>
-                    <ProvenanceBadge :state="row.badge" :title="row.title" />
+                    <ProvenanceBadge v-if="row.badge !== null" :state="row.badge" :title="row.title" />
                     <dd v-if="row.value !== null" class="font-mono text-sm text-ink">{{ row.value }}</dd>
                     <dd v-else>
                         <AbsenceValue :reason="row.title" compact />
@@ -111,7 +116,11 @@ const headingId = 'ura-pre-final-review';
 
             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <span class="text-xs text-ink-muted">To win the finale</span>
-                <ProvenanceBadge :state="props.preFinal.speed_target.badge" :title="props.preFinal.speed_target.title" />
+                <ProvenanceBadge
+                    v-if="props.preFinal.speed_target.badge !== null"
+                    :state="props.preFinal.speed_target.badge"
+                    :title="props.preFinal.speed_target.title"
+                />
                 <span class="text-sm text-ink">{{ props.preFinal.speed_target.phrasing }}</span>
                 <span v-if="props.preFinal.speed_target.value !== null" class="font-mono text-xs text-ink">
                     recorded {{ props.preFinal.speed_target.value }}
@@ -144,9 +153,10 @@ const headingId = 'ura-pre-final-review';
 
             <ProvenanceBadge :state="props.preFinal.stamina_floors.badge" :title="props.preFinal.stamina_floors.title" />
 
+            <!-- The distance is a pure absence: nothing computes it, so the row carries the `N/A`
+                 marker and its reason and no badge (owner ruling 2a). -->
             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <span class="text-xs text-ink-muted">This run's finale distance</span>
-                <ProvenanceBadge :state="props.preFinal.distance.badge" :title="props.preFinal.distance.title" />
                 <AbsenceValue :reason="props.preFinal.distance.title" compact />
             </div>
         </div>

@@ -2008,6 +2008,10 @@ class CockpitController extends Controller
      * `docs/URA-Finale-plan.md:245` records as unconfirmed, so a chance row carries the rule and an
      * empty value rather than a number.
      *
+     * **An absent value carries no badge** (owner ruling 2a, 2026-10-09): a badge qualifies a
+     * displayed value, and `unknown` beside an absence was retired. The rows that state a gap carry
+     * `badge => null` and their title is the absence reason the panel prints.
+     *
      * @return array<string, mixed>|null
      */
     private function duelSection(TrainingRun $run): ?array
@@ -2021,7 +2025,7 @@ class CockpitController extends Controller
 
         $cite = 'config/scenarios.php, from docs/UMAMUSUME_REFERENCE.md §2.2.1.';
 
-        /** @var list<array{label: string, value: string|null, badge: string, title: string}> $rules */
+        /** @var list<array{label: string, value: string|null, badge: string|null, title: string}> $rules */
         $rules = [
             ['label' => 'The prompt', 'value' => (string) $duel['options_rule'], 'badge' => 'confirmed', 'title' => 'The options a duel puts in front of the Trainer, from docs/URA-Finale-plan.md:182.'],
             ['label' => 'Win', 'value' => (string) $duel['win']['gains'], 'badge' => 'confirmed', 'title' => 'What a win grants. '.$cite],
@@ -2034,9 +2038,9 @@ class CockpitController extends Controller
                 .', '.number_format((int) $duel['escalation_reward']['sp_minimum']).' or more Skill Points',
                 'badge' => 'confirmed', 'title' => 'Beating the powered-up state at the finals. '.$cite],
             ['label' => 'Enhanced spark', 'value' => (string) $duel['escalation_reward']['spark'], 'badge' => 'confirmed', 'title' => 'The chance is published; its rate is not. '.$cite],
-            ['label' => 'Enhanced spark rate', 'value' => null, 'badge' => 'unknown', 'title' => 'No source this tool reads publishes the trigger rate, so none is shown.'],
-            ['label' => 'Per-stat gain of a win', 'value' => null, 'badge' => 'unknown', 'title' => 'The sources say a win grants stat gains and raise the cap of the stat dueled, and quantify neither.'],
-            ['label' => 'Win chance per option', 'value' => null, 'badge' => 'unknown', 'title' => 'The client shows an icon beside each option and prints no percentage, and no source publishes one.'],
+            ['label' => 'Enhanced spark rate', 'value' => null, 'badge' => null, 'title' => 'No source this tool reads publishes the trigger rate, so none is shown.'],
+            ['label' => 'Per-stat gain of a win', 'value' => null, 'badge' => null, 'title' => 'The sources say a win grants stat gains and raise the cap of the stat dueled, and quantify neither.'],
+            ['label' => 'Win chance per option', 'value' => null, 'badge' => null, 'title' => 'The client shows an icon beside each option and prints no percentage, and no source publishes one.'],
         ];
 
         /** @var array<string, string> $hintNames */
@@ -2058,19 +2062,19 @@ class CockpitController extends Controller
                 'stat' => (string) $stat,
                 'name' => $name,
                 'sp_cost' => $row === null ? null : number_format((int) $row->sp_cost),
-                'badge' => $row === null ? 'unknown' : 'confirmed',
+                'badge' => $row === null ? null : 'confirmed',
                 'title' => $row === null
                     ? 'The skills catalogue holds no client-named row for '.$name.', so no figure travels with it.'
                     : 'Read from the skills table, which carries this name as a client noun (name_is_client).',
             ];
         }
 
-        /** @var list<array{label: string, value: string|null, badge: string, title: string}> $runRows */
+        /** @var list<array{label: string, value: string|null, badge: string|null, title: string}> $runRows */
         $runRows = [
-            ['label' => 'Duels this run has fought', 'value' => null, 'badge' => 'unknown', 'title' => 'No table stores a duel. A race is a race_entries row and an event a turn_events row, and neither posts a choice.'],
-            ['label' => 'Wins toward escalation', 'value' => null, 'badge' => 'unknown', 'title' => 'Counting wins needs a stored duel outcome, which this build has none of.'],
-            ['label' => 'Happy Meek level', 'value' => null, 'badge' => 'unknown', 'title' => 'No column stores a Happy Meek level and no route writes one, so this run records none.'],
-            ['label' => 'The options offered', 'value' => null, 'badge' => 'unknown', 'title' => 'A duel puts two random stats and the stat dueled in front of the Trainer, and nothing this run records names them.'],
+            ['label' => 'Duels this run has fought', 'value' => null, 'badge' => null, 'title' => 'No table stores a duel. A race is a race_entries row and an event a turn_events row, and neither posts a choice.'],
+            ['label' => 'Wins toward escalation', 'value' => null, 'badge' => null, 'title' => 'Counting wins needs a stored duel outcome, which this build has none of.'],
+            ['label' => 'Happy Meek level', 'value' => null, 'badge' => null, 'title' => 'No column stores a Happy Meek level and no route writes one, so this run records none.'],
+            ['label' => 'The options offered', 'value' => null, 'badge' => null, 'title' => 'A duel puts two random stats and the stat dueled in front of the Trainer, and nothing this run records names them.'],
         ];
 
         return ['rules' => $rules, 'hints' => $hints, 'run' => $runRows];
@@ -2112,7 +2116,8 @@ class CockpitController extends Controller
                 'label' => $stat,
                 'value' => $value === null ? null : number_format($value),
                 'cap' => $cap === null ? null : number_format((int) $cap),
-                'badge' => $value === null ? 'unknown' : 'confirmed',
+                // No badge on the empty branch: a badge qualifies a displayed value (ruling 2a).
+                'badge' => $value === null ? null : 'confirmed',
                 'title' => $value === null
                     ? 'No turn entry for this run records a '.$stat.' reading, so nothing is shown.'
                     : 'The latest turn entry of this run, read the same way the header bars read it.',
@@ -2141,7 +2146,7 @@ class CockpitController extends Controller
                 'short_by' => $speed === null || $speed >= $approx
                     ? null
                     : number_format($approx - $speed),
-                'badge' => $speed === null ? 'unknown' : 'calculated',
+                'badge' => $speed === null ? null : 'calculated',
                 'title' => 'The recorded Speed against the published target, which '.$cite.' states as an approximation.',
             ],
             'stamina_floors' => [
@@ -2158,7 +2163,6 @@ class CockpitController extends Controller
             // the absence and the four floors stay a table rather than collapsing to one verdict.
             'distance' => [
                 'value' => null,
-                'badge' => 'unknown',
                 'title' => 'The finale distance is the distance this career raced most, and no column or reader in '
                     .'this tool computes it, so no single floor applies.',
             ],

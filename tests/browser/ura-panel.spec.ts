@@ -316,6 +316,10 @@ test('opens and closes the duel panel by keyboard and returns focus to the door'
     expect(text).not.toContain('%');
     await expect(dialog.getByText('N/A').first()).toBeVisible();
 
+    // Ruling 2a: every absence in the dialog is `N/A` plus its reason with no provenance badge —
+    // `unknown` beside an absence was retired, so no Unknown chip may appear on any of the rows.
+    await expect(dialog.getByRole('img', { name: /^Unknown/ })).toHaveCount(0);
+
     // Escape is the platform's own close for a modal dialog; the return is this component's.
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();

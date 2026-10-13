@@ -177,10 +177,15 @@ it('carries the published duel rules with their sources and prints no win chance
         ->and($rules->firstWhere('label', 'Escalation')['value'])->toBe('after 6 wins')
         ->and($rules->firstWhere('label', 'Powered-up reward')['value'])
         ->toBe('Past My Limits, 200 or more Skill Points')
-        // The three figures no source publishes stay empty, each with its own sentence.
+        // The three figures no source publishes stay empty, each with its own sentence, and none
+        // carries a badge: a badge qualifies a displayed value (owner ruling 2a, 2026-10-09), so an
+        // absence travels as `badge => null` with its reason, never as `unknown`.
         ->and($rules->firstWhere('label', 'Win chance per option')['value'])->toBeNull()
+        ->and($rules->firstWhere('label', 'Win chance per option')['badge'])->toBeNull()
         ->and($rules->firstWhere('label', 'Enhanced spark rate')['value'])->toBeNull()
+        ->and($rules->firstWhere('label', 'Enhanced spark rate')['badge'])->toBeNull()
         ->and($rules->firstWhere('label', 'Per-stat gain of a win')['value'])->toBeNull()
+        ->and($rules->firstWhere('label', 'Per-stat gain of a win')['badge'])->toBeNull()
         // No percentage reaches the page on any branch of this panel.
         ->and((string) json_encode($duel))->not->toMatch('/%|chance of \d/');
 });
@@ -202,7 +207,8 @@ it('reads the Racing Spirit hint names off the catalogue and marks the ones it c
         ->and($hints[0]['sp_cost'])->toBe('150')
         ->and($hints[0]['badge'])->toBe('confirmed')
         ->and($hints[1]['sp_cost'])->toBeNull()
-        ->and($hints[1]['badge'])->toBe('unknown')
+        // No catalogue row means no figure to qualify, so the row carries no badge (ruling 2a).
+        ->and($hints[1]['badge'])->toBeNull()
         ->and($hints[1]['title'])->toContain('holds no client-named row');
 });
 
@@ -214,7 +220,8 @@ it('states this run\'s duel record as named absences rather than zeros', functio
 
     expect($runRows)->toHaveCount(4)
         ->and(array_column($runRows, 'value'))->toBe([null, null, null, null])
-        ->and(array_column($runRows, 'badge'))->toBe(['unknown', 'unknown', 'unknown', 'unknown'])
+        // A named absence carries no badge (owner ruling 2a): the reason title is the whole statement.
+        ->and(array_column($runRows, 'badge'))->toBe([null, null, null, null])
         ->and($runRows[0]['title'])->toContain('No table stores a duel')
         ->and($runRows[3]['title'])->toContain('nothing this run records names them');
 });
@@ -258,8 +265,10 @@ it('opens the pre-final review only inside the window the advisor already owns',
             ['distance' => 'Medium', 'floor' => '600'],
             ['distance' => 'Long', 'floor' => '700'],
         ])
-        // Which floor applies is the finale distance, and nothing in this tool computes it.
+        // Which floor applies is the finale distance, and nothing in this tool computes it. The row
+        // is a pure absence, so it carries no badge key at all (owner ruling 2a).
         ->and($preFinal['distance']['value'])->toBeNull()
+        ->and($preFinal['distance'])->not->toHaveKey('badge')
         ->and($preFinal['distance']['title'])->toContain('no column or reader in this tool computes it');
 });
 
@@ -331,4 +340,25 @@ it('hands the three surfaces to every cockpit as part of the section contract', 
 
             return true;
         }));
+});
+
+it('emits no unknown provenance badge on any absence payload or absence surface', function (): void {
+    // The contract, at the two places a regression can enter: the controller that shapes the
+    // payloads and the components that draw them. An absent value is `badge => null` with its
+    // reason (owner ruling 2a); `unknown` survives only as the Database reference views'
+    // citation-strength mark for an available row, which `config/reference.php` still carries.
+    $controller = (string) file_get_contents(app_path('Http/Controllers/Career/CockpitController.php'));
+
+    expect(substr_count($controller, "'badge' => 'unknown'"))->toBe(0)
+        ->and((string) file_get_contents(resource_path('js/components/scenario/UraDuelPanel.vue')))
+        ->not->toContain('state="unknown"')
+        ->and((string) file_get_contents(resource_path('js/components/scenario/UraPreFinalReview.vue')))
+        ->not->toContain('state="unknown"')
+        ->and((string) file_get_contents(resource_path('js/components/scenario/UnityCupTournamentReadiness.vue')))
+        ->not->toContain('state="unknown"')
+        // The reference axis keeps its one unverified row: citation strength on an available result
+        // is a different claim from a badge beside an absence, and only the latter was retired.
+        ->and(array_column(config('reference.events.rows'), 'state'))->toContain('unknown')
+        ->and(array_column(config('reference.shop_items.rows'), 'state'))->not->toContain('unknown')
+        ->and(array_column(config('reference.sparks.categories'), 'state'))->not->toContain('unknown');
 });
