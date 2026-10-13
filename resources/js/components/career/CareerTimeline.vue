@@ -101,7 +101,7 @@ const kindVisible = (entry: Entry): boolean =>
                     <span class="font-medium text-ink-strong">{{ entry.action_label }}</span>
                     <span
                         v-if="entry.corrected"
-                        class="rounded-full bg-warning px-2 py-0.5 text-xs font-semibold text-on-warning"
+                        class="rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk"
                         :title="`Correction ${entry.correction_id}: row was updated.`"
                     >Updated</span>
                 </summary>

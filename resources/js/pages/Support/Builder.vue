@@ -282,7 +282,7 @@ function save(): void {
             <a :href="run.run_url" class="underline">Open the run</a>
         </p>
 
-        <p v-if="errors.deck" class="mt-3 rounded border border-goal-line bg-green-tint px-3 py-2 text-sm text-ink" role="alert">
+        <p v-if="errors.deck" class="mt-3 rounded border border-risk bg-raised px-3 py-2 text-sm text-risk" role="alert">
             {{ errors.deck }}
         </p>
 

@@ -105,7 +105,7 @@ const submit = (): void => {
         <Head title="Record an existing career" />
         <template #title>Record an existing career</template>
 
-        <p class="max-w-2xl text-sm text-ink-muted">
+        <p class="max-w-3xl text-sm text-ink-muted">
             Enter what your client shows right now. The position becomes the run's own position, and a
             field you leave empty is recorded as not provided rather than guessed at. You will read the
             snapshot back before it is written.

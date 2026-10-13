@@ -153,7 +153,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
     const base = 'inline-flex items-center justify-center w-5 h-5 text-xs font-mono font-bold rounded-full';
     const classes: Record<Milestone['status'], string> = {
         completed: `${base} bg-green text-on-chrome`,
-        current: `${base} bg-chrome text-on-chrome animate-pulse`,
+        current: `${base} bg-chrome text-on-chrome`,
         upcoming: `${base} border border-rule text-ink-muted bg-raised`,
         missed: `${base} bg-risk text-on-chrome`,
     };

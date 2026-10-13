@@ -15,7 +15,7 @@ import { Head } from '@inertiajs/vue3';
         <Head title="Start from existing snapshot" />
         <template #title>Start from existing snapshot</template>
 
-        <section aria-labelledby="snapshot-entry-heading" class="max-w-2xl rounded-md border border-rule bg-panel p-6">
+        <section aria-labelledby="snapshot-entry-heading" class="max-w-3xl rounded-md border border-rule bg-panel p-6">
             <h2 id="snapshot-entry-heading" class="text-lg font-semibold text-ink-strong">
                 Start from existing snapshot
             </h2>

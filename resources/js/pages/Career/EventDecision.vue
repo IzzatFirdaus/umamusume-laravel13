@@ -283,7 +283,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                             >{{ choice.outcome }}</span>
                             <span
                                 v-else
-                                class="rounded-full bg-warning px-2 py-0.5 text-xs font-semibold text-on-warning"
+                                class="rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk"
                                 title="No recorded outcome was entered for this choice. Choose manually."
                             >⚠ Outcome incomplete</span>
                         </li>
@@ -418,7 +418,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                     </span>
                     <span
                         v-else
-                        class="rounded-full bg-warning px-2 py-0.5 text-xs font-semibold text-on-warning"
+                        class="rounded-full border border-risk px-2 py-0.5 text-xs font-semibold text-risk"
                         title="No recorded outcome was entered for this choice. Choose manually."
                     >⚠ Outcome incomplete</span>
                 </label>

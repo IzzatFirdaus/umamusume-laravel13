@@ -293,13 +293,13 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                                 >{{ period.earned === null ? 'N/A' : period.earned }}</span>
                                 <span class="text-sm font-normal text-ink-muted"> / {{ period.required }} GP</span>
                             </dd>
-                            <p v-if="period.unpriced > 0" class="mt-1 text-xs text-warning" title="This period holds a finish below first, and no source prices one, so the period's total is withheld rather than understated.">
+                            <p v-if="period.unpriced > 0" class="mt-1 text-xs text-risk" title="This period holds a finish below first, and no source prices one, so the period's total is withheld rather than understated.">
                                 {{ period.unpriced }} finish{{ period.unpriced === 1 ? '' : 'es' }} unpriced
                             </p>
                         </div>
                     </dl>
 
-                    <p v-if="props.scenario.unassigned > 0" class="mt-3 text-xs text-warning" title="These races were completed before a period was chosen for them, so no period's total counts them.">
+                    <p v-if="props.scenario.unassigned > 0" class="mt-3 text-xs text-risk" title="These races were completed before a period was chosen for them, so no period's total counts them.">
                         {{ props.scenario.unassigned }} completed race{{ props.scenario.unassigned === 1 ? '' : 's' }}
                         {{ props.scenario.unassigned === 1 ? 'is' : 'are' }} not assigned to a Grade Point period.
                     </p>

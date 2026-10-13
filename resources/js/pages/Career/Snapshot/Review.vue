@@ -69,14 +69,13 @@ const treatment = (state: string): string => {
         <Head title="Review snapshot" />
         <template #title>Review snapshot</template>
 
-        <p class="max-w-2xl text-sm text-ink-muted">
+        <p class="max-w-3xl text-sm text-ink-muted">
             This is exactly what will be written. Read it back: a field marked Unknown is one the client
             did not show, and a field marked Not provided is one you left alone. They are different
             statements, and the run keeps them apart.
         </p>
 
         <section aria-labelledby="snapshot-review-heading" class="mt-6 max-w-3xl rounded-md border border-rule bg-panel p-4">
-            <h2 id="snapshot-review-heading" class="text-base font-semibold text-ink-strong">Current state</h2>
             <ul class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <li
                     v-for="field in props.fields"

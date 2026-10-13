@@ -33,7 +33,7 @@ const detail = (documented: boolean): string =>
 <template>
     <span
         class="inline-flex items-baseline gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold"
-        :class="props.documented ? 'bg-panel text-ink-muted' : 'bg-warning text-on-warning'"
+        :class="props.documented ? 'bg-panel text-ink-muted' : 'border border-risk text-risk'"
     >
         <span aria-hidden="true" class="font-mono">{{ glyph(props.documented) }}</span>
         <span :title="detail(props.documented)">{{ label(props.documented) }}</span>

@@ -42,6 +42,10 @@ const props = defineProps<{
     scenarioShop: { label: string; rotation_turns: number; items: ScenarioItem[] };
     source: { section: string; anchor: string; doc: string };
     totalCount: number;
+    // The controller sends it (DatabaseController's shopItems), and the SourceNote under the table
+    // renders it: without the declaration the re-check pointer this area's siblings all carry was
+    // silently dropped, and no gate looked at the prop path.
+    recheck: { text: string; url: string };
 }>();
 
 const selected = ref<ShopRow | null>(null);
