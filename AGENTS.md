@@ -181,7 +181,7 @@ tests/                       Feature/ (the bulk), Unit/ (no database), Fixtures/
 tools/                       lore.php (lore gate), gate.py (design-artifact gate), doc_census.py,
                              roster-crosscheck.php, check_untracked.py, dev-logs-pane.php
 docs/                        adr/, scenarios/, proposals/, research-scratch/ masters, deprecated/
-```text
+```
 
 ## 7. Coding conventions
 
@@ -326,6 +326,19 @@ failure-attribution step applies verbatim, and a sweep that came back red under
 load is reported void with its counts and the contention readings attached,
 never as a defect list (KI-74).
 
+**Everything a session writes under `.scratch-uma/` goes in its own
+subdirectory (owner rule, 2026-10-13).** Logs, scratch SQLite databases, dumps,
+probes, and driver scripts all live at `.scratch-uma/<session>/...`, never in
+the root of that gitignored tree (the root is a shared collision surface, KI-70).
+The root holds only directories (the sweep buckets from
+`.scratch-uma/reorganize-scratch.ps1` such as `data/`, `logs/`, `scripts/`, each
+session's own subdirectory, and `cited/`, which holds the citation-pinned
+evidence files because tracked documents cite their exact paths as dated
+evidence), plus `.scratch-uma/README.md` and
+`.scratch-uma/reorganize-scratch.ps1`. `.scratch-uma/README.md` records the
+layout and the sweep command. Root paths in older proving commands predate these
+moves; do not copy them as templates.
+
 **A broad sweep is pre-flighted, not launched.** Before any Level 3 run or the
 browser suite, time one trivial SQLite read (`php -r` on `select id from
 training_runs limit 1` against the dev file, per KI-74). If it takes more than
@@ -335,7 +348,7 @@ harness, and say which of the two the evidence is. Do not re-run a void sweep
 hoping for a different result.
 
 **The browser suite is always session-private.** `PLAYWRIGHT_PORT=<session port>
-PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-<port>.sqlite npm run test:browser`
+PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/browser-<port>.sqlite npm run test:browser`
 (KI-73, KI-80). An unqualified `npm run test:browser` in a shared worktree
 either polls a leaked server serving a deleted database, or deletes a peer's
 scratch database mid-run — and both failures read as product regressions.
@@ -375,7 +388,7 @@ invocation its own scratch database (`PLAYWRIGHT_SCRATCH_DB`, else
 `database/browser-scratch-<pid>-<ms>.sqlite`). A leaked `php artisan serve` on the default port takes
 every other session's suite down (KI-73), and one fixed scratch path let a second session delete the
 first one's database mid-run (KI-80). Run the browser suite with a session-private pair, e.g.
-`PLAYWRIGHT_PORT=8141 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-8141.sqlite npm run test:browser`.
+`PLAYWRIGHT_PORT=8141 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/browser-8141.sqlite npm run test:browser`.
 
 **The suite cannot see the dev database.** `phpunit.xml` forces `DB_DATABASE=:memory:`, so every test
 builds its own schema from the migration files and a green run proves nothing about
@@ -599,3 +612,4 @@ fails if the logic breaks; a trivial one-liner needs no test.
 | 2026-10-06   | §9: `migrate:status` on the dev database joins the Schema row and the hand-off, with a paragraph stating that the suite cannot see that file.                                                                                                                                                                                                                                                                                                                                                        | KI-60. Four committed migrations sat Pending on `database/database.sqlite` for four days while 1,326 tests passed, because `phpunit.xml:64` forces `DB_DATABASE=:memory:` and every test builds its own schema. A green suite was reported as evidence of a working application and it was not. This tightens the bar, which §5 permits an agent to apply; relaxing it remains escalation 4.                                                |
 | 2026-10-08   | §9 gains the cost-aware escalation policy: Level 1 focused runs during implementation, Level 2 related regression at slice end, Level 3 full verification only at checkpoints; the full suite is a gate, not the feedback loop. Adds failure classification (regression, pre-existing, unrelated, infrastructure, flaky, inconclusive) with focused reproduction, the explicit rule that a full-suite pass may never be claimed unexecuted, and the statement that no level licenses weakening, deleting, or suppressing tests. Repo-agnostic in shape; the existing change-class table and hand-off stay binding as its Level 3. | Agents were burning most of their implementation time rerunning the expensive full and browser suites after small localized edits. The escalation ladder was implicit in §9 ("narrow first") but never written down, so nothing stopped the reflexive broad run or required attributing a broad-run failure before re-running. Concurrent-agent work in this tree also made unrelated failures common, which the classification step now handles explicitly. |
 | 2026-10-12   | §9 gains the background/parallel test-execution rule: a Level 1/Level 2 run may be backgrounded to a session-private `.scratch-uma/<session>/` log, nothing that writes (`pint` without `--test`, `migrate`, `npm run build`) is backgrounded while a peer session works, a red background run is classified before anything re-runs, a broad sweep is pre-flighted with a timed SQLite read, and the browser suite is always session-private. §2's binding-decisions row is corrected to `docs/adr/0001`-`0024`; §6's `resources/js/` counts are corrected to the measured 48 pages and 63 components (2026-10-12). | KI-70 (a shared-worktree file is a collision surface; one session's unbuildable file blocked every peer's browser gate for a day), KI-73 and KI-80 (a leaked `:8127` server and a shared scratch database each take a peer's suite down), KI-74 (a gate run on a contended worktree is void, and a red sweep under load reads as a product regression), KI-75 (`pint --dirty` reformatted another session's uncommitted file). The §2 row still ended at 0018 while 0024 is on disk, and §6's counts were a 2026-10-06 snapshot. |
+| 2026-10-13   | §9's session-private rule is generalized: everything a session writes under `.scratch-uma/` (logs, scratch databases, dumps, probes, driver scripts) goes in `.scratch-uma/<session>/...`, never the root, and both browser-harness examples are repointed from `.scratch-uma/browser-<port>.sqlite` to the session path; the `.scratch-uma` root now holds no files beyond its README and reorganize script. | Owner instruction 2026-10-13 after the root had accumulated 676 loose files (104 scratch SQLite databases, 175 logs, 72 `.exit` sidecars) because every agent wrote there by default (KI-70). The same-day sweep of `.scratch-uma/` moved 635 files into the buckets of `.scratch-uma/reorganize-scratch.ps1`; on the follow-up ruling the 41 citation-pinned evidence files moved to `.scratch-uma/cited/` and all 72 citation references across 13 tracked files were repointed, reversing for this tree the 2026-10-06 hold-in-place ruling recorded in `PROCESS-PLANS.md`. |

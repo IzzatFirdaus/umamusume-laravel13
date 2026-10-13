@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
  * D-1a/D-1b/D-1c/D-1d).
  *
  * **Nothing here hard-codes the wire string for a choice.** `TrainingDetail.vue`'s guided rail posts a
- * prefixed form (`.scratch-uma/g2f4-vocab.txt` records the vocabulary read), so every case speaks through
+ * prefixed form (`.scratch-uma/cited/g2f4-vocab.txt` records the vocabulary read), so every case speaks through
  * `TurnChoice` itself. A change to a backing value moves the enum and these tests together, never one
  * without the other.
  *
