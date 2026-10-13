@@ -466,7 +466,7 @@ prints the full letter. `/design-preview` returns **200** and all five R17 runs 
 **200** with zero console errors.
 
 **Method (D-288).** R17 fixture on an isolated database
-(`.scratch-uma/cited/r17.sqlite`, migrated + seeded + loaded; `database/database.sqlite`
+(`.scratch-uma/r17.sqlite`, migrated + seeded + loaded; `database/database.sqlite`
 never opened). Pairs read from `getComputedStyle()` on the rendered elements and from
 the resolved custom properties on `documentElement`, then recomputed from those values â€”
 never sampled through an element that already carries a colour, and never taken from the
@@ -611,7 +611,7 @@ cause is worth naming, because it is a repeatable trap:
 - It was produced by `cp database/database.sqlite .scratch-uma/test.db`. A bare file copy of a SQLite
   database in WAL mode takes the main file without its `-wal`, and this one read back as
   `database disk image is malformed`.
-- **The cause is now reproduced deliberately, not inferred from one accident.** `.scratch-uma/cited/wal-probe.php`
+- **The cause is now reproduced deliberately, not inferred from one accident.** `.scratch-uma/wal-probe.php`
   migrates a throwaway file, writes one row, and copies only the main file: main = 4,096 B against
   `-wal` = 1,751,032 B, and the copy does not even declare the table (`no such table: support_cards`).
   After `PRAGMA wal_checkpoint(TRUNCATE)` the same copy reports the row. So the symptom varies with where
@@ -936,7 +936,7 @@ slice's own migration (four call sites at lines 27, 42, 43, 66) and the two file
 other migration in the repository ever used the method**, so the defect does not extend and no separate
 slice is owed. Recorded as its own row in `SESSION-CONSOLIDATION-2026-09-30.md` Â§6.
 
-**Gate 3 â€” page weight filed as KI-43.** Measured rather than estimated; `.scratch-uma/cited/measure-deck-weight.php`
+**Gate 3 â€” page weight filed as KI-43.** Measured rather than estimated; `.scratch-uma/measure-deck-weight.php`
 replays it against the saved pages:
 
 | Run state              | Page        | Deck block   | Share       |
@@ -1019,8 +1019,8 @@ Criteria applies â€” forward `migrate` plus `db:seed` against a brand-new s
 shared `database/database.sqlite` is never opened:
 
 ```text
-DB_DATABASE=.scratch-uma/cited/gate-slice3b.sqlite php artisan migrate --force   -> 21 migrations DONE
-DB_DATABASE=.scratch-uma/cited/gate-slice3b.sqlite php artisan db:seed --force   ->  2 seeders  DONE
+DB_DATABASE=.scratch-uma/gate-slice3b.sqlite php artisan migrate --force   -> 21 migrations DONE
+DB_DATABASE=.scratch-uma/gate-slice3b.sqlite php artisan db:seed --force   ->  2 seeders  DONE
 tables=24  skills=10  runs=0  slots=0  races=0
 ```text
 
@@ -1234,7 +1234,7 @@ brand-new scratch file. `database/database.sqlite` is never opened: `SESSION_DRI
 writes a session row per request.
 
 ```text
-.scratch-uma/cited/slice5.sqlite   20 migrations run (matches `ls database/migrations | wc -l`), 2 seeders
+.scratch-uma/slice5.sqlite   20 migrations run (matches `ls database/migrations | wc -l`), 2 seeders
 tables=24  skills=10  runs=5  slots=10  race_entries=5  turn_entries=5
 ```text
 
@@ -1284,7 +1284,7 @@ and is not a reproducible gate - it is a human measurement with a date and a sha
 ### 3. The browser pass
 
 Viewport 1440 Ã— 900, loopback `php artisan serve` on `127.0.0.1:8144`, R17 fixture rebuilt for
-this slice (`.scratch-uma/cited/slice5.sqlite`, `.scratch-uma/cited/r17-fixture-slice5.php`). Method per
+this slice (`.scratch-uma/slice5.sqlite`, `.scratch-uma/r17-fixture-slice5.php`). Method per
 D-288: every ratio is computed from `getComputedStyle()` on the rendered element, walking up
 for the first non-transparent background, and the resolved custom properties are read off
 `documentElement` separately and printed beside it. Nothing is sampled from a source hex and
@@ -1558,8 +1558,8 @@ the contrast failure would have cost.
 
 Measured in the browser from the rendered pills (`getComputedStyle` on the element, `data-theme`
 flipped between passes, token values read off `documentElement` so an undefined `var()` could not
-inherit silently â€” D-288). Fixture: `.scratch-uma/cited/slice6.sqlite`, one run with five logged turns,
-one tier per turn, built by `.scratch-uma/cited/slice6-mood-fixture.php`; `database/database.sqlite` was
+inherit silently â€” D-288). Fixture: `.scratch-uma/slice6.sqlite`, one run with five logged turns,
+one tier per turn, built by `.scratch-uma/slice6-mood-fixture.php`; `database/database.sqlite` was
 never opened. Server: `php artisan serve` on `127.0.0.1:8147` with `SESSION_DRIVER=database`
 pointed at the scratch file.
 
@@ -2057,7 +2057,7 @@ two entries were never committed here.
 
 ### 4. Browser pass, extended R17 fixture, per D-288
 
-Fixture `.scratch-uma/cited/slice8-fixture.php` against `.scratch-uma/cited/slice8.sqlite` (migrated and seeded
+Fixture `.scratch-uma/slice8-fixture.php` against `.scratch-uma/slice8.sqlite` (migrated and seeded
 on that file only; `database/database.sqlite` never opened). Three runs: Unity Cup (rank `A`, six
 burst states across six teammates, a team race with 4 circles and one unread, a friendship
 payload), Trackblazer (two catalogue purchases, `shop_resets_in = 2`, finishes attributed to
@@ -4134,7 +4134,7 @@ Three limits are recorded in the class rather than left to be discovered:
   Sources line names the export's categories as `blue, pink, skill, race, scenario, other`. One White row is
   the skill family and another is the competition family, so `white` here is one label over two dataset
   categories. The payload records what the Trainer read on screen, which is why the display set won; any
-  future join to the dataset needs the mapping stated, not inferred. `.scratch-uma/cited/factors.json` (untracked
+  future join to the dataset needs the mapping stated, not inferred. `.scratch-uma/factors.json` (untracked
   scratch, 606 records: blue 5, other 336, pink 10, race 37, scenario 34, skill 452) is consistent with the
   reference's counts but is not a committed source, so the citation is the reference table and not the file.
 - **`affinity` is one grade for the pair**, which is what D-268 lists. Â§1.5.4 grades **each link**,
@@ -4687,7 +4687,7 @@ present" and "the control measures 44px in a rendered page" are different claims
 second one.
 
 **Setup.** `php artisan serve` on **127.0.0.1:8125** against a scratch database
-(`.scratch-uma/cited/slice4.sqlite`, three trainees), never the shared development file. Measured with a real
+(`.scratch-uma/slice4.sqlite`, three trainees), never the shared development file. Measured with a real
 browser at two viewports, `getBoundingClientRect()` plus the computed `height`, which catches a class that is
 present but overridden.
 
@@ -5021,8 +5021,8 @@ Pint was scoped to this slice's own paths rather than `--dirty`, because three s
 ## 1. another session fixes its own file: delete the stray `}` at Preferences/Edit.vue:81
 npm run build
 ## 2. a scratch database, not the port-8127 default that serves the shared dev file (KI-69)
-DB_DATABASE="$PWD/.scratch-uma/cited/d16.sqlite" SESSION_DRIVER=file php artisan serve --host=127.0.0.1 --port=8141 &
-DB_DATABASE="$PWD/.scratch-uma/cited/d16.sqlite" php artisan migrate --seed --force
+DB_DATABASE="$PWD/.scratch-uma/d16.sqlite" SESSION_DRIVER=file php artisan serve --host=127.0.0.1 --port=8141 &
+DB_DATABASE="$PWD/.scratch-uma/d16.sqlite" php artisan migrate --seed --force
 PLAYWRIGHT_BASE_URL=http://127.0.0.1:8141 npx playwright test career-save-veteran veteran-compare
 ```
 
@@ -5035,7 +5035,7 @@ break `veterans.spec.ts`'s empty-library assertion, which is KI-69 class 1 with 
 
 `npm run build` returned exit 0 once another session fixed `Preferences/Edit.vue`, so the gate ran. Four passes,
 not one: 7 failed / 2 passed, then 7 failed / 2 passed with a different cause each time, then 3 failed / 2 passed
-on a five-case probe, then the nine below. Final run, port 8147, `DB_DATABASE=$PWD/.scratch-uma/cited/d20.sqlite`,
+on a five-case probe, then the nine below. Final run, port 8147, `DB_DATABASE=$PWD/.scratch-uma/d20.sqlite`,
 freshly migrated and seeded, 5 passed / 4 failed, `PLAYWRIGHT_EXIT=1`, 8.1m.
 
 | # | Case | Result | Cause |
@@ -5099,7 +5099,7 @@ re-run since the two class attributes and two spec files changed. `SCREEN_SPEC.m
 
 ### Re-run after the owner's rulings: 8 passed, 1 failed, exit 1 (6.7m)
 
-Port 8150, `DB_DATABASE=$PWD/.scratch-uma/cited/d22.sqlite`, fresh `migrate --seed`, `npm run build` exit 0 first, server
+Port 8150, `DB_DATABASE=$PWD/.scratch-uma/d22.sqlite`, fresh `migrate --seed`, `npm run build` exit 0 first, server
 alive at the end of the run (`SERVER_ALIVE_AT_END`), so cases 7-9 are real passes this time rather than refusals.
 
 | # | Case | Result |
@@ -5182,7 +5182,7 @@ doc hits, 75 exempt). Focused feature runs, all green: 25 Legacy/rank, 29 wizard
 26 deck, 43 snapshot, 5 review, 30 preference/error-page, 70 career decision, 50 runs/snapshot/review, 91
 career/dashboard/veteran, 101 event/timeline/result/snapshot/database/deck, 59 database/catalog/profile.
 Full suite: **1760 passed, 1 failed** in 228s. Browser sweep on the three specs this pass edited
-(`PLAYWRIGHT_PORT=8153 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/cited/browser-8153.sqlite`): **13 passed, 1 failed**.
+(`PLAYWRIGHT_PORT=8153 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-8153.sqlite`): **13 passed, 1 failed**.
 
 **The two red results, both attributed, neither fixed in passing.** `KeyboardPathTest:124` pins
 `NavGlyph.vue`'s mark count at 11 and the peer's `be5ad37` ("mark its seven doors") raised it to 17 without
