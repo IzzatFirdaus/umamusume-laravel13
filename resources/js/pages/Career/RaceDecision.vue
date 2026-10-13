@@ -184,6 +184,10 @@ function submitManual(): void {
                         <span class="ml-1.5 text-xs text-ink-muted">
                             {{ deadline.year_label }}
                             <template v-if="deadline.turn !== null"> · Turn {{ deadline.turn }}</template>
+                            <!-- The same words the planner uses for the one case that has no turn: a
+                                 mandatory race after December sits outside the turn count, and printing
+                                 the year alone left it looking like the turn had gone missing. -->
+                            <template v-else> · the post-December block</template>
                         </span>
                         <span v-if="deadline.is_next" class="ml-1.5 text-xs font-bold text-ink-strong">
                             <span aria-hidden="true">!</span> NEXT
