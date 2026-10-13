@@ -278,7 +278,7 @@ const mobileMoreClass =
                 role="banner"
                 class="flex items-center justify-between gap-4 border-b border-rule bg-panel px-6 py-3"
             >
-                <h1 class="text-base font-semibold text-ink-strong">
+                <h1 class="text-2xl font-semibold text-ink-strong">
                     <slot name="title" />
                 </h1>
                 <span

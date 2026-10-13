@@ -117,7 +117,7 @@ const denominator = (stat: Stat): number | null =>
 
 <template>
     <section aria-labelledby="career-state-heading" class="rounded-md border border-rule bg-panel p-4">
-        <h2 id="career-state-heading" class="text-base font-semibold text-ink-strong">Stats and state</h2>
+        <h2 id="career-state-heading" class="text-lg font-semibold text-ink-strong">Stats and state</h2>
 
         <ul class="mt-3 space-y-2">
             <li v-for="stat in props.stats" :key="stat.key" class="rounded-md border border-rule bg-raised p-2">

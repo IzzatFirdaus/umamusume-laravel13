@@ -30,7 +30,7 @@ const entryClass =
 
 <template>
     <section aria-labelledby="career-actions-heading" class="rounded-md border border-rule bg-panel p-4">
-        <h2 id="career-actions-heading" class="text-base font-semibold text-ink-strong">Actions</h2>
+        <h2 id="career-actions-heading" class="text-lg font-semibold text-ink-strong">Actions</h2>
 
         <ul class="mt-3 space-y-2">
             <!-- The recommended entry carries the fixed `#action-recommended` id, so the recommendation

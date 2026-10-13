@@ -27,7 +27,7 @@ const props = withDefaults(
 
 <template>
     <section aria-labelledby="career-advisor-heading" class="rounded-md border border-rule bg-panel p-4">
-        <h2 id="career-advisor-heading" class="text-base font-semibold text-ink-strong">Advisor</h2>
+        <h2 id="career-advisor-heading" class="text-lg font-semibold text-ink-strong">Advisor</h2>
 
         <NextDecision
             class="mt-3"

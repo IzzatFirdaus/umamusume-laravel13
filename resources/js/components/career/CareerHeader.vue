@@ -79,13 +79,13 @@ const hasTraineeIdentity = computed(
 
 <template>
     <section aria-labelledby="career-header-heading" class="rounded-md border border-rule bg-panel p-4">
-        <h2 id="career-header-heading" class="text-base font-semibold text-ink-strong">
-            {{ props.trainee }}
-            <span v-if="props.traineeJa" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
-                {{ props.traineeJa }}
-            </span>
+        <h2 id="career-header-heading" class="text-lg font-semibold text-ink-strong">
+            <span v-if="props.traineeJa" lang="ja">{{ props.traineeJa }}</span>
             <!-- The card form beside the trainee's name, where the Trainer named one. -->
             <span v-if="props.cardTitle" class="ml-2 text-sm font-normal text-ink-muted">{{ props.cardTitle }}</span>
+            <!-- The English name keeps the heading alive only when neither identity part exists; the
+                 h1 above already prints it, and an empty heading would leave the section unlabelled. -->
+            <span v-if="!props.traineeJa && !props.cardTitle">{{ props.trainee }}</span>
         </h2>
 
         <p class="mt-1 text-sm text-ink-muted">
