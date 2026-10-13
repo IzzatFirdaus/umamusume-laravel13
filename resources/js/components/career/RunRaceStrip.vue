@@ -74,7 +74,7 @@ const thisTurn = computed(() => props.strip.this_turn);
 
     <div v-else class="mt-3 flex flex-col gap-4">
         <section aria-labelledby="race-strip-recorded">
-            <h3 id="race-strip-recorded" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <h3 id="race-strip-recorded" class="text-lg font-semibold text-ink-strong">
                 Recorded in this run
             </h3>
 
@@ -105,7 +105,7 @@ const thisTurn = computed(() => props.strip.this_turn);
         </section>
 
         <section aria-labelledby="race-strip-turn">
-            <h3 id="race-strip-turn" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <h3 id="race-strip-turn" class="text-lg font-semibold text-ink-strong">
                 This turn
             </h3>
 
@@ -140,7 +140,7 @@ const thisTurn = computed(() => props.strip.this_turn);
         </section>
 
         <section aria-labelledby="race-strip-ahead">
-            <h3 id="race-strip-ahead" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <h3 id="race-strip-ahead" class="text-lg font-semibold text-ink-strong">
                 Still to come
             </h3>
 

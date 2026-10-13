@@ -384,7 +384,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
             :aria-labelledby="gradeHeadingId"
             class="flex flex-col gap-3 rounded-md border border-rule bg-panel p-4"
         >
-            <h3 :id="gradeHeadingId" tabindex="-1" class="text-base font-semibold text-ink-strong">
+            <h3 :id="gradeHeadingId" tabindex="-1" class="text-lg font-semibold text-ink-strong">
                 Grade Point
             </h3>
 
@@ -559,7 +559,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                 :id="shopHeadingId"
                 ref="shopHeading"
                 tabindex="-1"
-                class="text-base font-semibold text-ink-strong"
+                class="text-lg font-semibold text-ink-strong"
             >
                 Pro Shop
             </h3>
@@ -789,7 +789,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
             :aria-labelledby="epithetHeadingId"
             class="flex flex-col gap-3 rounded-md border border-rule bg-panel p-4"
         >
-            <h3 :id="epithetHeadingId" tabindex="-1" class="text-base font-semibold text-ink-strong">
+            <h3 :id="epithetHeadingId" tabindex="-1" class="text-lg font-semibold text-ink-strong">
                 Epithet routes
             </h3>
 

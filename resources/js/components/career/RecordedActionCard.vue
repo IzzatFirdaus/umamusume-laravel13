@@ -67,7 +67,7 @@ const when = (iso: string | null): string => {
     >
         <h3
             id="recorded-action-heading"
-            class="text-xs font-semibold uppercase tracking-wide text-ink-muted"
+            class="text-lg font-semibold text-ink-strong"
         >
             Recorded action
         </h3>
@@ -78,7 +78,7 @@ const when = (iso: string | null): string => {
                 correcting row {{ props.correctedFrom }}</span>
         </p>
 
-        <h4 class="mt-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+        <h4 class="mt-3 text-lg font-semibold text-ink-strong">
             What the rail said
         </h4>
         <dl v-if="props.expected.length > 0" class="mt-1 space-y-1">
@@ -97,7 +97,7 @@ const when = (iso: string | null): string => {
             The rail gave no benefit line for this action when it was taken.
         </p>
 
-        <h4 class="mt-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+        <h4 class="mt-3 text-lg font-semibold text-ink-strong">
             What the turn gave
         </h4>
 

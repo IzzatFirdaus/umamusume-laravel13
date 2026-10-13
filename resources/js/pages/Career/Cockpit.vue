@@ -894,7 +894,7 @@ const jumpToShop = (): void => {
                     aria-labelledby="career-empty-heading"
                     class="mb-3 rounded-md border border-dashed border-rule bg-raised p-4"
                 >
-                    <h2 id="career-empty-heading" class="text-base font-semibold text-ink-strong">No turn recorded yet</h2>
+                    <h2 id="career-empty-heading" class="text-lg font-semibold text-ink-strong">No turn recorded yet</h2>
                     <p class="mt-1 text-sm text-ink">
                         Energy, Mood, Fans, Skill Points and the five stats are what this screen reads, and
                         none has been entered for this run. Until one turn is recorded the advisor has

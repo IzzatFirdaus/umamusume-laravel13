@@ -215,7 +215,7 @@ const emptyText = computed<string>(() =>
                  a scenario the run declared, because lending an undeclared run the baseline entry's
                  caps would state a composition nobody chose. -->
             <section v-if="props.scenario.declared" class="flex flex-col gap-2">
-                <h3 class="flex flex-wrap items-baseline gap-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                <h3 class="flex flex-wrap items-baseline gap-2 text-lg font-semibold text-ink-strong">
                     Published stat caps
                     <ProvenanceBadge state="confirmed" :title="props.scenario.caps.source_title" />
                     <span

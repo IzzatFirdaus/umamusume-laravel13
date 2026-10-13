@@ -78,7 +78,7 @@ const headingId = 'ura-pre-final-review';
 
 <template>
     <section class="flex flex-col gap-3" :aria-labelledby="headingId">
-        <h3 :id="headingId" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+        <h3 :id="headingId" class="text-lg font-semibold text-ink-strong">
             Pre-final review
         </h3>
 
@@ -88,7 +88,7 @@ const headingId = 'ura-pre-final-review';
         </p>
 
         <div class="flex flex-col gap-2">
-            <h4 id="ura-pre-final-recorded" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <h4 id="ura-pre-final-recorded" class="text-lg font-semibold text-ink-strong">
                 Recorded against the published cap
             </h4>
 
@@ -110,7 +110,7 @@ const headingId = 'ura-pre-final-review';
         </div>
 
         <div class="flex flex-col gap-2">
-            <h4 id="ura-pre-final-targets" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <h4 id="ura-pre-final-targets" class="text-lg font-semibold text-ink-strong">
                 Published targets
             </h4>
 

@@ -84,7 +84,7 @@ const headingId = 'ura-duel-panel';
         >
             <div class="flex h-full flex-col gap-4 overflow-y-auto p-4">
                 <div class="flex items-baseline justify-between gap-3">
-                    <h3 :id="headingId" class="text-base font-semibold text-ink-strong">
+                    <h3 :id="headingId" class="text-lg font-semibold text-ink-strong">
                         Happy Meek duel
                     </h3>
                     <button
@@ -102,7 +102,7 @@ const headingId = 'ura-duel-panel';
                 </p>
 
                 <section class="flex flex-col gap-2" aria-labelledby="ura-duel-rules">
-                    <h4 id="ura-duel-rules" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                    <h4 id="ura-duel-rules" class="text-lg font-semibold text-ink-strong">
                         Published rules
                     </h4>
 
@@ -123,7 +123,7 @@ const headingId = 'ura-duel-panel';
                 </section>
 
                 <section class="flex flex-col gap-2" aria-labelledby="ura-duel-hints">
-                    <h4 id="ura-duel-hints" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                    <h4 id="ura-duel-hints" class="text-lg font-semibold text-ink-strong">
                         Racing Spirit hints
                     </h4>
 
@@ -151,7 +151,7 @@ const headingId = 'ura-duel-panel';
                 </section>
 
                 <section class="flex flex-col gap-2" aria-labelledby="ura-duel-run">
-                    <h4 id="ura-duel-run" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                    <h4 id="ura-duel-run" class="text-lg font-semibold text-ink-strong">
                         This run
                     </h4>
 

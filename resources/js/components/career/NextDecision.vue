@@ -129,7 +129,7 @@ const incompleteData = computed(
 <template>
     <div class="rounded-md border border-rule bg-raised p-4">
         <section v-if="hasObjectives" aria-labelledby="career-objectives-heading">
-            <h3 id="career-objectives-heading" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <h3 id="career-objectives-heading" class="text-lg font-semibold text-ink-strong">
                 Objectives
             </h3>
 
@@ -160,7 +160,7 @@ const incompleteData = computed(
         </section>
 
         <h3
-            class="text-xs font-semibold uppercase tracking-wide text-ink-muted"
+            class="text-lg font-semibold text-ink-strong"
             :class="hasObjectives ? 'mt-4' : ''"
         >
             Current priority
@@ -185,7 +185,7 @@ const incompleteData = computed(
         </template>
 
         <template v-else>
-            <h3 class="mt-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <h3 class="mt-3 text-lg font-semibold text-ink-strong">
                 Recommended action
             </h3>
             <p class="mt-1 text-xl font-bold text-ink-strong">{{ recommended?.action }}</p>
@@ -197,7 +197,7 @@ const incompleteData = computed(
                  side is room under a published cap and the team side is the rank this run reported. A
                  row with no reading prints its reason rather than a zero. -->
             <div v-if="teamValues.length > 0" class="mt-2">
-                <h4 class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                <h4 class="text-lg font-semibold text-ink-strong">
                     What this session pays
                 </h4>
                 <!-- `dt`/`dd` pairs as direct children of the `dl`, laid out by a grid. The reason lives in
@@ -223,7 +223,7 @@ const incompleteData = computed(
             </a>
 
             <template v-if="props.decision.alternatives.length > 0">
-                <h3 class="mt-4 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                <h3 class="mt-4 text-lg font-semibold text-ink-strong">
                     Alternatives
                 </h3>
                 <ul class="mt-1 space-y-2">
@@ -237,7 +237,7 @@ const incompleteData = computed(
             </template>
         </template>
 
-        <h3 class="mt-4 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+        <h3 class="mt-4 text-lg font-semibold text-ink-strong">
             Why this answer
         </h3>
         <dl class="mt-1 space-y-2">
@@ -250,7 +250,7 @@ const incompleteData = computed(
         </dl>
 
         <template v-if="props.decision.switch_if.length > 0">
-            <h3 class="mt-4 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <h3 class="mt-4 text-lg font-semibold text-ink-strong">
                 What would change this
             </h3>
             <ul class="mt-1 list-disc space-y-1 pl-5 text-sm text-ink">

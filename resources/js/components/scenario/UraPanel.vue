@@ -136,7 +136,7 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
         >
             <h3
                 :id="headingId(group.group)"
-                class="text-xs font-semibold uppercase tracking-wide text-ink-muted"
+                class="text-lg font-semibold text-ink-strong"
             >
                 {{ group.group }}
             </h3>

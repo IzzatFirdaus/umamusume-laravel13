@@ -66,7 +66,7 @@ const marked = (state: string): boolean => glyphs[state] !== undefined;
     >
         <h3
             :id="headingId"
-            class="text-xs font-semibold uppercase tracking-wide text-ink-muted"
+            class="text-lg font-semibold text-ink-strong"
         >
             Career milestones
         </h3>
