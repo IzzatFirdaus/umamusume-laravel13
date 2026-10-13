@@ -5306,3 +5306,114 @@ targeted sweep of this pass's own eighteen specs is the browser record below.
 Level 3. The full browser sweep launched for F.1 was stopped at test 12 with a peer's in-flight cockpit change red (`career-cockpit-forms.spec.ts:90`, hung 3m on an uncommitted `openIdentityDisclosure` helper); a broad run whose failures come from another session's unfinished work is void evidence, not a defect list, so the record is the targeted sweep of this pass's eighteen specs: **115 passed, 2 failed**, both attributed pre-existing. `navigation-determinism.spec.ts:89` is red since pass 2 and probe-verified there (a load fires a document commit and Inertia's `replaceState`, and the spec's counter counts both). `runs.spec.ts:41` passes 13/13 solo on a fresh scratch DB (port 8167) and fails only when `run-import.spec.ts`'s commit case precedes it in the same invocation: an empty-state precondition versus another spec's write, an ordering fragility, not a product defect and not caused by anything this pass changed.
 
 The full Pest suite read **1,790 passed, 1 failed (29,818 assertions, 351.8s)**; the one failure is attributed unrelated: `EmptyStateCommandNamesTest.php:135` reads "the README states Eight declared sources; config/uma.php declares 9", the doc/config drift left by the session that added the ninth fetch source, touching no file this pass changed. `composer lore` exit 0 on the unchanged 319-hit doc baseline; `composer lore-code` exit 0 (140, the allowed hit classes); `vendor/bin/pint --test --format agent` passed on every changed PHP path; `npm run typecheck` exit 0 (with its §4.1 limit unchanged: it reads no SFC); `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` reported "No errors". Pass 2's carried record landed as `ae2ae6c`, and the SFC compile check with a working negative control covered all 22 Vue files this pass touched.
+## UI-AUDIT-FIX-EXECUTION-2026-10-13 (pass 4: Agent 2, the whole-surface dispatch — Phases 1 and 2)
+
+**What this pass was.** The owner's Agent 2 dispatch: Track 1 shared rails (Phase 1), the four freed
+Phase E slices (Phase 2), the remaining Track 1 craft (Phase 3) and the hand-off matrix. Read in full
+first: `frontend-fidelity-2026-10-13.md`, `ux-laws-audit-plan-2026-10-13.md` and the remaining-screens
+audit. Nothing here touches a migration, a route, the fetch pipeline, `config/scenarios.php`, or any
+Track 2 clause — those stay blocked on the owner's `DESIGN.md` amendment.
+
+**Phase 1.**
+
+- **Slice 1.1 (shell measure): already landed, verified and reported rather than rebuilt.** The dispatch
+  asks for `mx-auto w-full max-w-5xl` on `AppLayout.vue`'s `main`; the tree carries exactly that at
+  `:306` (pass 2's `37eb694`), with the ratified-width comment beside it. Nothing to do.
+- **Slice 1.2 (the type scale): the shell half was also already landed** — `AppLayout.vue:290` reads
+  `text-2xl font-semibold text-ink-strong` (the peer's `26a2b41`), so the dispatch's "one shell decision
+  first" was satisfied before this pass began. What this pass landed is the page half, measured first:
+  an AST census of every heading element in `resources/js` counted **75 headings at `text-base
+  font-semibold` across 31 files** (69 h2/h3 and 6 scenario-panel h4s), **35 already at the ratified
+  `text-lg font-semibold`**, and **26 eyebrow headings** (`text-xs uppercase`) across 11 files. The
+  instrument mattered: the raw class-string grep counts 78 occurrences, and three of those are not
+  headings (a lead-in `<p>` in `TrackblazerPanel.vue`, plus two non-heading sites in files with no
+  heading at all), so a blind substitution would have restyled body copy. A second instrument scoped the
+  eyebrow class strings per file and split the 11 eyebrow files into the 10 where every occurrence is a
+  heading and the ones where the same string also styles `dt` labels — those stay untouched, which is
+  the dispatch's own "section headers, not metadata" line made mechanical. The six h4s keep
+  `text-base`, because promoting a sub-heading to the size of its parent h3 destroys the scale.
+  Seven cluster commits (`84b0b55` Database, `ab6d553` catalogs, `bd266c4` Veterans compare,
+  `ea29c49` the career decision screens and their cards, `dc27d1e` record/outcome/snapshot,
+  `4d31de4` wizard, `209e05e` Cockpit, advisor rail and scenario panels): the post-census reads
+  **6 `text-base` headings (the kept h4s), 0 eyebrows, 130 at `text-lg`**, all 34 touched SFCs compile,
+  and the guard specs the dispatch names (`dashboard`, `database`, `veterans`, `support-deck`) read
+  **35 passed** on the rebuilt bundle. The dispatch also asks for a 1280px visual read: two screenshots
+  were captured (the front door and the runs list) but this environment rendered no image content for
+  them, so the read is **captured, not visually judged** - the pixel judgement is owed.
+- **Slice 1.3 (dark ramp): measured and blocked, not landed.** The measured numbers: dark page
+  `#0D0C0F` against panel `#121013` is **1.03:1**, against `raised` `#24262A` 1.11:1, and against the
+  rule edge `#2E2C33` **1.42:1**. Two findings the dispatch's acceptance criterion does not account
+  for. First, a 3:1 *fill* step between a dark card and its page is not reachable inside a dark ramp:
+  the panel luminance 3:1 requires is mid-grey, lighter than `raised`, which inverts the surface ladder
+  and drops every text-on-panel pair. Second, the WCAG quantity that actually governs a bordered card
+  under 1.4.11 is its **boundary**: the rule edge against both sides, which measures 1.42:1 and would
+  need a dark `--color-rule` near `#60606A` to clear 3:1 - a design-visible change to every dark
+  hairline. The gate that must judge any such value (`g18ContractPairs()`, which computes ratios from
+  the stylesheet rather than remembering them) sits inside a peer session's in-flight rewrite of
+  `tests/Feature/DesignTokensTest.php` (+356/-56 uncommitted), and building on another session's
+  uncommitted file is the exact KI-70 collision. So the slice ships as the two numbers, the corrected
+  reading, the candidate value and the collision reason, and waits for a quiet tree.
+- **Slice 1.4 (form-control components): not reached.** Three new components plus a ~30-site
+  conversion is the largest slice in the plan and nothing ahead of it was small enough to leave room.
+  Reported open, not implied away.
+
+**Phase 2.**
+
+- **Slice 2.3 (provenance union) landed first among the four** because its census was already in hand:
+  **49 literal sites across 19 files**, exactly the audit's §4.4 figure. Two premise corrections from
+  the tree: the dispatch's "three `defineProps<>` sites" are not in `defineProps<>` at all - the three
+  Database pages re-declare the union inside local row *interfaces*, which alias fine - and the
+  dispatch's import path (from `ProvenanceBadge.vue:12`) cannot pass `npm run typecheck` as the tree
+  stands, because `vite/client`'s `*.vue` ambient module exports only a default component, so a named
+  type import from an SFC is unresolvable to `tsc`. The canonical union therefore lives in
+  `resources/js/types.ts` (the one module both TypeScript and the SFC compiler resolve natively), and
+  `ProvenanceBadge.vue` re-exports it so the name's public home is unchanged, keeping the literal
+  inside its own `defineProps` per the documented compiler limit. Eight of the 17 remaining SFCs
+  already carried a local `type Badge = ...` alias; their line now reads `type Badge = ProvenanceState`,
+  and every other literal site aliases `Badge`. Result: **2 literal sites remain** (the canonical
+  declaration and the one protected `defineProps`), 18 SFCs compile, typecheck and build are clean,
+  and `7fd49b6` carries the whole change. `DESIGN.md:615-618`'s four-file figure is reported stale,
+  not edited, per the plan.
+- **Slice 2.2 (pager consolidation) landed as `5c56578`, before 2.1 rather than after** - recorded as
+  an ordering deviation, because converting four pager blocks to `Link` and then deleting them into a
+  component moves the same markup twice; consolidating first means the Link conversion happens in one
+  place. `resources/js/components/Pagination.vue` keeps the byte shape (44px targets,
+  `aria-current="page"`, the paginator's HTML-entity labels via `v-html` on an inner span so a
+  component root never carries the directive). **`Database/Races.vue` keeps its copy**: that file
+  carries a peer session's staged intent (worktree at HEAD, index ahead of it), and committing under it
+  invites the peer's next plain commit to revert the change - the KI-70/71 lesson applied before the
+  fact for once.
+- **Slice 2.1 (Link conversion) landed as `35a1c68`.** The three catalogs' row drill-ins, `SkillRow`'s
+  skill link, the two detail pages' trainee and holder links, and the shared pager's anchor are Inertia
+  `Link` visits now. One deliberate reading of the dispatch: `preserve-scroll` goes on the **pager**,
+  not the rows - paging is reading the same list and the scroll position is the reading position,
+  while a row opens a new page that should start at its top. The three external source URLs stay plain
+  anchors, and `ArtworkSlot`'s thumbnail href is that component's own contract, not this slice's. The
+  performance comparison the plan asks for ran as counts on a scratch instrument (deleted after the
+  run, kept in the session scratch): one catalog row click produced **exactly one document load - the
+  arrival itself - and the visit over `X-Inertia`**, with the request filter matching the whole
+  `/umamusume` prefix so a plain anchor's reload would have been counted. The first instrument run had
+  a narrower filter that could not have caught the failure it was testing for; it was fixed and re-run,
+  and only the fixed run is evidence.
+- **Slice 2.4 (merge target) took the dispatch's smaller option**: the suggested row's id now prints
+  beside the suggestion it prefills (`28a2718`), guarded to the non-null case, so the value a Trainer
+  confirms is checkable on the screen. The combobox alternative stays open; `ReviewFormAccessibilityTest`
+  and `ReviewQueueTest` read 5 passed.
+
+**An incident this pass caused and what it cost.** The 2.3 staging swept a peer session's in-flight
+work: `7fd49b6` carries `UraPanel.vue`'s goals-ladder footer (`summary`/`empty_note` interface fields,
+template reads and docblocks) that this pass did not write, because the surgeon script staged whole
+worktree files whose collision status had not been re-checked. The content is coherent and compiles,
+but its server half lives in the peer's *uncommitted* `CockpitController.php:1816-1836`, so **HEAD
+alone renders every URA goals group with the fallback empty-note sentence and a blank summary
+paragraph** until the peer's controller commit lands. The TrackblazerPanel scare in the same sweep
+turned out to be the `-` sides of this pass's own replacements, not peer work. Every staging after the
+incident re-checked `git status` per file first.
+
+**Shared-index discipline.** All commits used the private `GIT_INDEX_FILE` recipe. The shared index was
+repaired to HEAD parity twice mid-pass (once for 12 paths, once for 18 plus a staged *deletion* of
+`Pagination.vue` - the shared index is a snapshot from before the CAS commits, so any plain peer commit
+from it would drop the files this dispatch's CAS commits added) and once more is owed at hand-off.
+
+**Verification.** `npm run typecheck` exit 0 after every slice; `npm run build` exit 0 four times (the type-scale gate, the alias gate, and the 2.1/2.4 gate); the SFC compile check with a working negative control covered 34 promoted files plus the 18 alias files plus the Link and pager files; the dispatch's guard specs read **35 passed** for the type scale (dashboard, database, veterans, support-deck on the rebuilt bundle) and **26 passed, 1 failed** for the Link slice (catalog, skills, support-cards, review; the one failure is `navigation-determinism.spec.ts:75`, the same case attributed pre-existing in passes 2 and 3). The Link instrument ran green after its own filter was fixed. `ReviewFormAccessibilityTest` and `ReviewQueueTest` read 5 passed for 2.4. `composer lore` exit 0 on the 319-hit baseline and `composer lore-code` exit 0 at 141 - the one rise over 140 is the peer session's uncommitted `CockpitController.php` `planned`-purchase vocabulary, their slice's gate, not this pass's copy. The end-of-pass full suite read **1,802 passed, 4 failed (29,970 assertions, 499.5s)**; all four attributed away from this pass, which touched no PHP file: `EmptyStateCommandNamesTest.php:135` (README states Eight declared sources, config declares 9 - the ninth source's session owes the README), and `CareerScenarioSelectTest` twice plus `LessonEvidenceBoundaryTest.php:119`, which reproduce solo and sit on the wizard scenario card the peer restructured in `84f9353` and the Cockpit capability flags their uncommitted controller work touches - peer-landed-red with the test moves owed by their slices. PHPStan and pint were not re-run: no PHP file changed since their last clean runs.
+
