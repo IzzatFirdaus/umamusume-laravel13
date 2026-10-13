@@ -250,15 +250,15 @@ const group = (n: number): string => n.toLocaleString('en-US');
                 <template v-if="props.recentVeterans.total === 0">
                     <p class="mt-2 text-sm text-ink">No Veterans recorded yet.</p>
                     <p class="mt-2 text-sm text-ink-muted">
-                        A Veteran is a completed run you have filed, and the library is where a finished
-                        career becomes something the next one can inherit from. Finish a run, set its
-                        status to Completed, and save it from the Legacy Lab.
+                        A Veteran is a completed career filed into the library. Nothing is filed there:
+                        a career is saved from its own Result screen, so open one that finished and
+                        choose Save Veteran.
                     </p>
                     <Link
                         :href="props.recentVeterans.library_url"
                         class="mt-4 inline-flex min-h-11 items-center rounded-md border border-rule px-4 text-sm font-semibold text-ink hover:text-ink-strong"
                     >
-                        Open the Legacy Lab
+                        Open the Veteran library
                     </Link>
                 </template>
 
@@ -285,7 +285,7 @@ const group = (n: number): string => n.toLocaleString('en-US');
                         Showing the {{ props.recentVeterans.rows.length }} most recent of
                         {{ group(props.recentVeterans.total) }}.
                         <Link :href="props.recentVeterans.library_url" class="underline hover:text-ink-strong">
-                            Open the Legacy Lab
+                            Open the Veteran library
                         </Link>
                     </p>
                 </template>

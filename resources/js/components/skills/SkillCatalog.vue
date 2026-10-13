@@ -132,8 +132,8 @@ function applyFilters(): void {
             v-if="totalCount === 0"
             class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
         >
-            The skill catalog holds no rows yet. Run `php artisan uma:fetch gametora-skills` to fill it,
-            or `php artisan uma:reparse gametora-skills` if a fetch says the document is unchanged.
+            The skill catalog holds no rows yet. Run <code>php artisan uma:fetch gametora-skills</code> to fill it,
+            or <code>php artisan uma:reparse gametora-skills</code> if a fetch says the document is unchanged.
         </p>
         <p
             v-else

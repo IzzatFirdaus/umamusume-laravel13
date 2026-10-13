@@ -164,8 +164,8 @@ function applyFilters(): void {
             v-if="totalCount === 0"
             class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
         >
-            The support-card catalog holds no rows yet. Run `php artisan uma:fetch gametora-support-cards`
-            to fill it, or `php artisan uma:reparse gametora-support-cards` if a fetch says the document
+            The support-card catalog holds no rows yet. Run <code>php artisan uma:fetch gametora-support-cards</code>
+            to fill it, or <code>php artisan uma:reparse gametora-support-cards</code> if a fetch says the document
             is unchanged.
         </p>
         <p
@@ -257,6 +257,6 @@ function applyFilters(): void {
     <p class="mt-6 max-w-3xl text-xs text-ink-muted">
         Effect figures are each effect's highest stated anchor, not an interpolation, and the anchor a card
         stops at is not always level 50. The type word is the client's: the source's key for Wit is
-        `intelligence` and for Pal is `friend`.
+        <code>intelligence</code> and for Pal is <code>friend</code>.
     </p>
 </template>

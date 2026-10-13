@@ -165,8 +165,7 @@ function runBackup(): void {
         <h2 class="text-2xl font-semibold text-ink-strong">Preferences</h2>
         <p class="mt-1 text-sm text-ink-muted">
             Settings are stored in this app's database for a single Trainer and read back on the next
-            request (PRD US-11, PRD §6 non-goal 12). A preference this tool cannot store is named
-            rather than offered.
+            full page load. A preference this tool cannot store is named rather than offered.
         </p>
 
         <form
@@ -239,11 +238,11 @@ function runBackup(): void {
                 </label>
 
                 <p class="text-xs text-ink-muted">
-                    Turning the estimate on changes no screen yet. `ADR-0001` §3 records that
-                    no source publishes a failure curve and requires any number this tool prints
-                    to show its formula beside it, so there is nothing honest to render until a
-                    model exists. The choice is stored, and the band the app can source from
-                    Energy (Safe, Caution, Danger) shows either way.
+                    Turning the estimate on changes no screen yet: no source publishes a failure
+                    curve, and any number this tool prints has to show its formula beside it, so
+                    there is nothing honest to render until a model exists. The choice is stored,
+                    and the band the app can source from Energy (Safe, Caution, Danger) shows
+                    either way.
                 </p>
 
                 <label class="block">
@@ -357,7 +356,7 @@ function runBackup(): void {
                         <dt class="text-ink">Risk tolerance</dt>
                         <dd
                             class="text-ink-muted"
-                            title="A preference the brief's Build Target step would carry, and whether it enters the stored payload is that screen's own open question, not this screen's to settle."
+                            title="Whether a risk tolerance enters the stored payload is the Build Target screen's own open question, not this one's to settle."
                         >
                             N/A
                         </dd>
@@ -415,7 +414,7 @@ function runBackup(): void {
                         <dt class="text-ink">Restore</dt>
                         <dd
                             class="text-ink-muted"
-                            title="Destructive: restoring replaces the database file, which AGENTS.md §5 scopes to the owner. Absent rather than a button without a backend."
+                            title="Destructive: restoring replaces the database file, which is an owner's action to take. Absent rather than a button without a backend."
                         >
                             N/A
                         </dd>
@@ -424,7 +423,7 @@ function runBackup(): void {
                         <dt class="text-ink">Reset</dt>
                         <dd
                             class="text-ink-muted"
-                            title="Destructive; requires owner approval for a route (AGENTS §5)"
+                            title="Destructive; adding it needs the owner's approval"
                         >
                             N/A
                         </dd>
@@ -452,7 +451,7 @@ function runBackup(): void {
                             :title="
                                 rulesetVersion
                                     ? undefined
-                                    : 'No source defines a Global ruleset version (design-2.0 §48)'
+                                    : 'No source defines a Global ruleset version'
                             "
                         >
                             {{ rulesetVersion ?? 'N/A' }}

@@ -42,7 +42,10 @@ it('renders a themed 419 that says what happened and what to do', function (): v
     $html = view('errors.419')->render();
 
     expect($html)
-        ->toContain('Sign-in session expired')
+        // This tool has no sign-in (PRD NFR-1), so the heading names the cause the body explains
+        // instead of pointing at a screen that does not exist.
+        ->toContain('This page is older than the session')
+        ->not->toContain('Sign-in')
         ->toContain('bg-page')
         ->toContain('min-h-11')
         // First paint is themed without a script deciding it afterwards: either the stored

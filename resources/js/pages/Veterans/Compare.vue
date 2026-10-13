@@ -117,7 +117,7 @@ function letterFor(column: Column, key: string): string | null {
 
         <p v-if="loading" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
 
-        <p class="text-sm text-ink-muted">{{ props.notice }}</p>
+        <p class="text-sm text-ink-muted" role="note">{{ props.notice }}</p>
 
         <fieldset class="mt-4 rounded-md border border-rule bg-panel p-4">
             <legend class="text-sm font-semibold text-ink-strong">Choose up to {{ props.max }}</legend>
@@ -254,7 +254,7 @@ function letterFor(column: Column, key: string): string | null {
                             <td v-for="column in props.columns" :key="`skills-${column.id}`" class="p-2 text-ink">{{ column.counts.skills }}</td>
                         </tr>
                         <tr class="border-b border-rule">
-                            <th scope="row" class="p-2 text-left font-medium text-ink-muted">Races entered</th>
+                            <th scope="row" class="p-2 text-left font-medium text-ink-muted">Races recorded</th>
                             <td v-for="column in props.columns" :key="`races-${column.id}`" class="p-2 text-ink">{{ column.counts.races }}</td>
                         </tr>
 

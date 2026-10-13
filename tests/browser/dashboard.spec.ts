@@ -112,7 +112,9 @@ test('sizes the dashboard controls to the 44px contract', async ({ page }) => {
         page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'New Career' }),
         page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Legacy Lab' }),
         page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Support Cards' }),
-        page.getByRole('link', { name: 'Open the Legacy Lab' }),
+        // The panel's door is the Veteran library now: the panel lists the library's rows and its
+        // empty state names the Result screen's Save Veteran as the filing step.
+        page.getByRole('link', { name: 'Open the Veteran library' }),
     ];
 
     for (const target of targets) {

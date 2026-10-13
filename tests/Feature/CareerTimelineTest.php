@@ -185,3 +185,35 @@ it('interleaves race, event and purchase rows under their own turns', function (
             })
         );
 });
+
+it('ships no em dash in the rail copy, on the two strings a placement and an incomplete outcome compose', function (): void {
+    // R-02 / AGENTS.md §5 ban the em dash from shipped copy, and these two strings are the rail's
+    // most-scanned lines: a finish with its ordinal, and the event row a Trainer must act on. The
+    // copy-hygiene sweep cannot see server-composed strings (it walks .blade.php and .vue only), so
+    // the contract is pinned here, on the payload the page prints verbatim.
+    $run = timelineRun(['scenario' => 'trackblazer'], turns: 1);
+
+    $turnOneId = TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)->first()->id;
+
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'turn_entry_id' => $turnOneId,
+        'status' => 'Completed',
+        'placement' => 1,
+        'fans_gain' => 1200,
+    ]);
+
+    TurnEvent::create([
+        'training_run_id' => $run->id,
+        'turn' => 1,
+        'event_type' => TurnEventType::Failure,
+        'source_name' => 'Training failure',
+        'origin_note' => null,
+    ]);
+
+    $this->get(route('runs.timeline', $run))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('entries.1.result', fn (string $result): bool => str_contains($result, 'Completed - '))
+            ->where('entries.2.result', 'Outcome incomplete - choose manually')
+        );
+});

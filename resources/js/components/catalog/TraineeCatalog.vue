@@ -120,7 +120,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
         v-if="umamusumes.data.length === 0"
         class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
     >
-        No Umamusume match. The catalog is filled by seed data or `php artisan uma:fetch`.
+        No Umamusume match. The catalog is filled by seed data or <code>php artisan uma:fetch</code>.
     </p>
 
     <template v-else>

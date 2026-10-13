@@ -101,12 +101,17 @@ const doorClass =
                 </div>
 
                 <div>
-                    <dt class="text-xs text-ink-muted">Skills learned</dt>
+                    <!-- Counted, not filtered, the same words the compare surface uses: the pivot holds
+                         Suggested and Skipped rows and `race_entries` holds NotOffered and Skipped rows,
+                         so these are the records a career carries rather than the skills it earned or
+                         the races it ran. "Learned" overstated the number one screen away from the
+                         surface that explains why. -->
+                    <dt class="text-xs text-ink-muted">Skills recorded</dt>
                     <dd class="text-ink-strong">{{ props.counts.skills }}</dd>
                 </div>
 
                 <div>
-                    <dt class="text-xs text-ink-muted">Races entered</dt>
+                    <dt class="text-xs text-ink-muted">Races recorded</dt>
                     <dd class="text-ink-strong">{{ props.counts.races }}</dd>
                 </div>
             </dl>

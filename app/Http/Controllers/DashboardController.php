@@ -198,7 +198,9 @@ class DashboardController extends Controller
             'rows' => array_map(fn (Veteran $veteran): array => $this->veteranRow($veteran), $page->items()),
             'total' => $page->total(),
             'limit' => self::RECENT_VETERANS,
-            'library_url' => route('legacy.index'),
+            // The panel is the Veteran library's newest rows, so its door is the library itself and
+            // not the Legacy Lab one screen away (`veterans.index` reads the same `ListVeterans`).
+            'library_url' => route('veterans.index'),
         ];
     }
 
@@ -247,9 +249,12 @@ class DashboardController extends Controller
      */
     private function dataStatus(): array
     {
+        // The state word is composed from the same flag the source string already reads: a hard-coded
+        // "Current" beside a "source marked stale" marker was two contradictions on the one line whose
+        // job is saying whether the data can be trusted.
         return [
             'label' => 'GLOBAL DATA',
-            'state' => 'Current',
+            'state' => config('scenarios.stale', false) ? 'Stale' : 'Current',
             'verified_at' => config('scenarios.verified_at'),
             'source' => $this->dataStatusSource(),
         ];

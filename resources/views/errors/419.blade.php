@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign-in session expired</title>
+    <title>This page is older than the session</title>
     @empty($theme)
         <script>
             (function () {
@@ -32,7 +32,7 @@
         Skip to content
     </a>
     <main id="main" class="mx-auto max-w-5xl px-4 py-8">
-        <h1 class="text-2xl font-semibold text-ink-strong">Sign-in session expired</h1>
+        <h1 class="text-2xl font-semibold text-ink-strong">This page is older than the session</h1>
 
         <div class="mt-6 rounded-md border border-dashed border-rule bg-panel p-6">
             <p class="text-sm font-semibold text-ink-strong">Nothing was saved</p>

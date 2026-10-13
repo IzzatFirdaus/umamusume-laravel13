@@ -143,7 +143,7 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
                 </dl>
                 <p class="mt-2 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted">
                     No profile recorded for this trainee yet. It arrives with
-                    `php artisan uma:fetch gametora-character-profiles`.
+                    <code>php artisan uma:fetch gametora-character-profiles</code>.
                 </p>
             </template>
 
@@ -272,7 +272,7 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
             </template>
             <template v-else>
                 No Global costume cards recorded for this trainee yet. Forms arrive with
-                `php artisan uma:fetch gametora-character-cards`.
+                <code>php artisan uma:fetch gametora-character-cards</code>.
             </template>
         </p>
 

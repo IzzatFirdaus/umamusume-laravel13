@@ -237,7 +237,10 @@ class TimelineController extends Controller
             'expected' => null,
             'actual' => null,
             'mood' => null,
-            'result' => $race->status->label().($race->placement !== null ? ' — '.$race->placementOrdinal() : ''),
+            // The separator is the plain hyphen `EventCard.vue` spells the same state with: the em
+            // dash is banned from shipped copy (AGENTS.md §5, R-02), and this string reaches the rail
+            // verbatim.
+            'result' => $race->status->label().($race->placement !== null ? ' - '.$race->placementOrdinal() : ''),
             'corrected' => false,
             'correction_id' => null,
             'decision_url' => route('runs.races.decision', $run),
@@ -267,7 +270,7 @@ class TimelineController extends Controller
             'mood' => null,
             'result' => $recorded
                 ? ($outcome ?? 'Outcome recorded')
-                : 'Outcome incomplete — choose manually',
+                : 'Outcome incomplete - choose manually',
             'corrected' => false,
             'correction_id' => null,
             'decision_url' => $this->eventDecisionUrl($run, $kind),
