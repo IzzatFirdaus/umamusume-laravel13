@@ -8,6 +8,7 @@
  * stays on it rather than being carried to the URL this query was first written for.
  */
 import ArtworkSlot from '../ArtworkSlot.vue';
+import Pagination from '../Pagination.vue';
 import RarityChip from '../RarityChip.vue';
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -208,18 +209,6 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
             </li>
         </ul>
 
-        <nav v-if="umamusumes.links.length > 3" aria-label="Pagination" class="mt-4 flex flex-wrap gap-2 text-sm">
-            <template v-for="(link, index) in umamusumes.links" :key="index">
-                <a
-                    v-if="link.url"
-                    :href="link.url"
-                    :aria-current="link.active ? 'page' : undefined"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised"
-                    :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
-                    v-html="link.label"
-                />
-                <span v-else class="inline-flex min-h-11 items-center px-3 text-ink-muted" v-html="link.label" />
-            </template>
-        </nav>
+        <Pagination :links="umamusumes.links" />
     </template>
 </template>

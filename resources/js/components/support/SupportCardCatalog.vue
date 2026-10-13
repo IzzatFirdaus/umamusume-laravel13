@@ -8,6 +8,7 @@
  * URL stays on it.
  */
 import ArtworkSlot from '../ArtworkSlot.vue';
+import Pagination from '../Pagination.vue';
 import RarityChip from '../RarityChip.vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -239,19 +240,7 @@ function applyFilters(): void {
             </li>
         </ul>
 
-        <nav v-if="cards.links.length > 3" aria-label="Pagination" class="mt-4 flex flex-wrap gap-2 text-sm">
-            <template v-for="(link, index) in cards.links" :key="index">
-                <a
-                    v-if="link.url"
-                    :href="link.url"
-                    :aria-current="link.active ? 'page' : undefined"
-                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised"
-                    :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
-                    v-html="link.label"
-                />
-                <span v-else class="inline-flex min-h-11 items-center px-3 text-ink-muted" v-html="link.label" />
-            </template>
-        </nav>
+        <Pagination :links="cards.links" />
     </template>
 
     <p class="mt-6 max-w-3xl text-xs text-ink-muted">
