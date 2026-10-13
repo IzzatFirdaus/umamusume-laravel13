@@ -5878,3 +5878,73 @@ back red under concurrent load is reported with its counts and not converted int
 only the solo-reproduced purchase failure is claimed as real.
 
 
+## Pass 9 (2026-10-14): the six-capture read, two copy defects, and the marker census corrected
+
+Skills: the pass-8 six plus `gstack:design-review` and `design-review:design-qa`. Adaptations
+recorded in `premises-2026-10-14-pass9.md`: no `browse` binary or live URL is invoked (the evidence
+is the saved captures against `DESIGN.md`, which is the source-truth-plus-rendering pair `design-qa`
+demands), and the skill's "no system font" rule is not applied because this tree exempts the system
+font by owner ruling (KI-6).
+
+### Phase 0
+
+- Pass 8's three commits are intact (`3dd8007` 42/0, `9dc6c25` 5/2, `b8cd071` 45/0) and HEAD's copy
+  of this file carries the `exits 1` correction.
+- **The dark ramp is still held**: own-path calls read ` M` and +332/−54 against `17261d4`, and
+  HEAD's copy still has zero `g18ContractPairs`.
+- **The shared index is down to one path** (`docs/research-scratch/SLICE-RECORDS.md`, the peer's
+  staged blob, left alone). No `resources/js` or `app/` path diverges, and the 02:57 bundle
+  post-dates the newest Vue commit (`1b92531`, 02:39), so the sweep needs no rebuild.
+- **The marker census is 13, not 11.** 18 `<summary>` elements across 117 Vue files: 13 carry a
+  display utility and lose the UA `::marker`, none carries a glyph, and the 5 native ones do render
+  `▶` on the same screens - so the 13 are an inconsistency, not a house style. Pass 8's grep needed
+  the class on the same line as the tag and missed `CareerTimeline.vue:92` and `Cockpit.vue:978`;
+  four of the thirteen are in `Cockpit.vue`, which is another agent's surface. `app.css` still has
+  no `summary`, `list-item` or `::marker` rule.
+
+### Phase 1 - five captures read for the first time
+
+Full readings in the premise file. The short form: **Dashboard** has one `h1`, one enamel primary and
+correct secondary doors, but its five section headers are `h2`s at `text-xs` in literal capitals -
+below the 14px body step, where `DESIGN.md:202` puts section headers at `text-lg` and audit **F-A3**
+already prescribes promoting them. The "26 eyebrow headings to 0" close-out counted the `uppercase`
+utility, not literal caps, so it never saw these. Its three explanatory paragraphs also run the full
+card width at roughly 115 characters a line, uncapped, where `DESIGN.md:221` ratifies `max-w-3xl`
+for long copy. **Database hub** reads clean; its full-width rows leave the right side empty, which is
+the hit target `database.spec.ts:29` pins, so it is accepted rather than filed. **Wizard-preflight**
+is the strongest screen: step bar per the `completed = visited` ruling, five warning rows each with a
+cause and a door, one enamel "Start Career" against five secondary edit doors, and native summaries
+that do render `▶`. Two dead cells in its Build grid are recorded as a minor. **Catalog detail**
+produced the two fixes. **Catalog index** reads as a grouped roster with one enamel Filter and the
+pager; its full-page capture downscales at this size, so the count line was not resolvable and no
+claim is made about it.
+
+### Slice 2.1 - the copy fixes (`52971d8`)
+
+`Catalog/Show.vue:308` printed `` `ADR-0012` `` with literal markdown backticks in shipped copy, and
+`Catalog/Show.vue:193-194` lost the space between the Japanese name and the `(EN: …)` span to Vue's
+whitespace condensing, rendering the two jammed together. Both are invisible to every automated gate
+this tree has: no test asserts either string, the feature tests pass regardless because the props are
+unchanged, and `npm run typecheck` reads no Vue template. The pixel read found them. Diff 2/2, SFC
+compile check ok, typecheck exit 0, and the screen's focused tests read **32 passed (397
+assertions)**. No rebuild was run, so the rendered proof of these two strings waits for the next
+build of `public/build`.
+
+### Held, with the reason
+
+- **2.2 the 16-failure classification**: needs either sixteen solo browser runs or the owner's
+  harness call, and the box was contended through this pass - two ripgrep calls timed out at 20s and
+  a `git status` hung long enough to be backgrounded. Not started rather than started and voided.
+- **2.3 the marker fix**: owner-gated (fix in one `app.css` rule, or ratify). The census now says
+  13 sites in 9 files with four of them on the Cockpit, which is the argument for one rule rather
+  than thirteen glyphs.
+- **3.1 the dark ramp**: held on 0.2, unchanged since pass 6.
+
+### Phase 5
+
+`npm run typecheck` exit 0 · focused catalog tests 32 passed / 397 assertions · `composer lore`
+**443 hits, 75 exempt, exit 0** and `composer lore-code` **141, exit 0**, both unchanged from pass
+8's post-record run, so this pass owes no new ruling and its own prose added no hits · pint not run
+(no PHP changed) · PHPStan not run (no PHP changed) · full suite not re-run: the only code change is
+two template strings in one Vue file, which no PHP test reads. `public/build` is still the peer's
+02:57 bundle, untouched here. No migration, route, network or `config/scenarios.php` change.
