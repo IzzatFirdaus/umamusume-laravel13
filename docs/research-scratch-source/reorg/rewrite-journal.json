@@ -1,0 +1,68 @@
+{
+  "files": [
+    "docs/adr/0008-character-card-catalog-layer.md",
+    "docs/data/2026-09-29-global-roster-crosscheck.md",
+    "docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md"
+  ],
+  "mapping": {
+    "research-scratch/data/json/character-cards.json": "research-scratch/data/json/CARD-RENAMED.json"
+  },
+  "ledger": [
+    {
+      "file": "docs/adr/0008-character-card-catalog-layer.md",
+      "line": 346,
+      "class": "UNKNOWN",
+      "path": "research-scratch/data/json/character-cards.json",
+      "applied": false
+    },
+    {
+      "file": "docs/data/2026-09-29-global-roster-crosscheck.md",
+      "line": 45,
+      "class": "RECORD",
+      "path": "research-scratch/data/json/character-cards.json",
+      "applied": false
+    },
+    {
+      "file": "docs/data/2026-09-29-global-roster-crosscheck.md",
+      "line": 48,
+      "class": "LIVE",
+      "path": "research-scratch/data/json/character-cards.json",
+      "applied": false
+    },
+    {
+      "file": "docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md",
+      "line": 1085,
+      "class": "UNKNOWN",
+      "path": "research-scratch/data/json/character-cards.json",
+      "applied": false
+    },
+    {
+      "file": "docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md",
+      "line": 1941,
+      "class": "UNKNOWN",
+      "path": "research-scratch/data/json/character-cards.json",
+      "applied": false
+    },
+    {
+      "file": "docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md",
+      "line": 1948,
+      "class": "LIVE",
+      "path": "research-scratch/data/json/character-cards.json",
+      "applied": false
+    },
+    {
+      "file": "docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md",
+      "line": 1954,
+      "class": "LIVE",
+      "path": "research-scratch/data/json/character-cards.json",
+      "applied": false
+    },
+    {
+      "file": "docs/requests/2026-09-29-catalog-roster-and-trainee-selector-plan.md",
+      "line": 1971,
+      "class": "RECORD",
+      "path": "research-scratch/data/json/character-cards.json",
+      "applied": false
+    }
+  ]
+}

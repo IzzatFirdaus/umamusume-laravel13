@@ -283,7 +283,7 @@ moved, 13 buckets, the two executor defects fixed first) is the dated status not
 | The E2 URA panel slice plan (SCREEN-014, goals + Happy Meek, the first `register()` call)                                                                                                         | `docs/proposals/frontend-development-plan.md` §9.2                                                                                                                                                                                                                                                                                              |
 | The D16 save-and-compare veteran library slice: the two-column comparison table, the four-at-once cap, and the `veterans[]=N` serialisation mismatch that keeps its gate at 8/9                   | `docs/research-scratch/SLICE-RECORDS.md` §`## D16-SAVE-VETERAN-2026-10-07.md`                                                                                                                                                                                                                                                                   |
 | The four scenario implementation plans (Our Grand Concert, Trackblazer, Unity Cup, URA Finale): screen deltas, caps, panels, MVP sets, acceptance criteria                                                                   | `PROCESS-PLANS.md`, sections `## Our-Grand-Concert-plan.md`, `## Trackblazer-plan.md`, `## Unity-Cup-plan.md`, `## URA-Finale-plan.md` (Round 14, augment-only)                                                                                                                   |
-| The Trainer Desk 2.0 G/D/E prompt sets (program prompts that opened the G and D/E slices)                                                                                                                                  | `PROCESS-PLANS.md`, sections `## Trainer-Desk-2.0-G-Prompts.md`, `## Trainer-Docs-2.0-D-Prompts.md`, `## Trainer-Docs-2.0-E-Prompts.md` (Round 14, augment-only)                                                   |
+| The Trainer Desk 2.0 G/D/E prompt sets (program prompts that opened the G and D/E slices)                                                                                                                                  | `PROCESS-PLANS.md`, sections `## Trainer-Desk-2.0-G-Prompts.md`, `## Trainer-Docs-2.0-D-Prompts.md`, `## Trainer-Docs-2.0-E-Prompts.md` (Round 14, augment-only; originals deleted Round 15, 2026-10-12)                                                                       |
 | The legacy Umamusume Progress Tracker run records and the URA Finale import record that reads them                                                                                                                           | `TRAINING-RUN-IMPORTS.md` (the Round 14 master), sections `## Umamusume_Progress_Tracker_Runs.md` and `## ura-finale-runs.md`                                                                                       |
 | The Trainer Desk 2.0 design target (visual/interaction spec for the Inertia + Vue rewrite; reference only, not authorization)                                                                                                | `DESIGN-CORPUS.md`, section `## design-2.0.md` (Round 14, augment-only)                                                                                                                                             |
 | The provenance-and-absence contracts proposal (rendered provenance badges, the three axes, the ten owner rulings) and the 2.0 screen-set target (SCREEN-001..024, governance holds)                                          | `PLANS-AND-BRIEFS.md`, sections `## provenance-and-absence-contracts.md` and `## screen-spec-2.0.md` (Round 14, augment-only)                                                                                       |
@@ -348,6 +348,35 @@ Unity Cup plan sections, and the round2-reconciliation section had gone stale th
 source is a live record still being appended to; both were corrected and the round2 section was regenerated
 from the current source. The `TRAINING-RUN-IMPORTS.md` master is untracked and carries the new-run
 documentation for the `UraFinaleRunsSeeder`.
+
+> **Erratum 2026-10-12.** The Round 14 table above says "(all live, all still in place)". That was true
+> on 2026-10-10. Three of the seventeen sources — the G/D/E prompt sets — were ordered consolidated and
+> deleted by the owner on 2026-10-12; see Round 15 below. The other fourteen remain live and in place.
+
+### Round 15 (2026-10-12, owner-ordered) — the three Trainer Desk 2.0 prompt sets deleted from `docs/`
+
+The owner ordered `docs/Trainer-Desk-2.0-G-Prompts.md`, `docs/Trainer-Docs-2.0-D-Prompts.md` and
+`docs/Trainer-Docs-2.0-E-Prompts.md` consolidated into the masters and the originals deleted. All three
+had been embedded in `PROCESS-PLANS.md` by Round 14, so this completed the embed-then-delete pair rather
+than performing a new embed.
+
+| Absorbed file                                | Lines | New home                                                                | Recoverable after delete?                                                                                                          |
+| -------------------------------------------- | ----- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/Trainer-Desk-2.0-G-Prompts.md`         | 1,046 | `PROCESS-PLANS.md`, section `## Trainer-Desk-2.0-G-Prompts.md`           | **No** — the file was untracked (`??` at delete time); the `PROCESS-PLANS.md` section is the only copy, per Round 13's E2 precedent |
+| `docs/Trainer-Docs-2.0-D-Prompts.md`         | 542   | `PROCESS-PLANS.md`, section `## Trainer-Docs-2.0-D-Prompts.md`           | Yes — tracked and clean at HEAD (`4b6ed13`)                                                                                       |
+| `docs/Trainer-Docs-2.0-E-Prompts.md`         | 230   | `PROCESS-PLANS.md`, section `## Trainer-Docs-2.0-E-Prompts.md`           | Yes — tracked and clean at HEAD (`4b6ed13`)                                                                                       |
+
+Verification, per the discipline's line-by-line rule, ran before the delete: every non-blank line of
+each source was found in its `PROCESS-PLANS.md` section, in order, allowing the one-level heading
+demotion (G: 687/687, D: 380/380, E: 166/166; 0 missing in each). Two live citations were repointed
+before the delete — `docs/proposals/provenance-and-absence-contracts.md` §22 (`G-Prompts.md:60` → the
+`PROCESS-PLANS.md` section, source line retained) and `PLANS-AND-BRIEFS.md` §"E6 — Our Grand Concert
+baseline strip" (`E-Prompts.md` §"PROMPT E6" → the same-named section here). One citation was left
+standing deliberately: the dated "What closure does not cover" note in `KNOWN-ISSUES.md` that names
+`docs/Trainer-Desk-2.0-G-Prompts.md` as another session's untracked in-flight work records a past
+measurement, and the register's own convention keeps dated provenance verbatim. The four scenario
+implementation plans from Round 14 (`Our-Grand-Concert-plan.md`, `Trackblazer-plan.md`,
+`Unity-Cup-plan.md`, `URA-Finale-plan.md`) remain live in `docs/` and are not part of this round.
 
 ### Deliberate exceptions, outside the masters
 

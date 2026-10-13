@@ -1,0 +1,968 @@
+[
+ [
+  "Late Jul Junior",
+  "G3",
+  "Hakodate Junior Stakes Racecourse : Hakodate Turf 1200m Direction : Right",
+  "Sprint"
+ ],
+ [
+  "Early April Classic Senior",
+  "G3",
+  "Marine Cup Racecourse : Funabashi Dirt 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Sept Classic Senior",
+  "G2",
+  "Sazanka TV Hai Racecourse : Funabashi Dirt 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Dec Classic Senior",
+  "G3",
+  "Queen Sho Racecourse : Funabashi Dirt 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Mar Senior",
+  "G2",
+  "Diolite Kinen Racecourse : Funabashi Dirt 2400m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early May Senior",
+  "G1",
+  "Kashiwa Kinen Racecourse : Funabashi Dirt 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late July Classic Senior",
+  "G3",
+  "Mercury Cup Racecourse : Morioka Dirt 2000m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Late Aug Classic Senior",
+  "G3",
+  "Cluster Cup Racecourse : Morioka Dirt 1200m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Early Oct Classic Senior",
+  "G1",
+  "Mile Championship Nambu Hai Racecourse : Morioka Dirt 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Dec Junior",
+  "G1",
+  "Zen-Nippon Junior Yushun Racecourse : Kawasaki Dirt 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early June Classic",
+  "G2",
+  "Kanto Oaks Racecourse : Kawasaki Dirt 2100m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early July Classic Senior",
+  "G3",
+  "Sparking Lady Cup Racecourse : Kawasaki Dirt 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Feb Senior",
+  "G1",
+  "Kawasaki Kinen Racecourse : Kawasaki Dirt 2100m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early Mar Senior",
+  "G2",
+  "Empress Hai Racecourse : Kawasaki Dirt 2100m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early Oct Classic Senior",
+  "G2",
+  "Tokyo Hai Racecourse : Oi Dirt 1200m Direction : Right",
+  "Sprint"
+ ],
+ [
+  "Early Oct Classic Senior",
+  "G2",
+  "Ladies Prelude Racecourse : Oi Dirt 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Late Jan Senior",
+  "G3",
+  "TCK Jo-o Hai Racecourse : Oi Dirt 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Late April Senior",
+  "G3",
+  "Tokyo Sprint Racecourse : Oi Dirt 1200m Direction : Right",
+  "Sprint"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Classic (Funabashi) Racecourse : Funabashi Dirt 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Classic (Kawasaki) Racecourse : Kawasaki Dirt 2100m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Classic (Morioka) Racecourse : Morioka Dirt 2000m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Sprint Racecourse : Funabashi Dirt 1000m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Sprint Racecourse : Kawasaki Dirt 1400m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Sprint Racecourse : Morioka Dirt 1200m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Ladies' Classic Racecourse : Funabashi Dirt 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Ladies' Classic Racecourse : Kawasaki Dirt 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Ladies' Classic Racecourse : Morioka Dirt 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Aug Junior",
+  "G3",
+  "Niigata Junior Stakes Racecourse : Niigata Turf 1600m Direction : Left Outer",
+  "Mile"
+ ],
+ [
+  "Early Sept Junior",
+  "G3",
+  "Sapporo Junior Stakes Racecourse : Sapporo Turf 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Early Sept Junior",
+  "G3",
+  "Kokura Junior Stakes Racecourse : Kokura Turf 1200m Direction : Right",
+  "Sprint"
+ ],
+ [
+  "Early Oct Junior",
+  "G3",
+  "Saudi Arabia Royal Cup Racecourse : Tokyo Turf 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Oct Junior",
+  "G3",
+  "Artemis Stakes Racecourse : Tokyo Turf 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Nov Junior",
+  "G2",
+  "Keio Hai Junior Stakes Racecourse : Tokyo Turf 1400m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Early Nov Junior",
+  "G2",
+  "Daily Hai Junior Stakes Racecourse : Kyoto Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early Nov Junior",
+  "G3",
+  "Fantasy Stakes Racecourse : Kyoto Turf 1400m Direction : Right Outer",
+  "Sprint"
+ ],
+ [
+  "Late Nov Junior",
+  "G3",
+  "Tokyo Sports Hai Junior Stakes Racecourse : Tokyo Turf 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Nov Junior",
+  "G3",
+  "Kyoto Junior Stakes Racecourse : Kyoto Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Early Dec Junior",
+  "G1",
+  "Hanshin Juvenile Fillies Racecourse : Hanshin Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early Dec Junior",
+  "G1",
+  "Asahi Hai Futurity Stakes Racecourse : Hanshin Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Late Dec Junior",
+  "G1",
+  "Hopeful Stakes Racecourse : Nakayama Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Early Jan Classic",
+  "G3",
+  "Shinzan Kinen Racecourse : Kyoto Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early Jan Classic",
+  "G3",
+  "Fairy Stakes Racecourse : Nakayama Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early Jan Classic",
+  "G3",
+  "Keisei Hai Racecourse : Nakayama Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Early Feb Classic",
+  "G3",
+  "Kisaragi Sho Racecourse : Kyoto Turf 1800m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early Feb Classic",
+  "G3",
+  "Queen Cup Racecourse : Tokyo Turf 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Feb Classic",
+  "G3",
+  "Kyodo News Hai Racecourse : Tokyo Turf 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Mar Classic",
+  "G2",
+  "Tulip Sho Racecourse : Hanshin Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early Mar Classic",
+  "G2",
+  "Yayoi Sho Racecourse : Nakayama Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Early Mar Classic",
+  "G2",
+  "Fillies' Revue Racecourse : Hanshin Turf 1400m Direction : Right Inner",
+  "Sprint"
+ ],
+ [
+  "Late Mar Classic",
+  "G2",
+  "Spring Stakes Racecourse : Nakayama Turf 1800m Direction : Right Inner",
+  "Mile"
+ ],
+ [
+  "Late Mar Classic",
+  "G3",
+  "Falcon Stakes Racecourse : Chukyo Turf 1600m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Late Mar Classic",
+  "G3",
+  "Flower Cup Racecourse : Nakayama Turf 1800m Direction : Right Inner",
+  "Mile"
+ ],
+ [
+  "Late Mar Classic",
+  "G3",
+  "Mainichi Hai Racecourse : Hanshin Turf 1800m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early April Classic",
+  "G2",
+  "New Zealand Trophy Racecourse : Nakayama Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early April Classic",
+  "G3",
+  "Arlington Cup Racecourse : Hanshin Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early April Classic",
+  "G1",
+  "Oka Sho Racecourse : Hanshin Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early April Classic",
+  "G1",
+  "Satsuki Sho Racecourse : Nakayama Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Late April Classic",
+  "G2",
+  "Flora Stakes Racecourse : Tokyo Turf 2000m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Late April Classic",
+  "G2",
+  "Aoba Sho Racecourse : Tokyo Turf 2400m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early May Classic",
+  "G2",
+  "Kyoto Shimbun Hai Racecourse : Kyoto Turf 2200m Direction : Right Outer",
+  "Medium"
+ ],
+ [
+  "Early May Classic",
+  "G1",
+  "NHK Mile Cup Racecourse : Tokyo Turf 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late May Classic",
+  "G3",
+  "Aoi Stakes Racecourse : Kyoto Turf 1200m Direction : Right Inner",
+  "Sprint"
+ ],
+ [
+  "Late May Classic",
+  "G1",
+  "Japanese Oaks Racecourse : Tokyo Turf 2400m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Late May Classic",
+  "G1",
+  "Japanese Derby (Tokyo Yushun) Racecourse : Tokyo Turf 2400m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early June Classic Senior",
+  "G3",
+  "Naruo Kinen Racecourse : Hanshin Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Early June Classic Senior",
+  "G3",
+  "Mermaid Stakes Racecourse : Hanshin Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Early June Classic Senior",
+  "G3",
+  "Epsom Cup Racecourse : Tokyo Turf 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early June Classic Senior",
+  "G1",
+  "Yasuda Kinen Racecourse : Tokyo Turf 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early July Classic Summer Camp",
+  "G1",
+  "Japan Dirt Derby Racecourse : Oi Dirt 2000m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Late June Classic",
+  "G3",
+  "Unicorn Stakes Racecourse : Tokyo Dirt 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early July Classic Senior Summer Camp",
+  "G3",
+  "CBC Sho Racecourse : Chukyo Turf 1200m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Early July Classic Summer Camp",
+  "G3",
+  "Radio Nikkei Sho Racecourse : Fukushima Turf 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Early July Classic Senior Summer Camp",
+  "G3",
+  "Procyon Stakes Racecourse : Chukyo Dirt 1400m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Early July Classic Senior Summer Camp",
+  "G3",
+  "Tanabata Sho Racecourse : Fukushima Turf 2000m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Early July Classic Senior Summer Camp",
+  "G3",
+  "Hakodate Kinen Racecourse : Hakodate Turf 2000m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Late June Classic Senior",
+  "G1",
+  "Takarazuka Kinen Racecourse : Hanshin Turf 2200m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Late Jul Classic Senior Summer Camp",
+  "G3",
+  "Chukyo Kinen Racecourse : Chukyo Turf 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Jul Classic Senior Summer Camp",
+  "G3",
+  "Ibis Summer Dash Racecourse : Niigata Turf 1000m Direction : Stretch",
+  "Sprint"
+ ],
+ [
+  "Late Jul Classic Senior Summer Camp",
+  "G3",
+  "Queen Stakes Racecourse : Sapporo Turf 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Early Aug Classic Senior Summer Camp",
+  "G3",
+  "Kokura Kinen Racecourse : Kokura Turf 2000m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Early Aug Classic Summer Camp",
+  "G3",
+  "Leopard Stakes Racecourse : Niigata Dirt 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Aug Classic Senior Summer Camp",
+  "G3",
+  "Sekiya Kinen Racecourse : Niigata Turf 1600m Direction : Left Outer",
+  "Mile"
+ ],
+ [
+  "Early Aug Classic Senior Summer Camp",
+  "G3",
+  "Elm Stakes Racecourse : Sapporo Dirt 1700m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Late Aug Classic Senior Summer Camp",
+  "G2",
+  "Sapporo Kinen Racecourse : Sapporo Turf 2000m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Late Aug Classic Senior Summer Camp",
+  "G3",
+  "Kitakyushu Kinen Racecourse : Kokura Turf 1200m Direction : Right",
+  "Sprint"
+ ],
+ [
+  "Late Aug Classic Senior Summer Camp",
+  "G3",
+  "Keeneland Cup Racecourse : Sapporo Turf 1200m Direction : Right",
+  "Sprint"
+ ],
+ [
+  "Early Sept Classic Senior",
+  "G2",
+  "Centaur Stakes Racecourse : Hanshin Turf 1200m Direction : Right Inner",
+  "Sprint"
+ ],
+ [
+  "Early Sept Classic",
+  "G2",
+  "Rose Stakes Racecourse : Hanshin Turf 1800m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early Sept Classic Senior",
+  "G3",
+  "Niigata Kinen Racecourse : Niigata Turf 2000m Direction : Left Outer",
+  "Medium"
+ ],
+ [
+  "Early Sept Classic",
+  "G3",
+  "Shion Stakes Racecourse : Nakayama Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Early Sept Classic Senior",
+  "G3",
+  "Keisei Hai Autumn Handicap Racecourse : Nakayama Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Late Sept Classic",
+  "G2",
+  "St. Lite Kinen Racecourse : Nakayama Turf 2200m Direction : Right Outer",
+  "Medium"
+ ],
+ [
+  "Late Sept Classic",
+  "G2",
+  "Kobe Shimbun Hai Racecourse : Hanshin Turf 2400m Direction : Right Outer",
+  "Medium"
+ ],
+ [
+  "Late Sept Classic Senior",
+  "G2",
+  "All Comers Racecourse : Nakayama Turf 2200m Direction : Right Outer",
+  "Medium"
+ ],
+ [
+  "Late Sept Classic Senior",
+  "G3",
+  "Sirius Stakes Racecourse : Hanshin Dirt 2000m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Late Sept Classic Senior",
+  "G1",
+  "Sprinters Stakes Racecourse : Nakayama Turf 1200m Direction : Right Outer",
+  "Sprint"
+ ],
+ [
+  "Early Oct Classic Senior",
+  "G2",
+  "Mainichi Okan Racecourse : Tokyo Turf 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Oct Classic Senior",
+  "G2",
+  "Kyoto Daishoten Racecourse : Kyoto Turf 2400m Direction : Right Outer",
+  "Medium"
+ ],
+ [
+  "Early Oct Classic",
+  "G2",
+  "Fuchu Umamusume Stakes Racecourse : Tokyo Turf 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Oct Classic Senior",
+  "G2",
+  "Fuji Stakes Racecourse : Tokyo Turf 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Oct Classic Senior",
+  "G2",
+  "Swan Stakes Racecourse : Kyoto Turf 1400m Direction : Right Outer",
+  "Sprint"
+ ],
+ [
+  "Late Oct Classic",
+  "G1",
+  "Shuka Sho Racecourse : Kyoto Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Late Oct Classic",
+  "G1",
+  "Kikuka Sho Racecourse : Kyoto Turf 3000m Direction : Right Outer",
+  "Long"
+ ],
+ [
+  "Late Oct Classic Senior",
+  "G1",
+  "Tenno Sho (Autumn) Racecourse : Tokyo Turf 2000m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Classic Racecourse : Oi Dirt 2000m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Sprint Racecourse : Oi Dirt 1200m Direction : Right",
+  "Sprint"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "JBC Ladies' Classic Racecourse : Oi Dirt 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G2",
+  "Copa Republica Argentina Racecourse : Tokyo Turf 2500m Direction : Left",
+  "Long"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G3",
+  "Miyako Stakes Racecourse : Kyoto Dirt 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G3",
+  "Musashino Stakes Racecourse : Tokyo Dirt 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G3",
+  "Fukushima Kinen Racecourse : Fukushima Turf 2000m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Early Nov Classic Senior",
+  "G1",
+  "Queen Elizabeth II Cup Racecourse : Kyoto Turf 2200m Direction : Right Outer",
+  "Medium"
+ ],
+ [
+  "Late Nov Classic Senior",
+  "G3",
+  "Keihan Hai Racecourse : Kyoto Turf 1200m Direction : Right Inner",
+  "Sprint"
+ ],
+ [
+  "Late Nov Classic Senior",
+  "G1",
+  "Mile Championship Racecourse : Kyoto Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Late Nov Classic Senior",
+  "G1",
+  "Japan Cup Racecourse : Tokyo Turf 2400m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early Dec Classic Senior",
+  "G1",
+  "Champions Cup Racecourse : Chukyo Dirt 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Dec Classic Senior",
+  "G2",
+  "Stayers Stakes Racecourse : Nakayama Turf 3600m Direction : Right Inner",
+  "Long"
+ ],
+ [
+  "Early Dec Classic Senior",
+  "G3",
+  "Challenge Cup Racecourse : Hanshin Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Early Dec Classic Senior",
+  "G3",
+  "Chunichi Shimbun Hai Racecourse : Chukyo Turf 2000m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early Dec Classic Senior",
+  "G3",
+  "Capella Stakes Racecourse : Nakayama Dirt 1200m Direction : Right",
+  "Sprint"
+ ],
+ [
+  "Early Dec Classic Senior",
+  "G3",
+  "Turquoise Stakes Racecourse : Nakayama Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Late Dec Classic Senior",
+  "G1",
+  "Arima Kinen Racecourse : Nakayama Turf 2500m Direction : Right Inner",
+  "Long"
+ ],
+ [
+  "Late Dec Classic Senior",
+  "G1",
+  "Tokyo Daishoten Racecourse : Oi Dirt 2000m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Late Dec Classic Senior",
+  "G2",
+  "Hanshin Cup Racecourse : Hanshin Turf 1400m Direction : Right Inner",
+  "Sprint"
+ ],
+ [
+  "Early Jan Senior",
+  "G2",
+  "Nikkei Shinshun Hai Racecourse : Kyoto Turf 2400m Direction : Right Outer",
+  "Medium"
+ ],
+ [
+  "Early Jan Senior",
+  "G3",
+  "Kyoto Kimpai Racecourse : Kyoto Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early Jan Senior",
+  "G3",
+  "Nakayama Kimpai Racecourse : Nakayama Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Early Jan Senior",
+  "G3",
+  "Aichi Hai Racecourse : Chukyo Turf 2000m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Late Jan Senior",
+  "G2",
+  "Tokai Stakes Racecourse : Chukyo Dirt 1800m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Jan Senior",
+  "G2",
+  "American JCC (Jockey Club Cup) Racecourse : Nakayama Turf 2200m Direction : Right Outer",
+  "Medium"
+ ],
+ [
+  "Late Jan Senior",
+  "G3",
+  "Silk Road Stakes Racecourse : Kyoto Turf 1200m Direction : Right Inner",
+  "Sprint"
+ ],
+ [
+  "Late Jan Senior",
+  "G3",
+  "Negishi Stakes Racecourse : Tokyo Dirt 1400m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Early Feb Senior",
+  "G2",
+  "Kyoto Kinen Racecourse : Kyoto Turf 2200m Direction : Right Outer",
+  "Medium"
+ ],
+ [
+  "Early Feb Senior",
+  "G3",
+  "Tokyo Shimbun Hai Racecourse : Tokyo Turf 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late Feb Senior",
+  "G2",
+  "Nakayama Kinen Racecourse : Nakayama Turf 1800m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Late Feb Senior",
+  "G3",
+  "Kyoto Umamusume Stakes Racecourse : Kyoto Turf 1400m Direction : Right Outer",
+  "Sprint"
+ ],
+ [
+  "Late Feb Senior",
+  "G3",
+  "Diamond Stakes Racecourse : Tokyo Turf 3400m Direction : Left",
+  "Long"
+ ],
+ [
+  "Late Feb Senior",
+  "G3",
+  "Kokura Daishoten Racecourse : Kokura Turf 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Late Feb Senior",
+  "G3",
+  "Hankyu Hai Racecourse : Hanshin Turf 1400m Direction : Right Inner",
+  "Sprint"
+ ],
+ [
+  "Late Feb Senior",
+  "G1",
+  "February Stakes Racecourse : Tokyo Dirt 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Early Mar Senior",
+  "G2",
+  "Kinko Sho Racecourse : Chukyo Turf 2000m Direction : Left",
+  "Medium"
+ ],
+ [
+  "Early Mar Senior",
+  "G3",
+  "Ocean Stakes Racecourse : Nakayama Turf 1200m Direction : Right Outer",
+  "Sprint"
+ ],
+ [
+  "Early Mar Senior",
+  "G3",
+  "Nakayama Umamusume Stakes Racecourse : Nakayama Turf 1800m Direction : Right Inner",
+  "Mile"
+ ],
+ [
+  "Late Mar Senior",
+  "G2",
+  "Hanshin Daishoten Racecourse : Hanshin Turf 3000m Direction : Right Inner",
+  "Long"
+ ],
+ [
+  "Late Mar Senior",
+  "G2",
+  "Nikkei Sho Racecourse : Nakayama Turf 2500m Direction : Right Inner",
+  "Long"
+ ],
+ [
+  "Late Mar Senior",
+  "G3",
+  "March Stakes Racecourse : Nakayama Dirt 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Late Mar Senior",
+  "G1",
+  "Takamatsunomiya Kinen Racecourse : Chukyo Turf 1200m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Late Mar Senior",
+  "G1",
+  "Osaka Hai Racecourse : Hanshin Turf 2000m Direction : Right Inner",
+  "Medium"
+ ],
+ [
+  "Early April Senior",
+  "G2",
+  "Hanshin Umamusume Stakes Racecourse : Hanshin Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early April Senior",
+  "G3",
+  "Lord Derby Challenge Trophy Racecourse : Nakayama Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Early April Senior",
+  "G3",
+  "Antares Stakes Racecourse : Hanshin Dirt 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Late April Senior",
+  "G2",
+  "Milers Cup (Yomiuri) Racecourse : Kyoto Turf 1600m Direction : Right Outer",
+  "Mile"
+ ],
+ [
+  "Late April Senior",
+  "G3",
+  "Fukushima Umamusume Stakes Racecourse : Fukushima Turf 1800m Direction : Right",
+  "Mile"
+ ],
+ [
+  "Late April Senior",
+  "G1",
+  "Tenno Sho (Spring) Racecourse : Kyoto Turf 3200m Direction : Right Outer",
+  "Long"
+ ],
+ [
+  "Early May Senior",
+  "G2",
+  "Keio Hai Spring Cup Racecourse : Tokyo Turf 1400m Direction : Left",
+  "Sprint"
+ ],
+ [
+  "Early May Senior",
+  "G3",
+  "Niigata Daishoten Racecourse : Niigata Turf 2000m Direction : Left Outer",
+  "Medium"
+ ],
+ [
+  "Early May Senior",
+  "G1",
+  "Victoria Mile Racecourse : Tokyo Turf 1600m Direction : Left",
+  "Mile"
+ ],
+ [
+  "Late May Senior",
+  "G2",
+  "Meguro Kinen Racecourse : Tokyo Turf 2500m Direction : Left",
+  "Long"
+ ],
+ [
+  "Late May Senior",
+  "G3",
+  "Heian Stakes Racecourse : Kyoto Dirt 1900m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Late June Senior",
+  "G1",
+  "Teio Sho Racecourse : Oi Dirt 2000m Direction : Right",
+  "Medium"
+ ],
+ [
+  "Late June Classic Senior",
+  "G3",
+  "Hakodate Sprint Stakes Racecourse : Hakodate Turf 1200m Direction : Right",
+  "Sprint"
+ ]
+]

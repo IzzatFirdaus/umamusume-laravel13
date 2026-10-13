@@ -1,0 +1,394 @@
+{
+  "moves": [
+    {
+      "from": "research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md",
+      "to": "research-scratch/reports/DOCUMENTATION-INVENTORY-2026-09-30.md",
+      "bucket": "reports",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/assemble.py",
+      "to": "research-scratch/scripts/assemble.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/assembled-body.md",
+      "to": "research-scratch/drafts/assembled-body.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/assembled-body.v2.md",
+      "to": "research-scratch/drafts/assembled-body.v2.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/assembled-body.v3.md",
+      "to": "research-scratch/drafts/assembled-body.v3.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/audit.md",
+      "to": "research-scratch/reports/audit.md",
+      "bucket": "reports",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/build.py",
+      "to": "research-scratch/scripts/build.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/calendar-tables.md",
+      "to": "research-scratch/drafts/calendar-tables.md",
+      "bucket": "drafts",
+      "cited_by": [
+        "docs/scenarios/09-global-race-calendar.md"
+      ],
+      "movable": false
+    },
+    {
+      "from": "research-scratch/cap_decode.py",
+      "to": "research-scratch/scripts/cap_decode.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/checklinks.py",
+      "to": "research-scratch/scripts/checklinks.py",
+      "bucket": "scripts",
+      "cited_by": [
+        "docs/UMAMUSUME_REFERENCE.md"
+      ],
+      "movable": false
+    },
+    {
+      "from": "research-scratch/conflict_stats.py",
+      "to": "research-scratch/scripts/conflict_stats.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/decode_races.py",
+      "to": "research-scratch/scripts/decode_races.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/docinv_xref.json",
+      "to": "research-scratch/out/docinv_xref.json",
+      "bucket": "out",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/draft-sec1-modes.md",
+      "to": "research-scratch/drafts/draft-sec1-modes.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/draft-sec1-race.md",
+      "to": "research-scratch/drafts/draft-sec1-race.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/draft-sec1-strategies-scenarios.md",
+      "to": "research-scratch/drafts/draft-sec1-strategies-scenarios.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/draft-sec1-support-inheritance.md",
+      "to": "research-scratch/drafts/draft-sec1-support-inheritance.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/draft-sec1-training-stats.md",
+      "to": "research-scratch/drafts/draft-sec1-training-stats.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/draft-sec3-4-liveops.md",
+      "to": "research-scratch/drafts/draft-sec3-4-liveops.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/facprobe.py",
+      "to": "research-scratch/scripts/facprobe.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/fetch_global_races.py",
+      "to": "research-scratch/scripts/fetch_global_races.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/final_measure.py",
+      "to": "research-scratch/scripts/final_measure.py",
+      "bucket": "scripts",
+      "cited_by": [
+        "docs/UMAMUSUME_REFERENCE.md"
+      ],
+      "movable": false
+    },
+    {
+      "from": "research-scratch/finalize_terms.py",
+      "to": "research-scratch/scripts/finalize_terms.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/front-matter.md",
+      "to": "research-scratch/drafts/front-matter.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/gates.py",
+      "to": "research-scratch/scripts/gates.py",
+      "bucket": "scripts",
+      "cited_by": [
+        "docs/UMAMUSUME_REFERENCE.md"
+      ],
+      "movable": false
+    },
+    {
+      "from": "research-scratch/gen-sec2.md",
+      "to": "research-scratch/drafts/gen-sec2.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/gen_calendar.py",
+      "to": "research-scratch/scripts/gen_calendar.py",
+      "bucket": "scripts",
+      "cited_by": [
+        "docs/scenarios/09-global-race-calendar.md"
+      ],
+      "movable": false
+    },
+    {
+      "from": "research-scratch/gen_roster.py",
+      "to": "research-scratch/scripts/gen_roster.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/gen_scenario_spine.py",
+      "to": "research-scratch/scripts/gen_scenario_spine.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/global-race-sources.md",
+      "to": "research-scratch/drafts/global-race-sources.md",
+      "bucket": "drafts",
+      "cited_by": [
+        "docs/scenarios/09-global-race-calendar.md"
+      ],
+      "movable": false
+    },
+    {
+      "from": "research-scratch/link-report.txt",
+      "to": "research-scratch/out/link-report.txt",
+      "bucket": "out",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/linkcheck.py",
+      "to": "research-scratch/scripts/linkcheck.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/metrics.txt",
+      "to": "research-scratch/out/metrics.txt",
+      "bucket": "out",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/patch_final.py",
+      "to": "research-scratch/scripts/patch_final.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/patch_round2.py",
+      "to": "research-scratch/scripts/patch_round2.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/probe_targets.py",
+      "to": "research-scratch/scripts/probe_targets.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/recompute.py",
+      "to": "research-scratch/scripts/recompute.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/relink.py",
+      "to": "research-scratch/scripts/relink.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/replace_g1.py",
+      "to": "research-scratch/scripts/replace_g1.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/resync_doc.py",
+      "to": "research-scratch/scripts/resync_doc.py",
+      "bucket": "scripts",
+      "cited_by": [
+        "docs/scenarios/09-global-race-calendar.md"
+      ],
+      "movable": false
+    },
+    {
+      "from": "research-scratch/review-findings.md",
+      "to": "research-scratch/reports/review-findings.md",
+      "bucket": "reports",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/scenario_spine.md",
+      "to": "research-scratch/drafts/scenario_spine.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/scrape-game8-scenarios.md",
+      "to": "research-scratch/drafts/scrape-game8-scenarios.md",
+      "bucket": "drafts",
+      "cited_by": [
+        "docs/UMAMUSUME_REFERENCE.md"
+      ],
+      "movable": false
+    },
+    {
+      "from": "research-scratch/scrape-training-heuristics.md",
+      "to": "research-scratch/drafts/scrape-training-heuristics.md",
+      "bucket": "drafts",
+      "cited_by": [
+        "docs/UMAMUSUME_REFERENCE.md"
+      ],
+      "movable": false
+    },
+    {
+      "from": "research-scratch/scrub_emoji.py",
+      "to": "research-scratch/scripts/scrub_emoji.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/sec2-crosscheck.md",
+      "to": "research-scratch/drafts/sec2-crosscheck.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/sec2-roster-diff.md",
+      "to": "research-scratch/drafts/sec2-roster-diff.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/sec2-secondsource-notes.md",
+      "to": "research-scratch/drafts/sec2-secondsource-notes.md",
+      "bucket": "drafts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/sec2-secondsource.tsv",
+      "to": "research-scratch/out/sec2-secondsource.tsv",
+      "bucket": "out",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/splice_calendar.py",
+      "to": "research-scratch/scripts/splice_calendar.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/strategy_truth.py",
+      "to": "research-scratch/scripts/strategy_truth.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/truthcheck.py",
+      "to": "research-scratch/scripts/truthcheck.py",
+      "bucket": "scripts",
+      "cited_by": [],
+      "movable": true
+    },
+    {
+      "from": "research-scratch/unfinished-phases-audit-2026-09-29.md",
+      "to": "research-scratch/reports/unfinished-phases-audit-2026-09-29.md",
+      "bucket": "reports",
+      "cited_by": [],
+      "movable": true
+    }
+  ],
+  "blocked": []
+}
