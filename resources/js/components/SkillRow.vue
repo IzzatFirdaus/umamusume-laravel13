@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
+
 // One row in the trainee detail page's Skills section. Prints only what the source states.
 // `url` is null for a skill the Global client has not shipped, so the name prints with no
 // link that would 404 on it (ADR-0011 §2). Nothing here ranks or recommends a skill.
@@ -9,7 +11,7 @@ defineProps<{
 
 <template>
     <li class="flex flex-wrap items-baseline gap-2 border-b border-rule py-1.5 last:border-b-0">
-        <a v-if="skill.url" :href="skill.url" class="text-ink hover:underline">{{ skill.name }}</a>
+        <Link v-if="skill.url" :href="skill.url" class="text-ink hover:underline">{{ skill.name }}</Link>
         <span v-else class="text-ink">{{ skill.name }}</span>
 
         <span

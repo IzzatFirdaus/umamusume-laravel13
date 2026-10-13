@@ -161,7 +161,7 @@ const conditions = computed(() => props.skill.condition_groups ?? []);
                         <h3 class="mt-4 text-lg font-semibold text-ink-strong">{{ group.heading }}</h3>
                         <ul class="mt-1">
                             <li v-for="holder in group.holders" :key="holder.slug" class="py-1 text-sm">
-                                <a :href="holder.url" class="text-ink-strong underline">{{ holder.name }}</a>
+                                <Link :href="holder.url" class="text-ink-strong underline">{{ holder.name }}</Link>
                             </li>
                         </ul>
                     </template>

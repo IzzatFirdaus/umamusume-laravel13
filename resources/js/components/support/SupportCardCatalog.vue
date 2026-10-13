@@ -10,7 +10,7 @@
 import ArtworkSlot from '../ArtworkSlot.vue';
 import Pagination from '../Pagination.vue';
 import RarityChip from '../RarityChip.vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface Effect {
@@ -216,7 +216,7 @@ function applyFilters(): void {
                     reserve
                 />
 
-                <a :href="card.url" class="font-semibold text-ink-strong hover:underline">{{ card.name }}</a>
+                <Link :href="card.url" class="font-semibold text-ink-strong hover:underline">{{ card.name }}</Link>
 
                 <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
 

@@ -138,7 +138,7 @@ const skillSections = computed(() => [
             <div>
                 <dt class="text-ink-muted">Belongs to</dt>
                 <dd class="text-ink">
-                    <a v-if="trainee" :href="trainee.url" class="text-ink-strong underline">{{ trainee.name }}</a>
+                    <Link v-if="trainee" :href="trainee.url" class="text-ink-strong underline">{{ trainee.name }}</Link>
                     <!-- `char_id` addresses the source's whole character space, not this catalog's, so the
                          join misses two ways: the 9000-block staff have no trainee row at all (ADR-0014
                          correction 1), and a card can name a trainee this catalog does not track. -->

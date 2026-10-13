@@ -10,7 +10,7 @@
 import ArtworkSlot from '../ArtworkSlot.vue';
 import Pagination from '../Pagination.vue';
 import RarityChip from '../RarityChip.vue';
-import { router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 interface Card {
@@ -160,12 +160,12 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
                          control. -->
                     <span class="flex items-center gap-3">
                         <ArtworkSlot :url="trainee.artworkURL" alt="" size="size-12" reserve />
-                        <a :href="`/umamusume/${trainee.slug}`" class="font-semibold text-ink-strong hover:underline">
+                        <Link :href="`/umamusume/${trainee.slug}`" class="font-semibold text-ink-strong hover:underline">
                             {{ trainee.name }}
                             <span v-if="trainee.name_ja" lang="ja" class="ml-2 text-sm font-normal text-ink-muted">
                                 {{ trainee.name_ja }}
                             </span>
-                        </a>
+                        </Link>
                     </span>
                     <span class="flex items-baseline gap-3 text-xs text-ink-muted">
                         <template v-if="trainee.max_rarity">

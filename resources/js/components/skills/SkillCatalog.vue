@@ -7,7 +7,7 @@
  * the address the filter form and the pager write back to, so a Trainer filtering from the Database
  * URL stays on it.
  */
-import { router, usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import Pagination from '../Pagination.vue';
 import { computed, ref } from 'vue';
 
@@ -158,7 +158,7 @@ function applyFilters(): void {
                 :key="skill.id"
                 class="flex flex-wrap items-baseline gap-x-2 gap-y-1 px-4 py-3 text-sm"
             >
-                <a :href="`/skills/${skill.id}`" class="font-semibold text-ink-strong hover:underline">{{ skill.name }}</a>
+                <Link :href="`/skills/${skill.id}`" class="font-semibold text-ink-strong hover:underline">{{ skill.name }}</Link>
 
                 <!-- 18 of the 623 [Global] rows store the same string in both name columns, so the
                      second slot only appears when it carries something the first does not. -->
