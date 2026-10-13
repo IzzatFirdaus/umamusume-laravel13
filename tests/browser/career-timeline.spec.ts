@@ -87,9 +87,12 @@ test('renders the rail with glyph alongside text and the audit opens by keyboard
     expect(await firstDetails.evaluate((el: HTMLDetailsElement) => el.open)).toBe(true);
     await expect(firstDetails.locator('dt', { hasText: 'BEFORE' })).toBeVisible();
     await expect(firstDetails.locator('dt', { hasText: 'ACTION' })).toBeVisible();
-    await expect(firstDetails.locator('dt', { hasText: 'EXPECTED' })).toBeVisible();
-    await expect(firstDetails.locator('dt', { hasText: 'ACTUAL' })).toBeVisible();
     await expect(firstDetails.locator('dt', { hasText: 'RESULT' })).toBeVisible();
+
+    // One end-of-turn block, not an EXPECTED/ACTUAL pair. ADR-0003 stores the absolute reading, so the
+    // pair printed the same five numbers twice, one heading claiming an expectation the tool refuses.
+    await expect(firstDetails.locator('dt', { hasText: 'END OF TURN' })).toBeVisible();
+    await expect(firstDetails.locator('dt', { hasText: /EXPECTED|ACTUAL/ })).toHaveCount(0);
 });
 
 test('toggles a type filter and shows only the active kind', async ({ page }) => {

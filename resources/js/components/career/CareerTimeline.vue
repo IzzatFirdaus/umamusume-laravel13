@@ -2,7 +2,7 @@
 /*
  * The vertical rail for SCREEN-018 (plan §8 D14). Each row is a keyboard-reachable disclosure
  * (aria-expanded on the summary); the expanded pane shows the decision audit (BEFORE / ACTION /
- * EXPECTED / ACTUAL / RESULT). Glyph + text are both rendered so the state never relies on
+ * END OF TURN / RESULT). Glyph + text are both rendered so the state never relies on
  * colour alone. Absent fields render `N/A` with a title, never defaults.
  *
  * Props are flattened from `TimelineController::buildEntries()`; `valueOf` exposes them read-only
@@ -28,8 +28,6 @@ interface Entry {
     turn: number;
     action_label: string;
     before: Stats | null;
-    after: Stats | null;
-    expected: Stats | null;
     actual: Stats | null;
     mood: string | null;
     /** The facility levels a turn row recorded, or null when it recorded none. */
@@ -68,7 +66,7 @@ const valueOf = (stats: Stats | null, field: keyof Stats): string => {
     return String(raw);
 };
 
-const titleFor = (stats: Stats | null, kind: 'before' | 'after' | 'expected' | 'actual'): string => {
+const titleFor = (stats: Stats | null, kind: 'before' | 'actual'): string => {
     if (stats === null) {
         return `No ${kind} state on file: this row did not record it.`;
     }
@@ -172,23 +170,7 @@ const kindVisible = (entry: Entry): boolean =>
                         </div>
 
                         <div v-if="entry.kind === 'turn'">
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">EXPECTED</dt>
-                            <dd class="mt-1 font-mono tabular-nums">
-                                <table>
-                                    <tbody>
-                                        <tr v-for="field in STAT_FIELDS" :key="field.key">
-                                            <td class="pr-3 text-xs text-ink-muted">{{ field.label }}</td>
-                                            <td>
-                                                <span :title="titleFor(entry.expected, 'expected')">{{ valueOf(entry.expected, field.key) }}</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </dd>
-                        </div>
-
-                        <div v-if="entry.kind === 'turn'">
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">ACTUAL</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">END OF TURN</dt>
                             <dd class="mt-1 font-mono tabular-nums">
                                 <table>
                                     <tbody>
@@ -201,11 +183,6 @@ const kindVisible = (entry: Entry): boolean =>
                                     </tbody>
                                 </table>
                             </dd>
-                        </div>
-
-                        <div v-else>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">ACTUAL</dt>
-                            <dd class="mt-1 text-ink">{{ entry.result }}</dd>
                         </div>
 
                         <div>

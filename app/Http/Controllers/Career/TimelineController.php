@@ -24,9 +24,9 @@ use Inertia\Response;
  * **Stored facts and entered values only.** No derived score, no readiness band, no advisor
  * confidence: the planner is rerun at each decision screen and the timeline is the thin audit
  * the Trainer can read afterwards. ADR-0003 §"Store the end-of-turn total, not the delta" sets the
- * shape: each row's AFTER block is the row's own absolute values, and BEFORE is the previous
- * logged turn (null on turn 1). EXPECTED === ACTUAL because the schema stores the actual; the
- * audit's prose is "Recorded as entered", never a fabricated projection.
+ * shape: each row's END OF TURN block is the row's own absolute values, and BEFORE is the previous
+ * logged turn (null on turn 1). There is no separate EXPECTED block, because the schema stores the
+ * actual; the audit's prose is "Recorded as entered", never a fabricated projection.
  *
  * **Corrections are a flag, not a separate row.** `runs.turns.update` mutates `updated_at` but
  * the model has no edit log column, so a corrected row carries `corrected: true` and a deterministic
@@ -185,8 +185,9 @@ class TimelineController extends Controller
     }
 
     /**
-     * The turn's own row: BEFORE = previous-turn stats (or null), AFTER = stored values,
-     * EXPECTED === ACTUAL (ADR-0003 stores absolute end-of-turn values).
+     * The turn's own row: BEFORE = previous-turn stats (or null), ACTUAL = the stored end-of-turn
+     * values. One block, not an EXPECTED/ACTUAL pair: `ADR-0003` stores the absolute end-of-turn reading,
+     * so the two were always the same numbers printed twice.
      *
      * @return array<string, mixed>
      */
@@ -204,8 +205,6 @@ class TimelineController extends Controller
             'turn' => $turn->turn,
             'action_label' => 'Turn recorded',
             'before' => $previous === null ? null : $this->stats($previous),
-            'after' => $this->stats($turn),
-            'expected' => $this->stats($turn),
             'actual' => $this->stats($turn),
             'mood' => $turn->mood?->value,
             'facilities' => $this->facilities($turn),
@@ -233,8 +232,6 @@ class TimelineController extends Controller
             'turn' => $turn->turn,
             'action_label' => $race->tierKey() !== null ? "Race: {$title} ({$race->tierKey()})" : "Race: {$title}",
             'before' => null,
-            'after' => null,
-            'expected' => null,
             'actual' => null,
             'mood' => null,
             // The separator is the plain hyphen `EventCard.vue` spells the same state with: the em
@@ -264,8 +261,6 @@ class TimelineController extends Controller
             'turn' => $turn->turn,
             'action_label' => $this->eventActionLabel($event),
             'before' => null,
-            'after' => null,
-            'expected' => null,
             'actual' => null,
             'mood' => null,
             'result' => $recorded

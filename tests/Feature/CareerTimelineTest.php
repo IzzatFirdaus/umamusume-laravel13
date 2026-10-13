@@ -65,7 +65,7 @@ it('returns the empty state when no turns have been logged', function (): void {
         );
 });
 
-it('emits one row per turn with BEFORE = previous turn and AFTER = this turn, oldest first', function (): void {
+it('emits one row per turn with BEFORE = previous turn and ACTUAL = this turn, oldest first', function (): void {
     $run = timelineRun(['scenario' => 'ura_finale'], turns: 3);
 
     $first = TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)->first();
@@ -81,22 +81,20 @@ it('emits one row per turn with BEFORE = previous turn and AFTER = this turn, ol
             ->where('entries.2.turn', 3)
             // Row 1 has no previous turn.
             ->where('entries.0.before', null)
-            ->where('entries.0.after.speed', $first->speed)
-            ->where('entries.0.after.stamina', $first->stamina)
+            ->where('entries.0.actual.speed', $first->speed)
+            ->where('entries.0.actual.stamina', $first->stamina)
             ->where('entries.0.kind', 'turn')
             ->where('entries.0.glyph', '●')
-            // Row 2's BEFORE is row 1's AFTER.
+            // Row 2's BEFORE is row 1's ACTUAL.
             ->where('entries.1.before.speed', $first->speed)
             ->where('entries.1.before.stamina', $first->stamina)
-            ->where('entries.1.after.speed', $second->speed)
-            ->where('entries.1.after.energy', $second->energy)
+            ->where('entries.1.actual.speed', $second->speed)
+            ->where('entries.1.actual.energy', $second->energy)
             ->where('entries.1.mood', fn (?string $mood): bool => $mood === null || is_string($mood))
-            // Row 3's BEFORE is row 2's AFTER.
+            // Row 3's BEFORE is row 2's ACTUAL, and row 3's ACTUAL is its own stored reading: one
+            // end-of-turn block, since ADR-0003 holds the absolute value, no separate deltas row exists
+            // and nothing is forecast against it. RESULT therefore reads "Recorded as entered".
             ->where('entries.2.before.speed', $second->speed)
-            ->where('entries.2.after.speed', $third->speed)
-            // EXPECTED and ACTUAL collapse to the stored values: ADR-0003 holds absolute end-of-turn,
-            // no separate deltas row exists, so RESULT = "Recorded as entered".
-            ->where('entries.2.expected.speed', $third->speed)
             ->where('entries.2.actual.speed', $third->speed)
             ->where('entries.2.result', 'Recorded as entered')
             // No correction yet.
@@ -119,7 +117,7 @@ it('flags a corrected turn with corrected: true and a deterministic correction_i
             ->has('entries', 1)
             ->where('entries.0.corrected', true)
             ->where('entries.0.correction_id', 'turn-1')
-            ->where('entries.0.after.speed', $entry->fresh()->speed)
+            ->where('entries.0.actual.speed', $entry->fresh()->speed)
         );
 });
 

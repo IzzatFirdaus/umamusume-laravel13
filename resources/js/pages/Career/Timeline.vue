@@ -77,9 +77,9 @@ const visibleCount = computed(() =>
 
         <p class="max-w-3xl text-sm text-ink-muted">
             The run's recorded turns, races and events, oldest first. Each row's BEFORE stat block
-            is the previous logged turn; EXPECTED and ACTUAL collapse because ADR-0003 stores the
-            absolute end-of-turn value, not the expected-then-actual pair. A row marked "Updated"
-            was edited after its first save; the Cockpit is where the edit happened.
+            is the previous logged turn; the END OF TURN block is the row's own absolute values, because
+            ADR-0003 stores the end-of-turn reading rather than an expected-then-actual pair. A row
+            marked "Updated" was edited after its first save; the Cockpit is where the edit happened.
         </p>
 
         <section
