@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 /**
  * One career objective a trainee's own ladder states (PRD US-10, ADR-0026).
@@ -162,6 +163,36 @@ class TraineeGoal extends Model
                 .', kept raw on the row.',
             default => null,
         };
+    }
+
+    /**
+     * Why this trainee's ladder prints no rows, in the sentence both ladder surfaces use.
+     *
+     * Two absences that look alike and are not alike. A table this tool has never loaded is a fact about
+     * this database; a loaded table holding nothing for one trainee is a fact about the source. Reading
+     * the second sentence out of the first state would tell a Trainer the publisher states nothing about
+     * their trainee when the tool has never asked it, so the states get two sentences and one owner, the
+     * same reason `obligationLine()` and `absenceReason()` sit here rather than in a caller.
+     *
+     * **The caller hands over the rows it already read**, so a populated ladder costs no query at all: the
+     * table-level probe runs only in the empty case. `CatalogDetailPageTest` pins that page's ladder at two
+     * queries, which a re-read of the same fact would have broken.
+     *
+     * Null when there is a ladder to print. The caller's own query carries the `FinalRound` exclusion (plan
+     * §2: final rounds are the scenario's obligation, never a trainee's own objective), so "no ladder" here
+     * means exactly what those surfaces would show as empty.
+     *
+     * @param  Collection<int, self>  $ownLadder
+     */
+    public static function ladderAbsenceReason(Collection $ownLadder): ?string
+    {
+        if ($ownLadder->isNotEmpty()) {
+            return null;
+        }
+
+        return static::query()->exists()
+            ? 'The loaded ladder states no objective for this trainee, so nothing is listed here.'
+            : 'No objective ladder has been loaded into this database, so nothing is listed here.';
     }
 
     /**

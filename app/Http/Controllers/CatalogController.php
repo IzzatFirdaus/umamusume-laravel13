@@ -466,11 +466,9 @@ class CatalogController extends Controller
             // The key the Cockpit's group carries, held null because this page has no run to count with.
             // A shape difference here would be a second contract for one ladder.
             'summary' => null,
-            // The empty array is the branch the page takes; a second boolean for the same fact would be
-            // a second source of truth for it.
-            'empty_note' => $rows === []
-                ? 'The fetched ladder states no objective for this trainee, so nothing is listed here.'
-                : null,
+            // One reader for the absence, shared with the Cockpit's group. It answers null for exactly the
+            // rows that are not empty, so this page still carries no second boolean for the same fact.
+            'empty_note' => TraineeGoal::ladderAbsenceReason($goals),
         ];
     }
 

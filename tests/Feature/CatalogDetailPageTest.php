@@ -477,11 +477,12 @@ it('names the unread requirement in the same sentence the Cockpit uses', functio
         .' has not decoded. Its own figures are condition type 2, value 7, kept raw on the row.');
 });
 
-it('says so when the fetched ladder states nothing for her', function (): void {
-    // The empty branch. Measured on a seeded scratch database on 2026-10-14: all 67 promoted trainees
-    // carry rows, so no seeded database reaches this branch, exactly like the "Not yet released on
-    // Global" notice `tests/browser/catalog-detail.spec.ts:9-16` records. The prop is proven here and
-    // the reachable populated state in the browser spec.
+it('says no ladder is loaded when this database holds none for anybody', function (): void {
+    // The empty branch, and the honest name for it. Measured on a seeded scratch database on 2026-10-14: all
+    // 67 promoted trainees carry rows, so no seeded database reaches this branch, exactly like the "Not yet
+    // released on Global" notice `tests/browser/catalog-detail.spec.ts:9-16` records. Because the state here
+    // is an unseeded table rather than a trainee the source skips, the sentence may only speak of the table
+    // (`TraineeGoal::ladderAbsenceReason()`, asserted in `TraineeGoalLadderStateTest`).
     $umamusume = detailTrainee(1);
 
     $ladder = $this->get(route('catalog.show', $umamusume->slug))
@@ -489,7 +490,7 @@ it('says so when the fetched ladder states nothing for her', function (): void {
         ->inertiaProps('traineeGoals');
 
     expect($ladder['rows'])->toBe([])
-        ->and($ladder['empty_note'])->toBe('The fetched ladder states no objective for this trainee,'
+        ->and($ladder['empty_note'])->toBe('No objective ladder has been loaded into this database,'
             .' so nothing is listed here.');
 });
 

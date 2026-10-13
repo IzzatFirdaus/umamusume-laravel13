@@ -222,7 +222,10 @@ it('renders the trainee goals group from the sourced ladder instead of naming an
         }));
 });
 
-it('says so when a trainee has no fetched ladder, rather than leaving the group silently empty', function (): void {
+it('says this database holds no ladder, rather than leaving the group silently empty', function (): void {
+    // No `trainee_goals` row exists in this case, so the honest sentence is about the database. The source
+    // is not on trial here: `TraineeGoalLadderStateTest` covers the loaded-table-trainee-absent branch,
+    // which is the only state that may say what the ladder states.
     $this->get(route('runs.cockpit', uraRun()))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page->where('scenario', function (Collection $section): bool {
@@ -231,7 +234,8 @@ it('says so when a trainee has no fetched ladder, rather than leaving the group 
             $goals = collect($all['objectives'])->keyBy('group')->get('Trainee goals');
 
             expect($goals['rows'])->toBe([])
-                ->and($goals['empty_note'])->toContain('states no objective for this trainee')
+                ->and($goals['empty_note'])->toContain('has been loaded into this database')
+                ->and($goals['empty_note'])->not->toContain('states no objective for this trainee')
                 // The generic empty line speaks of mandatory races, so a goals group that holds nothing
                 // carries its own sentence rather than borrowing that claim.
                 ->and($goals['empty_note'])->not->toBeNull();

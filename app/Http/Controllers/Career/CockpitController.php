@@ -1929,8 +1929,13 @@ class CockpitController extends Controller
                 'rows' => [],
                 'alerts' => [],
                 'summary' => null,
-                'empty_note' => 'The fetched ladder states no objective for this trainee, so nothing is'
-                    .' listed here. The mandatory races below are the scenario-wide record.',
+                // The first sentence belongs to the model, because the catalog detail page prints the same
+                // absence and two copies is how one absence ends up with two vocabularies. The clause after
+                // it is this screen's alone: only here does a Mandatory races group sit below the ladder.
+                // `ladderAbsenceReason()` answers with a sentence whenever this branch is the one taken, so
+                // the coalesce is for the typechecker, not for a state that can reach here.
+                'empty_note' => (TraineeGoal::ladderAbsenceReason($goals) ?? '')
+                    .' The mandatory races below are the scenario-wide record.',
             ];
         }
 
