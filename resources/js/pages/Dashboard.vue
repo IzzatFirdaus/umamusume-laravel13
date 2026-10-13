@@ -109,8 +109,8 @@ const group = (n: number): string => n.toLocaleString('en-US');
                 aria-labelledby="active-career-heading"
                 class="rounded-md border border-rule bg-panel p-5"
             >
-                <h2 id="active-career-heading" class="text-xs font-bold tracking-wide text-ink-muted">
-                    ACTIVE CAREER
+                <h2 id="active-career-heading" class="text-lg font-semibold text-ink-strong">
+                    Active Career
                 </h2>
 
                 <p class="mt-2 text-lg font-semibold text-ink-strong">
@@ -198,11 +198,11 @@ const group = (n: number): string => n.toLocaleString('en-US');
                 aria-labelledby="active-career-empty-heading"
                 class="rounded-md border border-dashed border-rule bg-raised p-6"
             >
-                <h2 id="active-career-empty-heading" class="text-xs font-bold tracking-wide text-ink-muted">
-                    ACTIVE CAREER
+                <h2 id="active-career-empty-heading" class="text-lg font-semibold text-ink-strong">
+                    Active Career
                 </h2>
                 <p class="mt-2 text-sm text-ink">No active career. Start a new training run.</p>
-                <p class="mt-2 text-sm text-ink-muted">
+                <p class="mt-2 max-w-3xl text-sm text-ink-muted">
                     A career keeps your turns, Energy and race record in one place, and this screen
                     resumes it from wherever you left off. Creating one takes a trainee and a scenario,
                     and nothing here changes until you log your first turn.
@@ -220,7 +220,7 @@ const group = (n: number): string => n.toLocaleString('en-US');
                  exactly the state in which this screen has an active career to resume. Held inside the
                  empty branch, the door only appeared when there was no career at all, so the audience
                  it exists for never saw it. -->
-            <p class="text-sm text-ink-muted">
+            <p class="max-w-3xl text-sm text-ink-muted">
                 Already partway through a career?
                 <Link href="/career/snapshot" class="underline font-medium text-ink">Import an existing career</Link>
                 instead, and this tool starts from where your client says it stands.
@@ -243,8 +243,8 @@ const group = (n: number): string => n.toLocaleString('en-US');
 
             <!-- RECENT VETERANS -->
             <section aria-labelledby="recent-veterans-heading" class="rounded-md border border-rule bg-panel p-5">
-                <h2 id="recent-veterans-heading" class="text-xs font-bold tracking-wide text-ink-muted">
-                    RECENT VETERANS
+                <h2 id="recent-veterans-heading" class="text-lg font-semibold text-ink-strong">
+                    Recent Veterans
                 </h2>
 
                 <template v-if="props.recentVeterans.total === 0">
@@ -294,11 +294,11 @@ const group = (n: number): string => n.toLocaleString('en-US');
             <!-- RECENT BUILDS: a named absence, not a dead panel. There is no build record to list
                  until the Career Plan wizard (D2–D7) lands. -->
             <section aria-labelledby="recent-builds-heading" class="rounded-md border border-dashed border-rule bg-raised p-6">
-                <h2 id="recent-builds-heading" class="text-xs font-bold tracking-wide text-ink-muted">
-                    RECENT BUILDS
+                <h2 id="recent-builds-heading" class="text-lg font-semibold text-ink-strong">
+                    Recent Builds
                 </h2>
                 <p class="mt-2 text-sm text-ink">No builds recorded yet.</p>
-                <p class="mt-2 text-sm text-ink-muted">
+                <p class="mt-2 max-w-3xl text-sm text-ink-muted">
                     A build is the Career Plan you set before a run: its purpose, distance, surface,
                     style and stat targets. Nothing records one yet, so a run listed here would be a
                     run wearing the wrong name. The plan wizard arrives with Trainer Desk 2.0.
@@ -310,8 +310,8 @@ const group = (n: number): string => n.toLocaleString('en-US');
                  glyph is decorative; the word "Current" carries the state, so nothing here is shown
                  through colour alone. -->
             <section aria-labelledby="data-status-heading" class="rounded-md border border-rule bg-panel p-5">
-                <h2 id="data-status-heading" class="text-xs font-bold tracking-wide text-ink-muted">
-                    DATA STATUS
+                <h2 id="data-status-heading" class="text-lg font-semibold text-ink-strong">
+                    Data Status
                 </h2>
 
                 <p class="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
