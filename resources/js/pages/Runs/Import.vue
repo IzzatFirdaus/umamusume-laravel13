@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Trainee {
     id: number;
@@ -78,10 +78,7 @@ function findRowError(field: string): string | null {
 }
 
 const rowErrors = computed(() => {
-    const lines = statNames
-        .map((stat) => ({ stat, message: findRowError(stat) }))
-        .filter((entry): entry is { stat: string; message: string } => entry.message !== null)
-        .map((entry) => `A ${entry.stat} value is outside what this scenario allows: ${entry.message}`);
+    const lines: string[] = [];
 
     const turn = findRowError('turn');
 
@@ -89,12 +86,25 @@ const rowErrors = computed(() => {
         lines.unshift(turn);
     }
 
-    for (const field of ['mood', 'energy']) {
+    // Every column the file declares gets a render path, driven from the request's own header list:
+    // a column whose rules can fail can no longer fail invisibly. The five stats keep their prefix
+    // sentence and their order; the rest print the row-keyed message as the server composed it.
+    for (const field of props.headers) {
+        if (field === 'turn') {
+            continue;
+        }
+
         const message = findRowError(field);
 
-        if (message !== null) {
-            lines.push(message);
+        if (message === null) {
+            continue;
         }
+
+        lines.push(
+            statNames.includes(field)
+                ? `A ${field} value is outside what this scenario allows: ${message}`
+                : message,
+        );
     }
 
     return lines;
@@ -124,17 +134,28 @@ const scenarioName = computed(() => {
     return props.scenarios[String(key)] ?? String(key);
 });
 
+const submitting = ref(false);
+
 function confirmImport(): void {
-    if (props.preview === null) {
+    if (props.preview === null || submitting.value) {
         return;
     }
 
     // Both halves of the file travel with the run's columns: the commit step re-runs the same Form
-    // Request the preview did, and `csv` and `turns` are what its rules require (KI-64).
+    // Request the preview did, and `csv` and `turns` are what its rules require (KI-64). The commit is
+    // not the form's own visit (the payload is the preview's, not the fields'), so its pending state is
+    // this ref: the button disables and names the work, and a second press while the first is in flight
+    // is ignored instead of writing the run twice.
+    submitting.value = true;
+
     router.post('/training-runs/import', {
         ...props.preview.run,
         csv: props.preview.csv,
         turns: props.preview.turns,
+    }, {
+        onFinish: () => {
+            submitting.value = false;
+        },
     });
 }
 </script>
@@ -154,7 +175,7 @@ function confirmImport(): void {
              preview did, so the preview is not a trust boundary: the raw text is carried in a field rather
              than a signed token standing in for it, and editing it into something invalid fails on the
              second POST rather than reaching the action. -->
-        <form v-if="preview !== null" class="mt-6" @submit.prevent="confirmImport">
+        <form v-if="preview !== null" class="mt-6" :aria-busy="submitting" @submit.prevent="confirmImport">
             <h2 class="text-lg font-semibold text-ink-strong">Confirm the import</h2>
 
             <p class="mt-2 text-sm text-ink-muted">
@@ -216,9 +237,10 @@ function confirmImport(): void {
             <div class="mt-5 flex flex-wrap gap-3">
                 <button
                     type="submit"
-                    class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-3 font-semibold text-on-chrome"
+                    :disabled="submitting"
+                    class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-3 font-semibold text-on-chrome disabled:opacity-60"
                 >
-                    Import {{ preview.turns.length }} turns
+                    {{ submitting ? 'Importing…' : `Import ${preview.turns.length} turns` }}
                 </button>
                 <Link
                     href="/training-runs/import"

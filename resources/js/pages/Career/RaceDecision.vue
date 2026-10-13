@@ -20,7 +20,7 @@
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import RaceCard from '../../components/career/RaceCard.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 
 interface Fact {
@@ -92,6 +92,22 @@ const manualForm = useForm({
     turn_entry_id: '',
     objective_index: '',
 });
+
+// A refused manual write answers in its own alert, and focus moves there rather than being left on
+// the press target below the fold (WCAG 2.2 SC 3.3.1, the idiom TrainingDetail's guided form owns).
+const alertRef = ref<HTMLElement | null>(null);
+
+watch(
+    () => manualForm.hasErrors,
+    async (hasErrors: boolean) => {
+        if (!hasErrors) {
+            return;
+        }
+
+        await nextTick();
+        alertRef.value?.focus();
+    },
+);
 
 // Post only what the manual branch renders, the way only rendered inputs submitted: the manual path
 // prohibits `scenario_slot_id` and the Form Request refuses circles without a team-race slot.
@@ -306,7 +322,13 @@ function submitManual(): void {
                             {{ manualForm.processing ? 'Saving…' : 'Record race' }}
                         </button>
                     </div>
-                    <p v-if="manualForm.hasErrors" role="alert" class="md:col-span-3 text-sm text-risk">
+                    <p
+                        v-if="manualForm.hasErrors"
+                        ref="alertRef"
+                        role="alert"
+                        tabindex="-1"
+                        class="md:col-span-3 rounded-md border border-risk bg-raised p-2 text-sm text-risk"
+                    >
                         <span v-for="(message, key) in manualForm.errors" :key="key" class="block">{{ message }}</span>
                     </p>
                 </form>

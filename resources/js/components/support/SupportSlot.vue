@@ -60,6 +60,12 @@ const props = defineProps<{
     ownership: 'OWNED' | 'RENTED' | null;
     /** Which slot the picker's Equip buttons write to, for the button's own label. */
     fillingSlot: number;
+    /**
+     * This slot's own refusal, keyed `deck.{position}.*` on the write. Optional: only the run-scoped
+     * builder passes it. The whole-deck refusals stay in the page's own alert band, because they name
+     * the deck and not a position.
+     */
+    error?: string;
 }>();
 
 const emit = defineEmits<{
@@ -198,5 +204,7 @@ function focusRow(): void {
                 <span class="sr-only"> the card in {{ label }}</span>
             </button>
         </div>
+
+        <p v-if="error" role="alert" class="w-full text-xs text-risk">{{ error }}</p>
     </li>
 </template>

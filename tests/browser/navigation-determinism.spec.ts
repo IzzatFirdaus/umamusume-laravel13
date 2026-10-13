@@ -38,7 +38,7 @@ test('a hover prefetch never announces a page load', async ({ page }) => {
     await page.locator(SIDEBAR).getByRole('link', { name: 'Veterans' }).hover();
     await page.waitForTimeout(400);
 
-    await expect(page.getByRole('status'), 'hovering a nav link announced a load').toHaveCount(0);
+    await expect(page.getByRole('status').filter({ hasText: /\S/ }), 'hovering a nav link announced a load').toHaveCount(0);
 
     await page.unroute('**/veterans');
 });
@@ -57,7 +57,7 @@ test('an interrupted prefetch does not strand the loading state', async ({ page 
     await sidebar.getByRole('link', { name: 'Skills' }).hover();
     await page.waitForTimeout(500);
 
-    await expect(page.getByRole('status'), 'an interrupted prefetch stranded the loading state').toHaveCount(0);
+    await expect(page.getByRole('status').filter({ hasText: /\S/ }), 'an interrupted prefetch stranded the loading state').toHaveCount(0);
 
     await page.unroute('**/veterans');
     await page.unroute('**/skills');
@@ -69,7 +69,7 @@ test('a settled navigation leaves no loading state behind', async ({ page }) => 
     await page.locator(SIDEBAR).getByRole('link', { name: 'Careers' }).click();
     await page.waitForURL(/\/training-runs$/);
 
-    await expect(page.getByRole('status')).toHaveCount(0);
+    await expect(page.getByRole('status').filter({ hasText: /\S/ })).toHaveCount(0);
 });
 
 test('refreshing a route renders it in a single navigation', async ({ page }) => {
@@ -87,5 +87,5 @@ test('refreshing a route renders it in a single navigation', async ({ page }) =>
 
     // A version mismatch or a redirect loop shows up here as more than the one reload.
     expect(navigations, 'the refresh reloaded more than once').toBe(1);
-    await expect(page.getByRole('status')).toHaveCount(0);
+    await expect(page.getByRole('status').filter({ hasText: /\S/ })).toHaveCount(0);
 });

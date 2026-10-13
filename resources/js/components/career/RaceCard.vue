@@ -21,7 +21,7 @@
  */
 import AbsenceValue from '../AbsenceValue.vue';
 import { useForm } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 interface Fact {
     key: string;
@@ -81,6 +81,22 @@ function closed(): void {
 }
 
 const form = useForm({ turn_entry_id: '' });
+
+// A refused enter answers in its own alert inside the drawer, and focus moves there rather than
+// staying on the press target (WCAG 2.2 SC 3.3.1, the same idiom TrainingDetail's guided form owns).
+const alertRef = ref<HTMLElement | null>(null);
+
+watch(
+    () => form.hasErrors,
+    async (hasErrors: boolean) => {
+        if (!hasErrors) {
+            return;
+        }
+
+        await nextTick();
+        alertRef.value?.focus();
+    },
+);
 
 // The decision the screen exists for: enter the race. The run's own panel records the outcome.
 function enter(): void {
@@ -230,8 +246,18 @@ const folds = computed<boolean>(
                         </select>
                     </label>
 
-                    <p v-if="form.hasErrors" role="alert" class="rounded-md border border-risk bg-raised p-2 text-sm text-risk">
-                        {{ Object.values(form.errors)[0] }}
+                    <!-- Every message the write refused with, not the first alone: the request can
+                         refuse the title and the placement together, and fixing one at a time
+                         re-submits blind to the other. The block takes focus so the refusal is the
+                         next thing a keyboard Trainer meets. -->
+                    <p
+                        v-if="form.hasErrors"
+                        ref="alertRef"
+                        role="alert"
+                        tabindex="-1"
+                        class="rounded-md border border-risk bg-raised p-2 text-sm text-risk"
+                    >
+                        <span v-for="(message, key) in form.errors" :key="key" class="block">{{ message }}</span>
                     </p>
 
                     <div class="flex flex-wrap items-center gap-3">

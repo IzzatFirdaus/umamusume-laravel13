@@ -108,6 +108,18 @@ const errors = computed(
     () => (page.props.errors as Record<string, string | undefined> | undefined) ?? {},
 );
 
+/**
+ * This slot's own refusal, keyed `deck.{position}.*` on the write. The whole-deck refusals stay in the
+ * page's band above the grid; the per-slot ones print on the row they refuse, because the most common
+ * one (a card the catalogue does not hold) is keyed to the slot and a band that reads only `errors.deck`
+ * never showed it at all.
+ */
+const slotError = (position: number): string | undefined => {
+    const key = Object.keys(errors.value).find((k) => k.startsWith(`deck.${position}.`));
+
+    return key === undefined ? undefined : errors.value[key];
+};
+
 const type = ref(props.picker.type ?? '');
 const rarity = ref(props.picker.rarity ?? '');
 const status = ref(props.picker.status ?? '');
@@ -291,6 +303,7 @@ function save(): void {
                         v-bind="slot"
                         :ownership="form.deck[slot.position].ownership"
                         :filling-slot="picker.fillingSlot"
+                        :error="slotError(slot.position)"
                         @replace="startReplace"
                         @ownership="(position, value) => (form.deck[position].ownership = value)"
                     />
@@ -310,7 +323,10 @@ function save(): void {
                         Confirm deck
                     </button>
                     <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the deck…</p>
-                    <span v-if="analysis.covered > 0" class="text-xs text-ink-muted">
+                    <!-- The sentence stands on its own, ungated: the write replaces all six positions,
+                         so the warning matters most exactly when the visible slots are empty, and
+                         gating it on the currently-covered count hid it at the moment it applied. -->
+                    <span class="text-xs text-ink-muted">
                         Confirming replaces the whole deck: slots left empty are cleared.
                     </span>
                 </form>

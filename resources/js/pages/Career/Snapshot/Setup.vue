@@ -194,6 +194,7 @@ const submit = (): void => {
                             >
                             I don't know this value
                         </span>
+                        <span v-if="form.errors[field.key]" class="text-xs text-risk">{{ form.errors[field.key] }}</span>
                     </label>
                 </div>
                 <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -211,6 +212,7 @@ const submit = (): void => {
                             >
                             I don't know this value
                         </span>
+                        <span v-if="form.errors[field.key]" class="text-xs text-risk">{{ form.errors[field.key] }}</span>
                     </label>
                 </div>
             </section>
@@ -220,6 +222,7 @@ const submit = (): void => {
                 <label class="mt-3 flex flex-col gap-1">
                     <span class="text-xs font-medium text-ink">Anything worth remembering about this career</span>
                     <textarea v-model="form.notes" name="notes" rows="2" maxlength="5000" class="rounded-md border border-rule bg-raised px-2 py-1.5 text-ink" />
+                    <span v-if="form.errors.notes" class="text-xs text-risk">{{ form.errors.notes }}</span>
                 </label>
             </section>
 

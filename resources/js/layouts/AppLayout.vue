@@ -293,12 +293,17 @@ const mobileMoreClass =
                 </span>
             </header>
             <main id="main" class="flex-1 px-6 py-6 pb-24 md:pb-6">
+                <!-- The flash region is always mounted and carries only its text (WCAG 4.1.3): a live
+                     region announces what changes inside it, so a region created in the same tick as its
+                     message may never be announced. Empty, it is sr-only and says nothing; the classes
+                     that paint the banner arrive with the message. -->
                 <p
-                     v-if="flashStatus"
                      role="status"
-                     class="mb-4 rounded border border-green-line bg-green-tint px-3 py-2 text-sm text-ink"
+                     :class="flashStatus
+                         ? 'mb-4 rounded border border-green-line bg-green-tint px-3 py-2 text-sm text-ink'
+                         : 'sr-only'"
                  >
-                     {{ flashStatus }}
+                     {{ flashStatus ?? '' }}
                  </p>
                 <slot />
             </main>

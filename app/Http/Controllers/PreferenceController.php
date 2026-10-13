@@ -88,6 +88,11 @@ class PreferenceController extends Controller
     {
         $preferences = $request->validated();
 
+        // Read before the write: the flash can then say whether the theme actually changed. First paint
+        // is composed by the server, so a partial visit repaints nothing, and a Trainer who chose Dark
+        // and read a bare "Preferences saved." on a still-light screen read two contradictory sentences.
+        $previousTheme = Preference::get('theme');
+
         if ($preferences['theme'] === null) {
             Preference::query()->whereKey('theme')->delete();
         } else {
@@ -119,7 +124,11 @@ class PreferenceController extends Controller
 
         // Back to wherever the Trainer was: the control sits in the shared nav, so a save that
         // landed them on a preferences screen would move them off the page they were working on.
-        return redirect()->back()->with('status', 'Preferences saved.');
+        $themeChanged = $previousTheme !== ($preferences['theme'] ?? null);
+
+        return redirect()->back()->with('status', $themeChanged
+            ? 'Preferences saved. The theme change shows on your next reload.'
+            : 'Preferences saved.');
     }
 
     /**

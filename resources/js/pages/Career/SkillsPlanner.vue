@@ -19,7 +19,7 @@ import SkillPlanRow from '../../components/career/SkillPlanRow.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import AcquisitionStatusEditor from '../../components/career/AcquisitionStatusEditor.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 
 interface FitCell {
@@ -116,6 +116,22 @@ const form = useForm({
     targets: {} as Record<string, number>,
     skill_priorities: [] as string[],
 });
+
+// A refused save answers in its own alert, and focus moves there rather than staying on the press
+// target (WCAG 2.2 SC 3.3.1, the idiom TrainingDetail's guided form owns).
+const alertRef = ref<HTMLElement | null>(null);
+
+watch(
+    () => form.hasErrors,
+    async (hasErrors: boolean) => {
+        if (!hasErrors) {
+            return;
+        }
+
+        await nextTick();
+        alertRef.value?.focus();
+    },
+);
 
 function save(): void {
     if (props.target === null) {
@@ -326,8 +342,15 @@ const coverageConstants = computed(() =>
                 {{ form.processing ? 'Saving…' : 'Save order' }}
             </button>
             <span class="text-xs text-ink-muted">The order above saves as the run's skill priorities.</span>
-            <p v-if="form.hasErrors" id="skills-order-error" role="alert" class="text-sm text-risk">
-                {{ Object.values(form.errors)[0] ?? 'The order could not be saved.' }}
+            <p
+                v-if="form.hasErrors"
+                id="skills-order-error"
+                ref="alertRef"
+                role="alert"
+                tabindex="-1"
+                class="rounded-md border border-risk bg-raised px-2 py-1 text-sm text-risk"
+            >
+                <span v-for="(message, key) in form.errors" :key="key" class="block">{{ message }}</span>
             </p>
         </form>
         <p v-else-if="props.target === null" class="mt-2 text-sm text-ink-muted" role="status">

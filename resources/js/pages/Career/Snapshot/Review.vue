@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '../../../layouts/AppLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import { nextTick, ref, watch } from 'vue';
 
 /*
  * The snapshot read-back. This screen exists so a Trainer reads exactly what will be written before
@@ -31,6 +32,20 @@ const props = defineProps<{
 }>();
 
 const form = useForm(props.payload);
+
+/*
+ * A refused confirm comes back to this page with the error bag populated, and until this block the
+ * page rendered none of it: "Record snapshot" pressed, nothing changed, and the read-back read as
+ * broken. The block takes focus so the refusal is the next thing a keyboard Trainer meets (the same
+ * shape the record screens own).
+ */
+const alertRef = ref<HTMLDivElement | null>(null);
+
+watch(() => form.hasErrors, (hasErrors) => {
+    if (hasErrors) {
+        void nextTick(() => alertRef.value?.focus());
+    }
+});
 
 const submit = (): void => {
     form.post(props.action);
@@ -74,6 +89,19 @@ const treatment = (state: string): string => {
                 </li>
             </ul>
         </section>
+
+        <div
+            v-if="form.hasErrors"
+            ref="alertRef"
+            role="alert"
+            tabindex="-1"
+            class="mt-6 max-w-3xl rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk"
+        >
+            <p class="font-semibold">The snapshot was not recorded.</p>
+            <ul class="mt-1 list-disc pl-4">
+                <li v-for="(message, key) in form.errors" :key="key">{{ message }}</li>
+            </ul>
+        </div>
 
         <div class="mt-6 flex flex-wrap items-center gap-3">
             <button

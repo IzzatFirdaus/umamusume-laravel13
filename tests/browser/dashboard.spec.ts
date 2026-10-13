@@ -236,7 +236,9 @@ test('announces a visit in flight and takes over the failure state', async ({ pa
     });
 
     await page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'New Career' }).click();
-    await expect(page.getByRole('status')).toHaveText('Loading…');
+    // The shell's flash region is always mounted (WCAG 4.1.3), so the assertion targets the region
+    // that is saying something, not the only one.
+    await expect(page.getByRole('status').filter({ hasText: 'Loading…' })).toHaveText('Loading…');
     await page.waitForURL(/\/career\/setup\/scenario$/);
 
     await page.unroute('**/career/setup/scenario');

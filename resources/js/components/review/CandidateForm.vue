@@ -14,7 +14,11 @@ const props = defineProps<{
 }>();
 
 const form = useForm({
-    status: 'Confirmed',
+    // No preselected verdict. Confirm was the default and it is the one option that writes a catalog
+    // row, so a stray click or Enter committed a merge the queue (Pending only) no longer lists and
+    // nothing could undo; an unset field makes every verdict a deliberate pick, and the request's own
+    // required rule refuses the unset value.
+    status: '',
     umamusume_id: props.candidate.suggested_umamusume_id ?? '',
     alias_language: '',
 });
@@ -41,6 +45,7 @@ function submit(): void {
             :aria-describedby="describedBy()"
             class="rounded-md border border-rule bg-raised px-2 py-1 text-ink"
         >
+            <option value="">Not set</option>
             <option value="Confirmed">Confirm (merge into suggestion, or create)</option>
             <option value="Aliased">Add as alias of…</option>
             <option value="Rejected">Reject</option>
