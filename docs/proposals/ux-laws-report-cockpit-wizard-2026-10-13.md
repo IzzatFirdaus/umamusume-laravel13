@@ -10,8 +10,11 @@
 > session landed the ratified type scale (`4d31de4`, `209e05e`) and the scenario systems work is in
 > flight in its working tree; the shared `public/build` bundle postdates no Vue change of the day. Every
 > verdict below cites a `file:line`, a measured number from the harness runs named, or a committed
-> test. Where a verdict depends on a render that no current bundle can show, it is marked
-> **needs measurement** and names the run that will settle it.
+> test. **Measured 2026-10-14:** a peer session rebuilt `public/build` twice (22:54, then 00:10 with
+> the goals ladder in it) and committed both builds, so the bundle post-dates every landed slice; the
+> five surface specs and the ladder's rendered read ran against it and the marks below carry their
+> numbers. The one red anywhere is the peer session's own uncommitted `config/scenarios.php` (the
+> browser-visible form of the two attributed Pest failures).
 >
 > **Provenance check (continuation pass, 2026-10-13 late).** The peer's later landings `35a1c68`
 > (catalog rows and pagers onto Inertia `Link`, with a shared `Pagination.vue`) and `28a2718` (the
@@ -38,16 +41,18 @@
   vocabulary (red exclamation, pink failure badge, obligation tag) has no counterpart in the app's
   semantic set; recorded as a convention per Laws-7, not a defect (P3, below).
 - **Laws most frequently violated.** After today's slices: none outright FAIL on either surface. The
-  recurring PARTIAL is **Goal-Gradient (18)** on the cockpit (distance-to-goal lives on the training
-  cards and in deficits; the goals ladder slice is Agent 1's, pending) and **Von Restorff (15)** /
-  **Closure (12)** as recorded by the Laws-7 ruling.
+  recurring PARTIAL was **Goal-Gradient (18)** on the cockpit; it is now measured: the peer landed the
+  goals ladder (`8668d9d`, composer at `careerGoalSections()` :1793, `GoalMark.vue`, the grouped
+  renderer) and its rendered read passes all six grammar checks (2026-10-14). **Von Restorff (15)** /
+  **Closure (12)** stay as recorded by the Laws-7 ruling.
 - **Accessibility and responsive risk summary.** axe A+AA scans are green wherever they ran
   (`accessibility.spec.ts`; the cockpit's 9-case spec; the wizard specs). Focus is not obscured by the
   two pinned bars: the cockpit's `scroll-margin-top` block and the wizard's `scroll-padding-top` were
   both click-through verified (0 of 7 anchors obscured; the 9.1 keyboard pass). Reduced motion is
-  inherited from the platform; the tree carries one `animate-pulse` (F-G10). The risks that remain are
-  the ones this report's numbers cannot reach while the bundle lags the tree — each is named
-  **needs measurement** at its row.
+  inherited from the platform; the tree carries one `animate-pulse` (F-G10). The 2026-10-14 sweep put
+  numbers on every mark this report had left open: the five surface specs read **36 passed / 1
+  failed**, the failure the peer session's uncommitted `config/scenarios.php` (classified at the P2
+  row below); the one risk that remains open is that config landing itself, not a measurement.
 
 # Route-by-route findings
 
@@ -169,31 +174,30 @@
 
 - **P0.** None. The wizard's stepper "done" P0 (the live capture's misleading completion indicator) is
   fixed at `4a5ff88` and ruled final (C-1); its acceptance criterion — a step the session only opened
-  never reads as done — holds in the shipped copy, with the rendered re-read **needs measurement** at
-  the next build.
+  never reads as done — is **measured**: the sweep's wizard-side specs ran against the bundle that
+  carries `4a5ff88` (`career-preflight.spec.ts` 4 passed; `career-scenario-select.spec.ts` 6 passed /
+  1 peer-attributed failure).
 - **P1.** None on these two surfaces. The preflight duplication (the audits' P1) landed at `3f9618c`
   and verified this pass.
 - **P2.**
-  1. **Goal ladder on the cockpit (Law 18) — blocked on A-1.** Acceptance: the goals region reads one
-     "next" plus an integer `Goals Achieved {cleared} of {total}` footer, no bar, no percentage, the
-     eight-field row contract intact (`CockpitObjectivesTest.php:127`). **Unblock condition:** a commit
-     replaces the hardcoded absence group inside `careerGoalSections()`
-     (`app/Http/Controllers/Career/CockpitController.php:1793`, gated at `:874`) with rows composed
-     from the landed `TraineeGoal` model — the data half is in (`24ab0eb`: the model, the
-     `StoreTraineeGoals` action, the `trainee_goals` migration). The brief's composer path
-     (`app/Http/Controllers/CockpitController.php`) omits the `Career\` namespace; the function name
-     itself was correct. An earlier revision of this note called the name stale — that claim came from
-     a silently mangled grep and is withdrawn (2026-10-13, late).
-  2. **Bundle-lagged renders — blocked on B-1.** Every verdict above that rests on DOM/copy shipped
-     this pass (`4a5ff88`, `0a58c88`, `84f9353`, `ebcbbac`) is **needs measurement**: the run that
-     settles them is the next `npm run build` followed by the cockpit, accessibility and six wizard
-     specs on a session-private harness, on a quiet box (KI-74 pre-flight first). **Unblock condition:**
-     `git diff --cached --name-only` returns nothing, and `git status --porcelain`'s modified `.vue`
-     set contains only paths a session can prove are its own by diffing it against that session's
-     `git show --name-only <its commits>`; at this pass's start the shared index held 60 staged files,
-     two of them wizard screens. A peer rebuilt the bundle at 22:54 during this pass, so the current
-     bundle already renders some of the listed slices — whether it is trusted for the sweep, given it
-     also captured that peer's mid-flight edits, is B-1's answer to give.
+  1. **Goal ladder on the cockpit (Law 18) — LANDED AND MEASURED.** The peer landed the whole ladder
+     at `8668d9d` (23:28): `careerGoalSections()` now composes the three real groups, `GoalMark.vue`
+     spends the reserved `--color-goal` token as the word-paired pennant, and
+     `TraineeGoalsPanelTest` (+225) pins the composer. The rendered read (2026-10-14, a URA run on
+     the 00:10 bundle): the Trainee goals group renders with **one** footer line in the client's own
+     shape ("Goals Achieved {cleared} of {total}"), **zero** percentage forms, **zero** bar/progress
+     elements, **at most one** Due-now mark (zero on a fresh run — no goal is due at turn 1, the
+     honest state), 21 goal rows, axe A+AA clean. Alternates-counted-once is carried by the
+     composer's own tests, not re-asserted in a browser.
+  2. **The one open red — the peer's uncommitted config.** `career-scenario-select.spec.ts` reads
+     6 passed / 1 failed: the failure is the peer session's uncommitted `config/scenarios.php`
+     giving Our Grand Concert a system, so `No scenario system` no longer renders — the same two
+     `CareerScenarioSelectTest` failures in their browser-visible form. Theirs to land with the
+     config; this report does not edit either side. The original "bundle-lagged renders" item is
+     closed by the same sweep: the peer's rebuilds (22:54, 00:10) put every landed slice's render
+     behind a committed bundle, and the specs ran against it — **36 passed / 1 failed** across the
+     five surface specs, with two transient webServer start-up timeouts retried green (infrastructure,
+     not product).
 - **P3.**
   1. **Continuity's column-order tension (cockpit, tablet).** The brief's CSS-only order is a ruling;
      if it ever changes, re-test the DOM sequence against the new columns. No change now.
