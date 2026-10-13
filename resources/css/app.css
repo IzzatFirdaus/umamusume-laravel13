@@ -447,4 +447,18 @@ html[data-theme='dark'] {
             scroll-behavior: auto !important;
         }
     }
+
+    /*
+     * Marker restoration on flex-based summary elements (audit 2026-10-12 §3.6).
+     * Setting display: flex or inline-flex on a <summary> suppresses the UA's
+     * ::marker triangle in Chromium. The 13 sites across 8 files all use flex or
+     * inline-flex for alignment control, so restore the glyph via ::before.
+     */
+    summary.flex::before,
+    summary.inline-flex::before {
+        content: "▸";
+        margin-inline-end: 0.25rem;
+        font-size: 0.75em;
+        color: var(--color-ink-muted);
+    }
 }
