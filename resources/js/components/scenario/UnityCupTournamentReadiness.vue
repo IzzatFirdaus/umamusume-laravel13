@@ -54,7 +54,7 @@ function anchorLine(): string {
         class="rounded-md border border-rule bg-panel p-3"
         :aria-labelledby="headingId"
     >
-        <h4 :id="headingId" class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+        <h4 :id="headingId" class="text-base font-semibold text-ink-strong">
             Team race shape
         </h4>
 
