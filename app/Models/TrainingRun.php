@@ -748,6 +748,16 @@ class TrainingRun extends Model
      * The component still renders a `goal` state, so the treatment is not being
      * deleted — only the model's authority to assert it.
      *
+     * *Dated correction 2026-10-13 (`ADR-0026`):* the promise above could not have been kept as written.
+     * `calendarCells()` has no live caller - `SCREEN_SPEC.md:2092` records it, and the only reader left in
+     * the tree is `RaceSlotPanelComposerTest` - because the Blade calendar it fed was retired with the rest
+     * of the Blade components at the E1 cutover. Setting a `goal` state here would have painted a mark no
+     * surface renders while leaving the three surfaces a Trainer actually reads unchanged. The mark now
+     * goes where the client puts it: on the race strip, on the Race Decision screen and in the race drawer
+     * (`components/career/GoalMark.vue`), each fed from the same `TraineeGoal::obligationLine()` the Career
+     * goals panel uses. This method is left running and unmarked; whether its grid returns is a
+     * `SCREEN_SPEC.md` decision of its own, not a data question.
+     *
      * @return array<string, mixed>
      */
     private function calendarCell(

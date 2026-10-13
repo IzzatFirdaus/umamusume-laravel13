@@ -21,6 +21,20 @@ use Illuminate\Support\Carbon;
  * the `race_entries` the Trainer already records, so a goal the client clears cannot drift out of
  * step with the race result, and no second owner for the same fact exists.
  *
+ * Engine-owned reference data: provenance is inline (`ADR-0003` Amendment R3), the engine skips a row
+ * the Trainer flagged `is_manual` (PRD FR-B-4), and progress against a row is derived from the run's
+ * own `race_entries` and `turn_entries`, never stored here.
+ *
+ * **The debut, kept as the source states it (dated note 2026-10-13, owner ruling 4b).** The export makes
+ * `Junior Make Debut` objective #1 for all 135 characters with `cond_value` 0, while the capture corpus
+ * (`RACE-AND-SLICE-RESEARCH.md:287-290`, four `[Global]` panels read cell by cell) shows no Goal banner on
+ * the debut or the final rounds. Both are evidence answering different questions: *does the source list
+ * this as an objective* and *does the Global client banner it*. This row set records the first, so `cv=0`
+ * rows whose calendar slot is `is_mandatory` are deliberately **not** filtered out. What makes the
+ * disagreement harmless is the alert dedupe in `CockpitController::traineeGoalRows()`: one obligation, one
+ * alert. A client capture showing whether the debut carries the banner is what would settle the question,
+ * and `SCREEN_SPEC.md` §7 is where the settlement belongs.
+ *
  * @property int $id
  * @property int $umamusume_id
  * @property int|null $race_catalog_slot_id null for a fan goal, an unread goal, or a race Global has not shipped
@@ -90,6 +104,39 @@ class TraineeGoal extends Model
             // The three final rounds are the scenario's obligation, not the trainee's, and the
             // Mandatory races group already renders them from race_catalog_slots.is_mandatory.
             TraineeGoalType::FinalRound, TraineeGoalType::Undecoded => null,
+        };
+    }
+
+    /**
+     * The race this objective names, as this tool is allowed to print it.
+     *
+     * The calendar's own title wins, because that column is the [Global]-vetted client string. The
+     * source's `name_en` is used only where no calendar row carries the race, which is the source saying
+     * a race this calendar does not hold rather than the tool naming a Global race.
+     */
+    public function raceName(): ?string
+    {
+        return $this->raceCatalogSlot !== null ? $this->raceCatalogSlot->title : $this->source_race_name;
+    }
+
+    /**
+     * The objective as the client states it: "Place top 3 in Nikkei Sho", "Earn 5000 fans".
+     *
+     * One reader for both surfaces that print a ladder (the Cockpit's Career goals group and the race
+     * strip), so the two cannot drift into two vocabularies for one fact. A row whose requirement is not
+     * decoded still answers with a sentence rather than null, because a strip row with no obligation line
+     * and a strip row whose obligation this tool cannot read are different claims.
+     */
+    public function obligationLine(): string
+    {
+        $race = $this->raceName();
+        $phrase = $this->requirementPhrase();
+
+        return match (true) {
+            $race !== null && $phrase !== null => $phrase.' in '.$race,
+            $race !== null => $race,
+            $phrase !== null => $phrase,
+            default => 'An objective the source states in codes this tool has not read',
         };
     }
 

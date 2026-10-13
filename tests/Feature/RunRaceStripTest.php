@@ -201,13 +201,19 @@ it('lists ahead only the obligations still to come and not yet recorded', functi
             ->where('raceStrip.ahead.0.title', 'URA Finals Final')
             ->where('raceStrip.ahead.0.year_label', 'Finale')
             ->where('raceStrip.ahead.0.turn', null)
-            // No goal flag: the tool holds no per-trainee objective data to set one from.
-            ->missing('raceStrip.ahead.0.goal')
+            // The key is present and null. It used to be absent because the tool held no per-trainee
+            // objective data at all; ADR-0026 sources the ladder, so a row now answers the question
+            // "is this one of her objectives" with null rather than by not having the field.
+            ->where('raceStrip.ahead.0.goal', null)
             // No deadline state either: the obligation the Trainer already entered is in Run, and a
             // region that shows only what is still to come has no state to report on it.
             ->missing('raceStrip.ahead.0.state')
+            // The KI-34 sentence this used to pin is retired by ADR-0026: the ladder is sourced. What the
+            // strip must still say is where it reads, so a race absent here is not read as a race nobody
+            // asked of her.
             ->where('raceStrip.absences.goal', fn (string $line): bool => str_contains($line, 'goal')
-                && str_contains($line, 'KI-34')));
+                && str_contains($line, 'Scenario')
+                && ! str_contains($line, 'KI-34')));
 });
 
 it('keeps one race in exactly one region', function (): void {

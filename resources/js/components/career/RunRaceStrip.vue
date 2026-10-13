@@ -20,6 +20,7 @@
  * the component reads nothing but it.
  */
 import AbsenceValue from '../AbsenceValue.vue';
+import GoalMark from './GoalMark.vue';
 import { computed } from 'vue';
 
 interface RecordedRow {
@@ -31,6 +32,8 @@ interface RecordedRow {
     status_label: string;
     placement: string | null;
     turn: number | null;
+    /** The trainee's own obligation for this slot, or null when her ladder names no race here. */
+    goal: string | null;
 }
 
 interface AheadRow {
@@ -39,6 +42,7 @@ interface AheadRow {
     tier: string | null;
     year_label: string;
     turn: number | null;
+    goal: string | null;
 }
 
 interface Strip {
@@ -100,6 +104,10 @@ const thisTurn = computed(() => props.strip.this_turn);
                     </div>
                     <span class="text-xs font-semibold text-ink-strong">{{ row.status_label }}</span>
                     <span v-if="row.placement !== null" class="text-xs text-ink-muted">{{ row.placement }}</span>
+                    <!-- A recorded goal keeps its finish state and still shows the mark: the client's
+                         pennant survives the finish, and clearing a race is not the same claim as
+                         running it. -->
+                    <GoalMark v-if="row.goal !== null" :requirement="row.goal" />
                 </li>
             </ul>
         </section>
@@ -127,6 +135,7 @@ const thisTurn = computed(() => props.strip.this_turn);
                     >
                         <span class="font-medium text-ink-strong">{{ row.title }}</span>
                         <span class="text-xs font-semibold text-ink-strong">{{ row.status_label }}</span>
+                        <GoalMark v-if="row.goal !== null" :requirement="row.goal" />
                     </li>
                 </ul>
 
@@ -162,11 +171,15 @@ const thisTurn = computed(() => props.strip.this_turn);
                     <span class="text-xs text-ink-muted">
                         {{ row.year_label }} Year<template v-if="row.turn !== null"> · Turn {{ row.turn }}</template>
                     </span>
+                    <!-- The obligation sits beside the lock, never in place of it: a fan-gated goal is
+                         still gated, and a Trainer needs both readings to decide. -->
+                    <GoalMark v-if="row.goal !== null" :requirement="row.goal" />
                 </li>
             </ul>
 
-            <!-- The goal races the client prints are per trainee, and no table here holds them, so the
-                 region names the absence once rather than printing a flag it cannot source. -->
+            <!-- The mark prints on the rows this trainee's own ladder names (ADR-0026). The sentence below
+                 says what a mark means and where the whole ladder reads, so an unmarked row is not
+                 mistaken for a race nobody asked of her. -->
             <div class="mt-2 text-xs text-ink-muted">
                 Goal races:
                 <AbsenceValue :reason="props.strip.absences.goal" compact />.

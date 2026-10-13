@@ -7,11 +7,13 @@ namespace App\Http\Controllers\Career;
 use App\Domain\Career\CareerPosition;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
+use App\Enums\TraineeGoalType;
 use App\Enums\TurnEventType;
 use App\Http\Controllers\Controller;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\Skill;
+use App\Models\TraineeGoal;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
@@ -640,6 +642,14 @@ class CockpitController extends Controller
      * once and the rows have no such key. `is_mandatory` is a career obligation, never a Goal
      * (`79ffad5`).
      *
+     * *Dated correction 2026-10-13 (`ADR-0026`):* the paragraph above described the state before the
+     * ladder was fetched, and its last sentence still holds - `is_mandatory` is not a Goal. What changed
+     * is the first clause: `trainee_goals` is migrated, sourced per character, and every strip row whose
+     * calendar slot is one of this trainee's objectives now carries a `goal` line stating the requirement.
+     * The obligation prints **beside** a gate rather than in place of it: a fan-locked goal is still
+     * locked, and a recorded goal keeps its finish state and still shows the mark. The absence sentence
+     * stays for a scenario or trainee with no ladder to read.
+     *
      * **Nothing here predicts.** No readiness band, no win figure, no percentage, no distance band
      * derived from metres and no race fact beyond the stored title and tier (`ADR-0016`, `ADR-0020` §3).
      *
@@ -653,7 +663,11 @@ class CockpitController extends Controller
         ];
         $absences = [
             'turn_link' => 'The Trainer has not tied this race to a logged turn (KI-17), so the turn is not known rather than zero.',
-            'goal' => 'No column records this trainee\'s goal races (KI-34). The client marks a goal per character and that table is not sourced, so this list holds only the calendar\'s own mandatory races.',
+            // Retired by ADR-0026: the trainee's own goal ladder is fetched per character. The strip marks
+            // an obligation on the row it belongs to and says where the whole ladder reads.
+            'goal' => 'A race marked Goal here is one this trainee\'s own ladder asks of her; the full ladder,'
+                .' including the objectives that name no race on this calendar, reads under Career goals in'
+                .' the Scenario panel (ADR-0026). A race missing the mark is not a race nobody asked of her.',
         ];
 
         if (! $run->composesPanel('race_calendar')) {
@@ -671,6 +685,23 @@ class CockpitController extends Controller
 
         $next = $run->hasScenario() ? $run->nextTurnToPlay() : null;
 
+        // The trainee's own obligations, keyed on the calendar row each one names (PRD FR-A-10,
+        // ADR-0026). One query for the whole region, not one per row: this strip prints three regions and
+        // a hundred races, and an N+1 here is a defect rather than a trade-off. Objectives with no slot
+        // (a fan gate, an unread one, a race Global has not shipped) carry no key, because there is no
+        // calendar row to mark; they still read in the Career goals panel. That panel runs its own query
+        // in the same request and both are indexed on (umamusume_id, career_year, turn) - two bounded
+        // reads, not one per row.
+        /** @var array<int, string> $obligations */
+        $obligations = TraineeGoal::query()
+            ->where('umamusume_id', $run->umamusume_id)
+            ->where('goal_type', '!=', TraineeGoalType::FinalRound->value)
+            ->whereNotNull('race_catalog_slot_id')
+            ->with('raceCatalogSlot')
+            ->get()
+            ->mapWithKeys(fn (TraineeGoal $goal): array => [(int) $goal->race_catalog_slot_id => $goal->obligationLine()])
+            ->all();
+
         // The run's own history, oldest logged turn first and unlinked rows last. An array key sorts
         // element-wise, which is how the tie-break on the entry id rides along with the turn. The sort
         // reads the foreign key rather than the relation: the column is `nullable()->nullOnDelete()`
@@ -679,7 +710,7 @@ class CockpitController extends Controller
         /** @var list<array<string, mixed>> $recorded */
         $recorded = $run->raceEntries
             ->sortBy(fn (RaceEntry $entry): array => [$entry->turn_entry_id === null ? PHP_INT_MAX : $entry->turnEntry->turn, $entry->id])
-            ->map(fn (RaceEntry $entry): array => $this->stripRow($entry))
+            ->map(fn (RaceEntry $entry): array => $this->stripRow($entry, $obligations))
             ->values()
             ->all();
 
@@ -703,7 +734,7 @@ class CockpitController extends Controller
             'recorded' => $run->raceEntries
                 ->filter(fn (RaceEntry $entry): bool => $entry->race_catalog_slot_id !== null
                     && $slotIds->contains($entry->race_catalog_slot_id))
-                ->map(fn (RaceEntry $entry): array => $this->stripRow($entry))
+                ->map(fn (RaceEntry $entry): array => $this->stripRow($entry, $obligations))
                 ->values()
                 ->all(),
         ];
@@ -720,6 +751,7 @@ class CockpitController extends Controller
                 'tier' => $slot->tier,
                 'year_label' => $slot->yearLabel(),
                 'turn' => $slot->turnNumber(),
+                'goal' => $obligations[$slot->id] ?? null,
             ])
             ->values()
             ->all();
@@ -757,9 +789,10 @@ class CockpitController extends Controller
      * has no catalogue row by definition. `title` falls back exactly as the run record screen's race
      * panel does, so one vocabulary owns the case where neither slot is there.
      *
+     * @param  array<int, string>  $obligations  calendar slot id => the trainee's own objective line
      * @return array<string, mixed>
      */
-    private function stripRow(RaceEntry $entry): array
+    private function stripRow(RaceEntry $entry, array $obligations): array
     {
         return [
             'id' => $entry->race_catalog_slot_id,
@@ -770,6 +803,9 @@ class CockpitController extends Controller
             'status_label' => $entry->status->label(),
             'placement' => $entry->placement === null ? null : $entry->placementOrdinal(),
             'turn' => $entry->turnEntry?->turn,
+            // The obligation prints beside the finish, not instead of it: a race the run has already run
+            // keeps its status and still says what the ladder asked (plan §5.2).
+            'goal' => $entry->race_catalog_slot_id === null ? null : ($obligations[$entry->race_catalog_slot_id] ?? null),
         ];
     }
 
@@ -1811,36 +1847,207 @@ class CockpitController extends Controller
             }
         }
 
+        /** @var array{rows: list<array<string, mixed>>, alerts: list<array<string, mixed>>, summary: string|null, empty_note: string|null} $trainee */
+        $trainee = $this->traineeGoalRows($run, $next, $slots);
+
         return [
             'objectives' => [
                 [
-                    'group' => 'Career goals',
-                    'rows' => [[
-                        'label' => 'Per-character career goals',
-                        'state' => null,
-                        'year_label' => null,
-                        'turn' => null,
-                        'race_url' => null,
-                        // design-2.0 §29's three parts: what is missing, why it matters, what unblocks
-                        // it. The unblock names a schema, not a date, because no date is knowable here.
-                        'absence' => 'No table in this tool holds a trainee\'s own objectives: trainee_goals'
-                            .' does not exist, so the goals the client marks with a red banner cannot be'
-                            .' listed. The mandatory races below are the scenario-wide record and are not a'
-                            .' substitute for them. A schema proposal with a PRD citation is what unblocks'
-                            .' this module.',
-                    ]],
+                    'group' => 'Trainee goals',
+                    'rows' => $trainee['rows'],
+                    'summary' => $trainee['summary'],
+                    'empty_note' => $trainee['empty_note'],
                 ],
                 [
                     'group' => 'Mandatory races',
                     'rows' => $rows,
+                    'summary' => null,
+                    'empty_note' => null,
                 ],
                 [
                     'group' => 'Happy Meek',
                     'rows' => $this->happyMeekRows(),
+                    'summary' => null,
+                    'empty_note' => null,
                 ],
             ],
-            'alerts' => $alerts,
+            // The trainee's own overdue objectives lead, the way every alert here leads the groups.
+            'alerts' => [...$trainee['alerts'], ...$alerts],
         ];
+    }
+
+    /**
+     * The trainee's own objectives, as the sourced ladder states them and this run has recorded them.
+     *
+     * Progress is **derived, never stored**: a race objective is met by a completed entry at the same
+     * calendar row finishing where the source asked, and a fan objective by the fan figure the run had
+     * already reached at or before the deadline turn. There is no write path for either, so no second
+     * owner exists for a fact the race record and the turn log already answer.
+     *
+     * Two rules the panel cannot see from here:
+     *   - an objective whose calendar row is scenario-wide mandatory raises **no alert of its own**. The
+     *     Mandatory races group alerts on it, and the debut is both facts at once: the export makes it
+     *     objective #1 for every trainee while the capture corpus says the client banners no pennant on
+     *     it (`RACE-AND-SLICE-RESEARCH.md:287-290`, carried to `SCREEN_SPEC.md` §7). One obligation, one
+     *     alert, whichever way that question is settled.
+     *   - an objective the source marks unreleased on `[Global]` renders as the source naming a race this
+     *     calendar does not carry, and never as a Global obligation.
+     *
+     * The scenario's three final rounds are deliberately absent. They are stored as `FinalRound` rows and
+     * are the obligation `race_catalog_slots.is_mandatory` already prints, so listing them here would show
+     * one demand twice.
+     *
+     * @param  array{year: int, turn: int}|null  $next
+     * @param  Collection<int, RaceCatalogSlot>  $mandatory
+     * @return array{rows: list<array<string, mixed>>, alerts: list<array<string, mixed>>, summary: string|null, empty_note: string|null}
+     */
+    private function traineeGoalRows(TrainingRun $run, ?array $next, Collection $mandatory): array
+    {
+        /** @var Collection<int, TraineeGoal> $goals */
+        $goals = TraineeGoal::query()
+            ->where('umamusume_id', $run->umamusume_id)
+            ->where('goal_type', '!=', TraineeGoalType::FinalRound->value)
+            ->with('raceCatalogSlot')
+            ->orderBy('career_year')
+            ->orderBy('turn')
+            ->orderBy('source_order')
+            ->orderBy('source_race_choice')
+            ->get();
+
+        if ($goals->isEmpty()) {
+            return [
+                'rows' => [],
+                'alerts' => [],
+                'summary' => null,
+                'empty_note' => 'The fetched ladder states no objective for this trainee, so nothing is'
+                    .' listed here. The mandatory races below are the scenario-wide record.',
+            ];
+        }
+
+        /** @var Collection<int, Collection<int, RaceEntry>> $finished */
+        $finished = $run->raceEntries
+            ->filter(fn (RaceEntry $entry): bool => $entry->status === RaceEntryStatus::Completed
+                && $entry->race_catalog_slot_id !== null)
+            ->groupBy('race_catalog_slot_id');
+
+        $rows = [];
+        $alerts = [];
+        /** @var array<int, bool> $metByOrder */
+        $metByOrder = [];
+
+        foreach ($goals as $goal) {
+            $slot = $goal->raceCatalogSlot;
+            $met = $this->objectiveMet($goal, $run, $finished);
+            $metByOrder[$goal->source_order] = ($metByOrder[$goal->source_order] ?? false) || $met;
+
+            $reached = $goal->isAtOrBeforeTurn($next);
+
+            $state = match (true) {
+                $goal->global_unreleased => null,
+                $met => 'completed',
+                $next === null => 'upcoming',
+                $goal->turnWithinYear() === (int) $next['turn']
+                    && $goal->career_year === (int) $next['year'] => 'current',
+                $reached => 'missed',
+                default => 'upcoming',
+            };
+
+            $race = $slot !== null ? $slot->title : $goal->source_race_name;
+            $phrase = $goal->requirementPhrase();
+
+            $rows[] = [
+                // One reader for both surfaces, so the panel and the race strip cannot drift into two
+                // vocabularies for one objective (TraineeGoal::obligationLine()).
+                'label' => $goal->obligationLine(),
+                'state' => $state,
+                'year_label' => $goal->yearLabel(),
+                'turn' => $goal->turnWithinYear(),
+                // A door back to the picker only for a race this calendar carries that the run has not
+                // finished. A fan objective is met by training, not by entering something.
+                'race_url' => $slot !== null && ! $met && $state !== null
+                    ? route('runs.races.decision', $run)
+                    : null,
+                'absence' => match (true) {
+                    $goal->global_unreleased => 'The source marks '.$race.' as not released on [Global], so this'
+                        .' calendar holds no row to record it against.',
+                    $phrase === null => 'The source states a requirement for this objective that this tool has not'
+                        .' decoded. Its own figures are condition type '.$goal->source_cond_type
+                        .', value '.$goal->source_cond_value
+                        .($goal->source_cond_value_2 > 0 ? ' and second value '.$goal->source_cond_value_2 : '')
+                        .', kept raw on the row.',
+                    default => null,
+                },
+            ];
+
+            if ($state !== null && $reached && ! $met && $run->status === RunStatus::Active
+                && ($slot === null || ! $mandatory->contains('id', $slot->id))) {
+                $alerts[] = [
+                    'level' => 'Critical',
+                    'text' => $race !== null ? $race.' is due and not met' : 'A trainee objective is due and not met',
+                    'detail' => 'The source puts it at '.$goal->yearLabel().' year turn '.$goal->turnWithinYear()
+                        .', and the next turn to play is '.$next['turn'].'. '
+                        .($phrase !== null ? $phrase.' is what it asks for.' : 'What it asks for is not decoded here.'),
+                ];
+            }
+        }
+
+        $obligations = count($metByOrder);
+        $cleared = count(array_filter($metByOrder));
+
+        return [
+            'rows' => $rows,
+            'alerts' => $alerts,
+            // Counted by ladder position rather than by row: an alternates branch is one obligation the
+            // Trainer answers either way. An integer pair and nothing else - no bar, no percentage, no
+            // score (PRD §6.11, and ux-laws §9 item 6).
+            'summary' => $obligations > 0 ? 'Goals Achieved '.$cleared.' of '.$obligations : null,
+            'empty_note' => null,
+        ];
+    }
+
+    /**
+     * Whether this run has met one objective. Read-only, and false where the requirement is unread.
+     *
+     * @param  Collection<int, Collection<int, RaceEntry>>  $finished
+     */
+    private function objectiveMet(TraineeGoal $goal, TrainingRun $run, Collection $finished): bool
+    {
+        if ($goal->goal_type === TraineeGoalType::Fan) {
+            $threshold = (int) $goal->fan_threshold;
+
+            // `turn_entries.turn` counts from the start of the career, the same clock the source's deadline
+            // turn uses, so the two compare without a conversion.
+            $fans = $run->turnEntries
+                ->filter(fn (TurnEntry $entry): bool => (int) $entry->turn <= $goal->turn)
+                ->max('fans');
+
+            return $threshold > 0 && $fans !== null && (int) $fans >= $threshold;
+        }
+
+        $slot = $goal->raceCatalogSlot;
+
+        if ($slot === null) {
+            return false;
+        }
+
+        /** @var Collection<int, RaceEntry> $entries */
+        $entries = $finished->get($slot->id, new Collection);
+
+        if ($goal->goal_type === TraineeGoalType::Participate) {
+            return $entries->isNotEmpty();
+        }
+
+        $placing = $goal->required_placement;
+
+        // An unconfirmed placing figure (2 and 4) cannot be claimed met, because this tool cannot state
+        // what would satisfy it. The row still shows its deadline.
+        if ($goal->goal_type !== TraineeGoalType::Placement || $placing === null
+            || ! in_array($placing, [1, 3, 5], true)) {
+            return false;
+        }
+
+        return $entries->contains(fn (RaceEntry $entry): bool => $entry->placement !== null
+            && (int) $entry->placement <= $placing);
     }
 
     /**

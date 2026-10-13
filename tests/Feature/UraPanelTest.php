@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\RunStatus;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
+use App\Models\TraineeGoal;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\Umamusume;
@@ -65,17 +66,20 @@ function uraSlots(string $scenario = 'ura_finale'): array
     ];
 }
 
-it('composes the career goals flag from the matrix, on for URA and off for every other scenario', function (): void {
+it('composes the career goals flag from the matrix, on where the scenario keeps race goals and off where it does not', function (): void {
     $this->get(route('runs.cockpit', uraRun()))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('scenario.panels.career_goals.label', 'Career goals')
             ->where('scenario.panels.career_goals.on', true));
 
-    // The other three do not declare it, so the shell must not draw URA content in their cockpits.
-    foreach (['unity_cup', 'trackblazer', 'our_grand_concert'] as $key) {
+    // Unity Cup and Our Grand Concert keep the trainee's own objectives on their normal schedule
+    // (docs/scenarios/02-unity-cup.md:155, docs/scenarios/07-grand-concert.md:92-95). Trackblazer
+    // replaces race goals with Grade Point deadlines and stays off. Declared in the matrix, never by a
+    // scenario name in a component.
+    foreach (['unity_cup' => true, 'our_grand_concert' => true, 'trackblazer' => false] as $key => $on) {
         $this->get(route('runs.cockpit', uraRun($key)))
-            ->assertInertia(fn (Assert $page) => $page->where('scenario.panels.career_goals.on', false));
+            ->assertInertia(fn (Assert $page) => $page->where('scenario.panels.career_goals.on', $on));
     }
 });
 
@@ -184,20 +188,53 @@ it('raises a Critical alert when a mandatory race turn has arrived and nothing i
         }));
 });
 
-it('names career goals as an absent module, saying what is missing and what unblocks it', function (): void {
+it('renders the trainee goals group from the sourced ladder instead of naming an absent module', function (): void {
+    $run = uraRun();
+    $slot = RaceCatalogSlot::factory()->create(['year' => 2, 'month' => 5, 'half' => 'Late', 'title' => 'Tokyo Yushun (Japanese Derby)']);
+    TraineeGoal::factory()->create([
+        'umamusume_id' => $run->umamusume_id,
+        'race_catalog_slot_id' => $slot->id,
+        'career_year' => 2,
+        'turn' => 34,
+        'required_placement' => 5,
+    ]);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('scenario', function (Collection $section): bool {
+            /** @var array<string, mixed> $all */
+            $all = $section->all();
+            $groups = collect($all['objectives'])->pluck('group')->all();
+            $goals = collect($all['objectives'])->keyBy('group')->get('Trainee goals');
+
+            // The three-part absence this slot used to print ("what is missing / why it matters / what
+            // unblocks it") is retired by ADR-0026: the module exists. The group leads the list, because
+            // the client puts the trainee's own ladder above the scenario's.
+            expect($groups[0])->toBe('Trainee goals')
+                ->and($goals['rows'])->toHaveCount(1)
+                ->and($goals['rows'][0]['label'])->toBe('Place top 5 in Tokyo Yushun (Japanese Derby)')
+                ->and($goals['rows'][0]['state'])->toBe('upcoming')
+                ->and($goals['summary'])->toBe('Goals Achieved 0 of 1')
+                // Nothing here may claim the old absence any more.
+                ->and(json_encode($all, JSON_THROW_ON_ERROR))->not->toContain('trainee_goals does not exist');
+
+            return true;
+        }));
+});
+
+it('says so when a trainee has no fetched ladder, rather than leaving the group silently empty', function (): void {
     $this->get(route('runs.cockpit', uraRun()))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page->where('scenario', function (Collection $section): bool {
             /** @var array<string, mixed> $all */
             $all = $section->all();
-            $goals = collect($all['objectives'])->keyBy('group')->get('Career goals');
-            $absence = (string) $goals['rows'][0]['absence'];
+            $goals = collect($all['objectives'])->keyBy('group')->get('Trainee goals');
 
-            // design-2.0 §29's three parts, and the unblock names the schema rather than a date.
-            expect($goals['rows'])->toHaveCount(1)
-                ->and($absence)->toContain('trainee_goals')
-                ->and($absence)->toContain('PRD')
-                ->and($goals['rows'][0]['state'])->toBeNull();
+            expect($goals['rows'])->toBe([])
+                ->and($goals['empty_note'])->toContain('states no objective for this trainee')
+                // The generic empty line speaks of mandatory races, so a goals group that holds nothing
+                // carries its own sentence rather than borrowing that claim.
+                ->and($goals['empty_note'])->not->toBeNull();
 
             return true;
         }));
@@ -229,8 +266,9 @@ it('renders each Happy Meek field as an unrecorded reading with a reason, and pr
 
 it('draws no objective groups at all for a scenario that leaves the flag off', function (): void {
     // E2's content is gated by the flag, never by a scenario name: a cockpit whose matrix says off
-    // must not gain URA rows.
-    $this->get(route('runs.cockpit', uraRun('unity_cup')))
+    // must not gain URA rows. Trackblazer is that scenario now - it replaces race goals with Grade
+    // Point deadlines (docs/scenarios/03-trackblazer.md:14-20).
+    $this->get(route('runs.cockpit', uraRun('trackblazer')))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('scenario.objectives', [])

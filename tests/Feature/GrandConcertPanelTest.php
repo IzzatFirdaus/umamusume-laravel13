@@ -14,6 +14,10 @@ use Inertia\Testing\AssertableInertia as Assert;
  * D-241, gate G-41). This is the fourth `[Global]` scenario's whole surface: it composes no panel of
  * its own, so what it draws is the shell's empty branch.
  *
+ * *Dated correction 2026-10-13 (`ADR-0026`):* the sentence above holds for everything the concert itself
+ * is on. It no longer holds whole: the trainee's own objective ladder draws here, because the scenario
+ * returns the standard career goals, so exactly one flag is on.
+ *
  * `ScenarioPanelTest` owns the shell's payload contract; this file owns the strip's content and the
  * G-41 property. The rendered copy, the 44px sweep, the 320px reflow and the axe scan live in
  * `tests/browser/grand-concert-panel.spec.ts`.
@@ -31,7 +35,7 @@ function grandConcertRun(string $scenario = 'our_grand_concert'): TrainingRun
     ]);
 }
 
-it('turns every panel flag off, which is the state gate G-41 is about', function (): void {
+it('turns every panel flag off but the one the sourced ladder earns, the state gate G-41 is about', function (): void {
     $run = grandConcertRun();
 
     $this->get(route('runs.cockpit', $run))
@@ -39,10 +43,16 @@ it('turns every panel flag off, which is the state gate G-41 is about', function
         ->assertInertia(function (Assert $page): void {
             $page->where('scenario.panels', function (Collection $panels): bool {
                 // The flag set is read from the matrix rather than repeated here, so a seventh flag
-                // cannot rot this case. Every one of them off is what makes the region draw the strip
-                // instead of a panel.
+                // cannot rot this case.
                 expect(array_keys($panels->all()))->toBe(array_keys(config('scenarios.panel_labels')));
-                expect(array_filter($panels->all(), fn (array $panel): bool => $panel['on'] === true))->toBe([]);
+
+                // G-41's premise was that this scenario composes no panel of its own. `ADR-0026` changes
+                // one half of that: Our Grand Concert "returns the standard trainee career features of
+                // race goals and career events" (docs/scenarios/07-grand-concert.md:92-95), so the ladder
+                // draws. Everything the concert itself is on - the lives, the songs, the finale title -
+                // still has no client capture and still draws nothing.
+                expect($panels->filter(fn (array $panel): bool => $panel['on'] === true)->keys()->all())
+                    ->toBe(['career_goals']);
 
                 return true;
             });

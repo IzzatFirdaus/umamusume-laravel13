@@ -272,6 +272,9 @@ return [
                 'shop' => false,
                 'epithet_routes' => false,
                 'team_rank_ladder' => true,
+                // The trainee's own objectives still apply here on their normal schedule:
+                // docs/scenarios/02-unity-cup.md:155. Appended last so no existing panels.N pin moves.
+                'career_goals' => true,
             ],
             'scenario_links' => [
                 'Taiki Shuttle', 'Rice Shower', 'Haru Urara', 'Matikanefukukitaru', 'Riko Kashimoto',
@@ -715,6 +718,10 @@ return [
                 'shop' => false,
                 'epithet_routes' => false,
                 'team_rank_ladder' => false,
+                // Our Grand Concert "returns the standard trainee career features of race goals and career
+                // events" (docs/scenarios/07-grand-concert.md:92-95), so the ladder applies here too.
+                // Appended last so no existing panels.N pin moves.
+                'career_goals' => true,
             ],
             /*
             | This scenario offers the turn rail a Performance observation field. It is deliberately NOT a
@@ -795,7 +802,7 @@ return [
             | here measures is the text on the client's own screens, so no panel can be drawn from a guide
             | without inventing the words above it (D-165, D-241).
             */
-            'panel_absence' => 'The mechanics for this scenario are sourced, but no capture of the client\'s own screens exists yet, so no panel is drawn.',
+            'panel_absence' => 'The mechanics for this scenario are sourced, but no capture of the client\'s own screens exists yet, so nothing the concert itself is on draws here. The trainee\'s own objective ladder is the one panel this entry composes, and that is a career fact rather than a concert mechanic (ADR-0026).',
             'panel_absence_title' => 'Sourced in docs/scenarios/07-grand-concert.md. The client\'s own screen text is not measured in this build.',
             'notes' => 'Live on `[Global]` since 2026-07-22 and caps Speed highest of any scenario here. '
                 .'Mechanics sourced 2026-10-05 by a primary read; every panel stays off because the client '
