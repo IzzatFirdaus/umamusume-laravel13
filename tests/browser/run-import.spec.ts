@@ -88,9 +88,11 @@ test('previews every row before anything is written, and says turns are all the 
     await expect(region.locator('tbody tr')).toHaveCount(2);
     await expect(region.locator('tbody tr').nth(1)).toContainText('600');
 
-    // The summary names the trainee, the scenario label rather than its slug, and the count.
+    // The summary names the trainee, the scenario label rather than its slug, and the count. Anchored on
+    // the separator because the confirm button's own label ends the same way, and `getByText` matches
+    // substrings: `/2 turns$/` alone resolves to both and fails in strict mode.
     await expect(region.locator('caption')).toHaveText('Every turn row that will be written');
-    await expect(page.getByText(/2 turns$/)).toBeVisible();
+    await expect(page.getByText(/· 2 turns$/)).toBeVisible();
     await expect(page.getByText(/No scenario/)).toHaveCount(0);
 });
 
@@ -128,6 +130,12 @@ test('commits the previewed file: confirm writes the run and the page leaves the
     const traineeName = await fillForm(page, csv([okRow('1'), okRow('2')]));
     await expect(page.getByRole('heading', { name: 'Confirm the import', level: 2 })).toBeVisible();
 
+    // The preview prints the provenance string the run will carry, which is the one moment a Trainer can
+    // read it before anything is written. `HistoricalRunImportTest` pins what the row stores; the Cockpit
+    // the commit lands on prints no provenance line at all, and KI-100 records that gap rather than
+    // pretending this step reads it back.
+    await expect(page.getByText(/from pasted CSV \(/)).toBeVisible();
+
     await page.getByRole('button', { name: 'Import 2 turns' }).click();
 
     // The commit redirects to the run's own page (`runs.show`, which is itself a redirect to the
@@ -136,6 +144,4 @@ test('commits the previewed file: confirm writes the run and the page leaves the
     // sitting on the same URL with nothing said.
     await page.waitForURL((url) => /\/training-runs\/\d+(\/cockpit)?$/.test(url.pathname));
     await expect(page.getByRole('heading', { level: 1 })).toContainText(traineeName);
-    // The run's own provenance line names the pasted body, so the page read is the run just written.
-    await expect(page.getByText(/from pasted CSV \(/)).toBeVisible();
 });
