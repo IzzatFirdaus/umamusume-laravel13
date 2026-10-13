@@ -108,7 +108,13 @@ const filtered = computed(
         <Head title="Veteran library" />
         <template #title>Veteran library</template>
 
-        <p class="text-sm text-ink-muted" role="note">{{ props.notice }}</p>
+        <p
+            role="note"
+            class="mt-3 flex items-start gap-2 rounded-md border border-rule bg-sunken px-3 py-2 text-sm text-ink"
+        >
+            <span aria-hidden="true" class="font-mono font-bold text-ink-strong">i</span>
+            <span>{{ props.notice }}</span>
+        </p>
 
         <form class="mt-4 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
             <label class="flex flex-col gap-1">

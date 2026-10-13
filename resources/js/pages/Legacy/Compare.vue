@@ -423,8 +423,7 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
             </div>
 
             <p class="mt-3 text-xs text-ink-muted">
-                Spark counts are per kind, as recorded. Affinity is stored per run and is not priced by
-                this tool, so no column carries a total or a rank.
+                Affinity is stored per run and is not priced by this tool.
             </p>
         </template>
     </AppLayout>

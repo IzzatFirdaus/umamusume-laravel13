@@ -41,7 +41,13 @@ const doorClass =
         <Head :title="`Veteran: ${props.veteran.trainee}`" />
         <template #title>Veteran: {{ props.veteran.trainee }}</template>
 
-        <p class="text-sm text-ink-muted" role="note">{{ props.notice }}</p>
+        <p
+            role="note"
+            class="mt-3 flex items-start gap-2 rounded-md border border-rule bg-sunken px-3 py-2 text-sm text-ink"
+        >
+            <span aria-hidden="true" class="font-mono font-bold text-ink-strong">i</span>
+            <span>{{ props.notice }}</span>
+        </p>
 
         <section aria-labelledby="veteran-record" class="mt-4 rounded-md border border-rule bg-raised p-4">
             <h2 id="veteran-record" class="text-xs font-bold tracking-wide text-ink-muted">
