@@ -39,7 +39,7 @@ const props = defineProps<{
                     <Link
                         :href="area.url"
                         :prefetch="'hover'"
-                        class="flex min-h-11 items-center px-4 text-sm font-medium text-ink-strong hover:bg-raised"
+                        class="flex min-h-11 items-center px-4 text-sm font-medium text-ink-strong hover:bg-panel"
                     >
                         {{ area.label }}
                     </Link>
