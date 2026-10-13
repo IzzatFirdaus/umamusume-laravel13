@@ -466,7 +466,7 @@ prints the full letter. `/design-preview` returns **200** and all five R17 runs 
 **200** with zero console errors.
 
 **Method (D-288).** R17 fixture on an isolated database
-(`.scratch-uma/r17.sqlite`, migrated + seeded + loaded; `database/database.sqlite`
+(`.scratch-uma/cited/r17.sqlite`, migrated + seeded + loaded; `database/database.sqlite`
 never opened). Pairs read from `getComputedStyle()` on the rendered elements and from
 the resolved custom properties on `documentElement`, then recomputed from those values â€”
 never sampled through an element that already carries a colour, and never taken from the
@@ -611,7 +611,7 @@ cause is worth naming, because it is a repeatable trap:
 - It was produced by `cp database/database.sqlite .scratch-uma/test.db`. A bare file copy of a SQLite
   database in WAL mode takes the main file without its `-wal`, and this one read back as
   `database disk image is malformed`.
-- **The cause is now reproduced deliberately, not inferred from one accident.** `.scratch-uma/wal-probe.php`
+- **The cause is now reproduced deliberately, not inferred from one accident.** `.scratch-uma/cited/wal-probe.php`
   migrates a throwaway file, writes one row, and copies only the main file: main = 4,096 B against
   `-wal` = 1,751,032 B, and the copy does not even declare the table (`no such table: support_cards`).
   After `PRAGMA wal_checkpoint(TRUNCATE)` the same copy reports the row. So the symptom varies with where
@@ -936,7 +936,7 @@ slice's own migration (four call sites at lines 27, 42, 43, 66) and the two file
 other migration in the repository ever used the method**, so the defect does not extend and no separate
 slice is owed. Recorded as its own row in `SESSION-CONSOLIDATION-2026-09-30.md` Â§6.
 
-**Gate 3 â€” page weight filed as KI-43.** Measured rather than estimated; `.scratch-uma/measure-deck-weight.php`
+**Gate 3 â€” page weight filed as KI-43.** Measured rather than estimated; `.scratch-uma/cited/measure-deck-weight.php`
 replays it against the saved pages:
 
 | Run state              | Page        | Deck block   | Share       |
@@ -1019,8 +1019,8 @@ Criteria applies â€” forward `migrate` plus `db:seed` against a brand-new s
 shared `database/database.sqlite` is never opened:
 
 ```text
-DB_DATABASE=.scratch-uma/gate-slice3b.sqlite php artisan migrate --force   -> 21 migrations DONE
-DB_DATABASE=.scratch-uma/gate-slice3b.sqlite php artisan db:seed --force   ->  2 seeders  DONE
+DB_DATABASE=.scratch-uma/cited/gate-slice3b.sqlite php artisan migrate --force   -> 21 migrations DONE
+DB_DATABASE=.scratch-uma/cited/gate-slice3b.sqlite php artisan db:seed --force   ->  2 seeders  DONE
 tables=24  skills=10  runs=0  slots=0  races=0
 ```text
 
@@ -1234,7 +1234,7 @@ brand-new scratch file. `database/database.sqlite` is never opened: `SESSION_DRI
 writes a session row per request.
 
 ```text
-.scratch-uma/slice5.sqlite   20 migrations run (matches `ls database/migrations | wc -l`), 2 seeders
+.scratch-uma/cited/slice5.sqlite   20 migrations run (matches `ls database/migrations | wc -l`), 2 seeders
 tables=24  skills=10  runs=5  slots=10  race_entries=5  turn_entries=5
 ```text
 
@@ -1284,7 +1284,7 @@ and is not a reproducible gate - it is a human measurement with a date and a sha
 ### 3. The browser pass
 
 Viewport 1440 Ã— 900, loopback `php artisan serve` on `127.0.0.1:8144`, R17 fixture rebuilt for
-this slice (`.scratch-uma/slice5.sqlite`, `.scratch-uma/r17-fixture-slice5.php`). Method per
+this slice (`.scratch-uma/cited/slice5.sqlite`, `.scratch-uma/cited/r17-fixture-slice5.php`). Method per
 D-288: every ratio is computed from `getComputedStyle()` on the rendered element, walking up
 for the first non-transparent background, and the resolved custom properties are read off
 `documentElement` separately and printed beside it. Nothing is sampled from a source hex and
@@ -1558,8 +1558,8 @@ the contrast failure would have cost.
 
 Measured in the browser from the rendered pills (`getComputedStyle` on the element, `data-theme`
 flipped between passes, token values read off `documentElement` so an undefined `var()` could not
-inherit silently â€” D-288). Fixture: `.scratch-uma/slice6.sqlite`, one run with five logged turns,
-one tier per turn, built by `.scratch-uma/slice6-mood-fixture.php`; `database/database.sqlite` was
+inherit silently â€” D-288). Fixture: `.scratch-uma/cited/slice6.sqlite`, one run with five logged turns,
+one tier per turn, built by `.scratch-uma/cited/slice6-mood-fixture.php`; `database/database.sqlite` was
 never opened. Server: `php artisan serve` on `127.0.0.1:8147` with `SESSION_DRIVER=database`
 pointed at the scratch file.
 
@@ -2057,7 +2057,7 @@ two entries were never committed here.
 
 ### 4. Browser pass, extended R17 fixture, per D-288
 
-Fixture `.scratch-uma/slice8-fixture.php` against `.scratch-uma/slice8.sqlite` (migrated and seeded
+Fixture `.scratch-uma/cited/slice8-fixture.php` against `.scratch-uma/cited/slice8.sqlite` (migrated and seeded
 on that file only; `database/database.sqlite` never opened). Three runs: Unity Cup (rank `A`, six
 burst states across six teammates, a team race with 4 circles and one unread, a friendship
 payload), Trackblazer (two catalogue purchases, `shop_resets_in = 2`, finishes attributed to
@@ -4134,7 +4134,7 @@ Three limits are recorded in the class rather than left to be discovered:
   Sources line names the export's categories as `blue, pink, skill, race, scenario, other`. One White row is
   the skill family and another is the competition family, so `white` here is one label over two dataset
   categories. The payload records what the Trainer read on screen, which is why the display set won; any
-  future join to the dataset needs the mapping stated, not inferred. `.scratch-uma/factors.json` (untracked
+  future join to the dataset needs the mapping stated, not inferred. `.scratch-uma/cited/factors.json` (untracked
   scratch, 606 records: blue 5, other 336, pink 10, race 37, scenario 34, skill 452) is consistent with the
   reference's counts but is not a committed source, so the citation is the reference table and not the file.
 - **`affinity` is one grade for the pair**, which is what D-268 lists. Â§1.5.4 grades **each link**,
@@ -4687,7 +4687,7 @@ present" and "the control measures 44px in a rendered page" are different claims
 second one.
 
 **Setup.** `php artisan serve` on **127.0.0.1:8125** against a scratch database
-(`.scratch-uma/slice4.sqlite`, three trainees), never the shared development file. Measured with a real
+(`.scratch-uma/cited/slice4.sqlite`, three trainees), never the shared development file. Measured with a real
 browser at two viewports, `getBoundingClientRect()` plus the computed `height`, which catches a class that is
 present but overridden.
 
@@ -5021,8 +5021,8 @@ Pint was scoped to this slice's own paths rather than `--dirty`, because three s
 ## 1. another session fixes its own file: delete the stray `}` at Preferences/Edit.vue:81
 npm run build
 ## 2. a scratch database, not the port-8127 default that serves the shared dev file (KI-69)
-DB_DATABASE="$PWD/.scratch-uma/d16.sqlite" SESSION_DRIVER=file php artisan serve --host=127.0.0.1 --port=8141 &
-DB_DATABASE="$PWD/.scratch-uma/d16.sqlite" php artisan migrate --seed --force
+DB_DATABASE="$PWD/.scratch-uma/cited/d16.sqlite" SESSION_DRIVER=file php artisan serve --host=127.0.0.1 --port=8141 &
+DB_DATABASE="$PWD/.scratch-uma/cited/d16.sqlite" php artisan migrate --seed --force
 PLAYWRIGHT_BASE_URL=http://127.0.0.1:8141 npx playwright test career-save-veteran veteran-compare
 ```
 
@@ -5035,7 +5035,7 @@ break `veterans.spec.ts`'s empty-library assertion, which is KI-69 class 1 with 
 
 `npm run build` returned exit 0 once another session fixed `Preferences/Edit.vue`, so the gate ran. Four passes,
 not one: 7 failed / 2 passed, then 7 failed / 2 passed with a different cause each time, then 3 failed / 2 passed
-on a five-case probe, then the nine below. Final run, port 8147, `DB_DATABASE=$PWD/.scratch-uma/d20.sqlite`,
+on a five-case probe, then the nine below. Final run, port 8147, `DB_DATABASE=$PWD/.scratch-uma/cited/d20.sqlite`,
 freshly migrated and seeded, 5 passed / 4 failed, `PLAYWRIGHT_EXIT=1`, 8.1m.
 
 | # | Case | Result | Cause |
@@ -5099,7 +5099,7 @@ re-run since the two class attributes and two spec files changed. `SCREEN_SPEC.m
 
 ### Re-run after the owner's rulings: 8 passed, 1 failed, exit 1 (6.7m)
 
-Port 8150, `DB_DATABASE=$PWD/.scratch-uma/d22.sqlite`, fresh `migrate --seed`, `npm run build` exit 0 first, server
+Port 8150, `DB_DATABASE=$PWD/.scratch-uma/cited/d22.sqlite`, fresh `migrate --seed`, `npm run build` exit 0 first, server
 alive at the end of the run (`SERVER_ALIVE_AT_END`), so cases 7-9 are real passes this time rather than refusals.
 
 | # | Case | Result |
@@ -5182,7 +5182,7 @@ doc hits, 75 exempt). Focused feature runs, all green: 25 Legacy/rank, 29 wizard
 26 deck, 43 snapshot, 5 review, 30 preference/error-page, 70 career decision, 50 runs/snapshot/review, 91
 career/dashboard/veteran, 101 event/timeline/result/snapshot/database/deck, 59 database/catalog/profile.
 Full suite: **1760 passed, 1 failed** in 228s. Browser sweep on the three specs this pass edited
-(`PLAYWRIGHT_PORT=8153 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-8153.sqlite`): **13 passed, 1 failed**.
+(`PLAYWRIGHT_PORT=8153 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/cited/browser-8153.sqlite`): **13 passed, 1 failed**.
 
 **The two red results, both attributed, neither fixed in passing.** `KeyboardPathTest:124` pins
 `NavGlyph.vue`'s mark count at 11 and the peer's `be5ad37` ("mark its seven doors") raised it to 17 without
@@ -5416,4 +5416,100 @@ repaired to HEAD parity twice mid-pass (once for 12 paths, once for 18 plus a st
 from it would drop the files this dispatch's CAS commits added) and once more is owed at hand-off.
 
 **Verification.** `npm run typecheck` exit 0 after every slice; `npm run build` exit 0 four times (the type-scale gate, the alias gate, and the 2.1/2.4 gate); the SFC compile check with a working negative control covered 34 promoted files plus the 18 alias files plus the Link and pager files; the dispatch's guard specs read **35 passed** for the type scale (dashboard, database, veterans, support-deck on the rebuilt bundle) and **26 passed, 1 failed** for the Link slice (catalog, skills, support-cards, review; the one failure is `navigation-determinism.spec.ts:75`, the same case attributed pre-existing in passes 2 and 3). The Link instrument ran green after its own filter was fixed. `ReviewFormAccessibilityTest` and `ReviewQueueTest` read 5 passed for 2.4. `composer lore` exit 0 on the 319-hit baseline and `composer lore-code` exit 0 at 141 - the one rise over 140 is the peer session's uncommitted `CockpitController.php` `planned`-purchase vocabulary, their slice's gate, not this pass's copy. The end-of-pass full suite read **1,802 passed, 4 failed (29,970 assertions, 499.5s)**; all four attributed away from this pass, which touched no PHP file: `EmptyStateCommandNamesTest.php:135` (README states Eight declared sources, config declares 9 - the ninth source's session owes the README), and `CareerScenarioSelectTest` twice plus `LessonEvidenceBoundaryTest.php:119`, which reproduce solo and sit on the wizard scenario card the peer restructured in `84f9353` and the Cockpit capability flags their uncommitted controller work touches - peer-landed-red with the test moves owed by their slices. PHPStan and pint were not re-run: no PHP file changed since their last clean runs.
+
+## UI-AUDIT-FIX-EXECUTION-2026-10-13 (pass 5: Agent 2 continuation — Phase 0 premises, Phase 2 completed, the veteran frame)
+
+**What this pass was.** The continuation dispatch: premise verification first (Phase 0), the held Phase 2
+slices, the Track 1 craft moves, and the review and pixel reads the prior hand-off owed. Read-only
+premises were run before any slice, per the dispatch's own first instruction.
+
+**Phase 0 — premises, four for four measured.**
+
+1. **DesignTokensTest (gates the dark-ramp slice): still held.** The peer's +356/−56 rewrite is
+   worktree-only (`git log` for the file still ends at `b30906a`; `git status` reads ` M` on it and on
+   `TestCase.php`), so the pair gate cannot be built on yet. The dark `--color-rule` slice stays blocked
+   on that file being committed, exactly as the dispatch's unblock condition states.
+2. **Races.vue: unblocked and then converted.** The file was clean on the shared index and in the
+   worktree; the staged intent that held Slice 2.1 last pass cleared.
+3. **Phase 1.4's form-control premise: refuted by measurement, no code.** The dispatch's literal-phrase
+   grep matches nothing (the tree orders the tokens `rounded-md border border-rule bg-raised`), and an
+   element-scoped AST census (the instrument is this session's `control-census.mjs`) reads **152 styled
+   controls across 29 files with a uniform idiom**, zero unstyled inputs/selects/textareas, and 15
+   checkbox controls carrying their own `rounded border-rule` shape; no `components/Form/` directory
+   exists and none is imported. The idiom has no drift for a component extraction to fix, and the
+   accessibility semantics the audit's X-5 asked for landed in pass 2. The component becomes worth
+   building the day a second idiom appears.
+4. **The four suite failures: re-verified, classification unchanged.** Three reproduce solo and
+   deterministically (`CareerScenarioSelectTest` twice, `LessonEvidenceBoundaryTest` once, the last with
+   `CockpitController.php` still worktree-dirty) and the fourth was read directly (`README.md:103`
+   states Eight sources with an eight-entry list; `config/uma.php` declares 9). All four are the owning
+   peer sessions' to close; none touches this pass's files.
+
+**Phase 2 — completed.**
+
+- **2.1, the fourth pager (`3f717dd`).** `Database/Races.vue` joins the shared `Pagination.vue`; the
+  server-side `withQueryString` and `PageSize::clamp` are untouched; `database.spec.ts` read 12/12 on
+  the rebuilt bundle including the 44px sweep of the reference views.
+- **2.2, the four-list instrument (verification, no commit).** Three revisions, and the two failed runs
+  are part of the evidence. The first's `^=` prefix selector matched nothing on `/support-cards`
+  because **that list's row href is absolute** - it consumes the server's `route()` url
+  (`SupportCardController.php:85`) while the other three lists compose theirs client-side - and
+  `route()` defaults to absolute. The second revision's `*=` selector then caught a real second
+  document load, which turned out to be the instrument clicking **`ArtworkSlot`'s row thumbnail**: the
+  support-card row carries two links to the same card with the same accessible name, and the thumbnail
+  is a plain anchor by that component's own contract. The third revision aims at the name link's class
+  and reads **4/4 passed**: exactly one document load per list (the arrival) and the row click over
+  `X-Inertia`, on `/umamusume`, `/skills`, `/support-cards` and `/database/trainees`. The instrument
+  findings are not product defects - the original `<a>` carried the same absolute href before the
+  conversion, and the thumbnail's full reload is pre-existing behavior the slice deliberately left to
+  `ArtworkSlot`.
+- **2.3, the shared contract (verification, no commit).** One prop (`links: PagerLink[]`), four callers
+  all passing a server paginator's own `links` array (`umamusumes`, `skills`, `cards`, `props.slots`),
+  shape-identical by Laravel's `links()` contract, the `length > 3` gate and the `v-html` entity
+  handling identical on all four. **No divergence.**
+
+**Phase 3.**
+
+- **3.3, artwork on the four named surfaces (`12d35b6`).** Verified first, and two of the four needed
+  nothing: `Catalog/Show` and the wizard's `TraineeSelect` already render `ArtworkSlot` (the OQ-6
+  pick-screen blocker cleared when that step left the native select), and the deck step's assigned
+  slots already show thumbs through `SupportSlot` while its picker is the native select the record
+  names as frameless. The real work was `Veterans/Show`: `VeteranController::show()` now carries
+  `artworkURL` by `CatalogController`'s own debut-card idiom (`artworkUrl()`, one query, null when the
+  mirror holds nothing, which the slot renders as a reserved cell), and the Trainee row renders the
+  frame beside her name. `VeteranLibraryScreenTest` + `ArtworkMirrorTest`: 22 passed; pint clean;
+  build clean. The dispatch's `Setup/` path prefix is stale - the wizard pages live at
+  `pages/Career/*.vue`.
+- **3.1 (wizard density) and 3.2 (enamel budget): not reached, and the reason is the read, not the
+  work.** Both slices' verification is a visual judgement (vertical rhythm, which control is the
+  screen's one completion write) that this environment has now twice failed to render for me; and 3.2's
+  multi-write screens are gated on the owner's still-open §6.3 question besides. Doing the mechanical
+  half without the reads risks restyling the wrong control on a screen another session is actively
+  reworking.
+- **3.4 (visit bar): owner-gated, untouched** (B-1 open).
+
+**Slice 5.1 — the multi-axis review over the fourteen commits.** No Critical, no Required. Two FYI
+findings: (a) `7fd49b6`'s local `type Badge = ProvenanceState` resolves *inside* `defineProps<>`
+(UraPanel's `figures_badge: Badge`), which proves `ProvenanceBadge.vue`'s documented compiler caveat is
+wider than the truth - the limit binds for directly imported types, not for local aliases; the
+correction belongs to a docs-in-code pass; (b) the absolute-vs-relative href split between the
+support-card list and its three siblings is an `APP_URL` exposure recorded in the premise report with
+the one-line remedy. Correctness spot-checks passed on the veteran payload (null-safe, one query), the
+pager (behavior-identical, server-side query string untouched), and the security axes (no new input
+path, no secret, `v-html` only on the paginator's own labels).
+
+**Verification.** The premise report and the control census are quoted above and live in this session's
+scratch. `npm run typecheck` exit 0; `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` read
+"5 errors" on one run and "No errors" on the immediate next - the five were the peer session's
+in-flight goals files, and that session's ladder commits (`24ab0eb`/`e950123`/`8668d9d`) landed and
+cleared them between the two runs; this pass's own PHP (`artworkUrl()`) was in the tree for both.
+`composer lore` 319-hit baseline unchanged and `composer lore-code` 141 (the peer's `planned`
+vocabulary), pint passed on the changed controller. `npm run build` exit 0 post-dating every Vue edit.
+The full suite read **1,804 passed, 4 failed (29,995 assertions, 858.5s)** - the same four failures as
+the prior pass's classification, unchanged and peer-owned, with the +2 the peer's ladder tests added.
+The final browser batch (veterans, accessibility, pixel capture) read **11 passed**. Six 1280px pixel
+captures sit in this session's scratch (`pixel-*.png`); this environment rendered no image content for
+them across three attempts, so the read is **captured, not visually judged** - the judgement is owed to
+the owner, and the Cockpit capture was skipped as a run-scoped surface the peer session is actively
+reworking.
 
