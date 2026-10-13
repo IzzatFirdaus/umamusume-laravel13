@@ -5155,3 +5155,70 @@ The value of this gate was not the number. It was four things, in order:
 
 Related: `superpowers:verification-before-completion` (a claim is the command output), and the owner's standing
 "Built, not landed" wording rule, which is why the gate state lived in `SCREEN_SPEC.md` rather than in chat.
+
+## UI-AUDIT-FIX-EXECUTION-2026-10-13 (pass 2: the remaining screens, Phases 1, 3, 4, 5, 6, 7, 8 partial)
+
+**What this pass was.** The 2026-10-13 audit of the 40 page components outside the Cockpit and the setup
+wizard (`docs/proposals/remaining-screens-ui-audit-2026-10-13.md`, 87 findings, 1 P0) was followed by an
+owner-supplied implementation plan slicing those findings into Phases 0-11. This record covers execution:
+what landed, on what evidence, what is owed, and what the owner's answers still gate.
+
+**Commit ledger (all on `master`, unpushed; O-1 holds every push).**
+
+| Commit | Plan slices | Content |
+| ------ | ----------- | ------- |
+| `6717c7c` (peer repair commit, carries this pass's blobs) | **1.1 (the P0)** | Legacy builder: the four dropped keys declared, seeded, posted; `rank_label` passed to `AncestryNode`; the wizard's per-ancestor rank and Spark editors against the shared request; plus the root cause a probe surfaced, `StoreLegacySelectionRequest::payload()` paired the per-ancestor lists with `array_values` over `validated()`'s unstable iteration order. |
+| `88923a0`, `5713592` | 1.1's register half | KI-99 filed, then its closure SHA corrected after the staging race orphaned the original landing. |
+| `f687696` | 3.1-3.9 | Import column errors driven from the request's own `HEADERS`; the guarded commit that cannot double-post; slot-keyed deck errors; the ungated clear-all warning; snapshot per-field errors plus the confirm screen's focused alert; the always-mounted shell `role="status"`; the unset review verdict; the theme-effect flash; the refused-write focus move on three career screens. |
+| `3162077` | 4.1-4.6 | `aria-invalid`/`aria-describedby` on every refused field of both run forms and the combobox; the snapshot label split; 44px on the queue, its pager and both library pagers, with a new `expectTapTargets` sweep in `review.spec.ts`; the visible disabled Compare state; the star-roll table's focusable labelled region. |
+| `0646381` | 5.1, 5.2, 5.3, 5.6-5.10 | Timeline em dashes gone with a payload-level pin; commands to `<code>`; governance citations stripped from Settings; one label per Veteran count; the 419 retitle; DATA STATUS composed from the stale flag; RECENT VETERANS pointed at the library; `role="note"` on the compare notice. |
+| `37eb694` | 7.1-7.3, 6.1, 6.2, 6.7, 8.1, 8.3 | Eight dead `warning`-token sites repointed at the declared `risk` pair; the `Deltas: {}` line deleted; `recheck` declared on Shop Items; the deck band de-greened; the lone `animate-pulse` removed; the flash neutralised; the shell's `max-w-5xl` and the snapshot's `max-w-3xl` ratified widths. |
+| `e8f9337` | 7.10, 5.5 | The reference badge's config-to-index whitelist (one config typo was a render-time failure of a whole view); the running styles in the client's case, with the terms map named as the owner. |
+
+**Verification actually run.** Typecheck exit 0 after every batch (`tsc --noEmit`, and note §4.1 of the audit:
+it reads no `.vue` file, so it is not evidence about the pages). `pint --test --format agent` clean on every
+touched path, never `--dirty`. `composer lore` exit 0 each time, no hit naming a changed file (baseline 319
+doc hits, 75 exempt). Focused feature runs, all green: 25 Legacy/rank, 29 wizard/inheritance, 5 import copy,
+26 deck, 43 snapshot, 5 review, 30 preference/error-page, 70 career decision, 50 runs/snapshot/review, 91
+career/dashboard/veteran, 101 event/timeline/result/snapshot/database/deck, 59 database/catalog/profile.
+Full suite: **1760 passed, 1 failed** in 228s. Browser sweep on the three specs this pass edited
+(`PLAYWRIGHT_PORT=8153 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-8153.sqlite`): **13 passed, 1 failed**.
+
+**The two red results, both attributed, neither fixed in passing.** `KeyboardPathTest:124` pins
+`NavGlyph.vue`'s mark count at 11 and the peer's `be5ad37` ("mark its seven doors") raised it to 17 without
+moving its own pin; it is the cockpit series' in-flight assertion. `navigation-determinism.spec.ts:89`
+counts two main-frame navigations for one reload: a throwaway probe showed every document load fires the
+commit plus Inertia's post-mount `replaceState`, so the counter was never counting one; the three assertions
+this pass retargeted in that file pass. Neither is touched here per `AGENTS.md` §9's attribution rule.
+
+**Corrections to the plan's own premises, found while executing.** 3.6's spec-move list names
+`career-cockpit-forms.spec.ts:100` for a `getByRole('status')` retarget; that file contains no such call
+(grep: zero matches), and `preferences.spec.ts:66,215` need no change because that page holds exactly one
+status region, so the moves reduced to four assertions in `navigation-determinism.spec.ts` and one in
+`dashboard.spec.ts`. 1.1's browser spec pins (`legacy.spec.ts:230` `getByLabel('Own rank')` substring
+matching, `:210` `getByRole('button', { name: 'Add Spark' })`) make the wizard's own label wording unsafe on
+this screen, so the ancestor controls read "Grandparent rank (letters/stars)" and "Add grandparent Spark",
+documented at the call site: the pins hold and no assertion was weakened. 5.5's server-passed-labels fix was
+scoped down to the component's own words because `Career/TraineeProfile.vue:208` shares the component and
+setup screens are outside this plan.
+
+**Owed by this pass (nothing here is blocked, only unbudgeted).** Browser runs for the deck, Legacy,
+Veterans, snapshot and review specs this pass changed at class level (`review.spec.ts`'s new sweep included);
+Slice 3.2's double-press count against a scratch database; Slice 4.2's post-split axe scan; then the
+unblocked remainder: 7.4, 7.5, 7.6, 7.7, 6.8, 6.9, 8.2, and Phase 10's 10.1-10.3, 10.5-10.7, 10.9-10.13,
+10.14-10.17 (10.18 is measure-first). Command shape for any browser run:
+`PLAYWRIGHT_PORT=<free port> PLAYWRIGHT_SCRATCH_DB=.scratch-uma/browser-<port>.sqlite npx playwright test tests/browser/<spec>`.
+
+**Waiting on the owner.** Phase 0 (0.1 copy-hygiene reach into PHP-composed copy, 0.2 `vue-tsc` as a new
+devDependency), Phase 2 (the ~100-site absence migration, whose register line at `SCREEN_SPEC.md:3352` still
+says 17), Phase 9 (the type scale, and with it the shell `h1`), Slices 5.4, 6.3-6.6, 7.9, 10.4, 10.8. These
+are the audit's §6 questions 1, 2, 3 and 6 plus the two spec-colliding rulings.
+
+**Shared-worktree incident, recorded because it moved a SHA.** The first attempt at 1.1 staged four files
+into the shared index; a cockpit commit landed inside that window and the plain `git commit` carried the
+peer's `app.css` and `Cockpit.vue` content under this pass's message (`44d956c`). The peer diagnosed and
+repaired it in `6717c7c` with an explanatory message; this pass's fix content is blob-identical in that
+commit, and `ff7332c` is the orphaned twin named in KI-99. Every commit after that was landed through a
+private `GIT_INDEX_FILE` with `git update-ref` compare-and-set against the observed HEAD, and the paths were
+re-staged afterwards so a later peer commit could not stage their pre-fix blobs; at the end of this pass the
+shared index equals HEAD for all of them.
