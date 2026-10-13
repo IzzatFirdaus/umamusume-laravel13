@@ -13,6 +13,7 @@
  * by nature. The table still scrolls inside its own container at 320px, never the page.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
+import Pagination from '../../components/Pagination.vue';
 import { Head } from '@inertiajs/vue3';
 
 interface Slot {
@@ -156,19 +157,7 @@ const gates = (slot: Slot): string[] =>
                 </table>
             </div>
 
-            <nav v-if="props.slots.links.length > 3" aria-label="Pagination" class="mt-4 flex flex-wrap gap-2 text-sm">
-                <template v-for="(link, index) in props.slots.links" :key="index">
-                    <a
-                        v-if="link.url"
-                        :href="link.url"
-                        :aria-current="link.active ? 'page' : undefined"
-                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised"
-                        :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
-                        v-html="link.label"
-                    />
-                    <span v-else class="inline-flex min-h-11 items-center px-3 text-ink-muted" v-html="link.label" />
-                </template>
-            </nav>
+            <Pagination :links="props.slots.links" />
         </template>
     </AppLayout>
 </template>
