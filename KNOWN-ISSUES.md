@@ -2690,3 +2690,47 @@ Two defects, one column. The builder (`Legacy/Builder.vue`) was a narrower secon
 **Proving commands.** `php artisan test --compact --filter="(LegacyLabPageTest|AncestorRankTest|GrandparentRanksTest)"` -> 25 passed (278 assertions), including a new full-shape round trip ("keeps the letter ranks and grandparent details a builder-shaped save carries") that fails on both the pre-fix builder payload and the pre-fix `array_values()` pairing; `php artisan test --compact tests/Feature/CareerLegacyDeckStepsTest.php tests/Feature/CareerInheritanceEventTest.php` -> 29 passed (600 assertions). `vendor/bin/pint --test --format agent` on the four paths: clean. `composer lore`: exit 0, no hit naming a changed file.
 
 **What closure does not cover.** It does not restore anything: a `legacy_selection` column already narrowed by an earlier builder confirm lost its rank keys for good, and nothing in the tree or the backups distinguishes an erased record from a never-recorded one, so repair is out of scope here. It does not exhaust `validated()`'s ordering behaviour beyond the three lists this request pairs - any future wildcard-in-wildcard list paired positionally should go by key - and it does not re-run `tests/browser/legacy.spec.ts` (the builder's new ancestor editors are worded so the spec's pinned locators still resolve to the same controls, but the browser pass that proves it on a rendered page is owed to the slice's Level 2). It does not touch `LEGACY`-adjacent read surfaces that print the stored shape.
+
+## KI-100 Twenty-two stored career objectives state a requirement this tool cannot read, and the display says so rather than guessing the client's words - FILED 2026-10-13 (trainee_goals slice 4, on the owner's ruling 4a), OPEN
+
+**Status: OPEN.** Found while building the ladder (`ADR-0026`, PRD FR-A-10), and disclosed on the surface
+from the first commit: an unread row prints its race and its deadline and names its own requirement as
+undecoded. The owner's ruling 4a chose that over an inference and asked for the register entry, on the
+grounds that a gap disclosed only in a widget is a gap the repository does not track.
+
+**The defect is a coverage gap in the source's codes, not a wrong number.** Two classes, measured on a seeded
+scratch database from the committed body `database/seeders/data/ura-objectives.ead4bbfe.json`:
+
+- **17 stored rows** are race objectives whose condition is `cond_type 1` (a placing is required) with
+  `cond_value 2`. Across the whole document the same class is 31 rows, plus one at `cond_value 4`. Our
+  captures attest three figures only - `1` → "Place 1st", `3` → "Place top 3", `5` → "Place top 5" - and
+  the client form for a figure of 2 or 4 is nowhere in this repository.
+- **5 stored rows** carry `cond_type 2` (Oguri Cap, Agnes Digital, Tamamo Cross, Smart Falcon,
+  Matikanetannhauser), a condition kind no capture or guide line in the corpus explains; 10 such rows exist
+  in the document, plus one at `cond_type 12`. `TraineeGoalType::Undecoded` is the row's state, and
+  `TraineeGoal::requirementPhrase()` returns null for it.
+
+**Why nothing was inferred.** `AGENTS.md` §5 ("Never invent a client string") and D-20 bind the display path.
+"Place top 2" is the pattern's obvious next term, and the whole reason §5 exists is that this corpus has been
+burned by plausible completions - the Unity Cup burst has two published names, the fan ladder has two
+captured phrasings ("Earn 3000 fans" against a second-hand "Have at least 5000 fans"), and `va_en` was read as
+a dub cast for a month. A wrong client string on 17 rows is worse than an opaque row, because the opaque row
+tells the Trainer to go and read the screen.
+
+**Proving commands.** `php artisan test --compact --filter=GametoraUraObjectivesParserTest` -> the case
+"keeps an unread condition as a row rather than inventing what it asks for" pins 11 undecoded rows across the
+document's 1,701 objectives and their condition types. On a seeded scratch file
+(`DB_DATABASE=.scratch-uma/<session>/tgoals.sqlite php artisan migrate:fresh --seed`),
+`select goal_type, required_placement, count(*) from trainee_goals where goal_type='Undecoded' or
+(goal_type='Placement' and required_placement not in (1,3,5)) group by 1,2` -> 17 rows at placement 2 and 5
+undecoded rows. Absence of a capture: `git grep -i -e "Place top 2" -e "Place 2nd" -e "Place top 4" -- docs`
+-> no hits.
+
+**What closure does not cover.** Closure needs either a `[Global]` client capture of one of these 22 objectives
+- a goal banner reading the figure-2 form, which would settle the whole class by the same
+Tier-B-needs-A-or-S rule that confirmed the other three - or a written owner ruling to print an inferred
+string. It does not cover the *semantics* of `cond_type 2` either way: a capture of the sentence is not an
+explanation of the condition, and a row whose kind is unread stays `Undecoded` even once its wording is known.
+This entry files neither the "Place 1st" versus "Place top 1" variant nor the "Earn N fans" versus "Have at
+least N fans" variant; both are wording conflicts inside a class already decoded and are recorded in
+`SCREEN_SPEC.md` §7 by the documentation slice that this instruction excludes.
