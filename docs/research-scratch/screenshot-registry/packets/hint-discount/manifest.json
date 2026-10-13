@@ -23,7 +23,7 @@
  ],
  "contracts": [],
  "evidence_strength": {
-  "cluster_members": 4,
+  "cluster_members": 5,
   "independent_frames": 8,
   "note": "frames counted by perceptual cluster; near-duplicate cluster members are not independent support"
  },
@@ -45,6 +45,12 @@
    "independent_context": false,
    "ref": "2026-07-17 232251",
    "sid": "90f96258fbd9"
+  },
+  {
+   "cluster_id": 752,
+   "independent_context": false,
+   "ref": "2026-07-17 232307",
+   "sid": "a10fa32d8387"
   },
   {
    "cluster_id": 751,

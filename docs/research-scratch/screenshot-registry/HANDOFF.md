@@ -14,12 +14,13 @@
   "total": 1159,
   "verified": 157
  },
- "last_validate": "2026-10-12T21:40:56Z",
+ "known_ambiguous_clusters": [],
+ "last_validate": "2026-10-13T11:55:09Z",
  "next_batch": "B011",
  "observed_claims": 14,
- "open_gates": [
-  "coverage-gap: 3 scenarios game-access gated (trackblazer, our_grand_concert, ura_finale); each maps to an active capture_required entry"
- ],
- "registry_head_commit": "2d126875f9ce03603c5e019ba620b9f066ff37ed",
- "typed_verified_frames": 157
+ "open_gates": [],
+ "registry_head_commit": "193f7c41524fe8cbffd34b30d896d36db400e366",
+ "terminal": true,
+ "typed_verified_frames": 157,
+ "unclassified_frames": 0
 }

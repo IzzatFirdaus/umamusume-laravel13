@@ -95,7 +95,7 @@ From the canonical `clusters.json` (dHash, Hamming 6, 60-frame rolling window). 
 
 | Cluster | Size | Representative |
 | --- | --- | --- |
-| 725 | 58 | `2026-07-18 001811` |
+| 725 | 45 | `2026-07-17 233344` |
 | 80 | 38 | `2026-07-14 202142` |
 | 66 | 23 | `2026-07-14 194819` |
 | 64 | 17 | `2026-07-14 194531` |
@@ -106,7 +106,7 @@ From the canonical `clusters.json` (dHash, Hamming 6, 60-frame rolling window). 
 | 7 | 10 | `2026-07-14 121144` |
 | 62 | 10 | `2026-07-14 194326` |
 
-Total distinct clusters on this corpus: 750.
+Total distinct clusters on this corpus: 753.
 
 ## Unmatched note references
 

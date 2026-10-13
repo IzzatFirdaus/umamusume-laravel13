@@ -10,6 +10,7 @@
 - 2026-07-14 130856 (db49bde2c227, 606x654, verified) — cluster 75
 - 2026-07-15 161624 (092c196777d5, 593x563, verified) — cluster 644
 - 2026-07-17 232251 (90f96258fbd9, 1920x1080, verified) — cluster 751
+- 2026-07-17 232307 (a10fa32d8387, 1920x1080, verified) — cluster 752
 - 2026-07-17 233324 (1f1c5aa6cee0, 1920x1080, verified) — cluster 751
 - 2026-07-17 233332 (bd09274bfb0f, 1920x1080, verified) — cluster 752
 - 2026-07-17 233339 (d59ae471c145, 1920x1080, verified) — cluster 752
@@ -27,6 +28,9 @@
 - 2026-07-15 161624: screen_type backfill; observation unchanged
 - 2026-07-17 232251: Skill allocation screen: 133 Skill Points available, 3 candidate skills with Hint Lv.1 10% OFF discount, costs 81/323/170 SP, 'Firm Conditions' (ground speed), 'Swinging Maestro' (corner endurance recovery), 'Corner Recovery' (corner endurance), Scheduled Races calendar Classic Year with Spring Stakes/Tokyo Yushun/Kikuka Sho/QEC scheduled
 - 2026-07-17 232251: screen_type backfill; observation unchanged
+- 2026-07-17 232307: Batch 1 of 5: Cluster 725 representative and four additional members.
+- 2026-07-17 232307: screen_type backfill; observation unchanged
+- 2026-07-17 232307: cluster-725 disambiguation: Learn panel with Skill Points 133 and three hint-discounted candidate skills (Subdued Front Runners 117, Subdued Pace Chasers 130, Plan X 304) over Confirm/Reset; Scheduled Races side panel; distinct from the Training screen sharing this cluster
 - 2026-07-17 233324: Skill Selection: Hint Lv2 20% OFF on Cut and Drive! (160 pts), Hint Lv1 10% OFF on Firm Conditions (81), Red Shift/LP1211-M in Obtained state (inverted row, no stepper). Skill Points total 169, Full Stats toggle. Two of three discount tiers visible in one frame; the third tier (Lv3 30%) is not shown.
 - 2026-07-17 233324: screen_type backfill; observation unchanged
 - 2026-07-17 233332: Learn screen. Chip 'Learn'. 'Skill Points 169'. Three skills all 'Hint Lvl 1 10% OFF!': Firm Conditions 81, Corner Adept 162, Swinging Maestro 323 (selected, gold). Confirm/Reset. Right: Scheduled Races panel (Classic Year) with Goal Tokyo Yushun + Kikuka Sho and Scheduled Satsuki Sho, Kyoto Shimbun Hai, Kyoto Daishoten, Queen Elizabeth II Cup. Legacy note ('Learn' chip; Scheduled Races panel) confirmed. Matches Firm Conditions 81 / Swinging Maestro 323 in 2026-07-17 232251.
@@ -46,8 +50,8 @@
 - hint-discount-0009: cost arithmetic is not exact for every row because the pre-discount base is not printed
 - hint-discount-confirmed-0007: single frame support
 - hint-discount-confirmed-0007: Hint Lv3 remains inferred from note
-- skill-allocation-0017: single frame
-- skill-allocation-0017: no second capture of this screen in the corpus
+- skill-allocation-0017: two independent capture contexts (clusters 751 and 752) evidence the screen structure
+- skill-allocation-0017: the costs 81/323/170 SP are read from 2026-07-17 232251 only
 
 ## Relevant contracts
 - (none)
