@@ -21,6 +21,7 @@
  * current value as a prop, which is also what lets a saved step read the pick back off the draft.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import AncestryNode from '../../components/legacy/AncestryNode.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { nextTick } from 'vue';
@@ -248,7 +249,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
             <span>{{ notice }}</span>
         </p>
 
-        <p class="mt-3 text-sm text-ink">
+        <div class="mt-3 flex flex-wrap items-baseline gap-x-1 text-sm text-ink">
             Trainee:
             <strong v-if="props.trainee" class="text-ink-strong">
                 {{ props.trainee.name }}
@@ -256,19 +257,18 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                     {{ props.trainee.name_ja }}
                 </span>
             </strong>
-            <span
+            <AbsenceValue
                 v-else
-                class="text-ink-muted"
-                title="No trainee has been chosen in this setup draft yet, so the graph has no first node."
-            >N/A, no trainee chosen</span>
-            &middot;
+                compact
+                reason="No trainee has been chosen in this setup draft yet, so the graph has no first node."
+            />
+            <span aria-hidden="true">&middot;</span>
             <span v-if="props.scenarioLabel" class="text-ink-muted">{{ props.scenarioLabel }}</span>
-            <span
-                v-else
-                class="text-ink-muted"
-                title="No scenario has been chosen in this setup draft yet."
-            >Scenario: N/A</span>
-        </p>
+            <template v-else>
+                Scenario:
+                <AbsenceValue compact reason="No scenario has been chosen in this setup draft yet." />
+            </template>
+        </div>
 
         <p v-if="!props.hasSelection" class="mt-2 text-sm text-ink-muted">
             No Legacy is recorded for this setup yet. Nothing is stored until you save, and a figure you have
@@ -298,12 +298,10 @@ const ancestorError = (index: number, slot: number): string | undefined =>
         <ol class="mt-4 max-w-3xl space-y-2">
             <li class="rounded-md border-2 border-rule bg-panel p-3">
                 <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</p>
-                <p class="mt-1 text-sm font-semibold text-ink-strong">
+                <div class="mt-1 text-sm font-semibold text-ink-strong">
                     <span v-if="props.graph.trainee.name">{{ props.graph.trainee.name }}</span>
-                    <span v-else class="text-ink-muted" title="No trainee chosen in this draft yet.">
-                        N/A, not chosen
-                    </span>
-                </p>
+                    <AbsenceValue v-else compact reason="No trainee chosen in this draft yet." />
+                </div>
             </li>
 
             <li

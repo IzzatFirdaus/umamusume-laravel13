@@ -14,6 +14,7 @@
  * that does the same thing.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
@@ -111,11 +112,11 @@ const optimizesText = (card: ScenarioCard): string | null => {
         <p class="mt-3 text-sm text-ink">
             Stored choice:
             <strong v-if="selectedLabel" class="text-ink-strong">{{ selectedLabel }}</strong>
-            <span
+            <AbsenceValue
                 v-else
-                class="text-ink-muted"
-                title="No scenario has been chosen in this setup draft yet."
-            >N/A</span>
+                compact
+                reason="No scenario has been chosen in this setup draft yet."
+            />
         </p>
 
         <p
@@ -165,7 +166,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
                     <div class="flex flex-wrap justify-between gap-x-4">
                         <dt class="text-ink-muted">Optimizes</dt>
                         <dd v-if="optimizesText(card)" class="text-ink">{{ optimizesText(card) }}</dd>
-                        <dd v-else class="text-ink-muted" title="This scenario publishes no stat cap bonus.">N/A</dd>
+                        <dd v-else class="text-ink-muted"><AbsenceValue compact reason="This scenario publishes no stat cap bonus." /></dd>
                     </div>
                     <div class="flex flex-wrap justify-between gap-x-4">
                         <dt class="text-ink-muted">Systems</dt>
@@ -184,17 +185,20 @@ const optimizesText = (card: ScenarioCard): string | null => {
                     <div class="flex flex-wrap justify-between gap-x-4">
                         <dt class="text-ink-muted">Turn loop</dt>
                         <dd v-if="card.loop.length > 0" class="text-ink">{{ card.loop.join(' → ') }}</dd>
-                        <dd v-else class="text-ink-muted" title="No turn loop steps are recorded for this scenario.">N/A</dd>
+                        <dd v-else class="text-ink-muted"><AbsenceValue compact reason="No turn loop steps are recorded for this scenario." /></dd>
                     </div>
                     <div class="flex flex-wrap justify-between gap-x-4">
                         <dt class="text-ink-muted">Live on Global</dt>
                         <dd v-if="card.live_on_global" class="font-mono text-ink">{{ card.live_on_global }}</dd>
-                        <dd v-else class="text-ink-muted" title="No Global availability date is recorded for this scenario.">N/A</dd>
+                        <dd v-else class="text-ink-muted"><AbsenceValue compact reason="No Global availability date is recorded for this scenario." /></dd>
                     </div>
                     <div class="flex flex-wrap justify-between gap-x-4">
                         <dt class="text-ink-muted">Ruleset version</dt>
-                        <dd class="font-mono text-ink" :title="props.ruleset.title">
-                            {{ props.ruleset.value ?? 'N/A' }}
+                        <dd v-if="props.ruleset.value === null" class="font-mono text-ink">
+                            <AbsenceValue compact :reason="props.ruleset.title" />
+                        </dd>
+                        <dd v-else class="font-mono text-ink" :title="props.ruleset.title">
+                            {{ props.ruleset.value }}
                         </dd>
                     </div>
                     <!-- The brief asks for a short description and a recommended use. Neither the
@@ -202,15 +206,17 @@ const optimizesText = (card: ScenarioCard): string | null => {
                          a sentence written here would be an invented fact (AGENTS.md §5). -->
                     <div class="flex flex-wrap justify-between gap-x-4">
                         <dt class="text-ink-muted">Description</dt>
-                        <dd class="text-ink-muted" title="No sourced one-line description exists for any scenario in this repository.">
-                            {{ card.description ?? 'N/A' }}
+                        <dd v-if="card.description === null" class="text-ink-muted">
+                            <AbsenceValue compact reason="No sourced one-line description exists for any scenario in this repository." />
                         </dd>
+                        <dd v-else class="text-ink-muted">{{ card.description }}</dd>
                     </div>
                     <div class="flex flex-wrap justify-between gap-x-4">
                         <dt class="text-ink-muted">Recommended use</dt>
-                        <dd class="text-ink-muted" title="Recommending a use would be a judgement this tool holds no source for.">
-                            {{ card.recommended_use ?? 'N/A' }}
+                        <dd v-if="card.recommended_use === null" class="text-ink-muted">
+                            <AbsenceValue compact reason="Recommending a use would be a judgement this tool holds no source for." />
                         </dd>
+                        <dd v-else class="text-ink-muted">{{ card.recommended_use }}</dd>
                     </div>
                 </dl>
 

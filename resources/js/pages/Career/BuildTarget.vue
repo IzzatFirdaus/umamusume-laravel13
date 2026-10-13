@@ -23,6 +23,7 @@
  * rather than skipped, so a reader is never told less than the form knows.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
@@ -321,11 +322,11 @@ function removeAt(index: number): void {
         <p class="mt-3 text-sm text-ink">
             Scenario:
             <strong v-if="props.scenarioLabel" class="text-ink-strong">{{ props.scenarioLabel }}</strong>
-            <span
+            <AbsenceValue
                 v-else
-                class="text-ink-muted"
-                title="No scenario has been chosen in this setup draft yet, so every cap below is the base cap with no scenario bonus."
-            >N/A</span>
+                compact
+                reason="No scenario has been chosen in this setup draft yet, so every cap below is the base cap with no scenario bonus."
+            />
             <Link
                 href="/career/setup/trainee"
                 class="ml-3 inline-flex min-h-11 items-center rounded-md px-2 text-sm text-ink underline"
@@ -491,10 +492,13 @@ function removeAt(index: number): void {
                                     :style="{ width: `${percent(stat)}%` }"
                                 ></span>
                             </span>
-                            <span
-                                class="font-mono text-xs text-ink tabular-nums"
-                                :title="entered(stat) === null ? 'No target entered for this stat yet.' : undefined"
-                            >{{ enteredLabel(stat) }}</span>
+                            <AbsenceValue
+                                v-if="entered(stat) === null"
+                                compact
+                                class="font-mono"
+                                reason="No target entered for this stat yet."
+                            />
+                            <span v-else class="font-mono text-xs text-ink tabular-nums">{{ enteredLabel(stat) }}</span>
                         </span>
 
                         <p

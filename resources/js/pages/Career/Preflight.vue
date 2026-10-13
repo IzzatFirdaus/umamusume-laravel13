@@ -18,6 +18,7 @@
  * action and its own progress is the only loading state this screen has (ADR-0007).
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { nextTick, ref, watch } from 'vue';
@@ -217,7 +218,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                                 class="ml-2 text-ink-muted"
                             >{{ props.contract.build.trainee.name_ja }}</span>
                         </template>
-                        <span v-else title="No trainee is recorded in this setup yet.">N/A</span>
+                        <AbsenceValue v-else compact reason="No trainee is recorded in this setup yet." />
                     </dd>
                 </div>
 
@@ -230,7 +231,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                                 {{ props.contract.build.scenario.focus }}
                             </span>
                         </template>
-                        <span v-else title="No scenario is recorded in this setup yet.">N/A</span>
+                        <AbsenceValue v-else compact reason="No scenario is recorded in this setup yet." />
                     </dd>
                 </div>
 
@@ -243,7 +244,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                             {{ props.contract.build.target.distance }} ·
                             {{ props.contract.build.target.style }}
                         </template>
-                        <span v-else title="No build target is recorded in this setup yet.">N/A</span>
+                        <AbsenceValue v-else compact reason="No build target is recorded in this setup yet." />
                     </dd>
                 </div>
 
@@ -255,7 +256,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                             <span v-if="props.contract.build.legacy.affinity">
                                 {{ props.contract.build.legacy.affinity }}
                             </span>
-                            <span v-else title="No Affinity grade was read for the pair.">N/A</span>
+                            <AbsenceValue v-else compact reason="No Affinity grade was read for the pair." />
                         </span>
                     </dt>
                     <dd class="mt-1 text-sm text-ink">
@@ -274,9 +275,12 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                                 <ul class="mt-1 space-y-0.5 text-xs text-ink-muted">
                                     <li v-for="ancestor in member.ancestors" :key="ancestor.slot">
                                         {{ ancestor.slot }}:
-                                        <span :title="ancestor.name === null ? 'No name was recorded for this ancestor.' : undefined">
-                                            {{ ancestor.name ?? 'N/A' }}
-                                        </span>
+                                        <AbsenceValue
+                                            v-if="ancestor.name === null"
+                                            compact
+                                            reason="No name was recorded for this ancestor."
+                                        />
+                                        <span v-else>{{ ancestor.name }}</span>
                                         <!-- The grandparent's own rank, in the parents' words, printed only
                                              where one was read: four of the six ranks in the source's tree
                                              sit on these nodes (R3-09). -->
@@ -303,7 +307,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                                 </p>
                             </li>
                         </ul>
-                        <span v-else title="No two-parent ancestry is recorded in this setup yet.">N/A</span>
+                        <AbsenceValue v-else compact reason="No two-parent ancestry is recorded in this setup yet." />
                     </dd>
                 </div>
             </dl>
@@ -312,9 +316,10 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         <section class="mt-6" aria-labelledby="deck-heading">
             <h2 id="deck-heading" class="text-base font-semibold text-ink-strong">Support deck</h2>
 
-            <p v-if="props.contract.deck === null" class="mt-2 rounded-md border border-rule bg-panel p-3 text-sm text-ink">
-                <span title="No six-slot deck is recorded in this setup yet.">N/A</span>. The deck step has not been saved.
-            </p>
+            <div v-if="props.contract.deck === null" class="mt-2 rounded-md border border-rule bg-panel p-3 text-sm text-ink">
+                <AbsenceValue compact reason="No six-slot deck is recorded in this setup yet." />
+                The deck step has not been saved.
+            </div>
 
             <template v-else>
                 <ol class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">

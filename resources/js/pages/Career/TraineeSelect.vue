@@ -21,6 +21,7 @@
  * more before committing.
  */
 import SetupLayout from '../../layouts/SetupLayout.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import RarityChip from '../../components/RarityChip.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import AptitudeBadge from '../../components/AptitudeBadge.vue';
@@ -229,9 +230,11 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
         <p class="mt-3 text-sm text-ink">
             Scenario:
             <strong v-if="props.scenarioLabel" class="text-ink-strong">{{ props.scenarioLabel }}</strong>
-            <span v-else class="text-ink-muted" title="No scenario has been chosen in this setup draft yet. Set it on step 1.">
-                N/A
-            </span>
+            <AbsenceValue
+                v-else
+                compact
+                reason="No scenario has been chosen in this setup draft yet. Set it on step 1."
+            />
             <Link
                 href="/career/setup/scenario"
                 class="ml-3 inline-flex min-h-11 items-center rounded-md px-2 text-sm text-ink underline"
@@ -243,7 +246,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
         <p class="mt-1 text-sm text-ink">
             Stored choice:
             <strong v-if="props.selectedName" class="text-ink-strong">{{ props.selectedName }}</strong>
-            <span v-else class="text-ink-muted" title="No trainee has been chosen in this setup draft yet.">N/A</span>
+            <AbsenceValue v-else compact reason="No trainee has been chosen in this setup draft yet." />
         </p>
 
         <form class="mt-5 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
@@ -371,9 +374,10 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                      letter and its band as two words and never a colour alone (`design-2.0` §17). Where no
                      letter has been published the whole grid is replaced by one sentence, which is the
                      same read `CatalogController::aptitudes()` makes of the all-or-nothing write. -->
-                <p v-if="trainee.aptitudes === null" class="mt-3 text-sm text-ink-muted" title="The character document published no aptitude letters for this trainee.">
-                    Aptitude: N/A
-                </p>
+                <div v-if="trainee.aptitudes === null" class="mt-3 flex items-baseline gap-1 text-sm text-ink-muted">
+                    Aptitude:
+                    <AbsenceValue compact reason="The character document published no aptitude letters for this trainee." />
+                </div>
                 <div v-else class="mt-3 flex flex-wrap gap-1.5">
                     <AptitudeBadge
                         v-for="cell in primaryAxes"
