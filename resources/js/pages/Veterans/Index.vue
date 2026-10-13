@@ -12,7 +12,6 @@ interface Veteran {
     trainee: string;
     trainee_ja: string | null;
     scenario_label: string;
-    status_label: string;
     tags: string[];
     notes: string | null;
     hasSelection: boolean;
@@ -225,8 +224,10 @@ const filtered = computed(
                         {{ veteran.trainee_ja }}
                     </span>
 
+                    <!-- No status: only a Completed run is recordable as a Veteran (`RecordVeteran`),
+                         so a status on every row is one word repeated, not a fact about this one. -->
                     <span class="ml-auto text-xs text-ink-muted">
-                        {{ veteran.scenario_label }} · {{ veteran.status_label }}
+                        {{ veteran.scenario_label }}
                     </span>
                 </div>
 

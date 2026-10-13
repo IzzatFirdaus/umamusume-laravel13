@@ -14,7 +14,7 @@
  * write on this page, so there is no `useForm` here.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface VeteranRow {
@@ -23,11 +23,11 @@ interface VeteranRow {
     trainee: string;
     trainee_ja: string | null;
     scenario_label: string;
-    status_label: string;
     tags: string[];
     notes: string | null;
     hasSelection: boolean;
     builder_url: string | null;
+    veteran_url: string;
 }
 
 interface Paginator<T> {
@@ -181,16 +181,20 @@ function applyFilters(): void {
                 >
                     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                         <span class="font-semibold text-ink-strong">
-                            {{ veteran.trainee }}
+                            <Link :href="veteran.veteran_url" class="hover:underline">
+                                {{ veteran.trainee }}
+                            </Link>
                             <span
                                 v-if="veteran.trainee_ja"
                                 lang="ja"
                                 class="ml-2 text-sm font-normal text-ink-muted"
                             >{{ veteran.trainee_ja }}</span>
                         </span>
+                        <!-- The run's state is not printed: only a Completed run is recordable as a
+                             Veteran (`RecordVeteran`), so a status column here says the same word on
+                             every row. -->
                         <span class="flex items-baseline gap-3 text-xs text-ink-muted">
                             <span>{{ veteran.scenario_label }}</span>
-                            <span>{{ veteran.status_label }}</span>
                         </span>
                     </div>
 

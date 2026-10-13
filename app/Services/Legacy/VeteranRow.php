@@ -21,9 +21,11 @@ use App\Models\Veteran;
  * on a screen whose contract says the library stores and searches. Everything here is a stored column or
  * a route.
  *
- * Both link fields are always present. The Legacy Lab renders `builder_url` and ignores `veteran_url`;
- * the library renders both. A key one screen does not use is a wider row; two rows that disagree about
- * what a Veteran is would be the defect.
+ * Both link fields are always present and both print: the library names the trainee with `veteran_url`,
+ * and the Legacy Lab now links the same name while still offering `builder_url` where a read-back exists.
+ * `status_label` travels because one record is one row shape for every surface, not because a list
+ * states it: neither list prints it, since only a Completed run is recordable (`RecordVeteran`) and a
+ * column that holds one word on every row says nothing about the row it is on.
  */
 final class VeteranRow
 {
