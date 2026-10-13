@@ -440,8 +440,11 @@ const hasAnyNode = computed(() =>
                                          the two editors are named apart. -->
                                     <details class="mt-2 rounded-md border border-rule bg-panel p-2">
                                         <summary class="flex min-h-11 cursor-pointer items-center text-xs font-medium text-ink">
-                                            Grandparent Sparks
-                                            <span class="sr-only"> {{ ancestor.slot }}</span>
+                                            <!-- The ancestor's own name in the visible word: four identical
+                                                 "Grandparent Sparks" summaries are told apart by proximity
+                                                 alone, and the word is the state's carrier (the rule the
+                                                 sr-only span below the old summary served). -->
+                                            Sparks for {{ ancestor.slot }}
                                         </summary>
 
                                         <ul
