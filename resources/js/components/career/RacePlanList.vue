@@ -90,7 +90,7 @@ function atLimit(id: number): boolean {
                          reads mode switches this way (`RacePanel.vue`). -->
                     <button
                         type="button"
-                        class="mb-2 inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm font-semibold"
+                        class="mb-2 inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm font-semibold disabled:opacity-40"
                         :class="
                             isSelected(race.id)
                                 ? 'border-pick-line bg-pick/10 text-ink-strong'

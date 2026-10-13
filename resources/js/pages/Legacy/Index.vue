@@ -248,11 +248,11 @@ function applyFilters(): void {
                         v-if="link.url"
                         :href="link.url"
                         :aria-current="link.active ? 'page' : undefined"
-                        class="rounded-md border border-rule px-3 py-1 text-ink hover:bg-raised"
+                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised"
                         :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
                         v-html="link.label"
                     />
-                    <span v-else class="px-3 py-1 text-ink-muted" v-html="link.label" />
+                    <span v-else class="inline-flex min-h-11 items-center px-3 text-ink-muted" v-html="link.label" />
                 </template>
             </nav>
         </template>

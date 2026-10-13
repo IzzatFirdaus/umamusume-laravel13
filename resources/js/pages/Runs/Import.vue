@@ -266,6 +266,8 @@ function confirmImport(): void {
                     v-model="form.umamusume_id"
                     name="umamusume_id"
                     required
+                    :aria-invalid="errors.umamusume_id ? 'true' : undefined"
+                    :aria-describedby="errors.umamusume_id ? 'import-umamusume_id-error' : undefined"
                     class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
                     :class="errors.umamusume_id ? 'border-risk' : ''"
                 >
@@ -274,7 +276,7 @@ function confirmImport(): void {
                         {{ trainee.name }}<template v-if="trainee.name_ja"> · {{ trainee.name_ja }} </template>
                     </option>
                 </select>
-                <p v-if="errors.umamusume_id" class="mt-1 text-risk">{{ errors.umamusume_id }}</p>
+                <p v-if="errors.umamusume_id" id="import-umamusume_id-error" class="mt-1 text-risk">{{ errors.umamusume_id }}</p>
             </label>
 
             <label class="block">
@@ -282,13 +284,15 @@ function confirmImport(): void {
                 <select
                     v-model="form.scenario"
                     name="scenario"
+                    :aria-invalid="errors.scenario ? 'true' : undefined"
+                    :aria-describedby="errors.scenario ? 'import-scenario-error' : undefined"
                     class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
                     :class="errors.scenario ? 'border-risk' : ''"
                 >
                     <option value="">Not set (baseline strip)</option>
                     <option v-for="(label, key) in scenarios" :key="key" :value="key">{{ label }}</option>
                 </select>
-                <p v-if="errors.scenario" class="mt-1 text-risk">{{ errors.scenario }}</p>
+                <p v-if="errors.scenario" id="import-scenario-error" class="mt-1 text-risk">{{ errors.scenario }}</p>
             </label>
 
             <label class="block">
@@ -297,11 +301,13 @@ function confirmImport(): void {
                     v-model="form.status"
                     name="status"
                     required
+                    :aria-invalid="errors.status ? 'true' : undefined"
+                    :aria-describedby="errors.status ? 'import-status-error' : undefined"
                     class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
                 >
                     <option v-for="(label, value) in statuses" :key="value" :value="value">{{ label }}</option>
                 </select>
-                <p v-if="errors.status" class="mt-1 text-risk">{{ errors.status }}</p>
+                <p v-if="errors.status" id="import-status-error" class="mt-1 text-risk">{{ errors.status }}</p>
             </label>
 
             <label class="block">
@@ -338,11 +344,15 @@ function confirmImport(): void {
                     rows="8"
                     class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 font-mono text-xs text-ink"
                     :class="errors.csv || errors.turns || rowErrors.length ? 'border-risk' : ''"
+                    :aria-invalid="errors.csv || errors.turns || rowErrors.length ? 'true' : undefined"
+                    :aria-describedby="errors.csv || errors.turns || rowErrors.length ? 'import-csv-errors' : undefined"
                     :placeholder="headers.join(',')"
                 />
-                <p v-if="errors.csv" class="mt-1 text-risk">{{ errors.csv }}</p>
-                <p v-if="errors.turns" class="mt-1 text-risk">{{ errors.turns }}</p>
-                <p v-for="(message, index) in rowErrors" :key="index" class="mt-1 text-risk">{{ message }}</p>
+                <div id="import-csv-errors">
+                    <p v-if="errors.csv" class="mt-1 text-risk">{{ errors.csv }}</p>
+                    <p v-if="errors.turns" class="mt-1 text-risk">{{ errors.turns }}</p>
+                    <p v-for="(message, index) in rowErrors" :key="index" class="mt-1 text-risk">{{ message }}</p>
+                </div>
             </label>
 
             <button

@@ -104,8 +104,8 @@ function submit(): void {
                     />
                 </div>
 
-                <p v-if="form.errors.umamusume_id" class="mt-1 text-risk">{{ form.errors.umamusume_id }}</p>
-                <p v-if="form.errors.character_card_id" class="mt-1 text-risk">{{ form.errors.character_card_id }}</p>
+                <p v-if="form.errors.umamusume_id" id="create-umamusume_id-error" class="mt-1 text-risk">{{ form.errors.umamusume_id }}</p>
+                <p v-if="form.errors.character_card_id" id="create-character_card_id-error" class="mt-1 text-risk">{{ form.errors.character_card_id }}</p>
             </div>
 
             <!-- A select over the composition matrix, because the request validates `scenario` against
@@ -116,12 +116,14 @@ function submit(): void {
                 <select
                     v-model="form.scenario"
                     name="scenario"
+                    :aria-invalid="form.errors.scenario ? 'true' : undefined"
+                    :aria-describedby="form.errors.scenario ? 'create-scenario-error' : undefined"
                     class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
                 >
                     <option value="">Not set (baseline strip)</option>
                     <option v-for="(label, key) in scenarios" :key="key" :value="key">{{ label }}</option>
                 </select>
-                <p v-if="form.errors.scenario" class="mt-1 text-risk">{{ form.errors.scenario }}</p>
+                <p v-if="form.errors.scenario" id="create-scenario-error" class="mt-1 text-risk">{{ form.errors.scenario }}</p>
             </label>
 
             <label class="block">
@@ -130,11 +132,13 @@ function submit(): void {
                     v-model="form.status"
                     name="status"
                     required
+                    :aria-invalid="form.errors.status ? 'true' : undefined"
+                    :aria-describedby="form.errors.status ? 'create-status-error' : undefined"
                     class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
                 >
                     <option v-for="(label, value) in statuses" :key="value" :value="value">{{ label }}</option>
                 </select>
-                <p v-if="form.errors.status" class="mt-1 text-risk">{{ form.errors.status }}</p>
+                <p v-if="form.errors.status" id="create-status-error" class="mt-1 text-risk">{{ form.errors.status }}</p>
             </label>
 
             <!-- Four fields the request validates and the model persists, surfaced here because the run
@@ -146,12 +150,14 @@ function submit(): void {
                 <select
                     v-model="form.inheritance_parent_a_id"
                     name="inheritance_parent_a_id"
+                    :aria-invalid="form.errors.inheritance_parent_a_id ? 'true' : undefined"
+                    :aria-describedby="form.errors.inheritance_parent_a_id ? 'create-inheritance_parent_a_id-error' : undefined"
                     class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
                 >
                     <option value="">Not set</option>
                     <option v-for="trainee in trainees" :key="trainee.id" :value="trainee.id">{{ trainee.name }}</option>
                 </select>
-                <p v-if="form.errors.inheritance_parent_a_id" class="mt-1 text-risk">
+                <p v-if="form.errors.inheritance_parent_a_id" id="create-inheritance_parent_a_id-error" class="mt-1 text-risk">
                     {{ form.errors.inheritance_parent_a_id }}
                 </p>
             </label>
@@ -161,12 +167,14 @@ function submit(): void {
                 <select
                     v-model="form.inheritance_parent_b_id"
                     name="inheritance_parent_b_id"
+                    :aria-invalid="form.errors.inheritance_parent_b_id ? 'true' : undefined"
+                    :aria-describedby="form.errors.inheritance_parent_b_id ? 'create-inheritance_parent_b_id-error' : undefined"
                     class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
                 >
                     <option value="">Not set</option>
                     <option v-for="trainee in trainees" :key="trainee.id" :value="trainee.id">{{ trainee.name }}</option>
                 </select>
-                <p v-if="form.errors.inheritance_parent_b_id" class="mt-1 text-risk">
+                <p v-if="form.errors.inheritance_parent_b_id" id="create-inheritance_parent_b_id-error" class="mt-1 text-risk">
                     {{ form.errors.inheritance_parent_b_id }}
                 </p>
             </label>
@@ -183,6 +191,8 @@ function submit(): void {
                     name="current_objective_index"
                     min="1"
                     :max="maxObjectiveIndex"
+                    :aria-invalid="form.errors.current_objective_index ? 'true' : undefined"
+                    :aria-describedby="form.errors.current_objective_index ? 'create-current_objective_index-error' : undefined"
                     class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
                     :class="form.errors.current_objective_index ? 'border-risk' : ''"
                 >
@@ -190,7 +200,7 @@ function submit(): void {
                     1 to {{ maxObjectiveIndex }}, tracked in the Grade Point meter on the run page. Only
                     scenarios that compose the Grade Point panel accept a value here.
                 </span>
-                <p v-if="form.errors.current_objective_index" class="mt-1 text-risk">
+                <p v-if="form.errors.current_objective_index" id="create-current_objective_index-error" class="mt-1 text-risk">
                     {{ form.errors.current_objective_index }}
                 </p>
             </label>
@@ -202,6 +212,8 @@ function submit(): void {
                     type="number"
                     name="shop_resets_in"
                     min="0"
+                    :aria-invalid="form.errors.shop_resets_in ? 'true' : undefined"
+                    :aria-describedby="form.errors.shop_resets_in ? 'create-shop_resets_in-error' : undefined"
                     class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
                     :class="form.errors.shop_resets_in ? 'border-risk' : ''"
                 >
@@ -209,7 +221,7 @@ function submit(): void {
                     Turns until the shop rotation as you read it. The scenario's own upper bound applies
                     at the model layer.
                 </span>
-                <p v-if="form.errors.shop_resets_in" class="mt-1 text-risk">{{ form.errors.shop_resets_in }}</p>
+                <p v-if="form.errors.shop_resets_in" id="create-shop_resets_in-error" class="mt-1 text-risk">{{ form.errors.shop_resets_in }}</p>
             </label>
 
             <label class="block">
@@ -218,8 +230,11 @@ function submit(): void {
                     v-model="form.notes"
                     name="notes"
                     rows="3"
+                    :aria-invalid="form.errors.notes ? 'true' : undefined"
+                    :aria-describedby="form.errors.notes ? 'create-notes-error' : undefined"
                     class="mt-1 block w-full rounded-md border border-rule bg-raised px-2 py-1 text-ink"
                 />
+                <p v-if="form.errors.notes" id="create-notes-error" class="mt-1 text-risk">{{ form.errors.notes }}</p>
             </label>
 
             <button

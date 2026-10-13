@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expectTapTargets } from '../utils/tap-targets';
 
 // Rendered-copy and accessibility evidence for the ported Review queue (SCR-REV-001, F14).
 // The server-side ReviewFormAccessibilityTest asserts the props; here the browser computes the
@@ -41,4 +42,18 @@ test('a failed verdict shows its message on the card', async ({ page }) => {
     await page.getByRole('button', { name: /^Resolve / }).first().click();
 
     await expect(page.getByRole('alert').first()).toContainText(/language/i);
+});
+
+test('every control on the queue meets the 44px floor', async ({ page }) => {
+    await page.goto('/review');
+    await page.locator('#app > *').first().waitFor();
+
+    const empty = page.getByText('Nothing pending.');
+    if (await empty.isVisible().catch(() => false)) {
+        test.skip(true, 'No pending candidates in the scratch database to measure.');
+    }
+
+    // The queue is the keyboard-first screen and its primary commit spent 2026-10-06 to 2026-10-13
+    // under the house bar as the only enamel control without a height floor; this sweep is the pin.
+    await expectTapTargets(page.locator('main a, main button, main select, main input'), 4);
 });

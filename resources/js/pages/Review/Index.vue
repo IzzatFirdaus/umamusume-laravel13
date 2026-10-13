@@ -42,7 +42,7 @@ defineProps<{
             v-if="candidates.data.length === 0"
             class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
         >
-            Nothing pending. Run `php artisan uma:fetch` to populate.
+            Nothing pending. Run <code>php artisan uma:fetch</code> to populate.
         </p>
 
         <template v-else>
@@ -80,11 +80,11 @@ defineProps<{
                         v-if="link.url"
                         :href="link.url"
                         :aria-current="link.active ? 'page' : undefined"
-                        class="rounded-md border border-rule px-3 py-1 text-ink hover:bg-raised"
+                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-raised"
                         :class="link.active ? 'bg-raised font-bold text-ink-strong' : ''"
                         v-html="link.label"
                     />
-                    <span v-else class="px-3 py-1 text-ink-muted" v-html="link.label" />
+                    <span v-else class="inline-flex min-h-11 items-center px-3 text-ink-muted" v-html="link.label" />
                 </template>
             </nav>
         </template>

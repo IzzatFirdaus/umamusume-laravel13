@@ -43,7 +43,7 @@ function submit(): void {
             name="status"
             :aria-invalid="form.errors.status ? 'true' : undefined"
             :aria-describedby="describedBy()"
-            class="rounded-md border border-rule bg-raised px-2 py-1 text-ink"
+            class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
         >
             <option value="">Not set</option>
             <option value="Confirmed">Confirm (merge into suggestion, or create)</option>
@@ -60,7 +60,7 @@ function submit(): void {
             placeholder="Umamusume id (optional)"
             :aria-invalid="form.errors.umamusume_id ? 'true' : undefined"
             :aria-describedby="describedBy()"
-            class="w-44 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
+            class="min-h-11 w-44 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
         >
 
         <label class="sr-only" :for="`review-alias-language-${candidate.id}`">Alias language for {{ candidate.proposed_name }}</label>
@@ -70,7 +70,7 @@ function submit(): void {
             name="alias_language"
             :aria-invalid="form.errors.alias_language ? 'true' : undefined"
             :aria-describedby="describedBy()"
-            class="rounded-md border border-rule bg-raised px-2 py-1 text-ink"
+            class="min-h-11 rounded-md border border-rule bg-raised px-2 py-1 text-ink"
         >
             <option value="">Alias language</option>
             <option v-for="language in aliasLanguages" :key="language.value" :value="language.value">
@@ -82,7 +82,7 @@ function submit(): void {
         <button
             type="submit"
             :aria-label="`Resolve ${candidate.proposed_name}`"
-            class="enamel rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome"
+            class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-3 font-semibold text-on-chrome"
         >
             Resolve
         </button>

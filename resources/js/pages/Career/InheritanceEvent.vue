@@ -307,7 +307,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                     From UMAMUSUME_REFERENCE.md §1.5.3 (Game8 guide 2026-08-24). Probabilities, not guarantees.
                     Shown as Estimated; never summed into a single number.
                 </p>
-                <div class="mt-2 overflow-x-auto">
+                <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Sourced star-roll probabilities">
                     <table class="w-full text-sm text-ink" role="table">
                         <thead>
                             <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">

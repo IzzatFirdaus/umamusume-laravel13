@@ -180,40 +180,47 @@ const submit = (): void => {
                     filled it in. The review says which of the three each field is.
                 </p>
                 <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                    <label v-for="field in STAT_FIELDS" :key="field.key" class="flex flex-col gap-1">
-                        <span class="text-xs font-medium text-ink">{{ field.label }}</span>
+                    <!-- One label per control: a wrapper label here made the number input's accessible
+                         name the whole block ("Speed I don't know this value") and left the checkbox
+                         unnamed. Each control now owns its label text. -->
+                    <div v-for="field in STAT_FIELDS" :key="field.key" class="flex flex-col gap-1">
+                        <label class="text-xs font-medium text-ink" :for="`snapshot-${field.key}`">{{ field.label }}</label>
                         <input
+                            :id="`snapshot-${field.key}`"
                             v-model="form[field.key]"
                             type="number" :name="field.key" min="0" :disabled="unknown[field.key]"
                             class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink disabled:opacity-60"
                         >
                         <span class="flex items-center gap-1.5 text-[0.7rem] text-ink-muted">
                             <input
+                                :id="`snapshot-unknown-${field.key}`"
                                 type="checkbox" :checked="unknown[field.key]"
                                 @change="toggleUnknown(field.key, ($event.target as HTMLInputElement).checked)"
                             >
-                            I don't know this value
+                            <label :for="`snapshot-unknown-${field.key}`">I don't know this value</label>
                         </span>
                         <span v-if="form.errors[field.key]" class="text-xs text-risk">{{ form.errors[field.key] }}</span>
-                    </label>
+                    </div>
                 </div>
                 <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <label v-for="field in META_FIELDS" :key="field.key" class="flex flex-col gap-1">
-                        <span class="text-xs font-medium text-ink">{{ field.label }}</span>
+                    <div v-for="field in META_FIELDS" :key="field.key" class="flex flex-col gap-1">
+                        <label class="text-xs font-medium text-ink" :for="`snapshot-${field.key}`">{{ field.label }}</label>
                         <input
+                            :id="`snapshot-${field.key}`"
                             v-model="form[field.key]"
                             type="number" :name="field.key" min="0" :disabled="unknown[field.key]"
                             class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink disabled:opacity-60"
                         >
                         <span class="flex items-center gap-1.5 text-[0.7rem] text-ink-muted">
                             <input
+                                :id="`snapshot-unknown-${field.key}`"
                                 type="checkbox" :checked="unknown[field.key]"
                                 @change="toggleUnknown(field.key, ($event.target as HTMLInputElement).checked)"
                             >
-                            I don't know this value
+                            <label :for="`snapshot-unknown-${field.key}`">I don't know this value</label>
                         </span>
                         <span v-if="form.errors[field.key]" class="text-xs text-risk">{{ form.errors[field.key] }}</span>
-                    </label>
+                    </div>
                 </div>
             </section>
 
