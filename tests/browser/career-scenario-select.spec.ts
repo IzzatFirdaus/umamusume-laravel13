@@ -78,12 +78,15 @@ test.describe('Scenario Selection', () => {
             await expect(card(page, label).locator('details').filter({ hasText: 'Facts and mechanics' })).not.toHaveAttribute('open');
         }
 
-        // Every panel is off and its widgets are the baseline three, so the derivation produces these
-        // two statements with no branch naming the scenario.
+        // The scenario composes no panel beyond the baseline, so its resource list is empty and its
+        // systems list is the one entry the goals flag names (8668d9d). Both read off the matrix.
         await openFacts(page, 'Our Grand Concert');
         await openFacts(page, 'URA Finale');
 
-        await expect(card(page, 'Our Grand Concert').getByText('No scenario system')).toBeVisible();
+        // The career-goals flag turned on for the scenario too (8668d9d), so the Systems row names it
+        // instead of the baseline absence it printed while the flag was off. The resource half of the
+        // baseline statement still holds: no widget beyond the baseline three composes a resource.
+        await expect(card(page, 'Our Grand Concert').getByText('Career goals', { exact: true })).toBeVisible();
         await expect(card(page, 'Our Grand Concert').getByText('None beyond the generic strip')).toBeVisible();
 
         // Caps are sourced even where mechanics are not, so the card still states what it optimizes.

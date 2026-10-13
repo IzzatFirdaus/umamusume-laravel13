@@ -71,7 +71,8 @@ it('names each scenario systems and resources from the matrix rather than from a
             ->where('scenarios.0.systems', ['Race calendar', 'Career goals'])
             // URA composes exactly the baseline widget set, so it claims no scenario resource.
             ->where('scenarios.0.resources', [])
-            ->where('scenarios.1.systems', ['Race calendar', 'Team races', 'Team Rank ladder'])
+            // The goals flag turned on for Unity Cup too (8668d9d), so the matrix names three systems.
+            ->where('scenarios.1.systems', ['Race calendar', 'Team races', 'Team Rank ladder', 'Career goals'])
             ->where('scenarios.1.resources', ['Team Rank', 'Spirit Bursts'])
             ->where('scenarios.2.systems', ['Grade Point objectives', 'Pro Shop', 'Epithet routes'])
             ->where('scenarios.2.resources', ['Grade Points', 'Shop Coins'])
@@ -81,8 +82,9 @@ it('names each scenario systems and resources from the matrix rather than from a
 
 it('derives the documentation badge from the matrix flag, not from a scenario name', function (): void {
     // The card's baseline state for Our Grand Concert is a derivation, not a branch: its entry composes
-    // no panel beyond the baseline and no widget beyond the baseline three, so the system and resource
-    // lists come back empty on their own (D-241, gate G-41).
+    // no panel beyond the baseline and no widget beyond the baseline three, so the resource list comes
+    // back empty on its own (D-241, gate G-41). Its systems list is no longer empty because the
+    // career-goals flag turned on for it too (8668d9d) — the one system the derivation now names.
     //
     // `documented` is read as it is stored. It is `true` here because commit `ab53861` recovered the
     // 2026-10-05 primary read for the scenario, which is what flipped the flag; the slice brief was
@@ -94,7 +96,7 @@ it('derives the documentation badge from the matrix flag, not from a scenario na
         ->assertInertia(fn (Assert $page) => $page
             ->where('scenarios.3.key', 'our_grand_concert')
             ->where('scenarios.3.documented', true)
-            ->where('scenarios.3.systems', [])
+            ->where('scenarios.3.systems', ['Career goals'])
             ->where('scenarios.3.resources', []));
 
     /** @var array<string, array<string, mixed>> $matrix */

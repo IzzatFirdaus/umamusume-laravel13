@@ -115,7 +115,8 @@ it('keeps the Grand Concert capability flag scoped to what is actually verified'
         ->and(config('scenarios.scenarios.our_grand_concert.lesson_input'))->toBeNull()
         ->and(config('scenarios.scenarios.our_grand_concert.lessons'))->toBeNull()
         // The panel map is unchanged in both directions: Lessons did not become a panel, and the
-        // scenario still composes none.
+        // scenario still composes none. The one flag that turned on since this test was written is
+        // the career-goals panel (8668d9d), whose ladder composes from the sourced trainee table.
         ->and(config('scenarios.scenarios.our_grand_concert.panels'))->toBe([
             'race_calendar' => false,
             'team_race' => false,
@@ -123,6 +124,7 @@ it('keeps the Grand Concert capability flag scoped to what is actually verified'
             'shop' => false,
             'epithet_routes' => false,
             'team_rank_ladder' => false,
+            'career_goals' => true,
         ]);
 });
 
