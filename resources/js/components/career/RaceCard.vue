@@ -20,6 +20,7 @@
  * "Mandatory", never "Goal".
  */
 import AbsenceValue from '../AbsenceValue.vue';
+import GoalMark from './GoalMark.vue';
 import { useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 
@@ -39,6 +40,14 @@ interface Race {
     fans_needed: number | null;
     maiden_gated: boolean;
     is_mandatory: boolean;
+    /**
+     * This trainee's own objective for this race, as the fetched ladder states it, or absent.
+     *
+     * Optional because the planner and the decision screen share this card and only the decision path
+     * composes it: a row without the key renders no mark, which is a different claim from a row whose
+     * objective is unread (that one arrives with a line naming itself as unread).
+     */
+    goal?: string | null;
     is_special: boolean;
     facts: Fact[];
     detail_recorded: boolean;
@@ -158,6 +167,13 @@ const folds = computed<boolean>(
         </p>
         <p v-if="props.race.maiden_gated" class="mt-1 text-sm text-ink">
             Maiden rule: this race opens only once the trainee has won one.
+        </p>
+        <!-- The trainee's own objective, which is a different fact from the calendar's obligation above
+             and the gates beside it: `is_mandatory` is what every career owes, this is what her ladder
+             asks. Printed with the same mark the race strip uses, and the word "Goal" carries it so the
+             reading never depends on the colour alone. -->
+        <p v-if="props.race.goal" class="mt-1 text-sm text-ink">
+            <GoalMark :requirement="props.race.goal" />
         </p>
 
         <!-- What the run has already done about this slot, when it has done anything. -->

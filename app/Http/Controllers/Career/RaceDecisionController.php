@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Career;
 
 use App\Enums\RaceEntryStatus;
+use App\Enums\TraineeGoalType;
 use App\Http\Controllers\Controller;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
+use App\Models\TraineeGoal;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Services\RaceFacts;
@@ -40,6 +42,12 @@ use Inertia\Response;
  * as the *pennant* input, because the client's red banner means "this character's objective" and the
  * Goal sets differ per trainee (`docs/scenarios/09-global-race-calendar.md`). This screen renders it
  * as the different fact it is, and says "mandatory", never "goal".
+ *
+ * *Dated addition 2026-10-13 (`ADR-0026`):* the screen now carries both facts. `is_mandatory` still reads
+ * as "Mandatory" and never as a goal; a row that is *also* one of this trainee's fetched objectives carries
+ * a `goal` obligation line, which `RaceCard.vue` prints beside the fan and maiden gate lines using the same
+ * mark the race strip uses. The obligation attaches to the race row and the action button stays the action
+ * button (`frontend-fidelity` §2.4, law 9: obligation and action are separate layers).
  */
 class RaceDecisionController extends Controller
 {
@@ -145,16 +153,30 @@ class RaceDecisionController extends Controller
             ->filter(fn (RaceEntry $entry): bool => $entry->race_catalog_slot_id !== null)
             ->keyBy('race_catalog_slot_id');
 
+        // The trainee's own objectives for the races on this turn, in one indexed read rather than one
+        // per row (PRD FR-A-10, ADR-0026). Same shape the race strip uses - a slot-keyed obligation line
+        // from `TraineeGoal::obligationLine()` - so one vocabulary covers the mark on every surface that
+        // prints it, and `GoalMark.vue` takes the same prop on all three.
+        $obligations = TraineeGoal::query()
+            ->where('umamusume_id', $run->umamusume_id)
+            ->where('goal_type', '!=', TraineeGoalType::FinalRound->value)
+            ->whereNotNull('race_catalog_slot_id')
+            ->with('raceCatalogSlot')
+            ->get()
+            ->mapWithKeys(fn (TraineeGoal $goal): array => [(int) $goal->race_catalog_slot_id => $goal->obligationLine()])
+            ->all();
+
         return $slots
-            ->map(fn (RaceCatalogSlot $slot): array => $this->raceRow($slot, $entries->get($slot->id)))
+            ->map(fn (RaceCatalogSlot $slot): array => $this->raceRow($slot, $entries->get($slot->id), $obligations))
             ->values()
             ->all();
     }
 
     /**
+     * @param  array<int, string>  $obligations  calendar slot id => the trainee's own objective line
      * @return array<string, mixed>
      */
-    private function raceRow(RaceCatalogSlot $slot, ?RaceEntry $entry): array
+    private function raceRow(RaceCatalogSlot $slot, ?RaceEntry $entry, array $obligations): array
     {
         return [
             'id' => $slot->id,
@@ -165,6 +187,9 @@ class RaceDecisionController extends Controller
             'fans_needed' => $slot->hasFanGate() ? $slot->fans_needed : null,
             'maiden_gated' => $slot->hasMaidenGate(),
             'is_mandatory' => $slot->is_mandatory,
+            // The second, different claim beside `is_mandatory`: this is what the calendar owes every
+            // trainee, this is what *her* ladder asks. Null when her objectives name no race here.
+            'goal' => $obligations[$slot->id] ?? null,
             'is_special' => $slot->is_special_race,
             'facts' => RaceFacts::forSlot($slot),
             // Whether the row's own columns describe the race at all, so the shared card can fold a

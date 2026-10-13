@@ -192,6 +192,27 @@ it('marks the strip row its own ladder names, beside the finish state rather tha
     // fetched ladder reads ahead rows with `goal` present and null.
 });
 
+it('offers the obligation on the decision row and its drawer, beside the calendar fact rather than over it', function (): void {
+    $run = goalsRun();
+    $slot = RaceCatalogSlot::factory()->create([
+        'scenario_key' => 'ura_finale', 'year' => 1, 'month' => 7, 'half' => 'Early', 'turn' => 13,
+        'title' => 'Satsuki Sho', 'is_mandatory' => false,
+    ]);
+    TraineeGoal::factory()->create([
+        'umamusume_id' => $run->umamusume_id, 'race_catalog_slot_id' => $slot->id,
+        'career_year' => 1, 'turn' => 13, 'source_order' => 2, 'required_placement' => 5,
+    ]);
+
+    /** @var list<array<string, mixed>> $races */
+    $races = test()->get(route('runs.races.decision', $run->fresh()))->assertOk()->inertiaProps('races');
+
+    // Two claims on one row: `is_mandatory` stays the scenario's, `goal` is hers. The screen's own
+    // docblock says it renders "mandatory", never "goal", and this is the addition that keeps both.
+    expect($races)->toHaveCount(1)
+        ->and($races[0]['goal'])->toBe('Place top 5 in Satsuki Sho')
+        ->and($races[0]['is_mandatory'])->toBeFalse();
+});
+
 it('draws the ladder for the three scenarios that keep race goals and not for Trackblazer', function (string $scenario, bool $expected): void {
     $run = goalsRun($scenario);
     goalFor($run, ['career_year' => 1, 'turn' => 12, 'source_order' => 1, 'goal_type' => TraineeGoalType::Participate, 'required_placement' => 0]);
