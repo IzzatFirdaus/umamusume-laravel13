@@ -5788,3 +5788,45 @@ No migration, route, network or `config/scenarios.php` change; no control height
 pushed (O-1).
 
 
+## Pass 8 (2026-10-14): both held slices stay held, and the image environment changed
+
+Premise-only close, read-only, per its dispatch: no slice landed and none was manufactured. Full
+detail in `premises-2026-10-14-pass8.md`; instruments `premise-02-03.mjs` and
+`record-hazard-check.mjs`.
+
+- **0.1** `DesignTokensTest.php` moved without unblocking: `17261d4` fixed which class the G-18
+  skip guard imports, but HEAD's copy still contains **zero `g18ContractPairs`** and two
+  `markTestIncomplete`, and the file is still ` M` at +332/−54. **Slice 1.1 stays held** on the same
+  prerequisite.
+- **0.2** 24 paths sit at `index != HEAD` (18 peer snapshots, 6 with live worktree edits too).
+  `public/build/manifest.json` measures 02:57 +0800 and the newest `resources/js` commit is
+  `1b92531` at 02:39, so the bundle post-dates `a1365fc` and `806372f`: **the build half of the
+  Phase 2 hold stays cleared, the staging half stays the peer's.**
+- **0.3** Nothing since `fdfaf9c` touched a file the width or scroll-region slices reasoned about,
+  so the conditional reconciliation slice does not apply.
+- **Shared-index hazard, measured:** HEAD's record is 5,791 lines and carries both pass sections
+  plus the fence correction; the **staged blob is 5,516 lines and carries none of the three**. A
+  commit through the shared index would delete 275 lines of this file's recent record. Left alone
+  per pass 7's ruling.
+- **2.3 The captures now render.** Three passes recorded every pixel read as
+  captured-not-judged; this pass the environment returned image content, and the Cockpit capture
+  reads clean: one shell `h1`, no inverted type step, no clipped or wrapped element, absences as
+  `N/A` with their reasons, the enamel split hard-edged as specified.
+- **New finding, repo-wide, from that read.** Eleven `<summary>` elements across eight files
+  (`Cockpit.vue:545,766,863`, `TrainingDetail.vue:588,618`, `ScenarioSelect.vue:178,258`,
+  `LegacySelect.vue:403`, `TraineeSelect.vue:392`, `UnityCupEditor.vue:78`,
+  `Legacy/Builder.vue:442`) carry `flex` or `inline-flex`, which drops the UA `::marker` triangle in
+  Chromium; `app.css` has no `summary`/`list-item`/`::marker` rule to restore it and the summaries
+  carry no glyph. The disclosure then advertises itself only through `cursor-pointer`, a mouse
+  signal. Confirmed on two independent surfaces in two themes: the Cockpit's "Edit identity" and
+  "Edit team state" boxes and all four "FACTS AND MECHANICS" disclosures in the wizard-scenario
+  capture, beside native summaries in the same images that do render `▶`. **Not fixed:** the Cockpit
+  is another agent's surface, the remedy is a design call on the pattern the laws pass chose at
+  `84f9353`, and this dispatch forbids manufacturing a slice.
+- **Also evidenced for the open §6.3 question:** the wizard-scenario screen renders four enamel
+  "Select Scenario" controls at once, one per card - the same one-primary-per-screen shape
+  `acff64d` recorded as owed an owner answer, now with pixel evidence.
+- **Phase 5:** no gate re-run. Nothing this session authored changed, so a sweep would describe the
+  peers' tree, not this pass. `public/build` is the peer's bundle, untouched here.
+
+
