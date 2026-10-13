@@ -179,11 +179,15 @@ const thisTurn = computed(() => props.strip.this_turn);
 
             <!-- The mark prints on the rows this trainee's own ladder names (ADR-0026). The sentence below
                  says what a mark means and where the whole ladder reads, so an unmarked row is not
-                 mistaken for a race nobody asked of her. -->
-            <div class="mt-2 text-xs text-ink-muted">
-                Goal races:
-                <AbsenceValue :reason="props.strip.absences.goal" compact />.
-            </div>
+                 mistaken for a race nobody asked of her.
+
+                 A note, not an `N/A`: the value it explains is on the rows above it, so marking it absent
+                 would contradict them. `AbsenceValue.vue` is for a reading the product does not have; the
+                 server still composes this sentence beside the one genuine absence in the same set
+                 (`absences.turn_link`), which stays a disclosure. -->
+            <p class="mt-2 text-xs text-ink-muted">
+                Goal races: {{ props.strip.absences.goal }}
+            </p>
         </section>
     </div>
 </template>

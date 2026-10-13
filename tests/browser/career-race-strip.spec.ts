@@ -118,7 +118,12 @@ test('keeps an entered race in the run region and out of the list ahead of it', 
     await page.locator('#app > *').first().waitFor();
 
     const recorded = page.getByRole('region', { name: 'Recorded in this run' });
-    await expect(recorded.getByText('Junior Make Debut')).toBeVisible();
+    // Two layers on one row: the race the calendar carries, and the obligation her own ladder states
+    // against it (ADR-0026). The title is matched exactly because the goal sentence repeats the race
+    // name inside it, so a substring match reads the same row twice and stops being a locator for the
+    // title.
+    await expect(recorded.getByText('Junior Make Debut', { exact: true })).toBeVisible();
+    await expect(recorded.getByText('· Participate in Junior Make Debut')).toBeVisible();
     await expect(recorded.getByText('Entered')).toBeVisible();
     // The turn the race was run on is not tied, so the row says N/A on a disclosure that names the
     // reason for a keyboard and a screen reader as well as a mouse.
@@ -129,8 +134,11 @@ test('keeps an entered race in the run region and out of the list ahead of it', 
     // One race, one region: the debut is mandatory, it is entered, and it is not still to come.
     await expect(page.getByRole('region', { name: 'Still to come' }).getByText('Junior Make Debut')).toHaveCount(0);
 
-    // And This Turn shows what the run has already done at the turn it is deciding.
-    await expect(page.getByRole('region', { name: 'This turn' }).getByText('Junior Make Debut')).toBeVisible();
+    // And This Turn shows what the run has already done at the turn it is deciding, with her own
+    // obligation on the same row: the turn being decided is where a Trainer needs both readings at once.
+    const thisTurn = page.getByRole('region', { name: 'This turn' });
+    await expect(thisTurn.getByText('Junior Make Debut', { exact: true })).toBeVisible();
+    await expect(thisTurn.getByText('· Participate in Junior Make Debut')).toBeVisible();
 });
 
 test('says so when there is no turn being decided, and prints no figure it cannot source', async ({ page }) => {
@@ -144,11 +152,13 @@ test('says so when there is no turn being decided, and prints no figure it canno
     await expect(page.getByText('No race on this scenario\'s calendar falls at turn 2.')).toBeVisible();
     await expect(page.getByRole('link', { name: 'Open Race Decision for turn 2' })).toHaveCount(0);
 
-    // The goal races the client prints per trainee have no column, so the line is an N/A whose
-    // disclosure states the reason, rather than a flag or an empty list.
-    const goal = page.locator('summary', { hasText: 'KI-34' });
-    await expect(goal).toContainText('N/A');
-    await expect(page.getByText('Goal races:')).toBeVisible();
+    // What the Goal mark means, and where the whole ladder reads. A note rather than an `N/A`: the
+    // value it explains is on the rows above it (ADR-0026 retired the absence this used to pin, along
+    // with the KI-34 sentence the disclosure used to carry).
+    const goal = strip(page).getByText('Goal races:');
+    await expect(goal).toBeVisible();
+    await expect(goal).toContainText('own ladder');
+    await expect(page.locator('summary', { hasText: 'KI-34' })).toHaveCount(0);
 
     // No percentage anywhere in the strip: readiness and win probability are held (`ADR-0016`).
     await expect(strip(page)).not.toContainText('%');

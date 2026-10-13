@@ -364,7 +364,7 @@ const turnLabel = (count: number): string => (count === 1 ? 'turn' : 'turns');
             <!-- `ADR-0026`'s widest-reach half (owner decision 3). This block printed "Goal races are
                  not recorded" until the per-character objectives landed; the rows and both sentences
                  come from the server, and the requirement phrase is the same reader the Cockpit's
-                 Career goals group uses (`TraineeGoal::obligationLine()`), so one objective cannot
+                 Trainee goals group uses (`TraineeGoal::obligationLine()`), so one objective cannot
                  have two wordings on two screens.
 
                  No `GoalMark.vue` here, deliberately: that mark picks out one objective among the

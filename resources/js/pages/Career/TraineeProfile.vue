@@ -16,6 +16,12 @@
  *   `race_catalog_slots`' own comment says its obligation rows are scenario-scoped and "deliberately not
  *   the per-character Goal". The filing is reserved as KI-34. An empty heading would advertise a fact the
  *   tool is known not to hold, so there is no heading.
+ *   *Dated correction 2026-10-14 (`ADR-0026`):* the first clause is retired - the table, model and factory
+ *   exist (`24ab0eb` and the slices after it), the ladder is fetched per character, and KI-34's reservation
+ *   is spent. What still holds is the decision: this screen renders no goals heading because the ladder has
+ *   two homes that can say something about it - her catalog detail page, which reads the published rungs
+ *   before any run exists, and the Cockpit's Trainee goals group, which reads them against a run's records.
+ *   A third copy here would be a fourth place for one list to drift.
  * - **Hint skills and evolution skills are not rendered.** `character_cards` has no `skills_hint` column
  *   (hints live only on `support_cards`), and `skills_evo` is stored but SCR-CAT-002 refuses to list it.
  * - **Growth rates are not rendered**, for the same two citations the roster screen names.
@@ -284,7 +290,7 @@ const profile = computed(() => props.trainee.profile);
                 The brief's four remaining figures are not stored anywhere in this catalog. They are printed
                 as absences with their reasons rather than filled by a guess. This page carries no career-goal
                 section by design: the trainee's own objectives are fetched per character (`ADR-0026`) and
-                read under Career goals in the Cockpit's Scenario panel, where the run's race record decides
+                read under Trainee goals in the Cockpit's Scenario panel, where the run's race record decides
                 whether each one is met.
             </p>
 

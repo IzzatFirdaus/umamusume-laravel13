@@ -122,10 +122,11 @@ class TraineeGoal extends Model
     /**
      * The objective as the client states it: "Place top 3 in Nikkei Sho", "Earn 5000 fans".
      *
-     * One reader for both surfaces that print a ladder (the Cockpit's Career goals group and the race
-     * strip), so the two cannot drift into two vocabularies for one fact. A row whose requirement is not
-     * decoded still answers with a sentence rather than null, because a strip row with no obligation line
-     * and a strip row whose obligation this tool cannot read are different claims.
+     * One reader for every surface that prints the objective (the Cockpit's Trainee goals group, the race
+     * strip, the decision row and its drawer, the catalog detail ladder), so they cannot drift into two
+     * vocabularies for one fact. A row whose requirement is not decoded still answers with a sentence
+     * rather than null, because a strip row with no obligation line and a strip row whose obligation this
+     * tool cannot read are different claims.
      */
     public function obligationLine(): string
     {
@@ -143,7 +144,7 @@ class TraineeGoal extends Model
     /**
      * Why this row prints no readable requirement, in the sentence both ladder surfaces use.
      *
-     * One owner for the wording because the Cockpit's Career goals group and the catalog detail page print
+     * One owner for the wording because the Cockpit's Trainee goals group and the catalog detail page print
      * the same rows: two copies of a sentence is how two vocabularies for one absence start, the same reason
      * `obligationLine()` is the single reader for the requirement itself.
      */

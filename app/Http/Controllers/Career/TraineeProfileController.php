@@ -38,8 +38,15 @@ use Inertia\Response;
  * - **Career goals: the section is omitted, not emptied.** No `trainee_goals` table, model or factory
  *   exists, and `database/migrations/2026_09_28_180350_create_race_catalog_slots_table.php:70-72` says the
  *   obligation rows it does hold are scenario-scoped and "deliberately not the per-character Goal; see
- *   trainee_goals". `KNOWN-ISSUES.md:10` records KI-34 as that filing's reservation. Rendering a heading
+ *   trainee_goals". `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section "KNOWN-ISSUES.md (defect
+ *   register)", records KI-34 as that filing's reservation: a number held for it, never an entry written.
+ *   Rendering a heading
  *   with nothing under it would advertise a fact the tool is known not to have, so there is no heading.
+ *   *Dated correction 2026-10-14 (`ADR-0026`):* the table, the model and the factory now exist (`24ab0eb`
+ *   and the slices after it), the ladder is fetched per character, and KI-34's reservation is spent on it.
+ *   The section stays omitted here for the reason on `TraineeProfile.vue`: the published rungs read on her
+ *   catalog detail page, where no run is needed, and against a run's records in the Cockpit's Trainee goals
+ *   group, and a third copy of one list is a third place for it to drift.
  * - **Growth rates and "Version"** are absent for the reasons on `TraineeSelectController` and on the
  *   `version` slot below, which is a named absence with its reason rather than a blank.
  * - **Hint skills** are not on a trainee at all: `character_cards` has no `skills_hint` column, and hints
