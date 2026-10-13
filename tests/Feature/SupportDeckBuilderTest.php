@@ -477,7 +477,7 @@ it('carries no score and no bar anywhere in the analysis', function (): void {
         ->and($analysis)->not->toHaveKey('rating')
         ->and($analysis)->not->toHaveKey('percent')
         ->and($analysis)->not->toHaveKey('bar')
-        ->and($analysis['strengths'])->toBe(['Race bonus: 1 of the 1 cards carry an effect here.']);
+        ->and($analysis['strengths'])->toBe(['Race bonus: 1 of the 1 cards carries an effect here.']);
 });
 
 // ── absences ───────────────────────────────────────────────────────────────
