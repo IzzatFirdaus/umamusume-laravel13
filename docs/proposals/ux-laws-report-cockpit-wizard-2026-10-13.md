@@ -177,19 +177,23 @@
   1. **Goal ladder on the cockpit (Law 18) — blocked on A-1.** Acceptance: the goals region reads one
      "next" plus an integer `Goals Achieved {cleared} of {total}` footer, no bar, no percentage, the
      eight-field row contract intact (`CockpitObjectivesTest.php:127`). **Unblock condition:** a commit
-     lands the composer half of the goals work on
-     `app/Http/Controllers/Career/CockpitController.php` — the data half is in (`24ab0eb`: the
-     `TraineeGoal` model, `StoreTraineeGoals`, the `trainee_goals` migration) and the composer's goals
-     group is that file's uncommitted edit as of this pass. Note: the brief's composer path
-     (`app/Http/Controllers/CockpitController.php`) and its `careerGoalSections()` name are stale; the
-     composer composes `$goalSections`.
+     replaces the hardcoded absence group inside `careerGoalSections()`
+     (`app/Http/Controllers/Career/CockpitController.php:1793`, gated at `:874`) with rows composed
+     from the landed `TraineeGoal` model — the data half is in (`24ab0eb`: the model, the
+     `StoreTraineeGoals` action, the `trainee_goals` migration). The brief's composer path
+     (`app/Http/Controllers/CockpitController.php`) omits the `Career\` namespace; the function name
+     itself was correct. An earlier revision of this note called the name stale — that claim came from
+     a silently mangled grep and is withdrawn (2026-10-13, late).
   2. **Bundle-lagged renders — blocked on B-1.** Every verdict above that rests on DOM/copy shipped
      this pass (`4a5ff88`, `0a58c88`, `84f9353`, `ebcbbac`) is **needs measurement**: the run that
      settles them is the next `npm run build` followed by the cockpit, accessibility and six wizard
      specs on a session-private harness, on a quiet box (KI-74 pre-flight first). **Unblock condition:**
-     `git diff --cached --name-only` returns no staged file and `git status --porcelain` shows no
-     modified `.vue` outside one session's own work; at this pass's start the shared index held 60
-     staged files, two of them wizard screens.
+     `git diff --cached --name-only` returns nothing, and `git status --porcelain`'s modified `.vue`
+     set contains only paths a session can prove are its own by diffing it against that session's
+     `git show --name-only <its commits>`; at this pass's start the shared index held 60 staged files,
+     two of them wizard screens. A peer rebuilt the bundle at 22:54 during this pass, so the current
+     bundle already renders some of the listed slices — whether it is trusted for the sweep, given it
+     also captured that peer's mid-flight edits, is B-1's answer to give.
 - **P3.**
   1. **Continuity's column-order tension (cockpit, tablet).** The brief's CSS-only order is a ruling;
      if it ever changes, re-test the DOM sequence against the new columns. No change now.
