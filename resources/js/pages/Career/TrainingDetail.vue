@@ -115,6 +115,28 @@ const choice = ref<string | null>(null);
 
 const chosen = computed(() => props.options.find((option) => option.choice === choice.value) ?? null);
 
+// The chosen card's key figures restated at the form (corpus §35's collapsed view): a Trainer working
+// down here should not need the card above still in view. Only figures the tool holds: the support
+// count is the deck's, and the energy aftermath is the card's own "calculated, not a reading" figure.
+// The client's previewed gain and failure rate are deliberately absent - no source publishes either
+// (TrainingCard's gainsTitle and failureTitle), so the sentence prints no number for them.
+const chosenSummary = computed(() => {
+    if (chosen.value === null) {
+        return null;
+    }
+
+    const supports = `${chosen.value.supports.length} support${chosen.value.supports.length === 1 ? '' : 's'} entered for this training`;
+    const after = chosen.value.energy_after;
+
+    if (after === null) {
+        return `${supports}.`;
+    }
+
+    const energy = after.min === after.max ? `${after.min}` : `${after.min} to ${after.max}`;
+
+    return `${supports}; energy after ${energy} (calculated, not a reading).`;
+});
+
 // The advisor's answer, read back out of the five cards. `Rest` is one of the advisor's six options
 // and not one of these five, so it resolves to null and the page names the absence.
 const recommended = computed(() => props.options.find((option) => option.key === props.advisor.action) ?? null);
@@ -360,6 +382,7 @@ const capFor = (label: string): number =>
             <p class="mt-1 text-sm text-ink">
                 <template v-if="chosen !== null">
                     Chosen: <span class="font-semibold text-ink-strong">{{ chosen.key }}</span>.
+                    {{ chosenSummary }}
                 </template>
                 <template v-else>
                     Press <span class="font-semibold text-ink-strong">Train</span> on one card to say which
