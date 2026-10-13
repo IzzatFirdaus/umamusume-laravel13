@@ -307,6 +307,17 @@ function removeAt(index: number): void {
             as one object, and it lives in this setup draft until Preflight creates the run.
         </p>
 
+        <section aria-labelledby="target-summary-heading" class="mt-3 rounded-md border border-rule bg-panel p-4">
+            <h2 id="target-summary-heading" class="text-base font-semibold text-ink-strong">Summary</h2>
+            <p class="mt-2 text-sm text-ink">
+                {{ summary }}
+                <ProvenanceBadge
+                    state="calculated"
+                    title="assembled by this tool from the values entered on this form, not a stored fact"
+                />
+            </p>
+        </section>
+
         <p class="mt-3 text-sm text-ink">
             Scenario:
             <strong v-if="props.scenarioLabel" class="text-ink-strong">{{ props.scenarioLabel }}</strong>
@@ -628,17 +639,6 @@ function removeAt(index: number): void {
                     recorded yet.
                 </p>
             </fieldset>
-
-            <section aria-labelledby="target-summary-heading" class="rounded-md border border-rule bg-panel p-4">
-                <h2 id="target-summary-heading" class="text-sm font-semibold text-ink-strong">Summary</h2>
-                <p class="mt-2 text-sm text-ink">
-                    {{ summary }}
-                    <ProvenanceBadge
-                        state="calculated"
-                        title="assembled by this tool from the values entered on this form, not a stored fact"
-                    />
-                </p>
-            </section>
 
             <div class="flex flex-wrap items-center gap-3">
                 <button
