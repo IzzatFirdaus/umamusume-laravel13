@@ -329,7 +329,7 @@ const coverageConstants = computed(() =>
              whole. -->
         <form
             v-if="props.target !== null && ordered.length > 0"
-            class="mt-4 flex items-center gap-3"
+            class="mt-4 flex max-w-3xl items-center gap-3"
             :aria-busy="form.processing"
             @submit.prevent="save"
         >
@@ -369,7 +369,7 @@ const coverageConstants = computed(() =>
             <p v-if="props.picker_skills.length === 0" class="mt-1 text-sm text-ink-muted">
                 Nothing left to add: the catalogue offers no Global skill this run does not already hold.
             </p>
-            <form v-else class="mt-3 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="addPickedSkill">
+            <form v-else class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 text-sm" @submit.prevent="addPickedSkill">
                 <label class="flex flex-col gap-1">
                     <span class="text-ink-muted">Skill to add</span>
                     <select v-model="pickedSkill" class="h-11 rounded-md border border-rule bg-raised px-2 text-ink">

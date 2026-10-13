@@ -375,7 +375,7 @@ const capFor = (label: string): number =>
                 ref="alert"
                 role="alert"
                 tabindex="-1"
-                class="mt-3 rounded-md border border-risk bg-raised p-3 text-sm text-risk"
+                class="mt-3 max-w-3xl rounded-md border border-risk bg-raised p-3 text-sm text-risk"
             >
                 <p class="font-semibold">The turn was not recorded.</p>
                 <ul class="mt-1 list-disc pl-5">
@@ -383,7 +383,7 @@ const capFor = (label: string): number =>
                 </ul>
             </div>
 
-            <form class="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-3" @submit.prevent="recordTurn">
+            <form class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm md:grid-cols-3" @submit.prevent="recordTurn">
                 <label class="flex flex-col gap-1">
                     <span class="text-ink-muted">Turn *</span>
                     <input

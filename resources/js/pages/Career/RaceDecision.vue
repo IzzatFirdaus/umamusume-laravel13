@@ -265,7 +265,7 @@ function submitManual(): void {
                 </p>
 
                 <form
-                    class="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-3"
+                    class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm md:grid-cols-3"
                     :aria-busy="manualForm.processing"
                     @submit.prevent="submitManual"
                 >

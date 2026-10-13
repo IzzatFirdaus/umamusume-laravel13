@@ -188,7 +188,7 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
         <!-- No calendar at all: one sentence naming what is missing and what to do. -->
         <p
             v-if="props.empty !== null"
-            class="mt-4 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
+            class="mt-4 max-w-3xl rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
         >
             {{ props.empty }}
         </p>
@@ -212,7 +212,7 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
 
                 <p
                     v-if="chosen.length < 2"
-                    class="mt-2 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
+                    class="mt-2 max-w-3xl rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink"
                 >
                     Nothing to compare yet. Pick two to four races with the "Compare" control on any
                     card above and their rewards line up here, one property per row.
