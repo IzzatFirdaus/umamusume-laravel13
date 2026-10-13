@@ -113,7 +113,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
             aria-labelledby="result-empty-heading"
             class="rounded-md border border-dashed border-rule bg-raised p-4"
         >
-            <h2 id="result-empty-heading" class="text-base font-semibold text-ink-strong">
+            <h2 id="result-empty-heading" class="text-lg font-semibold text-ink-strong">
                 {{ props.empty.reason === 'retired' ? 'This career was retired' : 'This career is still running' }}
             </h2>
             <p class="mt-1 max-w-3xl text-sm text-ink">{{ props.empty.message }}</p>
@@ -143,7 +143,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
 
             <!-- Final build -->
             <section aria-labelledby="result-build-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-                <h2 id="result-build-heading" class="text-base font-semibold text-ink-strong">Final build</h2>
+                <h2 id="result-build-heading" class="text-lg font-semibold text-ink-strong">Final build</h2>
 
                 <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                     <div v-for="stat in props.build.stats" :key="stat.key" class="rounded-md border border-rule bg-raised p-3">
@@ -219,7 +219,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
 
             <!-- Race history -->
             <section aria-labelledby="result-races-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-                <h2 id="result-races-heading" class="text-base font-semibold text-ink-strong">Race history</h2>
+                <h2 id="result-races-heading" class="text-lg font-semibold text-ink-strong">Race history</h2>
 
                 <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
                     <div class="rounded-md border border-rule bg-raised p-3">
@@ -279,7 +279,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
 
             <!-- Scenario result -->
             <section aria-labelledby="result-scenario-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-                <h2 id="result-scenario-heading" class="text-base font-semibold text-ink-strong">Scenario result</h2>
+                <h2 id="result-scenario-heading" class="text-lg font-semibold text-ink-strong">Scenario result</h2>
 
                 <p v-if="props.scenario.notice !== null" class="mt-1 text-sm text-ink-muted">{{ props.scenario.notice }}</p>
 
@@ -333,7 +333,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
             <!-- The doors. The Save Veteran link below is D16's, and the line that used to sit here said
                  it was named rather than linked: true while D16 was unlanded, false since `7b04b6c`. -->
             <section aria-labelledby="result-actions-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-                <h2 id="result-actions-heading" class="text-base font-semibold text-ink-strong">What you can do next</h2>
+                <h2 id="result-actions-heading" class="text-lg font-semibold text-ink-strong">What you can do next</h2>
 
                 <div class="mt-3 flex flex-wrap gap-2">
                     <a

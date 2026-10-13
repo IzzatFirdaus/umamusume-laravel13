@@ -113,7 +113,7 @@ const submit = (): void => {
 
         <form class="mt-6 max-w-3xl space-y-6" @submit.prevent="submit">
             <section aria-labelledby="snapshot-scenario-heading" class="rounded-md border border-rule bg-raised p-4">
-                <h2 id="snapshot-scenario-heading" class="text-base font-semibold text-ink-strong">Scenario</h2>
+                <h2 id="snapshot-scenario-heading" class="text-lg font-semibold text-ink-strong">Scenario</h2>
                 <label class="mt-3 flex flex-col gap-1">
                     <span class="text-xs font-medium text-ink">Scenario *</span>
                     <select v-model="form.scenario" name="scenario" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
@@ -125,7 +125,7 @@ const submit = (): void => {
             </section>
 
             <section aria-labelledby="snapshot-trainee-heading" class="rounded-md border border-rule bg-raised p-4">
-                <h2 id="snapshot-trainee-heading" class="text-base font-semibold text-ink-strong">Trainee</h2>
+                <h2 id="snapshot-trainee-heading" class="text-lg font-semibold text-ink-strong">Trainee</h2>
                 <label class="mt-3 flex flex-col gap-1">
                     <span class="text-xs font-medium text-ink">Trainee *</span>
                     <select v-model="form.umamusume_id" name="umamusume_id" required class="min-h-11 rounded-md border border-rule bg-raised px-2 text-ink">
@@ -139,7 +139,7 @@ const submit = (): void => {
             </section>
 
             <section aria-labelledby="snapshot-position-heading" class="rounded-md border border-rule bg-raised p-4">
-                <h2 id="snapshot-position-heading" class="text-base font-semibold text-ink-strong">Career position</h2>
+                <h2 id="snapshot-position-heading" class="text-lg font-semibold text-ink-strong">Career position</h2>
                 <p class="mt-1 text-xs text-ink-muted">
                     Where the career stands, as the client spells it. This run starts from here; it does
                     not start from turn 1.
@@ -173,7 +173,7 @@ const submit = (): void => {
             </section>
 
             <section aria-labelledby="snapshot-state-heading" class="rounded-md border border-rule bg-raised p-4">
-                <h2 id="snapshot-state-heading" class="text-base font-semibold text-ink-strong">Current state</h2>
+                <h2 id="snapshot-state-heading" class="text-lg font-semibold text-ink-strong">Current state</h2>
                 <p class="mt-1 text-xs text-ink-muted">
                     The numbers the client shows now. Type a number when you have read it, tick "I don't
                     know this value" when the client does not show it, or leave it blank when you have not
@@ -225,7 +225,7 @@ const submit = (): void => {
             </section>
 
             <section aria-labelledby="snapshot-notes-heading" class="rounded-md border border-rule bg-raised p-4">
-                <h2 id="snapshot-notes-heading" class="text-base font-semibold text-ink-strong">Notes</h2>
+                <h2 id="snapshot-notes-heading" class="text-lg font-semibold text-ink-strong">Notes</h2>
                 <label class="mt-3 flex flex-col gap-1">
                     <span class="text-xs font-medium text-ink">Anything worth remembering about this career</span>
                     <textarea v-model="form.notes" name="notes" rows="2" maxlength="5000" class="rounded-md border border-rule bg-raised px-2 py-1.5 text-ink" />
@@ -234,7 +234,7 @@ const submit = (): void => {
             </section>
 
             <section aria-labelledby="snapshot-later-heading" class="rounded-md border border-dashed border-rule bg-raised p-4">
-                <h2 id="snapshot-later-heading" class="text-base font-semibold text-ink-strong">Recorded on their own screens</h2>
+                <h2 id="snapshot-later-heading" class="text-lg font-semibold text-ink-strong">Recorded on their own screens</h2>
                 <p class="mt-1 text-sm text-ink-muted">
                     A run's Legacy and its support deck have one write path each, and this form is not
                     it: re-entering them here would give the same fact two writers.

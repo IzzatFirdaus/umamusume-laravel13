@@ -87,7 +87,7 @@ const visibleCount = computed(() =>
             aria-labelledby="timeline-origin-heading"
             class="mt-4 rounded-md border border-rule bg-panel p-4"
         >
-            <h2 id="timeline-origin-heading" class="text-base font-semibold text-ink-strong">Timeline opens here</h2>
+            <h2 id="timeline-origin-heading" class="text-lg font-semibold text-ink-strong">Timeline opens here</h2>
             <p class="mt-1 text-sm text-ink">
                 {{ props.origin.year_label }} · {{ props.origin.month_label }} · Turn {{ props.origin.turn }}
                 <span v-if="props.origin.imported" class="ml-2 text-xs text-ink-muted">imported from a snapshot</span>
@@ -99,7 +99,7 @@ const visibleCount = computed(() =>
             aria-labelledby="timeline-filter-heading"
             class="mt-4 rounded-md border border-rule bg-panel p-4"
         >
-            <h2 id="timeline-filter-heading" class="text-base font-semibold text-ink-strong">Filter by type</h2>
+            <h2 id="timeline-filter-heading" class="text-lg font-semibold text-ink-strong">Filter by type</h2>
             <p class="mt-1 text-xs text-ink-muted">
                 Toggle a type to hide its rows. Empty filter shows everything (showing {{ visibleCount }} of {{ props.entries.length }}).
             </p>

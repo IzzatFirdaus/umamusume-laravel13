@@ -184,7 +184,7 @@ function save(): void {
             aria-labelledby="blocked-heading"
             class="mt-4 rounded-md border border-rule bg-panel p-4"
         >
-            <h2 id="blocked-heading" class="text-base font-semibold text-ink-strong">Nothing to file yet</h2>
+            <h2 id="blocked-heading" class="text-lg font-semibold text-ink-strong">Nothing to file yet</h2>
             <p role="alert" class="mt-2 text-sm text-ink">{{ props.blocked }}</p>
             <p class="mt-3 flex flex-wrap gap-3 text-sm">
                 <Link href="/training-runs" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-sunken">Open the run list</Link>
@@ -195,7 +195,7 @@ function save(): void {
         <template v-else>
             <!-- Step 1 of the brief's workflow: review what the career recorded, before tagging it. -->
             <section aria-labelledby="review-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-                <h2 id="review-heading" class="text-base font-semibold text-ink-strong">What this career recorded</h2>
+                <h2 id="review-heading" class="text-lg font-semibold text-ink-strong">What this career recorded</h2>
                 <p class="mt-1 text-sm text-ink-muted">
                     Read back from the run. Nothing here is derived, and the library adds your tags and note to it.
                 </p>
@@ -271,7 +271,7 @@ function save(): void {
                  the reason. A number here would be an invention, and a sentence of advice would be a
                  recommendation `ADR-0020` §3 keeps out of the record screens. -->
             <section aria-labelledby="held-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-                <h2 id="held-heading" class="text-base font-semibold text-ink-strong">Not computed</h2>
+                <h2 id="held-heading" class="text-lg font-semibold text-ink-strong">Not computed</h2>
                 <dl class="mt-2 grid gap-3 text-sm sm:grid-cols-3">
                     <div v-for="(figure, name) in props.held" :key="name">
                         <dt class="text-xs text-ink-muted">{{ name === 'factor_analysis' ? 'Factor analysis' : name === 'legacy_value' ? 'Legacy value' : 'Best use' }}</dt>
@@ -285,7 +285,7 @@ function save(): void {
             <!-- Step 2: tag it. Suggestions first, grouped in the server's order, then the Trainer's own words. -->
             <form class="mt-4 space-y-4" @submit.prevent="save">
                 <section aria-labelledby="tags-heading" class="rounded-md border border-rule bg-panel p-4">
-                    <h2 id="tags-heading" class="text-base font-semibold text-ink-strong">Tags</h2>
+                    <h2 id="tags-heading" class="text-lg font-semibold text-ink-strong">Tags</h2>
                     <p id="tags-help" class="mt-1 text-sm text-ink-muted">
                         Suggestions, not a fixed list. Choose any of these, or add a word of your own below.
                     </p>
@@ -295,7 +295,7 @@ function save(): void {
                     </p>
 
                     <div v-for="(groupTags, group) in props.suggested_tags" :key="group" class="mt-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ group }}</h3>
+                        <h3 class="text-lg font-semibold text-ink-strong">{{ group }}</h3>
                         <div class="mt-1 flex flex-wrap gap-2">
                             <button
                                 v-for="tag in groupTags"
@@ -372,7 +372,7 @@ function save(): void {
                 </section>
 
                 <section aria-labelledby="note-heading" class="rounded-md border border-rule bg-panel p-4">
-                    <h2 id="note-heading" class="text-base font-semibold text-ink-strong">Note</h2>
+                    <h2 id="note-heading" class="text-lg font-semibold text-ink-strong">Note</h2>
                     <label class="mt-1 block text-sm" for="veteran-notes">
                         <span class="text-ink-muted">What you want to remember about this career</span>
                         <textarea
@@ -408,7 +408,7 @@ function save(): void {
             <!-- Step 3 is the save itself: the button above posts to `runs.veteran.store` and the library row
                  lands or rewrites in one step, so there is no second confirmation to click through. -->
             <section aria-labelledby="absences-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-                <h2 id="absences-heading" class="text-base font-semibold text-ink-strong">NOT IN THIS BUILD</h2>
+                <h2 id="absences-heading" class="text-lg font-semibold text-ink-strong">NOT IN THIS BUILD</h2>
                 <ul class="mt-2 space-y-2 text-sm">
                     <li v-for="absence in props.absences" :key="absence.label">
                         <span class="text-ink">{{ absence.label }}</span>: {{ absence.reason }}
