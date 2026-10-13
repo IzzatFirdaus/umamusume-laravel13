@@ -97,6 +97,8 @@ const props = defineProps<{
     direction: string;
     facets: Facet[];
     sortKeys: Option[];
+    /** The ten aptitude axes with the family each belongs to; the controller is their one owner. */
+    aptitudeAxes: { value: string; label: string; axis: string }[];
     uniqueSkills: SkillOption[];
 }>();
 
@@ -149,18 +151,11 @@ const pickedForm = ref<Record<number, number | null>>(
     props.selected === null || props.selectedCard === null ? {} : { [props.selected]: props.selectedCard },
 );
 
-const aptitudeCells: { label: string; key: string }[] = [
-    { label: 'Turf', key: 'turf' },
-    { label: 'Dirt', key: 'dirt' },
-    { label: 'Sprint', key: 'sprint' },
-    { label: 'Mile', key: 'mile' },
-    { label: 'Medium', key: 'medium' },
-    { label: 'Long', key: 'long' },
-    { label: 'Front runner', key: 'front_runner' },
-    { label: 'Pace chaser', key: 'pace_chaser' },
-    { label: 'Late surger', key: 'late_surger' },
-    { label: 'End closer', key: 'end_closer' },
-];
+// Track and distance read at full weight; the style axis sits behind the disclosure (owner ruling
+// 2026-10-13, audit §3.4 option 1). Both halves come from the controller's one list, so a tenth
+// axis arrives here without an edit.
+const primaryAxes = computed(() => props.aptitudeAxes.filter((axis) => axis.axis !== 'style'));
+const styleAxes = computed(() => props.aptitudeAxes.filter((axis) => axis.axis === 'style'));
 
 
 function applyFilters(): void {
@@ -381,11 +376,27 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                 </p>
                 <div v-else class="mt-3 flex flex-wrap gap-1.5">
                     <AptitudeBadge
-                        v-for="cell in aptitudeCells"
+                        v-for="cell in primaryAxes"
                         :key="cell.key"
                         :label="cell.label"
                         :letter="trainee.aptitudes[cell.key] ?? null"
                     />
+                    <!-- The style axis is the density a selection screen does not owe at full weight;
+                         the summary carries the count, and every badge keeps its letter and its word
+                         in the DOM whether the disclosure is open or closed. -->
+                    <details v-if="styleAxes.length > 0">
+                        <summary class="inline-flex min-h-11 cursor-pointer items-center rounded-md border border-rule px-2 text-xs text-ink-muted hover:bg-raised">
+                            Show all aptitudes ({{ styleAxes.length }})
+                        </summary>
+                        <div class="mt-1 flex flex-wrap gap-1.5">
+                            <AptitudeBadge
+                                v-for="cell in styleAxes"
+                                :key="cell.key"
+                                :label="cell.label"
+                                :letter="trainee.aptitudes[cell.key] ?? null"
+                            />
+                        </div>
+                    </details>
                 </div>
 
                 <p class="mt-3 text-sm text-ink-muted">

@@ -51,6 +51,24 @@ use Inertia\Response;
  */
 class TraineeSelectController extends Controller
 {
+    /**
+     * The ten aptitude axes in `ADR-0004`'s element order, each carrying the family it belongs to.
+     * The roster card's disclosure split is server knowledge, and `sortKeys` derives from this one
+     * list so the label map cannot drift between the filter bar and the cards.
+     */
+    private const APTITUDE_AXES = [
+        ['value' => 'turf', 'label' => 'Turf', 'axis' => 'surface'],
+        ['value' => 'dirt', 'label' => 'Dirt', 'axis' => 'surface'],
+        ['value' => 'sprint', 'label' => 'Sprint', 'axis' => 'distance'],
+        ['value' => 'mile', 'label' => 'Mile', 'axis' => 'distance'],
+        ['value' => 'medium', 'label' => 'Medium', 'axis' => 'distance'],
+        ['value' => 'long', 'label' => 'Long', 'axis' => 'distance'],
+        ['value' => 'front_runner', 'label' => 'Front runner', 'axis' => 'style'],
+        ['value' => 'pace_chaser', 'label' => 'Pace chaser', 'axis' => 'style'],
+        ['value' => 'late_surger', 'label' => 'Late surger', 'axis' => 'style'],
+        ['value' => 'end_closer', 'label' => 'End closer', 'axis' => 'style'],
+    ];
+
     public function show(TraineeSearchRequest $request, ArtworkMirror $mirror): Response
     {
         SetupDraft::markVisited(2);
@@ -102,19 +120,11 @@ class TraineeSelectController extends Controller
                 ['param' => 'distance', 'label' => 'Distance', 'letters' => TraineeSearchRequest::LETTERS],
                 ['param' => 'style', 'label' => 'Running style', 'letters' => TraineeSearchRequest::LETTERS],
             ],
-            'sortKeys' => [
-                ['value' => 'name', 'label' => 'Name'],
-                ['value' => 'turf', 'label' => 'Turf'],
-                ['value' => 'dirt', 'label' => 'Dirt'],
-                ['value' => 'sprint', 'label' => 'Sprint'],
-                ['value' => 'mile', 'label' => 'Mile'],
-                ['value' => 'medium', 'label' => 'Medium'],
-                ['value' => 'long', 'label' => 'Long'],
-                ['value' => 'front_runner', 'label' => 'Front runner'],
-                ['value' => 'pace_chaser', 'label' => 'Pace chaser'],
-                ['value' => 'late_surger', 'label' => 'Late surger'],
-                ['value' => 'end_closer', 'label' => 'End closer'],
-            ],
+            'aptitudeAxes' => self::APTITUDE_AXES,
+            'sortKeys' => [['value' => 'name', 'label' => 'Name'], ...array_map(
+                static fn (array $axis): array => ['value' => $axis['value'], 'label' => $axis['label']],
+                self::APTITUDE_AXES,
+            )],
             'uniqueSkills' => $this->uniqueSkillOptions(),
         ]);
     }

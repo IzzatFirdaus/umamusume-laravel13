@@ -33,10 +33,17 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(first).toBeVisible();
         await expect(first.locator('span[lang="ja"]')).toHaveText('アドマイヤベガ');
 
-        // The aptitude letters carry their band word as text, not colour alone (`design-2.0` §17).
+        // The aptitude badges state the axis and the band in words, never colour alone (`design-2.0`
+        // §17). The roster fixture publishes no letters, so the word every badge carries is the
+        // absence word - which is still the badge's second statement, and the sweep below the
+        // disclosure is the contract check: all ten badges name their axis and carry a letter slot
+        // and a word beside it, six at full weight and four behind the count-summary.
         await expect(first.getByText('Turf', { exact: true })).toBeVisible();
-        await expect(first.getByText('A', { exact: true }).first()).toBeVisible();
-        await expect(first.getByText('Very weak').first()).toBeVisible();
+        await expect(first.getByText('Show all aptitudes (4)')).toBeVisible();
+        await first.getByText('Show all aptitudes (4)').click();
+        await expect(first.getByText('Front runner', { exact: true })).toBeVisible();
+        await expect(first.getByText('N/A')).toHaveCount(10);
+        await expect(first.getByText('Not published')).toHaveCount(10);
 
         // Two actions per card: the read one and the primary one.
         await expect(first.getByRole('button', { name: 'Select Trainee', exact: true })).toBeVisible();
