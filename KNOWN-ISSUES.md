@@ -58,9 +58,10 @@ KI-70 and KI-71 are counted as the register reports them). Per each entry's own 
   (`a3f0795` and `d7d6ed5` respectively); the body is later and dated, so the entry is classified CLOSED
   here and the heading/body divergence is named rather than silently resolved.
 - **FIXED IN TREE / NOT CLOSED:** KI-98 (the `doc_census.py` resolver, fixed in the working tree, not
-  landed), KI-99 (the Legacy builder's rank drop and the per-ancestor pairing, fixed at `ff7332c`, not
-  landed). Both are held on **O-1** like the other unlanded fixes: register discipline closes an entry only
-  when the fix is on `origin/master`, and `master` is unpushed.
+  landed), KI-99 (the Legacy builder's rank drop and the per-ancestor pairing, fixed in the working tree
+  and standing in master's chain via the peer repair commit `6717c7c` after `ff7332c` was orphaned by the
+  staging race; not landed). Both are held on **O-1** like the other unlanded fixes: register discipline
+  closes an entry only when the fix is on `origin/master`, and `master` is unpushed.
 - **OPEN:** KI-59, KI-60, KI-61, KI-63, KI-69, KI-70 (the first of the two — the shared-files process
   hazard; the second KI-70, E1's 44px sweep, is CLOSED above), KI-74, KI-82, KI-84, KI-87, KI-91, KI-94,
   KI-95. Each names its own closure condition; none is closed here.
@@ -2678,7 +2679,7 @@ Two defects, one column. The builder (`Legacy/Builder.vue`) was a narrower secon
 
 **The second defect is a data-corruption path, not a display one, and it predated the builder.** `payload()` paired the per-ancestor lists with `array_values()` over `validated()`'s output. Laravel assembles nested wildcard arrays leaf by leaf, and the probe (`StoreLegacySelectionRequest` run through `validateResolved()` with `ancestors_sparks = [[spark], []]`) returned `{"1":[],"0":[{...}]}`: the key-to-value mapping is correct but the iteration order is not, so `array_values()` re-indexed the empty list into ancestor A1's slot and stored grandparent A2's absence against A1's Sparks. Any writer posting one populated and one empty grandparent list - which is the wizard's own shape whenever a Trainer reads a Spark for one grandparent only - could store the pair misaligned. The letters and star counts went through the same `array_values()` pattern.
 
-**The fix** (`ff7332c`): the builder declares, seeds and posts all four keys, passes `rank_label` through, and carries the wizard's per-ancestor rank and Spark editors (category-filtered targets, so the `assertTargetMatchesCategory` boundary check runs on this screen too); and `payload()` pairs all three per-ancestor lists **by key** instead of by iteration order, which covers the wizard and the `StartCareerRequest` re-run through `StoreDraftLegacyRequest` (both extend the one request).
+**The fix** (`ff7332c`; SHA corrected 2026-10-13, same day: that commit holds the fix's exact tree but was orphaned by the same shared-index race that mislabelled `44d956c`, and the fix's content stands in master's history through the peer repair commit `6717c7c`, all four blobs blob-identical): the builder declares, seeds and posts all four keys, passes `rank_label` through, and carries the wizard's per-ancestor rank and Spark editors (category-filtered targets, so the `assertTargetMatchesCategory` boundary check runs on this screen too); and `payload()` pairs all three per-ancestor lists **by key** instead of by iteration order, which covers the wizard and the `StartCareerRequest` re-run through `StoreDraftLegacyRequest` (both extend the one request).
 
 **Proving commands.** `php artisan test --compact --filter="(LegacyLabPageTest|AncestorRankTest|GrandparentRanksTest)"` -> 25 passed (278 assertions), including a new full-shape round trip ("keeps the letter ranks and grandparent details a builder-shaped save carries") that fails on both the pre-fix builder payload and the pre-fix `array_values()` pairing; `php artisan test --compact tests/Feature/CareerLegacyDeckStepsTest.php tests/Feature/CareerInheritanceEventTest.php` -> 29 passed (600 assertions). `vendor/bin/pint --test --format agent` on the four paths: clean. `composer lore`: exit 0, no hit naming a changed file.
 
