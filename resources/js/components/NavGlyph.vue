@@ -55,6 +55,20 @@ const MARKS: Record<string, string[]> = {
     ],
     /** The rail's own control, so the collapse affordance is drawn like the marks and not a typographic glyph. */
     chevron: ['M9.5 5.5 16 12l-6.5 6.5'],
+
+    /*
+     * The Cockpit action grid's seven doors (audit 2026-10-12 §3.4; owner ruling 2026-10-13 to build
+     * them as their own slice). Bar chart, track oval, stopwatch and tactical grid sit on §6's allowed
+     * motif list; the umbrella and the bell are neutral objects, the same class the home, cards, book
+     * and gear marks cleared the gate under. Inheritance reuses `network`, the mark the six-node
+     * ancestry already prints.
+     */
+    chart: ['M4.4 20h15.2', 'M7.4 20v-6', 'M12 20v-10', 'M16.6 20v-14'],
+    track: ['M8 4.6h8a7.4 7.4 0 0 1 0 14.8H8a7.4 7.4 0 0 1 0-14.8z', 'M10 8h4a4 4 0 0 1 0 8h-4a4 4 0 0 1 0-8z'],
+    stopwatch: ['M10 2.6h4', 'M12 2.6v3.4', 'M12 6a7 7 0 1 0 0 14 7 7 0 0 0 0-14z', 'M12 13l3.2-3.2'],
+    umbrella: ['M12 3.6a8.4 8.4 0 0 1 8.4 8.4H3.6A8.4 8.4 0 0 1 12 3.6z', 'M12 12v6.4a2.2 2.2 0 0 0 4.4 0'],
+    grid: ['M4.6 4.6h14.8v14.8H4.6z', 'M4.6 12h14.8', 'M12 4.6v14.8'],
+    bell: ['M12 3.6a6.4 6.4 0 0 1 6.4 6.4v3.6l1.6 2.8H4l1.6-2.8V10A6.4 6.4 0 0 1 12 3.6z', 'M9.8 19.6a2.2 2.2 0 0 0 4.4 0'],
 };
 
 const props = defineProps<{ name: keyof typeof MARKS | string }>();

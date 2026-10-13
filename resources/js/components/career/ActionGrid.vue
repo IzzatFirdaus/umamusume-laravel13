@@ -14,6 +14,8 @@
  * ancestry — and the entry's note names the 2.0 screen that will replace it. There is therefore no
  * absent arm to render, which is why the template has none.
  */
+import NavGlyph from '../NavGlyph.vue';
+
 interface Action {
     key: string;
     label: string;
@@ -23,6 +25,18 @@ interface Action {
 }
 
 const props = defineProps<{ actions: Action[] }>();
+
+// The entry's mark, drawn from NavGlyph's motif-gated registry. A key without a mark renders no
+// glyph and the word still names the action, so a new action degrades to today's word-only entry.
+const marks: Record<string, string> = {
+    training: 'chart',
+    race: 'track',
+    rest: 'stopwatch',
+    recreation: 'umbrella',
+    scenario: 'grid',
+    event: 'bell',
+    inheritance: 'network',
+};
 
 const entryClass =
     'flex min-h-11 w-full flex-col justify-center rounded-md border border-rule bg-raised px-3 py-2 text-left hover:bg-panel';
@@ -47,12 +61,13 @@ const entryClass =
                     :class="[entryClass, action.recommended ? 'border-2 border-pick-line' : '']"
                 >
                     <span class="flex flex-wrap items-baseline gap-x-2">
-                        <span class="text-sm font-semibold text-ink-strong">{{ action.label }}</span>
+                        <NavGlyph v-if="marks[action.key]" :name="marks[action.key]" class="self-center" />
+                        <span class="text-base font-semibold text-ink-strong">{{ action.label }}</span>
                         <span v-if="action.recommended" class="text-xs font-bold text-ink-strong">
                             <span aria-hidden="true">★</span> RECOMMENDED
                         </span>
                     </span>
-                    <span class="mt-0.5 text-xs text-ink-muted">{{ action.note }}</span>
+                    <span class="mt-0.5 text-sm text-ink-muted">{{ action.note }}</span>
                 </a>
             </li>
         </ul>
