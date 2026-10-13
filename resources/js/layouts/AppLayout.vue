@@ -185,6 +185,15 @@ const mobileBarClass =
 // the bar wants the word "More" to read as a destination slot rather than as a fieldset header.
 const mobileMoreClass =
     'flex min-h-11 flex-1 cursor-pointer list-none items-center justify-center px-1 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong [&::-webkit-details-marker]:hidden';
+
+/*
+ * The bar carries five destinations and the disclosure carries the rest, so a Trainer standing on a
+ * destination in the overflow saw the bar mark nothing at all. `computed`, not a const: `page.url`
+ * changes under an Inertia visit, and a value taken once would freeze on the first screen.
+ */
+const moreIsCurrent = computed(() =>
+    moreItems.some((item) => item.to !== null && isCurrent(item.to)),
+);
 </script>
 
 <template>
@@ -348,7 +357,11 @@ const mobileMoreClass =
                 @toggle="onMoreToggle"
                 @keydown.esc="closeMore"
             >
-                <summary ref="moreSummary" :class="mobileMoreClass">More</summary>
+                <summary
+                    ref="moreSummary"
+                    :class="[mobileMoreClass, moreIsCurrent ? activeClass : '']"
+                    :aria-label="moreIsCurrent ? 'More, current section' : 'More'"
+                >More</summary>
                 <ul
                     class="fixed inset-x-0 bottom-11 max-h-[60vh] overflow-y-auto border-t border-rule bg-panel p-2"
                 >
