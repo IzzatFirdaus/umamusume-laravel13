@@ -47,7 +47,7 @@ origin/master), KI-74 (process hazard), KI-82 (title unchanged), KI-84 (owner ru
 KI-87 (two queries not reconciled, label partially fixed).
 
 **Status correction (2026-10-12, register pass):** the composition above is superseded again, and every
-dated claim above is left standing rather than rewritten. This file now carries **KI-57 through KI-98**
+dated claim above is left standing rather than rewritten. This file now carries **KI-57 through KI-99**
 (read from each entry's own heading and status line, not from the chain above; the two duplicate numbers
 KI-70 and KI-71 are counted as the register reports them). Per each entry's own text:
 
@@ -58,7 +58,8 @@ KI-70 and KI-71 are counted as the register reports them). Per each entry's own 
   (`a3f0795` and `d7d6ed5` respectively); the body is later and dated, so the entry is classified CLOSED
   here and the heading/body divergence is named rather than silently resolved.
 - **FIXED IN TREE / NOT CLOSED:** KI-98 (the `doc_census.py` resolver, fixed in the working tree, not
-  landed). It is held on **O-1** like the other unlanded fixes: register discipline closes an entry only
+  landed), KI-99 (the Legacy builder's rank drop and the per-ancestor pairing, fixed at `ff7332c`, not
+  landed). Both are held on **O-1** like the other unlanded fixes: register discipline closes an entry only
   when the fix is on `origin/master`, and `master` is unpushed.
 - **OPEN:** KI-59, KI-60, KI-61, KI-63, KI-69, KI-70 (the first of the two — the shared-files process
   hazard; the second KI-70, E1's 44px sweep, is CLOSED above), KI-74, KI-82, KI-84, KI-87, KI-91, KI-94,
@@ -2668,3 +2669,17 @@ own header, and repointing them is still Task 5 of the `PROCESS-PLANS.md` sectio
 `docs/research-scratch/TRAINING-RUN-IMPORTS.md`), and those files are another session's in-flight work in this
 shared worktree. It does not re-measure `AGENTS.md`'s §3 documentation map against the new resolver, and it leaves
 `composer docs`' other sections (master line counts, inbound citation counts) exactly as they were.
+
+### KI-99 The Legacy Lab builder's confirm dropped every recorded rank letter and grandparent detail on a routine save, and the write boundary could pair an empty grandparent's Spark list against the other grandparent's Sparks - FILED 2026-10-13 (remaining-screens UI audit fix pass, Slice 1.1), FIXED IN TREE, NOT LANDED
+
+**Status: FIXED IN TREE, NOT LANDED.** Found by the remaining-screens UI audit (`docs/proposals/remaining-screens-ui-audit-2026-10-13.md` finding F-E1) and fixed in the same pass. Held on **O-1** with the other unlanded fixes: master is unpushed, and register discipline closes an entry only when the fix is on `origin/master`.
+
+Two defects, one column. The builder (`Legacy/Builder.vue`) was a narrower second copy of the wizard's ancestry editor: it never passed `rank_label` to `AncestryNode`, so a run whose `legacy_selection` carried a recorded letter rank printed "Rank not recorded" (`AncestryNode.vue:77`'s default), and its form re-posted only `legacy_id`, `rank`, `is_guest`, ancestor names and the parent's own Sparks. `StoreLegacySelectionRequest::payload()` maps every unposted key to null and `LegacyController::update()` replaces the `legacy_selection` column whole, so **confirming from this screen silently dropped `rank_letter`, `ancestors_rank_letters`, `ancestors_rank` and `ancestors_sparks`** - the same run rendered `Rank B+` from the wizard's step and `Rank not recorded` from the Lab, and a save erased what the second reading named. The wizard's own screen was not the source: it posts every key.
+
+**The second defect is a data-corruption path, not a display one, and it predated the builder.** `payload()` paired the per-ancestor lists with `array_values()` over `validated()`'s output. Laravel assembles nested wildcard arrays leaf by leaf, and the probe (`StoreLegacySelectionRequest` run through `validateResolved()` with `ancestors_sparks = [[spark], []]`) returned `{"1":[],"0":[{...}]}`: the key-to-value mapping is correct but the iteration order is not, so `array_values()` re-indexed the empty list into ancestor A1's slot and stored grandparent A2's absence against A1's Sparks. Any writer posting one populated and one empty grandparent list - which is the wizard's own shape whenever a Trainer reads a Spark for one grandparent only - could store the pair misaligned. The letters and star counts went through the same `array_values()` pattern.
+
+**The fix** (`ff7332c`): the builder declares, seeds and posts all four keys, passes `rank_label` through, and carries the wizard's per-ancestor rank and Spark editors (category-filtered targets, so the `assertTargetMatchesCategory` boundary check runs on this screen too); and `payload()` pairs all three per-ancestor lists **by key** instead of by iteration order, which covers the wizard and the `StartCareerRequest` re-run through `StoreDraftLegacyRequest` (both extend the one request).
+
+**Proving commands.** `php artisan test --compact --filter="(LegacyLabPageTest|AncestorRankTest|GrandparentRanksTest)"` -> 25 passed (278 assertions), including a new full-shape round trip ("keeps the letter ranks and grandparent details a builder-shaped save carries") that fails on both the pre-fix builder payload and the pre-fix `array_values()` pairing; `php artisan test --compact tests/Feature/CareerLegacyDeckStepsTest.php tests/Feature/CareerInheritanceEventTest.php` -> 29 passed (600 assertions). `vendor/bin/pint --test --format agent` on the four paths: clean. `composer lore`: exit 0, no hit naming a changed file.
+
+**What closure does not cover.** It does not restore anything: a `legacy_selection` column already narrowed by an earlier builder confirm lost its rank keys for good, and nothing in the tree or the backups distinguishes an erased record from a never-recorded one, so repair is out of scope here. It does not exhaust `validated()`'s ordering behaviour beyond the three lists this request pairs - any future wildcard-in-wildcard list paired positionally should go by key - and it does not re-run `tests/browser/legacy.spec.ts` (the builder's new ancestor editors are worded so the spec's pinned locators still resolve to the same controls, but the browser pass that proves it on a rendered page is owed to the slice's Level 2). It does not touch `LEGACY`-adjacent read surfaces that print the stored shape.
