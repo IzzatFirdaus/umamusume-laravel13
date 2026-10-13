@@ -50,11 +50,11 @@
                     Training runs
                 </a>
                 <a href="{{ route('catalog.index') }}"
-                   class="inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 font-semibold text-ink-strong hover:underline">
+                   class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:text-ink-strong">
                     Catalog
                 </a>
                 <a href="{{ route('review.index') }}"
-                   class="inline-flex min-h-11 items-center rounded-full border-2 border-rule px-4 font-semibold text-ink-strong hover:underline">
+                   class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 font-semibold text-ink hover:text-ink-strong">
                     Review
                 </a>
             </div>
