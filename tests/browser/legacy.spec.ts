@@ -232,7 +232,10 @@ test.describe('Legacy Lab builder', () => {
         await page.getByRole('button', { name: 'Add Spark' }).first().click();
         await page.getByLabel('Kind').first().selectOption('blue');
         await page.getByLabel('Applies to').first().fill('Speed');
-        await page.getByLabel('Stars').first().fill('2');
+        // `exact` because the grandparent rows carry "Grandparent rank (stars)", which a substring label
+        // match answers to first, and the fill would land on the rank rather than the Spark. The wizard
+        // step's own walk pins the same control the same way.
+        await page.getByLabel('Stars', { exact: true }).first().fill('2');
 
         await page.getByRole('button', { name: 'Confirm Inheritance' }).click();
 
