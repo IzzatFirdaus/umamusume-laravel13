@@ -128,7 +128,34 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
             That screen did not load. Nothing was saved; try again.
         </p>
 
-        <section aria-labelledby="race-planner-position-heading" class="rounded-md border border-rule bg-panel p-4">
+        <!-- Level 1, Critical (design-2.0 §4): a glyph plus the word, never colour alone. It is raised
+             by the calendar — the obligation's turn has arrived and nothing is recorded against it —
+             and the region otherwise states only the next obligation and its turn. First on the screen
+             because it is the only block here that reports something the Trainer has not yet answered. -->
+        <section v-if="props.deadline.next !== null" aria-labelledby="race-planner-deadline-heading" class="rounded-md border border-rule bg-panel p-4">
+            <h2 id="race-planner-deadline-heading" class="text-base font-semibold text-ink-strong">Deadlines</h2>
+            <AlertRow
+                v-if="props.deadline.alert !== null"
+                glyph="▲"
+                :text="props.deadline.alert.text"
+                :detail="props.deadline.alert.detail"
+                tone="critical"
+            />
+            <p class="mt-2 text-sm text-ink">
+                Next mandatory race:
+                <span class="font-semibold text-ink-strong">{{ props.deadline.next.title }}</span>,
+                {{ props.deadline.next.year_label }}
+                <template v-if="props.deadline.next.turn !== null"> turn {{ props.deadline.next.turn }}</template>
+                <template v-else> (the post-December block)</template>.
+                It reads "{{ props.deadline.next.state }}".
+            </p>
+            <p class="mt-1 text-xs text-ink-muted">
+                This states the next obligation the run has not cleared. Whether the rest of the career
+                keeps its deadlines is not something this tool predicts.
+            </p>
+        </section>
+
+        <section aria-labelledby="race-planner-position-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
             <h2 id="race-planner-position-heading" class="text-base font-semibold text-ink-strong">Planning from</h2>
             <p v-if="props.nextTurn !== null" class="mt-1 text-sm text-ink">
                 {{ props.nextTurn.year_label }} ·
@@ -157,32 +184,6 @@ function cell(race: Race, key: string, from: 'comparison' | 'alignment'): Cell |
                     </dd>
                 </div>
             </dl>
-        </section>
-
-        <!-- Level 1, Critical (design-2.0 §4): a glyph plus the word, never colour alone. It is raised
-             by the calendar — the obligation's turn has arrived and nothing is recorded against it —
-             and the region otherwise states only the next obligation and its turn. -->
-        <section v-if="props.deadline.next !== null" aria-labelledby="race-planner-deadline-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="race-planner-deadline-heading" class="text-base font-semibold text-ink-strong">Deadlines</h2>
-            <AlertRow
-                v-if="props.deadline.alert !== null"
-                glyph="▲"
-                :text="props.deadline.alert.text"
-                :detail="props.deadline.alert.detail"
-                tone="critical"
-            />
-            <p class="mt-2 text-sm text-ink">
-                Next mandatory race:
-                <span class="font-semibold text-ink-strong">{{ props.deadline.next.title }}</span>,
-                {{ props.deadline.next.year_label }}
-                <template v-if="props.deadline.next.turn !== null"> turn {{ props.deadline.next.turn }}</template>
-                <template v-else> (the post-December block)</template>.
-                It reads "{{ props.deadline.next.state }}".
-            </p>
-            <p class="mt-1 text-xs text-ink-muted">
-                This states the next obligation the run has not cleared. Whether the rest of the career
-                keeps its deadlines is not something this tool predicts.
-            </p>
         </section>
 
         <!-- No calendar at all: one sentence naming what is missing and what to do. -->
