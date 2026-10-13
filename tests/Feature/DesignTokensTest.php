@@ -6,7 +6,7 @@ use App\Models\MatchCandidate;
 use App\Models\Preference;
 use App\Models\Umamusume;
 use Illuminate\Support\Facades\Schema;
-use Pest\Browser\Browser;
+use Pest\Browser\Playwright\Browser;
 
 /*
  * G-18 / G-19 for the application's two source trees.
