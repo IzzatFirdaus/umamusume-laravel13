@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '../../layouts/AppLayout.vue';
 import CandidateForm from '../../components/review/CandidateForm.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 
 interface Candidate {
     id: number;
@@ -24,6 +24,7 @@ interface Paginator<T> {
 defineProps<{
     candidates: Paginator<Candidate>;
     aliasLanguages: { value: string; label: string }[];
+    neverFetched: boolean;
 }>();
 </script>
 
@@ -38,11 +39,22 @@ defineProps<{
             decision.
         </p>
 
+        <!-- Two different absences. A queue someone has worked through is empty for a reason, and a
+             database nobody has ever fetched has never had anything to review; telling a Trainer to run
+             the fetch when they cleared six candidates an hour ago is the wrong instruction (R-27). -->
         <p
-            v-if="candidates.data.length === 0"
+            v-if="candidates.data.length === 0 && neverFetched"
             class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
         >
-            Nothing pending. Run <code>php artisan uma:fetch</code> to populate.
+            Nothing pending. This database has never been fetched, so there is nothing here yet. Run
+            <code>php artisan uma:fetch</code> to populate.
+        </p>
+        <p
+            v-else-if="candidates.data.length === 0"
+            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+        >
+            Nothing pending. Every match the engine could not decide has had your verdict. The rows it
+            promoted are on the <Link href="/database">Database screens</Link>.
         </p>
 
         <template v-else>

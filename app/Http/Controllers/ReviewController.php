@@ -44,6 +44,10 @@ class ReviewController extends Controller
 
         return Inertia::render('Review/Index', [
             'candidates' => $candidates,
+            // The queue being empty means two different things, and only the table knows which: no row
+            // at all is a database nobody has fetched, while rows with a verdict on them is a queue
+            // someone has worked through.
+            'neverFetched' => MatchCandidate::query()->count() === 0,
             'aliasLanguages' => collect(AliasLanguage::cases())
                 ->map(fn (AliasLanguage $language): array => [
                     'value' => $language->value,
