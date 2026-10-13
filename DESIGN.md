@@ -107,6 +107,21 @@ missing; that directory holds four PNGs and nothing else). Treat every ratio in 
 file as **documented, not re-verified here**. Closing that is a gate decision (R-class),
 not a copy fix.
 
+**Dated correction 2026-10-14.** The install half of that sentence is false, and the skip was a name.
+`pestphp/pest-plugin-browser` is installed on this host (`vendor/pestphp/pest-plugin-browser/src/`), and
+so is Playwright (chromium-1244, firefox-1544 and webkit-2361 in the browser cache). The guard did not
+fire because a driver was missing: the file imported `Pest\Browser\Browser`, which no autoload root
+provides, while the plugin's own class is `Pest\Browser\Playwright\Browser`
+(`vendor/pestphp/pest-plugin-browser/src/Playwright/Browser.php:5` and `:12`), so
+`class_exists(Browser::class)` answered false on a machine that has everything. `17261d4` repointed that
+import on 2026-10-14; with it the guard resolves and the two tests reach their `markTestIncomplete`
+calls, reporting *incomplete* rather than *skipped*. That much is derived from the guard's own semantics
+plus a `php -r` class probe, not from a run of the fixed file: the working copy at that path is another
+session's uncommitted gate body, so no run of HEAD's shape exists on this tree. What the correction does
+not buy: the gate measures nothing yet, so every ratio in this file stays **documented, not re-verified**
+and the corpus-transcription caveat above holds. Replacing those two stubs is the peer's rewrite's work
+(609 lines against HEAD's 331 as this is written), and this paragraph is theirs to supersede.
+
 | Role                     | Token                                    | Light (default)         | Dark (override)         | Why                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------ | ---------------------------------------- | ----------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Page field               | `--color-page`                           | `#F2F1F8`               | `#0D0C0F`               | pale lavender; raceboard surround, measured                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
@@ -762,12 +777,12 @@ repo, and it is the finding most worth carrying out of this audit.
 | -------------------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------- |
 | No `zinc-*` utility, no `dark:` fork, on shell pages                             | `DesignTokensTest` (data provider over URLs)   | **passing**                                                 |
 | Pagination renders from tokens                                                   | `DesignTokensTest`                             | **passing**                                                 |
-| Exactly 60 colour tokens in `@theme static`                                      | `DesignTokensTest`                             | **passing** (11 passed, 42 assertions)                      |
+| Exactly 60 colour tokens in `@theme static`                                      | `DesignTokensTest`                             | **passing** (11 passed, 42 assertions) **(2026-10-14: the number this row states is 59, and the row was left behind by the §2.1 erratum above. The tripwire counts the stylesheet rather than a hand list — `tests/Feature/DesignTokensTest.php:268` asserts `toHaveCount(59)` — and a comment-stripped scan of `resources/css/app.css` measures 110 `--color-*` declarations resolving to 59 unique names. The count test passes: 1 passed, 3 assertions, measured 2026-10-14.)**  |
 | Selection boundary uses `pick-line`, never `pick`                                | `DesignTokensTest` (whole view tree)           | **passing**                                                 |
 | Theme preference is one keyed row, SQLite only                                   | `DesignTokensTest`                             | **passing**                                                 |
 | First paint is the resolved theme; unknown stored value ignored                  | `DesignTokensTest`                             | **passing**                                                 |
-| All 60 tokens resolve non-empty in both themes (D-288)                           | `DesignTokensTest`, browser block              | **skipped** — no Playwright, test is `markTestIncomplete`   |
-| All 19 text/background pairs + 9 grade fills clear 4.5:1 in both themes (G-18)   | `DesignTokensTest`, browser block              | **skipped** — same cause                                    |
+| All 60 tokens resolve non-empty in both themes (D-288)                           | `DesignTokensTest`, browser block              | **skipped** — no Playwright, test is `markTestIncomplete` **(2026-10-14: the driver is installed and, since `17261d4` repointed `DesignTokensTest.php:9`, the guard resolves — so this row now reports the `markTestIncomplete` state, which is *unimplemented*, not *skipped for want of Playwright*. Cause and state both move; nothing is measured yet.)**   |
+| All 19 text/background pairs + 9 grade fills clear 4.5:1 in both themes (G-18)   | `DesignTokensTest`, browser block              | **skipped** — same cause **(2026-10-14: the cause is replaced and the list is not there. The driver is installed; the guard resolves since `17261d4`; and HEAD's `DesignTokensTest.php` contains no pair list at all — `g18ContractPairs` is absent and the block ends in `markTestIncomplete` at `:320` and `:329`. The 19 pairs are a number this file carried from a contract the committed test never enforced. Ratios stay documented; the enforcement is a peer's uncommitted rewrite, 609 lines against HEAD's 331.)**   |
 | Rendered copy: `N/A` for absence, never a dash, no `Unknown`                     | `RenderedCopyHygieneTest`, view tests          | **passing**                                                 |
 | Flash banners use tokens                                                         | `FlashBannerTokensTest`                        | **passing**                                                 |
 | 768px minimum width is safe                                                      | nothing                                        | **Unverified** — see §2.3's held proposal                   |
@@ -800,6 +815,21 @@ classes, and the browser specs carry the 44px floor and the reflow checks the Bl
 What the re-read does **not** change: the ratio figures themselves stay "documented, not re-verified",
 because the evidence files the §2.1 comment cites are still absent from the tree, and the §2.3 768px
 row stays Unverified as §2.3's held proposal records.*
+
+_Dated correction 2026-10-14, on the two passages immediately above._ The re-read's first move is a
+category error, and it is the reason this file has carried two accounts of one gate.
+`@axe-core/playwright` and the axe A + AA runs on `#app` belong to the **Playwright browser specs** under
+`tests/browser/`, which assert accessibility rules against rendered pages; the D-288 / G-18 block in
+`tests/Feature/DesignTokensTest.php` is a **different instrument**, resolving custom properties and
+computing contrast ratios inside a Pest browser test. A green browser suite was never evidence that the
+PHPUnit gate ran, and it never ran: first because its `:9` import named a class that does not exist in the
+installed plugin, and now because its body is still the pair of `markTestIncomplete` calls. So
+"no longer skipped for lack of a driver" was true of the specs and false of the gate — the gate is
+unimplemented, and the half-sentence above about installing the package has since been overtaken by facts:
+the package is installed, the pin in `composer.json:27` is `"*"` and uncommitted, and the only remaining
+work in that "single change" is the assertion body, which a peer session holds uncommitted. The re-read's
+second move (the Inertia page set as the assertion base, the `dark:` and skeleton-palette sweep, the 44px
+floor and reflow checks in the browser specs) stands exactly as written._
 
 ## 11. Open questions for the owner
 
