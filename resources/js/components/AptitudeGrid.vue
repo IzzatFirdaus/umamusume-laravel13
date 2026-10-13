@@ -33,7 +33,7 @@ const rows: { label: string; key: string }[][] = [
             <div
                 v-for="cell in row"
                 :key="cell.key"
-                class="flex items-baseline justify-between gap-2 border-b border-rule pb-1"
+                class="flex items-baseline gap-2 border-b border-rule pb-1"
             >
                 <dt class="text-ink-muted">{{ cell.label }}</dt>
                 <dd class="font-mono font-bold text-ink-strong">{{ aptitudes[cell.key] }}</dd>
