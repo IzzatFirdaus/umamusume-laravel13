@@ -249,7 +249,7 @@ const group = (n: number): string => n.toLocaleString('en-US');
 
                 <template v-if="props.recentVeterans.total === 0">
                     <p class="mt-2 text-sm text-ink">No Veterans recorded yet.</p>
-                    <p class="mt-2 text-sm text-ink-muted">
+                    <p class="mt-2 max-w-3xl text-sm text-ink-muted">
                         A Veteran is a completed career filed into the library. Nothing is filed there:
                         a career is saved from its own Result screen, so open one that finished and
                         choose Save Veteran.
