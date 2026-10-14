@@ -25,6 +25,7 @@ import SetupLayout from '../../layouts/SetupLayout.vue';
 import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
 import SupportSlot from '../../components/support/SupportSlot.vue';
 import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
@@ -229,13 +230,13 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
             that role belongs to the position: any card may sit in it.
         </p>
 
-        <p class="mt-3 text-sm text-ink-muted">
+        <div class="mt-3 text-sm text-ink-muted">
             <template v-if="props.scenarioLabel">{{ props.scenarioLabel }}</template>
-            <span
-                v-else
-                title="No scenario has been chosen in this setup draft yet, so a card's Scenario Link cannot be checked against a linked list."
-            >Scenario: N/A</span>
-        </p>
+            <template v-else>
+                Scenario:
+                <AbsenceValue reason="No scenario has been chosen in this setup draft yet, so a card's Scenario Link cannot be checked against a linked list." />
+            </template>
+        </div>
 
         <p
             v-if="form.errors.deck"
