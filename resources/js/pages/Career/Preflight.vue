@@ -146,8 +146,6 @@ const start = (): void => {
 };
 
 const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
-const statLabel = (value: number | null): string => (value === null ? 'N/A' : String(value));
-const raceLabel = (value: string | null): string => value ?? 'N/A';
 </script>
 
 <template>
@@ -367,29 +365,30 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
             <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
                 <div v-for="stat in props.contract.target.stats" :key="stat.key" class="rounded-lg border border-rule bg-panel p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ stat.label }}</dt>
-                    <dd
-                        class="mt-1 font-mono text-sm text-ink-strong"
-                        :title="stat.value === null ? 'No target was entered for this stat.' : undefined"
-                    >
-                        {{ statLabel(stat.value) }}
+                    <dd class="mt-1 font-mono text-sm text-ink-strong">
+                        <template v-if="stat.value !== null">{{ stat.value }}</template>
+                        <AbsenceValue v-else compact reason="No target was entered for this stat." />
                     </dd>
                 </div>
             </dl>
 
-            <p class="mt-2 text-sm text-ink">
+            <div class="mt-2 text-sm text-ink">
                 Race profile:
-                <span :title="props.contract.target.races.distance === null ? 'No distance band was entered.' : undefined">
-                    {{ raceLabel(props.contract.target.races.distance) }}
-                </span>
+                <template v-if="props.contract.target.races.distance !== null">
+                    {{ props.contract.target.races.distance }}
+                </template>
+                <AbsenceValue v-else compact reason="No distance band was entered." />
                 <span class="text-ink-muted"> · </span>
-                <span :title="props.contract.target.races.surface === null ? 'No surface was entered.' : undefined">
-                    {{ raceLabel(props.contract.target.races.surface) }}
-                </span>
+                <template v-if="props.contract.target.races.surface !== null">
+                    {{ props.contract.target.races.surface }}
+                </template>
+                <AbsenceValue v-else compact reason="No surface was entered." />
                 <span class="text-ink-muted"> · </span>
-                <span :title="props.contract.target.races.style === null ? 'No running style was entered.' : undefined">
-                    {{ raceLabel(props.contract.target.races.style) }}
-                </span>
-            </p>
+                <template v-if="props.contract.target.races.style !== null">
+                    {{ props.contract.target.races.style }}
+                </template>
+                <AbsenceValue v-else compact reason="No running style was entered." />
+            </div>
 
             <p class="mt-1 text-sm text-ink">
                 Skill priorities:
