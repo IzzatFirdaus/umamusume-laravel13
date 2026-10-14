@@ -284,7 +284,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
              controls that are merely unused. -->
         <p
             v-if="props.rosterTotal === 0"
-            class="mt-3 rounded-md border border-dashed border-rule bg-raised p-3 text-sm text-ink-muted"
+            class="mt-3 rounded-lg border border-dashed border-rule bg-raised p-3 text-sm text-ink-muted"
         >
             No Veterans recorded yet. The Veteran library is where a parent is picked from, and it holds a
             run once you complete one, so this step cannot name a parent until then. Record the parents you
@@ -296,7 +296,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
         </p>
 
         <ol class="mt-4 max-w-3xl space-y-2">
-            <li class="rounded-md border-2 border-rule bg-panel p-3">
+            <li class="rounded-lg border-2 border-rule bg-panel p-3">
                 <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</p>
                 <div class="mt-1 text-sm font-semibold text-ink-strong">
                     <span v-if="props.graph.trainee.name">{{ props.graph.trainee.name }}</span>
@@ -331,7 +331,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                             <li
                                 v-for="(ancestor, ancestorIndex) in parent.ancestors"
                                 :key="ancestor.slot"
-                                class="rounded-md border border-rule bg-raised p-3"
+                                class="rounded-lg border border-rule bg-raised p-3"
                             >
                                 <label
                                     class="block text-xs font-medium text-ink"

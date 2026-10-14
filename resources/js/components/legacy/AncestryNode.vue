@@ -83,7 +83,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 <template>
     <!-- The node. `<li>` because every node in this graph is one item of the parent's list, and the
          browser's own list semantics are then the graph's semantics. -->
-    <li class="rounded-md border border-rule bg-raised p-3">
+    <li class="rounded-lg border border-rule bg-raised p-3">
         <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ label }}</p>
 
         <p class="mt-1 text-sm font-semibold text-ink-strong">

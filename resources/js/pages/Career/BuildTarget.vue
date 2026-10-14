@@ -308,7 +308,7 @@ function removeAt(index: number): void {
             as one object, and it lives in this setup draft until Preflight creates the run.
         </p>
 
-        <section aria-labelledby="target-summary-heading" class="mt-3 rounded-md border border-rule bg-panel p-4">
+        <section aria-labelledby="target-summary-heading" class="mt-3 rounded-lg border border-rule bg-panel p-4">
             <h2 id="target-summary-heading" class="text-lg font-semibold text-ink-strong">Summary</h2>
             <p class="mt-2 text-sm text-ink">
                 {{ summary }}
@@ -354,7 +354,7 @@ function removeAt(index: number): void {
              letting the server refuse with its named bound, which is the message this page renders
              with its own `aria-describedby` and focus. -->
         <form class="mt-5 max-w-3xl space-y-6" novalidate @submit.prevent="submit">
-            <fieldset class="rounded-md border border-rule bg-panel p-4">
+            <fieldset class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-sm font-semibold text-ink-strong">What the career is for</legend>
 
                 <div class="grid gap-4 sm:grid-cols-2">
@@ -452,7 +452,7 @@ function removeAt(index: number): void {
                 </p>
             </fieldset>
 
-            <fieldset class="rounded-md border border-rule bg-panel p-4">
+            <fieldset class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-sm font-semibold text-ink-strong">Stat targets</legend>
 
                 <p class="text-sm text-ink-muted">
@@ -518,7 +518,7 @@ function removeAt(index: number): void {
                 >{{ errors.targets }}</p>
             </fieldset>
 
-            <fieldset class="rounded-md border border-rule bg-panel p-4">
+            <fieldset class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-sm font-semibold text-ink-strong">Stat ceilings</legend>
 
                 <p class="text-sm text-ink-muted">
@@ -558,7 +558,7 @@ function removeAt(index: number): void {
                 </div>
             </fieldset>
 
-            <fieldset class="rounded-md border border-rule bg-panel p-4">
+            <fieldset class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-sm font-semibold text-ink-strong">Skill priorities</legend>
 
                 <p class="text-sm text-ink-muted">

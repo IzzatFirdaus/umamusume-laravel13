@@ -344,7 +344,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
 
         <p
             v-if="props.trainees.data.length === 0 && !loading"
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="mt-8 rounded-lg border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
         >
             No trainee matches these filters. The roster is filled by seed data or `php artisan uma:fetch`;
             clearing the filters shows every row the catalog holds.
@@ -354,7 +354,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
             <li
                 v-for="trainee in props.trainees.data"
                 :key="trainee.id"
-                class="rounded-md border border-rule bg-panel p-4"
+                class="rounded-lg border border-rule bg-panel p-4"
                 :class="props.selected === trainee.id ? 'border-2 border-chrome' : ''"
             >
                 <h2 class="flex flex-wrap items-center gap-3">

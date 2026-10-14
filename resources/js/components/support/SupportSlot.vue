@@ -89,7 +89,7 @@ function focusRow(): void {
     <li
         :id="`deck-slot-${position}`"
         tabindex="-1"
-        class="flex flex-wrap items-start gap-x-4 gap-y-2 rounded-md border border-rule bg-raised px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+        class="flex flex-wrap items-start gap-x-4 gap-y-2 rounded-lg border border-rule bg-raised px-3 py-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
     >
         <ArtworkSlot
             v-if="card"

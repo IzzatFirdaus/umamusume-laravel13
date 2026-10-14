@@ -135,7 +135,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
              blank so the screen never shows an empty grid and calls it a choice. -->
         <p
             v-if="props.scenarios.length === 0"
-            class="mt-8 rounded-md border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
+            class="mt-8 rounded-lg border border-dashed border-rule bg-raised p-6 text-sm text-ink-muted"
         >
             No scenario is composed. `config/scenarios.php` holds none, so there is nothing to choose
             and no career can be started until one is added.
@@ -145,7 +145,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
             <li
                 v-for="card in props.scenarios"
                 :key="card.key"
-                class="rounded-md border border-rule bg-panel p-5"
+                class="rounded-lg border border-rule bg-panel p-5"
                 :class="props.selected === card.key ? 'border-2 border-chrome' : ''"
             >
                 <h2 class="flex flex-wrap items-baseline gap-x-3 text-lg font-semibold text-ink-strong">

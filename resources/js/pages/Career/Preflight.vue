@@ -183,7 +183,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                 <li
                     v-for="warning in props.contract.warnings"
                     :key="warning.key"
-                    class="flex flex-wrap items-baseline gap-x-2 rounded-md border border-rule bg-panel p-3 text-sm"
+                    class="flex flex-wrap items-baseline gap-x-2 rounded-lg border border-rule bg-panel p-3 text-sm"
                 >
                     <span aria-hidden="true" class="font-mono font-bold text-goal-line">!</span>
                     <span class="font-semibold text-ink-strong">{{ warning.title }}.</span>
@@ -197,7 +197,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
 
         <p
             v-else
-            class="mt-6 rounded-md border border-rule bg-panel p-3 text-sm text-ink"
+            class="mt-6 rounded-lg border border-rule bg-panel p-3 text-sm text-ink"
         >
             No warnings. Every section is filled and nothing in the entered data reads as a gap this tool can
             see.
@@ -207,7 +207,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
             <h2 id="build-heading" class="text-lg font-semibold text-ink-strong">Build</h2>
 
             <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
-                <div class="rounded-md border border-rule bg-panel p-3">
+                <div class="rounded-lg border border-rule bg-panel p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Trainee</dt>
                     <dd class="mt-1 text-sm text-ink-strong">
                         <template v-if="props.contract.build.trainee">
@@ -222,7 +222,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                     </dd>
                 </div>
 
-                <div class="rounded-md border border-rule bg-panel p-3">
+                <div class="rounded-lg border border-rule bg-panel p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Scenario</dt>
                     <dd class="mt-1 text-sm text-ink-strong">
                         <template v-if="props.contract.build.scenario">
@@ -235,7 +235,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                     </dd>
                 </div>
 
-                <div class="rounded-md border border-rule bg-panel p-3 sm:col-span-2">
+                <div class="rounded-lg border border-rule bg-panel p-3 sm:col-span-2">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Your target</dt>
                     <dd class="mt-1 text-sm text-ink">
                         <template v-if="props.contract.build.target">
@@ -248,7 +248,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                     </dd>
                 </div>
 
-                <div class="rounded-md border border-rule bg-panel p-3 sm:col-span-2">
+                <div class="rounded-lg border border-rule bg-panel p-3 sm:col-span-2">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                         Ancestry
                         <span v-if="props.contract.build.legacy" class="ml-2 normal-case tracking-normal">
@@ -316,7 +316,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
         <section class="mt-6" aria-labelledby="deck-heading">
             <h2 id="deck-heading" class="text-lg font-semibold text-ink-strong">Support deck</h2>
 
-            <div v-if="props.contract.deck === null" class="mt-2 rounded-md border border-rule bg-panel p-3 text-sm text-ink">
+            <div v-if="props.contract.deck === null" class="mt-2 rounded-lg border border-rule bg-panel p-3 text-sm text-ink">
                 <AbsenceValue compact reason="No six-slot deck is recorded in this setup yet." />
                 The deck step has not been saved.
             </div>
@@ -326,7 +326,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
                     <li
                         v-for="slot in props.contract.deck.slots"
                         :key="slot.position"
-                        class="rounded-md border border-rule bg-panel p-3 text-sm"
+                        class="rounded-lg border border-rule bg-panel p-3 text-sm"
                     >
                         <p class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                             {{ slot.label }}
@@ -365,7 +365,7 @@ const raceLabel = (value: string | null): string => value ?? 'N/A';
             <h2 id="target-heading" class="text-lg font-semibold text-ink-strong">Target</h2>
 
             <dl class="mt-2 max-w-3xl grid gap-2 sm:grid-cols-2">
-                <div v-for="stat in props.contract.target.stats" :key="stat.key" class="rounded-md border border-rule bg-panel p-3">
+                <div v-for="stat in props.contract.target.stats" :key="stat.key" class="rounded-lg border border-rule bg-panel p-3">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">{{ stat.label }}</dt>
                     <dd
                         class="mt-1 font-mono text-sm text-ink-strong"

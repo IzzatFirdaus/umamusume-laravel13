@@ -349,7 +349,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
 
                 <p
                     v-if="props.picker.options.length === 0"
-                    class="mt-3 rounded-md border border-dashed border-rule bg-raised p-5 text-sm text-ink-muted"
+                    class="mt-3 rounded-lg border border-dashed border-rule bg-raised p-5 text-sm text-ink-muted"
                 >
                     The support-card catalog holds no row matching that. Run
                     <code>php artisan uma:fetch gametora-support-cards</code> to fill it, or

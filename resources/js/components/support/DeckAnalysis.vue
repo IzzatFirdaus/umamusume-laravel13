@@ -46,10 +46,10 @@ defineProps<{
 </script>
 
 <template>
-    <section class="mt-6 rounded-md border border-rule bg-panel p-4" aria-labelledby="deck-analysis-heading">
+    <section class="mt-6 rounded-lg border border-rule bg-panel p-4" aria-labelledby="deck-analysis-heading">
         <h3 id="deck-analysis-heading" class="text-lg font-semibold text-ink-strong">Deck analysis</h3>
 
-        <p v-if="covered === 0" class="mt-3 rounded-md border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted">
+        <p v-if="covered === 0" class="mt-3 rounded-lg border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted">
             Nothing to analyse yet. The analysis reads the effects the six cards state, so it is blank
             until the deck has at least one card in it. Fill a slot on the left and this fills in with it.
         </p>
