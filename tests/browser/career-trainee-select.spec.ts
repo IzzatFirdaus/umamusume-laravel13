@@ -23,6 +23,19 @@ function card(page: import('@playwright/test').Page, name: string) {
     return page.getByRole('listitem').filter({ has: page.getByRole('heading', { name }) });
 }
 
+/**
+ * A named absence as `AbsenceValue` renders it: one disclosure whose marker is the visible `N/A` and
+ * whose reason is the other half of the same node.
+ *
+ * This replaces `getByTitle(reason)`, the grammar the component carried until `d0bf4c8` retired the
+ * mouse-only `title` in favour of the disclosure. Measured on the served page: the disclosure resolves
+ * as a `group` with no accessible name, so `getByRole('group', { name: reason })` finds nothing and the
+ * reason has to be matched as the group's content.
+ */
+function absence(page: import('@playwright/test').Page, reason: string) {
+    return page.getByRole('group').filter({ hasText: reason });
+}
+
 test.describe('Trainee Selection and Profile', () => {
     test('renders the roster with the wizard shell and no implied choice', async ({ page }) => {
         await page.goto('/career/setup/trainee');
@@ -57,7 +70,7 @@ test.describe('Trainee Selection and Profile', () => {
 
         // Nothing is chosen on a fresh draft, so the stored-choice line states the absence and no row
         // is pre-pressed.
-        await expect(page.getByTitle('No trainee has been chosen in this setup draft yet.')).toHaveText('N/A');
+        await expect(absence(page, 'No trainee has been chosen in this setup draft yet.')).toContainText('N/A');
         await expect(page.getByRole('button', { name: 'Select Trainee', exact: true })).toHaveCount(25);
         await expect(page.getByText('67 trainees match.')).toBeVisible();
     });
@@ -120,7 +133,7 @@ test.describe('Trainee Selection and Profile', () => {
         const action = card(page, 'Admire Vega').getByRole('button', { name: 'Select Trainee', exact: true });
 
         await expect(action).toHaveAttribute('aria-pressed', 'false');
-        await expect(page.getByTitle('No trainee has been chosen in this setup draft yet.')).toHaveText('N/A');
+        await expect(absence(page, 'No trainee has been chosen in this setup draft yet.')).toContainText('N/A');
 
         await action.focus();
         await expect(action).toBeFocused();
