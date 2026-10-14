@@ -213,7 +213,7 @@ const deficitText = computed(() => (props.option.deficit === null ? 'N/A' : fmt(
 <template>
     <article
         :class="[
-            'flex min-w-0 flex-col rounded-md border bg-panel p-4',
+            'flex min-w-0 flex-col rounded-lg border bg-panel p-4',
             props.option.recommended
                 ? 'border-2 border-pick-line'
                 : `border ${groupBorder[group] ?? 'border-rule'}`,

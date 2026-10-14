@@ -116,7 +116,7 @@ const denominator = (stat: Stat): number | null =>
 </script>
 
 <template>
-    <section aria-labelledby="career-state-heading" class="rounded-md border border-rule bg-panel p-4">
+    <section aria-labelledby="career-state-heading" class="rounded-lg border border-rule bg-panel p-4">
         <h2 id="career-state-heading" class="text-lg font-semibold text-ink-strong">Stats and state</h2>
 
         <ul class="mt-3 space-y-2">

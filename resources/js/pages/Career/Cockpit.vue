@@ -541,7 +541,7 @@ const jumpToShop = (): void => {
                 </li>
             </ul>
 
-            <details class="mt-2 rounded-md border border-rule bg-panel p-4">
+            <details class="mt-2 rounded-lg border border-rule bg-panel p-4">
                 <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
                     Edit identity
                 </summary>
@@ -762,7 +762,7 @@ const jumpToShop = (): void => {
                         </select>
                     </label>
 
-                    <details class="mt-2 rounded-md border border-rule bg-panel p-4">
+                    <details class="mt-2 rounded-lg border border-rule bg-panel p-4">
                         <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
                             Correct turn {{ props.correction.turn }} by hand
                         </summary>
@@ -892,7 +892,7 @@ const jumpToShop = (): void => {
                 <section
                     v-if="empty"
                     aria-labelledby="career-empty-heading"
-                    class="mb-3 rounded-md border border-dashed border-rule bg-raised p-4"
+                    class="mb-3 rounded-lg border border-dashed border-rule bg-raised p-4"
                 >
                     <h2 id="career-empty-heading" class="text-lg font-semibold text-ink-strong">No turn recorded yet</h2>
                     <p class="mt-1 text-sm text-ink">
@@ -924,7 +924,7 @@ const jumpToShop = (): void => {
             </div>
 
             <section
-                class="order-4 min-w-0 rounded-md border border-rule bg-panel p-4 md:order-none md:col-span-2 md:row-start-4 lg:col-span-3 lg:row-start-3"
+                class="order-4 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none md:col-span-2 md:row-start-4 lg:col-span-3 lg:row-start-3"
                 aria-labelledby="career-scenario-heading"
             >
                 <h2 id="career-scenario-heading" class="text-lg font-semibold text-ink-strong">Scenario</h2>
@@ -938,7 +938,7 @@ const jumpToShop = (): void => {
             </section>
 
             <section
-                class="order-5 min-w-0 rounded-md border border-rule bg-panel p-4 md:order-none md:col-span-2 md:row-start-1 lg:col-span-1 lg:col-start-1 lg:row-span-2 lg:row-start-1"
+                class="order-5 min-w-0 rounded-lg border border-rule bg-panel p-4 md:order-none md:col-span-2 md:row-start-1 lg:col-span-1 lg:col-start-1 lg:row-span-2 lg:row-start-1"
                 aria-labelledby="career-timeline-heading"
             >
                 <h2 id="career-timeline-heading" class="text-lg font-semibold text-ink-strong">

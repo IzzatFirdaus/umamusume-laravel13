@@ -43,7 +43,7 @@ const entryClass =
 </script>
 
 <template>
-    <section aria-labelledby="career-actions-heading" class="rounded-md border border-rule bg-panel p-4">
+    <section aria-labelledby="career-actions-heading" class="rounded-lg border border-rule bg-panel p-4">
         <h2 id="career-actions-heading" class="text-lg font-semibold text-ink-strong">Actions</h2>
 
         <ul class="mt-3 space-y-2">
