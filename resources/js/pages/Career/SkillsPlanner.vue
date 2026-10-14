@@ -215,7 +215,7 @@ const coverageConstants = computed(() =>
         <template #title>Skills planner</template>
 
         <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
-        <p v-if="visitFailed" role="alert" class="mb-4 rounded border border-risk bg-raised px-3 py-2 text-sm text-risk">
+        <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That screen did not load. Nothing was saved; try again.
         </p>
 

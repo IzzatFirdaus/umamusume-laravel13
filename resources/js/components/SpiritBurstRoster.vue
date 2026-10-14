@@ -46,7 +46,7 @@ const treatments: Record<BurstState, { mark: string; treat: string }> = {
                 class="flex items-baseline justify-between gap-3 rounded-md border border-rule bg-raised px-3 py-2 text-sm"
             >
                 <span class="font-semibold text-ink-strong">{{ row.teammate }}</span>
-                <span class="shrink-0 rounded px-2 py-0.5 font-mono text-xs font-bold" :class="treatments[row.state].treat">
+                <span class="shrink-0 rounded-md px-2 py-0.5 font-mono text-xs font-bold" :class="treatments[row.state].treat">
                     {{ treatments[row.state].mark }} {{ row.stateLabel }}
                 </span>
             </li>

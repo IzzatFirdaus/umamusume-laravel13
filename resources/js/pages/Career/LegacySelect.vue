@@ -515,7 +515,7 @@ const ancestorError = (index: number, slot: number): string | undefined =>
                                 <input
                                     v-model="form.legacies[index].is_guest"
                                     type="checkbox"
-                                    class="h-5 w-5 rounded border-rule"
+                                    class="h-5 w-5 rounded-md border-rule"
                                 >
                                 <span class="text-xs text-ink">Rented for the run</span>
                             </label>

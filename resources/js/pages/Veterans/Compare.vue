@@ -143,7 +143,7 @@ function letterFor(column: Column, key: string): string | null {
                         <input
                             :id="`pick-${option.id}`"
                             type="checkbox"
-                            class="h-6 w-6 rounded border border-rule bg-raised"
+                            class="h-6 w-6 rounded-md border border-rule bg-raised"
                             :checked="isChecked(option.id)"
                             :disabled="!isChecked(option.id) && picked.length >= props.max"
                             @change="toggle(option.id)"
@@ -172,7 +172,7 @@ function letterFor(column: Column, key: string): string | null {
                     v-for="(message, field) in errors"
                     :key="field"
                     role="alert"
-                    class="rounded border border-risk bg-raised px-3 py-1 text-sm text-risk"
+                    class="rounded-md border border-risk bg-raised px-3 py-1 text-sm text-risk"
                 >
                     {{ field }}: {{ message }}
                 </li>

@@ -152,7 +152,7 @@ const sparkCount = (column: CompareColumn, slot: string, kind: string): number =
                                 type="checkbox"
                                 :value="option.id"
                                 :checked="isChecked(option.id)"
-                                class="h-5 w-5 rounded border-rule"
+                                class="h-5 w-5 rounded-md border-rule"
                                 @change="toggle(option.id)"
                             >
                             <span>{{ option.label }}</span>

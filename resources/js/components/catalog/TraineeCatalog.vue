@@ -109,7 +109,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'form' : 'forms
             </select>
         </label>
         <label class="flex items-center gap-2 pb-1.5">
-            <input v-model="showUnconfirmed" type="checkbox" name="show_unconfirmed" value="1" class="rounded border-rule">
+            <input v-model="showUnconfirmed" type="checkbox" name="show_unconfirmed" value="1" class="rounded-md border-rule">
             <span class="text-ink-muted">Show unconfirmed cards</span>
         </label>
         <button type="submit" class="enamel h-11 rounded-full bg-chrome px-3 py-1.5 font-semibold text-on-chrome">

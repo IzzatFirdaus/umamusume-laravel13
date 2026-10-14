@@ -108,7 +108,7 @@ function applyFilters(): void {
                 type="checkbox"
                 name="unique"
                 value="1"
-                class="size-6 rounded border-rule bg-raised"
+                class="size-6 rounded-md border-rule bg-raised"
             >
             <span>Unique only</span>
         </label>

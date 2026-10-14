@@ -240,7 +240,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         <p
             v-if="form.errors.deck"
             role="alert"
-            class="mt-3 rounded border border-risk bg-raised px-3 py-2 text-sm text-risk"
+            class="mt-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk"
         >
             {{ form.errors.deck }}
         </p>

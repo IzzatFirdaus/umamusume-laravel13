@@ -143,7 +143,7 @@ const denominator = (stat: Stat): number | null =>
                     </div>
                 </div>
 
-                <div v-if="stat.current !== null && stat.target !== null" class="mt-1.5 h-1.5 overflow-hidden rounded bg-sunken" aria-hidden="true">
+                <div v-if="stat.current !== null && stat.target !== null" class="mt-1.5 h-1.5 overflow-hidden rounded-md bg-sunken" aria-hidden="true">
                     <div class="h-full bg-green-deep" :style="{ width: `${percent(stat)}%` }"></div>
                 </div>
                 <p v-else class="mt-1 text-xs text-ink-muted">{{ statAbsence(stat) }}</p>

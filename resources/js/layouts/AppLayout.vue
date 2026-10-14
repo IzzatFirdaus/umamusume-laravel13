@@ -311,7 +311,7 @@ const moreIsCurrent = computed(() =>
                 <p
                      role="status"
                      :class="flashStatus
-                         ? 'mb-4 rounded border border-rule bg-raised px-3 py-2 text-sm text-ink'
+                         ? 'mb-4 rounded-md border border-rule bg-raised px-3 py-2 text-sm text-ink'
                          : 'sr-only'"
                  >
                      {{ flashStatus ?? '' }}

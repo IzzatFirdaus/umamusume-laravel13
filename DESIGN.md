@@ -252,6 +252,13 @@ external fonts (offline constraint + C-8 dependency gate).
 - Structure per surface: one h1, one primary action per screen, filters as a
   single inline form row, pagination under tables.
 - Radius `rounded-md` consistently; borders `1px --color-rule`.
+  **Amended 2026-10-14 (Track 2-A, owner-signed): radius is a declared scale, not one value.**
+  `app.css`'s `@theme static` carries `--radius-sm: 6px`, `--radius-md: 10px`, `--radius-lg: 14px`,
+  `--radius-xl: 16px` and `--radius-pill: 999px`. Cards take `rounded-md` or `rounded-lg`, dialogs
+  `rounded-xl`, pills and chips `rounded-pill`. Borders stay `1px --color-rule`; the sentence above
+  stands as the record of what was ruled before this amendment. One exception is deliberate:
+  `turn-chip` is pinned to `--radius-sm`, because its 6px corner is measured from client frame
+  `194819` and a scale amendment must not move a measured motif.
 - Shadows: none. Separation comes from the rule edge and the raised/sunken step
   (research doc §3.7 consequence 2).
 - **Amended 2026-09-27: three franchise motifs are material, not elevation, and are

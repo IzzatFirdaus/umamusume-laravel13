@@ -485,7 +485,7 @@ function removeAt(index: number): void {
                         <!-- Bar and number together, always: the number is the readout and the bar is
                              its illustration, so the bar alone never stands in for a value. -->
                         <span class="flex flex-wrap items-center gap-2">
-                            <span class="h-2 w-36 overflow-hidden rounded bg-sunken" aria-hidden="true">
+                            <span class="h-2 w-36 overflow-hidden rounded-md bg-sunken" aria-hidden="true">
                                 <span
                                     class="block h-full bg-chrome"
                                     :data-fill="percent(stat)"

@@ -62,7 +62,7 @@ const stateClass = computed(() => {
             </div>
             <span class="flex items-center gap-2 text-xs">
                 <span class="font-mono tabular-nums text-ink-muted">{{ value }}/100</span>
-                <span class="rounded border border-transparent px-2 py-0.5 font-bold" :class="stateClass">{{ state }}</span>
+                <span class="rounded-md border border-transparent px-2 py-0.5 font-bold" :class="stateClass">{{ state }}</span>
             </span>
         </template>
     </div>

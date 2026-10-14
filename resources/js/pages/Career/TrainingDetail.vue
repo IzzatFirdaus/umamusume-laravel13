@@ -289,7 +289,7 @@ const capFor = (label: string): number =>
         <template #title>Training decision</template>
 
         <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
-        <p v-if="visitFailed" role="alert" class="mb-4 rounded border border-risk bg-raised px-3 py-2 text-sm text-risk">
+        <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That turn did not go through. Nothing was saved; try again.
         </p>
 

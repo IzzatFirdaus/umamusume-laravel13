@@ -171,7 +171,7 @@ function save(): void {
         <template #title>Save Veteran</template>
 
         <p v-if="visiting" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
-        <p v-if="visitFailed" role="alert" class="mb-4 rounded border border-risk bg-raised px-3 py-2 text-sm text-risk">
+        <p v-if="visitFailed" role="alert" class="mb-4 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             This screen did not load. Nothing was saved; try again.
         </p>
 
@@ -290,7 +290,7 @@ function save(): void {
                         Suggestions, not a fixed list. Choose any of these, or add a word of your own below.
                     </p>
 
-                    <p v-if="form.errors.run" id="tag-run-error" role="alert" class="mt-2 rounded border border-risk bg-raised px-3 py-2 text-sm text-risk">
+                    <p v-if="form.errors.run" id="tag-run-error" role="alert" class="mt-2 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
                         {{ form.errors.run }}
                     </p>
 
@@ -364,7 +364,7 @@ function save(): void {
                             v-for="message in tagErrors"
                             :key="message"
                             role="alert"
-                            class="rounded border border-risk bg-raised px-3 py-1 text-sm text-risk"
+                            class="rounded-md border border-risk bg-raised px-3 py-1 text-sm text-risk"
                         >
                             {{ message }}
                         </li>

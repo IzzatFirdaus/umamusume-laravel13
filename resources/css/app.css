@@ -17,8 +17,9 @@
  * utilities anywhere, only these variables flip
  * (docs/research-scratch/DESIGN-CORPUS.md D-101, gate G-19).
  *
- * No shadows and no custom radius tokens: separation comes from the hairline rule
- * and the raised/sunken step, and radius is `rounded-md` throughout (DESIGN.md §2.3).
+ * Radius is a declared scale, not a single value (DESIGN.md §2.3, owner amendment
+ * 2026-10-14): 6 / 10 / 14 / 16 / pill. Shadows stay absent — separation still comes from the
+ * hairline rule and the raised/sunken step; elevation is a later Track 2 amendment.
  */
 @theme static {
     /*
@@ -30,6 +31,17 @@
      */
     --font-sans: ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', Consolas, monospace;
+
+    /*
+     * Radius scale (DESIGN.md §2.3, owner amendment 2026-10-14). Cards take --radius-md or
+     * --radius-lg, dialogs --radius-xl, pills and chips --radius-pill. `turn-chip` is pinned to
+     * --radius-sm because its 6px corner is measured from client frame 194819, not chosen here.
+     */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 16px;
+    --radius-pill: 999px;
 
     /*
      * Surfaces and ink. LIGHT is the default theme, owner ruling 2026-09-27, which restores
@@ -329,7 +341,7 @@ html[data-theme='dark'] {
     position: relative;
     overflow: hidden;
     border: 2px solid var(--color-anchor);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     background-color: var(--color-raised);
     padding: 1.5rem 0.75rem 0.5rem;
 

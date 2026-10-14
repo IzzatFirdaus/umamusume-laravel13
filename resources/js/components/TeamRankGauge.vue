@@ -34,7 +34,7 @@ defineProps<{
             <li
                 v-for="rung in ladder"
                 :key="rung.rank"
-                class="rounded px-2 py-1 font-mono text-xs font-bold tabular-nums"
+                class="rounded-md px-2 py-1 font-mono text-xs font-bold tabular-nums"
                 :class="current?.rank === rung.rank ? 'bg-pick text-on-pick' : 'bg-sunken text-ink-muted'"
                 :aria-current="current?.rank === rung.rank ? 'step' : undefined"
             >

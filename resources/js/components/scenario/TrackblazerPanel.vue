@@ -832,7 +832,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                             </span>
                             <span
                                 :class="[
-                                    'rounded px-2 py-0.5 font-mono text-xs font-bold uppercase tracking-wide',
+                                    'rounded-md px-2 py-0.5 font-mono text-xs font-bold uppercase tracking-wide',
                                     epithetToneClasses[row.state],
                                 ]"
                             >
