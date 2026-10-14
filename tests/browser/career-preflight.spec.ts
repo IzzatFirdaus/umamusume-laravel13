@@ -93,7 +93,11 @@ test('carries every entered step into the contract and states the deck gap in wo
     // Target: the five stats with their entered numbers, the race profile, and the ruleset absence.
     await expect(page.getByText('800').first()).toBeVisible();
     await expect(page.getByText('Race profile:').first()).toBeVisible();
-    await expect(page.getByTitle(/No source defines a Global ruleset version/)).toBeVisible();
+    // AbsenceValue renders the reason as the disclosure's content, not as a mouse-only title, and the
+    // group carries no accessible name, so the reason is matched as content and the marker as text.
+    await expect(
+        page.getByRole('group').filter({ hasText: /No source defines a Global ruleset version/ }),
+    ).toContainText('N/A');
 });
 
 test('an Edit round trip returns with every value intact', async ({ page }) => {

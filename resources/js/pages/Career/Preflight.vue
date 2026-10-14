@@ -398,10 +398,10 @@ const memberName = (member: Member): string => member.name ?? 'N/A, not chosen';
                 <span v-else title="No skill priorities were entered on the target step.">None entered</span>
             </p>
 
-            <p class="mt-3 text-sm text-ink-muted">
+            <div class="mt-3 text-sm text-ink-muted">
                 Ruleset version:
-                <span class="text-ink" :title="props.contract.ruleset.title">{{ props.contract.ruleset.label }}</span>
-            </p>
+                <AbsenceValue compact :reason="props.contract.ruleset.title" />
+            </div>
         </section>
 
         <div class="mt-6 flex flex-wrap items-center gap-3">
