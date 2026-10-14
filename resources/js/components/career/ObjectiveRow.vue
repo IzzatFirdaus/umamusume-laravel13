@@ -52,7 +52,15 @@ const state = computed(() => STATES[props.state]);
     <li class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
         <span class="shrink-0 font-mono text-ink-strong" aria-hidden="true">{{ state.glyph }}</span>
         <span class="font-semibold text-ink-strong">{{ state.word }}</span>
-        <span class="min-w-0 flex-1 break-words text-ink">{{ props.label }}</span>
+        <!-- No `min-w-0` here, and that is the fix. `min-w-0` on a `flex-1` item removes the automatic
+             minimum size, so this span became the thing that absorbs whatever the rest of the row
+             leaves: 15px wide and 200-240px tall in the 215px Advisor rail, one fragment per line,
+             while the same labels measured 126-142px in every wider context. Without it the item's
+             floor is its min-content width, which is what stops the collapse, and `flex-wrap` carries
+             the row. A pixel floor was tried first (`min-w-36`) and is wrong: it overflowed the cockpit
+             and the objectives strip sideways at 768px by 5px, which
+             `career-cockpit.spec.ts:275` catches. -->
+        <span class="flex-1 break-words text-ink">{{ props.label }}</span>
 
         <span class="text-xs text-ink-muted">
             <template v-if="props.due_label !== null">{{ props.due_label }}</template>
