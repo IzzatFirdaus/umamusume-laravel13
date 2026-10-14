@@ -212,6 +212,29 @@ external fonts (offline constraint + C-8 dependency gate).
 - Scale (Proposed, standard Tailwind sizes, reason = desk density):
   body `text-sm`, table cells `text-sm`, section headers `text-lg font-600`,
   page title `text-2xl font-600`, one `h1` per page.
+  **Amended 2026-10-14 (Track 2-F/2-C, owner-signed): the Critical tier gets its own step, so the
+  page title moves to `text-3xl font-semibold`.** Measured across twelve screens at 1280×900, every
+  `h1` computed 24px while section headers computed 18px — a 6px gap, one step on the Tailwind ramp,
+  which is why the title read as a section header that happened to come first rather than as the
+  page's own voice. `text-3xl` (30px) doubles the gap to 12px without touching the Heading, Body or
+  Metadata tiers. The four tiers as they now stand:
+
+  | Tier | Contains | Treatment |
+  | --- | --- | --- |
+  | Critical | Page title | `text-3xl font-semibold text-ink-strong` |
+  | Heading | Section headers, panel titles | `text-lg font-semibold text-ink-strong` |
+  | Body | Content | `text-sm` |
+  | Metadata | Labels, hints, timestamps | `text-xs text-ink-muted` |
+
+  The size carries the tier, not a typeface: the display-font proposal below stays parked, so the
+  Critical tier renders from the same system stack as everything else. One `h1` per page still holds.
+  It is emitted in **two** kinds of place, and the second is not an oversight: `AppLayout.vue`'s
+  `#title` heading, which `CareerLayout.vue` and `SetupLayout.vue` forward into rather than rendering
+  their own, and the three standalone error documents (`errors/404`, `errors/419`, `errors/500`),
+  which are full documents that cannot mount the shell — `errors.500` deliberately never touches the
+  database, so it cannot share a path that reads a preference from it. A first pass at this amendment
+  claimed one home for the `h1`; the measured 404 at 24px against the shell's 30px is what disproved
+  it. The sentence above stands as the record of the 24px rule.
 - The research package's rounded display-font proposal ("M PLUS Rounded 1s" /
   self-hosted Nunito) stays parked: it needs a C-8 dependency approval and
   the owner's ruling asks for a neutral sans.
