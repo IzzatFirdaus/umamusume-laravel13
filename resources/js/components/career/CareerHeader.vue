@@ -79,7 +79,11 @@ const hasTraineeIdentity = computed(
 
 <template>
     <section aria-labelledby="career-header-heading" class="rounded-lg border border-rule bg-panel p-4">
-        <h2 id="career-header-heading" class="text-lg font-semibold text-ink-strong">
+        <h2
+            id="career-header-heading"
+            class="text-lg font-semibold text-ink-strong"
+            :title="props.header.widgets.length === 0 ? 'No scenario resource on this screen. Mood, Fans and Skill Points are what every scenario carries, and they read in Stats and state.' : null"
+        >
             <span v-if="props.traineeJa" lang="ja">{{ props.traineeJa }}</span>
             <!-- The card form beside the trainee's name, where the Trainer named one. -->
             <span v-if="props.cardTitle" class="ml-2 text-sm font-normal text-ink-muted">{{ props.cardTitle }}</span>
@@ -121,7 +125,7 @@ const hasTraineeIdentity = computed(
             </div>
             <div class="flex flex-col">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Turn</dt>
-                <dd class="font-mono tabular-nums text-ink-strong">{{ group(props.header.turn) }}</dd>
+                <dd class="font-mono tabular-nums text-ink-strong" data-field="turn">{{ group(props.header.turn) }}</dd>
             </div>
             <div class="flex flex-col">
                 <dt class="text-xs font-semibold uppercase tracking-wide text-ink-muted">Energy</dt>
@@ -148,9 +152,5 @@ const hasTraineeIdentity = computed(
                 :values="props.header.values"
             />
         </div>
-        <p v-else class="mt-3 text-xs text-ink-muted">
-            This scenario composes no resource of its own. Mood, Fans and Skill Points are what every
-            scenario carries; their readings are on Stats and state, beside the advisor.
-        </p>
     </section>
 </template>

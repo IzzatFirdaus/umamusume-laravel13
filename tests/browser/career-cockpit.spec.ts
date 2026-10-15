@@ -457,3 +457,88 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
 
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
+
+/*
+ * The three run states and the one turn source (Cockpit pass, 2026-10-15).
+ *
+ * The header used to count this run's logged rows while the correction form read the latest row's own
+ * `turn`, so a career entered mid-course printed turn 1 beside a dropdown reading turn 75. Both cases
+ * below reach the state through the screen's own doors — a recorded turn, then the header's status
+ * editor — rather than through a seeder, so the state under test is one a Trainer can arrive at.
+ *
+ * The URA mandatory ladder's four `Met` rows at Completed are asserted at the prop level in
+ * `CockpitAlertScopeTest` and `UraPanelTest`; this file's wizard walk builds a Unity Cup career, and a
+ * second walk per case is not worth its runtime here.
+ */
+
+/** The career, closed: the header's own status editor is the only door to this state. */
+async function completeCareer(page: import('@playwright/test').Page): Promise<string> {
+    const cockpitUrl = await newCareer(page);
+    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+
+    // One logged turn first. `correctionSection()` answers null for a run with no turns, so a career that
+    // never logged one renders no correction form at all and the collapse sweep would pass on an absence.
+    await recordTurns(page, runId, 1, { energy: '80', choice: 'training-Speed' });
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await page.locator('details[data-region="edit-identity"] > summary').click();
+    await page.selectOption('details[data-region="edit-identity"] select[name="status"]', 'Completed', WRITE);
+    await page.getByRole('button', { name: 'Change status' }).click();
+    await page.locator('#app > *').first().waitFor();
+
+    return cockpitUrl;
+}
+
+test('reads one turn number in the header and in the correction selector', async ({ page }) => {
+    const cockpitUrl = await newCareer(page);
+    const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+
+    await recordTurns(page, runId, 1, { energy: '80', choice: 'training-Speed' });
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const header = page.locator('[data-field="turn"]');
+    await expect(header).toHaveCount(1);
+    await expect(header).toHaveText('1');
+
+    // The dropdown's own value is a turn id, so the comparison is on the number the screen shows beside
+    // it: the summary of the form that opens on this turn.
+    await expect(page.locator('details[data-region="correct-turn"] > summary')).toContainText('Correct turn 1 by hand');
+});
+
+test('names the run state in the DOM, and only the one that applies', async ({ page }) => {
+    await openCockpit(page);
+
+    await expect(page.locator('[data-run-state="active"]')).toHaveCount(1);
+    await expect(page.locator('[data-run-state="completed"]')).toHaveCount(0);
+
+    const cockpitUrl = await completeCareer(page);
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.locator('[data-run-state="completed"]')).toHaveCount(1);
+    await expect(page.locator('[data-run-state="active"]')).toHaveCount(0);
+
+    // The finished career states itself and offers the Result door; the advisor's refusal is gone. The
+    // door prints twice by design, once in the summary and once in the closed-run region, so the
+    // assertion names the region it means rather than taking `.first()` of an ambiguous locator.
+    const closed = page.getByRole('region', { name: 'This run is complete.' });
+    await expect(closed).toHaveCount(1);
+    await expect(closed.getByRole('link', { name: 'Open the Career Result' })).toBeVisible();
+    await expect(page.getByText('Critical:')).toHaveCount(0);
+});
+
+test('keeps every settings disclosure closed on load for a finished career', async ({ page }) => {
+    const cockpitUrl = await completeCareer(page);
+
+    // Reload rather than read the page the status write left behind: that one was opened to change it.
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    for (const region of ['edit-identity', 'correct-turn', 'team-state', 'danger-zone']) {
+        const details = page.locator(`details[data-region="${region}"]`);
+        await expect(details, region).toHaveCount(1);
+        await expect(details, `${region} must be closed on load`).not.toHaveAttribute('open');
+    }
+});

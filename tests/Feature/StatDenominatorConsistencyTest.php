@@ -86,8 +86,12 @@ it('labels the Cockpit strip with the word target', function (): void {
     $panel = (string) file_get_contents(resource_path('js/components/career/CareerStatePanel.vue'));
     $page = (string) file_get_contents(resource_path('js/pages/Career/Cockpit.vue'));
 
+    // The missing target is one fact about the run, so it now reads once above the five rows instead of as
+    // a phrase repeated on each of them. This case pins both halves of that change: the caption is there,
+    // and the per-row phrase is not.
     expect($panel)->toContain('denominatorLabel')
-        ->and($panel)->toContain('no {{ props.denominatorLabel }} set')
+        ->and($panel)->toContain("'No build target was set for this run.'")
+        ->and($panel)->not->toContain('no {{ props.denominatorLabel }} set')
         ->and($page)->toContain('denominator-label="target"');
 });
 
