@@ -570,10 +570,17 @@ test('a completed URA career prints no Critical row', async ({ page }) => {
     await expect(page.getByText('Critical:')).toHaveCount(0);
 });
 
-// The four recorded mandatory rows are asserted on the payload in
-// `tests/Feature/CockpitAlertScopeTest.php`, not here: the `career_goals` flag resolves to
-// `CareerGoalsPanel.vue`, which iterates `scenario.goals` — a key `CockpitController::scenarioSection()`
-// never sends — while `UraPanel.vue`, which reads the `objectives` that are sent, is registered against
-// the same flag earlier and overwritten in the registry Map (`ScenarioPanel.vue:67` then `:89`). So no
-// ladder draws in the panels region today, at any status, and a browser case here would assert a
-// composition the screen does not have.
+test('a completed URA career draws its four recorded mandatory races as a ladder', async ({ page }) => {
+    await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const rows = page.locator('[data-region="scenario-panels"] [data-ladder-group="Mandatory races"] [data-ladder-row]');
+    await expect(rows).toHaveCount(4);
+
+    // `completed` is this build's state word for a race the run entered, and the ladder prints it as
+    // `Recorded`. The attribute mirrors the payload rather than inventing a second vocabulary for one
+    // fact.
+    for (const row of await rows.all()) {
+        await expect(row).toHaveAttribute('data-state', 'completed');
+    }
+});
