@@ -107,7 +107,7 @@ const visibleCount = computed(() =>
                 <li v-for="label in props.filters.available" :key="label">
                     <button
                         type="button"
-                        class="enamel inline-flex min-h-11 items-center rounded-full border border-rule px-3 text-xs font-semibold aria-pressed:bg-pick aria-pressed:text-on-pick"
+                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-xs font-semibold aria-pressed:bg-pick aria-pressed:text-on-pick"
                         :aria-pressed="activeKinds.includes(label)"
                         @click="toggleKind(label)"
                     >

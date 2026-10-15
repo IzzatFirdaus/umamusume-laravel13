@@ -22,6 +22,7 @@ import RaceCard from '../../components/career/RaceCard.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import { BaseButton, BaseInput, BaseSelect } from '../../components/Form';
 
 interface Fact {
     key: string;
@@ -349,7 +350,7 @@ function submitManual(): void {
                      <div class="flex items-end">
                          <BaseButton
                            type="submit"
-                           variant="enamel"
+                           variant="primary"
                            :disabled="manualForm.processing"
                          >
                            {{ manualForm.processing ? 'Saving…' : 'Record race' }}

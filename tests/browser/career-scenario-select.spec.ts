@@ -100,8 +100,12 @@ test.describe('Scenario Selection', () => {
         await expect(ruleset).toBeVisible();
         await expect(ruleset).toContainText('N/A');
 
-        // And the two brief fields nobody can source say so instead of carrying invented prose.
-        await expect(card(page, 'URA Finale').getByText('Recommended use').locator('..').getByText('N/A')).toBeVisible();
+        // And the brief's description and recommended use render where a scenario guide sources
+        // them: URA Finale's guide states both, so this card prints them rather than the absence,
+        // and the absence is reserved for a guide that names neither.
+        const use = card(page, 'URA Finale').getByText('Recommended use').locator('..');
+        await expect(use).toContainText('baseline for learning');
+        await expect(use.getByText('N/A')).toHaveCount(0);
     });
 
     test('keeps the ruleset version and the rule family as two separately named facts', async ({ page }) => {
@@ -119,9 +123,15 @@ test.describe('Scenario Selection', () => {
         await expect(unityRuleset).toContainText('N/A');
         await expect(unity.getByText('Rule family', { exact: true }).locator('..').getByText('Team', { exact: true })).toBeVisible();
 
-        // Neither heading is bare `Ruleset` any more, on any card, and no heading repeats.
+        // Neither heading is bare `Ruleset` any more, on any card, and no heading repeats. The row
+        // that carries the family prints the family where the matrix records one and the named
+        // absence where it does not, so a scenario entry holding no ruleset still names the gap
+        // rather than dropping the row.
         await expect(page.getByText('Ruleset', { exact: true })).toHaveCount(0);
-        await expect(card(page, 'Trackblazer').getByText('Rule family', { exact: true })).toHaveCount(0);
+        await expect(card(page, 'Trackblazer').getByText('Rule family', { exact: true })).toHaveCount(1);
+        await expect(
+            card(page, 'Trackblazer').getByText('Rule family', { exact: true }).locator('..').getByText('Not recorded'),
+        ).toHaveCount(1);
     });
 
     test('states the documentation badge when the matrix records no guide', async ({ page }) => {
@@ -210,5 +220,29 @@ test.describe('Scenario Selection', () => {
         await expect(card(page, 'Our Grand Concert')).toBeVisible();
 
         expect(consoleErrors, `console errors: ${consoleErrors.join(' | ')}`).toEqual([]);
+    });
+
+    test('each scenario card carries a sourced summary, not the named absence', async ({ page }) => {
+        await page.goto('/career/setup/scenario');
+        await page.locator('#app > *').first().waitFor();
+
+        const cards = page.locator('[data-scenario-card]');
+        await expect(cards.first()).toBeVisible();
+        const count = await cards.count();
+        expect(count).toBeGreaterThan(0);
+
+        // Every scenario's guide states a summary, so the fallback sentence must appear nowhere. The
+        // earlier form of this case accepted "summary or named absence" and therefore passed while
+        // nothing had landed; this form fails in exactly that state, which is the whole point.
+        await expect(
+            page.getByText('No sourced summary line exists for this scenario in this repository.'),
+        ).toHaveCount(0);
+
+        for (let i = 0; i < count; i++) {
+            const summary = cards.nth(i).locator('[data-field="summary"]');
+
+            await expect(summary).toBeVisible();
+            await expect(summary).not.toHaveText(/^\s*$/);
+        }
     });
 });

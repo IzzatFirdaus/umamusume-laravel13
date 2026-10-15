@@ -260,7 +260,7 @@ function confirmImport(): void {
                 <button
                     type="submit"
                     :disabled="submitting"
-                    class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-3 font-semibold text-on-chrome disabled:opacity-60"
+                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-3 font-semibold text-on-primary-action disabled:opacity-60"
                 >
                     {{ submitting ? 'Importing…' : `Import ${preview.turns.length} turns` }}
                 </button>
@@ -349,7 +349,7 @@ function confirmImport(): void {
             <button
                 type="submit"
                 :disabled="form.processing"
-                class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-3 font-semibold text-on-chrome disabled:opacity-60"
+                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-3 font-semibold text-on-primary-action disabled:opacity-60"
             >
                 {{ form.processing ? 'Reading the file…' : 'Preview import' }}
             </button>

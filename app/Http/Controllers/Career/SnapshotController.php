@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSnapshotRequest;
 use App\Models\Umamusume;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -51,7 +52,7 @@ class SnapshotController extends Controller
         return Inertia::render('Career/Snapshot/Entry');
     }
 
-    public function setup(): Response
+    public function setup(Request $request): Response
     {
         return Inertia::render('Career/Snapshot/Setup', [
             'trainees' => Umamusume::query()->orderBy('name')->get(['id', 'name'])->values()->all(),
@@ -71,6 +72,10 @@ class SnapshotController extends Controller
             // before it is written; `action` stays the commit endpoint the review posts to.
             'review' => route('career.snapshot.review'),
             'action' => route('career.snapshot.store'),
+            // The review screen's Back returns here, and without this the Trainer landed on a blank
+            // form having just confirmed their entries. `review()` parks the validated payload in the
+            // session for exactly this read; a first visit has none and the form opens empty.
+            'draft' => $request->session()->get('career.snapshot.draft'),
         ]);
     }
 
@@ -85,6 +90,10 @@ class SnapshotController extends Controller
     public function review(StoreSnapshotRequest $request): Response
     {
         $data = $request->validated();
+
+        // Parked for `setup()`: the review screen's Back returns to the form, and the Trainer should
+        // meet their own entries rather than an empty one.
+        $request->session()->put('career.snapshot.draft', $data);
 
         return Inertia::render('Career/Snapshot/Review', [
             'fields' => $this->reviewFields($data),

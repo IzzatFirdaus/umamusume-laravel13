@@ -310,7 +310,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                 <form class="mt-4 flex flex-wrap items-center gap-3" @submit.prevent="save()">
                     <button
                         type="submit"
-                        class="enamel h-11 rounded-full bg-chrome px-5 font-semibold text-on-chrome disabled:cursor-wait disabled:bg-disabled"
+                        class="h-11 rounded-md bg-primary-action px-5 font-semibold text-on-primary-action disabled:cursor-wait disabled:bg-disabled"
                         :disabled="form.processing"
                     >
                         {{ form.processing ? 'Saving…' : 'Save deck' }}

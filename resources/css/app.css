@@ -43,6 +43,21 @@
     --radius-xl: 16px;
     --radius-pill: 999px;
 
+    /* Tailwind v4's container scale stops at --container-7xl (1280px), so the ratified wide
+       shell has no stock utility to carry 1536px; this key is what makes `max-w-shell-wide` exist. */
+    --container-shell-wide: 96rem;
+
+    /* Stat tiles never squeeze below a readable value: `auto-fit` folds the row count instead of
+       shrinking "1,910" or "Support cards" past the point where they ellipsis. A token because
+       §2.3 forbids an arbitrary value at the call site. */
+    --grid-template-columns-tiles: repeat(auto-fit, minmax(7.5rem, 1fr));
+
+    /* A tile value that cannot shrink is the reason "1,910" touched its own border: a fixed
+       text-3xl is wider than the tile's inner box at the 7.5rem floor. This tracks the viewport so
+       the digit stays inside the tile at every width instead of ellipsizing a real number. */
+    --text-kpi: clamp(1.25rem, 2.2vw, 1.75rem);
+    --text-kpi--line-height: 1.2;
+
     /*
      * Surfaces and ink. LIGHT is the default theme, owner ruling 2026-09-27, which restores
      * research D-100 ("the client is a high-key light interface") and reverses the earlier
@@ -75,9 +90,15 @@
        surface, so it must never carry a label. The accessible subordinate tier is
        ink-muted, which clears 4.5 on every surface in both themes. */
     --color-ink-faint: #988F87;
-    --color-rule: #6E6C73;
+    /* Hairline. 2026-10-15 (Phase 11R.2): the light step was #6E6C73, the same value the dark
+       override carries, so a card edge and a status-pill border read as a dark-mode line on the
+       light field. Lightened to the palest grey that still clears G-18's `rule on page` 3:1 for a
+       non-text boundary: 3.46:1 on `page`, 3.66:1 on `panel`. Dark keeps #6E6C73 (3.82:1). */
+    --color-rule: #84828C;
 
-    /* Semantic roles. Green is action and affordability only, never "good". */
+    /* Semantic roles. Amended 2026-10-15: green is a STATUS colour only — the positive status pill,
+       and nothing else. Green is never the primary action fill, which is `--color-primary-action`
+       (blue). This supersedes the pre-2026-10-15 rule that made green the action colour. */
     --color-green: #7FCC09;
     --color-green-deep: #4E7906;
     --color-green-tint: #F0F8EC;
@@ -261,8 +282,15 @@
     --color-brand-chrome: #2255FF;
     --color-on-brand-chrome: #FFFFFF;
     --color-brand-accent: #FF77CC;
-    --color-brand-accent-ink: #8877FF;
+    --color-brand-accent-ink: #6554E0;
     --color-brand-accent-soft: #EEEBFF;
+
+    /* The one filled action on a screen. An alias, not a new colour: the action role and the
+       chrome role share a hex value but not a meaning, so the button primitive names the role it
+       wants and the top bar keeps naming its own. Aliasing means the dark block redefines only
+       `--color-brand-chrome` and both roles follow. */
+    --color-primary-action: var(--color-brand-chrome);
+    --color-on-primary-action: var(--color-on-brand-chrome);
     --color-status-positive: #BBDD11;
     --color-status-positive-ink: #0D0C0F;
     --color-status-caution: #FFE9A8;
@@ -399,8 +427,9 @@ html[data-theme='dark'] {
     --color-brand-accent-soft: #2A2640;
     --color-status-positive: #8FBF09;
     --color-status-positive-ink: #0D0C0F;
-    --color-status-caution: #8A6F1A;
-    --color-status-caution-ink: #F4E4B0;
+    /* Caution is deliberately NOT overridden: the light pair measures 6.74:1, and the amber pill is a
+       chrome colour the client paints the same in either theme, the same reasoning `--color-mood-*`
+       carries. The draft's dark pair measured 3.92:1 and the gate would not have it. */
     --shadow-overlay: 0 6px 16px rgb(0 0 0 / 0.32);
 }
 
@@ -409,24 +438,14 @@ html[data-theme='dark'] {
  * a pile of arbitrary values. DESIGN.md §2.3 amendment; research §6.1 and §6.3.
  */
 
-/* Enamel gloss, on the one primary action per screen. A single hard split, never a
-   feathered ramp. A soft gradient here is the generic-web tell the client does not have. */
-@utility enamel {
-    position: relative;
-    overflow: hidden;
+/* Enamel is gone (2026-10-15). The variant named for the gloss was collapsed into `primary`, which
+   carries the brand fill, so there is no second path to the action colour and no stripe utility to
+   keep alive for it. */
 
-    &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: linear-gradient(116deg, rgba(255, 255, 255, 0.30) 0 34%, rgba(255, 255, 255, 0) 34.5% 100%);
-    }
-}
-
-/* The action accent. `bg-action` and `text-on-action` alias the existing chrome token pair so
-   components reference a meaning rather than a colour name. Green is action and affordability
-   only, never "good" (DESIGN.md §2.3). */
+/* Amended 2026-10-15: this pair is NOT the action fill. The action fill is `--color-primary-action`
+   (blue, aliased from the chrome pair). These utilities survive for the surfaces that still want the
+   deep green chrome — the capsule motif and the progress bar — so components reference a meaning
+   rather than a colour name. Green is a status colour, never "good" (DESIGN.md §2.3). */
 @utility bg-action {
     background-color: var(--color-chrome);
 }

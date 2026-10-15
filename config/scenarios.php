@@ -141,6 +141,11 @@ return [
 
         'ura_finale' => [
             'label' => 'URA Finale',
+            'metadata' => [
+                'summary' => 'The first and most basic career scenario, and the Global launch baseline: three years of turns between training, rest, recreation and racing, with no team system, no shop and no mid-scenario currency on top.',
+                'description' => 'Take a trainee through three in-game years, alternating training, rest, recreation and racing while managing Energy and Mood, so the career ends with strong stats, a good skill set and a completed Unique Skill. Its guide calls it the purest scenario for learning the fundamentals.',
+                'recommended_use' => 'Its guide names it the baseline for learning training, mood, energy and race timing before moving to scenarios with extra systems.',
+            ],
             'live_on_global' => '2025-06-26',
             'cap_bonus' => ['Speed' => 200, 'Stamina' => 200, 'Power' => 200, 'Guts' => 200, 'Wit' => 200],
             'widgets' => ['turn', 'energy', 'fans'],
@@ -254,9 +259,6 @@ return [
                 'speed_to_win' => ['approx' => 800, 'phrasing' => 'around 800 Speed, or an A rank'],
                 'stamina_by_distance' => ['Sprint' => 400, 'Mile' => 500, 'Medium' => 600, 'Long' => 700],
             ],
-
-            // No source in this repository describes this scenario in the card metadata's words.
-            'metadata' => null,
         ],
 
         'unity_cup' => [
@@ -387,6 +389,10 @@ return [
 
         'trackblazer' => [
             'label' => 'Trackblazer',
+            'metadata' => [
+                'summary' => 'Make a New Track, the anniversary scenario whose headline difference is no fixed schedule of mandatory race goals: race timing stays the Trainer\'s own.',
+                'description' => 'Where URA Finale and Unity Cup lock a run into a fixed schedule of mandatory race goals and end the career when too many are missed, Trackblazer publishes no race goals. The guide is marked superseded, so its remaining detail reads from the publisher references.',
+            ],
             'live_on_global' => '2026-03-12',
             'cap_bonus' => ['Speed' => 0, 'Stamina' => 700, 'Power' => 0, 'Guts' => 0, 'Wit' => 300],
             'widgets' => ['turn', 'energy', 'fans', 'grade_points', 'shop_coins'],
@@ -699,12 +705,14 @@ return [
             'notes' => 'No mandatory race goals, so the race calendar is absent rather than empty, and no '
                 .'Scenario Link character exists here. Racing is the strategy in this scenario and is '
                 .'discouraged in Unity Cup, so any race advisory must be scenario-gated (D-225).',
-            // No source in this repository describes this scenario in the card metadata's words.
-            'metadata' => null,
         ],
 
         'our_grand_concert' => [
             'label' => 'Our Grand Concert',
+            'metadata' => [
+                'summary' => 'The fourth Global scenario, whose vocabulary names Performance and its five types, Promo Concert, Grand Concert, lessons, songs, concert techniques, Live Performance Expectations and Great Success.',
+                'description' => 'Its guide files itself as a boundary document: the vocabulary is official copy from Global notice 905, while the screen-level text and the song list remain unmeasured.',
+            ],
             // Cygames' notice 899 opens "As of 10:00 p.m., Jul 22, 2026 (UTC)", the same instant the
             // export's start_en decodes to, so this is a dated hour and not only a dated day.
             'live_on_global' => '2026-07-22',
@@ -808,8 +816,6 @@ return [
                 .'Mechanics sourced 2026-10-05 by a primary read; every panel stays off because the client '
                 .'strings behind them are still third-party renderings, so the strip renders baseline plus the '
                 .'published caps (D-241, gate G-41).',
-            // No source in this repository describes this scenario in the card metadata's words.
-            'metadata' => null,
         ],
 
     ],

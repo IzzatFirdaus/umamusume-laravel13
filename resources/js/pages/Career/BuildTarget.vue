@@ -368,7 +368,7 @@ function removeAt(index: number): void {
              native constraint validation would block the submit with a browser bubble instead of
              letting the server refuse with its named bound, which is the message this page renders
              with its own `aria-describedby` and focus. -->
-        <form class="mt-5 max-w-3xl space-y-6" novalidate @submit.prevent="submit">
+        <form class="mt-5 mx-auto max-w-4xl space-y-6" novalidate @submit.prevent="submit">
             <fieldset class="rounded-lg border border-rule bg-panel p-4">
                 <legend class="px-1 text-lg font-semibold text-ink-strong">What the career is for</legend>
 
@@ -464,7 +464,7 @@ function removeAt(index: number): void {
                                 :max="cap(stat)"
                                 inputmode="numeric"
                                 :aria-describedby="describedBy(`targets.${stat}`)"
-                                label="{{ stat }}"
+                                :label="stat"
                                 value-class="font-mono text-ink tabular-nums"
                                 :error="errorOf(`targets.${stat}`)"
                             />
@@ -500,7 +500,7 @@ function removeAt(index: number): void {
                                 :max="props.hardCap"
                                 inputmode="numeric"
                                 :aria-describedby="describedBy(capColumn(stat))"
-                                label="{{ stat }} ceiling"
+                                :label="`${stat} ceiling`"
                                 value-class="font-mono text-ink tabular-nums"
                                 class="w-full"
                                 :error="errorOf(capColumn(stat))"

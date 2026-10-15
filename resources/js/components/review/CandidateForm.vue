@@ -7,7 +7,7 @@ import { BaseInput, BaseSelect } from '../Form';
 // "Status" label would be technically named and useless. Asserted in the browser spec.
 // The visible label sits above the control; the aria-label keeps the candidate-named
 // form of the name, and WCAG 2.5.3 holds because the visible text is its prefix.
-// The queue's one accented primary (plan 6A.4): only the topmost unresolved card renders enamel.
+// The queue's one accented primary (plan 6A.4): only the topmost unresolved card renders .
 // The shared controls are multi-root, so the class that sizes them rides a wrapper div.
 const props = defineProps<{
     candidate: {
@@ -108,7 +108,7 @@ function submit(): void {
             :disabled="form.processing"
             class="inline-flex min-h-11 items-center rounded-full px-3 font-semibold transition-colors duration-150 ease-out disabled:opacity-60 disabled:cursor-wait"
             :class="accented
-                ? 'enamel bg-chrome text-on-chrome'
+                ? 'bg-primary-action text-on-primary-action'
                 : 'border border-rule bg-raised text-ink-strong hover:bg-panel'"
         >
             Resolve

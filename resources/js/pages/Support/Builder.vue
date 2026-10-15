@@ -318,7 +318,7 @@ function save(): void {
                 <form class="mt-4 flex flex-wrap items-center gap-3" @submit.prevent="save">
                     <button
                         type="submit"
-                        class="enamel h-11 rounded-full bg-chrome px-5 font-semibold text-on-chrome"
+                        class="h-11 rounded-md bg-primary-action px-5 font-semibold text-on-primary-action"
                         :disabled="form.processing"
                     >
                         Confirm deck

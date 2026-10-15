@@ -222,7 +222,7 @@ const hasSharedAncestryNote = computed(() =>
             <p>{{ props.filingNotice }}</p>
             <a
                 :href="props.file_veteran_url"
-                class="enamel mt-3 inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-semibold text-on-chrome"
+                class="mt-3 inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action"
             >Open the run list</a>
         </div>
 

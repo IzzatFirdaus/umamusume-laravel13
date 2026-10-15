@@ -62,7 +62,11 @@ class PreferenceController extends Controller
                     ? $settings['language']
                     : null,
                 'dashboard_layout' => isset($settings['dashboard_layout']) && is_string($settings['dashboard_layout'])
-                    ? $settings['dashboard_layout']
+                    ? (match ($settings['dashboard_layout']) {
+                        'compact', 'focused' => 'compact',
+                        'wide' => 'wide',
+                        default => 'standard',
+                    })
                     : null,
                 'dashboard_hidden_cards' => isset($settings['dashboard_hidden_cards']) && is_array($settings['dashboard_hidden_cards'])
                     ? $settings['dashboard_hidden_cards']
@@ -125,11 +129,19 @@ class PreferenceController extends Controller
             );
         }
 
-        // DL.12/DL.14: the disabled radio is authoritative. A `wide_bento` that reaches the writer
-        // while the flag is off (a stale row, a hand-written request) is stored as `bento`, never
-        // as a layout the Trainer cannot select.
-        if (($settings['dashboard_layout'] ?? null) === 'wide_bento' && ! config('dashboard.wide_bento_enabled')) {
-            $settings['dashboard_layout'] = 'bento';
+        // The vocabulary rename (2026-10-15) and the DL.12/DL.14 guard, both in the new names: a
+        // legacy or hand-written value is stored canonical, and a `wide` that reaches the writer
+        // while the flag is off is stored as `standard`, never as a layout the Trainer cannot pick.
+        if (isset($settings['dashboard_layout']) && is_string($settings['dashboard_layout'])) {
+            $settings['dashboard_layout'] = match ($settings['dashboard_layout']) {
+                'compact', 'focused' => 'compact',
+                'wide', 'wide_bento' => 'wide',
+                default => 'standard',
+            };
+
+            if ($settings['dashboard_layout'] === 'wide' && ! config('dashboard.wide_bento_enabled')) {
+                $settings['dashboard_layout'] = 'standard';
+            }
         }
 
         if ($settings === []) {

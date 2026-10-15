@@ -80,10 +80,30 @@ class UpdatePreferenceRequest extends FormRequest
             // One language, because the corpus is Global-labelled. The control is a disabled
             // single-option select, so this rule exists for the boundary rather than for the form.
             'settings.language' => ['nullable', Rule::in(Preference::LANGUAGES)],
-            'settings.dashboard_layout' => ['nullable', Rule::in(['bento', 'wide_bento', 'focused'])],
+            'settings.dashboard_layout' => ['nullable', Rule::in(['compact', 'standard', 'wide', 'focused', 'bento', 'wide_bento'])],
             'settings.dashboard_hidden_cards' => ['nullable', 'array'],
             'settings.dashboard_hidden_cards.*' => ['string', Rule::in(['active_career', 'next_best_action', 'quick_actions', 'recent_veterans', 'data_status'])],
         ];
+    }
+
+    /**
+     * The retired next-best-action card id is tolerated, not refused: a Trainer whose stored
+     * hidden-cards list predates the merge would otherwise have every later save bounced by a
+     * value this screen no longer offers. Stripped here, explicitly, rather than silently by
+     * `validated()`; every other unknown id is still refused below.
+     */
+    protected function prepareForValidation(): void
+    {
+        $settings = $this->input('settings');
+
+        if (is_array($settings) && is_array($settings['dashboard_hidden_cards'] ?? null)) {
+            $settings['dashboard_hidden_cards'] = array_values(array_filter(
+                $settings['dashboard_hidden_cards'],
+                static fn (mixed $id): bool => $id !== 'next_best_action',
+            ));
+
+            $this->merge(['settings' => $settings]);
+        }
     }
 
     public function withValidator(Validator $validator): void

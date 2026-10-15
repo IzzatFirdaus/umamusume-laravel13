@@ -216,7 +216,7 @@ function submit(): void {
             <button
                 type="submit"
                 :disabled="form.processing"
-                class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-3 font-semibold text-on-chrome disabled:opacity-60"
+                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-3 font-semibold text-on-primary-action disabled:opacity-60"
             >
                 {{ form.processing ? 'Creating…' : 'Create run' }}
             </button>

@@ -32,12 +32,12 @@ test.describe('Accessibility', () => {
         await page.goto('/');
         await page.locator('#app > *').first().waitFor();
 
-        await page.route('**/support-cards', async (route) => {
+        await page.route('**/review', async (route) => {
             await new Promise((resolve) => setTimeout(resolve, 2500));
             await route.continue();
         });
 
-        await page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Support Cards' }).click();
+        await page.getByRole('navigation', { name: 'Quick actions' }).getByRole('link', { name: 'Review queue' }).click({ noWaitAfter: true });
 
         // The indicator is the indeterminate pattern the slice names: a native `progress` with an
         // accessible name and no value attribute. A real percentage is not available to invent -
@@ -52,7 +52,7 @@ test.describe('Accessibility', () => {
         expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
         await expect(page.locator('[role="bar"]')).toHaveCount(0);
 
-        await page.waitForURL(/\/support-cards$/);
+        await page.waitForURL(/\/review$/);
 
         // Settled: the indicator leaves the tree entirely, so the settled scans above scan a
         // document with no progress control in it.

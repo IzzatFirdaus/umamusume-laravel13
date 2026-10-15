@@ -44,6 +44,10 @@ class HandleInertiaRequests extends Middleware
                 // No source defines a Global ruleset version (docs/proposals/design-2.0.md §48),
                 // so this is a named absence, never an invented number.
                 'ruleset' => null,
+                // The Blade shell writes `data-theme` on the first paint, and an Inertia visit never
+                // re-renders it. Shared so `useTheme` can move the attribute with the stored value
+                // instead of waiting for a full reload. Null means follow-the-OS.
+                'theme' => Preference::resolvedTheme(),
             ],
             // The one confirmation surface (the Blade shell's `session('status')`), shared so
             // ported pages and the layout render it the same way.

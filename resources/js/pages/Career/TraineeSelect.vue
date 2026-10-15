@@ -267,7 +267,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
 
         <!-- Filter bar in bordered container -->
         <div class="mt-5 rounded-md border border-rule bg-raised p-4">
-            <form class="flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
+            <form class="mx-auto w-full max-w-4xl flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
                 <BaseInput
                     v-model="filterValues.search"
                     type="text"
@@ -348,7 +348,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
             clearing the filters shows every row the catalog holds.
         </p>
 
-        <ul v-else class="mt-6 max-w-3xl space-y-4">
+        <ul v-else class="mt-6 space-y-4">
             <li
                 v-for="trainee in props.trainees.data"
                 :key="trainee.id"
@@ -435,7 +435,7 @@ const formCountLabel = (count: number): string => (count === 1 ? 'costume form' 
                         :id="`trainee-${trainee.id}`"
                         type="button"
                         :class="[
-                            'enamel inline-flex min-h-11 items-center rounded-full px-4 text-sm font-bold disabled:cursor-wait disabled:bg-disabled',
+                            'inline-flex min-h-11 items-center rounded-md px-4 text-sm font-bold disabled:cursor-wait disabled:bg-disabled',
                             props.selected === trainee.id
                                 ? 'bg-chrome text-on-chrome'
                                 : 'border border-rule bg-raised text-ink hover:bg-sunken transition-colors duration-150 ease-out'

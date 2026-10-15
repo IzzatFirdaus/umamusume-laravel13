@@ -118,6 +118,7 @@ class ScenarioSelectController extends Controller
             /** @var array<string, mixed> $bonus */
             $bonus = (array) ($def['cap_bonus'] ?? []);
             $caps = array_map(static fn (mixed $value): int => (int) $value, $bonus);
+            $meta = $this->metadata($def);
 
             $cards[] = [
                 'key' => $key,
@@ -141,11 +142,11 @@ class ScenarioSelectController extends Controller
                 'live_on_global' => isset($def['live_on_global']) ? (string) $def['live_on_global'] : null,
                 // The card's own metadata, recorded in the matrix for a scenario a source describes and
                 // null for the rest. Null is the absence the page names, never a sentence invented here.
-                'metadata' => $this->metadata($def),
-                // Config holds no player-facing blurb and no "recommended use" for any scenario, so
-                // these are named absences. The title carries the reason to the element itself.
-                'description' => null,
-                'recommended_use' => null,
+                'metadata' => $meta,
+                // Config holds no player-facing blurb and no "recommended use" for a scenario whose
+                // guide does not state one, so a null here is a named absence on the page.
+                'description' => $meta['description'] ?? null,
+                'recommended_use' => $meta['recommended_use'] ?? null,
             ];
         }
 
@@ -156,7 +157,7 @@ class ScenarioSelectController extends Controller
      * The card's metadata, read straight from the matrix, or null when the entry holds none.
      *
      * @param  array<string, mixed>  $def
-     * @return array{ruleset: string|null, summary: string|null, planning_focus: string|null, key_mechanics: list<string>}|null
+     * @return array{ruleset: string|null, summary: string|null, planning_focus: string|null, key_mechanics: list<string>, description: string|null, recommended_use: string|null}|null
      */
     private function metadata(array $def): ?array
     {
@@ -174,6 +175,8 @@ class ScenarioSelectController extends Controller
                 static fn (mixed $line): string => (string) $line,
                 (array) ($metadata['key_mechanics'] ?? []),
             )),
+            'description' => isset($metadata['description']) ? (string) $metadata['description'] : null,
+            'recommended_use' => isset($metadata['recommended_use']) ? (string) $metadata['recommended_use'] : null,
         ];
     }
 

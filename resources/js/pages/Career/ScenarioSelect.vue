@@ -157,10 +157,11 @@ const optimizesText = (card: ScenarioCard): string | null => {
             and no career can be started until one is added.
         </p>
 
-        <ul v-else class="mt-6 grid list-none max-w-3xl grid-cols-1 gap-4 xl:grid-cols-2">
+        <ul v-else class="mt-6 grid list-none grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <li
                 v-for="card in props.scenarios"
                 :key="card.key"
+                data-scenario-card
                 class="rounded-lg border border-rule bg-panel p-5"
                 :class="props.selected === card.key ? 'border-2 border-chrome' : ''"
             >
@@ -184,7 +185,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
                      mechanics collapse already uses. The subtitle is the matrix's summary where the
                      matrix has one, and the named absence where it does not; writing a sentence here
                      would be an invented fact (AGENTS.md §5). -->
-                <p v-if="card.metadata?.summary" class="mt-2 text-sm text-ink-muted">{{ card.metadata.summary }}</p>
+                <p v-if="card.metadata?.summary" data-field="summary" class="mt-2 text-sm text-ink-muted">{{ card.metadata.summary }}</p>
                 <AbsenceValue
                     v-else
                     reason="No sourced summary line exists for this scenario in this repository."
@@ -210,8 +211,8 @@ const optimizesText = (card: ScenarioCard): string | null => {
                                 {{ props.ruleset.value }}
                             </dd>
                         </div>
-                        <SubCell label="Description" :value="card.description ?? 'N/A'" :title="card.description ? undefined : 'No sourced one-line description exists for any scenario in this repository.'" />
-                        <SubCell label="Recommended use" :value="card.recommended_use ?? 'N/A'" :title="card.recommended_use ? undefined : 'Recommending a use would be a judgement this tool holds no source for.'" />
+                        <SubCell data-field="description" label="Description" :value="card.description ?? 'N/A'" :title="card.description ? undefined : `No sourced description line exists for the ${card.label} guide in this repository.`" />
+                        <SubCell data-field="recommended_use" label="Recommended use" :value="card.recommended_use ?? 'N/A'" :title="card.recommended_use ? undefined : 'The scenario guides state no recommended use, and choosing one would be a judgement this tool holds no source for.'" />
                     </div>
 
                     <!-- The scenario's recorded metadata, straight from the matrix. A scenario the matrix
@@ -247,7 +248,7 @@ const optimizesText = (card: ScenarioCard): string | null => {
                         :id="`scenario-${card.key}`"
                         type="button"
                         :class="[
-                            'enamel inline-flex min-h-11 items-center rounded-full px-4 text-sm font-bold disabled:cursor-wait disabled:bg-disabled',
+                            'inline-flex min-h-11 items-center rounded-md px-4 text-sm font-bold disabled:cursor-wait disabled:bg-disabled',
                             props.selected === card.key
                                 ? 'bg-chrome text-on-chrome'
                                 : 'border border-rule bg-raised text-ink hover:bg-sunken transition-colors duration-150 ease-out'

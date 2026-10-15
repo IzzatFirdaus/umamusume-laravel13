@@ -26,9 +26,13 @@ it('renders one card per scenario the matrix composes, each derived from config'
             // A ruleset version is not sourced, so the card carries the absence and its reason.
             ->where('ruleset.value', null)
             ->has('ruleset.title')
-            // The two brief fields the corpus holds nothing for, named rather than filled.
-            ->where('scenarios.0.description', null)
-            ->where('scenarios.0.recommended_use', null));
+            // The brief's two fields render where a scenario guide sources them and stay a named
+            // absence where it does not, so both ends are pinned: URA Finale's guide states both,
+            // Trackblazer's states a description and no use, and the use stays null there.
+            ->where('scenarios.0.description', config('scenarios.scenarios.ura_finale.metadata.description'))
+            ->where('scenarios.0.recommended_use', config('scenarios.scenarios.ura_finale.metadata.recommended_use'))
+            ->where('scenarios.2.description', config('scenarios.scenarios.trackblazer.metadata.description'))
+            ->where('scenarios.2.recommended_use', null));
 });
 
 it('marks the steps a session has opened as visited, including one left unsaved', function (): void {

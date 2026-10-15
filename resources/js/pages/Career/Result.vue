@@ -121,7 +121,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                 <a
                     v-if="props.empty.reason === 'active'"
                     :href="props.run.cockpit_url"
-                    class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-semibold text-on-chrome"
+                    class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action"
                 >Back to the Cockpit</a>
                 <a
                     :href="props.run.timeline_url"
@@ -352,7 +352,7 @@ const countOf = (key: string): number => props.races.counts[key] ?? 0;
                 <div v-if="props.save_veteran.available" class="mt-3 flex flex-wrap items-center gap-3">
                     <a
                         :href="props.save_veteran.url"
-                        class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 font-semibold text-on-chrome"
+                        class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action"
                     >Save Veteran</a>
                     <p class="text-sm text-ink-muted">{{ props.save_veteran.reason }}</p>
                 </div>

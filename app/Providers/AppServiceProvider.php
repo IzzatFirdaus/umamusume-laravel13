@@ -60,9 +60,7 @@ class AppServiceProvider extends ServiceProvider
          * `preferences` read as the proof the canary is measuring something.
          */
         View::composer(['app', 'errors.404', 'errors.419', 'errors::404', 'errors::419'], function ($view): void {
-            $theme = Preference::get('theme');
-
-            $view->with('theme', in_array($theme, ['light', 'dark'], true) ? $theme : null);
+            $view->with('theme', Preference::resolvedTheme());
         });
     }
 }

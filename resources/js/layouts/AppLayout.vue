@@ -6,6 +6,23 @@ import VisitProgressBar from '../components/VisitProgressBar.vue';
 
 const page = usePage();
 const appVersion = computed(() => page.props.app?.version ?? null);
+
+/*
+ * The shell measure is read from `Layout width` (the renamed `dashboard_layout` preference). The
+ * ScalaCaps-pre Rules: `compact` keeps the 768px reading measure, `standard` lands on the 1152px
+ * shell, `wide` opens the 1536px shell (`--container-shell-wide`, DESIGN.md §2.3). The choice
+ * reaches every AppLayout screen, not only the Dashboard, which is the workstream 1 change: the
+ * shell is one renderer, every page inherits it. The Dashboard's own narrow union has its own
+ * copy in `useLayout.ts`.
+ */
+const shellMeasure = computed(() => {
+    const settings = page.props?.preferences?.settings as { dashboard_layout?: string } | null;
+    const layout = settings?.dashboard_layout ?? 'standard';
+
+    return layout === 'compact' ? 'max-w-3xl'
+        : layout === 'wide' ? 'max-w-shell-wide'
+        : 'max-w-6xl';
+});
 const flashStatus = computed(() => page.props.flash?.status ?? null);
 
 // The banner dismisses itself after five seconds and can be dismissed by hand (plan 6B.6).
@@ -208,9 +225,11 @@ function toggleRail(): void {
     }
 }
 
+// One brand accent on the surface: the header blue carries the active nav item, so the rail reads
+// as the same family as the chrome above it instead of adding a second hue beside it.
 const linkClass =
     'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
-const activeClass = 'bg-brand-accent-ink text-on-brand-chrome';
+const activeClass = 'bg-brand-chrome/10 font-semibold text-brand-chrome';
 const disabledClass =
     'flex min-h-11 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium text-ink-muted';
 const mobileClass =
@@ -288,7 +307,7 @@ const moreIsCurrent = computed(() =>
                                 linkClass,
                                 railCollapsed ? 'justify-center px-0' : '',
                                 isCurrent(item.to as string) ? activeClass : '',
-                                isCurrent(item.to as string) && railCollapsed ? 'border-l-2 border-l-green' : '',
+                                isCurrent(item.to as string) && railCollapsed ? 'border-l-2 border-l-brand-chrome' : '',
                             ]"
                             :aria-current="isCurrent(item.to as string) ? 'page' : undefined"
                             :title="railCollapsed ? item.label : undefined"
@@ -326,11 +345,11 @@ const moreIsCurrent = computed(() =>
         <div class="flex min-w-0 flex-1 flex-col">
             <header
                 role="banner"
-                class="relative flex items-center justify-between gap-4 border-b-2 border-b-brand-accent bg-brand-chrome px-6 py-3 text-on-brand-chrome"
+                class="relative flex items-center justify-between gap-4 bg-brand-chrome px-6 py-2 text-on-brand-chrome"
             >
                 <div class="flex flex-col gap-1 min-w-0">
                     <span
-                        class="text-xs font-semibold uppercase tracking-wider text-on-brand-chrome/80"
+                        class="text-xs font-semibold uppercase tracking-wider text-on-brand-chrome"
                         v-if="$slots.eyebrow"
                     >
                         <slot name="eyebrow" />
@@ -341,18 +360,18 @@ const moreIsCurrent = computed(() =>
                 </div>
                 <span
                     v-if="appVersion"
-                    class="font-mono text-xs tabular-nums text-on-brand-chrome/80"
+                    class="font-mono text-xs tabular-nums text-on-brand-chrome"
                     title="Application version"
                 >
                     v{{ appVersion }}
                 </span>
-                <span v-else class="text-xs text-on-brand-chrome/80" title="Application version not recorded">
+                <span v-else class="text-xs text-on-brand-chrome" title="Application version not recorded">
                     N/A
                 </span>
             </header>
             <!-- The ratified shell measure (DESIGN.md:197-208): the error documents constrain
                  themselves to this width and the product shell now does too. -->
-            <main id="main" class="mx-auto w-full max-w-5xl flex-1 px-6 py-6 pb-24 md:pb-6">
+            <main id="main" :class="['mx-auto w-full flex-1 px-6 py-6 pb-24 md:pb-6', shellMeasure]">
                 <!-- The flash region is always mounted and carries only its text (WCAG 4.1.3): a live
                      region announces what changes inside it, so a region created in the same tick as its
                      message may never be announced. Empty, it is sr-only and says nothing; the classes

@@ -106,7 +106,7 @@ const treatment = (state: string): string => {
             <button
                 type="button"
                 :disabled="form.processing"
-                class="enamel inline-flex min-h-11 items-center rounded-full bg-chrome px-4 text-sm font-bold text-on-chrome disabled:opacity-60"
+                class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action disabled:opacity-60"
                 @click="submit"
             >
                 {{ form.processing ? 'Recording…' : 'Record snapshot' }}

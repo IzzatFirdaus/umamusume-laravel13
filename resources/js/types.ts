@@ -6,6 +6,8 @@ declare module '@inertiajs/core' {
             name: string;
             version: string | null;
             ruleset: string | null;
+            /** The stored theme, or null for follow-the-OS. Mirrors `Preference::resolvedTheme()`. */
+            theme: 'light' | 'dark' | null;
         };
         flash: {
             status: string | null;

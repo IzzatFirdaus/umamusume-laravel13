@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../../layouts/AppLayout.vue';
-import { BaseCheckbox, BaseInput, BaseTextarea } from '../../../components/Form';
+import { BaseButton, BaseCheckbox, BaseInput, BaseSelect, BaseTextarea } from '../../../components/Form';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, reactive } from 'vue';
 
@@ -27,6 +27,8 @@ const props = defineProps<{
     phases: { value: string; label: string }[];
     review: string;
     action: string;
+    /** The payload the review screen confirmed, so Back re-hydrates this form. Null on a first visit. */
+    draft?: Record<string, unknown> | null;
 }>();
 
 type StateField = 'speed' | 'stamina' | 'power' | 'guts' | 'wit' | 'energy' | 'fans' | 'skill_points';
@@ -45,21 +47,30 @@ const META_FIELDS: { key: StateField; label: string }[] = [
     { key: 'skill_points', label: 'Skill Points' },
 ];
 
+// The draft the review screen parked, read as a string per field: the inputs are text controls and a
+// number that arrives as `5` must still render as `5`. An absent draft is a first visit and every
+// field opens empty.
+const seeded = (key: string): string => {
+    const value = (props.draft ?? {})[key];
+
+    return value === null || value === undefined ? '' : String(value);
+};
+
 const form = useForm({
-    umamusume_id: '',
-    scenario: '',
-    career_year: '',
-    career_month: '',
-    career_phase: '',
-    speed: '',
-    stamina: '',
-    power: '',
-    guts: '',
-    wit: '',
-    energy: '',
-    fans: '',
-    skill_points: '',
-    notes: '',
+    umamusume_id: seeded('umamusume_id'),
+    scenario: seeded('scenario'),
+    career_year: seeded('career_year'),
+    career_month: seeded('career_month'),
+    career_phase: seeded('career_phase'),
+    speed: seeded('speed'),
+    stamina: seeded('stamina'),
+    power: seeded('power'),
+    guts: seeded('guts'),
+    wit: seeded('wit'),
+    energy: seeded('energy'),
+    fans: seeded('fans'),
+    skill_points: seeded('skill_points'),
+    notes: seeded('notes'),
 });
 
 const unknown = reactive<Record<StateField, boolean>>({
@@ -72,6 +83,12 @@ const unknown = reactive<Record<StateField, boolean>>({
     fans: false,
     skill_points: false,
 });
+
+// The parked payload carries the per-field states as well as the values, so Back restores the
+// "Unknown" toggles rather than only the text the Trainer typed.
+for (const key of Object.keys(unknown) as StateField[]) {
+    unknown[key] = (props.draft?.field_states as Record<string, string> | undefined)?.[key] === 'unknown';
+}
 
 const toggleUnknown = (field: StateField, checked: boolean): void => {
     unknown[field] = checked;
@@ -206,7 +223,7 @@ const submit = (): void => {
                             min="0"
                             :disabled="unknown[field.key]"
                             :error="form.errors[field.key]"
-                            label="{{ field.label }}"
+                            :label="field.label"
                         />
                         <BaseCheckbox
                             :id="`snapshot-unknown-${field.key}`"
@@ -228,7 +245,7 @@ const submit = (): void => {
                             min="0"
                             :disabled="unknown[field.key]"
                             :error="form.errors[field.key]"
-                            label="{{ field.label }}"
+                            :label="field.label"
                         />
                         <BaseCheckbox
                             :id="`snapshot-unknown-${field.key}`"

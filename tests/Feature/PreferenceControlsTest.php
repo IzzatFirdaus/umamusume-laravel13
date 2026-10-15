@@ -442,13 +442,13 @@ it('round-trips the dashboard layout and hidden cards', function (): void {
 
     $settings = Preference::settings();
 
-    expect($settings['dashboard_layout'])->toBe('focused')
+    expect($settings['dashboard_layout'])->toBe('compact')
         ->and($settings['dashboard_hidden_cards'])->toBe(['recent_veterans', 'data_status']);
 
     test()->get('/preferences')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('settings.dashboard_layout', 'focused')
+            ->where('settings.dashboard_layout', 'compact')
             ->where('settings.dashboard_hidden_cards', ['recent_veterans', 'data_status']));
 });
 
@@ -483,8 +483,9 @@ it('refuses a hidden card id the dashboard does not compose', function (): void 
     expect(Preference::settings())->toBe([]);
 });
 
-it('coerces wide_bento to bento when the flag is explicitly off', function (): void {
-    // The old fallback behavior: with the flag off, the writer coerces wide_bento → bento.
+it('coerces wide to standard when the flag is explicitly off', function (): void {
+    // DL.12/DL.14, in the renamed vocabulary: with the flag off, the writer stores the widest
+    // layout the Trainer can actually pick rather than the one the request asked for.
     config(['dashboard.wide_bento_enabled' => false]);
     Preference::putSettings(['dashboard_layout' => 'wide_bento']);
 
@@ -494,7 +495,7 @@ it('coerces wide_bento to bento when the flag is explicitly off', function (): v
         'settings' => ['dashboard_layout' => 'wide_bento'],
     ])->assertRedirect();
 
-    expect(Preference::settings()['dashboard_layout'])->toBe('bento');
+    expect(Preference::settings()['dashboard_layout'])->toBe('standard');
 });
 
 it('ships wide bento enabled by default per the DESIGN.md ruling', function (): void {
@@ -504,8 +505,8 @@ it('ships wide bento enabled by default per the DESIGN.md ruling', function (): 
         ->assertInertia(fn (Assert $page) => $page->where('wideBentoEnabled', true));
 });
 
-it('enables wide bento end-to-end with the default flag', function (): void {
-    // The default flag is now true; the radio is enabled and submissions store wide_bento.
+it('enables wide end-to-end with the default flag', function (): void {
+    // The default flag is now true; the radio is enabled and submissions store the wide layout.
     test()->get('/preferences')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page->where('wideBentoEnabled', true));
@@ -516,5 +517,5 @@ it('enables wide bento end-to-end with the default flag', function (): void {
         'settings' => ['dashboard_layout' => 'wide_bento'],
     ])->assertRedirect();
 
-    expect(Preference::settings()['dashboard_layout'])->toBe('wide_bento');
+    expect(Preference::settings()['dashboard_layout'])->toBe('wide');
 });
