@@ -303,7 +303,7 @@ it('keeps the gate figures and the win-chance vocabulary out of the components t
         resource_path('js/components/scenario/UraMilestoneTracker.vue'),
         resource_path('js/components/scenario/UraDuelPanel.vue'),
         resource_path('js/components/scenario/UraPreFinalReview.vue'),
-        resource_path('js/components/scenario/UraPanel.vue'),
+        // Phase 7A.1: UraPanel was archived; its extracted panels are checked individually above.
     ];
 
     foreach ($surfaces as $file) {

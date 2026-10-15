@@ -42,7 +42,6 @@ import RaceCalendarNote from './RaceCalendarNote.vue';
 import ResourceMeter from './ResourceMeter.vue';
 import ScenarioStatusBadge from './ScenarioStatusBadge.vue';
 import TrackblazerPanel from './TrackblazerPanel.vue';
-import UraPanel from './UraPanel.vue';
 import UnityCupPanel from './UnityCupPanel.vue';
 import WidgetFallback from './WidgetFallback.vue';
 import { register, resolve } from './registry';
@@ -51,6 +50,7 @@ import { register, resolve } from './registry';
 import UraMandatoryLadder from '@/Pages/Career/Cockpit/Panels/UraMandatoryLadder.vue';
 import HappyMeekPanel from '@/Pages/Career/Cockpit/Panels/HappyMeekPanel.vue';
 import CareerMilestonesPanel from '@/Pages/Career/Cockpit/Panels/CareerMilestonesPanel.vue';
+import PreFinalReviewPanel from '@/Pages/Career/Cockpit/Panels/PreFinalReviewPanel.vue';
 import TeamRaceFacilityPanel from '@/Pages/Career/Cockpit/Panels/TeamRaceFacilityPanel.vue';
 import SpiritBurstsPanel from '@/Pages/Career/Cockpit/Panels/SpiritBurstsPanel.vue';
 import TeamRankLadderPanel from '@/Pages/Career/Cockpit/Panels/TeamRankLadderPanel.vue';
@@ -64,7 +64,6 @@ import CareerGoalsPanel from '@/Pages/Career/Cockpit/Panels/CareerGoalsPanel.vue
  * reached by a flag, never by a scenario name, so a scenario that leaves `career_goals` off cannot
  * draw URA's rows and a fifth scenario needs one config entry and no edit here (gate G-33).
  */
-register('career_goals', UraPanel);
 // E3 (plan §9.1): the calendar note states where the Cockpit already draws the calendar, and the
 // two Unity-Cup flags share one panel component that draws the region each registration is for.
 register('race_calendar', RaceCalendarNote);
@@ -80,6 +79,7 @@ register('epithet_routes', TrackblazerPanel);
 register('ura_mandatory_ladder', UraMandatoryLadder);
 register('happy_meek', HappyMeekPanel);
 register('career_milestones', CareerMilestonesPanel);
+register('pre_final_review', PreFinalReviewPanel);
 register('team_race_facility', TeamRaceFacilityPanel);
 register('spirit_bursts', SpiritBurstsPanel);
 register('team_rank_ladder', TeamRankLadderPanel);
